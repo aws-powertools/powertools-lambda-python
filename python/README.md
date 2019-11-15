@@ -146,11 +146,6 @@ def handler(event, context)
   ...
 ```
 
-## TODO
-
-* [ ] Enable CI
-* [ ] Publish PyPi package
-
 ## Credits
 
 * We use a microlib for structured logging [aws-lambda-logging](https://gitlab.com/hadrien/aws_lambda_logging)
