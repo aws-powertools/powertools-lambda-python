@@ -3,8 +3,7 @@ import io
 import json
 import logging
 
-from pytest import fixture, yield_fixture
-from pytest import mark
+from pytest import fixture, mark, yield_fixture
 
 from aws_lambda_powertools.logging.aws_lambda_logging import setup
 

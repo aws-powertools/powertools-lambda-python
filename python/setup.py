@@ -32,6 +32,7 @@ setup(
     install_requires=requirements,
     license="Apache Software License",
     long_description=readme + "\n\n" + history,
+    long_description_content_type="text/markdown",
     include_package_data=True,
     keywords="aws_lambda_powertools",
     name="aws_lambda_powertools",
@@ -39,6 +40,7 @@ setup(
     setup_requires=setup_requirements,
     test_suite="tests",
     tests_require=test_requirements,
-    version="0.1.0",
+    version="0.3.0",
+    url="https://github.com/awslabs/aws-lambda-powertools/",
     zip_safe=False,
 )
