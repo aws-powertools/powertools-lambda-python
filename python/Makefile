@@ -21,3 +21,11 @@ test-html:
 	pipenv run pytest --cov-report html
 
 pr: lint test 
+
+release: pr
+	python setup.py sdist bdist_wheel
+	twine upload dist/* --verbose
+
+release-test: pr
+	python setup.py sdist bdist_wheel
+	twine upload --repository testpypi dist/* --verbose

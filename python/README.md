@@ -10,18 +10,33 @@ A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray,
 
 **Tracing**
 
+> It currently uses AWS X-Ray
+
 * Decorators that capture cold start as annotation, and response and exceptions as metadata
 * Run functions locally without code change to disable tracing
-* Explicitly disable tracing via env var POWERTOOLS_TRACE_DISABLED="true"
+* Explicitly disable tracing via env var `POWERTOOLS_TRACE_DISABLED="true"`
 
 **Logging**
 
 * Decorators that capture key fields from Lambda context, cold start and structures logging output as JSON
 * Optionally log Lambda request when instructed (disabled by default)
-    - Enable via POWERTOOLS_LOGGER_LOG_EVENT="true" or explicitly via decorator param
+    - Enable via `POWERTOOLS_LOGGER_LOG_EVENT="true"` or explicitly via decorator param
 * Logs canonical custom metric line to logs that can be consumed asynchronously
 
+**Environment variables** used across suite of utilities
+
+Environment variable | Description | Default | Utility
+------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
+POWERTOOLS_SERVICE_NAME | Sets service name used for tracing namespace, metrics dimensions and structured logging | "service_undefined" | all
+POWERTOOLS_TRACE_DISABLED | Disables tracing | "false" | tracing
+POWERTOOLS_LOGGER_LOG_EVENT | Logs incoming event | "false" | logging
+LOG_LEVEL | Sets logging level | "INFO" | logging
+
 ## Usage
+
+### Installation
+
+With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip install aws-lambda-powertools``
 
 ### Tracing
 
@@ -30,10 +45,11 @@ A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray,
 ```yaml
 Globals:
   Function:
+    Tracing: Active # can also be enabled per function
     Environment:
         Variables:
-            POWERTOOLS_SERVICE_NAME: "payment" # service_undefined by default
-            POWERTOOLS_TRACE_DISABLED: "false" # false by default
+            POWERTOOLS_SERVICE_NAME: "payment" 
+            POWERTOOLS_TRACE_DISABLED: "false" 
 ```
 
 **Pseudo Python Lambda code**
@@ -68,9 +84,8 @@ Globals:
   Function:
     Environment:
         Variables:
-            POWERTOOLS_SERVICE_NAME: "payment" # service_undefined by default
-            POWERTOOLS_LOGGER_LOG_EVENT: "true" # false by default
-            LOG_LEVEL: "INFO" # INFO by default
+            POWERTOOLS_SERVICE_NAME: "payment" 
+            LOG_LEVEL: "INFO"
 ```
 
 **Pseudo Python Lambda code**
@@ -86,6 +101,7 @@ logger = logger_setup()
 def handler(event, context)
   logger.info("Collecting payment")
   ...
+  # You can log entire objects too
   logger.info({
     "operation": "collect_payment",
     "charge_id": event['charge_id']
@@ -142,14 +158,38 @@ def handler(event, context)
   log_metric(name="SuccessfulPayment", unit=MetricUnit.Count, value=10, namespace="MyApplication", customer_id="123-abc", charge_id="abc-123")
   
   # Explicit service name
-  log_metric(service="payment", name="SuccessfulPayment", namespace="MyApplication".....)
+  log_metric(service="paymentTest", name="SuccessfulPayment", namespace="MyApplication".....)
   ...
 ```
 
+**Exerpt output in CloudWatch Logs**
+
+```
+MONITORING|10|Count|SuccessfulPayment|MyApplication|service="payment
+MONITORING|10|Count|SuccessfulPayment|MyApplication|customer_id="123-abc",charge_id="abc-123",service="payment
+MONITORING|10|Count|SuccessfulPayment|MyApplication|service="paymentTest
+```
+
+
+## Beta
+
+This library may change its API/methods or environment variables as it receives feedback from customers. Currently looking for ideas in the following areas before making it stable:
+
+* **Should Tracer patch all possible imported libraries by default or only AWS SDKs?**
+    - Patching all libraries may have a small performance penalty (~50ms) at cold start
+    - Alternatively, we could patch only AWS SDK if available and to provide a param to patch multiple `Tracer(modules=("boto3", "requests"))` 
+* **Create a Tracer provider to support additional tracing**
+    - Either duck typing or ABC to allow additional tracing providers
+
+## TODO
+
+* [ ] Enable CI
+* [ ] Add an example code using powertools
+
 ## Credits
 
-* We use a microlib for structured logging [aws-lambda-logging](https://gitlab.com/hadrien/aws_lambda_logging)
-* Idea of a powertools to provide a handful utilities for AWS Lambda functiones comes from [DAZN Powertools](https://github.com/getndazn/dazn-lambda-powertools/)
+* Structured logging initial implementation from [aws-lambda-logging](https://gitlab.com/hadrien/aws_lambda_logging)
+* Powertools idea [DAZN Powertools](https://github.com/getndazn/dazn-lambda-powertools/)
 
 ## License
 

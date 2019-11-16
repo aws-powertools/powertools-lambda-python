@@ -3,8 +3,6 @@ Originally taken from https://gitlab.com/hadrien/aws_lambda_logging/
 """
 import json
 import logging
-import os
-from functools import wraps
 
 
 def json_formatter(obj):
@@ -40,7 +38,7 @@ class JsonFormatter(logging.Formatter):
         self.format_dict.update(kwargs)
         self.default_json_formatter = kwargs.pop("json_default", json_formatter)
 
-    def format(self, record):
+    def format(self, record):  # noqa: A003
         record_dict = record.__dict__.copy()
         record_dict["asctime"] = self.formatTime(record, self.datefmt)
 
