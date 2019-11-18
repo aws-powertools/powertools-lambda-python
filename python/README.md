@@ -144,6 +144,8 @@ def handler(event, context)
 
 #### Custom Metrics async
 
+> **NOTE**: This will **likely change after Beta** in light of [new Amazon CloudWatch embedded metric format](https://aws.amazon.com/about-aws/whats-new/2019/11/amazon-cloudwatch-launches-embedded-metric-format/), meaning we won't need an additional stack and interface could change.
+
 This feature requires [Custom Metrics SAR App](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:374852340823:applications~async-custom-metrics) in order to process canonical metric lines in CloudWatch Logs. 
 
 If you're starting from scratch, you may want to see a working example, tune to your needs and deploy within your account - [Serverless Airline Log Processing Stack](https://github.com/aws-samples/aws-serverless-airline-booking/blob/develop/src/backend/log-processing/template.yaml)
