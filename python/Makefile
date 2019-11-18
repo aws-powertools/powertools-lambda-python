@@ -24,8 +24,10 @@ pr: lint test
 
 release: pr
 	python setup.py sdist bdist_wheel
-	twine upload dist/* --verbose
+	pipenv run twine upload dist/* --verbose
+	rm -rf dist build	
 
 release-test: pr
 	python setup.py sdist bdist_wheel
-	twine upload --repository testpypi dist/* --verbose
+	pipenv run twine upload --repository testpypi dist/* --verbose
+	rm -rf dist build	
