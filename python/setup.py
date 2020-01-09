@@ -40,7 +40,7 @@ setup(
     setup_requires=setup_requirements,
     test_suite="tests",
     tests_require=test_requirements,
-    version="0.3.3",
+    version="0.3.4",
     url="https://github.com/awslabs/aws-lambda-powertools/",
     zip_safe=False,
 )
