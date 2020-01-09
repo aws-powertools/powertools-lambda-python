@@ -6,7 +6,6 @@ from distutils.util import strtobool
 from typing import Any, Callable, Dict
 
 from . import aws_lambda_logging
-
 from ..helper.models import MetricUnit, build_lambda_context_model, build_metric_unit_from_str
 
 logger = logging.getLogger(__name__)
