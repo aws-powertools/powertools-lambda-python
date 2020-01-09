@@ -1,6 +1,6 @@
 # Lambda Powertools
 
-![PackageStatus](https://img.shields.io/static/v1?label=status&message=beta&color=blueviolet?style=flat-square) ![PythonSupport](https://img.shields.io/static/v1?label=python&message=3.6%20|%203.7&color=blue?style=flat-square&logo=python)
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fawslabs%2Faws-lambda-powertools%2Fbadge%3Fref%3Ddevelop&style=flat)](https://actions-badge.atrox.dev/awslabs/aws-lambda-powertools/goto?ref=develop) ![PackageStatus](https://img.shields.io/static/v1?label=status&message=beta&color=blueviolet?style=flat-square) ![PythonSupport](https://img.shields.io/static/v1?label=python&message=3.6%20|%203.7&color=blue?style=flat-square&logo=python)
 
 A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier - Currently available for Python only and compatible with Python >=3.6.
 
