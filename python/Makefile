@@ -3,6 +3,7 @@ target:
 	@$(MAKE) pr
 
 dev:
+	pip install --upgrade pipenv
 	pipenv install
 	pipenv install -d
 
