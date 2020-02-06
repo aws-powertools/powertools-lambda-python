@@ -27,6 +27,7 @@ setup(
         "Natural Language :: English",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
     description="Python utilities for AWS Lambda functions including but not limited to tracing, logging and custom metric",
     install_requires=requirements,
