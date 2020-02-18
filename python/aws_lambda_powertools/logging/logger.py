@@ -2,11 +2,12 @@ import functools
 import itertools
 import logging
 import os
+import random
 from distutils.util import strtobool
 from typing import Any, Callable, Dict
 
-from . import aws_lambda_logging
 from ..helper.models import MetricUnit, build_lambda_context_model, build_metric_unit_from_str
+from . import aws_lambda_logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
@@ -14,7 +15,9 @@ logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 is_cold_start = True
 
 
-def logger_setup(service: str = "service_undefined", level: str = "INFO", **kwargs):
+def logger_setup(
+        service: str = "service_undefined", level: str = "INFO", sampling_rate: float = 0.0, **kwargs
+):
     """Setups root logger to format statements in JSON.
 
     Includes service name and any additional key=value into logs
@@ -26,6 +29,8 @@ def logger_setup(service: str = "service_undefined", level: str = "INFO", **kwar
         service name
     LOG_LEVEL: str
         logging level (e.g. INFO, DEBUG)
+    POWERTOOLS_SAMPLE_RATE: str
+        samping rate ranging from 0 to 1, float precision
 
     Parameters
     ----------
@@ -33,6 +38,8 @@ def logger_setup(service: str = "service_undefined", level: str = "INFO", **kwar
         service name to be appended in logs, by default "service_undefined"
     level : str, optional
         logging.level, by default "INFO"
+    sample_rate: float, optional
+        sample rate for debug calls within execution context defaults to 0
 
     Example
     -------
@@ -52,21 +59,36 @@ def logger_setup(service: str = "service_undefined", level: str = "INFO", **kwar
         >>>
         >>> def handler(event, context):
                 logger.info("Hello")
+                :param service:
+                :param level:
+                :param sampling_rate:
 
     """
     service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
+    sampling_rate = os.getenv("POWERTOOLS_SAMPLE_RATE") or sampling_rate
     log_level = os.getenv("LOG_LEVEL") or level
     logger = logging.getLogger(name=service)
+
+    # sampling a small percentage of requests with debug level, using a float value 0.1 = 10%~
+
+    try:
+        if sampling_rate and random.random() <= float(sampling_rate):
+            log_level = logging.DEBUG
+    except ValueError:
+        logger.debug("POWERTOOLS_SAMPLE_RATE provided value {0} is not valid.".format(sampling_rate))
+
     logger.setLevel(log_level)
 
     # Patch logger by structuring its outputs as JSON
-    aws_lambda_logging.setup(level=log_level, service=service, **kwargs)
+    aws_lambda_logging.setup(
+        level=log_level, service=service, sampling_rate=sampling_rate, **kwargs
+    )
 
     return logger
 
 
 def logger_inject_lambda_context(
-    lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False
+        lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False
 ):
     """Decorator to capture Lambda contextual info and inject into struct logging
 
@@ -110,6 +132,8 @@ def logger_inject_lambda_context(
     -------
     decorate : Callable
         Decorated lambda handler
+        :param log_event:
+        :param lambda_handler:
     """
 
     # If handler is None we've been called with parameters
@@ -159,12 +183,12 @@ def __is_cold_start() -> str:
 
 
 def log_metric(
-    name: str,
-    namespace: str,
-    unit: MetricUnit,
-    value: float = 0,
-    service: str = "service_undefined",
-    **dimensions,
+        name: str,
+        namespace: str,
+        unit: MetricUnit,
+        value: float = 0,
+        service: str = "service_undefined",
+        **dimensions,
 ):
     """Logs a custom metric in a statsD-esque format to stdout.
 
