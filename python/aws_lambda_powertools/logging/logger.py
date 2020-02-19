@@ -16,7 +16,7 @@ is_cold_start = True
 
 
 def logger_setup(
-        service: str = "service_undefined", level: str = "INFO", sampling_rate: float = 0.0, **kwargs
+    service: str = "service_undefined", level: str = "INFO", sampling_rate: float = 0.0, **kwargs
 ):
     """Setups root logger to format statements in JSON.
 
@@ -29,7 +29,7 @@ def logger_setup(
         service name
     LOG_LEVEL: str
         logging level (e.g. INFO, DEBUG)
-    POWERTOOLS_SAMPLE_RATE: str
+    POWERTOOLS_LOGGER_SAMPLE_RATE: str
         samping rate ranging from 0 to 1, float precision
 
     Parameters
@@ -65,7 +65,7 @@ def logger_setup(
 
     """
     service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
-    sampling_rate = os.getenv("POWERTOOLS_SAMPLE_RATE") or sampling_rate
+    sampling_rate = os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or sampling_rate
     log_level = os.getenv("LOG_LEVEL") or level
     logger = logging.getLogger(name=service)
 
@@ -75,7 +75,9 @@ def logger_setup(
         if sampling_rate and random.random() <= float(sampling_rate):
             log_level = logging.DEBUG
     except ValueError:
-        logger.debug("POWERTOOLS_SAMPLE_RATE provided value {0} is not valid.".format(sampling_rate))
+        logger.debug(
+            "POWERTOOLS_LOGGER_SAMPLE_RATE provided value {0} is not valid.".format(sampling_rate)
+        )
 
     logger.setLevel(log_level)
 
@@ -88,7 +90,7 @@ def logger_setup(
 
 
 def logger_inject_lambda_context(
-        lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False
+    lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False
 ):
     """Decorator to capture Lambda contextual info and inject into struct logging
 
@@ -183,12 +185,12 @@ def __is_cold_start() -> str:
 
 
 def log_metric(
-        name: str,
-        namespace: str,
-        unit: MetricUnit,
-        value: float = 0,
-        service: str = "service_undefined",
-        **dimensions,
+    name: str,
+    namespace: str,
+    unit: MetricUnit,
+    value: float = 0,
+    service: str = "service_undefined",
+    **dimensions,
 ):
     """Logs a custom metric in a statsD-esque format to stdout.
 

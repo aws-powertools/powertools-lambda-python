@@ -81,11 +81,11 @@ def test_setup_service_env_var(monkeypatch, root_logger, stdout):
 
 
 def test_setup_sampling_rate(monkeypatch, root_logger, stdout):
-    # GIVEN samping rate is explicitly defined via POWERTOOLS_SAMPLE_RATE env
+    # GIVEN samping rate is explicitly defined via POWERTOOLS_LOGGER_SAMPLE_RATE env
     # WHEN logger is setup
-    # THEN sampling rate should be equals POWERTOOLS_SAMPLE_RATE value
+    # THEN sampling rate should be equals POWERTOOLS_LOGGER_SAMPLE_RATE value
     sampling_rate = "0.1"
-    monkeypatch.setenv("POWERTOOLS_SAMPLE_RATE", sampling_rate)
+    monkeypatch.setenv("POWERTOOLS_LOGGER_SAMPLE_RATE", sampling_rate)
 
     logger = logger_setup()
     logger.info("Hello")
@@ -141,7 +141,7 @@ def test_inject_lambda_context_log_event_request(root_logger, stdout, lambda_con
 
 
 def test_inject_lambda_context_log_event_request_env_var(
-        monkeypatch, root_logger, stdout, lambda_context
+    monkeypatch, root_logger, stdout, lambda_context
 ):
     # GIVEN a lambda function is decorated with logger instructed to log event
     # via POWERTOOLS_LOGGER_LOG_EVENT env
@@ -172,7 +172,7 @@ def test_inject_lambda_context_log_event_request_env_var(
 
 
 def test_inject_lambda_context_log_no_request_by_default(
-        monkeypatch, root_logger, stdout, lambda_context
+    monkeypatch, root_logger, stdout, lambda_context
 ):
     # GIVEN a lambda function is decorated with logger
     # WHEN logger is setup
@@ -293,12 +293,12 @@ def test_log_metric_multiple_dimensions(capsys):
     "invalid_input,expected",
     [
         (
-                {"unit": "seconds"},
-                "MONITORING|0|Seconds|test_metric|DemoApp|service=service_undefined\n",
+            {"unit": "seconds"},
+            "MONITORING|0|Seconds|test_metric|DemoApp|service=service_undefined\n",
         ),
         (
-                {"unit": "Seconds", "customer": None, "charge_id": "123", "payment_status": ""},
-                "MONITORING|0|Seconds|test_metric|DemoApp|service=service_undefined,charge_id=123\n",
+            {"unit": "Seconds", "customer": None, "charge_id": "123", "payment_status": ""},
+            "MONITORING|0|Seconds|test_metric|DemoApp|service=service_undefined,charge_id=123\n",
         ),
     ],
     ids=["metric unit as string lower case", "empty dimension value"],
