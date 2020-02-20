@@ -291,5 +291,5 @@ $RECYCLE.BIN/
 # End of https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
 
 # Misc
-
 test_report
+/.idea/*
