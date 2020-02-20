@@ -83,14 +83,18 @@ def test_setup_service_env_var(monkeypatch, root_logger, stdout):
 def test_setup_sampling_rate(monkeypatch, root_logger, stdout):
     # GIVEN samping rate is explicitly defined via POWERTOOLS_LOGGER_SAMPLE_RATE env
     # WHEN logger is setup
-    # THEN sampling rate should be equals POWERTOOLS_LOGGER_SAMPLE_RATE value
-    sampling_rate = "0.1"
+    # THEN sampling rate should be equals POWERTOOLS_LOGGER_SAMPLE_RATE value and should sample debug logs
+
+    sampling_rate = "1"
     monkeypatch.setenv("POWERTOOLS_LOGGER_SAMPLE_RATE", sampling_rate)
+    monkeypatch.setenv("LOG_LEVEL", "INFO")
 
     logger = logger_setup()
-    logger.info("Hello")
+    logger.debug("I am being sampled")
     log = json.loads(stdout.getvalue())
+
     assert sampling_rate == log["sampling_rate"]
+    assert "DEBUG" == log["level"]
 
 
 def test_inject_lambda_context(root_logger, stdout, lambda_context):

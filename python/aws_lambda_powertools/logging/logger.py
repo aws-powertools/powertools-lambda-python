@@ -29,8 +29,8 @@ def logger_setup(
         service name
     LOG_LEVEL: str
         logging level (e.g. INFO, DEBUG)
-    POWERTOOLS_LOGGER_SAMPLE_RATE: str
-        samping rate ranging from 0 to 1, float precision
+    POWERTOOLS_LOGGER_SAMPLE_RATE: float
+        samping rate ranging from 0 to 1, 1 being 100% sampling
 
     Parameters
     ----------
@@ -54,14 +54,12 @@ def logger_setup(
     Setups structured logging in JSON for Lambda functions using env vars
 
         $ export POWERTOOLS_SERVICE_NAME="payment"
+        $ export POWERTOOLS_LOGGER_SAMPLE_RATE=0.01 # 1% debug sampling
         >>> from aws_lambda_powertools.logging import logger_setup
         >>> logger = logger_setup()
         >>>
         >>> def handler(event, context):
                 logger.info("Hello")
-                :param service:
-                :param level:
-                :param sampling_rate:
 
     """
     service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
@@ -69,14 +67,13 @@ def logger_setup(
     log_level = os.getenv("LOG_LEVEL") or level
     logger = logging.getLogger(name=service)
 
-    # sampling a small percentage of requests with debug level, using a float value 0.1 = 10%~
-
     try:
         if sampling_rate and random.random() <= float(sampling_rate):
             log_level = logging.DEBUG
     except ValueError:
-        logger.debug(
-            "POWERTOOLS_LOGGER_SAMPLE_RATE provided value {0} is not valid.".format(sampling_rate)
+        raise ValueError(
+            f"Expected a float value ranging 0 to 1, but received {sampling_rate} instead. Please review "
+            f"POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
         )
 
     logger.setLevel(log_level)
@@ -134,8 +131,6 @@ def logger_inject_lambda_context(
     -------
     decorate : Callable
         Decorated lambda handler
-        :param log_event:
-        :param lambda_handler:
     """
 
     # If handler is None we've been called with parameters
