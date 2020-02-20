@@ -22,6 +22,8 @@ A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray,
 * Optionally log Lambda request when instructed (disabled by default)
     - Enable via `POWERTOOLS_LOGGER_LOG_EVENT="true"` or explicitly via decorator param
 * Logs canonical custom metric line to logs that can be consumed asynchronously
+* Log sampling enables DEBUG log level for a percentage of requests (disabled by default)
+    - Enable via `POWERTOOLS_LOGGER_SAMPLE_RATE=0.1`, ranges from 0 to 1, where 0.1 is 10% and 1 is 100%
 
 **Environment variables** used across suite of utilities
 
@@ -30,6 +32,7 @@ Environment variable | Description | Default | Utility
 POWERTOOLS_SERVICE_NAME | Sets service name used for tracing namespace, metrics dimensions and structured logging | "service_undefined" | all
 POWERTOOLS_TRACE_DISABLED | Disables tracing | "false" | tracing
 POWERTOOLS_LOGGER_LOG_EVENT | Logs incoming event | "false" | logging
+POWERTOOLS_LOGGER_SAMPLE_RATE | Debug log sampling  | 0 | logging
 LOG_LEVEL | Sets logging level | "INFO" | logging
 
 ## Usage
@@ -85,6 +88,7 @@ Globals:
     Environment:
         Variables:
             POWERTOOLS_SERVICE_NAME: "payment" 
+            POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1 # enable debug logging for 1% of requests, 0% by default
             LOG_LEVEL: "INFO"
 ```
 
@@ -185,7 +189,6 @@ This library may change its API/methods or environment variables as it receives 
 
 ## TODO
 
-* [ ] Enable CI
 * [ ] Add an example code using powertools
 
 ## Credits
