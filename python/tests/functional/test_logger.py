@@ -95,6 +95,7 @@ def test_setup_sampling_rate(monkeypatch, root_logger, stdout):
 
     assert sampling_rate == log["sampling_rate"]
     assert "DEBUG" == log["level"]
+    assert "I am being sampled" == log["message"]
 
 
 def test_inject_lambda_context(root_logger, stdout, lambda_context):

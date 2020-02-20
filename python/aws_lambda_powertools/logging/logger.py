@@ -72,8 +72,7 @@ def logger_setup(
             log_level = logging.DEBUG
     except ValueError:
         raise ValueError(
-            f"Expected a float value ranging 0 to 1, but received {sampling_rate} instead. Please review "
-            f"POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
+            f"Expected a float value ranging 0 to 1, but received {sampling_rate} instead. Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
         )
 
     logger.setLevel(log_level)
