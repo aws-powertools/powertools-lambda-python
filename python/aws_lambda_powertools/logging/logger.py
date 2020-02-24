@@ -15,9 +15,7 @@ logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 is_cold_start = True
 
 
-def logger_setup(
-    service: str = "service_undefined", level: str = "INFO", sampling_rate: float = 0.0, **kwargs
-):
+def logger_setup(service: str = "service_undefined", level: str = "INFO", sampling_rate: float = 0.0, **kwargs):
     """Setups root logger to format statements in JSON.
 
     Includes service name and any additional key=value into logs
@@ -70,24 +68,20 @@ def logger_setup(
     try:
         if sampling_rate and random.random() <= float(sampling_rate):
             log_level = logging.DEBUG
-    except ValueError:
+    except ValueError:  
         raise ValueError(
-            f"Expected a float value ranging 0 to 1, but received {sampling_rate} instead. Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
+            "fExpected a float value ranging 0 to 1, but received {sampling_rate} instead. Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
         )
 
     logger.setLevel(log_level)
 
     # Patch logger by structuring its outputs as JSON
-    aws_lambda_logging.setup(
-        level=log_level, service=service, sampling_rate=sampling_rate, **kwargs
-    )
+    aws_lambda_logging.setup(level=log_level, service=service, sampling_rate=sampling_rate, **kwargs)
 
     return logger
 
 
-def logger_inject_lambda_context(
-    lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False
-):
+def logger_inject_lambda_context(lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False):
     """Decorator to capture Lambda contextual info and inject into struct logging
 
     Parameters
@@ -179,12 +173,7 @@ def __is_cold_start() -> str:
 
 
 def log_metric(
-    name: str,
-    namespace: str,
-    unit: MetricUnit,
-    value: float = 0,
-    service: str = "service_undefined",
-    **dimensions,
+    name: str, namespace: str, unit: MetricUnit, value: float = 0, service: str = "service_undefined", **dimensions,
 ):
     """Logs a custom metric in a statsD-esque format to stdout.
 
@@ -248,9 +237,7 @@ def log_metric(
         keyword arguments as additional dimensions (e.g. customer=customerId)
     """
 
-    logger.debug(
-        f"Building new custom metric. Name: {name}, Unit: {unit}, Value: {value}, Dimensions: {dimensions}"
-    )
+    logger.debug(f"Building new custom metric. Name: {name}, Unit: {unit}, Value: {value}, Dimensions: {dimensions}")
     service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
     dimensions = __build_dimensions(**dimensions)
     unit = build_metric_unit_from_str(unit)
@@ -283,9 +270,7 @@ def __build_dimensions(**dimensions) -> str:
     # so we take up to 9 values as additional dimensions
     # before we convert everything to a string of key=value
     dimensions_partition = dict(itertools.islice(dimensions.items(), MAX_DIMENSIONS))
-    dimensions_list = [
-        dimension + "=" + value for dimension, value in dimensions_partition.items() if value
-    ]
+    dimensions_list = [dimension + "=" + value for dimension, value in dimensions_partition.items() if value]
     dimension = ",".join(dimensions_list)
 
     return dimension

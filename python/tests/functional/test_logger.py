@@ -5,12 +5,7 @@ from collections import namedtuple
 
 import pytest
 
-from aws_lambda_powertools.logging import (
-    MetricUnit,
-    log_metric,
-    logger_inject_lambda_context,
-    logger_setup,
-)
+from aws_lambda_powertools.logging import MetricUnit, log_metric, logger_inject_lambda_context, logger_setup
 
 
 @pytest.fixture
@@ -145,9 +140,7 @@ def test_inject_lambda_context_log_event_request(root_logger, stdout, lambda_con
     assert "greeting" in logged_event["message"]
 
 
-def test_inject_lambda_context_log_event_request_env_var(
-    monkeypatch, root_logger, stdout, lambda_context
-):
+def test_inject_lambda_context_log_event_request_env_var(monkeypatch, root_logger, stdout, lambda_context):
     # GIVEN a lambda function is decorated with logger instructed to log event
     # via POWERTOOLS_LOGGER_LOG_EVENT env
     # WHEN logger is setup
@@ -176,9 +169,7 @@ def test_inject_lambda_context_log_event_request_env_var(
     assert event == lambda_event
 
 
-def test_inject_lambda_context_log_no_request_by_default(
-    monkeypatch, root_logger, stdout, lambda_context
-):
+def test_inject_lambda_context_log_no_request_by_default(monkeypatch, root_logger, stdout, lambda_context):
     # GIVEN a lambda function is decorated with logger
     # WHEN logger is setup
     # THEN logger should not log event received by lambda handler
@@ -250,11 +241,7 @@ def test_log_metric(capsys):
     # WHEN log_metric is called
     # THEN custom metric line should be match given values
     log_metric(
-        service="payment",
-        name="test_metric",
-        unit=MetricUnit.Seconds,
-        value=60,
-        namespace="DemoApp",
+        service="payment", name="test_metric", unit=MetricUnit.Seconds, value=60, namespace="DemoApp",
     )
     expected = "MONITORING|60|Seconds|test_metric|DemoApp|service=payment\n"
     captured = capsys.readouterr()
@@ -281,12 +268,7 @@ def test_log_metric_multiple_dimensions(capsys):
     # WHEN log_metric is called
     # THEN dimensions should appear as dimenion=value
     log_metric(
-        name="test_metric",
-        unit=MetricUnit.Seconds,
-        value=60,
-        customer="abc",
-        charge_id="123",
-        namespace="DemoApp",
+        name="test_metric", unit=MetricUnit.Seconds, value=60, customer="abc", charge_id="123", namespace="DemoApp",
     )
     expected = "MONITORING|60|Seconds|test_metric|DemoApp|service=service_undefined,customer=abc,charge_id=123\n"
     captured = capsys.readouterr()
@@ -297,10 +279,7 @@ def test_log_metric_multiple_dimensions(capsys):
 @pytest.mark.parametrize(
     "invalid_input,expected",
     [
-        (
-            {"unit": "seconds"},
-            "MONITORING|0|Seconds|test_metric|DemoApp|service=service_undefined\n",
-        ),
+        ({"unit": "seconds"}, "MONITORING|0|Seconds|test_metric|DemoApp|service=service_undefined\n",),
         (
             {"unit": "Seconds", "customer": None, "charge_id": "123", "payment_status": ""},
             "MONITORING|0|Seconds|test_metric|DemoApp|service=service_undefined,charge_id=123\n",

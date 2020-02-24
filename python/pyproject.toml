@@ -1,19 +1,87 @@
-[tool.black]
-line-length = 100
-target-version = ['py37']
-include = '\.pyi?$'
-exclude = '''
+[tool.poetry]
+name = "aws_lambda_powertools"
+version = "0.5.0"
+description = "Python utilities for AWS Lambda functions including but not limited to tracing, logging and custom metric"
+authors = ["Amazon Web Services"]
+classifiers=[
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+]
+repository="https://github.com/awslabs/aws-lambda-powertools/"
+readme = "README.md"
+keywords = ["aws_lambda_powertools", "aws", "tracing", "logging", "lambda", "powertools"]
+license = "MIT-0"
 
-(
-  /(
-      \.eggs         
-    | \.git          # root of the project
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-)
-'''
+[tool.poetry.dependencies]
+python = "^3.6"
+aws-xray-sdk = "^2.4.3"
+coverage = {extras = ["toml"], version = "^5.0.3"}
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+black = "^19.10b0"
+flake8 = "^3.7.9"
+flake8-black = "^0.1.1"
+flake8-bugbear = "^20.1.4"
+flake8-builtins = "^1.4.2"
+flake8-comprehensions = "^3.2.2"
+flake8-debugger = "^3.2.1"
+flake8-eradicate = "^0.2.4"
+flake8-fixme = "^1.1.1"
+flake8-isort = "^2.8.0"
+flake8-variables-names = "^0.0.3"
+isort = "^4.3.21"
+pre-commit = "^2.1.0"
+pytest-cov = "^2.8.1"
+pytest-mock = "^2.0.0"
+bumpversion = "^0.5.3"
+
+[tool.coverage.run]
+source = ["aws_lambda_powertools"]
+omit = ["tests/*"]
+branch = true
+
+[tool.coverage.html]
+directory = "test_report"
+title = "Lambda Powertools Test Coverage"
+
+[tool.coverage.report]
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self.debug",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+]
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 120
+
+[tool.black]
+line-length = 120
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+# NOTE
+# As of now, Feb 2020, flake8 and pytest don't support pyproject
+# For latest: https://github.com/flying-sheep/awesome-python-packaging

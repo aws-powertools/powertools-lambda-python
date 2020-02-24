@@ -96,10 +96,7 @@ class Tracer:
     """
 
     def __init__(
-        self,
-        service: str = "service_undefined",
-        disabled: bool = False,
-        provider: xray_recorder = xray_recorder,
+        self, service: str = "service_undefined", disabled: bool = False, provider: xray_recorder = xray_recorder,
     ):
         self.provider = provider
         self.disabled = self.__is_trace_disabled() or disabled

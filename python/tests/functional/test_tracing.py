@@ -70,9 +70,7 @@ def test_tracer_method(mocker, dummy_response, xray_stub):
     begin_subsegment_mock = mocker.MagicMock()
     end_subsegment_mock = mocker.MagicMock()
 
-    xray_provider = xray_stub(
-        put_metadata_mock, put_annotation_mock, begin_subsegment_mock, end_subsegment_mock
-    )
+    xray_provider = xray_stub(put_metadata_mock, put_annotation_mock, begin_subsegment_mock, end_subsegment_mock)
     tracer = Tracer(provider=xray_provider, service="booking")
 
     @tracer.capture_method

@@ -127,8 +127,6 @@ def build_metric_unit_from_str(unit: Union[str, MetricUnit]) -> MetricUnit:
         metric_unit = MetricUnit[unit]
     except (TypeError, KeyError):
         metric_units = [units for units, _ in MetricUnit.__members__.items()]
-        raise ValueError(
-            f"Invalid Metric Unit - Received {unit}. Value Metric Units are {metric_units}"
-        )
+        raise ValueError(f"Invalid Metric Unit - Received {unit}. Value Metric Units are {metric_units}")
 
     return metric_unit

@@ -3,32 +3,31 @@ target:
 	@$(MAKE) pr
 
 dev:
-	pip install --upgrade pipenv
-	pipenv install
-	pipenv install -d
+	pip install --upgrade poetry
+	poetry install
 
 format:
-	pipenv run isort -rc .
-	pipenv run black aws_lambda_powertools
-	pipenv run black tests
+	poetry run isort -rc .
+	poetry run black aws_lambda_powertools
+	poetry run black tests
 
 lint: format
-	pipenv run flake8
+	poetry run flake8
 
 test:
-	pipenv run pytest
+	poetry run pytest
 
 test-html:
-	pipenv run pytest --cov-report html
+	poetry run pytest --cov-report html
 
 pr: lint test 
 
 release: pr
 	python setup.py sdist bdist_wheel
-	pipenv run twine upload dist/* --verbose
+	poetry run twine upload dist/* --verbose
 	rm -rf dist build	
 
 release-test: pr
 	python setup.py sdist bdist_wheel
-	pipenv run twine upload --repository testpypi dist/* --verbose
+	poetry run twine upload --repository testpypi dist/* --verbose
 	rm -rf dist build	
