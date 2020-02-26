@@ -11,7 +11,7 @@ format:
 	poetry run black aws_lambda_powertools
 	poetry run black tests
 
-lint:
+lint: format
 	poetry run flake8
 
 test:
@@ -20,7 +20,7 @@ test:
 test-html:
 	poetry run pytest --cov-report html
 
-pr: format lint test 
+pr: lint test 
 
 build: pr
 	poetry run build
