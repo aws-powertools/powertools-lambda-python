@@ -11,7 +11,7 @@ format:
 	poetry run black aws_lambda_powertools
 	poetry run black tests
 
-lint: format
+lint:
 	poetry run flake8
 
 test:
@@ -20,14 +20,23 @@ test:
 test-html:
 	poetry run pytest --cov-report html
 
-pr: lint test 
+pr: format lint test 
 
-release: pr
-	python setup.py sdist bdist_wheel
-	poetry run twine upload dist/* --verbose
-	rm -rf dist build	
+build: pr
+	poetry run build
 
-release-test: pr
-	python setup.py sdist bdist_wheel
-	poetry run twine upload --repository testpypi dist/* --verbose
-	rm -rf dist build	
+#
+# Use `poetry version <major>/<minor></patch>` for version bump
+#
+release:
+	poetry config pypi-token.pypi ${PYPI_TOKEN}
+	@$(MAKE) build
+	poetry publish
+	rm -rf dist
+
+release-test:
+	poetry config repositories.testpypi https://test.pypi.org/legacy
+	poetry config pypi-token.pypi ${PYPI_TEST_TOKEN}
+	@$(MAKE) build
+	poetry publish --repository testpypi
+	rm -rf dist

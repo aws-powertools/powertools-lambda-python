@@ -39,7 +39,6 @@ isort = "^4.3.21"
 pre-commit = "^2.1.0"
 pytest-cov = "^2.8.1"
 pytest-mock = "^2.0.0"
-bumpversion = "^0.5.3"
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]

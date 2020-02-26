@@ -82,14 +82,6 @@ version = ">=1.20,<1.26"
 
 [[package]]
 category = "dev"
-description = "Version-bump your software with a single command!"
-name = "bumpversion"
-optional = false
-python-versions = "*"
-version = "0.5.3"
-
-[[package]]
-category = "dev"
 description = "Validate configuration and produce human readable error messages."
 name = "cfgv"
 optional = false
@@ -678,7 +670,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "d69202b1e4e085655b0738fd3c7fa6f50f00a221bdd87e12df4b86af54ef9338"
+content-hash = "7bb35f84fdacf1eacc6fc98c3b3f3170b7bd659fef3ebfa91d707ea004592bca"
 python-versions = "^3.6"
 
 [metadata.files]
@@ -705,10 +697,6 @@ black = [
 botocore = [
     {file = "botocore-1.15.5-py2.py3-none-any.whl", hash = "sha256:8c9fa943e1890b44a7f31be2654cd4f4f88e634adadb931b0f298f1cf03a52a4"},
     {file = "botocore-1.15.5.tar.gz", hash = "sha256:9de7885e9e9d6dbc30b9846d7edd8f98251db7f00395a6f4cfd765efc7098bdb"},
-]
-bumpversion = [
-    {file = "bumpversion-0.5.3-py2.py3-none-any.whl", hash = "sha256:6753d9ff3552013e2130f7bc03c1007e24473b4835952679653fb132367bdd57"},
-    {file = "bumpversion-0.5.3.tar.gz", hash = "sha256:6744c873dd7aafc24453d8b6a1a0d6d109faf63cd0cd19cb78fd46e74932c77e"},
 ]
 cfgv = [
     {file = "cfgv-3.0.0-py2.py3-none-any.whl", hash = "sha256:f22b426ed59cd2ab2b54ff96608d846c33dfb8766a67f0b4a6ce130ce244414f"},
