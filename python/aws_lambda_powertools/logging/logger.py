@@ -68,9 +68,9 @@ def logger_setup(service: str = "service_undefined", level: str = "INFO", sampli
     try:
         if sampling_rate and random.random() <= float(sampling_rate):
             log_level = logging.DEBUG
-    except ValueError:  
+    except ValueError:
         raise ValueError(
-            "fExpected a float value ranging 0 to 1, but received {sampling_rate} instead. Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
+            "fExpected a float value ranging 0 to 1, but received {sampling_rate} instead. Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."  # noqa E501
         )
 
     logger.setLevel(log_level)
