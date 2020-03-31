@@ -1,9 +1,10 @@
 import json
-
-import pytest
 from dataclasses import dataclass
 
+import pytest
+
 from hello_world import app
+
 
 @pytest.fixture()
 def apigw_event():

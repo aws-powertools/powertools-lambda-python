@@ -1,6 +1,8 @@
 import json
+
+from aws_lambda_powertools.logging import logger_inject_lambda_context, logger_setup
 from aws_lambda_powertools.tracing import Tracer
-from aws_lambda_powertools.logging import logger_setup, logger_inject_lambda_context
+
 # import requests
 
 tracer = Tracer()
