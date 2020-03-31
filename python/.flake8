@@ -1,5 +1,5 @@
 [flake8]
-exclude = docs, .eggs, setup.py
+exclude = docs, .eggs, setup.py, example, .aws-sam
 ignore = E203, E266, W503, BLK100, W291
 max-line-length = 120
 max-complexity = 18
@@ -10,3 +10,4 @@ include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
 line_length = 120
+
