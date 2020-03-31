@@ -186,16 +186,3 @@ This library may change its API/methods or environment variables as it receives 
     - Alternatively, we could patch only AWS SDK if available and to provide a param to patch multiple `Tracer(modules=("boto3", "requests"))` 
 * **Create a Tracer provider to support additional tracing**
     - Either duck typing or ABC to allow additional tracing providers
-
-## TODO
-
-* [ ] Add an example code using powertools
-
-## Credits
-
-* Structured logging initial implementation from [aws-lambda-logging](https://gitlab.com/hadrien/aws_lambda_logging)
-* Powertools idea [DAZN Powertools](https://github.com/getndazn/dazn-lambda-powertools/)
-
-## License
-
-This library is licensed under the MIT-0 License. See the LICENSE file.
