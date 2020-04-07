@@ -15,7 +15,7 @@ lint: format
 	poetry run flake8
 
 test:
-	poetry run pytest
+	poetry run pytest -vvv
 
 test-html:
 	poetry run pytest --cov-report html
