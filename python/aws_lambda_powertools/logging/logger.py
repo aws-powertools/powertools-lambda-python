@@ -3,13 +3,12 @@ import itertools
 import logging
 import os
 import random
+import warnings
 from distutils.util import strtobool
 from typing import Any, Callable, Dict
 
 from ..helper.models import MetricUnit, build_lambda_context_model, build_metric_unit_from_str
 from . import aws_lambda_logging
-
-import warnings
 
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
