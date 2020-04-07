@@ -25,6 +25,13 @@ A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray,
 * Log sampling enables DEBUG log level for a percentage of requests (disabled by default)
     - Enable via `POWERTOOLS_LOGGER_SAMPLE_RATE=0.1`, ranges from 0 to 1, where 0.1 is 10% and 1 is 100%
 
+**Metrics**
+
+* Aggregate up to 100 metrics using a single CloudWatch Embedded Metric Format object (large JSON blob)
+* Context manager to create an one off metric with a different dimension than metrics already aggregated
+* Validate against common metric definitions mistakes (metric unit, values, max dimensions, max metrics, etc)
+* No stack, custom resource, data collection needed — Metrics are created async by CloudWatch EMF
+
 **Environment variables** used across suite of utilities
 
 Environment variable | Description | Default | Utility
@@ -33,6 +40,7 @@ POWERTOOLS_SERVICE_NAME | Sets service name used for tracing namespace, metrics 
 POWERTOOLS_TRACE_DISABLED | Disables tracing | "false" | tracing
 POWERTOOLS_LOGGER_LOG_EVENT | Logs incoming event | "false" | logging
 POWERTOOLS_LOGGER_SAMPLE_RATE | Debug log sampling  | 0 | logging
+POWERTOOLS_METRICS_NAMESPACE | Metrics namespace  | None | metrics
 LOG_LEVEL | Sets logging level | "INFO" | logging
 
 ## Usage
@@ -148,34 +156,51 @@ def handler(event, context)
 
 #### Custom Metrics async
 
-> **NOTE**: This will **likely change after Beta** in light of [new Amazon CloudWatch embedded metric format](https://aws.amazon.com/about-aws/whats-new/2019/11/amazon-cloudwatch-launches-embedded-metric-format/), meaning we won't need an additional stack and interface could change.
+> **NOTE** `log_metric` will be removed once it's GA.
 
-This feature requires [Custom Metrics SAR App](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:374852340823:applications~async-custom-metrics) in order to process canonical metric lines in CloudWatch Logs. 
+This feature makes use of CloudWatch Embedded Metric Format (EMF) and metrics are created asynchronously by CloudWatch service - You don't need any custom resource or additional CloudFormation stack as before.
 
-If you're starting from scratch, you may want to see a working example, tune to your needs and deploy within your account - [Serverless Airline Log Processing Stack](https://github.com/aws-samples/aws-serverless-airline-booking/blob/develop/src/backend/log-processing/template.yaml)
+CloudWatch requires that every object must have at least one Metric, one Namespace, and one Dimension. Namespace can be automatically added by using `POWERTOOLS_METRICS_NAMESPACE` environment variable.
+
+**Creating multiple metrics**
 
 ```python
-from aws_lambda_powertools.logging import MetricUnit, log_metric
+from aws_lambda_powertools.metrics import Metrics, MetricUnit
 
-def handler(event, context)
-  log_metric(name="SuccessfulPayment", unit=MetricUnit.Count, value=10, namespace="MyApplication")
-  
-  # Optional dimensions
-  log_metric(name="SuccessfulPayment", unit=MetricUnit.Count, value=10, namespace="MyApplication", customer_id="123-abc", charge_id="abc-123")
-  
-  # Explicit service name
-  log_metric(service="paymentTest", name="SuccessfulPayment", namespace="MyApplication".....)
-  ...
+metrics = Metrics()
+metrics.add_namespace(name="ServerlessAirline")
+metrics.add_metric(name="ColdStart", unit="Count", value=1)
+metrics.add_dimension(name="service", value="booking")
+
+@tracer.capture_lambda_handler
+@metrics.log_metrics
+def lambda_handler(evt, ctx):
+    metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
+    some_code()
+    return True
+
+def some_code():
+    metrics.add_metric(name="some_other_metric", unit=MetricUnit.Seconds, value=1)
+    ...
 ```
 
-**Exerpt output in CloudWatch Logs**
+By default, `log_metrics` doesn't call the decorated function. If you want to use Metrics middleware only (no Tracer), use `call_function` parameter to explicitly call your function handler and capture all metrics before printing to logs.
 
-```
-MONITORING|10|Count|SuccessfulPayment|MyApplication|service="payment
-MONITORING|10|Count|SuccessfulPayment|MyApplication|customer_id="123-abc",charge_id="abc-123",service="payment
-MONITORING|10|Count|SuccessfulPayment|MyApplication|service="paymentTest
+```python
+...
+@metric.log_metrics(call_function=True)
+def lambda_handler(evt, ctx):
+    some_code()
+    return True
 ```
 
+CloudWatch EMF uses the same dimensions across all metrics. If you have metrics that should have different dimensions, you can use `single_metric` context manager to create a single metric with any dimension you want.
+
+```python
+from aws_lambda_powertools.metrics import MetricUnit, single_metric
+with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric:
+    metric.add_dimension(name="function_context", value="$LATEST")
+```
 
 ## Beta
 
