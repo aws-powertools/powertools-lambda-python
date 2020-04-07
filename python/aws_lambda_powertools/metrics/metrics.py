@@ -87,13 +87,9 @@ class Metrics(MetricManager):
     _dimensions = {}
 
     def __init__(self, metric_set=None, dimension_set=None, namespace=None):
-        super().__init__(
-            metric_set=self._metrics, dimension_set=self._dimensions, namespace=namespace
-        )
+        super().__init__(metric_set=self._metrics, dimension_set=self._dimensions, namespace=namespace)
 
-    def log_metrics(
-        self, lambda_handler: Callable[[Any, Any], Any] = None, call_function: bool = False
-    ):
+    def log_metrics(self, lambda_handler: Callable[[Any, Any], Any] = None, call_function: bool = False):
         """Decorator to serialize and publish metrics at the end of a function execution.
 
         By default, it doesn't run the lambda function handler as other decorators

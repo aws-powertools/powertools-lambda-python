@@ -3,115 +3,21 @@ import json
 import logging
 import numbers
 import os
+import pathlib
 from typing import Dict, List, Union
 
 import jsonschema
 
 from aws_lambda_powertools.helper.models import MetricUnit
 
-from .exceptions import (
-    MetricUnitError,
-    MetricValueError,
-    SchemaValidationError,
-    UniqueNamespaceError,
-)
+from .exceptions import MetricUnitError, MetricValueError, SchemaValidationError, UniqueNamespaceError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
-CLOUDWATCH_EMF_SCHEMA = {
-    "type": "object",
-    "title": "Root Node",
-    "required": ["_aws"],
-    "properties": {
-        "_aws": {
-            "$id": "#/properties/_aws",
-            "type": "object",
-            "title": "Metadata",
-            "required": ["Timestamp", "CloudWatchMetrics"],
-            "properties": {
-                "Timestamp": {
-                    "$id": "#/properties/_aws/properties/Timestamp",
-                    "type": "integer",
-                    "title": "The Timestamp Schema",
-                    "examples": [1565375354953],
-                },
-                "CloudWatchMetrics": {
-                    "$id": "#/properties/_aws/properties/CloudWatchMetrics",
-                    "type": "array",
-                    "title": "MetricDirectives",
-                    "items": {
-                        "$id": "#/properties/_aws/properties/CloudWatchMetrics/items",
-                        "type": "object",
-                        "title": "MetricDirective",
-                        "required": ["Namespace", "Dimensions", "Metrics"],
-                        "properties": {
-                            "Namespace": {
-                                "$id": "#/properties/_aws/properties/CloudWatchMetrics/items/properties/Namespace",
-                                "type": "string",
-                                "title": "CloudWatch Metrics Namespace",
-                                "examples": ["MyApp"],
-                                "pattern": "^(.*)$",
-                                "minLength": 1,
-                            },
-                            "Dimensions": {
-                                "$id": "#/properties/_aws/properties/CloudWatchMetrics/items/properties/Dimensions",
-                                "type": "array",
-                                "title": "The Dimensions Schema",
-                                "minItems": 1,
-                                "items": {
-                                    "$id": "#/properties/_aws/properties/CloudWatchMetrics/items/properties/Dimensions/items",
-                                    "type": "array",
-                                    "title": "DimensionSet",
-                                    "minItems": 1,
-                                    "maxItems": 9,
-                                    "items": {
-                                        "$id": "#/properties/_aws/properties/CloudWatchMetrics/items/properties/Dimensions/items/items",
-                                        "type": "string",
-                                        "title": "DimensionReference",
-                                        "examples": ["Operation"],
-                                        "pattern": "^(.*)$",
-                                        "minItems": 1,
-                                    },
-                                },
-                            },
-                            "Metrics": {
-                                "$id": "#/properties/_aws/properties/CloudWatchMetrics/items/properties/Metrics",
-                                "type": "array",
-                                "title": "MetricDefinitions",
-                                "minItems": 1,
-                                "items": {
-                                    "$id": "#/properties/_aws/properties/CloudWatchMetrics/items/properties/Metrics/items",
-                                    "type": "object",
-                                    "title": "MetricDefinition",
-                                    "required": ["Name"],
-                                    "minItems": 1,
-                                    "properties": {
-                                        "Name": {
-                                            "$id": "#/properties/_aws/properties/CloudWatchMetrics/items/properties/Metrics/items/properties/Name",
-                                            "type": "string",
-                                            "title": "MetricName",
-                                            "examples": ["ProcessingLatency"],
-                                            "pattern": "^(.*)$",
-                                            "minLength": 1,
-                                        },
-                                        "Unit": {
-                                            "$id": "#/properties/_aws/properties/CloudWatchMetrics/items/properties/Metrics/items/properties/Unit",
-                                            "type": "string",
-                                            "title": "MetricUnit",
-                                            "examples": ["Milliseconds"],
-                                            "pattern": "^(Seconds|Microseconds|Milliseconds|Bytes|Kilobytes|Megabytes|Gigabytes|Terabytes|Bits|Kilobits|Megabits|Gigabits|Terabits|Percent|Count|Bytes\\/Second|Kilobytes\\/Second|Megabytes\\/Second|Gigabytes\\/Second|Terabytes\\/Second|Bits\\/Second|Kilobits\\/Second|Megabits\\/Second|Gigabits\\/Second|Terabits\\/Second|Count\\/Second|None)$",
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        }
-    },
-}
+_schema_path = pathlib.Path(__file__).parent / "./schema.json"
+with _schema_path.open() as f:
+    CLOUDWATCH_EMF_SCHEMA = json.load(f)
 
 
 class MetricManager:
@@ -120,11 +26,9 @@ class MetricManager:
     MetricManager creates metrics asynchronously thanks to CloudWatch Embedded Metric Format (EMF).
     CloudWatch EMF can create up to 100 metrics per EMF object
     and metrics, dimensions, and namespace created via MetricManager
-    will adhere to the specification[1], will be serialized and validated against EMF Schema[1].
+    will adhere to the schema, will be serialized and validated against EMF Schema.
 
     Use Metrics and SingleMetric classes to create EMF metrics.
-
-    [1] https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html
 
     Environment variables
     ---------------------
@@ -139,9 +43,7 @@ class MetricManager:
         Raised when metric object fails EMF schema validation
     """
 
-    def __init__(
-        self, metric_set: Dict[str, str] = None, dimension_set: Dict = None, namespace: str = None
-    ):
+    def __init__(self, metric_set: Dict[str, str] = None, dimension_set: Dict = None, namespace: str = None):
         self.metric_set = metric_set or {}
         self.dimension_set = dimension_set or {}
         self.namespace = os.getenv("POWERTOOLS_METRICS_NAMESPACE") or namespace
@@ -208,9 +110,7 @@ class MetricManager:
                 unit = MetricUnit[unit]
             except KeyError:
                 unit_options = list(MetricUnit.__members__)
-                raise MetricUnitError(
-                    f"Invalid metric unit '{unit}', expected either option: {unit_options}"
-                )
+                raise MetricUnitError(f"Invalid metric unit '{unit}', expected either option: {unit_options}")
 
         metric = {"Unit": unit.value, "Value": float(value)}
         logger.debug(f"Adding metric: {name} with {metric}")
@@ -266,11 +166,7 @@ class MetricManager:
 
         metrics_definition = {
             "CloudWatchMetrics": [
-                {
-                    "Namespace": self.namespace,
-                    "Dimensions": [dimension_keys],
-                    "Metrics": metric_names_unit,
-                }
+                {"Namespace": self.namespace, "Dimensions": [dimension_keys], "Metrics": metric_names_unit}
             ]
         }
         metrics_timestamp = {"Timestamp": int(datetime.datetime.now().timestamp() * 1000)}
@@ -280,7 +176,7 @@ class MetricManager:
             logger.debug("Validating serialized metrics against CloudWatch EMF schema", metric_set)
             jsonschema.validate(metric_set, schema=CLOUDWATCH_EMF_SCHEMA)
         except jsonschema.exceptions.ValidationError as e:
-            message = f"Invalid format. Error: {e.message} ({e.validator}), Invalid item: {e.absolute_schema_path}"  # noqa: B306
+            message = f"Invalid format. Error: {e.message} ({e.validator}), Invalid item: {e.absolute_schema_path}"  # noqa: B306, E501
             raise SchemaValidationError(message)
         return metric_set
 

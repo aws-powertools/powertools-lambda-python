@@ -2,12 +2,7 @@
 """
 from aws_lambda_powertools.helper.models import MetricUnit
 
-from .exceptions import (
-    MetricUnitError,
-    MetricValueError,
-    SchemaValidationError,
-    UniqueNamespaceError,
-)
+from .exceptions import MetricUnitError, MetricValueError, SchemaValidationError, UniqueNamespaceError
 from .metric import single_metric
 from .metrics import Metrics
 

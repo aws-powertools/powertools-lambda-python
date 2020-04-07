@@ -212,21 +212,12 @@ def test_metrics_spillover(capsys, metric, dimension, namespace, a_hundred_metri
     spillover_metrics = json.loads(spillover_metrics)
     single_metric = json.loads(single_metric)
 
-    expected_single_metric = serialize_single_metric(
-        metric=metric, dimension=dimension, namespace=namespace
-    )
+    expected_single_metric = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
     expected_spillover_metrics = serialize_metrics(
         metrics=a_hundred_metrics, dimensions=[dimension], namespace=namespace
     )
 
-    remove_timestamp(
-        metrics=[
-            spillover_metrics,
-            expected_spillover_metrics,
-            single_metric,
-            expected_single_metric,
-        ]
-    )
+    remove_timestamp(metrics=[spillover_metrics, expected_spillover_metrics, single_metric, expected_single_metric])
 
     assert single_metric["_aws"] == expected_single_metric["_aws"]
     assert spillover_metrics["_aws"] == expected_spillover_metrics["_aws"]
