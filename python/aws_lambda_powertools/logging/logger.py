@@ -9,6 +9,8 @@ from typing import Any, Callable, Dict
 from ..helper.models import MetricUnit, build_lambda_context_model, build_metric_unit_from_str
 from . import aws_lambda_logging
 
+import warnings
+
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
@@ -237,6 +239,7 @@ def log_metric(
         keyword arguments as additional dimensions (e.g. customer=customerId)
     """
 
+    warnings.warn(message="This method will be removed in GA; use Metrics instead", category=DeprecationWarning)
     logger.debug(f"Building new custom metric. Name: {name}, Unit: {unit}, Value: {value}, Dimensions: {dimensions}")
     service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
     dimensions = __build_dimensions(**dimensions)
