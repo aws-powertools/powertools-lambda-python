@@ -1,5 +1,12 @@
 # HISTORY 
 
+## April 8th, 2020
+
+**0.6.1**
+
+* Introduces Metrics middleware to utilise CloudWatch Embedded Metric Format
+* Adds deprecation warning for `log_metrics`
+
 ## February 20th, 2020
 
 **0.5.0**
