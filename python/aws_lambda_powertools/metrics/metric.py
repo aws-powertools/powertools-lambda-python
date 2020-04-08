@@ -17,8 +17,9 @@ class SingleMetric(MetricManager):
     EMF specification doesn't allow metrics with different dimensions.
     SingleMetric overrides MetricManager's add_metric method to do just that.
 
-    Use SingleMetric when you need to create metrics with different dimensions,
-    and for simplicity use single_metric() context manager.
+    Use `single_metric` when you need to create metrics with different dimensions,
+    otherwise `aws_lambda_powertools.metrics.metrics.Metrics` is
+    a more cost effective option
 
     Environment variables
     ---------------------
@@ -27,20 +28,22 @@ class SingleMetric(MetricManager):
 
     Example
     -------
-    Creates cold start metric with function_version as dimension
+    **Creates cold start metric with function_version as dimension**
 
-        >>> from aws_lambda_powertools.metrics import SingleMetric, MetricUnit
-        >>> import json
-        >>> metric = Single_Metric()
-        >>> metric.add_namespace(name="ServerlessAirline")
-        >>> metric.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
-        >>> metric.add_dimension(name="function_version", value=47)
-        >>> print(json.dumps(metric.serialize_metric_set(), indent=4))
+        from aws_lambda_powertools.metrics import SingleMetric, MetricUnit
+        import json
+        metric = Single_Metric()
+
+        metric.add_namespace(name="ServerlessAirline")
+        metric.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
+        metric.add_dimension(name="function_version", value=47)
+
+        print(json.dumps(metric.serialize_metric_set(), indent=4))
 
     Parameters
     ----------
     MetricManager : MetricManager
-        Inherits from MetricManager
+        Inherits from `aws_lambda_powertools.metrics.base.MetricManager`
     """
 
     def add_metric(self, name: str, unit: MetricUnit, value: float):
@@ -63,22 +66,25 @@ class SingleMetric(MetricManager):
 
 @contextmanager
 def single_metric(name: str, unit: MetricUnit, value: float):
-    """context manager to simplify creation of a single metric
+    """Context manager to simplify creation of a single metric
 
     Example
     -------
-    Creates cold start metric with function_version as dimension
+    **Creates cold start metric with function_version as dimension**
 
-        >>> from aws_lambda_powertools.metrics import single_metric, MetricUnit
-        >>> with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric:
+        from aws_lambda_powertools.metrics import single_metric, MetricUnit
+
+        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric:
                 metric.add_namespace(name="ServerlessAirline")
                 metric.add_dimension(name="function_version", value=47)
 
-    Same as above but set namespace using environment variable
+    **Same as above but set namespace using environment variable**
 
         $ export POWERTOOLS_METRICS_NAMESPACE="ServerlessAirline"
-        >>> from aws_lambda_powertools.metrics import single_metric, MetricUnit
-        >>> with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric:
+
+        from aws_lambda_powertools.metrics import single_metric, MetricUnit
+
+        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric:
                 metric.add_dimension(name="function_version", value=47)
 
     Parameters
@@ -86,7 +92,7 @@ def single_metric(name: str, unit: MetricUnit, value: float):
     name : str
         Metric name
     unit : MetricUnit
-        Metric unit (e.g. "Seconds", MetricUnit.Seconds)
+        `aws_lambda_powertools.helper.models.MetricUnit`
     value : float
         Metric value
 

@@ -27,43 +27,45 @@ class Metrics(MetricManager):
 
     Example
     -------
-    Creates a few metrics and publish at the end of a function execution
+    **Creates a few metrics and publish at the end of a function execution**
 
-        >>> from aws_lambda_powertools.metrics import Metrics
-        >>> metrics = Metrics()
-        >>> metrics.add_namespace(name="ServerlessAirline")
-        >>> metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
-        >>> metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
-        >>> metrics.add_dimension(name="service", value="booking")
-        >>> metrics.add_dimension(name="function_version", value="$LATEST")
-        >>> ...
-        >>> @tracer.capture_lambda_handler
-        >>> @metrics.log_metrics()
-        >>> def lambda_handler():
+        from aws_lambda_powertools.metrics import Metrics
+
+        metrics = Metrics()
+        metrics.add_namespace(name="ServerlessAirline")
+        metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
+        metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
+        metrics.add_dimension(name="service", value="booking")
+        metrics.add_dimension(name="function_version", value="$LATEST")
+        ...
+
+        @tracer.capture_lambda_handler
+        @metrics.log_metrics()
+        def lambda_handler():
                 do_something()
                 return True
 
-        >>> def do_something():
+        def do_something():
                 metrics.add_metric(name="Something", unit="Count", value=1)
 
-    Calls lambda function and creates a few metrics and publish.
-    Useful log_metrics is the only decorator used, or when no other decorator calls the handler
+    **Calls lambda function and creates a few metrics and publish.** \n
+    Useful when log_metrics is the only decorator used, or when no other decorator calls the handler
 
-        >>> from aws_lambda_powertools.metrics import Metrics
-        >>> metrics = Metrics()
-        >>> metrics.add_namespace(name="ServerlessAirline")
-        >>> metrics.add_dimension(name="service", value="booking")
-        >>> metrics.add_dimension(name="function_version", value="$LATEST")
-        >>> ...
-        >>> @metrics.log_metrics(call_function=True)
-        >>> def lambda_handler():
+        from aws_lambda_powertools.metrics import Metrics
+        metrics = Metrics()
+        metrics.add_namespace(name="ServerlessAirline")
+        metrics.add_dimension(name="service", value="booking")
+        metrics.add_dimension(name="function_version", value="$LATEST")
+        ...
+        @metrics.log_metrics(call_function=True)
+        def lambda_handler():
                 if cold_start:
                     metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
                     metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
                 do_something()
                 return True
 
-        >>> def do_something():
+        def do_something():
                 metrics.add_metric
 
 
@@ -75,7 +77,7 @@ class Metrics(MetricManager):
     Parameters
     ----------
     MetricManager : MetricManager
-        Inherits from MetricManager
+        Inherits from `aws_lambda_powertools.metrics.base.MetricManager`
 
     Raises
     ------
@@ -92,24 +94,25 @@ class Metrics(MetricManager):
     def log_metrics(self, lambda_handler: Callable[[Any, Any], Any] = None, call_function: bool = False):
         """Decorator to serialize and publish metrics at the end of a function execution.
 
-        By default, it doesn't run the lambda function handler as other decorators
-        like Tracer and Logger could be used too.
-        However, if you are only using Metrics feature, use `log_metrics(call_function=True)`.
+        By default, log_metrics doesn't run the method it decorates (lambda handler). However,
+        if you are only using Metrics feature, you can change that behaviour with
+        `call_function` parameter.
 
         Example
         -------
-        Lambda function using tracer and metrics decorators
+        **Lambda function using tracer and metrics decorators**
 
-            >>> metrics = Metrics()
-            >>> tracer = Tracer(service="payment")
-            >>> @tracer.capture_lambda_handler
-            >>> @metrics.log_metrics
+            metrics = Metrics()
+            tracer = Tracer(service="payment")
+
+            @tracer.capture_lambda_handler
+            @metrics.log_metrics
                 def handler(event, context)
 
-        Lambda function using metrics decorator only
+        **Lambda function using metrics decorator only**
 
-            >>> metrics = Metrics()
-            >>> @metrics.log_metrics(call_function=True)
+            metrics = Metrics()
+            @metrics.log_metrics(call_function=True)
                 def handler(event, context)
 
         Parameters

@@ -19,7 +19,9 @@ _schema_path = pathlib.Path(__file__).parent / "./schema.json"
 with _schema_path.open() as f:
     CLOUDWATCH_EMF_SCHEMA = json.load(f)
 
+
 validate_schema = fastjsonschema.compile(definition=CLOUDWATCH_EMF_SCHEMA)
+"""JSON Schema validator."""
 
 
 class MetricManager:
@@ -30,19 +32,24 @@ class MetricManager:
     and metrics, dimensions, and namespace created via MetricManager
     will adhere to the schema, will be serialized and validated against EMF Schema.
 
-    Use Metrics and SingleMetric classes to create EMF metrics.
+    **Use `aws_lambda_powertools.metrics.metrics.Metrics` or
+    `aws_lambda_powertools.metrics.metric.single_metric` to create EMF metrics.**
 
     Environment variables
     ---------------------
     POWERTOOLS_METRICS_NAMESPACE : str
-        metric namespace
+        metric namespace to be set for all metrics
 
     Raises
     ------
     MetricUnitError
-        Raised when metric added doesn't provide correct metric unit.
+        When metric metric isn't supported by CloudWatch
+    MetricValueError
+        When metric value isn't a number
+    UniqueNamespaceError
+        When an additional namespace is set
     SchemaValidationError
-        Raised when metric object fails EMF schema validation
+        When metric object fails EMF schema validation
     """
 
     def __init__(self, metric_set: Dict[str, str] = None, dimension_set: Dict = None, namespace: str = None):
@@ -55,9 +62,9 @@ class MetricManager:
 
         Example
         -------
-        Add metric namespace
+        **Add metric namespace**
 
-            >>> metric.add_namespace(name="ServerlessAirline")
+            metric.add_namespace(name="ServerlessAirline")
 
         Parameters
         ----------
@@ -76,27 +83,27 @@ class MetricManager:
 
         Example
         -------
-        Add given metric using MetricUnit enum
+        **Add given metric using MetricUnit enum**
 
-            >>> metric.add_metric(name="BookingConfirmation", unit=MetricUnit.Count, value=1)
+            metric.add_metric(name="BookingConfirmation", unit=MetricUnit.Count, value=1)
 
-        Add given metric using plain string but value unit
+        **Add given metric using plain string as value unit**
 
-            >>> metric.add_metric(name="BookingConfirmation", unit="Count", value=1)
+            metric.add_metric(name="BookingConfirmation", unit="Count", value=1)
 
         Parameters
         ----------
         name : str
             Metric name
         unit : MetricUnit
-            Metric unit (e.g. "Seconds", MetricUnit.Seconds)
+            `aws_lambda_powertools.helper.models.MetricUnit`
         value : float
             Metric value
 
         Raises
         ------
         MetricUnitError
-            Raised when metric unit is not supported by CloudWatch
+            When metric unit is not supported by CloudWatch
         """
         if len(self.metric_set) == 100:
             logger.debug("Exceeded maximum of 100 metrics - Publishing existing metric set")
@@ -130,10 +137,11 @@ class MetricManager:
 
         Example
         -------
-        Serialize metrics into EMF format
-            >>> metrics = MetricManager()
-            >>> ...add metrics, dimensions, namespace
-            >>> ret = metrics.serialize_metric_set()
+        **Serialize metrics into EMF format**
+
+            metrics = MetricManager()
+            # ...add metrics, dimensions, namespace
+            ret = metrics.serialize_metric_set()
 
         Returns
         -------
@@ -184,6 +192,12 @@ class MetricManager:
 
     def add_dimension(self, name: str, value: str):
         """Adds given dimension to all metrics
+
+        Example
+        -------
+        **Add a metric dimensions**
+
+            metric.add_dimension(name="operation", value="confirm_booking")
 
         Parameters
         ----------
