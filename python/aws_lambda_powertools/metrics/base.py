@@ -6,7 +6,7 @@ import os
 import pathlib
 from typing import Dict, List, Union
 
-import jsonschema
+import fastjsonschema
 
 from aws_lambda_powertools.helper.models import MetricUnit
 
@@ -18,6 +18,8 @@ logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 _schema_path = pathlib.Path(__file__).parent / "./schema.json"
 with _schema_path.open() as f:
     CLOUDWATCH_EMF_SCHEMA = json.load(f)
+
+validate_schema = fastjsonschema.compile(definition=CLOUDWATCH_EMF_SCHEMA)
 
 
 class MetricManager:
@@ -174,9 +176,9 @@ class MetricManager:
 
         try:
             logger.debug("Validating serialized metrics against CloudWatch EMF schema", metric_set)
-            jsonschema.validate(metric_set, schema=CLOUDWATCH_EMF_SCHEMA)
-        except jsonschema.exceptions.ValidationError as e:
-            message = f"Invalid format. Error: {e.message} ({e.validator}), Invalid item: {e.absolute_schema_path}"  # noqa: B306, E501
+            validate_schema(metric_set)
+        except fastjsonschema.JsonSchemaException as e:
+            message = f"Invalid format. Error: {e.message}, Invalid item: {e.name}"  # noqa: B306, E501
             raise SchemaValidationError(message)
         return metric_set
 

@@ -28,15 +28,21 @@ build: pr
 #
 # Use `poetry version <major>/<minor></patch>` for version bump
 #
-release:
+release-prod:
 	poetry config pypi-token.pypi ${PYPI_TOKEN}
-	poetry build
-	poetry publish
-	rm -rf dist
+	poetry publish -n
 
 release-test:
 	poetry config repositories.testpypi https://test.pypi.org/legacy
 	poetry config pypi-token.pypi ${PYPI_TEST_TOKEN}
+	poetry publish --repository testpypi -n
+
+build-linux-wheels:
 	poetry build
-	poetry publish --repository testpypi
-	rm -rf dist
+	docker run --env PLAT=manylinux1_x86_64 --rm -it -v ${PWD}:/io -w /io quay.io/pypa/manylinux1_x86_64 /io/build_linux_wheels.sh
+	cp /io/wheelhouse/* dist/ && rm -rf wheelhouse
+
+release:
+	$(MAKE) build-linux-wheels
+	$(MAKE) release-test
+	$(MAKE) release-prod

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "0.6.0"
+version = "0.6.1"
 description = "Python utilities for AWS Lambda functions including but not limited to tracing, logging and custom metric"
 authors = ["Amazon Web Services"]
 classifiers=[
@@ -20,7 +20,7 @@ license = "MIT-0"
 [tool.poetry.dependencies]
 python = "^3.6"
 aws-xray-sdk = "^2.4.3"
-jsonschema = "^3.2.0"
+fastjsonschema = "^2.14.4"
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^5.0.3"}
