@@ -25,6 +25,12 @@ pr: lint test
 build: pr
 	poetry run build
 
+docs: dev
+	poetry run pdoc --html --output-dir docs ./aws_lambda_powertools --force
+
+docs-dev:
+	poetry run pdoc --http : aws_lambda_powertools
+
 #
 # Use `poetry version <major>/<minor></patch>` for version bump
 #
