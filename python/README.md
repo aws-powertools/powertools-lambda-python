@@ -158,9 +158,16 @@ def handler(event, context)
 
 > **NOTE** `log_metric` will be removed once it's GA.
 
-This feature makes use of CloudWatch Embedded Metric Format (EMF) and metrics are created asynchronously by CloudWatch service - You don't need any custom resource or additional CloudFormation stack as before.
+This feature makes use of CloudWatch Embedded Metric Format (EMF) and metrics are created asynchronously by CloudWatch service
 
-CloudWatch requires that every object must have at least one Metric, one Namespace, and one Dimension. Namespace can be automatically added by using `POWERTOOLS_METRICS_NAMESPACE` environment variable.
+> Contrary to `log_metric`, you don't need any custom resource or additional CloudFormation stack anymore.
+
+Metrics middleware validates against the minimum necessary for a metric to be published:
+
+* At least of one Metric and Dimension 
+* Maximum of 9 dimensions
+* Only one Namespace
+* [Any Metric unit supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html)
 
 **Creating multiple metrics**
 
@@ -184,7 +191,7 @@ def some_code():
     ...
 ```
 
-By default, `log_metrics` doesn't call the decorated function. If you want to use Metrics middleware only (no Tracer), use `call_function` parameter to explicitly call your function handler and capture all metrics before printing to logs.
+By default, `log_metrics` doesn't call the decorated function. If you want to use Metrics middleware only (no Tracer), use `call_function` parameter to explicitly call your function handler to capture all metrics before printing to logs.
 
 ```python
 ...
@@ -194,20 +201,23 @@ def lambda_handler(evt, ctx):
     return True
 ```
 
-CloudWatch EMF uses the same dimensions across all metrics. If you have metrics that should have different dimensions, you can use `single_metric` context manager to create a single metric with any dimension you want.
+CloudWatch EMF uses the same dimensions across all metrics. If you have metrics that should have different dimensions, use `single_metric` to create a single metric with any dimension you want. Generally, this would be an edge case since you [pay for unique metric](https://aws.amazon.com/cloudwatch/pricing/) 
+
+> unique metric = (metric_name + dimension_name + dimension_value)
 
 ```python
 from aws_lambda_powertools.metrics import MetricUnit, single_metric
+
 with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric:
     metric.add_dimension(name="function_context", value="$LATEST")
 ```
 
 ## Beta
 
+> **[Progress towards GA](https://github.com/awslabs/aws-lambda-powertools/projects/1)**
+
 This library may change its API/methods or environment variables as it receives feedback from customers. Currently looking for ideas in the following areas before making it stable:
 
 * **Should Tracer patch all possible imported libraries by default or only AWS SDKs?**
     - Patching all libraries may have a small performance penalty (~50ms) at cold start
     - Alternatively, we could patch only AWS SDK if available and to provide a param to patch multiple `Tracer(modules=("boto3", "requests"))` 
-* **Create a Tracer provider to support additional tracing**
-    - Either duck typing or ABC to allow additional tracing providers
