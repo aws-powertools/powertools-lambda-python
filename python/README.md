@@ -195,7 +195,7 @@ By default, `log_metrics` doesn't call the decorated function. If you want to us
 
 ```python
 ...
-@metric.log_metrics(call_function=True)
+@metrics.log_metrics(call_function=True)
 def lambda_handler(evt, ctx):
     some_code()
     return True

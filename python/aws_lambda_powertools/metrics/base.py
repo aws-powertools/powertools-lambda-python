@@ -20,10 +20,6 @@ with _schema_path.open() as f:
     CLOUDWATCH_EMF_SCHEMA = json.load(f)
 
 
-validate_schema = fastjsonschema.compile(definition=CLOUDWATCH_EMF_SCHEMA)
-"""JSON Schema validator."""
-
-
 class MetricManager:
     """Base class for metric functionality (namespace, metric, dimension, serialization)
 
@@ -184,7 +180,7 @@ class MetricManager:
 
         try:
             logger.debug("Validating serialized metrics against CloudWatch EMF schema", metric_set)
-            validate_schema(metric_set)
+            fastjsonschema.validate(definition=CLOUDWATCH_EMF_SCHEMA, data=metric_set)
         except fastjsonschema.JsonSchemaException as e:
             message = f"Invalid format. Error: {e.message}, Invalid item: {e.name}"  # noqa: B306, E501
             raise SchemaValidationError(message)

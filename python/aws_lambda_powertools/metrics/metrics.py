@@ -140,7 +140,6 @@ class Metrics(MetricManager):
                 logger.debug("Publishing metrics", {"metrics": metrics})
                 print(json.dumps(metrics))
             except Exception as e:
-                logger.error(e)
                 raise e
 
         return decorate

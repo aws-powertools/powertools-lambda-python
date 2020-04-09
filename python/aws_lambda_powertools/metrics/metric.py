@@ -114,7 +114,6 @@ def single_metric(name: str, unit: MetricUnit, value: float):
         logger.debug("Serializing single metric")
         metric_set: Dict = metric.serialize_metric_set()
     except Exception as e:
-        logger.error(e)
         raise e
     finally:
         logger.debug("Publishing single metric", {"metric": metric})
