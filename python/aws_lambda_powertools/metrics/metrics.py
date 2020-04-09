@@ -100,11 +100,14 @@ class Metrics(MetricManager):
         @functools.wraps(lambda_handler)
         def decorate(*args, **kwargs):
             try:
-                lambda_handler(*args, **kwargs)
+                response = lambda_handler(*args, **kwargs)
+            except Exception as e:
+                raise e
+            finally:
                 metrics = self.serialize_metric_set()
                 logger.debug("Publishing metrics", {"metrics": metrics})
                 print(json.dumps(metrics))
-            except Exception as e:
-                raise e
+
+            return response
 
         return decorate
