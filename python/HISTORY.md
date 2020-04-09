@@ -2,9 +2,9 @@
 
 ## April 9th, 2020
 
-**0.6.2**
+**0.6.3**
 
-* Fix `log_metrics` decorator logic not calling the decorated function
+* Fix `log_metrics` decorator logic not calling the decorated function, and exception handling
 
 ## April 8th, 2020
 
