@@ -46,7 +46,7 @@ release-test:
 build-linux-wheels:
 	poetry build
 	docker run --env PLAT=manylinux1_x86_64 --rm -it -v ${PWD}:/io -w /io quay.io/pypa/manylinux1_x86_64 /io/build_linux_wheels.sh
-	cp /io/wheelhouse/* dist/ && rm -rf wheelhouse
+	cp ./wheelhouse/* dist/ && rm -rf wheelhouse
 
 release:
 	$(MAKE) build-linux-wheels
