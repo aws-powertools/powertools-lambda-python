@@ -1,0 +1,9 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "example-powertools"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1pssy5gdxqcao"
+s3_prefix = "example-powertools"
+region = "eu-west-1"
+capabilities = "CAPABILITY_IAM"

@@ -1,6 +1,6 @@
 [flake8]
 exclude = docs, .eggs, setup.py, example, .aws-sam
-ignore = E203, E266, W503, BLK100, W291
+ignore = E203, E266, W503, BLK100, W291, I004
 max-line-length = 120
 max-complexity = 18
 

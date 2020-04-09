@@ -3,6 +3,7 @@ import itertools
 import logging
 import os
 import random
+import warnings
 from distutils.util import strtobool
 from typing import Any, Callable, Dict
 
@@ -237,6 +238,7 @@ def log_metric(
         keyword arguments as additional dimensions (e.g. customer=customerId)
     """
 
+    warnings.warn(message="This method will be removed in GA; use Metrics instead", category=DeprecationWarning)
     logger.debug(f"Building new custom metric. Name: {name}, Unit: {unit}, Value: {value}, Dimensions: {dimensions}")
     service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
     dimensions = __build_dimensions(**dimensions)

@@ -1,5 +1,18 @@
 # HISTORY 
 
+## April 9th, 2020
+
+**0.6.3**
+
+* Fix `log_metrics` decorator logic not calling the decorated function, and exception handling
+
+## April 8th, 2020
+
+**0.6.1**
+
+* Introduces Metrics middleware to utilise CloudWatch Embedded Metric Format
+* Adds deprecation warning for `log_metrics`
+
 ## February 20th, 2020
 
 **0.5.0**
