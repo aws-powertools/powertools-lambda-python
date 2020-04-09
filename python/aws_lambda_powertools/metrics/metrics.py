@@ -48,27 +48,6 @@ class Metrics(MetricManager):
         def do_something():
                 metrics.add_metric(name="Something", unit="Count", value=1)
 
-    **Calls lambda function and creates a few metrics and publish.** \n
-    Useful when log_metrics is the only decorator used, or when no other decorator calls the handler
-
-        from aws_lambda_powertools.metrics import Metrics
-        metrics = Metrics()
-        metrics.add_namespace(name="ServerlessAirline")
-        metrics.add_dimension(name="service", value="booking")
-        metrics.add_dimension(name="function_version", value="$LATEST")
-        ...
-        @metrics.log_metrics(call_function=True)
-        def lambda_handler():
-                if cold_start:
-                    metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
-                    metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
-                do_something()
-                return True
-
-        def do_something():
-                metrics.add_metric
-
-
     Environment variables
     ---------------------
     POWERTOOLS_METRICS_NAMESPACE : str
@@ -91,12 +70,10 @@ class Metrics(MetricManager):
     def __init__(self, metric_set=None, dimension_set=None, namespace=None):
         super().__init__(metric_set=self._metrics, dimension_set=self._dimensions, namespace=namespace)
 
-    def log_metrics(self, lambda_handler: Callable[[Any, Any], Any] = None, call_function: bool = False):
+    def log_metrics(self, lambda_handler: Callable[[Any, Any], Any] = None):
         """Decorator to serialize and publish metrics at the end of a function execution.
 
-        By default, log_metrics doesn't run the method it decorates (lambda handler). However,
-        if you are only using Metrics feature, you can change that behaviour with
-        `call_function` parameter.
+        Be aware that the log_metrics **does call* the decorated function (e.g. lambda_handler).
 
         Example
         -------
@@ -109,33 +86,21 @@ class Metrics(MetricManager):
             @metrics.log_metrics
                 def handler(event, context)
 
-        **Lambda function using metrics decorator only**
-
-            metrics = Metrics()
-            @metrics.log_metrics(call_function=True)
-                def handler(event, context)
-
         Parameters
         ----------
         lambda_handler : Callable[[Any, Any], Any], optional
             Lambda function handler, by default None
-        call_function : bool, optional
-            Call function it annotates, by default False
 
         Raises
         ------
         e
             Propagate error received
         """
-        if lambda_handler is None:
-            return functools.partial(self.log_metrics, call_function=call_function)
 
         @functools.wraps(lambda_handler)
         def decorate(*args, **kwargs):
             try:
-                if call_function:
-                    logger.debug("Calling Lambda handler")
-                    lambda_handler(*args, **kwargs)
+                lambda_handler(*args, **kwargs)
                 metrics = self.serialize_metric_set()
                 logger.debug("Publishing metrics", {"metrics": metrics})
                 print(json.dumps(metrics))

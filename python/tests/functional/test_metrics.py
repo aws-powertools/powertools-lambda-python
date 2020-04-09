@@ -137,7 +137,7 @@ def test_multiple_namespaces(metric, dimension, namespace):
             m.add_namespace(**namespace_b)
 
 
-def test_log_metrics_no_function_call(capsys, metrics, dimensions, namespace):
+def test_log_metrics(capsys, metrics, dimensions, namespace):
     my_metrics = Metrics()
     my_metrics.add_namespace(**namespace)
     for metric in metrics:
@@ -150,27 +150,6 @@ def test_log_metrics_no_function_call(capsys, metrics, dimensions, namespace):
         return True
 
     lambda_handler({}, {})
-    output = json.loads(capsys.readouterr().out.strip())
-    expected = serialize_metrics(metrics=metrics, dimensions=dimensions, namespace=namespace)
-
-    remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
-    assert expected["_aws"] == output["_aws"]
-
-
-def test_log_metrics_call_function(capsys, metrics, dimensions, namespace):
-    my_metrics = Metrics()
-
-    @my_metrics.log_metrics(call_function=True)
-    def lambda_handler(evt, handler):
-        my_metrics.add_namespace(**namespace)
-        for metric in metrics:
-            my_metrics.add_metric(**metric)
-        for dimension in dimensions:
-            my_metrics.add_dimension(**dimension)
-        return True
-
-    lambda_handler({}, {})
-
     output = json.loads(capsys.readouterr().out.strip())
     expected = serialize_metrics(metrics=metrics, dimensions=dimensions, namespace=namespace)
 
@@ -200,7 +179,7 @@ def test_metrics_spillover(capsys, metric, dimension, namespace, a_hundred_metri
     for _metric in a_hundred_metrics:
         my_metrics.add_metric(**_metric)
 
-    @my_metrics.log_metrics(call_function=True)
+    @my_metrics.log_metrics
     def lambda_handler(evt, handler):
         my_metrics.add_metric(**metric)
         return True

@@ -171,6 +171,8 @@ Metrics middleware validates against the minimum necessary for a metric to be pu
 
 **Creating multiple metrics**
 
+`log_metrics` decorator calls the decorated function, so leave that for last decorator or will fail with `SchemaValidationError` if no metrics are recorded.
+
 ```python
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
 
@@ -179,8 +181,8 @@ metrics.add_namespace(name="ServerlessAirline")
 metrics.add_metric(name="ColdStart", unit="Count", value=1)
 metrics.add_dimension(name="service", value="booking")
 
-@tracer.capture_lambda_handler
 @metrics.log_metrics
+@tracer.capture_lambda_handler
 def lambda_handler(evt, ctx):
     metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
     some_code()
@@ -189,16 +191,6 @@ def lambda_handler(evt, ctx):
 def some_code():
     metrics.add_metric(name="some_other_metric", unit=MetricUnit.Seconds, value=1)
     ...
-```
-
-By default, `log_metrics` doesn't call the decorated function. If you want to use Metrics middleware only (no Tracer), use `call_function` parameter to explicitly call your function handler to capture all metrics before printing to logs.
-
-```python
-...
-@metrics.log_metrics(call_function=True)
-def lambda_handler(evt, ctx):
-    some_code()
-    return True
 ```
 
 CloudWatch EMF uses the same dimensions across all metrics. If you have metrics that should have different dimensions, use `single_metric` to create a single metric with any dimension you want. Generally, this would be an edge case since you [pay for unique metric](https://aws.amazon.com/cloudwatch/pricing/) 
