@@ -1,5 +1,11 @@
 # HISTORY 
 
+## April 9th, 2020
+
+**0.6.2**
+
+* Fix `log_metrics` decorator logic not calling the decorated function
+
 ## April 8th, 2020
 
 **0.6.1**
