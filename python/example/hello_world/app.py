@@ -52,6 +52,9 @@ def lambda_handler(event, context):
         logger.error(e)
         raise e
     
+    with single_metric(name="UniqueMetricDimension", unit="Seconds", value=1) as metric:
+        metric.add_dimension(name="unique_dimension", value="for_unique_metric")
+
     logger.info("Returning message to the caller")
     return {
         "statusCode": 200,

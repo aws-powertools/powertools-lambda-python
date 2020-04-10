@@ -84,9 +84,9 @@ def remove_timestamp(metrics: List):
 
 
 def test_single_metric(capsys, metric, dimension, namespace):
-    with single_metric(**metric) as my_metrics:
-        my_metrics.add_dimension(**dimension)
-        my_metrics.add_namespace(**namespace)
+    with single_metric(**metric) as my_metric:
+        my_metric.add_dimension(**dimension)
+        my_metric.add_namespace(**namespace)
 
     output = json.loads(capsys.readouterr().out.strip())
     expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
@@ -96,11 +96,11 @@ def test_single_metric(capsys, metric, dimension, namespace):
 
 
 def test_single_metric_one_metric_only(capsys, metric, dimension, namespace):
-    with single_metric(**metric) as my_metrics:
-        my_metrics.add_metric(name="second_metric", unit="Count", value=1)
-        my_metrics.add_metric(name="third_metric", unit="Seconds", value=1)
-        my_metrics.add_dimension(**dimension)
-        my_metrics.add_namespace(**namespace)
+    with single_metric(**metric) as my_metric:
+        my_metric.add_metric(name="second_metric", unit="Count", value=1)
+        my_metric.add_metric(name="third_metric", unit="Seconds", value=1)
+        my_metric.add_dimension(**dimension)
+        my_metric.add_namespace(**namespace)
 
     output = json.loads(capsys.readouterr().out.strip())
     expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
@@ -130,11 +130,11 @@ def test_multiple_namespaces(metric, dimension, namespace):
     namespace_b = {"name": "AnotherNamespace"}
 
     with pytest.raises(UniqueNamespaceError):
-        with single_metric(**metric) as m:
-            m.add_dimension(**dimension)
-            m.add_namespace(**namespace)
-            m.add_namespace(**namespace_a)
-            m.add_namespace(**namespace_b)
+        with single_metric(**metric) as my_metric:
+            my_metric.add_dimension(**dimension)
+            my_metric.add_namespace(**namespace)
+            my_metric.add_namespace(**namespace_a)
+            my_metric.add_namespace(**namespace_b)
 
 
 def test_log_metrics(capsys, metrics, dimensions, namespace):
@@ -224,23 +224,23 @@ def test_incorrect_metric_unit(metric, dimension, namespace):
     metric["unit"] = "incorrect_unit"
 
     with pytest.raises(MetricUnitError):
-        with single_metric(**metric) as m:
-            m.add_dimension(**dimension)
-            m.add_namespace(**namespace)
+        with single_metric(**metric) as my_metric:
+            my_metric.add_dimension(**dimension)
+            my_metric.add_namespace(**namespace)
 
 
 def test_schema_no_namespace(metric, dimension):
     with pytest.raises(SchemaValidationError):
-        with single_metric(**metric) as m:
-            m.add_dimension(**dimension)
+        with single_metric(**metric) as my_metric:
+            my_metric.add_dimension(**dimension)
 
 
 def test_schema_incorrect_value(metric, dimension, namespace):
     metric["value"] = "some_value"
     with pytest.raises(MetricValueError):
-        with single_metric(**metric) as m:
-            m.add_dimension(**dimension)
-            m.add_namespace(**namespace)
+        with single_metric(**metric) as my_metric:
+            my_metric.add_dimension(**dimension)
+            my_metric.add_namespace(**namespace)
 
 
 def test_schema_no_metrics(dimensions, namespace):
@@ -258,7 +258,7 @@ def test_exceed_number_of_dimensions(metric, namespace):
         dimensions.append({"name": f"test_{i}", "value": "test"})
 
     with pytest.raises(SchemaValidationError):
-        with single_metric(**metric) as m:
-            m.add_namespace(**namespace)
+        with single_metric(**metric) as my_metric:
+            my_metric.add_namespace(**namespace)
             for dimension in dimensions:
-                m.add_dimension(**dimension)
+                my_metric.add_dimension(**dimension)
