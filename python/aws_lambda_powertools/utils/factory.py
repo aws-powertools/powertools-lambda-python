@@ -1,4 +1,9 @@
 import functools
+import logging
+import os
+
+logger = logging.getLogger(__name__)
+logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 
 def lambda_handler_decorator(decorator):
@@ -54,7 +59,11 @@ def lambda_handler_decorator(decorator):
 
         @functools.wraps(func)
         def wrapper(event, context):
-            return decorator(func, event, context, **kwargs)
+            try:
+                return decorator(func, event, context, **kwargs)
+            except Exception as err:
+                logger.error(f"Caught exception in {decorator.__qualname__}")
+                raise err
 
         return wrapper
 
