@@ -1,12 +1,13 @@
 import functools
 import logging
 import os
+from typing import Callable
 
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 
-def lambda_handler_decorator(decorator):
+def lambda_handler_decorator(decorator: Callable):
     """Decorator factory for decorating Lambda handlers.
 
     You can use lambda_handler_decorator to create your own middlewares,
@@ -52,7 +53,7 @@ def lambda_handler_decorator(decorator):
     """
 
     @functools.wraps(decorator)
-    def final_decorator(func=None, **kwargs):
+    def final_decorator(func: Callable = None, **kwargs):
         # If called with args return new func with args
         if func is None:
             return functools.partial(final_decorator, **kwargs)
