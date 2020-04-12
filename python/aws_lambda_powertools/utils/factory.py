@@ -17,7 +17,7 @@ def lambda_handler_decorator(decorator):
 
         @lambda_handler_decorator
         def log_response(handler, event, context):
-            any_code_to_execute_before_lambda_handler()                
+            any_code_to_execute_before_lambda_handler()
             response = handler(event, context)
             any_code_to_execute_after_lambda_handler()
             print(f"Lambda handler response: {response}")
@@ -31,37 +31,31 @@ def lambda_handler_decorator(decorator):
         from aws_lambda_powertools.utils import lambda_handler_decorator
 
         @lambda_handler_decorator
-        def obfuscate_sensitive_data(handler, event, context, obfuscate_email=None):
+        def obfuscate_sensitive_data(handler, event, context, fields=None):
             # Obfuscate email before calling Lambda handler
-            if obfuscate_email:
-                email = event.get('email', "")
-                event['email'] = obfuscate_pii(email)
-            
+            if fields:
+                for field in fields:
+                    field = event.get(field, "")
+                    event[field] = obfuscate_pii(field)
+
             response = handler(event, context)
             print(f"Lambda handler response: {response}")
 
-        @obfuscate_sensitive_data(obfuscate_email=True)
+        @obfuscate_sensitive_data(fields=["email"])
         def lambda_handler(event, context):
             return True
     """
 
     @functools.wraps(decorator)
     def final_decorator(func=None, **kwargs):
-        def decorated(func):
-            """This is the decorator function that will be called when setting a decorator."""
-
-            @functools.wraps(func)
-            def wrapper(event, context):
-                """Return decorator with decorated function incl. event/context/params"""
-                return decorator(func, event, context, **kwargs)
-
-            return wrapper
-
-        # Return decorator if no params
-        # Otherwise return decorator with params received
+        # If called with args return new func with args
         if func is None:
-            return decorated
-        else:
-            return decorated(func)
+            return functools.partial(final_decorator, **kwargs)
+
+        @functools.wraps(func)
+        def wrapper(event, context):
+            return decorator(func, event, context, **kwargs)
+
+        return wrapper
 
     return final_decorator
