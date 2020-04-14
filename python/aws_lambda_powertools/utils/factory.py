@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 
-def lambda_handler_decorator(decorator: Callable):
+def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
     """Decorator factory for decorating Lambda handlers.
 
     You can use lambda_handler_decorator to create your own middlewares,
@@ -53,6 +53,11 @@ def lambda_handler_decorator(decorator: Callable):
             return True
     """
 
+    if decorator is None:
+        return functools.partial(lambda_handler_decorator, trace_execution=trace_execution)
+
+    trace_execution = trace_execution or os.getenv("POWERTOOLS_TRACE_MIDDLEWARES", False)
+
     @functools.wraps(decorator)
     def final_decorator(func: Callable = None, **kwargs):
         # If called with args return new func with args
@@ -62,7 +67,7 @@ def lambda_handler_decorator(decorator: Callable):
         @functools.wraps(func)
         def wrapper(event, context):
             try:
-                if os.getenv("POWERTOOLS_TRACE_MIDDLEWARES", False):
+                if trace_execution:
                     with _trace_middleware(middleware=decorator):
                         response = decorator(func, event, context, **kwargs)
                 else:

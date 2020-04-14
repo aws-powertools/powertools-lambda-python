@@ -49,7 +49,7 @@ def test_factory_nested_decorator(capsys, say_hi_middleware, say_bye_middleware)
     assert "goodbye after lambda handler is executed" in output
 
 
-def test_factory_exception_propagation(capsys, say_bye_middleware, say_hi_middleware):
+def test_factory_exception_propagation(say_bye_middleware, say_hi_middleware):
     @say_bye_middleware
     @say_hi_middleware
     def lambda_handler(evt, ctx):
@@ -57,3 +57,31 @@ def test_factory_exception_propagation(capsys, say_bye_middleware, say_hi_middle
 
     with pytest.raises(ValueError):
         lambda_handler({}, {})
+
+def test_factory_explicit_tracing(monkeypatch):
+    monkeypatch.setenv("POWERTOOLS_TRACE_DISABLED", "true")
+    @lambda_handler_decorator(trace_execution=True)
+    def no_op(handler, event, context):
+        ret = handler(event, context)
+        return ret    
+
+    @no_op
+    def lambda_handler(evt, ctx):
+        return True
+
+    lambda_handler({}, {})
+
+def test_factory_explicit_tracing_env_var(monkeypatch):
+    monkeypatch.setenv("POWERTOOLS_TRACE_MIDDLEWARES", "true")
+    monkeypatch.setenv("POWERTOOLS_TRACE_DISABLED", "true")
+    
+    @lambda_handler_decorator
+    def no_op(handler, event, context):
+        ret = handler(event, context)
+        return ret    
+
+    @no_op
+    def lambda_handler(evt, ctx):
+        return True
+
+    lambda_handler({}, {})
