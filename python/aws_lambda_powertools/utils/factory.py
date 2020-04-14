@@ -1,6 +1,7 @@
 import functools
 import logging
 import os
+from contextlib import contextmanager
 from typing import Callable
 
 logger = logging.getLogger(__name__)
@@ -61,7 +62,12 @@ def lambda_handler_decorator(decorator: Callable):
         @functools.wraps(func)
         def wrapper(event, context):
             try:
-                return decorator(func, event, context, **kwargs)
+                if os.getenv("POWERTOOLS_TRACE_MIDDLEWARES", False):
+                    with _trace_middleware(middleware=decorator):
+                        response = decorator(func, event, context, **kwargs)
+                else:
+                    response = decorator(func, event, context, **kwargs)
+                return response
             except Exception as err:
                 logger.error(f"Caught exception in {decorator.__qualname__}")
                 raise err
@@ -69,3 +75,15 @@ def lambda_handler_decorator(decorator: Callable):
         return wrapper
 
     return final_decorator
+
+
+@contextmanager
+def _trace_middleware(middleware):
+    try:
+        from ..tracing import Tracer
+
+        tracer = Tracer()
+        tracer.create_subsegment(name=f"## middleware {middleware.__qualname__}")
+        yield
+    finally:
+        tracer.end_subsegment()

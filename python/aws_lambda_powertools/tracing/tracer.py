@@ -134,7 +134,7 @@ class Tracer:
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
-            self.__create_subsegment(name=f"## {lambda_handler.__name__}")
+            self.create_subsegment(name=f"## {lambda_handler.__name__}")
 
             try:
                 logger.debug("Calling lambda handler")
@@ -148,7 +148,7 @@ class Tracer:
                 self.put_metadata(f"{self.service}_error", err)
                 raise err
             finally:
-                self.__end_subsegment()
+                self.end_subsegment()
 
             return response
 
@@ -183,7 +183,7 @@ class Tracer:
         @functools.wraps(method)
         def decorate(*args, **kwargs):
             method_name = f"{method.__name__}"
-            self.__create_subsegment(name=f"## {method_name}")
+            self.create_subsegment(name=f"## {method_name}")
 
             try:
                 logger.debug(f"Calling method: {method_name}")
@@ -197,7 +197,7 @@ class Tracer:
                 self.put_metadata(f"{method_name} error", err)
                 raise err
             finally:
-                self.__end_subsegment()
+                self.end_subsegment()
 
             return response
 
@@ -257,7 +257,7 @@ class Tracer:
         logger.debug(f"Adding metadata on key '{key}'' with '{value}'' at namespace '{namespace}''")
         self.provider.put_metadata(key=key, value=value, namespace=_namespace)
 
-    def __create_subsegment(self, name: str) -> models.subsegment:
+    def create_subsegment(self, name: str) -> models.subsegment:
         """Creates subsegment or a dummy segment plus subsegment if tracing is disabled
 
         It also assumes Tracer would be instantiated statically so that cold starts are captured.
@@ -271,7 +271,7 @@ class Tracer:
         -------
         Creates a genuine subsegment
 
-            >>> self.__create_subsegment(name="a meaningful name")
+            >>> self.create_subsegment(name="a meaningful name")
 
         Returns
         -------
@@ -296,7 +296,7 @@ class Tracer:
 
         return subsegment
 
-    def __end_subsegment(self):
+    def end_subsegment(self):
         """Ends an existing subsegment
 
         Parameters
