@@ -58,30 +58,51 @@ def test_factory_exception_propagation(say_bye_middleware, say_hi_middleware):
     with pytest.raises(ValueError):
         lambda_handler({}, {})
 
+
 def test_factory_explicit_tracing(monkeypatch):
     monkeypatch.setenv("POWERTOOLS_TRACE_DISABLED", "true")
+
     @lambda_handler_decorator(trace_execution=True)
     def no_op(handler, event, context):
         ret = handler(event, context)
-        return ret    
+        return ret
 
     @no_op
     def lambda_handler(evt, ctx):
         return True
 
     lambda_handler({}, {})
+
 
 def test_factory_explicit_tracing_env_var(monkeypatch):
     monkeypatch.setenv("POWERTOOLS_TRACE_MIDDLEWARES", "true")
     monkeypatch.setenv("POWERTOOLS_TRACE_DISABLED", "true")
-    
+
     @lambda_handler_decorator
     def no_op(handler, event, context):
         ret = handler(event, context)
-        return ret    
+        return ret
 
     @no_op
     def lambda_handler(evt, ctx):
         return True
 
     lambda_handler({}, {})
+
+
+def test_factory_decorator_with_params(capsys):
+    @lambda_handler_decorator
+    def log_event(handler, event, context, log_event=False):
+        if log_event:
+            print(json.dumps(event))
+        return handler(event, context)
+
+    @log_event(log_event=True)
+    def lambda_handler(evt, ctx):
+        return True
+
+    event = {"message": "hello"}
+    lambda_handler(event, {})
+    output = json.loads(capsys.readouterr().out.strip())
+
+    assert event == output
