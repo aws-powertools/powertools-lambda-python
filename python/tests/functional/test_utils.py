@@ -3,7 +3,7 @@ from typing import Callable
 
 import pytest
 
-from aws_lambda_powertools.utils.factory import lambda_handler_decorator
+from aws_lambda_powertools.utils import lambda_handler_decorator
 
 
 @pytest.fixture
