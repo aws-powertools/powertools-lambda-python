@@ -32,12 +32,20 @@ A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray,
 * Validate against common metric definitions mistakes (metric unit, values, max dimensions, max metrics, etc)
 * No stack, custom resource, data collection needed — Metrics are created async by CloudWatch EMF
 
+**Bring your own middleware**
+
+* Utility to easily create your own middleware
+* Run logic before, after, and handle exceptions
+* Receive lambda handler, event, context
+* Optionally create sub-segment for each custom middleware
+
 **Environment variables** used across suite of utilities
 
 Environment variable | Description | Default | Utility
 ------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
 POWERTOOLS_SERVICE_NAME | Sets service name used for tracing namespace, metrics dimensions and structured logging | "service_undefined" | all
 POWERTOOLS_TRACE_DISABLED | Disables tracing | "false" | tracing
+POWERTOOLS_TRACE_MIDDLEWARES | Creates sub-segment for each middleware created by lambda_handler_decorator | "false" | utils
 POWERTOOLS_LOGGER_LOG_EVENT | Logs incoming event | "false" | logging
 POWERTOOLS_LOGGER_SAMPLE_RATE | Debug log sampling  | 0 | logging
 POWERTOOLS_METRICS_NAMESPACE | Metrics namespace  | None | metrics
@@ -154,7 +162,7 @@ def handler(event, context)
 }
 ```
 
-#### Custom Metrics async
+### Custom Metrics async
 
 > **NOTE** `log_metric` will be removed once it's GA.
 
@@ -202,6 +210,72 @@ from aws_lambda_powertools.metrics import MetricUnit, single_metric
 
 with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric:
     metric.add_dimension(name="function_context", value="$LATEST")
+```
+
+
+### Utilities
+
+#### Bring your own middleware
+
+This feature allows you to create your own middleware as a decorator with ease by following a simple signature. 
+
+* Accept 3 mandatory args - `handler, event, context` 
+* Always return the handler with event/context or response if executed
+  - Supports nested middleware/decorators use case
+
+**Middleware with no params**
+
+```python
+from aws_lambda_powertools.utils import lambda_handler_decorator
+
+@lambda_handler_decorator
+def middleware_name(handler, event, context):
+    return handler(event, context)
+
+@lambda_handler_decorator
+def middleware_before_after(handler, event, context):
+    logic_before_handler_execution()
+    response = handler(event, context)
+    logic_after_handler_execution()
+    return response
+
+@middleware_before_after
+@middleware_name
+def lambda_handler(event, context):
+    return True
+```
+
+**Middleware with params**
+
+```python
+@lambda_handler_decorator
+def obfuscate_sensitive_data(handler, event, context, fields=None):
+    # Obfuscate email before calling Lambda handler
+    if fields:
+        for field in fields:
+            field = event.get(field, "")
+            event[field] = obfuscate_pii(field)
+
+    response = handler(event, context)
+    return response
+
+@obfuscate_sensitive_data(fields=["email"])
+def lambda_handler(event, context):
+    return True
+```
+
+**Optionally trace middleware execution**
+
+```python
+from aws_lambda_powertools.utils import lambda_handler_decorator
+
+@lambda_handler_decorator(trace_execution=True)
+def middleware_name(handler, event, context):
+    return handler(event, context)
+
+@middleware_name
+def lambda_handler(event, context):
+    return True
 ```
 
 ## Beta
