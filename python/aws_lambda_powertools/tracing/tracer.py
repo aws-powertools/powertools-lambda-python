@@ -14,7 +14,7 @@ logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 class Tracer:
     """Tracer using AWS-XRay to provide decorators with known defaults for Lambda functions
 
-    When running locally, it honours POWERTOOLS_TRACE_DISABLED environment variable
+    When running locally, it honours `POWERTOOLS_TRACE_DISABLED` environment variable
     so end user code doesn't have to be modified to run it locally
     instead Tracer returns dummy segments/subsegments.
 
@@ -26,60 +26,9 @@ class Tracer:
     Environment variables
     ---------------------
     POWERTOOLS_TRACE_DISABLED : str
-        disable tracer (e.g. "true", "True", "TRUE")
+        disable tracer (e.g. `"true", "True", "TRUE"`)
     POWERTOOLS_SERVICE_NAME : str
         service name
-
-    Example
-    -------
-    A Lambda function using Tracer
-
-        >>> from aws_lambda_powertools.tracing import Tracer
-        >>> tracer = Tracer(service="greeting")
-
-        >>> @tracer.capture_method
-        >>> def greeting(name: str) -> Dict:
-                return {
-                    "name": name
-                }
-
-        >>> @tracer.capture_lambda_handler
-        >>> def handler(event: dict, context: Any) -> Dict:
-            >>> print("Received event from Lambda...")
-            >>> response = greeting(name="Heitor")
-            >>> return response
-
-    Booking Lambda function using Tracer that adds additional annotation/metadata
-
-        >>> from aws_lambda_powertools.tracing import Tracer
-        >>> tracer = Tracer(service="booking")
-
-        >>> @tracer.capture_method
-        >>> def confirm_booking(booking_id: str) -> Dict:
-                resp = add_confirmation(booking_id)
-
-                tracer.put_annotation("BookingConfirmation", resp['requestId'])
-                tracer.put_metadata("Booking confirmation", resp)
-
-                return resp
-
-        >>> @tracer.capture_lambda_handler
-        >>> def handler(event: dict, context: Any) -> Dict:
-            >>> print("Received event from Lambda...")
-            >>> response = greeting(name="Heitor")
-            >>> return response
-
-    A Lambda function using service name via POWERTOOLS_SERVICE_NAME
-
-        >>> export POWERTOOLS_SERVICE_NAME="booking"
-        >>> from aws_lambda_powertools.tracing import Tracer
-        >>> tracer = Tracer()
-
-        >>> @tracer.capture_lambda_handler
-        >>> def handler(event: dict, context: Any) -> Dict:
-            >>> print("Received event from Lambda...")
-            >>> response = greeting(name="Lessa")
-            >>> return response
 
     Parameters
     ----------
@@ -87,12 +36,68 @@ class Tracer:
         Service name that will be appended in all tracing metadata
     disabled: bool
         Flag to explicitly disable tracing, useful when running locally.
-        Env: POWERTOOLS_TRACE_DISABLED="true"
+        `Env POWERTOOLS_TRACE_DISABLED="true"`
+
+    Example
+    -------
+    **A Lambda function using Tracer**
+
+        from aws_lambda_powertools.tracing import Tracer
+        tracer = Tracer(service="greeting")
+
+        @tracer.capture_method
+        def greeting(name: str) -> Dict:
+            return {
+                "name": name
+            }
+
+        @tracer.capture_lambda_handler
+        def handler(event: dict, context: Any) -> Dict:
+            print("Received event from Lambda...")
+            response = greeting(name="Heitor")
+            return response
+
+    **Booking Lambda function using Tracer that adds additional annotation/metadata**
+
+        from aws_lambda_powertools.tracing import Tracer
+        tracer = Tracer(service="booking")
+
+        @tracer.capture_method
+        def confirm_booking(booking_id: str) -> Dict:
+                resp = add_confirmation(booking_id)
+
+                tracer.put_annotation("BookingConfirmation", resp['requestId'])
+                tracer.put_metadata("Booking confirmation", resp)
+
+                return resp
+
+        @tracer.capture_lambda_handler
+        def handler(event: dict, context: Any) -> Dict:
+            print("Received event from Lambda...")
+            response = greeting(name="Heitor")
+            return response
+
+    **A Lambda function using service name via POWERTOOLS_SERVICE_NAME**
+
+        export POWERTOOLS_SERVICE_NAME="booking"
+        from aws_lambda_powertools.tracing import Tracer
+        tracer = Tracer()
+
+        @tracer.capture_lambda_handler
+        def handler(event: dict, context: Any) -> Dict:
+            print("Received event from Lambda...")
+            response = greeting(name="Lessa")
+            return response
 
     Returns
     -------
     Tracer
         Tracer instance with imported modules patched
+
+    Limitations
+    -----------
+    * Async handler and methods not supported
+
     """
 
     def __init__(
@@ -115,11 +120,11 @@ class Tracer:
 
         Example
         -------
-        Lambda function using capture_lambda_handler decorator
+        **Lambda function using capture_lambda_handler decorator**
 
-            >>> tracer = Tracer(service="payment")
-            >>> @tracer.capture_lambda_handler
-                def handler(event, context)
+            tracer = Tracer(service="payment")
+            @tracer.capture_lambda_handler
+            def handler(event, context)
 
         Parameters
         ----------
@@ -162,12 +167,11 @@ class Tracer:
 
         Example
         -------
-        Custom function using capture_method decorator
+        **Custom function using capture_method decorator**
 
-            >>> tracer = Tracer(service="payment")
-
-            >>> @tracer.capture_method
-                def some_function()
+            tracer = Tracer(service="payment")
+            @tracer.capture_method
+            def some_function()
 
         Parameters
         ----------
@@ -210,8 +214,8 @@ class Tracer:
         -------
         Custom annotation for a pseudo service named payment
 
-            >>> tracer = Tracer(service="payment")
-            >>> tracer.put_annotation("PaymentStatus", "CONFIRMED")
+            tracer = Tracer(service="payment")
+            tracer.put_annotation("PaymentStatus", "CONFIRMED")
 
         Parameters
         ----------
@@ -244,9 +248,9 @@ class Tracer:
         -------
         Custom metadata for a pseudo service named payment
 
-            >>> tracer = Tracer(service="payment")
-            >>> response = collect_payment()
-            >>> tracer.put_metadata("Payment collection", response)
+            tracer = Tracer(service="payment")
+            response = collect_payment()
+            tracer.put_metadata("Payment collection", response)
         """
         # Will no longer be needed once #155 is resolved
         # https://github.com/aws/aws-xray-sdk-python/issues/155
@@ -271,7 +275,7 @@ class Tracer:
         -------
         Creates a genuine subsegment
 
-            >>> self.create_subsegment(name="a meaningful name")
+            self.create_subsegment(name="a meaningful name")
 
         Returns
         -------
@@ -339,9 +343,9 @@ class Tracer:
 
         Tracing is automatically disabled in the following conditions:
 
-        1. Explicitly disabled via TRACE_DISABLED environment variable
+        1. Explicitly disabled via `TRACE_DISABLED` environment variable
         2. Running in Lambda Emulators where X-Ray Daemon will not be listening
-        3. Explicitly disabled via constructor e.g Tracer(disabled=True)
+        3. Explicitly disabled via constructor e.g `Tracer(disabled=True)`
 
         Returns
         -------

@@ -94,32 +94,34 @@ def logger_inject_lambda_context(lambda_handler: Callable, event: Dict, context:
     Environment variables
     ---------------------
     POWERTOOLS_LOGGER_LOG_EVENT : str
-        instruct logger to log Lambda Event (e.g. "true", "True", "TRUE")
+        instruct logger to log Lambda Event (e.g. `"true", "True", "TRUE"`)
 
     Example
     -------
-    Captures Lambda contextual runtime info (e.g memory, arn, req_id)
-        >>> from aws_lambda_powertools.logging import logger_setup, logger_inject_lambda_context
-        >>> import logging
-        >>>
-        >>> logger = logging.getLogger(__name__)
-        >>> logging.setLevel(logging.INFO)
-        >>> logger_setup()
-        >>>
-        >>> @logger_inject_lambda_context
-        >>> def handler(event, context):
+    **Captures Lambda contextual runtime info (e.g memory, arn, req_id)**
+
+        from aws_lambda_powertools.logging import logger_setup, logger_inject_lambda_context
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logging.setLevel(logging.INFO)
+        logger_setup()
+
+        @logger_inject_lambda_context
+        def handler(event, context):
                 logger.info("Hello")
 
-    Captures Lambda contextual runtime info and logs incoming request
-        >>> from aws_lambda_powertools.logging import logger_setup, logger_inject_lambda_context
-        >>> import logging
-        >>>
-        >>> logger = logging.getLogger(__name__)
-        >>> logging.setLevel(logging.INFO)
-        >>> logger_setup()
-        >>>
-        >>> @logger_inject_lambda_context(log_event=True)
-        >>> def handler(event, context):
+    **Captures Lambda contextual runtime info and logs incoming request**
+
+        from aws_lambda_powertools.logging import logger_setup, logger_inject_lambda_context
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logging.setLevel(logging.INFO)
+        logger_setup()
+
+        @logger_inject_lambda_context(log_event=True)
+        def handler(event, context):
                 logger.info("Hello")
 
     Returns
@@ -167,6 +169,8 @@ def log_metric(
 ):
     """Logs a custom metric in a statsD-esque format to stdout.
 
+    **This will be removed when GA - Use `aws_lambda_powertools.metrics.metrics.Metrics` instead**
+
     Creating Custom Metrics synchronously impact on performance/execution time.
     Instead, log_metric prints a metric to CloudWatch Logs.
     That allows us to pick them up asynchronously via another Lambda function and create them as a metric.
@@ -174,7 +178,7 @@ def log_metric(
     NOTE: It takes up to 9 dimensions by default, and Metric units are conveniently available via MetricUnit Enum.
     If service is not passed as arg or via env var, "service_undefined" will be used as dimension instead.
 
-    Output in CloudWatch Logs: MONITORING|<metric_value>|<metric_unit>|<metric_name>|<namespace>|<dimensions>
+    **Output in CloudWatch Logs**: `MONITORING|<metric_value>|<metric_unit>|<metric_name>|<namespace>|<dimensions>`
 
     Serverless Application Repository App that creates custom metric from this log output:
     https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:374852340823:applications~async-custom-metrics
@@ -184,23 +188,39 @@ def log_metric(
     POWERTOOLS_SERVICE_NAME: str
         service name
 
+    Parameters
+    ----------
+    name : str
+        metric name, by default None
+    namespace : str
+        metric namespace (e.g. application name), by default None
+    unit : MetricUnit, by default MetricUnit.Count
+        metric unit enum value (e.g. MetricUnit.Seconds), by default None\n
+        API Info: https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html
+    value : float, optional
+        metric value, by default 0
+    service : str, optional
+        service name used as dimension, by default "service_undefined"
+    dimensions: dict, optional
+        keyword arguments as additional dimensions (e.g. `customer=customerId`)
+
     Example
     -------
-    Log metric to count number of successful payments; define service via env var
+    **Log metric to count number of successful payments; define service via env var**
 
         $ export POWERTOOLS_SERVICE_NAME="payment"
-        >>> from aws_lambda_powertools.logging import MetricUnit, log_metric
-        >>> log_metric(
+        from aws_lambda_powertools.logging import MetricUnit, log_metric
+        log_metric(
             name="SuccessfulPayments",
             unit=MetricUnit.Count,
             value=1,
             namespace="DemoApp"
         )
 
-    Log metric to count number of successful payments per campaign & customer
+    **Log metric to count number of successful payments per campaign & customer**
 
-        >>> from aws_lambda_powertools.logging import MetricUnit, log_metric
-        >>> log_metric(
+        from aws_lambda_powertools.logging import MetricUnit, log_metric
+        log_metric(
             name="SuccessfulPayments",
             service="payment",
             unit=MetricUnit.Count,
@@ -209,22 +229,6 @@ def log_metric(
             campaign=campaign_id,
             customer=customer_id
         )
-
-    Parameters
-    ----------
-    name : str
-        metric name, by default None
-    namespace : str
-        metric namespace (e.g. application name), by default None
-    unit : MetricUnit, by default MetricUnit.Count
-        metric unit enum value (e.g. MetricUnit.Seconds), by default None
-        API Info: https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html
-    value : float, optional
-        metric value, by default 0
-    service : str, optional
-        service name used as dimension, by default "service_undefined"
-    dimensions: dict, optional
-        keyword arguments as additional dimensions (e.g. customer=customerId)
     """
 
     warnings.warn(message="This method will be removed in GA; use Metrics instead", category=DeprecationWarning)
