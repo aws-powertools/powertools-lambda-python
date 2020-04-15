@@ -1,4 +1,3 @@
-import functools
 import itertools
 import logging
 import os
@@ -8,6 +7,7 @@ from distutils.util import strtobool
 from typing import Any, Callable, Dict
 
 from ..helper.models import MetricUnit, build_lambda_context_model, build_metric_unit_from_str
+from ..utils import lambda_handler_decorator
 from . import aws_lambda_logging
 
 logger = logging.getLogger(__name__)
@@ -82,7 +82,8 @@ def logger_setup(service: str = "service_undefined", level: str = "INFO", sampli
     return logger
 
 
-def logger_inject_lambda_context(lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False):
+@lambda_handler_decorator
+def logger_inject_lambda_context(lambda_handler: Callable, event: Dict, context: Any, log_event: bool = False):
     """Decorator to capture Lambda contextual info and inject into struct logging
 
     Parameters
@@ -127,31 +128,19 @@ def logger_inject_lambda_context(lambda_handler: Callable[[Dict, Any], Any] = No
         Decorated lambda handler
     """
 
-    # If handler is None we've been called with parameters
-    # We then return a partial function with args filled
-    # Next time we're called we'll call our Lambda
-    # This allows us to avoid writing wrapper_wrapper type of fn
-    if lambda_handler is None:
-        logger.debug("Decorator called with parameters")
-        return functools.partial(logger_inject_lambda_context, log_event=log_event)
-
     log_event_env_option = str(os.getenv("POWERTOOLS_LOGGER_LOG_EVENT", "false"))
     log_event = strtobool(log_event_env_option) or log_event
 
-    @functools.wraps(lambda_handler)
-    def decorate(event, context):
-        if log_event:
-            logger.debug("Event received")
-            logger.info(event)
+    if log_event:
+        logger.debug("Event received")
+        logger.info(event)
 
-        lambda_context = build_lambda_context_model(context)
-        cold_start = __is_cold_start()
+    lambda_context = build_lambda_context_model(context)
+    cold_start = __is_cold_start()
 
-        logger_setup(cold_start=cold_start, **lambda_context.__dict__)
+    logger_setup(cold_start=cold_start, **lambda_context.__dict__)
 
-        return lambda_handler(event, context)
-
-    return decorate
+    return lambda_handler(event, context)
 
 
 def __is_cold_start() -> str:

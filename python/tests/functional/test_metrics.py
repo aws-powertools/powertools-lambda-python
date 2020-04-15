@@ -208,7 +208,7 @@ def test_log_metrics_schema_error(metrics, dimensions, namespace):
     my_metrics = Metrics()
 
     @my_metrics.log_metrics
-    def lambda_handler(evt, handler):
+    def lambda_handler(evt, context):
         my_metrics.add_namespace(namespace)
         for metric in metrics:
             my_metrics.add_metric(**metric)

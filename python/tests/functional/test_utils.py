@@ -90,7 +90,7 @@ def test_factory_explicit_tracing_env_var(monkeypatch):
     lambda_handler({}, {})
 
 
-def test_factory_decorator_with_params(capsys):
+def test_factory_decorator_with_kwarg_params(capsys):
     @lambda_handler_decorator
     def log_event(handler, event, context, log_event=False):
         if log_event:
@@ -106,3 +106,16 @@ def test_factory_decorator_with_params(capsys):
     output = json.loads(capsys.readouterr().out.strip())
 
     assert event == output
+
+
+def test_factory_decorator_with_non_kwarg_params():
+    @lambda_handler_decorator
+    def log_event(handler, event, context, log_event=False):
+        if log_event:
+            print(json.dumps(event))
+        return handler(event, context)
+
+    with pytest.raises(TypeError):
+        @log_event(True)
+        def lambda_handler(evt, ctx):
+            return True

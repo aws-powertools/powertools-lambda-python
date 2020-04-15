@@ -1,4 +1,5 @@
 import functools
+import inspect
 import logging
 import os
 from contextlib import contextmanager
@@ -51,6 +52,11 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
         @obfuscate_sensitive_data(fields=["email"])
         def lambda_handler(event, context):
             return True
+
+    Raises
+    ------
+    TypeError
+        When middleware receives non keyword=arguments
     """
 
     if decorator is None:
@@ -60,18 +66,24 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
 
     @functools.wraps(decorator)
     def final_decorator(func: Callable = None, **kwargs):
-        # If called with args return new func with args
+        # If called with kwargs return new func with kwargs
         if func is None:
             return functools.partial(final_decorator, **kwargs)
+
+        if not inspect.isfunction(func):
+            raise TypeError(
+                f"Only keyword arguments is supported for middlewares: {decorator.__qualname__} received {func}"
+            )
 
         @functools.wraps(func)
         def wrapper(event, context):
             try:
+                middleware = functools.partial(decorator, func, event, context, **kwargs)
                 if trace_execution:
                     with _trace_middleware(middleware=decorator):
-                        response = decorator(func, event, context, **kwargs)
+                        response = middleware()
                 else:
-                    response = decorator(func, event, context, **kwargs)
+                    response = middleware()
                 return response
             except Exception as err:
                 logger.error(f"Caught exception in {decorator.__qualname__}")
