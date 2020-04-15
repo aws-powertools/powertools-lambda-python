@@ -116,6 +116,7 @@ def test_factory_decorator_with_non_kwarg_params():
         return handler(event, context)
 
     with pytest.raises(TypeError):
+
         @log_event(True)
         def lambda_handler(evt, ctx):
             return True
