@@ -3,6 +3,7 @@ import inspect
 import logging
 import os
 from contextlib import contextmanager
+from distutils.util import strtobool
 from typing import Callable
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,25 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
     You can use lambda_handler_decorator to create your own middlewares,
     where your function signature follows: fn(handler, event, context)
 
-    You can also set your own key=value params: fn(handler, event, context, option=value)
+    You can also set your own key=value params e.g. fn(handler, event, context, option=value)
+    Non-key value params are not supported e.g. fn(handler, event, context, option)
+
+    Middlewares created by this factory supports tracing to help you quickly troubleshoot
+    any overhead that custom middlewares may cause - They will appear as custom subsegments.
+
+    Environment variables
+    ---------------------
+    POWERTOOLS_TRACE_MIDDLEWARES : str
+        uses Tracer to create sub-segments per middleware (e.g. "true", "True", "TRUE")
+
+    Parameters
+    ----------
+    decorator: Callable
+        Middleware to be wrapped by this factory
+    trace_execution: bool
+        Flag to explicitly enable trace execution for middlewares.
+        Env: POWERTOOLS_TRACE_MIDDLEWARES="true"
+
 
     Example
     -------
@@ -53,6 +72,18 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
         def lambda_handler(event, context):
             return True
 
+    **Trace execution of custom middleware**
+
+        from aws_lambda_powertools.utils import lambda_handler_decorator
+
+        @lambda_handler_decorator(trace_execution=True)
+        def log_response(handler, event, context):
+            ...
+
+        @log_response
+        def lambda_handler(event, context):
+            return True
+
     Raises
     ------
     TypeError
@@ -62,7 +93,7 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
     if decorator is None:
         return functools.partial(lambda_handler_decorator, trace_execution=trace_execution)
 
-    trace_execution = trace_execution or os.getenv("POWERTOOLS_TRACE_MIDDLEWARES", False)
+    trace_execution = trace_execution or strtobool(str(os.getenv("POWERTOOLS_TRACE_MIDDLEWARES", False)))
 
     @functools.wraps(decorator)
     def final_decorator(func: Callable = None, **kwargs):
