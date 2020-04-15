@@ -14,27 +14,27 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
     """Decorator factory for decorating Lambda handlers.
 
     You can use lambda_handler_decorator to create your own middlewares,
-    where your function signature follows: fn(handler, event, context)
+    where your function signature follows: `fn(handler, event, context)`
 
-    You can also set your own key=value params e.g. fn(handler, event, context, option=value)
-    Non-key value params are not supported e.g. fn(handler, event, context, option)
+    Custom keyword arguments are also supported e.g. `fn(handler, event, context, option=value)`
 
     Middlewares created by this factory supports tracing to help you quickly troubleshoot
     any overhead that custom middlewares may cause - They will appear as custom subsegments.
 
+    **Non-key value params are not supported** e.g. `fn(handler, event, context, option)`
+
     Environment variables
     ---------------------
     POWERTOOLS_TRACE_MIDDLEWARES : str
-        uses Tracer to create sub-segments per middleware (e.g. "true", "True", "TRUE")
+        uses `aws_lambda_powertools.tracing.Tracer` to create sub-segments per middleware (e.g. `"true", "True", "TRUE"`)
 
     Parameters
     ----------
     decorator: Callable
         Middleware to be wrapped by this factory
     trace_execution: bool
-        Flag to explicitly enable trace execution for middlewares.
-        Env: POWERTOOLS_TRACE_MIDDLEWARES="true"
-
+        Flag to explicitly enable trace execution for middlewares.\n
+        `Env POWERTOOLS_TRACE_MIDDLEWARES="true"`
 
     Example
     -------
@@ -83,6 +83,11 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
         @log_response
         def lambda_handler(event, context):
             return True
+
+    Limitations
+    -----------
+    * Async middlewares not supported
+    * Classes, class methods middlewares not supported
 
     Raises
     ------
