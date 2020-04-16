@@ -62,4 +62,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/aws_lambda_powertools/
+          publish_dir: python/docs/aws_lambda_powertools/
