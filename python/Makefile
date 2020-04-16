@@ -3,7 +3,7 @@ target:
 	@$(MAKE) pr
 
 dev:
-	pip install --upgrade poetry
+	pip install --upgrade pip poetry
 	poetry install
 
 format:
