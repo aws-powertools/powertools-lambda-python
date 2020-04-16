@@ -1,0 +1,35 @@
+name: Powertools Python Docs
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "python/**"
+  push:
+    branches:
+      - master
+    paths:
+      - "python/**"
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./python/
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.8"
+      - name: Install dependencies
+        run: make dev
+      - name: build docs
+        run: make docs
+      - name: deploy docs
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: python/docs/aws_lambda_powertools/
