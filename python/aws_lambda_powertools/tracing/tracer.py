@@ -20,7 +20,7 @@ class Tracer:
 
     Tracing is automatically disabled when running locally via via SAM CLI.
 
-    It patches all available libraries supported by X-Ray SDK
+    By default, it patches all available libraries supported by X-Ray SDK. \n
     Ref: https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/thirdparty.html
 
     Environment variables
@@ -34,6 +34,8 @@ class Tracer:
     ----------
     service: str
         Service name that will be appended in all tracing metadata
+    auto_patch: bool
+        Patch existing imported modules during initialization, by default True
     disabled: bool
         Flag to explicitly disable tracing, useful when running locally.
         `Env POWERTOOLS_TRACE_DISABLED="true"`
@@ -101,16 +103,22 @@ class Tracer:
     """
 
     def __init__(
-        self, service: str = "service_undefined", disabled: bool = False, provider: xray_recorder = xray_recorder,
+        self,
+        service: str = "service_undefined",
+        disabled: bool = False,
+        provider: xray_recorder = xray_recorder,
+        auto_patch: bool = True,
     ):
         self.provider = provider
         self.disabled = self.__is_trace_disabled() or disabled
         self.service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
+        self.auto_patch = auto_patch
 
         if self.disabled:
             self.__disable_tracing_provider()
 
-        self.__patch()
+        if auto_patch:
+            self.patch()
 
     def capture_lambda_handler(self, lambda_handler: Callable[[Dict, Any], Any] = None):
         """Decorator to create subsegment for lambda handlers
@@ -314,7 +322,7 @@ class Tracer:
 
         self.provider.end_subsegment()
 
-    def __patch(self):
+    def patch(self):
         """Patch modules for instrumentation
         """
         logger.debug("Patching modules...")
