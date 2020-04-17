@@ -41,7 +41,7 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
     -------
     **Create a middleware no params**
 
-        from aws_lambda_powertools.utils import lambda_handler_decorator
+        from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
         @lambda_handler_decorator
         def log_response(handler, event, context):
@@ -56,7 +56,7 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
 
     **Create a middleware with params**
 
-        from aws_lambda_powertools.utils import lambda_handler_decorator
+        from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
         @lambda_handler_decorator
         def obfuscate_sensitive_data(handler, event, context, fields=None):
@@ -75,7 +75,7 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
 
     **Trace execution of custom middleware**
 
-        from aws_lambda_powertools.utils import lambda_handler_decorator
+        from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
         @lambda_handler_decorator(trace_execution=True)
         def log_response(handler, event, context):

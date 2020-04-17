@@ -226,7 +226,7 @@ This feature allows you to create your own middleware as a decorator with ease b
 **Middleware with no params**
 
 ```python
-from aws_lambda_powertools.utils import lambda_handler_decorator
+from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
 @lambda_handler_decorator
 def middleware_name(handler, event, context):
@@ -267,7 +267,7 @@ def lambda_handler(event, context):
 **Optionally trace middleware execution**
 
 ```python
-from aws_lambda_powertools.utils import lambda_handler_decorator
+from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
 @lambda_handler_decorator(trace_execution=True)
 def middleware_name(handler, event, context):
