@@ -17,7 +17,7 @@ lint: format
 test:
 	poetry run pytest -vvv
 
-test-html:
+coverage-html:
 	poetry run pytest --cov-report html
 
 pr: lint test 
