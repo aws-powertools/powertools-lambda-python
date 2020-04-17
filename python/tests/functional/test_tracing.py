@@ -8,6 +8,12 @@ def dummy_response():
     return {"test": "succeeds"}
 
 
+@pytest.fixture(scope="function", autouse=True)
+def reset_singleton():
+    yield
+    Tracer.clear_instance()
+
+
 def test_capture_lambda_handler(dummy_response):
     # GIVEN tracer is disabled, and decorator is used
     # WHEN a lambda handler is run
@@ -105,3 +111,32 @@ def test_tracer_with_exception(mocker):
 
     with pytest.raises(CustomException):
         greeting(name="Foo", message="Bar")
+
+
+def test_tracer_reuse():
+    # GIVEN tracer A, B and C were initialized
+    # WHEN tracer B explicitly reuses A instance
+    # THEN tracer B attributes should be equal to tracer A
+    # and tracer C should use have defaults instead
+    service_name = "booking"
+    tracer_a = Tracer(disabled=True, service=service_name)
+    tracer_b = Tracer.instance()
+    tracer_c = Tracer()
+
+    assert id(tracer_a) == id(tracer_b)
+    assert id(tracer_a) != id(tracer_c)
+    assert id(tracer_b) != id(tracer_c)
+
+
+def test_tracer_reuse_no_instance():
+    # GIVEN tracer A and B instance were not registered
+    # WHEN instance is method is explicitly called
+    # THEN we initialize a new instance and register it
+    # so that tracer B receives a copy of the instance
+    # and only one __init__ is executed
+    tracer_a = Tracer.instance()
+    tracer_b = Tracer.instance()
+
+    assert id(tracer_a) == id(tracer_b)
+
+    Tracer.clear_instance()

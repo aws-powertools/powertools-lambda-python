@@ -6,12 +6,14 @@ from typing import Any, Callable, Dict
 
 from aws_xray_sdk.core import models, patch_all, xray_recorder
 
+from ..helper.register import RegisterMeta
+
 is_cold_start = True
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 
-class Tracer:
+class Tracer(metaclass=RegisterMeta):
     """Tracer using AWS-XRay to provide decorators with known defaults for Lambda functions
 
     When running locally, it honours `POWERTOOLS_TRACE_DISABLED` environment variable
@@ -90,6 +92,21 @@ class Tracer:
             print("Received event from Lambda...")
             response = greeting(name="Lessa")
             return response
+
+    **Reuse an existing instance of Tracer anywhere in the code**
+
+        # lambda_handler.py
+        from aws_lambda_powertools.tracing import Tracer
+        tracer = Tracer()
+
+        @tracer.capture_lambda_handler
+        def handler(event: dict, context: Any) -> Dict:
+            ...
+
+        # utils.py
+        from aws_lambda_powertools.tracing import Tracer
+        tracer = Tracer.instance()
+        ...
 
     Returns
     -------

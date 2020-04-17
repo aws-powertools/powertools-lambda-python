@@ -38,7 +38,6 @@ def xray_stub(mocker):
     return XRayStub
 
 
-
 def test_tracer_lambda_handler(mocker, dummy_response, xray_stub):
     put_metadata_mock = mocker.MagicMock()
     begin_subsegment_mock = mocker.MagicMock()
@@ -88,26 +87,6 @@ def test_tracer_method(mocker, dummy_response, xray_stub):
     )
 
 
-def test_tracer_custom_annotation(mocker, dummy_response, xray_stub):
-    put_annotation_mock = mocker.MagicMock()
-
-    xray_provider = xray_stub(put_annotation_mock=put_annotation_mock)
-
-    tracer = Tracer(provider=xray_provider, service="booking")
-    annotation_key = "BookingId"
-    annotation_value = "123456"
-
-    @tracer.capture_lambda_handler
-    def handler(event, context):
-        tracer.put_annotation(annotation_key, annotation_value)
-        return dummy_response
-
-    handler({}, mocker.MagicMock())
-
-    assert put_annotation_mock.call_count == 1
-    assert put_annotation_mock.call_args == mocker.call(key=annotation_key, value=annotation_value)
-
-
 def test_tracer_custom_metadata(mocker, dummy_response, xray_stub):
     put_metadata_mock = mocker.MagicMock()
 
@@ -130,11 +109,21 @@ def test_tracer_custom_metadata(mocker, dummy_response, xray_stub):
     )
 
 
+def test_tracer_custom_annotation(mocker, dummy_response, xray_stub):
+    put_annotation_mock = mocker.MagicMock()
 
+    xray_provider = xray_stub(put_annotation_mock=put_annotation_mock)
 
+    tracer = Tracer(provider=xray_provider, service="booking")
+    annotation_key = "BookingId"
+    annotation_value = "123456"
 
+    @tracer.capture_lambda_handler
+    def handler(event, context):
+        tracer.put_annotation(annotation_key, annotation_value)
+        return dummy_response
 
+    handler({}, mocker.MagicMock())
 
-
-
-
+    assert put_annotation_mock.call_count == 1
+    assert put_annotation_mock.call_args == mocker.call(key=annotation_key, value=annotation_value)

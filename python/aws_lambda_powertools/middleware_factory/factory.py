@@ -136,7 +136,7 @@ def _trace_middleware(middleware):
     try:
         from ..tracing import Tracer
 
-        tracer = Tracer()
+        tracer = Tracer.instance()
         tracer.create_subsegment(name=f"## middleware {middleware.__qualname__}")
         yield
     finally:
