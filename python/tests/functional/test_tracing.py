@@ -8,70 +8,25 @@ def dummy_response():
     return {"test": "succeeds"}
 
 
-@pytest.fixture
-def xray_stub(mocker):
-    class XRayStub:
-        def __init__(
-            self,
-            put_metadata_mock: mocker.MagicMock = None,
-            put_annotation_mock: mocker.MagicMock = None,
-            begin_subsegment_mock: mocker.MagicMock = None,
-            end_subsegment_mock: mocker.MagicMock = None,
-        ):
-            self.put_metadata_mock = put_metadata_mock or mocker.MagicMock()
-            self.put_annotation_mock = put_annotation_mock or mocker.MagicMock()
-            self.begin_subsegment_mock = begin_subsegment_mock or mocker.MagicMock()
-            self.end_subsegment_mock = end_subsegment_mock or mocker.MagicMock()
-
-        def put_metadata(self, *args, **kwargs):
-            return self.put_metadata_mock(*args, **kwargs)
-
-        def put_annotation(self, *args, **kwargs):
-            return self.put_annotation_mock(*args, **kwargs)
-
-        def begin_subsegment(self, *args, **kwargs):
-            return self.begin_subsegment_mock(*args, **kwargs)
-
-        def end_subsegment(self, *args, **kwargs):
-            return self.end_subsegment_mock(*args, **kwargs)
-
-    return XRayStub
-
-
-def test_tracer_lambda_handler(mocker, dummy_response, xray_stub):
-    put_metadata_mock = mocker.MagicMock()
-    begin_subsegment_mock = mocker.MagicMock()
-    end_subsegment_mock = mocker.MagicMock()
-
-    xray_provider = xray_stub(
-        put_metadata_mock=put_metadata_mock,
-        begin_subsegment_mock=begin_subsegment_mock,
-        end_subsegment_mock=end_subsegment_mock,
-    )
-    tracer = Tracer(provider=xray_provider, service="booking")
+def test_capture_lambda_handler(dummy_response):
+    # GIVEN tracer is disabled, and decorator is used
+    # WHEN a lambda handler is run
+    # THEN tracer should not raise an Exception
+    tracer = Tracer(disabled=True)
 
     @tracer.capture_lambda_handler
     def handler(event, context):
         return dummy_response
 
-    handler({}, mocker.MagicMock())
-
-    assert begin_subsegment_mock.call_count == 1
-    assert begin_subsegment_mock.call_args == mocker.call(name="## handler")
-    assert end_subsegment_mock.call_count == 1
-    assert put_metadata_mock.call_args == mocker.call(
-        key="lambda handler response", value=dummy_response, namespace="booking"
-    )
+    handler({}, {})
 
 
-def test_tracer_method(mocker, dummy_response, xray_stub):
-    put_metadata_mock = mocker.MagicMock()
-    put_annotation_mock = mocker.MagicMock()
-    begin_subsegment_mock = mocker.MagicMock()
-    end_subsegment_mock = mocker.MagicMock()
+def test_capture_method(dummy_response):
+    # GIVEN tracer is disabled, and method decorator is used
+    # WHEN a function is run
+    # THEN tracer should not raise an Exception
 
-    xray_provider = xray_stub(put_metadata_mock, put_annotation_mock, begin_subsegment_mock, end_subsegment_mock)
-    tracer = Tracer(provider=xray_provider, service="booking")
+    tracer = Tracer(disabled=True)
 
     @tracer.capture_method
     def greeting(name, message):
@@ -79,51 +34,74 @@ def test_tracer_method(mocker, dummy_response, xray_stub):
 
     greeting(name="Foo", message="Bar")
 
-    assert begin_subsegment_mock.call_count == 1
-    assert begin_subsegment_mock.call_args == mocker.call(name="## greeting")
-    assert end_subsegment_mock.call_count == 1
-    assert put_metadata_mock.call_args == mocker.call(
-        key="greeting response", value=dummy_response, namespace="booking"
-    )
 
-
-def test_tracer_custom_annotation(mocker, dummy_response, xray_stub):
-    put_annotation_mock = mocker.MagicMock()
-
-    xray_provider = xray_stub(put_annotation_mock=put_annotation_mock)
-
-    tracer = Tracer(provider=xray_provider, service="booking")
-    annotation_key = "BookingId"
-    annotation_value = "123456"
+def test_tracer_lambda_emulator(monkeypatch, dummy_response):
+    # GIVEN tracer is run locally
+    # WHEN a lambda function is run through SAM CLI
+    # THEN tracer should not raise an Exception
+    monkeypatch.setenv("AWS_SAM_LOCAL", "true")
+    tracer = Tracer()
 
     @tracer.capture_lambda_handler
     def handler(event, context):
-        tracer.put_annotation(annotation_key, annotation_value)
         return dummy_response
 
-    handler({}, mocker.MagicMock())
-
-    assert put_annotation_mock.call_count == 1
-    assert put_annotation_mock.call_args == mocker.call(key=annotation_key, value=annotation_value)
+    handler({}, {})
 
 
-def test_tracer_custom_metadata(mocker, dummy_response, xray_stub):
-    put_metadata_mock = mocker.MagicMock()
-
-    xray_provider = xray_stub(put_metadata_mock=put_metadata_mock)
-
-    tracer = Tracer(provider=xray_provider, service="booking")
-    annotation_key = "Booking response"
-    annotation_value = {"bookingStatus": "CONFIRMED"}
+def test_tracer_metadata_disabled(dummy_response):
+    # GIVEN tracer is disabled, and annotations/metadata are used
+    # WHEN a lambda handler is run
+    # THEN tracer should not raise an Exception and simply ignore
+    tracer = Tracer(disabled=True)
 
     @tracer.capture_lambda_handler
     def handler(event, context):
-        tracer.put_metadata(annotation_key, annotation_value)
+        tracer.put_annotation("PaymentStatus", "SUCCESS")
+        tracer.put_metadata("PaymentMetadata", "Metadata")
         return dummy_response
 
-    handler({}, mocker.MagicMock())
+    handler({}, {})
 
-    assert put_metadata_mock.call_count == 2
-    assert put_metadata_mock.call_args_list[0] == mocker.call(
-        key=annotation_key, value=annotation_value, namespace="booking"
-    )
+
+def test_tracer_env_vars(monkeypatch):
+    # GIVEN tracer disabled, is run without parameters
+    # WHEN service is explicitly defined
+    # THEN tracer should have use that service name
+    service_name = "booking"
+    monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", service_name)
+    tracer_env_var = Tracer(disabled=True)
+
+    assert tracer_env_var.service == service_name
+
+    tracer_explicit = Tracer(disabled=True, service=service_name)
+    assert tracer_explicit.service == service_name
+
+    monkeypatch.setenv("POWERTOOLS_TRACE_DISABLED", "true")
+    tracer = Tracer()
+
+    assert bool(tracer.disabled) is True
+
+
+def test_tracer_with_exception(mocker):
+    # GIVEN tracer is disabled, decorator is used
+    # WHEN a lambda handler or method returns an Exception
+    # THEN tracer should reraise the same Exception
+    class CustomException(Exception):
+        pass
+
+    tracer = Tracer(disabled=True)
+
+    @tracer.capture_lambda_handler
+    def handler(event, context):
+        raise CustomException("test")
+
+    @tracer.capture_method
+    def greeting(name, message):
+        raise CustomException("test")
+
+    with pytest.raises(CustomException):
+        handler({}, {})
+
+    with pytest.raises(CustomException):
+        greeting(name="Foo", message="Bar")
