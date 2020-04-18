@@ -45,7 +45,7 @@ Environment variable | Description | Default | Utility
 ------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
 POWERTOOLS_SERVICE_NAME | Sets service name used for tracing namespace, metrics dimensions and structured logging | "service_undefined" | all
 POWERTOOLS_TRACE_DISABLED | Disables tracing | "false" | tracing
-POWERTOOLS_TRACE_MIDDLEWARES | Creates sub-segment for each middleware created by lambda_handler_decorator | "false" | utils
+POWERTOOLS_TRACE_MIDDLEWARES | Creates sub-segment for each middleware created by lambda_handler_decorator | "false" | middleware_factory
 POWERTOOLS_LOGGER_LOG_EVENT | Logs incoming event | "false" | logging
 POWERTOOLS_LOGGER_SAMPLE_RATE | Debug log sampling  | 0 | logging
 POWERTOOLS_METRICS_NAMESPACE | Metrics namespace  | None | metrics
@@ -93,6 +93,23 @@ def handler(event, context)
   ...
 ```
 
+**Fetching a pre-configured tracer anywhere**
+
+```python
+# handler.py
+from aws_lambda_powertools.tracing import Tracer
+tracer = Tracer(service="payment")
+
+@tracer.capture_lambda_handler
+def handler(event, context)
+  charge_id = event.get('charge_id')
+  payment = collect_payment(charge_id)
+  ...
+
+# another_file.py
+from aws_lambda_powertools.tracing import Tracer
+tracer = Tracer.instance()
+```
 
 ### Logging
 
@@ -266,11 +283,31 @@ def lambda_handler(event, context):
 
 **Optionally trace middleware execution**
 
+This makes use of an existing Tracer instance that you may have initialized anywhere in your code, otherwise it'll initialize one using default options and provider (X-Ray).
+
 ```python
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
 @lambda_handler_decorator(trace_execution=True)
 def middleware_name(handler, event, context):
+    return handler(event, context)
+
+@middleware_name
+def lambda_handler(event, context):
+    return True
+```
+
+Optionally, you can enrich the final trace with additional annotations and metadata by retrieving a copy of the Tracer used.
+
+```python
+from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+from aws_lambda_powertools.tracing import Tracer
+
+@lambda_handler_decorator(trace_execution=True)
+def middleware_name(handler, event, context):
+    tracer = Tracer.instance() # Takes a copy of an existing tracer instance
+    tracer.add_anotation...
+    tracer.metadata...
     return handler(event, context)
 
 @middleware_name
