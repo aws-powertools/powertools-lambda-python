@@ -1,8 +1,8 @@
 class RegisterMeta(type):
-    _instance = None
+    _instances = {}
 
     def __call__(cls, *args, **kwargs):
-        """Register class instance at first initialization
+        """Register class instance at initialization
 
         It only returns an existing instance via `instance`
         method  e.g. `Tracer.instance()`.
@@ -10,10 +10,11 @@ class RegisterMeta(type):
         Not a Singleton per se as it only returns an existing
         instance via the `instance` method.
         """
-        if cls._instance is None:
-            cls._instance = super().__call__(*args, **kwargs)
-            return cls._instance
-        return super().__call__(*args, **kwargs)
+        if cls not in RegisterMeta._instances:
+            RegisterMeta._instances[cls] = super().__call__(*args, **kwargs)
+            return RegisterMeta._instances[cls]
+        
+        return super().__call__(**kwargs)
 
     def instance(cls):
         """Returns registered class instance
@@ -22,12 +23,12 @@ class RegisterMeta(type):
         when needed, reuse previous instance and its attributes,
         and still allow multiple inheritance and __new__.
         """
-        if cls._instance is None:
+        if cls not in RegisterMeta._instances:
             return cls.__call__(cls)
 
-        return cls._instance
+        return RegisterMeta._instances[cls]
 
     def clear_instance(cls):
         """Destroys registered class instance"""
-        if cls._instance is not None:
-            cls._instance = None
+        if cls in RegisterMeta._instances:
+            del RegisterMeta._instances[cls]
