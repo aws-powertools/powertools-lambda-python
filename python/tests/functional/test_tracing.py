@@ -9,9 +9,9 @@ def dummy_response():
 
 
 @pytest.fixture(scope="function", autouse=True)
-def reset_singleton():
+def reset_tracing_config():
+    Tracer._reset_config()
     yield
-    Tracer.clear_instance()
 
 
 def test_capture_lambda_handler(dummy_response):
@@ -53,6 +53,7 @@ def test_tracer_lambda_emulator(monkeypatch, dummy_response):
         return dummy_response
 
     handler({}, {})
+    monkeypatch.delenv("AWS_SAM_LOCAL")
 
 
 def test_tracer_metadata_disabled(dummy_response):
@@ -114,29 +115,12 @@ def test_tracer_with_exception(mocker):
 
 
 def test_tracer_reuse():
-    # GIVEN tracer A, B and C were initialized
-    # WHEN tracer B explicitly reuses A instance
+    # GIVEN tracer A, B were initialized
+    # WHEN tracer B explicitly reuses A config
     # THEN tracer B attributes should be equal to tracer A
-    # and tracer C should use have defaults instead
     service_name = "booking"
     tracer_a = Tracer(disabled=True, service=service_name)
-    tracer_b = Tracer.instance()
-    tracer_c = Tracer()
+    tracer_b = Tracer()
 
-    assert id(tracer_a) == id(tracer_b)
-    assert id(tracer_a) != id(tracer_c)
-    assert id(tracer_b) != id(tracer_c)
-
-
-def test_tracer_reuse_no_instance():
-    # GIVEN tracer A and B instance were not registered
-    # WHEN instance is method is explicitly called
-    # THEN we initialize a new instance and register it
-    # so that tracer B receives a copy of the instance
-    # and only one __init__ is executed
-    tracer_a = Tracer.instance()
-    tracer_b = Tracer.instance()
-
-    assert id(tracer_a) == id(tracer_b)
-
-    Tracer.clear_instance()
+    assert id(tracer_a) != id(tracer_b)
+    assert tracer_a.__dict__.items() == tracer_b.__dict__.items()

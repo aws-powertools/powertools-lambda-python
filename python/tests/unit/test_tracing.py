@@ -40,6 +40,12 @@ def xray_stub(mocker):
     return XRayStub
 
 
+@pytest.fixture(scope="function", autouse=True)
+def reset_tracing_config():
+    Tracer._reset_config()
+    yield
+
+
 def test_tracer_lambda_handler(mocker, dummy_response, xray_stub):
     put_metadata_mock = mocker.MagicMock()
     begin_subsegment_mock = mocker.MagicMock()
@@ -130,26 +136,20 @@ def test_tracer_custom_annotation(mocker, dummy_response, xray_stub):
     assert put_annotation_mock.call_count == 1
     assert put_annotation_mock.call_args == mocker.call(key=annotation_key, value=annotation_value)
 
-@mock.patch('aws_lambda_powertools.tracing.Tracer.patch')
+
+@mock.patch("aws_lambda_powertools.tracing.Tracer.patch")
 def test_tracer_autopatch(patch_mock):
     # GIVEN tracer is instantiated
     # WHEN default options were used, or patch() was called
     # THEN tracer should patch all modules
-    tracer_a = Tracer(disabled=True)    
-    
+    Tracer(disabled=True)
     assert patch_mock.call_count == 1
 
-    tracer_b = Tracer(disabled=True, auto_patch=False)
-    tracer_b.patch()
 
-    assert patch_mock.call_count == 2
-
-@mock.patch('aws_lambda_powertools.tracing.Tracer.patch')
+@mock.patch("aws_lambda_powertools.tracing.Tracer.patch")
 def test_tracer_no_autopatch(patch_mock):
     # GIVEN tracer is instantiated
     # WHEN auto_patch is disabled
     # THEN tracer should not patch any module
-    tracer_a = Tracer(disabled=True, auto_patch=False)
-    tracer_b = tracer_a.instance()
-
+    Tracer(disabled=True, auto_patch=False)
     assert patch_mock.call_count == 0

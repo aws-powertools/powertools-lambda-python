@@ -2,9 +2,10 @@ import functools
 import inspect
 import logging
 import os
-from contextlib import contextmanager
 from distutils.util import strtobool
 from typing import Callable
+
+from ..tracing import Tracer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
@@ -117,8 +118,10 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
             try:
                 middleware = functools.partial(decorator, func, event, context, **kwargs)
                 if trace_execution:
-                    with _trace_middleware(middleware=decorator):
-                        response = middleware()
+                    tracer = Tracer(auto_patch=False)
+                    tracer.create_subsegment(name=f"## middleware {decorator.__qualname__}")
+                    response = middleware()
+                    tracer.end_subsegment()
                 else:
                     response = middleware()
                 return response
@@ -129,15 +132,3 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
         return wrapper
 
     return final_decorator
-
-
-@contextmanager
-def _trace_middleware(middleware):
-    try:
-        from ..tracing import Tracer
-
-        tracer = Tracer.instance()
-        tracer.create_subsegment(name=f"## middleware {middleware.__qualname__}")
-        yield
-    finally:
-        tracer.end_subsegment()

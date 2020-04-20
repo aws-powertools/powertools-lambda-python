@@ -1,3 +1,4 @@
+import copy
 import functools
 import logging
 import os
@@ -6,24 +7,24 @@ from typing import Any, Callable, Dict
 
 from aws_xray_sdk.core import models, patch_all, xray_recorder
 
-from ..helper.register import RegisterMeta
-
 is_cold_start = True
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 
-class Tracer(metaclass=RegisterMeta):
+class Tracer:
     """Tracer using AWS-XRay to provide decorators with known defaults for Lambda functions
 
-    When running locally, it honours `POWERTOOLS_TRACE_DISABLED` environment variable
-    so end user code doesn't have to be modified to run it locally
-    instead Tracer returns dummy segments/subsegments.
+    When running locally, it detects whether it's running via SAM CLI,
+    and if it is it returns dummy segments/subsegments instead.
 
-    Tracing is automatically disabled when running locally via via SAM CLI.
-
-    By default, it patches all available libraries supported by X-Ray SDK. \n
+    By default, it patches all available libraries supported by X-Ray SDK. Patching is
+    automatically disabled when running locally via SAM CLI or by any other means. \n
     Ref: https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/thirdparty.html
+
+    Tracer keeps a copy of its configuration as it can be instantiated more than once. This
+    is useful when you are using your own middlewares and want to utilize an existing Tracer.
+    Make sure to set `auto_patch=False` in subsequent Tracer instances to avoid double patching.
 
     Environment variables
     ---------------------
@@ -39,7 +40,7 @@ class Tracer(metaclass=RegisterMeta):
     auto_patch: bool
         Patch existing imported modules during initialization, by default True
     disabled: bool
-        Flag to explicitly disable tracing, useful when running locally.
+        Flag to explicitly disable tracing, useful when running/testing locally.
         `Env POWERTOOLS_TRACE_DISABLED="true"`
 
     Example
@@ -105,7 +106,7 @@ class Tracer(metaclass=RegisterMeta):
 
         # utils.py
         from aws_lambda_powertools.tracing import Tracer
-        tracer = Tracer.instance()
+        tracer = Tracer()
         ...
 
     Returns
@@ -119,22 +120,22 @@ class Tracer(metaclass=RegisterMeta):
 
     """
 
+    _default_config = {"service": "service_undefined", "disabled": False, "provider": xray_recorder, "auto_patch": True}
+    _config = copy.copy(_default_config)
+
     def __init__(
-        self,
-        service: str = "service_undefined",
-        disabled: bool = False,
-        provider: xray_recorder = xray_recorder,
-        auto_patch: bool = True,
+        self, service: str = None, disabled: bool = None, provider: xray_recorder = None, auto_patch: bool = None
     ):
-        self.provider = provider
-        self.disabled = self.__is_trace_disabled() or disabled
-        self.service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
-        self.auto_patch = auto_patch
+        self.__build_config(service=service, disabled=disabled, provider=provider, auto_patch=auto_patch)
+        self.provider = self._config["provider"]
+        self.disabled = self._config["disabled"]
+        self.service = self._config["service"]
+        self.auto_patch = self._config["auto_patch"]
 
         if self.disabled:
             self.__disable_tracing_provider()
 
-        if auto_patch:
+        if self.auto_patch:
             self.patch()
 
     def capture_lambda_handler(self, lambda_handler: Callable[[Dict, Any], Any] = None):
@@ -340,18 +341,17 @@ class Tracer(metaclass=RegisterMeta):
         self.provider.end_subsegment()
 
     def patch(self):
-        """Patch modules for instrumentation
-        """
+        """Patch modules for instrumentation"""
         logger.debug("Patching modules...")
 
-        is_lambda_emulator = os.getenv("AWS_SAM_LOCAL")
-        is_lambda_env = os.getenv("LAMBDA_TASK_ROOT")
+        is_lambda_emulator = os.getenv("AWS_SAM_LOCAL", False)
+        is_lambda_env = os.getenv("LAMBDA_TASK_ROOT", False)
 
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting patch")
             return
 
-        if is_lambda_emulator or not is_lambda_env:
+        if is_lambda_emulator or is_lambda_env:
             logger.debug("Running under SAM CLI env or not in Lambda; aborting patch")
             return
 
@@ -390,3 +390,19 @@ class Tracer(metaclass=RegisterMeta):
             return is_lambda_emulator
 
         return False
+
+    def __build_config(
+        self, service: str = None, disabled: bool = None, provider: xray_recorder = None, auto_patch: bool = None
+    ):
+        """ Populates Tracer config for new and existing initializations """
+        is_disabled = disabled if disabled is not None else self.__is_trace_disabled()
+        is_service = service if service is not None else os.getenv("POWERTOOLS_SERVICE_NAME")
+
+        self._config["provider"] = provider if provider is not None else self._config["provider"]
+        self._config["auto_patch"] = auto_patch if auto_patch is not None else self._config["auto_patch"]
+        self._config["service"] = is_service if is_service else self._config["service"]
+        self._config["disabled"] = is_disabled if is_disabled else self._config["disabled"]
+
+    @classmethod
+    def _reset_config(cls):
+        cls._config = copy.copy(cls._default_config)

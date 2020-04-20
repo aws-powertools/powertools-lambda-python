@@ -108,7 +108,7 @@ def handler(event, context)
 
 # another_file.py
 from aws_lambda_powertools.tracing import Tracer
-tracer = Tracer.instance()
+tracer = Tracer(auto_patch=False) # new instance using existing configuration with auto patching overriden
 ```
 
 ### Logging
@@ -256,8 +256,14 @@ def middleware_before_after(handler, event, context):
     logic_after_handler_execution()
     return response
 
-@middleware_before_after
-@middleware_name
+
+# middleware_name will wrap Lambda handler 
+# and simply return the handler as we're not pre/post-processing anything
+# then middleware_before_after will wrap middleware_name
+# run some code before/after calling the handler returned by middleware_name
+# This way, lambda_handler is only actually called once (top-down)
+@middleware_before_after # This will run last
+@middleware_name # This will run first
 def lambda_handler(event, context):
     return True
 ```
@@ -273,8 +279,7 @@ def obfuscate_sensitive_data(handler, event, context, fields=None):
             field = event.get(field, "")
             event[field] = obfuscate_pii(field)
 
-    response = handler(event, context)
-    return response
+    return handler(event, context)
 
 @obfuscate_sensitive_data(fields=["email"])
 def lambda_handler(event, context):
@@ -305,7 +310,7 @@ from aws_lambda_powertools.tracing import Tracer
 
 @lambda_handler_decorator(trace_execution=True)
 def middleware_name(handler, event, context):
-    tracer = Tracer.instance() # Takes a copy of an existing tracer instance
+    tracer = Tracer() # Takes a copy of an existing tracer instance
     tracer.add_anotation...
     tracer.metadata...
     return handler(event, context)
