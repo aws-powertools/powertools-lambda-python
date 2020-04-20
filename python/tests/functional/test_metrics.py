@@ -155,6 +155,8 @@ def test_log_metrics(capsys, metrics, dimensions, namespace):
 
     remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
     assert expected["_aws"] == output["_aws"]
+    for dimension in dimensions:
+        assert dimension["name"] in output
 
 
 def test_namespace_env_var(monkeypatch, capsys, metric, dimension, namespace):

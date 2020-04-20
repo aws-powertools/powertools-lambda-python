@@ -177,6 +177,7 @@ class MetricManager:
         }
         metrics_timestamp = {"Timestamp": int(datetime.datetime.now().timestamp() * 1000)}
         metric_set["_aws"] = {**metrics_timestamp, **metrics_definition}
+        metric_set.update(**dimensions)
 
         try:
             logger.debug("Validating serialized metrics against CloudWatch EMF schema", metric_set)
