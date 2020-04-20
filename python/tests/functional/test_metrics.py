@@ -155,6 +155,8 @@ def test_log_metrics(capsys, metrics, dimensions, namespace):
 
     remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
     assert expected["_aws"] == output["_aws"]
+    for dimension in dimensions:
+        assert dimension["name"] in output
 
 
 def test_namespace_env_var(monkeypatch, capsys, metric, dimension, namespace):
@@ -208,7 +210,7 @@ def test_log_metrics_schema_error(metrics, dimensions, namespace):
     my_metrics = Metrics()
 
     @my_metrics.log_metrics
-    def lambda_handler(evt, handler):
+    def lambda_handler(evt, context):
         my_metrics.add_namespace(namespace)
         for metric in metrics:
             my_metrics.add_metric(**metric)

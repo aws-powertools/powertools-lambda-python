@@ -1,5 +1,12 @@
 # HISTORY 
 
+## April 20th, 2020
+
+**0.7.0**
+
+* Introduces Middleware Factory to build your own middleware
+* Fixes Metrics dimensions not being included correctly in EMF
+
 ## April 9th, 2020
 
 **0.6.3**
