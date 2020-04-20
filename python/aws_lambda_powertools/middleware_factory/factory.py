@@ -76,12 +76,16 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
 
     **Trace execution of custom middleware**
 
+        from aws_lambda_powertools.tracing import Tracer
         from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
+        tracer = Tracer(service="payment") # or via env var
+        ...
         @lambda_handler_decorator(trace_execution=True)
         def log_response(handler, event, context):
             ...
 
+        @tracer.capture_lambda_handler
         @log_response
         def lambda_handler(event, context):
             return True
@@ -119,7 +123,7 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
                 middleware = functools.partial(decorator, func, event, context, **kwargs)
                 if trace_execution:
                     tracer = Tracer(auto_patch=False)
-                    tracer.create_subsegment(name=f"## middleware {decorator.__qualname__}")
+                    tracer.create_subsegment(name=f"## {decorator.__qualname__}")
                     response = middleware()
                     tracer.end_subsegment()
                 else:
