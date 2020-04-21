@@ -150,7 +150,7 @@ def test_inject_lambda_context_log_event_request_env_var(monkeypatch, root_logge
 
     logger = logger_setup()
 
-    @logger_inject_lambda_context()
+    @logger_inject_lambda_context
     def handler(event, context):
         logger.info("Hello")
 
@@ -177,7 +177,7 @@ def test_inject_lambda_context_log_no_request_by_default(monkeypatch, root_logge
 
     logger = logger_setup()
 
-    @logger_inject_lambda_context()
+    @logger_inject_lambda_context
     def handler(event, context):
         logger.info("Hello")
 

@@ -1,3 +1,4 @@
+import copy
 import functools
 import logging
 import os
@@ -14,48 +15,60 @@ logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 class Tracer:
     """Tracer using AWS-XRay to provide decorators with known defaults for Lambda functions
 
-    When running locally, it honours POWERTOOLS_TRACE_DISABLED environment variable
-    so end user code doesn't have to be modified to run it locally
-    instead Tracer returns dummy segments/subsegments.
+    When running locally, it detects whether it's running via SAM CLI,
+    and if it is it returns dummy segments/subsegments instead.
 
-    Tracing is automatically disabled when running locally via via SAM CLI.
-
-    It patches all available libraries supported by X-Ray SDK
+    By default, it patches all available libraries supported by X-Ray SDK. Patching is
+    automatically disabled when running locally via SAM CLI or by any other means. \n
     Ref: https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/thirdparty.html
+
+    Tracer keeps a copy of its configuration as it can be instantiated more than once. This
+    is useful when you are using your own middlewares and want to utilize an existing Tracer.
+    Make sure to set `auto_patch=False` in subsequent Tracer instances to avoid double patching.
 
     Environment variables
     ---------------------
     POWERTOOLS_TRACE_DISABLED : str
-        disable tracer (e.g. "true", "True", "TRUE")
+        disable tracer (e.g. `"true", "True", "TRUE"`)
     POWERTOOLS_SERVICE_NAME : str
         service name
 
+    Parameters
+    ----------
+    service: str
+        Service name that will be appended in all tracing metadata
+    auto_patch: bool
+        Patch existing imported modules during initialization, by default True
+    disabled: bool
+        Flag to explicitly disable tracing, useful when running/testing locally.
+        `Env POWERTOOLS_TRACE_DISABLED="true"`
+
     Example
     -------
-    A Lambda function using Tracer
+    **A Lambda function using Tracer**
 
-        >>> from aws_lambda_powertools.tracing import Tracer
-        >>> tracer = Tracer(service="greeting")
+        from aws_lambda_powertools.tracing import Tracer
+        tracer = Tracer(service="greeting")
 
-        >>> @tracer.capture_method
-        >>> def greeting(name: str) -> Dict:
-                return {
-                    "name": name
-                }
+        @tracer.capture_method
+        def greeting(name: str) -> Dict:
+            return {
+                "name": name
+            }
 
-        >>> @tracer.capture_lambda_handler
-        >>> def handler(event: dict, context: Any) -> Dict:
-            >>> print("Received event from Lambda...")
-            >>> response = greeting(name="Heitor")
-            >>> return response
+        @tracer.capture_lambda_handler
+        def handler(event: dict, context: Any) -> Dict:
+            print("Received event from Lambda...")
+            response = greeting(name="Heitor")
+            return response
 
-    Booking Lambda function using Tracer that adds additional annotation/metadata
+    **Booking Lambda function using Tracer that adds additional annotation/metadata**
 
-        >>> from aws_lambda_powertools.tracing import Tracer
-        >>> tracer = Tracer(service="booking")
+        from aws_lambda_powertools.tracing import Tracer
+        tracer = Tracer(service="booking")
 
-        >>> @tracer.capture_method
-        >>> def confirm_booking(booking_id: str) -> Dict:
+        @tracer.capture_method
+        def confirm_booking(booking_id: str) -> Dict:
                 resp = add_confirmation(booking_id)
 
                 tracer.put_annotation("BookingConfirmation", resp['requestId'])
@@ -63,49 +76,67 @@ class Tracer:
 
                 return resp
 
-        >>> @tracer.capture_lambda_handler
-        >>> def handler(event: dict, context: Any) -> Dict:
-            >>> print("Received event from Lambda...")
-            >>> response = greeting(name="Heitor")
-            >>> return response
+        @tracer.capture_lambda_handler
+        def handler(event: dict, context: Any) -> Dict:
+            print("Received event from Lambda...")
+            response = greeting(name="Heitor")
+            return response
 
-    A Lambda function using service name via POWERTOOLS_SERVICE_NAME
+    **A Lambda function using service name via POWERTOOLS_SERVICE_NAME**
 
-        >>> export POWERTOOLS_SERVICE_NAME="booking"
-        >>> from aws_lambda_powertools.tracing import Tracer
-        >>> tracer = Tracer()
+        export POWERTOOLS_SERVICE_NAME="booking"
+        from aws_lambda_powertools.tracing import Tracer
+        tracer = Tracer()
 
-        >>> @tracer.capture_lambda_handler
-        >>> def handler(event: dict, context: Any) -> Dict:
-            >>> print("Received event from Lambda...")
-            >>> response = greeting(name="Lessa")
-            >>> return response
+        @tracer.capture_lambda_handler
+        def handler(event: dict, context: Any) -> Dict:
+            print("Received event from Lambda...")
+            response = greeting(name="Lessa")
+            return response
 
-    Parameters
-    ----------
-    service: str
-        Service name that will be appended in all tracing metadata
-    disabled: bool
-        Flag to explicitly disable tracing, useful when running locally.
-        Env: POWERTOOLS_TRACE_DISABLED="true"
+    **Reuse an existing instance of Tracer anywhere in the code**
+
+        # lambda_handler.py
+        from aws_lambda_powertools.tracing import Tracer
+        tracer = Tracer()
+
+        @tracer.capture_lambda_handler
+        def handler(event: dict, context: Any) -> Dict:
+            ...
+
+        # utils.py
+        from aws_lambda_powertools.tracing import Tracer
+        tracer = Tracer()
+        ...
 
     Returns
     -------
     Tracer
         Tracer instance with imported modules patched
+
+    Limitations
+    -----------
+    * Async handler and methods not supported
+
     """
 
+    _default_config = {"service": "service_undefined", "disabled": False, "provider": xray_recorder, "auto_patch": True}
+    _config = copy.copy(_default_config)
+
     def __init__(
-        self, service: str = "service_undefined", disabled: bool = False, provider: xray_recorder = xray_recorder,
+        self, service: str = None, disabled: bool = None, provider: xray_recorder = None, auto_patch: bool = None
     ):
-        self.provider = provider
-        self.disabled = self.__is_trace_disabled() or disabled
-        self.service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
+        self.__build_config(service=service, disabled=disabled, provider=provider, auto_patch=auto_patch)
+        self.provider = self._config["provider"]
+        self.disabled = self._config["disabled"]
+        self.service = self._config["service"]
+        self.auto_patch = self._config["auto_patch"]
 
         if self.disabled:
             self.__disable_tracing_provider()
 
-        self.__patch()
+        if self.auto_patch:
+            self.patch()
 
     def capture_lambda_handler(self, lambda_handler: Callable[[Dict, Any], Any] = None):
         """Decorator to create subsegment for lambda handlers
@@ -115,11 +146,11 @@ class Tracer:
 
         Example
         -------
-        Lambda function using capture_lambda_handler decorator
+        **Lambda function using capture_lambda_handler decorator**
 
-            >>> tracer = Tracer(service="payment")
-            >>> @tracer.capture_lambda_handler
-                def handler(event, context)
+            tracer = Tracer(service="payment")
+            @tracer.capture_lambda_handler
+            def handler(event, context)
 
         Parameters
         ----------
@@ -134,7 +165,7 @@ class Tracer:
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
-            self.__create_subsegment(name=f"## {lambda_handler.__name__}")
+            self.create_subsegment(name=f"## {lambda_handler.__name__}")
 
             try:
                 logger.debug("Calling lambda handler")
@@ -148,7 +179,7 @@ class Tracer:
                 self.put_metadata(f"{self.service}_error", err)
                 raise err
             finally:
-                self.__end_subsegment()
+                self.end_subsegment()
 
             return response
 
@@ -162,12 +193,11 @@ class Tracer:
 
         Example
         -------
-        Custom function using capture_method decorator
+        **Custom function using capture_method decorator**
 
-            >>> tracer = Tracer(service="payment")
-
-            >>> @tracer.capture_method
-                def some_function()
+            tracer = Tracer(service="payment")
+            @tracer.capture_method
+            def some_function()
 
         Parameters
         ----------
@@ -183,7 +213,7 @@ class Tracer:
         @functools.wraps(method)
         def decorate(*args, **kwargs):
             method_name = f"{method.__name__}"
-            self.__create_subsegment(name=f"## {method_name}")
+            self.create_subsegment(name=f"## {method_name}")
 
             try:
                 logger.debug(f"Calling method: {method_name}")
@@ -197,7 +227,7 @@ class Tracer:
                 self.put_metadata(f"{method_name} error", err)
                 raise err
             finally:
-                self.__end_subsegment()
+                self.end_subsegment()
 
             return response
 
@@ -210,8 +240,8 @@ class Tracer:
         -------
         Custom annotation for a pseudo service named payment
 
-            >>> tracer = Tracer(service="payment")
-            >>> tracer.put_annotation("PaymentStatus", "CONFIRMED")
+            tracer = Tracer(service="payment")
+            tracer.put_annotation("PaymentStatus", "CONFIRMED")
 
         Parameters
         ----------
@@ -244,9 +274,9 @@ class Tracer:
         -------
         Custom metadata for a pseudo service named payment
 
-            >>> tracer = Tracer(service="payment")
-            >>> response = collect_payment()
-            >>> tracer.put_metadata("Payment collection", response)
+            tracer = Tracer(service="payment")
+            response = collect_payment()
+            tracer.put_metadata("Payment collection", response)
         """
         # Will no longer be needed once #155 is resolved
         # https://github.com/aws/aws-xray-sdk-python/issues/155
@@ -257,7 +287,7 @@ class Tracer:
         logger.debug(f"Adding metadata on key '{key}'' with '{value}'' at namespace '{namespace}''")
         self.provider.put_metadata(key=key, value=value, namespace=_namespace)
 
-    def __create_subsegment(self, name: str) -> models.subsegment:
+    def create_subsegment(self, name: str) -> models.subsegment:
         """Creates subsegment or a dummy segment plus subsegment if tracing is disabled
 
         It also assumes Tracer would be instantiated statically so that cold starts are captured.
@@ -271,7 +301,7 @@ class Tracer:
         -------
         Creates a genuine subsegment
 
-            >>> self.__create_subsegment(name="a meaningful name")
+            self.create_subsegment(name="a meaningful name")
 
         Returns
         -------
@@ -296,7 +326,7 @@ class Tracer:
 
         return subsegment
 
-    def __end_subsegment(self):
+    def end_subsegment(self):
         """Ends an existing subsegment
 
         Parameters
@@ -310,19 +340,18 @@ class Tracer:
 
         self.provider.end_subsegment()
 
-    def __patch(self):
-        """Patch modules for instrumentation
-        """
+    def patch(self):
+        """Patch modules for instrumentation"""
         logger.debug("Patching modules...")
 
-        is_lambda_emulator = os.getenv("AWS_SAM_LOCAL")
-        is_lambda_env = os.getenv("LAMBDA_TASK_ROOT")
+        is_lambda_emulator = os.getenv("AWS_SAM_LOCAL", False)
+        is_lambda_env = os.getenv("LAMBDA_TASK_ROOT", False)
 
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting patch")
             return
 
-        if is_lambda_emulator or not is_lambda_env:
+        if is_lambda_emulator or is_lambda_env:
             logger.debug("Running under SAM CLI env or not in Lambda; aborting patch")
             return
 
@@ -339,9 +368,9 @@ class Tracer:
 
         Tracing is automatically disabled in the following conditions:
 
-        1. Explicitly disabled via TRACE_DISABLED environment variable
+        1. Explicitly disabled via `TRACE_DISABLED` environment variable
         2. Running in Lambda Emulators where X-Ray Daemon will not be listening
-        3. Explicitly disabled via constructor e.g Tracer(disabled=True)
+        3. Explicitly disabled via constructor e.g `Tracer(disabled=True)`
 
         Returns
         -------
@@ -361,3 +390,19 @@ class Tracer:
             return is_lambda_emulator
 
         return False
+
+    def __build_config(
+        self, service: str = None, disabled: bool = None, provider: xray_recorder = None, auto_patch: bool = None
+    ):
+        """ Populates Tracer config for new and existing initializations """
+        is_disabled = disabled if disabled is not None else self.__is_trace_disabled()
+        is_service = service if service is not None else os.getenv("POWERTOOLS_SERVICE_NAME")
+
+        self._config["provider"] = provider if provider is not None else self._config["provider"]
+        self._config["auto_patch"] = auto_patch if auto_patch is not None else self._config["auto_patch"]
+        self._config["service"] = is_service if is_service else self._config["service"]
+        self._config["disabled"] = is_disabled if is_disabled else self._config["disabled"]
+
+    @classmethod
+    def _reset_config(cls):
+        cls._config = copy.copy(cls._default_config)

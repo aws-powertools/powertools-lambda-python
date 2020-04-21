@@ -1,6 +1,6 @@
 # Lambda Powertools
 
-![PackageStatus](https://img.shields.io/static/v1?label=status&message=beta&color=blueviolet?style=flat-square) ![PythonSupport](https://img.shields.io/static/v1?label=python&message=3.6%20|%203.7|%203.8&color=blue?style=flat-square&logo=python)
+![PackageStatus](https://img.shields.io/static/v1?label=status&message=beta&color=blueviolet?style=flat-square) ![PythonSupport](https://img.shields.io/static/v1?label=python&message=3.6%20|%203.7|%203.8&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools) ![Build](https://github.com/awslabs/aws-lambda-powertools/workflows/Powertools%20Python/badge.svg?branch=master)
 
 A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier - Currently available for Python only and compatible with Python >=3.6.
 
@@ -32,12 +32,20 @@ A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray,
 * Validate against common metric definitions mistakes (metric unit, values, max dimensions, max metrics, etc)
 * No stack, custom resource, data collection needed — Metrics are created async by CloudWatch EMF
 
+**Bring your own middleware**
+
+* Utility to easily create your own middleware
+* Run logic before, after, and handle exceptions
+* Receive lambda handler, event, context
+* Optionally create sub-segment for each custom middleware
+
 **Environment variables** used across suite of utilities
 
 Environment variable | Description | Default | Utility
 ------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
 POWERTOOLS_SERVICE_NAME | Sets service name used for tracing namespace, metrics dimensions and structured logging | "service_undefined" | all
 POWERTOOLS_TRACE_DISABLED | Disables tracing | "false" | tracing
+POWERTOOLS_TRACE_MIDDLEWARES | Creates sub-segment for each middleware created by lambda_handler_decorator | "false" | middleware_factory
 POWERTOOLS_LOGGER_LOG_EVENT | Logs incoming event | "false" | logging
 POWERTOOLS_LOGGER_SAMPLE_RATE | Debug log sampling  | 0 | logging
 POWERTOOLS_METRICS_NAMESPACE | Metrics namespace  | None | metrics
@@ -85,6 +93,23 @@ def handler(event, context)
   ...
 ```
 
+**Fetching a pre-configured tracer anywhere**
+
+```python
+# handler.py
+from aws_lambda_powertools.tracing import Tracer
+tracer = Tracer(service="payment")
+
+@tracer.capture_lambda_handler
+def handler(event, context)
+  charge_id = event.get('charge_id')
+  payment = collect_payment(charge_id)
+  ...
+
+# another_file.py
+from aws_lambda_powertools.tracing import Tracer
+tracer = Tracer(auto_patch=False) # new instance using existing configuration with auto patching overriden
+```
 
 ### Logging
 
@@ -154,7 +179,7 @@ def handler(event, context)
 }
 ```
 
-#### Custom Metrics async
+### Custom Metrics async
 
 > **NOTE** `log_metric` will be removed once it's GA.
 
@@ -202,6 +227,97 @@ from aws_lambda_powertools.metrics import MetricUnit, single_metric
 
 with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric:
     metric.add_dimension(name="function_context", value="$LATEST")
+```
+
+
+### Utilities
+
+#### Bring your own middleware
+
+This feature allows you to create your own middleware as a decorator with ease by following a simple signature. 
+
+* Accept 3 mandatory args - `handler, event, context` 
+* Always return the handler with event/context or response if executed
+  - Supports nested middleware/decorators use case
+
+**Middleware with no params**
+
+```python
+from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+
+@lambda_handler_decorator
+def middleware_name(handler, event, context):
+    return handler(event, context)
+
+@lambda_handler_decorator
+def middleware_before_after(handler, event, context):
+    logic_before_handler_execution()
+    response = handler(event, context)
+    logic_after_handler_execution()
+    return response
+
+
+# middleware_name will wrap Lambda handler 
+# and simply return the handler as we're not pre/post-processing anything
+# then middleware_before_after will wrap middleware_name
+# run some code before/after calling the handler returned by middleware_name
+# This way, lambda_handler is only actually called once (top-down)
+@middleware_before_after # This will run last
+@middleware_name # This will run first
+def lambda_handler(event, context):
+    return True
+```
+
+**Middleware with params**
+
+```python
+@lambda_handler_decorator
+def obfuscate_sensitive_data(handler, event, context, fields=None):
+    # Obfuscate email before calling Lambda handler
+    if fields:
+        for field in fields:
+            field = event.get(field, "")
+            event[field] = obfuscate_pii(field)
+
+    return handler(event, context)
+
+@obfuscate_sensitive_data(fields=["email"])
+def lambda_handler(event, context):
+    return True
+```
+
+**Optionally trace middleware execution**
+
+This makes use of an existing Tracer instance that you may have initialized anywhere in your code, otherwise it'll initialize one using default options and provider (X-Ray).
+
+```python
+from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+
+@lambda_handler_decorator(trace_execution=True)
+def middleware_name(handler, event, context):
+    return handler(event, context)
+
+@middleware_name
+def lambda_handler(event, context):
+    return True
+```
+
+Optionally, you can enrich the final trace with additional annotations and metadata by retrieving a copy of the Tracer used.
+
+```python
+from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+from aws_lambda_powertools.tracing import Tracer
+
+@lambda_handler_decorator(trace_execution=True)
+def middleware_name(handler, event, context):
+    tracer = Tracer() # Takes a copy of an existing tracer instance
+    tracer.add_anotation...
+    tracer.metadata...
+    return handler(event, context)
+
+@middleware_name
+def lambda_handler(event, context):
+    return True
 ```
 
 ## Beta

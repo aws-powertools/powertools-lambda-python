@@ -3,7 +3,7 @@ target:
 	@$(MAKE) pr
 
 dev:
-	pip install --upgrade poetry
+	pip install --upgrade pip poetry
 	poetry install
 
 format:
@@ -17,7 +17,7 @@ lint: format
 test:
 	poetry run pytest -vvv
 
-test-html:
+coverage-html:
 	poetry run pytest --cov-report html
 
 pr: lint test 
