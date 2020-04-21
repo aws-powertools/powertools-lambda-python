@@ -88,8 +88,8 @@ class JsonFormatter(logging.Formatter):
         return json_record
 
 
-def logger_setup(service: str = "service_undefined", level: str = "INFO", sampling_rate: float = 0.0, **kwargs):
-    """Setups root logger to format statements in JSON.
+def logger_setup(service: str = None, level: str = None, sampling_rate: float = 0.0, **kwargs):
+    """Creates and setups a logger to format statements in JSON.
 
     Includes service name and any additional key=value into logs
     It also accepts both service name or level explicitly via env vars
@@ -133,12 +133,12 @@ def logger_setup(service: str = "service_undefined", level: str = "INFO", sampli
                 logger.info("Hello")
 
     """
-    service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
-    sampling_rate = os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or sampling_rate
-    log_level = os.getenv("LOG_LEVEL") or level
+    service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
+    sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE")
+    log_level = level or os.getenv("LOG_LEVEL") or logging.INFO
+    
     handler = logging.StreamHandler(sys.stdout)
     logger = logging.getLogger(name=service)
-
     handler.setFormatter(JsonFormatter(service=service, sampling_rate=sampling_rate, **kwargs))
     logger.addHandler(handler)
 
