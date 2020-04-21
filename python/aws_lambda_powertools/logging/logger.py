@@ -29,7 +29,6 @@ class JsonFormatter(logging.Formatter):
     dict it will be used directly.  If the message can be parsed as JSON, then
     the parse d value is used in the output record.
 
-    Microlibrary to simplify logging in AWS Lambda.
     Originally taken from https://gitlab.com/hadrien/aws_lambda_logging/
 
     """
@@ -69,7 +68,7 @@ class JsonFormatter(logging.Formatter):
             # overall message for clarity.
             try:
                 log_dict["message"] = json.loads(log_dict["message"])
-            except (TypeError, ValueError):
+            except (json.decoder.JSONDecodeError, TypeError, ValueError):
                 pass
 
         if record.exc_info:
