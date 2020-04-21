@@ -8,7 +8,6 @@ from typing import Callable
 from ..tracing import Tracer
 
 logger = logging.getLogger(__name__)
-logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 
 def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):

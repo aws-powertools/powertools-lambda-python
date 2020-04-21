@@ -13,7 +13,6 @@ from aws_lambda_powertools.helper.models import MetricUnit
 from .exceptions import MetricUnitError, MetricValueError, SchemaValidationError, UniqueNamespaceError
 
 logger = logging.getLogger(__name__)
-logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 _schema_path = pathlib.Path(__file__).parent / "./schema.json"
 with _schema_path.open() as f:

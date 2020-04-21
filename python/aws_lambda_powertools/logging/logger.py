@@ -12,7 +12,6 @@ from typing import Any, Callable, Dict
 from ..helper.models import MetricUnit, build_lambda_context_model, build_metric_unit_from_str
 
 logger = logging.getLogger(__name__)
-logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 is_cold_start = True
 

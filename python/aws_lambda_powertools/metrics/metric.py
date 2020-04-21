@@ -8,7 +8,6 @@ from aws_lambda_powertools.helper.models import MetricUnit
 from aws_lambda_powertools.metrics.base import MetricManager
 
 logger = logging.getLogger(__name__)
-logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 
 class SingleMetric(MetricManager):

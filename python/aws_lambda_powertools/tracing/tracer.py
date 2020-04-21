@@ -9,7 +9,6 @@ from aws_xray_sdk.core import models, patch_all, xray_recorder
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
-logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 
 class Tracer:
