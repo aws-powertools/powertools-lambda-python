@@ -136,7 +136,7 @@ def logger_setup(service: str = None, level: str = None, sampling_rate: float = 
     service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
     sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE")
     log_level = level or os.getenv("LOG_LEVEL") or logging.INFO
-    
+
     handler = logging.StreamHandler(sys.stdout)
     logger = logging.getLogger(name=service)
     handler.setFormatter(JsonFormatter(service=service, sampling_rate=sampling_rate, **kwargs))
@@ -144,10 +144,11 @@ def logger_setup(service: str = None, level: str = None, sampling_rate: float = 
 
     try:
         if sampling_rate and random.random() <= float(sampling_rate):
+            logging.debug("Setting log level to Debug due to sampling rate")
             log_level = logging.DEBUG
     except ValueError:
         raise ValueError(
-            "fExpected a float value ranging 0 to 1, but received {sampling_rate} instead. Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."  # noqa E501
+            f"Expected a float value ranging 0 to 1, but received {sampling_rate} instead. Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."  # noqa E501
         )
 
     logger.setLevel(log_level)

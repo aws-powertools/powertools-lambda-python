@@ -174,9 +174,9 @@ class Tracer:
                 if response:
                     self.put_metadata("lambda handler response", response)
             except Exception as err:
-                logger.debug("Exception received from lambda handler")
+                logger.exception("Exception received from lambda handler", exc_info=True)
                 self.put_metadata(f"{self.service}_error", err)
-                raise err
+                raise
             finally:
                 self.end_subsegment()
 
@@ -222,9 +222,9 @@ class Tracer:
                 if response is not None:
                     self.put_metadata(f"{method_name} response", response)
             except Exception as err:
-                logger.debug(f"Exception received from '{method_name}'' method")
+                logger.exception(f"Exception received from '{method_name}'' method", exc_info=True)
                 self.put_metadata(f"{method_name} error", err)
-                raise err
+                raise
             finally:
                 self.end_subsegment()
 
