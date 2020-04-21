@@ -1,19 +1,93 @@
 import functools
 import itertools
+import json
 import logging
 import os
 import random
+import sys
 import warnings
 from distutils.util import strtobool
 from typing import Any, Callable, Dict
 
 from ..helper.models import MetricUnit, build_lambda_context_model, build_metric_unit_from_str
-from . import aws_lambda_logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 is_cold_start = True
+
+
+def json_formatter(obj):
+    """Formatter for unserialisable values."""
+    return str(obj)
+
+
+class JsonFormatter(logging.Formatter):
+    """AWS Lambda Logging formatter.
+
+    Formats the log message as a JSON encoded string.  If the message is a
+    dict it will be used directly.  If the message can be parsed as JSON, then
+    the parse d value is used in the output record.
+
+    Microlibrary to simplify logging in AWS Lambda.
+    Originally taken from https://gitlab.com/hadrien/aws_lambda_logging/
+
+    """
+
+    def __init__(self, **kwargs):
+        """Return a JsonFormatter instance.
+
+        The `json_default` kwarg is used to specify a formatter for otherwise
+        unserialisable values.  It must not throw.  Defaults to a function that
+        coerces the value to a string.
+
+        Other kwargs are used to specify log field format strings.
+        """
+        datefmt = kwargs.pop("datefmt", None)
+
+        super(JsonFormatter, self).__init__(datefmt=datefmt)
+        self.format_dict = {
+            "timestamp": "%(asctime)s",
+            "level": "%(levelname)s",
+            "location": "%(name)s.%(funcName)s:%(lineno)d",
+        }
+        self.format_dict.update(kwargs)
+        self.default_json_formatter = kwargs.pop("json_default", json_formatter)
+
+    def format(self, record):  # noqa: A003
+        record_dict = record.__dict__.copy()
+        record_dict["asctime"] = self.formatTime(record, self.datefmt)
+
+        log_dict = {k: v % record_dict for k, v in self.format_dict.items() if v}
+
+        if isinstance(record_dict["msg"], dict):
+            log_dict["message"] = record_dict["msg"]
+        else:
+            log_dict["message"] = record.getMessage()
+
+            # Attempt to decode the message as JSON, if so, merge it with the
+            # overall message for clarity.
+            try:
+                log_dict["message"] = json.loads(log_dict["message"])
+            except (TypeError, ValueError):
+                pass
+
+        if record.exc_info:
+            # Cache the traceback text to avoid converting it multiple times
+            # (it's constant anyway)
+            # from logging.Formatter:format
+            if not record.exc_text:
+                record.exc_text = self.formatException(record.exc_info)
+
+        if record.exc_text:
+            log_dict["exception"] = record.exc_text
+
+        json_record = json.dumps(log_dict, default=self.default_json_formatter)
+
+        if hasattr(json_record, "decode"):  # pragma: no cover
+            json_record = json_record.decode("utf-8")
+
+        return json_record
 
 
 def logger_setup(service: str = "service_undefined", level: str = "INFO", sampling_rate: float = 0.0, **kwargs):
@@ -64,7 +138,11 @@ def logger_setup(service: str = "service_undefined", level: str = "INFO", sampli
     service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
     sampling_rate = os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or sampling_rate
     log_level = os.getenv("LOG_LEVEL") or level
+    handler = logging.StreamHandler(sys.stdout)
     logger = logging.getLogger(name=service)
+
+    handler.setFormatter(JsonFormatter(service=service, sampling_rate=sampling_rate, **kwargs))
+    logger.addHandler(handler)
 
     try:
         if sampling_rate and random.random() <= float(sampling_rate):
@@ -75,9 +153,6 @@ def logger_setup(service: str = "service_undefined", level: str = "INFO", sampli
         )
 
     logger.setLevel(log_level)
-
-    # Patch logger by structuring its outputs as JSON
-    aws_lambda_logging.setup(level=log_level, service=service, sampling_rate=sampling_rate, **kwargs)
 
     return logger
 
