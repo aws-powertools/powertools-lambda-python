@@ -89,149 +89,40 @@ class JsonFormatter(logging.Formatter):
         return json_record
 
 
-def logger_setup(service: str = None, level: str = None, sampling_rate: float = 0.0, **kwargs):
-    """Creates and setups a logger to format statements in JSON.
-
-    **This will be removed when GA - Use `aws_lambda_powertools.logging.logger.Logger` instead**
-
-    Includes service name and any additional key=value into logs
-    It also accepts both service name or level explicitly via env vars
-
-    Environment variables
-    ---------------------
-    POWERTOOLS_SERVICE_NAME : str
-        service name
-    LOG_LEVEL: str
-        logging level (e.g. INFO, DEBUG)
-    POWERTOOLS_LOGGER_SAMPLE_RATE: float
-        samping rate ranging from 0 to 1, 1 being 100% sampling
-
-    Parameters
-    ----------
-    service : str, optional
-        service name to be appended in logs, by default "service_undefined"
-    level : str, optional
-        logging.level, by default "INFO"
-    sample_rate: float, optional
-        sample rate for debug calls within execution context defaults to 0
+def logger_setup(service: str = None, level: str = None, sampling_rate: float = 0.0, legacy: bool = False, **kwargs):
+    """DEPRECATED
+    
+    This will be removed when GA - Use `aws_lambda_powertools.logging.logger.Logger` instead
 
     Example
     -------
-    Setups structured logging in JSON for Lambda functions with explicit service name
+        **Logger class - Same UX**
 
-        >>> from aws_lambda_powertools.logging import logger_setup
-        >>> logger = logger_setup(service="payment")
-        >>>
-        >>> def handler(event, context):
-                logger.info("Hello")
-
-    Setups structured logging in JSON for Lambda functions using env vars
-
-        $ export POWERTOOLS_SERVICE_NAME="payment"
-        $ export POWERTOOLS_LOGGER_SAMPLE_RATE=0.01 # 1% debug sampling
-        >>> from aws_lambda_powertools.logging import logger_setup
-        >>> logger = logger_setup()
-        >>>
-        >>> def handler(event, context):
-                logger.info("Hello")
+        from aws_lambda_powertools.logging import Logger
+        logger = Logger(service="payment") # same env var still applies
 
     """
     warnings.warn(message="This method will be removed in GA; use Logger instead", category=DeprecationWarning)
-
-    service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
-    sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE")
-    log_level = level or os.getenv("LOG_LEVEL") or logging.INFO
-
-    handler = logging.StreamHandler(sys.stdout)
-    logger = logging.getLogger(name=service)
-    handler.setFormatter(JsonFormatter(service=service, sampling_rate=sampling_rate, **kwargs))
-    logger.addHandler(handler)
-
-    try:
-        if sampling_rate and random.random() <= float(sampling_rate):
-            logging.debug("Setting log level to Debug due to sampling rate")
-            log_level = logging.DEBUG
-    except ValueError:
-        raise ValueError(
-            f"Expected a float value ranging 0 to 1, but received {sampling_rate} instead. Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."  # noqa E501
-        )
-
-    logger.setLevel(log_level)
-
-    return logger
+    raise DeprecationWarning("Use Logger instead - This method will be removed when GA")
 
 
 def logger_inject_lambda_context(lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False):
-    """Decorator to capture Lambda contextual info and inject into struct logging
+    """DEPRECATED
 
-    Parameters
-    ----------
-    log_event : bool, optional
-        Instructs logger to log Lambda Event, by default False
-
-    Environment variables
-    ---------------------
-    POWERTOOLS_LOGGER_LOG_EVENT : str
-        instruct logger to log Lambda Event (e.g. `"true", "True", "TRUE"`)
+    This will be removed when GA - Use `aws_lambda_powertools.logging.logger.Logger` instead
 
     Example
     -------
-    **Captures Lambda contextual runtime info (e.g memory, arn, req_id)**
+        **Logger class - Same UX**
 
-        from aws_lambda_powertools.logging import logger_setup, logger_inject_lambda_context
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logging.setLevel(logging.INFO)
-        logger_setup()
-
-        @logger_inject_lambda_context
-        def handler(event, context):
-                logger.info("Hello")
-
-    **Captures Lambda contextual runtime info and logs incoming request**
-
-        from aws_lambda_powertools.logging import logger_setup, logger_inject_lambda_context
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logging.setLevel(logging.INFO)
-        logger_setup()
-
-        @logger_inject_lambda_context(log_event=True)
-        def handler(event, context):
-                logger.info("Hello")
-
-    Returns
-    -------
-    decorate : Callable
-        Decorated lambda handler
+        from aws_lambda_powertools.logging import Logger
+        logger = Logger(service="payment") # same env var still applies
+        @logger.inject_lambda_context
+        def handler(evt, ctx):
+            pass
     """
 
-    # If handler is None we've been called with parameters
-    # Return a partial function with args filled
-    if lambda_handler is None:
-        logger.debug("Decorator called with parameters")
-        return functools.partial(logger_inject_lambda_context, log_event=log_event)
-
-    log_event_env_option = str(os.getenv("POWERTOOLS_LOGGER_LOG_EVENT", "false"))
-    log_event = strtobool(log_event_env_option) or log_event
-
-    @functools.wraps(lambda_handler)
-    def decorate(event, context):
-        if log_event:
-            logger.debug("Event received")
-            logger.info(event)
-
-        lambda_context = build_lambda_context_model(context)
-        cold_start = _is_cold_start()
-
-        logger_setup(cold_start=cold_start, **lambda_context.__dict__)
-
-        return lambda_handler(event, context)
-
-    return decorate
-
+    raise DeprecationWarning("Use Logger instead - This method will be removed when GA")
 
 def _is_cold_start() -> str:
     """Verifies whether is cold start and return a string used for struct logging
