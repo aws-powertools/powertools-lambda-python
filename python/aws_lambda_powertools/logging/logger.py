@@ -47,7 +47,7 @@ class JsonFormatter(logging.Formatter):
         self.format_dict = {
             "timestamp": "%(asctime)s",
             "level": "%(levelname)s",
-            "location": "%(name)s.%(funcName)s:%(lineno)d",
+            "location": "%(funcName)s:%(lineno)d",
         }
         self.format_dict.update(kwargs)
         self.default_json_formatter = kwargs.pop("json_default", json_formatter)
