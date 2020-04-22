@@ -10,8 +10,7 @@ import warnings
 from distutils.util import strtobool
 from typing import Any, Callable, Dict
 
-from ..helper.models import (MetricUnit, build_lambda_context_model,
-                             build_metric_unit_from_str)
+from ..helper.models import MetricUnit, build_lambda_context_model, build_metric_unit_from_str
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +92,8 @@ class JsonFormatter(logging.Formatter):
 def logger_setup(service: str = None, level: str = None, sampling_rate: float = 0.0, **kwargs):
     """Creates and setups a logger to format statements in JSON.
 
+    **This will be removed when GA - Use `aws_lambda_powertools.logging.logger.Logger` instead**
+
     Includes service name and any additional key=value into logs
     It also accepts both service name or level explicitly via env vars
 
@@ -135,6 +136,8 @@ def logger_setup(service: str = None, level: str = None, sampling_rate: float = 
                 logger.info("Hello")
 
     """
+    warnings.warn(message="This method will be removed in GA; use Logger instead", category=DeprecationWarning)
+
     service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
     sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE")
     log_level = level or os.getenv("LOG_LEVEL") or logging.INFO
