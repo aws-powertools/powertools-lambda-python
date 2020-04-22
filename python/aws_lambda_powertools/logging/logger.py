@@ -312,10 +312,10 @@ class Logger(logging.Logger):
     """
 
     def __init__(
-        self, service: str = None, level: str = None, sampling_rate: float = 0.0, stream: sys.stdout = None, **kwargs
+        self, service: str = None, level: str = None, sampling_rate: float = None, stream: sys.stdout = None, **kwargs
     ):
         self.service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
-        self.sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE")
+        self.sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or 0.0
         self.log_level = level or os.getenv("LOG_LEVEL") or logging.INFO
         self.handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
@@ -326,14 +326,14 @@ class Logger(logging.Logger):
         try:
             if self.sampling_rate and random.random() <= float(self.sampling_rate):
                 logger.debug("Setting log level to Debug due to sampling rate")
-                log_level = logging.DEBUG
+                self.log_level = logging.DEBUG
         except ValueError:
             raise ValueError(
                 f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead. Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."  # noqa E501
             )
 
         self.setLevel(self.log_level)
-        self.structure_logs()
+        self.structure_logs(**kwargs)
         self.addHandler(self.handler)
 
     def inject_lambda_context(self, lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False):
@@ -381,7 +381,7 @@ class Logger(logging.Logger):
         # Return a partial function with args filled
         if lambda_handler is None:
             logger.debug("Decorator called with parameters")
-            return functools.partial(logger_inject_lambda_context, log_event=log_event)
+            return functools.partial(self.inject_lambda_context, log_event=log_event)
 
         log_event_env_option = str(os.getenv("POWERTOOLS_LOGGER_LOG_EVENT", "false"))
         log_event = strtobool(log_event_env_option) or log_event
@@ -390,12 +390,12 @@ class Logger(logging.Logger):
         def decorate(event, context):
             if log_event:
                 logger.debug("Event received")
-                logger.info(event)
+                self.info(event)
 
             lambda_context = build_lambda_context_model(context)
             cold_start = _is_cold_start()
 
-            self.structure_logs(append=True, cold_start=cold_start, **lambda_context.__dict__)
+            self.structure_logs(cold_start=cold_start, **lambda_context.__dict__)
             return lambda_handler(event, context)
 
         return decorate
@@ -412,9 +412,9 @@ class Logger(logging.Logger):
         append : bool, optional
             [description], by default False
         """
+        self.handler.setFormatter(JsonFormatter(**self._default_log_keys, **kwargs))
+
         if append:
             self.handler.setFormatter(JsonFormatter(**self.log_keys, **kwargs))
-        else:
-            self.handler.setFormatter(JsonFormatter(**kwargs))
 
         self.log_keys.update(**kwargs)

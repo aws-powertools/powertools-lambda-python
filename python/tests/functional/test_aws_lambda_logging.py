@@ -2,10 +2,12 @@
 import io
 import json
 import logging
+import functools
 
 from pytest import fixture, mark, yield_fixture
+import pytest
 
-from aws_lambda_powertools.logging.aws_lambda_logging import setup
+from aws_lambda_powertools.logging.logger import Logger
 
 
 @fixture
@@ -31,23 +33,32 @@ def root_logger(handler):
 
 
 @mark.parametrize("level", ["DEBUG", "WARNING", "ERROR", "INFO", "CRITICAL"])
-def test_setup_with_valid_log_levels(root_logger, logger, stdout, level):
-    setup(level, request_id="request id!", another="value")
+def test_setup_with_valid_log_levels(root_logger, stdout, level):
+    logger = Logger(level=level, stream=stdout, request_id="request id!", another="value")
+    msg = "This is a test"
+    log_command = {
+        "INFO": logger.info,
+        "ERROR": logger.error,
+        "WARNING": logger.warning,
+        "DEBUG": logger.debug,
+        "CRITICAL": logger.critical,
+    }
 
-    logger.critical("This is a test")
+    log_message = log_command[level]
+    log_message(msg)
 
-    log_dict = json.loads(stdout.getvalue())
+    log_dict = json.loads(stdout.getvalue().strip())
 
     check_log_dict(log_dict)
 
-    assert "CRITICAL" == log_dict["level"]
+    assert level == log_dict["level"]
     assert "This is a test" == log_dict["message"]
     assert "request id!" == log_dict["request_id"]
     assert "exception" not in log_dict
 
 
-def test_logging_exception_traceback(root_logger, logger, stdout):
-    setup("DEBUG", request_id="request id!", another="value")
+def test_logging_exception_traceback(root_logger, stdout):
+    logger = Logger(level="DEBUG", stream=stdout, request_id="request id!", another="value")
 
     try:
         raise Exception("Boom")
@@ -61,11 +72,9 @@ def test_logging_exception_traceback(root_logger, logger, stdout):
 
 
 def test_setup_with_invalid_log_level(root_logger, logger, stdout):
-    setup("not a valid log level")  # writes a log event
-
-    log_dict = json.loads(stdout.getvalue())
-
-    check_log_dict(log_dict)
+    with pytest.raises(ValueError) as e:
+        Logger(level="not a valid log level")
+        assert "Unknown level" in e.value.args[0]
 
 
 def check_log_dict(log_dict):
@@ -76,11 +85,11 @@ def check_log_dict(log_dict):
 
 
 def test_setup_with_bad_level_does_not_fail():
-    setup("DBGG", request_id="request id!", another="value")
+    Logger("DBGG", request_id="request id!", another="value")
 
 
-def test_with_dict_message(root_logger, logger, stdout):
-    setup("DEBUG", another="value")
+def test_with_dict_message(root_logger, stdout):
+    logger = Logger(level="DEBUG", stream=stdout)
 
     msg = {"x": "isx"}
     logger.critical(msg)
@@ -90,25 +99,25 @@ def test_with_dict_message(root_logger, logger, stdout):
     assert msg == log_dict["message"]
 
 
-def test_with_json_message(root_logger, logger, stdout):
-    setup("DEBUG", another="value")
+def test_with_json_message(root_logger, stdout):
+    logger = Logger(stream=stdout)
 
     msg = {"x": "isx"}
-    logger.critical(json.dumps(msg))
+    logger.info(json.dumps(msg))
 
     log_dict = json.loads(stdout.getvalue())
 
     assert msg == log_dict["message"]
 
 
-def test_with_unserialisable_value_in_message(root_logger, logger, stdout):
-    setup("DEBUG", another="value")
+def test_with_unserialisable_value_in_message(root_logger, stdout):
+    logger = Logger(level="DEBUG", stream=stdout)
 
     class X:
         pass
 
     msg = {"x": X()}
-    logger.critical(msg)
+    logger.debug(msg)
 
     log_dict = json.loads(stdout.getvalue())
 
