@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 from contextlib import contextmanager
 from typing import Dict
 
@@ -112,8 +111,8 @@ def single_metric(name: str, unit: MetricUnit, value: float):
         yield metric
         logger.debug("Serializing single metric")
         metric_set: Dict = metric.serialize_metric_set()
-    except Exception as e:
-        raise e
+    except Exception:
+        raise
     finally:
         logger.debug("Publishing single metric", {"metric": metric})
         print(json.dumps(metric_set))

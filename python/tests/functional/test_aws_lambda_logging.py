@@ -1,5 +1,4 @@
 """aws_lambda_logging tests."""
-import functools
 import io
 import json
 import logging

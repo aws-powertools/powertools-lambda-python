@@ -6,6 +6,8 @@ from collections import namedtuple
 import pytest
 
 from aws_lambda_powertools.logging import Logger, MetricUnit, log_metric, logger_inject_lambda_context, logger_setup
+from aws_lambda_powertools.logging.logger import JsonFormatter, set_package_logger
+from aws_lambda_powertools.tracing import Tracer
 
 
 @pytest.fixture
@@ -295,6 +297,23 @@ def test_log_metric_partially_correct_args(capsys, invalid_input, expected):
     assert captured.out == expected
 
 
+def test_package_logger(capsys):
+
+    set_package_logger()
+    Tracer(disabled=True)
+    output = capsys.readouterr()
+
+    assert "Tracing has been disabled" in output.out
+
+
+def test_package_logger_format(stdout, capsys):
+    set_package_logger(stream=stdout, formatter=JsonFormatter(formatter="test"))
+    Tracer(disabled=True)
+    output = json.loads(stdout.getvalue().split("\n")[0])
+
+    assert "test" in output["formatter"]
+
+
 @pytest.mark.parametrize(
     "invalid_input,expected",
     [({"unit": "Blah"}, ValueError), ({"unit": None}, ValueError), ({}, TypeError)],
@@ -318,7 +337,7 @@ def test_logger_setup_deprecated():
 def test_logger_inject_lambda_context_deprecated():
     # Should be removed when GA
     with pytest.raises(DeprecationWarning):
-        logger_setup()
+        logger_inject_lambda_context()
 
 
 def test_logger_append_duplicated(stdout):
@@ -327,3 +346,8 @@ def test_logger_append_duplicated(stdout):
     logger.info("log")
     log = json.loads(stdout.getvalue())
     assert "new_value" == log["request_id"]
+
+
+def test_logger_invalid_sampling_rate():
+    with pytest.raises(ValueError):
+        Logger(sampling_rate="TEST")

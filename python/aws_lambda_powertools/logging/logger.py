@@ -321,7 +321,12 @@ class Logger(logging.Logger):
     """
 
     def __init__(
-        self, service: str = None, level: Union[str, int] = None, sampling_rate: float = None, stream: sys.stdout = None, **kwargs
+        self,
+        service: str = None,
+        level: Union[str, int] = None,
+        sampling_rate: float = None,
+        stream: sys.stdout = None,
+        **kwargs,
     ):
         self.service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
         self.sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or 0.0
@@ -431,7 +436,9 @@ class Logger(logging.Logger):
 
         self.log_keys.update(**kwargs)
 
-def set_package_logger(level: Union[str, int] = logging.DEBUG, stream: sys.stdout = None, formatter: logging.Formatter = None
+
+def set_package_logger(
+    level: Union[str, int] = logging.DEBUG, stream: sys.stdout = None, formatter: logging.Formatter = None
 ):
     """Set an additional stream handler, formatter, and log level for aws_lambda_powertools package logger.
 
@@ -455,7 +462,7 @@ def set_package_logger(level: Union[str, int] = logging.DEBUG, stream: sys.stdou
         log formatter, "%(asctime)s %(name)s [%(levelname)s] %(message)s" by default
     """
     if formatter is None:
-        formatter = "%(asctime)s %(name)s [%(levelname)s] %(message)s"
+        formatter = logging.Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s")
 
     if stream is None:
         stream = sys.stdout
@@ -463,6 +470,5 @@ def set_package_logger(level: Union[str, int] = logging.DEBUG, stream: sys.stdou
     logger = logging.getLogger("aws_lambda_powertools")
     logger.setLevel(level)
     handler = logging.StreamHandler(stream)
-    formatter = logging.Formatter(formatter)
     handler.setFormatter(formatter)
     logger.addHandler(handler)

@@ -128,7 +128,7 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
                 else:
                     response = middleware()
                 return response
-            except Exception as err:
+            except Exception:
                 logger.exception(f"Caught exception in {decorator.__qualname__}", exc_info=True)
                 raise
 

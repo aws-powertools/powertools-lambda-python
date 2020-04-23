@@ -1,7 +1,6 @@
 import functools
 import json
 import logging
-import os
 from typing import Any, Callable
 
 from aws_lambda_powertools.metrics.base import MetricManager
@@ -100,8 +99,8 @@ class Metrics(MetricManager):
         def decorate(*args, **kwargs):
             try:
                 response = lambda_handler(*args, **kwargs)
-            except Exception as e:
-                raise e
+            except Exception:
+                raise
             finally:
                 metrics = self.serialize_metric_set()
                 logger.debug("Publishing metrics", {"metrics": metrics})
