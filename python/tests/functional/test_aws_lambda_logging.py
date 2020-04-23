@@ -1,38 +1,37 @@
 """aws_lambda_logging tests."""
+import functools
 import io
 import json
 import logging
-import functools
 
-from pytest import fixture, mark, yield_fixture
 import pytest
 
 from aws_lambda_powertools.logging.logger import Logger
 
 
-@fixture
+@pytest.fixture
 def stdout():
     return io.StringIO()
 
 
-@fixture
+@pytest.fixture
 def handler(stdout):
     return logging.StreamHandler(stdout)
 
 
-@fixture
+@pytest.fixture
 def logger():
     return logging.getLogger(__name__)
 
 
-@yield_fixture
+@pytest.fixture
 def root_logger(handler):
     logging.root.addHandler(handler)
     yield logging.root
     logging.root.removeHandler(handler)
 
 
-@mark.parametrize("level", ["DEBUG", "WARNING", "ERROR", "INFO", "CRITICAL"])
+@pytest.mark.parametrize("level", ["DEBUG", "WARNING", "ERROR", "INFO", "CRITICAL"])
 def test_setup_with_valid_log_levels(root_logger, stdout, level):
     logger = Logger(level=level, stream=stdout, request_id="request id!", another="value")
     msg = "This is a test"

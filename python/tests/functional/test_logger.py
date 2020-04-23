@@ -5,7 +5,7 @@ from collections import namedtuple
 
 import pytest
 
-from aws_lambda_powertools.logging import MetricUnit, log_metric, logger_inject_lambda_context, logger_setup, Logger
+from aws_lambda_powertools.logging import Logger, MetricUnit, log_metric, logger_inject_lambda_context, logger_setup
 
 
 @pytest.fixture
@@ -35,21 +35,6 @@ def lambda_context():
     }
 
     return namedtuple("LambdaContext", lambda_context.keys())(*lambda_context.values())
-
-
-# FIXME - Add test for multiple identical keys or multiple append w/ same keys
-# TypeError: type object got multiple values for keyword argument 'cold_start'
-
-def test_logger_setup_deprecated():
-    # Should be removed when GA
-    with pytest.raises(DeprecationWarning):
-        logger_setup()
-
-
-def test_logger_inject_lambda_context_deprecated():
-    # Should be removed when GA
-    with pytest.raises(DeprecationWarning):
-        logger_setup()
 
 
 def test_setup_service_name(root_logger, stdout):
@@ -322,3 +307,23 @@ def test_log_metric_invalid_unit(capsys, invalid_input, expected):
 
     with pytest.raises(expected):
         log_metric(name="test_metric", namespace="DemoApp", **invalid_input)
+
+
+def test_logger_setup_deprecated():
+    # Should be removed when GA
+    with pytest.raises(DeprecationWarning):
+        logger_setup()
+
+
+def test_logger_inject_lambda_context_deprecated():
+    # Should be removed when GA
+    with pytest.raises(DeprecationWarning):
+        logger_setup()
+
+
+def test_logger_append_duplicated(stdout):
+    logger = Logger(stream=stdout, request_id="value")
+    logger.structure_logs(append=True, request_id="new_value")
+    logger.info("log")
+    log = json.loads(stdout.getvalue())
+    assert "new_value" == log["request_id"]

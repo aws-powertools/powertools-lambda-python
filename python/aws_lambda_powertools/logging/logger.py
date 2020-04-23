@@ -91,7 +91,7 @@ class JsonFormatter(logging.Formatter):
 
 def logger_setup(service: str = None, level: str = None, sampling_rate: float = 0.0, legacy: bool = False, **kwargs):
     """DEPRECATED
-    
+
     This will be removed when GA - Use `aws_lambda_powertools.logging.logger.Logger` instead
 
     Example
@@ -123,6 +123,7 @@ def logger_inject_lambda_context(lambda_handler: Callable[[Dict, Any], Any] = No
     """
 
     raise DeprecationWarning("Use Logger instead - This method will be removed when GA")
+
 
 def _is_cold_start() -> str:
     """Verifies whether is cold start and return a string used for struct logging
@@ -407,6 +408,8 @@ class Logger(logging.Logger):
         to an existing logger so it is available
         across future log statements.
 
+        Last keyword argument and value wins if duplicated.
+
         Parameters
         ----------
         append : bool, optional
@@ -415,6 +418,7 @@ class Logger(logging.Logger):
         self.handler.setFormatter(JsonFormatter(**self._default_log_keys, **kwargs))
 
         if append:
-            self.handler.setFormatter(JsonFormatter(**self.log_keys, **kwargs))
+            new_keys = {**self.log_keys, **kwargs}
+            self.handler.setFormatter(JsonFormatter(**new_keys))
 
         self.log_keys.update(**kwargs)
