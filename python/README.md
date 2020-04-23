@@ -24,6 +24,7 @@ A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray,
 * Logs canonical custom metric line to logs that can be consumed asynchronously
 * Log sampling enables DEBUG log level for a percentage of requests (disabled by default)
     - Enable via `POWERTOOLS_LOGGER_SAMPLE_RATE=0.1`, ranges from 0 to 1, where 0.1 is 10% and 1 is 100%
+* Append additional keys to structured log at any point in time so they're available across log statements
 
 **Metrics**
 
@@ -113,6 +114,8 @@ tracer = Tracer(auto_patch=False) # new instance using existing configuration wi
 
 ### Logging
 
+> **NOTE** `logger_setup` and `logger_inject_lambda_context` are deprecated and will be completely removed once it's GA.
+
 **Example SAM template using supported environment variables**
 
 ```yaml
@@ -128,13 +131,13 @@ Globals:
 **Pseudo Python Lambda code**
 
 ```python
-from aws_lambda_powertools.logging import logger_setup, logger_inject_lambda_context
+from aws_lambda_powertools.logging import Logger
 
-logger = logger_setup()  
-# logger_setup(service="payment") # also accept explicit service name
-# logger_setup(level="INFO") # also accept explicit log level
+logger = Logger()
+# Logger(service="payment") # also accepts explicit service name
+# Logger(level="INFO") # also accepts explicit log level
 
-@logger_inject_lambda_context
+@logger.inject_lambda_context
 def handler(event, context)
   logger.info("Collecting payment")
   ...
@@ -159,6 +162,7 @@ def handler(event, context)
    "lambda_function_arn":"arn:aws:lambda:eu-west-1:12345678910:function:test",
    "lambda_request_id":"52fdfc07-2182-154f-163f-5f0f9a621d72",
    "cold_start": "true",
+   "sampling_rate": 0.1,
    "message": "Collecting payment"
 }
 
@@ -172,10 +176,45 @@ def handler(event, context)
    "lambda_function_arn":"arn:aws:lambda:eu-west-1:12345678910:function:test",
    "lambda_request_id":"52fdfc07-2182-154f-163f-5f0f9a621d72",
    "cold_start": "true",
+   "sampling_rate": 0.1,
    "message":{  
       "operation":"collect_payment",
       "charge_id": "ch_AZFlk2345C0"
    }
+}
+```
+
+**Append additional keys to structured log**
+
+```python
+from aws_lambda_powertools.logging import Logger
+
+logger = Logger()
+
+@logger.inject_lambda_context
+def handler(event, context)
+  if "order_id" in event:
+      logger.structure_logs(append=True, order_id=event["order_id"])
+  logger.info("Collecting payment")
+  ...
+```
+
+**Exerpt output in CloudWatch Logs**
+
+```json
+{  
+   "timestamp":"2019-08-22 18:17:33,774",
+   "level":"INFO",
+   "location":"collect.handler:1",
+   "service":"payment",
+   "lambda_function_name":"test",
+   "lambda_function_memory_size":"128",
+   "lambda_function_arn":"arn:aws:lambda:eu-west-1:12345678910:function:test",
+   "lambda_request_id":"52fdfc07-2182-154f-163f-5f0f9a621d72",
+   "cold_start": "true",
+   "sampling_rate": 0.1,
+   "order_id": "order_id_value",
+   "message": "Collecting payment"
 }
 ```
 
@@ -320,12 +359,19 @@ def lambda_handler(event, context):
     return True
 ```
 
+
+### Debug mode
+
+By default, all debug log statements from AWS Lambda Powertools package are suppressed. If you'd like to enable them, use `set_package_logger` utility:
+
+```python
+import aws_lambda_powertools
+aws_lambda_powertools.logging.logger.set_package_logger()
+...
+```
+
 ## Beta
 
-> **[Progress towards GA](https://github.com/awslabs/aws-lambda-powertools/projects/1)**
+This library may change its API/methods or environment variables as it receives feedback from customers
 
-This library may change its API/methods or environment variables as it receives feedback from customers. Currently looking for ideas in the following areas before making it stable:
-
-* **Should Tracer patch all possible imported libraries by default or only AWS SDKs?**
-    - Patching all libraries may have a small performance penalty (~50ms) at cold start
-    - Alternatively, we could patch only AWS SDK if available and to provide a param to patch multiple `Tracer(modules=("boto3", "requests"))` 
+**[Progress towards GA](https://github.com/awslabs/aws-lambda-powertools/projects/1)**
