@@ -343,15 +343,8 @@ class Tracer:
         """Patch modules for instrumentation"""
         logger.debug("Patching modules...")
 
-        is_lambda_emulator = os.getenv("AWS_SAM_LOCAL", False)
-        is_lambda_env = os.getenv("LAMBDA_TASK_ROOT", False)
-
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting patch")
-            return
-
-        if is_lambda_emulator or is_lambda_env:
-            logger.debug("Running under SAM CLI env or not in Lambda; aborting patch")
             return
 
         patch_all()  # pragma: no cover
@@ -368,7 +361,7 @@ class Tracer:
         Tracing is automatically disabled in the following conditions:
 
         1. Explicitly disabled via `TRACE_DISABLED` environment variable
-        2. Running in Lambda Emulators where X-Ray Daemon will not be listening
+        2. Running in Lambda Emulators, or locally where X-Ray Daemon will not be listening
         3. Explicitly disabled via constructor e.g `Tracer(disabled=True)`
 
         Returns
@@ -377,6 +370,7 @@ class Tracer:
         """
         logger.debug("Verifying whether Tracing has been disabled")
         is_lambda_emulator = os.getenv("AWS_SAM_LOCAL")
+        is_lambda_env = os.getenv("LAMBDA_TASK_ROOT")
         env_option = str(os.getenv("POWERTOOLS_TRACE_DISABLED", "false"))
         disabled_env = strtobool(env_option)
 
@@ -384,9 +378,9 @@ class Tracer:
             logger.debug("Tracing has been disabled via env var POWERTOOLS_TRACE_DISABLED")
             return disabled_env
 
-        if is_lambda_emulator:
-            logger.debug("Running under SAM CLI env; Tracing has been disabled")
-            return is_lambda_emulator
+        if is_lambda_emulator or is_lambda_env:
+            logger.debug("Running under SAM CLI env or not in Lambda env; disabling Tracing")
+            return True
 
         return False
 

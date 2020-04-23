@@ -148,10 +148,10 @@ class MetricManager:
         SchemaValidationError
             Raised when serialization fail schema validation
         """
-        if metrics is None:
+        if metrics is None:  # pragma: no cover
             metrics = self.metric_set
 
-        if dimensions is None:
+        if dimensions is None:  # pragma: no cover
             dimensions = self.dimension_set
 
         logger.debug("Serializing...", {"metrics": metrics, "dimensions": dimensions})
@@ -163,11 +163,10 @@ class MetricManager:
         for metric_name in metrics:
             metric: str = metrics[metric_name]
             metric_value: int = metric.get("Value", 0)
-            metric_unit: str = metric.get("Unit")
+            metric_unit: str = metric.get("Unit", "")
 
-            if metric_value > 0 and metric_unit is not None:
-                metric_names_unit.append({"Name": metric_name, "Unit": metric["Unit"]})
-                metric_set.update({metric_name: metric["Value"]})
+            metric_names_unit.append({"Name": metric_name, "Unit": metric_unit})
+            metric_set.update({metric_name: metric_value})
 
         metrics_definition = {
             "CloudWatchMetrics": [

@@ -264,3 +264,41 @@ def test_exceed_number_of_dimensions(metric, namespace):
             my_metric.add_namespace(**namespace)
             for dimension in dimensions:
                 my_metric.add_dimension(**dimension)
+
+
+def test_log_metrics_error_propagation(capsys, metric, dimension, namespace):
+    # GIVEN Metrics are serialized after handler execution
+    # WHEN If an error occurs and metrics have been added
+    # THEN we should log metrics and propagate exception up
+    my_metrics = Metrics()
+
+    my_metrics.add_metric(**metric)
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_namespace(**namespace)
+
+    @my_metrics.log_metrics
+    def lambda_handler(evt, context):
+        raise ValueError("Bubble up")
+
+    with pytest.raises(ValueError):
+        lambda_handler({}, {})
+
+    output = json.loads(capsys.readouterr().out.strip())
+    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
+
+    remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
+    assert expected["_aws"] == output["_aws"]
+
+
+def test_log_no_metrics_error_propagation(capsys, metric, dimension, namespace):
+    # GIVEN Metrics are serialized after handler execution
+    # WHEN If an error occurs and no metrics have been added
+    # THEN we should propagate exception up and raise SchemaValidationError
+    my_metrics = Metrics()
+
+    @my_metrics.log_metrics
+    def lambda_handler(evt, context):
+        raise ValueError("Bubble up")
+
+    with pytest.raises(SchemaValidationError):
+        lambda_handler({}, {})

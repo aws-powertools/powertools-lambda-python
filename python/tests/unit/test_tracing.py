@@ -153,3 +153,31 @@ def test_tracer_no_autopatch(patch_mock):
     # THEN tracer should not patch any module
     Tracer(disabled=True, auto_patch=False)
     assert patch_mock.call_count == 0
+
+
+def test_tracer_lambda_handler_empty_response_metadata(mocker, xray_stub):
+    put_metadata_mock = mocker.MagicMock()
+    xray_provider = xray_stub(put_metadata_mock=put_metadata_mock)
+    tracer = Tracer(provider=xray_provider)
+
+    @tracer.capture_lambda_handler
+    def handler(event, context):
+        return
+
+    handler({}, mocker.MagicMock())
+
+    assert put_metadata_mock.call_count == 0
+
+
+def test_tracer_method_empty_response_metadata(mocker, xray_stub):
+    put_metadata_mock = mocker.MagicMock()
+    xray_provider = xray_stub(put_metadata_mock=put_metadata_mock)
+    tracer = Tracer(provider=xray_provider)
+
+    @tracer.capture_method
+    def greeting(name, message):
+        return
+
+    greeting(name="Foo", message="Bar")
+
+    assert put_metadata_mock.call_count == 0
