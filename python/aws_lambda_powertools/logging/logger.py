@@ -8,7 +8,7 @@ import random
 import sys
 import warnings
 from distutils.util import strtobool
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Union
 
 from ..helper.models import MetricUnit, build_lambda_context_model, build_metric_unit_from_str
 
@@ -261,7 +261,7 @@ class Logger(logging.Logger):
     ---------------------
     POWERTOOLS_SERVICE_NAME : str
         service name
-    LOG_LEVEL: str
+    LOG_LEVEL: str, int
         logging level (e.g. INFO, DEBUG)
     POWERTOOLS_LOGGER_SAMPLE_RATE: float
         samping rate ranging from 0 to 1, 1 being 100% sampling
@@ -310,10 +310,18 @@ class Logger(logging.Logger):
     ----------
     logging : logging.Logger
         Inherits Logger
+    service: str
+        name of the service to create the logger for, "service_undefined" by default
+    level: str, int
+        log level, INFO by default
+    sampling_rate: float
+        debug log sampling rate, 0.0 by default
+    stream: sys.stdout
+        log stream, stdout by default
     """
 
     def __init__(
-        self, service: str = None, level: str = None, sampling_rate: float = None, stream: sys.stdout = None, **kwargs
+        self, service: str = None, level: Union[str, int] = None, sampling_rate: float = None, stream: sys.stdout = None, **kwargs
     ):
         self.service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
         self.sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or 0.0
@@ -422,3 +430,39 @@ class Logger(logging.Logger):
             self.handler.setFormatter(JsonFormatter(**new_keys))
 
         self.log_keys.update(**kwargs)
+
+def set_package_logger(level: Union[str, int] = logging.DEBUG, stream: sys.stdout = None, formatter: logging.Formatter = None
+):
+    """Set an additional stream handler, formatter, and log level for aws_lambda_powertools package logger.
+
+    **Package log by default is supressed (NullHandler), this should only used for debugging. 
+    This is separate from application Logger class utility**
+
+    Example
+    -------
+    **Enables debug logging for AWS Lambda Powertools package**
+
+        >>> from aws_lambda_powertools.logging.logger import set_package_logger
+        >>> set_package_logger()
+
+    Parameters
+    ----------
+    level: str, int
+        log level, DEBUG by default
+    stream: sys.stdout
+        log stream, stdout by default
+    formatter: logging.Formatter
+        log formatter, "%(asctime)s %(name)s [%(levelname)s] %(message)s" by default
+    """
+    if formatter is None:
+        formatter = "%(asctime)s %(name)s [%(levelname)s] %(message)s"
+
+    if stream is None:
+        stream = sys.stdout
+
+    logger = logging.getLogger("aws_lambda_powertools")
+    logger.setLevel(level)
+    handler = logging.StreamHandler(stream)
+    formatter = logging.Formatter(formatter)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
