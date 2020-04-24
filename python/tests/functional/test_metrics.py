@@ -195,7 +195,7 @@ def test_metrics_spillover(monkeypatch, capsys, metric, dimension, namespace, a_
     single_metric = json.loads(single_metric)
 
     expected_single_metric = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
-    
+
     serialize_metrics(metrics=a_hundred_metrics, dimensions=[dimension], namespace=namespace)
     expected_spillover_metrics = json.loads(capsys.readouterr().out.strip())
 

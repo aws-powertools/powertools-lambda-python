@@ -20,6 +20,7 @@ with _schema_path.open() as f:
 
 MAX_METRICS = 100
 
+
 class MetricManager:
     """Base class for metric functionality (namespace, metric, dimension, serialization)
 
