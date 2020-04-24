@@ -7,3 +7,4 @@ __author__ = """Amazon Web Services"""
 
 logger = logging.getLogger("aws_lambda_powertools")
 logger.addHandler(logging.NullHandler())
+logger.propagate = False

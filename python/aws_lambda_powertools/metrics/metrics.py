@@ -99,8 +99,6 @@ class Metrics(MetricManager):
         def decorate(*args, **kwargs):
             try:
                 response = lambda_handler(*args, **kwargs)
-            except Exception:
-                raise
             finally:
                 metrics = self.serialize_metric_set()
                 logger.debug("Publishing metrics", {"metrics": metrics})

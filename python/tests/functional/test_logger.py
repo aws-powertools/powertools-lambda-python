@@ -8,6 +8,7 @@ import pytest
 from aws_lambda_powertools.logging import Logger, MetricUnit, log_metric, logger_inject_lambda_context, logger_setup
 from aws_lambda_powertools.logging.logger import JsonFormatter, set_package_logger
 from aws_lambda_powertools.tracing import Tracer
+from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
 
 
 @pytest.fixture
@@ -349,5 +350,5 @@ def test_logger_append_duplicated(stdout):
 
 
 def test_logger_invalid_sampling_rate():
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidLoggerSamplingRateError):
         Logger(sampling_rate="TEST")

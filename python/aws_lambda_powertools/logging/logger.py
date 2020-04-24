@@ -11,15 +11,32 @@ from distutils.util import strtobool
 from typing import Any, Callable, Dict, Union
 
 from ..helper.models import MetricUnit, build_lambda_context_model, build_metric_unit_from_str
+from .exceptions import InvalidLoggerSamplingRateError
 
 logger = logging.getLogger(__name__)
 
 is_cold_start = True
 
 
-def json_formatter(obj):
-    """Formatter for unserialisable values."""
-    return str(obj)
+def json_formatter(unserialized_value: Any):
+    """JSON custom serializer to cast unserialisable values to strings.
+
+    Example
+    -------
+
+    **Serialize unserialisable value to string**
+
+        class X: pass
+        value = {"x": X()}
+
+        json.dumps(value, default=json_formatter)
+
+    Parameters
+    ----------
+    unserialized_value: Any
+        Python object unserializable by JSON
+    """
+    return str(unserialized_value)
 
 
 class JsonFormatter(logging.Formatter):
@@ -57,7 +74,12 @@ class JsonFormatter(logging.Formatter):
         record_dict = record.__dict__.copy()
         record_dict["asctime"] = self.formatTime(record, self.datefmt)
 
-        log_dict = {k: v % record_dict for k, v in self.format_dict.items() if v}
+        log_dict = {}
+        for key, value in self.format_dict.items():
+            if value:
+                # converts default logging expr to its record value
+                # e.g. '%(asctime)s' to '2020-04-24 09:35:40,698'
+                log_dict[key] = value % record_dict
 
         if isinstance(record_dict["msg"], dict):
             log_dict["message"] = record_dict["msg"]
@@ -89,7 +111,9 @@ class JsonFormatter(logging.Formatter):
         return json_record
 
 
-def logger_setup(service: str = None, level: str = None, sampling_rate: float = 0.0, legacy: bool = False, **kwargs):
+def logger_setup(
+    service: str = None, level: str = None, sampling_rate: float = 0.0, legacy: bool = False, **kwargs
+) -> DeprecationWarning:
     """DEPRECATED
 
     This will be removed when GA - Use `aws_lambda_powertools.logging.logger.Logger` instead
@@ -102,11 +126,12 @@ def logger_setup(service: str = None, level: str = None, sampling_rate: float = 
         logger = Logger(service="payment") # same env var still applies
 
     """
-    warnings.warn(message="This method will be removed in GA; use Logger instead", category=DeprecationWarning)
     raise DeprecationWarning("Use Logger instead - This method will be removed when GA")
 
 
-def logger_inject_lambda_context(lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False):
+def logger_inject_lambda_context(
+    lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False
+) -> DeprecationWarning:
     """DEPRECATED
 
     This will be removed when GA - Use `aws_lambda_powertools.logging.logger.Logger` instead
@@ -121,7 +146,6 @@ def logger_inject_lambda_context(lambda_handler: Callable[[Dict, Any], Any] = No
         def handler(evt, ctx):
             pass
     """
-
     raise DeprecationWarning("Use Logger instead - This method will be removed when GA")
 
 
@@ -318,6 +342,11 @@ class Logger(logging.Logger):
         debug log sampling rate, 0.0 by default
     stream: sys.stdout
         log stream, stdout by default
+    
+    Raises
+    ------
+    InvalidLoggerSamplingRateError
+        When sampling rate provided is not a float
     """
 
     def __init__(
@@ -342,7 +371,7 @@ class Logger(logging.Logger):
                 logger.debug("Setting log level to Debug due to sampling rate")
                 self.log_level = logging.DEBUG
         except ValueError:
-            raise ValueError(
+            raise InvalidLoggerSamplingRateError(
                 f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead. Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."  # noqa E501
             )
 

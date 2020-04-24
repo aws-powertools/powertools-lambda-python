@@ -111,8 +111,6 @@ def single_metric(name: str, unit: MetricUnit, value: float):
         yield metric
         logger.debug("Serializing single metric")
         metric_set: Dict = metric.serialize_metric_set()
-    except Exception:
-        raise
     finally:
         logger.debug("Publishing single metric", {"metric": metric})
         print(json.dumps(metric_set))

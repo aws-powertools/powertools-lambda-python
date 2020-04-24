@@ -1,0 +1,2 @@
+class MiddlewareInvalidArgumentError(Exception):
+    pass

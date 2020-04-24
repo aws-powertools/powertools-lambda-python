@@ -6,6 +6,7 @@ from distutils.util import strtobool
 from typing import Callable
 
 from ..tracing import Tracer
+from .exceptions import MiddlewareInvalidArgumentError
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +97,7 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
 
     Raises
     ------
-    TypeError
+    MiddlewareInvalidArgumentError
         When middleware receives non keyword=arguments
     """
 
@@ -112,7 +113,8 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
             return functools.partial(final_decorator, **kwargs)
 
         if not inspect.isfunction(func):
-            raise TypeError(
+            # @custom_middleware(True) vs @custom_middleware(log_event=True)
+            raise MiddlewareInvalidArgumentError(
                 f"Only keyword arguments is supported for middlewares: {decorator.__qualname__} received {func}"
             )
 
@@ -129,7 +131,7 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
                     response = middleware()
                 return response
             except Exception:
-                logger.exception(f"Caught exception in {decorator.__qualname__}", exc_info=True)
+                logger.exception(f"Caught exception in {decorator.__qualname__}")
                 raise
 
         return wrapper
