@@ -18,6 +18,7 @@ _schema_path = pathlib.Path(__file__).parent / "./schema.json"
 with _schema_path.open() as f:
     CLOUDWATCH_EMF_SCHEMA = json.load(f)
 
+MAX_METRICS = 100
 
 class MetricManager:
     """Base class for metric functionality (namespace, metric, dimension, serialization)
@@ -100,12 +101,6 @@ class MetricManager:
         MetricUnitError
             When metric unit is not supported by CloudWatch
         """
-        if len(self.metric_set) == 100:
-            logger.debug("Exceeded maximum of 100 metrics - Publishing existing metric set")
-            metrics = self.serialize_metric_set()
-            print(json.dumps(metrics))
-            self.metric_set = {}
-
         if not isinstance(value, numbers.Number):
             raise MetricValueError(f"{value} is not a valid number")
 
@@ -119,6 +114,12 @@ class MetricManager:
         metric = {"Unit": unit.value, "Value": float(value)}
         logger.debug(f"Adding metric: {name} with {metric}")
         self.metric_set[name] = metric
+
+        if len(self.metric_set) == MAX_METRICS:
+            logger.debug(f"Exceeded maximum of {MAX_METRICS} metrics - Publishing existing metric set")
+            metrics = self.serialize_metric_set()
+            print(json.dumps(metrics))
+            self.metric_set = {}
 
     def serialize_metric_set(self, metrics: Dict = None, dimensions: Dict = None) -> Dict:
         """Serializes metric and dimensions set
