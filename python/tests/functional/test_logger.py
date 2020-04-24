@@ -5,7 +5,10 @@ from collections import namedtuple
 
 import pytest
 
-from aws_lambda_powertools.logging import MetricUnit, log_metric, logger_inject_lambda_context, logger_setup
+from aws_lambda_powertools.logging import Logger, MetricUnit, log_metric, logger_inject_lambda_context, logger_setup
+from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
+from aws_lambda_powertools.logging.logger import JsonFormatter, set_package_logger
+from aws_lambda_powertools.tracing import Tracer
 
 
 @pytest.fixture
@@ -42,40 +45,40 @@ def test_setup_service_name(root_logger, stdout):
     # WHEN logger is setup
     # THEN service field should be equals service given
     service_name = "payment"
-    logger = logger_setup(service=service_name)
+    logger = Logger(service=service_name, stream=stdout)
+
     logger.info("Hello")
     log = json.loads(stdout.getvalue())
 
     assert service_name == log["service"]
 
 
-def test_setup_no_service_name(root_logger, stdout):
+def test_setup_no_service_name(stdout):
     # GIVEN no service is explicitly defined
     # WHEN logger is setup
     # THEN service field should be "service_undefined"
-    logger_setup()
-    logger = logger_setup()
+    logger = Logger(stream=stdout)
     logger.info("Hello")
     log = json.loads(stdout.getvalue())
 
     assert "service_undefined" == log["service"]
 
 
-def test_setup_service_env_var(monkeypatch, root_logger, stdout):
+def test_setup_service_env_var(monkeypatch, stdout):
     # GIVEN service is explicitly defined via POWERTOOLS_SERVICE_NAME env
     # WHEN logger is setup
     # THEN service field should be equals POWERTOOLS_SERVICE_NAME value
     service_name = "payment"
     monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", service_name)
 
-    logger = logger_setup()
+    logger = Logger(stream=stdout)
     logger.info("Hello")
     log = json.loads(stdout.getvalue())
 
     assert service_name == log["service"]
 
 
-def test_setup_sampling_rate(monkeypatch, root_logger, stdout):
+def test_setup_sampling_rate(monkeypatch, stdout):
     # GIVEN samping rate is explicitly defined via POWERTOOLS_LOGGER_SAMPLE_RATE env
     # WHEN logger is setup
     # THEN sampling rate should be equals POWERTOOLS_LOGGER_SAMPLE_RATE value and should sample debug logs
@@ -84,7 +87,7 @@ def test_setup_sampling_rate(monkeypatch, root_logger, stdout):
     monkeypatch.setenv("POWERTOOLS_LOGGER_SAMPLE_RATE", sampling_rate)
     monkeypatch.setenv("LOG_LEVEL", "INFO")
 
-    logger = logger_setup()
+    logger = Logger(stream=stdout)
     logger.debug("I am being sampled")
     log = json.loads(stdout.getvalue())
 
@@ -93,7 +96,7 @@ def test_setup_sampling_rate(monkeypatch, root_logger, stdout):
     assert "I am being sampled" == log["message"]
 
 
-def test_inject_lambda_context(root_logger, stdout, lambda_context):
+def test_inject_lambda_context(lambda_context, stdout):
     # GIVEN a lambda function is decorated with logger
     # WHEN logger is setup
     # THEN lambda contextual info should always be in the logs
@@ -104,9 +107,9 @@ def test_inject_lambda_context(root_logger, stdout, lambda_context):
         "function_request_id",
     )
 
-    logger = logger_setup()
+    logger = Logger(stream=stdout)
 
-    @logger_inject_lambda_context
+    @logger.inject_lambda_context
     def handler(event, context):
         logger.info("Hello")
 
@@ -118,15 +121,16 @@ def test_inject_lambda_context(root_logger, stdout, lambda_context):
         assert key in log
 
 
-def test_inject_lambda_context_log_event_request(root_logger, stdout, lambda_context):
+def test_inject_lambda_context_log_event_request(lambda_context, stdout):
     # GIVEN a lambda function is decorated with logger instructed to log event
     # WHEN logger is setup
     # THEN logger should log event received from Lambda
     lambda_event = {"greeting": "hello"}
 
-    logger = logger_setup()
+    logger = Logger(stream=stdout)
 
-    @logger_inject_lambda_context(log_event=True)
+    @logger.inject_lambda_context(log_event=True)
+    # @logger.inject_lambda_context(log_event=True)
     def handler(event, context):
         logger.info("Hello")
 
@@ -134,13 +138,12 @@ def test_inject_lambda_context_log_event_request(root_logger, stdout, lambda_con
 
     # Given that our string buffer has many log statements separated by newline \n
     # We need to clean it before we can assert on
-    stdout.seek(0)
-    logs = [json.loads(line.strip()) for line in stdout.readlines()]
+    logs = [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
     logged_event, _ = logs
     assert "greeting" in logged_event["message"]
 
 
-def test_inject_lambda_context_log_event_request_env_var(monkeypatch, root_logger, stdout, lambda_context):
+def test_inject_lambda_context_log_event_request_env_var(monkeypatch, lambda_context, stdout):
     # GIVEN a lambda function is decorated with logger instructed to log event
     # via POWERTOOLS_LOGGER_LOG_EVENT env
     # WHEN logger is setup
@@ -148,9 +151,9 @@ def test_inject_lambda_context_log_event_request_env_var(monkeypatch, root_logge
     lambda_event = {"greeting": "hello"}
     monkeypatch.setenv("POWERTOOLS_LOGGER_LOG_EVENT", "true")
 
-    logger = logger_setup()
+    logger = Logger(stream=stdout)
 
-    @logger_inject_lambda_context
+    @logger.inject_lambda_context
     def handler(event, context):
         logger.info("Hello")
 
@@ -158,8 +161,7 @@ def test_inject_lambda_context_log_event_request_env_var(monkeypatch, root_logge
 
     # Given that our string buffer has many log statements separated by newline \n
     # We need to clean it before we can assert on
-    stdout.seek(0)
-    logs = [json.loads(line.strip()) for line in stdout.readlines()]
+    logs = [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
 
     event = {}
     for log in logs:
@@ -169,15 +171,15 @@ def test_inject_lambda_context_log_event_request_env_var(monkeypatch, root_logge
     assert event == lambda_event
 
 
-def test_inject_lambda_context_log_no_request_by_default(monkeypatch, root_logger, stdout, lambda_context):
+def test_inject_lambda_context_log_no_request_by_default(monkeypatch, lambda_context, stdout):
     # GIVEN a lambda function is decorated with logger
     # WHEN logger is setup
     # THEN logger should not log event received by lambda handler
     lambda_event = {"greeting": "hello"}
 
-    logger = logger_setup()
+    logger = Logger(stream=stdout)
 
-    @logger_inject_lambda_context
+    @logger.inject_lambda_context
     def handler(event, context):
         logger.info("Hello")
 
@@ -185,8 +187,7 @@ def test_inject_lambda_context_log_no_request_by_default(monkeypatch, root_logge
 
     # Given that our string buffer has many log statements separated by newline \n
     # We need to clean it before we can assert on
-    stdout.seek(0)
-    logs = [json.loads(line.strip()) for line in stdout.readlines()]
+    logs = [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
 
     event = {}
     for log in logs:
@@ -196,7 +197,7 @@ def test_inject_lambda_context_log_no_request_by_default(monkeypatch, root_logge
     assert event != lambda_event
 
 
-def test_inject_lambda_cold_start(root_logger, stdout, lambda_context):
+def test_inject_lambda_cold_start(lambda_context, stdout):
     # GIVEN a lambda function is decorated with logger, and called twice
     # WHEN logger is setup
     # THEN cold_start key should only be true in the first call
@@ -208,12 +209,12 @@ def test_inject_lambda_cold_start(root_logger, stdout, lambda_context):
     # # since Lambda will only import our logger lib once per concurrent execution
     logger.is_cold_start = True
 
-    logger = logger_setup()
+    logger = Logger(stream=stdout)
 
     def custom_method():
         logger.info("Hello from method")
 
-    @logger_inject_lambda_context
+    @logger.inject_lambda_context
     def handler(event, context):
         custom_method()
         logger.info("Hello")
@@ -223,8 +224,7 @@ def test_inject_lambda_cold_start(root_logger, stdout, lambda_context):
 
     # Given that our string buffer has many log statements separated by newline \n
     # We need to clean it before we can assert on
-    stdout.seek(0)
-    logs = [json.loads(line.strip()) for line in stdout.readlines()]
+    logs = [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
     first_log, second_log, third_log, fourth_log = logs
 
     # First execution
@@ -298,15 +298,57 @@ def test_log_metric_partially_correct_args(capsys, invalid_input, expected):
     assert captured.out == expected
 
 
+def test_package_logger(capsys):
+
+    set_package_logger()
+    Tracer(disabled=True)
+    output = capsys.readouterr()
+
+    assert "Tracing has been disabled" in output.out
+
+
+def test_package_logger_format(stdout, capsys):
+    set_package_logger(stream=stdout, formatter=JsonFormatter(formatter="test"))
+    Tracer(disabled=True)
+    output = json.loads(stdout.getvalue().split("\n")[0])
+
+    assert "test" in output["formatter"]
+
+
 @pytest.mark.parametrize(
     "invalid_input,expected",
     [({"unit": "Blah"}, ValueError), ({"unit": None}, ValueError), ({}, TypeError)],
     ids=["invalid metric unit as str", "unit as None", "missing required unit"],
 )
-def test_log_metric_invalid_unit(invalid_input, expected):
+def test_log_metric_invalid_unit(capsys, invalid_input, expected):
     # GIVEN invalid units are provided
     # WHEN log_metric is called
     # THEN ValueError exception should be raised
 
     with pytest.raises(expected):
         log_metric(name="test_metric", namespace="DemoApp", **invalid_input)
+
+
+def test_logger_setup_deprecated():
+    # Should be removed when GA
+    with pytest.raises(DeprecationWarning):
+        logger_setup()
+
+
+def test_logger_inject_lambda_context_deprecated():
+    # Should be removed when GA
+    with pytest.raises(DeprecationWarning):
+        logger_inject_lambda_context()
+
+
+def test_logger_append_duplicated(stdout):
+    logger = Logger(stream=stdout, request_id="value")
+    logger.structure_logs(append=True, request_id="new_value")
+    logger.info("log")
+    log = json.loads(stdout.getvalue())
+    assert "new_value" == log["request_id"]
+
+
+def test_logger_invalid_sampling_rate():
+    with pytest.raises(InvalidLoggerSamplingRateError):
+        Logger(sampling_rate="TEST")

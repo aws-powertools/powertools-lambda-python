@@ -1,5 +1,11 @@
 # HISTORY 
 
+## April 24th
+
+* Introduces `Logger` for stuctured logging as a replacement for `logger_setup`
+* Introduces `Logger.inject_lambda_context` decorator as a replacement for `logger_inject_lambda_context`
+* Raise `DeprecationWarning` exception for both `logger_setup`, `logger_inject_lambda_context`
+
 ## April 20th, 2020
 
 **0.7.0**
