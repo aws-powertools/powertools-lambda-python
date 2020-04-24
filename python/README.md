@@ -13,7 +13,7 @@ A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray,
 > It currently uses AWS X-Ray
 
 * Decorators that capture cold start as annotation, and response and exceptions as metadata
-* Run functions locally without code change to disable tracing
+* Run functions locally with SAM CLI without code change to disable tracing
 * Explicitly disable tracing via env var `POWERTOOLS_TRACE_DISABLED="true"`
 
 **Logging**
@@ -134,8 +134,7 @@ Globals:
 from aws_lambda_powertools.logging import Logger
 
 logger = Logger()
-# Logger(service="payment") # also accepts explicit service name
-# Logger(level="INFO") # also accepts explicit log level
+# Logger(service="payment", level="INFO") # also accepts explicit service name, log level
 
 @logger.inject_lambda_context
 def handler(event, context)
@@ -268,6 +267,7 @@ with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric:
     metric.add_dimension(name="function_context", value="$LATEST")
 ```
 
+> **NOTE**: If you want to instantiate Metrics() in multiple places in your code, make sure to use `POWERTOOLS_METRICS_NAMESPACE` env var as we don't keep a copy of that across instances.
 
 ### Utilities
 

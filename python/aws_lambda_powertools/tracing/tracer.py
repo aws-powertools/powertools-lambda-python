@@ -369,8 +369,7 @@ class Tracer:
         bool
         """
         logger.debug("Verifying whether Tracing has been disabled")
-        is_lambda_emulator = os.getenv("AWS_SAM_LOCAL")
-        is_lambda_env = os.getenv("LAMBDA_TASK_ROOT")
+        is_lambda_sam_cli = os.getenv("AWS_SAM_LOCAL")
         env_option = str(os.getenv("POWERTOOLS_TRACE_DISABLED", "false"))
         disabled_env = strtobool(env_option)
 
@@ -378,7 +377,7 @@ class Tracer:
             logger.debug("Tracing has been disabled via env var POWERTOOLS_TRACE_DISABLED")
             return disabled_env
 
-        if is_lambda_emulator or is_lambda_env:
+        if is_lambda_sam_cli:
             logger.debug("Running under SAM CLI env or not in Lambda env; disabling Tracing")
             return True
 
