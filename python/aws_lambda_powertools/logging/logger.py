@@ -342,7 +342,7 @@ class Logger(logging.Logger):
         debug log sampling rate, 0.0 by default
     stream: sys.stdout
         log stream, stdout by default
-    
+
     Raises
     ------
     InvalidLoggerSamplingRateError
@@ -471,7 +471,7 @@ def set_package_logger(
 ):
     """Set an additional stream handler, formatter, and log level for aws_lambda_powertools package logger.
 
-    **Package log by default is supressed (NullHandler), this should only used for debugging. 
+    **Package log by default is supressed (NullHandler), this should only used for debugging.
     This is separate from application Logger class utility**
 
     Example
