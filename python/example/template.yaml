@@ -24,8 +24,8 @@ Resources:
           POWERTOOLS_TRACE_DISABLED: "false"          # Explicitly disables tracing
           POWERTOOLS_LOGGER_LOG_EVENT: "false"        # Logs incoming event
           POWERTOOLS_LOGGER_SAMPLE_RATE: "0"          # Debug log sampling percentage
-          POWERTOOLS_METRICS_NAMESPACE: "Example"     # Debug log sampling percentage
-          LOG_LEVEL: INFO                            # Log level (INFO, DEBUG, etc.)
+          POWERTOOLS_METRICS_NAMESPACE: "Example"     # Metric Namespace
+          LOG_LEVEL: INFO                             # Log level (INFO, DEBUG, etc.)
       Events:
         HelloWorld:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api

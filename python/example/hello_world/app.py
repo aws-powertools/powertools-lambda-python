@@ -2,13 +2,16 @@ import json
 
 import requests
 
-from aws_lambda_powertools.logging import logger_inject_lambda_context, logger_setup
+from aws_lambda_powertools.logging import Logger
 from aws_lambda_powertools.metrics import Metrics, MetricUnit, single_metric
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.tracing import Tracer
+from aws_lambda_powertools.logging.logger import set_package_logger
+
+set_package_logger() # Enable package diagnostics (DEBUG log)
 
 tracer = Tracer()
-logger = logger_setup()
+logger = Logger()
 metrics = Metrics()
 
 _cold_start = True
@@ -31,7 +34,7 @@ def my_middleware(handler, event, context, say_hello=False):
 @metrics.log_metrics
 @tracer.capture_lambda_handler
 @my_middleware(say_hello=True)
-@logger_inject_lambda_context
+@logger.inject_lambda_context
 def lambda_handler(event, context):
     """Sample pure Lambda function
 
@@ -53,6 +56,9 @@ def lambda_handler(event, context):
 
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
+    if "charge_id" in event:
+        logger.structure_logs(append=True, payment_id="charge_id")
+
     global _cold_start
     if _cold_start:
         logger.debug("Recording cold start metric")
