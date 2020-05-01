@@ -303,3 +303,11 @@ def test_log_no_metrics_error_propagation(capsys, metric, dimension, namespace):
 
     with pytest.raises(SchemaValidationError):
         lambda_handler({}, {})
+
+def test_all_metric_units(metric, dimension, namespace):
+
+    for unit in MetricUnit:
+        metric['unit'] = unit.value
+        with single_metric(**metric) as my_metric:
+            my_metric.add_dimension(**dimension)
+            my_metric.add_namespace(**namespace)
