@@ -304,10 +304,27 @@ def test_log_no_metrics_error_propagation(capsys, metric, dimension, namespace):
     with pytest.raises(SchemaValidationError):
         lambda_handler({}, {})
 
-def test_all_metric_units(metric, dimension, namespace):
 
+def test_all_metric_units_string(metric, dimension, namespace):
+
+    # "Seconds", "BytesPerSecond", etc.
     for unit in MetricUnit:
-        metric['unit'] = unit.value
+        metric["unit"] = unit.name
+        with single_metric(**metric) as my_metric:
+            my_metric.add_dimension(**dimension)
+            my_metric.add_namespace(**namespace)
+
+    with pytest.raises(MetricUnitError):
+        metric["unit"] = "seconds"
+        with single_metric(**metric) as my_metric:
+            my_metric.add_dimension(**dimension)
+            my_metric.add_namespace(**namespace)
+
+    all_metric_units = [unit.value for unit in MetricUnit]
+
+    # "Seconds", "Bytes/Second", etc.
+    for unit in all_metric_units:
+        metric["unit"] = unit
         with single_metric(**metric) as my_metric:
             my_metric.add_dimension(**dimension)
             my_metric.add_namespace(**namespace)

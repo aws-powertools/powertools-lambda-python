@@ -53,6 +53,8 @@ class MetricManager:
         self.metric_set = metric_set or {}
         self.dimension_set = dimension_set or {}
         self.namespace = os.getenv("POWERTOOLS_METRICS_NAMESPACE") or namespace
+        self._metric_units = [unit.value for unit in MetricUnit]
+        self._metric_unit_options = list(MetricUnit.__members__)
 
     def add_namespace(self, name: str):
         """Adds given metric namespace
@@ -105,14 +107,19 @@ class MetricManager:
         if not isinstance(value, numbers.Number):
             raise MetricValueError(f"{value} is not a valid number")
 
-        if not isinstance(unit, MetricUnit):
-            try:
-                unit = MetricUnit[unit]
-            except KeyError:
-                unit_options = list(MetricUnit.__members__)
-                raise MetricUnitError(f"Invalid metric unit '{unit}', expected either option: {unit_options}")
+        if isinstance(unit, str):
+            if unit in self._metric_unit_options:
+                unit = MetricUnit[unit].value
 
-        metric = {"Unit": unit.value, "Value": float(value)}
+            if unit not in self._metric_units:  # str correta
+                raise MetricUnitError(
+                    f"Invalid metric unit '{unit}', expected either option: {self._metric_unit_options}"
+                )
+
+        if isinstance(unit, MetricUnit):
+            unit = MetricUnit[unit].value
+
+        metric = {"Unit": unit, "Value": float(value)}
         logger.debug(f"Adding metric: {name} with {metric}")
         self.metric_set[name] = metric
 
