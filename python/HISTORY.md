@@ -1,6 +1,26 @@
 # HISTORY 
 
+## May 1st
+
+**0.8.1**
+
+* Fix metric unit casting logic if one passes plain string (value or key)
+* Fix `MetricUnit` enum values for
+    - `BytesPerSecond`
+    - `KilobytesPerSecond`
+    - `MegabytesPerSecond`
+    - `GigabytesPerSecond`
+    - `TerabytesPerSecond`
+    - `BitsPerSecond`
+    - `KilobitsPerSecond`
+    - `MegabitsPerSecond`
+    - `GigabitsPerSecond`
+    - `TerabitsPerSecond`
+    - `CountPerSecond`
+
 ## April 24th
+
+**0.8.0**
 
 * Introduces `Logger` for stuctured logging as a replacement for `logger_setup`
 * Introduces `Logger.inject_lambda_context` decorator as a replacement for `logger_inject_lambda_context`
