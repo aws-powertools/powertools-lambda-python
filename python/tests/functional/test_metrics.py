@@ -307,7 +307,7 @@ def test_log_no_metrics_error_propagation(capsys, metric, dimension, namespace):
 
 def test_all_metric_units_string(metric, dimension, namespace):
 
-    # "Seconds", "BytesPerSecond", etc.
+    # metric unit as MetricUnit key e.g. "Seconds", "BytesPerSecond"
     for unit in MetricUnit:
         metric["unit"] = unit.name
         with single_metric(**metric) as my_metric:
@@ -322,7 +322,7 @@ def test_all_metric_units_string(metric, dimension, namespace):
 
     all_metric_units = [unit.value for unit in MetricUnit]
 
-    # "Seconds", "Bytes/Second", etc.
+    # metric unit as MetricUnit value e.g. "Seconds", "Bytes/Second"
     for unit in all_metric_units:
         metric["unit"] = unit
         with single_metric(**metric) as my_metric:
