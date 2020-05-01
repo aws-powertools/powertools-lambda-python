@@ -107,18 +107,7 @@ class MetricManager:
         if not isinstance(value, numbers.Number):
             raise MetricValueError(f"{value} is not a valid number")
 
-        if isinstance(unit, str):
-            if unit in self._metric_unit_options:
-                unit = MetricUnit[unit].value
-
-            if unit not in self._metric_units:  # str correta
-                raise MetricUnitError(
-                    f"Invalid metric unit '{unit}', expected either option: {self._metric_unit_options}"
-                )
-
-        if isinstance(unit, MetricUnit):
-            unit = MetricUnit[unit].value
-
+        unit = self.__extract_metric_unit_value(unit=unit)
         metric = {"Unit": unit, "Value": float(value)}
         logger.debug(f"Adding metric: {name} with {metric}")
         self.metric_set[name] = metric
@@ -212,3 +201,36 @@ class MetricManager:
         """
         logger.debug(f"Adding dimension: {name}:{value}")
         self.dimension_set[name] = value
+
+    def __extract_metric_unit_value(self, unit: Union[str, MetricUnit]) -> str:
+        """Return metric value from metric unit whether that's str or MetricUnit enum
+
+        Parameters
+        ----------
+        unit : Union[str, MetricUnit]
+            Metric unit
+
+        Returns
+        -------
+        str
+            Metric unit value (e.g. "Seconds", "Count/Second")
+
+        Raises
+        ------
+        MetricUnitError
+            When metric unit is not supported by CloudWatch
+        """
+
+        if isinstance(unit, str):
+            if unit in self._metric_unit_options:
+                unit = MetricUnit[unit].value
+
+            if unit not in self._metric_units:  # str correta
+                raise MetricUnitError(
+                    f"Invalid metric unit '{unit}', expected either option: {self._metric_unit_options}"
+                )
+
+        if isinstance(unit, MetricUnit):
+            unit = unit.value
+
+        return unit
