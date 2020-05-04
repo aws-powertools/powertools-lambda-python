@@ -1,11 +1,13 @@
 import copy
 import functools
+import inspect
 import logging
 import os
 from distutils.util import strtobool
 from typing import Any, Callable, Dict, List
 
 from .base import TracerProvider, XrayProvider
+from .exceptions import InvalidTracerProviderError, TracerProviderNotInitializedError
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
@@ -124,7 +126,7 @@ class Tracer:
         "provider": None,
         "auto_patch": True,
         "patch_modules": None,
-        "provider": None
+        "provider": None,
     }
     _config = copy.copy(_default_config)
 
@@ -134,14 +136,10 @@ class Tracer:
         disabled: bool = None,
         auto_patch: bool = None,
         patch_modules: List = None,
-        provider: TracerProvider = None
+        provider: TracerProvider = None,
     ):
         self.__build_config(
-            service=service,
-            disabled=disabled,
-            auto_patch=auto_patch,
-            patch_modules=patch_modules,
-            provider=provider
+            service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
         )
         self.provider = self._config["provider"]
         self.disabled = self._config["disabled"]
@@ -182,7 +180,7 @@ class Tracer:
             logger.debug("Tracing has been disabled, aborting create_segment")
             return
 
-        return self.provider.begin_subsegment(name=name)
+        return self.provider.create_subsegment(name=name)
 
     def end_subsegment(self):
         """Ends an existing subsegment"""
@@ -388,7 +386,7 @@ class Tracer:
         disabled: bool = None,
         auto_patch: bool = None,
         patch_modules: List = None,
-        provider: TracerProvider = None
+        provider: TracerProvider = None,
     ):
         """ Populates Tracer config for new and existing initializations """
         is_disabled = disabled if disabled is not None else self.__is_trace_disabled()
@@ -400,11 +398,27 @@ class Tracer:
         self._config["patch_modules"] = patch_modules if patch_modules else self._config["patch_modules"]
 
         if provider is not None:
+            self._validate_provider(provider)
             self._config["provider"] = provider
-
-        if self._config["provider"] is None:
+        elif self._config["provider"] is None:
             self._config["provider"] = XrayProvider()
 
     @classmethod
     def _reset_config(cls):
         cls._config = copy.copy(cls._default_config)
+
+    def _validate_provider(self, provider) -> bool:
+        invalid_provider_msg = f"{provider} must implement TracerProvider interface"
+        # not bound
+        if inspect.isclass(provider):
+            if not issubclass(provider, TracerProvider):
+                raise InvalidTracerProviderError(invalid_provider_msg)
+            raise TracerProviderNotInitializedError(
+                f"Initialize {provider} and pass a class instance reference as the provider."
+            )
+
+        # bound
+        if not isinstance(provider, TracerProvider):
+            raise InvalidTracerProviderError(invalid_provider_msg)
+
+        return True

@@ -46,10 +46,6 @@ class TracerProvider(metaclass=abc.ABCMeta):
         tracer = Tracer(service="greeting", provider=custom_provider)
     """
 
-    def __init__(self):
-        """Trace provider initialization."""
-        pass
-
     @abc.abstractmethod
     def patch(self, modules: List[str] = None):
         """Patch modules for instrumentation
@@ -116,9 +112,7 @@ class TracerProvider(metaclass=abc.ABCMeta):
 
 
 class XrayProvider(TracerProvider):
-    def __init__(
-        self, client: aws_xray_sdk.core.xray_recorder = aws_xray_sdk.core.xray_recorder
-    ):
+    def __init__(self, client: aws_xray_sdk.core.xray_recorder = aws_xray_sdk.core.xray_recorder):
         self.client = client
 
     def create_subsegment(self, name: str) -> aws_xray_sdk.core.models.subsegment:
@@ -143,14 +137,11 @@ class XrayProvider(TracerProvider):
         """
         # Will no longer be needed once #155 is resolved
         # https://github.com/aws/aws-xray-sdk-python/issues/155
-        # if self.disabled:
-        #     logger.debug("Tracing has been disabled, return dummy subsegment instead")
-        #     return
         subsegment = self.client.begin_subsegment(name=name)
         global is_cold_start
         if is_cold_start:
             logger.debug("Annotating cold start")
-            subsegment.put_annotation("ColdStart", True)
+            subsegment.put_annotation(key="ColdStart", value=True)
             is_cold_start = False
 
         return subsegment
@@ -198,7 +189,7 @@ class XrayProvider(TracerProvider):
             response = collect_payment()
             tracer.put_metadata("Payment collection", response)
         """
-        self.provider.put_metadata(key=key, value=value, namespace=namespace)
+        self.client.put_metadata(key=key, value=value, namespace=namespace)
 
     def patch(self, modules: List[str] = None):
         """Patch modules for instrumentation.
