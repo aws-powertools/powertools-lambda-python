@@ -4,11 +4,12 @@ import inspect
 import logging
 import os
 from distutils.util import strtobool
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, Generic, List, TypeVar
 
 from .base import TracerProvider, XrayProvider
 from .exceptions import InvalidTracerProviderError, TracerProviderNotInitializedError
 
+subsegment = TypeVar("subsegment")
 is_cold_start = True
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,9 @@ class Tracer:
     Tracer keeps a copy of its configuration as it can be instantiated more than once. This
     is useful when you are using your own middlewares and want to utilize an existing Tracer.
     Make sure to set `auto_patch=False` in subsequent Tracer instances to avoid double patching.
+
+    Tracer supports custom providers that implement
+    `aws_lambda_powertools.tracing.base.TracerProvider`.
 
     Environment variables
     ---------------------
@@ -115,6 +119,13 @@ class Tracer:
     Tracer
         Tracer instance with imported modules patched
 
+    Raises
+    ------
+    InvalidTracerProviderError
+        When given provider doesn't implement `aws_lambda_powertools.tracing.base.TracerProvider`
+    TracerProviderNotInitializedError
+        When given provider isn't initialized/bound
+
     Limitations
     -----------
     * Async handler and methods not supported
@@ -152,7 +163,7 @@ class Tracer:
         if self.auto_patch:
             self.patch(modules=patch_modules)
 
-    def create_subsegment(self, name: str):
+    def create_subsegment(self, name: str) -> Generic[subsegment]:
         """Creates subsegment/span with a given name
 
         It also assumes Tracer would be instantiated statically so that cold starts are captured.
@@ -168,11 +179,10 @@ class Tracer:
 
             self.create_subsegment(name="a meaningful name")
 
-        # FIXME - Return Subsegment Any type
         Returns
         -------
-        models.subsegment
-            AWS X-Ray Subsegment
+        subsegment
+            Trace provider subsegment
         """
         # Will no longer be needed once #155 is resolved
         # https://github.com/aws/aws-xray-sdk-python/issues/155
@@ -204,7 +214,7 @@ class Tracer:
         ----------
         key : str
             Annotation key (e.g. PaymentStatus)
-        value : Any
+        value : any
             Value for annotation (e.g. "CONFIRMED")
         """
         # Will no longer be needed once #155 is resolved
@@ -216,14 +226,14 @@ class Tracer:
         logger.debug(f"Annotating on key '{key}'' with '{value}''")
         self.provider.put_annotation(key=key, value=value)
 
-    def put_metadata(self, key: str, value: object, namespace: str = None):
+    def put_metadata(self, key: str, value: Any, namespace: str = None):
         """Adds metadata to existing segment or subsegment
 
         Parameters
         ----------
         key : str
             Metadata key
-        value : object
+        value : any
             Value for metadata
         namespace : str, optional
             Namespace that metadata will lie under, by default None
@@ -285,7 +295,6 @@ class Tracer:
         @functools.wraps(lambda_handler)
         def decorate(event, context):
             self.create_subsegment(name=f"## {lambda_handler.__name__}")
-
             try:
                 logger.debug("Calling lambda handler")
                 response = lambda_handler(event, context)

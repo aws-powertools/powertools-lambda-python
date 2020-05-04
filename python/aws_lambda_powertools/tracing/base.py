@@ -1,11 +1,8 @@
 from __future__ import annotations
 
 import abc
-import copy
-import functools
 import logging
-import os
-from typing import Any, Callable, List
+from typing import Any, List
 
 import aws_xray_sdk
 import aws_xray_sdk.core
@@ -20,7 +17,14 @@ class TracerProvider(metaclass=abc.ABCMeta):
     Providers should be initialized independently. This
     allows providers to control their config/initialization,
     and only pass a class instance to
-    ```aws_lambda_powertools.tracing.tracer.Tracer```.
+    `aws_lambda_powertools.tracing.tracer.Tracer`.
+
+    It also allows custom providers to keep lean while Tracer provide:
+
+    * a simplified UX
+    * decorators for Lambda handler and methods
+    * auto-patching, patch all modules by default or a subset
+    * disabling all tracing operations with a single parameter or env var
 
     Trace providers should implement the following methods:
 
@@ -32,9 +36,16 @@ class TracerProvider(metaclass=abc.ABCMeta):
     * **disable_tracing_provider**
 
     These methods will be called by
-    ```aws_lambda_powertools.tracing.tracer.Tracer```.
-    See ```aws_lambda_powertools.tracing.base.XrayProvider```
+    `aws_lambda_powertools.tracing.tracer.Tracer` -
+    See `aws_lambda_powertools.tracing.base.XrayProvider`
     for a reference implementation.
+
+    `aws_lambda_powertools.tracing.tracer.Tracer` decorators
+    for Lambda and methods use the following provider methods:
+
+    * create_subsegment
+    * put_metadata
+    * end_subsegment
 
     Example
     -------
@@ -112,6 +123,17 @@ class TracerProvider(metaclass=abc.ABCMeta):
 
 
 class XrayProvider(TracerProvider):
+    """X-Ray Tracer provider
+
+    It implements all basic ``aws_lambda_powertools.tracing.base.TracerProvider` methods,
+    and automatically annotates cold start on first subsegment created.
+
+    Parameters
+    ----------
+    client : aws_xray_sdk.core.xray_recorder
+        X-Ray recorder client
+    """
+
     def __init__(self, client: aws_xray_sdk.core.xray_recorder = aws_xray_sdk.core.xray_recorder):
         self.client = client
 
