@@ -150,7 +150,7 @@ class Tracer:
         self.auto_patch = self._config["auto_patch"]
 
         if self.disabled:
-            self.disable_tracing_provider()
+            self.__disable_tracing_provider()
 
         if self.auto_patch:
             self.patch(modules=patch_modules)
@@ -227,11 +227,6 @@ class Tracer:
             aws_xray_sdk.core.patch_all()
         else:
             aws_xray_sdk.core.patch(modules)
-
-    def disable_tracing_provider(self):
-        """Forcefully disables tracing"""
-        logger.debug("Disabling tracer provider...")
-        aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)
 
     def capture_lambda_handler(self, lambda_handler: Callable[[Dict, Any], Any] = None):
         """Decorator to create subsegment for lambda handlers
@@ -327,6 +322,11 @@ class Tracer:
                 return response
 
         return decorate
+
+    def __disable_tracing_provider(self):
+        """Forcefully disables tracing"""
+        logger.debug("Disabling tracer provider...")
+        aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)
 
     def __is_trace_disabled(self) -> bool:
         """Detects whether trace has been disabled
