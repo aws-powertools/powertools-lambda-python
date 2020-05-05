@@ -12,7 +12,7 @@ def dummy_response():
 
 @pytest.fixture
 def provider_stub(mocker):
-    class CustomProvider():
+    class CustomProvider:
         def __init__(
             self,
             put_metadata_mock: mocker.MagicMock = None,
@@ -56,9 +56,7 @@ def test_tracer_lambda_handler(mocker, dummy_response, provider_stub):
     put_annotation_mock = mocker.MagicMock()
 
     provider = provider_stub(
-        put_metadata_mock=put_metadata_mock,
-        put_annotation_mock=put_annotation_mock,
-        in_subsegment=in_subsegment
+        put_metadata_mock=put_metadata_mock, put_annotation_mock=put_annotation_mock, in_subsegment=in_subsegment
     )
     tracer = Tracer(provider=provider, service="booking")
 
@@ -83,9 +81,7 @@ def test_tracer_method(mocker, dummy_response, provider_stub):
     in_subsegment = mocker.MagicMock()
 
     provider = provider_stub(
-        put_metadata_mock=put_metadata_mock,
-        put_annotation_mock=put_annotation_mock,
-        in_subsegment=in_subsegment
+        put_metadata_mock=put_metadata_mock, put_annotation_mock=put_annotation_mock, in_subsegment=in_subsegment
     )
     tracer = Tracer(provider=provider, service="booking")
 
@@ -140,7 +136,7 @@ def test_tracer_custom_annotation(mocker, dummy_response, provider_stub):
 
     handler({}, mocker.MagicMock())
 
-    assert put_annotation_mock.call_count == 2 # cold_start + annotation
+    assert put_annotation_mock.call_count == 2  # cold_start + annotation
     assert put_annotation_mock.call_args == mocker.call(key=annotation_key, value=annotation_value)
 
 
@@ -202,16 +198,15 @@ def test_tracer_patch(xray_patch_all_mock, xray_patch_mock, mocker):
 
     modules = ["boto3"]
     tracer = Tracer(service="booking", patch_modules=modules)
-    
+
     assert xray_patch_mock.call_count == 1
     assert xray_patch_mock.call_args == mocker.call(modules)
+
 
 def test_tracer_method_exception_metadata(mocker, provider_stub):
     put_metadata_mock = mocker.MagicMock()
 
-    provider = provider_stub(
-        put_metadata_mock=put_metadata_mock,
-    )
+    provider = provider_stub(put_metadata_mock=put_metadata_mock,)
     tracer = Tracer(provider=provider, service="booking")
 
     @tracer.capture_method
@@ -221,15 +216,14 @@ def test_tracer_method_exception_metadata(mocker, provider_stub):
     with pytest.raises(ValueError):
         greeting(name="Foo", message="Bar")
         assert put_metadata_mock.call_args == mocker.call(
-            key="greeting error", value=ValueError('test'), namespace="booking"
+            key="greeting error", value=ValueError("test"), namespace="booking"
         )
+
 
 def test_tracer_lambda_handler_exception_metadata(mocker, provider_stub):
     put_metadata_mock = mocker.MagicMock()
 
-    provider = provider_stub(
-        put_metadata_mock=put_metadata_mock,
-    )
+    provider = provider_stub(put_metadata_mock=put_metadata_mock,)
     tracer = Tracer(provider=provider, service="booking")
 
     @tracer.capture_lambda_handler
@@ -239,5 +233,5 @@ def test_tracer_lambda_handler_exception_metadata(mocker, provider_stub):
     with pytest.raises(ValueError):
         handler({}, mocker.MagicMock())
         assert put_metadata_mock.call_args == mocker.call(
-            key="booking error", value=ValueError('test'), namespace="booking"
+            key="booking error", value=ValueError("test"), namespace="booking"
         )
