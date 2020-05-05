@@ -29,7 +29,8 @@ class Tracer:
     Make sure to set `auto_patch=False` in subsequent Tracer instances to avoid double patching.
 
     Tracer supports custom providers that implement
-    `aws_lambda_powertools.tracing.base.TracerProvider`.
+    `aws_lambda_powertools.tracing.base.TracerProvider`. It defaults and initializes to
+    `aws_lambda_powertools.tracing.base.XrayProvider` if no custom provider is given.
 
     Environment variables
     ---------------------
@@ -45,8 +46,12 @@ class Tracer:
     auto_patch: bool
         Patch existing imported modules during initialization, by default True
     disabled: bool
-        Flag to explicitly disable tracing, useful when running/testing locally.
+        Flag to explicitly disable tracing, useful when running/testing locally
         `Env POWERTOOLS_TRACE_DISABLED="true"`
+    patch_modules: List
+        List of modules supported by tracing provider to patch, by default all modules are patched
+    provider: TracerProvider
+        Tracing provider, by default `aws_lambda_powertools.tracing.base.XrayProvider`
 
     Example
     -------

@@ -26,14 +26,14 @@ class TracerProvider(metaclass=abc.ABCMeta):
     * auto-patching, patch all modules by default or a subset
     * disabling all tracing operations with a single parameter or env var
 
-    Trace providers should implement the following methods:
+    Trace providers should implement 
 
-    * **patch**
-    * **create_subsegment**
-    * **end_subsegment**
-    * **put_metadata**
-    * **put_annotation**
-    * **disable_tracing_provider**
+    * `aws_lambda_powertools.tracing.base.TracerProvider.patch`
+    * `aws_lambda_powertools.tracing.base.TracerProvider.create_subsegment`
+    * `aws_lambda_powertools.tracing.base.TracerProvider.end_subsegment`
+    * `aws_lambda_powertools.tracing.base.TracerProvider.put_metadata`
+    * `aws_lambda_powertools.tracing.base.TracerProvider.put_annotation`
+    * `aws_lambda_powertools.tracing.base.TracerProvider.disable_tracing_provider`
 
     These methods will be called by
     `aws_lambda_powertools.tracing.tracer.Tracer` -
@@ -41,18 +41,20 @@ class TracerProvider(metaclass=abc.ABCMeta):
     for a reference implementation.
 
     `aws_lambda_powertools.tracing.tracer.Tracer` decorators
-    for Lambda and methods use the following provider methods:
+    `aws_lambda_powertools.tracing.Tracer.capture_lambda_handler`,
+    and `aws_lambda_powertools.tracing.Tracer.capture_method` 
+    use the following provider methods:
 
-    * create_subsegment
-    * put_metadata
-    * end_subsegment
+    * `aws_lambda_powertools.tracing.base.TracerProvider.create_subsegment`
+    * `aws_lambda_powertools.tracing.base.TracerProvider.end_subsegment`
+    * `aws_lambda_powertools.tracing.base.TracerProvider.put_metadata`
 
     Example
     -------
     **Client using a custom tracing provider**
 
         from aws_lambda_powertools.tracing import Tracer
-        ... import ... ProviderX
+        import ProviderX
         custom_provider = ProviderX()
         tracer = Tracer(service="greeting", provider=custom_provider)
     """
@@ -125,8 +127,10 @@ class TracerProvider(metaclass=abc.ABCMeta):
 class XrayProvider(TracerProvider):
     """X-Ray Tracer provider
 
-    It implements all basic ``aws_lambda_powertools.tracing.base.TracerProvider` methods,
+    It implements all basic `aws_lambda_powertools.tracing.base.TracerProvider` methods,
     and automatically annotates cold start on first subsegment created.
+
+    XrayProvider is the default provider for `aws_lambda_powertools.tracing.Tracer`.
 
     Parameters
     ----------
