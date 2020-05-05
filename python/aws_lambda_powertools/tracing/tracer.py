@@ -3,6 +3,7 @@ import functools
 import inspect
 import logging
 import os
+from contextlib import contextmanager
 from distutils.util import strtobool
 from typing import Any, Callable, Dict, List, Tuple
 
@@ -12,8 +13,6 @@ import aws_xray_sdk.core
 is_cold_start = True
 logger = logging.getLogger(__name__)
 
-# FIXME - Add get current subsegment()
-# FIXME - Add subsegment type
 
 class Tracer:
     """Tracer using AWS-XRay to provide decorators with known defaults for Lambda functions
@@ -156,45 +155,6 @@ class Tracer:
         if self.auto_patch:
             self.patch(modules=patch_modules)
 
-    def create_subsegment(self, name: str) -> aws_xray_sdk.core.models.subsegment:
-        """Creates subsegment/span with a given name
-
-        Parameters
-        ----------
-        name : str
-            Subsegment name
-
-        Example
-        -------
-
-        **Creates a subsegment**
-
-            self.create_subsegment(name="a meaningful name")
-
-        Returns
-        -------
-        aws_xray_sdk.core.models.subsegment
-            AWS X-Ray Subsegment
-        """
-        # Will no longer be needed once #155 is resolved
-        # https://github.com/aws/aws-xray-sdk-python/issues/155
-        subsegment = self.provider.begin_subsegment(name=name)
-        global is_cold_start
-        if is_cold_start:
-            logger.debug("Annotating cold start")
-            subsegment.put_annotation(key="ColdStart", value=True)
-            is_cold_start = False
-
-        return subsegment
-
-    def end_subsegment(self):
-        """Ends an existing subsegment"""
-        if self.disabled:
-            logger.debug("Tracing has been disabled, aborting end_subsegment")
-            return
-
-        self.provider.end_subsegment()
-
     def put_annotation(self, key: str, value: Any):
         """Adds annotation to existing segment or subsegment
 
@@ -300,23 +260,26 @@ class Tracer:
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
-            # FIXME - Use newly created subsegment to avoid race conditions
-            self.create_subsegment(name=f"## {lambda_handler.__name__}")
-            try:
-                logger.debug("Calling lambda handler")
-                response = lambda_handler(event, context)
-                logger.debug("Received lambda handler response successfully")
-                logger.debug(response)
-                if response:
-                    self.put_metadata("lambda handler response", response)
-            except Exception as err:
-                logger.exception("Exception received from lambda handler", exc_info=True)
-                self.put_metadata(f"{self.service}_error", err)
-                raise
-            finally:
-                self.end_subsegment()
+            with self.provider.in_subsegment(name=f"## {lambda_handler.__name__}") as subsegment:
+                global is_cold_start
+                if is_cold_start:
+                    logger.debug("Annotating cold start")
+                    self.put_annotation(key="ColdStart", value=True)
+                    is_cold_start = False
 
-            return response
+                try:
+                    logger.debug("Calling lambda handler")
+                    response = lambda_handler(event, context)
+                    logger.debug("Received lambda handler response successfully")
+                    logger.debug(response)
+                    if response:
+                        self.put_metadata("lambda handler response", response)
+                except Exception as err:
+                    logger.exception("Exception received from lambda handler", exc_info=True)
+                    self.put_metadata(f"{self.service} error", err)
+                    raise
+
+                return response
 
         return decorate
 
@@ -348,24 +311,20 @@ class Tracer:
         @functools.wraps(method)
         def decorate(*args, **kwargs):
             method_name = f"{method.__name__}"
-            # FIXME - Use newly created subsegment to avoid race conditions
-            self.create_subsegment(name=f"## {method_name}")
+            with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+                try:
+                    logger.debug(f"Calling method: {method_name}")
+                    response = method(*args, **kwargs)
+                    logger.debug(f"Received {method_name} response successfully")
+                    logger.debug(response)
+                    if response is not None:
+                        self.put_metadata(f"{method_name} response", response)
+                except Exception as err:
+                    logger.exception(f"Exception received from '{method_name}'' method", exc_info=True)
+                    self.put_metadata(f"{method_name} error", err)
+                    raise
 
-            try:
-                logger.debug(f"Calling method: {method_name}")
-                response = method(*args, **kwargs)
-                logger.debug(f"Received {method_name} response successfully")
-                logger.debug(response)
-                if response is not None:
-                    self.put_metadata(f"{method_name} response", response)
-            except Exception as err:
-                logger.exception(f"Exception received from '{method_name}'' method", exc_info=True)
-                self.put_metadata(f"{method_name} error", err)
-                raise
-            finally:
-                self.end_subsegment()
-
-            return response
+                return response
 
         return decorate
 

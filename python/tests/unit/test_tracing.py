@@ -17,15 +17,13 @@ def provider_stub(mocker):
             self,
             put_metadata_mock: mocker.MagicMock = None,
             put_annotation_mock: mocker.MagicMock = None,
-            begin_subsegment: mocker.MagicMock = None,
-            end_subsegment_mock: mocker.MagicMock = None,
+            in_subsegment: mocker.MagicMock = None,
             patch_mock: mocker.MagicMock = None,
             disable_tracing_provider_mock: mocker.MagicMock = None,
         ):
             self.put_metadata_mock = put_metadata_mock or mocker.MagicMock()
             self.put_annotation_mock = put_annotation_mock or mocker.MagicMock()
-            self.begin_subsegment = begin_subsegment or mocker.MagicMock()
-            self.end_subsegment_mock = end_subsegment_mock or mocker.MagicMock()
+            self.in_subsegment = in_subsegment or mocker.MagicMock()
             self.patch_mock = patch_mock or mocker.MagicMock()
             self.disable_tracing_provider_mock = disable_tracing_provider_mock or mocker.MagicMock()
 
@@ -35,11 +33,8 @@ def provider_stub(mocker):
         def put_annotation(self, *args, **kwargs):
             return self.put_annotation_mock(*args, **kwargs)
 
-        def create_subsegment(self, *args, **kwargs):
-            return self.begin_subsegment(*args, **kwargs)
-
-        def end_subsegment(self, *args, **kwargs):
-            return self.end_subsegment_mock(*args, **kwargs)
+        def in_subsegment(self, *args, **kwargs):
+            return self.in_subsegment(*args, **kwargs)
 
         def patch(self, *args, **kwargs):
             return self.patch_mock(*args, **kwargs)
@@ -57,13 +52,13 @@ def reset_tracing_config(mocker):
 
 def test_tracer_lambda_handler(mocker, dummy_response, provider_stub):
     put_metadata_mock = mocker.MagicMock()
-    begin_subsegment = mocker.MagicMock()
-    end_subsegment_mock = mocker.MagicMock()
+    in_subsegment = mocker.MagicMock()
+    put_annotation_mock = mocker.MagicMock()
 
     provider = provider_stub(
         put_metadata_mock=put_metadata_mock,
-        begin_subsegment=begin_subsegment,
-        end_subsegment_mock=end_subsegment_mock,
+        put_annotation_mock=put_annotation_mock,
+        in_subsegment=in_subsegment
     )
     tracer = Tracer(provider=provider, service="booking")
 
@@ -73,25 +68,24 @@ def test_tracer_lambda_handler(mocker, dummy_response, provider_stub):
 
     handler({}, mocker.MagicMock())
 
-    assert begin_subsegment.call_count == 1
-    assert begin_subsegment.call_args == mocker.call(name="## handler")
-    assert end_subsegment_mock.call_count == 1
+    assert in_subsegment.call_count == 1
+    assert in_subsegment.call_args == mocker.call(name="## handler")
     assert put_metadata_mock.call_args == mocker.call(
         key="lambda handler response", value=dummy_response, namespace="booking"
     )
+    assert put_annotation_mock.call_count == 1
+    assert put_annotation_mock.call_args == mocker.call(key="ColdStart", value=True)
 
 
 def test_tracer_method(mocker, dummy_response, provider_stub):
     put_metadata_mock = mocker.MagicMock()
     put_annotation_mock = mocker.MagicMock()
-    begin_subsegment = mocker.MagicMock()
-    end_subsegment_mock = mocker.MagicMock()
+    in_subsegment = mocker.MagicMock()
 
     provider = provider_stub(
         put_metadata_mock=put_metadata_mock,
         put_annotation_mock=put_annotation_mock,
-        begin_subsegment=begin_subsegment,
-        end_subsegment_mock=end_subsegment_mock,
+        in_subsegment=in_subsegment
     )
     tracer = Tracer(provider=provider, service="booking")
 
@@ -101,9 +95,8 @@ def test_tracer_method(mocker, dummy_response, provider_stub):
 
     greeting(name="Foo", message="Bar")
 
-    assert begin_subsegment.call_count == 1
-    assert begin_subsegment.call_args == mocker.call(name="## greeting")
-    assert end_subsegment_mock.call_count == 1
+    assert in_subsegment.call_count == 1
+    assert in_subsegment.call_args == mocker.call(name="## greeting")
     assert put_metadata_mock.call_args == mocker.call(
         key="greeting response", value=dummy_response, namespace="booking"
     )
@@ -147,7 +140,7 @@ def test_tracer_custom_annotation(mocker, dummy_response, provider_stub):
 
     handler({}, mocker.MagicMock())
 
-    assert put_annotation_mock.call_count == 1
+    assert put_annotation_mock.call_count == 2 # cold_start + annotation
     assert put_annotation_mock.call_args == mocker.call(key=annotation_key, value=annotation_value)
 
 
@@ -213,20 +206,38 @@ def test_tracer_patch(xray_patch_all_mock, xray_patch_mock, mocker):
     assert xray_patch_mock.call_count == 1
     assert xray_patch_mock.call_args == mocker.call(modules)
 
-def test_tracer_xray_provider_cold_start(mocker, provider_stub):
-    # GIVEN tracer is instantiated
-    # WHEN multiple subsegments are created
-    # THEN tracer should record cold start only once
-    begin_subsegment_mock = mock.MagicMock()
-    begin_subsegment_mock.put_annotation = mock.MagicMock()
+def test_tracer_method_exception_metadata(mocker, provider_stub):
+    put_metadata_mock = mocker.MagicMock()
 
     provider = provider_stub(
-        begin_subsegment=begin_subsegment_mock,
+        put_metadata_mock=put_metadata_mock,
     )
-    tracer = Tracer(provider=provider)
+    tracer = Tracer(provider=provider, service="booking")
 
-    subsegment_mock = tracer.create_subsegment("test subsegment")
-    subsegment_mock = tracer.create_subsegment("test subsegment 2")
+    @tracer.capture_method
+    def greeting(name, message):
+        raise ValueError("test")
 
-    assert subsegment_mock.put_annotation.call_count == 1
-    assert subsegment_mock.put_annotation.call_args == mocker.call(key="ColdStart", value=True)
+    with pytest.raises(ValueError):
+        greeting(name="Foo", message="Bar")
+        assert put_metadata_mock.call_args == mocker.call(
+            key="greeting error", value=ValueError('test'), namespace="booking"
+        )
+
+def test_tracer_lambda_handler_exception_metadata(mocker, provider_stub):
+    put_metadata_mock = mocker.MagicMock()
+
+    provider = provider_stub(
+        put_metadata_mock=put_metadata_mock,
+    )
+    tracer = Tracer(provider=provider, service="booking")
+
+    @tracer.capture_lambda_handler
+    def handler(event, context):
+        raise ValueError("test")
+
+    with pytest.raises(ValueError):
+        handler({}, mocker.MagicMock())
+        assert put_metadata_mock.call_args == mocker.call(
+            key="booking error", value=ValueError('test'), namespace="booking"
+        )
