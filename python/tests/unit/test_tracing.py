@@ -50,14 +50,31 @@ def reset_tracing_config(mocker):
     yield
 
 
-def test_tracer_lambda_handler(mocker, dummy_response, provider_stub):
-    put_metadata_mock = mocker.MagicMock()
-    in_subsegment = mocker.MagicMock()
-    put_annotation_mock = mocker.MagicMock()
+def mock_in_subsegment_annotation_metadata():
+    """ Mock context manager in_subsegment, and its put_metadata/annotation methods 
 
-    provider = provider_stub(
-        put_metadata_mock=put_metadata_mock, put_annotation_mock=put_annotation_mock, in_subsegment=in_subsegment
-    )
+    Returns
+    -------
+    in_subsegment_mock
+        in_subsegment_mock mock
+    put_annotation_mock
+        in_subsegment.put_annotation mock
+    put_metadata_mock
+        in_subsegment.put_metadata mock
+    """
+    in_subsegment_mock = mock.MagicMock()
+    put_annotation_mock = mock.MagicMock()
+    put_metadata_mock = mock.MagicMock()
+    in_subsegment_mock.return_value.__enter__.return_value.put_annotation = put_annotation_mock
+    in_subsegment_mock.return_value.__enter__.return_value.put_metadata = put_metadata_mock
+
+    return in_subsegment_mock, put_annotation_mock, put_metadata_mock
+
+
+def test_tracer_lambda_handler(mocker, dummy_response, provider_stub):
+    in_subsegment, put_annotation_mock, put_metadata_mock = mock_in_subsegment_annotation_metadata()
+
+    provider = provider_stub(in_subsegment=in_subsegment)
     tracer = Tracer(provider=provider, service="booking")
 
     @tracer.capture_lambda_handler
@@ -76,13 +93,9 @@ def test_tracer_lambda_handler(mocker, dummy_response, provider_stub):
 
 
 def test_tracer_method(mocker, dummy_response, provider_stub):
-    put_metadata_mock = mocker.MagicMock()
-    put_annotation_mock = mocker.MagicMock()
-    in_subsegment = mocker.MagicMock()
+    in_subsegment, _, put_metadata_mock = mock_in_subsegment_annotation_metadata()
 
-    provider = provider_stub(
-        put_metadata_mock=put_metadata_mock, put_annotation_mock=put_annotation_mock, in_subsegment=in_subsegment
-    )
+    provider = provider_stub(in_subsegment=in_subsegment)
     tracer = Tracer(provider=provider, service="booking")
 
     @tracer.capture_method
@@ -100,21 +113,14 @@ def test_tracer_method(mocker, dummy_response, provider_stub):
 
 def test_tracer_custom_metadata(mocker, dummy_response, provider_stub):
     put_metadata_mock = mocker.MagicMock()
-
-    provider = provider_stub(put_metadata_mock=put_metadata_mock)
-
-    tracer = Tracer(provider=provider, service="booking")
     annotation_key = "Booking response"
     annotation_value = {"bookingStatus": "CONFIRMED"}
+    
+    provider = provider_stub(put_metadata_mock=put_metadata_mock)
+    tracer = Tracer(provider=provider, service="booking")
+    tracer.put_metadata(annotation_key, annotation_value)
 
-    @tracer.capture_lambda_handler
-    def handler(event, context):
-        tracer.put_metadata(annotation_key, annotation_value)
-        return dummy_response
-
-    handler({}, mocker.MagicMock())
-
-    assert put_metadata_mock.call_count == 2
+    assert put_metadata_mock.call_count == 1
     assert put_metadata_mock.call_args_list[0] == mocker.call(
         key=annotation_key, value=annotation_value, namespace="booking"
     )
@@ -122,21 +128,15 @@ def test_tracer_custom_metadata(mocker, dummy_response, provider_stub):
 
 def test_tracer_custom_annotation(mocker, dummy_response, provider_stub):
     put_annotation_mock = mocker.MagicMock()
-
-    provider = provider_stub(put_annotation_mock=put_annotation_mock)
-
-    tracer = Tracer(provider=provider, service="booking")
     annotation_key = "BookingId"
     annotation_value = "123456"
 
-    @tracer.capture_lambda_handler
-    def handler(event, context):
-        tracer.put_annotation(annotation_key, annotation_value)
-        return dummy_response
+    provider = provider_stub(put_annotation_mock=put_annotation_mock)
+    tracer = Tracer(provider=provider, service="booking")
 
-    handler({}, mocker.MagicMock())
+    tracer.put_annotation(annotation_key, annotation_value)
 
-    assert put_annotation_mock.call_count == 2  # cold_start + annotation
+    assert put_annotation_mock.call_count == 1
     assert put_annotation_mock.call_args == mocker.call(key=annotation_key, value=annotation_value)
 
 

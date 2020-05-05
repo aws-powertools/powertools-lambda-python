@@ -259,7 +259,7 @@ class Tracer:
                 global is_cold_start
                 if is_cold_start:
                     logger.debug("Annotating cold start")
-                    self.put_annotation(key="ColdStart", value=True)
+                    subsegment.put_annotation(key="ColdStart", value=True)
                     is_cold_start = False
 
                 try:
@@ -268,10 +268,12 @@ class Tracer:
                     logger.debug("Received lambda handler response successfully")
                     logger.debug(response)
                     if response:
-                        self.put_metadata("lambda handler response", response)
+                        subsegment.put_metadata(
+                            key="lambda handler response", value=response, namespace=self._config["service"]
+                        )
                 except Exception as err:
                     logger.exception("Exception received from lambda handler", exc_info=True)
-                    self.put_metadata(f"{self.service} error", err)
+                    subsegment.put_metadata(key=f"{self.service} error", value=err, namespace=self._config["service"])
                     raise
 
                 return response
@@ -313,10 +315,12 @@ class Tracer:
                     logger.debug(f"Received {method_name} response successfully")
                     logger.debug(response)
                     if response is not None:
-                        self.put_metadata(f"{method_name} response", response)
+                        subsegment.put_metadata(
+                            key=f"{method_name} response", value=response, namespace=self._config["service"]
+                        )
                 except Exception as err:
                     logger.exception(f"Exception received from '{method_name}'' method", exc_info=True)
-                    self.put_metadata(f"{method_name} error", err)
+                    subsegment.put_metadata(key=f"{method_name} error", value=err, namespace=self._config["service"])
                     raise
 
                 return response
