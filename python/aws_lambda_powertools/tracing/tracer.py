@@ -4,7 +4,7 @@ import inspect
 import logging
 import os
 from distutils.util import strtobool
-from typing import Any, Callable, Dict, Generic, List
+from typing import Any, Callable, Dict, List, Tuple
 
 import aws_xray_sdk
 import aws_xray_sdk.core
@@ -45,8 +45,8 @@ class Tracer:
     disabled: bool
         Flag to explicitly disable tracing, useful when running/testing locally
         `Env POWERTOOLS_TRACE_DISABLED="true"`
-    patch_modules: List
-        List of modules supported by tracing provider to patch, by default all modules are patched
+    patch_modules: Tuple[str]
+        Tuple of modules supported by tracing provider to patch, by default all modules are patched
 
     Example
     -------
@@ -189,7 +189,6 @@ class Tracer:
 
     def end_subsegment(self):
         """Ends an existing subsegment"""
-        # FIXME - Receive subsegment to close
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting end_subsegment")
             return
@@ -250,14 +249,14 @@ class Tracer:
         logger.debug(f"Adding metadata on key '{key}'' with '{value}'' at namespace '{namespace}''")
         self.provider.put_metadata(key=key, value=value, namespace=namespace)
 
-    def patch(self, modules: List[str] = None):
+    def patch(self, modules: Tuple[str] = None):
         """Patch modules for instrumentation.
 
         Patches all supported modules by default if none are given.
 
         Parameters
         ----------
-        modules : List[str]
+        modules : Tuple[str]
             List of modules to be patched, optional by default
         """
         if self.disabled:
