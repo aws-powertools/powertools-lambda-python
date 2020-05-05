@@ -115,7 +115,7 @@ def test_tracer_custom_metadata(mocker, dummy_response, provider_stub):
     put_metadata_mock = mocker.MagicMock()
     annotation_key = "Booking response"
     annotation_value = {"bookingStatus": "CONFIRMED"}
-    
+
     provider = provider_stub(put_metadata_mock=put_metadata_mock)
     tracer = Tracer(provider=provider, service="booking")
     tracer.put_metadata(annotation_key, annotation_value)
@@ -197,7 +197,7 @@ def test_tracer_patch(xray_patch_all_mock, xray_patch_mock, mocker):
     assert xray_patch_all_mock.call_count == 1
 
     modules = ["boto3"]
-    tracer = Tracer(service="booking", patch_modules=modules)
+    Tracer(service="booking", patch_modules=modules)
 
     assert xray_patch_mock.call_count == 1
     assert xray_patch_mock.call_args == mocker.call(modules)

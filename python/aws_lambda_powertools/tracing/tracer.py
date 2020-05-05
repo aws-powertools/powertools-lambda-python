@@ -1,9 +1,7 @@
 import copy
 import functools
-import inspect
 import logging
 import os
-from contextlib import contextmanager
 from distutils.util import strtobool
 from typing import Any, Callable, Dict, List, Tuple
 
@@ -126,7 +124,6 @@ class Tracer:
     _default_config = {
         "service": "service_undefined",
         "disabled": False,
-        "provider": None,
         "auto_patch": True,
         "patch_modules": None,
         "provider": aws_xray_sdk.core.xray_recorder,

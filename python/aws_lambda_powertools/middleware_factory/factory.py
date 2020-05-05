@@ -124,7 +124,7 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
                 middleware = functools.partial(decorator, func, event, context, **kwargs)
                 if trace_execution:
                     tracer = Tracer(auto_patch=False)
-                    with tracer.provider.in_subsegment(name=f"## {decorator.__qualname__}") as subsegment:
+                    with tracer.provider.in_subsegment(name=f"## {decorator.__qualname__}"):
                         response = middleware()
                 else:
                     response = middleware()
