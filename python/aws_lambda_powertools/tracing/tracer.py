@@ -4,15 +4,16 @@ import inspect
 import logging
 import os
 from distutils.util import strtobool
-from typing import Any, Callable, Dict, Generic, List, TypeVar
+from typing import Any, Callable, Dict, Generic, List
 
-from .base import TracerProvider, XrayProvider
-from .exceptions import InvalidTracerProviderError, TracerProviderNotInitializedError
+import aws_xray_sdk
+import aws_xray_sdk.core
 
-subsegment = TypeVar("subsegment")
 is_cold_start = True
 logger = logging.getLogger(__name__)
 
+# FIXME - Add get current subsegment()
+# FIXME - Add subsegment type
 
 class Tracer:
     """Tracer using AWS-XRay to provide decorators with known defaults for Lambda functions
@@ -27,10 +28,6 @@ class Tracer:
     Tracer keeps a copy of its configuration as it can be instantiated more than once. This
     is useful when you are using your own middlewares and want to utilize an existing Tracer.
     Make sure to set `auto_patch=False` in subsequent Tracer instances to avoid double patching.
-
-    Tracer supports custom providers that implement
-    `aws_lambda_powertools.tracing.base.TracerProvider`. It defaults and initializes to
-    `aws_lambda_powertools.tracing.base.XrayProvider` if no custom provider is given.
 
     Environment variables
     ---------------------
@@ -50,8 +47,6 @@ class Tracer:
         `Env POWERTOOLS_TRACE_DISABLED="true"`
     patch_modules: List
         List of modules supported by tracing provider to patch, by default all modules are patched
-    provider: TracerProvider
-        Tracing provider, by default `aws_lambda_powertools.tracing.base.XrayProvider`
 
     Example
     -------
@@ -124,13 +119,6 @@ class Tracer:
     Tracer
         Tracer instance with imported modules patched
 
-    Raises
-    ------
-    InvalidTracerProviderError
-        When given provider doesn't implement `aws_lambda_powertools.tracing.base.TracerProvider`
-    TracerProviderNotInitializedError
-        When given provider isn't initialized/bound
-
     Limitations
     -----------
     * Async handler and methods not supported
@@ -142,7 +130,7 @@ class Tracer:
         "provider": None,
         "auto_patch": True,
         "patch_modules": None,
-        "provider": None,
+        "provider": aws_xray_sdk.core.xray_recorder,
     }
     _config = copy.copy(_default_config)
 
@@ -152,7 +140,7 @@ class Tracer:
         disabled: bool = None,
         auto_patch: bool = None,
         patch_modules: List = None,
-        provider: TracerProvider = None,
+        provider: aws_xray_sdk.core.xray_recorder = None,
     ):
         self.__build_config(
             service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
@@ -168,10 +156,8 @@ class Tracer:
         if self.auto_patch:
             self.patch(modules=patch_modules)
 
-    def create_subsegment(self, name: str) -> Generic[subsegment]:
+    def create_subsegment(self, name: str) -> aws_xray_sdk.core.models.subsegment:
         """Creates subsegment/span with a given name
-
-        It also assumes Tracer would be instantiated statically so that cold starts are captured.
 
         Parameters
         ----------
@@ -180,25 +166,30 @@ class Tracer:
 
         Example
         -------
-        Creates a genuine subsegment
+
+        **Creates a subsegment**
 
             self.create_subsegment(name="a meaningful name")
 
         Returns
         -------
-        subsegment
-            Trace provider subsegment
+        aws_xray_sdk.core.models.subsegment
+            AWS X-Ray Subsegment
         """
         # Will no longer be needed once #155 is resolved
         # https://github.com/aws/aws-xray-sdk-python/issues/155
-        if self.disabled:
-            logger.debug("Tracing has been disabled, aborting create_segment")
-            return
+        subsegment = self.provider.begin_subsegment(name=name)
+        global is_cold_start
+        if is_cold_start:
+            logger.debug("Annotating cold start")
+            subsegment.put_annotation(key="ColdStart", value=True)
+            is_cold_start = False
 
-        return self.provider.create_subsegment(name=name)
+        return subsegment
 
     def end_subsegment(self):
         """Ends an existing subsegment"""
+        # FIXME - Receive subsegment to close
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting end_subsegment")
             return
@@ -260,17 +251,28 @@ class Tracer:
         self.provider.put_metadata(key=key, value=value, namespace=namespace)
 
     def patch(self, modules: List[str] = None):
-        """Patch modules for instrumentation"""
+        """Patch modules for instrumentation.
+
+        Patches all supported modules by default if none are given.
+
+        Parameters
+        ----------
+        modules : List[str]
+            List of modules to be patched, optional by default
+        """
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting patch")
             return
 
-        self.provider.patch(modules=modules)
+        if modules is None:
+            aws_xray_sdk.core.patch_all()
+        else:
+            aws_xray_sdk.core.patch(modules)
 
     def disable_tracing_provider(self):
         """Forcefully disables tracing"""
         logger.debug("Disabling tracer provider...")
-        self.provider.disable_tracing_provider()
+        aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)
 
     def capture_lambda_handler(self, lambda_handler: Callable[[Dict, Any], Any] = None):
         """Decorator to create subsegment for lambda handlers
@@ -299,6 +301,7 @@ class Tracer:
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
+            # FIXME - Use newly created subsegment to avoid race conditions
             self.create_subsegment(name=f"## {lambda_handler.__name__}")
             try:
                 logger.debug("Calling lambda handler")
@@ -346,6 +349,7 @@ class Tracer:
         @functools.wraps(method)
         def decorate(*args, **kwargs):
             method_name = f"{method.__name__}"
+            # FIXME - Use newly created subsegment to avoid race conditions
             self.create_subsegment(name=f"## {method_name}")
 
             try:
@@ -400,39 +404,18 @@ class Tracer:
         disabled: bool = None,
         auto_patch: bool = None,
         patch_modules: List = None,
-        provider: TracerProvider = None,
+        provider: aws_xray_sdk.core.xray_recorder = None,
     ):
         """ Populates Tracer config for new and existing initializations """
         is_disabled = disabled if disabled is not None else self.__is_trace_disabled()
         is_service = service if service is not None else os.getenv("POWERTOOLS_SERVICE_NAME")
 
+        self._config["provider"] = provider if provider is not None else self._config["provider"]
         self._config["auto_patch"] = auto_patch if auto_patch is not None else self._config["auto_patch"]
         self._config["service"] = is_service if is_service else self._config["service"]
         self._config["disabled"] = is_disabled if is_disabled else self._config["disabled"]
         self._config["patch_modules"] = patch_modules if patch_modules else self._config["patch_modules"]
 
-        if provider is not None:
-            self._validate_provider(provider)
-            self._config["provider"] = provider
-        elif self._config["provider"] is None:
-            self._config["provider"] = XrayProvider()
-
     @classmethod
     def _reset_config(cls):
         cls._config = copy.copy(cls._default_config)
-
-    def _validate_provider(self, provider) -> bool:
-        invalid_provider_msg = f"{provider} must implement TracerProvider interface"
-        # not bound
-        if inspect.isclass(provider):
-            if not issubclass(provider, TracerProvider):
-                raise InvalidTracerProviderError(invalid_provider_msg)
-            raise TracerProviderNotInitializedError(
-                f"Initialize {provider} and pass a class instance reference as the provider."
-            )
-
-        # bound
-        if not isinstance(provider, TracerProvider):
-            raise InvalidTracerProviderError(invalid_provider_msg)
-
-        return True
