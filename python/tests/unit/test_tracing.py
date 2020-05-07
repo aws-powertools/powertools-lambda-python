@@ -1,3 +1,4 @@
+from typing import NamedTuple
 from unittest import mock
 
 import pytest
@@ -18,6 +19,7 @@ def provider_stub(mocker):
             put_metadata_mock: mocker.MagicMock = None,
             put_annotation_mock: mocker.MagicMock = None,
             in_subsegment: mocker.MagicMock = None,
+            in_subsegment_async: mocker.MagicMock = None,
             patch_mock: mocker.MagicMock = None,
             disable_tracing_provider_mock: mocker.MagicMock = None,
         ):
@@ -26,6 +28,7 @@ def provider_stub(mocker):
             self.in_subsegment = in_subsegment or mocker.MagicMock()
             self.patch_mock = patch_mock or mocker.MagicMock()
             self.disable_tracing_provider_mock = disable_tracing_provider_mock or mocker.MagicMock()
+            self.in_subsegment_async = in_subsegment_async or mocker.MagicMock(spec=True)
 
         def put_metadata(self, *args, **kwargs):
             return self.put_metadata_mock(*args, **kwargs)
@@ -50,31 +53,29 @@ def reset_tracing_config(mocker):
     yield
 
 
-def mock_in_subsegment_annotation_metadata():
-    """ Mock context manager in_subsegment, and its put_metadata/annotation methods 
+@pytest.fixture
+def in_subsegment_mock():
+    class Async_context_manager(mock.MagicMock):
+        async def __aenter__(self, *args, **kwargs):
+            return self.__enter__()
 
-    Returns
-    -------
-    in_subsegment_mock
-        in_subsegment_mock mock
-    put_annotation_mock
-        in_subsegment.put_annotation mock
-    put_metadata_mock
-        in_subsegment.put_metadata mock
-    """
-    in_subsegment_mock = mock.MagicMock()
-    put_annotation_mock = mock.MagicMock()
-    put_metadata_mock = mock.MagicMock()
-    in_subsegment_mock.return_value.__enter__.return_value.put_annotation = put_annotation_mock
-    in_subsegment_mock.return_value.__enter__.return_value.put_metadata = put_metadata_mock
+        async def __aexit__(self, *args, **kwargs):
+            return self.__exit__(*args, **kwargs)
 
-    return in_subsegment_mock, put_annotation_mock, put_metadata_mock
+    class In_subsegment(NamedTuple):
+        in_subsegment: mock.MagicMock = Async_context_manager()
+        put_annotation: mock.MagicMock = mock.MagicMock()
+        put_metadata: mock.MagicMock = mock.MagicMock()
+
+    in_subsegment = In_subsegment()
+    in_subsegment.in_subsegment.return_value.__enter__.return_value.put_annotation = in_subsegment.put_annotation
+    in_subsegment.in_subsegment.return_value.__enter__.return_value.put_metadata = in_subsegment.put_metadata
+
+    yield in_subsegment
 
 
-def test_tracer_lambda_handler(mocker, dummy_response, provider_stub):
-    in_subsegment, put_annotation_mock, put_metadata_mock = mock_in_subsegment_annotation_metadata()
-
-    provider = provider_stub(in_subsegment=in_subsegment)
+def test_tracer_lambda_handler(mocker, dummy_response, provider_stub, in_subsegment_mock):
+    provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
     tracer = Tracer(provider=provider, service="booking")
 
     @tracer.capture_lambda_handler
@@ -83,19 +84,17 @@ def test_tracer_lambda_handler(mocker, dummy_response, provider_stub):
 
     handler({}, mocker.MagicMock())
 
-    assert in_subsegment.call_count == 1
-    assert in_subsegment.call_args == mocker.call(name="## handler")
-    assert put_metadata_mock.call_args == mocker.call(
+    assert in_subsegment_mock.in_subsegment.call_count == 1
+    assert in_subsegment_mock.in_subsegment.call_args == mocker.call(name="## handler")
+    assert in_subsegment_mock.put_metadata.call_args == mocker.call(
         key="lambda handler response", value=dummy_response, namespace="booking"
     )
-    assert put_annotation_mock.call_count == 1
-    assert put_annotation_mock.call_args == mocker.call(key="ColdStart", value=True)
+    assert in_subsegment_mock.put_annotation.call_count == 1
+    assert in_subsegment_mock.put_annotation.call_args == mocker.call(key="ColdStart", value=True)
 
 
-def test_tracer_method(mocker, dummy_response, provider_stub):
-    in_subsegment, _, put_metadata_mock = mock_in_subsegment_annotation_metadata()
-
-    provider = provider_stub(in_subsegment=in_subsegment)
+def test_tracer_method(mocker, dummy_response, provider_stub, in_subsegment_mock):
+    provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
     tracer = Tracer(provider=provider, service="booking")
 
     @tracer.capture_method
@@ -104,9 +103,9 @@ def test_tracer_method(mocker, dummy_response, provider_stub):
 
     greeting(name="Foo", message="Bar")
 
-    assert in_subsegment.call_count == 1
-    assert in_subsegment.call_args == mocker.call(name="## greeting")
-    assert put_metadata_mock.call_args == mocker.call(
+    assert in_subsegment_mock.in_subsegment.call_count == 1
+    assert in_subsegment_mock.in_subsegment.call_args == mocker.call(name="## greeting")
+    assert in_subsegment_mock.put_metadata.call_args == mocker.call(
         key="greeting response", value=dummy_response, namespace="booking"
     )
 
@@ -203,10 +202,9 @@ def test_tracer_patch(xray_patch_all_mock, xray_patch_mock, mocker):
     assert xray_patch_mock.call_args == mocker.call(modules)
 
 
-def test_tracer_method_exception_metadata(mocker, provider_stub):
-    put_metadata_mock = mocker.MagicMock()
+def test_tracer_method_exception_metadata(mocker, provider_stub, in_subsegment_mock):
 
-    provider = provider_stub(put_metadata_mock=put_metadata_mock,)
+    provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
     tracer = Tracer(provider=provider, service="booking")
 
     @tracer.capture_method
@@ -215,15 +213,15 @@ def test_tracer_method_exception_metadata(mocker, provider_stub):
 
     with pytest.raises(ValueError):
         greeting(name="Foo", message="Bar")
-        assert put_metadata_mock.call_args == mocker.call(
-            key="greeting error", value=ValueError("test"), namespace="booking"
-        )
+
+    put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
+    assert put_metadata_mock_args["key"] == "greeting error"
+    assert put_metadata_mock_args["namespace"] == "booking"
 
 
-def test_tracer_lambda_handler_exception_metadata(mocker, provider_stub):
-    put_metadata_mock = mocker.MagicMock()
+def test_tracer_lambda_handler_exception_metadata(mocker, provider_stub, in_subsegment_mock):
 
-    provider = provider_stub(put_metadata_mock=put_metadata_mock,)
+    provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
     tracer = Tracer(provider=provider, service="booking")
 
     @tracer.capture_lambda_handler
@@ -232,6 +230,78 @@ def test_tracer_lambda_handler_exception_metadata(mocker, provider_stub):
 
     with pytest.raises(ValueError):
         handler({}, mocker.MagicMock())
-        assert put_metadata_mock.call_args == mocker.call(
-            key="booking error", value=ValueError("test"), namespace="booking"
-        )
+
+    put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
+    assert put_metadata_mock_args["key"] == "booking error"
+    assert put_metadata_mock_args["namespace"] == "booking"
+
+
+@pytest.mark.asyncio
+async def test_tracer_method_nested_async(mocker, dummy_response, provider_stub, in_subsegment_mock):
+    provider = provider_stub(in_subsegment_async=in_subsegment_mock.in_subsegment)
+    tracer = Tracer(provider=provider, service="booking")
+
+    @tracer.capture_method
+    async def greeting_2(name, message):
+        return dummy_response
+
+    @tracer.capture_method
+    async def greeting(name, message):
+        await greeting_2(name, message)
+        return dummy_response
+
+    await greeting(name="Foo", message="Bar")
+
+    (
+        in_subsegment_greeting_call_args,
+        in_subsegment_greeting2_call_args,
+    ) = in_subsegment_mock.in_subsegment.call_args_list
+    put_metadata_greeting2_call_args, put_metadata_greeting_call_args = in_subsegment_mock.put_metadata.call_args_list
+
+    assert in_subsegment_mock.in_subsegment.call_count == 2
+    assert in_subsegment_greeting_call_args == mocker.call(name="## greeting")
+    assert in_subsegment_greeting2_call_args == mocker.call(name="## greeting_2")
+
+    assert in_subsegment_mock.put_metadata.call_count == 2
+    assert put_metadata_greeting2_call_args == mocker.call(
+        key="greeting_2 response", value=dummy_response, namespace="booking"
+    )
+    assert put_metadata_greeting_call_args == mocker.call(
+        key="greeting response", value=dummy_response, namespace="booking"
+    )
+
+
+@pytest.mark.asyncio
+async def test_tracer_method_nested_async_disabled(dummy_response):
+
+    tracer = Tracer(service="booking", disabled=True)
+
+    @tracer.capture_method
+    async def greeting_2(name, message):
+        return dummy_response
+
+    @tracer.capture_method
+    async def greeting(name, message):
+        await greeting_2(name, message)
+        return dummy_response
+
+    ret = await greeting(name="Foo", message="Bar")
+
+    assert ret == dummy_response
+
+
+@pytest.mark.asyncio
+async def test_tracer_method_exception_metadata_async(mocker, provider_stub, in_subsegment_mock):
+    provider = provider_stub(in_subsegment_async=in_subsegment_mock.in_subsegment)
+    tracer = Tracer(provider=provider, service="booking")
+
+    @tracer.capture_method
+    async def greeting(name, message):
+        raise ValueError("test")
+
+    with pytest.raises(ValueError):
+        await greeting(name="Foo", message="Bar")
+
+    put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
+    assert put_metadata_mock_args["key"] == "greeting error"
+    assert put_metadata_mock_args["namespace"] == "booking"

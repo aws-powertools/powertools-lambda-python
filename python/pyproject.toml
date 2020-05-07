@@ -41,6 +41,7 @@ pre-commit = "^2.1.0"
 pytest-cov = "^2.8.1"
 pytest-mock = "^2.0.0"
 pdoc3 = "^0.7.5"
+pytest-asyncio = "^0.12.0"
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]

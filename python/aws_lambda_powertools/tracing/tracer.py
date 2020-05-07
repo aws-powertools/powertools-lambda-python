@@ -1,5 +1,7 @@
+import asyncio
 import copy
 import functools
+import inspect
 import logging
 import os
 from distutils.util import strtobool
@@ -81,7 +83,7 @@ class Tracer:
         @tracer.capture_lambda_handler
         def handler(event: dict, context: Any) -> Dict:
             print("Received event from Lambda...")
-            response = greeting(name="Heitor")
+            response = confirm_booking(booking_id=event["booking_id])
             return response
 
     **A Lambda function using service name via POWERTOOLS_SERVICE_NAME**
@@ -111,6 +113,23 @@ class Tracer:
         tracer = Tracer()
         ...
 
+    **Tracing an async method**
+
+        from aws_lambda_powertools.tracing import Tracer
+        tracer = Tracer(service="booking")
+
+        @tracer.capture_method
+        async def confirm_booking(booking_id: str) -> Dict:
+            resp = confirm_booking(booking_id=event["booking_id])
+
+            tracer.put_annotation("BookingConfirmation", resp['requestId'])
+            tracer.put_metadata("Booking confirmation", resp)
+
+            return resp
+
+        def lambda_handler(event: dict, context: Any) -> Dict:
+            asyncio.run(confirm_booking(booking=id))
+
     Returns
     -------
     Tracer
@@ -118,7 +137,7 @@ class Tracer:
 
     Limitations
     -----------
-    * Async handler and methods not supported
+    * Async handler not supported
     """
 
     _default_config = {
@@ -301,26 +320,70 @@ class Tracer:
         err
             Exception raised by method
         """
+        method_name = f"{method.__name__}"
 
-        @functools.wraps(method)
-        def decorate(*args, **kwargs):
-            method_name = f"{method.__name__}"
-            with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
-                try:
-                    logger.debug(f"Calling method: {method_name}")
-                    response = method(*args, **kwargs)
+        async def decorate_logic(
+            decorated_method_with_args: functools.partial = None,
+            subsegment: aws_xray_sdk.core.models.subsegment = None,
+            coroutine: bool = False,
+        ) -> Any:
+            """Decorate logic runs both sync and async decorated methods
+
+            Parameters
+            ----------
+            decorated_method_with_args : functools.partial
+                Partial decorated method with arguments/keyword arguments
+            subsegment : aws_xray_sdk.core.models.subsegment
+                X-Ray subsegment to reuse
+            coroutine : bool, optional
+                Instruct whether partial decorated method is a wrapped coroutine, by default False
+
+            Returns
+            -------
+            Any
+                Returns method's response
+            """
+            response = None
+            try:
+                logger.debug(f"Calling method: {method_name}")
+                if coroutine:
+                    response = await decorated_method_with_args()
+                else:
+                    response = decorated_method_with_args()
                     logger.debug(f"Received {method_name} response successfully")
                     logger.debug(response)
-                    if response is not None:
-                        subsegment.put_metadata(
-                            key=f"{method_name} response", value=response, namespace=self._config["service"]
-                        )
-                except Exception as err:
-                    logger.exception(f"Exception received from '{method_name}'' method", exc_info=True)
-                    subsegment.put_metadata(key=f"{method_name} error", value=err, namespace=self._config["service"])
-                    raise
+            except Exception as err:
+                logger.exception(f"Exception received from '{method_name}'' method", exc_info=True)
+                subsegment.put_metadata(key=f"{method_name} error", value=err, namespace=self._config["service"])
+                raise
+            finally:
+                if response is not None:
+                    subsegment.put_metadata(  # pragma: no cover
+                        key=f"{method_name} response", value=response, namespace=self._config["service"]
+                    )
 
-                return response
+            return response
+
+        if inspect.iscoroutinefunction(method):
+
+            @functools.wraps(method)
+            async def decorate(*args, **kwargs):
+                decorated_method_with_args = functools.partial(method, *args, **kwargs)
+                async with self.provider.in_subsegment_async(name=f"## {method_name}") as subsegment:
+                    return await decorate_logic(
+                        decorated_method_with_args=decorated_method_with_args, subsegment=subsegment, coroutine=True
+                    )
+
+        else:
+
+            @functools.wraps(method)
+            def decorate(*args, **kwargs):
+                loop = asyncio.get_event_loop()
+                decorated_method_with_args = functools.partial(method, *args, **kwargs)
+                with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+                    return loop.run_until_complete(
+                        decorate_logic(decorated_method_with_args=decorated_method_with_args, subsegment=subsegment)
+                    )
 
         return decorate
 
