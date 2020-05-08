@@ -19,8 +19,8 @@ license = "MIT-0"
 
 [tool.poetry.dependencies]
 python = "^3.6"
-aws-xray-sdk = "^2.4.3"
-fastjsonschema = "^2.14.4"
+aws-xray-sdk = "~=2.5.0"
+fastjsonschema = "~=2.14.4"
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^5.0.3"}
