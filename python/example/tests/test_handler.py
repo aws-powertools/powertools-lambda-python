@@ -80,6 +80,7 @@ def test_lambda_handler(apigw_event, mocker, capsys):
     assert data["message"] == "hello world"
     assert "location" in data
     assert "message" in ret["body"]
+    assert "async_http" in data
     
     # assess custom metric was flushed in stdout/logs
     assert "SuccessfulLocations" in stdout_one_string 
