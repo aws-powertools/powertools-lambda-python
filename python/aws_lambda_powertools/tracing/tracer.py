@@ -171,8 +171,6 @@ class Tracer:
         value : any
             Value for annotation (e.g. "CONFIRMED")
         """
-        # Will no longer be needed once #155 is resolved
-        # https://github.com/aws/aws-xray-sdk-python/issues/155
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting put_annotation")
             return
