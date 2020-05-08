@@ -113,23 +113,6 @@ class Tracer:
         tracer = Tracer()
         ...
 
-    **Tracing an async method**
-
-        from aws_lambda_powertools.tracing import Tracer
-        tracer = Tracer(service="booking")
-
-        @tracer.capture_method
-        async def confirm_booking(booking_id: str) -> Dict:
-            resp = confirm_booking(booking_id=event["booking_id])
-
-            tracer.put_annotation("BookingConfirmation", resp['requestId'])
-            tracer.put_metadata("Booking confirmation", resp)
-
-            return resp
-
-        def lambda_handler(event: dict, context: Any) -> Dict:
-            asyncio.run(confirm_booking(booking=id))
-
     Returns
     -------
     Tracer
@@ -302,6 +285,14 @@ class Tracer:
         It also captures both response and exceptions as metadata
         and creates a subsegment named `## <method_name>`
 
+        For concurrency async functions called via async.gather,
+        methods may impact each others subsegment and can trigger
+        and AlreadyEndedException from X-Ray due to async nature.
+
+        When using async.gather, remember to set `return_exceptions`.
+        See example on how to best work around this using
+        an explicit context manager via the escape hatch mechanism.
+
         Example
         -------
         **Custom function using capture_method decorator**
@@ -309,6 +300,62 @@ class Tracer:
             tracer = Tracer(service="payment")
             @tracer.capture_method
             def some_function()
+
+        **Custom async method using capture_method decorator**
+
+            from aws_lambda_powertools.tracing import Tracer
+            tracer = Tracer(service="booking")
+
+            @tracer.capture_method
+            async def confirm_booking(booking_id: str) -> Dict:
+                resp = confirm_booking(booking_id=event["booking_id])
+
+                tracer.put_annotation("BookingConfirmation", resp['requestId'])
+                tracer.put_metadata("Booking confirmation", resp)
+
+                return resp
+
+            def lambda_handler(event: dict, context: Any) -> Dict:
+                asyncio.run(confirm_booking(booking=id))
+
+        **Tracing nested async calls**
+
+            from aws_lambda_powertools.tracing import Tracer
+            tracer = Tracer(service="booking")
+
+            @tracer.capture_method
+            async def get_identity():
+                ...
+
+            @tracer.capture_method
+            async def long_async_call():
+                ...
+
+            @tracer.capture_method
+            async def async_tasks():
+                await get_identity()
+                ret = await long_async_call()
+
+                return { "task": "done", **ret }
+
+        **Safely tracing multiple concurrent nested async calls**
+
+            from aws_lambda_powertools.tracing import Tracer
+            tracer = Tracer(service="booking")
+
+            async def get_identity():
+                async with aioboto3.client("sts") as sts:
+                    account = await sts.get_caller_identity()
+                    return account
+
+            async def long_async_call():
+                ...
+
+            @tracer.capture_method
+            async def async_tasks():
+                _, ret = await asyncio.gather(get_identity(), long_async_call(), return_exceptions=True)
+
+                return { "task": "done", **ret }
 
         Parameters
         ----------
