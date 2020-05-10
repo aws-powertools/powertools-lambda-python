@@ -54,15 +54,15 @@ LOG_LEVEL | Sets logging level | "INFO" | [Logging](###Logging)
 
 ## Usage
 
+See **[example](./example/README.md)** of all features, testing, and a SAM template with all Powertools env vars. All features also provide full docs, and code completion for VSCode and PyCharm.
+
 ### Installation
 
 With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip install aws-lambda-powertools``
 
-See **[example](./example/README.md)** of all features, testing, and a SAM template with all Powertools env vars. All features also provide full docs, and code completion for VSCode and PyCharm.
-
 ### Tracing
 
-#### Tracing Lambda handler and a custom method
+#### Tracing Lambda handler and a function
 
 ```python
 from aws_lambda_powertools.tracing import Tracer
@@ -79,6 +79,62 @@ def collect_payment(charge_id):
 def handler(event, context)
   charge_id = event.get('charge_id')
   payment = collect_payment(charge_id)
+  ...
+```
+
+#### Tracing asynchronous functions
+
+```python
+import asyncio
+
+from aws_lambda_powertools.tracing import Tracer
+tracer = Tracer()
+# tracer = Tracer(service="payment") # can also be explicitly defined
+
+@tracer.capture_method
+async def collect_payment(charge_id):
+    ...
+
+@tracer.capture_lambda_handler
+def handler(event, context)
+  charge_id = event.get('charge_id')
+  payment = asyncio.run(collect_payment(charge_id)) # python 3.7+  
+  ...
+```
+
+#### Using escape hatch mechanisms
+
+You can use `tracer.provider` attribute to access all methods provided by `xray_recorder`. This is useful when you need a feature available in X-Ray that is not available in the Tracer middleware, for example [thread-safe](https://github.com/aws/aws-xray-sdk-python/#user-content-trace-threadpoolexecutor), or [context managers](https://github.com/aws/aws-xray-sdk-python/#user-content-start-a-custom-segmentsubsegment).
+
+**Example using aiohttp with an async context manager**
+
+```python
+import asyncio
+
+from aws_lambda_powertools.tracing import Tracer, aiohttp_trace_config
+tracer = Tracer()
+
+async def aiohttp_task():
+    # Async context manager as opposed to `@tracer.capture_method`
+    async with tracer.provider.in_subsegment_async("## aiohttp escape hatch"):
+        async with aiohttp.ClientSession(trace_configs=[aiohttp_trace_config()]) as session:
+            async with session.get("https://httpbin.org/json") as resp:
+                resp = await resp.json()
+                return resp
+
+@tracer.capture_method
+async def async_tasks():
+    ret = await aiohttp_task()
+    ...
+
+    return {
+        "task": "done",
+        **ret
+    }
+
+@tracer.capture_lambda_handler
+def handler(event, context)
+  ret = asyncio.run(async_tasks()) # python 3.7+  
   ...
 ```
 
