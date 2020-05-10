@@ -70,6 +70,7 @@ def in_subsegment_mock():
     in_subsegment = In_subsegment()
     in_subsegment.in_subsegment.return_value.__enter__.return_value.put_annotation = in_subsegment.put_annotation
     in_subsegment.in_subsegment.return_value.__enter__.return_value.put_metadata = in_subsegment.put_metadata
+    in_subsegment.in_subsegment.return_value.__aenter__.return_value.put_metadata = in_subsegment.put_metadata
 
     yield in_subsegment
 
