@@ -2,38 +2,38 @@
 
 ![PackageStatus](https://img.shields.io/static/v1?label=status&message=beta&color=blueviolet?style=flat-square) ![PythonSupport](https://img.shields.io/static/v1?label=python&message=3.6%20|%203.7|%203.8&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools) ![Build](https://github.com/awslabs/aws-lambda-powertools/workflows/Powertools%20Python/badge.svg?branch=master)
 
-A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier - Currently available for Python only and compatible with Python >=3.6.
+A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging, and creating custom metrics asynchronously easier - Compatible with Python >=3.6.
 
-**Status**: Beta
+> During beta, this library may change its API/methods, or environment variables as it receives feedback from customers.
+
+* **Status**: Beta
+* **How long until GA?**: [Current progress](https://github.com/awslabs/aws-lambda-powertools/projects/1)
 
 ## Features
 
-**Tracing**
+**[Tracing](###Tracing)**
 
-> It currently uses AWS X-Ray
-
-* Decorators that capture cold start as annotation, and response and exceptions as metadata
+* Capture cold start as annotation, and response and exceptions as metadata
 * Run functions locally with SAM CLI without code change to disable tracing
 * Explicitly disable tracing via env var `POWERTOOLS_TRACE_DISABLED="true"`
+* Support tracing async methods
 
-**Logging**
+**[Logging](###Logging)**
 
-* Decorators that capture key fields from Lambda context, cold start and structures logging output as JSON
-* Optionally log Lambda request when instructed (disabled by default)
+* Capture key fields from Lambda context, cold start and structures logging output as JSON
+* Log Lambda event when instructed (disabled by default)
     - Enable via `POWERTOOLS_LOGGER_LOG_EVENT="true"` or explicitly via decorator param
-* Logs canonical custom metric line to logs that can be consumed asynchronously
 * Log sampling enables DEBUG log level for a percentage of requests (disabled by default)
     - Enable via `POWERTOOLS_LOGGER_SAMPLE_RATE=0.1`, ranges from 0 to 1, where 0.1 is 10% and 1 is 100%
-* Append additional keys to structured log at any point in time so they're available across log statements
+* Append additional keys to structured log at any point in time
 
-**Metrics**
+**[Metrics](###Metrics)**
 
 * Aggregate up to 100 metrics using a single CloudWatch Embedded Metric Format object (large JSON blob)
 * Context manager to create an one off metric with a different dimension than metrics already aggregated
 * Validate against common metric definitions mistakes (metric unit, values, max dimensions, max metrics, etc)
-* No stack, custom resource, data collection needed — Metrics are created async by CloudWatch EMF
 
-**Bring your own middleware**
+**[Bring your own middleware](###Bring-your-own-middleware)**
 
 * Utility to easily create your own middleware
 * Run logic before, after, and handle exceptions
@@ -45,12 +45,12 @@ A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray,
 Environment variable | Description | Default | Utility
 ------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
 POWERTOOLS_SERVICE_NAME | Sets service name used for tracing namespace, metrics dimensions and structured logging | "service_undefined" | all
-POWERTOOLS_TRACE_DISABLED | Disables tracing | "false" | tracing
-POWERTOOLS_TRACE_MIDDLEWARES | Creates sub-segment for each middleware created by lambda_handler_decorator | "false" | middleware_factory
-POWERTOOLS_LOGGER_LOG_EVENT | Logs incoming event | "false" | logging
-POWERTOOLS_LOGGER_SAMPLE_RATE | Debug log sampling  | 0 | logging
-POWERTOOLS_METRICS_NAMESPACE | Metrics namespace  | None | metrics
-LOG_LEVEL | Sets logging level | "INFO" | logging
+POWERTOOLS_TRACE_DISABLED | Disables tracing | "false" | [Tracing](###Tracing)
+POWERTOOLS_TRACE_MIDDLEWARES | Creates sub-segment for each middleware created by lambda_handler_decorator | "false" | [middleware_factory](###Bring-your-own-middleware)
+POWERTOOLS_LOGGER_LOG_EVENT | Logs incoming event | "false" | [Logging](###Logging)
+POWERTOOLS_LOGGER_SAMPLE_RATE | Debug log sampling  | 0 | [Logging](###Logging)
+POWERTOOLS_METRICS_NAMESPACE | Metrics namespace  | None | [Metrics](###Metrics)
+LOG_LEVEL | Sets logging level | "INFO" | [Logging](###Logging)
 
 ## Usage
 
@@ -58,21 +58,11 @@ LOG_LEVEL | Sets logging level | "INFO" | logging
 
 With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip install aws-lambda-powertools``
 
+See **[example](./example/README.md)** of all features, testing, and a SAM template with all Powertools env vars. All features also provide full docs, and code completion for VSCode and PyCharm.
+
 ### Tracing
 
-**Example SAM template using supported environment variables**
-
-```yaml
-Globals:
-  Function:
-    Tracing: Active # can also be enabled per function
-    Environment:
-        Variables:
-            POWERTOOLS_SERVICE_NAME: "payment" 
-            POWERTOOLS_TRACE_DISABLED: "false" 
-```
-
-**Pseudo Python Lambda code**
+#### Tracing Lambda handler and a custom method
 
 ```python
 from aws_lambda_powertools.tracing import Tracer
@@ -81,10 +71,8 @@ tracer = Tracer()
 
 @tracer.capture_method
 def collect_payment(charge_id):
-  # logic
-  ret = requests.post(PAYMENT_ENDPOINT)
-  # custom annotation
-  tracer.put_annotation("PAYMENT_STATUS", "SUCCESS")
+  ret = requests.post(PAYMENT_ENDPOINT) # logic
+  tracer.put_annotation("PAYMENT_STATUS", "SUCCESS") # custom annotation
   return ret
 
 @tracer.capture_lambda_handler
@@ -94,7 +82,7 @@ def handler(event, context)
   ...
 ```
 
-**Fetching a pre-configured tracer anywhere**
+#### Using a pre-configured tracer anywhere
 
 ```python
 # handler.py
@@ -114,21 +102,7 @@ tracer = Tracer(auto_patch=False) # new instance using existing configuration wi
 
 ### Logging
 
-> **NOTE** `logger_setup` and `logger_inject_lambda_context` are deprecated and will be completely removed once it's GA.
-
-**Example SAM template using supported environment variables**
-
-```yaml
-Globals:
-  Function:
-    Environment:
-        Variables:
-            POWERTOOLS_SERVICE_NAME: "payment" 
-            POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1 # enable debug logging for 1% of requests, 0% by default
-            LOG_LEVEL: "INFO"
-```
-
-**Pseudo Python Lambda code**
+#### Structuring logs with Lambda context info
 
 ```python
 from aws_lambda_powertools.logging import Logger
@@ -148,7 +122,8 @@ def handler(event, context)
   ...
 ```
 
-**Exerpt output in CloudWatch Logs**
+<details>
+<summary>Exerpt output in CloudWatch Logs</summary>
 
 ```json
 {  
@@ -182,8 +157,9 @@ def handler(event, context)
    }
 }
 ```
+</details>
 
-**Append additional keys to structured log**
+#### Appending additional keys to current logger
 
 ```python
 from aws_lambda_powertools.logging import Logger
@@ -198,7 +174,8 @@ def handler(event, context)
   ...
 ```
 
-**Exerpt output in CloudWatch Logs**
+<details>
+<summary>Exerpt output in CloudWatch Logs</summary>
 
 ```json
 {  
@@ -216,14 +193,11 @@ def handler(event, context)
    "message": "Collecting payment"
 }
 ```
+</details>
 
-### Custom Metrics async
+### Metrics
 
-> **NOTE** `log_metric` will be removed once it's GA.
-
-This feature makes use of CloudWatch Embedded Metric Format (EMF) and metrics are created asynchronously by CloudWatch service
-
-> Contrary to `log_metric`, you don't need any custom resource or additional CloudFormation stack anymore.
+This feature makes use of CloudWatch Embedded Metric Format (EMF), and metrics are created asynchronously by CloudWatch service.
 
 Metrics middleware validates against the minimum necessary for a metric to be published:
 
@@ -232,9 +206,9 @@ Metrics middleware validates against the minimum necessary for a metric to be pu
 * Only one Namespace
 * [Any Metric unit supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html)
 
-**Creating multiple metrics**
+#### Creating multiple metrics
 
-`log_metrics` decorator calls the decorated function, so leave that for last decorator or will fail with `SchemaValidationError` if no metrics are recorded.
+If using multiple middlewares, use `log_metrics` as the last decorator, or else it will fail with `SchemaValidationError` if no metrics are recorded.
 
 ```python
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
@@ -267,11 +241,9 @@ with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric:
     metric.add_dimension(name="function_context", value="$LATEST")
 ```
 
-> **NOTE**: If you want to instantiate Metrics() in multiple places in your code, make sure to use `POWERTOOLS_METRICS_NAMESPACE` env var as we don't keep a copy of that across instances.
+> **NOTE**: When using Metrics() in multiple places in your code, make sure to use `POWERTOOLS_METRICS_NAMESPACE` env var, or setting namespace param.
 
-### Utilities
-
-#### Bring your own middleware
+### Bring your own middleware
 
 This feature allows you to create your own middleware as a decorator with ease by following a simple signature. 
 
@@ -279,7 +251,7 @@ This feature allows you to create your own middleware as a decorator with ease b
 * Always return the handler with event/context or response if executed
   - Supports nested middleware/decorators use case
 
-**Middleware with no params**
+#### Middleware with no params
 
 ```python
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
@@ -307,7 +279,7 @@ def lambda_handler(event, context):
     return True
 ```
 
-**Middleware with params**
+#### Middleware with params
 
 ```python
 @lambda_handler_decorator
@@ -325,9 +297,9 @@ def lambda_handler(event, context):
     return True
 ```
 
-**Optionally trace middleware execution**
+#### Tracing middleware execution
 
-This makes use of an existing Tracer instance that you may have initialized anywhere in your code, otherwise it'll initialize one using default options and provider (X-Ray).
+This makes use of an existing Tracer instance that you may have initialized anywhere in your code. If no Tracer instance is found,  it'll initialize one using default options.
 
 ```python
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
@@ -359,19 +331,12 @@ def lambda_handler(event, context):
     return True
 ```
 
-
 ### Debug mode
 
-By default, all debug log statements from AWS Lambda Powertools package are suppressed. If you'd like to enable them, use `set_package_logger` utility:
+By default, all log statements from AWS Lambda Powertools package are suppressed. If you'd like to enable them, use `set_package_logger` utility:
 
 ```python
 import aws_lambda_powertools
 aws_lambda_powertools.logging.logger.set_package_logger()
 ...
 ```
-
-## Beta
-
-This library may change its API/methods or environment variables as it receives feedback from customers
-
-**[Progress towards GA](https://github.com/awslabs/aws-lambda-powertools/projects/1)**
