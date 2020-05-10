@@ -283,13 +283,13 @@ class Tracer:
         It also captures both response and exceptions as metadata
         and creates a subsegment named `## <method_name>`
 
-        For concurrency async functions called via async.gather,
-        methods may impact each others subsegment and can trigger
+        When running [async functions concurrently](https://docs.python.org/3/library/asyncio-task.html#id6),
+        methods may impact each others subsegment, and can trigger
         and AlreadyEndedException from X-Ray due to async nature.
-
-        When using async.gather, remember to set `return_exceptions`.
-        See example on how to best work around this using
-        an explicit context manager via the escape hatch mechanism.
+        
+        For this use case, either use `capture_method` only where
+        `async.gather` is called, or use `in_subsegment_async`
+        context manager via our escape hatch mechanism - See examples.
 
         Example
         -------
@@ -336,7 +336,7 @@ class Tracer:
 
                 return { "task": "done", **ret }
 
-        **Safely tracing multiple concurrent nested async calls**
+        **Safely tracing concurrent async calls with decorator**
 
             from aws_lambda_powertools.tracing import Tracer
             tracer = Tracer(service="booking")
@@ -348,6 +348,25 @@ class Tracer:
 
             async def long_async_call():
                 ...
+
+            @tracer.capture_method
+            async def async_tasks():
+                _, ret = await asyncio.gather(get_identity(), long_async_call(), return_exceptions=True)
+
+                return { "task": "done", **ret }
+        
+        **Safely tracing each concurrent async calls with escape hatch**
+
+            from aws_lambda_powertools.tracing import Tracer
+            tracer = Tracer(service="booking")
+
+            async def get_identity():
+                async tracer.provider.in_subsegment_async("## get_identity"):
+                    ...
+
+            async def long_async_call():
+                async tracer.provider.in_subsegment_async("## long_async_call"):
+                    ...
 
             @tracer.capture_method
             async def async_tasks():
