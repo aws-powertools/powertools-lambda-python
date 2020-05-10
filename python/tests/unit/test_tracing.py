@@ -2,6 +2,7 @@ from typing import NamedTuple
 from unittest import mock
 
 import pytest
+import sys
 
 from aws_lambda_powertools.tracing import Tracer
 
@@ -70,7 +71,9 @@ def in_subsegment_mock():
     in_subsegment = In_subsegment()
     in_subsegment.in_subsegment.return_value.__enter__.return_value.put_annotation = in_subsegment.put_annotation
     in_subsegment.in_subsegment.return_value.__enter__.return_value.put_metadata = in_subsegment.put_metadata
-    in_subsegment.in_subsegment.return_value.__aenter__.return_value.put_metadata = in_subsegment.put_metadata
+
+    if sys.version_info >= (3, 8):  # 3.8 introduced AsyncMock
+        in_subsegment.in_subsegment.return_value.__aenter__.return_value.put_metadata = in_subsegment.put_metadata
 
     yield in_subsegment
 
