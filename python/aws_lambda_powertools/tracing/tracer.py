@@ -286,7 +286,7 @@ class Tracer:
         When running [async functions concurrently](https://docs.python.org/3/library/asyncio-task.html#id6),
         methods may impact each others subsegment, and can trigger
         and AlreadyEndedException from X-Ray due to async nature.
-        
+
         For this use case, either use `capture_method` only where
         `async.gather` is called, or use `in_subsegment_async`
         context manager via our escape hatch mechanism - See examples.
@@ -354,7 +354,7 @@ class Tracer:
                 _, ret = await asyncio.gather(get_identity(), long_async_call(), return_exceptions=True)
 
                 return { "task": "done", **ret }
-        
+
         **Safely tracing each concurrent async calls with escape hatch**
 
             from aws_lambda_powertools.tracing import Tracer
