@@ -337,6 +337,8 @@ class Tracer:
                 return { "task": "done", **ret }
 
         **Safely tracing concurrent async calls with decorator**
+        
+        This may not needed once [this bug is closed](https://github.com/aws/aws-xray-sdk-python/issues/164)
 
             from aws_lambda_powertools.tracing import Tracer
             tracer = Tracer(service="booking")
@@ -356,6 +358,8 @@ class Tracer:
                 return { "task": "done", **ret }
 
         **Safely tracing each concurrent async calls with escape hatch**
+
+        This may not needed once [this bug is closed](https://github.com/aws/aws-xray-sdk-python/issues/164)
 
             from aws_lambda_powertools.tracing import Tracer
             tracer = Tracer(service="booking")

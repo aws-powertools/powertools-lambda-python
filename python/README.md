@@ -102,6 +102,40 @@ def handler(event, context)
   ...
 ```
 
+#### Tracing concurrent asynchronous with gather
+
+:warning: This will no longer be necessary after [this X-Ray recorder issue is resolved](https://github.com/aws/aws-xray-sdk-python/issues/164) as it's an edge case. :warning:
+
+To safely workaround this issue, use `@tracer.capture_method` on functions not being run with `async.gather`, and instead use `in_subsegment_async` context manager escape hatch to have the same tracing effect.
+
+
+```python
+import asyncio
+
+from aws_lambda_powertools.tracing import Tracer
+tracer = Tracer()
+# tracer = Tracer(service="payment") # can also be explicitly defined
+
+async def another_async_task():
+    async with tracer.provider.in_subsegment_async("## another_async_task"):
+        ...
+
+async def another_async_task_2():
+    async with tracer.provider.in_subsegment_async("## another_async_task_2"):
+        ...
+
+@tracer.capture_method
+async def collect_payment(charge_id):
+    asyncio.gather(another_async_task(), another_async_task_2())
+    ...
+
+@tracer.capture_lambda_handler
+def handler(event, context)
+  charge_id = event.get('charge_id')
+  payment = asyncio.run(collect_payment(charge_id)) # python 3.7+  
+  ...
+```
+
 #### Using escape hatch mechanisms
 
 You can use `tracer.provider` attribute to access all methods provided by `xray_recorder`. This is useful when you need a feature available in X-Ray that is not available in the Tracer middleware, for example [thread-safe](https://github.com/aws/aws-xray-sdk-python/#user-content-trace-threadpoolexecutor), or [context managers](https://github.com/aws/aws-xray-sdk-python/#user-content-start-a-custom-segmentsubsegment).
@@ -113,6 +147,8 @@ import asyncio
 
 from aws_lambda_powertools.tracing import Tracer, aiohttp_trace_config
 tracer = Tracer()
+
+# aiohttp_trace_config is x-ray extension for aiohttp trace config known as aws_xray_trace_config
 
 async def aiohttp_task():
     # Async context manager as opposed to `@tracer.capture_method`

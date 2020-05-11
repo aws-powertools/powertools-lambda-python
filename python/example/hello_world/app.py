@@ -1,20 +1,20 @@
+import asyncio
 import json
 
+import aioboto3
+import aiohttp
 import requests
 
 from aws_lambda_powertools.logging import Logger
+from aws_lambda_powertools.logging.logger import set_package_logger
 from aws_lambda_powertools.metrics import Metrics, MetricUnit, single_metric
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.tracing import Tracer, aiohttp_trace_config
-from aws_lambda_powertools.logging.logger import set_package_logger
-import asyncio
-import aioboto3
-import aiohttp
 
-set_package_logger() # Enable package diagnostics (DEBUG log)
+set_package_logger()  # Enable package diagnostics (DEBUG log)
 
 # tracer = Tracer() # patches all available modules
-tracer = Tracer(patch_modules=("aioboto3", "boto3", "requests")) # ~90-100ms faster in perf depending on set of libs
+tracer = Tracer(patch_modules=("aioboto3", "boto3", "requests"))  # ~90-100ms faster in perf depending on set of libs
 logger = Logger()
 metrics = Metrics()
 
@@ -22,14 +22,17 @@ _cold_start = True
 
 metrics.add_dimension(name="operation", value="example")
 
+
 async def aioboto_task():
     async with aioboto3.client("sts") as sts:
         account = await sts.get_caller_identity()
         return account
 
+
 async def aiohttp_task():
     # You have full access to all xray_recorder methods via `tracer.provider`
     # these include thread-safe methods, all context managers, x-ray configuration etc.
+    # see https://github.com/aws/aws-xray-sdk-python/issues/164
     async with tracer.provider.in_subsegment_async("## aiohttp escape hatch"):
         async with aiohttp.ClientSession(trace_configs=[aiohttp_trace_config()]) as session:
             async with session.get("https://httpbin.org/json") as resp:
@@ -41,10 +44,7 @@ async def aiohttp_task():
 async def async_tasks():
     _, ret = await asyncio.gather(aioboto_task(), aiohttp_task(), return_exceptions=True)
 
-    return {
-        "task": "done",
-        **ret
-    }
+    return {"task": "done", **ret}
 
 
 @lambda_handler_decorator(trace_execution=True)
@@ -108,13 +108,9 @@ def lambda_handler(event, context):
     with single_metric(name="UniqueMetricDimension", unit="Seconds", value=1) as metric:
         metric.add_dimension(name="unique_dimension", value="for_unique_metric")
 
-    resp = {
-        "message": "hello world",
-        "location": ip.text.replace("\n", ""),
-        "async_http": async_http_ret
-    }
+    resp = {"message": "hello world", "location": ip.text.replace("\n", ""), "async_http": async_http_ret}
     logger.info("Returning message to the caller")
-    
+
     return {
         "statusCode": 200,
         "body": json.dumps(resp),
