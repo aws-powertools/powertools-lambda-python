@@ -75,7 +75,7 @@ class Tracer:
         def confirm_booking(booking_id: str) -> Dict:
                 resp = add_confirmation(booking_id)
 
-                tracer.put_annotation("BookingConfirmation", resp['requestId'])
+                tracer.put_annotation("BookingConfirmation", resp["requestId"])
                 tracer.put_metadata("Booking confirmation", resp)
 
                 return resp
@@ -83,7 +83,8 @@ class Tracer:
         @tracer.capture_lambda_handler
         def handler(event: dict, context: Any) -> Dict:
             print("Received event from Lambda...")
-            response = confirm_booking(booking_id=event["booking_id])
+            booking_id = event.get("booking_id")
+            response = confirm_booking(booking_id=booking_id)
             return response
 
     **A Lambda function using service name via POWERTOOLS_SERVICE_NAME**
@@ -175,7 +176,7 @@ class Tracer:
             logger.debug("Tracing has been disabled, aborting put_annotation")
             return
 
-        logger.debug(f"Annotating on key '{key}'' with '{value}''")
+        logger.debug(f"Annotating on key '{key}' with '{value}'")
         self.provider.put_annotation(key=key, value=value)
 
     def put_metadata(self, key: str, value: Any, namespace: str = None):
@@ -203,7 +204,7 @@ class Tracer:
             return
 
         namespace = namespace or self.service
-        logger.debug(f"Adding metadata on key '{key}'' with '{value}'' at namespace '{namespace}''")
+        logger.debug(f"Adding metadata on key '{key}' with '{value}' at namespace '{namespace}'")
         self.provider.put_metadata(key=key, value=value, namespace=namespace)
 
     def patch(self, modules: Tuple[str] = None):
@@ -306,15 +307,16 @@ class Tracer:
 
             @tracer.capture_method
             async def confirm_booking(booking_id: str) -> Dict:
-                resp = confirm_booking(booking_id=event["booking_id])
+                resp = call_to_booking_service()
 
-                tracer.put_annotation("BookingConfirmation", resp['requestId'])
+                tracer.put_annotation("BookingConfirmation", resp["requestId"])
                 tracer.put_metadata("Booking confirmation", resp)
 
                 return resp
 
             def lambda_handler(event: dict, context: Any) -> Dict:
-                asyncio.run(confirm_booking(booking=id))
+                booking_id = event.get("booking_id")
+                asyncio.run(confirm_booking(booking_id=booking_id))
 
         **Tracing nested async calls**
 
@@ -337,7 +339,7 @@ class Tracer:
                 return { "task": "done", **ret }
 
         **Safely tracing concurrent async calls with decorator**
-        
+
         This may not needed once [this bug is closed](https://github.com/aws/aws-xray-sdk-python/issues/164)
 
             from aws_lambda_powertools.tracing import Tracer
@@ -421,7 +423,7 @@ class Tracer:
                     logger.debug(f"Received {method_name} response successfully")
                     logger.debug(response)
             except Exception as err:
-                logger.exception(f"Exception received from '{method_name}'' method", exc_info=True)
+                logger.exception(f"Exception received from '{method_name}' method", exc_info=True)
                 subsegment.put_metadata(key=f"{method_name} error", value=err, namespace=self._config["service"])
                 raise
             finally:

@@ -1,8 +1,8 @@
+import sys
 from typing import NamedTuple
 from unittest import mock
 
 import pytest
-import sys
 
 from aws_lambda_powertools.tracing import Tracer
 

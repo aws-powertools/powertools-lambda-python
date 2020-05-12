@@ -144,6 +144,7 @@ You can use `tracer.provider` attribute to access all methods provided by `xray_
 
 ```python
 import asyncio
+import aiohttp
 
 from aws_lambda_powertools.tracing import Tracer, aiohttp_trace_config
 tracer = Tracer()
