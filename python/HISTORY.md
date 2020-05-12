@@ -13,7 +13,19 @@
 
 **0.8.1**
 
-* **Metrics**: Fix incorrect metric units enum values for `*PerSecond` e.g. CountPerSecond
+* **Metrics**: Fix metric unit casting logic if one passes plain string (value or key)
+* **Metrics: **Fix `MetricUnit` enum values for
+    - `BytesPerSecond`
+    - `KilobytesPerSecond`
+    - `MegabytesPerSecond`
+    - `GigabytesPerSecond`
+    - `TerabytesPerSecond`
+    - `BitsPerSecond`
+    - `KilobitsPerSecond`
+    - `MegabitsPerSecond`
+    - `GigabitsPerSecond`
+    - `TerabitsPerSecond`
+    - `CountPerSecond`
 
 ## April 24th
 
