@@ -402,7 +402,7 @@ class Logger(logging.Logger):
 
             @logger.inject_lambda_context
             def handler(event, context):
-                    logger.info("Hello")
+                logger.info("Hello")
 
         **Captures Lambda contextual runtime info and logs incoming request**
 
@@ -412,7 +412,7 @@ class Logger(logging.Logger):
 
             @logger.inject_lambda_context(log_event=True)
             def handler(event, context):
-                    logger.info("Hello")
+                logger.info("Hello")
 
         Returns
         -------
