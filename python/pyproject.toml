@@ -44,6 +44,7 @@ pdoc3 = "^0.7.5"
 pytest-asyncio = "^0.12.0"
 aioboto3 = "^8.0.3"
 aiohttp = "^3.6.2"
+bandit = "^1.6.2"
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]

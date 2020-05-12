@@ -20,7 +20,7 @@ test:
 coverage-html:
 	poetry run pytest --cov-report html
 
-pr: lint test 
+pr: lint test security-baseline
 
 build: pr
 	poetry run build
@@ -30,6 +30,9 @@ docs: dev
 
 docs-dev:
 	poetry run pdoc --http : aws_lambda_powertools
+
+security-baseline:
+	poetry run bandit --baseline bandit.baseline -r aws_lambda_powertools
 
 #
 # Use `poetry version <major>/<minor></patch>` for version bump
