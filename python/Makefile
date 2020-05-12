@@ -20,7 +20,7 @@ test:
 coverage-html:
 	poetry run pytest --cov-report html
 
-pr: lint test security-baseline
+pr: lint test security-baseline complexity-baseline
 
 build: pr
 	poetry run build
@@ -33,6 +33,12 @@ docs-dev:
 
 security-baseline:
 	poetry run bandit --baseline bandit.baseline -r aws_lambda_powertools
+
+complexity-baseline:
+	$(info Maintenability index)
+	poetry run radon mi aws_lambda_powertools
+	$(info Cyclomatic complexity index)
+	poetry run xenon --max-absolute C --max-modules A --max-average A aws_lambda_powertools
 
 #
 # Use `poetry version <major>/<minor></patch>` for version bump
