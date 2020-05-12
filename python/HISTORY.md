@@ -1,5 +1,12 @@
 # HISTORY 
 
+## May 12th
+
+* **Tracer**: Support for async functions in `Tracer` via `capture_method` decorator
+* **Tracer**: Support for `aiohttp` via `aiohttp_trace_config` trace config
+* **Tracer**: Support for patching specific modules via `patch_modules` param
+* **Tracer**: Document escape hatch mechanisms via `tracer.provider`
+
 ## April 24th
 
 * Introduces `Logger` for stuctured logging as a replacement for `logger_setup`
