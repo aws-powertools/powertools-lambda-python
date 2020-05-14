@@ -142,6 +142,8 @@ You can use `tracer.provider` attribute to access all methods provided by `xray_
 
 **Example using aiohttp with an async context manager**
 
+> NOTE: It expects you have `aiohttp` as a dependency. `aiohttp_trace_config` uses lazy import to create a trace_config object following `aiohttp` protocol.
+
 ```python
 import asyncio
 import aiohttp

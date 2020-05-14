@@ -1,5 +1,11 @@
 # HISTORY 
 
+## May 14th
+
+**0.9.2**
+
+* **Tracer**: Bugfix - aiohttp lazy import so it's not a hard dependency
+
 ## May 12th
 
 **0.9.0**
