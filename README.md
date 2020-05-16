@@ -17,7 +17,7 @@ _`*` Core utilities are Tracer, Logger and Metrics. Optional utilities may vary 
 
 ## Powertools available
 
-* [Python - Beta](./python/README.md)
+* [Python](./python/README.md)
 
 ## Credits
 

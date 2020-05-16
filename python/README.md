@@ -1,12 +1,10 @@
 # Lambda Powertools
 
-![PackageStatus](https://img.shields.io/static/v1?label=status&message=beta&color=blueviolet?style=flat-square) ![PythonSupport](https://img.shields.io/static/v1?label=python&message=3.6%20|%203.7|%203.8&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools) ![Build](https://github.com/awslabs/aws-lambda-powertools/workflows/Powertools%20Python/badge.svg?branch=master)
+![PackageStatus](https://img.shields.io/static/v1?label=status&message=release-candidate&color=blueviolet?style=flat-square) ![PythonSupport](https://img.shields.io/static/v1?label=python&message=3.6%20|%203.7|%203.8&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools) ![Build](https://github.com/awslabs/aws-lambda-powertools/workflows/Powertools%20Python/badge.svg?branch=master)
 
 A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging, and creating custom metrics asynchronously easier - Compatible with Python >=3.6.
 
-> During beta, this library may change its API/methods, or environment variables as it receives feedback from customers.
-
-* **Status**: Beta
+* **Status**: Release candidate
 * **How long until GA?**: [Current progress](https://github.com/awslabs/aws-lambda-powertools/projects/1)
 
 ## Features
