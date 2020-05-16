@@ -91,7 +91,7 @@ def test_tracer_lambda_handler(mocker, dummy_response, provider_stub, in_subsegm
     assert in_subsegment_mock.in_subsegment.call_count == 1
     assert in_subsegment_mock.in_subsegment.call_args == mocker.call(name="## handler")
     assert in_subsegment_mock.put_metadata.call_args == mocker.call(
-        key="lambda handler response", value=dummy_response, namespace="booking"
+        key="handler response", value=dummy_response, namespace="booking"
     )
     assert in_subsegment_mock.put_annotation.call_count == 1
     assert in_subsegment_mock.put_annotation.call_args == mocker.call(key="ColdStart", value=True)

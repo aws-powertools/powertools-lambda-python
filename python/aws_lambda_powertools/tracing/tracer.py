@@ -1,4 +1,3 @@
-import asyncio
 import copy
 import functools
 import inspect
@@ -250,10 +249,11 @@ class Tracer:
         err
             Exception raised by method
         """
+        lambda_handler_name = lambda_handler.__name__
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
-            with self.provider.in_subsegment(name=f"## {lambda_handler.__name__}") as subsegment:
+            with self.provider.in_subsegment(name=f"## {lambda_handler_name}") as subsegment:
                 global is_cold_start
                 if is_cold_start:
                     logger.debug("Annotating cold start")
@@ -265,13 +265,12 @@ class Tracer:
                     response = lambda_handler(event, context)
                     logger.debug("Received lambda handler response successfully")
                     logger.debug(response)
-                    if response:
-                        subsegment.put_metadata(
-                            key="lambda handler response", value=response, namespace=self._config["service"]
-                        )
+                    self._add_response_as_metadata(
+                        function_name=lambda_handler_name, data=response, subsegment=subsegment
+                    )
                 except Exception as err:
-                    logger.exception("Exception received from lambda handler", exc_info=True)
-                    subsegment.put_metadata(key=f"{self.service} error", value=err, namespace=self._config["service"])
+                    logger.exception("Exception received from lambda handler")
+                    self._add_full_exception_as_metadata(function_name=self.service, error=err, subsegment=subsegment)
                     raise
 
                 return response
@@ -392,70 +391,78 @@ class Tracer:
         """
         method_name = f"{method.__name__}"
 
-        async def decorate_logic(
-            decorated_method_with_args: functools.partial = None,
-            subsegment: aws_xray_sdk.core.models.subsegment = None,
-            coroutine: bool = False,
-        ) -> Any:
-            """Decorate logic runs both sync and async decorated methods
-
-            Parameters
-            ----------
-            decorated_method_with_args : functools.partial
-                Partial decorated method with arguments/keyword arguments
-            subsegment : aws_xray_sdk.core.models.subsegment
-                X-Ray subsegment to reuse
-            coroutine : bool, optional
-                Instruct whether partial decorated method is a wrapped coroutine, by default False
-
-            Returns
-            -------
-            Any
-                Returns method's response
-            """
-            response = None
-            try:
-                logger.debug(f"Calling method: {method_name}")
-                if coroutine:
-                    response = await decorated_method_with_args()
-                else:
-                    response = decorated_method_with_args()
-                    logger.debug(f"Received {method_name} response successfully")
-                    logger.debug(response)
-            except Exception as err:
-                logger.exception(f"Exception received from '{method_name}' method", exc_info=True)
-                subsegment.put_metadata(key=f"{method_name} error", value=err, namespace=self._config["service"])
-                raise
-            finally:
-                if response is not None:
-                    subsegment.put_metadata(  # pragma: no cover
-                        key=f"{method_name} response", value=response, namespace=self._config["service"]
-                    )
-
-            return response
-
         if inspect.iscoroutinefunction(method):
 
             @functools.wraps(method)
             async def decorate(*args, **kwargs):
-                decorated_method_with_args = functools.partial(method, *args, **kwargs)
                 async with self.provider.in_subsegment_async(name=f"## {method_name}") as subsegment:
-                    return await decorate_logic(
-                        decorated_method_with_args=decorated_method_with_args, subsegment=subsegment, coroutine=True
-                    )
+                    try:
+                        logger.debug(f"Calling method: {method_name}")
+                        response = await method(*args, **kwargs)
+                        self._add_response_as_metadata(function_name=method_name, data=response, subsegment=subsegment)
+                    except Exception as err:
+                        logger.exception(f"Exception received from '{method_name}' method")
+                        self._add_full_exception_as_metadata(
+                            function_name=method_name, error=err, subsegment=subsegment
+                        )
+                        raise
+
+                    return response
 
         else:
 
             @functools.wraps(method)
             def decorate(*args, **kwargs):
-                loop = asyncio.get_event_loop()
-                decorated_method_with_args = functools.partial(method, *args, **kwargs)
                 with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
-                    return loop.run_until_complete(
-                        decorate_logic(decorated_method_with_args=decorated_method_with_args, subsegment=subsegment)
-                    )
+                    try:
+                        logger.debug(f"Calling method: {method_name}")
+                        response = method(*args, **kwargs)
+                        self._add_response_as_metadata(function_name=method_name, data=response, subsegment=subsegment)
+                    except Exception as err:
+                        logger.exception(f"Exception received from '{method_name}' method")
+                        self._add_full_exception_as_metadata(
+                            function_name=method_name, error=err, subsegment=subsegment
+                        )
+                        raise
+
+                    return response
 
         return decorate
+
+    def _add_response_as_metadata(
+        self, function_name: str = None, data: Any = None, subsegment: aws_xray_sdk.core.models.subsegment = None
+    ):
+        """Add response as metadata for given subsegment
+
+        Parameters
+        ----------
+        function_name : str, optional
+            function name to add as metadata key, by default None
+        data : Any, optional
+            data to add as subsegment metadata, by default None
+        subsegment : aws_xray_sdk.core.models.subsegment, optional
+            existing subsegment to add metadata on, by default None
+        """
+        if data is None or subsegment is None:
+            return
+
+        subsegment.put_metadata(key=f"{function_name} response", value=data, namespace=self._config["service"])
+
+    def _add_full_exception_as_metadata(
+        self, function_name: str = None, error: Exception = None, subsegment: aws_xray_sdk.core.models.subsegment = None
+    ):
+        """Add full exception object as metadata for given subsegment
+
+        Parameters
+        ----------
+        function_name : str, optional
+            function name to add as metadata key, by default None
+        error : Exception, optional
+            error to add as subsegment metadata, by default None
+        subsegment : aws_xray_sdk.core.models.subsegment, optional
+            existing subsegment to add metadata on, by default None
+        """
+        subsegment.put_metadata(key=f"{function_name} error", value=error, namespace=self._config["service"])
 
     def __disable_tracing_provider(self):
         """Forcefully disables tracing"""

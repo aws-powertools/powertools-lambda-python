@@ -1,5 +1,11 @@
 # HISTORY 
 
+## May 16th
+
+**0.9.3**
+
+* **Tracer**: Bugfix - Runtime Error for nested sync due to incorrect loop usage
+
 ## May 14th
 
 **0.9.2**

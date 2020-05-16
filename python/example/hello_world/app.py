@@ -59,6 +59,21 @@ def my_middleware(handler, event, context, say_hello=False):
     return ret
 
 
+@tracer.capture_method
+def func_1():
+    return 1
+
+
+@tracer.capture_method
+def func_2():
+    return 2
+
+
+@tracer.capture_method
+def sums_values():
+    return func_1() + func_2()  # nested sync calls to reproduce issue #32
+
+
 @metrics.log_metrics
 @tracer.capture_lambda_handler
 @my_middleware(say_hello=True)
@@ -84,7 +99,7 @@ def lambda_handler(event, context):
 
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
-
+    sums_values()
     async_http_ret = asyncio.run(async_tasks())
 
     if "charge_id" in event:
