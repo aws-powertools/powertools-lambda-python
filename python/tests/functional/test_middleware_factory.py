@@ -4,6 +4,7 @@ from typing import Callable
 import pytest
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+from aws_lambda_powertools.middleware_factory.exceptions import MiddlewareInvalidArgumentError
 
 
 @pytest.fixture
@@ -115,8 +116,26 @@ def test_factory_decorator_with_non_kwarg_params():
             print(json.dumps(event))
         return handler(event, context)
 
-    with pytest.raises(TypeError):
+    with pytest.raises(MiddlewareInvalidArgumentError):
 
         @log_event(True)
         def lambda_handler(evt, ctx):
             return True
+
+
+def test_factory_middleware_exception_propagation(say_bye_middleware, say_hi_middleware):
+    class CustomMiddlewareException(Exception):
+        pass
+
+    @lambda_handler_decorator
+    def raise_middleware(handler, evt, ctx):
+        raise CustomMiddlewareException("Raise middleware exception")
+
+    @say_bye_middleware
+    @raise_middleware
+    @say_hi_middleware
+    def lambda_handler(evt, ctx):
+        return "hello world"
+
+    with pytest.raises(CustomMiddlewareException):
+        lambda_handler({}, {})

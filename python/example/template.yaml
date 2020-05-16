@@ -8,7 +8,7 @@ Description: >
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 7
 
 Resources:
   HelloWorldFunction:
@@ -16,16 +16,16 @@ Resources:
     Properties:
       CodeUri: hello_world/
       Handler: app.lambda_handler
-      Runtime: python3.7
-      Tracing: Active
+      Runtime: python3.8
+      Tracing: Active                                 # enables X-Ray tracing
       Environment:
         Variables:
-          POWERTOOLS_SERVICE_NAME: example            # Sets service name used for tracing namespace, metrics dimensions and structured logging
-          POWERTOOLS_TRACE_DISABLED: "false"          # Explicitly disables tracing
-          POWERTOOLS_LOGGER_LOG_EVENT: "false"        # Logs incoming event
-          POWERTOOLS_LOGGER_SAMPLE_RATE: "0"          # Debug log sampling percentage
-          POWERTOOLS_METRICS_NAMESPACE: "Example"     # Debug log sampling percentage
-          LOG_LEVEL: INFO                            # Log level (INFO, DEBUG, etc.)
+          POWERTOOLS_SERVICE_NAME: example            # Sets service name used for all middlewares, "service_undefined" by default
+          POWERTOOLS_TRACE_DISABLED: "false"          # Explicitly disables tracing, default
+          POWERTOOLS_LOGGER_LOG_EVENT: "false"        # Logs incoming event, default
+          POWERTOOLS_LOGGER_SAMPLE_RATE: "0"          # Debug log sampling percentage, default
+          POWERTOOLS_METRICS_NAMESPACE: "Example"     # Metric Namespace
+          LOG_LEVEL: INFO                             # Log level for Logger (INFO, DEBUG, etc.), default
       Events:
         HelloWorld:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api

@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 from contextlib import contextmanager
 from typing import Dict
 
@@ -8,7 +7,6 @@ from aws_lambda_powertools.helper.models import MetricUnit
 from aws_lambda_powertools.metrics.base import MetricManager
 
 logger = logging.getLogger(__name__)
-logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 
 class SingleMetric(MetricManager):
@@ -113,8 +111,6 @@ def single_metric(name: str, unit: MetricUnit, value: float):
         yield metric
         logger.debug("Serializing single metric")
         metric_set: Dict = metric.serialize_metric_set()
-    except Exception as e:
-        raise e
     finally:
         logger.debug("Publishing single metric", {"metric": metric})
         print(json.dumps(metric_set))

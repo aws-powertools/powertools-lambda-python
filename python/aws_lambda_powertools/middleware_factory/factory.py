@@ -6,9 +6,9 @@ from distutils.util import strtobool
 from typing import Callable
 
 from ..tracing import Tracer
+from .exceptions import MiddlewareInvalidArgumentError
 
 logger = logging.getLogger(__name__)
-logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 
 def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
@@ -97,7 +97,7 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
 
     Raises
     ------
-    TypeError
+    MiddlewareInvalidArgumentError
         When middleware receives non keyword=arguments
     """
 
@@ -113,7 +113,8 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
             return functools.partial(final_decorator, **kwargs)
 
         if not inspect.isfunction(func):
-            raise TypeError(
+            # @custom_middleware(True) vs @custom_middleware(log_event=True)
+            raise MiddlewareInvalidArgumentError(
                 f"Only keyword arguments is supported for middlewares: {decorator.__qualname__} received {func}"
             )
 
@@ -123,15 +124,14 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
                 middleware = functools.partial(decorator, func, event, context, **kwargs)
                 if trace_execution:
                     tracer = Tracer(auto_patch=False)
-                    tracer.create_subsegment(name=f"## {decorator.__qualname__}")
-                    response = middleware()
-                    tracer.end_subsegment()
+                    with tracer.provider.in_subsegment(name=f"## {decorator.__qualname__}"):
+                        response = middleware()
                 else:
                     response = middleware()
                 return response
-            except Exception as err:
-                logger.error(f"Caught exception in {decorator.__qualname__}")
-                raise err
+            except Exception:
+                logger.exception(f"Caught exception in {decorator.__qualname__}")
+                raise
 
         return wrapper
 

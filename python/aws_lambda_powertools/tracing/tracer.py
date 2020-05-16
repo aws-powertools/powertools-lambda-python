@@ -1,15 +1,16 @@
 import copy
 import functools
+import inspect
 import logging
 import os
 from distutils.util import strtobool
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List, Tuple
 
-from aws_xray_sdk.core import models, patch_all, xray_recorder
+import aws_xray_sdk
+import aws_xray_sdk.core
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
-logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 
 class Tracer:
@@ -40,8 +41,10 @@ class Tracer:
     auto_patch: bool
         Patch existing imported modules during initialization, by default True
     disabled: bool
-        Flag to explicitly disable tracing, useful when running/testing locally.
+        Flag to explicitly disable tracing, useful when running/testing locally
         `Env POWERTOOLS_TRACE_DISABLED="true"`
+    patch_modules: Tuple[str]
+        Tuple of modules supported by tracing provider to patch, by default all modules are patched
 
     Example
     -------
@@ -71,7 +74,7 @@ class Tracer:
         def confirm_booking(booking_id: str) -> Dict:
                 resp = add_confirmation(booking_id)
 
-                tracer.put_annotation("BookingConfirmation", resp['requestId'])
+                tracer.put_annotation("BookingConfirmation", resp["requestId"])
                 tracer.put_metadata("Booking confirmation", resp)
 
                 return resp
@@ -79,7 +82,8 @@ class Tracer:
         @tracer.capture_lambda_handler
         def handler(event: dict, context: Any) -> Dict:
             print("Received event from Lambda...")
-            response = greeting(name="Heitor")
+            booking_id = event.get("booking_id")
+            response = confirm_booking(booking_id=booking_id)
             return response
 
     **A Lambda function using service name via POWERTOOLS_SERVICE_NAME**
@@ -116,17 +120,29 @@ class Tracer:
 
     Limitations
     -----------
-    * Async handler and methods not supported
-
+    * Async handler not supported
     """
 
-    _default_config = {"service": "service_undefined", "disabled": False, "provider": xray_recorder, "auto_patch": True}
+    _default_config = {
+        "service": "service_undefined",
+        "disabled": False,
+        "auto_patch": True,
+        "patch_modules": None,
+        "provider": aws_xray_sdk.core.xray_recorder,
+    }
     _config = copy.copy(_default_config)
 
     def __init__(
-        self, service: str = None, disabled: bool = None, provider: xray_recorder = None, auto_patch: bool = None
+        self,
+        service: str = None,
+        disabled: bool = None,
+        auto_patch: bool = None,
+        patch_modules: List = None,
+        provider: aws_xray_sdk.core.xray_recorder = None,
     ):
-        self.__build_config(service=service, disabled=disabled, provider=provider, auto_patch=auto_patch)
+        self.__build_config(
+            service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
+        )
         self.provider = self._config["provider"]
         self.disabled = self._config["disabled"]
         self.service = self._config["service"]
@@ -136,7 +152,78 @@ class Tracer:
             self.__disable_tracing_provider()
 
         if self.auto_patch:
-            self.patch()
+            self.patch(modules=patch_modules)
+
+    def put_annotation(self, key: str, value: Any):
+        """Adds annotation to existing segment or subsegment
+
+        Example
+        -------
+        Custom annotation for a pseudo service named payment
+
+            tracer = Tracer(service="payment")
+            tracer.put_annotation("PaymentStatus", "CONFIRMED")
+
+        Parameters
+        ----------
+        key : str
+            Annotation key (e.g. PaymentStatus)
+        value : any
+            Value for annotation (e.g. "CONFIRMED")
+        """
+        if self.disabled:
+            logger.debug("Tracing has been disabled, aborting put_annotation")
+            return
+
+        logger.debug(f"Annotating on key '{key}' with '{value}'")
+        self.provider.put_annotation(key=key, value=value)
+
+    def put_metadata(self, key: str, value: Any, namespace: str = None):
+        """Adds metadata to existing segment or subsegment
+
+        Parameters
+        ----------
+        key : str
+            Metadata key
+        value : any
+            Value for metadata
+        namespace : str, optional
+            Namespace that metadata will lie under, by default None
+
+        Example
+        -------
+        Custom metadata for a pseudo service named payment
+
+            tracer = Tracer(service="payment")
+            response = collect_payment()
+            tracer.put_metadata("Payment collection", response)
+        """
+        if self.disabled:
+            logger.debug("Tracing has been disabled, aborting put_metadata")
+            return
+
+        namespace = namespace or self.service
+        logger.debug(f"Adding metadata on key '{key}' with '{value}' at namespace '{namespace}'")
+        self.provider.put_metadata(key=key, value=value, namespace=namespace)
+
+    def patch(self, modules: Tuple[str] = None):
+        """Patch modules for instrumentation.
+
+        Patches all supported modules by default if none are given.
+
+        Parameters
+        ----------
+        modules : Tuple[str]
+            List of modules to be patched, optional by default
+        """
+        if self.disabled:
+            logger.debug("Tracing has been disabled, aborting patch")
+            return
+
+        if modules is None:
+            aws_xray_sdk.core.patch_all()
+        else:
+            aws_xray_sdk.core.patch(modules)
 
     def capture_lambda_handler(self, lambda_handler: Callable[[Dict, Any], Any] = None):
         """Decorator to create subsegment for lambda handlers
@@ -162,26 +249,31 @@ class Tracer:
         err
             Exception raised by method
         """
+        lambda_handler_name = lambda_handler.__name__
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
-            self.create_subsegment(name=f"## {lambda_handler.__name__}")
+            with self.provider.in_subsegment(name=f"## {lambda_handler_name}") as subsegment:
+                global is_cold_start
+                if is_cold_start:
+                    logger.debug("Annotating cold start")
+                    subsegment.put_annotation(key="ColdStart", value=True)
+                    is_cold_start = False
 
-            try:
-                logger.debug("Calling lambda handler")
-                response = lambda_handler(event, context)
-                logger.debug("Received lambda handler response successfully")
-                logger.debug(response)
-                if response:
-                    self.put_metadata("lambda handler response", response)
-            except Exception as err:
-                logger.debug("Exception received from lambda handler")
-                self.put_metadata(f"{self.service}_error", err)
-                raise err
-            finally:
-                self.end_subsegment()
+                try:
+                    logger.debug("Calling lambda handler")
+                    response = lambda_handler(event, context)
+                    logger.debug("Received lambda handler response successfully")
+                    logger.debug(response)
+                    self._add_response_as_metadata(
+                        function_name=lambda_handler_name, data=response, subsegment=subsegment
+                    )
+                except Exception as err:
+                    logger.exception("Exception received from lambda handler")
+                    self._add_full_exception_as_metadata(function_name=self.service, error=err, subsegment=subsegment)
+                    raise
 
-            return response
+                return response
 
         return decorate
 
@@ -191,6 +283,14 @@ class Tracer:
         It also captures both response and exceptions as metadata
         and creates a subsegment named `## <method_name>`
 
+        When running [async functions concurrently](https://docs.python.org/3/library/asyncio-task.html#id6),
+        methods may impact each others subsegment, and can trigger
+        and AlreadyEndedException from X-Ray due to async nature.
+
+        For this use case, either use `capture_method` only where
+        `async.gather` is called, or use `in_subsegment_async`
+        context manager via our escape hatch mechanism - See examples.
+
         Example
         -------
         **Custom function using capture_method decorator**
@@ -198,6 +298,86 @@ class Tracer:
             tracer = Tracer(service="payment")
             @tracer.capture_method
             def some_function()
+
+        **Custom async method using capture_method decorator**
+
+            from aws_lambda_powertools.tracing import Tracer
+            tracer = Tracer(service="booking")
+
+            @tracer.capture_method
+            async def confirm_booking(booking_id: str) -> Dict:
+                resp = call_to_booking_service()
+
+                tracer.put_annotation("BookingConfirmation", resp["requestId"])
+                tracer.put_metadata("Booking confirmation", resp)
+
+                return resp
+
+            def lambda_handler(event: dict, context: Any) -> Dict:
+                booking_id = event.get("booking_id")
+                asyncio.run(confirm_booking(booking_id=booking_id))
+
+        **Tracing nested async calls**
+
+            from aws_lambda_powertools.tracing import Tracer
+            tracer = Tracer(service="booking")
+
+            @tracer.capture_method
+            async def get_identity():
+                ...
+
+            @tracer.capture_method
+            async def long_async_call():
+                ...
+
+            @tracer.capture_method
+            async def async_tasks():
+                await get_identity()
+                ret = await long_async_call()
+
+                return { "task": "done", **ret }
+
+        **Safely tracing concurrent async calls with decorator**
+
+        This may not needed once [this bug is closed](https://github.com/aws/aws-xray-sdk-python/issues/164)
+
+            from aws_lambda_powertools.tracing import Tracer
+            tracer = Tracer(service="booking")
+
+            async def get_identity():
+                async with aioboto3.client("sts") as sts:
+                    account = await sts.get_caller_identity()
+                    return account
+
+            async def long_async_call():
+                ...
+
+            @tracer.capture_method
+            async def async_tasks():
+                _, ret = await asyncio.gather(get_identity(), long_async_call(), return_exceptions=True)
+
+                return { "task": "done", **ret }
+
+        **Safely tracing each concurrent async calls with escape hatch**
+
+        This may not needed once [this bug is closed](https://github.com/aws/aws-xray-sdk-python/issues/164)
+
+            from aws_lambda_powertools.tracing import Tracer
+            tracer = Tracer(service="booking")
+
+            async def get_identity():
+                async tracer.provider.in_subsegment_async("## get_identity"):
+                    ...
+
+            async def long_async_call():
+                async tracer.provider.in_subsegment_async("## long_async_call"):
+                    ...
+
+            @tracer.capture_method
+            async def async_tasks():
+                _, ret = await asyncio.gather(get_identity(), long_async_call(), return_exceptions=True)
+
+                return { "task": "done", **ret }
 
         Parameters
         ----------
@@ -209,159 +389,85 @@ class Tracer:
         err
             Exception raised by method
         """
+        method_name = f"{method.__name__}"
 
-        @functools.wraps(method)
-        def decorate(*args, **kwargs):
-            method_name = f"{method.__name__}"
-            self.create_subsegment(name=f"## {method_name}")
+        if inspect.iscoroutinefunction(method):
 
-            try:
-                logger.debug(f"Calling method: {method_name}")
-                response = method(*args, **kwargs)
-                logger.debug(f"Received {method_name} response successfully")
-                logger.debug(response)
-                if response is not None:
-                    self.put_metadata(f"{method_name} response", response)
-            except Exception as err:
-                logger.debug(f"Exception received from '{method_name}'' method")
-                self.put_metadata(f"{method_name} error", err)
-                raise err
-            finally:
-                self.end_subsegment()
+            @functools.wraps(method)
+            async def decorate(*args, **kwargs):
+                async with self.provider.in_subsegment_async(name=f"## {method_name}") as subsegment:
+                    try:
+                        logger.debug(f"Calling method: {method_name}")
+                        response = await method(*args, **kwargs)
+                        self._add_response_as_metadata(function_name=method_name, data=response, subsegment=subsegment)
+                    except Exception as err:
+                        logger.exception(f"Exception received from '{method_name}' method")
+                        self._add_full_exception_as_metadata(
+                            function_name=method_name, error=err, subsegment=subsegment
+                        )
+                        raise
 
-            return response
+                    return response
+
+        else:
+
+            @functools.wraps(method)
+            def decorate(*args, **kwargs):
+                with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+                    try:
+                        logger.debug(f"Calling method: {method_name}")
+                        response = method(*args, **kwargs)
+                        self._add_response_as_metadata(function_name=method_name, data=response, subsegment=subsegment)
+                    except Exception as err:
+                        logger.exception(f"Exception received from '{method_name}' method")
+                        self._add_full_exception_as_metadata(
+                            function_name=method_name, error=err, subsegment=subsegment
+                        )
+                        raise
+
+                    return response
 
         return decorate
 
-    def put_annotation(self, key: str, value: Any):
-        """Adds annotation to existing segment or subsegment
-
-        Example
-        -------
-        Custom annotation for a pseudo service named payment
-
-            tracer = Tracer(service="payment")
-            tracer.put_annotation("PaymentStatus", "CONFIRMED")
+    def _add_response_as_metadata(
+        self, function_name: str = None, data: Any = None, subsegment: aws_xray_sdk.core.models.subsegment = None
+    ):
+        """Add response as metadata for given subsegment
 
         Parameters
         ----------
-        key : str
-            Annotation key (e.g. PaymentStatus)
-        value : Any
-            Value for annotation (e.g. "CONFIRMED")
+        function_name : str, optional
+            function name to add as metadata key, by default None
+        data : Any, optional
+            data to add as subsegment metadata, by default None
+        subsegment : aws_xray_sdk.core.models.subsegment, optional
+            existing subsegment to add metadata on, by default None
         """
-        # Will no longer be needed once #155 is resolved
-        # https://github.com/aws/aws-xray-sdk-python/issues/155
-        if self.disabled:
+        if data is None or subsegment is None:
             return
 
-        logger.debug(f"Annotating on key '{key}'' with '{value}''")
-        self.provider.put_annotation(key=key, value=value)
+        subsegment.put_metadata(key=f"{function_name} response", value=data, namespace=self._config["service"])
 
-    def put_metadata(self, key: str, value: object, namespace: str = None):
-        """Adds metadata to existing segment or subsegment
+    def _add_full_exception_as_metadata(
+        self, function_name: str = None, error: Exception = None, subsegment: aws_xray_sdk.core.models.subsegment = None
+    ):
+        """Add full exception object as metadata for given subsegment
 
         Parameters
         ----------
-        key : str
-            Metadata key
-        value : object
-            Value for metadata
-        namespace : str, optional
-            Namespace that metadata will lie under, by default None
-
-        Example
-        -------
-        Custom metadata for a pseudo service named payment
-
-            tracer = Tracer(service="payment")
-            response = collect_payment()
-            tracer.put_metadata("Payment collection", response)
+        function_name : str, optional
+            function name to add as metadata key, by default None
+        error : Exception, optional
+            error to add as subsegment metadata, by default None
+        subsegment : aws_xray_sdk.core.models.subsegment, optional
+            existing subsegment to add metadata on, by default None
         """
-        # Will no longer be needed once #155 is resolved
-        # https://github.com/aws/aws-xray-sdk-python/issues/155
-        if self.disabled:
-            return
-
-        _namespace = namespace or self.service
-        logger.debug(f"Adding metadata on key '{key}'' with '{value}'' at namespace '{namespace}''")
-        self.provider.put_metadata(key=key, value=value, namespace=_namespace)
-
-    def create_subsegment(self, name: str) -> models.subsegment:
-        """Creates subsegment or a dummy segment plus subsegment if tracing is disabled
-
-        It also assumes Tracer would be instantiated statically so that cold starts are captured.
-
-        Parameters
-        ----------
-        name : str
-            Subsegment name
-
-        Example
-        -------
-        Creates a genuine subsegment
-
-            self.create_subsegment(name="a meaningful name")
-
-        Returns
-        -------
-        models.subsegment
-            AWS X-Ray Subsegment
-        """
-        # Will no longer be needed once #155 is resolved
-        # https://github.com/aws/aws-xray-sdk-python/issues/155
-        subsegment = None
-
-        if self.disabled:
-            logger.debug("Tracing has been disabled, return dummy subsegment instead")
-            segment = models.dummy_entities.DummySegment()
-            subsegment = models.dummy_entities.DummySubsegment(segment)
-        else:
-            subsegment = self.provider.begin_subsegment(name=name)
-            global is_cold_start
-            if is_cold_start:
-                logger.debug("Annotating cold start")
-                subsegment.put_annotation("ColdStart", True)
-                is_cold_start = False
-
-        return subsegment
-
-    def end_subsegment(self):
-        """Ends an existing subsegment
-
-        Parameters
-        ----------
-        subsegment : models.subsegment
-            Subsegment previously created
-        """
-        if self.disabled:
-            logger.debug("Tracing has been disabled, return instead")
-            return
-
-        self.provider.end_subsegment()
-
-    def patch(self):
-        """Patch modules for instrumentation"""
-        logger.debug("Patching modules...")
-
-        is_lambda_emulator = os.getenv("AWS_SAM_LOCAL", False)
-        is_lambda_env = os.getenv("LAMBDA_TASK_ROOT", False)
-
-        if self.disabled:
-            logger.debug("Tracing has been disabled, aborting patch")
-            return
-
-        if is_lambda_emulator or is_lambda_env:
-            logger.debug("Running under SAM CLI env or not in Lambda; aborting patch")
-            return
-
-        patch_all()  # pragma: no cover
+        subsegment.put_metadata(key=f"{function_name} error", value=error, namespace=self._config["service"])
 
     def __disable_tracing_provider(self):
-        """Forcefully disables tracing and patching"""
-        from aws_xray_sdk import global_sdk_config
-
-        global_sdk_config.set_sdk_enabled(False)
+        """Forcefully disables tracing"""
+        logger.debug("Disabling tracer provider...")
+        aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)
 
     def __is_trace_disabled(self) -> bool:
         """Detects whether trace has been disabled
@@ -369,7 +475,7 @@ class Tracer:
         Tracing is automatically disabled in the following conditions:
 
         1. Explicitly disabled via `TRACE_DISABLED` environment variable
-        2. Running in Lambda Emulators where X-Ray Daemon will not be listening
+        2. Running in Lambda Emulators, or locally where X-Ray Daemon will not be listening
         3. Explicitly disabled via constructor e.g `Tracer(disabled=True)`
 
         Returns
@@ -377,7 +483,7 @@ class Tracer:
         bool
         """
         logger.debug("Verifying whether Tracing has been disabled")
-        is_lambda_emulator = os.getenv("AWS_SAM_LOCAL")
+        is_lambda_sam_cli = os.getenv("AWS_SAM_LOCAL")
         env_option = str(os.getenv("POWERTOOLS_TRACE_DISABLED", "false"))
         disabled_env = strtobool(env_option)
 
@@ -385,14 +491,19 @@ class Tracer:
             logger.debug("Tracing has been disabled via env var POWERTOOLS_TRACE_DISABLED")
             return disabled_env
 
-        if is_lambda_emulator:
-            logger.debug("Running under SAM CLI env; Tracing has been disabled")
-            return is_lambda_emulator
+        if is_lambda_sam_cli:
+            logger.debug("Running under SAM CLI env or not in Lambda env; disabling Tracing")
+            return True
 
         return False
 
     def __build_config(
-        self, service: str = None, disabled: bool = None, provider: xray_recorder = None, auto_patch: bool = None
+        self,
+        service: str = None,
+        disabled: bool = None,
+        auto_patch: bool = None,
+        patch_modules: List = None,
+        provider: aws_xray_sdk.core.xray_recorder = None,
     ):
         """ Populates Tracer config for new and existing initializations """
         is_disabled = disabled if disabled is not None else self.__is_trace_disabled()
@@ -402,6 +513,7 @@ class Tracer:
         self._config["auto_patch"] = auto_patch if auto_patch is not None else self._config["auto_patch"]
         self._config["service"] = is_service if is_service else self._config["service"]
         self._config["disabled"] = is_disabled if is_disabled else self._config["disabled"]
+        self._config["patch_modules"] = patch_modules if patch_modules else self._config["patch_modules"]
 
     @classmethod
     def _reset_config(cls):

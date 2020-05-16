@@ -57,15 +57,16 @@ def a_hundred_metrics() -> List[Dict[str, str]]:
 
 def serialize_metrics(metrics: List[Dict], dimensions: List[Dict], namespace: Dict) -> Dict:
     """ Helper function to build EMF object from a list of metrics, dimensions """
-    my_metrics = MetricManager()
-    for metric in metrics:
-        my_metrics.add_metric(**metric)
-
+    my_metrics = Metrics()
     for dimension in dimensions:
         my_metrics.add_dimension(**dimension)
 
     my_metrics.add_namespace(**namespace)
-    return my_metrics.serialize_metric_set()
+    for metric in metrics:
+        my_metrics.add_metric(**metric)
+
+    if len(metrics) != 100:
+        return my_metrics.serialize_metric_set()
 
 
 def serialize_single_metric(metric: Dict, dimension: Dict, namespace: Dict) -> Dict:
@@ -173,10 +174,10 @@ def test_namespace_env_var(monkeypatch, capsys, metric, dimension, namespace):
     assert expected["_aws"] == output["_aws"]
 
 
-def test_metrics_spillover(capsys, metric, dimension, namespace, a_hundred_metrics):
+def test_metrics_spillover(monkeypatch, capsys, metric, dimension, namespace, a_hundred_metrics):
     my_metrics = Metrics()
-    my_metrics.add_namespace(**namespace)
     my_metrics.add_dimension(**dimension)
+    my_metrics.add_namespace(**namespace)
 
     for _metric in a_hundred_metrics:
         my_metrics.add_metric(**_metric)
@@ -194,9 +195,9 @@ def test_metrics_spillover(capsys, metric, dimension, namespace, a_hundred_metri
     single_metric = json.loads(single_metric)
 
     expected_single_metric = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
-    expected_spillover_metrics = serialize_metrics(
-        metrics=a_hundred_metrics, dimensions=[dimension], namespace=namespace
-    )
+
+    serialize_metrics(metrics=a_hundred_metrics, dimensions=[dimension], namespace=namespace)
+    expected_spillover_metrics = json.loads(capsys.readouterr().out.strip())
 
     remove_timestamp(metrics=[spillover_metrics, expected_spillover_metrics, single_metric, expected_single_metric])
 
@@ -264,3 +265,66 @@ def test_exceed_number_of_dimensions(metric, namespace):
             my_metric.add_namespace(**namespace)
             for dimension in dimensions:
                 my_metric.add_dimension(**dimension)
+
+
+def test_log_metrics_error_propagation(capsys, metric, dimension, namespace):
+    # GIVEN Metrics are serialized after handler execution
+    # WHEN If an error occurs and metrics have been added
+    # THEN we should log metrics and propagate exception up
+    my_metrics = Metrics()
+
+    my_metrics.add_metric(**metric)
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_namespace(**namespace)
+
+    @my_metrics.log_metrics
+    def lambda_handler(evt, context):
+        raise ValueError("Bubble up")
+
+    with pytest.raises(ValueError):
+        lambda_handler({}, {})
+
+    output = json.loads(capsys.readouterr().out.strip())
+    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
+
+    remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
+    assert expected["_aws"] == output["_aws"]
+
+
+def test_log_no_metrics_error_propagation(capsys, metric, dimension, namespace):
+    # GIVEN Metrics are serialized after handler execution
+    # WHEN If an error occurs and no metrics have been added
+    # THEN we should propagate exception up and raise SchemaValidationError
+    my_metrics = Metrics()
+
+    @my_metrics.log_metrics
+    def lambda_handler(evt, context):
+        raise ValueError("Bubble up")
+
+    with pytest.raises(SchemaValidationError):
+        lambda_handler({}, {})
+
+
+def test_all_metric_units_string(metric, dimension, namespace):
+
+    # metric unit as MetricUnit key e.g. "Seconds", "BytesPerSecond"
+    for unit in MetricUnit:
+        metric["unit"] = unit.name
+        with single_metric(**metric) as my_metric:
+            my_metric.add_dimension(**dimension)
+            my_metric.add_namespace(**namespace)
+
+    with pytest.raises(MetricUnitError):
+        metric["unit"] = "seconds"
+        with single_metric(**metric) as my_metric:
+            my_metric.add_dimension(**dimension)
+            my_metric.add_namespace(**namespace)
+
+    all_metric_units = [unit.value for unit in MetricUnit]
+
+    # metric unit as MetricUnit value e.g. "Seconds", "Bytes/Second"
+    for unit in all_metric_units:
+        metric["unit"] = unit
+        with single_metric(**metric) as my_metric:
+            my_metric.add_dimension(**dimension)
+            my_metric.add_namespace(**namespace)

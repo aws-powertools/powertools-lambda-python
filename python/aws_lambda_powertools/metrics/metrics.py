@@ -1,13 +1,11 @@
 import functools
 import json
 import logging
-import os
 from typing import Any, Callable
 
 from aws_lambda_powertools.metrics.base import MetricManager
 
 logger = logging.getLogger(__name__)
-logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 
 class Metrics(MetricManager):
@@ -101,8 +99,6 @@ class Metrics(MetricManager):
         def decorate(*args, **kwargs):
             try:
                 response = lambda_handler(*args, **kwargs)
-            except Exception as e:
-                raise e
             finally:
                 metrics = self.serialize_metric_set()
                 logger.debug("Publishing metrics", {"metrics": metrics})

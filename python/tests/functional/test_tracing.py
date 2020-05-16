@@ -124,3 +124,24 @@ def test_tracer_reuse():
 
     assert id(tracer_a) != id(tracer_b)
     assert tracer_a.__dict__.items() == tracer_b.__dict__.items()
+
+
+def test_tracer_method_nested_sync(mocker):
+    # GIVEN tracer is disabled, decorator is used
+    # WHEN multiple sync functions are nested
+    # THEN tracer should not raise a Runtime Error
+    tracer = Tracer(disabled=True)
+
+    @tracer.capture_method
+    def func_1():
+        return 1
+
+    @tracer.capture_method
+    def func_2():
+        return 2
+
+    @tracer.capture_method
+    def sums_values():
+        return func_1() + func_2()
+
+    sums_values()
