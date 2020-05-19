@@ -10,10 +10,10 @@ A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray,
 
 ## Features
 
-**[Tracing](###Tracing)** - Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions
-**[Logging](###Logging)** - Structured logging made easier, and decorator to enrich structured logging with key Lambda context details
-**[Metrics](###Metrics)** - Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
-**[Bring your own middleware](###Bring-your-own-middleware)** - Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
+* **[Tracing](###Tracing)** - Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions
+* **[Logging](###Logging)** - Structured logging made easier, and decorator to enrich structured logging with key Lambda context details
+* **[Metrics](###Metrics)** - Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
+* **[Bring your own middleware](###Bring-your-own-middleware)** - Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
 
 ## Usage
 
@@ -441,7 +441,7 @@ aws_lambda_powertools.logging.logger.set_package_logger()
 
 ## Tenets
 
-* **AWS Lambda only** – We optimise for AWS Lambda function environments only. Utilities might work with web frameworks and non-Lambda environments, though they are not officially supported.
+* **AWS Lambda only** – We optimise for AWS Lambda function environments and supported runtimes only. Utilities might work with web frameworks and non-Lambda environments, though they are not officially supported.
 * **Eases the adoption of best practices** – The main priority of the utilities is to facilitate best practices adoption, as defined in the AWS Well-Architected Serverless Lens; all other functionality is optional.
 * **Keep it lean** – Additional dependencies are carefully considered for security and ease of maintenance, and prevent negatively impacting startup time. 
 * **We strive for backwards compatibility** – New features and changes should keep backwards compatibility. If a breaking change cannot be avoided, the deprecation and migration process should be clearly defined.
