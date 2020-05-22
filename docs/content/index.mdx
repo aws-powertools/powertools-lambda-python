@@ -16,15 +16,15 @@ Powertools is a suite of utilities for AWS Lambda Functions that makes tracing w
 
 **Environment variables** used across suite of utilities.
 
-Environment variable | Description | Default | Utility
+Environment variable | Description | Utility
 ------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
-POWERTOOLS_SERVICE_NAME | Sets service name used for tracing namespace, metrics dimensions and structured logging | "service_undefined" | all
-POWERTOOLS_TRACE_DISABLED | Disables tracing | "false" | [Tracing](./core/tracer)
-POWERTOOLS_TRACE_MIDDLEWARES | Creates sub-segment for each middleware created by lambda_handler_decorator | "false" | [middleware_factory](./utilities/middleware_factory)
-POWERTOOLS_LOGGER_LOG_EVENT | Logs incoming event | "false" | [Logging](./core/logger)
-POWERTOOLS_LOGGER_SAMPLE_RATE | Debug log sampling  | 0 | [Logging](./core/logger)
-POWERTOOLS_METRICS_NAMESPACE | Metrics namespace  | None | [Metrics](./core/metrics)
-LOG_LEVEL | Sets logging level | "INFO" | [Logging](./core/logger)
+**POWERTOOLS_SERVICE_NAME** | Sets service name used for tracing namespace, metrics dimensions and structured logging | all
+**POWERTOOLS_TRACE_DISABLED** | Disables tracing | [Tracing](./core/tracer)
+**POWERTOOLS_TRACE_MIDDLEWARES** | Creates sub-segment for each custom middleware | [middleware_factory](./utilities/middleware_factory)
+**POWERTOOLS_LOGGER_LOG_EVENT** | Logs incoming event | [Logging](./core/logger)
+**POWERTOOLS_LOGGER_SAMPLE_RATE** | Debug log sampling | [Logging](./core/logger)
+**POWERTOOLS_METRICS_NAMESPACE** | Metrics namespace | [Metrics](./core/metrics)
+**LOG_LEVEL** | Sets logging level | [Logging](./core/logger)
 
 ## Tenets
 
