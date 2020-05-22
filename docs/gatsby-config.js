@@ -1,11 +1,10 @@
 module.exports = {
     pathPrefix: '/docs',
     siteMetadata: {
-        title: 'AWS Lambda Powertools Python ',
+        title: 'AWS Lambda Powertools Python',
         description: 'A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier',
         author: `Amazon Web Services`,
-        siteName: 'AWS Lambda Powertools Python ',
-        subtitle: 'Well-Architected',
+        siteName: 'AWS Lambda Powertools Python'
     },
     plugins: [
         {
