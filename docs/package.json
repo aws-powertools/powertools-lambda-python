@@ -1,0 +1,19 @@
+{
+    "scripts": {
+        "start": "gatsby develop",
+        "build": "gatsby build"
+    },
+    "dependencies": {
+        "antd": "^4.2.4",
+        "gatsby": "^2.22.9",
+        "gatsby-plugin-antd": "^2.2.0",
+        "gatsby-plugin-catch-links": "^2.3.2",
+        "gatsby-remark-autolink-headers": "^2.3.3",
+        "gatsby-theme-apollo-docs": "^4.2.3",
+        "react": "^16.13.1",
+        "react-dom": "^16.13.1"
+    },
+    "keywords": [],
+    "name": "aws-lambda-powertools-python",
+    "description": "Powertools is a suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier."
+}
