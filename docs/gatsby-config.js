@@ -57,6 +57,7 @@ module.exports = {
             },
         },
         'gatsby-plugin-antd',
-        'gatsby-remark-autolink-headers'
+        'gatsby-remark-autolink-headers',
+        'gatsby-plugin-offline'
     ]
 };
