@@ -14,6 +14,9 @@
         "react-dom": "^16.13.1"
     },
     "keywords": [],
+    "license": "MIT-0",
+    "repository": "https://github.com/awslabs/aws-lambda-powertools-python",
     "name": "aws-lambda-powertools-python",
-    "description": "Powertools is a suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier."
+    "description": "Powertools is a suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier.",
+    "devDependencies": {}
 }
