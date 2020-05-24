@@ -10,3 +10,7 @@ tr > td {
 .ant-alert-description {
     font-size: 1rem !important
 }
+
+.language-text {
+    font-weight: 700;
+}
