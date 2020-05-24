@@ -167,15 +167,15 @@ def handler(event, context)
 
 ```json
 {  
-   "timestamp":"2020-05-24 18:17:33,774",
-   "level":"INFO",
-   "location":"collect.handler:1",
-   "service":"payment",
-   "lambda_function_name":"test",
-   "lambda_function_memory_size":"128",
-   "lambda_function_arn":"arn:aws:lambda:eu-west-1:12345678910:function:test",
-   "lambda_request_id":"52fdfc07-2182-154f-163f-5f0f9a621d72",
-   "cold_start": "true",
+   "timestamp": "2020-05-24 18:17:33,774",
+   "level": "INFO",
+   "location": "collect.handler:1",
+   "service": "payment",
+   "lambda_function_name": "test",
+   "lambda_function_memory_size": 128,
+   "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
+   "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
+   "cold_start": true,
    "sampling_rate": 0.0,
    "order_id": "order_id_value", // highlight-line
    "message": "Collecting payment"
@@ -208,15 +208,15 @@ def handler(event, context)
 
 ```json
 {  
-   "timestamp":"2020-05-24 18:17:33,774",
-   "level":"INFO",
-   "location":"collect.handler:1",
-   "service":"payment",
-   "lambda_function_name":"test",
-   "lambda_function_memory_size":"128",
-   "lambda_function_arn":"arn:aws:lambda:eu-west-1:12345678910:function:test",
-   "lambda_request_id":"52fdfc07-2182-154f-163f-5f0f9a621d72",
-   "cold_start": "true",
+   "timestamp": "2020-05-24 18:17:33,774",
+   "level": "INFO",
+   "location": "collect.handler:1",
+   "service": "payment",
+   "lambda_function_name": "test",
+   "lambda_function_memory_size": 128,
+   "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
+   "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
+   "cold_start": true,
    "sampling_rate": 0.1, // highlight-line
    "message": "Collecting payment"
 }
