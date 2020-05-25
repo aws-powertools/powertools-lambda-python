@@ -51,10 +51,10 @@ module.exports = {
                     Serverless: {
                         href: 'https://aws.amazon.com/serverless/'
                     },
-                    'AWS SAM docs': {
+                    'AWS SAM Docs': {
                         href: 'https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html',
                     },
-                    'AWS Serverless application architecture review': {
+                    'AWS Serverless Application Architecture Review': {
                         href: 'https://console.aws.amazon.com/wellarchitected/home'
                     }
                 }                
