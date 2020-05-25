@@ -105,7 +105,7 @@ def handler(evt, ctx): # highlight-line
 
 You can use `aiohttp_trace_config` function to create a valid [aiohttp trace_config object](https://docs.aiohttp.org/en/stable/tracing_reference.html). This is necessary since X-Ray utilizes aiohttp trace hooks to capture requests end-to-end.
 
-```python
+```python:title=app.py
 import asyncio
 import aiohttp
 

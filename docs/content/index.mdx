@@ -41,7 +41,7 @@ Environment variable | Description | Utility
 
 As a best practice, AWS Lambda Powertools logging statements are suppressed. If necessary, you can enable debugging using `set_package_logger`:
 
-```python:title=enable_debug_logs
+```python:title=app.py
 from aws_lambda_powertools.logging.logger import set_package_logger
 
 set_package_logger()
