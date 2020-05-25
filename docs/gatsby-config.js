@@ -11,7 +11,7 @@ module.exports = {
             resolve: 'gatsby-theme-apollo-docs',
             options: {
                 root: __dirname,
-                menuTitle: 'AWS Lambda Powertools',
+                menuTitle: 'Additional helpful resources',
                 githubRepo: 'awslabs/aws-lambda-powertools-python',
                 sidebarCategories: {
                     null: [
@@ -27,25 +27,35 @@ module.exports = {
                     ],
                 },
                 navConfig: {
-                    'AWS Serverless': {
-                        url: 'https://aws.amazon.com/serverless/',
-                        description: 'AWS Serverless homepage',
+                    'Serverless Best Practices video': {
+                        url: 'https://www.youtube.com/watch?v=9IYpGTS7Jy0',
+                        description: 'AWS re:Invent ARC307: Serverless architectural patterns & best practices - Origins of Powertools',
                     },
                     'AWS Well-Architected Serverless Lens': {
                         url: 'https://d1.awsstatic.com/whitepapers/architecture/AWS-Serverless-Applications-Lens.pdf',
                         description: 'AWS Well-Architected Serverless Applications Lens whitepaper',
                     },
-                    'AWS Serverless Application Model (SAM)': {
-                        url: 'https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html',
-                        description: "AWS SAM docs"
+                    'Amazon Builders Library': {
+                        url: 'https://aws.amazon.com/builders-library/',
+                        description: 'Collection of living articles covering topics across architecture, software delivery, and operations'
+                    },
+                    'AWS CDK Patterns': {
+                        url: 'https://cdkpatterns.com/patterns/',
+                        description: "CDK Patterns maintained by Matt Coulter (@nideveloper)"
                     }
                 },
                 footerNavConfig: {
-                    Website: {
-                        href: 'https://aws.amazon.com/architecture/well-architected/'
+                    API: {
+                        href: 'https://aws.amazon.com/serverless/'
                     },
-                    'Intro to Well-Architected': {
-                        href: 'https://www.youtube.com/watch?v=gjNPpjYNiow'
+                    Serverless: {
+                        href: 'https://aws.amazon.com/serverless/'
+                    },
+                    'AWS SAM docs': {
+                        href: 'https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html',
+                    },
+                    'AWS Serverless application architecture review': {
+                        href: 'https://console.aws.amazon.com/wellarchitected/home'
                     }
                 }                
             }
