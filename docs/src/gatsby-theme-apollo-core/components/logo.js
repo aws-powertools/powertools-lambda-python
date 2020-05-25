@@ -6,7 +6,7 @@ import { ReactComponent as AWSLogo } from '../../assets/aws-logo.svg';
 const Wrapper = styled.div({
     display: 'flex',
     padding: '0 60px',
-    height: '8vh'
+    height: '5vh'
 });
 
 const StyledAwsIcon = styled(AWSLogo)({
