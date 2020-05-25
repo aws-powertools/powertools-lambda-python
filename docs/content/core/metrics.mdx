@@ -121,3 +121,13 @@ def lambda_handler(evt, ctx):
     metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
     ...
 ```
+
+## Testing your code
+
+Use `POWERTOOLS_METRICS_NAMESPACE` env var when unit testing your code to ensure a metric namespace object is created, and your code doesn't fail validation.
+
+```bash:title=pytest_metric_namespace.sh
+POWERTOOLS_METRICS_NAMESPACE="Example" python -m pytest
+```
+
+You can ignore that if you are explicitly creating metric namespace within your own code `metrics.add_namespace()`.

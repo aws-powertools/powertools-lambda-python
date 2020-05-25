@@ -100,3 +100,11 @@ def middleware_name(handler, event, context):
 * When nesting multiple middlewares, always return the handler with event and context, or response
 * Keep in mind [Python decorators execution order](https://realpython.com/primer-on-python-decorators/#nesting-decorators). Lambda handler is actually called once (top-down)
 * Async middlewares are not supported
+
+## Testing your code
+
+When unit testing middlewares with `trace_execution` option enabled, use `POWERTOOLS_TRACE_DISABLED` env var to safely disable Tracer.
+
+```bash:title=pytest_disable_tracing.sh
+POWERTOOLS_TRACE_DISABLED=1 python -m pytest
+```
