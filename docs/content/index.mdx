@@ -36,3 +36,13 @@ Environment variable | Description | Utility
 **POWERTOOLS_LOGGER_SAMPLE_RATE** | Debug log sampling | [Logging](./core/logger)
 **POWERTOOLS_METRICS_NAMESPACE** | Metrics namespace | [Metrics](./core/metrics)
 **LOG_LEVEL** | Sets logging level | [Logging](./core/logger)
+
+## Debug mode
+
+As a best practice, AWS Lambda Powertools logging statements are suppressed. If necessary, you can enable debugging using `set_package_logger`:
+
+```python:title=enable_debug_logs
+from aws_lambda_powertools.logging.logger import set_package_logger
+
+set_package_logger()
+```
