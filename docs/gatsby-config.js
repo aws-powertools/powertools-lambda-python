@@ -11,7 +11,7 @@ module.exports = {
             resolve: 'gatsby-theme-apollo-docs',
             options: {
                 root: __dirname,
-                menuTitle: 'Additional helpful resources',
+                menuTitle: 'Helpful resources',
                 githubRepo: 'awslabs/aws-lambda-powertools-python',
                 sidebarCategories: {
                     null: [
