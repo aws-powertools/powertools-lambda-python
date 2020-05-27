@@ -29,18 +29,17 @@ build: pr
 	poetry run build
 
 build-docs:
+	mkdir -p dist/docs && mkdir -p dist/api
 	@$(MAKE) build-docs-website
 	@$(MAKE) build-docs-api
-	mkdir -p dist/docs && mkdir -p dist/api
-	mv docs/public/* dist/docs/
-	mv docs/public/api/aws_lambda_powertools/* dist/api/
-	rm -rf dist/api/aws_lambda_powertools
 
 build-docs-api: dev
-	poetry run pdoc --html --output-dir docs/public/api ./aws_lambda_powertools --force
+	poetry run pdoc --html --output-dir dist/api ./aws_lambda_powertools --force
+	rm -rf dist/api/aws_lambda_powertools
 
 build-docs-website: dev-docs
 	cd docs && npm run build
+	cp -R docs/public/* dist/docs/
 
 docs-dev:
 	poetry run pdoc --http : aws_lambda_powertools
