@@ -1,0 +1,224 @@
+---
+title: Logger
+description: Core utility
+---
+
+import Note from "../../src/components/Note"
+
+Logger provides an opinionated logger with output structured as JSON.
+
+**Key features**
+
+* Capture key fields from Lambda context, cold start and structures logging output as JSON
+* Log Lambda event when instructed (disabled by default)
+    - Enable via `POWERTOOLS_LOGGER_LOG_EVENT="true"` or explicitly via decorator param
+* Log sampling enables DEBUG log level for a percentage of requests (disabled by default)
+    - Enable via `POWERTOOLS_LOGGER_SAMPLE_RATE=0.1`, ranges from 0 to 1, where 0.1 is 10% and 1 is 100%
+* Append additional keys to structured log at any point in time
+
+## Initialization
+
+Set `LOG_LEVEL` env var as a start - Here is an example using AWS Serverless Application Model (SAM)
+
+```yaml:title=template.yaml
+Resources:
+    HelloWorldFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+        ...
+        Runtime: python3.8
+        Environment:
+            Variables:
+                LOG_LEVEL: INFO # highlight-line
+```
+
+By default, Logger uses **INFO** log level. You can either change log level via `level` param or via env var.
+
+You can also explicitly set a service name via `service` param or via `POWERTOOLS_SERVICE_NAME` env var. This sets **service** key that will be present across all log statements.
+
+```python:title=app.py
+from aws_lambda_powertools.logging import Logger
+# POWERTOOLS_SERVICE_NAME defined
+logger = Logger() # highlight-line 
+
+# Explicit definition
+Logger(service="payment", level="INFO")
+```
+
+## Standard structured keys
+
+Your Logger will always include the following keys to your structured logging:
+
+Key | Type | Example | Description
+------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
+**timestamp** | str | "2020-05-24 18:17:33,774" | Timestamp of actual log statement
+**level** | str | "INFO" | Logging level
+**location** | str | "collect.handler:1" | Source code location where statement was executed
+**service** | str | "payment" | Service name defined. "service_undefined" will be used if unknown
+**sampling_rate** | int |  0.1 | Debug logging sampling rate in percentage e.g. 1% in this case
+**message** | any |  "Collecting payment" | Log statement value. Unserializable JSON values will be casted to string
+
+## Capturing context Lambda info 
+
+You can enrich your structured logs with key Lambda context information via `inject_lambda_context`.
+
+```python:title=collect.py
+from aws_lambda_powertools.logging import Logger
+
+logger = Logger()
+
+@logger.inject_lambda_context
+def handler(event, context)
+  logger.info("Collecting payment")
+  ...
+  # You can log entire objects too
+  logger.info({
+    "operation": "collect_payment",
+    "charge_id": event['charge_id']
+  })
+  ...
+```
+
+You can also explicitly log any incoming event using `log_event` param or via `POWERTOOLS_LOGGER_LOG_EVENT` env var.
+
+<Note type="warning">
+  This is disabled by default to prevent sensitive info being logged.
+</Note><br/>
+
+```python:title=log_handler_event.py
+from aws_lambda_powertools.logging import Logger
+
+logger = Logger()
+
+@logger.inject_lambda_context(log_event=True) # highlight-start
+def handler(event, context)
+  ...
+```
+
+When used, this will include the following keys:
+
+Key | Type | Example
+------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
+**cold_start**| bool | false
+**function_name**| str | "example-powertools-HelloWorldFunction-1P1Z6B39FLU73"
+**function_memory_size**| int | 128
+**function_arn**| str | "arn:aws:lambda:eu-west-1:012345678910:function:example-powertools-HelloWorldFunction-1P1Z6B39FLU73"
+**function_request_id**| str | "899856cb-83d1-40d7-8611-9e78f15f32f4"
+
+<details>
+<summary><strong>Exerpt output in CloudWatch Logs</strong></summary>
+
+```json:title=cloudwatch_logs.json
+{  
+   "timestamp":"2020-05-24 18:17:33,774",
+   "level":"INFO",
+   "location":"collect.handler:1",
+   "service":"payment",
+// highlight-start
+   "lambda_function_name":"test",
+   "lambda_function_memory_size": 128,
+   "lambda_function_arn":"arn:aws:lambda:eu-west-1:12345678910:function:test",
+   "lambda_request_id":"52fdfc07-2182-154f-163f-5f0f9a621d72",
+   "cold_start": true,
+// highlight-end
+   "sampling_rate": 0.0,
+   "message": "Collecting payment"
+}
+
+{  
+   "timestamp":"2020-05-24 18:17:33,774",
+   "level":"INFO",
+   "location":"collect.handler:15",
+   "service":"payment",
+   "lambda_function_name":"test",
+   "lambda_function_memory_size": 128,
+   "lambda_function_arn":"arn:aws:lambda:eu-west-1:12345678910:function:test",
+   "lambda_request_id":"52fdfc07-2182-154f-163f-5f0f9a621d72",
+   "cold_start": true,
+   "sampling_rate": 0.0,
+// highlight-start
+   "message":{  
+      "operation":"collect_payment",
+      "charge_id": "ch_AZFlk2345C0"
+   }
+// highlight-end
+}
+```
+</details>
+
+## Appending additional keys
+
+You can append your own keys to your existing Logger via `structure_logs` with **append** param. 
+
+```python:title=collect.py
+from aws_lambda_powertools.logging import Logger
+
+logger = Logger()
+
+def handler(event, context)
+  if "order_id" in event:
+      logger.structure_logs(append=True, order_id=event["order_id"]) # highlight-line
+      logger.info("Collecting payment")
+      ...
+```
+
+<details>
+<summary><strong>Exerpt output in CloudWatch Logs</strong></summary>
+
+```json:title=cloudwatch_logs.jsonn
+{  
+   "timestamp": "2020-05-24 18:17:33,774",
+   "level": "INFO",
+   "location": "collect.handler:1",
+   "service": "payment",
+   "lambda_function_name": "test",
+   "lambda_function_memory_size": 128,
+   "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
+   "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
+   "cold_start": true,
+   "sampling_rate": 0.0,
+   "order_id": "order_id_value", // highlight-line
+   "message": "Collecting payment"
+}
+```
+</details>
+
+## Sampling debug logs
+
+You can dynamically set a percentage of your logs to **DEBUG** level using `sample_rate` param or via env var `POWERTOOLS_LOGGER_SAMPLE_RATE`.
+
+<Note type="warning">
+  This is possible due to <a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html">AWS Lambda reuse of execution context</a>, <strong>however, it is not always guaranteed.</strong>
+</Note><br/>
+
+```python:title=collect.py
+from aws_lambda_powertools.logging import Logger
+
+# Sample 1% of debug logs e.g. 0.1
+logger = Logger(sample_rate=0.1) # highlight-line
+
+def handler(event, context)
+  if "order_id" in event:
+      logger.info("Collecting payment")
+      ...
+```
+
+<details>
+<summary><strong>Exerpt output in CloudWatch Logs</strong></summary>
+
+```json:title=cloudwatch_logs.json
+{  
+   "timestamp": "2020-05-24 18:17:33,774",
+   "level": "INFO",
+   "location": "collect.handler:1",
+   "service": "payment",
+   "lambda_function_name": "test",
+   "lambda_function_memory_size": 128,
+   "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
+   "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
+   "cold_start": true,
+   "sampling_rate": 0.1, // highlight-line
+   "message": "Collecting payment"
+}
+```
+</details>

@@ -1,0 +1,16 @@
+tr > td {
+    font-size: 0.95rem
+}
+
+/* Override Ant default styles */
+.ant-alert-with-description .ant-alert-message {
+    font-size: 1.125rem !important
+}
+
+.ant-alert-description {
+    font-size: 1rem !important
+}
+
+.language-text {
+    font-weight: 700;
+}

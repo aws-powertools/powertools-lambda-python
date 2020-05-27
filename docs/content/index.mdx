@@ -1,0 +1,48 @@
+---
+title: Homepage
+description: AWS Lambda Powertools Python
+---
+
+Powertools is a suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier.
+
+## Features
+
+* [Tracing](./core/tracer) - Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions
+* [Logging](./core/logger) - Structured logging made easier, and decorator to enrich structured logging with key Lambda context details
+* [Metrics](./core/metrics) - Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
+* [Bring your own middleware](./utilities/middleware_factory) - Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
+
+## Tenets
+
+* **AWS Lambda only** – We optimise for AWS Lambda function environments and supported runtimes only. Utilities might work with web frameworks and non-Lambda environments, though they are not officially supported.
+* **Eases the adoption of best practices** – The main priority of the utilities is to facilitate best practices adoption, as defined in the AWS Well-Architected Serverless Lens; all other functionality is optional.
+* **Keep it lean** – Additional dependencies are carefully considered for security and ease of maintenance, and prevent negatively impacting startup time. 
+* **We strive for backwards compatibility** – New features and changes should keep backwards compatibility. If a breaking change cannot be avoided, the deprecation and migration process should be clearly defined.
+* **We work backwards from the community** – We aim to strike a balance of what would work best for 80% of customers. Emerging practices are considered and discussed via Requests for Comment (RFCs)
+* **Idiomatic** – Utilities follow programming language idioms and language-specific best practices.
+
+_`*` Core utilities are Tracer, Logger and Metrics. Optional utilities may vary across languages._
+
+## Environment variables
+
+**Environment variables** used across suite of utilities.
+
+Environment variable | Description | Utility
+------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
+**POWERTOOLS_SERVICE_NAME** | Sets service name used for tracing namespace, metrics dimensions and structured logging | all
+**POWERTOOLS_TRACE_DISABLED** | Disables tracing | [Tracing](./core/tracer)
+**POWERTOOLS_TRACE_MIDDLEWARES** | Creates sub-segment for each custom middleware | [middleware_factory](./utilities/middleware_factory)
+**POWERTOOLS_LOGGER_LOG_EVENT** | Logs incoming event | [Logging](./core/logger)
+**POWERTOOLS_LOGGER_SAMPLE_RATE** | Debug log sampling | [Logging](./core/logger)
+**POWERTOOLS_METRICS_NAMESPACE** | Metrics namespace | [Metrics](./core/metrics)
+**LOG_LEVEL** | Sets logging level | [Logging](./core/logger)
+
+## Debug mode
+
+As a best practice, AWS Lambda Powertools logging statements are suppressed. If necessary, you can enable debugging using `set_package_logger`:
+
+```python:title=app.py
+from aws_lambda_powertools.logging.logger import set_package_logger
+
+set_package_logger()
+```

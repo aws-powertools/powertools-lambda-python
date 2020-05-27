@@ -1,0 +1,133 @@
+---
+title: Metrics
+description: Core utility
+---
+
+import Note from "../../src/components/Note"
+
+Metrics creates custom metrics asynchronously via logging metrics to standard output following Amazon CloudWatch Embedded Metric Format (EMF).
+
+**Key features**
+
+* Aggregate up to 100 metrics using a single CloudWatch EMF object (large JSON blob)
+* Validate against common metric definitions mistakes (metric unit, values, max dimensions, max metrics, etc)
+* Metrics are created asynchronously by CloudWatch service, no custom stacks needed
+* Context manager to create an one off metric with a different dimension
+
+## Initialization
+
+Set `POWERTOOLS_METRICS_NAMESPACE` env var as a start - Here is an example using AWS Serverless Application Model (SAM)
+
+```yaml:title=template.yaml
+Resources:
+    HelloWorldFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+        ...
+        Runtime: python3.8
+        Environment:
+            Variables:
+                POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline # highlight-line
+```
+
+We recommend you use your application or main service as a metric namespace.
+
+```python:title=app.py
+from aws_lambda_powertools.metrics import Metrics, MetricUnit
+
+metrics = Metrics()
+# metrics.add_namespace("ServerlessAirline") # optionally if you set via env var
+```
+
+You can initialize Metrics anywhere in your code as many time as you need - It'll keep track of your aggregate metrics in memory.
+
+## Creating metrics
+
+You can create metrics using `add_metric`, and set dimensions for all your aggregate metrics using `add_dimension`.
+
+```python:title=app.py
+from aws_lambda_powertools.metrics import Metrics, MetricUnit
+
+metrics = Metrics()
+# highlight-start
+metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
+metrics.add_dimension(name="service", value="booking")
+# highlight-end
+```
+
+`MetricUnit` enum facilitate finding a supported metric unit by CloudWatch. Alternatively, you can pass the value as a string if you already know them e.g. "Count".
+
+CloudWatch EMF supports a max of 100 metrics. Metrics will automatically flush all metrics when adding the 100th metric, where subsequent metrics will be aggregated into a new EMF object.
+
+## Creating a metric with a different dimension
+
+CloudWatch EMF uses the same dimensions across all your metrics. Use `single_metric` if you have a metric that should have different dimensions. 
+
+<Note type="info">
+  Generally, this would be an edge case since you <a href="https://aws.amazon.com/cloudwatch/pricing/">pay for unique metric</a>. Keep the following formula in mind:
+  <br/><br/>
+  <strong>unique metric = (metric_name + dimension_name + dimension_value)</strong>
+</Note><br/>
+
+
+```python:title=single_metric.py
+from aws_lambda_powertools.metrics import MetricUnit, single_metric
+
+with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric: # highlight-line
+    metric.add_dimension(name="function_context", value="$LATEST")
+    ...
+```
+
+## Flushing metrics
+
+As you finish adding all your metrics, you need to serialize and flush them to standard output. You can do that right before you return your response to the caller via `log_metrics`.
+
+```python:title=lambda_handler.py
+from aws_lambda_powertools.metrics import Metrics, MetricUnit
+
+metrics = Metrics()
+metrics.add_metric(name="ColdStart", unit="Count", value=1)
+
+@metrics.log_metrics # highlight-line
+def lambda_handler(evt, ctx):
+    metrics.add_dimension(name="service", value="booking")
+    metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
+    ...
+```
+
+`log_metrics` decorator **validates**, **serializes**, and **flushes** all your metrics. During metrics validation, if any of the following criteria is met, `SchemaValidationError` exception will be raised:
+
+* At least of one Metric and Dimension 
+* Maximum of 9 dimensions
+* Namespace is set, and no more than one
+* Metric units must be [supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html)
+
+<Note type="warning">
+  When nesting multiple middlwares, you should use <strong><code>log_metrics</code> as your last decorator wrapping all subsequent ones</strong>.
+</Note><br/>
+
+```python:title=lambda_handler_nested_middlewares.py
+from aws_lambda_powertools.metrics import Metrics, MetricUnit
+
+metrics = Metrics()
+metrics.add_metric(name="ColdStart", unit="Count", value=1)
+
+# highlight-start
+@metrics.log_metrics
+@tracer.capture_lambda_handler
+# highlight-end
+def lambda_handler(evt, ctx):
+    metrics.add_dimension(name="service", value="booking")
+    metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
+    ...
+```
+
+## Testing your code
+
+Use `POWERTOOLS_METRICS_NAMESPACE` env var when unit testing your code to ensure a metric namespace object is created, and your code doesn't fail validation.
+
+```bash:title=pytest_metric_namespace.sh
+POWERTOOLS_METRICS_NAMESPACE="Example" python -m pytest
+```
+
+You can ignore that if you are explicitly creating metric namespace within your own code `metrics.add_namespace()`.

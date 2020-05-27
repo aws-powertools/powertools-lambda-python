@@ -20,7 +20,7 @@ metrics = Metrics()
 
 _cold_start = True
 
-metrics.add_dimension(name="operation", value="example")
+metrics.add_dimension(name="operation", value="example") # added at cold start only
 
 
 async def aioboto_task():

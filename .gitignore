@@ -292,4 +292,11 @@ $RECYCLE.BIN/
 
 # Misc
 test_report
+wheelhouse
 /.idea/*
+*.html
+
+# Docs files
+docs/.cache/
+docs/public
+node_modules
