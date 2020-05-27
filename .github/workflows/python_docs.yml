@@ -20,8 +20,10 @@ jobs:
           python-version: "3.8"
       - name: Build docs website
         run: make docs
+      - name: DEBUG Setup tmate session
+        uses: mxschmitt/action-tmate@v2
       - name: Deploy docs
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/public
+          publish_dir: ./docs/public
