@@ -31,11 +31,14 @@ build: pr
 build-docs:
 	@$(MAKE) build-docs-website
 	@$(MAKE) build-docs-api
+	$(info Copying latest doc dist)
+	mkdir -p dist/{docs,api}
+	mv docs/public/* dist/docs/
+	mv docs/public/api/aws_lambda_powertools/* dist/api/
+	rm -rf dist/api/aws_lambda_powertools
 
 build-docs-api: dev
 	poetry run pdoc --html --output-dir docs/public/api ./aws_lambda_powertools --force
-	mv docs/public/api/aws_lambda_powertools/* docs/public/api/
-	rm -rf docs/public/api/aws_lambda_powertools
 
 build-docs-website: dev-docs
 	cd docs && npm run build
