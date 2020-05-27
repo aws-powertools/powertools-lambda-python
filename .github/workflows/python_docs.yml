@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - master
-      - feat/docs
 
 jobs:
   docs:
