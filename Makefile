@@ -43,6 +43,9 @@ build-docs-website: dev-docs
 	cp -R docs/public/* dist/
 
 docs-dev:
+	cd docs && npm run start
+
+docs-api-dev:
 	poetry run pdoc --http : aws_lambda_powertools
 
 security-baseline:
