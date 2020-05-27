@@ -1,10 +1,11 @@
 module.exports = {
-    pathPrefix: '/docs',
+    pathPrefix: '',
     siteMetadata: {
         title: 'AWS Lambda Powertools Python',
         description: 'A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier',
         author: `Amazon Web Services`,
-        siteName: 'AWS Lambda Powertools Python'
+        siteName: 'AWS Lambda Powertools Python',
+        siteUrl: 'https://awslabs.github.io/aws-lambda-powertools-python'
     },
     plugins: [
         {
@@ -13,6 +14,7 @@ module.exports = {
                 root: __dirname,
                 menuTitle: 'Helpful resources',
                 githubRepo: 'awslabs/aws-lambda-powertools-python',
+                baseUrl: 'https://awslabs.github.io/aws-lambda-powertools-python',
                 sidebarCategories: {
                     null: [
                         'index'

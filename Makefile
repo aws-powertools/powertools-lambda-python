@@ -6,6 +6,9 @@ dev:
 	pip install --upgrade pip poetry
 	poetry install
 
+dev-docs:
+	cd docs && npm install
+
 format:
 	poetry run isort -rc .
 	poetry run black aws_lambda_powertools
@@ -26,10 +29,17 @@ build: pr
 	poetry run build
 
 docs: dev
-	poetry run pdoc --html --output-dir docs ./aws_lambda_powertools --force
+	$(MAKE) build-docs
+	poetry run pdoc --html --output-dir docs/public/api ./aws_lambda_powertools --force
+
+docs-api: dev
+	poetry run pdoc --html --output-dir docs/public/api ./aws_lambda_powertools --force
 
 docs-dev:
 	poetry run pdoc --http : aws_lambda_powertools
+
+build-docs: dev-docs
+	cd docs && npm run build
 
 security-baseline:
 	poetry run bandit --baseline bandit.baseline -r aws_lambda_powertools
