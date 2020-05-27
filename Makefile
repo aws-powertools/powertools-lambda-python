@@ -28,12 +28,14 @@ pr: lint test security-baseline complexity-baseline
 build: pr
 	poetry run build
 
-docs: dev
+docs:
 	$(MAKE) build-docs
-	poetry run pdoc --html --output-dir docs/public/api ./aws_lambda_powertools --force
+	$(MAKE) build-docs-api
 
-docs-api: dev
+build-docs-api: dev
 	poetry run pdoc --html --output-dir docs/public/api ./aws_lambda_powertools --force
+	mv docs/public/api/aws_lambda_powertools/* docs/public/api/
+	rm -rf docs/public/api/aws_lambda_powertools
 
 docs-dev:
 	poetry run pdoc --http : aws_lambda_powertools

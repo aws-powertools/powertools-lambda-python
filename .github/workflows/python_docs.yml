@@ -19,15 +19,9 @@ jobs:
         with:
           python-version: "3.8"
       - name: Build docs website
-        uses: jzweifel/gatsby-cli-github-action@v1.0.0
-        env:
-          GATSBY_PROJECT_PATH: "./docs"
-        with:
-          gatsby-arg: build
-      - name: Build API docs
-        run: make docs-api
-      - name: deploy docs
+        run: make docs
+      - name: Deploy docs
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs
+          publish_dir: docs/public
