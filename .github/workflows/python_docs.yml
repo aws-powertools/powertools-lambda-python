@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: "3.8"
       - name: Build docs website
-        run: make docs
+        run: make build-docs
       # - name: DEBUG tmate session
       #   uses: mxschmitt/action-tmate@v2
       - name: Deploy docs
