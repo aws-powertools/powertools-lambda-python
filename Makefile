@@ -31,8 +31,7 @@ build: pr
 build-docs:
 	@$(MAKE) build-docs-website
 	@$(MAKE) build-docs-api
-	$(info Copying latest doc dist)
-	mkdir -p dist/{docs,api}
+	mkdir -p dist/docs && mkdir -p dist/api
 	mv docs/public/* dist/docs/
 	mv docs/public/api/aws_lambda_powertools/* dist/api/
 	rm -rf dist/api/aws_lambda_powertools
