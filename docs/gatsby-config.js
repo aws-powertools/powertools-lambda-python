@@ -47,17 +47,14 @@ module.exports = {
                     }
                 },
                 footerNavConfig: {
-                    API: {
-                        href: 'https://aws.amazon.com/serverless/'
+                    'API Reference': {
+                        href: 'https://awslabs.github.io/aws-lambda-powertools-python/api/'
                     },
                     Serverless: {
                         href: 'https://aws.amazon.com/serverless/'
                     },
                     'AWS SAM Docs': {
                         href: 'https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html',
-                    },
-                    'AWS Serverless Application Architecture Review': {
-                        href: 'https://console.aws.amazon.com/wellarchitected/home'
                     }
                 }                
             }
