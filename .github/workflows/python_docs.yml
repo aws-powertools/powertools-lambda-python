@@ -20,8 +20,8 @@ jobs:
           python-version: "3.8"
       - name: Build docs website
         run: make docs
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v2
+      # - name: DEBUG tmate session
+      #   uses: mxschmitt/action-tmate@v2
       - name: Deploy docs
         uses: peaceiris/actions-gh-pages@v3
         with:

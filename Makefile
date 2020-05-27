@@ -28,8 +28,8 @@ pr: lint test security-baseline complexity-baseline
 build: pr
 	poetry run build
 
-docs:
-	@$(MAKE) build-docs
+build-docs:
+	@$(MAKE) build-docs-website
 	@$(MAKE) build-docs-api
 
 build-docs-api: dev
@@ -37,11 +37,11 @@ build-docs-api: dev
 	mv docs/public/api/aws_lambda_powertools/* docs/public/api/
 	rm -rf docs/public/api/aws_lambda_powertools
 
+build-docs-website: dev-docs
+	cd docs && npm run build
+
 docs-dev:
 	poetry run pdoc --http : aws_lambda_powertools
-
-build-docs: dev-docs
-	cd docs && npm run build
 
 security-baseline:
 	poetry run bandit --baseline bandit.baseline -r aws_lambda_powertools
