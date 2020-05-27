@@ -29,8 +29,8 @@ build: pr
 	poetry run build
 
 docs:
-	$(MAKE) build-docs
-	$(MAKE) build-docs-api
+	@$(MAKE) build-docs
+	@$(MAKE) build-docs-api
 
 build-docs-api: dev
 	poetry run pdoc --html --output-dir docs/public/api ./aws_lambda_powertools --force
