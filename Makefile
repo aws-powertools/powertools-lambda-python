@@ -6,6 +6,9 @@ dev:
 	pip install --upgrade pip poetry
 	poetry install
 
+dev-docs:
+	cd docs && npm install
+
 format:
 	poetry run isort -rc .
 	poetry run black aws_lambda_powertools
@@ -25,10 +28,24 @@ pr: lint test security-baseline complexity-baseline
 build: pr
 	poetry run build
 
-docs: dev
-	poetry run pdoc --html --output-dir docs ./aws_lambda_powertools --force
+build-docs:
+	mkdir -p dist/api
+	@$(MAKE) build-docs-website
+	@$(MAKE) build-docs-api
+
+build-docs-api: dev
+	poetry run pdoc --html --output-dir dist/api/ ./aws_lambda_powertools --force
+	mv dist/api/aws_lambda_powertools/* dist/api/
+	rm -rf dist/api/aws_lambda_powertools
+
+build-docs-website: dev-docs
+	cd docs && npm run build
+	cp -R docs/public/* dist/
 
 docs-dev:
+	cd docs && npm run start
+
+docs-api-dev:
 	poetry run pdoc --http : aws_lambda_powertools
 
 security-baseline:
