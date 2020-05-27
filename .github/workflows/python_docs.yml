@@ -18,6 +18,8 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: "3.8"
+      - name: DEBUG
+        uses: mxschmitt/action-tmate@v2
       - name: Build docs website
         run: make build-docs
       - name: Deploy docs
