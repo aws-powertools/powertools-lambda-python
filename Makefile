@@ -34,7 +34,8 @@ build-docs:
 	@$(MAKE) build-docs-api
 
 build-docs-api: dev
-	poetry run pdoc --html --output-dir dist/api ./aws_lambda_powertools --force
+	poetry run pdoc --html --output-dir dist/api/ ./aws_lambda_powertools --force
+	mv dist/api/aws_lambda_powertools/* dist/api/
 	rm -rf dist/api/aws_lambda_powertools
 
 build-docs-website: dev-docs
