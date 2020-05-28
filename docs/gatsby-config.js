@@ -1,3 +1,5 @@
+const docsWebsite = "https://awslabs.github.io/aws-lambda-powertools-python"
+
 module.exports = {
     pathPrefix: '/aws-lambda-powertools-python',
     siteMetadata: {
@@ -5,7 +7,7 @@ module.exports = {
         description: 'A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier',
         author: `Amazon Web Services`,
         siteName: 'AWS Lambda Powertools Python',
-        siteUrl: 'https://awslabs.github.io/aws-lambda-powertools-python'
+        siteUrl: `${docsWebsite}`
     },
     plugins: [
         {
@@ -14,9 +16,10 @@ module.exports = {
                 root: __dirname,
                 menuTitle: 'Helpful resources',
                 githubRepo: 'awslabs/aws-lambda-powertools-python',
-                baseUrl: 'https://awslabs.github.io/aws-lambda-powertools-python',
+                baseUrl: `${docsWebsite}`,
                 algoliaApiKey: 'a8491b576861e819fd50d567134eb9ce',
                 algoliaIndexName: 'aws-lambda-powertools-python',
+                logoLink: `${docsWebsite}`,
                 sidebarCategories: {
                     null: [
                         'index'
@@ -69,7 +72,6 @@ module.exports = {
         },
         'gatsby-plugin-antd',
         'gatsby-remark-autolink-headers',
-        'gatsby-plugin-offline',
         'gatsby-plugin-sitemap'
     ]
 };
