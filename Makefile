@@ -33,8 +33,9 @@ build-docs:
 	@$(MAKE) build-docs-website
 	@$(MAKE) build-docs-api
 
-build-docs-api: dev
-	poetry run pdoc --html --output-dir dist/api/ ./aws_lambda_powertools --force
+build-docs-api:
+	pip install pdoc3~=0.7.5
+	pdoc3 --html --output-dir dist/api/ ./aws_lambda_powertools --force
 	mv dist/api/aws_lambda_powertools/* dist/api/
 	rm -rf dist/api/aws_lambda_powertools
 
