@@ -15,6 +15,8 @@ module.exports = {
                 menuTitle: 'Helpful resources',
                 githubRepo: 'awslabs/aws-lambda-powertools-python',
                 baseUrl: 'https://awslabs.github.io/aws-lambda-powertools-python',
+                algoliaApiKey: 'a8491b576861e819fd50d567134eb9ce',
+                algoliaIndexName: 'aws-lambda-powertools-python',
                 sidebarCategories: {
                     null: [
                         'index'
