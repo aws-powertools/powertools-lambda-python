@@ -69,7 +69,6 @@ module.exports = {
         },
         'gatsby-plugin-antd',
         'gatsby-remark-autolink-headers',
-        'gatsby-plugin-offline',
         'gatsby-plugin-sitemap'
     ]
 };
