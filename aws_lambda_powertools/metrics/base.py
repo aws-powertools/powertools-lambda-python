@@ -116,7 +116,7 @@ class MetricManager:
             logger.debug(f"Exceeded maximum of {MAX_METRICS} metrics - Publishing existing metric set")
             metrics = self.serialize_metric_set()
             print(json.dumps(metrics))
-            
+
             # clear metric set only as opposed to metrics and dimensions set
             # since we could have more than 100 metrics
             self.metric_set.clear()

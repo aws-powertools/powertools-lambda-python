@@ -357,10 +357,10 @@ def test_metrics_reuse_metric_set(metric, dimension, namespace):
     my_metrics.add_metric(**metric)
 
     # WHEN Metrics is initialized one more time
-    m = Metrics()
+    my_metrics_2 = Metrics()
 
     # THEN Both class instances should have the same metric set
-    assert m.metric_set == my_metrics.metric_set
+    assert my_metrics_2.metric_set == my_metrics.metric_set
 
 
 def test_log_metrics_clear_metrics_after_invocation(metric, dimension, namespace):
