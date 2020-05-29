@@ -14,6 +14,11 @@ from aws_lambda_powertools.metrics import (
 )
 from aws_lambda_powertools.metrics.base import MetricManager
 
+@pytest.fixture(scope="function", autouse=True)
+def reset_metric_set():
+    metrics = Metrics()
+    metrics.clear_metrics()
+    yield
 
 @pytest.fixture
 def metric() -> Dict[str, str]:
@@ -267,10 +272,10 @@ def test_exceed_number_of_dimensions(metric, namespace):
                 my_metric.add_dimension(**dimension)
 
 
-def test_log_metrics_error_propagation(capsys, metric, dimension, namespace):
-    # GIVEN Metrics are serialized after handler execution
-    # WHEN If an error occurs and metrics have been added
-    # THEN we should log metrics and propagate exception up
+def test_log_metrics_during_exception(capsys, metric, dimension, namespace):
+    # GIVEN Metrics are serialized via log_metrics
+    # WHEN an error has been raised during handler execution
+    # THEN we should log metrics and propagate the exception up
     my_metrics = Metrics()
 
     my_metrics.add_metric(**metric)
