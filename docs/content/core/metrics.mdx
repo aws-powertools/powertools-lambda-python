@@ -127,6 +127,7 @@ def lambda_handler(evt, ctx):
 If you prefer not to use `log_metrics` because you might want to encapsulate additional logic when doing so, you can manually flush and clear metrics as follows:
 
 ```python:title=manual_metric_serialization.py
+import json
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
 
 metrics = Metrics()
@@ -134,8 +135,9 @@ metrics.add_metric(name="ColdStart", unit="Count", value=1)
 metrics.add_dimension(name="service", value="booking")
 
 # highlight-start
-metrics.serialize_metric_set() 
+your_metrics_object = metrics.serialize_metric_set() 
 metrics.clear_metrics()
+print(json.dumps(your_metrics_object))
 # highlight-end
 ```
 
