@@ -50,8 +50,8 @@ class MetricManager:
     """
 
     def __init__(self, metric_set: Dict[str, str] = None, dimension_set: Dict = None, namespace: str = None):
-        self.metric_set = metric_set or {}
-        self.dimension_set = dimension_set or {}
+        self.metric_set = metric_set if metric_set is not None else {}
+        self.dimension_set = dimension_set if dimension_set is not None else {}
         self.namespace = os.getenv("POWERTOOLS_METRICS_NAMESPACE") or namespace
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_options = list(MetricUnit.__members__)
@@ -116,7 +116,10 @@ class MetricManager:
             logger.debug(f"Exceeded maximum of {MAX_METRICS} metrics - Publishing existing metric set")
             metrics = self.serialize_metric_set()
             print(json.dumps(metrics))
-            self.metric_set = {}
+
+            # clear metric set only as opposed to metrics and dimensions set
+            # since we could have more than 100 metrics
+            self.metric_set.clear()
 
     def serialize_metric_set(self, metrics: Dict = None, dimensions: Dict = None) -> Dict:
         """Serializes metric and dimensions set

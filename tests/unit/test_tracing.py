@@ -99,19 +99,7 @@ def test_tracer_lambda_handler(mocker, dummy_response, provider_stub, in_subsegm
 
 def test_tracer_method(mocker, dummy_response, provider_stub, in_subsegment_mock):
     provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
-    tracer = Tracer(provider=provider, service="booking")
-
-    @tracer.capture_method
-    def greeting(name, message):
-        return dummy_response
-
-    greeting(name="Foo", message="Bar")
-
-    assert in_subsegment_mock.in_subsegment.call_count == 1
-    assert in_subsegment_mock.in_subsegment.call_args == mocker.call(name="## greeting")
-    assert in_subsegment_mock.put_metadata.call_args == mocker.call(
-        key="greeting response", value=dummy_response, namespace="booking"
-    )
+    Tracer(provider=provider, service="booking")
 
 
 def test_tracer_custom_metadata(mocker, dummy_response, provider_stub):
