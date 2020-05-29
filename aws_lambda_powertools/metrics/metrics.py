@@ -71,10 +71,9 @@ class Metrics(MetricManager):
         super().__init__(metric_set=self.metric_set, dimension_set=self.dimension_set)
 
     def clear_metrics(self):
-        # self._metrics.clear()
+        logger.debug("Clearing out existing metric set from memory")
         self.metric_set.clear()
         self.dimension_set.clear()
-        self._dimensions.clear()
 
     def log_metrics(self, lambda_handler: Callable[[Any, Any], Any] = None):
         """Decorator to serialize and publish metrics at the end of a function execution.
@@ -109,7 +108,7 @@ class Metrics(MetricManager):
                 response = lambda_handler(*args, **kwargs)
             finally:
                 metrics = self.serialize_metric_set()
-                # self.clear_metrics()
+                self.clear_metrics()
                 logger.debug("Publishing metrics", {"metrics": metrics})
                 print(json.dumps(metrics))
 

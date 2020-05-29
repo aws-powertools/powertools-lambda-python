@@ -341,3 +341,18 @@ def test_metrics_reuse_metric_set(metric, dimension, namespace):
     m = Metrics()
 
     assert m.metric_set == my_metrics.metric_set
+
+
+def test_log_metrics_clear_metrics_after_invocation(metric, dimension, namespace):
+    my_metrics = Metrics()
+
+    my_metrics.add_metric(**metric)
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_namespace(**namespace)
+
+    @my_metrics.log_metrics
+    def lambda_handler(evt, context):
+        return True
+
+    lambda_handler({}, {})
+    assert my_metrics.metric_set == {}
