@@ -62,7 +62,7 @@ def a_hundred_metrics() -> List[Dict[str, str]]:
 
 def serialize_metrics(metrics: List[Dict], dimensions: List[Dict], namespace: Dict) -> Dict:
     """ Helper function to build EMF object from a list of metrics, dimensions """
-    my_metrics = Metrics()
+    my_metrics = MetricManager()
     for dimension in dimensions:
         my_metrics.add_dimension(**dimension)
 
