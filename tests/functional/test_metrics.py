@@ -328,3 +328,11 @@ def test_all_metric_units_string(metric, dimension, namespace):
         with single_metric(**metric) as my_metric:
             my_metric.add_dimension(**dimension)
             my_metric.add_namespace(**namespace)
+
+
+def test_metrics_reuse_metric_set(metric, dimension, namespace):
+    my_metrics = Metrics()
+    my_metrics.add_metric(**metric)
+    m = Metrics()
+
+    assert m.metric_set == my_metrics.metric_set

@@ -65,8 +65,10 @@ class Metrics(MetricManager):
     _metrics = {}
     _dimensions = {}
 
-    def __init__(self, metric_set=None, dimension_set=None, namespace=None):
-        super().__init__(metric_set=self._metrics, dimension_set=self._dimensions, namespace=namespace)
+    def __init__(self):
+        self.metric_set = self._metrics
+        self.dimension_set = self._dimensions
+        super().__init__(metric_set=self.metric_set, dimension_set=self.dimension_set)
 
     def log_metrics(self, lambda_handler: Callable[[Any, Any], Any] = None):
         """Decorator to serialize and publish metrics at the end of a function execution.
