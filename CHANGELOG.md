@@ -1,5 +1,11 @@
 # HISTORY 
 
+## May 29th
+
+**0.9.4**
+
+* **Metrics**: Bugfix - Metrics were not correctly flushed, and cleared on every invocation
+
 ## May 16th
 
 **0.9.3**
