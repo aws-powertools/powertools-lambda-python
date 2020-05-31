@@ -187,8 +187,10 @@ def handler(event, context)
 
 You can dynamically set a percentage of your logs to **DEBUG** level using `sample_rate` param or via env var `POWERTOOLS_LOGGER_SAMPLE_RATE`.
 
-<Note type="warning">
-  This is possible due to <a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html">AWS Lambda reuse of execution context</a>, <strong>however, it is not always guaranteed.</strong>
+This happens on an entire request basis, and <strong>DEBUG</strong> level is set at the constructor. That means, concurrent requests or infrequent invocations are more likely to occur as [new Lambda execution contexts are created](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html), not reused.
+
+<Note type="info">
+  If you want this logic to happen on every invocation regardless whether Lambda reuses the execution environment or not, then create your Logger inside your Lambda handler.
 </Note><br/>
 
 ```python:title=collect.py
