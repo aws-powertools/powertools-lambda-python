@@ -68,7 +68,7 @@ module.exports = {
         {
             resolve: `gatsby-plugin-catch-links`,
             options: {
-                excludePattern: /(excluded-link|external)/,
+                excludePattern: /\/aws-lambda-powertools-python/,
             },
         },
         'gatsby-plugin-antd',
