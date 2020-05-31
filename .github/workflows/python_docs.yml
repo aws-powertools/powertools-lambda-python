@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - master
+      - develop
 
 jobs:
   docs:
@@ -17,10 +18,28 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: "3.8"
+      - name: Capture branch and tag
+        id: branch_name
+        run: |
+          echo ::set-env name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
+          echo ::set-env name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
       - name: Build docs website
-        run: make build-docs
-      - name: Deploy docs
+        run: make build-docs-website
+      - name: Build docs API reference
+        if: env.SOURCE_BRANCH == 'master'
+        run: make build-docs-api
+      - name: Deploy docs website
         uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          # when deploying docs website only
+          # we need to keep existing API docs checked in
+          # but only for dev branch
+          keep_files: true
+      - name: Deploy all docs
+        uses: peaceiris/actions-gh-pages@v3
+        if: env.SOURCE_BRANCH == 'master'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
