@@ -53,7 +53,8 @@ module.exports = {
                 },
                 footerNavConfig: {
                     'API Reference': {
-                        href: 'https://awslabs.github.io/aws-lambda-powertools-python/api/'
+                        href: 'https://awslabs.github.io/aws-lambda-powertools-python/api/',
+                        target: '_blank'
                     },
                     Serverless: {
                         href: 'https://aws.amazon.com/serverless/'
