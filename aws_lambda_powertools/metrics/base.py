@@ -203,7 +203,14 @@ class MetricManager:
             Dimension value
         """
         logger.debug(f"Adding dimension: {name}:{value}")
-        self.dimension_set[name] = value
+
+        # Cast value to str according to EMF spec
+        # Majority of values are expected to be string already, so
+        # checking before casting improves performance in most cases
+        if isinstance(value, str):
+            self.dimension_set[name] = value
+        else:
+            self.dimension_set[name] = str(value)
 
     def __extract_metric_unit_value(self, unit: Union[str, MetricUnit]) -> str:
         """Return metric value from metric unit whether that's str or MetricUnit enum
