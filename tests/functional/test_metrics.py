@@ -47,6 +47,12 @@ def dimensions() -> List[Dict[str, str]]:
         {"name": "test_dimension_2", "value": "test"},
     ]
 
+@pytest.fixture
+def non_str_dimensions() -> List[Dict[str, str]]:
+    return [
+        {"name": "test_dimension", "value": True},
+        {"name": "test_dimension_2", "value": 3},
+    ]
 
 @pytest.fixture
 def namespace() -> Dict[str, str]:
@@ -380,3 +386,32 @@ def test_log_metrics_clear_metrics_after_invocation(metric, dimension, namespace
 
     # THEN metric set should be empty after function has been run
     assert my_metrics.metric_set == {}
+
+def test_log_metrics_non_string_dimension_values(capsys, metrics, non_str_dimensions, namespace):
+    # GIVEN Metrics is initialized and dimensions with non-string values are added
+    my_metrics = Metrics()
+    my_metrics.add_namespace(**namespace)
+    for metric in metrics:
+        my_metrics.add_metric(**metric)
+    for dimension in non_str_dimensions:
+        my_metrics.add_dimension(**dimension)
+
+    # WHEN we utilize log_metrics to serialize
+    # and flush all metrics at the end of a function execution
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        return True
+
+    lambda_handler({}, {})
+
+    output = json.loads(capsys.readouterr().out.strip())
+    expected = serialize_metrics(metrics=metrics, dimensions=non_str_dimensions, namespace=namespace)
+
+    remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
+
+    # THEN we should have no exceptions
+    # and dimension values hould be serialized as strings
+    assert expected["_aws"] == output["_aws"]
+    for dimension in non_str_dimensions:
+        assert dimension["name"] in output
+        assert isinstance(output[dimension["name"]], str)
