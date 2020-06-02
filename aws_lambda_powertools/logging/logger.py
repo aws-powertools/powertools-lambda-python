@@ -152,20 +152,19 @@ def logger_inject_lambda_context(
     raise DeprecationWarning("Use Logger instead - This method will be removed when GA")
 
 
-def _is_cold_start() -> str:
-    """Verifies whether is cold start and return a string used for struct logging
+def _is_cold_start() -> bool:
+    """Verifies whether is cold start
 
     Returns
     -------
-    str
-        lower case bool as a string
-        aws_lambda_logging doesn't support bool; cast cold start value to string
+    bool
+        cold start bool value
     """
-    cold_start = "false"
+    cold_start = False
 
     global is_cold_start
     if is_cold_start:
-        cold_start = str(is_cold_start).lower()
+        cold_start = is_cold_start
         is_cold_start = False
 
     return cold_start
