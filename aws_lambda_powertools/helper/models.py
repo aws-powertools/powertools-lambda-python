@@ -65,7 +65,7 @@ def build_lambda_context_model(context: object) -> LambdaContextModel:
 
     context = {
         "function_name": context.function_name,
-        "function_memory_size": str(context.memory_limit_in_mb),
+        "function_memory_size": context.memory_limit_in_mb,
         "function_arn": context.invoked_function_arn,
         "function_request_id": context.aws_request_id,
     }
