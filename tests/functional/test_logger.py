@@ -228,12 +228,12 @@ def test_inject_lambda_cold_start(lambda_context, stdout):
     first_log, second_log, third_log, fourth_log = logs
 
     # First execution
-    assert "true" == first_log["cold_start"]
-    assert "true" == second_log["cold_start"]
+    assert first_log["cold_start"] is True
+    assert second_log["cold_start"] is True
 
     # Second execution
-    assert "false" == third_log["cold_start"]
-    assert "false" == fourth_log["cold_start"]
+    assert third_log["cold_start"] is False
+    assert fourth_log["cold_start"] is False
 
 
 def test_log_metric(capsys):
