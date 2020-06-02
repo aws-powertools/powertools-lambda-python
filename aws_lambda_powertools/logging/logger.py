@@ -62,6 +62,7 @@ class JsonFormatter(logging.Formatter):
         datefmt = kwargs.pop("datefmt", None)
 
         super(JsonFormatter, self).__init__(datefmt=datefmt)
+        self.reserved_keys = ["timestamp", "level", "location"]
         self.format_dict = {
             "timestamp": "%(asctime)s",
             "level": "%(levelname)s",
@@ -76,10 +77,12 @@ class JsonFormatter(logging.Formatter):
 
         log_dict = {}
         for key, value in self.format_dict.items():
-            if value:
+            if value and key in self.reserved_keys:
                 # converts default logging expr to its record value
                 # e.g. '%(asctime)s' to '2020-04-24 09:35:40,698'
                 log_dict[key] = value % record_dict
+            else:
+                log_dict[key] = value
 
         if isinstance(record_dict["msg"], dict):
             log_dict["message"] = record_dict["msg"]
