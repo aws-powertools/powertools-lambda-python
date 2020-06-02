@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 import pytest
 
@@ -47,12 +47,14 @@ def dimensions() -> List[Dict[str, str]]:
         {"name": "test_dimension_2", "value": "test"},
     ]
 
+
 @pytest.fixture
 def non_str_dimensions() -> List[Dict[str, Any]]:
     return [
         {"name": "test_dimension", "value": True},
         {"name": "test_dimension_2", "value": 3},
     ]
+
 
 @pytest.fixture
 def namespace() -> Dict[str, str]:
@@ -386,6 +388,7 @@ def test_log_metrics_clear_metrics_after_invocation(metric, dimension, namespace
 
     # THEN metric set should be empty after function has been run
     assert my_metrics.metric_set == {}
+
 
 def test_log_metrics_non_string_dimension_values(capsys, metrics, non_str_dimensions, namespace):
     # GIVEN Metrics is initialized and dimensions with non-string values are added
