@@ -403,15 +403,9 @@ def test_log_metrics_non_string_dimension_values(capsys, metrics, non_str_dimens
         return True
 
     lambda_handler({}, {})
-
     output = json.loads(capsys.readouterr().out.strip())
-    expected = serialize_metrics(metrics=metrics, dimensions=non_str_dimensions, namespace=namespace)
-
-    remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
 
     # THEN we should have no exceptions
     # and dimension values hould be serialized as strings
-    assert expected["_aws"] == output["_aws"]
     for dimension in non_str_dimensions:
-        assert dimension["name"] in output
         assert isinstance(output[dimension["name"]], str)
