@@ -70,12 +70,7 @@ release-test:
 	poetry config pypi-token.pypi ${PYPI_TEST_TOKEN}
 	poetry publish --repository testpypi -n
 
-build-linux-wheels:
+release: pr
 	poetry build
-	docker run --env PLAT=manylinux1_x86_64 --rm -it -v ${PWD}:/io -w /io quay.io/pypa/manylinux1_x86_64 /io/build_linux_wheels.sh
-	cp ./wheelhouse/* dist/ && rm -rf wheelhouse
-
-release:
-	$(MAKE) build-linux-wheels
 	$(MAKE) release-test
 	$(MAKE) release-prod

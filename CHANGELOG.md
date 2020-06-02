@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.5] - 2020-06-02
+### Fixed
+- **Metrics**: Coerce non-string dimension values to string
+- **Logger**: Correct `cold_start`, `function_memory_size` values from string to bool and int respectively
+
 ## [0.9.4] - 2020-05-29
 ### Fixed
 - **Metrics**: Fix issue where metrics were not correctly flushed, and cleared on every invocation
