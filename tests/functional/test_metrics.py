@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List
+from typing import Dict, List, Any
 
 import pytest
 
@@ -48,7 +48,7 @@ def dimensions() -> List[Dict[str, str]]:
     ]
 
 @pytest.fixture
-def non_str_dimensions() -> List[Dict[str, str]]:
+def non_str_dimensions() -> List[Dict[str, Any]]:
     return [
         {"name": "test_dimension", "value": True},
         {"name": "test_dimension_2", "value": 3},
