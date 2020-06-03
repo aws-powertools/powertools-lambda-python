@@ -3,12 +3,12 @@ categories:
   - title: '⚡ Breaking Changes'
     labels:
       - 'breaking-change'
-  - title: '🌟Non-Breaking Changes'
+  - title: '🌟New features and non-breaking changes'
     labels:
       - 'major'
+      - 'feature'
   - title: '🌟 Minor Changes'
     labels:
-      - 'feature'
       - 'enhancement'
   - title: '📜 Documentation updates'
     labels:
