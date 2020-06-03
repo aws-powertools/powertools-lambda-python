@@ -12,3 +12,8 @@ types:
   - chore
   - revert
   - improv
+
+# Always validate the PR title
+# and ignore the commits to lower the entry bar for contribution
+# while titles make up the Release notes to ease maintenance overhead
+titleOnly: true
