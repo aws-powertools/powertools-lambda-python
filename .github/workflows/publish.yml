@@ -1,0 +1,35 @@
+name: Publish to PyPi
+
+# only build & publish to PyPi once release notes are published
+# this ensures we have release notes correctly, tags, changelog, etc.
+# TODO: Check source code version against tags and changelog for match
+
+on:
+  release:
+    types: [published] 
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: "3.8"
+    - name: Install dependencies
+      run: make dev
+    - name: Run all tests, linting and baselines
+      run: make pr
+    - name: Build python package and wheel
+      run: poetry build
+    - name: Upload to PyPi test
+      run: make release-test
+      env:
+        PYPI_USERNAME: __token__
+        PYPI_TOKEN: ${{ secrets.PYPI_TEST_TOKEN }}
+    - name: Upload to PyPi prod
+      run: make release-prod
+      env:
+        TWINE_USERNAME: __token__
+        PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
