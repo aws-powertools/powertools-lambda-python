@@ -30,6 +30,6 @@ jobs:
       - name: Test with pytest
         run: make test
       - name: Security baseline
-        run: make test
+        run: make security-baseline
       - name: Complexity baseline
-        run: make test
+        run: make complexity-baseline
