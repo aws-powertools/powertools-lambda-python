@@ -1,6 +1,7 @@
 import functools
 import json
 import logging
+import os
 from typing import Any, Callable
 
 from aws_lambda_powertools.metrics.base import MetricManager
@@ -29,8 +30,7 @@ class Metrics(MetricManager):
 
         from aws_lambda_powertools.metrics import Metrics
 
-        metrics = Metrics()
-        metrics.add_namespace(name="ServerlessAirline")
+        metrics = Metrics(service="ServerlessAirline")
         metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
         metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
         metrics.add_dimension(name="service", value="booking")
@@ -48,7 +48,7 @@ class Metrics(MetricManager):
 
     Environment variables
     ---------------------
-    POWERTOOLS_METRICS_NAMESPACE : str
+    POWERTOOLS_SERVICE_NAME : str
         metric namespace
 
     Parameters
@@ -65,10 +65,13 @@ class Metrics(MetricManager):
     _metrics = {}
     _dimensions = {}
 
-    def __init__(self):
+    def __init__(
+        self, service: str = None,
+    ):
         self.metric_set = self._metrics
         self.dimension_set = self._dimensions
-        super().__init__(metric_set=self.metric_set, dimension_set=self.dimension_set)
+        self.service = service
+        super().__init__(metric_set=self.metric_set, dimension_set=self.dimension_set, namespace=self.service)
 
     def clear_metrics(self):
         logger.debug("Clearing out existing metric set from memory")
