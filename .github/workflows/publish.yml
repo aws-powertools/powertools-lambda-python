@@ -2,7 +2,6 @@ name: Publish to PyPi
 
 # only build & publish to PyPi once release notes are published
 # this ensures we have release notes correctly, tags, changelog, etc.
-# TODO: Check source code version against tags and changelog for match
 
 on:
   release:
@@ -17,6 +16,14 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: "3.8"
+    - name: Set release notes tag
+      run: |
+        export RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}
+        echo ::set-env name=RELEASE_TAG_VERSION::${RELEASE_TAG_VERSION:1}
+    - name: Ensure new version is also set in pyproject and CHANGELOG
+      run: |
+        grep ${RELEASE_TAG_VERSION} CHANGELOG.md
+        grep ${RELEASE_TAG_VERSION} pyproject.toml
     - name: Install dependencies
       run: make dev
     - name: Run all tests, linting and baselines
