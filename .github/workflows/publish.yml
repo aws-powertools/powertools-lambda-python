@@ -40,3 +40,15 @@ jobs:
       env:
         TWINE_USERNAME: __token__
         PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+  
+  sync_master:
+    needs: upload
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Sync master from detached head
+      # If version matches CHANGELOG and pyproject.toml
+      # If it passes all checks, successfully releases to test and prod
+      # Then sync up master with latest source code release
+      # where commit message will be Release notes title  
+      run: git push origin HEAD:refs/heads/master --force
