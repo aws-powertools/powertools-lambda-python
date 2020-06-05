@@ -1,7 +1,6 @@
 import functools
 import json
 import logging
-import os
 from typing import Any, Callable
 
 from aws_lambda_powertools.metrics.base import MetricManager
