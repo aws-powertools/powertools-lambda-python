@@ -499,6 +499,5 @@ def test_namespace_var_precedence(monkeypatch, capsys, metric, dimension):
 
     remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
 
-    # THEN we should add a namespace implicitly
-    # with the value of POWERTOOLS_METRICS_NAMESPACE env var
+    # THEN namespace should match the explicitly passed variable and not the env var
     assert expected["_aws"] == output["_aws"]
