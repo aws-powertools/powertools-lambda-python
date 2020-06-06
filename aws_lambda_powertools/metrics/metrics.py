@@ -86,7 +86,7 @@ class Metrics(MetricManager):
         -------
         **Lambda function using tracer and metrics decorators**
 
-            metrics = Metrics()
+            metrics = Metrics(service="payment")
             tracer = Tracer(service="payment")
 
             @tracer.capture_lambda_handler
