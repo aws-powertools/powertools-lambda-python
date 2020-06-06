@@ -36,12 +36,11 @@ _`*` Core utilities are Tracer, Logger and Metrics. Optional utilities may vary 
 
 Environment variable | Description | Utility
 ------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
-**POWERTOOLS_SERVICE_NAME** | Sets service name used for tracing namespace, metrics dimensions and structured logging | all
+**POWERTOOLS_SERVICE_NAME** | Sets service name used for tracing namespace, metrics namespace and structured logging | all
 **POWERTOOLS_TRACE_DISABLED** | Disables tracing | [Tracing](./core/tracer)
 **POWERTOOLS_TRACE_MIDDLEWARES** | Creates sub-segment for each custom middleware | [middleware_factory](./utilities/middleware_factory)
 **POWERTOOLS_LOGGER_LOG_EVENT** | Logs incoming event | [Logging](./core/logger)
 **POWERTOOLS_LOGGER_SAMPLE_RATE** | Debug log sampling | [Logging](./core/logger)
-**POWERTOOLS_METRICS_NAMESPACE** | Metrics namespace | [Metrics](./core/metrics)
 **LOG_LEVEL** | Sets logging level | [Logging](./core/logger)
 
 ## Debug mode
