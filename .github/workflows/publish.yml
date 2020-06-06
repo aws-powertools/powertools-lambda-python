@@ -54,7 +54,7 @@ jobs:
     - name: Upload to PyPi prod
       run: make release-prod
       env:
-        TWINE_USERNAME: __token__
+        PYPI_USERNAME: __token__
         PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
   
   sync_master:
