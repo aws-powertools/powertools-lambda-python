@@ -38,8 +38,8 @@ jobs:
         echo ::set-env name=RELEASE_TAG_VERSION::${RELEASE_TAG_VERSION:1}
     - name: Ensure new version is also set in pyproject and CHANGELOG
       run: |
-        grep ${RELEASE_TAG_VERSION} CHANGELOG.md
-        grep ${RELEASE_TAG_VERSION} pyproject.toml
+        grep --regexp "\[${RELEASE_TAG_VERSION}\]" CHANGELOG.md
+        grep --regexp "version \= \"${RELEASE_TAG_VERSION}\"" pyproject.toml
     - name: Install dependencies
       run: make dev
     - name: Run all tests, linting and baselines
