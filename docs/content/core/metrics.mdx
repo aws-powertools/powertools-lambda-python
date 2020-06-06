@@ -40,7 +40,7 @@ from aws_lambda_powertools.metrics import Metrics, MetricUnit
 metrics = Metrics() # highlight-line 
 
 # Explicit definition
-Logger(service="ServerlessAirline")  # sets namespace to "ServerlessAirline"
+Metrics(service="ServerlessAirline")  # sets namespace to "ServerlessAirline"
 
 
 ```
