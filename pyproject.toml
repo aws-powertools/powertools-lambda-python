@@ -18,7 +18,7 @@ keywords = ["aws_lambda_powertools", "aws", "tracing", "logging", "lambda", "pow
 license = "MIT-0"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.8"
 aws-xray-sdk = "~=2.5.0"
 fastjsonschema = "~=2.14.4"
 
@@ -46,6 +46,7 @@ radon = "^4.1.0"
 xenon = "^0.7.0"
 flake8-bugbear = "^20.1.4"
 flake8-eradicate = "^0.3.0"
+pre-commit = "^2.4.0"
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]
