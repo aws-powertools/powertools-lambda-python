@@ -42,7 +42,7 @@ from aws_lambda_powertools.metrics import Metrics, MetricUnit
 metrics = Metrics() # highlight-line 
 
 # Explicit definition
-Metrics(namespace="ServerlessAirline", service="orders")  # creates a default dimension {"service": "ServerlessAirline"} under the namespace "ServerlessAirline"
+Metrics(namespace="ServerlessAirline", service="orders")  # creates a default dimension {"service": "orders"} under the namespace "ServerlessAirline"
 
 
 ```
