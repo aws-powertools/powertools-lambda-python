@@ -1,6 +1,6 @@
 import json
 import os
-
+import sys
 from dataclasses import dataclass
 
 import pytest
@@ -12,10 +12,13 @@ def env_vars(monkeypatch):
     monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", "example_service")
     monkeypatch.setenv("POWERTOOLS_TRACE_DISABLED", "1")
 
+
 @pytest.fixture()
 def lambda_handler(env_vars):
     from hello_world import app
+
     return app.lambda_handler
+
 
 @pytest.fixture()
 def apigw_event():
@@ -82,6 +85,7 @@ class Context:
     aws_request_id: str = "5b441b59-a550-11c8-6564-f1c833cf438c"
 
 
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher")
 def test_lambda_handler(lambda_handler, apigw_event, mocker, capsys):
     ret = lambda_handler(apigw_event, Context())
     data = json.loads(ret["body"])
