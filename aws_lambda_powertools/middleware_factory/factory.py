@@ -27,7 +27,7 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
     Environment variables
     ---------------------
     POWERTOOLS_TRACE_MIDDLEWARES : str
-        uses `aws_lambda_powertools.tracing.Tracer` 
+        uses `aws_lambda_powertools.tracing.Tracer`
         to create sub-segments per middleware (e.g. `"true", "True", "TRUE"`)
 
     Parameters

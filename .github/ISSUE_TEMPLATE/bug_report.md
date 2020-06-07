@@ -36,7 +36,7 @@ assignees: ''
 
 * **Powertools version used**:
 * **Packaging format (Layers, PyPi)**:
-* **AWS Lambda function runtime:** 
+* **AWS Lambda function runtime:**
 * **Debugging logs**
 
 > [How to enable debug mode](https://awslabs.github.io/aws-lambda-powertools-python/#debug-mode)**

@@ -4,6 +4,17 @@
 # All checks can be run locally via `make pr`
 
 repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v2.4.0
+      hooks:
+          - id: check-merge-conflict
+          - id: trailing-whitespace
+          - id: end-of-file-fixer
+          - id: check-toml
+    - repo: https://github.com/pre-commit/pygrep-hooks
+      rev: v1.5.1
+      hooks:
+          - id: python-use-type-annotations
     - repo: local
       hooks:
           - id: black
@@ -23,5 +34,5 @@ repos:
             entry: poetry run flake8
             language: system
             types: [python]
-            exclude: example 
+            exclude: example
 fail_fast: true
