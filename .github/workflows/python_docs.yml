@@ -7,7 +7,8 @@ on:
   push:
     branches:
       - master
-      - develop
+      # Disabled until docs support versioning per branch/release
+      # - develop
 
 jobs:
   docs:
@@ -26,20 +27,27 @@ jobs:
       - name: Build docs website
         run: make build-docs-website
       - name: Build docs API reference
-        if: env.SOURCE_BRANCH == 'master'
+        # if: env.SOURCE_BRANCH == 'master' # Disabled until docs support versioning per branch/release
         run: make build-docs-api
-      - name: Deploy docs website
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          # when deploying docs website only
-          # we need to keep existing API docs checked in
-          # but only for dev branch
-          keep_files: true
       - name: Deploy all docs
         uses: peaceiris/actions-gh-pages@v3
-        if: env.SOURCE_BRANCH == 'master'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
+
+      # Disabled until docs support versioning per branch/release
+      # - name: Deploy docs website
+      #   uses: peaceiris/actions-gh-pages@v3
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     publish_dir: ./dist
+      #     # when deploying docs website only
+      #     # we need to keep existing API docs checked in
+      #     # but only for dev branch
+      #     keep_files: true
+      # - name: Deploy all docs
+      #   uses: peaceiris/actions-gh-pages@v3
+      #   if: env.SOURCE_BRANCH == 'master'
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     publish_dir: ./dist
