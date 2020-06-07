@@ -46,7 +46,7 @@ build-docs-website: dev-docs
 docs-local:
 	cd docs && npm run start
 
-docs-api-dev:
+docs-api-local:
 	poetry run pdoc --http : aws_lambda_powertools
 
 security-baseline:
