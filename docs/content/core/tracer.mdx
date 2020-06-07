@@ -39,7 +39,7 @@ You can either explicitly pass using `service` param or via `POWERTOOLS_SERVICE_
 ```python:title=app.py
 from aws_lambda_powertools.tracing import Tracer
 # POWERTOOLS_SERVICE_NAME defined
-tracer = Tracer() # highlight-line 
+tracer = Tracer() # highlight-line
 
 # Explicit definition
 tracer = Tracer(service="booking")
@@ -47,7 +47,7 @@ tracer = Tracer(service="booking")
 
 ## Lambda handler
 
-You can trace your Lambda function handler via `capture_lambda_handler`. 
+You can trace your Lambda function handler via `capture_lambda_handler`.
 
 When using this decorator, Tracer performs these additional tasks to ease operations:
 
@@ -56,7 +56,7 @@ When using this decorator, Tracer performs these additional tasks to ease operat
 
 ```python:title=lambda_handler.py
 from aws_lambda_powertools.tracing import Tracer
-tracer = Tracer() 
+tracer = Tracer()
 
 @tracer.capture_lambda_handler # highlight-line
 def handler(event, context)
@@ -73,7 +73,7 @@ You can add annotations using `put_annotation` method from Tracer.
 
 ```python:title=app.py
 from aws_lambda_powertools.tracing import Tracer
-tracer = Tracer() 
+tracer = Tracer()
 
 @tracer.capture_lambda_handler
 def handler(event, context):
@@ -89,7 +89,7 @@ You can add metadata using `put_metadata` method from Tracer.
 
 ```python:title=app.py
 from aws_lambda_powertools.tracing import Tracer
-tracer = Tracer() 
+tracer = Tracer()
 
 @tracer.capture_lambda_handler
 def handler(event, context):
@@ -125,7 +125,7 @@ from aws_lambda_powertools.tracing import Tracer
 tracer = Tracer()
 
 # highlight-start
-@tracer.capture_method 
+@tracer.capture_method
 async def collect_payment():
     ...
 # highlight-end
@@ -194,7 +194,7 @@ async def collect_payment(charge_id):
     ...
 ```
 
-## Reusing Tracer across your code 
+## Reusing Tracer across your code
 
 Tracer keeps a copy of its configuration after the first initialization. This is useful for scenarios where you want to use Tracer in more than one location across your code base.
 
@@ -214,7 +214,7 @@ def handler(event, context)
 from aws_lambda_powertools.tracing import Tracer
 # highlight-start
 # new instance using existing configuration with auto patching overriden
-tracer = Tracer(auto_patch=False) 
+tracer = Tracer(auto_patch=False)
 # highlight-end
 ```
 

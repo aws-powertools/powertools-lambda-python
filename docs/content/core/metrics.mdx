@@ -39,7 +39,7 @@ You can also pass a service name via `service` param or `POWERTOOLS_SERVICE_NAME
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
 
 # POWERTOOLS_METRICS_NAMESPACE and POWERTOOLS_SERVICE_NAME defined
-metrics = Metrics() # highlight-line 
+metrics = Metrics() # highlight-line
 
 # Explicit definition
 Metrics(namespace="ServerlessAirline", service="orders")  # creates a default dimension {"service": "orders"} under the namespace "ServerlessAirline"
@@ -69,7 +69,7 @@ CloudWatch EMF supports a max of 100 metrics. Metrics will automatically flush a
 
 ## Creating a metric with a different dimension
 
-CloudWatch EMF uses the same dimensions across all your metrics. Use `single_metric` if you have a metric that should have different dimensions. 
+CloudWatch EMF uses the same dimensions across all your metrics. Use `single_metric` if you have a metric that should have different dimensions.
 
 <Note type="info">
   Generally, this would be an edge case since you <a href="https://aws.amazon.com/cloudwatch/pricing/">pay for unique metric</a>. Keep the following formula in mind:
@@ -105,7 +105,7 @@ def lambda_handler(evt, ctx):
 
 `log_metrics` decorator **validates**, **serializes**, and **flushes** all your metrics. During metrics validation, if any of the following criteria is met, `SchemaValidationError` exception will be raised:
 
-* At least of one Metric and Dimension 
+* At least of one Metric and Dimension
 * Maximum of 9 dimensions
 * Namespace is set, and no more than one
 * Metric units must be [supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html)
@@ -141,7 +141,7 @@ metrics = Metrics(namespace="ExampleApplication", service="booking")
 metrics.add_metric(name="ColdStart", unit="Count", value=1)
 
 # highlight-start
-your_metrics_object = metrics.serialize_metric_set() 
+your_metrics_object = metrics.serialize_metric_set()
 metrics.clear_metrics()
 print(json.dumps(your_metrics_object))
 # highlight-end

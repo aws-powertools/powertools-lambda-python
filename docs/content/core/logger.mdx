@@ -39,7 +39,7 @@ You can also explicitly set a service name via `service` param or via `POWERTOOL
 ```python:title=app.py
 from aws_lambda_powertools.logging import Logger
 # POWERTOOLS_SERVICE_NAME defined
-logger = Logger() # highlight-line 
+logger = Logger() # highlight-line
 
 # Explicit definition
 Logger(service="payment", level="INFO")
@@ -58,7 +58,7 @@ Key | Type | Example | Description
 **sampling_rate** | int |  0.1 | Debug logging sampling rate in percentage e.g. 1% in this case
 **message** | any |  "Collecting payment" | Log statement value. Unserializable JSON values will be casted to string
 
-## Capturing context Lambda info 
+## Capturing context Lambda info
 
 You can enrich your structured logs with key Lambda context information via `inject_lambda_context`.
 
@@ -109,7 +109,7 @@ Key | Type | Example
 <summary><strong>Exerpt output in CloudWatch Logs</strong></summary>
 
 ```json:title=cloudwatch_logs.json
-{  
+{
    "timestamp":"2020-05-24 18:17:33,774",
    "level":"INFO",
    "location":"collect.handler:1",
@@ -125,7 +125,7 @@ Key | Type | Example
    "message": "Collecting payment"
 }
 
-{  
+{
    "timestamp":"2020-05-24 18:17:33,774",
    "level":"INFO",
    "location":"collect.handler:15",
@@ -137,7 +137,7 @@ Key | Type | Example
    "cold_start": true,
    "sampling_rate": 0.0,
 // highlight-start
-   "message":{  
+   "message":{
       "operation":"collect_payment",
       "charge_id": "ch_AZFlk2345C0"
    }
@@ -148,7 +148,7 @@ Key | Type | Example
 
 ## Appending additional keys
 
-You can append your own keys to your existing Logger via `structure_logs` with **append** param. 
+You can append your own keys to your existing Logger via `structure_logs` with **append** param.
 
 ```python:title=collect.py
 from aws_lambda_powertools.logging import Logger
@@ -166,7 +166,7 @@ def handler(event, context)
 <summary><strong>Exerpt output in CloudWatch Logs</strong></summary>
 
 ```json:title=cloudwatch_logs.jsonn
-{  
+{
    "timestamp": "2020-05-24 18:17:33,774",
    "level": "INFO",
    "location": "collect.handler:1",
@@ -209,7 +209,7 @@ def handler(event, context)
 <summary><strong>Exerpt output in CloudWatch Logs</strong></summary>
 
 ```json:title=cloudwatch_logs.json
-{  
+{
    "timestamp": "2020-05-24 18:17:33,774",
    "level": "INFO",
    "location": "collect.handler:1",

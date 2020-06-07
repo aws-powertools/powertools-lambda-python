@@ -10,7 +10,7 @@ assignees: ''
 ## Key information
 
 * RFC PR: (leave this empty)
-* Related issue(s), if known: 
+* Related issue(s), if known:
 * Area: (i.e. Tracer, Metrics, Logger, etc.)
 * Meet [tenets](https://awslabs.github.io/aws-lambda-powertools-python/#tenets): (Yes/no)
 

@@ -3,16 +3,16 @@ target:
 	@$(MAKE) pr
 
 dev:
-	pip install --upgrade pip poetry
+	pip install --upgrade pip poetry pre-commit
 	poetry install
+	pre-commit install
 
 dev-docs:
 	cd docs && npm install
 
 format:
-	poetry run isort -rc .
-	poetry run black aws_lambda_powertools
-	poetry run black tests
+	poetry run isort -rc aws_lambda_powertools tests example
+	poetry run black aws_lambda_powertools tests
 
 lint: format
 	poetry run flake8
