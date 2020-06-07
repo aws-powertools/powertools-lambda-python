@@ -1,9 +1,21 @@
 import json
+import os
+
 from dataclasses import dataclass
 
 import pytest
 
-from hello_world import app
+
+@pytest.fixture()
+def env_vars(monkeypatch):
+    monkeypatch.setenv("POWERTOOLS_METRICS_NAMESPACE", "example_namespace")
+    monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", "example_service")
+    monkeypatch.setenv("POWERTOOLS_TRACE_DISABLED", "1")
+
+@pytest.fixture()
+def lambda_handler(env_vars):
+    from hello_world import app
+    return app.lambda_handler
 
 @pytest.fixture()
 def apigw_event():
@@ -61,6 +73,7 @@ def apigw_event():
         "path": "/examplepath",
     }
 
+
 @dataclass
 class Context:
     function_name: str = "test"
@@ -68,23 +81,24 @@ class Context:
     invoked_function_arn: str = "arn:aws:lambda:eu-west-1:298026489:function:test"
     aws_request_id: str = "5b441b59-a550-11c8-6564-f1c833cf438c"
 
-def test_lambda_handler(apigw_event, mocker, capsys):
-    ret = app.lambda_handler(apigw_event, Context())
+
+def test_lambda_handler(lambda_handler, apigw_event, mocker, capsys):
+    ret = lambda_handler(apigw_event, Context())
     data = json.loads(ret["body"])
 
     output = capsys.readouterr()
-    output = output.out.split('\n')
-    stdout_one_string = '\t'.join(output)
+    output = output.out.split("\n")
+    stdout_one_string = "\t".join(output)
 
     assert ret["statusCode"] == 200
     assert data["message"] == "hello world"
     assert "location" in data
     assert "message" in ret["body"]
     assert "async_http" in data
-    
+
     # assess custom metric was flushed in stdout/logs
-    assert "SuccessfulLocations" in stdout_one_string 
-    assert "ColdStart" in stdout_one_string 
+    assert "SuccessfulLocations" in stdout_one_string
+    assert "ColdStart" in stdout_one_string
     assert "UniqueMetricDimension" in stdout_one_string
 
     # assess our custom middleware ran
