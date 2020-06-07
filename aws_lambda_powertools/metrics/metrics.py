@@ -39,7 +39,7 @@ class Metrics(MetricManager):
         @tracer.capture_lambda_handler
         @metrics.log_metrics()
         def lambda_handler():
-                do_something()§
+                do_something()
                 return True
 
         def do_something():
