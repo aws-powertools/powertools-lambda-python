@@ -20,7 +20,6 @@ def lambda_handler(env_vars):
     return app.lambda_handler
 
 
-
 @pytest.fixture()
 def apigw_event():
     """ Generates API GW Event"""
