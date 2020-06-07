@@ -1,6 +1,7 @@
 import functools
 import json
 import logging
+import os
 from typing import Any, Callable
 
 from aws_lambda_powertools.metrics.base import MetricManager
@@ -29,17 +30,16 @@ class Metrics(MetricManager):
 
         from aws_lambda_powertools.metrics import Metrics
 
-        metrics = Metrics(service="ServerlessAirline")
+        metrics = Metrics(namespace="ServerlessAirline", service="payment")
         metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
         metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
-        metrics.add_dimension(name="service", value="booking")
         metrics.add_dimension(name="function_version", value="$LATEST")
         ...
 
         @tracer.capture_lambda_handler
         @metrics.log_metrics()
         def lambda_handler():
-                do_something()
+                do_something()§
                 return True
 
         def do_something():
@@ -47,8 +47,10 @@ class Metrics(MetricManager):
 
     Environment variables
     ---------------------
-    POWERTOOLS_SERVICE_NAME : str
+    POWERTOOLS_METRICS_NAMESPACE : str
         metric namespace
+    POWERTOOLS_SERVICE_NAME : str
+        service name used for default dimension
 
     Parameters
     ----------
@@ -64,13 +66,14 @@ class Metrics(MetricManager):
     _metrics = {}
     _dimensions = {}
 
-    def __init__(
-        self, service: str = None,
-    ):
+    def __init__(self, service: str = None, namespace: str = None):
         self.metric_set = self._metrics
         self.dimension_set = self._dimensions
-        self.service = service
-        super().__init__(metric_set=self.metric_set, dimension_set=self.dimension_set, namespace=self.service)
+        self.service = service or os.environ.get("POWERTOOLS_SERVICE_NAME")
+        self.namespace = namespace
+        if self.service:
+            self.dimension_set["service"] = self.service
+        super().__init__(metric_set=self.metric_set, dimension_set=self.dimension_set, namespace=self.namespace)
 
     def clear_metrics(self):
         logger.debug("Clearing out existing metric set from memory")
