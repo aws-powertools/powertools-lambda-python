@@ -147,6 +147,22 @@ print(json.dumps(your_metrics_object))
 # highlight-end
 ```
 
+## Capturing cold start metric
+
+You can capture cold start metrics automatically with `log_metrics` via `capture_cold_start_metric` param.
+
+```python:title=lambda_handler.py
+from aws_lambda_powertools.metrics import Metrics, MetricUnit
+
+metrics = Metrics(service="ExampleService")
+
+@metrics.log_metrics(capture_cold_start_metric=True) # highlight-line
+def lambda_handler(evt, ctx):
+    ...
+```
+
+If it's a cold start, this feature will add a metric named `ColdStart` and a dimension named `function_name`.
+
 ## Testing your code
 
 Use `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` env vars when unit testing your code to ensure metric namespace and dimension objects are created, and your code doesn't fail validation.
