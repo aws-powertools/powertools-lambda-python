@@ -3,8 +3,9 @@ target:
 	@$(MAKE) pr
 
 dev:
-	pip install --upgrade pip poetry
+	pip install --upgrade pip poetry pre-commit
 	poetry install
+	pre-commit install
 
 dev-docs:
 	cd docs && npm install
