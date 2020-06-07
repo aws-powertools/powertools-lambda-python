@@ -10,9 +10,8 @@ dev-docs:
 	cd docs && npm install
 
 format:
-	poetry run isort -rc .
-	poetry run black aws_lambda_powertools
-	poetry run black tests
+	poetry run isort -rc aws_lambda_powertools tests example
+	poetry run black aws_lambda_powertools tests
 
 lint: format
 	poetry run flake8
