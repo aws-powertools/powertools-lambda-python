@@ -1,6 +1,6 @@
 # Summary
 
-This example uses both [tracing](https://github.com/awslabs/aws-lambda-powertools/tree/develop/python#tracing) and [logging](https://github.com/awslabs/aws-lambda-powertools/tree/develop/python#logging) features, includes all environment variables that can be used, and demonstrates how to explicitly disable tracing while running unit tests - That is not necessary when running within SAM CLI as it detects the local env automatically.
+This example uses [tracer](https://awslabs.github.io/aws-lambda-powertools-python/core/tracer/), [metrics](https://awslabs.github.io/aws-lambda-powertools-python/core/metrics/),and [logger](https://awslabs.github.io/aws-lambda-powertools-python/core/logger/) features, includes all environment variables that can be used, and demonstrates how to explicitly disable tracing while running unit tests - That is not necessary when running within SAM CLI as it detects the local env automatically.
 
 **Quick commands**
 
@@ -118,7 +118,7 @@ Tests are defined in the `tests` folder in this project. Use PIP to install the 
 ```bash
 example$ pip install -r hello_world/requirements.txt
 example$ pip install -r requirements-dev.txt
-example$ POWERTOOLS_TRACE_DISABLED=1 python -m pytest tests/ -v
+example$ pytest -v
 ```
 
 ## Cleanup
