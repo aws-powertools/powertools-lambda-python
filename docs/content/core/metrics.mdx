@@ -33,7 +33,7 @@ Resources:
 
 We recommend you use your application or main service as a metric namespace.
 You can explicitly set a namespace name via `namespace` param or via `POWERTOOLS_METRICS_NAMESPACE` env var. This sets **namespace** key that will be used for all metrics.
-You can also pass a service name via `service` param or `POWERTOOLS_SERVICE_NAME` env var. This will also create a dimension with the service name.
+You can also pass a service name via `service` param or `POWERTOOLS_SERVICE_NAME` env var. This will create a dimension with the service name.
 
 ```python:title=app.py
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
