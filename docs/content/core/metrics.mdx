@@ -16,7 +16,7 @@ Metrics creates custom metrics asynchronously via logging metrics to standard ou
 
 ## Initialization
 
-Set `POWERTOOLS_SERVICE_NAME` env var as a start - Here is an example using AWS Serverless Application Model (SAM)
+Set `POWERTOOLS_SERVICE_NAME` and `POWERTOOLS_METRICS_NAMESPACE` env vars as a start - Here is an example using AWS Serverless Application Model (SAM)
 
 ```yaml:title=template.yaml
 Resources:
@@ -27,37 +27,39 @@ Resources:
         Runtime: python3.8
         Environment:
             Variables:
-                POWERTOOLS_SERVICE_NAME: ServerlessAirline # highlight-line
+                POWERTOOLS_SERVICE_NAME: payment # highlight-line
+                POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline # highlight-line
 ```
 
 We recommend you use your application or main service as a metric namespace.
-You can explicitly set a namespace name via `service` param or via `POWERTOOLS_SERVICE_NAME` env var. This sets **namespace** key that will be used for all metrics.
+You can explicitly set a namespace name via `namespace` param or via `POWERTOOLS_METRICS_NAMESPACE` env var. This sets **namespace** key that will be used for all metrics.
+You can also pass a service name via `service` param or `POWERTOOLS_SERVICE_NAME` env var. This will create a dimension with the service name.
 
 ```python:title=app.py
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
 
-# POWERTOOLS_SERVICE_NAME defined
+# POWERTOOLS_METRICS_NAMESPACE and POWERTOOLS_SERVICE_NAME defined
 metrics = Metrics() # highlight-line 
 
 # Explicit definition
-Metrics(service="ServerlessAirline")  # sets namespace to "ServerlessAirline"
+Metrics(namespace="ServerlessAirline", service="orders")  # creates a default dimension {"service": "orders"} under the namespace "ServerlessAirline"
 
 
 ```
 
-You can initialize Metrics anywhere in your code as many time as you need - It'll keep track of your aggregate metrics in memory.
+You can initialize Metrics anywhere in your code as many times as you need - It'll keep track of your aggregate metrics in memory.
 
 ## Creating metrics
 
-You can create metrics using `add_metric`, and set dimensions for all your aggregate metrics using `add_dimension`.
+You can create metrics using `add_metric`, and manually create dimensions for all your aggregate metrics using `add_dimension`.
 
 ```python:title=app.py
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
 
-metrics = Metrics(service="ExampleService")
+metrics = Metrics(namespace="ExampleApplication", service="booking")
 # highlight-start
-metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
-metrics.add_dimension(name="service", value="booking")
+metrics.add_dimension(name="environment", value="prod")
+metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
 # highlight-end
 ```
 
@@ -79,7 +81,7 @@ CloudWatch EMF uses the same dimensions across all your metrics. Use `single_met
 ```python:title=single_metric.py
 from aws_lambda_powertools.metrics import MetricUnit, single_metric
 
-with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, service="ExampleService") as metric: # highlight-line
+with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace="ExampleApplication") as metric: # highlight-line
     metric.add_dimension(name="function_context", value="$LATEST")
     ...
 ```
@@ -115,7 +117,7 @@ def lambda_handler(evt, ctx):
 ```python:title=lambda_handler_nested_middlewares.py
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
 
-metrics = Metrics(service="ExampleService")
+metrics = Metrics(namespace="ExampleApplication", service="booking")
 metrics.add_metric(name="ColdStart", unit="Count", value=1)
 
 # highlight-start
@@ -123,7 +125,6 @@ metrics.add_metric(name="ColdStart", unit="Count", value=1)
 @tracer.capture_lambda_handler
 # highlight-end
 def lambda_handler(evt, ctx):
-    metrics.add_dimension(name="service", value="booking")
     metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
     ...
 ```
@@ -136,9 +137,8 @@ If you prefer not to use `log_metrics` because you might want to encapsulate add
 import json
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
 
-metrics = Metrics(service="ExampleService")
+metrics = Metrics(namespace="ExampleApplication", service="booking")
 metrics.add_metric(name="ColdStart", unit="Count", value=1)
-metrics.add_dimension(name="service", value="booking")
 
 # highlight-start
 your_metrics_object = metrics.serialize_metric_set() 
@@ -149,10 +149,11 @@ print(json.dumps(your_metrics_object))
 
 ## Testing your code
 
-Use `POWERTOOLS_SERVICE_NAME` env var when unit testing your code to ensure a metric namespace object is created, and your code doesn't fail validation.
+Use `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` env vars when unit testing your code to ensure metric namespace and dimension objects are created, and your code doesn't fail validation.
 
 ```bash:title=pytest_metric_namespace.sh
-POWERTOOLS_SERVICE_NAME="Example" python -m pytest
+
+POWERTOOLS_SERVICE_NAME="Example" POWERTOOLS_METRICS_NAMESPACE="Application" python -m pytest
 ```
 
-You can ignore this if you are explicitly setting namespace by passing a service name when initializing Metrics: `metrics = Metrics(service=ServiceName)`.
+You can ignore this if you are explicitly setting namespace/default dimension by passing the `namespace` and `service` parameters when initializing Metrics: `metrics = Metrics(namespace=ApplicationName, service=ServiceName)`.

@@ -9,9 +9,9 @@ This example uses both [tracing](https://github.com/awslabs/aws-lambda-powertool
 * **Deploy**: `sam deploy --guided`
 * **Unit Tests**: We recommend proceeding with the following commands in a virtual environment
   - **Install deps**: `pip install -r hello_world/requirements.txt && pip install -r requirements-dev.txt`
-  - **Run tests with tracing disabled and namespace set**
-    - `POWERTOOLS_SERVICE_NAME="Example" POWERTOOLS_TRACE_DISABLED=1 python -m pytest`
-    - Both are necessary because `app.py` initializes them in the global scope, since both Tracer and Metrics will be initialized and configured during import time. For unit tests, we could always patch and explicitly config but env vars do just fine for this example.
+  - **Run tests with namespace and service set, and tracing disabled**
+    - `POWERTOOLS_METRICS_NAMESPACE="Example" POWERTOOLS_SERVICE_NAME="Example" POWERTOOLS_TRACE_DISABLED=1 python -m pytest`
+    - These are necessary because `app.py` initializes them in the global scope, since both Tracer and Metrics will be initialized and configured during import time. For unit tests, we could always patch and explicitly config but env vars do just fine for this example.
 
 # Example code
 
