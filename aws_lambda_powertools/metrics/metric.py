@@ -21,7 +21,7 @@ class SingleMetric(MetricManager):
 
     Environment variables
     ---------------------
-    POWERTOOLS_METRICS_NAMESPACE : str
+    POWERTOOLS_SERVICE_NAME : str
         metric namespace
 
     Example
@@ -30,9 +30,8 @@ class SingleMetric(MetricManager):
 
         from aws_lambda_powertools.metrics import SingleMetric, MetricUnit
         import json
-        metric = Single_Metric()
+        metric = Single_Metric(service="ServerlessAirline")
 
-        metric.add_namespace(name="ServerlessAirline")
         metric.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
         metric.add_dimension(name="function_version", value=47)
 
@@ -63,7 +62,7 @@ class SingleMetric(MetricManager):
 
 
 @contextmanager
-def single_metric(name: str, unit: MetricUnit, value: float):
+def single_metric(name: str, unit: MetricUnit, value: float, service: str = None):
     """Context manager to simplify creation of a single metric
 
     Example
@@ -72,13 +71,12 @@ def single_metric(name: str, unit: MetricUnit, value: float):
 
         from aws_lambda_powertools.metrics import single_metric, MetricUnit
 
-        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric:
-                metric.add_namespace(name="ServerlessAirline")
+        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, service="ServerlessAirline") as metric:
                 metric.add_dimension(name="function_version", value=47)
 
     **Same as above but set namespace using environment variable**
 
-        $ export POWERTOOLS_METRICS_NAMESPACE="ServerlessAirline"
+        $ export POWERTOOLS_SERVICE_NAME="ServerlessAirline"
 
         from aws_lambda_powertools.metrics import single_metric, MetricUnit
 
@@ -93,6 +91,8 @@ def single_metric(name: str, unit: MetricUnit, value: float):
         `aws_lambda_powertools.helper.models.MetricUnit`
     value : float
         Metric value
+    service: str
+        Service name used as namespace
 
     Yields
     -------
@@ -106,7 +106,7 @@ def single_metric(name: str, unit: MetricUnit, value: float):
     """
     metric_set = None
     try:
-        metric: SingleMetric = SingleMetric()
+        metric: SingleMetric = SingleMetric(namespace=service)
         metric.add_metric(name=name, unit=unit, value=value)
         yield metric
         logger.debug("Serializing single metric")

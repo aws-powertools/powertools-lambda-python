@@ -16,7 +16,7 @@ Metrics creates custom metrics asynchronously via logging metrics to standard ou
 
 ## Initialization
 
-Set `POWERTOOLS_METRICS_NAMESPACE` env var as a start - Here is an example using AWS Serverless Application Model (SAM)
+Set `POWERTOOLS_SERVICE_NAME` env var as a start - Here is an example using AWS Serverless Application Model (SAM)
 
 ```yaml:title=template.yaml
 Resources:
@@ -27,16 +27,22 @@ Resources:
         Runtime: python3.8
         Environment:
             Variables:
-                POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline # highlight-line
+                POWERTOOLS_SERVICE_NAME: ServerlessAirline # highlight-line
 ```
 
 We recommend you use your application or main service as a metric namespace.
+You can explicitly set a namespace name via `service` param or via `POWERTOOLS_SERVICE_NAME` env var. This sets **namespace** key that will be used for all metrics.
 
 ```python:title=app.py
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
 
-metrics = Metrics()
-# metrics.add_namespace("ServerlessAirline") # optionally if you set via env var
+# POWERTOOLS_SERVICE_NAME defined
+metrics = Metrics() # highlight-line 
+
+# Explicit definition
+Metrics(service="ServerlessAirline")  # sets namespace to "ServerlessAirline"
+
+
 ```
 
 You can initialize Metrics anywhere in your code as many time as you need - It'll keep track of your aggregate metrics in memory.
@@ -48,7 +54,7 @@ You can create metrics using `add_metric`, and set dimensions for all your aggre
 ```python:title=app.py
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
 
-metrics = Metrics()
+metrics = Metrics(service="ExampleService")
 # highlight-start
 metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
 metrics.add_dimension(name="service", value="booking")
@@ -73,7 +79,7 @@ CloudWatch EMF uses the same dimensions across all your metrics. Use `single_met
 ```python:title=single_metric.py
 from aws_lambda_powertools.metrics import MetricUnit, single_metric
 
-with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric: # highlight-line
+with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, service="ExampleService") as metric: # highlight-line
     metric.add_dimension(name="function_context", value="$LATEST")
     ...
 ```
@@ -85,7 +91,7 @@ As you finish adding all your metrics, you need to serialize and flush them to s
 ```python:title=lambda_handler.py
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
 
-metrics = Metrics()
+metrics = Metrics(service="ExampleService")
 metrics.add_metric(name="ColdStart", unit="Count", value=1)
 
 @metrics.log_metrics # highlight-line
@@ -109,7 +115,7 @@ def lambda_handler(evt, ctx):
 ```python:title=lambda_handler_nested_middlewares.py
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
 
-metrics = Metrics()
+metrics = Metrics(service="ExampleService")
 metrics.add_metric(name="ColdStart", unit="Count", value=1)
 
 # highlight-start
@@ -130,7 +136,7 @@ If you prefer not to use `log_metrics` because you might want to encapsulate add
 import json
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
 
-metrics = Metrics()
+metrics = Metrics(service="ExampleService")
 metrics.add_metric(name="ColdStart", unit="Count", value=1)
 metrics.add_dimension(name="service", value="booking")
 
@@ -143,10 +149,10 @@ print(json.dumps(your_metrics_object))
 
 ## Testing your code
 
-Use `POWERTOOLS_METRICS_NAMESPACE` env var when unit testing your code to ensure a metric namespace object is created, and your code doesn't fail validation.
+Use `POWERTOOLS_SERVICE_NAME` env var when unit testing your code to ensure a metric namespace object is created, and your code doesn't fail validation.
 
 ```bash:title=pytest_metric_namespace.sh
-POWERTOOLS_METRICS_NAMESPACE="Example" python -m pytest
+POWERTOOLS_SERVICE_NAME="Example" python -m pytest
 ```
 
-You can ignore that if you are explicitly creating metric namespace within your own code `metrics.add_namespace()`.
+You can ignore this if you are explicitly setting namespace by passing a service name when initializing Metrics: `metrics = Metrics(service=ServiceName)`.
