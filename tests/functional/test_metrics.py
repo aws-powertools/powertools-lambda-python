@@ -570,7 +570,7 @@ def test_single_metric_with_service(capsys, metric, dimension):
 
 
 def test_namespace_var_precedence(monkeypatch, capsys, metric, dimension, namespace):
-    # GIVEN we use POWERTOOLS_SERVICE_NAME
+    # GIVEN we use POWERTOOLS_METRICS_NAMESPACE
     monkeypatch.setenv("POWERTOOLS_METRICS_NAMESPACE", namespace["name"])
 
     # WHEN creating a metric and explicitly set a namespace
