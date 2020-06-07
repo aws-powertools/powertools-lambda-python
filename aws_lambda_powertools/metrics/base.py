@@ -35,7 +35,7 @@ class MetricManager:
 
     Environment variables
     ---------------------
-    POWERTOOLS_SERVICE_NAME : str
+    POWERTOOLS_METRICS_NAMESPACE : str
         metric namespace to be set for all metrics
 
     Raises
@@ -53,7 +53,7 @@ class MetricManager:
     def __init__(self, metric_set: Dict[str, str] = None, dimension_set: Dict = None, namespace: str = None):
         self.metric_set = metric_set if metric_set is not None else {}
         self.dimension_set = dimension_set if dimension_set is not None else {}
-        self.namespace = namespace or os.getenv("POWERTOOLS_SERVICE_NAME")
+        self.namespace = namespace or os.getenv("POWERTOOLS_METRICS_NAMESPACE")
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_options = list(MetricUnit.__members__)
 

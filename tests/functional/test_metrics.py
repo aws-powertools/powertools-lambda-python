@@ -162,14 +162,14 @@ def test_log_metrics(capsys, metrics, dimensions, namespace):
 
 
 def test_namespace_env_var(monkeypatch, capsys, metric, dimension, namespace):
-    # GIVEN we use POWERTOOLS_SERVICE_NAME
-    monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", namespace["name"])
+    # GIVEN we use POWERTOOLS_METRICS_NAMESPACE
+    monkeypatch.setenv("POWERTOOLS_METRICS_NAMESPACE", namespace["name"])
 
     # WHEN creating a metric but don't explicitly
     # add a namespace
     with single_metric(**metric) as my_metrics:
         my_metrics.add_dimension(**dimension)
-        monkeypatch.delenv("POWERTOOLS_SERVICE_NAME")
+        monkeypatch.delenv("POWERTOOLS_METRICS_NAMESPACE")
 
     output = json.loads(capsys.readouterr().out.strip())
     expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
@@ -177,8 +177,34 @@ def test_namespace_env_var(monkeypatch, capsys, metric, dimension, namespace):
     remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
 
     # THEN we should add a namespace implicitly
-    # with the value of POWERTOOLS_SERVICE_NAME env var
+    # with the value of POWERTOOLS_METRICS_NAMESPACE env var
     assert expected["_aws"] == output["_aws"]
+
+
+def test_service_env_var(monkeypatch, capsys, metric, namespace):
+    # GIVEN we use POWERTOOLS_SERVICE_NAME
+    monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", "test_service")
+    my_metrics = Metrics(namespace=namespace["name"])
+
+    # WHEN creating a metric but don't explicitly
+    # add a dimension
+    @my_metrics.log_metrics
+    def lambda_handler(evt, context):
+        my_metrics.add_metric(**metric)
+        return True
+
+    lambda_handler({}, {})
+
+    monkeypatch.delenv("POWERTOOLS_SERVICE_NAME")
+
+    output = json.loads(capsys.readouterr().out.strip())
+    expected_dimension = {"name": "service", "value": "test_service"}
+    expected = serialize_single_metric(metric=metric, dimension=expected_dimension, namespace=namespace)
+
+    remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
+
+    # THEN metrics should be logged using the implicitly created "service" dimension
+    assert expected == output
 
 
 def test_metrics_spillover(monkeypatch, capsys, metric, dimension, namespace, a_hundred_metrics):
@@ -243,8 +269,8 @@ def test_incorrect_metric_unit(metric, dimension, namespace):
 
 
 def test_schema_no_namespace(metric, dimension):
-    # GIVEN we don't add any metric or dimension
-    # but a namespace
+    # GIVEN we add any metric or dimension
+    # but no namespace
 
     # WHEN we attempt to serialize a valid EMF object
     # THEN it should fail validation and raise SchemaValidationError
@@ -421,9 +447,9 @@ def test_add_namespace_warns_for_deprecation(capsys, metrics, dimensions, namesp
         my_metrics.add_namespace(**namespace)
 
 
-def test_log_metrics_with_explicit_service(capsys, metrics, dimensions):
+def test_log_metrics_with_explicit_namespace(capsys, metrics, dimensions, namespace):
     # GIVEN Metrics is initialized with service specified
-    my_metrics = Metrics(service="test_service")
+    my_metrics = Metrics(service="test_service", namespace=namespace["name"])
     for metric in metrics:
         my_metrics.add_metric(**metric)
     for dimension in dimensions:
@@ -438,18 +464,76 @@ def test_log_metrics_with_explicit_service(capsys, metrics, dimensions):
     lambda_handler({}, {})
 
     output = json.loads(capsys.readouterr().out.strip())
-    expected = serialize_metrics(metrics=metrics, dimensions=dimensions, namespace={"name": "test_service"})
+
+    dimensions.insert(0, {"name": "service", "value": "test_service"})
+    expected = serialize_metrics(metrics=metrics, dimensions=dimensions, namespace=namespace)
 
     remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
 
     # THEN we should have no exceptions and the namespace should be set to the name provided in the
     # service passed to Metrics constructor
-    assert expected["_aws"] == output["_aws"]
+    assert expected == output
+
+
+def test_log_metrics_with_implicit_dimensions(capsys, metrics):
+    # GIVEN Metrics is initialized with service specified
+    my_metrics = Metrics(service="test_service", namespace="test_application")
+    for metric in metrics:
+        my_metrics.add_metric(**metric)
+
+    # WHEN we utilize log_metrics to serialize and don't explicitly add any dimensions
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        return True
+
+    lambda_handler({}, {})
+
+    output = json.loads(capsys.readouterr().out.strip())
+
+    expected_dimensions = [{"name": "service", "value": "test_service"}]
+    expected = serialize_metrics(
+        metrics=metrics, dimensions=expected_dimensions, namespace={"name": "test_application"}
+    )
+
+    remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
+
+    # THEN we should have no exceptions and the dimensions should be set to the name provided in the
+    # service passed to Metrics constructor
+    assert expected == output
+
+
+def test_log_metrics_with_renamed_service(capsys, metrics):
+    # GIVEN Metrics is initialized with service specified
+    my_metrics = Metrics(service="test_service", namespace="test_application")
+    for metric in metrics:
+        my_metrics.add_metric(**metric)
+
+    # WHEN we manually call add_dimension to change the value of the service dimension
+    my_metrics.add_dimension(name="service", value="another_test_service")
+
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        return True
+
+    lambda_handler({}, {})
+
+    output = json.loads(capsys.readouterr().out.strip())
+
+    expected_dimensions = [{"name": "service", "value": "test_service"}]
+    expected = serialize_metrics(
+        metrics=metrics, dimensions=expected_dimensions, namespace={"name": "test_application"}
+    )
+
+    remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
+
+    # THEN we should have no exceptions and the dimensions should be set to the name provided in the
+    # add_dimension call
+    assert output["service"] == "another_test_service"
 
 
 def test_log_metrics_with_namespace_overridden(capsys, metrics, dimensions):
-    # GIVEN Metrics is initialized with service specified
-    my_metrics = Metrics(service="test_service")
+    # GIVEN Metrics is initialized with namespace specified
+    my_metrics = Metrics(namespace="test_service")
     for metric in metrics:
         my_metrics.add_metric(**metric)
     for dimension in dimensions:
@@ -470,10 +554,10 @@ def test_log_metrics_with_namespace_overridden(capsys, metrics, dimensions):
 
 
 def test_single_metric_with_service(capsys, metric, dimension):
-    # GIVEN we pass service parameter to single_metric
+    # GIVEN we pass namespace parameter to single_metric
 
     # WHEN creating a metric
-    with single_metric(**metric, service="test_service") as my_metrics:
+    with single_metric(**metric, namespace="test_service") as my_metrics:
         my_metrics.add_dimension(**dimension)
 
     output = json.loads(capsys.readouterr().out.strip())
@@ -485,17 +569,17 @@ def test_single_metric_with_service(capsys, metric, dimension):
     assert expected["_aws"] == output["_aws"]
 
 
-def test_namespace_var_precedence(monkeypatch, capsys, metric, dimension):
-    # GIVEN we use POWERTOOLS_SERVICE_NAME
-    monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", "test_service_env_var")
+def test_namespace_var_precedence(monkeypatch, capsys, metric, dimension, namespace):
+    # GIVEN we use POWERTOOLS_METRICS_NAMESPACE
+    monkeypatch.setenv("POWERTOOLS_METRICS_NAMESPACE", namespace["name"])
 
-    # WHEN creating a metric and explicitly set a service name
-    with single_metric(**metric, service="test_service_explicit") as my_metrics:
+    # WHEN creating a metric and explicitly set a namespace
+    with single_metric(**metric, namespace=namespace["name"]) as my_metrics:
         my_metrics.add_dimension(**dimension)
-        monkeypatch.delenv("POWERTOOLS_SERVICE_NAME")
+        monkeypatch.delenv("POWERTOOLS_METRICS_NAMESPACE")
 
     output = json.loads(capsys.readouterr().out.strip())
-    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace={"name": "test_service_explicit"})
+    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
 
     remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
 
