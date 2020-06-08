@@ -35,4 +35,3 @@ repos:
             language: system
             types: [python]
             exclude: example
-# fail_fast: true
