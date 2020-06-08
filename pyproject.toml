@@ -44,9 +44,9 @@ aiohttp = "^3.6.2"
 bandit = "^1.6.2"
 radon = "^4.1.0"
 xenon = "^0.7.0"
-flake8-bugbear = "^20.1.4"
 flake8-eradicate = "^0.3.0"
 dataclasses = {version = "*", python = "~3.6"}
+flake8-bugbear = "^20.1.4"
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]

@@ -13,7 +13,7 @@ from aws_lambda_powertools.tracing import aiohttp_trace_config
 
 set_package_logger()  # Enable package diagnostics (DEBUG log)
 
-# tracer = Tracer() # patches all available modules
+# tracer = Tracer() # patches all available modules # noqa: E800
 tracer = Tracer(patch_modules=("aioboto3", "boto3", "requests"))  # ~90-100ms faster in perf depending on set of libs
 logger = Logger()
 metrics = Metrics()
@@ -86,7 +86,7 @@ def lambda_handler(event, context):
     event: dict, required
         API Gateway Lambda Proxy Input Format
 
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
+        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format # noqa: E501
 
     context: object, required
         Lambda Context runtime methods and attributes
