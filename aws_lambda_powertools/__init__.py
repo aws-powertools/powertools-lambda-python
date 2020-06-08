@@ -5,17 +5,9 @@
 
 from .logging import Logger  # noqa: F401
 from .metrics import Metrics, single_metric  # noqa: F401
+from .package_logger import set_package_logger_handler
 from .tracing import Tracer  # noqa: F401
 
 __author__ = """Amazon Web Services"""
 
-
-def set_package_logging_null_handler():
-    import logging
-
-    logger = logging.getLogger("aws_lambda_powertools")
-    logger.addHandler(logging.NullHandler())
-    logger.propagate = False
-
-
-set_package_logging_null_handler()
+set_package_logger_handler()
