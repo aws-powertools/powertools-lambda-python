@@ -21,7 +21,7 @@ name: Publish to PyPi
 
 on:
   release:
-    types: [published] 
+    types: [published]
 
 jobs:
   upload:
@@ -50,13 +50,13 @@ jobs:
       run: make release-test
       env:
         PYPI_USERNAME: __token__
-        PYPI_TOKEN: ${{ secrets.PYPI_TEST_TOKEN }}
+        PYPI_TEST_TOKEN: ${{ secrets.PYPI_TEST_TOKEN }}
     - name: Upload to PyPi prod
       run: make release-prod
       env:
         PYPI_USERNAME: __token__
         PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-  
+
   sync_master:
     needs: upload
     runs-on: ubuntu-latest
@@ -66,5 +66,5 @@ jobs:
       # If version matches CHANGELOG and pyproject.toml
       # If it passes all checks, successfully releases to test and prod
       # Then sync up master with latest source code release
-      # where commit message will be Release notes title  
+      # where commit message will be Release notes title
       run: git push origin HEAD:refs/heads/master --force
