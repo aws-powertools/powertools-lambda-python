@@ -8,6 +8,8 @@ from aws_lambda_powertools.metrics.base import MetricManager
 
 logger = logging.getLogger(__name__)
 
+is_cold_start = True
+
 
 class Metrics(MetricManager):
     """Metrics create an EMF object with up to 100 metrics
@@ -80,7 +82,7 @@ class Metrics(MetricManager):
         self.metric_set.clear()
         self.dimension_set.clear()
 
-    def log_metrics(self, lambda_handler: Callable[[Any, Any], Any] = None):
+    def log_metrics(self, lambda_handler: Callable[[Any, Any], Any] = None, capture_cold_start_metric: bool = False):
         """Decorator to serialize and publish metrics at the end of a function execution.
 
         Be aware that the log_metrics **does call* the decorated function (e.g. lambda_handler).
@@ -107,10 +109,18 @@ class Metrics(MetricManager):
             Propagate error received
         """
 
+        # If handler is None we've been called with parameters
+        # Return a partial function with args filled
+        if lambda_handler is None:
+            logger.debug("Decorator called with parameters")
+            return functools.partial(self.log_metrics, capture_cold_start_metric=capture_cold_start_metric)
+
         @functools.wraps(lambda_handler)
-        def decorate(*args, **kwargs):
+        def decorate(event, context):
             try:
-                response = lambda_handler(*args, **kwargs)
+                response = lambda_handler(event, context)
+                if capture_cold_start_metric:
+                    self.__add_cold_start_metric(context=context)
             finally:
                 metrics = self.serialize_metric_set()
                 self.clear_metrics()
@@ -120,3 +130,18 @@ class Metrics(MetricManager):
             return response
 
         return decorate
+
+    def __add_cold_start_metric(self, context: Any):
+        """Add cold start metric and function_name dimension
+
+        Parameters
+        ----------
+        context : Any
+            Lambda context
+        """
+        global is_cold_start
+        if is_cold_start:
+            logger.debug("Adding cold start metric and function_name dimension")
+            self.add_metric(name="ColdStart", value=1, unit="Count")
+            self.add_dimension(name="function_name", value=context.function_name)
+            is_cold_start = False

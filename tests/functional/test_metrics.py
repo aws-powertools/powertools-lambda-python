@@ -1,4 +1,5 @@
 import json
+from collections import namedtuple
 from typing import Any, Dict, List
 
 import pytest
@@ -585,3 +586,50 @@ def test_namespace_var_precedence(monkeypatch, capsys, metric, dimension, namesp
 
     # THEN namespace should match the explicitly passed variable and not the env var
     assert expected["_aws"] == output["_aws"]
+
+
+def test_emit_cold_start_metric(capsys, namespace):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics()
+    my_metrics.add_namespace(**namespace)
+
+    # WHEN log_metrics is used with capture_cold_start_metric
+    @my_metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(evt, context):
+        return True
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+    lambda_handler({}, LambdaContext("example_fn"))
+
+    output = json.loads(capsys.readouterr().out.strip())
+
+    # THEN ColdStart metric and function_name dimension should be logged
+    assert output["ColdStart"] == 1
+    assert output["function_name"] == "example_fn"
+
+
+def test_emit_cold_start_metric_only_once(capsys, namespace, dimension, metric):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics()
+    my_metrics.add_namespace(**namespace)
+
+    # WHEN log_metrics is used with capture_cold_start_metric
+    # and handler is called more than once
+    @my_metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(evt, context):
+        my_metrics.add_metric(**metric)
+        my_metrics.add_dimension(**dimension)
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+    lambda_handler({}, LambdaContext("example_fn"))
+    capsys.readouterr().out.strip()
+
+    # THEN ColdStart metric and function_name dimension should be logged
+    # only once
+    lambda_handler({}, LambdaContext("example_fn"))
+
+    output = json.loads(capsys.readouterr().out.strip())
+
+    assert "ColdStart" not in output
+
+    assert "function_name" not in output
