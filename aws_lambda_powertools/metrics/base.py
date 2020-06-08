@@ -71,7 +71,7 @@ class MetricManager:
             Metric namespace
         """
         warnings.warn(
-            "add_namespace method is deprecated. Pass service to Metrics constructor instead", DeprecationWarning
+            "add_namespace method is deprecated. Pass namespace to Metrics constructor instead", DeprecationWarning
         )
         if self.namespace is not None:
             raise UniqueNamespaceError(

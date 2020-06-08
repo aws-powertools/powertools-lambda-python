@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2020-06-08
+### Added
+- **Metrics**: `capture_cold_start_metric` parameter added to `log_metrics` decorator
+- **Metrics**: Optional `namespace` and `service` parameters added to Metrics constructor to more closely resemble other core utils
+
+### Changed
+- **Metrics**: Default dimension is now created based on `service` parameter or `POWERTOOLS_SERVICE_NAME` env var
+
+### Deprecated
+- **Metrics**: `add_namespace` method deprecated in favor of using `namespace` parameter to Metrics constructor or `POWERTOOLS_METRICS_NAMESPACE` env var
+
 ## [0.9.5] - 2020-06-02
 ### Fixed
 - **Metrics**: Coerce non-string dimension values to string
