@@ -4,14 +4,13 @@ from typing import Any, Dict, List
 
 import pytest
 
+from aws_lambda_powertools import Metrics, single_metric
 from aws_lambda_powertools.metrics import (
-    Metrics,
     MetricUnit,
     MetricUnitError,
     MetricValueError,
     SchemaValidationError,
     UniqueNamespaceError,
-    single_metric,
 )
 from aws_lambda_powertools.metrics.base import MetricManager
 

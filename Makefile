@@ -15,7 +15,7 @@ format:
 	poetry run black aws_lambda_powertools tests
 
 lint: format
-	poetry run flake8
+	poetry run flake8 aws_lambda_powertools/* tests/* example/*
 
 test:
 	poetry run pytest -vvv --cov=./ --cov-report=xml

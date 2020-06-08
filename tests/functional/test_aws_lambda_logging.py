@@ -5,7 +5,7 @@ import logging
 
 import pytest
 
-from aws_lambda_powertools.logging.logger import Logger
+from aws_lambda_powertools import Logger
 
 
 @pytest.fixture

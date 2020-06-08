@@ -76,7 +76,7 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
 
     **Trace execution of custom middleware**
 
-        from aws_lambda_powertools.tracing import Tracer
+        from aws_lambda_powertools import Tracer
         from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
         tracer = Tracer(service="payment") # or via env var

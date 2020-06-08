@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from aws_lambda_powertools.tracing import Tracer
+from aws_lambda_powertools import Tracer
 
 
 @pytest.fixture

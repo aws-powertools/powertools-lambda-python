@@ -37,7 +37,7 @@ By default, Logger uses **INFO** log level. You can either change log level via 
 You can also explicitly set a service name via `service` param or via `POWERTOOLS_SERVICE_NAME` env var. This sets **service** key that will be present across all log statements.
 
 ```python:title=app.py
-from aws_lambda_powertools.logging import Logger
+from aws_lambda_powertools import Logger
 # POWERTOOLS_SERVICE_NAME defined
 logger = Logger() # highlight-line
 
@@ -63,7 +63,7 @@ Key | Type | Example | Description
 You can enrich your structured logs with key Lambda context information via `inject_lambda_context`.
 
 ```python:title=collect.py
-from aws_lambda_powertools.logging import Logger
+from aws_lambda_powertools import Logger
 
 logger = Logger()
 
@@ -86,7 +86,7 @@ You can also explicitly log any incoming event using `log_event` param or via `P
 </Note><br/>
 
 ```python:title=log_handler_event.py
-from aws_lambda_powertools.logging import Logger
+from aws_lambda_powertools import Logger
 
 logger = Logger()
 
@@ -151,7 +151,7 @@ Key | Type | Example
 You can append your own keys to your existing Logger via `structure_logs` with **append** param.
 
 ```python:title=collect.py
-from aws_lambda_powertools.logging import Logger
+from aws_lambda_powertools import Logger
 
 logger = Logger()
 
@@ -194,7 +194,7 @@ This happens on an entire request basis, and <strong>DEBUG</strong> level is set
 </Note><br/>
 
 ```python:title=collect.py
-from aws_lambda_powertools.logging import Logger
+from aws_lambda_powertools import Logger
 
 # Sample 1% of debug logs e.g. 0.1
 logger = Logger(sample_rate=0.1) # highlight-line
