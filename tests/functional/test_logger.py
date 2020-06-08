@@ -5,10 +5,10 @@ from collections import namedtuple
 
 import pytest
 
-from aws_lambda_powertools.logging import Logger, MetricUnit, log_metric, logger_inject_lambda_context, logger_setup
+from aws_lambda_powertools import Logger, Tracer
+from aws_lambda_powertools.logging import MetricUnit, log_metric, logger_inject_lambda_context, logger_setup
 from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
 from aws_lambda_powertools.logging.logger import JsonFormatter, set_package_logger
-from aws_lambda_powertools.tracing import Tracer
 
 
 @pytest.fixture

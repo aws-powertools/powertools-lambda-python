@@ -125,7 +125,7 @@ def logger_setup(
     -------
         **Logger class - Same UX**
 
-        from aws_lambda_powertools.logging import Logger
+        from aws_lambda_powertools import Logger
         logger = Logger(service="payment") # same env var still applies
 
     """
@@ -143,7 +143,7 @@ def logger_inject_lambda_context(
     -------
         **Logger class - Same UX**
 
-        from aws_lambda_powertools.logging import Logger
+        from aws_lambda_powertools import Logger
         logger = Logger(service="payment") # same env var still applies
         @logger.inject_lambda_context
         def handler(evt, ctx):
@@ -307,7 +307,7 @@ class Logger(logging.Logger):
     -------
     **Setups structured logging in JSON for Lambda functions with explicit service name**
 
-        >>> from aws_lambda_powertools.logging import Logger
+        >>> from aws_lambda_powertools import Logger
         >>> logger = Logger(service="payment")
         >>>
         >>> def handler(event, context):
@@ -317,7 +317,7 @@ class Logger(logging.Logger):
 
         $ export POWERTOOLS_SERVICE_NAME="payment"
         $ export POWERTOOLS_LOGGER_SAMPLE_RATE=0.01 # 1% debug sampling
-        >>> from aws_lambda_powertools.logging import Logger
+        >>> from aws_lambda_powertools import Logger
         >>> logger = Logger()
         >>>
         >>> def handler(event, context):
@@ -325,7 +325,7 @@ class Logger(logging.Logger):
 
     **Append payment_id to previously setup structured log logger**
 
-        >>> from aws_lambda_powertools.logging import Logger
+        >>> from aws_lambda_powertools import Logger
         >>> logger = Logger(service="payment")
         >>>
         >>> def handler(event, context):
@@ -398,7 +398,7 @@ class Logger(logging.Logger):
         -------
         **Captures Lambda contextual runtime info (e.g memory, arn, req_id)**
 
-            from aws_lambda_powertools.logging import Logger
+            from aws_lambda_powertools import Logger
 
             logger = Logger(service="payment")
 
@@ -408,7 +408,7 @@ class Logger(logging.Logger):
 
         **Captures Lambda contextual runtime info and logs incoming request**
 
-            from aws_lambda_powertools.logging import Logger
+            from aws_lambda_powertools import Logger
 
             logger = Logger(service="payment")
 

@@ -5,11 +5,11 @@ import aioboto3
 import aiohttp
 import requests
 
-from aws_lambda_powertools.logging import Logger
+from aws_lambda_powertools import Logger, Metrics, Tracer, single_metric
 from aws_lambda_powertools.logging.logger import set_package_logger
-from aws_lambda_powertools.metrics import Metrics, MetricUnit, single_metric
+from aws_lambda_powertools.metrics import MetricUnit
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.tracing import Tracer, aiohttp_trace_config
+from aws_lambda_powertools.tracing import aiohttp_trace_config
 
 set_package_logger()  # Enable package diagnostics (DEBUG log)
 

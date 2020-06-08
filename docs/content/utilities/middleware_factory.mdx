@@ -82,7 +82,7 @@ For advanced use cases, you can instantiate [Tracer](../core/tracer) inside your
 
 ```python:title=app.py
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.tracing import Tracer
+from aws_lambda_powertools import Tracer
 
 @lambda_handler_decorator(trace_execution=True)
 def middleware_name(handler, event, context):

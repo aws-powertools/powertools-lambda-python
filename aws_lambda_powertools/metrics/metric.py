@@ -3,8 +3,8 @@ import logging
 from contextlib import contextmanager
 from typing import Dict
 
-from aws_lambda_powertools.helper.models import MetricUnit
-from aws_lambda_powertools.metrics.base import MetricManager
+from ..helper.models import MetricUnit
+from .base import MetricManager
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,8 @@ def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = No
     -------
     **Creates cold start metric with function_version as dimension**
 
-        from aws_lambda_powertools.metrics import single_metric, MetricUnit
+        from aws_lambda_powertools import single_metric
+        from aws_lambda_powertools.metrics import MetricUnit
 
         with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace="ServerlessAirline") as metric:
                 metric.add_dimension(name="function_version", value=47)
@@ -78,7 +79,8 @@ def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = No
 
         $ export POWERTOOLS_METRICS_NAMESPACE="ServerlessAirline"
 
-        from aws_lambda_powertools.metrics import single_metric, MetricUnit
+        from aws_lambda_powertools import single_metric
+        from aws_lambda_powertools.metrics import MetricUnit
 
         with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric:
                 metric.add_dimension(name="function_version", value=47)

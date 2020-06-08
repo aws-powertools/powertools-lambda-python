@@ -4,7 +4,7 @@ import logging
 import os
 from typing import Any, Callable
 
-from aws_lambda_powertools.metrics.base import MetricManager
+from .base import MetricManager
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class Metrics(MetricManager):
     -------
     **Creates a few metrics and publish at the end of a function execution**
 
-        from aws_lambda_powertools.metrics import Metrics
+        from aws_lambda_powertools import Metrics
 
         metrics = Metrics(namespace="ServerlessAirline", service="payment")
         metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)

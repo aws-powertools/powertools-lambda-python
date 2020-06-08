@@ -36,7 +36,8 @@ You can explicitly set a namespace name via `namespace` param or via `POWERTOOLS
 You can also pass a service name via `service` param or `POWERTOOLS_SERVICE_NAME` env var. This will create a dimension with the service name.
 
 ```python:title=app.py
-from aws_lambda_powertools.metrics import Metrics, MetricUnit
+from aws_lambda_powertools import Metrics
+from aws_lambda_powertools.metrics import MetricUnit
 
 # POWERTOOLS_METRICS_NAMESPACE and POWERTOOLS_SERVICE_NAME defined
 metrics = Metrics() # highlight-line
@@ -54,7 +55,8 @@ You can initialize Metrics anywhere in your code as many times as you need - It'
 You can create metrics using `add_metric`, and manually create dimensions for all your aggregate metrics using `add_dimension`.
 
 ```python:title=app.py
-from aws_lambda_powertools.metrics import Metrics, MetricUnit
+from aws_lambda_powertools import Metrics
+from aws_lambda_powertools.metrics import MetricUnit
 
 metrics = Metrics(namespace="ExampleApplication", service="booking")
 # highlight-start
@@ -79,7 +81,8 @@ CloudWatch EMF uses the same dimensions across all your metrics. Use `single_met
 
 
 ```python:title=single_metric.py
-from aws_lambda_powertools.metrics import MetricUnit, single_metric
+from aws_lambda_powertools import single_metric
+from aws_lambda_powertools.metrics import MetricUnit
 
 with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace="ExampleApplication") as metric: # highlight-line
     metric.add_dimension(name="function_context", value="$LATEST")
@@ -91,7 +94,8 @@ with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace="
 As you finish adding all your metrics, you need to serialize and flush them to standard output. You can do that right before you return your response to the caller via `log_metrics`.
 
 ```python:title=lambda_handler.py
-from aws_lambda_powertools.metrics import Metrics, MetricUnit
+from aws_lambda_powertools import Metrics
+from aws_lambda_powertools.metrics import MetricUnit
 
 metrics = Metrics(service="ExampleService")
 metrics.add_metric(name="ColdStart", unit="Count", value=1)
@@ -115,7 +119,8 @@ def lambda_handler(evt, ctx):
 </Note><br/>
 
 ```python:title=lambda_handler_nested_middlewares.py
-from aws_lambda_powertools.metrics import Metrics, MetricUnit
+from aws_lambda_powertools import Metrics
+from aws_lambda_powertools.metrics import MetricUnit
 
 metrics = Metrics(namespace="ExampleApplication", service="booking")
 metrics.add_metric(name="ColdStart", unit="Count", value=1)
@@ -135,7 +140,8 @@ If you prefer not to use `log_metrics` because you might want to encapsulate add
 
 ```python:title=manual_metric_serialization.py
 import json
-from aws_lambda_powertools.metrics import Metrics, MetricUnit
+from aws_lambda_powertools import Metrics
+from aws_lambda_powertools.metrics import MetricUnit
 
 metrics = Metrics(namespace="ExampleApplication", service="booking")
 metrics.add_metric(name="ColdStart", unit="Count", value=1)
@@ -152,7 +158,8 @@ print(json.dumps(your_metrics_object))
 You can capture cold start metrics automatically with `log_metrics` via `capture_cold_start_metric` param.
 
 ```python:title=lambda_handler.py
-from aws_lambda_powertools.metrics import Metrics, MetricUnit
+from aws_lambda_powertools import Metrics
+from aws_lambda_powertools.metrics import MetricUnit
 
 metrics = Metrics(service="ExampleService")
 

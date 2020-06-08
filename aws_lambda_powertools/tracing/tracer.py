@@ -50,7 +50,7 @@ class Tracer:
     -------
     **A Lambda function using Tracer**
 
-        from aws_lambda_powertools.tracing import Tracer
+        from aws_lambda_powertools import Tracer
         tracer = Tracer(service="greeting")
 
         @tracer.capture_method
@@ -67,7 +67,7 @@ class Tracer:
 
     **Booking Lambda function using Tracer that adds additional annotation/metadata**
 
-        from aws_lambda_powertools.tracing import Tracer
+        from aws_lambda_powertools import Tracer
         tracer = Tracer(service="booking")
 
         @tracer.capture_method
@@ -89,7 +89,7 @@ class Tracer:
     **A Lambda function using service name via POWERTOOLS_SERVICE_NAME**
 
         export POWERTOOLS_SERVICE_NAME="booking"
-        from aws_lambda_powertools.tracing import Tracer
+        from aws_lambda_powertools import Tracer
         tracer = Tracer()
 
         @tracer.capture_lambda_handler
@@ -101,7 +101,7 @@ class Tracer:
     **Reuse an existing instance of Tracer anywhere in the code**
 
         # lambda_handler.py
-        from aws_lambda_powertools.tracing import Tracer
+        from aws_lambda_powertools import Tracer
         tracer = Tracer()
 
         @tracer.capture_lambda_handler
@@ -109,7 +109,7 @@ class Tracer:
             ...
 
         # utils.py
-        from aws_lambda_powertools.tracing import Tracer
+        from aws_lambda_powertools import Tracer
         tracer = Tracer()
         ...
 
@@ -301,7 +301,7 @@ class Tracer:
 
         **Custom async method using capture_method decorator**
 
-            from aws_lambda_powertools.tracing import Tracer
+            from aws_lambda_powertools import Tracer
             tracer = Tracer(service="booking")
 
             @tracer.capture_method
@@ -319,7 +319,7 @@ class Tracer:
 
         **Tracing nested async calls**
 
-            from aws_lambda_powertools.tracing import Tracer
+            from aws_lambda_powertools import Tracer
             tracer = Tracer(service="booking")
 
             @tracer.capture_method
@@ -341,7 +341,7 @@ class Tracer:
 
         This may not needed once [this bug is closed](https://github.com/aws/aws-xray-sdk-python/issues/164)
 
-            from aws_lambda_powertools.tracing import Tracer
+            from aws_lambda_powertools import Tracer
             tracer = Tracer(service="booking")
 
             async def get_identity():
@@ -362,7 +362,7 @@ class Tracer:
 
         This may not needed once [this bug is closed](https://github.com/aws/aws-xray-sdk-python/issues/164)
 
-            from aws_lambda_powertools.tracing import Tracer
+            from aws_lambda_powertools import Tracer
             tracer = Tracer(service="booking")
 
             async def get_identity():

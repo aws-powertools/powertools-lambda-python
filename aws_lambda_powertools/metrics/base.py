@@ -9,8 +9,7 @@ from typing import Dict, List, Union
 
 import fastjsonschema
 
-from aws_lambda_powertools.helper.models import MetricUnit
-
+from ..helper.models import MetricUnit
 from .exceptions import MetricUnitError, MetricValueError, SchemaValidationError, UniqueNamespaceError
 
 logger = logging.getLogger(__name__)
