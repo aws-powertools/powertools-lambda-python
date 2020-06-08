@@ -358,7 +358,7 @@ def test_log_no_metrics_error_propagation(capsys, metric, dimension, namespace):
         raise ValueError("Bubble up")
 
     # THEN the raised exception should be
-    with pytest.raises(ValueError):
+    with pytest.raises(SchemaValidationError):
         lambda_handler({}, {})
 
 

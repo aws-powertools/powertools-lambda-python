@@ -122,7 +122,11 @@ class Metrics(MetricManager):
         # Return a partial function with args filled
         if lambda_handler is None:
             logger.debug("Decorator called with parameters")
-            return functools.partial(self.log_metrics, capture_cold_start_metric=capture_cold_start_metric)
+            return functools.partial(
+                self.log_metrics,
+                capture_cold_start_metric=capture_cold_start_metric,
+                raise_on_empty_metrics=raise_on_empty_metrics,
+            )
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
