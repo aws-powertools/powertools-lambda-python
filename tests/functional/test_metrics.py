@@ -351,9 +351,9 @@ def test_log_no_metrics_error_propagation(capsys, metric, dimension, namespace):
     # GIVEN Metrics is initialized
     my_metrics = Metrics()
 
-    @my_metrics.log_metrics(raise_for_empty_metrics=True)
+    @my_metrics.log_metrics(raise_on_empty_metrics=True)
     def lambda_handler(evt, context):
-        # WHEN log_metrics is used with raise_for_empty_metrics param and has no metrics
+        # WHEN log_metrics is used with raise_on_empty_metrics param and has no metrics
         # and the function decorated also raised an exception
         raise ValueError("Bubble up")
 

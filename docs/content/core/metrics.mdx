@@ -110,7 +110,7 @@ def lambda_handler(evt, ctx):
 * Namespace is set, and no more than one
 * Metric units must be [supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html)
 
-If you want to ensure that at least 1 metric is emitted, you can pass `raise_for_empty_metrics` to the `log_metrics` decorator: `@metrics.log_metrics(raise_for_empty_metrics=True)`
+If you want to ensure that at least 1 metric is emitted, you can pass `raise_on_empty_metrics` to the `log_metrics` decorator: `@metrics.log_metrics(raise_on_empty_metrics=True)`
 
 <Note type="warning">
   When nesting multiple middlewares, you should use <strong><code>log_metrics</code> as your last decorator wrapping all subsequent ones</strong>.

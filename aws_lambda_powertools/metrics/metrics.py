@@ -86,7 +86,7 @@ class Metrics(MetricManager):
         self,
         lambda_handler: Callable[[Any, Any], Any] = None,
         capture_cold_start_metric: bool = False,
-        raise_for_empty_metrics: bool = False,
+        raise_on_empty_metrics: bool = False,
     ):
         """Decorator to serialize and publish metrics at the end of a function execution.
 
@@ -109,7 +109,7 @@ class Metrics(MetricManager):
             Lambda function handler, by default None
         capture_cold_start_metric : bool, optional
             Captures cold start metric, by default False
-        raise_for_empty_metrics : bool, optional
+        raise_on_empty_metrics : bool, optional
             Raise exception if no metrics are emitted, by default False
 
         Raises
@@ -131,7 +131,7 @@ class Metrics(MetricManager):
                 if capture_cold_start_metric:
                     self.__add_cold_start_metric(context=context)
             finally:
-                if not raise_for_empty_metrics and not self.metric_set:
+                if not raise_on_empty_metrics and not self.metric_set:
                     logger.debug("No metrics to publish, skipping")
                 else:
                     metrics = self.serialize_metric_set()
