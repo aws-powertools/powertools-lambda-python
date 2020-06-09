@@ -1,4 +1,5 @@
 import json
+import warnings
 from collections import namedtuple
 from typing import Any, Dict, List
 
@@ -350,13 +351,13 @@ def test_log_no_metrics_error_propagation(capsys, metric, dimension, namespace):
     # GIVEN Metrics is initialized
     my_metrics = Metrics()
 
-    @my_metrics.log_metrics
+    @my_metrics.log_metrics(raise_on_empty_metrics=True)
     def lambda_handler(evt, context):
-        # WHEN log_metrics is used despite having no metrics
+        # WHEN log_metrics is used with raise_on_empty_metrics param and has no metrics
         # and the function decorated also raised an exception
         raise ValueError("Bubble up")
 
-    # THEN we should first raise SchemaValidationError as the main exception
+    # THEN the raised exception should be
     with pytest.raises(SchemaValidationError):
         lambda_handler({}, {})
 
@@ -632,3 +633,19 @@ def test_emit_cold_start_metric_only_once(capsys, namespace, dimension, metric):
     assert "ColdStart" not in output
 
     assert "function_name" not in output
+
+
+def test_log_metrics_decorator_no_metrics(dimensions, namespace):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(namespace=namespace["name"], service="test_service")
+
+    # WHEN using the log_metrics decorator and no metrics have been added
+    @my_metrics.log_metrics
+    def lambda_handler(evt, context):
+        pass
+
+    # THEN it should raise a warning instead of throwing an exception
+    with warnings.catch_warnings(record=True) as w:
+        lambda_handler({}, {})
+        assert len(w) == 1
+        assert str(w[-1].message) == "No metrics to publish, skipping"

@@ -2,6 +2,7 @@ import functools
 import json
 import logging
 import os
+import warnings
 from typing import Any, Callable
 
 from .base import MetricManager
@@ -82,7 +83,12 @@ class Metrics(MetricManager):
         self.metric_set.clear()
         self.dimension_set.clear()
 
-    def log_metrics(self, lambda_handler: Callable[[Any, Any], Any] = None, capture_cold_start_metric: bool = False):
+    def log_metrics(
+        self,
+        lambda_handler: Callable[[Any, Any], Any] = None,
+        capture_cold_start_metric: bool = False,
+        raise_on_empty_metrics: bool = False,
+    ):
         """Decorator to serialize and publish metrics at the end of a function execution.
 
         Be aware that the log_metrics **does call* the decorated function (e.g. lambda_handler).
@@ -102,6 +108,10 @@ class Metrics(MetricManager):
         ----------
         lambda_handler : Callable[[Any, Any], Any], optional
             Lambda function handler, by default None
+        capture_cold_start_metric : bool, optional
+            Captures cold start metric, by default False
+        raise_on_empty_metrics : bool, optional
+            Raise exception if no metrics are emitted, by default False
 
         Raises
         ------
@@ -113,7 +123,11 @@ class Metrics(MetricManager):
         # Return a partial function with args filled
         if lambda_handler is None:
             logger.debug("Decorator called with parameters")
-            return functools.partial(self.log_metrics, capture_cold_start_metric=capture_cold_start_metric)
+            return functools.partial(
+                self.log_metrics,
+                capture_cold_start_metric=capture_cold_start_metric,
+                raise_on_empty_metrics=raise_on_empty_metrics,
+            )
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
@@ -122,10 +136,13 @@ class Metrics(MetricManager):
                 if capture_cold_start_metric:
                     self.__add_cold_start_metric(context=context)
             finally:
-                metrics = self.serialize_metric_set()
-                self.clear_metrics()
-                logger.debug("Publishing metrics", {"metrics": metrics})
-                print(json.dumps(metrics))
+                if not raise_on_empty_metrics and not self.metric_set:
+                    warnings.warn("No metrics to publish, skipping")
+                else:
+                    metrics = self.serialize_metric_set()
+                    self.clear_metrics()
+                    logger.debug("Publishing metrics", {"metrics": metrics})
+                    print(json.dumps(metrics))
 
             return response
 
