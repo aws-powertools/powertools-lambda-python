@@ -135,6 +135,10 @@ def lambda_handler(evt, ctx):
 
 If you prefer not to use `log_metrics` because you might want to encapsulate additional logic when doing so, you can manually flush and clear metrics as follows:
 
+<Note type="warning">
+  Metrics, dimensions and namespace validation still applies.
+</Note><br/>
+
 ```python:title=manual_metric_serialization.py
 import json
 from aws_lambda_powertools.metrics import Metrics, MetricUnit
