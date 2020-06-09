@@ -103,14 +103,28 @@ def lambda_handler(evt, ctx):
     ...
 ```
 
-`log_metrics` decorator **validates**, **serializes**, and **flushes** all your metrics. During metrics validation, if no metrics are provided then a warning will be logged, but no exception will be raised. If metrics are provided, and any of the following criteria are not met, `SchemaValidationError` exception will be raised:
+`log_metrics` decorator **validates**, **serializes**, and **flushes** all your metrics. During metrics validation, if no metrics are provided then a warning will be logged, but no exception will be raised.
+
+If metrics are provided, and any of the following criteria are not met, `SchemaValidationError` exception will be raised:
 
 * Minimum of 1 dimension
 * Maximum of 9 dimensions
 * Namespace is set, and no more than one
 * Metric units must be [supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html)
 
-If you want to ensure that at least 1 metric is emitted, you can pass `raise_on_empty_metrics` to the `log_metrics` decorator: `@metrics.log_metrics(raise_on_empty_metrics=True)`. If you expect your function to execute without publishing metrics every time, you can suppress the warning with `warnings.filterwarnings("ignore", "No metrics to publish*")`.
+If you want to ensure that at least one metric is emitted, you can pass `raise_on_empty_metrics` to the **log_metrics** decorator:
+
+```python:title=lambda_handler.py
+from aws_lambda_powertools.metrics import Metrics
+
+@metrics.log_metrics(raise_on_empty_metrics=True) # highlight-line
+def lambda_handler(evt, ctx):
+    ...
+```
+
+<Note type="info">
+  If you expect your function to execute without publishing metrics every time, you can suppress the warning with <strong><code>warnings.filterwarnings("ignore", "No metrics to publish*")</code></strong>.
+</Note><br/>
 
 <Note type="warning">
   When nesting multiple middlewares, you should use <strong><code>log_metrics</code> as your last decorator wrapping all subsequent ones</strong>.
