@@ -2,6 +2,7 @@ import functools
 import json
 import logging
 import os
+import warnings
 from typing import Any, Callable
 
 from aws_lambda_powertools.metrics.base import MetricManager
@@ -136,7 +137,7 @@ class Metrics(MetricManager):
                     self.__add_cold_start_metric(context=context)
             finally:
                 if not raise_on_empty_metrics and not self.metric_set:
-                    logger.debug("No metrics to publish, skipping")
+                    warnings.warn("No metrics to publish, skipping")
                 else:
                     metrics = self.serialize_metric_set()
                     self.clear_metrics()

@@ -1,4 +1,5 @@
 import json
+import warnings
 from collections import namedtuple
 from typing import Any, Dict, List
 
@@ -635,7 +636,7 @@ def test_emit_cold_start_metric_only_once(capsys, namespace, dimension, metric):
     assert "function_name" not in output
 
 
-def test_log_metrics_decorator_no_metrics(capsys, dimensions, namespace):
+def test_log_metrics_decorator_no_metrics(dimensions, namespace):
     # GIVEN Metrics is initialized
     my_metrics = Metrics(namespace=namespace["name"], service="test_service")
 
@@ -644,8 +645,8 @@ def test_log_metrics_decorator_no_metrics(capsys, dimensions, namespace):
     def lambda_handler(evt, context):
         pass
 
-    # THEN it should not throw an exception, and should not log anything
-    LambdaContext = namedtuple("LambdaContext", "function_name")
-    lambda_handler({}, LambdaContext("example_fn"))
-
-    assert capsys.readouterr().out == ""
+    # THEN it should raise a warning instead of throwing an exception
+    with warnings.catch_warnings(record=True) as w:
+        lambda_handler({}, {})
+        assert len(w) == 1
+        assert str(w[-1].message) == "No metrics to publish, skipping"
