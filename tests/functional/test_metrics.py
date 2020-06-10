@@ -466,7 +466,7 @@ def test_log_metrics_with_explicit_namespace(capsys, metrics, dimensions, namesp
 
     output = json.loads(capsys.readouterr().out.strip())
 
-    dimensions.insert(0, {"name": "service", "value": "test_service"})
+    dimensions.append({"name": "service", "value": "test_service"})
     expected = serialize_metrics(metrics=metrics, dimensions=dimensions, namespace=namespace)
 
     remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
@@ -503,33 +503,31 @@ def test_log_metrics_with_implicit_dimensions(capsys, metrics):
     assert expected == output
 
 
-def test_log_metrics_with_renamed_service(capsys, metrics):
+def test_log_metrics_with_renamed_service(capsys, metrics, metric):
     # GIVEN Metrics is initialized with service specified
     my_metrics = Metrics(service="test_service", namespace="test_application")
     for metric in metrics:
         my_metrics.add_metric(**metric)
 
-    # WHEN we manually call add_dimension to change the value of the service dimension
-    my_metrics.add_dimension(name="service", value="another_test_service")
-
     @my_metrics.log_metrics
     def lambda_handler(evt, ctx):
+        # WHEN we manually call add_dimension to change the value of the service dimension
+        my_metrics.add_dimension(name="service", value="another_test_service")
+        my_metrics.add_metric(**metric)
         return True
 
     lambda_handler({}, {})
 
     output = json.loads(capsys.readouterr().out.strip())
+    lambda_handler({}, {})
+    second_output = json.loads(capsys.readouterr().out.strip())
 
-    expected_dimensions = [{"name": "service", "value": "test_service"}]
-    expected = serialize_metrics(
-        metrics=metrics, dimensions=expected_dimensions, namespace={"name": "test_application"}
-    )
-
-    remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
+    remove_timestamp(metrics=[output])  # Timestamp will always be different
 
     # THEN we should have no exceptions and the dimensions should be set to the name provided in the
     # add_dimension call
     assert output["service"] == "another_test_service"
+    assert second_output["service"] == "another_test_service"
 
 
 def test_log_metrics_with_namespace_overridden(capsys, metrics, dimensions):
@@ -649,3 +647,40 @@ def test_log_metrics_decorator_no_metrics(dimensions, namespace):
         lambda_handler({}, {})
         assert len(w) == 1
         assert str(w[-1].message) == "No metrics to publish, skipping"
+
+
+def test_log_metrics_with_implicit_dimensions_called_twice(capsys, metrics):
+    # GIVEN Metrics is initialized with service specified
+    my_metrics = Metrics(service="test_service", namespace="test_application")
+
+    # WHEN we utilize log_metrics to serialize and don't explicitly add any dimensions,
+    # and the lambda function is called more than once
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        for metric in metrics:
+            my_metrics.add_metric(**metric)
+        return True
+
+    lambda_handler({}, {})
+    output = json.loads(capsys.readouterr().out.strip())
+
+    lambda_handler({}, {})
+    second_output = json.loads(capsys.readouterr().out.strip())
+
+    expected_dimensions = [{"name": "service", "value": "test_service"}]
+    expected = serialize_metrics(
+        metrics=metrics, dimensions=expected_dimensions, namespace={"name": "test_application"}
+    )
+
+    remove_timestamp(metrics=[output, expected, second_output])  # Timestamp will always be different
+
+    # THEN we should have no exceptions and the dimensions should be set to the name provided in the
+    # service passed to Metrics constructor
+    assert output["service"] == "test_service"
+    assert second_output["service"] == "test_service"
+
+    for metric_record in output["_aws"]["CloudWatchMetrics"]:
+        assert ["service"] in metric_record["Dimensions"]
+
+    for metric_record in second_output["_aws"]["CloudWatchMetrics"]:
+        assert ["service"] in metric_record["Dimensions"]
