@@ -13,4 +13,15 @@ tr > td {
 
 .language-text {
     font-weight: 700;
+    color: #5A6270 !important
+}
+
+.token.variable,
+.token.boolean,
+.token.number,
+.language-bash > .variable,
+.token.function,
+.token.decorator,
+.token.property {
+    color: darkmagenta !important
 }
