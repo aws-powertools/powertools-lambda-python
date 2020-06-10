@@ -36,6 +36,8 @@ class MetricManager:
     ---------------------
     POWERTOOLS_METRICS_NAMESPACE : str
         metric namespace to be set for all metrics
+    POWERTOOLS_SERVICE_NAME : str
+        service name used for default dimension
 
     Raises
     ------
@@ -49,10 +51,13 @@ class MetricManager:
         When metric object fails EMF schema validation
     """
 
-    def __init__(self, metric_set: Dict[str, str] = None, dimension_set: Dict = None, namespace: str = None):
+    def __init__(
+        self, metric_set: Dict[str, str] = None, dimension_set: Dict = None, namespace: str = None, service: str = None
+    ):
         self.metric_set = metric_set if metric_set is not None else {}
         self.dimension_set = dimension_set if dimension_set is not None else {}
         self.namespace = namespace or os.getenv("POWERTOOLS_METRICS_NAMESPACE")
+        self.service = service or os.environ.get("POWERTOOLS_SERVICE_NAME")
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_options = list(MetricUnit.__members__)
 
@@ -157,6 +162,9 @@ class MetricManager:
 
         if dimensions is None:  # pragma: no cover
             dimensions = self.dimension_set
+
+        if self.service and not self.dimension_set.get("service"):
+            self.dimension_set["service"] = self.service
 
         logger.debug("Serializing...", {"metrics": metrics, "dimensions": dimensions})
 
