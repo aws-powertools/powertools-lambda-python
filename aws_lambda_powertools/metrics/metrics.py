@@ -1,7 +1,6 @@
 import functools
 import json
 import logging
-import os
 import warnings
 from typing import Any, Callable
 
@@ -72,11 +71,11 @@ class Metrics(MetricManager):
     def __init__(self, service: str = None, namespace: str = None):
         self.metric_set = self._metrics
         self.dimension_set = self._dimensions
-        self.service = service or os.environ.get("POWERTOOLS_SERVICE_NAME")
+        self.service = service
         self.namespace = namespace
-        if self.service:
-            self.dimension_set["service"] = self.service
-        super().__init__(metric_set=self.metric_set, dimension_set=self.dimension_set, namespace=self.namespace)
+        super().__init__(
+            metric_set=self.metric_set, dimension_set=self.dimension_set, namespace=self.namespace, service=self.service
+        )
 
     def clear_metrics(self):
         logger.debug("Clearing out existing metric set from memory")
