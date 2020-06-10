@@ -6,9 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.10.1] - 2020-06-08
+## [0.11.0] - 2020-06-08
 ### Fixed
 - **Metrics**: Fix a bug with Metrics causing an exception to be thrown when logging metrics if dimensions were not explicitly added.
+
+### Changed
+- **Metrics**: No longer throws exception by default in case no metrics are emitted when using the log_metrics decorator.
 
 ## [0.10.0] - 2020-06-08
 ### Added
