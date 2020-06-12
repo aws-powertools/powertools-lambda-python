@@ -17,7 +17,7 @@ reported the issue. Please try to include as much information as you can.
 
 Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
 
-1. You are working against the latest source on the *develop* branch.
+1. You are working against the latest source on the **develop** branch.
 2. You check existing open, and recently merged, pull requests to make sure someone else hasn't addressed the problem already.
 3. You open a RFC issue to discuss any significant work - we would hate for your time to be wasted.
 
