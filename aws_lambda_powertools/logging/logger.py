@@ -1,16 +1,14 @@
 import copy
 import functools
-import itertools
 import json
 import logging
 import os
 import random
 import sys
-import warnings
 from distutils.util import strtobool
 from typing import Any, Callable, Dict, Union
 
-from ..helper.models import MetricUnit, build_lambda_context_model, build_metric_unit_from_str
+from ..helper.models import build_lambda_context_model
 from .exceptions import InvalidLoggerSamplingRateError
 
 logger = logging.getLogger(__name__)
@@ -114,44 +112,6 @@ class JsonFormatter(logging.Formatter):
         return json_record
 
 
-def logger_setup(
-    service: str = None, level: str = None, sampling_rate: float = 0.0, legacy: bool = False, **kwargs
-) -> DeprecationWarning:
-    """DEPRECATED
-
-    This will be removed when GA - Use `aws_lambda_powertools.logging.logger.Logger` instead
-
-    Example
-    -------
-        **Logger class - Same UX**
-
-        from aws_lambda_powertools import Logger
-        logger = Logger(service="payment") # same env var still applies
-
-    """
-    raise DeprecationWarning("Use Logger instead - This method will be removed when GA")
-
-
-def logger_inject_lambda_context(
-    lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False
-) -> DeprecationWarning:
-    """DEPRECATED
-
-    This will be removed when GA - Use `aws_lambda_powertools.logging.logger.Logger` instead
-
-    Example
-    -------
-        **Logger class - Same UX**
-
-        from aws_lambda_powertools import Logger
-        logger = Logger(service="payment") # same env var still applies
-        @logger.inject_lambda_context
-        def handler(evt, ctx):
-            pass
-    """
-    raise DeprecationWarning("Use Logger instead - This method will be removed when GA")
-
-
 def _is_cold_start() -> bool:
     """Verifies whether is cold start
 
@@ -168,113 +128,6 @@ def _is_cold_start() -> bool:
         is_cold_start = False
 
     return cold_start
-
-
-def log_metric(
-    name: str, namespace: str, unit: MetricUnit, value: float = 0, service: str = "service_undefined", **dimensions,
-):
-    """Logs a custom metric in a statsD-esque format to stdout.
-
-    **This will be removed when GA - Use `aws_lambda_powertools.metrics.metrics.Metrics` instead**
-
-    Creating Custom Metrics synchronously impact on performance/execution time.
-    Instead, log_metric prints a metric to CloudWatch Logs.
-    That allows us to pick them up asynchronously via another Lambda function and create them as a metric.
-
-    NOTE: It takes up to 9 dimensions by default, and Metric units are conveniently available via MetricUnit Enum.
-    If service is not passed as arg or via env var, "service_undefined" will be used as dimension instead.
-
-    **Output in CloudWatch Logs**: `MONITORING|<metric_value>|<metric_unit>|<metric_name>|<namespace>|<dimensions>`
-
-    Serverless Application Repository App that creates custom metric from this log output:
-    https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:374852340823:applications~async-custom-metrics
-
-    Environment variables
-    ---------------------
-    POWERTOOLS_SERVICE_NAME: str
-        service name
-
-    Parameters
-    ----------
-    name : str
-        metric name, by default None
-    namespace : str
-        metric namespace (e.g. application name), by default None
-    unit : MetricUnit, by default MetricUnit.Count
-        metric unit enum value (e.g. MetricUnit.Seconds), by default None\n
-        API Info: https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html
-    value : float, optional
-        metric value, by default 0
-    service : str, optional
-        service name used as dimension, by default "service_undefined"
-    dimensions: dict, optional
-        keyword arguments as additional dimensions (e.g. `customer=customerId`)
-
-    Example
-    -------
-    **Log metric to count number of successful payments; define service via env var**
-
-        $ export POWERTOOLS_SERVICE_NAME="payment"
-        from aws_lambda_powertools.logging import MetricUnit, log_metric
-        log_metric(
-            name="SuccessfulPayments",
-            unit=MetricUnit.Count,
-            value=1,
-            namespace="DemoApp"
-        )
-
-    **Log metric to count number of successful payments per campaign & customer**
-
-        from aws_lambda_powertools.logging import MetricUnit, log_metric
-        log_metric(
-            name="SuccessfulPayments",
-            service="payment",
-            unit=MetricUnit.Count,
-            value=1,
-            namespace="DemoApp",
-            campaign=campaign_id,
-            customer=customer_id
-        )
-    """
-
-    warnings.warn(message="This method will be removed in GA; use Metrics instead", category=DeprecationWarning)
-    logger.debug(f"Building new custom metric. Name: {name}, Unit: {unit}, Value: {value}, Dimensions: {dimensions}")
-    service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
-    dimensions = __build_dimensions(**dimensions)
-    unit = build_metric_unit_from_str(unit)
-
-    metric = f"MONITORING|{value}|{unit.name}|{name}|{namespace}|service={service}"
-    if dimensions:
-        metric = f"MONITORING|{value}|{unit.name}|{name}|{namespace}|service={service},{dimensions}"
-
-    print(metric)
-
-
-def __build_dimensions(**dimensions) -> str:
-    """Builds correct format for custom metric dimensions from kwargs
-
-    Parameters
-    ----------
-    dimensions: dict, optional
-        additional dimensions
-
-    Returns
-    -------
-    str
-        Dimensions in the form of "key=value,key2=value2"
-    """
-    MAX_DIMENSIONS = 10
-    dimension = ""
-
-    # CloudWatch accepts a max of 10 dimensions per metric
-    # We include service name as a dimension
-    # so we take up to 9 values as additional dimensions
-    # before we convert everything to a string of key=value
-    dimensions_partition = dict(itertools.islice(dimensions.items(), MAX_DIMENSIONS))
-    dimensions_list = [dimension + "=" + value for dimension, value in dimensions_partition.items() if value]
-    dimension = ",".join(dimensions_list)
-
-    return dimension
 
 
 class Logger(logging.Logger):

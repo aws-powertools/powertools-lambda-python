@@ -6,7 +6,6 @@ from collections import namedtuple
 import pytest
 
 from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.logging import MetricUnit, log_metric, logger_inject_lambda_context, logger_setup
 from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
 from aws_lambda_powertools.logging.logger import JsonFormatter, set_package_logger
 
@@ -236,68 +235,6 @@ def test_inject_lambda_cold_start(lambda_context, stdout):
     assert fourth_log["cold_start"] is False
 
 
-def test_log_metric(capsys):
-    # GIVEN a service, unit and value have been provided
-    # WHEN log_metric is called
-    # THEN custom metric line should be match given values
-    log_metric(
-        service="payment", name="test_metric", unit=MetricUnit.Seconds, value=60, namespace="DemoApp",
-    )
-    expected = "MONITORING|60|Seconds|test_metric|DemoApp|service=payment\n"
-    captured = capsys.readouterr()
-
-    assert captured.out == expected
-
-
-def test_log_metric_env_var(monkeypatch, capsys):
-    # GIVEN a service, unit and value have been provided
-    # WHEN log_metric is called
-    # THEN custom metric line should be match given values
-    service_name = "payment"
-    monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", service_name)
-
-    log_metric(name="test_metric", unit=MetricUnit.Seconds, value=60, namespace="DemoApp")
-    expected = "MONITORING|60|Seconds|test_metric|DemoApp|service=payment\n"
-    captured = capsys.readouterr()
-
-    assert captured.out == expected
-
-
-def test_log_metric_multiple_dimensions(capsys):
-    # GIVEN multiple optional dimensions are provided
-    # WHEN log_metric is called
-    # THEN dimensions should appear as dimenion=value
-    log_metric(
-        name="test_metric", unit=MetricUnit.Seconds, value=60, customer="abc", charge_id="123", namespace="DemoApp",
-    )
-    expected = "MONITORING|60|Seconds|test_metric|DemoApp|service=service_undefined,customer=abc,charge_id=123\n"
-    captured = capsys.readouterr()
-
-    assert captured.out == expected
-
-
-@pytest.mark.parametrize(
-    "invalid_input,expected",
-    [
-        ({"unit": "seconds"}, "MONITORING|0|Seconds|test_metric|DemoApp|service=service_undefined\n",),
-        (
-            {"unit": "Seconds", "customer": None, "charge_id": "123", "payment_status": ""},
-            "MONITORING|0|Seconds|test_metric|DemoApp|service=service_undefined,charge_id=123\n",
-        ),
-    ],
-    ids=["metric unit as string lower case", "empty dimension value"],
-)
-def test_log_metric_partially_correct_args(capsys, invalid_input, expected):
-    # GIVEN invalid arguments are provided such as empty dimension values and metric units in strings
-    # WHEN log_metric is called
-    # THEN default values should be used such as "Count" as a unit, invalid dimensions not included
-    # and no exception raised
-    log_metric(name="test_metric", namespace="DemoApp", **invalid_input)
-    captured = capsys.readouterr()
-
-    assert captured.out == expected
-
-
 def test_package_logger(capsys):
 
     set_package_logger()
@@ -313,32 +250,6 @@ def test_package_logger_format(stdout, capsys):
     output = json.loads(stdout.getvalue().split("\n")[0])
 
     assert "test" in output["formatter"]
-
-
-@pytest.mark.parametrize(
-    "invalid_input,expected",
-    [({"unit": "Blah"}, ValueError), ({"unit": None}, ValueError), ({}, TypeError)],
-    ids=["invalid metric unit as str", "unit as None", "missing required unit"],
-)
-def test_log_metric_invalid_unit(capsys, invalid_input, expected):
-    # GIVEN invalid units are provided
-    # WHEN log_metric is called
-    # THEN ValueError exception should be raised
-
-    with pytest.raises(expected):
-        log_metric(name="test_metric", namespace="DemoApp", **invalid_input)
-
-
-def test_logger_setup_deprecated():
-    # Should be removed when GA
-    with pytest.raises(DeprecationWarning):
-        logger_setup()
-
-
-def test_logger_inject_lambda_context_deprecated():
-    # Should be removed when GA
-    with pytest.raises(DeprecationWarning):
-        logger_inject_lambda_context()
 
 
 def test_logger_append_duplicated(stdout):
