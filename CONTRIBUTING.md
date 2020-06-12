@@ -23,8 +23,6 @@ Contributions via pull requests are much appreciated. Before sending us a pull r
 
 ### Dev setup
 
-If you prefer not to use your current IDE and environment, you can use a pre-configured browser IDE with all tools installed - [![Launch IDE](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/awslabs/aws-lambda-powertools-python)
-
 To send us a pull request, please follow these steps:
 
 1. Fork the repository.
@@ -39,16 +37,28 @@ To send us a pull request, please follow these steps:
 GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
 [creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
 
-## Finding contributions to work on
+#### Local documentation
 
-Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/help wanted/invalid/question/documentation), looking at any 'help wanted' issues is a great place to start.
-
-## Local documentation
-
-You might find useful to run both the documentation website and the API reference locally while contributing.
+You might find useful to run both the documentation website and the API reference locally while contributing:
 
 * **API reference**: `make docs-api-local`
 * **Docs website**: `make dev-docs` to install deps, and `make docs-local` to run it thereafter
+
+### Conventions
+
+Category | Convention
+------------------------------------------------- | ---------------------------------------------------------------------------------
+**Docstring** |  We use a slight variation of numpy convention with markdown to help generate more readable API references.
+**Style guide** | We use black as well as flake8 extensions to enforce beyond good practices [PEP8](https://pep8.org/). We strive to make use of type annotation as much as possible, but don't overdo in creating custom types.
+**Core utilities** | Core utilities use a Class, always accept `service` as a constructor parameter, can work in isolation, and are also available in other languages implementation.
+**Utilities** | Utilities are not as strict as core and focus on solving a developer experience problem while following the project [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/#tenets).
+**Exceptions** | Specific exceptions live within utilities themselves and use `Error` suffix e.g. `MetricUnitError`.
+**Git commits** | We follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/). These are not enforced as we squash and merge PRs, but PR titles are enforced during CI.
+**Documentation** | API reference docs are generated from docstrings which should have Examples section to allow developers to have what they need within their own IDE. Documentation website covers the wider usage, tips, and strive to be concise.
+
+## Finding contributions to work on
+
+Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/help wanted/invalid/question/documentation), looking at any 'help wanted' issues is a great place to start.
 
 ## Code of Conduct
 
