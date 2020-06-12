@@ -21,7 +21,9 @@ Contributions via pull requests are much appreciated. Before sending us a pull r
 2. You check existing open, and recently merged, pull requests to make sure someone else hasn't addressed the problem already.
 3. You open a RFC issue to discuss any significant work - we would hate for your time to be wasted.
 
-### Local dev setup
+### Dev setup
+
+If you prefer not to use your current IDE and environment, you can use a pre-configured browser IDE with all tools installed - [![Launch IDE](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/awslabs/aws-lambda-powertools-python)
 
 To send us a pull request, please follow these steps:
 
