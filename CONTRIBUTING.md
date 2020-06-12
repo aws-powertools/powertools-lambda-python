@@ -41,6 +41,13 @@ GitHub provides additional document on [forking a repository](https://help.githu
 
 Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/help wanted/invalid/question/documentation), looking at any 'help wanted' issues is a great place to start.
 
+## Local documentation
+
+You might find useful to run both the documentation website and the API reference locally while contributing.
+
+* **API reference**: `make docs-api-local`
+* **Docs website**: `make dev-docs` to install deps, and `make docs-local` to run it thereafter
+
 ## Code of Conduct
 
 This project has adopted the [Amazon Open Source Code of Conduct](https://aws.github.io/code-of-conduct).
