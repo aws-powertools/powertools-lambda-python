@@ -31,7 +31,7 @@ To send us a pull request, please follow these steps:
 4. Run all tests, and code baseline checks: `make pr`
     - Git hooks will run linting and formatting while `make pr` run deep checks that also run in the CI process
 4. Commit to your fork using clear commit messages.
-5. Send us a pull request with a [conventional semantic title](https://github.com/awslabs/aws-lambda-powertools-python/pulls?q=is%3Apr+is%3Aclosed), and answering any default questions in the pull request interface.
+5. Send us a pull request with a [conventional semantic title](https://github.com/awslabs/aws-lambda-powertools-python/pull/67), and answering any default questions in the pull request interface.
 6. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
 
 GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
