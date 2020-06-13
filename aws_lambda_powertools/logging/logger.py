@@ -8,8 +8,8 @@ import sys
 from distutils.util import strtobool
 from typing import Any, Callable, Dict, Union
 
-from ..helper.models import build_lambda_context_model
 from .exceptions import InvalidLoggerSamplingRateError
+from .lambda_context import build_lambda_context_model
 
 logger = logging.getLogger(__name__)
 

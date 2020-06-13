@@ -4,11 +4,11 @@ import logging
 import numbers
 import os
 import pathlib
+from enum import Enum
 from typing import Dict, List, Union
 
 import fastjsonschema
 
-from ..helper.models import MetricUnit
 from .exceptions import MetricUnitError, MetricValueError, SchemaValidationError
 
 logger = logging.getLogger(__name__)
@@ -18,6 +18,35 @@ with _schema_path.open() as f:
     CLOUDWATCH_EMF_SCHEMA = json.load(f)
 
 MAX_METRICS = 100
+
+
+class MetricUnit(Enum):
+    Seconds = "Seconds"
+    Microseconds = "Microseconds"
+    Milliseconds = "Milliseconds"
+    Bytes = "Bytes"
+    Kilobytes = "Kilobytes"
+    Megabytes = "Megabytes"
+    Gigabytes = "Gigabytes"
+    Terabytes = "Terabytes"
+    Bits = "Bits"
+    Kilobits = "Kilobits"
+    Megabits = "Megabits"
+    Gigabits = "Gigabits"
+    Terabits = "Terabits"
+    Percent = "Percent"
+    Count = "Count"
+    BytesPerSecond = "Bytes/Second"
+    KilobytesPerSecond = "Kilobytes/Second"
+    MegabytesPerSecond = "Megabytes/Second"
+    GigabytesPerSecond = "Gigabytes/Second"
+    TerabytesPerSecond = "Terabytes/Second"
+    BitsPerSecond = "Bits/Second"
+    KilobitsPerSecond = "Kilobits/Second"
+    MegabitsPerSecond = "Megabits/Second"
+    GigabitsPerSecond = "Gigabits/Second"
+    TerabitsPerSecond = "Terabits/Second"
+    CountPerSecond = "Count/Second"
 
 
 class MetricManager:

@@ -3,8 +3,7 @@ import logging
 from contextlib import contextmanager
 from typing import Dict
 
-from ..helper.models import MetricUnit
-from .base import MetricManager
+from .base import MetricManager, MetricUnit
 
 logger = logging.getLogger(__name__)
 

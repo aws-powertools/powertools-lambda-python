@@ -1,32 +1,15 @@
-"""Collection of classes as models and builder functions
-that provide classes as data representation for
-key data used in more than one place.
-"""
-
-from enum import Enum
-
-
 class LambdaContextModel:
     """A handful of Lambda Runtime Context fields
 
     Full Lambda Context object: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
-
-    NOTE
-    ----
-
-    Originally, memory_size is `int` but we cast to `str` in this model
-    due to aws_lambda_logging library use of `%` during formatting
-    Ref: https://gitlab.com/hadrien/aws_lambda_logging/blob/master/aws_lambda_logging.py#L47
 
     Parameters
     ----------
     function_name: str
         Lambda function name, by default "UNDEFINED"
         e.g. "test"
-    function_memory_size: str
-        Lambda function memory in MB, by default "UNDEFINED"
-        e.g. "128"
-        casting from int to str due to aws_lambda_logging using `%` when enumerating fields
+    function_memory_size: int
+        Lambda function memory in MB, by default 128
     function_arn: str
         Lambda function ARN, by default "UNDEFINED"
         e.g. "arn:aws:lambda:eu-west-1:809313241:function:test"
@@ -38,7 +21,7 @@ class LambdaContextModel:
     def __init__(
         self,
         function_name: str = "UNDEFINED",
-        function_memory_size: str = "UNDEFINED",
+        function_memory_size: int = 128,
         function_arn: str = "UNDEFINED",
         function_request_id: str = "UNDEFINED",
     ):
@@ -70,32 +53,3 @@ def build_lambda_context_model(context: object) -> LambdaContextModel:
     }
 
     return LambdaContextModel(**context)
-
-
-class MetricUnit(Enum):
-    Seconds = "Seconds"
-    Microseconds = "Microseconds"
-    Milliseconds = "Milliseconds"
-    Bytes = "Bytes"
-    Kilobytes = "Kilobytes"
-    Megabytes = "Megabytes"
-    Gigabytes = "Gigabytes"
-    Terabytes = "Terabytes"
-    Bits = "Bits"
-    Kilobits = "Kilobits"
-    Megabits = "Megabits"
-    Gigabits = "Gigabits"
-    Terabits = "Terabits"
-    Percent = "Percent"
-    Count = "Count"
-    BytesPerSecond = "Bytes/Second"
-    KilobytesPerSecond = "Kilobytes/Second"
-    MegabytesPerSecond = "Megabytes/Second"
-    GigabytesPerSecond = "Gigabytes/Second"
-    TerabytesPerSecond = "Terabytes/Second"
-    BitsPerSecond = "Bits/Second"
-    KilobitsPerSecond = "Kilobits/Second"
-    MegabitsPerSecond = "Megabits/Second"
-    GigabitsPerSecond = "Gigabits/Second"
-    TerabitsPerSecond = "Terabits/Second"
-    CountPerSecond = "Count/Second"

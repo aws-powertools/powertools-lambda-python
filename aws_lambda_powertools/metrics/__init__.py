@@ -1,6 +1,6 @@
 """CloudWatch Embedded Metric Format utility
 """
-from ..helper.models import MetricUnit
+from .base import MetricUnit
 from .exceptions import MetricUnitError, MetricValueError, SchemaValidationError
 from .metric import single_metric
 from .metrics import Metrics
