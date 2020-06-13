@@ -2,7 +2,11 @@
 
 ## Description of changes:
 
-> One or two sentences as a summary of what's being changed
+<!--- One or two sentences as a summary of what's being changed -->
+
+**Checklist**
+
+<!--- Leave unchecked if your change doesn't seem to apply --> 
 
 * [ ] [Meet tenets criteria](https://awslabs.github.io/aws-lambda-powertools-python/#tenets)
 * [ ] Update tests
@@ -11,7 +15,7 @@
 
 ## Breaking change checklist
 
-> Ignore if it's not a breaking change
+<!--- Ignore if it's not a breaking change -->
 
 **RFC issue #**:
 
