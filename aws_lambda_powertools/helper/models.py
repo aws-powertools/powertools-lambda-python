@@ -4,7 +4,6 @@ key data used in more than one place.
 """
 
 from enum import Enum
-from typing import Union
 
 
 class LambdaContextModel:
@@ -100,33 +99,3 @@ class MetricUnit(Enum):
     GigabitsPerSecond = "Gigabits/Second"
     TerabitsPerSecond = "Terabits/Second"
     CountPerSecond = "Count/Second"
-
-
-def build_metric_unit_from_str(unit: Union[str, MetricUnit]) -> MetricUnit:
-    """Builds correct metric unit value from string or return Count as default
-
-    Parameters
-    ----------
-    unit : str, MetricUnit
-        metric unit
-
-    Returns
-    -------
-    MetricUnit
-        Metric Unit enum from string value or MetricUnit.Count as a default
-    """
-    if isinstance(unit, MetricUnit):
-        return unit
-
-    if isinstance(unit, str):
-        unit = unit.lower().capitalize()
-
-    metric_unit = None
-
-    try:
-        metric_unit = MetricUnit[unit]
-    except (TypeError, KeyError):
-        metric_units = [units for units, _ in MetricUnit.__members__.items()]
-        raise ValueError(f"Invalid Metric Unit - Received {unit}. Value Metric Units are {metric_units}")
-
-    return metric_unit

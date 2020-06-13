@@ -14,9 +14,3 @@ class MetricValueError(Exception):
     """When metric value isn't a valid number"""
 
     pass
-
-
-class UniqueNamespaceError(Exception):
-    """When an additional namespace is set"""
-
-    pass

@@ -4,13 +4,12 @@ import logging
 import numbers
 import os
 import pathlib
-import warnings
 from typing import Dict, List, Union
 
 import fastjsonschema
 
 from ..helper.models import MetricUnit
-from .exceptions import MetricUnitError, MetricValueError, SchemaValidationError, UniqueNamespaceError
+from .exceptions import MetricUnitError, MetricValueError, SchemaValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -45,8 +44,6 @@ class MetricManager:
         When metric metric isn't supported by CloudWatch
     MetricValueError
         When metric value isn't a number
-    UniqueNamespaceError
-        When an additional namespace is set
     SchemaValidationError
         When metric object fails EMF schema validation
     """
@@ -60,30 +57,6 @@ class MetricManager:
         self.service = service or os.environ.get("POWERTOOLS_SERVICE_NAME")
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_options = list(MetricUnit.__members__)
-
-    def add_namespace(self, name: str):
-        """Adds given metric namespace
-
-        Example
-        -------
-        **Add metric namespace**
-
-            metric.add_namespace(name="ServerlessAirline")
-
-        Parameters
-        ----------
-        name : str
-            Metric namespace
-        """
-        warnings.warn(
-            "add_namespace method is deprecated. Pass namespace to Metrics constructor instead", DeprecationWarning
-        )
-        if self.namespace is not None:
-            raise UniqueNamespaceError(
-                f"Namespace '{self.namespace}' already set - Only one namespace is allowed across metrics"
-            )
-        logger.debug(f"Adding metrics namespace: {name}")
-        self.namespace = name
 
     def add_metric(self, name: str, unit: MetricUnit, value: Union[float, int]):
         """Adds given metric

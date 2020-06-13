@@ -6,13 +6,7 @@ from typing import Any, Dict, List
 import pytest
 
 from aws_lambda_powertools import Metrics, single_metric
-from aws_lambda_powertools.metrics import (
-    MetricUnit,
-    MetricUnitError,
-    MetricValueError,
-    SchemaValidationError,
-    UniqueNamespaceError,
-)
+from aws_lambda_powertools.metrics import MetricUnit, MetricUnitError, MetricValueError, SchemaValidationError
 from aws_lambda_powertools.metrics.base import MetricManager
 
 
@@ -59,11 +53,11 @@ def non_str_dimensions() -> List[Dict[str, Any]]:
 
 @pytest.fixture
 def namespace() -> Dict[str, str]:
-    return {"name": "test_namespace"}
+    return "test_namespace"
 
 
 @pytest.fixture
-def a_hundred_metrics() -> List[Dict[str, str]]:
+def a_hundred_metrics(namespace=namespace) -> List[Dict[str, str]]:
     metrics = []
     for i in range(100):
         metrics.append({"name": f"metric_{i}", "unit": "Count", "value": 1})
@@ -71,13 +65,12 @@ def a_hundred_metrics() -> List[Dict[str, str]]:
     return metrics
 
 
-def serialize_metrics(metrics: List[Dict], dimensions: List[Dict], namespace: Dict) -> Dict:
+def serialize_metrics(metrics: List[Dict], dimensions: List[Dict], namespace: str) -> Dict:
     """ Helper function to build EMF object from a list of metrics, dimensions """
-    my_metrics = MetricManager()
+    my_metrics = MetricManager(namespace=namespace)
     for dimension in dimensions:
         my_metrics.add_dimension(**dimension)
 
-    my_metrics.add_namespace(**namespace)
     for metric in metrics:
         my_metrics.add_metric(**metric)
 
@@ -85,12 +78,11 @@ def serialize_metrics(metrics: List[Dict], dimensions: List[Dict], namespace: Di
         return my_metrics.serialize_metric_set()
 
 
-def serialize_single_metric(metric: Dict, dimension: Dict, namespace: Dict) -> Dict:
+def serialize_single_metric(metric: Dict, dimension: Dict, namespace: str) -> Dict:
     """ Helper function to build EMF object from a given metric, dimension and namespace """
-    my_metrics = MetricManager()
+    my_metrics = MetricManager(namespace=namespace)
     my_metrics.add_metric(**metric)
     my_metrics.add_dimension(**dimension)
-    my_metrics.add_namespace(**namespace)
     return my_metrics.serialize_metric_set()
 
 
@@ -103,11 +95,10 @@ def remove_timestamp(metrics: List):
 def test_single_metric_one_metric_only(capsys, metric, dimension, namespace):
     # GIVEN we attempt to add more than one metric
     # WHEN using single_metric context manager
-    with single_metric(**metric) as my_metric:
+    with single_metric(namespace=namespace, **metric) as my_metric:
         my_metric.add_metric(name="second_metric", unit="Count", value=1)
         my_metric.add_metric(name="third_metric", unit="Seconds", value=1)
         my_metric.add_dimension(**dimension)
-        my_metric.add_namespace(**namespace)
 
     output = json.loads(capsys.readouterr().out.strip())
     expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
@@ -118,25 +109,9 @@ def test_single_metric_one_metric_only(capsys, metric, dimension, namespace):
     assert expected["_aws"] == output["_aws"]
 
 
-def test_multiple_namespaces_exception(metric, dimension, namespace):
-    # GIVEN we attempt to add multiple namespaces
-    namespace_a = {"name": "OtherNamespace"}
-    namespace_b = {"name": "AnotherNamespace"}
-
-    # WHEN an EMF object can only have one
-    # THEN we should raise UniqueNamespaceError exception
-    with pytest.raises(UniqueNamespaceError):
-        with single_metric(**metric) as my_metric:
-            my_metric.add_dimension(**dimension)
-            my_metric.add_namespace(**namespace)
-            my_metric.add_namespace(**namespace_a)
-            my_metric.add_namespace(**namespace_b)
-
-
 def test_log_metrics(capsys, metrics, dimensions, namespace):
     # GIVEN Metrics is initialized
-    my_metrics = Metrics()
-    my_metrics.add_namespace(**namespace)
+    my_metrics = Metrics(namespace=namespace)
     for metric in metrics:
         my_metrics.add_metric(**metric)
     for dimension in dimensions:
@@ -164,7 +139,7 @@ def test_log_metrics(capsys, metrics, dimensions, namespace):
 
 def test_namespace_env_var(monkeypatch, capsys, metric, dimension, namespace):
     # GIVEN we use POWERTOOLS_METRICS_NAMESPACE
-    monkeypatch.setenv("POWERTOOLS_METRICS_NAMESPACE", namespace["name"])
+    monkeypatch.setenv("POWERTOOLS_METRICS_NAMESPACE", namespace)
 
     # WHEN creating a metric but don't explicitly
     # add a namespace
@@ -185,7 +160,7 @@ def test_namespace_env_var(monkeypatch, capsys, metric, dimension, namespace):
 def test_service_env_var(monkeypatch, capsys, metric, namespace):
     # GIVEN we use POWERTOOLS_SERVICE_NAME
     monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", "test_service")
-    my_metrics = Metrics(namespace=namespace["name"])
+    my_metrics = Metrics(namespace=namespace)
 
     # WHEN creating a metric but don't explicitly
     # add a dimension
@@ -210,9 +185,8 @@ def test_service_env_var(monkeypatch, capsys, metric, namespace):
 
 def test_metrics_spillover(monkeypatch, capsys, metric, dimension, namespace, a_hundred_metrics):
     # GIVEN Metrics is initialized and we have over a hundred metrics to add
-    my_metrics = Metrics()
+    my_metrics = Metrics(namespace=namespace)
     my_metrics.add_dimension(**dimension)
-    my_metrics.add_namespace(**namespace)
 
     # WHEN we add more than 100 metrics
     for _metric in a_hundred_metrics:
@@ -242,12 +216,11 @@ def test_metrics_spillover(monkeypatch, capsys, metric, dimension, namespace, a_
 
 def test_log_metrics_should_invoke_function(metric, dimension, namespace):
     # GIVEN Metrics is initialized
-    my_metrics = Metrics()
+    my_metrics = Metrics(namespace=namespace)
 
     # WHEN log_metrics is used to serialize metrics
     @my_metrics.log_metrics
     def lambda_handler(evt, context):
-        my_metrics.add_namespace(**namespace)
         my_metrics.add_metric(**metric)
         my_metrics.add_dimension(**dimension)
         return True
@@ -266,7 +239,6 @@ def test_incorrect_metric_unit(metric, dimension, namespace):
     with pytest.raises(MetricUnitError):
         with single_metric(**metric) as my_metric:
             my_metric.add_dimension(**dimension)
-            my_metric.add_namespace(**namespace)
 
 
 def test_schema_no_namespace(metric, dimension):
@@ -289,13 +261,11 @@ def test_schema_incorrect_value(metric, dimension, namespace):
     with pytest.raises(MetricValueError):
         with single_metric(**metric) as my_metric:
             my_metric.add_dimension(**dimension)
-            my_metric.add_namespace(**namespace)
 
 
 def test_schema_no_metrics(dimensions, namespace):
     # GIVEN Metrics is initialized
-    my_metrics = Metrics()
-    my_metrics.add_namespace(**namespace)
+    my_metrics = Metrics(namespace=namespace)
 
     # WHEN no metrics have been added
     # but a namespace and dimensions only
@@ -317,18 +287,16 @@ def test_exceed_number_of_dimensions(metric, namespace):
     # THEN it should fail validation and raise SchemaValidationError
     with pytest.raises(SchemaValidationError):
         with single_metric(**metric) as my_metric:
-            my_metric.add_namespace(**namespace)
             for dimension in dimensions:
                 my_metric.add_dimension(**dimension)
 
 
 def test_log_metrics_during_exception(capsys, metric, dimension, namespace):
     # GIVEN Metrics is initialized
-    my_metrics = Metrics()
+    my_metrics = Metrics(namespace=namespace)
 
     my_metrics.add_metric(**metric)
     my_metrics.add_dimension(**dimension)
-    my_metrics.add_namespace(**namespace)
 
     # WHEN log_metrics is used to serialize metrics
     # but an error has been raised during handler execution
@@ -347,18 +315,18 @@ def test_log_metrics_during_exception(capsys, metric, dimension, namespace):
     assert expected["_aws"] == output["_aws"]
 
 
-def test_log_no_metrics_error_propagation(capsys, metric, dimension, namespace):
+def test_log_metrics_raise_on_empty_metrics(capsys, metric, dimension, namespace):
     # GIVEN Metrics is initialized
-    my_metrics = Metrics()
+    my_metrics = Metrics(service="test_service", namespace=namespace)
 
     @my_metrics.log_metrics(raise_on_empty_metrics=True)
     def lambda_handler(evt, context):
         # WHEN log_metrics is used with raise_on_empty_metrics param and has no metrics
-        # and the function decorated also raised an exception
-        raise ValueError("Bubble up")
+        return True
 
-    # THEN the raised exception should be
-    with pytest.raises(SchemaValidationError):
+    # THEN the raised exception should be SchemaValidationError
+    # and specifically about the lack of Metrics
+    with pytest.raises(SchemaValidationError, match="_aws\.CloudWatchMetrics\[0\]\.Metrics"):  # noqa: W605
         lambda_handler({}, {})
 
 
@@ -370,9 +338,8 @@ def test_all_possible_metric_units(metric, dimension, namespace):
         metric["unit"] = unit.name
         # WHEN we iterate over all available metric unit keys from MetricUnit enum
         # THEN we raise no MetricUnitError nor SchemaValidationError
-        with single_metric(**metric) as my_metric:
+        with single_metric(namespace=namespace, **metric) as my_metric:
             my_metric.add_dimension(**dimension)
-            my_metric.add_namespace(**namespace)
 
     # WHEN we iterate over all available metric unit keys from MetricUnit enum
     all_metric_units = [unit.value for unit in MetricUnit]
@@ -381,18 +348,17 @@ def test_all_possible_metric_units(metric, dimension, namespace):
     for unit in all_metric_units:
         metric["unit"] = unit
         # THEN we raise no MetricUnitError nor SchemaValidationError
-        with single_metric(**metric) as my_metric:
+        with single_metric(namespace=namespace, **metric) as my_metric:
             my_metric.add_dimension(**dimension)
-            my_metric.add_namespace(**namespace)
 
 
 def test_metrics_reuse_metric_set(metric, dimension, namespace):
     # GIVEN Metrics is initialized
-    my_metrics = Metrics()
+    my_metrics = Metrics(namespace=namespace)
     my_metrics.add_metric(**metric)
 
     # WHEN Metrics is initialized one more time
-    my_metrics_2 = Metrics()
+    my_metrics_2 = Metrics(namespace=namespace)
 
     # THEN Both class instances should have the same metric set
     assert my_metrics_2.metric_set == my_metrics.metric_set
@@ -400,11 +366,10 @@ def test_metrics_reuse_metric_set(metric, dimension, namespace):
 
 def test_log_metrics_clear_metrics_after_invocation(metric, dimension, namespace):
     # GIVEN Metrics is initialized
-    my_metrics = Metrics()
+    my_metrics = Metrics(namespace=namespace)
 
     my_metrics.add_metric(**metric)
     my_metrics.add_dimension(**dimension)
-    my_metrics.add_namespace(**namespace)
 
     # WHEN log_metrics is used to flush metrics from memory
     @my_metrics.log_metrics
@@ -419,8 +384,7 @@ def test_log_metrics_clear_metrics_after_invocation(metric, dimension, namespace
 
 def test_log_metrics_non_string_dimension_values(capsys, metrics, non_str_dimensions, namespace):
     # GIVEN Metrics is initialized and dimensions with non-string values are added
-    my_metrics = Metrics()
-    my_metrics.add_namespace(**namespace)
+    my_metrics = Metrics(namespace=namespace)
     for metric in metrics:
         my_metrics.add_metric(**metric)
     for dimension in non_str_dimensions:
@@ -441,16 +405,9 @@ def test_log_metrics_non_string_dimension_values(capsys, metrics, non_str_dimens
         assert isinstance(output[dimension["name"]], str)
 
 
-def test_add_namespace_warns_for_deprecation(capsys, metrics, dimensions, namespace):
-    # GIVEN Metrics is initialized
-    my_metrics = Metrics()
-    with pytest.deprecated_call():
-        my_metrics.add_namespace(**namespace)
-
-
 def test_log_metrics_with_explicit_namespace(capsys, metrics, dimensions, namespace):
     # GIVEN Metrics is initialized with service specified
-    my_metrics = Metrics(service="test_service", namespace=namespace["name"])
+    my_metrics = Metrics(service="test_service", namespace=namespace)
     for metric in metrics:
         my_metrics.add_metric(**metric)
     for dimension in dimensions:
@@ -476,9 +433,9 @@ def test_log_metrics_with_explicit_namespace(capsys, metrics, dimensions, namesp
     assert expected == output
 
 
-def test_log_metrics_with_implicit_dimensions(capsys, metrics):
+def test_log_metrics_with_implicit_dimensions(capsys, metrics, namespace):
     # GIVEN Metrics is initialized with service specified
-    my_metrics = Metrics(service="test_service", namespace="test_application")
+    my_metrics = Metrics(service="test_service", namespace=namespace)
     for metric in metrics:
         my_metrics.add_metric(**metric)
 
@@ -492,9 +449,7 @@ def test_log_metrics_with_implicit_dimensions(capsys, metrics):
     output = json.loads(capsys.readouterr().out.strip())
 
     expected_dimensions = [{"name": "service", "value": "test_service"}]
-    expected = serialize_metrics(
-        metrics=metrics, dimensions=expected_dimensions, namespace={"name": "test_application"}
-    )
+    expected = serialize_metrics(metrics=metrics, dimensions=expected_dimensions, namespace=namespace)
 
     remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
 
@@ -530,37 +485,15 @@ def test_log_metrics_with_renamed_service(capsys, metrics, metric):
     assert second_output["service"] == "another_test_service"
 
 
-def test_log_metrics_with_namespace_overridden(capsys, metrics, dimensions):
-    # GIVEN Metrics is initialized with namespace specified
-    my_metrics = Metrics(namespace="test_service")
-    for metric in metrics:
-        my_metrics.add_metric(**metric)
-    for dimension in dimensions:
-        my_metrics.add_dimension(**dimension)
-
-    # WHEN we try to call add_namespace
-    # THEN we should raise UniqueNamespaceError exception
-    @my_metrics.log_metrics
-    def lambda_handler(evt, ctx):
-        my_metrics.add_namespace(name="new_namespace")
-        return True
-
-    with pytest.raises(UniqueNamespaceError):
-        lambda_handler({}, {})
-
-    with pytest.raises(UniqueNamespaceError):
-        my_metrics.add_namespace(name="another_new_namespace")
-
-
-def test_single_metric_with_service(capsys, metric, dimension):
+def test_single_metric_with_service(capsys, metric, dimension, namespace):
     # GIVEN we pass namespace parameter to single_metric
 
     # WHEN creating a metric
-    with single_metric(**metric, namespace="test_service") as my_metrics:
+    with single_metric(**metric, namespace=namespace) as my_metrics:
         my_metrics.add_dimension(**dimension)
 
     output = json.loads(capsys.readouterr().out.strip())
-    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace={"name": "test_service"})
+    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
 
     remove_timestamp(metrics=[output, expected])  # Timestamp will always be different
 
@@ -570,10 +503,10 @@ def test_single_metric_with_service(capsys, metric, dimension):
 
 def test_namespace_var_precedence(monkeypatch, capsys, metric, dimension, namespace):
     # GIVEN we use POWERTOOLS_METRICS_NAMESPACE
-    monkeypatch.setenv("POWERTOOLS_METRICS_NAMESPACE", namespace["name"])
+    monkeypatch.setenv("POWERTOOLS_METRICS_NAMESPACE", namespace)
 
     # WHEN creating a metric and explicitly set a namespace
-    with single_metric(**metric, namespace=namespace["name"]) as my_metrics:
+    with single_metric(namespace=namespace, **metric) as my_metrics:
         my_metrics.add_dimension(**dimension)
         monkeypatch.delenv("POWERTOOLS_METRICS_NAMESPACE")
 
@@ -588,8 +521,7 @@ def test_namespace_var_precedence(monkeypatch, capsys, metric, dimension, namesp
 
 def test_emit_cold_start_metric(capsys, namespace):
     # GIVEN Metrics is initialized
-    my_metrics = Metrics()
-    my_metrics.add_namespace(**namespace)
+    my_metrics = Metrics(service="test_service", namespace=namespace)
 
     # WHEN log_metrics is used with capture_cold_start_metric
     @my_metrics.log_metrics(capture_cold_start_metric=True)
@@ -608,8 +540,7 @@ def test_emit_cold_start_metric(capsys, namespace):
 
 def test_emit_cold_start_metric_only_once(capsys, namespace, dimension, metric):
     # GIVEN Metrics is initialized
-    my_metrics = Metrics()
-    my_metrics.add_namespace(**namespace)
+    my_metrics = Metrics(namespace=namespace)
 
     # WHEN log_metrics is used with capture_cold_start_metric
     # and handler is called more than once
@@ -635,7 +566,7 @@ def test_emit_cold_start_metric_only_once(capsys, namespace, dimension, metric):
 
 def test_log_metrics_decorator_no_metrics(dimensions, namespace):
     # GIVEN Metrics is initialized
-    my_metrics = Metrics(namespace=namespace["name"], service="test_service")
+    my_metrics = Metrics(namespace=namespace, service="test_service")
 
     # WHEN using the log_metrics decorator and no metrics have been added
     @my_metrics.log_metrics
@@ -649,9 +580,9 @@ def test_log_metrics_decorator_no_metrics(dimensions, namespace):
         assert str(w[-1].message) == "No metrics to publish, skipping"
 
 
-def test_log_metrics_with_implicit_dimensions_called_twice(capsys, metrics):
+def test_log_metrics_with_implicit_dimensions_called_twice(capsys, metrics, namespace):
     # GIVEN Metrics is initialized with service specified
-    my_metrics = Metrics(service="test_service", namespace="test_application")
+    my_metrics = Metrics(service="test_service", namespace=namespace)
 
     # WHEN we utilize log_metrics to serialize and don't explicitly add any dimensions,
     # and the lambda function is called more than once
@@ -668,9 +599,7 @@ def test_log_metrics_with_implicit_dimensions_called_twice(capsys, metrics):
     second_output = json.loads(capsys.readouterr().out.strip())
 
     expected_dimensions = [{"name": "service", "value": "test_service"}]
-    expected = serialize_metrics(
-        metrics=metrics, dimensions=expected_dimensions, namespace={"name": "test_application"}
-    )
+    expected = serialize_metrics(metrics=metrics, dimensions=expected_dimensions, namespace=namespace)
 
     remove_timestamp(metrics=[output, expected, second_output])  # Timestamp will always be different
 
