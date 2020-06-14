@@ -117,7 +117,7 @@ def lambda_handler(event, context):
         metrics.add_metric(name="SuccessfulLocations", unit="Count", value=1)
     except requests.RequestException as e:
         # Send some context about this error to Lambda Logs
-        logger.exception(e, exc_info=True)
+        logger.exception(e)
         raise
 
     with single_metric(name="UniqueMetricDimension", unit="Seconds", value=1) as metric:
