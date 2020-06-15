@@ -67,20 +67,28 @@ class Metrics(MetricManager):
 
     _metrics = {}
     _dimensions = {}
+    _metadata = {}
 
     def __init__(self, service: str = None, namespace: str = None):
         self.metric_set = self._metrics
         self.dimension_set = self._dimensions
         self.service = service
         self.namespace = namespace
+        self.metadata_set = self._metadata
+
         super().__init__(
-            metric_set=self.metric_set, dimension_set=self.dimension_set, namespace=self.namespace, service=self.service
+            metric_set=self.metric_set,
+            dimension_set=self.dimension_set,
+            namespace=self.namespace,
+            metadata_set=self.metadata_set,
+            service=self.service,
         )
 
     def clear_metrics(self):
         logger.debug("Clearing out existing metric set from memory")
         self.metric_set.clear()
         self.dimension_set.clear()
+        self.metadata_set.clear()
 
     def log_metrics(
         self,

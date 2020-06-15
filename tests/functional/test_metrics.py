@@ -533,3 +533,30 @@ def test_log_metrics_with_implicit_dimensions_called_twice(capsys, metric, names
 
     for metric_record in second_output["_aws"]["CloudWatchMetrics"]:
         assert ["service"] in metric_record["Dimensions"]
+
+
+def test_add_metadata_non_string_dimension_keys(service, metric, namespace):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(service=service, namespace=namespace)
+    my_metrics.add_metric(**metric)
+
+    # WHEN we utilize add_metadata with non-string keys
+    my_metrics.add_metadata(key=10, value="number_ten")
+
+    # THEN we should have no exceptions
+    # and dimension values should be serialized as strings
+    expected_metadata = {"10": "number_ten"}
+    assert my_metrics.metadata_set == expected_metadata
+
+
+def test_add_metadata(service, metric, namespace):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(service=service, namespace=namespace)
+    my_metrics.add_metric(**metric)
+
+    # WHEN we utilize add_metadata with non-string keys
+    my_metrics.add_metadata(key="username", value="test")
+
+    # THEN we should have no exceptions
+    # and dimension values should be serialized as strings
+    assert my_metrics.metadata_set == {"username": "test"}
