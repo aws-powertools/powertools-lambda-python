@@ -85,7 +85,7 @@ class JsonFormatter(logging.Formatter):
             # Cache the traceback text to avoid converting it multiple times
             # (it's constant anyway)
             # from logging.Formatter:format
-            if not record.exc_text:
+            if not record.exc_text:  # pragma: no cover
                 record.exc_text = self.formatException(record.exc_info)
 
         if record.exc_text:

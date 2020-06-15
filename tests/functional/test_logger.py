@@ -7,7 +7,7 @@ import pytest
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
-from aws_lambda_powertools.logging.logger import JsonFormatter, set_package_logger
+from aws_lambda_powertools.logging.logger import set_package_logger
 
 
 @pytest.fixture
@@ -39,227 +39,220 @@ def lambda_context():
     return namedtuple("LambdaContext", lambda_context.keys())(*lambda_context.values())
 
 
+@pytest.fixture
+def lambda_event():
+    return {"greeting": "hello"}
+
+
+def capture_logging_output(stdout):
+    return json.loads(stdout.getvalue())
+
+
+def capture_multiple_logging_statements_output(stdout):
+    return [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
+
+
 def test_setup_service_name(root_logger, stdout):
-    # GIVEN service is explicitly defined
-    # WHEN logger is setup
-    # THEN service field should be equals service given
     service_name = "payment"
+    # GIVEN Logger is initialized
+    # WHEN service is explicitly defined
     logger = Logger(service=service_name, stream=stdout)
 
     logger.info("Hello")
-    log = json.loads(stdout.getvalue())
 
+    # THEN service field should be equals service given
+    log = capture_logging_output(stdout)
     assert service_name == log["service"]
 
 
 def test_setup_no_service_name(stdout):
-    # GIVEN no service is explicitly defined
-    # WHEN logger is setup
-    # THEN service field should be "service_undefined"
+    # GIVEN Logger is initialized
+    # WHEN no service is explicitly defined
     logger = Logger(stream=stdout)
-    logger.info("Hello")
-    log = json.loads(stdout.getvalue())
 
+    logger.info("Hello")
+
+    # THEN service field should be "service_undefined"
+    log = capture_logging_output(stdout)
     assert "service_undefined" == log["service"]
 
 
 def test_setup_service_env_var(monkeypatch, stdout):
-    # GIVEN service is explicitly defined via POWERTOOLS_SERVICE_NAME env
-    # WHEN logger is setup
-    # THEN service field should be equals POWERTOOLS_SERVICE_NAME value
     service_name = "payment"
+    # GIVEN Logger is initialized
+    # WHEN service is explicitly defined via POWERTOOLS_SERVICE_NAME env
     monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", service_name)
-
     logger = Logger(stream=stdout)
-    logger.info("Hello")
-    log = json.loads(stdout.getvalue())
 
+    logger.info("Hello")
+
+    # THEN service field should be equals POWERTOOLS_SERVICE_NAME value
+    log = capture_logging_output(stdout)
     assert service_name == log["service"]
 
 
-def test_setup_sampling_rate(monkeypatch, stdout):
-    # GIVEN samping rate is explicitly defined via POWERTOOLS_LOGGER_SAMPLE_RATE env
-    # WHEN logger is setup
-    # THEN sampling rate should be equals POWERTOOLS_LOGGER_SAMPLE_RATE value and should sample debug logs
-
+def test_setup_sampling_rate_env_var(monkeypatch, stdout):
+    # GIVEN Logger is initialized
+    # WHEN samping rate is explicitly set to 100% via POWERTOOLS_LOGGER_SAMPLE_RATE env
     sampling_rate = "1"
     monkeypatch.setenv("POWERTOOLS_LOGGER_SAMPLE_RATE", sampling_rate)
-    monkeypatch.setenv("LOG_LEVEL", "INFO")
-
-    logger = Logger(stream=stdout)
+    logger = Logger(stream=stdout, level="INFO")
     logger.debug("I am being sampled")
-    log = json.loads(stdout.getvalue())
 
+    # THEN sampling rate should be equals POWERTOOLS_LOGGER_SAMPLE_RATE value
+    # log level should be DEBUG
+    # and debug log statements should be in stdout
+    log = capture_logging_output(stdout)
     assert sampling_rate == log["sampling_rate"]
     assert "DEBUG" == log["level"]
     assert "I am being sampled" == log["message"]
 
 
 def test_inject_lambda_context(lambda_context, stdout):
-    # GIVEN a lambda function is decorated with logger
-    # WHEN logger is setup
+    # GIVEN Logger is initialized
+    logger = Logger(stream=stdout)
+
+    # WHEN a lambda function is decorated with logger
+    @logger.inject_lambda_context
+    def handler(event, context):
+        logger.info("Hello")
+
+    handler({}, lambda_context)
+
     # THEN lambda contextual info should always be in the logs
-    logger_context_keys = (
+    log = capture_logging_output(stdout)
+    expected_logger_context_keys = (
         "function_name",
         "function_memory_size",
         "function_arn",
         "function_request_id",
     )
-
-    logger = Logger(stream=stdout)
-
-    @logger.inject_lambda_context
-    def handler(event, context):
-        logger.info("Hello")
-
-    handler({}, lambda_context)
-
-    log = json.loads(stdout.getvalue())
-
-    for key in logger_context_keys:
+    for key in expected_logger_context_keys:
         assert key in log
 
 
-def test_inject_lambda_context_log_event_request(lambda_context, stdout):
-    # GIVEN a lambda function is decorated with logger instructed to log event
-    # WHEN logger is setup
-    # THEN logger should log event received from Lambda
-    lambda_event = {"greeting": "hello"}
-
+def test_inject_lambda_context_log_event_request(lambda_context, stdout, lambda_event):
+    # GIVEN Logger is initialized
     logger = Logger(stream=stdout)
 
+    # WHEN a lambda function is decorated with logger instructed to log event
     @logger.inject_lambda_context(log_event=True)
-    # @logger.inject_lambda_context(log_event=True)
     def handler(event, context):
         logger.info("Hello")
 
     handler(lambda_event, lambda_context)
 
-    # Given that our string buffer has many log statements separated by newline \n
-    # We need to clean it before we can assert on
-    logs = [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
-    logged_event, _ = logs
-    assert "greeting" in logged_event["message"]
-
-
-def test_inject_lambda_context_log_event_request_env_var(monkeypatch, lambda_context, stdout):
-    # GIVEN a lambda function is decorated with logger instructed to log event
-    # via POWERTOOLS_LOGGER_LOG_EVENT env
-    # WHEN logger is setup
     # THEN logger should log event received from Lambda
-    lambda_event = {"greeting": "hello"}
+    logged_event, _ = capture_multiple_logging_statements_output(stdout)
+    assert logged_event["message"] == lambda_event
+
+
+def test_inject_lambda_context_log_event_request_env_var(monkeypatch, lambda_context, stdout, lambda_event):
+    # GIVEN Logger is initialized
     monkeypatch.setenv("POWERTOOLS_LOGGER_LOG_EVENT", "true")
-
     logger = Logger(stream=stdout)
 
+    # WHEN a lambda function is decorated with logger instructed to log event
+    # via POWERTOOLS_LOGGER_LOG_EVENT env
     @logger.inject_lambda_context
     def handler(event, context):
         logger.info("Hello")
 
     handler(lambda_event, lambda_context)
 
-    # Given that our string buffer has many log statements separated by newline \n
-    # We need to clean it before we can assert on
-    logs = [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
-
-    event = {}
-    for log in logs:
-        if "greeting" in log["message"]:
-            event = log["message"]
-
-    assert event == lambda_event
+    # THEN logger should log event received from Lambda
+    logged_event, _ = capture_multiple_logging_statements_output(stdout)
+    assert logged_event["message"] == lambda_event
 
 
-def test_inject_lambda_context_log_no_request_by_default(monkeypatch, lambda_context, stdout):
-    # GIVEN a lambda function is decorated with logger
-    # WHEN logger is setup
+def test_inject_lambda_context_log_no_request_by_default(monkeypatch, lambda_context, stdout, lambda_event):
+    # GIVEN Logger is initialized
+    logger = Logger(stream=stdout)
+
+    # WHEN a lambda function is decorated with logger
+    @logger.inject_lambda_context
+    def handler(event, context):
+        logger.info("Hello")
+
+    handler(lambda_event, lambda_context)
+
     # THEN logger should not log event received by lambda handler
-    lambda_event = {"greeting": "hello"}
-
-    logger = Logger(stream=stdout)
-
-    @logger.inject_lambda_context
-    def handler(event, context):
-        logger.info("Hello")
-
-    handler(lambda_event, lambda_context)
-
-    # Given that our string buffer has many log statements separated by newline \n
-    # We need to clean it before we can assert on
-    logs = [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
-
-    event = {}
-    for log in logs:
-        if "greeting" in log["message"]:
-            event = log["message"]
-
-    assert event != lambda_event
+    log = capture_logging_output(stdout)
+    assert log["message"] != lambda_event
 
 
 def test_inject_lambda_cold_start(lambda_context, stdout):
-    # GIVEN a lambda function is decorated with logger, and called twice
-    # WHEN logger is setup
-    # THEN cold_start key should only be true in the first call
-
+    # cold_start can be false as it's a global variable in Logger module
+    # so we reset it to simulate the correct behaviour
+    # since Lambda will only import our logger lib once per concurrent execution
     from aws_lambda_powertools.logging import logger
 
-    # # As we run tests in parallel global cold_start value can be false
-    # # here we reset to simulate the correct behaviour
-    # # since Lambda will only import our logger lib once per concurrent execution
     logger.is_cold_start = True
 
+    # GIVEN Logger is initialized
     logger = Logger(stream=stdout)
 
-    def custom_method():
-        logger.info("Hello from method")
-
+    # WHEN a lambda function is decorated with logger, and called twice
     @logger.inject_lambda_context
     def handler(event, context):
-        custom_method()
         logger.info("Hello")
 
     handler({}, lambda_context)
     handler({}, lambda_context)
 
-    # Given that our string buffer has many log statements separated by newline \n
-    # We need to clean it before we can assert on
-    logs = [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
-    first_log, second_log, third_log, fourth_log = logs
-
-    # First execution
+    # THEN cold_start key should only be true in the first call
+    first_log, second_log = capture_multiple_logging_statements_output(stdout)
     assert first_log["cold_start"] is True
-    assert second_log["cold_start"] is True
-
-    # Second execution
-    assert third_log["cold_start"] is False
-    assert fourth_log["cold_start"] is False
+    assert second_log["cold_start"] is False
 
 
-def test_package_logger(capsys):
+def test_package_logger_stream(stdout):
+    # GIVEN package logger "aws_lambda_powertools" is explicitly set with no params
+    set_package_logger(stream=stdout)
 
-    set_package_logger()
+    # WHEN Tracer is initialized in disabled mode
     Tracer(disabled=True)
-    output = capsys.readouterr()
 
-    assert "Tracing has been disabled" in output.out
+    # THEN Tracer debug log statement should be logged
+    output = stdout.getvalue()
+    logger = logging.getLogger("aws_lambda_powertools")
+    assert "Tracing has been disabled" in output
+    assert logger.level == logging.DEBUG
 
 
-def test_package_logger_format(stdout, capsys):
-    set_package_logger(stream=stdout, formatter=JsonFormatter(formatter="test"))
+def test_package_logger_format(capsys):
+    # GIVEN package logger "aws_lambda_powertools" is explicitly
+    # with a custom formatter
+    formatter = logging.Formatter("message=%(message)s")
+    set_package_logger(formatter=formatter)
+
+    # WHEN Tracer is initialized in disabled mode
     Tracer(disabled=True)
-    output = json.loads(stdout.getvalue().split("\n")[0])
 
-    assert "test" in output["formatter"]
+    # THEN Tracer debug log statement should be logged using `message=` format
+    output = capsys.readouterr().out
+    logger = logging.getLogger("aws_lambda_powertools")
+    assert "message=" in output
+    assert logger.level == logging.DEBUG
 
 
 def test_logger_append_duplicated(stdout):
+    # GIVEN Logger is initialized with request_id field
     logger = Logger(stream=stdout, request_id="value")
+
+    # WHEN `request_id` is appended to the existing structured log
+    # using a different value
     logger.structure_logs(append=True, request_id="new_value")
     logger.info("log")
-    log = json.loads(stdout.getvalue())
+
+    # THEN subsequent log statements should have the latest value
+    log = capture_logging_output(stdout)
     assert "new_value" == log["request_id"]
 
 
 def test_logger_invalid_sampling_rate():
+    # GIVEN Logger is initialized
+    # WHEN sampling_rate non-numeric value
+    # THEN we should raise InvalidLoggerSamplingRateError
     with pytest.raises(InvalidLoggerSamplingRateError):
         Logger(sampling_rate="TEST")

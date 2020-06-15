@@ -269,8 +269,10 @@ class Tracer:
                         function_name=lambda_handler_name, data=response, subsegment=subsegment
                     )
                 except Exception as err:
-                    logger.exception("Exception received from lambda handler")
-                    self._add_full_exception_as_metadata(function_name=self.service, error=err, subsegment=subsegment)
+                    logger.exception(f"Exception received from {lambda_handler_name}")
+                    self._add_full_exception_as_metadata(
+                        function_name=lambda_handler_name, error=err, subsegment=subsegment
+                    )
                     raise
 
                 return response

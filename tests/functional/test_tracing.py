@@ -14,120 +14,125 @@ def reset_tracing_config():
     yield
 
 
+@pytest.fixture
+def service_name():
+    return "booking"
+
+
 def test_capture_lambda_handler(dummy_response):
-    # GIVEN tracer is disabled, and decorator is used
-    # WHEN a lambda handler is run
-    # THEN tracer should not raise an Exception
+    # GIVEN tracer lambda handler decorator is used
     tracer = Tracer(disabled=True)
 
+    # WHEN a lambda handler is run
     @tracer.capture_lambda_handler
     def handler(event, context):
         return dummy_response
 
+    # THEN tracer should not raise an Exception
     handler({}, {})
 
 
 def test_capture_method(dummy_response):
-    # GIVEN tracer is disabled, and method decorator is used
-    # WHEN a function is run
-    # THEN tracer should not raise an Exception
-
+    # GIVEN tracer method decorator is used
     tracer = Tracer(disabled=True)
 
+    # WHEN a function is run
     @tracer.capture_method
     def greeting(name, message):
         return dummy_response
 
+    # THEN tracer should not raise an Exception
     greeting(name="Foo", message="Bar")
 
 
 def test_tracer_lambda_emulator(monkeypatch, dummy_response):
-    # GIVEN tracer is run locally
-    # WHEN a lambda function is run through SAM CLI
-    # THEN tracer should not raise an Exception
+    # GIVEN tracer runs locally
     monkeypatch.setenv("AWS_SAM_LOCAL", "true")
     tracer = Tracer()
 
+    # WHEN a lambda function is run through SAM CLI
     @tracer.capture_lambda_handler
     def handler(event, context):
         return dummy_response
 
+    # THEN tracer should run in disabled mode, and not raise an Exception
     handler({}, {})
-    monkeypatch.delenv("AWS_SAM_LOCAL")
 
 
 def test_tracer_metadata_disabled(dummy_response):
     # GIVEN tracer is disabled, and annotations/metadata are used
-    # WHEN a lambda handler is run
-    # THEN tracer should not raise an Exception and simply ignore
     tracer = Tracer(disabled=True)
 
+    # WHEN a lambda handler is run
     @tracer.capture_lambda_handler
     def handler(event, context):
         tracer.put_annotation("PaymentStatus", "SUCCESS")
         tracer.put_metadata("PaymentMetadata", "Metadata")
         return dummy_response
 
+    # THEN tracer should not raise any Exception
     handler({}, {})
 
 
-def test_tracer_env_vars(monkeypatch):
-    # GIVEN tracer disabled, is run without parameters
-    # WHEN service is explicitly defined
-    # THEN tracer should have use that service name
-    service_name = "booking"
+def test_tracer_service_env_var(monkeypatch, service_name):
+    # GIVEN tracer is run without parameters
+    # WHEN service is implicitly defined via env var
     monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", service_name)
-    tracer_env_var = Tracer(disabled=True)
+    tracer = Tracer(disabled=True)
 
-    assert tracer_env_var.service == service_name
+    # THEN tracer should have use that service name
+    assert tracer.service == service_name
 
+
+def test_tracer_explicit_service(monkeypatch, service_name):
+    # GIVEN tracer is disabled
+    # WHEN service is explicitly defined
     tracer_explicit = Tracer(disabled=True, service=service_name)
     assert tracer_explicit.service == service_name
 
     monkeypatch.setenv("POWERTOOLS_TRACE_DISABLED", "true")
     tracer = Tracer()
 
-    assert bool(tracer.disabled) is True
+    # THEN tracer should have use that service name
+    assert tracer.service == service_name
 
 
-def test_tracer_with_exception(mocker):
-    # GIVEN tracer is disabled, decorator is used
-    # WHEN a lambda handler or method returns an Exception
-    # THEN tracer should reraise the same Exception
+def test_tracer_propagate_exception(mocker):
+    # GIVEN tracer decorator is used
     class CustomException(Exception):
         pass
 
     tracer = Tracer(disabled=True)
 
+    # WHEN a lambda handler or method returns an Exception
     @tracer.capture_lambda_handler
     def handler(event, context):
         raise CustomException("test")
 
     @tracer.capture_method
-    def greeting(name, message):
+    def greeting():
         raise CustomException("test")
 
+    # THEN tracer should reraise the same Exception
     with pytest.raises(CustomException):
         handler({}, {})
 
     with pytest.raises(CustomException):
-        greeting(name="Foo", message="Bar")
+        greeting()
 
 
-def test_tracer_reuse():
-    # GIVEN tracer A, B were initialized
-    # WHEN tracer B explicitly reuses A config
-    # THEN tracer B attributes should be equal to tracer A
-    service_name = "booking"
+def test_tracer_reuse_configuration(service_name):
+    # GIVEN tracer A is initialized
     tracer_a = Tracer(disabled=True, service=service_name)
+    # WHEN tracer B is initialized afterwards
     tracer_b = Tracer()
 
-    assert id(tracer_a) != id(tracer_b)
+    # THEN tracer B attributes should be equal to tracer A
     assert tracer_a.__dict__.items() == tracer_b.__dict__.items()
 
 
 def test_tracer_method_nested_sync(mocker):
-    # GIVEN tracer is disabled, decorator is used
+    # GIVEN tracer decorator is used
     # WHEN multiple sync functions are nested
     # THEN tracer should not raise a Runtime Error
     tracer = Tracer(disabled=True)

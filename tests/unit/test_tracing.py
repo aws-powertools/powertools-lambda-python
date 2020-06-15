@@ -79,15 +79,20 @@ def in_subsegment_mock():
 
 
 def test_tracer_lambda_handler(mocker, dummy_response, provider_stub, in_subsegment_mock):
+    # GIVEN Tracer is initialized with booking as the service name
     provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
     tracer = Tracer(provider=provider, service="booking")
 
+    # WHEN lambda_handler decorator is used
     @tracer.capture_lambda_handler
     def handler(event, context):
         return dummy_response
 
     handler({}, mocker.MagicMock())
 
+    # THEN we should have a subsegment named handler
+    # annotate cold start, and add its response as trace metadata
+    # and use service name as a metadata namespace
     assert in_subsegment_mock.in_subsegment.call_count == 1
     assert in_subsegment_mock.in_subsegment.call_args == mocker.call(name="## handler")
     assert in_subsegment_mock.put_metadata.call_args == mocker.call(
@@ -98,19 +103,39 @@ def test_tracer_lambda_handler(mocker, dummy_response, provider_stub, in_subsegm
 
 
 def test_tracer_method(mocker, dummy_response, provider_stub, in_subsegment_mock):
+    # GIVEN Tracer is initialized with booking as the service name
     provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
-    Tracer(provider=provider, service="booking")
+    tracer = Tracer(provider=provider, service="booking")
+
+    # WHEN capture_method decorator is used
+    @tracer.capture_method
+    def greeting(name, message):
+        return dummy_response
+
+    greeting(name="Foo", message="Bar")
+
+    # THEN we should have a subsegment named after the method name
+    # and add its response as trace metadata
+    # and use service name as a metadata namespace
+    assert in_subsegment_mock.in_subsegment.call_count == 1
+    assert in_subsegment_mock.in_subsegment.call_args == mocker.call(name="## greeting")
+    assert in_subsegment_mock.put_metadata.call_args == mocker.call(
+        key="greeting response", value=dummy_response, namespace="booking"
+    )
 
 
 def test_tracer_custom_metadata(mocker, dummy_response, provider_stub):
+    # GIVEN Tracer is initialized with booking as the service name
     put_metadata_mock = mocker.MagicMock()
-    annotation_key = "Booking response"
-    annotation_value = {"bookingStatus": "CONFIRMED"}
-
     provider = provider_stub(put_metadata_mock=put_metadata_mock)
     tracer = Tracer(provider=provider, service="booking")
+
+    # WHEN put_metadata is used
+    annotation_key = "Booking response"
+    annotation_value = {"bookingStatus": "CONFIRMED"}
     tracer.put_metadata(annotation_key, annotation_value)
 
+    # THEN we should have metadata expected and booking as namespace
     assert put_metadata_mock.call_count == 1
     assert put_metadata_mock.call_args_list[0] == mocker.call(
         key=annotation_key, value=annotation_value, namespace="booking"
@@ -118,87 +143,97 @@ def test_tracer_custom_metadata(mocker, dummy_response, provider_stub):
 
 
 def test_tracer_custom_annotation(mocker, dummy_response, provider_stub):
+    # GIVEN Tracer is initialized
     put_annotation_mock = mocker.MagicMock()
+    provider = provider_stub(put_annotation_mock=put_annotation_mock)
+    tracer = Tracer(provider=provider)
+
+    # WHEN put_metadata is used
     annotation_key = "BookingId"
     annotation_value = "123456"
-
-    provider = provider_stub(put_annotation_mock=put_annotation_mock)
-    tracer = Tracer(provider=provider, service="booking")
-
     tracer.put_annotation(annotation_key, annotation_value)
 
+    # THEN we should have an annotation as expected
     assert put_annotation_mock.call_count == 1
     assert put_annotation_mock.call_args == mocker.call(key=annotation_key, value=annotation_value)
 
 
 @mock.patch("aws_lambda_powertools.tracing.Tracer.patch")
 def test_tracer_autopatch(patch_mock):
-    # GIVEN tracer is instantiated
-    # WHEN default options were used, or patch() was called
-    # THEN tracer should patch all modules
+    # GIVEN tracer is initialized
+    # WHEN auto_patch hasn't been explicitly disabled
     Tracer(disabled=True)
+
+    # THEN tracer should patch all modules
     assert patch_mock.call_count == 1
 
 
 @mock.patch("aws_lambda_powertools.tracing.Tracer.patch")
 def test_tracer_no_autopatch(patch_mock):
-    # GIVEN tracer is instantiated
+    # GIVEN tracer is initialized
     # WHEN auto_patch is disabled
-    # THEN tracer should not patch any module
     Tracer(disabled=True, auto_patch=False)
+
+    # THEN tracer should not patch any module
     assert patch_mock.call_count == 0
 
 
-def test_tracer_lambda_handler_empty_response_metadata(mocker, provider_stub):
+def test_tracer_lambda_handler_does_not_add_empty_response_as_metadata(mocker, provider_stub):
+    # GIVEN tracer is initialized
     put_metadata_mock = mocker.MagicMock()
     provider = provider_stub(put_metadata_mock=put_metadata_mock)
     tracer = Tracer(provider=provider)
 
+    # WHEN capture_lambda_handler decorator is used
+    # and the handler response is empty
     @tracer.capture_lambda_handler
     def handler(event, context):
         return
 
     handler({}, mocker.MagicMock())
 
+    # THEN we should not add empty metadata
     assert put_metadata_mock.call_count == 0
 
 
-def test_tracer_method_empty_response_metadata(mocker, provider_stub):
+def test_tracer_method_does_not_add_empty_response_as_metadata(mocker, provider_stub):
+    # GIVEN tracer is initialized
     put_metadata_mock = mocker.MagicMock()
     provider = provider_stub(put_metadata_mock=put_metadata_mock)
     tracer = Tracer(provider=provider)
 
+    # WHEN capture_method decorator is used
+    # and the method response is empty
     @tracer.capture_method
     def greeting(name, message):
         return
 
     greeting(name="Foo", message="Bar")
 
+    # THEN we should not add empty metadata
     assert put_metadata_mock.call_count == 0
 
 
 @mock.patch("aws_lambda_powertools.tracing.tracer.aws_xray_sdk.core.patch")
-@mock.patch("aws_lambda_powertools.tracing.tracer.aws_xray_sdk.core.patch_all")
-def test_tracer_patch(xray_patch_all_mock, xray_patch_mock, mocker):
-    # GIVEN tracer is instantiated
-    # WHEN default X-Ray provider client is mocked
-    # THEN tracer should run just fine
-
-    Tracer()
-    assert xray_patch_all_mock.call_count == 1
-
+def test_tracer_patch_modules(xray_patch_mock, mocker):
+    # GIVEN tracer is initialized with a list of modules to patch
     modules = ["boto3"]
+
+    # WHEN modules are supported by X-Ray
     Tracer(service="booking", patch_modules=modules)
 
+    # THEN tracer should run just fine
     assert xray_patch_mock.call_count == 1
     assert xray_patch_mock.call_args == mocker.call(modules)
 
 
 def test_tracer_method_exception_metadata(mocker, provider_stub, in_subsegment_mock):
-
+    # GIVEN tracer is initialized
     provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
     tracer = Tracer(provider=provider, service="booking")
 
+    # WHEN capture_method decorator is used
+    # and the method raises an exception
     @tracer.capture_method
     def greeting(name, message):
         raise ValueError("test")
@@ -206,16 +241,20 @@ def test_tracer_method_exception_metadata(mocker, provider_stub, in_subsegment_m
     with pytest.raises(ValueError):
         greeting(name="Foo", message="Bar")
 
+    # THEN we should add the exception using method name as key plus error
+    # and their service name as the namespace
     put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
     assert put_metadata_mock_args["key"] == "greeting error"
     assert put_metadata_mock_args["namespace"] == "booking"
 
 
 def test_tracer_lambda_handler_exception_metadata(mocker, provider_stub, in_subsegment_mock):
-
+    # GIVEN tracer is initialized
     provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
     tracer = Tracer(provider=provider, service="booking")
 
+    # WHEN capture_lambda_handler decorator is used
+    # and the method raises an exception
     @tracer.capture_lambda_handler
     def handler(event, context):
         raise ValueError("test")
@@ -223,16 +262,21 @@ def test_tracer_lambda_handler_exception_metadata(mocker, provider_stub, in_subs
     with pytest.raises(ValueError):
         handler({}, mocker.MagicMock())
 
+    # THEN we should add the exception using handler name as key plus error
+    # and their service name as the namespace
     put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
-    assert put_metadata_mock_args["key"] == "booking error"
+    assert put_metadata_mock_args["key"] == "handler error"
+
     assert put_metadata_mock_args["namespace"] == "booking"
 
 
 @pytest.mark.asyncio
 async def test_tracer_method_nested_async(mocker, dummy_response, provider_stub, in_subsegment_mock):
+    # GIVEN tracer is initialized
     provider = provider_stub(in_subsegment_async=in_subsegment_mock.in_subsegment)
     tracer = Tracer(provider=provider, service="booking")
 
+    # WHEN capture_method decorator is used for nested async methods
     @tracer.capture_method
     async def greeting_2(name, message):
         return dummy_response
@@ -250,6 +294,7 @@ async def test_tracer_method_nested_async(mocker, dummy_response, provider_stub,
     ) = in_subsegment_mock.in_subsegment.call_args_list
     put_metadata_greeting2_call_args, put_metadata_greeting_call_args = in_subsegment_mock.put_metadata.call_args_list
 
+    # THEN we should add metadata for each response like we would for a sync decorated method
     assert in_subsegment_mock.in_subsegment.call_count == 2
     assert in_subsegment_greeting_call_args == mocker.call(name="## greeting")
     assert in_subsegment_greeting2_call_args == mocker.call(name="## greeting_2")
@@ -265,9 +310,10 @@ async def test_tracer_method_nested_async(mocker, dummy_response, provider_stub,
 
 @pytest.mark.asyncio
 async def test_tracer_method_nested_async_disabled(dummy_response):
-
+    # GIVEN tracer is initialized and explicitly disabled
     tracer = Tracer(service="booking", disabled=True)
 
+    # WHEN capture_method decorator is used
     @tracer.capture_method
     async def greeting_2(name, message):
         return dummy_response
@@ -277,16 +323,19 @@ async def test_tracer_method_nested_async_disabled(dummy_response):
         await greeting_2(name, message)
         return dummy_response
 
+    # THEN we should run the decorator methods without side effects
     ret = await greeting(name="Foo", message="Bar")
-
     assert ret == dummy_response
 
 
 @pytest.mark.asyncio
 async def test_tracer_method_exception_metadata_async(mocker, provider_stub, in_subsegment_mock):
+    # GIVEN tracer is initialized
     provider = provider_stub(in_subsegment_async=in_subsegment_mock.in_subsegment)
     tracer = Tracer(provider=provider, service="booking")
 
+    # WHEN capture_method decorator is used in an async method
+    # and the method raises an exception
     @tracer.capture_method
     async def greeting(name, message):
         raise ValueError("test")
@@ -294,6 +343,8 @@ async def test_tracer_method_exception_metadata_async(mocker, provider_stub, in_
     with pytest.raises(ValueError):
         await greeting(name="Foo", message="Bar")
 
+    # THEN we should add the exception using method name as key plus error
+    # and their service name as the namespace
     put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
     assert put_metadata_mock_args["key"] == "greeting error"
     assert put_metadata_mock_args["namespace"] == "booking"
