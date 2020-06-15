@@ -179,35 +179,40 @@ class MetricManager:
 
         logger.debug("Serializing...", {"metrics": metrics, "dimensions": dimensions})
 
-        dimension_keys: List[str] = list(dimensions.keys())
-        metric_names_unit: List[Dict[str, str]] = []
-        metric_set: Dict[str, str] = {}
+        metric_names_and_units: List[Dict[str, str]] = []  # [ { "Name": "metric_name", "Unit": "Count" } ]
+        metric_names_and_values: Dict[str, str] = {}  # { "metric_name": 1.0 }
 
         for metric_name in metrics:
             metric: str = metrics[metric_name]
             metric_value: int = metric.get("Value", 0)
             metric_unit: str = metric.get("Unit", "")
 
-            metric_names_unit.append({"Name": metric_name, "Unit": metric_unit})
-            metric_set.update({metric_name: metric_value})
+            metric_names_and_units.append({"Name": metric_name, "Unit": metric_unit})
+            metric_names_and_values.update({metric_name: metric_value})
 
-        metrics_definition = {
-            "CloudWatchMetrics": [
-                {"Namespace": self.namespace, "Dimensions": [dimension_keys], "Metrics": metric_names_unit}
-            ]
+        embedded_metrics_object = {
+            "_aws": {
+                "Timestamp": int(datetime.datetime.now().timestamp() * 1000),  # epoch
+                "CloudWatchMetrics": [
+                    {
+                        "Namespace": self.namespace,  # "test_namespace"
+                        "Dimensions": [list(dimensions.keys())],  # [ "service" ]
+                        "Metrics": metric_names_and_units,
+                    }
+                ],
+            },
+            **dimensions,  # "service": "test_service"
+            **metadata,  # "username": "test"
+            **metric_names_and_values,  # "single_metric": 1.0
         }
-        metrics_timestamp = {"Timestamp": int(datetime.datetime.now().timestamp() * 1000)}
-        metric_set["_aws"] = {**metrics_timestamp, **metrics_definition}
-        metric_set.update(**dimensions)
-        metric_set.update(**metadata)
 
         try:
-            logger.debug("Validating serialized metrics against CloudWatch EMF schema", metric_set)
-            fastjsonschema.validate(definition=CLOUDWATCH_EMF_SCHEMA, data=metric_set)
+            logger.debug("Validating serialized metrics against CloudWatch EMF schema", embedded_metrics_object)
+            fastjsonschema.validate(definition=CLOUDWATCH_EMF_SCHEMA, data=embedded_metrics_object)
         except fastjsonschema.JsonSchemaException as e:
             message = f"Invalid format. Error: {e.message}, Invalid item: {e.name}"  # noqa: B306, E501
             raise SchemaValidationError(message)
-        return metric_set
+        return embedded_metrics_object
 
     def add_dimension(self, name: str, value: str):
         """Adds given dimension to all metrics
