@@ -583,8 +583,7 @@ def test_log_metrics_with_metadata(capsys, metric, dimension, namespace, service
     my_metrics.add_metric(**metric)
     my_metrics.add_dimension(**dimension)
 
-    # WHEN we utilize log_metrics to serialize
-    # and add metadata
+    # WHEN we utilize log_metrics to serialize and add metadata
     @my_metrics.log_metrics
     def lambda_handler(evt, ctx):
         my_metrics.add_metadata(**metadata)
@@ -598,3 +597,36 @@ def test_log_metrics_with_metadata(capsys, metric, dimension, namespace, service
     # THEN we should have no exceptions and metadata
     remove_timestamp(metrics=[output, expected])
     assert expected == output
+
+
+def test_serialize_metric_set_metric_definition(metric, dimension, namespace, service, metadata):
+    expected_metric_definition = {
+        "single_metric": 1.0,
+        "_aws": {
+            "Timestamp": 1592237875494,
+            "CloudWatchMetrics": [
+                {
+                    "Namespace": "test_namespace",
+                    "Dimensions": [["test_dimension", "service"]],
+                    "Metrics": [{"Name": "single_metric", "Unit": "Count"}],
+                }
+            ],
+        },
+        "service": "test_service",
+        "username": "test",
+        "test_dimension": "test",
+    }
+
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(service=service, namespace=namespace)
+    my_metrics.add_metric(**metric)
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_metadata(**metadata)
+
+    # WHEN metrics are serialized manually
+    metric_definition_output = my_metrics.serialize_metric_set()
+
+    # THEN we should emit a valid embedded metric definition object
+    assert "Timestamp" in metric_definition_output["_aws"]
+    remove_timestamp(metrics=[metric_definition_output, expected_metric_definition])
+    assert metric_definition_output == expected_metric_definition
