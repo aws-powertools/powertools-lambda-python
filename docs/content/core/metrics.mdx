@@ -89,6 +89,56 @@ with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace="
     ...
 ```
 
+## Adding metadata
+
+You can use `add_metadata` for advanced use cases, where you want to metadata as part of the serialized metrics object.
+
+<Note type="info">
+  <strong>This will not be available during metrics visualization</strong> - Use <strong>dimensions</strong> for this purpose
+</Note><br/>
+
+```python:title=app.py
+from aws_lambda_powertools import Metrics
+from aws_lambda_powertools.metrics import MetricUnit
+
+metrics = Metrics(namespace="ExampleApplication", service="booking")
+metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
+metrics.add_metadata(key="booking_id", value="booking_uuid") # highlight-line
+```
+
+This will be available in CloudWatch Logs to ease operations on high cardinal data.
+
+<details>
+<summary><strong>Exerpt output in CloudWatch Logs</strong></summary>
+
+```json:title=cloudwatch_logs.json
+{
+    "SuccessfulBooking": 1.0,
+    "_aws": {
+        "Timestamp": 1592234975665,
+        "CloudWatchMetrics": [
+            {
+                "Namespace": "ExampleApplication",
+                "Dimensions": [
+                    [
+                        "service"
+                    ]
+                ],
+                "Metrics": [
+                    {
+                        "Name": "SuccessfulBooking",
+                        "Unit": "Count"
+                    }
+                ]
+            }
+        ]
+    },
+    "service": "booking",
+    "booking_id": "booking_uuid" // highlight-line
+}
+```
+</details>
+
 ## Flushing metrics
 
 As you finish adding all your metrics, you need to serialize and flush them to standard output. You can do that right before you return your response to the caller via `log_metrics`.
