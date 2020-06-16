@@ -62,11 +62,18 @@ def service() -> str:
 
 
 @pytest.fixture
+def metadata() -> Dict[str, str]:
+    return {"key": "username", "value": "test"}
+
+
+@pytest.fixture
 def a_hundred_metrics(namespace=namespace) -> List[Dict[str, str]]:
     return [{"name": f"metric_{i}", "unit": "Count", "value": 1} for i in range(100)]
 
 
-def serialize_metrics(metrics: List[Dict], dimensions: List[Dict], namespace: str) -> Dict:
+def serialize_metrics(
+    metrics: List[Dict], dimensions: List[Dict], namespace: str, metadatas: List[Dict] = None
+) -> Dict:
     """ Helper function to build EMF object from a list of metrics, dimensions """
     my_metrics = MetricManager(namespace=namespace)
     for dimension in dimensions:
@@ -75,15 +82,23 @@ def serialize_metrics(metrics: List[Dict], dimensions: List[Dict], namespace: st
     for metric in metrics:
         my_metrics.add_metric(**metric)
 
+    if metadatas is not None:
+        for metadata in metadatas:
+            my_metrics.add_metadata(**metadata)
+
     if len(metrics) != 100:
         return my_metrics.serialize_metric_set()
 
 
-def serialize_single_metric(metric: Dict, dimension: Dict, namespace: str) -> Dict:
+def serialize_single_metric(metric: Dict, dimension: Dict, namespace: str, metadata: Dict = None) -> Dict:
     """ Helper function to build EMF object from a given metric, dimension and namespace """
     my_metrics = MetricManager(namespace=namespace)
     my_metrics.add_metric(**metric)
     my_metrics.add_dimension(**dimension)
+
+    if metadata is not None:
+        my_metrics.add_metadata(**metadata)
+
     return my_metrics.serialize_metric_set()
 
 
@@ -533,3 +548,85 @@ def test_log_metrics_with_implicit_dimensions_called_twice(capsys, metric, names
 
     for metric_record in second_output["_aws"]["CloudWatchMetrics"]:
         assert ["service"] in metric_record["Dimensions"]
+
+
+def test_add_metadata_non_string_dimension_keys(service, metric, namespace):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(service=service, namespace=namespace)
+    my_metrics.add_metric(**metric)
+
+    # WHEN we utilize add_metadata with non-string keys
+    my_metrics.add_metadata(key=10, value="number_ten")
+
+    # THEN we should have no exceptions
+    # and dimension values should be serialized as strings
+    expected_metadata = {"10": "number_ten"}
+    assert my_metrics.metadata_set == expected_metadata
+
+
+def test_add_metadata(service, metric, namespace, metadata):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(service=service, namespace=namespace)
+    my_metrics.add_metric(**metric)
+
+    # WHEN we utilize add_metadata with non-string keys
+    my_metrics.add_metadata(**metadata)
+
+    # THEN we should have no exceptions
+    # and dimension values should be serialized as strings
+    assert my_metrics.metadata_set == {metadata["key"]: metadata["value"]}
+
+
+def test_log_metrics_with_metadata(capsys, metric, dimension, namespace, service, metadata):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(namespace=namespace)
+    my_metrics.add_metric(**metric)
+    my_metrics.add_dimension(**dimension)
+
+    # WHEN we utilize log_metrics to serialize and add metadata
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        my_metrics.add_metadata(**metadata)
+        pass
+
+    lambda_handler({}, {})
+
+    output = capture_metrics_output(capsys)
+    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace, metadata=metadata)
+
+    # THEN we should have no exceptions and metadata
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
+def test_serialize_metric_set_metric_definition(metric, dimension, namespace, service, metadata):
+    expected_metric_definition = {
+        "single_metric": 1.0,
+        "_aws": {
+            "Timestamp": 1592237875494,
+            "CloudWatchMetrics": [
+                {
+                    "Namespace": "test_namespace",
+                    "Dimensions": [["test_dimension", "service"]],
+                    "Metrics": [{"Name": "single_metric", "Unit": "Count"}],
+                }
+            ],
+        },
+        "service": "test_service",
+        "username": "test",
+        "test_dimension": "test",
+    }
+
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(service=service, namespace=namespace)
+    my_metrics.add_metric(**metric)
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_metadata(**metadata)
+
+    # WHEN metrics are serialized manually
+    metric_definition_output = my_metrics.serialize_metric_set()
+
+    # THEN we should emit a valid embedded metric definition object
+    assert "Timestamp" in metric_definition_output["_aws"]
+    remove_timestamp(metrics=[metric_definition_output, expected_metric_definition])
+    assert metric_definition_output == expected_metric_definition

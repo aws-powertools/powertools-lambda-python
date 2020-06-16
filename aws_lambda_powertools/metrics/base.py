@@ -5,7 +5,7 @@ import numbers
 import os
 import pathlib
 from enum import Enum
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 import fastjsonschema
 
@@ -78,7 +78,12 @@ class MetricManager:
     """
 
     def __init__(
-        self, metric_set: Dict[str, str] = None, dimension_set: Dict = None, namespace: str = None, service: str = None
+        self,
+        metric_set: Dict[str, str] = None,
+        dimension_set: Dict = None,
+        namespace: str = None,
+        metadata_set: Dict[str, Any] = None,
+        service: str = None,
     ):
         self.metric_set = metric_set if metric_set is not None else {}
         self.dimension_set = dimension_set if dimension_set is not None else {}
@@ -86,6 +91,7 @@ class MetricManager:
         self.service = service or os.environ.get("POWERTOOLS_SERVICE_NAME")
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_options = list(MetricUnit.__members__)
+        self.metadata_set = self.metadata_set if metadata_set is not None else {}
 
     def add_metric(self, name: str, unit: MetricUnit, value: Union[float, int]):
         """Adds given metric
@@ -131,7 +137,7 @@ class MetricManager:
             # since we could have more than 100 metrics
             self.metric_set.clear()
 
-    def serialize_metric_set(self, metrics: Dict = None, dimensions: Dict = None) -> Dict:
+    def serialize_metric_set(self, metrics: Dict = None, dimensions: Dict = None, metadata: Dict = None) -> Dict:
         """Serializes metric and dimensions set
 
         Parameters
@@ -165,39 +171,48 @@ class MetricManager:
         if dimensions is None:  # pragma: no cover
             dimensions = self.dimension_set
 
+        if metadata is None:  # pragma: no cover
+            metadata = self.metadata_set
+
         if self.service and not self.dimension_set.get("service"):
             self.dimension_set["service"] = self.service
 
         logger.debug("Serializing...", {"metrics": metrics, "dimensions": dimensions})
 
-        dimension_keys: List[str] = list(dimensions.keys())
-        metric_names_unit: List[Dict[str, str]] = []
-        metric_set: Dict[str, str] = {}
+        metric_names_and_units: List[Dict[str, str]] = []  # [ { "Name": "metric_name", "Unit": "Count" } ]
+        metric_names_and_values: Dict[str, str] = {}  # { "metric_name": 1.0 }
 
         for metric_name in metrics:
             metric: str = metrics[metric_name]
             metric_value: int = metric.get("Value", 0)
             metric_unit: str = metric.get("Unit", "")
 
-            metric_names_unit.append({"Name": metric_name, "Unit": metric_unit})
-            metric_set.update({metric_name: metric_value})
+            metric_names_and_units.append({"Name": metric_name, "Unit": metric_unit})
+            metric_names_and_values.update({metric_name: metric_value})
 
-        metrics_definition = {
-            "CloudWatchMetrics": [
-                {"Namespace": self.namespace, "Dimensions": [dimension_keys], "Metrics": metric_names_unit}
-            ]
+        embedded_metrics_object = {
+            "_aws": {
+                "Timestamp": int(datetime.datetime.now().timestamp() * 1000),  # epoch
+                "CloudWatchMetrics": [
+                    {
+                        "Namespace": self.namespace,  # "test_namespace"
+                        "Dimensions": [list(dimensions.keys())],  # [ "service" ]
+                        "Metrics": metric_names_and_units,
+                    }
+                ],
+            },
+            **dimensions,  # "service": "test_service"
+            **metadata,  # "username": "test"
+            **metric_names_and_values,  # "single_metric": 1.0
         }
-        metrics_timestamp = {"Timestamp": int(datetime.datetime.now().timestamp() * 1000)}
-        metric_set["_aws"] = {**metrics_timestamp, **metrics_definition}
-        metric_set.update(**dimensions)
 
         try:
-            logger.debug("Validating serialized metrics against CloudWatch EMF schema", metric_set)
-            fastjsonschema.validate(definition=CLOUDWATCH_EMF_SCHEMA, data=metric_set)
+            logger.debug("Validating serialized metrics against CloudWatch EMF schema", embedded_metrics_object)
+            fastjsonschema.validate(definition=CLOUDWATCH_EMF_SCHEMA, data=embedded_metrics_object)
         except fastjsonschema.JsonSchemaException as e:
             message = f"Invalid format. Error: {e.message}, Invalid item: {e.name}"  # noqa: B306, E501
             raise SchemaValidationError(message)
-        return metric_set
+        return embedded_metrics_object
 
     def add_dimension(self, name: str, value: str):
         """Adds given dimension to all metrics
@@ -224,6 +239,38 @@ class MetricManager:
             self.dimension_set[name] = value
         else:
             self.dimension_set[name] = str(value)
+
+    def add_metadata(self, key: str, value: Any):
+        """Adds high cardinal metadata for metrics object
+
+        This will not be available during metrics visualization.
+        Instead, this will be searchable through logs.
+
+        If you're looking to add metadata to filter metrics, then
+        use add_dimensions method.
+
+        Example
+        -------
+        **Add metrics metadata**
+
+            metric.add_metadata(key="booking_id", value="booking_id")
+
+        Parameters
+        ----------
+        name : str
+            Metadata key
+        value : any
+            Metadata value
+        """
+        logger.debug(f"Adding metadata: {key}:{value}")
+
+        # Cast key to str according to EMF spec
+        # Majority of keys are expected to be string already, so
+        # checking before casting improves performance in most cases
+        if isinstance(key, str):
+            self.metadata_set[key] = value
+        else:
+            self.metadata_set[str(key)] = value
 
     def __extract_metric_unit_value(self, unit: Union[str, MetricUnit]) -> str:
         """Return metric value from metric unit whether that's str or MetricUnit enum
