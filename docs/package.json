@@ -4,7 +4,9 @@
         "build": "gatsby build --prefix-paths"
     },
     "dependencies": {
+        "@aws-amplify/analytics": "^3.2.0",
         "antd": "^4.2.4",
+        "aws-amplify": "^3.0.17",
         "gatsby": "^2.22.9",
         "gatsby-plugin-antd": "^2.2.0",
         "gatsby-plugin-catch-links": "^2.3.2",
