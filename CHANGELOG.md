@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2020-06-18
 ### Added
-- **Metrics**: `add_medatada` method to add any metric metadata you'd like to ease finding metric related data via CloudWatch Logs
+- **Metrics**: `add_metadata` method to add any metric metadata you'd like to ease finding metric related data via CloudWatch Logs
 - Set status as General Availability
 
 ## [0.11.0] - 2020-06-08
