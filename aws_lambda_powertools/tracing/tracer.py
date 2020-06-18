@@ -237,7 +237,8 @@ class Tracer:
 
             tracer = Tracer(service="payment")
             @tracer.capture_lambda_handler
-            def handler(event, context)
+            def handler(event, context):
+                ...
 
         Parameters
         ----------

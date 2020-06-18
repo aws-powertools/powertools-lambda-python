@@ -109,7 +109,8 @@ class Metrics(MetricManager):
 
             @tracer.capture_lambda_handler
             @metrics.log_metrics
-                def handler(event, context)
+                def handler(event, context):
+                    ...
 
         Parameters
         ----------

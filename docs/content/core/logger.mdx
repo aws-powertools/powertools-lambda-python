@@ -68,15 +68,15 @@ from aws_lambda_powertools import Logger
 logger = Logger()
 
 @logger.inject_lambda_context
-def handler(event, context)
-  logger.info("Collecting payment")
-  ...
-  # You can log entire objects too
-  logger.info({
-    "operation": "collect_payment",
-    "charge_id": event['charge_id']
-  })
-  ...
+def handler(event, context):
+   logger.info("Collecting payment")
+   ...
+   # You can log entire objects too
+   logger.info({
+      "operation": "collect_payment",
+      "charge_id": event['charge_id']
+   })
+   ...
 ```
 
 You can also explicitly log any incoming event using `log_event` param or via `POWERTOOLS_LOGGER_LOG_EVENT` env var.
@@ -91,8 +91,8 @@ from aws_lambda_powertools import Logger
 logger = Logger()
 
 @logger.inject_lambda_context(log_event=True) # highlight-start
-def handler(event, context)
-  ...
+def handler(event, context):
+   ...
 ```
 
 When used, this will include the following keys:
@@ -155,8 +155,8 @@ from aws_lambda_powertools import Logger
 
 logger = Logger()
 
-def handler(event, context)
-  if "order_id" in event:
+def handler(event, context):
+   if "order_id" in event:
       logger.structure_logs(append=True, order_id=event["order_id"]) # highlight-line
       logger.info("Collecting payment")
       ...
@@ -199,8 +199,8 @@ from aws_lambda_powertools import Logger
 # Sample 1% of debug logs e.g. 0.1
 logger = Logger(sample_rate=0.1) # highlight-line
 
-def handler(event, context)
-  if "order_id" in event:
+def handler(event, context):
+   if "order_id" in event:
       logger.info("Collecting payment")
       ...
 ```
