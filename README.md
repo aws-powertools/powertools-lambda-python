@@ -5,8 +5,6 @@
 
 A suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier.
 
-* **Status**: Release candidate
-* **How long until GA?**: [Current progress](https://github.com/awslabs/aws-lambda-powertools/projects/1)
 * **Docs**: [Main docs](https://awslabs.github.io/aws-lambda-powertools-python/) | [API Docs](https://awslabs.github.io/aws-lambda-powertools-python/api/)
 
 ## Features
