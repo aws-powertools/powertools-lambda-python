@@ -197,7 +197,7 @@ class Logger(logging.Logger):
             lambda_context = build_lambda_context_model(context)
             cold_start = _is_cold_start()
 
-            self.structure_logs(cold_start=cold_start, **lambda_context.__dict__)
+            self.structure_logs(append=True, cold_start=cold_start, **lambda_context.__dict__)
             return lambda_handler(event, context)
 
         return decorate

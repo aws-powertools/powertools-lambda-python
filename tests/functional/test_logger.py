@@ -256,3 +256,30 @@ def test_logger_invalid_sampling_rate():
     # THEN we should raise InvalidLoggerSamplingRateError
     with pytest.raises(InvalidLoggerSamplingRateError):
         Logger(sampling_rate="TEST")
+
+
+def test_inject_lambda_context_with_structured_log(lambda_context, stdout):
+    # GIVEN Logger is initialized
+    logger = Logger(stream=stdout)
+
+    # WHEN structure_logs has been used to add an additional key upfront
+    # and a lambda function is decorated with logger.inject_lambda_context
+    logger.structure_logs(append=True, additional_key="test")
+
+    @logger.inject_lambda_context
+    def handler(event, context):
+        logger.info("Hello")
+
+    handler({}, lambda_context)
+
+    # THEN lambda contextual info should always be in the logs
+    log = capture_logging_output(stdout)
+    expected_logger_context_keys = (
+        "function_name",
+        "function_memory_size",
+        "function_arn",
+        "function_request_id",
+        "additional_key",
+    )
+    for key in expected_logger_context_keys:
+        assert key in log
