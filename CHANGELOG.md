@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2020-07-06
+### Fixed
+- **Logger**: Fix a bug with `inject_lambda_context` causing existing an Logger keys to be overriden if `structure_logs` was called before
+
 ## [1.0.0] - 2020-06-18
 ### Added
 - **Metrics**: `add_metadata` method to add any metric metadata you'd like to ease finding metric related data via CloudWatch Logs
