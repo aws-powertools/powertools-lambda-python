@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2020-07-16
+### Fixed
+- **Tracer**: Correct AWS X-Ray SDK dependency to support 2.5.0 and higher
+
 ## [1.0.1] - 2020-07-06
 ### Fixed
 - **Logger**: Fix a bug with `inject_lambda_context` causing existing an Logger keys to be overriden if `structure_logs` was called before
