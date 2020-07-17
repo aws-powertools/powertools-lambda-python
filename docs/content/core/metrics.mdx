@@ -29,6 +29,18 @@ Resources:
             Variables:
                 POWERTOOLS_SERVICE_NAME: payment # highlight-line
                 POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline # highlight-line
+        ...
+        Policies:
+          - Version: 2012-10-17
+            Statement:          
+              # highlight-start
+              - Effect: Allow
+                Resource: '*'
+                Action: cloudwatch:PutMetricData
+                Condition:
+                  ForAllValues:StringEquals:
+                    cloudwatch:namespace: ServerlessAirline
+              # highlight-end
 ```
 
 We recommend you use your application or main service as a metric namespace.
