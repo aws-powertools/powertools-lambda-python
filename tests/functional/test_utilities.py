@@ -5,9 +5,6 @@ from datetime import datetime, timedelta
 import pytest
 from botocore import stub
 
-from aws_lambda_powertools import utilities
-from aws_lambda_powertools.utilities import parameters
-
 
 @pytest.fixture(scope="function")
 def mock_name():
@@ -30,6 +27,12 @@ def test_get_parameter_new(monkeypatch, mock_name, mock_value, mock_version):
     """
     Test get_parameter() with a new parameter name
     """
+
+    # Set default region for boto3
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+
+    from aws_lambda_powertools import utilities
+    from aws_lambda_powertools.utilities import parameters
 
     # Patch the parameter value store
     monkeypatch.setattr(parameters, "PARAMETER_VALUES", {})
@@ -67,6 +70,12 @@ def test_get_parameter_cached(monkeypatch, mock_name, mock_value, mock_version):
     Test get_parameter() with a cached value for parameter name
     """
 
+    # Set default region for boto3
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+
+    from aws_lambda_powertools import utilities
+    from aws_lambda_powertools.utilities import parameters
+
     # Patch the parameter value store
     monkeypatch.setattr(
         parameters,
@@ -92,6 +101,12 @@ def test_get_parameter_expired(monkeypatch, mock_name, mock_value, mock_version)
     """
     Test get_parameter() with a cached, but expired value for parameter name
     """
+
+    # Set default region for boto3
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+
+    from aws_lambda_powertools import utilities
+    from aws_lambda_powertools.utilities import parameters
 
     # Patch the parameter value store
     monkeypatch.setattr(
