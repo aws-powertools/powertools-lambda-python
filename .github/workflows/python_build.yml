@@ -32,6 +32,8 @@ jobs:
         run: make lint
       - name: Test with pytest
         run: make test
+        env:
+          AWS_DEFAULT_REGION: us-east-1
       - name: Security baseline
         run: make security-baseline
       - name: Complexity baseline
