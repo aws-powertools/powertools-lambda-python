@@ -147,6 +147,59 @@ def test_dynamodb_provider_get_multiple(mock_name, mock_value):
         stubber.deactivate()
 
 
+def test_dynamodb_provider_get_multiple_next_token(mock_name, mock_value):
+    """
+    Test DynamoDBProvider.get_multiple() with a non-cached path
+    """
+
+    mock_param_names = ["A", "B", "C"]
+    table_name = "TEST_TABLE"
+
+    # Create a new provider
+    provider = parameters.DynamoDBProvider(table_name, region="us-east-1")
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.table.meta.client)
+
+    # First call
+    response = {
+        "Items": [
+            {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": f"{mock_value}/{name}"}}
+            for name in mock_param_names[:1]
+        ],
+        "LastEvaluatedKey": {"id": {"S": mock_name}, "sk": {"S": mock_param_names[0]}},
+    }
+    expected_params = {"TableName": table_name, "KeyConditionExpression": Key("id").eq(mock_name)}
+    stubber.add_response("query", response, expected_params)
+
+    # Second call
+    response = {
+        "Items": [
+            {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": f"{mock_value}/{name}"}}
+            for name in mock_param_names[1:]
+        ]
+    }
+    expected_params = {
+        "TableName": table_name,
+        "KeyConditionExpression": Key("id").eq(mock_name),
+        "ExclusiveStartKey": {"id": mock_name, "sk": mock_param_names[0]},
+    }
+    stubber.add_response("query", response, expected_params)
+    stubber.activate()
+
+    try:
+        values = provider.get_multiple(mock_name)
+
+        stubber.assert_no_pending_responses()
+
+        assert len(values) == len(mock_param_names)
+        for name in mock_param_names:
+            assert name in values
+            assert values[name] == f"{mock_value}/{name}"
+    finally:
+        stubber.deactivate()
+
+
 def test_ssm_provider_get(mock_name, mock_value, mock_version):
     """
     Test SSMProvider.get() with a non-cached value
@@ -465,9 +518,51 @@ def test_base_provider_get_transform_json(mock_name, mock_value):
     assert value[mock_name] == mock_value
 
 
+def test_base_provider_get_exception(mock_name):
+    """
+    Test BaseProvider.get() that raises an exception
+    """
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            assert name == mock_name
+            raise Exception("test exception raised")
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    provider = TestProvider()
+
+    with pytest.raises(parameters.GetParameterError) as excinfo:
+        provider.get(mock_name)
+
+    assert "test exception raised" in str(excinfo)
+
+
+def test_base_provider_get_multiple_exception(mock_name):
+    """
+    Test BaseProvider.get_multiple() that raises an exception
+    """
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            assert path == mock_name
+            raise Exception("test exception raised")
+
+    provider = TestProvider()
+
+    with pytest.raises(parameters.GetParameterError) as excinfo:
+        provider.get_multiple(mock_name)
+
+    assert "test exception raised" in str(excinfo)
+
+
 def test_base_provider_get_transform_binary(mock_name, mock_value):
     """
-    Test BaseProvider.get() with a bianry transform
+    Test BaseProvider.get() with a binary transform
     """
 
     mock_binary = mock_value.encode()
@@ -556,6 +651,27 @@ def test_get_parameter(monkeypatch, mock_name, mock_value):
     assert value == mock_value
 
 
+def test_get_parameter_new(monkeypatch, mock_name, mock_value):
+    """
+    Test get_parameter() without a default provider
+    """
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            assert name == mock_name
+            return mock_value
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    monkeypatch.setattr(parameters, "_DEFAULT_PROVIDERS", {})
+    monkeypatch.setattr(parameters, "SSMProvider", TestProvider)
+
+    value = parameters.get_parameter(mock_name)
+
+    assert value == mock_value
+
+
 def test_get_parameters(monkeypatch, mock_name, mock_value):
     """
     Test get_parameters()
@@ -577,6 +693,27 @@ def test_get_parameters(monkeypatch, mock_name, mock_value):
     assert values["A"] == mock_value
 
 
+def test_get_parameters_new(monkeypatch, mock_name, mock_value):
+    """
+    Test get_parameters() without a default provider
+    """
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            assert path == mock_name
+            return mock_value
+
+    monkeypatch.setattr(parameters, "_DEFAULT_PROVIDERS", {})
+    monkeypatch.setattr(parameters, "SSMProvider", TestProvider)
+
+    value = parameters.get_parameters(mock_name)
+
+    assert value == mock_value
+
+
 def test_get_secret(monkeypatch, mock_name, mock_value):
     """
     Test get_secret()
@@ -591,6 +728,27 @@ def test_get_secret(monkeypatch, mock_name, mock_value):
             raise NotImplementedError()
 
     monkeypatch.setitem(parameters._DEFAULT_PROVIDERS, "secrets", TestProvider())
+
+    value = parameters.get_secret(mock_name)
+
+    assert value == mock_value
+
+
+def test_get_secret_new(monkeypatch, mock_name, mock_value):
+    """
+    Test get_secret() without a default provider
+    """
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            assert name == mock_name
+            return mock_value
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    monkeypatch.setattr(parameters, "_DEFAULT_PROVIDERS", {})
+    monkeypatch.setattr(parameters, "SecretsProvider", TestProvider)
 
     value = parameters.get_secret(mock_name)
 

@@ -9,9 +9,17 @@ from typing import Dict, Optional, Union
 import boto3
 from boto3.dynamodb.conditions import Key
 
-from .base import BaseProvider
+from .base import BaseProvider, GetParameterError
 
-__all__ = ["BaseProvider", "DynamoDBProvider", "SecretsProvider", "SSMProvider", "get_parameter", "get_secret"]
+__all__ = [
+    "BaseProvider",
+    "GetParameterError",
+    "DynamoDBProvider",
+    "SecretsProvider",
+    "SSMProvider",
+    "get_parameter",
+    "get_secret",
+]
 
 
 class SSMProvider(BaseProvider):
@@ -28,10 +36,11 @@ class SSMProvider(BaseProvider):
         Initialize the SSM Parameter Store client
         """
 
+        client_kwargs = {}
         if region:
-            self.client = boto3.client("ssm", region_name=region)
-        else:
-            self.client = boto3.client("ssm")
+            client_kwargs["region_name"] = region
+
+        self.client = boto3.client("ssm", **client_kwargs)
 
         super().__init__()
 
@@ -109,10 +118,11 @@ class SecretsProvider(BaseProvider):
         Initialize the Secrets Manager client
         """
 
+        client_kwargs = {}
         if region:
-            self.client = boto3.client("secretsmanager", region_name=region)
-        else:
-            self.client = boto3.client("secretsmanager")
+            client_kwargs["region_name"] = region
+
+        self.client = boto3.client("secretsmanager", **client_kwargs)
 
         super().__init__()
 
@@ -146,10 +156,10 @@ class DynamoDBProvider(BaseProvider):
         Initialize the DynamoDB client
         """
 
+        client_kwargs = {}
         if region:
-            self.table = boto3.resource("dynamodb", region_name=region).Table(table_name)
-        else:
-            self.table = boto3.resource("dynamodb").Table(table_name)
+            client_kwargs["region_name"] = region
+        self.table = boto3.resource("dynamodb", **client_kwargs).Table(table_name)
 
         self.key_attr = key_attr
         self.value_attr = value_attr
