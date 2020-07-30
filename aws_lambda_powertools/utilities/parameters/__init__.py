@@ -18,6 +18,7 @@ __all__ = [
     "SecretsProvider",
     "SSMProvider",
     "get_parameter",
+    "get_parameters",
     "get_secret",
 ]
 
