@@ -1,12 +1,16 @@
+import base64
+import json
 import random
 import string
 from datetime import datetime, timedelta
+from typing import Dict
 
 import pytest
+from boto3.dynamodb.conditions import Key
 from botocore import stub
 
 from aws_lambda_powertools.utilities import parameters
-from aws_lambda_powertools.utilities.parameters.base import ExpirableValue
+from aws_lambda_powertools.utilities.parameters.base import BaseProvider, ExpirableValue
 
 
 @pytest.fixture(scope="function")
@@ -26,7 +30,124 @@ def mock_version():
     return random.randrange(1, 1000)
 
 
-def test_ssm_provider_get(monkeypatch, mock_name, mock_value, mock_version):
+def test_dynamodb_provider_get(mock_name, mock_value):
+    """
+    Test DynamoDBProvider.get() with a non-cached value
+    """
+
+    table_name = "TEST_TABLE"
+
+    # Create a new provider
+    provider = parameters.DynamoDBProvider(table_name, region="us-east-1")
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.table.meta.client)
+    response = {"Item": {"id": {"S": mock_name}, "value": {"S": mock_value}}}
+    expected_params = {"TableName": table_name, "Key": {"id": mock_name}}
+    stubber.add_response("get_item", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name)
+
+        assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_dynamodb_provider_get_cached(mock_name, mock_value):
+    """
+    Test DynamoDBProvider.get() with a cached value
+    """
+
+    table_name = "TEST_TABLE"
+
+    # Create a new provider
+    provider = parameters.DynamoDBProvider(table_name, region="us-east-1")
+
+    # Inject value in the internal store
+    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.table.meta.client)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name)
+
+        assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_dynamodb_provider_get_expired(mock_name, mock_value):
+    """
+    Test DynamoDBProvider.get() with a cached but expired value
+    """
+
+    table_name = "TEST_TABLE"
+
+    # Create a new provider
+    provider = parameters.DynamoDBProvider(table_name, region="us-east-1")
+
+    # Inject value in the internal store
+    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() - timedelta(seconds=60))
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.table.meta.client)
+    response = {"Item": {"id": {"S": mock_name}, "value": {"S": mock_value}}}
+    expected_params = {"TableName": table_name, "Key": {"id": mock_name}}
+    stubber.add_response("get_item", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name)
+
+        assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_dynamodb_provider_get_multiple(mock_name, mock_value):
+    """
+    Test DynamoDBProvider.get_multiple() with a non-cached path
+    """
+
+    mock_param_names = ["A", "B", "C"]
+    table_name = "TEST_TABLE"
+
+    # Create a new provider
+    provider = parameters.DynamoDBProvider(table_name, region="us-east-1")
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.table.meta.client)
+    response = {
+        "Items": [
+            {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": f"{mock_value}/{name}"}}
+            for name in mock_param_names
+        ]
+    }
+    expected_params = {"TableName": table_name, "KeyConditionExpression": Key("id").eq(mock_name)}
+    stubber.add_response("query", response, expected_params)
+    stubber.activate()
+
+    try:
+        values = provider.get_multiple(mock_name)
+
+        stubber.assert_no_pending_responses()
+
+        assert len(values) == len(mock_param_names)
+        for name in mock_param_names:
+            assert name in values
+            assert values[name] == f"{mock_value}/{name}"
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get(mock_name, mock_value, mock_version):
     """
     Test SSMProvider.get() with a non-cached value
     """
@@ -48,7 +169,7 @@ def test_ssm_provider_get(monkeypatch, mock_name, mock_value, mock_version):
             "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
         }
     }
-    expected_params = {"Name": mock_name}
+    expected_params = {"Name": mock_name, "WithDecryption": False}
     stubber.add_response("get_parameter", response, expected_params)
     stubber.activate()
 
@@ -61,7 +182,7 @@ def test_ssm_provider_get(monkeypatch, mock_name, mock_value, mock_version):
         stubber.deactivate()
 
 
-def test_ssm_provider_get_cached(monkeypatch, mock_name, mock_value, mock_version):
+def test_ssm_provider_get_cached(mock_name, mock_value):
     """
     Test SSMProvider.get() with a cached value
     """
@@ -85,7 +206,7 @@ def test_ssm_provider_get_cached(monkeypatch, mock_name, mock_value, mock_versio
         stubber.deactivate()
 
 
-def test_ssm_provider_get_expired(monkeypatch, mock_name, mock_value, mock_version):
+def test_ssm_provider_get_expired(mock_name, mock_value, mock_version):
     """
     Test SSMProvider.get() with a cached but expired value
     """
@@ -110,7 +231,7 @@ def test_ssm_provider_get_expired(monkeypatch, mock_name, mock_value, mock_versi
             "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
         }
     }
-    expected_params = {"Name": mock_name}
+    expected_params = {"Name": mock_name, "WithDecryption": False}
     stubber.add_response("get_parameter", response, expected_params)
     stubber.activate()
 
@@ -123,7 +244,117 @@ def test_ssm_provider_get_expired(monkeypatch, mock_name, mock_value, mock_versi
         stubber.deactivate()
 
 
-def test_secrets_provider_get(monkeypatch, mock_name, mock_value):
+def test_ssm_provider_get_multiple(mock_name, mock_value, mock_version):
+    """
+    Test SSMProvider.get_multiple() with a non-cached path
+    """
+
+    mock_param_names = ["A", "B", "C"]
+
+    # Create a new provider
+    provider = parameters.SSMProvider(region="us-east-1")
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "Parameters": [
+            {
+                "Name": f"{mock_name}/{name}",
+                "Type": "String",
+                "Value": f"{mock_value}/{name}",
+                "Version": mock_version,
+                "Selector": f"{mock_name}/{name}:{mock_version}",
+                "SourceResult": "string",
+                "LastModifiedDate": datetime(2015, 1, 1),
+                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
+            }
+            for name in mock_param_names
+        ]
+    }
+    expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False}
+    stubber.add_response("get_parameters_by_path", response, expected_params)
+    stubber.activate()
+
+    try:
+        values = provider.get_multiple(mock_name)
+
+        stubber.assert_no_pending_responses()
+
+        assert len(values) == len(mock_param_names)
+        for name in mock_param_names:
+            assert name in values
+            assert values[name] == f"{mock_value}/{name}"
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_multiple_next_token(mock_name, mock_value, mock_version):
+    """
+    Test SSMProvider.get_multiple() with a non-cached path with multiple calls
+    """
+
+    mock_param_names = ["A", "B", "C"]
+
+    # Create a new provider
+    provider = parameters.SSMProvider(region="us-east-1")
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+
+    # First call
+    response = {
+        "Parameters": [
+            {
+                "Name": f"{mock_name}/{name}",
+                "Type": "String",
+                "Value": f"{mock_value}/{name}",
+                "Version": mock_version,
+                "Selector": f"{mock_name}/{name}:{mock_version}",
+                "SourceResult": "string",
+                "LastModifiedDate": datetime(2015, 1, 1),
+                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
+            }
+            for name in mock_param_names[:1]
+        ],
+        "NextToken": "next_token",
+    }
+    expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False}
+    stubber.add_response("get_parameters_by_path", response, expected_params)
+
+    # Second call
+    response = {
+        "Parameters": [
+            {
+                "Name": f"{mock_name}/{name}",
+                "Type": "String",
+                "Value": f"{mock_value}/{name}",
+                "Version": mock_version,
+                "Selector": f"{mock_name}/{name}:{mock_version}",
+                "SourceResult": "string",
+                "LastModifiedDate": datetime(2015, 1, 1),
+                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
+            }
+            for name in mock_param_names[1:]
+        ]
+    }
+    expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False, "NextToken": "next_token"}
+    stubber.add_response("get_parameters_by_path", response, expected_params)
+    stubber.activate()
+
+    try:
+        values = provider.get_multiple(mock_name)
+
+        stubber.assert_no_pending_responses()
+
+        assert len(values) == len(mock_param_names)
+        for name in mock_param_names:
+            assert name in values
+            assert values[name] == f"{mock_value}/{name}"
+    finally:
+        stubber.deactivate()
+
+
+def test_secrets_provider_get(mock_name, mock_value):
     """
     Test SecretsProvider.get() with a non-cached value
     """
@@ -153,7 +384,7 @@ def test_secrets_provider_get(monkeypatch, mock_name, mock_value):
         stubber.deactivate()
 
 
-def test_secrets_provider_get_cached(monkeypatch, mock_name, mock_value, mock_version):
+def test_secrets_provider_get_cached(mock_name, mock_value):
     """
     Test SecretsProvider.get() with a cached value
     """
@@ -177,7 +408,7 @@ def test_secrets_provider_get_cached(monkeypatch, mock_name, mock_value, mock_ve
         stubber.deactivate()
 
 
-def test_secrets_provider_get_expired(monkeypatch, mock_name, mock_value):
+def test_secrets_provider_get_expired(mock_name, mock_value):
     """
     Test SecretsProvider.get() with a cached but expired value
     """
@@ -208,3 +439,51 @@ def test_secrets_provider_get_expired(monkeypatch, mock_name, mock_value):
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
+
+
+def test_base_provider_get_transform_json(mock_name, mock_value):
+    """
+    Test BaseProvider.get() with a json transform
+    """
+
+    mock_data = json.dumps({mock_name: mock_value})
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            assert name == mock_name
+            return mock_data
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    provider = TestProvider()
+
+    value = provider.get(mock_name, transform="json")
+
+    assert isinstance(value, dict)
+    assert mock_name in value
+    assert value[mock_name] == mock_value
+
+
+def test_base_provider_get_transform_binary(mock_name, mock_value):
+    """
+    Test BaseProvider.get() with a bianry transform
+    """
+
+    mock_binary = mock_value.encode()
+    mock_data = base64.b64encode(mock_binary).decode()
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            assert name == mock_name
+            return mock_data
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    provider = TestProvider()
+
+    value = provider.get(mock_name, transform="binary")
+
+    assert isinstance(value, bytes)
+    assert value == mock_binary

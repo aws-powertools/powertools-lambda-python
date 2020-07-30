@@ -7,7 +7,7 @@ import json
 from abc import ABC, abstractmethod
 from collections import namedtuple
 from datetime import datetime, timedelta
-from typing import Optional, Union
+from typing import Dict, Optional, Union
 
 DEFAULT_MAX_AGE_SECS = 5
 ExpirableValue = namedtuple("ExpirableValue", ["value", "ttl"])
@@ -32,8 +32,8 @@ class BaseProvider(ABC):
         self.store = {}
 
     def get(
-        self, name: str, max_age: int = DEFAULT_MAX_AGE_SECS, transform: Optional[str] = None,
-    ) -> Union[str, dict, bytes]:
+        self, name: str, max_age: int = DEFAULT_MAX_AGE_SECS, transform: Optional[str] = None, **kwargs
+    ) -> Union[str, list, dict, bytes]:
         """
         Retrieve a parameter value or return the cached value
 
@@ -70,7 +70,7 @@ class BaseProvider(ABC):
 
         if key not in self.store or self.store[key].ttl < datetime.now():
             try:
-                value = self._get(name)
+                value = self._get(name, **kwargs)
             # Encapsulate all errors into a generic GetParameterError
             except Exception as exc:
                 raise GetParameterError(str(exc))
@@ -85,8 +85,40 @@ class BaseProvider(ABC):
         return self.store[key].value
 
     @abstractmethod
-    def _get(self, name: str) -> str:
+    def _get(self, name: str, **kwargs) -> str:
         """
         Retrieve paramater value from the underlying parameter store
+        """
+        raise NotImplementedError()
+
+    def get_multiple(
+        self, path: str, max_age: int = DEFAULT_MAX_AGE_SECS, transform: Optional[str] = None, **kwargs
+    ) -> Union[Dict[str, str], Dict[str, dict], Dict[str, bytes]]:
+        """
+        Retrieve multiple parameters based on a path prefix
+        """
+
+        key = (path, transform)
+
+        if key not in self.store or self.store[key].ttl < datetime.now():
+            try:
+                values = self._get_multiple(path, **kwargs)
+            # Encapsulate all errors into a generic GetParameterError
+            except Exception as exc:
+                raise GetParameterError(str(exc))
+
+            if transform == "json":
+                values = {k: json.loads(v) for k, v in values}
+            elif transform == "binary":
+                values = {k: base64.b64decode(v) for k, v in values}
+
+            self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age),)
+
+        return self.store[key].value
+
+    @abstractmethod
+    def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        """
+        Retrieve multiple parameter values from the underlying parameter store
         """
         raise NotImplementedError()
