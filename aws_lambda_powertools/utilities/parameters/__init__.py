@@ -34,7 +34,7 @@ class SSMProvider(BaseProvider):
 
         super().__init__()
 
-    def _get_from_external_store(self, name: str) -> str:
+    def _get(self, name: str) -> str:
         """
         Retrieve a parameter value from AWS Systems Manager Parameter Store
         """
@@ -61,7 +61,7 @@ class SecretsProvider(BaseProvider):
 
         super().__init__()
 
-    def _get_from_external_store(self, name: str) -> str:
+    def _get(self, name: str) -> str:
         """
         Retrieve a parameter value from AWS Systems Manager Parameter Store
         """
@@ -95,7 +95,7 @@ class DynamoDBProvider(BaseProvider):
 
         super().__init__()
 
-    def _get_from_external_store(self, name: str) -> str:
+    def _get(self, name: str) -> str:
         """
         Retrieve a parameter value from Amazon DynamoDB
         """

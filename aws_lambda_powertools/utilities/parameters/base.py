@@ -70,7 +70,7 @@ class BaseProvider(ABC):
 
         if key not in self.store or self.store[key].ttl < datetime.now():
             try:
-                value = self._get_from_external_store(name)
+                value = self._get(name)
             # Encapsulate all errors into a generic GetParameterError
             except Exception as exc:
                 raise GetParameterError(str(exc))
@@ -85,7 +85,7 @@ class BaseProvider(ABC):
         return self.store[key].value
 
     @abstractmethod
-    def _get_from_external_store(self, name: str) -> str:
+    def _get(self, name: str) -> str:
         """
         Retrieve paramater value from the underlying parameter store
         """
