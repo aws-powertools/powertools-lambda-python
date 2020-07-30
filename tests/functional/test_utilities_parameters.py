@@ -56,6 +56,34 @@ def test_dynamodb_provider_get(mock_name, mock_value):
         stubber.deactivate()
 
 
+def test_dynamodb_provider_get_default_region(monkeypatch, mock_name, mock_value):
+    """
+    Test DynamoDBProvider.get() without setting a region
+    """
+
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+
+    table_name = "TEST_TABLE"
+
+    # Create a new provider
+    provider = parameters.DynamoDBProvider(table_name)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.table.meta.client)
+    response = {"Item": {"id": {"S": mock_name}, "value": {"S": mock_value}}}
+    expected_params = {"TableName": table_name, "Key": {"id": mock_name}}
+    stubber.add_response("get_item", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name)
+
+        assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
 def test_dynamodb_provider_get_cached(mock_name, mock_value):
     """
     Test DynamoDBProvider.get() with a cached value
@@ -235,6 +263,43 @@ def test_ssm_provider_get(mock_name, mock_value, mock_version):
         stubber.deactivate()
 
 
+def test_ssm_provider_get_default_region(monkeypatch, mock_name, mock_value, mock_version):
+    """
+    Test SSMProvider.get() without specifying the region
+    """
+
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+
+    # Create a new provider
+    provider = parameters.SSMProvider()
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "Parameter": {
+            "Name": mock_name,
+            "Type": "String",
+            "Value": mock_value,
+            "Version": mock_version,
+            "Selector": f"{mock_name}:{mock_version}",
+            "SourceResult": "string",
+            "LastModifiedDate": datetime(2015, 1, 1),
+            "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
+        }
+    }
+    expected_params = {"Name": mock_name, "WithDecryption": False}
+    stubber.add_response("get_parameter", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name)
+
+        assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
 def test_ssm_provider_get_cached(mock_name, mock_value):
     """
     Test SSMProvider.get() with a cached value
@@ -341,6 +406,50 @@ def test_ssm_provider_get_multiple(mock_name, mock_value, mock_version):
         stubber.deactivate()
 
 
+def test_ssm_provider_get_multiple_different_path(mock_name, mock_value, mock_version):
+    """
+    Test SSMProvider.get_multiple() with a non-cached path and names that don't start with the path
+    """
+
+    mock_param_names = ["A", "B", "C"]
+
+    # Create a new provider
+    provider = parameters.SSMProvider(region="us-east-1")
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "Parameters": [
+            {
+                "Name": f"{name}",
+                "Type": "String",
+                "Value": f"{mock_value}/{name}",
+                "Version": mock_version,
+                "Selector": f"{mock_name}/{name}:{mock_version}",
+                "SourceResult": "string",
+                "LastModifiedDate": datetime(2015, 1, 1),
+                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
+            }
+            for name in mock_param_names
+        ]
+    }
+    expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False}
+    stubber.add_response("get_parameters_by_path", response, expected_params)
+    stubber.activate()
+
+    try:
+        values = provider.get_multiple(mock_name)
+
+        stubber.assert_no_pending_responses()
+
+        assert len(values) == len(mock_param_names)
+        for name in mock_param_names:
+            assert name in values
+            assert values[name] == f"{mock_value}/{name}"
+    finally:
+        stubber.deactivate()
+
+
 def test_ssm_provider_get_multiple_next_token(mock_name, mock_value, mock_version):
     """
     Test SSMProvider.get_multiple() with a non-cached path with multiple calls
@@ -414,6 +523,38 @@ def test_secrets_provider_get(mock_name, mock_value):
 
     # Create a new provider
     provider = parameters.SecretsProvider(region="us-east-1")
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "ARN": f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{mock_name}",
+        "Name": mock_name,
+        "VersionId": "7a9155b8-2dc9-466e-b4f6-5bc46516c84d",
+        "SecretString": mock_value,
+        "CreatedDate": datetime(2015, 1, 1),
+    }
+    expected_params = {"SecretId": mock_name}
+    stubber.add_response("get_secret_value", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name)
+
+        assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_secrets_provider_get_default_region(monkeypatch, mock_name, mock_value):
+    """
+    Test SecretsProvider.get() without specifying a region
+    """
+
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+
+    # Create a new provider
+    provider = parameters.SecretsProvider()
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -629,6 +770,51 @@ def test_base_provider_get_multiple_transform_binary(mock_name, mock_value):
 
     assert isinstance(value, dict)
     assert value["A"] == mock_binary
+
+
+def test_base_provider_get_multiple_cached(mock_name, mock_value):
+    """
+    Test BaseProvider.get_multiple() with cached values
+    """
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    provider = TestProvider()
+
+    provider.store[(mock_name, None)] = ExpirableValue({"A": mock_value}, datetime.now() + timedelta(seconds=60))
+
+    value = provider.get_multiple(mock_name)
+
+    assert isinstance(value, dict)
+    assert value["A"] == mock_value
+
+
+def test_base_provider_get_multiple_expired(mock_name, mock_value):
+    """
+    Test BaseProvider.get_multiple() with expired values
+    """
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            assert path == mock_name
+            return {"A": mock_value}
+
+    provider = TestProvider()
+
+    provider.store[(mock_name, None)] = ExpirableValue({"B": mock_value}, datetime.now() - timedelta(seconds=60))
+
+    value = provider.get_multiple(mock_name)
+
+    assert isinstance(value, dict)
+    assert value["A"] == mock_value
 
 
 def test_get_parameter(monkeypatch, mock_name, mock_value):
