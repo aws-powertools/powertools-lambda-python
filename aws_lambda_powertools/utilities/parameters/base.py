@@ -108,9 +108,9 @@ class BaseProvider(ABC):
                 raise GetParameterError(str(exc))
 
             if transform == "json":
-                values = {k: json.loads(v) for k, v in values}
+                values = {k: json.loads(v) for k, v in values.items()}
             elif transform == "binary":
-                values = {k: base64.b64decode(v) for k, v in values}
+                values = {k: base64.b64decode(v) for k, v in values.items()}
 
             self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age),)
 
