@@ -118,7 +118,7 @@ class Logger(logging.Logger):
     ):
         self.service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
         self.sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or 0.0
-        self.log_level = level or os.getenv("LOG_LEVEL") or logging.INFO
+        self.log_level = level or os.getenv("LOG_LEVEL".upper()) or logging.INFO
         self.handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self.log_keys = copy.copy(self._default_log_keys)
