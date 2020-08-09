@@ -119,7 +119,7 @@ class Logger:
         self.name = name or self.service
         self.sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or 0.0
         self.log_level = level or os.getenv("LOG_LEVEL".upper()) or logging.INFO
-        self.handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
+        self._handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = logging.getLogger(self.name)
 
@@ -141,7 +141,7 @@ class Logger:
         if self._logger.parent.name == "root" and not self._logger.handlers:
             self._configure_sampling()
             self._logger.setLevel(self.log_level)
-            self._logger.addHandler(self.handler)
+            self._logger.addHandler(self._handler)
             self.structure_logs(**kwargs)
 
     def _configure_sampling(self):
