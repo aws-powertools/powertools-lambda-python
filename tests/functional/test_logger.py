@@ -9,22 +9,12 @@ from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
 from aws_lambda_powertools.logging.logger import set_package_logger
 
+from .utility_functions import get_random_logger
+
 
 @pytest.fixture
 def stdout():
     return io.StringIO()
-
-
-@pytest.fixture
-def handler(stdout):
-    return logging.StreamHandler(stdout)
-
-
-@pytest.fixture
-def root_logger(handler):
-    logging.root.addHandler(handler)
-    yield logging.root
-    logging.root.removeHandler(handler)
 
 
 @pytest.fixture
@@ -45,14 +35,14 @@ def lambda_event():
 
 
 def capture_logging_output(stdout):
-    return json.loads(stdout.getvalue())
+    return json.loads(stdout.getvalue().strip())
 
 
 def capture_multiple_logging_statements_output(stdout):
     return [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
 
 
-def test_setup_service_name(root_logger, stdout):
+def test_setup_service_name(stdout):
     service_name = "payment"
     # GIVEN Logger is initialized
     # WHEN service is explicitly defined
@@ -68,7 +58,7 @@ def test_setup_service_name(root_logger, stdout):
 def test_setup_no_service_name(stdout):
     # GIVEN Logger is initialized
     # WHEN no service is explicitly defined
-    logger = Logger(stream=stdout)
+    logger = get_random_logger(stream=stdout)
 
     logger.info("Hello")
 
@@ -82,7 +72,7 @@ def test_setup_service_env_var(monkeypatch, stdout):
     # GIVEN Logger is initialized
     # WHEN service is explicitly defined via POWERTOOLS_SERVICE_NAME env
     monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", service_name)
-    logger = Logger(stream=stdout)
+    logger = get_random_logger(stream=stdout)
 
     logger.info("Hello")
 
@@ -96,7 +86,7 @@ def test_setup_sampling_rate_env_var(monkeypatch, stdout):
     # WHEN samping rate is explicitly set to 100% via POWERTOOLS_LOGGER_SAMPLE_RATE env
     sampling_rate = "1"
     monkeypatch.setenv("POWERTOOLS_LOGGER_SAMPLE_RATE", sampling_rate)
-    logger = Logger(stream=stdout, level="INFO")
+    logger = get_random_logger(stream=stdout)
     logger.debug("I am being sampled")
 
     # THEN sampling rate should be equals POWERTOOLS_LOGGER_SAMPLE_RATE value
@@ -110,7 +100,7 @@ def test_setup_sampling_rate_env_var(monkeypatch, stdout):
 
 def test_inject_lambda_context(lambda_context, stdout):
     # GIVEN Logger is initialized
-    logger = Logger(stream=stdout)
+    logger = get_random_logger(stream=stdout)
 
     # WHEN a lambda function is decorated with logger
     @logger.inject_lambda_context
@@ -133,7 +123,7 @@ def test_inject_lambda_context(lambda_context, stdout):
 
 def test_inject_lambda_context_log_event_request(lambda_context, stdout, lambda_event):
     # GIVEN Logger is initialized
-    logger = Logger(stream=stdout)
+    logger = get_random_logger(stream=stdout)
 
     # WHEN a lambda function is decorated with logger instructed to log event
     @logger.inject_lambda_context(log_event=True)
@@ -150,7 +140,7 @@ def test_inject_lambda_context_log_event_request(lambda_context, stdout, lambda_
 def test_inject_lambda_context_log_event_request_env_var(monkeypatch, lambda_context, stdout, lambda_event):
     # GIVEN Logger is initialized
     monkeypatch.setenv("POWERTOOLS_LOGGER_LOG_EVENT", "true")
-    logger = Logger(stream=stdout)
+    logger = get_random_logger(stream=stdout)
 
     # WHEN a lambda function is decorated with logger instructed to log event
     # via POWERTOOLS_LOGGER_LOG_EVENT env
@@ -167,7 +157,7 @@ def test_inject_lambda_context_log_event_request_env_var(monkeypatch, lambda_con
 
 def test_inject_lambda_context_log_no_request_by_default(monkeypatch, lambda_context, stdout, lambda_event):
     # GIVEN Logger is initialized
-    logger = Logger(stream=stdout)
+    logger = get_random_logger(stream=stdout)
 
     # WHEN a lambda function is decorated with logger
     @logger.inject_lambda_context
@@ -190,7 +180,7 @@ def test_inject_lambda_cold_start(lambda_context, stdout):
     logger.is_cold_start = True
 
     # GIVEN Logger is initialized
-    logger = Logger(stream=stdout)
+    logger = get_random_logger(stream=stdout)
 
     # WHEN a lambda function is decorated with logger, and called twice
     @logger.inject_lambda_context
@@ -238,7 +228,7 @@ def test_package_logger_format(capsys):
 
 def test_logger_append_duplicated(stdout):
     # GIVEN Logger is initialized with request_id field
-    logger = Logger(stream=stdout, request_id="value")
+    logger = get_random_logger(stream=stdout, request_id="value")
 
     # WHEN `request_id` is appended to the existing structured log
     # using a different value
@@ -255,12 +245,12 @@ def test_logger_invalid_sampling_rate():
     # WHEN sampling_rate non-numeric value
     # THEN we should raise InvalidLoggerSamplingRateError
     with pytest.raises(InvalidLoggerSamplingRateError):
-        Logger(sampling_rate="TEST")
+        get_random_logger(stream=stdout, sampling_rate="TEST")
 
 
 def test_inject_lambda_context_with_structured_log(lambda_context, stdout):
     # GIVEN Logger is initialized
-    logger = Logger(stream=stdout)
+    logger = get_random_logger(stream=stdout)
 
     # WHEN structure_logs has been used to add an additional key upfront
     # and a lambda function is decorated with logger.inject_lambda_context
