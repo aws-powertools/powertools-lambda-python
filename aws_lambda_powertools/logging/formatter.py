@@ -56,6 +56,9 @@ class JsonFormatter(logging.Formatter):
         self.format_dict.update(kwargs)
         self.default_json_formatter = kwargs.pop("json_default", json_formatter)
 
+    def update_formatter(self, **kwargs):
+        self.format_dict.update(kwargs)
+
     def format(self, record):  # noqa: A003
         record_dict = record.__dict__.copy()
         record_dict["asctime"] = self.formatTime(record, self.datefmt)
