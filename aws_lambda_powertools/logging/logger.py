@@ -55,6 +55,8 @@ class Logger(logging.Logger):
         service name to be appended in logs, by default "service_undefined"
     level : str, optional
         logging.level, by default "INFO"
+    name: str
+        Logger name, "{service}" by default
     sample_rate: float, optional
         sample rate for debug calls within execution context defaults to 0.0
     stream: sys.stdout, optional
@@ -80,7 +82,7 @@ class Logger(logging.Logger):
         >>> def handler(event, context):
                 logger.info("Hello")
 
-    **Append payment_id to previously setup structured log logger**
+    **Append payment_id to previously setup logger**
 
         >>> from aws_lambda_powertools import Logger
         >>> logger = Logger(service="payment")
@@ -88,6 +90,16 @@ class Logger(logging.Logger):
         >>> def handler(event, context):
                 logger.structure_logs(append=True, payment_id=event["payment_id"])
                 logger.info("Hello")
+
+    **Create child Logger using logging inheritance via name param**
+
+        >>> # app.py
+        >>> from aws_lambda_powertools import Logger
+        >>> logger = Logger(name="payment")
+        >>>
+        >>> # another_file.py
+        >>> from aws_lambda_powertools import Logger
+        >>> logger = Logger(name="payment.child)
 
     Raises
     ------
@@ -99,18 +111,20 @@ class Logger(logging.Logger):
         self,
         service: str = None,
         level: Union[str, int] = None,
+        name: str = None,
         sampling_rate: float = None,
         stream: sys.stdout = None,
         **kwargs,
     ):
         self.service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
+        self.name = name or self.service
         self.sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or 0.0
         self.log_level = level or os.getenv("LOG_LEVEL".upper()) or logging.INFO
         self.handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self.log_keys = copy.copy(self._default_log_keys)
 
-        super().__init__(name=self.service, level=self.log_level)
+        super().__init__(name=self.name, level=self.log_level)
 
         try:
             if self.sampling_rate and random.random() <= float(self.sampling_rate):
