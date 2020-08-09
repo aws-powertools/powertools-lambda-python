@@ -1,4 +1,3 @@
-import copy
 import functools
 import logging
 import os
@@ -34,7 +33,7 @@ def _is_cold_start() -> bool:
     return cold_start
 
 
-class Logger(logging.Logger):
+class Logger:
     """Creates and setups a logger to format statements in JSON.
 
     Includes service name and any additional key=value into logs
@@ -122,10 +121,37 @@ class Logger(logging.Logger):
         self.log_level = level or os.getenv("LOG_LEVEL".upper()) or logging.INFO
         self.handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
-        self.log_keys = copy.copy(self._default_log_keys)
+        self._logger = logging.getLogger(self.name)
 
-        super().__init__(name=self.name, level=self.log_level)
+        self._init_logger(**kwargs)
 
+    def __getattr__(self, name):
+        # Proxy attributes not found to actual logger to support backward compatibility
+        # https://github.com/awslabs/aws-lambda-powertools-python/issues/97
+        return getattr(self._logger, name)
+
+    def _init_logger(self, **kwargs):
+        """Configures new logger"""
+        # Ensure logger children remains independent
+        self._logger.propagate = False
+
+        # Skip configuration if it's a child logger, or a handler is already present
+        # to prevent multiple Loggers with the same name or its children having different sampling mechanisms
+        # and multiple messages from being logged as handlers can be duplicated
+        if self._logger.parent.name == "root" and not self._logger.handlers:
+            self._configure_sampling()
+            self._logger.setLevel(self.log_level)
+            self._logger.addHandler(self.handler)
+            self.structure_logs(**kwargs)
+
+    def _configure_sampling(self):
+        """Dynamically set log level based on sampling rate
+
+        Raises
+        ------
+        InvalidLoggerSamplingRateError
+            When sampling rate provided is not a float
+        """
         try:
             if self.sampling_rate and random.random() <= float(self.sampling_rate):
                 logger.debug("Setting log level to Debug due to sampling rate")
@@ -134,10 +160,6 @@ class Logger(logging.Logger):
             raise InvalidLoggerSamplingRateError(
                 f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead. Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."  # noqa E501
             )
-
-        self.setLevel(self.log_level)
-        self.structure_logs(**kwargs)
-        self.addHandler(self.handler)
 
     def inject_lambda_context(self, lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False):
         """Decorator to capture Lambda contextual info and inject into struct logging
@@ -217,13 +239,13 @@ class Logger(logging.Logger):
         append : bool, optional
             [description], by default False
         """
-        self.handler.setFormatter(JsonFormatter(**self._default_log_keys, **kwargs))
-
-        if append:
-            new_keys = {**self.log_keys, **kwargs}
-            self.handler.setFormatter(JsonFormatter(**new_keys))
-
-        self.log_keys.update(**kwargs)
+        for handler in self._logger.handlers:
+            if append:
+                # Update existing formatter in an existing logger handler
+                handler.formatter.update_formatter(**kwargs)
+            else:
+                # Set a new formatter for a logger handler
+                handler.setFormatter(JsonFormatter(**self._default_log_keys, **kwargs))
 
 
 def set_package_logger(
