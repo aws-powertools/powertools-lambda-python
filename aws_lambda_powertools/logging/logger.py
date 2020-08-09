@@ -89,19 +89,6 @@ class Logger(logging.Logger):
                 logger.structure_logs(append=True, payment_id=event["payment_id"])
                 logger.info("Hello")
 
-    Parameters
-    ----------
-    logging : logging.Logger
-        Inherits Logger
-    service: str
-        name of the service to create the logger for, "service_undefined" by default
-    level: str, int
-        log level, INFO by default
-    sampling_rate: float
-        debug log sampling rate, 0.0 by default
-    stream: sys.stdout
-        log stream, stdout by default
-
     Raises
     ------
     InvalidLoggerSamplingRateError
