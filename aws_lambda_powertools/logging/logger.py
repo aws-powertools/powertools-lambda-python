@@ -162,7 +162,7 @@ class Logger:
             )
 
     def inject_lambda_context(self, lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False):
-        """Decorator to capture Lambda contextual info and inject into struct logging
+        """Decorator to capture Lambda contextual info and inject into logger
 
         Parameters
         ----------
@@ -253,7 +253,7 @@ def set_package_logger(
 ):
     """Set an additional stream handler, formatter, and log level for aws_lambda_powertools package logger.
 
-    **Package log by default is supressed (NullHandler), this should only used for debugging.
+    **Package log by default is suppressed (NullHandler), this should only used for debugging.
     This is separate from application Logger class utility**
 
     Example
