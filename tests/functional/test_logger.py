@@ -294,3 +294,19 @@ def test_logger_children_do_not_propagate_changes(stdout):
     assert "customer_id" not in parent_log
     assert "customer_id" in child_log
     assert child.parent.name == "order"
+
+
+def test_logger_name_not_set(stdout):
+    # GIVEN Logger is initialized
+    # WHEN name isn't set
+    logger = Logger(stream=stdout, service="something")
+
+    # THEN Logger should function just as fine
+    # and access to its properties should be
+    # proxied to the inner Logger
+    logger.info("Hello")
+
+    log = capture_logging_output(stdout)
+    assert "Hello" == log["message"]
+    assert logger.parent.name == "root"
+    assert logger.name == "something"
