@@ -54,7 +54,7 @@ class Logger:
         service name to be appended in logs, by default "service_undefined"
     level : str, optional
         logging.level, by default "INFO"
-    name: str
+    name: str, optional
         Logger name, "{service}" by default
     sample_rate: float, optional
         sample rate for debug calls within execution context defaults to 0.0
