@@ -46,7 +46,7 @@ def test_setup_service_name(stdout):
     service_name = "payment"
     # GIVEN Logger is initialized
     # WHEN service is explicitly defined
-    logger = Logger(service=service_name, stream=stdout)
+    logger = get_random_logger(service=service_name, stream=stdout)
 
     logger.info("Hello")
 
@@ -273,3 +273,24 @@ def test_inject_lambda_context_with_structured_log(lambda_context, stdout):
     )
     for key in expected_logger_context_keys:
         assert key in log
+
+
+def test_logger_children_do_not_propagate_changes(stdout):
+    # GIVEN Loggers are initialized
+    # mimick importing logger from another module/file
+    # as loggers are created in global scope
+    child = Logger(stream=stdout, name="order.warehouse")
+    parent = Logger(stream=stdout, name="order")
+
+    # WHEN a child Logger adds an additional key
+    child.structure_logs(append=True, customer_id="value")
+
+    # THEN child Logger changes should not propagate to parent
+    # and subsequent log statements should have the latest value
+    parent.info("Hello parent")
+    child.info("Hello child")
+
+    parent_log, child_log = capture_multiple_logging_statements_output(stdout)
+    assert "customer_id" not in parent_log
+    assert "customer_id" in child_log
+    assert child.parent.name == "order"
