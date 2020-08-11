@@ -1,4 +1,5 @@
 import functools
+import inspect
 import logging
 import os
 import random
@@ -54,8 +55,8 @@ class Logger:
         service name to be appended in logs, by default "service_undefined"
     level : str, optional
         logging.level, by default "INFO"
-    name: str, optional
-        Logger name, "{service}" by default
+    child: bool, optional
+        create a child Logger named <service>.<caller_file_name>, False by default
     sample_rate: float, optional
         sample rate for debug calls within execution context defaults to 0.0
     stream: sys.stdout, optional
@@ -90,15 +91,16 @@ class Logger:
                 logger.structure_logs(append=True, payment_id=event["payment_id"])
                 logger.info("Hello")
 
-    **Create child Logger using logging inheritance via name param**
+    **Create child Logger using logging inheritance via child param**
 
         >>> # app.py
+        >>> import another_file
         >>> from aws_lambda_powertools import Logger
-        >>> logger = Logger(name="payment")
+        >>> logger = Logger(service="payment")
         >>>
         >>> # another_file.py
         >>> from aws_lambda_powertools import Logger
-        >>> logger = Logger(name="payment.child)
+        >>> logger = Logger(service="payment", child=True)
 
     Raises
     ------
@@ -110,18 +112,18 @@ class Logger:
         self,
         service: str = None,
         level: Union[str, int] = None,
-        name: str = None,
+        child: bool = False,
         sampling_rate: float = None,
         stream: sys.stdout = None,
         **kwargs,
     ):
         self.service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
-        self.name = name or self.service
         self.sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or 0.0
         self.log_level = level or os.getenv("LOG_LEVEL".upper()) or logging.INFO
+        self.child = child
         self._handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
-        self._logger = logging.getLogger(self.name)
+        self._logger = self._get_logger()
 
         self._init_logger(**kwargs)
 
@@ -130,15 +132,32 @@ class Logger:
         # https://github.com/awslabs/aws-lambda-powertools-python/issues/97
         return getattr(self._logger, name)
 
+    def _get_logger(self):
+        """ Returns a Logger named {self.service}, or {service.filename} for child loggers"""
+        logger_name = self.service
+        if self.child:
+            logger_name = f"{self.service}.{self._get_caller_filename()}"
+
+        return logging.getLogger(logger_name)
+
+    def _get_caller_filename(self):
+        """ Return caller filename by finding the caller frame """
+        # Current frame         => _get_logger()
+        # Previous frame        => logger.py
+        # Before previous frame => Caller
+        frame = inspect.currentframe()
+        caller_frame = frame.f_back.f_back.f_back
+        filename = caller_frame.f_globals["__name__"]
+
+        return filename
+
     def _init_logger(self, **kwargs):
         """Configures new logger"""
-        # Ensure logger children remains independent
-        self._logger.propagate = False
 
-        # Skip configuration if it's a child logger, or a handler is already present
-        # to prevent multiple Loggers with the same name or its children having different sampling mechanisms
+        # Skip configuration if it's a child logger to prevent
+        # multiple handlers being attached as well as different sampling mechanisms
         # and multiple messages from being logged as handlers can be duplicated
-        if self._logger.parent.name == "root" and not self._logger.handlers:
+        if not self.child:
             self._configure_sampling()
             self._logger.setLevel(self.log_level)
             self._logger.addHandler(self._handler)
@@ -239,7 +258,10 @@ class Logger:
         append : bool, optional
             [description], by default False
         """
-        for handler in self._logger.handlers:
+
+        # Child loggers don't have handlers attached, use its parent handlers
+        handlers = self._logger.parent.handlers if self.child else self._logger.handlers
+        for handler in handlers:
             if append:
                 # Update existing formatter in an existing logger handler
                 handler.formatter.update_formatter(**kwargs)
