@@ -9,8 +9,6 @@ from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
 from aws_lambda_powertools.logging.logger import set_package_logger
 
-from .utility_functions import get_random_logger
-
 
 @pytest.fixture
 def stdout():
@@ -46,7 +44,7 @@ def test_setup_service_name(stdout):
     service_name = "payment"
     # GIVEN Logger is initialized
     # WHEN service is explicitly defined
-    logger = get_random_logger(service=service_name, stream=stdout)
+    logger = Logger(service=service_name, stream=stdout)
 
     logger.info("Hello")
 
@@ -58,7 +56,7 @@ def test_setup_service_name(stdout):
 def test_setup_no_service_name(stdout):
     # GIVEN Logger is initialized
     # WHEN no service is explicitly defined
-    logger = get_random_logger(stream=stdout)
+    logger = Logger(stream=stdout)
 
     logger.info("Hello")
 
@@ -72,7 +70,7 @@ def test_setup_service_env_var(monkeypatch, stdout):
     # GIVEN Logger is initialized
     # WHEN service is explicitly defined via POWERTOOLS_SERVICE_NAME env
     monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", service_name)
-    logger = get_random_logger(stream=stdout)
+    logger = Logger(stream=stdout)
 
     logger.info("Hello")
 
@@ -86,7 +84,7 @@ def test_setup_sampling_rate_env_var(monkeypatch, stdout):
     # WHEN samping rate is explicitly set to 100% via POWERTOOLS_LOGGER_SAMPLE_RATE env
     sampling_rate = "1"
     monkeypatch.setenv("POWERTOOLS_LOGGER_SAMPLE_RATE", sampling_rate)
-    logger = get_random_logger(stream=stdout)
+    logger = Logger(stream=stdout)
     logger.debug("I am being sampled")
 
     # THEN sampling rate should be equals POWERTOOLS_LOGGER_SAMPLE_RATE value
@@ -100,7 +98,7 @@ def test_setup_sampling_rate_env_var(monkeypatch, stdout):
 
 def test_inject_lambda_context(lambda_context, stdout):
     # GIVEN Logger is initialized
-    logger = get_random_logger(stream=stdout)
+    logger = Logger(stream=stdout)
 
     # WHEN a lambda function is decorated with logger
     @logger.inject_lambda_context
@@ -123,7 +121,7 @@ def test_inject_lambda_context(lambda_context, stdout):
 
 def test_inject_lambda_context_log_event_request(lambda_context, stdout, lambda_event):
     # GIVEN Logger is initialized
-    logger = get_random_logger(stream=stdout)
+    logger = Logger(stream=stdout)
 
     # WHEN a lambda function is decorated with logger instructed to log event
     @logger.inject_lambda_context(log_event=True)
@@ -140,7 +138,7 @@ def test_inject_lambda_context_log_event_request(lambda_context, stdout, lambda_
 def test_inject_lambda_context_log_event_request_env_var(monkeypatch, lambda_context, stdout, lambda_event):
     # GIVEN Logger is initialized
     monkeypatch.setenv("POWERTOOLS_LOGGER_LOG_EVENT", "true")
-    logger = get_random_logger(stream=stdout)
+    logger = Logger(stream=stdout)
 
     # WHEN a lambda function is decorated with logger instructed to log event
     # via POWERTOOLS_LOGGER_LOG_EVENT env
@@ -157,7 +155,7 @@ def test_inject_lambda_context_log_event_request_env_var(monkeypatch, lambda_con
 
 def test_inject_lambda_context_log_no_request_by_default(monkeypatch, lambda_context, stdout, lambda_event):
     # GIVEN Logger is initialized
-    logger = get_random_logger(stream=stdout)
+    logger = Logger(stream=stdout)
 
     # WHEN a lambda function is decorated with logger
     @logger.inject_lambda_context
@@ -180,7 +178,7 @@ def test_inject_lambda_cold_start(lambda_context, stdout):
     logger.is_cold_start = True
 
     # GIVEN Logger is initialized
-    logger = get_random_logger(stream=stdout)
+    logger = Logger(stream=stdout)
 
     # WHEN a lambda function is decorated with logger, and called twice
     @logger.inject_lambda_context
@@ -228,7 +226,7 @@ def test_package_logger_format(capsys):
 
 def test_logger_append_duplicated(stdout):
     # GIVEN Logger is initialized with request_id field
-    logger = get_random_logger(stream=stdout, request_id="value")
+    logger = Logger(stream=stdout, request_id="value")
 
     # WHEN `request_id` is appended to the existing structured log
     # using a different value
@@ -245,12 +243,12 @@ def test_logger_invalid_sampling_rate():
     # WHEN sampling_rate non-numeric value
     # THEN we should raise InvalidLoggerSamplingRateError
     with pytest.raises(InvalidLoggerSamplingRateError):
-        get_random_logger(stream=stdout, sampling_rate="TEST")
+        Logger(stream=stdout, sampling_rate="TEST")
 
 
 def test_inject_lambda_context_with_structured_log(lambda_context, stdout):
     # GIVEN Logger is initialized
-    logger = get_random_logger(stream=stdout)
+    logger = Logger(stream=stdout)
 
     # WHEN structure_logs has been used to add an additional key upfront
     # and a lambda function is decorated with logger.inject_lambda_context
@@ -275,38 +273,36 @@ def test_inject_lambda_context_with_structured_log(lambda_context, stdout):
         assert key in log
 
 
-def test_logger_children_do_not_propagate_changes(stdout):
+def test_logger_children_propagate_changes(stdout):
     # GIVEN Loggers are initialized
-    # mimick importing logger from another module/file
+    # create child logger before parent to mimick
+    # importing logger from another module/file
     # as loggers are created in global scope
-    child = Logger(stream=stdout, name="order.warehouse")
-    parent = Logger(stream=stdout, name="order")
+    child = Logger(stream=stdout, service="order", child=True)
+    parent = Logger(stream=stdout, service="order")
 
     # WHEN a child Logger adds an additional key
     child.structure_logs(append=True, customer_id="value")
 
-    # THEN child Logger changes should not propagate to parent
+    # THEN child Logger changes should propagate to parent
     # and subsequent log statements should have the latest value
     parent.info("Hello parent")
     child.info("Hello child")
 
     parent_log, child_log = capture_multiple_logging_statements_output(stdout)
-    assert "customer_id" not in parent_log
+    assert "customer_id" in parent_log
     assert "customer_id" in child_log
     assert child.parent.name == "order"
 
 
-def test_logger_name_not_set(stdout):
-    # GIVEN Logger is initialized
-    # WHEN name isn't set
-    logger = Logger(stream=stdout, service="something")
+def test_logger_child_not_set(stdout):
+    # GIVEN two Loggers are initialized
+    # WHEN child param isn't set
+    logger_one = Logger(service="something")
+    logger_two = Logger(service="something")
 
-    # THEN Logger should function just as fine
-    # and access to its properties should be
-    # proxied to the inner Logger
-    logger.info("Hello")
-
-    log = capture_logging_output(stdout)
-    assert "Hello" == log["message"]
-    assert logger.parent.name == "root"
-    assert logger.name == "something"
+    # THEN we should have two Logger instances
+    # however inner logger wise should be the same
+    assert id(logger_one) != id(logger_two)
+    assert logger_one._logger is logger_two._logger
+    assert logger_one.name is logger_two.name
