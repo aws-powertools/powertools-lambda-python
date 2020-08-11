@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from .utility_functions import get_random_logger
+from aws_lambda_powertools import Logger
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def stdout():
 
 @pytest.mark.parametrize("level", ["DEBUG", "WARNING", "ERROR", "INFO", "CRITICAL"])
 def test_setup_with_valid_log_levels(stdout, level):
-    logger = get_random_logger(level=level, stream=stdout, request_id="request id!", another="value")
+    logger = Logger(level=level, stream=stdout, request_id="request id!", another="value")
     msg = "This is a test"
     log_command = {
         "INFO": logger.info,
@@ -38,7 +38,7 @@ def test_setup_with_valid_log_levels(stdout, level):
 
 
 def test_logging_exception_traceback(stdout):
-    logger = get_random_logger(level="DEBUG", stream=stdout, request_id="request id!", another="value")
+    logger = Logger(level="DEBUG", stream=stdout, request_id="request id!", another="value")
 
     try:
         raise Exception("Boom")
@@ -53,7 +53,7 @@ def test_logging_exception_traceback(stdout):
 
 def test_setup_with_invalid_log_level(stdout):
     with pytest.raises(ValueError) as e:
-        get_random_logger(level="not a valid log level")
+        Logger(level="not a valid log level")
         assert "Unknown level" in e.value.args[0]
 
 
@@ -65,7 +65,7 @@ def check_log_dict(log_dict):
 
 
 def test_with_dict_message(stdout):
-    logger = get_random_logger(level="DEBUG", stream=stdout)
+    logger = Logger(level="DEBUG", stream=stdout)
 
     msg = {"x": "isx"}
     logger.critical(msg)
@@ -76,7 +76,7 @@ def test_with_dict_message(stdout):
 
 
 def test_with_json_message(stdout):
-    logger = get_random_logger(stream=stdout)
+    logger = Logger(stream=stdout)
 
     msg = {"x": "isx"}
     logger.info(json.dumps(msg))
@@ -87,7 +87,7 @@ def test_with_json_message(stdout):
 
 
 def test_with_unserialisable_value_in_message(stdout):
-    logger = get_random_logger(level="DEBUG", stream=stdout)
+    logger = Logger(level="DEBUG", stream=stdout)
 
     class X:
         pass
