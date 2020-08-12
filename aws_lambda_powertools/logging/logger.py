@@ -133,7 +133,7 @@ class Logger:
         return getattr(self._logger, name)
 
     def _get_logger(self):
-        """ Returns a Logger named {self.service}, or {service.filename} for child loggers"""
+        """ Returns a Logger named {self.service}, or {self.service.filename} for child loggers"""
         logger_name = self.service
         if self.child:
             logger_name = f"{self.service}.{self._get_caller_filename()}"
