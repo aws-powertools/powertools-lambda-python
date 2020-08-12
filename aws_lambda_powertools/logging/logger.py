@@ -119,7 +119,7 @@ class Logger:
     ):
         self.service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
         self.sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or 0.0
-        self.log_level = level or os.getenv("LOG_LEVEL".upper()) or logging.INFO
+        self.log_level = self._get_log_level(level)
         self.child = child
         self._handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
@@ -131,6 +131,13 @@ class Logger:
         # Proxy attributes not found to actual logger to support backward compatibility
         # https://github.com/awslabs/aws-lambda-powertools-python/issues/97
         return getattr(self._logger, name)
+
+    def _get_log_level(self, level: str):
+        """ Returns preferred log level set by the customer in upper case """
+        log_level: str = level or os.getenv("LOG_LEVEL")
+        log_level = log_level.upper() if log_level is not None else logging.INFO
+
+        return log_level
 
     def _get_logger(self):
         """ Returns a Logger named {self.service}, or {self.service.filename} for child loggers"""

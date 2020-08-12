@@ -306,3 +306,21 @@ def test_logger_child_not_set_returns_same_logger(stdout):
     assert id(logger_one) != id(logger_two)
     assert logger_one._logger is logger_two._logger
     assert logger_one.name is logger_two.name
+
+
+def test_logger_level_case_insensitive(stdout):
+    # GIVEN a Loggers is initialized
+    # WHEN log level is set as "info" instead of "INFO"
+    logger = Logger(level="info")
+
+    # THEN we should correctly set log level as INFO
+    assert logger.level == logging.INFO
+
+
+def test_logger_level_not_set(stdout):
+    # GIVEN a Loggers is initialized
+    # WHEN no log level was passed
+    logger = Logger(level="info")
+
+    # THEN we should default to INFO
+    assert logger.level == logging.INFO
