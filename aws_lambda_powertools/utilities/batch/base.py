@@ -27,7 +27,7 @@ class BaseProcessor(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def _process_record(self):
+    def _process_record(self, record):
         raise NotImplementedError()
 
     def process(self) -> List[Tuple]:
