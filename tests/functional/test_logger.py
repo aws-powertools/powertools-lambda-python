@@ -16,18 +16,6 @@ def stdout():
 
 
 @pytest.fixture
-def handler(stdout):
-    return logging.StreamHandler(stdout)
-
-
-@pytest.fixture
-def root_logger(handler):
-    logging.root.addHandler(handler)
-    yield logging.root
-    logging.root.removeHandler(handler)
-
-
-@pytest.fixture
 def lambda_context():
     lambda_context = {
         "function_name": "test",
@@ -45,14 +33,14 @@ def lambda_event():
 
 
 def capture_logging_output(stdout):
-    return json.loads(stdout.getvalue())
+    return json.loads(stdout.getvalue().strip())
 
 
 def capture_multiple_logging_statements_output(stdout):
     return [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
 
 
-def test_setup_service_name(root_logger, stdout):
+def test_setup_service_name(stdout):
     service_name = "payment"
     # GIVEN Logger is initialized
     # WHEN service is explicitly defined
@@ -96,7 +84,7 @@ def test_setup_sampling_rate_env_var(monkeypatch, stdout):
     # WHEN samping rate is explicitly set to 100% via POWERTOOLS_LOGGER_SAMPLE_RATE env
     sampling_rate = "1"
     monkeypatch.setenv("POWERTOOLS_LOGGER_SAMPLE_RATE", sampling_rate)
-    logger = Logger(stream=stdout, level="INFO")
+    logger = Logger(stream=stdout)
     logger.debug("I am being sampled")
 
     # THEN sampling rate should be equals POWERTOOLS_LOGGER_SAMPLE_RATE value
@@ -255,7 +243,7 @@ def test_logger_invalid_sampling_rate():
     # WHEN sampling_rate non-numeric value
     # THEN we should raise InvalidLoggerSamplingRateError
     with pytest.raises(InvalidLoggerSamplingRateError):
-        Logger(sampling_rate="TEST")
+        Logger(stream=stdout, sampling_rate="TEST")
 
 
 def test_inject_lambda_context_with_structured_log(lambda_context, stdout):
@@ -283,3 +271,56 @@ def test_inject_lambda_context_with_structured_log(lambda_context, stdout):
     )
     for key in expected_logger_context_keys:
         assert key in log
+
+
+def test_logger_children_propagate_changes(stdout):
+    # GIVEN Loggers are initialized
+    # create child logger before parent to mimick
+    # importing logger from another module/file
+    # as loggers are created in global scope
+    child = Logger(stream=stdout, service="order", child=True)
+    parent = Logger(stream=stdout, service="order")
+
+    # WHEN a child Logger adds an additional key
+    child.structure_logs(append=True, customer_id="value")
+
+    # THEN child Logger changes should propagate to parent
+    # and subsequent log statements should have the latest value
+    parent.info("Hello parent")
+    child.info("Hello child")
+
+    parent_log, child_log = capture_multiple_logging_statements_output(stdout)
+    assert "customer_id" in parent_log
+    assert "customer_id" in child_log
+    assert child.parent.name == "order"
+
+
+def test_logger_child_not_set_returns_same_logger(stdout):
+    # GIVEN two Loggers are initialized with the same service name
+    # WHEN child param isn't set
+    logger_one = Logger(service="something")
+    logger_two = Logger(service="something")
+
+    # THEN we should have two Logger instances
+    # however inner logger wise should be the same
+    assert id(logger_one) != id(logger_two)
+    assert logger_one._logger is logger_two._logger
+    assert logger_one.name is logger_two.name
+
+
+def test_logger_level_case_insensitive(stdout):
+    # GIVEN a Loggers is initialized
+    # WHEN log level is set as "info" instead of "INFO"
+    logger = Logger(level="info")
+
+    # THEN we should correctly set log level as INFO
+    assert logger.level == logging.INFO
+
+
+def test_logger_level_not_set(stdout):
+    # GIVEN a Loggers is initialized
+    # WHEN no log level was passed
+    logger = Logger(level="info")
+
+    # THEN we should default to INFO
+    assert logger.level == logging.INFO

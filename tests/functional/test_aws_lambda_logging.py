@@ -1,7 +1,6 @@
 """aws_lambda_logging tests."""
 import io
 import json
-import logging
 
 import pytest
 
@@ -13,25 +12,8 @@ def stdout():
     return io.StringIO()
 
 
-@pytest.fixture
-def handler(stdout):
-    return logging.StreamHandler(stdout)
-
-
-@pytest.fixture
-def logger():
-    return logging.getLogger(__name__)
-
-
-@pytest.fixture
-def root_logger(handler):
-    logging.root.addHandler(handler)
-    yield logging.root
-    logging.root.removeHandler(handler)
-
-
 @pytest.mark.parametrize("level", ["DEBUG", "WARNING", "ERROR", "INFO", "CRITICAL"])
-def test_setup_with_valid_log_levels(root_logger, stdout, level):
+def test_setup_with_valid_log_levels(stdout, level):
     logger = Logger(level=level, stream=stdout, request_id="request id!", another="value")
     msg = "This is a test"
     log_command = {
@@ -55,7 +37,7 @@ def test_setup_with_valid_log_levels(root_logger, stdout, level):
     assert "exception" not in log_dict
 
 
-def test_logging_exception_traceback(root_logger, stdout):
+def test_logging_exception_traceback(stdout):
     logger = Logger(level="DEBUG", stream=stdout, request_id="request id!", another="value")
 
     try:
@@ -69,7 +51,7 @@ def test_logging_exception_traceback(root_logger, stdout):
     assert "exception" in log_dict
 
 
-def test_setup_with_invalid_log_level(root_logger, logger, stdout):
+def test_setup_with_invalid_log_level(stdout):
     with pytest.raises(ValueError) as e:
         Logger(level="not a valid log level")
         assert "Unknown level" in e.value.args[0]
@@ -82,11 +64,7 @@ def check_log_dict(log_dict):
     assert "message" in log_dict
 
 
-def test_setup_with_bad_level_does_not_fail():
-    Logger("DBGG", request_id="request id!", another="value")
-
-
-def test_with_dict_message(root_logger, stdout):
+def test_with_dict_message(stdout):
     logger = Logger(level="DEBUG", stream=stdout)
 
     msg = {"x": "isx"}
@@ -97,7 +75,7 @@ def test_with_dict_message(root_logger, stdout):
     assert msg == log_dict["message"]
 
 
-def test_with_json_message(root_logger, stdout):
+def test_with_json_message(stdout):
     logger = Logger(stream=stdout)
 
     msg = {"x": "isx"}
@@ -108,7 +86,7 @@ def test_with_json_message(root_logger, stdout):
     assert msg == log_dict["message"]
 
 
-def test_with_unserialisable_value_in_message(root_logger, stdout):
+def test_with_unserialisable_value_in_message(stdout):
     logger = Logger(level="DEBUG", stream=stdout)
 
     class X:

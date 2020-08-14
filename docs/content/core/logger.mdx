@@ -183,6 +183,41 @@ def handler(event, context):
 ```
 </details>
 
+## Reusing Logger across your code
+
+Logger supports inheritance via `child` parameter. This allows you to create multiple Loggers across your code base, and propagate changes such as new keys to all Loggers.
+
+```python:title=collect.py
+# POWERTOOLS_SERVICE_NAME: "payment"
+import shared # Creates a child logger named "payment.shared"
+from aws_lambda_powertools import Logger
+
+logger = Logger()
+
+def handler(event, context):
+  shared.inject_payment_id(event) # highlight-line
+  logger.structure_logs(append=True, order_id=event["order_id"]) # highlight-line
+      ...
+```
+
+```python:title=shared.py
+# POWERTOOLS_SERVICE_NAME: "payment"
+from aws_lambda_powertools import Logger
+
+logger = Logger(child=True) # highlight-line
+
+def inject_payment_id(event):
+    logger.structure_logs(append=True, payment_id=event["payment_id"])
+```
+
+In this example, `Logger` will create a parent logger named `payment` and a child logger named `payment.shared`. Any changes in the parent and child `Loggers` will be propagated among them.
+
+If you ever forget to use `child` param, we will return an existing `Logger` with the same `service` name.
+
+<Note type="info">
+	Child loggers will be named after the following convention <code>service.filename</code>.
+</Note><br/>
+
 ## Sampling debug logs
 
 You can dynamically set a percentage of your logs to **DEBUG** level using `sample_rate` param or via env var `POWERTOOLS_LOGGER_SAMPLE_RATE`.

@@ -1,5 +1,5 @@
-import copy
 import functools
+import inspect
 import logging
 import os
 import random
@@ -34,7 +34,7 @@ def _is_cold_start() -> bool:
     return cold_start
 
 
-class Logger(logging.Logger):
+class Logger:
     """Creates and setups a logger to format statements in JSON.
 
     Includes service name and any additional key=value into logs
@@ -55,6 +55,8 @@ class Logger(logging.Logger):
         service name to be appended in logs, by default "service_undefined"
     level : str, optional
         logging.level, by default "INFO"
+    child: bool, optional
+        create a child Logger named <service>.<caller_file_name>, False by default
     sample_rate: float, optional
         sample rate for debug calls within execution context defaults to 0.0
     stream: sys.stdout, optional
@@ -80,7 +82,7 @@ class Logger(logging.Logger):
         >>> def handler(event, context):
                 logger.info("Hello")
 
-    **Append payment_id to previously setup structured log logger**
+    **Append payment_id to previously setup logger**
 
         >>> from aws_lambda_powertools import Logger
         >>> logger = Logger(service="payment")
@@ -89,18 +91,16 @@ class Logger(logging.Logger):
                 logger.structure_logs(append=True, payment_id=event["payment_id"])
                 logger.info("Hello")
 
-    Parameters
-    ----------
-    logging : logging.Logger
-        Inherits Logger
-    service: str
-        name of the service to create the logger for, "service_undefined" by default
-    level: str, int
-        log level, INFO by default
-    sampling_rate: float
-        debug log sampling rate, 0.0 by default
-    stream: sys.stdout
-        log stream, stdout by default
+    **Create child Logger using logging inheritance via child param**
+
+        >>> # app.py
+        >>> import another_file
+        >>> from aws_lambda_powertools import Logger
+        >>> logger = Logger(service="payment")
+        >>>
+        >>> # another_file.py
+        >>> from aws_lambda_powertools import Logger
+        >>> logger = Logger(service="payment", child=True)
 
     Raises
     ------
@@ -112,19 +112,72 @@ class Logger(logging.Logger):
         self,
         service: str = None,
         level: Union[str, int] = None,
+        child: bool = False,
         sampling_rate: float = None,
         stream: sys.stdout = None,
         **kwargs,
     ):
         self.service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
         self.sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or 0.0
-        self.log_level = level or os.getenv("LOG_LEVEL") or logging.INFO
-        self.handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
+        self.log_level = self._get_log_level(level)
+        self.child = child
+        self._handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
-        self.log_keys = copy.copy(self._default_log_keys)
+        self._logger = self._get_logger()
 
-        super().__init__(name=self.service, level=self.log_level)
+        self._init_logger(**kwargs)
 
+    def __getattr__(self, name):
+        # Proxy attributes not found to actual logger to support backward compatibility
+        # https://github.com/awslabs/aws-lambda-powertools-python/issues/97
+        return getattr(self._logger, name)
+
+    def _get_log_level(self, level: str):
+        """ Returns preferred log level set by the customer in upper case """
+        log_level: str = level or os.getenv("LOG_LEVEL")
+        log_level = log_level.upper() if log_level is not None else logging.INFO
+
+        return log_level
+
+    def _get_logger(self):
+        """ Returns a Logger named {self.service}, or {self.service.filename} for child loggers"""
+        logger_name = self.service
+        if self.child:
+            logger_name = f"{self.service}.{self._get_caller_filename()}"
+
+        return logging.getLogger(logger_name)
+
+    def _get_caller_filename(self):
+        """ Return caller filename by finding the caller frame """
+        # Current frame         => _get_logger()
+        # Previous frame        => logger.py
+        # Before previous frame => Caller
+        frame = inspect.currentframe()
+        caller_frame = frame.f_back.f_back.f_back
+        filename = caller_frame.f_globals["__name__"]
+
+        return filename
+
+    def _init_logger(self, **kwargs):
+        """Configures new logger"""
+
+        # Skip configuration if it's a child logger to prevent
+        # multiple handlers being attached as well as different sampling mechanisms
+        # and multiple messages from being logged as handlers can be duplicated
+        if not self.child:
+            self._configure_sampling()
+            self._logger.setLevel(self.log_level)
+            self._logger.addHandler(self._handler)
+            self.structure_logs(**kwargs)
+
+    def _configure_sampling(self):
+        """Dynamically set log level based on sampling rate
+
+        Raises
+        ------
+        InvalidLoggerSamplingRateError
+            When sampling rate provided is not a float
+        """
         try:
             if self.sampling_rate and random.random() <= float(self.sampling_rate):
                 logger.debug("Setting log level to Debug due to sampling rate")
@@ -134,12 +187,8 @@ class Logger(logging.Logger):
                 f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead. Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."  # noqa E501
             )
 
-        self.setLevel(self.log_level)
-        self.structure_logs(**kwargs)
-        self.addHandler(self.handler)
-
     def inject_lambda_context(self, lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False):
-        """Decorator to capture Lambda contextual info and inject into struct logging
+        """Decorator to capture Lambda contextual info and inject into logger
 
         Parameters
         ----------
@@ -216,13 +265,16 @@ class Logger(logging.Logger):
         append : bool, optional
             [description], by default False
         """
-        self.handler.setFormatter(JsonFormatter(**self._default_log_keys, **kwargs))
 
-        if append:
-            new_keys = {**self.log_keys, **kwargs}
-            self.handler.setFormatter(JsonFormatter(**new_keys))
-
-        self.log_keys.update(**kwargs)
+        # Child loggers don't have handlers attached, use its parent handlers
+        handlers = self._logger.parent.handlers if self.child else self._logger.handlers
+        for handler in handlers:
+            if append:
+                # Update existing formatter in an existing logger handler
+                handler.formatter.update_formatter(**kwargs)
+            else:
+                # Set a new formatter for a logger handler
+                handler.setFormatter(JsonFormatter(**self._default_log_keys, **kwargs))
 
 
 def set_package_logger(
@@ -230,7 +282,7 @@ def set_package_logger(
 ):
     """Set an additional stream handler, formatter, and log level for aws_lambda_powertools package logger.
 
-    **Package log by default is supressed (NullHandler), this should only used for debugging.
+    **Package log by default is suppressed (NullHandler), this should only used for debugging.
     This is separate from application Logger class utility**
 
     Example
