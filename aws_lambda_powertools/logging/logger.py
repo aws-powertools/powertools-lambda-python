@@ -132,8 +132,11 @@ class Logger:
         # https://github.com/awslabs/aws-lambda-powertools-python/issues/97
         return getattr(self._logger, name)
 
-    def _get_log_level(self, level: str):
+    def _get_log_level(self, level: Union[str, int]) -> Union[str, int]:
         """ Returns preferred log level set by the customer in upper case """
+        if isinstance(level, int):
+            return level
+
         log_level: str = level or os.getenv("LOG_LEVEL")
         log_level = log_level.upper() if log_level is not None else logging.INFO
 
