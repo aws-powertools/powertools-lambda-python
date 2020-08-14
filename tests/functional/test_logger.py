@@ -320,7 +320,7 @@ def test_logger_level_case_insensitive(stdout):
 def test_logger_level_not_set(stdout):
     # GIVEN a Loggers is initialized
     # WHEN no log level was passed
-    logger = Logger(level="info")
+    logger = Logger()
 
     # THEN we should default to INFO
     assert logger.level == logging.INFO
