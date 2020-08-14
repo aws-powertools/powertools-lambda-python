@@ -9,6 +9,8 @@ on:
       - master
       # Disabled until docs support versioning per branch/release
       # - develop
+  release:
+    types: [published] # update Docs upon new release
 
 jobs:
   docs:
