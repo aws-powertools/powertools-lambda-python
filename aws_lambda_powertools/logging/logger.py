@@ -44,7 +44,7 @@ class Logger:
     ---------------------
     POWERTOOLS_SERVICE_NAME : str
         service name
-    LOG_LEVEL: str, int
+    LOG_LEVEL: str
         logging level (e.g. INFO, DEBUG)
     POWERTOOLS_LOGGER_SAMPLE_RATE: float
         samping rate ranging from 0 to 1, 1 being 100% sampling
