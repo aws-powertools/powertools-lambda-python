@@ -324,3 +324,12 @@ def test_logger_level_not_set(stdout):
 
     # THEN we should default to INFO
     assert logger.level == logging.INFO
+
+
+def test_logger_level_as_int(stdout):
+    # GIVEN a Loggers is initialized
+    # WHEN log level is inst
+    logger = Logger(level=logging.INFO)
+
+    # THEN we should default to INFO
+    assert logger.level == logging.INFO
