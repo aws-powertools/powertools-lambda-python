@@ -333,3 +333,14 @@ def test_logger_level_as_int():
 
     # THEN we should be expected int (20, in this case)
     assert logger.level == logging.INFO
+
+
+def test_logger_level_env_var_as_int(monkeypatch):
+    # GIVEN Logger is initialized
+    # WHEN log level is explicitly defined via LOG_LEVEL env as int
+    # THEN Logger should propagate ValueError
+    # since env vars can only be string
+    # and '50' is not a correct log level
+    monkeypatch.setenv("LOG_LEVEL", 50)
+    with pytest.raises(ValueError, match="Unknown level: '50'"):
+        Logger()
