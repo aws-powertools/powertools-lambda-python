@@ -53,7 +53,7 @@ class Logger:
     ----------
     service : str, optional
         service name to be appended in logs, by default "service_undefined"
-    level : str, optional
+    level : str, int optional
         logging.level, by default "INFO"
     child: bool, optional
         create a child Logger named <service>.<caller_file_name>, False by default
