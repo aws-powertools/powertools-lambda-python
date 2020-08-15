@@ -199,6 +199,11 @@ async def collect_payment(charge_id):
 
 Tracer keeps a copy of its configuration after the first initialization. This is useful for scenarios where you want to use Tracer in more than one location across your code base.
 
+<Note type="warning">
+    When reusing Tracer in Lambda Layers, or in multiple modules, <strong>do not set <code>auto_patch=False</code></strong>, because import order matters.
+    <br/><br/>This can result in the first Tracer config being inherited by new instances, and their modules not being patched.
+</Note><br/>
+
 ```python:title=lambda_handler.py
 # handler.py
 from aws_lambda_powertools import Tracer
@@ -214,8 +219,8 @@ def handler(event, context):
 ```python:title=another_file.py
 from aws_lambda_powertools import Tracer
 # highlight-start
-# new instance using existing configuration with auto patching overriden
-tracer = Tracer(auto_patch=False)
+# new instance using existing configuration
+tracer = Tracer(service="payment")
 # highlight-end
 ```
 
