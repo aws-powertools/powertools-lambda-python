@@ -38,7 +38,7 @@ def _is_cold_start() -> bool:
 # so we need to return to subclassing removed in #97
 # All methods/properties continue to be proxied to inner logger
 # https://github.com/awslabs/aws-lambda-powertools-python/issues/107
-class Logger(logging.Logger):
+class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     """Creates and setups a logger to format statements in JSON.
 
     Includes service name and any additional key=value into logs
