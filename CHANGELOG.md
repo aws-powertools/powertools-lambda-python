@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Docs**: Clarify confusion on Tracer reuse and `auto_patch=False` statement
+- **Logger**: Autocomplete for log statements in PyCharm
 
 ## [1.1.1] - 2020-08-14
 ### Fixed
