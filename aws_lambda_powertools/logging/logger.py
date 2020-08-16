@@ -34,7 +34,11 @@ def _is_cold_start() -> bool:
     return cold_start
 
 
-class Logger:
+# PyCharm does not support autocomplete via getattr
+# so we need to return to subclassing removed in #97
+# All methods/properties continue to be proxied to inner logger
+# https://github.com/awslabs/aws-lambda-powertools-python/issues/107
+class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     """Creates and setups a logger to format statements in JSON.
 
     Includes service name and any additional key=value into logs
@@ -187,7 +191,8 @@ class Logger:
                 self.log_level = logging.DEBUG
         except ValueError:
             raise InvalidLoggerSamplingRateError(
-                f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead. Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."  # noqa E501
+                f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead."
+                f"Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
             )
 
     def inject_lambda_context(self, lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False):

@@ -1,3 +1,4 @@
+import inspect
 import io
 import json
 import logging
@@ -295,7 +296,7 @@ def test_logger_children_propagate_changes(stdout):
     assert child.parent.name == "order"
 
 
-def test_logger_child_not_set_returns_same_logger(stdout):
+def test_logger_child_not_set_returns_same_logger():
     # GIVEN two Loggers are initialized with the same service name
     # WHEN child param isn't set
     logger_one = Logger(service="something")
@@ -308,7 +309,7 @@ def test_logger_child_not_set_returns_same_logger(stdout):
     assert logger_one.name is logger_two.name
 
 
-def test_logger_level_case_insensitive(stdout):
+def test_logger_level_case_insensitive():
     # GIVEN a Loggers is initialized
     # WHEN log level is set as "info" instead of "INFO"
     logger = Logger(level="info")
@@ -344,3 +345,17 @@ def test_logger_level_env_var_as_int(monkeypatch):
     monkeypatch.setenv("LOG_LEVEL", 50)
     with pytest.raises(ValueError, match="Unknown level: '50'"):
         Logger()
+
+
+def test_logger_record_caller_location(stdout):
+    # GIVEN Logger is initialized
+    logger = Logger(stream=stdout)
+
+    # WHEN log statement is run
+    logger.info("log")
+
+    # THEN 'location' field should have
+    # the correct caller resolution
+    caller_fn_name = inspect.currentframe().f_code.co_name
+    log = capture_logging_output(stdout)
+    assert caller_fn_name in log["location"]
