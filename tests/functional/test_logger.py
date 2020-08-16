@@ -296,7 +296,7 @@ def test_logger_children_propagate_changes(stdout):
     assert child.parent.name == "order"
 
 
-def test_logger_child_not_set_returns_same_logger(stdout):
+def test_logger_child_not_set_returns_same_logger():
     # GIVEN two Loggers are initialized with the same service name
     # WHEN child param isn't set
     logger_one = Logger(service="something")
@@ -309,7 +309,7 @@ def test_logger_child_not_set_returns_same_logger(stdout):
     assert logger_one.name is logger_two.name
 
 
-def test_logger_level_case_insensitive(stdout):
+def test_logger_level_case_insensitive():
     # GIVEN a Loggers is initialized
     # WHEN log level is set as "info" instead of "INFO"
     logger = Logger(level="info")
