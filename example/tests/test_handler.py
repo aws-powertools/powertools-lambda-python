@@ -4,6 +4,14 @@ from dataclasses import dataclass
 
 import pytest
 
+from aws_lambda_powertools import Tracer
+
+
+@pytest.fixture(scope="function", autouse=True)
+def reset_tracing_config():
+    Tracer._reset_config()
+    yield
+
 
 @pytest.fixture()
 def env_vars(monkeypatch):
