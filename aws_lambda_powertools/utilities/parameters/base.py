@@ -9,12 +9,12 @@ from collections import namedtuple
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Union
 
+from .exceptions import GetParameterError
+
 DEFAULT_MAX_AGE_SECS = 5
 ExpirableValue = namedtuple("ExpirableValue", ["value", "ttl"])
-
-
-class GetParameterError(Exception):
-    """When a provider raises an exception on parameter retrieval"""
+# These providers will be dynamically initialized on first use of the helper functions
+DEFAULT_PROVIDERS = {}
 
 
 class BaseProvider(ABC):

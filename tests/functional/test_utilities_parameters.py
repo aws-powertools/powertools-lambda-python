@@ -830,7 +830,7 @@ def test_get_parameter(monkeypatch, mock_name, mock_value):
         def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
             raise NotImplementedError()
 
-    monkeypatch.setitem(parameters._DEFAULT_PROVIDERS, "ssm", TestProvider())
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
 
     value = parameters.get_parameter(mock_name)
 
@@ -850,8 +850,8 @@ def test_get_parameter_new(monkeypatch, mock_name, mock_value):
         def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
             raise NotImplementedError()
 
-    monkeypatch.setattr(parameters, "_DEFAULT_PROVIDERS", {})
-    monkeypatch.setattr(parameters, "SSMProvider", TestProvider)
+    monkeypatch.setattr(parameters.ssm, "DEFAULT_PROVIDERS", {})
+    monkeypatch.setattr(parameters.ssm, "SSMProvider", TestProvider)
 
     value = parameters.get_parameter(mock_name)
 
@@ -871,7 +871,7 @@ def test_get_parameters(monkeypatch, mock_name, mock_value):
             assert path == mock_name
             return {"A": mock_value}
 
-    monkeypatch.setitem(parameters._DEFAULT_PROVIDERS, "ssm", TestProvider())
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
 
     values = parameters.get_parameters(mock_name)
 
@@ -892,8 +892,8 @@ def test_get_parameters_new(monkeypatch, mock_name, mock_value):
             assert path == mock_name
             return mock_value
 
-    monkeypatch.setattr(parameters, "_DEFAULT_PROVIDERS", {})
-    monkeypatch.setattr(parameters, "SSMProvider", TestProvider)
+    monkeypatch.setattr(parameters.ssm, "DEFAULT_PROVIDERS", {})
+    monkeypatch.setattr(parameters.ssm, "SSMProvider", TestProvider)
 
     value = parameters.get_parameters(mock_name)
 
@@ -913,7 +913,7 @@ def test_get_secret(monkeypatch, mock_name, mock_value):
         def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
             raise NotImplementedError()
 
-    monkeypatch.setitem(parameters._DEFAULT_PROVIDERS, "secrets", TestProvider())
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "secrets", TestProvider())
 
     value = parameters.get_secret(mock_name)
 
@@ -933,8 +933,8 @@ def test_get_secret_new(monkeypatch, mock_name, mock_value):
         def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
             raise NotImplementedError()
 
-    monkeypatch.setattr(parameters, "_DEFAULT_PROVIDERS", {})
-    monkeypatch.setattr(parameters, "SecretsProvider", TestProvider)
+    monkeypatch.setattr(parameters.secrets, "DEFAULT_PROVIDERS", {})
+    monkeypatch.setattr(parameters.secrets, "SecretsProvider", TestProvider)
 
     value = parameters.get_secret(mock_name)
 
