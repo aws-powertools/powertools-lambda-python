@@ -6,6 +6,7 @@ AWS Secrets Manager parameter retrieval and caching utility
 from typing import Dict, Optional, Union
 
 import boto3
+from botocore.config import Config
 
 from .base import DEFAULT_PROVIDERS, BaseProvider
 
@@ -17,16 +18,14 @@ class SecretsProvider(BaseProvider):
 
     client = None
 
-    def __init__(self, region: Optional[str] = None):
+    def __init__(self, config: Optional[Config] = None):
         """
         Initialize the Secrets Manager client
         """
 
-        client_kwargs = {}
-        if region:
-            client_kwargs["region_name"] = region
+        config = config or Config()
 
-        self.client = boto3.client("secretsmanager", **client_kwargs)
+        self.client = boto3.client("secretsmanager", config=config)
 
         super().__init__()
 

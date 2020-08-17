@@ -6,6 +6,7 @@ AWS SSM Parameter retrieval and caching utility
 from typing import Dict, Optional, Union
 
 import boto3
+from botocore.config import Config
 
 from .base import DEFAULT_PROVIDERS, BaseProvider
 
@@ -18,17 +19,14 @@ class SSMProvider(BaseProvider):
     client = None
 
     def __init__(
-        self, region: Optional[str] = None,
+        self, config: Optional[Config] = None,
     ):
         """
         Initialize the SSM Parameter Store client
         """
 
-        client_kwargs = {}
-        if region:
-            client_kwargs["region_name"] = region
-
-        self.client = boto3.client("ssm", **client_kwargs)
+        config = config or Config()
+        self.client = boto3.client("ssm", config=config)
 
         super().__init__()
 

@@ -8,6 +8,7 @@ from typing import Dict
 import pytest
 from boto3.dynamodb.conditions import Key
 from botocore import stub
+from botocore.config import Config
 
 from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.utilities.parameters.base import BaseProvider, ExpirableValue
@@ -30,7 +31,12 @@ def mock_version():
     return random.randrange(1, 1000)
 
 
-def test_dynamodb_provider_get(mock_name, mock_value):
+@pytest.fixture(scope="module")
+def config():
+    return Config(region_name="us-east-1")
+
+
+def test_dynamodb_provider_get(mock_name, mock_value, config):
     """
     Test DynamoDBProvider.get() with a non-cached value
     """
@@ -38,7 +44,7 @@ def test_dynamodb_provider_get(mock_name, mock_value):
     table_name = "TEST_TABLE"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, region="us-east-1")
+    provider = parameters.DynamoDBProvider(table_name, config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.table.meta.client)
@@ -56,9 +62,9 @@ def test_dynamodb_provider_get(mock_name, mock_value):
         stubber.deactivate()
 
 
-def test_dynamodb_provider_get_default_region(monkeypatch, mock_name, mock_value):
+def test_dynamodb_provider_get_default_config(monkeypatch, mock_name, mock_value):
     """
-    Test DynamoDBProvider.get() without setting a region
+    Test DynamoDBProvider.get() without setting a config
     """
 
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
@@ -84,7 +90,7 @@ def test_dynamodb_provider_get_default_region(monkeypatch, mock_name, mock_value
         stubber.deactivate()
 
 
-def test_dynamodb_provider_get_cached(mock_name, mock_value):
+def test_dynamodb_provider_get_cached(mock_name, mock_value, config):
     """
     Test DynamoDBProvider.get() with a cached value
     """
@@ -92,7 +98,7 @@ def test_dynamodb_provider_get_cached(mock_name, mock_value):
     table_name = "TEST_TABLE"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, region="us-east-1")
+    provider = parameters.DynamoDBProvider(table_name, config=config)
 
     # Inject value in the internal store
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
@@ -110,7 +116,7 @@ def test_dynamodb_provider_get_cached(mock_name, mock_value):
         stubber.deactivate()
 
 
-def test_dynamodb_provider_get_expired(mock_name, mock_value):
+def test_dynamodb_provider_get_expired(mock_name, mock_value, config):
     """
     Test DynamoDBProvider.get() with a cached but expired value
     """
@@ -118,7 +124,7 @@ def test_dynamodb_provider_get_expired(mock_name, mock_value):
     table_name = "TEST_TABLE"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, region="us-east-1")
+    provider = parameters.DynamoDBProvider(table_name, config=config)
 
     # Inject value in the internal store
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() - timedelta(seconds=60))
@@ -139,7 +145,7 @@ def test_dynamodb_provider_get_expired(mock_name, mock_value):
         stubber.deactivate()
 
 
-def test_dynamodb_provider_get_multiple(mock_name, mock_value):
+def test_dynamodb_provider_get_multiple(mock_name, mock_value, config):
     """
     Test DynamoDBProvider.get_multiple() with a non-cached path
     """
@@ -148,7 +154,7 @@ def test_dynamodb_provider_get_multiple(mock_name, mock_value):
     table_name = "TEST_TABLE"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, region="us-east-1")
+    provider = parameters.DynamoDBProvider(table_name, config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.table.meta.client)
@@ -175,7 +181,7 @@ def test_dynamodb_provider_get_multiple(mock_name, mock_value):
         stubber.deactivate()
 
 
-def test_dynamodb_provider_get_multiple_next_token(mock_name, mock_value):
+def test_dynamodb_provider_get_multiple_next_token(mock_name, mock_value, config):
     """
     Test DynamoDBProvider.get_multiple() with a non-cached path
     """
@@ -184,7 +190,7 @@ def test_dynamodb_provider_get_multiple_next_token(mock_name, mock_value):
     table_name = "TEST_TABLE"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, region="us-east-1")
+    provider = parameters.DynamoDBProvider(table_name, config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.table.meta.client)
@@ -228,13 +234,13 @@ def test_dynamodb_provider_get_multiple_next_token(mock_name, mock_value):
         stubber.deactivate()
 
 
-def test_ssm_provider_get(mock_name, mock_value, mock_version):
+def test_ssm_provider_get(mock_name, mock_value, mock_version, config):
     """
     Test SSMProvider.get() with a non-cached value
     """
 
     # Create a new provider
-    provider = parameters.SSMProvider(region="us-east-1")
+    provider = parameters.SSMProvider(config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -263,9 +269,9 @@ def test_ssm_provider_get(mock_name, mock_value, mock_version):
         stubber.deactivate()
 
 
-def test_ssm_provider_get_default_region(monkeypatch, mock_name, mock_value, mock_version):
+def test_ssm_provider_get_default_config(monkeypatch, mock_name, mock_value, mock_version):
     """
-    Test SSMProvider.get() without specifying the region
+    Test SSMProvider.get() without specifying the config
     """
 
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
@@ -300,13 +306,13 @@ def test_ssm_provider_get_default_region(monkeypatch, mock_name, mock_value, moc
         stubber.deactivate()
 
 
-def test_ssm_provider_get_cached(mock_name, mock_value):
+def test_ssm_provider_get_cached(mock_name, mock_value, config):
     """
     Test SSMProvider.get() with a cached value
     """
 
     # Create a new provider
-    provider = parameters.SSMProvider(region="us-east-1")
+    provider = parameters.SSMProvider(config=config)
 
     # Inject value in the internal store
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
@@ -324,13 +330,13 @@ def test_ssm_provider_get_cached(mock_name, mock_value):
         stubber.deactivate()
 
 
-def test_ssm_provider_get_expired(mock_name, mock_value, mock_version):
+def test_ssm_provider_get_expired(mock_name, mock_value, mock_version, config):
     """
     Test SSMProvider.get() with a cached but expired value
     """
 
     # Create a new provider
-    provider = parameters.SSMProvider(region="us-east-1")
+    provider = parameters.SSMProvider(config=config)
 
     # Inject value in the internal store
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() - timedelta(seconds=60))
@@ -362,7 +368,7 @@ def test_ssm_provider_get_expired(mock_name, mock_value, mock_version):
         stubber.deactivate()
 
 
-def test_ssm_provider_get_multiple(mock_name, mock_value, mock_version):
+def test_ssm_provider_get_multiple(mock_name, mock_value, mock_version, config):
     """
     Test SSMProvider.get_multiple() with a non-cached path
     """
@@ -370,7 +376,7 @@ def test_ssm_provider_get_multiple(mock_name, mock_value, mock_version):
     mock_param_names = ["A", "B", "C"]
 
     # Create a new provider
-    provider = parameters.SSMProvider(region="us-east-1")
+    provider = parameters.SSMProvider(config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -406,7 +412,7 @@ def test_ssm_provider_get_multiple(mock_name, mock_value, mock_version):
         stubber.deactivate()
 
 
-def test_ssm_provider_get_multiple_different_path(mock_name, mock_value, mock_version):
+def test_ssm_provider_get_multiple_different_path(mock_name, mock_value, mock_version, config):
     """
     Test SSMProvider.get_multiple() with a non-cached path and names that don't start with the path
     """
@@ -414,7 +420,7 @@ def test_ssm_provider_get_multiple_different_path(mock_name, mock_value, mock_ve
     mock_param_names = ["A", "B", "C"]
 
     # Create a new provider
-    provider = parameters.SSMProvider(region="us-east-1")
+    provider = parameters.SSMProvider(config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -450,7 +456,7 @@ def test_ssm_provider_get_multiple_different_path(mock_name, mock_value, mock_ve
         stubber.deactivate()
 
 
-def test_ssm_provider_get_multiple_next_token(mock_name, mock_value, mock_version):
+def test_ssm_provider_get_multiple_next_token(mock_name, mock_value, mock_version, config):
     """
     Test SSMProvider.get_multiple() with a non-cached path with multiple calls
     """
@@ -458,7 +464,7 @@ def test_ssm_provider_get_multiple_next_token(mock_name, mock_value, mock_versio
     mock_param_names = ["A", "B", "C"]
 
     # Create a new provider
-    provider = parameters.SSMProvider(region="us-east-1")
+    provider = parameters.SSMProvider(config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -516,13 +522,13 @@ def test_ssm_provider_get_multiple_next_token(mock_name, mock_value, mock_versio
         stubber.deactivate()
 
 
-def test_secrets_provider_get(mock_name, mock_value):
+def test_secrets_provider_get(mock_name, mock_value, config):
     """
     Test SecretsProvider.get() with a non-cached value
     """
 
     # Create a new provider
-    provider = parameters.SecretsProvider(region="us-east-1")
+    provider = parameters.SecretsProvider(config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -546,9 +552,9 @@ def test_secrets_provider_get(mock_name, mock_value):
         stubber.deactivate()
 
 
-def test_secrets_provider_get_default_region(monkeypatch, mock_name, mock_value):
+def test_secrets_provider_get_default_config(monkeypatch, mock_name, mock_value):
     """
-    Test SecretsProvider.get() without specifying a region
+    Test SecretsProvider.get() without specifying a config
     """
 
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
@@ -578,13 +584,13 @@ def test_secrets_provider_get_default_region(monkeypatch, mock_name, mock_value)
         stubber.deactivate()
 
 
-def test_secrets_provider_get_cached(mock_name, mock_value):
+def test_secrets_provider_get_cached(mock_name, mock_value, config):
     """
     Test SecretsProvider.get() with a cached value
     """
 
     # Create a new provider
-    provider = parameters.SecretsProvider(region="us-east-1")
+    provider = parameters.SecretsProvider(config=config)
 
     # Inject value in the internal store
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
@@ -602,13 +608,13 @@ def test_secrets_provider_get_cached(mock_name, mock_value):
         stubber.deactivate()
 
 
-def test_secrets_provider_get_expired(mock_name, mock_value):
+def test_secrets_provider_get_expired(mock_name, mock_value, config):
     """
     Test SecretsProvider.get() with a cached but expired value
     """
 
     # Create a new provider
-    provider = parameters.SecretsProvider(region="us-east-1")
+    provider = parameters.SecretsProvider(config=config)
 
     # Inject value in the internal store
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() - timedelta(seconds=60))

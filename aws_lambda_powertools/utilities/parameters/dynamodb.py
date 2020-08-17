@@ -7,6 +7,7 @@ from typing import Dict, Optional
 
 import boto3
 from boto3.dynamodb.conditions import Key
+from botocore.config import Config
 
 from .base import BaseProvider
 
@@ -21,16 +22,14 @@ class DynamoDBProvider(BaseProvider):
     value_attr = None
 
     def __init__(
-        self, table_name: str, key_attr: str = "id", value_attr: str = "value", region: Optional[str] = None,
+        self, table_name: str, key_attr: str = "id", value_attr: str = "value", config: Optional[Config] = None,
     ):
         """
         Initialize the DynamoDB client
         """
 
-        client_kwargs = {}
-        if region:
-            client_kwargs["region_name"] = region
-        self.table = boto3.resource("dynamodb", **client_kwargs).Table(table_name)
+        config = config or Config()
+        self.table = boto3.resource("dynamodb", config=config).Table(table_name)
 
         self.key_attr = key_attr
         self.value_attr = value_attr
