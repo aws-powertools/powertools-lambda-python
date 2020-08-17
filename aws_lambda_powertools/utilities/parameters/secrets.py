@@ -14,6 +14,25 @@ from .base import DEFAULT_PROVIDERS, BaseProvider
 class SecretsProvider(BaseProvider):
     """
     AWS Secrets Manager Parameter Provider
+
+    Example
+    -------
+    **Retrieves a parameter value from Secrets Manager**
+
+        >>> from aws_lambda_powertools.utilities.parameters import SecretsProvider
+        >>> secrets_provider = SecretsProvider()
+        >>>
+        >>> secrets_provider.get("my-parameter")
+
+    **Retrieves a parameter value from Secrets Manager in another AWS region**
+
+        >>> from botocore.config import Config
+        >>> from aws_lambda_powertools.utilities.parameters import SecretsProvider
+        >>>
+        >>> config = Config(region_name="us-west-1")
+        >>> secrets_provider = SecretsProvider(config=config)
+        >>>
+        >>> secrets_provider.get("my-parameter")
     """
 
     client = None

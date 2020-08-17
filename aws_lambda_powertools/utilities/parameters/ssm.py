@@ -14,6 +14,32 @@ from .base import DEFAULT_PROVIDERS, BaseProvider
 class SSMProvider(BaseProvider):
     """
     AWS Systems Manager Parameter Store Provider
+
+    Example
+    -------
+    **Retrieves a parameter value from Systems Manager Parameter Store**
+
+        >>> from aws_lambda_powertools.utilities.parameters import SSMProvider
+        >>> ssm_provider = SSMProvider()
+        >>>
+        >>> ssm_provider.get("/my/parameter")
+
+    **Retrieves a parameter value from Systems Manager Parameter Store in another AWS region**
+
+        >>> from botocore.config import Config
+        >>> from aws_lambda_powertools.utilities.parameters import SSMProvider
+        >>>
+        >>> config = Config(region_name="us-west-1")
+        >>> ssm_provider = SSMProvider(config=config)
+        >>>
+        >>> ssm_provider.get("/my/parameter")
+
+    **Retrieves multiple parameter values from Systes Manager Parameter Store using a path prefix**
+
+        >>> from aws_lambda_powertools.utilities.parameters import SSMProvider
+        >>> ssm_provider = SSMProvider()
+        >>>
+        >>> ssm_provider.get_multiple("/my/path/prefix")
     """
 
     client = None

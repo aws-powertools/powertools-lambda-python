@@ -15,6 +15,60 @@ from .base import BaseProvider
 class DynamoDBProvider(BaseProvider):
     """
     Amazon DynamoDB Parameter Provider
+
+    Example
+    -------
+    **Retrieves a parameter value from a DynamoDB table**
+
+    In this example, the DynamoDB table uses `id` as hash key and stores the value in the `value`
+    attribute.
+
+        >>> from aws_lambda_powertools.utilities.parameters import DynamoDBProvider
+        >>> ddb_provider = DynamoDBProvider("ParametersTable")
+        >>>
+        >>> ddb_provider.get("my-parameter")
+
+    **Retrieves a parameter value from a DynamoDB table that has custom attribute names**
+
+        >>> from aws_lambda_powertools.utilities.parameters import DynamoDBProvider
+        >>> ddb_provider = DynamoDBProvider(
+        ...     "ParametersTable",
+        ...     key_attr="my-id",
+        ...     value_attr="my-value"
+        ... )
+        >>>
+        >>> ddb_provider.get("my-parameter")
+
+    **Retrieves a parameter value from a DynamoDB table in another AWS region**
+
+        >>> from botocore.config import Config
+        >>> from aws_lambda_powertools.utilities.parameters import DynamoDBProvider
+        >>>
+        >>> config = Config(region_name="us-west-1")
+        >>> ddb_provider = DynamoDBProvider("ParametersTable", config=config)
+        >>>
+        >>> ddb_provider.get("my-parameter")
+
+    **Retrieves multiple values from a DynamoDB table**
+
+    In this case, the provider will use a sort key to retrieve multiple values using a query under
+    the hood. This expects that the sort key is named `sk`.
+
+        >>> from aws_lambda_powertools.utilities.parameters import DynamoDBProvider
+        >>> ddb_provider = DynamoDBProvider("ParametersTable")
+        >>>
+        >>> ddb_provider.get_multiple("my-parameters")
+
+    **Retrieves multiple values from a DynamoDB table with a custom sort key**
+
+    In this case, the provider will use a sort key to retrieve multiple values using a query under
+    the hood.
+
+        >>> from aws_lambda_powertools.utilities.parameters import DynamoDBProvider
+        >>> ddb_provider = DynamoDBProvider("ParametersTable")
+        >>>
+        >>> ddb_provider.get_multiple("my-parameters", sort_attr="my-sort-attr")
+
     """
 
     table = None
