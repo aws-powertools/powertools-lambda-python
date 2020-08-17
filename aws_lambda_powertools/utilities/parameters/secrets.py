@@ -33,6 +33,13 @@ class SecretsProvider(BaseProvider):
         >>> secrets_provider = SecretsProvider(config=config)
         >>>
         >>> secrets_provider.get("my-parameter")
+
+    **Retrieves a parameter value from Secrets Manager passing options to the SDK call**
+
+        >>> from aws_lambda_powertools.utilities.parameters import SecretsProvider
+        >>> secrets_provider = SecretsProvider()
+        >>>
+        >>> secrets_provider.get("my-parameter", VersionId="f658cac0-98a5-41d9-b993-8a76a7799194")
     """
 
     client = None
@@ -48,14 +55,24 @@ class SecretsProvider(BaseProvider):
 
         super().__init__()
 
-    def _get(self, name: str, **kwargs) -> str:
+    def _get(self, name: str, **sdk_options) -> str:
         """
         Retrieve a parameter value from AWS Systems Manager Parameter Store
+
+        Parameters
+        ----------
+        name: str
+            Name of the parameter
+        sdk_options: dict
+            Dictionary of options that will be passed to the get_secret_value call
         """
 
-        return self.client.get_secret_value(SecretId=name)["SecretString"]
+        # Explicit arguments will take precedence over keyword arguments
+        sdk_options["SecretId"] = name
 
-    def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        return self.client.get_secret_value(**sdk_options)["SecretString"]
+
+    def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
         """
         Retrieving multiple parameter values is not supported with AWS Secrets Manager
         """

@@ -145,6 +145,58 @@ def test_dynamodb_provider_get_expired(mock_name, mock_value, config):
         stubber.deactivate()
 
 
+def test_dynamodb_provider_get_sdk_options(mock_name, mock_value, config):
+    """
+    Test DynamoDBProvider.get() with SDK options
+    """
+
+    table_name = "TEST_TABLE"
+
+    # Create a new provider
+    provider = parameters.DynamoDBProvider(table_name, config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.table.meta.client)
+    response = {"Item": {"id": {"S": mock_name}, "value": {"S": mock_value}}}
+    expected_params = {"TableName": table_name, "Key": {"id": mock_name}, "ConsistentRead": True}
+    stubber.add_response("get_item", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name, ConsistentRead=True)
+
+        assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_dynamodb_provider_get_sdk_options_overwrite(mock_name, mock_value, config):
+    """
+    Test DynamoDBProvider.get() with SDK options that should be overwritten
+    """
+
+    table_name = "TEST_TABLE"
+
+    # Create a new provider
+    provider = parameters.DynamoDBProvider(table_name, config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.table.meta.client)
+    response = {"Item": {"id": {"S": mock_name}, "value": {"S": mock_value}}}
+    expected_params = {"TableName": table_name, "Key": {"id": mock_name}}
+    stubber.add_response("get_item", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name, Key="THIS_SHOULD_BE_OVERWRITTEN")
+
+        assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
 def test_dynamodb_provider_get_multiple(mock_name, mock_value, config):
     """
     Test DynamoDBProvider.get_multiple() with a non-cached path
@@ -223,6 +275,85 @@ def test_dynamodb_provider_get_multiple_next_token(mock_name, mock_value, config
 
     try:
         values = provider.get_multiple(mock_name)
+
+        stubber.assert_no_pending_responses()
+
+        assert len(values) == len(mock_param_names)
+        for name in mock_param_names:
+            assert name in values
+            assert values[name] == f"{mock_value}/{name}"
+    finally:
+        stubber.deactivate()
+
+
+def test_dynamodb_provider_get_multiple_sdk_options(mock_name, mock_value, config):
+    """
+    Test DynamoDBProvider.get_multiple() with custom SDK options
+    """
+
+    mock_param_names = ["A", "B", "C"]
+    table_name = "TEST_TABLE"
+
+    # Create a new provider
+    provider = parameters.DynamoDBProvider(table_name, config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.table.meta.client)
+    response = {
+        "Items": [
+            {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": f"{mock_value}/{name}"}}
+            for name in mock_param_names
+        ]
+    }
+    expected_params = {
+        "TableName": table_name,
+        "KeyConditionExpression": Key("id").eq(mock_name),
+        "ConsistentRead": True,
+    }
+    stubber.add_response("query", response, expected_params)
+    stubber.activate()
+
+    try:
+        values = provider.get_multiple(mock_name, ConsistentRead=True)
+
+        stubber.assert_no_pending_responses()
+
+        assert len(values) == len(mock_param_names)
+        for name in mock_param_names:
+            assert name in values
+            assert values[name] == f"{mock_value}/{name}"
+    finally:
+        stubber.deactivate()
+
+
+def test_dynamodb_provider_get_multiple_sdk_options_overwrite(mock_name, mock_value, config):
+    """
+    Test DynamoDBProvider.get_multiple() with custom SDK options that should be overwritten
+    """
+
+    mock_param_names = ["A", "B", "C"]
+    table_name = "TEST_TABLE"
+
+    # Create a new provider
+    provider = parameters.DynamoDBProvider(table_name, config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.table.meta.client)
+    response = {
+        "Items": [
+            {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": f"{mock_value}/{name}"}}
+            for name in mock_param_names
+        ]
+    }
+    expected_params = {
+        "TableName": table_name,
+        "KeyConditionExpression": Key("id").eq(mock_name),
+    }
+    stubber.add_response("query", response, expected_params)
+    stubber.activate()
+
+    try:
+        values = provider.get_multiple(mock_name, KeyConditionExpression="THIS_SHOULD_BE_OVERWRITTEN")
 
         stubber.assert_no_pending_responses()
 
@@ -361,6 +492,41 @@ def test_ssm_provider_get_expired(mock_name, mock_value, mock_version, config):
 
     try:
         value = provider.get(mock_name)
+
+        assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_sdk_options_overwrite(mock_name, mock_value, mock_version, config):
+    """
+    Test SSMProvider.get() with custom SDK options overwritten
+    """
+
+    # Create a new provider
+    provider = parameters.SSMProvider(config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "Parameter": {
+            "Name": mock_name,
+            "Type": "String",
+            "Value": mock_value,
+            "Version": mock_version,
+            "Selector": f"{mock_name}:{mock_version}",
+            "SourceResult": "string",
+            "LastModifiedDate": datetime(2015, 1, 1),
+            "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
+        }
+    }
+    expected_params = {"Name": mock_name, "WithDecryption": False}
+    stubber.add_response("get_parameter", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name, Name="THIS_SHOULD_BE_OVERWRITTEN", WithDecryption=True)
 
         assert value == mock_value
         stubber.assert_no_pending_responses()
@@ -522,6 +688,96 @@ def test_ssm_provider_get_multiple_next_token(mock_name, mock_value, mock_versio
         stubber.deactivate()
 
 
+def test_ssm_provider_get_multiple_sdk_options(mock_name, mock_value, mock_version, config):
+    """
+    Test SSMProvider.get_multiple() with SDK options
+    """
+
+    mock_param_names = ["A", "B", "C"]
+
+    # Create a new provider
+    provider = parameters.SSMProvider(config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "Parameters": [
+            {
+                "Name": f"{mock_name}/{name}",
+                "Type": "String",
+                "Value": f"{mock_value}/{name}",
+                "Version": mock_version,
+                "Selector": f"{mock_name}/{name}:{mock_version}",
+                "SourceResult": "string",
+                "LastModifiedDate": datetime(2015, 1, 1),
+                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
+            }
+            for name in mock_param_names
+        ]
+    }
+    expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False, "MaxResults": 10}
+    stubber.add_response("get_parameters_by_path", response, expected_params)
+    stubber.activate()
+
+    try:
+        values = provider.get_multiple(mock_name, MaxResults=10)
+
+        stubber.assert_no_pending_responses()
+
+        assert len(values) == len(mock_param_names)
+        for name in mock_param_names:
+            assert name in values
+            assert values[name] == f"{mock_value}/{name}"
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_multiple_sdk_options_overwrite(mock_name, mock_value, mock_version, config):
+    """
+    Test SSMProvider.get_multiple() with SDK options overwritten
+    """
+
+    mock_param_names = ["A", "B", "C"]
+
+    # Create a new provider
+    provider = parameters.SSMProvider(config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "Parameters": [
+            {
+                "Name": f"{mock_name}/{name}",
+                "Type": "String",
+                "Value": f"{mock_value}/{name}",
+                "Version": mock_version,
+                "Selector": f"{mock_name}/{name}:{mock_version}",
+                "SourceResult": "string",
+                "LastModifiedDate": datetime(2015, 1, 1),
+                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
+            }
+            for name in mock_param_names
+        ]
+    }
+    expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False}
+    stubber.add_response("get_parameters_by_path", response, expected_params)
+    stubber.activate()
+
+    try:
+        values = provider.get_multiple(
+            mock_name, Path="THIS_SHOULD_BE_OVERWRITTEN", Recursive=True, WithDecryption=True,
+        )
+
+        stubber.assert_no_pending_responses()
+
+        assert len(values) == len(mock_param_names)
+        for name in mock_param_names:
+            assert name in values
+            assert values[name] == f"{mock_value}/{name}"
+    finally:
+        stubber.deactivate()
+
+
 def test_secrets_provider_get(mock_name, mock_value, config):
     """
     Test SecretsProvider.get() with a non-cached value
@@ -634,6 +890,66 @@ def test_secrets_provider_get_expired(mock_name, mock_value, config):
 
     try:
         value = provider.get(mock_name)
+
+        assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_secrets_provider_get_sdk_options(mock_name, mock_value, config):
+    """
+    Test SecretsProvider.get() with custom SDK options
+    """
+
+    # Create a new provider
+    provider = parameters.SecretsProvider(config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "ARN": f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{mock_name}",
+        "Name": mock_name,
+        "VersionId": "7a9155b8-2dc9-466e-b4f6-5bc46516c84d",
+        "SecretString": mock_value,
+        "CreatedDate": datetime(2015, 1, 1),
+    }
+    expected_params = {"SecretId": mock_name, "VersionId": "7a9155b8-2dc9-466e-b4f6-5bc46516c84d"}
+    stubber.add_response("get_secret_value", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name, VersionId="7a9155b8-2dc9-466e-b4f6-5bc46516c84d")
+
+        assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_secrets_provider_get_sdk_options_overwrite(mock_name, mock_value, config):
+    """
+    Test SecretsProvider.get() with custom SDK options overwritten
+    """
+
+    # Create a new provider
+    provider = parameters.SecretsProvider(config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "ARN": f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{mock_name}",
+        "Name": mock_name,
+        "VersionId": "7a9155b8-2dc9-466e-b4f6-5bc46516c84d",
+        "SecretString": mock_value,
+        "CreatedDate": datetime(2015, 1, 1),
+    }
+    expected_params = {"SecretId": mock_name}
+    stubber.add_response("get_secret_value", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name, SecretId="THIS_SHOULD_BE_OVERWRITTEN")
 
         assert value == mock_value
         stubber.assert_no_pending_responses()

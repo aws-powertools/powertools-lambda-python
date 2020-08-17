@@ -49,6 +49,13 @@ class DynamoDBProvider(BaseProvider):
         >>>
         >>> ddb_provider.get("my-parameter")
 
+    **Retrieves a parameter value from a DynamoDB table passing options to the SDK call**
+
+        >>> from aws_lambda_powertools.utilities.parameters import DynamoDBProvider
+        >>> ddb_provider = DynamoDBProvider("ParametersTable")
+        >>>
+        >>> ddb_provider.get("my-parameter", ConsistentRead=True)
+
     **Retrieves multiple values from a DynamoDB table**
 
     In this case, the provider will use a sort key to retrieve multiple values using a query under
@@ -69,6 +76,12 @@ class DynamoDBProvider(BaseProvider):
         >>>
         >>> ddb_provider.get_multiple("my-parameters", sort_attr="my-sort-attr")
 
+    **Retrieves multiple values from a DynamoDB table passing options to the SDK calls**
+
+        >>> from aws_lambda_powertools.utilities.parameters import DynamoDBProvider
+        >>> ddb_provider = DynamoDBProvider("ParametersTable")
+        >>>
+        >>> ddb_provider.get("my-parameter", ConsistentRead=True)
     """
 
     table = None
@@ -90,14 +103,24 @@ class DynamoDBProvider(BaseProvider):
 
         super().__init__()
 
-    def _get(self, name: str, **kwargs) -> str:
+    def _get(self, name: str, **sdk_options) -> str:
         """
         Retrieve a parameter value from Amazon DynamoDB
+
+        Parameters
+        ----------
+        name: str
+            Name of the parameter
+        sdk_options: dict
+            Dictionary of options that will be passed to the get_item call
         """
 
-        return self.table.get_item(Key={self.key_attr: name})["Item"][self.value_attr]
+        # Explicit arguments will take precedence over keyword arguments
+        sdk_options["Key"] = {self.key_attr: name}
 
-    def _get_multiple(self, path: str, sort_attr: str = "sk", **kwargs) -> Dict[str, str]:
+        return self.table.get_item(**sdk_options)["Item"][self.value_attr]
+
+    def _get_multiple(self, path: str, sort_attr: str = "sk", **sdk_options) -> Dict[str, str]:
         """
         Retrieve multiple parameter values from Amazon DynamoDB
 
@@ -107,16 +130,20 @@ class DynamoDBProvider(BaseProvider):
             Path to retrieve the parameters
         sort_attr: str
             Name of the DynamoDB table sort key (defaults to 'sk')
+        sdk_options: dict
+            Dictionary of options that will be passed to the query call
         """
 
-        response = self.table.query(KeyConditionExpression=Key(self.key_attr).eq(path))
+        # Explicit arguments will take precedence over keyword arguments
+        sdk_options["KeyConditionExpression"] = Key(self.key_attr).eq(path)
+
+        response = self.table.query(**sdk_options)
         items = response.get("Items", [])
 
         # Keep querying while there are more items matching the partition key
         while "LastEvaluatedKey" in response:
-            response = self.table.query(
-                KeyConditionExpression=Key(self.key_attr).eq(path), ExclusiveStartKey=response["LastEvaluatedKey"],
-            )
+            sdk_options["ExclusiveStartKey"] = response["LastEvaluatedKey"]
+            response = self.table.query(**sdk_options)
             items.extend(response.get("Items", []))
 
         retval = {}

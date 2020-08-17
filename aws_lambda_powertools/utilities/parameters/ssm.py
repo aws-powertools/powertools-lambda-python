@@ -34,12 +34,19 @@ class SSMProvider(BaseProvider):
         >>>
         >>> ssm_provider.get("/my/parameter")
 
-    **Retrieves multiple parameter values from Systes Manager Parameter Store using a path prefix**
+    **Retrieves multiple parameter values from Systems Manager Parameter Store using a path prefix**
 
         >>> from aws_lambda_powertools.utilities.parameters import SSMProvider
         >>> ssm_provider = SSMProvider()
         >>>
         >>> ssm_provider.get_multiple("/my/path/prefix")
+
+    **Retrieves multiple parameter values from Systems Manager Parameter Store passing options to the SDK call**
+
+        >>> from aws_lambda_powertools.utilities.parameters import SSMProvider
+        >>> ssm_provider = SSMProvider()
+        >>>
+        >>> ssm_provider.get_multiple("/my/path/prefix", MaxResults=10)
     """
 
     client = None
@@ -56,7 +63,7 @@ class SSMProvider(BaseProvider):
 
         super().__init__()
 
-    def _get(self, name: str, decrypt: bool = False, **kwargs) -> str:
+    def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
         """
         Retrieve a parameter value from AWS Systems Manager Parameter Store
 
@@ -66,11 +73,17 @@ class SSMProvider(BaseProvider):
             Parameter name
         decrypt: bool
             If the parameter value should be decrypted
+        sdk_options: dict
+            Dictionary of options that will be passed to the get_parameter call
         """
 
-        return self.client.get_parameter(Name=name, WithDecryption=decrypt)["Parameter"]["Value"]
+        # Explicit arguments will take precedence over keyword arguments
+        sdk_options["Name"] = name
+        sdk_options["WithDecryption"] = decrypt
 
-    def _get_multiple(self, path: str, decrypt: bool = False, recursive: bool = False, **kwargs) -> Dict[str, str]:
+        return self.client.get_parameter(**sdk_options)["Parameter"]["Value"]
+
+    def _get_multiple(self, path: str, decrypt: bool = False, recursive: bool = False, **sdk_options) -> Dict[str, str]:
         """
         Retrieve multiple parameter values from AWS Systems Manager Parameter Store
 
@@ -82,9 +95,16 @@ class SSMProvider(BaseProvider):
             If the parameter values should be decrypted
         recursive: bool
             If this should retrieve the parameter values recursively or not
+        sdk_options: dict
+            Dictionary of options that will be passed to the get_parameters_by_path call
         """
 
-        response = self.client.get_parameters_by_path(Path=path, WithDecryption=decrypt, Recursive=recursive)
+        # Explicit arguments will take precedence over keyword arguments
+        sdk_options["Path"] = path
+        sdk_options["WithDecryption"] = decrypt
+        sdk_options["Recursive"] = recursive
+
+        response = self.client.get_parameters_by_path(**sdk_options)
         parameters = response.get("Parameters", [])
 
         # Keep retrieving parameters
