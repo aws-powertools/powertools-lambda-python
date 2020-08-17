@@ -1,3 +1,4 @@
+import contextlib
 import copy
 import functools
 import inspect
@@ -280,7 +281,7 @@ class Tracer:
 
         return decorate
 
-    def capture_method(self, method: Callable = None):
+    def capture_method(self, method: Callable = None):  # noqa: C901
         """Decorator to create subsegment for arbitrary functions
 
         It also captures both response and exceptions as metadata
@@ -411,6 +412,44 @@ class Tracer:
                         raise
 
                     return response
+
+        elif inspect.isgeneratorfunction(method):
+
+            @functools.wraps(method)
+            def decorate(*args, **kwargs):
+                with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+                    try:
+                        logger.debug(f"Calling method: {method_name}")
+                        result = yield from method(*args, **kwargs)
+                        self._add_response_as_metadata(function_name=method_name, data=result, subsegment=subsegment)
+                    except Exception as err:
+                        logger.exception(f"Exception received from '{method_name}' method")
+                        self._add_full_exception_as_metadata(
+                            function_name=method_name, error=err, subsegment=subsegment
+                        )
+                        raise
+
+                    return result
+
+        elif hasattr(method, "__wrapped__") and inspect.isgeneratorfunction(method.__wrapped__):
+
+            @functools.wraps(method)
+            @contextlib.contextmanager
+            def decorate(*args, **kwargs):
+                with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+                    try:
+                        logger.debug(f"Calling method: {method_name}")
+                        with method(*args, **kwargs) as return_val:
+                            result = return_val
+                        self._add_response_as_metadata(function_name=method_name, data=result, subsegment=subsegment)
+                    except Exception as err:
+                        logger.exception(f"Exception received from '{method_name}' method")
+                        self._add_full_exception_as_metadata(
+                            function_name=method_name, error=err, subsegment=subsegment
+                        )
+                        raise
+
+                    yield result
 
         else:
 
