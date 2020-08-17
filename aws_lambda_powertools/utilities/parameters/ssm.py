@@ -30,7 +30,7 @@ class SSMProvider(BaseProvider):
 
         super().__init__()
 
-    def _get(self, name: str, **kwargs) -> str:
+    def _get(self, name: str, decrypt: bool = False, **kwargs) -> str:
         """
         Retrieve a parameter value from AWS Systems Manager Parameter Store
 
@@ -42,12 +42,9 @@ class SSMProvider(BaseProvider):
             If the parameter value should be decrypted
         """
 
-        # Load kwargs
-        decrypt = kwargs.get("decrypt", False)
-
         return self.client.get_parameter(Name=name, WithDecryption=decrypt)["Parameter"]["Value"]
 
-    def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+    def _get_multiple(self, path: str, decrypt: bool = False, recursive: bool = False, **kwargs) -> Dict[str, str]:
         """
         Retrieve multiple parameter values from AWS Systems Manager Parameter Store
 
@@ -60,10 +57,6 @@ class SSMProvider(BaseProvider):
         recursive: bool
             If this should retrieve the parameter values recursively or not
         """
-
-        # Load kwargs
-        decrypt = kwargs.get("decrypt", False)
-        recursive = kwargs.get("recursive", False)
 
         response = self.client.get_parameters_by_path(Path=path, WithDecryption=decrypt, Recursive=recursive)
         parameters = response.get("Parameters", [])

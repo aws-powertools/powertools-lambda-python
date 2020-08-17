@@ -43,7 +43,7 @@ class DynamoDBProvider(BaseProvider):
 
         return self.table.get_item(Key={self.key_attr: name})["Item"][self.value_attr]
 
-    def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+    def _get_multiple(self, path: str, sort_attr: str = "sk", **kwargs) -> Dict[str, str]:
         """
         Retrieve multiple parameter values from Amazon DynamoDB
 
@@ -54,8 +54,6 @@ class DynamoDBProvider(BaseProvider):
         sort_attr: str
             Name of the DynamoDB table sort key (defaults to 'sk')
         """
-
-        sort_attr = kwargs.get("sort_attr", "sk")
 
         response = self.table.query(KeyConditionExpression=Key(self.key_attr).eq(path))
         items = response.get("Items", [])
