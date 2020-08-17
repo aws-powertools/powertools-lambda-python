@@ -16,6 +16,17 @@ class DynamoDBProvider(BaseProvider):
     """
     Amazon DynamoDB Parameter Provider
 
+    Parameters
+    ----------
+    table_name: str
+        Name of the DynamoDB table that stores parameters
+    key_attr: str, optional
+        Hash key for the DynamoDB table
+    value_attr: str, optional
+        Attribute that contains the values in the DynamoDB table
+    config: botocore.config.Config, optional
+        Botocore configuration to pass during client initialization
+
     Example
     -------
     **Retrieves a parameter value from a DynamoDB table**
@@ -111,7 +122,7 @@ class DynamoDBProvider(BaseProvider):
         ----------
         name: str
             Name of the parameter
-        sdk_options: dict
+        sdk_options: dict, optional
             Dictionary of options that will be passed to the get_item call
         """
 
@@ -128,9 +139,9 @@ class DynamoDBProvider(BaseProvider):
         ----------
         path: str
             Path to retrieve the parameters
-        sort_attr: str
+        sort_attr: str, optional
             Name of the DynamoDB table sort key (defaults to 'sk')
-        sdk_options: dict
+        sdk_options: dict, optional
             Dictionary of options that will be passed to the query call
         """
 

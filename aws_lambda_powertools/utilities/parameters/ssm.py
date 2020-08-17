@@ -15,6 +15,11 @@ class SSMProvider(BaseProvider):
     """
     AWS Systems Manager Parameter Store Provider
 
+    Parameters
+    ----------
+    config: botocore.config.Config, optional
+        Botocore configuration to pass during client initialization
+
     Example
     -------
     **Retrieves a parameter value from Systems Manager Parameter Store**
@@ -71,9 +76,9 @@ class SSMProvider(BaseProvider):
         ----------
         name: str
             Parameter name
-        decrypt: bool
+        decrypt: bool, optional
             If the parameter value should be decrypted
-        sdk_options: dict
+        sdk_options: dict, optional
             Dictionary of options that will be passed to the get_parameter call
         """
 
@@ -91,11 +96,11 @@ class SSMProvider(BaseProvider):
         ----------
         path: str
             Path to retrieve the parameters
-        decrypt: bool
+        decrypt: bool, optional
             If the parameter values should be decrypted
-        recursive: bool
+        recursive: bool, optional
             If this should retrieve the parameter values recursively or not
-        sdk_options: dict
+        sdk_options: dict, optional
             Dictionary of options that will be passed to the get_parameters_by_path call
         """
 
@@ -131,9 +136,32 @@ class SSMProvider(BaseProvider):
         return retval
 
 
-def get_parameter(name: str, transform: Optional[str] = None) -> Union[str, list, dict, bytes]:
+def get_parameter(name: str, transform: Optional[str] = None, **sdk_options) -> Union[str, list, dict, bytes]:
     """
     Retrieve a parameter value from AWS Systems Manager (SSM) Parameter Store
+
+    Parameters
+    ----------
+    name: str
+        Name of the parameter
+    transform: str, optional
+        Transforms the content from a JSON object ('json') or base64 binary string ('binary')
+    sdk_options: dict, optional
+        Dictionary of options that will be passed to the get_secret_value call
+
+    Example
+    -------
+    **Retrieves a parameter value from Systems Manager Parameter Store**
+
+        >>> from aws_lambda_powertools.utilities.parameters import get_parameter
+        >>>
+        >>> get_parameter("/my/parameter")
+
+    **Retrieves a parameter value and decodes it using a Base64 decoder**
+
+        >>> from aws_lambda_powertools.utilities.parameters import get_parameter
+        >>>
+        >>> get_parameter("/my/parameter", transform='binary')
     """
 
     # Only create the provider if this function is called at least once
@@ -144,10 +172,37 @@ def get_parameter(name: str, transform: Optional[str] = None) -> Union[str, list
 
 
 def get_parameters(
-    path: str, transform: Optional[str] = None, recursive: bool = False, decrypt: bool = False
+    path: str, transform: Optional[str] = None, recursive: bool = False, decrypt: bool = False, **sdk_options
 ) -> Union[Dict[str, str], Dict[str, dict], Dict[str, bytes]]:
     """
     Retrieve multiple parameter values from AWS Systems Manager (SSM) Parameter Store
+
+    Parameters
+    ----------
+    path: str
+        Path to retrieve the parameters
+    transform: str, optional
+        Transforms the content from a JSON object ('json') or base64 binary string ('binary')
+    decrypt: bool, optional
+        If the parameter values should be decrypted
+    recursive: bool, optional
+        If this should retrieve the parameter values recursively or not
+    sdk_options: dict, optional
+        Dictionary of options that will be passed to the get_parameters_by_path call
+
+    Example
+    -------
+    **Retrieves parameter values from Systems Manager Parameter Store**
+
+        >>> from aws_lambda_powertools.utilities.parameters import get_parameter
+        >>>
+        >>> get_parameters("/my/path/parameter")
+
+    **Retrieves parameter values and decodes them using a Base64 decoder**
+
+        >>> from aws_lambda_powertools.utilities.parameters import get_parameter
+        >>>
+        >>> get_parameters("/my/path/parameter", transform='binary')
     """
 
     # Only create the provider if this function is called at least once
