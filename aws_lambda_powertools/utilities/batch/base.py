@@ -9,9 +9,6 @@ from typing import Any, Callable, Iterable, List, MutableSequence, Tuple
 
 
 class BaseProcessor(ABC):
-
-    # init with lambda's context ?
-
     @abstractmethod
     def _prepare(self):
         """

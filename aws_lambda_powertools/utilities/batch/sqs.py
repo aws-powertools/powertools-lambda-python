@@ -13,7 +13,7 @@ from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from .base import BasePartialProcessor
 
 
-class BasePartialSQSProcessor(BasePartialProcessor):
+class PartialSQSProcessor(BasePartialProcessor):
     def __init__(self):
         self._client = boto3.client("sqs")
         self.success_messages: List = []
@@ -44,7 +44,8 @@ class BasePartialSQSProcessor(BasePartialProcessor):
     def _clean(self):
         """
         """
-        if not self.fail_messages:
+        # skip only failures or only successes
+        if not (self.fail_messages and self.success_messages):
             return
 
         queue_url = self.get_queue_url()
@@ -53,14 +54,12 @@ class BasePartialSQSProcessor(BasePartialProcessor):
         return self._client.delete_message_batch(QueueUrl=queue_url, Entries=entries_to_remove)
 
 
-class DefaultPartialSQSProcessor(BasePartialSQSProcessor):
-    pass
-
-
 @lambda_handler_decorator
 def partial_sqs_processor(handler, event, context, record_handler, processor=None):
     records = event["Records"]
-    processor = processor or DefaultPartialSQSProcessor()
+    processor = processor or PartialSQSProcessor()
 
     with processor(records, record_handler) as ctx:
         ctx.process()
+
+    return handler(event, context)
