@@ -21,9 +21,11 @@ class DynamoDBProvider(BaseProvider):
     table_name: str
         Name of the DynamoDB table that stores parameters
     key_attr: str, optional
-        Hash key for the DynamoDB table
+        Hash key for the DynamoDB table (default to 'id')
+    sort_attr: str, optional
+        Name of the DynamoDB table sort key (defaults to 'sk'), used only for get_multiple
     value_attr: str, optional
-        Attribute that contains the values in the DynamoDB table
+        Attribute that contains the values in the DynamoDB table (defaults to 'value')
     config: botocore.config.Config, optional
         Botocore configuration to pass during client initialization
 
@@ -102,15 +104,20 @@ class DynamoDBProvider(BaseProvider):
         b   Parameter value b
         c   Parameter value c
 
-    **Retrieves multiple values from a DynamoDB table with a custom sort key**
+    **Retrieves multiple values from a DynamoDB table that has custom attribute names**
 
     In this case, the provider will use a sort key to retrieve multiple values using a query under
     the hood.
 
         >>> from aws_lambda_powertools.utilities.parameters import DynamoDBProvider
-        >>> ddb_provider = DynamoDBProvider("ParametersTable")
+        >>> ddb_provider = DynamoDBProvider(
+        ...     "ParametersTable",
+        ...     key_attr="my-id",
+        ...     sort_attr="my-sort-key",
+        ...     value_attr="my-value"
+        ... )
         >>>
-        >>> values = ddb_provider.get_multiple("my-parameters", sort_attr="my-sort-attr")
+        >>> values = ddb_provider.get_multiple("my-parameters")
         >>>
         >>> for key, value in values.items():
         ...     print(key, value)
@@ -134,10 +141,16 @@ class DynamoDBProvider(BaseProvider):
 
     table = None
     key_attr = None
+    sort_attr = None
     value_attr = None
 
     def __init__(
-        self, table_name: str, key_attr: str = "id", value_attr: str = "value", config: Optional[Config] = None,
+        self,
+        table_name: str,
+        key_attr: str = "id",
+        sort_attr: str = "sk",
+        value_attr: str = "value",
+        config: Optional[Config] = None,
     ):
         """
         Initialize the DynamoDB client
@@ -147,6 +160,7 @@ class DynamoDBProvider(BaseProvider):
         self.table = boto3.resource("dynamodb", config=config).Table(table_name)
 
         self.key_attr = key_attr
+        self.sort_attr = sort_attr
         self.value_attr = value_attr
 
         super().__init__()
@@ -168,7 +182,7 @@ class DynamoDBProvider(BaseProvider):
 
         return self.table.get_item(**sdk_options)["Item"][self.value_attr]
 
-    def _get_multiple(self, path: str, sort_attr: str = "sk", **sdk_options) -> Dict[str, str]:
+    def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
         """
         Retrieve multiple parameter values from Amazon DynamoDB
 
@@ -176,8 +190,6 @@ class DynamoDBProvider(BaseProvider):
         ----------
         path: str
             Path to retrieve the parameters
-        sort_attr: str, optional
-            Name of the DynamoDB table sort key (defaults to 'sk')
         sdk_options: dict, optional
             Dictionary of options that will be passed to the DynamoDB query API call
         """
@@ -196,6 +208,6 @@ class DynamoDBProvider(BaseProvider):
 
         retval = {}
         for item in items:
-            retval[item[sort_attr]] = item[self.value_attr]
+            retval[item[self.sort_attr]] = item[self.value_attr]
 
         return retval
