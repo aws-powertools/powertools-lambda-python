@@ -32,12 +32,17 @@ class DynamoDBProvider(BaseProvider):
     **Retrieves a parameter value from a DynamoDB table**
 
     In this example, the DynamoDB table uses `id` as hash key and stores the value in the `value`
-    attribute.
+    attribute. The parameter item looks like this:
+
+        { "id": "my-parameters", "value": "Parameter value a" }
 
         >>> from aws_lambda_powertools.utilities.parameters import DynamoDBProvider
         >>> ddb_provider = DynamoDBProvider("ParametersTable")
         >>>
-        >>> ddb_provider.get("my-parameter")
+        >>> value = ddb_provider.get("my-parameter")
+        >>>
+        >>> print(value)
+        My parameter value
 
     **Retrieves a parameter value from a DynamoDB table that has custom attribute names**
 
@@ -48,7 +53,10 @@ class DynamoDBProvider(BaseProvider):
         ...     value_attr="my-value"
         ... )
         >>>
-        >>> ddb_provider.get("my-parameter")
+        >>> value = ddb_provider.get("my-parameter")
+        >>>
+        >>> print(value)
+        My parameter value
 
     **Retrieves a parameter value from a DynamoDB table in another AWS region**
 
@@ -58,24 +66,41 @@ class DynamoDBProvider(BaseProvider):
         >>> config = Config(region_name="us-west-1")
         >>> ddb_provider = DynamoDBProvider("ParametersTable", config=config)
         >>>
-        >>> ddb_provider.get("my-parameter")
+        >>> value = ddb_provider.get("my-parameter")
+        >>>
+        >>> print(value)
+        My parameter value
 
     **Retrieves a parameter value from a DynamoDB table passing options to the SDK call**
 
         >>> from aws_lambda_powertools.utilities.parameters import DynamoDBProvider
         >>> ddb_provider = DynamoDBProvider("ParametersTable")
         >>>
-        >>> ddb_provider.get("my-parameter", ConsistentRead=True)
+        >>> value = ddb_provider.get("my-parameter", ConsistentRead=True)
+        >>>
+        >>> print(value)
+        My parameter value
 
     **Retrieves multiple values from a DynamoDB table**
 
     In this case, the provider will use a sort key to retrieve multiple values using a query under
-    the hood. This expects that the sort key is named `sk`.
+    the hood. This expects that the sort key is named `sk`. The DynamoDB table contains three items
+    looking like this:
+
+        { "id": "my-parameters", "sk": "a", "value": "Parameter value a" }
+        { "id": "my-parameters", "sk": "b", "value": "Parameter value b" }
+        { "id": "my-parameters", "sk": "c", "value": "Parameter value c" }
 
         >>> from aws_lambda_powertools.utilities.parameters import DynamoDBProvider
         >>> ddb_provider = DynamoDBProvider("ParametersTable")
         >>>
-        >>> ddb_provider.get_multiple("my-parameters")
+        >>> values = ddb_provider.get_multiple("my-parameters")
+        >>>
+        >>> for key, value in values.items():
+        ...     print(key, value)
+        a   Parameter value a
+        b   Parameter value b
+        c   Parameter value c
 
     **Retrieves multiple values from a DynamoDB table with a custom sort key**
 
@@ -85,14 +110,26 @@ class DynamoDBProvider(BaseProvider):
         >>> from aws_lambda_powertools.utilities.parameters import DynamoDBProvider
         >>> ddb_provider = DynamoDBProvider("ParametersTable")
         >>>
-        >>> ddb_provider.get_multiple("my-parameters", sort_attr="my-sort-attr")
+        >>> values = ddb_provider.get_multiple("my-parameters", sort_attr="my-sort-attr")
+        >>>
+        >>> for key, value in values.items():
+        ...     print(key, value)
+        a   Parameter value a
+        b   Parameter value b
+        c   Parameter value c
 
     **Retrieves multiple values from a DynamoDB table passing options to the SDK calls**
 
         >>> from aws_lambda_powertools.utilities.parameters import DynamoDBProvider
         >>> ddb_provider = DynamoDBProvider("ParametersTable")
         >>>
-        >>> ddb_provider.get_multiple("my-parameters", ConsistentRead=True)
+        >>> values = ddb_provider.get_multiple("my-parameters", ConsistentRead=True)
+        >>>
+        >>> for key, value in values.items():
+        ...     print(key, value)
+        a   Parameter value a
+        b   Parameter value b
+        c   Parameter value c
     """
 
     table = None
@@ -123,7 +160,7 @@ class DynamoDBProvider(BaseProvider):
         name: str
             Name of the parameter
         sdk_options: dict, optional
-            Dictionary of options that will be passed to the get_item call
+            Dictionary of options that will be passed to the DynamoDB get_item API call
         """
 
         # Explicit arguments will take precedence over keyword arguments
@@ -142,7 +179,7 @@ class DynamoDBProvider(BaseProvider):
         sort_attr: str, optional
             Name of the DynamoDB table sort key (defaults to 'sk')
         sdk_options: dict, optional
-            Dictionary of options that will be passed to the query call
+            Dictionary of options that will be passed to the DynamoDB query API call
         """
 
         # Explicit arguments will take precedence over keyword arguments

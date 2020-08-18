@@ -27,7 +27,10 @@ class SSMProvider(BaseProvider):
         >>> from aws_lambda_powertools.utilities.parameters import SSMProvider
         >>> ssm_provider = SSMProvider()
         >>>
-        >>> ssm_provider.get("/my/parameter")
+        >>> value = ssm_provider.get("/my/parameter")
+        >>>
+        >>> print(value)
+        My parameter value
 
     **Retrieves a parameter value from Systems Manager Parameter Store in another AWS region**
 
@@ -37,21 +40,36 @@ class SSMProvider(BaseProvider):
         >>> config = Config(region_name="us-west-1")
         >>> ssm_provider = SSMProvider(config=config)
         >>>
-        >>> ssm_provider.get("/my/parameter")
+        >>> value = ssm_provider.get("/my/parameter")
+        >>>
+        >>> print(value)
+        My parameter value
 
     **Retrieves multiple parameter values from Systems Manager Parameter Store using a path prefix**
 
         >>> from aws_lambda_powertools.utilities.parameters import SSMProvider
         >>> ssm_provider = SSMProvider()
         >>>
-        >>> ssm_provider.get_multiple("/my/path/prefix")
+        >>> values = ssm_provider.get_multiple("/my/path/prefix")
+        >>>
+        >>> for key, value in values.items():
+        ...     print(key, value)
+        /my/path/prefix/a   Parameter value a
+        /my/path/prefix/b   Parameter value b
+        /my/path/prefix/c   Parameter value c
 
     **Retrieves multiple parameter values from Systems Manager Parameter Store passing options to the SDK call**
 
         >>> from aws_lambda_powertools.utilities.parameters import SSMProvider
         >>> ssm_provider = SSMProvider()
         >>>
-        >>> ssm_provider.get_multiple("/my/path/prefix", MaxResults=10)
+        >>> values = ssm_provider.get_multiple("/my/path/prefix", MaxResults=10)
+        >>>
+        >>> for key, value in values.items():
+        ...     print(key, value)
+        /my/path/prefix/a   Parameter value a
+        /my/path/prefix/b   Parameter value b
+        /my/path/prefix/c   Parameter value c
     """
 
     client = None
@@ -79,7 +97,7 @@ class SSMProvider(BaseProvider):
         decrypt: bool, optional
             If the parameter value should be decrypted
         sdk_options: dict, optional
-            Dictionary of options that will be passed to the get_parameter call
+            Dictionary of options that will be passed to the Parameter Store get_parameter API call
         """
 
         # Explicit arguments will take precedence over keyword arguments
@@ -101,7 +119,7 @@ class SSMProvider(BaseProvider):
         recursive: bool, optional
             If this should retrieve the parameter values recursively or not
         sdk_options: dict, optional
-            Dictionary of options that will be passed to the get_parameters_by_path call
+            Dictionary of options that will be passed to the Parameter Store get_parameters_by_path API call
         """
 
         # Explicit arguments will take precedence over keyword arguments
@@ -147,7 +165,15 @@ def get_parameter(name: str, transform: Optional[str] = None, **sdk_options) -> 
     transform: str, optional
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
     sdk_options: dict, optional
-        Dictionary of options that will be passed to the get_secret_value call
+        Dictionary of options that will be passed to the Parameter Store get_parameter API call
+
+    Raises
+    ------
+    GetParameterError
+        When the parameter provider fails to retrieve a parameter value for
+        a given name.
+    TransformParameterError
+        When the parameter provider fails to transform a parameter value.
 
     Example
     -------
@@ -188,7 +214,15 @@ def get_parameters(
     recursive: bool, optional
         If this should retrieve the parameter values recursively or not
     sdk_options: dict, optional
-        Dictionary of options that will be passed to the get_parameters_by_path call
+        Dictionary of options that will be passed to the Parameter Store get_parameters_by_path API call
+
+    Raises
+    ------
+    GetParameterError
+        When the parameter provider fails to retrieve parameter values for
+        a given path.
+    TransformParameterError
+        When the parameter provider fails to transform a parameter value.
 
     Example
     -------

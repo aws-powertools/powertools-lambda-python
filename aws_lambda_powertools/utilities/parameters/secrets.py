@@ -27,7 +27,10 @@ class SecretsProvider(BaseProvider):
         >>> from aws_lambda_powertools.utilities.parameters import SecretsProvider
         >>> secrets_provider = SecretsProvider()
         >>>
-        >>> secrets_provider.get("my-parameter")
+        >>> value secrets_provider.get("my-parameter")
+        >>>
+        >>> print(value)
+        My parameter value
 
     **Retrieves a parameter value from Secrets Manager in another AWS region**
 
@@ -37,14 +40,20 @@ class SecretsProvider(BaseProvider):
         >>> config = Config(region_name="us-west-1")
         >>> secrets_provider = SecretsProvider(config=config)
         >>>
-        >>> secrets_provider.get("my-parameter")
+        >>> value = secrets_provider.get("my-parameter")
+        >>>
+        >>> print(value)
+        My parameter value
 
     **Retrieves a parameter value from Secrets Manager passing options to the SDK call**
 
         >>> from aws_lambda_powertools.utilities.parameters import SecretsProvider
         >>> secrets_provider = SecretsProvider()
         >>>
-        >>> secrets_provider.get("my-parameter", VersionId="f658cac0-98a5-41d9-b993-8a76a7799194")
+        >>> value = secrets_provider.get("my-parameter", VersionId="f658cac0-98a5-41d9-b993-8a76a7799194")
+        >>>
+        >>> print(value)
+        My parameter value
     """
 
     client = None
@@ -69,7 +78,7 @@ class SecretsProvider(BaseProvider):
         name: str
             Name of the parameter
         sdk_options: dict
-            Dictionary of options that will be passed to the get_secret_value call
+            Dictionary of options that will be passed to the Secrets Manager get_secret_value API call
         """
 
         # Explicit arguments will take precedence over keyword arguments
@@ -96,6 +105,14 @@ def get_secret(name: str, transform: Optional[str] = None, **sdk_options) -> Uni
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
     sdk_options: dict, optional
         Dictionary of options that will be passed to the get_secret_value call
+
+    Raises
+    ------
+    GetParameterError
+        When the parameter provider fails to retrieve a parameter value for
+        a given name.
+    TransformParameterError
+        When the parameter provider fails to transform a parameter value.
 
     Example
     -------
