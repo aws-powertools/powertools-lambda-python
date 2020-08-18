@@ -92,7 +92,7 @@ class DynamoDBProvider(BaseProvider):
         >>> from aws_lambda_powertools.utilities.parameters import DynamoDBProvider
         >>> ddb_provider = DynamoDBProvider("ParametersTable")
         >>>
-        >>> ddb_provider.get("my-parameter", ConsistentRead=True)
+        >>> ddb_provider.get_multiple("my-parameters", ConsistentRead=True)
     """
 
     table = None
