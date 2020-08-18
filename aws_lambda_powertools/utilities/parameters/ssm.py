@@ -171,13 +171,19 @@ def get_parameter(name: str, transform: Optional[str] = None, **sdk_options) -> 
 
         >>> from aws_lambda_powertools.utilities.parameters import get_parameter
         >>>
-        >>> get_parameter("/my/parameter")
+        >>> value = get_parameter("/my/parameter")
+        >>>
+        >>> print(value)
+        My parameter value
 
     **Retrieves a parameter value and decodes it using a Base64 decoder**
 
         >>> from aws_lambda_powertools.utilities.parameters import get_parameter
         >>>
-        >>> get_parameter("/my/parameter", transform='binary')
+        >>> value = get_parameter("/my/parameter", transform='binary')
+        >>>
+        >>> print(value)
+        My parameter value
     """
 
     # Only create the provider if this function is called at least once
@@ -188,7 +194,7 @@ def get_parameter(name: str, transform: Optional[str] = None, **sdk_options) -> 
 
 
 def get_parameters(
-    path: str, transform: Optional[str] = None, recursive: bool = False, decrypt: bool = False, **sdk_options
+    path: str, transform: Optional[str] = None, recursive: bool = True, decrypt: bool = False, **sdk_options
 ) -> Union[Dict[str, str], Dict[str, dict], Dict[str, bytes]]:
     """
     Retrieve multiple parameter values from AWS Systems Manager (SSM) Parameter Store
@@ -202,7 +208,7 @@ def get_parameters(
     decrypt: bool, optional
         If the parameter values should be decrypted
     recursive: bool, optional
-        If this should retrieve the parameter values recursively or not
+        If this should retrieve the parameter values recursively or not, defaults to True
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameters_by_path API call
 
@@ -220,13 +226,19 @@ def get_parameters(
 
         >>> from aws_lambda_powertools.utilities.parameters import get_parameter
         >>>
-        >>> get_parameters("/my/path/parameter")
+        >>> values = get_parameters("/my/path/prefix")
+        >>>
+        >>> for key, value in values.items():
+        ...     print(key, value)
+        /my/path/prefix/a   Parameter value a
+        /my/path/prefix/b   Parameter value b
+        /my/path/prefix/c   Parameter value c
 
     **Retrieves parameter values and decodes them using a Base64 decoder**
 
         >>> from aws_lambda_powertools.utilities.parameters import get_parameter
         >>>
-        >>> get_parameters("/my/path/parameter", transform='binary')
+        >>> values = get_parameters("/my/path/prefix", transform='binary')
     """
 
     # Only create the provider if this function is called at least once
