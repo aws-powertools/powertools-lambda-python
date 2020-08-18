@@ -9,7 +9,7 @@ from collections import namedtuple
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Union
 
-from .exceptions import GetParameterError
+from .exceptions import GetParameterError, TransformParameterError
 
 DEFAULT_MAX_AGE_SECS = 5
 ExpirableValue = namedtuple("ExpirableValue", ["value", "ttl"])
@@ -32,14 +32,13 @@ class BaseProvider(ABC):
         self.store = {}
 
     def get(
-        self, name: str, max_age: int = DEFAULT_MAX_AGE_SECS, transform: Optional[str] = None, **kwargs
+        self, name: str, max_age: int = DEFAULT_MAX_AGE_SECS, transform: Optional[str] = None, **sdk_options
     ) -> Union[str, list, dict, bytes]:
         """
         Retrieve a parameter value or return the cached value
 
         Parameters
         ----------
-
         name: str
             Parameter name
         max_age: int
@@ -51,10 +50,11 @@ class BaseProvider(ABC):
 
         Raises
         ------
-
         GetParameterError
             When the parameter provider fails to retrieve a parameter value for
             a given name.
+        TransformParameterError
+            When the parameter provider fails to transform a parameter value.
         """
 
         # If there are multiple calls to the same parameter but in a different
@@ -70,54 +70,81 @@ class BaseProvider(ABC):
 
         if key not in self.store or self.store[key].ttl < datetime.now():
             try:
-                value = self._get(name, **kwargs)
+                value = self._get(name, **sdk_options)
             # Encapsulate all errors into a generic GetParameterError
             except Exception as exc:
                 raise GetParameterError(str(exc))
 
-            if transform == "json":
-                value = json.loads(value)
-            elif transform == "binary":
-                value = base64.b64decode(value)
+            try:
+                if transform == "json":
+                    value = json.loads(value)
+                elif transform == "binary":
+                    value = base64.b64decode(value)
+            # Encapsulate transform exceptions into TransformParameterError
+            except Exception as exc:
+                raise TransformParameterError(str(exc))
 
             self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age),)
 
         return self.store[key].value
 
     @abstractmethod
-    def _get(self, name: str, **kwargs) -> str:
+    def _get(self, name: str, **sdk_options) -> str:
         """
         Retrieve paramater value from the underlying parameter store
         """
         raise NotImplementedError()
 
     def get_multiple(
-        self, path: str, max_age: int = DEFAULT_MAX_AGE_SECS, transform: Optional[str] = None, **kwargs
+        self, path: str, max_age: int = DEFAULT_MAX_AGE_SECS, transform: Optional[str] = None, **sdk_options
     ) -> Union[Dict[str, str], Dict[str, dict], Dict[str, bytes]]:
         """
         Retrieve multiple parameters based on a path prefix
+
+        Parameters
+        ----------
+        path: str
+            Parameter path used to retrieve multiple parameters
+        max_age: int
+            Maximum age of the cached value
+        transform: str
+            Optional transformation of the parameter value. Supported values
+            are "json" for JSON strings and "binary" for base 64 encoded
+            values.
+
+        Raises
+        ------
+        GetParameterError
+            When the parameter provider fails to retrieve parameter values for
+            a given path.
+        TransformParameterError
+            When the parameter provider fails to transform a parameter value.
         """
 
         key = (path, transform)
 
         if key not in self.store or self.store[key].ttl < datetime.now():
             try:
-                values = self._get_multiple(path, **kwargs)
+                values = self._get_multiple(path, **sdk_options)
             # Encapsulate all errors into a generic GetParameterError
             except Exception as exc:
                 raise GetParameterError(str(exc))
 
-            if transform == "json":
-                values = {k: json.loads(v) for k, v in values.items()}
-            elif transform == "binary":
-                values = {k: base64.b64decode(v) for k, v in values.items()}
+            try:
+                if transform == "json":
+                    values = {k: json.loads(v) for k, v in values.items()}
+                elif transform == "binary":
+                    values = {k: base64.b64decode(v) for k, v in values.items()}
+            # Encapsulate transform exceptions into TransformParameterError
+            except Exception as exc:
+                raise TransformParameterError(str(exc))
 
             self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age),)
 
         return self.store[key].value
 
     @abstractmethod
-    def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+    def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
         """
         Retrieve multiple parameter values from the underlying parameter store
         """

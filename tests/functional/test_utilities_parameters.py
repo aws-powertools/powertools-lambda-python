@@ -957,30 +957,6 @@ def test_secrets_provider_get_sdk_options_overwrite(mock_name, mock_value, confi
         stubber.deactivate()
 
 
-def test_base_provider_get_transform_json(mock_name, mock_value):
-    """
-    Test BaseProvider.get() with a json transform
-    """
-
-    mock_data = json.dumps({mock_name: mock_value})
-
-    class TestProvider(BaseProvider):
-        def _get(self, name: str, **kwargs) -> str:
-            assert name == mock_name
-            return mock_data
-
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
-            raise NotImplementedError()
-
-    provider = TestProvider()
-
-    value = provider.get(mock_name, transform="json")
-
-    assert isinstance(value, dict)
-    assert mock_name in value
-    assert value[mock_name] == mock_value
-
-
 def test_base_provider_get_exception(mock_name):
     """
     Test BaseProvider.get() that raises an exception
@@ -1023,6 +999,53 @@ def test_base_provider_get_multiple_exception(mock_name):
     assert "test exception raised" in str(excinfo)
 
 
+def test_base_provider_get_transform_json(mock_name, mock_value):
+    """
+    Test BaseProvider.get() with a json transform
+    """
+
+    mock_data = json.dumps({mock_name: mock_value})
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            assert name == mock_name
+            return mock_data
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    provider = TestProvider()
+
+    value = provider.get(mock_name, transform="json")
+
+    assert isinstance(value, dict)
+    assert mock_name in value
+    assert value[mock_name] == mock_value
+
+
+def test_base_provider_get_transform_json_exception(mock_name, mock_value):
+    """
+    Test BaseProvider.get() with a json transform that raises an exception
+    """
+
+    mock_data = json.dumps({mock_name: mock_value}) + "{"
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            assert name == mock_name
+            return mock_data
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    provider = TestProvider()
+
+    with pytest.raises(parameters.TransformParameterError) as excinfo:
+        provider.get(mock_name, transform="json")
+
+    assert "Extra data" in str(excinfo)
+
+
 def test_base_provider_get_transform_binary(mock_name, mock_value):
     """
     Test BaseProvider.get() with a binary transform
@@ -1045,6 +1068,30 @@ def test_base_provider_get_transform_binary(mock_name, mock_value):
 
     assert isinstance(value, bytes)
     assert value == mock_binary
+
+
+def test_base_provider_get_transform_binary_exception(mock_name):
+    """
+    Test BaseProvider.get() with a binary transform that raises an exception
+    """
+
+    mock_data = "qw"
+    print(mock_data)
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            assert name == mock_name
+            return mock_data
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    provider = TestProvider()
+
+    with pytest.raises(parameters.TransformParameterError) as excinfo:
+        provider.get(mock_name, transform="binary")
+
+    assert "Incorrect padding" in str(excinfo)
 
 
 def test_base_provider_get_multiple_transform_json(mock_name, mock_value):
@@ -1070,6 +1117,29 @@ def test_base_provider_get_multiple_transform_json(mock_name, mock_value):
     assert value["A"][mock_name] == mock_value
 
 
+def test_base_provider_get_multiple_transform_json_exception(mock_name, mock_value):
+    """
+    Test BaseProvider.get_multiple() with a json transform that raises an exception
+    """
+
+    mock_data = json.dumps({mock_name: mock_value}) + "{"
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            assert path == mock_name
+            return {"A": mock_data}
+
+    provider = TestProvider()
+
+    with pytest.raises(parameters.TransformParameterError) as excinfo:
+        provider.get_multiple(mock_name, transform="json")
+
+    assert "Extra data" in str(excinfo)
+
+
 def test_base_provider_get_multiple_transform_binary(mock_name, mock_value):
     """
     Test BaseProvider.get_multiple() with a binary transform
@@ -1092,6 +1162,29 @@ def test_base_provider_get_multiple_transform_binary(mock_name, mock_value):
 
     assert isinstance(value, dict)
     assert value["A"] == mock_binary
+
+
+def test_base_provider_get_multiple_transform_binary_exception(mock_name):
+    """
+    Test BaseProvider.get_multiple() with a binary transform that raises an exception
+    """
+
+    mock_data = "qw"
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            assert path == mock_name
+            return {"A": mock_data}
+
+    provider = TestProvider()
+
+    with pytest.raises(parameters.TransformParameterError) as excinfo:
+        provider.get_multiple(mock_name, transform="binary")
+
+    assert "Incorrect padding" in str(excinfo)
 
 
 def test_base_provider_get_multiple_cached(mock_name, mock_value):
