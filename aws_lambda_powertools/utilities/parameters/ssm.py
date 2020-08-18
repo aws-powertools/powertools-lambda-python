@@ -127,31 +127,21 @@ class SSMProvider(BaseProvider):
         sdk_options["WithDecryption"] = decrypt
         sdk_options["Recursive"] = recursive
 
-        response = self.client.get_parameters_by_path(**sdk_options)
-        parameters = response.get("Parameters", [])
+        parameters = {}
+        for page in self.client.get_paginator("get_parameters_by_path").paginate(**sdk_options):
+            for parameter in page.get("Parameters", []):
+                # Standardize the parameter name
+                # The parameter name returned by SSM will contained the full path.
+                # However, for readability, we should return only the part after
+                # the path.
+                name = parameter["Name"]
+                if name.startswith(path):
+                    name = name[len(path) :]
+                name = name.lstrip("/")
 
-        # Keep retrieving parameters
-        while "NextToken" in response:
-            response = self.client.get_parameters_by_path(
-                Path=path, WithDecryption=decrypt, Recursive=recursive, NextToken=response["NextToken"]
-            )
-            parameters.extend(response.get("Parameters", []))
+                parameters[name] = parameter["Value"]
 
-        retval = {}
-        for parameter in parameters:
-
-            # Standardize the parameter name
-            # The parameter name returned by SSM will contained the full path.
-            # However, for readability, we should return only the part after
-            # the path.
-            name = parameter["Name"]
-            if name.startswith(path):
-                name = name[len(path) :]
-            name = name.lstrip("/")
-
-            retval[name] = parameter["Value"]
-
-        return retval
+        return parameters
 
 
 def get_parameter(name: str, transform: Optional[str] = None, **sdk_options) -> Union[str, list, dict, bytes]:
