@@ -168,6 +168,13 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     def _init_logger(self, **kwargs):
         """Configures new logger"""
 
+        # Lambda by default configures the root logger handler
+        # therefore, we need to remove it to prevent messages being logged twice
+        # when customers use our Logger
+        logger.debug("Removing Lambda root handler whether it exists")
+        root_logger = logging.getLogger()
+        root_logger.handlers.clear()
+
         # Skip configuration if it's a child logger to prevent
         # multiple handlers being attached as well as different sampling mechanisms
         # and multiple messages from being logged as handlers can be duplicated
