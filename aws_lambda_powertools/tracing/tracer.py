@@ -281,7 +281,7 @@ class Tracer:
 
         return decorate
 
-    def capture_method(self, method: Callable = None):  # noqa: C901
+    def capture_method(self, method: Callable = None):
         """Decorator to create subsegment for arbitrary functions
 
         It also captures both response and exceptions as metadata
@@ -320,6 +320,39 @@ class Tracer:
             def lambda_handler(event: dict, context: Any) -> Dict:
                 booking_id = event.get("booking_id")
                 asyncio.run(confirm_booking(booking_id=booking_id))
+
+        **Custom generator function using capture_method decorator**
+
+            from aws_lambda_powertools import Tracer
+            tracer = Tracer(service="booking")
+
+            @tracer.capture_method
+            def bookings_generator(booking_id):
+                resp = call_to_booking_service()
+                yield resp[0]
+                yield resp[1]
+
+            def lambda_handler(event: dict, context: Any) -> Dict:
+                gen = bookings_generator(booking_id=booking_id)
+                result = list(gen)
+
+        **Custom generator context manager using capture_method decorator**
+
+            from aws_lambda_powertools import Tracer
+            tracer = Tracer(service="booking")
+
+            @tracer.capture_method
+            @contextlib.contextmanager
+            def booking_actions(booking_id):
+                resp = call_to_booking_service()
+                yield "example result"
+                cleanup_stuff()
+
+            def lambda_handler(event: dict, context: Any) -> Dict:
+                booking_id = event.get("booking_id")
+
+                with booking_actions(booking_id=booking_id) as booking:
+                    result = booking
 
         **Tracing nested async calls**
 
@@ -393,81 +426,93 @@ class Tracer:
         err
             Exception raised by method
         """
-        method_name = f"{method.__name__}"
 
         if inspect.iscoroutinefunction(method):
-
-            @functools.wraps(method)
-            async def decorate(*args, **kwargs):
-                async with self.provider.in_subsegment_async(name=f"## {method_name}") as subsegment:
-                    try:
-                        logger.debug(f"Calling method: {method_name}")
-                        response = await method(*args, **kwargs)
-                        self._add_response_as_metadata(function_name=method_name, data=response, subsegment=subsegment)
-                    except Exception as err:
-                        logger.exception(f"Exception received from '{method_name}' method")
-                        self._add_full_exception_as_metadata(
-                            function_name=method_name, error=err, subsegment=subsegment
-                        )
-                        raise
-
-                    return response
-
+            decorate = self._decorate_async_function(method=method)
         elif inspect.isgeneratorfunction(method):
-
-            @functools.wraps(method)
-            def decorate(*args, **kwargs):
-                with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
-                    try:
-                        logger.debug(f"Calling method: {method_name}")
-                        result = yield from method(*args, **kwargs)
-                        self._add_response_as_metadata(function_name=method_name, data=result, subsegment=subsegment)
-                    except Exception as err:
-                        logger.exception(f"Exception received from '{method_name}' method")
-                        self._add_full_exception_as_metadata(
-                            function_name=method_name, error=err, subsegment=subsegment
-                        )
-                        raise
-
-                    return result
-
+            decorate = self._decorate_generator_function(method=method)
         elif hasattr(method, "__wrapped__") and inspect.isgeneratorfunction(method.__wrapped__):
-
-            @functools.wraps(method)
-            @contextlib.contextmanager
-            def decorate(*args, **kwargs):
-                with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
-                    try:
-                        logger.debug(f"Calling method: {method_name}")
-                        with method(*args, **kwargs) as return_val:
-                            result = return_val
-                        self._add_response_as_metadata(function_name=method_name, data=result, subsegment=subsegment)
-                    except Exception as err:
-                        logger.exception(f"Exception received from '{method_name}' method")
-                        self._add_full_exception_as_metadata(
-                            function_name=method_name, error=err, subsegment=subsegment
-                        )
-                        raise
-
-                    yield result
-
+            decorate = self._decorate_generator_function_with_context_manager(method=method)
         else:
+            decorate = self._decorate_sync_function(method=method)
 
-            @functools.wraps(method)
-            def decorate(*args, **kwargs):
-                with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
-                    try:
-                        logger.debug(f"Calling method: {method_name}")
-                        response = method(*args, **kwargs)
-                        self._add_response_as_metadata(function_name=method_name, data=response, subsegment=subsegment)
-                    except Exception as err:
-                        logger.exception(f"Exception received from '{method_name}' method")
-                        self._add_full_exception_as_metadata(
-                            function_name=method_name, error=err, subsegment=subsegment
-                        )
-                        raise
+        return decorate
 
-                    return response
+    def _decorate_async_function(self, method: Callable = None):
+        method_name = f"{method.__name__}"
+
+        @functools.wraps(method)
+        async def decorate(*args, **kwargs):
+            async with self.provider.in_subsegment_async(name=f"## {method_name}") as subsegment:
+                try:
+                    logger.debug(f"Calling method: {method_name}")
+                    response = await method(*args, **kwargs)
+                    self._add_response_as_metadata(function_name=method_name, data=response, subsegment=subsegment)
+                except Exception as err:
+                    logger.exception(f"Exception received from '{method_name}' method")
+                    self._add_full_exception_as_metadata(function_name=method_name, error=err, subsegment=subsegment)
+                    raise
+
+                return response
+
+        return decorate
+
+    def _decorate_generator_function(self, method: Callable = None):
+        method_name = f"{method.__name__}"
+
+        @functools.wraps(method)
+        def decorate(*args, **kwargs):
+            with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+                try:
+                    logger.debug(f"Calling method: {method_name}")
+                    result = yield from method(*args, **kwargs)
+                    self._add_response_as_metadata(function_name=method_name, data=result, subsegment=subsegment)
+                except Exception as err:
+                    logger.exception(f"Exception received from '{method_name}' method")
+                    self._add_full_exception_as_metadata(function_name=method_name, error=err, subsegment=subsegment)
+                    raise
+
+                return result
+
+        return decorate
+
+    def _decorate_generator_function_with_context_manager(self, method: Callable = None):
+        method_name = f"{method.__name__}"
+
+        @functools.wraps(method)
+        @contextlib.contextmanager
+        def decorate(*args, **kwargs):
+            with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+                try:
+                    logger.debug(f"Calling method: {method_name}")
+                    with method(*args, **kwargs) as return_val:
+                        result = return_val
+                    self._add_response_as_metadata(function_name=method_name, data=result, subsegment=subsegment)
+                except Exception as err:
+                    logger.exception(f"Exception received from '{method_name}' method")
+                    self._add_full_exception_as_metadata(function_name=method_name, error=err, subsegment=subsegment)
+                    raise
+
+                yield result
+
+        return decorate
+
+    def _decorate_sync_function(self, method: Callable = None):
+        method_name = f"{method.__name__}"
+
+        @functools.wraps(method)
+        def decorate(*args, **kwargs):
+            with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+                try:
+                    logger.debug(f"Calling method: {method_name}")
+                    response = method(*args, **kwargs)
+                    self._add_response_as_metadata(function_name=method_name, data=response, subsegment=subsegment)
+                except Exception as err:
+                    logger.exception(f"Exception received from '{method_name}' method")
+                    self._add_full_exception_as_metadata(function_name=method_name, error=err, subsegment=subsegment)
+                    raise
+
+                return response
 
         return decorate
 
