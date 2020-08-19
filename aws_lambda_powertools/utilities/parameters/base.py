@@ -47,6 +47,8 @@ class BaseProvider(ABC):
             Optional transformation of the parameter value. Supported values
             are "json" for JSON strings and "binary" for base 64 encoded
             values.
+        sdk_options: dict, optional
+            Arguments that will be passed directly to the underlying API call
 
         Raises
         ------
@@ -113,6 +115,8 @@ class BaseProvider(ABC):
         raise_on_transform_error: bool, optional
             Raises an exception if any transform fails, otherwise this will
             return a None value for each transform that failed
+        sdk_options: dict, optional
+            Arguments that will be passed directly to the underlying API call
 
         Raises
         ------
