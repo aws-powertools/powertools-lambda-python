@@ -170,3 +170,17 @@ def handler(event, context):
     # This will raise a TransformParameterError exception
     values = ssm_provider.get_multiple("/param", transform="json", raise_on_transform_error=True)
 ```
+
+## Passing arguments to the underlying SDK
+
+You can use arbitrary keyword arguments to pass it directly to the underlying SDK method.
+
+```python:title=ssm.py
+from aws_lambda_powertools.utilities import parameters
+
+secrets_provider = parameters.SecretsProvider()
+
+def handler(event, context):
+    # The 'VersionId' argument will be passed to the underlying get_secret_value() call.
+    value = secrets_provider.get("my-secret", VersionId="e62ec170-6b01-48c7-94f3-d7497851a8d2")
+```
