@@ -14,7 +14,7 @@ Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.
 * Capture cold start as annotation, and responses as well as full exceptions as metadata
 * Run functions locally with SAM CLI without code change to disable tracing
 * Explicitly disable tracing via env var `POWERTOOLS_TRACE_DISABLED="true"`
-* Support tracing async methods
+* Support tracing async methods, generators, and context managers
 * Auto patch supported modules, or a tuple of explicit modules supported by AWS X-Ray
 
 ## Initialization
@@ -111,16 +111,18 @@ def collect_payment(charge_id):
 ...
 ```
 
-## Asynchronous functions
+## Asynchronous and generator functions
 
 <Note type="warning">
   <strong>We do not support async Lambda handler</strong> - Lambda handler itself must be synchronous
 </Note><br/>
 
-You can trace an asynchronous function using the `capture_method`. The decorator will detect whether your function is asynchronous, and adapt its behaviour accordingly.
+You can trace asynchronous functions and generator functions (including context managers) using `capture_method`.
+The decorator will detect whether your function is asynchronous, a generator, or a  context manager and adapt its behaviour accordingly.
 
 ```python:title=lambda_handler_with_async_code.py
 import asyncio
+import contextlib
 from aws_lambda_powertools import Tracer
 tracer = Tracer()
 
@@ -130,9 +132,29 @@ async def collect_payment():
     ...
 # highlight-end
 
+# highlight-start
+@contextlib.contextmanager
+@tracer.capture_method
+def collect_payment_ctxman():
+    yield result
+    ...
+# highlight-end
+
+# highlight-start
+@tracer.capture_method
+def collect_payment_gen():
+    yield result
+    ...
+# highlight-end
+
 @tracer.capture_lambda_handler
 def handler(evt, ctx): # highlight-line
     asyncio.run(collect_payment())
+
+    with collect_payment_ctxman as result:
+        do_something_with(result)
+
+    another_result = list(collect_payment_gen())
 ```
 
 ## Tracing aiohttp requests
