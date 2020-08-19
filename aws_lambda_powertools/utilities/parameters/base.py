@@ -75,14 +75,8 @@ class BaseProvider(ABC):
             except Exception as exc:
                 raise GetParameterError(str(exc))
 
-            try:
-                if transform == "json":
-                    value = json.loads(value)
-                elif transform == "binary":
-                    value = base64.b64decode(value)
-            # Encapsulate transform exceptions into TransformParameterError
-            except Exception as exc:
-                raise TransformParameterError(str(exc))
+            if transform is not None:
+                value = transform_value(value, transform)
 
             self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age),)
 
@@ -96,7 +90,12 @@ class BaseProvider(ABC):
         raise NotImplementedError()
 
     def get_multiple(
-        self, path: str, max_age: int = DEFAULT_MAX_AGE_SECS, transform: Optional[str] = None, **sdk_options
+        self,
+        path: str,
+        max_age: int = DEFAULT_MAX_AGE_SECS,
+        transform: Optional[str] = None,
+        raise_on_transform_error: bool = False,
+        **sdk_options,
     ) -> Union[Dict[str, str], Dict[str, dict], Dict[str, bytes]]:
         """
         Retrieve multiple parameters based on a path prefix
@@ -105,12 +104,15 @@ class BaseProvider(ABC):
         ----------
         path: str
             Parameter path used to retrieve multiple parameters
-        max_age: int
+        max_age: int, optional
             Maximum age of the cached value
-        transform: str
+        transform: str, optional
             Optional transformation of the parameter value. Supported values
             are "json" for JSON strings and "binary" for base 64 encoded
             values.
+        raise_on_transform_error: bool, optional
+            Raises an exception if any transform fails, otherwise this will
+            return a None value for each transform that failed
 
         Raises
         ------
@@ -130,14 +132,18 @@ class BaseProvider(ABC):
             except Exception as exc:
                 raise GetParameterError(str(exc))
 
-            try:
-                if transform == "json":
-                    values = {k: json.loads(v) for k, v in values.items()}
-                elif transform == "binary":
-                    values = {k: base64.b64decode(v) for k, v in values.items()}
-            # Encapsulate transform exceptions into TransformParameterError
-            except Exception as exc:
-                raise TransformParameterError(str(exc))
+            if transform is not None:
+                new_values = {}
+                for key, value in values.items():
+                    try:
+                        new_values[key] = transform_value(value, transform)
+                    except Exception as exc:
+                        if raise_on_transform_error:
+                            raise exc
+                        else:
+                            new_values[key] = None
+
+                values = new_values
 
             self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age),)
 
@@ -149,3 +155,32 @@ class BaseProvider(ABC):
         Retrieve multiple parameter values from the underlying parameter store
         """
         raise NotImplementedError()
+
+
+def transform_value(value: str, transform: str) -> Union[dict, bytes]:
+    """
+    Apply a transform to a value
+
+    Parameters
+    ---------
+    value: str
+        Parameter alue to transform
+    transform: str
+        Type of transform, supported values are "json" and "binary"
+
+    Raises
+    ------
+    TransformParameterError:
+        When the parameter value could not be transformed
+    """
+
+    try:
+        if transform == "json":
+            return json.loads(value)
+        elif transform == "binary":
+            return base64.b64decode(value)
+        else:
+            raise ValueError(f"Invalid transform type '{transform}'")
+
+    except Exception as exc:
+        raise TransformParameterError(str(exc))

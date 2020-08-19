@@ -1117,6 +1117,30 @@ def test_base_provider_get_multiple_transform_json(mock_name, mock_value):
     assert value["A"][mock_name] == mock_value
 
 
+def test_base_provider_get_multiple_transform_json_partial_failure(mock_name, mock_value):
+    """
+    Test BaseProvider.get_multiple() with a json transform that contains a partial failure
+    """
+
+    mock_data = json.dumps({mock_name: mock_value})
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            assert path == mock_name
+            return {"A": mock_data, "B": mock_data + "{"}
+
+    provider = TestProvider()
+
+    value = provider.get_multiple(mock_name, transform="json")
+
+    assert isinstance(value, dict)
+    assert value["A"][mock_name] == mock_value
+    assert value["B"] is None
+
+
 def test_base_provider_get_multiple_transform_json_exception(mock_name, mock_value):
     """
     Test BaseProvider.get_multiple() with a json transform that raises an exception
@@ -1135,7 +1159,7 @@ def test_base_provider_get_multiple_transform_json_exception(mock_name, mock_val
     provider = TestProvider()
 
     with pytest.raises(parameters.TransformParameterError) as excinfo:
-        provider.get_multiple(mock_name, transform="json")
+        provider.get_multiple(mock_name, transform="json", raise_on_transform_error=True)
 
     assert "Extra data" in str(excinfo)
 
@@ -1164,6 +1188,32 @@ def test_base_provider_get_multiple_transform_binary(mock_name, mock_value):
     assert value["A"] == mock_binary
 
 
+def test_base_provider_get_multiple_transform_binary_partial_failure(mock_name, mock_value):
+    """
+    Test BaseProvider.get_multiple() with a binary transform that contains a partial failure
+    """
+
+    mock_binary = mock_value.encode()
+    mock_data_a = base64.b64encode(mock_binary).decode()
+    mock_data_b = "qw"
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            assert path == mock_name
+            return {"A": mock_data_a, "B": mock_data_b}
+
+    provider = TestProvider()
+
+    value = provider.get_multiple(mock_name, transform="binary")
+
+    assert isinstance(value, dict)
+    assert value["A"] == mock_binary
+    assert value["B"] is None
+
+
 def test_base_provider_get_multiple_transform_binary_exception(mock_name):
     """
     Test BaseProvider.get_multiple() with a binary transform that raises an exception
@@ -1182,7 +1232,7 @@ def test_base_provider_get_multiple_transform_binary_exception(mock_name):
     provider = TestProvider()
 
     with pytest.raises(parameters.TransformParameterError) as excinfo:
-        provider.get_multiple(mock_name, transform="binary")
+        provider.get_multiple(mock_name, transform="binary", raise_on_transform_error=True)
 
     assert "Incorrect padding" in str(excinfo)
 
@@ -1354,3 +1404,67 @@ def test_get_secret_new(monkeypatch, mock_name, mock_value):
     value = parameters.get_secret(mock_name)
 
     assert value == mock_value
+
+
+def test_transform_value_json(mock_value):
+    """
+    Test transform_value() with a json transform
+    """
+
+    mock_data = json.dumps({"A": mock_value})
+
+    value = parameters.base.transform_value(mock_data, "json")
+
+    assert isinstance(value, dict)
+    assert value["A"] == mock_value
+
+
+def test_transform_value_json_exception(mock_value):
+    """
+    Test transform_value() with a json transform that fails
+    """
+
+    mock_data = json.dumps({"A": mock_value}) + "{"
+
+    with pytest.raises(parameters.TransformParameterError) as excinfo:
+        parameters.base.transform_value(mock_data, "json")
+
+    assert "Extra data" in str(excinfo)
+
+
+def test_transform_value_binary(mock_value):
+    """
+    Test transform_value() with a binary transform
+    """
+
+    mock_binary = mock_value.encode()
+    mock_data = base64.b64encode(mock_binary).decode()
+
+    value = parameters.base.transform_value(mock_data, "binary")
+
+    assert isinstance(value, bytes)
+    assert value == mock_binary
+
+
+def test_transform_value_binary_exception():
+    """
+    Test transform_value() with a binary transform that fails
+    """
+
+    mock_data = "qw"
+
+    with pytest.raises(parameters.TransformParameterError) as excinfo:
+        parameters.base.transform_value(mock_data, "binary")
+
+    assert "Incorrect padding" in str(excinfo)
+
+
+def test_transform_value_wrong(mock_value):
+    """
+    Test transform_value() with an incorrect transform
+    """
+
+    with pytest.raises(parameters.TransformParameterError) as excinfo:
+        parameters.base.transform_value(mock_value, "INCORRECT")
+
+    assert "Invalid transform type" in str(excinfo)
