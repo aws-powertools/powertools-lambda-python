@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2020-08-20
+### Added
+- **Tracer**: capture_method decorator now supports generator functions (including context managers)
+
 ## [1.1.3] - 2020-08-18
 ### Fixed
 - **Logger**: Logs emitted twice, structured and unstructured, due to Lambda configuring the root handler
