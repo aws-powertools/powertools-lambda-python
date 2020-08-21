@@ -31,6 +31,7 @@ module.exports = {
                     ],
                     'Utilities': [
                         'utilities/middleware_factory',
+                        'utilities/parameters',
                     ],
                 },
                 navConfig: {
