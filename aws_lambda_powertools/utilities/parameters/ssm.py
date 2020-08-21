@@ -8,7 +8,7 @@ from typing import Dict, Optional, Union
 import boto3
 from botocore.config import Config
 
-from .base import DEFAULT_PROVIDERS, BaseProvider
+from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 
 
 class SSMProvider(BaseProvider):
@@ -85,6 +85,46 @@ class SSMProvider(BaseProvider):
         self.client = boto3.client("ssm", config=config)
 
         super().__init__()
+
+    def get(
+        _,
+        name: str,
+        max_age: int = DEFAULT_MAX_AGE_SECS,
+        transform: Optional[str] = None,
+        decrypt: bool = False,
+        **sdk_options
+    ) -> Union[str, list, dict, bytes]:
+        """
+        Retrieve a parameter value or return the cached value
+
+        Parameters
+        ----------
+        name: str
+            Parameter name
+        max_age: int
+            Maximum age of the cached value
+        transform: str
+            Optional transformation of the parameter value. Supported values
+            are "json" for JSON strings and "binary" for base 64 encoded
+            values.
+        decrypt: bool, optional
+            If the parameter value should be decrypted
+        sdk_options: dict, optional
+            Arguments that will be passed directly to the underlying API call
+
+        Raises
+        ------
+        GetParameterError
+            When the parameter provider fails to retrieve a parameter value for
+            a given name.
+        TransformParameterError
+            When the parameter provider fails to transform a parameter value.
+        """
+
+        # Add to `decrypt` sdk_options to we can have an explicit option for this
+        sdk_options["decrypt"] = decrypt
+
+        return super().get(name, max_age, transform, **sdk_options)
 
     def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
         """
