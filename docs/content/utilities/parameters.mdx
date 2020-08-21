@@ -13,6 +13,21 @@ The parameters utility provides a way to retrieve parameter values from [AWS Sys
 * Cache parameter values for a given amount of time (defaults to 5 seconds)
 * Transform parameter values from JSON or base 64 encoded strings
 
+**IAM Permissions**
+
+This utility requires additional permissions to work as expected. See the table below:
+
+| Provider            | Function/Method                 | IAM Permission                  |
+|---------------------|---------------------------------|---------------------------------|
+| SSM Parameter Store | `get_parameter`                 | `ssm:GetParameter`              |
+| SSM Parameter Store | `get_parameters`                | `ssm:GetParametersByPath`       |
+| SSM Parameter Store | `SSMProvider.get`               | `ssm:GetParameter`              |
+| SSM Parameter Store | `SSMProvider.get_multiple`      | `ssm:GetParametersByPath`       |
+| Secrets Manager     | `get_secret`                    | `secretsmanager:GetSecretValue` |
+| Secrets Manager     | `SecretsManager.get`            | `secretsmanager:GetSecretValue` |
+| DynamoDB            | `DynamoDBProvider.get`          | `dynamodb:GetItem`              |
+| DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb:Query`                |
+
 ## SSM Parameter Store
 
 You can retrieve a single parameter using `get_parameter` high-level function. For multiple parameters, you can use `get_parameters` and pass a path to retrieve them recursively.
@@ -54,7 +69,7 @@ def handler(event, context):
         print(f"{k}: {v}")
 ```
 
-### SSMProvider arguments
+**Additional arguments**
 
 The AWS Systems Manager Parameter Store provider supports two additional arguments for the `get()` and `get_multiple()` methods:
 
@@ -112,7 +127,15 @@ To use the DynamoDB provider, you need to import and instantiate the `DynamoDBPr
 
 The DynamoDB Provider does not have any high-level functions, as it needs to know the name of the DynamoDB table containing the parameters.
 
-**Example:**
+**DynamoDB table structure**
+
+When using the default options, if you want to retrieve only single parameters, your table should be structured as such, assuming a parameter named **my-parameter** with a value of **my-value**. The `id` attribute should be the [partition key](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html#HowItWorks.CoreComponents.PrimaryKey) for that table.
+
+| `id`         | `value`  |
+|--------------|----------|
+| my-parameter | my-value |
+
+With this table, when you do a `dynamodb_provider.get("my-param")` call, this will return `my-value`.
 
 ```python:title=dynamodb.py
 from aws_lambda_powertools.utilities import parameters
@@ -122,7 +145,36 @@ dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table")
 def handler(event, context):
     # Retrieve a value from DynamoDB
     value = dynamodb_provider.get("my-parameter")
+```
 
+**Retrieve multiple values**
+
+If you want to be able to retrieve multiple parameters at once sharing the same `id`, your table needs to contain a sort key name `sk`. For example, if you want to retrieve multiple parameters having `my-hash-key` as ID:
+
+| `id`        | `sk`    |   `value`  |
+|-------------|---------|------------|
+| my-hash-key | param-a | my-value-a |
+| my-hash-key | param-b | my-value-b |
+| my-hash-key | param-c | my-value-c |
+
+With this table, when you do a `dynamodb_provider.get_multiple("my-hash-key")` call, you will receive the following dict as a response:
+
+```
+{
+    "param-a": "my-value-a",
+    "param-b": "my-value-b",
+    "param-c": "my-value-c"
+}
+```
+
+**Example:**
+
+```python:title="dynamodb_multiple.py
+from aws_lambda_powertools.utilities import parameters
+
+dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table")
+
+def handler(event, context):
     # Retrieve multiple values by performing a Query on the DynamoDB table
     # This returns a dict with the sort key attribute as dict key.
     values = dynamodb_provider.get_multiple("my-hash-key")
@@ -130,7 +182,7 @@ def handler(event, context):
         print(f"{k}: {v}")
 ```
 
-### DynamoDBProvider options
+**Additional arguments**
 
 The Amazon DynamoDB provider supports four additional arguments at initialization:
 
@@ -155,41 +207,13 @@ def handler(event, context):
     value = dynamodb_provider.get("my-parameter")
 ```
 
-### DynamoDB table structure
-
-When using the default options, if you want to retrieve only single parameters, your table should be structured as such, assuming a parameter named **my-param** with a value of **my-value**. The `id` attribute should be the [partition key](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html#HowItWorks.CoreComponents.PrimaryKey) for that table.
-
-| `id`     | `value`  |
-|----------|----------|
-| my-param | my-value |
-
-With this table, when you do a `dynamodb_provider.get("my-param")` call, this will return `my-value`.
-
-**Multiple values:**
-
-If you want to be able to retrieve multiple parameters at once sharing the same `id`, your table needs to contain a sort key name `sk`. For example, if you want to retrieve multiple parameters having `my-params` as ID:
-
-| `id`      | `sk`    |   `value`  |
-|-----------|---------|------------|
-| my-params | param-a | my-value-a |
-| my-params | param-b | my-value-b |
-| my-params | param-c | my-value-c |
-
-With this table, when you do a `dynamodb_provider.get_multiple("my-params")` call, you will receive the following dict as a response:
-
-```
-{
-    "param-a": "my-value-a",
-    "param-b": "my-value-b",
-    "param-c": "my-value-c"
-}
-```
-
 ## Create your own provider
 
-If you want to use a parameter store other than DynamoDB, Parameter store or Secrets Manager, you can create a custom provider that inherits from the base class. You then need to create your own `_get()` and `_get_multiple()` methods that will handle retrieving data from your parameter provider.
+You can create your own custom parameter store provider by inheriting the `BaseProvider` class, and implementing both `_get()` and `_get_multiple()` methods to retrieve a single, or multiple parameters from your custom store.
 
 All transformation and caching logic is handled by the `get()` and `get_multiple()` methods from the base provider class.
+
+Here is an example implementation using S3 as a custom parameter store:
 
 ```python:title=custom_provider.py
 import copy
@@ -247,7 +271,7 @@ class S3Provider(BaseProvider):
 
 ## Transform values
 
-You can transform the incoming values if they are storing in JSON or Base64 format using the `transform` argument for the `get()` and `get_multiple()` methods. This is also supported by the helper functions.
+For parameters stored in JSON or Base64 format, you can use the `transform` argument for deserialization - The `transform` argument is available across all providers, including the high level functions.
 
 ```python:title=transform.py
 from aws_lambda_powertools.utilities import parameters
@@ -310,3 +334,16 @@ def handler(event, context):
     # The 'VersionId' argument will be passed to the underlying get_secret_value() call.
     value = secrets_provider.get("my-secret", VersionId="e62ec170-6b01-48c7-94f3-d7497851a8d2")
 ```
+
+Here is the mapping between this utility's functions and methods and the underlying SDK:
+
+| Provider            | Function/Method                 | Client name | Function name |
+|---------------------|---------------------------------|-------------|---------------|
+| SSM Parameter Store | `get_parameter`                 | `ssm`       | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter) |
+| SSM Parameter Store | `get_parameters`                | `ssm`       | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path) |
+| SSM Parameter Store | `SSMProvider.get`               | `ssm`       | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter) |
+| SSM Parameter Store | `SSMProvider.get_multiple`      | `ssm`       | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path) |
+| Secrets Manager     | `get_secret`                    | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value) |
+| Secrets Manager     | `SecretsManager.get`            | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value) |
+| DynamoDB            | `DynamoDBProvider.get`          | `dynamodb` ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table)) | [get_item](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.get_item)
+| DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb` ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table)) | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)
