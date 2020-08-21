@@ -1,5 +1,5 @@
 ---
-title: Parameters utility
+title: Parameters
 description: Utility
 ---
 
@@ -10,29 +10,77 @@ The parameters utility provides a way to retrieve parameter values from [AWS Sys
 **Key features**
 
 * Retrieve one or multiple parameters from the underlying provider
-* Cache parameter values for a given amount of time
-  * By default, parameters are cached for 5 seconds
+* Cache parameter values for a given amount of time (defaults to 5 seconds)
 * Transform parameter values from JSON or base 64 encoded strings
 
-## High-level functions
+## SSM Parameter Store
 
-This utility provides high-level functions for quick use. These support both the AWS Systems Manager Parameter Store and AWS Secrets Manager.
+You can retrieve a single parameter using `get_parameter` high-level function. For multiple parameters, you can use `get_parameters` and pass a path to retrieve them recursively.
 
-```python:title=ssm.py
+```python:title=ssm_parameter_store.py
 from aws_lambda_powertools.utilities import parameters
 
 def handler(event, context):
     # Retrieve a single parameter
     value = parameters.get_parameter("/my/parameter")
 
-    # Retrieve multiple parameters from a path prefix
+    # Retrieve multiple parameters from a path prefix recursively
     # This returns a dict with the parameter name as key
     values = parameters.get_parameters("/my/path/prefix")
     for k, v in values.items():
         print(f"{k}: {v}")
 ```
 
-```python:title=secrets.py
+### SSMProvider class
+
+Alternatively, you can use the `SSMProvider` class, which give more flexibility, such as the ability to configure the underlying SDK client.
+
+This can be used to retrieve values from other regions, change the retry behavior, etc.
+
+```python:title=ssm_parameter_store.py
+from aws_lambda_powertools.utilities import parameters
+from botocore.config import Config
+
+config = Config(region_name="us-west-1")
+ssm_provider = parameters.SSMProvider(config=config)
+
+def handler(event, context):
+    # Retrieve a single parameter
+    value = ssm_provider.get("/my/parameter")
+
+    # Retrieve multiple parameters from a path prefix
+    values = ssm_provider.get_multiple("/my/path/prefix")
+    for k, v in values.items():
+        print(f"{k}: {v}")
+```
+
+### SSMProvider arguments
+
+The AWS Systems Manager Parameter Store provider supports two additional arguments for the `get()` and `get_multiple()` methods:
+
+| Parameter     | Default | Description |
+|---------------|---------|-------------|
+| **decrypt**   | `False` | Will automatically decrypt the parameter. |
+| **recursive** | `True`  | For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix. |
+
+**Example:**
+
+```python:title=ssm_parameter_store.py
+from aws_lambda_powertools.utilities import parameters
+
+ssm_provider = parameters.SSMProvider()
+
+def handler(event, context):
+    decrypted_value = ssm_provider.get("/my/encrypted/parameter", decrypt=True)
+
+    no_recursive_values = ssm_provider.get_multiple("/my/path/prefix", recursive=False)
+```
+
+## Secrets Manager
+
+For secrets stored in Secrets Manager, use `get_secret`.
+
+```python:title=secrets_manager.py
 from aws_lambda_powertools.utilities import parameters
 
 def handler(event, context):
@@ -40,9 +88,31 @@ def handler(event, context):
     value = parameters.get_secret("my-secret")
 ```
 
-## Provider classes
+### SecretsProvider class
 
-Alternatively, you can use the provider classes, which give more flexibility, such as the ability to configure the underlying SDK client.
+Alternatively, you can use the `SecretsProvider` class, which give more flexibility, such as the ability to configure the underlying SDK client.
+
+This can be used to retrieve values from other regions, change the retry behavior, etc.
+
+```python:title=secrets_manager.py
+from aws_lambda_powertools.utilities import parameters
+from botocore.config import Config
+
+config = Config(region_name="us-west-1")
+secrets_provider = parameters.SecretsProvider(config=config)
+
+def handler(event, context):
+    # Retrieve a single secret
+    value = secrets_provider.get("my-secret")
+```
+
+## DynamoDB
+
+To use the DynamoDB provider, you need to import and instantiate the `DynamoDBProvider` class.
+
+The DynamoDB Provider does not have any high-level functions, as it needs to know the name of the DynamoDB table containing the parameters.
+
+**Example:**
 
 ```python:title=dynamodb.py
 from aws_lambda_powertools.utilities import parameters
@@ -60,33 +130,119 @@ def handler(event, context):
         print(f"{k}: {v}")
 ```
 
-```python:title=ssm.py
-from aws_lambda_powertools.utilities import parameters
-from botocore.config import Config
+### DynamoDBProvider options
 
-config = Config(region_name="us-west-1")
-ssm_provider = parameters.SSMProvider(config=config)
+The Amazon DynamoDB provider supports four additional arguments at initialization:
+
+| Parameter      | Mandatory | Default | Description |
+|----------------|-----------|---------|-------------|
+| **table_name** | **Yes**   | *(N/A)* | Name of the DynamoDB table containing the parameter values.
+| **key_attr**   | No        | `id`    | Hash key for the DynamoDB table.
+| **sort_attr**  | No        | `sk`    | Range key for the DynamoDB table. You don't need to set this if you don't use the `get_multiple()` method.
+| **value_attr** | No        | `value` | Name of the attribute containing the parameter value.
+
+```python:title=dynamodb.py
+from aws_lambda_powertools.utilities import parameters
+
+dynamodb_provider = parameters.DynamoDBProvider(
+    table_name="my-table",
+    key_attr="MyKeyAttr",
+    sort_attr="MySortAttr",
+    value_attr="MyvalueAttr"
+)
 
 def handler(event, context):
-    # Retrieve a single parameter
-    value = ssm_provider.get("/my/parameter")
-
-    # Retrieve multiple parameters from a path prefix
-    values = ssm_provider.get_multiple("/my/path/prefix")
-    for k, v in values.items():
-        print(f"{k}: {v}")
+    value = dynamodb_provider.get("my-parameter")
 ```
 
-```python:title=secrets.py
-from aws_lambda_powertools.utilities import parameters
-from botocore.config import Config
+### DynamoDB table structure
 
-config = Config(region_name="us-west-1")
-secrets_provider = parameters.SecretsProvider(config=config)
+When using the default options, if you want to retrieve only single parameters, your table should be structured as such, assuming a parameter named **my-param** with a value of **my-value**. The `id` attribute should be the [partition key](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html#HowItWorks.CoreComponents.PrimaryKey) for that table.
 
-def handler(event, context):
-    # Retrieve a single secret
-    value = secrets_provider.get("my-secret")
+| `id`     | `value`  |
+|----------|----------|
+| my-param | my-value |
+
+With this table, when you do a `dynamodb_provider.get("my-param")` call, this will return `my-value`.
+
+**Multiple values:**
+
+If you want to be able to retrieve multiple parameters at once sharing the same `id`, your table needs to contain a sort key name `sk`. For example, if you want to retrieve multiple parameters having `my-params` as ID:
+
+| `id`      | `sk`    |   `value`  |
+|-----------|---------|------------|
+| my-params | param-a | my-value-a |
+| my-params | param-b | my-value-b |
+| my-params | param-c | my-value-c |
+
+With this table, when you do a `dynamodb_provider.get_multiple("my-params")` call, you will receive the following dict as a response:
+
+```
+{
+    "param-a": "my-value-a",
+    "param-b": "my-value-b",
+    "param-c": "my-value-c"
+}
+```
+
+## Create your own provider
+
+If you want to use a parameter store other than DynamoDB, Parameter store or Secrets Manager, you can create a custom provider that inherits from the base class. You then need to create your own `_get()` and `_get_multiple()` methods that will handle retrieving data from your parameter provider.
+
+All transformation and caching logic is handled by the `get()` and `get_multiple()` methods from the base provider class.
+
+```python:title=custom_provider.py
+import copy
+
+from aws_lambda_powertools.utilities import BaseProvider
+import boto3
+
+class S3Provider(BaseProvider):
+    bucket_name = None
+    client = None
+
+    def __init__(self, bucket_name: str):
+        # Initialize the client to your custom parameter store
+        # E.g.:
+
+        self.bucket_name = bucket_name
+        self.client = boto3.client("s3")
+
+    def _get(self, name: str, **sdk_options) -> str:
+        # Retrieve a single value
+        # E.g.:
+
+        sdk_options["Bucket"] = self.bucket_name
+        sdk_options["Key"] = name
+
+        response = self.client.get_object(**sdk_options)
+        return
+
+    def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
+        # Retrieve multiple values
+        # E.g.:
+
+        list_sdk_options = copy.deepcopy(sdk_options)
+
+        list_sdk_options["Bucket"] = self.bucket_name
+        list_sdk_options["Prefix"] = path
+
+        list_response = self.client.list_objects_v2(**list_sdk_options)
+
+        parameters = {}
+
+        for obj in list_response.get("Contents", []):
+            get_sdk_options = copy.deepcopy(sdk_options)
+
+            get_sdk_options["Bucket"] = self.bucket_name
+            get_sdk_options["Key"] = obj["Key"]
+
+            get_response = self.client.get_object(**get_sdk_options)
+
+            parameters[obj["Key"]] = get_response["Body"].read().decode()
+
+        return parameters
+
 ```
 
 ## Transform values
@@ -106,50 +262,20 @@ def handler(event, context):
     value_from_binary = ssm_provider.get("/my/binary/parameter", transform="binary")
 ```
 
-## DynamoDB provider options
+You can also use the `transform` argument with high-level functions:
 
-The Amazon DynamoDB provider supports four additional arguments at initialization:
-
-* __table_name__ (mandatory): Name of the DynamoDB table containing the parameter values.
-* __key_attr__: Hash key for the DynamoDB table, defaults to `id`.
-* __sort_attr__: Range key for the DynamoDB table , defaults to `sk`. You don't need to set this if you don't use the `get_multiple()` method.
-* __value_attr__: Name of the attribute containing the parameter value, defaults to `value`.
-
-```python:title=dynamodb.py
+```python:title=transform.py
 from aws_lambda_powertools.utilities import parameters
 
-dynamodb_provider = parameters.DynamoDBProvider(
-    table_name="my-table",
-    key_attr="MyKeyAttr",
-    sort_attr="MySortAttr",
-    value_attr="MyvalueAttr"
-)
-
 def handler(event, context):
-    value = dynamodb_provider.get("my-parameter")
+    value_from_json = parameters.get_parameter("/my/json/parameter", transform="json")
 ```
 
-## Parameter Store provider options
+### Partial transform failures with `get_multiple()`
 
-The AWS Systems Manager Parameter Store provider supports two additional arguments for the `get()` and `get_multiple()` methods:
+If you use `transform` with `get_multiple()`, you can have a single malformed parameter value. To prevent failing the entire request, the method will return a `None` value for the parameters that failed to transform.
 
-* **decrypt**: Will automatically decrypt the parameter.
-* **recursive**: For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix. Defaults to `True`.
-
-```python:title=ssm.py
-from aws_lambda_powertools.utilities import parameters
-
-ssm_provider = parameters.SSMProvider()
-
-def handler(event, context):
-    decrypted_value = ssm_provider.get("/my/encrypted/parameter", decrypt=True)
-
-    no_recursive_values = ssm_provider.get_multiple("/my/path/prefix", recursive=False)
-```
-
-## Partial transform failures with `get_multiple()`
-
-If you use `transform` with `get_multiple()`, you can have a single malformed parameter value. To prevent failing the entire request, the method will return a `None` value for the parameters that failed to transform. You can override this by setting the `raise_on_transform_error` argument to `True`.
+You can override this by setting the `raise_on_transform_error` argument to `True`. If you do so, a single transform error will raise a `TransformParameterError` exception.
 
 For example, if you have three parameters (*/param/a*, */param/b* and */param/c*) but */param/c* is malformed:
 
@@ -171,11 +297,11 @@ def handler(event, context):
     values = ssm_provider.get_multiple("/param", transform="json", raise_on_transform_error=True)
 ```
 
-## Passing arguments to the underlying SDK
+## Additional SDK arguments
 
 You can use arbitrary keyword arguments to pass it directly to the underlying SDK method.
 
-```python:title=ssm.py
+```python:title=ssm_parameter_store.py
 from aws_lambda_powertools.utilities import parameters
 
 secrets_provider = parameters.SecretsProvider()
