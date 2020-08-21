@@ -17,16 +17,13 @@ The parameters utility provides a way to retrieve parameter values from [AWS Sys
 
 This utility requires additional permissions to work as expected. See the table below:
 
-| Provider            | Function/Method                 | IAM Permission                  |
-|---------------------|---------------------------------|---------------------------------|
-| SSM Parameter Store | `get_parameter`                 | `ssm:GetParameter`              |
-| SSM Parameter Store | `get_parameters`                | `ssm:GetParametersByPath`       |
-| SSM Parameter Store | `SSMProvider.get`               | `ssm:GetParameter`              |
-| SSM Parameter Store | `SSMProvider.get_multiple`      | `ssm:GetParametersByPath`       |
-| Secrets Manager     | `get_secret`                    | `secretsmanager:GetSecretValue` |
-| Secrets Manager     | `SecretsManager.get`            | `secretsmanager:GetSecretValue` |
-| DynamoDB            | `DynamoDBProvider.get`          | `dynamodb:GetItem`              |
-| DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb:Query`                |
+Provider | Function/Method | IAM Permission
+------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
+SSM Parameter Store | `get_parameter`, `SSMProvider.get`  | `ssm:GetParameter`
+SSM Parameter Store | `get_parameters`, `SSMProvider.get_multiple` | `ssm:GetParametersByPath`
+Secrets Manager | `get_secret`, `SecretsManager.get` | `secretsmanager:GetSecretValue`
+DynamoDB | `DynamoDBProvider.get` | `dynamodb:GetItem`
+DynamoDB | `DynamoDBProvider.get_multiple` | `dynamodb:Query`
 
 ## SSM Parameter Store
 
