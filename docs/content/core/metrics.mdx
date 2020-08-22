@@ -238,7 +238,12 @@ def lambda_handler(evt, ctx):
     ...
 ```
 
-If it's a cold start, this feature will add a metric named `ColdStart` and a dimension named `function_name`.
+If it's a cold start invocation, this feature will:
+
+* Create a separate EMF blob solely containing a metric named `ColdStart`
+* Add `function_name` and `service` dimensions
+
+This has the advantage of keeping cold start metric separate from your application metrics.
 
 ## Testing your code
 
