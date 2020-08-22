@@ -184,7 +184,9 @@ class SSMProvider(BaseProvider):
         return parameters
 
 
-def get_parameter(name: str, transform: Optional[str] = None, **sdk_options) -> Union[str, list, dict, bytes]:
+def get_parameter(
+    name: str, transform: Optional[str] = None, decrypt: bool = False, **sdk_options
+) -> Union[str, list, dict, bytes]:
     """
     Retrieve a parameter value from AWS Systems Manager (SSM) Parameter Store
 
@@ -194,6 +196,8 @@ def get_parameter(name: str, transform: Optional[str] = None, **sdk_options) -> 
         Name of the parameter
     transform: str, optional
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
+    decrypt: bool, optional
+        If the parameter values should be decrypted
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameter API call
 
@@ -230,7 +234,10 @@ def get_parameter(name: str, transform: Optional[str] = None, **sdk_options) -> 
     if "ssm" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
-    return DEFAULT_PROVIDERS["ssm"].get(name, transform=transform)
+    # Add to `decrypt` sdk_options to we can have an explicit option for this
+    sdk_options["decrypt"] = decrypt
+
+    return DEFAULT_PROVIDERS["ssm"].get(name, transform=transform, **sdk_options)
 
 
 def get_parameters(
@@ -245,10 +252,10 @@ def get_parameters(
         Path to retrieve the parameters
     transform: str, optional
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
-    decrypt: bool, optional
-        If the parameter values should be decrypted
     recursive: bool, optional
         If this should retrieve the parameter values recursively or not, defaults to True
+    decrypt: bool, optional
+        If the parameter values should be decrypted
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameters_by_path API call
 
@@ -285,4 +292,7 @@ def get_parameters(
     if "ssm" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
-    return DEFAULT_PROVIDERS["ssm"].get_multiple(path, transform=transform, recursive=recursive, decrypt=decrypt)
+    sdk_options["recursive"] = recursive
+    sdk_options["decrypt"] = decrypt
+
+    return DEFAULT_PROVIDERS["ssm"].get_multiple(path, transform=transform, **sdk_options)
