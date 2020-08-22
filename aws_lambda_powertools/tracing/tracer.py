@@ -150,7 +150,7 @@ class Tracer:
         self.auto_patch = self._config["auto_patch"]
 
         if self.disabled:
-            self.__disable_tracing_provider()
+            self._disable_tracer_provider()
 
         if self.auto_patch:
             self.patch(modules=patch_modules)
@@ -601,12 +601,14 @@ class Tracer:
         """
         subsegment.put_metadata(key=f"{method_name} error", value=error, namespace=self._config["service"])
 
-    def __disable_tracing_provider(self):
+    @staticmethod
+    def _disable_tracer_provider():
         """Forcefully disables tracing"""
         logger.debug("Disabling tracer provider...")
         aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)
 
-    def __is_trace_disabled(self) -> bool:
+    @staticmethod
+    def _is_tracer_disabled() -> bool:
         """Detects whether trace has been disabled
 
         Tracing is automatically disabled in the following conditions:
@@ -643,7 +645,7 @@ class Tracer:
         provider: aws_xray_sdk.core.xray_recorder = None,
     ):
         """ Populates Tracer config for new and existing initializations """
-        is_disabled = disabled if disabled is not None else self.__is_trace_disabled()
+        is_disabled = disabled if disabled is not None else self._is_tracer_disabled()
         is_service = service if service is not None else os.getenv("POWERTOOLS_SERVICE_NAME")
 
         self._config["provider"] = provider if provider is not None else self._config["provider"]
