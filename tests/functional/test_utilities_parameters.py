@@ -1310,6 +1310,7 @@ def test_get_parameter_new(monkeypatch, mock_name, mock_value):
     class TestProvider(BaseProvider):
         def _get(self, name: str, **kwargs) -> str:
             assert name == mock_name
+            assert not kwargs["decrypt"]
             return mock_value
 
         def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
@@ -1355,6 +1356,8 @@ def test_get_parameters_new(monkeypatch, mock_name, mock_value):
 
         def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
             assert path == mock_name
+            assert kwargs["recursive"]
+            assert not kwargs["decrypt"]
             return mock_value
 
     monkeypatch.setattr(parameters.ssm, "DEFAULT_PROVIDERS", {})
