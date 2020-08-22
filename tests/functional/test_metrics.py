@@ -7,6 +7,7 @@ import pytest
 
 from aws_lambda_powertools import Metrics, single_metric
 from aws_lambda_powertools.metrics import MetricUnit, MetricUnitError, MetricValueError, SchemaValidationError
+from aws_lambda_powertools.metrics import metrics as metrics_global
 from aws_lambda_powertools.metrics.base import MetricManager
 
 
@@ -14,6 +15,7 @@ from aws_lambda_powertools.metrics.base import MetricManager
 def reset_metric_set():
     metrics = Metrics()
     metrics.clear_metrics()
+    metrics_global.is_cold_start = True  # ensure each test has cold start
     yield
 
 
@@ -110,6 +112,10 @@ def remove_timestamp(metrics: List):
 
 def capture_metrics_output(capsys):
     return json.loads(capsys.readouterr().out.strip())
+
+
+def capture_metrics_output_multiple_emf_objects(capsys):
+    return [json.loads(line.strip()) for line in capsys.readouterr().out.split("\n") if line]
 
 
 def test_single_metric_logs_one_metric_only(capsys, metric, dimension, namespace):
@@ -495,7 +501,7 @@ def test_emit_cold_start_metric_only_once(capsys, namespace, service, metric):
 
     LambdaContext = namedtuple("LambdaContext", "function_name")
     lambda_handler({}, LambdaContext("example_fn"))
-    _ = capture_metrics_output(capsys)  # ignore first stdout captured
+    _, _ = capture_metrics_output_multiple_emf_objects(capsys)  # ignore first stdout captured
 
     # THEN ColdStart metric and function_name dimension should be logged once
     lambda_handler({}, LambdaContext("example_fn"))
@@ -630,3 +636,34 @@ def test_serialize_metric_set_metric_definition(metric, dimension, namespace, se
     assert "Timestamp" in metric_definition_output["_aws"]
     remove_timestamp(metrics=[metric_definition_output, expected_metric_definition])
     assert metric_definition_output == expected_metric_definition
+
+
+def test_log_metrics_capture_cold_start_metric_separately(capsys, namespace, service, metric, dimension):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(service=service, namespace=namespace)
+
+    # WHEN log_metrics is used with capture_cold_start_metric
+    @my_metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(evt, context):
+        my_metrics.add_metric(**metric)
+        my_metrics.add_dimension(**dimension)
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+    lambda_handler({}, LambdaContext("example_fn"))
+
+    cold_start_blob, custom_metrics_blob = capture_metrics_output_multiple_emf_objects(capsys)
+
+    # THEN ColdStart metric and function_name dimension should be logged
+    # in a separate EMF blob than the application metrics
+    assert cold_start_blob["ColdStart"] == 1
+    assert cold_start_blob["function_name"] == "example_fn"
+    assert cold_start_blob["service"] == service
+
+    # and that application metrics dimensions are not part of ColdStart EMF blob
+    assert "test_dimension" not in cold_start_blob
+
+    # THEN application metrics EMF blob should not have function_name dimension
+    assert "function_name" not in custom_metrics_blob
+    assert custom_metrics_blob["service"] == service
+    assert custom_metrics_blob["single_metric"] == metric["value"]
+    assert custom_metrics_blob["test_dimension"] == dimension["value"]

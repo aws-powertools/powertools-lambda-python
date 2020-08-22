@@ -4,7 +4,8 @@ import logging
 import warnings
 from typing import Any, Callable
 
-from .base import MetricManager
+from .base import MetricManager, MetricUnit
+from .metric import single_metric
 
 logger = logging.getLogger(__name__)
 
@@ -167,6 +168,7 @@ class Metrics(MetricManager):
         global is_cold_start
         if is_cold_start:
             logger.debug("Adding cold start metric and function_name dimension")
-            self.add_metric(name="ColdStart", value=1, unit="Count")
-            self.add_dimension(name="function_name", value=context.function_name)
-            is_cold_start = False
+            with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace=self.namespace) as metric:
+                metric.add_dimension(name="function_name", value=context.function_name)
+                metric.add_dimension(name="service", value=self.service)
+                is_cold_start = False
