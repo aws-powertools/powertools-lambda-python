@@ -383,6 +383,72 @@ def test_tracer_yield_from_context_manager(mocker, provider_stub, in_subsegment_
     assert "test result" in result
 
 
+def test_tracer_yield_from_context_manager_exception_metadata(mocker, provider_stub, in_subsegment_mock):
+    # GIVEN tracer is initialized
+    provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
+    tracer = Tracer(provider=provider, service="booking")
+
+    # WHEN capture_method decorator is used on a context manager
+    # and the method raises an exception
+    @tracer.capture_method
+    @contextlib.contextmanager
+    def yield_with_capture():
+        yield "partial"
+        raise ValueError("test")
+
+    with pytest.raises(ValueError):
+        with yield_with_capture() as partial_val:
+            assert partial_val == "partial"
+
+    # THEN we should add the exception using method name as key plus error
+    # and their service name as the namespace
+    put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
+    assert put_metadata_mock_args["key"] == "yield_with_capture error"
+    assert isinstance(put_metadata_mock_args["value"], ValueError)
+    assert put_metadata_mock_args["namespace"] == "booking"
+
+
+def test_tracer_yield_from_nested_context_manager(mocker, provider_stub, in_subsegment_mock):
+    # GIVEN tracer is initialized
+    provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
+    tracer = Tracer(provider=provider, service="booking")
+
+    # WHEN capture_method decorator is used on a context manager nesting another context manager
+    class NestedContextManager(object):
+        def __enter__(self):
+            self._value = {"result": "test result"}
+            return self._value
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            self._value["result"] = "exit was called before yielding"
+
+    @tracer.capture_method
+    @contextlib.contextmanager
+    def yield_with_capture():
+        with NestedContextManager() as nested_context:
+            yield nested_context
+
+    @tracer.capture_lambda_handler
+    def handler(event, context):
+        response = []
+        with yield_with_capture() as yielded_value:
+            response.append(yielded_value["result"])
+
+        return response
+
+    result = handler({}, {})
+
+    # THEN we should have a subsegment named after the method name
+    # and add its response as trace metadata
+    handler_trace, yield_function_trace = in_subsegment_mock.in_subsegment.call_args_list
+
+    assert "test result" in in_subsegment_mock.put_metadata.call_args[1]["value"]
+    assert in_subsegment_mock.in_subsegment.call_count == 2
+    assert handler_trace == mocker.call(name="## handler")
+    assert yield_function_trace == mocker.call(name="## yield_with_capture")
+    assert "test result" in result
+
+
 def test_tracer_yield_from_generator(mocker, provider_stub, in_subsegment_mock):
     # GIVEN tracer is initialized
     provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
@@ -411,3 +477,28 @@ def test_tracer_yield_from_generator(mocker, provider_stub, in_subsegment_mock):
     assert handler_trace == mocker.call(name="## handler")
     assert generator_fn_trace == mocker.call(name="## generator_fn")
     assert "test result" in result
+
+
+def test_tracer_yield_from_generator_exception_metadata(mocker, provider_stub, in_subsegment_mock):
+    # GIVEN tracer is initialized
+    provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
+    tracer = Tracer(provider=provider, service="booking")
+
+    # WHEN capture_method decorator is used on a generator function
+    # and the method raises an exception
+    @tracer.capture_method
+    def generator_fn():
+        yield "partial"
+        raise ValueError("test")
+
+    with pytest.raises(ValueError):
+        gen = generator_fn()
+        list(gen)
+
+    # THEN we should add the exception using method name as key plus error
+    # and their service name as the namespace
+    put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
+    assert put_metadata_mock_args["key"] == "generator_fn error"
+    assert put_metadata_mock_args["namespace"] == "booking"
+    assert isinstance(put_metadata_mock_args["value"], ValueError)
+    assert str(put_metadata_mock_args["value"]) == "test"

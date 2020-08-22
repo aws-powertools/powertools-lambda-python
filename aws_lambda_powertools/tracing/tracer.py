@@ -487,13 +487,12 @@ class Tracer:
                     logger.debug(f"Calling method: {method_name}")
                     with method(*args, **kwargs) as return_val:
                         result = return_val
+                        yield result
                     self._add_response_as_metadata(function_name=method_name, data=result, subsegment=subsegment)
                 except Exception as err:
                     logger.exception(f"Exception received from '{method_name}' method")
                     self._add_full_exception_as_metadata(function_name=method_name, error=err, subsegment=subsegment)
                     raise
-
-                yield result
 
         return decorate
 
