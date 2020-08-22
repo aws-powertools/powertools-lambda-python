@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.1] - 2020-08-22
+### Fixed
+- **Tracer**: capture_method decorator did not properly handle nested context managers
+
 ## [1.3.0] - 2020-08-21
 ### Added
 - **Utilities**: Add new `parameters` utility to retrieve a single or multiple parameters from SSM Parameter Store, Secrets Manager, DynamoDB, or your very own
