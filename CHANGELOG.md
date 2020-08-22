@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Metrics**: Cold start metric is now completely separate from application metrics dimensions, making it easier and cheaper to visualize
+
 ## [1.1.3] - 2020-08-18
 ### Fixed
 - **Logger**: Logs emitted twice, structured and unstructured, due to Lambda configuring the root handler
