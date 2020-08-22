@@ -662,8 +662,12 @@ def test_log_metrics_capture_cold_start_metric_separately(capsys, namespace, ser
     # and that application metrics dimensions are not part of ColdStart EMF blob
     assert "test_dimension" not in cold_start_blob
 
-    # THEN application metrics EMF blob should not have function_name dimension
+    # THEN application metrics EMF blob should not have
+    # ColdStart metric nor function_name dimension
     assert "function_name" not in custom_metrics_blob
+    assert "ColdStart" not in custom_metrics_blob
+
+    # and that application metrics are recorded as normal
     assert custom_metrics_blob["service"] == service
     assert custom_metrics_blob["single_metric"] == metric["value"]
     assert custom_metrics_blob["test_dimension"] == dimension["value"]
