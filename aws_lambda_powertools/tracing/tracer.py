@@ -158,19 +158,19 @@ class Tracer:
     def put_annotation(self, key: str, value: Any):
         """Adds annotation to existing segment or subsegment
 
+        Parameters
+        ----------
+        key : str
+            Annotation key
+        value : any
+            Value for annotation
+
         Example
         -------
         Custom annotation for a pseudo service named payment
 
             tracer = Tracer(service="payment")
             tracer.put_annotation("PaymentStatus", "CONFIRMED")
-
-        Parameters
-        ----------
-        key : str
-            Annotation key (e.g. PaymentStatus)
-        value : any
-            Value for annotation (e.g. "CONFIRMED")
         """
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting put_annotation")
@@ -283,7 +283,7 @@ class Tracer:
                     logger.debug("Received lambda handler response successfully")
                     logger.debug(response)
                     self._add_response_as_metadata(
-                        function_name=lambda_handler_name,
+                        method_name=lambda_handler_name,
                         data=response,
                         subsegment=subsegment,
                         capture_response=capture_response,
@@ -291,7 +291,7 @@ class Tracer:
                 except Exception as err:
                     logger.exception(f"Exception received from {lambda_handler_name}")
                     self._add_full_exception_as_metadata(
-                        function_name=lambda_handler_name, error=err, subsegment=subsegment
+                        method_name=lambda_handler_name, error=err, subsegment=subsegment
                     )
                     raise
 
@@ -452,22 +452,28 @@ class Tracer:
             logger.debug("Decorator called with parameters")
             return functools.partial(self.capture_method, capture_response=capture_response)
 
+        method_name = f"{method.__name__}"
+
         if inspect.iscoroutinefunction(method):
-            decorate = self._decorate_async_function(method=method, capture_response=capture_response)
+            decorate = self._decorate_async_function(
+                method=method, capture_response=capture_response, method_name=method_name
+            )
         elif inspect.isgeneratorfunction(method):
-            decorate = self._decorate_generator_function(method=method, capture_response=capture_response)
+            decorate = self._decorate_generator_function(
+                method=method, capture_response=capture_response, method_name=method_name
+            )
         elif hasattr(method, "__wrapped__") and inspect.isgeneratorfunction(method.__wrapped__):
             decorate = self._decorate_generator_function_with_context_manager(
-                method=method, capture_response=capture_response
+                method=method, capture_response=capture_response, method_name=method_name
             )
         else:
-            decorate = self._decorate_sync_function(method=method, capture_response=capture_response)
+            decorate = self._decorate_sync_function(
+                method=method, capture_response=capture_response, method_name=method_name
+            )
 
         return decorate
 
-    def _decorate_async_function(self, method: Callable = None, capture_response: bool = True):
-        method_name = f"{method.__name__}"
-
+    def _decorate_async_function(self, method: Callable = None, capture_response: bool = True, method_name: str = None):
         @functools.wraps(method)
         async def decorate(*args, **kwargs):
             async with self.provider.in_subsegment_async(name=f"## {method_name}") as subsegment:
@@ -475,23 +481,23 @@ class Tracer:
                     logger.debug(f"Calling method: {method_name}")
                     response = await method(*args, **kwargs)
                     self._add_response_as_metadata(
-                        function_name=method_name,
+                        method_name=method_name,
                         data=response,
                         subsegment=subsegment,
                         capture_response=capture_response,
                     )
                 except Exception as err:
                     logger.exception(f"Exception received from '{method_name}' method")
-                    self._add_full_exception_as_metadata(function_name=method_name, error=err, subsegment=subsegment)
+                    self._add_full_exception_as_metadata(method_name=method_name, error=err, subsegment=subsegment)
                     raise
 
                 return response
 
         return decorate
 
-    def _decorate_generator_function(self, method: Callable = None, capture_response: bool = True):
-        method_name = f"{method.__name__}"
-
+    def _decorate_generator_function(
+        self, method: Callable = None, capture_response: bool = True, method_name: str = None
+    ):
         @functools.wraps(method)
         def decorate(*args, **kwargs):
             with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
@@ -499,20 +505,20 @@ class Tracer:
                     logger.debug(f"Calling method: {method_name}")
                     result = yield from method(*args, **kwargs)
                     self._add_response_as_metadata(
-                        function_name=method_name, data=result, subsegment=subsegment, capture_response=capture_response
+                        method_name=method_name, data=result, subsegment=subsegment, capture_response=capture_response
                     )
                 except Exception as err:
                     logger.exception(f"Exception received from '{method_name}' method")
-                    self._add_full_exception_as_metadata(function_name=method_name, error=err, subsegment=subsegment)
+                    self._add_full_exception_as_metadata(method_name=method_name, error=err, subsegment=subsegment)
                     raise
 
                 return result
 
         return decorate
 
-    def _decorate_generator_function_with_context_manager(self, method: Callable = None, capture_response: bool = True):
-        method_name = f"{method.__name__}"
-
+    def _decorate_generator_function_with_context_manager(
+        self, method: Callable = None, capture_response: bool = True, method_name: str = None
+    ):
         @functools.wraps(method)
         @contextlib.contextmanager
         def decorate(*args, **kwargs):
@@ -523,18 +529,16 @@ class Tracer:
                         result = return_val
                         yield result
                     self._add_response_as_metadata(
-                        function_name=method_name, data=result, subsegment=subsegment, capture_response=capture_response
+                        method_name=method_name, data=result, subsegment=subsegment, capture_response=capture_response
                     )
                 except Exception as err:
                     logger.exception(f"Exception received from '{method_name}' method")
-                    self._add_full_exception_as_metadata(function_name=method_name, error=err, subsegment=subsegment)
+                    self._add_full_exception_as_metadata(method_name=method_name, error=err, subsegment=subsegment)
                     raise
 
         return decorate
 
-    def _decorate_sync_function(self, method: Callable = None, capture_response: bool = True):
-        method_name = f"{method.__name__}"
-
+    def _decorate_sync_function(self, method: Callable = None, capture_response: bool = True, method_name: str = None):
         @functools.wraps(method)
         def decorate(*args, **kwargs):
             with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
@@ -542,14 +546,14 @@ class Tracer:
                     logger.debug(f"Calling method: {method_name}")
                     response = method(*args, **kwargs)
                     self._add_response_as_metadata(
-                        function_name=method_name,
+                        method_name=method_name,
                         data=response,
                         subsegment=subsegment,
                         capture_response=capture_response,
                     )
                 except Exception as err:
                     logger.exception(f"Exception received from '{method_name}' method")
-                    self._add_full_exception_as_metadata(function_name=method_name, error=err, subsegment=subsegment)
+                    self._add_full_exception_as_metadata(method_name=method_name, error=err, subsegment=subsegment)
                     raise
 
                 return response
@@ -558,7 +562,7 @@ class Tracer:
 
     def _add_response_as_metadata(
         self,
-        function_name: str = None,
+        method_name: str = None,
         data: Any = None,
         subsegment: aws_xray_sdk.core.models.subsegment = None,
         capture_response: bool = True,
@@ -567,7 +571,7 @@ class Tracer:
 
         Parameters
         ----------
-        function_name : str, optional
+        method_name : str, optional
             function name to add as metadata key, by default None
         data : Any, optional
             data to add as subsegment metadata, by default None
@@ -579,23 +583,23 @@ class Tracer:
         if data is None or not capture_response or subsegment is None:
             return
 
-        subsegment.put_metadata(key=f"{function_name} response", value=data, namespace=self._config["service"])
+        subsegment.put_metadata(key=f"{method_name} response", value=data, namespace=self._config["service"])
 
     def _add_full_exception_as_metadata(
-        self, function_name: str = None, error: Exception = None, subsegment: aws_xray_sdk.core.models.subsegment = None
+        self, method_name: str = None, error: Exception = None, subsegment: aws_xray_sdk.core.models.subsegment = None
     ):
         """Add full exception object as metadata for given subsegment
 
         Parameters
         ----------
-        function_name : str, optional
+        method_name : str, optional
             function name to add as metadata key, by default None
         error : Exception, optional
             error to add as subsegment metadata, by default None
         subsegment : aws_xray_sdk.core.models.subsegment, optional
             existing subsegment to add metadata on, by default None
         """
-        subsegment.put_metadata(key=f"{function_name} error", value=error, namespace=self._config["service"])
+        subsegment.put_metadata(key=f"{method_name} error", value=error, namespace=self._config["service"])
 
     def __disable_tracing_provider(self):
         """Forcefully disables tracing"""
