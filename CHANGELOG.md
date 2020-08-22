@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1] - 2020-07-06
 ### Fixed
-- **Logger**: Fix a bug with `inject_lambda_context` causing existing an Logger keys to be overriden if `structure_logs` was called before
+- **Logger**: Fix a bug with `inject_lambda_context` causing existing an Logger keys to be overridden if `structure_logs` was called before
 
 ## [1.0.0] - 2020-06-18
 ### Added
@@ -102,7 +102,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.8.0] - 2020-04-24
 ### Added
-- **Logger**: Introduced `Logger` class for stuctured logging as a replacement for `logger_setup`
+- **Logger**: Introduced `Logger` class for structured logging as a replacement for `logger_setup`
 - **Logger**: Introduced `Logger.inject_lambda_context` decorator as a replacement for `logger_inject_lambda_context`
 
 ### Removed
