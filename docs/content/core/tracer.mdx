@@ -20,7 +20,7 @@ Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.
 <Note type="warning">
   <strong>Returning sensitive information from your Lambda handler or functions, where Tracer is used?</strong>
   <br/><br/>
-  You can disable capturing their responses as tracing metadata with <strong><code>capture_response=False</code></strong> parameter for both capture_lambda_handler and capture_method decorators.
+  You can disable Tracer from capturing their responses as tracing metadata with <strong><code>capture_response=False</code></strong> parameter in both capture_lambda_handler and capture_method decorators.
 </Note><br/>
 
 ## Initialization
