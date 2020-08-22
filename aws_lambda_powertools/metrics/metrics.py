@@ -150,7 +150,7 @@ class Metrics(MetricManager):
                 else:
                     metrics = self.serialize_metric_set()
                     self.clear_metrics()
-                    logger.debug("Publishing metrics", {"metrics": metrics})
+                    logger.debug("Publishing metrics")
                     print(json.dumps(metrics))
 
             return response
