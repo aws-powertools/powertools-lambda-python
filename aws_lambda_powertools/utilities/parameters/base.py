@@ -87,7 +87,7 @@ class BaseProvider(ABC):
     @abstractmethod
     def _get(self, name: str, **sdk_options) -> str:
         """
-        Retrieve paramater value from the underlying parameter store
+        Retrieve parameter value from the underlying parameter store
         """
         raise NotImplementedError()
 
@@ -168,7 +168,7 @@ def transform_value(value: str, transform: str) -> Union[dict, bytes]:
     Parameters
     ---------
     value: str
-        Parameter alue to transform
+        Parameter value to transform
     transform: str
         Type of transform, supported values are "json" and "binary"
 
