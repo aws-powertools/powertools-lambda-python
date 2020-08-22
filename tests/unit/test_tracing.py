@@ -502,3 +502,37 @@ def test_tracer_yield_from_generator_exception_metadata(mocker, provider_stub, i
     assert put_metadata_mock_args["namespace"] == "booking"
     assert isinstance(put_metadata_mock_args["value"], ValueError)
     assert str(put_metadata_mock_args["value"]) == "test"
+
+
+def test_tracer_lambda_handler_does_not_add_response_as_metadata(mocker, provider_stub, in_subsegment_mock):
+    # GIVEN tracer is initialized
+    provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
+    tracer = Tracer(provider=provider, auto_patch=False)
+
+    # WHEN capture_lambda_handler decorator is used
+    # and the handler response is empty
+    @tracer.capture_lambda_handler(capture_response=False)
+    def handler(event, context):
+        return "response"
+
+    handler({}, mocker.MagicMock())
+
+    # THEN we should not add any metadata
+    assert in_subsegment_mock.put_metadata.call_count == 0
+
+
+def test_tracer_method_does_not_add_response_as_metadata(mocker, provider_stub, in_subsegment_mock):
+    # GIVEN tracer is initialized
+    provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
+    tracer = Tracer(provider=provider, auto_patch=False)
+
+    # WHEN capture_method decorator is used
+    # and the method response is empty
+    @tracer.capture_method(capture_response=False)
+    def greeting(name, message):
+        return "response"
+
+    greeting(name="Foo", message="Bar")
+
+    # THEN we should not add any metadata
+    assert in_subsegment_mock.put_metadata.call_count == 0
