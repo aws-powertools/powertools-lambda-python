@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Metrics**: Cold start metric is now completely separate from application metrics dimensions, making it easier and cheaper to visualize
 
+## [1.3.1] - 2020-08-22
+### Fixed
+- **Tracer**: capture_method decorator did not properly handle nested context managers
+
+## [1.3.0] - 2020-08-21
+### Added
+- **Utilities**: Add new `parameters` utility to retrieve a single or multiple parameters from SSM Parameter Store, Secrets Manager, DynamoDB, or your very own
+
+## [1.2.0] - 2020-08-20
+### Added
+- **Tracer**: capture_method decorator now supports generator functions (including context managers)
+
 ## [1.1.3] - 2020-08-18
 ### Fixed
 - **Logger**: Logs emitted twice, structured and unstructured, due to Lambda configuring the root handler

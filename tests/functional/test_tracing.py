@@ -1,3 +1,5 @@
+import contextlib
+
 import pytest
 
 from aws_lambda_powertools import Tracer
@@ -150,3 +152,36 @@ def test_tracer_method_nested_sync(mocker):
         return func_1() + func_2()
 
     sums_values()
+
+
+def test_tracer_yield_with_capture():
+    # GIVEN tracer method decorator is used
+    tracer = Tracer(disabled=True)
+
+    # WHEN capture_method decorator is applied to a context manager
+    @tracer.capture_method
+    @contextlib.contextmanager
+    def yield_with_capture():
+        yield "testresult"
+
+    # Or WHEN capture_method decorator is applied to a generator function
+    @tracer.capture_method
+    def generator_func():
+        yield "testresult2"
+
+    @tracer.capture_lambda_handler
+    def handler(event, context):
+        result = []
+        with yield_with_capture() as yielded_value:
+            result.append(yielded_value)
+
+        gen = generator_func()
+
+        result.append(next(gen))
+
+        return result
+
+    # THEN no exception is thrown, and the functions properly return values
+    result = handler({}, {})
+    assert "testresult" in result
+    assert "testresult2" in result

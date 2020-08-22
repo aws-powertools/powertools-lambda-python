@@ -162,7 +162,7 @@ typed-ast = ">=1.4.0"
 d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "The AWS SDK for Python"
 name = "boto3"
 optional = false
@@ -816,7 +816,7 @@ security = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)"]
 socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7)", "win-inet-pton"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "An Amazon S3 Transfer Manager"
 name = "s3transfer"
 optional = false
@@ -951,7 +951,6 @@ multidict = ">=4.0"
 [[package]]
 category = "main"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-marker = "python_version < \"3.8\""
 name = "zipp"
 optional = false
 python-versions = ">=3.6"
@@ -962,7 +961,8 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "a2760fd5f04b7f1841509fcbcb4ccdaf35d92d1395627787e4a11f391a0597d2"
+content-hash = "18607a712e4a4a05de7350ecbcf26327a4fb45bb8609dc7f3d19b7610c2faafc"
+lock-version = "1.0"
 python-versions = "^3.6"
 
 [metadata.files]
