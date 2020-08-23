@@ -138,13 +138,14 @@ class BaseProvider(ABC):
             return self.store[key].value
 
         try:
-            values = self._get_multiple(path, **sdk_options)
+            values: Dict[str, Union[str, bytes, dict, None]] = self._get_multiple(path, **sdk_options)
         # Encapsulate all errors into a generic GetParameterError
         except Exception as exc:
             raise GetParameterError(str(exc))
 
         if transform is not None:
-            values = {k: transform_value(v, transform, raise_on_transform_error) for (k, v) in values.items()}
+            for (key, value) in values.items():
+                values[key] = transform_value(value, transform, raise_on_transform_error)
 
         self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age),)
 
