@@ -7,7 +7,7 @@ import json
 from abc import ABC, abstractmethod
 from collections import namedtuple
 from datetime import datetime, timedelta
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Tuple, Union
 
 from .exceptions import GetParameterError, TransformParameterError
 
@@ -30,6 +30,9 @@ class BaseProvider(ABC):
         """
 
         self.store = {}
+
+    def _has_not_expired(self, key: Tuple[str, Optional[str]]) -> bool:
+        return key in self.store and self.store[key].ttl >= datetime.now()
 
     def get(
         self, name: str, max_age: int = DEFAULT_MAX_AGE_SECS, transform: Optional[str] = None, **sdk_options
@@ -70,19 +73,21 @@ class BaseProvider(ABC):
         # an acceptable tradeoff.
         key = (name, transform)
 
-        if key not in self.store or self.store[key].ttl < datetime.now():
-            try:
-                value = self._get(name, **sdk_options)
-            # Encapsulate all errors into a generic GetParameterError
-            except Exception as exc:
-                raise GetParameterError(str(exc))
+        if self._has_not_expired(key):
+            return self.store[key].value
 
-            if transform is not None:
-                value = transform_value(value, transform)
+        try:
+            value = self._get(name, **sdk_options)
+        # Encapsulate all errors into a generic GetParameterError
+        except Exception as exc:
+            raise GetParameterError(str(exc))
 
-            self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age),)
+        if transform is not None:
+            value = transform_value(value, transform)
 
-        return self.store[key].value
+        self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age),)
+
+        return value
 
     @abstractmethod
     def _get(self, name: str, **sdk_options) -> str:
@@ -129,29 +134,21 @@ class BaseProvider(ABC):
 
         key = (path, transform)
 
-        if key not in self.store or self.store[key].ttl < datetime.now():
-            try:
-                values = self._get_multiple(path, **sdk_options)
-            # Encapsulate all errors into a generic GetParameterError
-            except Exception as exc:
-                raise GetParameterError(str(exc))
+        if self._has_not_expired(key):
+            return self.store[key].value
 
-            if transform is not None:
-                new_values = {}
-                for key, value in values.items():
-                    try:
-                        new_values[key] = transform_value(value, transform)
-                    except Exception as exc:
-                        if raise_on_transform_error:
-                            raise exc
-                        else:
-                            new_values[key] = None
+        try:
+            values = self._get_multiple(path, **sdk_options)
+        # Encapsulate all errors into a generic GetParameterError
+        except Exception as exc:
+            raise GetParameterError(str(exc))
 
-                values = new_values
+        if transform is not None:
+            values = {k: transform_value(v, transform, raise_on_transform_error) for (k, v) in values.items()}
 
-            self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age),)
+        self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age),)
 
-        return self.store[key].value
+        return values
 
     @abstractmethod
     def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
@@ -161,7 +158,7 @@ class BaseProvider(ABC):
         raise NotImplementedError()
 
 
-def transform_value(value: str, transform: str) -> Union[dict, bytes]:
+def transform_value(value: str, transform: str, raise_on_transform_error: bool = True) -> Union[dict, bytes, None]:
     """
     Apply a transform to a value
 
@@ -171,6 +168,9 @@ def transform_value(value: str, transform: str) -> Union[dict, bytes]:
         Parameter value to transform
     transform: str
         Type of transform, supported values are "json" and "binary"
+    raise_on_transform_error: bool, optional
+        Raises an exception if any transform fails, otherwise this will
+        return a None value for each transform that failed
 
     Raises
     ------
@@ -187,4 +187,6 @@ def transform_value(value: str, transform: str) -> Union[dict, bytes]:
             raise ValueError(f"Invalid transform type '{transform}'")
 
     except Exception as exc:
-        raise TransformParameterError(str(exc))
+        if raise_on_transform_error:
+            raise TransformParameterError(str(exc))
+        return None

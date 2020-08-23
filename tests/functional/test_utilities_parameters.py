@@ -1471,3 +1471,13 @@ def test_transform_value_wrong(mock_value):
         parameters.base.transform_value(mock_value, "INCORRECT")
 
     assert "Invalid transform type" in str(excinfo)
+
+
+def test_transform_value_ignore_error(mock_value):
+    """
+    Test transform_value() does not raise errors when raise_on_transform_error is False
+    """
+
+    value = parameters.base.transform_value(mock_value, "INCORRECT", raise_on_transform_error=False)
+
+    assert value is None
