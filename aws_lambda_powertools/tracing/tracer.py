@@ -281,7 +281,6 @@ class Tracer:
                     logger.debug("Calling lambda handler")
                     response = lambda_handler(event, context)
                     logger.debug("Received lambda handler response successfully")
-                    logger.debug(response)
                     self._add_response_as_metadata(
                         method_name=lambda_handler_name,
                         data=response,
