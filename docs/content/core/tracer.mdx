@@ -199,7 +199,7 @@ You can use `tracer.provider` attribute to access all methods provided by AWS X-
 
 This is useful when you need a feature available in X-Ray that is not available in the Tracer utility, for example [thread-safe](https://github.com/aws/aws-xray-sdk-python/#user-content-trace-threadpoolexecutor), or [context managers](https://github.com/aws/aws-xray-sdk-python/#user-content-start-a-custom-segmentsubsegment).
 
-## Concurrent asynchronous functions
+### Concurrent asynchronous functions
 
 <Note type="info">
     <a href="https://github.com/aws/aws-xray-sdk-python/issues/164">As of now, X-Ray SDK will raise an exception when async functions are run and traced concurrently</a>.
