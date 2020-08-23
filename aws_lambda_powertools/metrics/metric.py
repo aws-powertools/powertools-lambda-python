@@ -110,8 +110,6 @@ def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = No
         metric: SingleMetric = SingleMetric(namespace=namespace)
         metric.add_metric(name=name, unit=unit, value=value)
         yield metric
-        logger.debug("Serializing single metric")
         metric_set: Dict = metric.serialize_metric_set()
     finally:
-        logger.debug("Publishing single metric", {"metric": metric})
         print(json.dumps(metric_set))
