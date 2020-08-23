@@ -11,16 +11,16 @@ env:
   AWS_DEFAULT_OUTPUT: json
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Set release notes tag
-        run: |
-          export RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}
-          echo ::set-env name=RELEASE_TAG_VERSION::${RELEASE_TAG_VERSION:1}
-      - name: write version to ssm
-        run: |
-          aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_TAG_VERSION
-      - name: trigger lamber layer publish pipeline
-        run: |
-          aws codepipeline start-pipeline-execution --name ${{ secret.CODEPIPELINE_NAME }}
+    - name: Set release notes tag
+      run: |
+        export RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}
+        echo ::set-env name=RELEASE_TAG_VERSION::${RELEASE_TAG_VERSION:1}
+    - name: write version to ssm
+      run: |
+        aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_TAG_VERSION
+    - name: trigger lamber layer publish pipeline
+      run: |
+        aws codepipeline start-pipeline-execution --name ${{ secret.CODEPIPELINE_NAME }}
