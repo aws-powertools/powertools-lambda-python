@@ -21,7 +21,7 @@ jobs:
     - name: write version to ssm
       run: |
         RELEASE_TAG_VERSION=1.3.0 # simulate release here, will be removed later
-        aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_TAG_VERSION
+        aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_TAG_VERSION --overwrite
     - name: trigger lamber layer publish pipeline
       run: |
         aws codepipeline start-pipeline-execution --name ${{ secrets.CODEPIPELINE_NAME }}
