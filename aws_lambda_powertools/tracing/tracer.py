@@ -571,7 +571,7 @@ class Tracer:
         Parameters
         ----------
         method_name : str, optional
-            function name to add as metadata key, by default None
+            method name to add as metadata key, by default None
         data : Any, optional
             data to add as subsegment metadata, by default None
         subsegment : aws_xray_sdk.core.models.subsegment, optional
@@ -592,7 +592,7 @@ class Tracer:
         Parameters
         ----------
         method_name : str, optional
-            function name to add as metadata key, by default None
+            method name to add as metadata key, by default None
         error : Exception, optional
             error to add as subsegment metadata, by default None
         subsegment : aws_xray_sdk.core.models.subsegment, optional
