@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Metrics**: Cold start metric is now completely separate from application metrics dimensions, making it easier and cheaper to visualize.
+    - This is a breaking change if you were graphing/alerting on both application metrics with the same name to compensate this previous malfunctioning
+    - Marked as bugfix as this is the intended behaviour since the beginning, as you shouldn't have the same application metric with different dimensions
+
+### Added
+- **Tracer**: capture_lambda_handler and capture_method decorators now support `capture_response` parameter to not include function's response as part of tracing metadata
+
 ## [1.3.1] - 2020-08-22
 ### Fixed
 - **Tracer**: capture_method decorator did not properly handle nested context managers
@@ -44,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1] - 2020-07-06
 ### Fixed
-- **Logger**: Fix a bug with `inject_lambda_context` causing existing an Logger keys to be overriden if `structure_logs` was called before
+- **Logger**: Fix a bug with `inject_lambda_context` causing existing Logger keys to be overridden if `structure_logs` was called before
 
 ## [1.0.0] - 2020-06-18
 ### Added
@@ -114,7 +122,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.8.0] - 2020-04-24
 ### Added
-- **Logger**: Introduced `Logger` class for stuctured logging as a replacement for `logger_setup`
+- **Logger**: Introduced `Logger` class for structured logging as a replacement for `logger_setup`
 - **Logger**: Introduced `Logger.inject_lambda_context` decorator as a replacement for `logger_inject_lambda_context`
 
 ### Removed

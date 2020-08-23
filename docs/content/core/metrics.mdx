@@ -5,7 +5,9 @@ description: Core utility
 
 import Note from "../../src/components/Note"
 
-Metrics creates custom metrics asynchronously via logging metrics to standard output following Amazon CloudWatch Embedded Metric Format (EMF).
+Metrics creates custom metrics asynchronously by logging metrics to standard output following Amazon CloudWatch Embedded Metric Format (EMF).
+
+These metrics can be visualized through [Amazon CloudWatch Console](https://console.aws.amazon.com/cloudwatch/).
 
 **Key features**
 
@@ -32,7 +34,9 @@ Resources:
 ```
 
 We recommend you use your application or main service as a metric namespace.
-You can explicitly set a namespace name via `namespace` param or via `POWERTOOLS_METRICS_NAMESPACE` env var. This sets **namespace** key that will be used for all metrics.
+You can explicitly set a namespace name via `namespace` param or via `POWERTOOLS_METRICS_NAMESPACE` env var.
+
+This sets **namespace** key that will be used for all metrics.
 You can also pass a service name via `service` param or `POWERTOOLS_SERVICE_NAME` env var. This will create a dimension with the service name.
 
 ```python:title=app.py
@@ -67,7 +71,7 @@ metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
 
 `MetricUnit` enum facilitate finding a supported metric unit by CloudWatch. Alternatively, you can pass the value as a string if you already know them e.g. "Count".
 
-CloudWatch EMF supports a max of 100 metrics. Metrics will automatically flush all metrics when adding the 100th metric, where subsequent metrics will be aggregated into a new EMF object.
+CloudWatch EMF supports a max of 100 metrics. Metrics utility will flush all metrics when adding the 100th metric while subsequent metrics will be aggregated into a new EMF object, for your convenience.
 
 ## Creating a metric with a different dimension
 
@@ -238,7 +242,12 @@ def lambda_handler(evt, ctx):
     ...
 ```
 
-If it's a cold start, this feature will add a metric named `ColdStart` and a dimension named `function_name`.
+If it's a cold start invocation, this feature will:
+
+* Create a separate EMF blob solely containing a metric named `ColdStart`
+* Add `function_name` and `service` dimensions
+
+This has the advantage of keeping cold start metric separate from your application metrics.
 
 ## Testing your code
 
