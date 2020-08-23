@@ -58,7 +58,7 @@ Key | Type | Example | Description
 **sampling_rate** | int |  0.1 | Debug logging sampling rate in percentage e.g. 1% in this case
 **message** | any |  "Collecting payment" | Log statement value. Unserializable JSON values will be casted to string
 
-## Capturing context Lambda info
+## Capturing Lambda context info
 
 You can enrich your structured logs with key Lambda context information via `inject_lambda_context`.
 
@@ -76,22 +76,6 @@ def handler(event, context):
       "operation": "collect_payment",
       "charge_id": event['charge_id']
    })
-   ...
-```
-
-You can also explicitly log any incoming event using `log_event` param or via `POWERTOOLS_LOGGER_LOG_EVENT` env var.
-
-<Note type="warning">
-  This is disabled by default to prevent sensitive info being logged.
-</Note><br/>
-
-```python:title=log_handler_event.py
-from aws_lambda_powertools import Logger
-
-logger = Logger()
-
-@logger.inject_lambda_context(log_event=True) # highlight-start
-def handler(event, context):
    ...
 ```
 
@@ -145,6 +129,23 @@ Key | Type | Example
 }
 ```
 </details>
+<br/>
+
+You can also explicitly log any incoming event using `log_event` param or via `POWERTOOLS_LOGGER_LOG_EVENT` env var.
+
+<Note type="warning">
+  This is disabled by default to prevent sensitive info being logged.
+</Note><br/>
+
+```python:title=log_handler_event.py
+from aws_lambda_powertools import Logger
+
+logger = Logger()
+
+@logger.inject_lambda_context(log_event=True) # highlight-line
+def handler(event, context):
+   ...
+```
 
 ## Appending additional keys
 
@@ -222,7 +223,7 @@ If you ever forget to use `child` param, we will return an existing `Logger` wit
 
 You can dynamically set a percentage of your logs to **DEBUG** level using `sample_rate` param or via env var `POWERTOOLS_LOGGER_SAMPLE_RATE`.
 
-This happens on an entire request basis, and <strong>DEBUG</strong> level is set at the constructor. That means, concurrent requests or infrequent invocations are more likely to occur as [new Lambda execution contexts are created](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html), not reused.
+Sampling calculation happens at the Logger class initialization. This means, when configured it, sampling it's more likely to happen during concurrent requests, or infrequent invocations as [new Lambda execution contexts are created](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html), not reused.
 
 <Note type="info">
   If you want this logic to happen on every invocation regardless whether Lambda reuses the execution environment or not, then create your Logger inside your Lambda handler.
