@@ -77,7 +77,7 @@ class SecretsProvider(BaseProvider):
         ----------
         name: str
             Name of the parameter
-        sdk_options: dict
+        sdk_options: dict, optional
             Dictionary of options that will be passed to the Secrets Manager get_secret_value API call
         """
 

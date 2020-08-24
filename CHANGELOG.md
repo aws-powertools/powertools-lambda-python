@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - This is a breaking change if you were graphing/alerting on both application metrics with the same name to compensate this previous malfunctioning
     - Marked as bugfix as this is the intended behaviour since the beginning, as you shouldn't have the same application metric with different dimensions
 
+### Added
+- **Tracer**: capture_lambda_handler and capture_method decorators now support `capture_response` parameter to not include function's response as part of tracing metadata
+
 ## [1.3.1] - 2020-08-22
 ### Fixed
 - **Tracer**: capture_method decorator did not properly handle nested context managers
