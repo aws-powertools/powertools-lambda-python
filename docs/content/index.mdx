@@ -59,7 +59,7 @@ set_package_logger()
 Powertools is also available as a layer and is distributed via the [Serverless Application Repository](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/what-is-serverlessrepo.html).
 Create the layer via API with:
 
-```
+```bash:title=bash-script
 aws serverlessrepo create-cloud-formation-change-set --application-id arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer --stack-name YOUR_STACK_NAME --capabilities CAPABILITY_NAMED_IAM
 CHANGE_SET_ID=$(aws cloudformation list-change-sets --stack-name YOUR_STACK_NAME --query 'Summaries[*].ChangeSetId' --output text)
 aws cloudformation wait change-set-create-complete --change-set-name $CHANGE_SET_ID
