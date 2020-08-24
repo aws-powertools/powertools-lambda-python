@@ -8,7 +8,7 @@ from typing import Dict, Optional, Union
 import boto3
 from botocore.config import Config
 
-from .base import DEFAULT_PROVIDERS, BaseProvider
+from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 
 
 class SSMProvider(BaseProvider):
@@ -86,6 +86,46 @@ class SSMProvider(BaseProvider):
 
         super().__init__()
 
+    def get(
+        self,
+        name: str,
+        max_age: int = DEFAULT_MAX_AGE_SECS,
+        transform: Optional[str] = None,
+        decrypt: bool = False,
+        **sdk_options
+    ) -> Union[str, list, dict, bytes]:
+        """
+        Retrieve a parameter value or return the cached value
+
+        Parameters
+        ----------
+        name: str
+            Parameter name
+        max_age: int
+            Maximum age of the cached value
+        transform: str
+            Optional transformation of the parameter value. Supported values
+            are "json" for JSON strings and "binary" for base 64 encoded
+            values.
+        decrypt: bool, optional
+            If the parameter value should be decrypted
+        sdk_options: dict, optional
+            Arguments that will be passed directly to the underlying API call
+
+        Raises
+        ------
+        GetParameterError
+            When the parameter provider fails to retrieve a parameter value for
+            a given name.
+        TransformParameterError
+            When the parameter provider fails to transform a parameter value.
+        """
+
+        # Add to `decrypt` sdk_options to we can have an explicit option for this
+        sdk_options["decrypt"] = decrypt
+
+        return super().get(name, max_age, transform, **sdk_options)
+
     def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
         """
         Retrieve a parameter value from AWS Systems Manager Parameter Store
@@ -144,7 +184,9 @@ class SSMProvider(BaseProvider):
         return parameters
 
 
-def get_parameter(name: str, transform: Optional[str] = None, **sdk_options) -> Union[str, list, dict, bytes]:
+def get_parameter(
+    name: str, transform: Optional[str] = None, decrypt: bool = False, **sdk_options
+) -> Union[str, list, dict, bytes]:
     """
     Retrieve a parameter value from AWS Systems Manager (SSM) Parameter Store
 
@@ -154,6 +196,8 @@ def get_parameter(name: str, transform: Optional[str] = None, **sdk_options) -> 
         Name of the parameter
     transform: str, optional
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
+    decrypt: bool, optional
+        If the parameter values should be decrypted
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameter API call
 
@@ -190,7 +234,10 @@ def get_parameter(name: str, transform: Optional[str] = None, **sdk_options) -> 
     if "ssm" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
-    return DEFAULT_PROVIDERS["ssm"].get(name, transform=transform)
+    # Add to `decrypt` sdk_options to we can have an explicit option for this
+    sdk_options["decrypt"] = decrypt
+
+    return DEFAULT_PROVIDERS["ssm"].get(name, transform=transform, **sdk_options)
 
 
 def get_parameters(
@@ -205,10 +252,10 @@ def get_parameters(
         Path to retrieve the parameters
     transform: str, optional
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
-    decrypt: bool, optional
-        If the parameter values should be decrypted
     recursive: bool, optional
         If this should retrieve the parameter values recursively or not, defaults to True
+    decrypt: bool, optional
+        If the parameter values should be decrypted
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameters_by_path API call
 
@@ -245,4 +292,7 @@ def get_parameters(
     if "ssm" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
-    return DEFAULT_PROVIDERS["ssm"].get_multiple(path, transform=transform, recursive=recursive, decrypt=decrypt)
+    sdk_options["recursive"] = recursive
+    sdk_options["decrypt"] = decrypt
+
+    return DEFAULT_PROVIDERS["ssm"].get_multiple(path, transform=transform, **sdk_options)

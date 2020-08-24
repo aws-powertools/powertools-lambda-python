@@ -1310,6 +1310,7 @@ def test_get_parameter_new(monkeypatch, mock_name, mock_value):
     class TestProvider(BaseProvider):
         def _get(self, name: str, **kwargs) -> str:
             assert name == mock_name
+            assert not kwargs["decrypt"]
             return mock_value
 
         def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
@@ -1355,6 +1356,8 @@ def test_get_parameters_new(monkeypatch, mock_name, mock_value):
 
         def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
             assert path == mock_name
+            assert kwargs["recursive"]
+            assert not kwargs["decrypt"]
             return mock_value
 
     monkeypatch.setattr(parameters.ssm, "DEFAULT_PROVIDERS", {})
@@ -1468,3 +1471,13 @@ def test_transform_value_wrong(mock_value):
         parameters.base.transform_value(mock_value, "INCORRECT")
 
     assert "Invalid transform type" in str(excinfo)
+
+
+def test_transform_value_ignore_error(mock_value):
+    """
+    Test transform_value() does not raise errors when raise_on_transform_error is False
+    """
+
+    value = parameters.base.transform_value(mock_value, "INCORRECT", raise_on_transform_error=False)
+
+    assert value is None
