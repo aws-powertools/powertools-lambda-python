@@ -56,6 +56,17 @@ jobs:
       env:
         PYPI_USERNAME: __token__
         PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+    - name: publish lambda layer in SAR by triggering the internal codepipeline
+      run: |
+        aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_TAG_VERSION --overwrite
+        aws codepipeline start-pipeline-execution --name ${{ secrets.CODEPIPELINE_NAME }}
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: eu-west-1
+        AWS_DEFAULT_OUTPUT: json
+
+
 
   sync_master:
     needs: upload
