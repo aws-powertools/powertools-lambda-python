@@ -38,16 +38,17 @@ def test_setup_with_valid_log_levels(stdout, level):
 
 
 def test_logging_exception_traceback(stdout):
-    logger = Logger(level="DEBUG", stream=stdout, request_id="request id!", another="value")
+    logger = Logger(level="DEBUG", stream=stdout)
 
     try:
-        raise Exception("Boom")
-    except Exception:
-        logger.exception("This is a test")
+        raise ValueError("Boom")
+    except ValueError:
+        logger.exception("A value error occurred")
 
     log_dict = json.loads(stdout.getvalue())
 
     check_log_dict(log_dict)
+    assert "ERROR" == log_dict["level"]
     assert "exception" in log_dict
 
 
@@ -86,15 +87,32 @@ def test_with_json_message(stdout):
     assert msg == log_dict["message"]
 
 
-def test_with_unserialisable_value_in_message(stdout):
+def test_with_unserializable_value_in_message(stdout):
     logger = Logger(level="DEBUG", stream=stdout)
 
-    class X:
+    class Unserializable:
         pass
 
-    msg = {"x": X()}
+    msg = {"x": Unserializable()}
     logger.debug(msg)
 
     log_dict = json.loads(stdout.getvalue())
 
     assert log_dict["message"]["x"].startswith("<")
+
+
+def test_with_unserializable_value_in_message_custom(stdout):
+    class Unserializable:
+        pass
+
+    # GIVEN a custom json_default
+    logger = Logger(level="DEBUG", stream=stdout, json_default=lambda o: f"<non-serializable: {type(o).__name__}>")
+
+    # WHEN we log a message
+    logger.debug({"x": Unserializable()})
+
+    log_dict = json.loads(stdout.getvalue())
+
+    # THEN json_default should not be in the log message and the custom unserializable handler should be used
+    assert log_dict["message"]["x"] == "<non-serializable: Unserializable>"
+    assert "json_default" not in log_dict

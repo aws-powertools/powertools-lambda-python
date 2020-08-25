@@ -3,13 +3,13 @@ import logging
 from typing import Any
 
 
-def json_formatter(unserialized_value: Any):
-    """JSON custom serializer to cast unserialisable values to strings.
+def json_formatter(unserializable_value: Any):
+    """JSON custom serializer to cast unserializable values to strings.
 
     Example
     -------
 
-    **Serialize unserialisable value to string**
+    **Serialize unserializable value to string**
 
         class X: pass
         value = {"x": X()}
@@ -18,10 +18,10 @@ def json_formatter(unserialized_value: Any):
 
     Parameters
     ----------
-    unserialized_value: Any
+    unserializable_value: Any
         Python object unserializable by JSON
     """
-    return str(unserialized_value)
+    return str(unserializable_value)
 
 
 class JsonFormatter(logging.Formatter):
@@ -39,11 +39,12 @@ class JsonFormatter(logging.Formatter):
         """Return a JsonFormatter instance.
 
         The `json_default` kwarg is used to specify a formatter for otherwise
-        unserialisable values.  It must not throw.  Defaults to a function that
+        unserializable values.  It must not throw.  Defaults to a function that
         coerces the value to a string.
 
         Other kwargs are used to specify log field format strings.
         """
+        self.default_json_formatter = kwargs.pop("json_default", json_formatter)
         datefmt = kwargs.pop("datefmt", None)
 
         super(JsonFormatter, self).__init__(datefmt=datefmt)
@@ -54,7 +55,6 @@ class JsonFormatter(logging.Formatter):
             "location": "%(funcName)s:%(lineno)d",
         }
         self.format_dict.update(kwargs)
-        self.default_json_formatter = kwargs.pop("json_default", json_formatter)
 
     def update_formatter(self, **kwargs):
         self.format_dict.update(kwargs)
@@ -64,6 +64,7 @@ class JsonFormatter(logging.Formatter):
         record_dict["asctime"] = self.formatTime(record, self.datefmt)
 
         log_dict = {}
+
         for key, value in self.format_dict.items():
             if value and key in self.reserved_keys:
                 # converts default logging expr to its record value
@@ -84,19 +85,13 @@ class JsonFormatter(logging.Formatter):
             except (json.decoder.JSONDecodeError, TypeError, ValueError):
                 pass
 
-        if record.exc_info:
+        if record.exc_info and not record.exc_text:
             # Cache the traceback text to avoid converting it multiple times
             # (it's constant anyway)
             # from logging.Formatter:format
-            if not record.exc_text:  # pragma: no cover
-                record.exc_text = self.formatException(record.exc_info)
+            record.exc_text = self.formatException(record.exc_info)
 
         if record.exc_text:
             log_dict["exception"] = record.exc_text
 
-        json_record = json.dumps(log_dict, default=self.default_json_formatter)
-
-        if hasattr(json_record, "decode"):  # pragma: no cover
-            json_record = json_record.decode("utf-8")
-
-        return json_record
+        return json.dumps(log_dict, default=self.default_json_formatter)
