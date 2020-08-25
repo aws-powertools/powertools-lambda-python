@@ -1,12 +1,13 @@
 from typing import Callable
 
 import pytest
+from botocore.config import Config
 from botocore.stub import Stubber
 
 from aws_lambda_powertools.utilities.batch import PartialSQSProcessor, partial_sqs_processor
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def sqs_event_factory() -> Callable:
     def factory(body: str):
         return {
@@ -24,7 +25,7 @@ def sqs_event_factory() -> Callable:
     return factory
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def record_handler() -> Callable:
     def handler(record):
         body = record["body"]
@@ -35,11 +36,20 @@ def record_handler() -> Callable:
     return handler
 
 
-def test_partial_sqs_processor_context_with_failure(sqs_event_factory, record_handler):
+@pytest.fixture(scope="module")
+def config() -> Config:
+    return Config(region_name="us-east-1")
+
+
+@pytest.fixture(scope="function")
+def partial_processor(config) -> PartialSQSProcessor:
+    return PartialSQSProcessor(config=config)
+
+
+def test_partial_sqs_processor_context_with_failure(sqs_event_factory, record_handler, partial_processor):
     """
     Test processor with one failing record
     """
-    processor = PartialSQSProcessor()
 
     fail_record = sqs_event_factory("fail")
     success_record = sqs_event_factory("success")
@@ -48,10 +58,10 @@ def test_partial_sqs_processor_context_with_failure(sqs_event_factory, record_ha
 
     response = {"Successful": [{"Id": fail_record["messageId"]}], "Failed": []}
 
-    with Stubber(processor.client) as stubber:
+    with Stubber(partial_processor.client) as stubber:
         stubber.add_response("delete_message_batch", response)
 
-        with processor(records, record_handler) as ctx:
+        with partial_processor(records, record_handler) as ctx:
             result = ctx.process()
 
         stubber.assert_no_pending_responses()
@@ -62,19 +72,17 @@ def test_partial_sqs_processor_context_with_failure(sqs_event_factory, record_ha
     ]
 
 
-def test_partial_sqs_processor_context_only_success(sqs_event_factory, record_handler):
+def test_partial_sqs_processor_context_only_success(sqs_event_factory, record_handler, partial_processor):
     """
     Test processor without failure
     """
-
-    processor = PartialSQSProcessor()
 
     first_record = sqs_event_factory("success")
     second_record = sqs_event_factory("success")
 
     records = [first_record, second_record]
 
-    with processor(records, record_handler) as ctx:
+    with partial_processor(records, record_handler) as ctx:
         result = ctx.process()
 
     assert result == [
@@ -83,35 +91,31 @@ def test_partial_sqs_processor_context_only_success(sqs_event_factory, record_ha
     ]
 
 
-def test_partial_sqs_processor_context_multiple_calls(sqs_event_factory, record_handler):
+def test_partial_sqs_processor_context_multiple_calls(sqs_event_factory, record_handler, partial_processor):
     """
     Test processor without failure
     """
-
-    processor = PartialSQSProcessor()
 
     first_record = sqs_event_factory("success")
     second_record = sqs_event_factory("success")
 
     records = [first_record, second_record]
 
-    with processor(records, record_handler) as ctx:
+    with partial_processor(records, record_handler) as ctx:
         ctx.process()
 
-    with processor([first_record], record_handler) as ctx:
+    with partial_processor([first_record], record_handler) as ctx:
         ctx.process()
 
-    assert processor.success_messages == [first_record]
+    assert partial_processor.success_messages == [first_record]
 
 
-def test_partial_sqs_processor_middleware_with_default(sqs_event_factory, record_handler):
+def test_partial_sqs_processor_middleware_with_default(sqs_event_factory, record_handler, partial_processor):
     """
     Test middleware with default partial processor
     """
 
-    processor = PartialSQSProcessor()
-
-    @partial_sqs_processor(record_handler=record_handler, processor=processor)
+    @partial_sqs_processor(record_handler=record_handler, processor=partial_processor)
     def lambda_handler(event, context):
         return True
 
@@ -120,7 +124,7 @@ def test_partial_sqs_processor_middleware_with_default(sqs_event_factory, record
     event = {"Records": [sqs_event_factory("fail"), sqs_event_factory("success")]}
     response = {"Successful": [{"Id": fail_record["messageId"]}], "Failed": []}
 
-    with Stubber(processor.client) as stubber:
+    with Stubber(partial_processor.client) as stubber:
         stubber.add_response("delete_message_batch", response)
 
         result = lambda_handler(event, {})
@@ -130,7 +134,7 @@ def test_partial_sqs_processor_middleware_with_default(sqs_event_factory, record
     assert result is True
 
 
-def test_partial_sqs_processor_middleware_with_custom(capsys, sqs_event_factory, record_handler):
+def test_partial_sqs_processor_middleware_with_custom(capsys, sqs_event_factory, record_handler, config):
     """
     Test middle with custom partial processor
     """
@@ -140,7 +144,7 @@ def test_partial_sqs_processor_middleware_with_custom(capsys, sqs_event_factory,
             print("Oh no ! It's a failure.")
             return super().failure_handler(record, exception)
 
-    processor = CustomProcessor()
+    processor = CustomProcessor(config=config)
 
     @partial_sqs_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context):
