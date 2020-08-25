@@ -29,7 +29,7 @@ def test_partial_sqs_get_queue_url_with_records(mocker, sqs_event):
 
 
 def test_partial_sqs_get_queue_url_without_records():
-    assert PartialSQSProcessor().get_queue_url() == None
+    assert PartialSQSProcessor().get_queue_url() is None
 
 
 def test_partial_sqs_get_entries_to_clean_with_success(mocker, sqs_event):
