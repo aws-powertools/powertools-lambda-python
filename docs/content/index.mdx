@@ -58,6 +58,22 @@ from aws_lambda_powertools.logging.logger import set_package_logger
 set_package_logger()
 ```
 
+## Lambda Layer
+
+Powertools is also available as a layer and is distributed via the [Serverless Application Repository](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/what-is-serverlessrepo.html).
+Create the layer via API with:
+
+```bash:title=bash-script
+aws serverlessrepo create-cloud-formation-change-set --application-id arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer --stack-name YOUR_STACK_NAME --capabilities CAPABILITY_NAMED_IAM
+CHANGE_SET_ID=$(aws cloudformation list-change-sets --stack-name YOUR_STACK_NAME --query 'Summaries[*].ChangeSetId' --output text)
+aws cloudformation wait change-set-create-complete --change-set-name $CHANGE_SET_ID
+aws cloudformation execute-change-set --change-set-name $CHANGE_SET_ID
+```
+
+this will create a CloudFormation stack with the powertools layer in a specific region where you run this commands.
+Keep in mind that layers are regional resources and you need to create the layer in every region where you need it.
+Alternatively, you can deploy the layer from the AWS Console by navigating to Serverless Application Repository and search for `aws-lambda-powertools-python-layer` and follow the deploy steps from there.
+
 ## Tenets
 
 * **AWS Lambda only** – We optimise for AWS Lambda function environments and supported runtimes only. Utilities might work with web frameworks and non-Lambda environments, though they are not officially supported.
