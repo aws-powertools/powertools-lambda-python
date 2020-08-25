@@ -35,12 +35,12 @@ def test_partial_sqs_get_queue_url_with_records(mocker, sqs_event, partial_sqs_p
     records_mock = mocker.patch.object(PartialSQSProcessor, "records", create=True, new_callable=mocker.PropertyMock)
     records_mock.return_value = [sqs_event]
 
-    result = partial_sqs_processor.get_queue_url()
+    result = partial_sqs_processor._get_queue_url()
     assert result == expected_url
 
 
 def test_partial_sqs_get_queue_url_without_records(partial_sqs_processor):
-    assert partial_sqs_processor.get_queue_url() is None
+    assert partial_sqs_processor._get_queue_url() is None
 
 
 def test_partial_sqs_get_entries_to_clean_with_success(mocker, sqs_event, partial_sqs_processor):
@@ -51,7 +51,7 @@ def test_partial_sqs_get_entries_to_clean_with_success(mocker, sqs_event, partia
     )
     success_messages_mock.return_value = [sqs_event]
 
-    result = partial_sqs_processor.get_entries_to_clean()
+    result = partial_sqs_processor._get_entries_to_clean()
 
     assert result == expected_entries
 
@@ -64,7 +64,7 @@ def test_partial_sqs_get_entries_to_clean_without_success(mocker, partial_sqs_pr
     )
     success_messages_mock.return_value = []
 
-    result = partial_sqs_processor.get_entries_to_clean()
+    result = partial_sqs_processor._get_entries_to_clean()
 
     assert result == expected_entries
 
@@ -119,8 +119,8 @@ def test_partial_sqs_clean(monkeypatch, mocker, partial_sqs_processor):
     monkeypatch.setattr(partial_sqs_processor, "fail_messages", records)
     monkeypatch.setattr(partial_sqs_processor, "success_messages", records)
 
-    queue_url_mock = mocker.patch.object(PartialSQSProcessor, "get_queue_url")
-    entries_to_clean_mock = mocker.patch.object(PartialSQSProcessor, "get_entries_to_clean")
+    queue_url_mock = mocker.patch.object(PartialSQSProcessor, "_get_queue_url")
+    entries_to_clean_mock = mocker.patch.object(PartialSQSProcessor, "_get_entries_to_clean")
 
     queue_url_mock.return_value = mocker.sentinel.queue_url
     entries_to_clean_mock.return_value = mocker.sentinel.entries_to_clean

@@ -23,7 +23,7 @@ class PartialSQSProcessor(BasePartialProcessor):
 
         super().__init__()
 
-    def get_queue_url(self):
+    def _get_queue_url(self):
         """
         Format QueueUrl from first records entry
         """
@@ -33,7 +33,7 @@ class PartialSQSProcessor(BasePartialProcessor):
         *_, account_id, queue_name = self.records[0]["eventSourceARN"].split(":")
         return f"{self.client._endpoint.host}/{account_id}/{queue_name}"
 
-    def get_entries_to_clean(self):
+    def _get_entries_to_clean(self):
         """
         Format messages to use in batch deletion
         """
@@ -60,8 +60,8 @@ class PartialSQSProcessor(BasePartialProcessor):
         if not (self.fail_messages and self.success_messages):
             return
 
-        queue_url = self.get_queue_url()
-        entries_to_remove = self.get_entries_to_clean()
+        queue_url = self._get_queue_url()
+        entries_to_remove = self._get_entries_to_clean()
 
         return self.client.delete_message_batch(QueueUrl=queue_url, Entries=entries_to_remove)
 
