@@ -63,14 +63,14 @@ class BasePartialProcessor(BaseProcessor):
         """
         Success callback
         """
-        entry = (result, record)
+        entry = ("success", result, record)
         self.success_messages.append(record)
         return entry
 
-    def failure_handler(self, record, error):
+    def failure_handler(self, record, exception):
         """
         Failure callback
         """
-        entry = (error, record)
+        entry = ("fail", exception.args, record)
         self.fail_messages.append(entry)
         return entry
