@@ -72,5 +72,5 @@ class BasePartialProcessor(BaseProcessor):
         Failure callback
         """
         entry = ("fail", exception.args, record)
-        self.fail_messages.append(entry)
+        self.fail_messages.append(record)
         return entry
