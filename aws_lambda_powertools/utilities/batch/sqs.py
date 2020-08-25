@@ -4,9 +4,10 @@
 Batch SQS utilities
 """
 
-from typing import List
+from typing import List, Optional
 
 import boto3
+from botocore.config import Config
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
@@ -14,8 +15,9 @@ from .base import BasePartialProcessor
 
 
 class PartialSQSProcessor(BasePartialProcessor):
-    def __init__(self):
-        self.client = boto3.client("sqs")
+    def __init__(self, config: Optional[Config] = None):
+        config = config or Config()
+        self.client = boto3.client("sqs", config=config)
         self.success_messages: List = []
         self.fail_messages: List = []
 
