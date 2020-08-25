@@ -73,7 +73,6 @@ aws cloudformation execute-change-set --change-set-name $CHANGE_SET_ID
 this will create a CloudFormation stack with the powertools layer in a specific region where you run this commands.
 Keep in mind that layers are regional resources and you need to create the layer in every region where you need it.
 Alternatively, you can deploy the layer from the AWS Console by navigating to Serverless Application Repository and search for `aws-lambda-powertools-python-layer` and follow the deploy steps from there.
-=======
 
 ## Tenets
 
@@ -85,4 +84,3 @@ Alternatively, you can deploy the layer from the AWS Console by navigating to Se
 * **Idiomatic** – Utilities follow programming language idioms and language-specific best practices.
 
 _`*` Core utilities are Tracer, Logger and Metrics. Optional utilities may vary across languages._
-
