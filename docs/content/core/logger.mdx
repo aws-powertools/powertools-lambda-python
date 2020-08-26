@@ -55,7 +55,7 @@ Key | Type | Example | Description
 **level** | str | "INFO" | Logging level
 **location** | str | "collect.handler:1" | Source code location where statement was executed
 **service** | str | "payment" | Service name defined. "service_undefined" will be used if unknown
-**sampling_rate** | int |  0.1 | Debug logging sampling rate in percentage e.g. 1% in this case
+**sampling_rate** | int |  0.1 | Debug logging sampling rate in percentage e.g. 10% in this case
 **message** | any |  "Collecting payment" | Log statement value. Unserializable JSON values will be casted to string
 
 ## Capturing Lambda context info
@@ -232,7 +232,7 @@ Sampling calculation happens at the Logger class initialization. This means, whe
 ```python:title=collect.py
 from aws_lambda_powertools import Logger
 
-# Sample 1% of debug logs e.g. 0.1
+# Sample 10% of debug logs e.g. 0.1
 logger = Logger(sample_rate=0.1) # highlight-line
 
 def handler(event, context):
