@@ -9,6 +9,16 @@ from aws_lambda_powertools.utilities.validation.envelopes.base import BaseEnvelo
 logger = logging.getLogger(__name__)
 
 
+def validate(
+    event: Dict[str, Any], schema_model: BaseModel, envelope: BaseEnvelope, return_parsed_event: bool = False
+) -> Any:
+    logger.debug("Validating schema")
+    parsed_event_model = envelope.parse(event=event, inbound_schema_model=schema_model)
+    if return_parsed_event:
+        return parsed_event_model
+    return None
+
+
 @lambda_handler_decorator
 def validator(
     handler: Callable[[Dict, Any], Any],

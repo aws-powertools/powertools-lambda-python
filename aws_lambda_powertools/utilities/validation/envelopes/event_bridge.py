@@ -6,7 +6,6 @@ from pydantic import BaseModel, ValidationError
 from aws_lambda_powertools.utilities.validation.envelopes.base import BaseEnvelope
 from aws_lambda_powertools.utilities.validation.schemas import EventBridgeSchema
 
-
 logger = logging.getLogger(__name__)
 
 

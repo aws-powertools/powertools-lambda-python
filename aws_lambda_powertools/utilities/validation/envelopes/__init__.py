@@ -4,11 +4,4 @@ from .event_bridge import EventBridgeEnvelope
 from .sns import SnsEnvelope
 from .sqs import SqsEnvelope
 
-
-__all__ = [
-    "UserEnvelope",
-    "DynamoDBEnvelope",
-    "EventBridgeEnvelope",
-    "SqsEnvelope",
-    "SnsEnvelope"
-]
+__all__ = ["UserEnvelope", "DynamoDBEnvelope", "EventBridgeEnvelope", "SqsEnvelope", "SnsEnvelope"]

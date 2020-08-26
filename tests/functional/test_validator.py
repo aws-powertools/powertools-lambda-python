@@ -1,4 +1,3 @@
-import io
 from http import HTTPStatus
 from typing import Any, Dict, Optional
 
@@ -12,8 +11,77 @@ from aws_lambda_powertools.utilities.validation import (
     EventBridgeEnvelope,
     SqsEnvelope,
     UserEnvelope,
-    validator
+    validate,
+    validator,
 )
+
+
+class MyMessage(BaseModel):
+    message: str
+    messageId: int
+
+
+def test_validate_function():
+    eventbridge_event = {
+        "version": "0",
+        "id": "553961c5-5017-5763-6f21-f88d5f5f4b05",
+        "detail-type": "my func stream event json",
+        "source": "arn:aws:lambda:eu-west-1:88888888:function:my_func",
+        "account": "88888888",
+        "time": "2020-02-11T08:18:09Z",
+        "region": "eu-west-1",
+        "resources": ["arn:aws:dynamodb:eu-west-1:88888888:table/stream/2020-02"],
+        "detail": {"message": "hello", "messageId": 8},
+    }
+    parsed_event = validate(eventbridge_event, MyMessage, EventBridgeEnvelope(), True)
+    assert parsed_event.dict() == {"message": "hello", "messageId": 8}
+
+
+def test_validate_function_no_return_value():
+    eventbridge_event = {
+        "version": "0",
+        "id": "553961c5-5017-5763-6f21-f88d5f5f4b05",
+        "detail-type": "my func stream event json",
+        "source": "arn:aws:lambda:eu-west-1:88888888:function:my_func",
+        "account": "88888888",
+        "time": "2020-02-11T08:18:09Z",
+        "region": "eu-west-1",
+        "resources": ["arn:aws:dynamodb:eu-west-1:88888888:table/stream/2020-02"],
+        "detail": {"message": "hello", "messageId": 8},
+    }
+    parsed_event = validate(eventbridge_event, MyMessage, EventBridgeEnvelope())
+    assert parsed_event is None
+
+
+def test_validate_function_fail_envelope():
+    eventbridge_event = {
+        "version": "0",
+        "id": "553961c5-5017-5763-6f21-f88d5f5f4b05",
+        "detail-type": "my func stream event json",
+        "source": "arn:aws:lambda:eu-west-1:88888888:function:my_func",
+        "time": "2020-02-11T08:18:09Z",
+        "region": "eu-west-1",
+        "resources": ["arn:aws:dynamodb:eu-west-1:88888888:table/stream/2020-02"],
+        "detail": {"message": "hello", "messageId": 8},
+    }
+    with pytest.raises(ValidationError):
+        validate(eventbridge_event, MyMessage, EventBridgeEnvelope())
+
+
+def test_validate_function_fail_user_schema():
+    eventbridge_event = {
+        "version": "0",
+        "id": "553961c5-5017-5763-6f21-f88d5f5f4b05",
+        "detail-type": "my func stream event json",
+        "source": "arn:aws:lambda:eu-west-1:88888888:function:my_func",
+        "account": "88888888",
+        "time": "2020-02-11T08:18:09Z",
+        "region": "eu-west-1",
+        "resources": ["arn:aws:dynamodb:eu-west-1:88888888:table/stream/2020-02"],
+        "detail": {"mess11age": "hello", "messageId": 8},
+    }
+    with pytest.raises(ValidationError):
+        validate(eventbridge_event, MyMessage, EventBridgeEnvelope())
 
 
 class OutboundSchema(BaseModel):
@@ -23,11 +91,6 @@ class OutboundSchema(BaseModel):
 
 class InboundSchema(BaseModel):
     greeting: str
-
-
-@pytest.fixture
-def stdout():
-    return io.StringIO()
 
 
 @validator(inbound_schema_model=InboundSchema, outbound_schema_model=OutboundSchema, envelope=UserEnvelope())
@@ -56,11 +119,6 @@ def test_fail_outbound():
 def test_fail_inbound_validation():
     with pytest.raises(ValidationError):
         my_handler({"this_fails": "hello"}, LambdaContext())
-
-
-class MyMessage(BaseModel):
-    message: str
-    messageId: int
 
 
 @validator(inbound_schema_model=MyMessage, outbound_schema_model=OutboundSchema, envelope=DynamoDBEnvelope())

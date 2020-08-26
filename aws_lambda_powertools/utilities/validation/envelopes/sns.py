@@ -12,9 +12,8 @@ logger = logging.getLogger(__name__)
 class SnsEnvelope(BaseEnvelope):
     def parse(self, event: Dict[str, Any], inbound_schema_model: BaseModel) -> Any:
         try:
-            parsed_envelope = SnsSchema(**event)
+            SnsSchema(**event)
         except (ValidationError, TypeError):
             logger.exception("Validation exception received from input sqs event")
             raise
-        ## TODO
         return None
