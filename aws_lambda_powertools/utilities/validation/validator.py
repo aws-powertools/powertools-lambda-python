@@ -4,8 +4,7 @@ from typing import Any, Callable, Dict
 from pydantic import BaseModel, ValidationError
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-
-from .envelopes.base import BaseEnvelope
+from aws_lambda_powertools.utilities.validation.envelopes.base import BaseEnvelope
 
 logger = logging.getLogger(__name__)
 

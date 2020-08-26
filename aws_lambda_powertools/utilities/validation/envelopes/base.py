@@ -13,15 +13,19 @@ class BaseEnvelope(ABC):
         try:
             return inbound_schema_model(**user_event)
         except (ValidationError, TypeError):
-            logger.exception("Valdation exception while extracting user custom schema")
+            logger.exception("Validation exception while extracting user custom schema")
             raise
 
     def _parse_user_json_string_schema(self, user_event: str, inbound_schema_model: BaseModel) -> Any:
         logger.debug("parsing user dictionary schema")
+        if inbound_schema_model == str:
+            logger.debug("input is string, returning")
+            return user_event
+        logger.debug("trying to parse as json encoded string")
         try:
             return inbound_schema_model.parse_raw(user_event)
         except (ValidationError, TypeError):
-            logger.exception("Valdation exception while extracting user custom schema")
+            logger.exception("Validation exception while extracting user custom schema")
             raise
 
     @abstractmethod
@@ -34,5 +38,5 @@ class UserEnvelope(BaseEnvelope):
         try:
             return inbound_schema_model(**event)
         except (ValidationError, TypeError):
-            logger.exception("Valdation exception received from input user custom envelopes event")
+            logger.exception("Validation exception received from input user custom envelopes event")
             raise

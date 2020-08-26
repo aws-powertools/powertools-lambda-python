@@ -3,8 +3,8 @@ from typing import Any, Dict
 
 from pydantic import BaseModel, ValidationError
 
-from ..schemas import DynamoDBSchema
-from .base import BaseEnvelope
+from aws_lambda_powertools.utilities.validation.envelopes.base import BaseEnvelope
+from aws_lambda_powertools.utilities.validation.schemas import DynamoDBSchema
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ class DynamoDBEnvelope(BaseEnvelope):
         try:
             parsed_envelope = DynamoDBSchema(**event)
         except (ValidationError, TypeError):
-            logger.exception("Valdation exception received from input dynamodb stream event")
+            logger.exception("Validation exception received from input dynamodb stream event")
             raise
         output = []
         for record in parsed_envelope.Records:
