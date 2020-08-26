@@ -233,6 +233,48 @@ def test_dynamodb_provider_get_multiple(mock_name, mock_value, config):
         stubber.deactivate()
 
 
+def test_dynamodb_provider_get_multiple_auto(mock_name, mock_value, config):
+    """
+    Test DynamoDBProvider.get_multiple() with transform = "auto"
+    """
+    mock_binary = mock_value.encode()
+    mock_binary_data = base64.b64encode(mock_binary).decode()
+    mock_json_data = json.dumps({mock_name: mock_value})
+    mock_params = {"D.json": mock_json_data, "E.binary": mock_binary_data, "F": mock_value}
+    table_name = "TEST_TABLE_AUTO"
+
+    # Create a new provider
+    provider = parameters.DynamoDBProvider(table_name, config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.table.meta.client)
+    response = {
+        "Items": [
+            {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": value}} for (name, value) in mock_params.items()
+        ]
+    }
+    expected_params = {"TableName": table_name, "KeyConditionExpression": Key("id").eq(mock_name)}
+    stubber.add_response("query", response, expected_params)
+    stubber.activate()
+
+    try:
+        values = provider.get_multiple(mock_name, transform="auto")
+
+        stubber.assert_no_pending_responses()
+
+        assert len(values) == len(mock_params)
+        for key in mock_params.keys():
+            assert key in values
+            if key.endswith(".json"):
+                assert values[key][mock_name] == mock_value
+            elif key.endswith(".binary"):
+                assert values[key] == mock_binary
+            else:
+                assert values[key] == mock_value
+    finally:
+        stubber.deactivate()
+
+
 def test_dynamodb_provider_get_multiple_next_token(mock_name, mock_value, config):
     """
     Test DynamoDBProvider.get_multiple() with a non-cached path

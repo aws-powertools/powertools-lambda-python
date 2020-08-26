@@ -115,8 +115,8 @@ class BaseProvider(ABC):
             Maximum age of the cached value
         transform: str, optional
             Optional transformation of the parameter value. Supported values
-            are "json" for JSON strings and "binary" for base 64 encoded
-            values.
+            are "json" for JSON strings, "binary" for base 64 encoded
+            values or "auto" which looks at the attribute key to determine the type.
         raise_on_transform_error: bool, optional
             Raises an exception if any transform fails, otherwise this will
             return a None value for each transform that failed
@@ -145,7 +145,11 @@ class BaseProvider(ABC):
 
         if transform is not None:
             for (key, value) in values.items():
-                values[key] = transform_value(value, transform, raise_on_transform_error)
+                _transform = get_transform_method(key, transform)
+                if _transform is None:
+                    continue
+
+                values[key] = transform_value(value, _transform, raise_on_transform_error)
 
         self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age),)
 
@@ -157,6 +161,18 @@ class BaseProvider(ABC):
         Retrieve multiple parameter values from the underlying parameter store
         """
         raise NotImplementedError()
+
+
+def get_transform_method(key: str, transform: str) -> Union[str, None]:
+    if transform != "auto":
+        return transform
+
+    if key.endswith(".json"):
+        return "json"
+    elif key.endswith(".binary"):
+        return "binary"
+    else:
+        return None
 
 
 def transform_value(value: str, transform: str, raise_on_transform_error: bool = True) -> Union[dict, bytes, None]:
