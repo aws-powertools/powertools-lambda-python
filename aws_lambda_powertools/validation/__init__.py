@@ -1,2 +1,0 @@
-"""Validation utility
-"""

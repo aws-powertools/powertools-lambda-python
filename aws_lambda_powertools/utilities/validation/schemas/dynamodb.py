@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, root_validator
@@ -35,22 +35,3 @@ class DynamoRecordSchema(BaseModel):
 
 class DynamoDBSchema(BaseModel):
     Records: List[DynamoRecordSchema]
-
-
-class EventBridgeSchema(BaseModel):
-    version: str
-    id: str  # noqa: A003,VNE003
-    source: str
-    account: int
-    time: datetime
-    region: str
-    resources: List[str]
-    detail: Dict[str, Any]
-
-
-class SqsSchema(BaseModel):
-    todo: str
-
-
-class SnsSchema(BaseModel):
-    todo: str

@@ -7,7 +7,7 @@ from aws_lambda_context import LambdaContext
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError
 
-from aws_lambda_powertools.validation.validator import DynamoDBEnvelope, EventBridgeEnvelope, UserEnvelope, validator
+from aws_lambda_powertools.utilities.validation import DynamoDBEnvelope, EventBridgeEnvelope, UserEnvelope, validator
 
 
 class OutboundSchema(BaseModel):
