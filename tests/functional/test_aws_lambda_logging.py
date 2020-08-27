@@ -127,18 +127,44 @@ def test_log_dict_key_seq(stdout):
 
     log_dict: dict = json.loads(stdout.getvalue())
 
-    # THEN the key sequence should be `level,location,message,timestamp`
+    # THEN the beginning key sequence must be `level,location,message,timestamp`
     assert ",".join(list(log_dict.keys())[:4]) == "level,location,message,timestamp"
 
 
 def test_log_dict_key_custom_seq(stdout):
-    # GIVEN any logger configuration
-    logger = Logger(level="INFO", stream=stdout, another="xxx", format_key=["message"])
+    # GIVEN a logger configuration with format_keys set to ["message"]
+    logger = Logger(stream=stdout, format_keys=["message"])
 
     # WHEN logging a message
     logger.info("Message")
 
     log_dict: dict = json.loads(stdout.getvalue())
 
-    # THEN the key sequence should be `level,location,message,timestamp`
-    assert ",".join(list(log_dict.keys())[:4]) == "message,level,location,timestamp"
+    # THEN the first key should be "message"
+    assert list(log_dict.keys())[0] == "message"
+
+
+def test_log_custom_formatting(stdout):
+    # GIVEN a logger where we have a custom location format
+    logger = Logger(stream=stdout, location="[%(funcName)s] %(module)s")
+
+    # WHEN logging a message
+    logger.info("foo")
+
+    log_dict: dict = json.loads(stdout.getvalue())
+
+    # THEN the `location` match the formatting
+    assert log_dict["location"] == "[test_log_custom_formatting] test_aws_lambda_logging"
+
+
+def test_log_dict_key_strip_nones(stdout):
+    # GIVEN a logger confirmation where we set `location` and `timestamp` to None
+    logger = Logger(stream=stdout, location=None, timestamp=None)
+
+    # WHEN logging a message
+    logger.info("foo")
+
+    log_dict: dict = json.loads(stdout.getvalue())
+
+    # THEN the keys should only include `level`, `message`, `service`, `sampling_rate`
+    assert sorted(log_dict.keys()) == ["level", "message", "sampling_rate", "service"]

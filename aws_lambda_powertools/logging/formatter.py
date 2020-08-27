@@ -27,7 +27,7 @@ class JsonFormatter(logging.Formatter):
 
         super(JsonFormatter, self).__init__(datefmt=datefmt)
         self.reserved_keys = ["timestamp", "level", "location"]
-        self.format_dict = dict.fromkeys(kwargs.pop("format_key", ["level", "location", "message", "timestamp"]))
+        self.format_dict = dict.fromkeys(kwargs.pop("format_keys", ["level", "location", "message", "timestamp"]))
         self.format_dict.update(
             {"level": "%(levelname)s", "location": "%(funcName)s:%(lineno)d", "timestamp": "%(asctime)s"}
         )
@@ -70,5 +70,8 @@ class JsonFormatter(logging.Formatter):
 
         if record.exc_text:
             log_dict["exception"] = record.exc_text
+
+        # Filter out top level key with values that are None
+        log_dict = {k: v for k, v in log_dict.items() if v is not None}
 
         return json.dumps(log_dict, default=self.default_json_formatter)

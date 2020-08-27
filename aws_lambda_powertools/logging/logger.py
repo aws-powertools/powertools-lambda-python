@@ -123,7 +123,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     ):
         self.service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
         self.sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or 0.0
-        self.log_level = self._get_log_level(level)
+        self.log_level = _get_log_level(level)
         self.child = child
         self._handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
@@ -136,34 +136,13 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         # https://github.com/awslabs/aws-lambda-powertools-python/issues/97
         return getattr(self._logger, name)
 
-    def _get_log_level(self, level: Union[str, int]) -> Union[str, int]:
-        """ Returns preferred log level set by the customer in upper case """
-        if isinstance(level, int):
-            return level
-
-        log_level: str = level or os.getenv("LOG_LEVEL")
-        log_level = log_level.upper() if log_level is not None else logging.INFO
-
-        return log_level
-
     def _get_logger(self):
         """ Returns a Logger named {self.service}, or {self.service.filename} for child loggers"""
         logger_name = self.service
         if self.child:
-            logger_name = f"{self.service}.{self._get_caller_filename()}"
+            logger_name = f"{self.service}.{_get_caller_filename()}"
 
         return logging.getLogger(logger_name)
-
-    def _get_caller_filename(self):
-        """ Return caller filename by finding the caller frame """
-        # Current frame         => _get_logger()
-        # Previous frame        => logger.py
-        # Before previous frame => Caller
-        frame = inspect.currentframe()
-        caller_frame = frame.f_back.f_back.f_back
-        filename = caller_frame.f_globals["__name__"]
-
-        return filename
 
     def _init_logger(self, **kwargs):
         """Configures new logger"""
@@ -207,6 +186,8 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
         Parameters
         ----------
+        lambda_handler : Callable
+            Method to inject the lambda context
         log_event : bool, optional
             Instructs logger to log Lambda Event, by default False
 
@@ -290,6 +271,29 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             else:
                 # Set a new formatter for a logger handler
                 handler.setFormatter(JsonFormatter(**self._default_log_keys, **kwargs))
+
+
+def _get_log_level(level: Union[str, int]) -> Union[str, int]:
+    """ Returns preferred log level set by the customer in upper case """
+    if isinstance(level, int):
+        return level
+
+    log_level: str = level or os.getenv("LOG_LEVEL")
+    log_level = log_level.upper() if log_level is not None else logging.INFO
+
+    return log_level
+
+
+def _get_caller_filename():
+    """ Return caller filename by finding the caller frame """
+    # Current frame         => _get_logger()
+    # Previous frame        => logger.py
+    # Before previous frame => Caller
+    frame = inspect.currentframe()
+    caller_frame = frame.f_back.f_back.f_back
+    filename = caller_frame.f_globals["__name__"]
+
+    return filename
 
 
 def set_package_logger(
