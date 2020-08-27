@@ -1,27 +1,5 @@
 import json
 import logging
-from typing import Any
-
-
-def json_formatter(unserializable_value: Any):
-    """JSON custom serializer to cast unserializable values to strings.
-
-    Example
-    -------
-
-    **Serialize unserializable value to string**
-
-        class X: pass
-        value = {"x": X()}
-
-        json.dumps(value, default=json_formatter)
-
-    Parameters
-    ----------
-    unserializable_value: Any
-        Python object unserializable by JSON
-    """
-    return str(unserializable_value)
 
 
 class JsonFormatter(logging.Formatter):
@@ -44,17 +22,15 @@ class JsonFormatter(logging.Formatter):
 
         Other kwargs are used to specify log field format strings.
         """
-        self.default_json_formatter = kwargs.pop("json_default", json_formatter)
+        self.default_json_formatter = kwargs.pop("json_default", str)
         datefmt = kwargs.pop("datefmt", None)
 
         super(JsonFormatter, self).__init__(datefmt=datefmt)
         self.reserved_keys = ["timestamp", "level", "location"]
-        self.format_dict = {
-            "timestamp": "%(asctime)s",
-            "level": "%(levelname)s",
-            "location": "%(funcName)s:%(lineno)d",
-            "message": None,
-        }
+        self.format_dict = dict.fromkeys(kwargs.pop("format_key", ["level", "location", "message", "timestamp"]))
+        self.format_dict.update(
+            {"level": "%(levelname)s", "location": "%(funcName)s:%(lineno)d", "timestamp": "%(asctime)s"}
+        )
         self.format_dict.update(kwargs)
 
     def update_formatter(self, **kwargs):

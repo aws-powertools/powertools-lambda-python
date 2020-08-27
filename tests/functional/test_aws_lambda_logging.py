@@ -127,5 +127,18 @@ def test_log_dict_key_seq(stdout):
 
     log_dict: dict = json.loads(stdout.getvalue())
 
-    # THEN the key sequence should be `timestamp,level,location,message`
-    assert ",".join(list(log_dict.keys())[:4]) == "timestamp,level,location,message"
+    # THEN the key sequence should be `level,location,message,timestamp`
+    assert ",".join(list(log_dict.keys())[:4]) == "level,location,message,timestamp"
+
+
+def test_log_dict_key_custom_seq(stdout):
+    # GIVEN any logger configuration
+    logger = Logger(level="INFO", stream=stdout, another="xxx", format_key=["message"])
+
+    # WHEN logging a message
+    logger.info("Message")
+
+    log_dict: dict = json.loads(stdout.getvalue())
+
+    # THEN the key sequence should be `level,location,message,timestamp`
+    assert ",".join(list(log_dict.keys())[:4]) == "message,level,location,timestamp"
