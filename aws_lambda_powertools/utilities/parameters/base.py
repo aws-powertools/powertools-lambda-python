@@ -163,7 +163,34 @@ class BaseProvider(ABC):
         raise NotImplementedError()
 
 
-def get_transform_method(key: str, transform: str) -> Union[str, None]:
+def get_transform_method(key: str, transform: str) -> Optional[str]:
+    """
+    Determine the transform method
+
+    Examples
+    -------
+        >>> get_transform_method("key", "any_other_value")
+        'any_other_value'
+        >>> get_transform_method("key.json", "auto")
+        'json'
+        >>> get_transform_method("key.binary", "auto")
+        'binary'
+        >>> get_transform_method("key", "auto")
+        None
+
+    Parameters
+    ---------
+    key: str
+        Only used when the tranform is "auto".
+    transform: str
+        Original transform method, only "auto" will try to detect the transform method by the key
+
+    Returns
+    ------
+    Optional[str]:
+        The transform method either when transform is "auto" then None, "json" or "binary" is returned
+        or the original transform method
+    """
     if transform != "auto":
         return transform
 
