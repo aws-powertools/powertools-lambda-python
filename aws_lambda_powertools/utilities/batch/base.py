@@ -71,6 +71,11 @@ class BasePartialProcessor(BaseProcessor):
     def success_handler(self, record: Any, result: Any):
         """
         Success callback
+
+        Returns
+        -------
+        tuple
+            "success", record processing result and original record
         """
         entry = ("success", result, record)
         self.success_messages.append(record)
@@ -79,6 +84,11 @@ class BasePartialProcessor(BaseProcessor):
     def failure_handler(self, record: Any, exception: Exception):
         """
         Failure callback
+
+        Returns
+        -------
+        tuple
+            "fail", exceptions args, original record
         """
         entry = ("fail", exception.args, record)
         self.fail_messages.append(record)
