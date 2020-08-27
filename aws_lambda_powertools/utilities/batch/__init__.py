@@ -3,9 +3,9 @@
 """
 Batch processing utility
 """
-
 from .base import BasePartialProcessor, BaseProcessor
-from .sqs import PartialSQSProcessor, partial_sqs_processor
+from .middlewares import partial_sqs_processor
+from .sqs import PartialSQSProcessor
 
 __all__ = (
     "BaseProcessor",
