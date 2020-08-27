@@ -3,27 +3,63 @@
 """
 Batch SQS utilities
 """
-
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import boto3
 from botocore.config import Config
-
-from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
 from .base import BasePartialProcessor
 
 
 class PartialSQSProcessor(BasePartialProcessor):
+    """
+    Amazon SQS batch processor to delete successes from the Queue.
+
+    Only the **special** case of partial failure is handled, thus a batch in
+    which all records failed is **not** going to be removed from the queue, and
+    the same is valid for a full success.
+
+    Parameters
+    ----------
+    config: Config
+        botocore config object
+
+    Example
+    -------
+    **Process batch triggered by SQS**
+
+        >>> from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
+        >>>
+        >>> def record_handler(record):
+        >>>     return record["body"]
+        >>>
+        >>> def handler(event, context):
+        >>>     records = event["Records"]
+        >>>     processor = PartialSQSProcessor()
+        >>>
+        >>>     with processor(records=records, handler=record_handler) as ctx:
+        >>>         result = ctx.process()
+        >>>
+        >>>     # Case a partial failure occurred, all successful executions
+        >>>     # have been deleted from the queue after context's exit.
+        >>>
+        >>>     return result
+    """
+
     def __init__(self, config: Optional[Config] = None):
+        """
+        Initializes sqs client and also success and failure lists
+        to keep track of record's execution status.
+        """
         config = config or Config()
         self.client = boto3.client("sqs", config=config)
+
         self.success_messages: List = []
         self.fail_messages: List = []
 
         super().__init__()
 
-    def _get_queue_url(self):
+    def _get_queue_url(self) -> str:
         """
         Format QueueUrl from first records entry
         """
@@ -33,13 +69,21 @@ class PartialSQSProcessor(BasePartialProcessor):
         *_, account_id, queue_name = self.records[0]["eventSourceARN"].split(":")
         return f"{self.client._endpoint.host}/{account_id}/{queue_name}"
 
-    def _get_entries_to_clean(self):
+    def _get_entries_to_clean(self) -> List:
         """
         Format messages to use in batch deletion
         """
         return [{"Id": msg["messageId"], "ReceiptHandle": msg["receiptHandle"]} for msg in self.success_messages]
 
-    def _process_record(self, record):
+    def _process_record(self, record) -> Tuple:
+        """
+        Process a record with instance's handler
+
+        Parameters
+        ----------
+        record: Any
+            An object to be processed.
+        """
         try:
             result = self.handler(record)
             return self.success_handler(record, result)
@@ -48,7 +92,7 @@ class PartialSQSProcessor(BasePartialProcessor):
 
     def _prepare(self):
         """
-        Remove results from previous executions.
+        Remove results from previous execution.
         """
         self.success_messages.clear()
         self.fail_messages.clear()
@@ -64,14 +108,3 @@ class PartialSQSProcessor(BasePartialProcessor):
         entries_to_remove = self._get_entries_to_clean()
 
         return self.client.delete_message_batch(QueueUrl=queue_url, Entries=entries_to_remove)
-
-
-@lambda_handler_decorator
-def partial_sqs_processor(handler, event, context, record_handler, processor=None):
-    records = event["Records"]
-    processor = processor or PartialSQSProcessor()
-
-    with processor(records, record_handler) as ctx:
-        ctx.process()
-
-    return handler(event, context)
