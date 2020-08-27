@@ -1,0 +1,95 @@
+---
+title: Batch
+description: Utility
+---
+
+import Note from "../../src/components/Note"
+
+The batch utility provides an abstraction to process a batch event. Useful for lambda integrations with [AWS SQS](https://aws.amazon.com/sqs/), [AWS Kinesis](https://aws.amazon.com/kinesis/) and [AWS DynamoDB Streams](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html).
+It also provides base classes (`BaseProcessor`, `BasePartialProcessor`) allowing you to create your **own** batch processor.
+
+**Key Features**
+
+* Run batch processing logic with a clean interface;
+* Middleware and context to handle a batch event;
+* Removal of successful messages for [AWS SQS](https://aws.amazon.com/sqs/) batch - in case of partial failure.
+
+**IAM Permissions**
+
+This utility requires additional permissions to work as expected. See the following table:
+
+Processor | Function/Method | IAM Permission
+|---------|-----------------|---------------|
+PartialSQSProcessor | `_clean` | `sqs:DeleteMessageBatch`
+
+### PartialSQSProcessor
+
+A special batch processor which aims to `clean` your SQS:Queue if one or more (not all) records of the batch fails.
+A batch's partial failure sends back all the records to the queue, reprocessing this batch until all records succed.
+This processor exists to improve performance in such cases, deleting successful messages of a batch with partial failure.
+
+### Middleware
+
+```python:title=app.py
+from aws_lambda_powertools.utilities.batch import batch_processor, PartialSQSProcessor
+
+def record_handler(record):
+    return record["body"]
+
+# highlight-start
+@batch_processor(record_handler=record_handler, processor=PartialSQSProcessor())
+# highlight-end
+def lambda_handler(event, context):
+    return {"statusCode": 200}
+```
+
+## Create your own processor
+
+You can create your own batch processor by inheriting the `BaseProcessor` class, and implementing `_prepare()`, `_clean` and `_process_record()`.
+It's also possible to inherit the `BasePartialProcessor` which contains additional logic to handle a partial failure and keep track of record status.
+
+Here is an example implementation of a DynamoDBStream custom processor:
+
+```python:title=custom_processor.py
+import json
+
+from aws_lambda_powertools.utilities.batch import BaseProcessor, batch_processor
+import boto3
+
+class DynamoDBProcessor(BaseProcessor):
+
+    def __init__(self, queue_url: str):
+        self.queue_url = queue_url
+        self.client = boto3.client("sqs")
+
+    def _prepare(self):
+        pass
+
+    def _clean(self):
+        pass
+
+    def _process_record(self, record):
+        """
+        Process record and send result to sqs
+        """
+        result = self.handler(record)
+        body = json.dumps(result)
+        self.client.send_message(QueueUrl=self.queue_url, MessageBody=body)
+        return result
+
+def record_handler(record):
+    return record["Keys"]
+
+# As context
+
+processor = DynamoDBProcessor("dummy")
+records = {"Records": []}
+
+with processor(records=records, handler=record_handler) as ctx:
+    result = ctx.process()
+
+# As middleware
+@batch.batch_processor(record_handler=record_handler, processor=DynamoDBProcessor("dummy"))
+def lambda_handler(event, context):
+    return {"statusCode": 200}
+```
