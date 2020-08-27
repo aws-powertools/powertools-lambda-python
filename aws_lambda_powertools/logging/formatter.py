@@ -53,7 +53,7 @@ class JsonFormatter(logging.Formatter):
             "timestamp": "%(asctime)s",
             "level": "%(levelname)s",
             "location": "%(funcName)s:%(lineno)d",
-            "message": "",
+            "message": None,
         }
         self.format_dict.update(kwargs)
 
