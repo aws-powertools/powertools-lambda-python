@@ -9,6 +9,10 @@ from typing import Any, Callable, Iterable, List, MutableSequence, Tuple
 
 
 class BaseProcessor(ABC):
+    """
+    Abstract class for batch processors.
+    """
+
     @abstractmethod
     def _prepare(self):
         """
@@ -24,10 +28,16 @@ class BaseProcessor(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def _process_record(self, record):
+    def _process_record(self, record: Any):
+        """
+        Process record with handler.
+        """
         raise NotImplementedError()
 
     def process(self) -> List[Tuple]:
+        """
+        Call instance's handler for each record.
+        """
         return [self._process_record(record) for record in self.records]
 
     def __enter__(self):
@@ -43,7 +53,6 @@ class BaseProcessor(ABC):
 
         Parameters
         ----------
-
         records: Iterable[Any]
             Iterable with objects to be processed.
         handler: Callable
@@ -59,7 +68,7 @@ class BasePartialProcessor(BaseProcessor):
     success_messages: MutableSequence = None
     fail_messages: MutableSequence = None
 
-    def success_handler(self, record, result):
+    def success_handler(self, record: Any, result: Any):
         """
         Success callback
         """
@@ -67,7 +76,7 @@ class BasePartialProcessor(BaseProcessor):
         self.success_messages.append(record)
         return entry
 
-    def failure_handler(self, record, exception):
+    def failure_handler(self, record: Any, exception: Exception):
         """
         Failure callback
         """
