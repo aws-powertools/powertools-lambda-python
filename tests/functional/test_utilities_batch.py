@@ -4,7 +4,7 @@ import pytest
 from botocore.config import Config
 from botocore.stub import Stubber
 
-from aws_lambda_powertools.utilities.batch import PartialSQSProcessor, partial_sqs_processor
+from aws_lambda_powertools.utilities.batch import PartialSQSProcessor, batch_processor
 
 
 @pytest.fixture(scope="module")
@@ -50,7 +50,6 @@ def test_partial_sqs_processor_context_with_failure(sqs_event_factory, record_ha
     """
     Test processor with one failing record
     """
-
     fail_record = sqs_event_factory("fail")
     success_record = sqs_event_factory("success")
 
@@ -76,7 +75,6 @@ def test_partial_sqs_processor_context_only_success(sqs_event_factory, record_ha
     """
     Test processor without failure
     """
-
     first_record = sqs_event_factory("success")
     second_record = sqs_event_factory("success")
 
@@ -95,7 +93,6 @@ def test_partial_sqs_processor_context_multiple_calls(sqs_event_factory, record_
     """
     Test processor without failure
     """
-
     first_record = sqs_event_factory("success")
     second_record = sqs_event_factory("success")
 
@@ -110,12 +107,12 @@ def test_partial_sqs_processor_context_multiple_calls(sqs_event_factory, record_
     assert partial_processor.success_messages == [first_record]
 
 
-def test_partial_sqs_processor_middleware_with_default(sqs_event_factory, record_handler, partial_processor):
+def test_batch_processor_middleware_with_partial_sqs_processor(sqs_event_factory, record_handler, partial_processor):
     """
-    Test middleware with default partial processor
+    Test middleware's integration with PartialSQSProcessor
     """
 
-    @partial_sqs_processor(record_handler=record_handler, processor=partial_processor)
+    @batch_processor(record_handler=record_handler, processor=partial_processor)
     def lambda_handler(event, context):
         return True
 
@@ -134,9 +131,9 @@ def test_partial_sqs_processor_middleware_with_default(sqs_event_factory, record
     assert result is True
 
 
-def test_partial_sqs_processor_middleware_with_custom(capsys, sqs_event_factory, record_handler, config):
+def test_batch_processor_middleware_with_custom_processor(capsys, sqs_event_factory, record_handler, config):
     """
-    Test middle with custom partial processor
+    Test middlewares' integration with custom batch processor
     """
 
     class CustomProcessor(PartialSQSProcessor):
@@ -146,7 +143,7 @@ def test_partial_sqs_processor_middleware_with_custom(capsys, sqs_event_factory,
 
     processor = CustomProcessor(config=config)
 
-    @partial_sqs_processor(record_handler=record_handler, processor=processor)
+    @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context):
         return True
 
