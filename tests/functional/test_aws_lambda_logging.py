@@ -116,3 +116,16 @@ def test_with_unserializable_value_in_message_custom(stdout):
     # THEN json_default should not be in the log message and the custom unserializable handler should be used
     assert log_dict["message"]["x"] == "<non-serializable: Unserializable>"
     assert "json_default" not in log_dict
+
+
+def test_log_dict_key_seq(stdout):
+    # GIVEN any logger configuration
+    logger = Logger(level="INFO", stream=stdout, another="xxx")
+
+    # WHEN logging a message
+    logger.info("Message")
+
+    log_dict: dict = json.loads(stdout.getvalue())
+
+    # THEN the key sequence should be `timestamp,level,location,message`
+    assert ",".join(list(log_dict.keys())[:4]) == "timestamp,level,location,message"
