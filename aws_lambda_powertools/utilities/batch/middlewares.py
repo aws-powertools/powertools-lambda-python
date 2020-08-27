@@ -38,7 +38,7 @@ def batch_processor(
         >>> def record_handler(record):
         >>>     return record["body"]
         >>>
-        >>> @batch_processor(record_handler=record_handler, processor=PartialSQSProcessor)
+        >>> @batch_processor(record_handler=record_handler, processor=PartialSQSProcessor())
         >>> def handler(event, context):
         >>>     return {"StatusCode": 200}
 
