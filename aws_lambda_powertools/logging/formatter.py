@@ -30,7 +30,7 @@ class JsonFormatter(logging.Formatter):
         self.default_json_formatter = kwargs.pop("json_default", str)
         # Set the insertion order for the log messages
         self.format_dict = dict.fromkeys(kwargs.pop("log_record_order", ["level", "location", "message", "timestamp"]))
-        # Set timestamp the date format
+        # Set the date format used by `asctime`
         super(JsonFormatter, self).__init__(datefmt=kwargs.pop("datefmt", None))
 
         self.reserved_keys = ["timestamp", "level", "location"]
