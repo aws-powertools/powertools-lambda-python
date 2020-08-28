@@ -20,18 +20,23 @@ class JsonFormatter(logging.Formatter):
         unserializable values.  It must not throw.  Defaults to a function that
         coerces the value to a string.
 
+        The `log_record_order` kwarg is used to specify the order of the keys used in
+        the structured json logs. By default the order is: "level", "location", "message", "timestamp",
+        "service" and "sampling_rate".
+
         Other kwargs are used to specify log field format strings.
         """
+        # Set the default unserializable function, by default values will be cast as str.
         self.default_json_formatter = kwargs.pop("json_default", str)
-        datefmt = kwargs.pop("datefmt", None)
+        # Set the insertion order for the log messages
+        self.format_dict = dict.fromkeys(kwargs.pop("log_record_order", ["level", "location", "message", "timestamp"]))
+        # Set timestamp the date format
+        super(JsonFormatter, self).__init__(datefmt=kwargs.pop("datefmt", None))
 
-        super(JsonFormatter, self).__init__(datefmt=datefmt)
         self.reserved_keys = ["timestamp", "level", "location"]
-        self.format_dict = dict.fromkeys(kwargs.pop("format_keys", ["level", "location", "message", "timestamp"]))
         self.format_dict.update(
-            {"level": "%(levelname)s", "location": "%(funcName)s:%(lineno)d", "timestamp": "%(asctime)s"}
+            {"level": "%(levelname)s", "location": "%(funcName)s:%(lineno)d", "timestamp": "%(asctime)s", **kwargs}
         )
-        self.format_dict.update(kwargs)
 
     def update_formatter(self, **kwargs):
         self.format_dict.update(kwargs)

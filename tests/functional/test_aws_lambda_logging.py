@@ -119,8 +119,8 @@ def test_with_unserializable_value_in_message_custom(stdout):
 
 
 def test_log_dict_key_seq(stdout):
-    # GIVEN any logger configuration
-    logger = Logger(level="INFO", stream=stdout, another="xxx")
+    # GIVEN the default logger configuration
+    logger = Logger(stream=stdout)
 
     # WHEN logging a message
     logger.info("Message")
@@ -133,7 +133,7 @@ def test_log_dict_key_seq(stdout):
 
 def test_log_dict_key_custom_seq(stdout):
     # GIVEN a logger configuration with format_keys set to ["message"]
-    logger = Logger(stream=stdout, format_keys=["message"])
+    logger = Logger(stream=stdout, log_record_order=["message"])
 
     # WHEN logging a message
     logger.info("Message")
@@ -145,21 +145,23 @@ def test_log_dict_key_custom_seq(stdout):
 
 
 def test_log_custom_formatting(stdout):
-    # GIVEN a logger where we have a custom location format
-    logger = Logger(stream=stdout, location="[%(funcName)s] %(module)s")
+    # GIVEN a logger where we have a custom `location`, 'datefmt' format
+    logger = Logger(stream=stdout, location="[%(funcName)s] %(module)s", datefmt="fake-datefmt")
 
     # WHEN logging a message
     logger.info("foo")
 
     log_dict: dict = json.loads(stdout.getvalue())
 
-    # THEN the `location` match the formatting
+    # THEN the `location` and "timestamp" should match the formatting
     assert log_dict["location"] == "[test_log_custom_formatting] test_aws_lambda_logging"
+    assert log_dict["timestamp"] == "fake-datefmt"
 
 
 def test_log_dict_key_strip_nones(stdout):
     # GIVEN a logger confirmation where we set `location` and `timestamp` to None
-    logger = Logger(stream=stdout, location=None, timestamp=None)
+    # Note: level, sampling_rate and service can not be suppressed
+    logger = Logger(stream=stdout, level=None, location=None, timestamp=None, sampling_rate=None, service=None)
 
     # WHEN logging a message
     logger.info("foo")
