@@ -132,7 +132,7 @@ def test_log_dict_key_seq(stdout):
 
 
 def test_log_dict_key_custom_seq(stdout):
-    # GIVEN a logger configuration with format_keys set to ["message"]
+    # GIVEN a logger configuration with log_record_order set to ["message"]
     logger = Logger(stream=stdout, log_record_order=["message"])
 
     # WHEN logging a message
