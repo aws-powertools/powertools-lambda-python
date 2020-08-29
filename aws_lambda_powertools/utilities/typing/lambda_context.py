@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import annotations
-
 from aws_lambda_powertools.utilities.typing import LambdaClientContext, LambdaCognitoIdentity
 
 
