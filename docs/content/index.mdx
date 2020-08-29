@@ -29,7 +29,7 @@ sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 * [Metrics](./core/metrics) - Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
 * [Bring your own middleware](./utilities/middleware_factory) - Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
 * [Parameters utility](./utilities/parameters) - Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time
-* [Batch utility](./utilities/batch) - Batch processing for AWS SQS, with a middleware allow custom record handling
+* [Batch utility](./utilities/batch) - Batch processing for AWS SQS, handles partial failure.
 
 ### Lambda Layer
 

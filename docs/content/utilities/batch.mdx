@@ -5,14 +5,15 @@ description: Utility
 
 import Note from "../../src/components/Note"
 
-The batch utility provides an abstraction to process a batch event. Useful for lambda integrations with [AWS SQS](https://aws.amazon.com/sqs/), [AWS Kinesis](https://aws.amazon.com/kinesis/) and [AWS DynamoDB Streams](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html).
-It also provides base classes (`BaseProcessor`, `BasePartialProcessor`) allowing you to create your **own** batch processor.
+One very attractive feature of Lambda functions is the ability to integrate them with a plethora of internal and external [event sources][1]. Some of these event providers allows a feature called "Batch processing" in which [predefined number][2] of events is sent to lambda function at once.
+
+The proposed batch utility aims to provide an abstraction to process batch events, providing base classes (`BaseProcessor`, `BasePartialProcessor`) allowing you to create your **own** batch processor.
+It also provides a useful implementation to handle partial batch failures from the SQS provider.
 
 **Key Features**
 
-* Run batch processing logic with a clean interface;
-* Middleware and context to handle a batch event;
-* Removal of successful messages for [AWS SQS](https://aws.amazon.com/sqs/) batch - in case of partial failure.
+* Removal of successful messages for [AWS SQS](https://aws.amazon.com/sqs/) batch - in case of partial failure;
+* Build your own batch processor using the base classes.
 
 **IAM Permissions**
 
@@ -24,13 +25,32 @@ PartialSQSProcessor | `_clean` | `sqs:DeleteMessageBatch`
 
 ### PartialSQSProcessor
 
-A special batch processor which aims to `clean` your SQS:Queue if one or more (not all) records of the batch fails.
-A batch's partial failure sends back all the records to the queue, reprocessing this batch until all records succed.
-This processor exists to improve performance in such cases, deleting successful messages of a batch with partial failure.
+SQS integration with Lambda is one of the most well established ones and pretty useful when building asynchronous applications. One common approach to maximize the performance of this integration is to enable the batch processing feature, resulting in higher throughput with less invocations.
 
-### Middleware
+As any function call, you may face errors during execution, in one or more records belonging to a batch. SQS's native behavior is to redrive the **whole** batch to the queue again, reprocessing all of them again, including successful ones. This cycle can happen multiple times depending on your [configuration][3], until the whole batch succeeds or the maximum number of attempts is reached. Your application may face some problems with such behavior, especially if there's no idempotency.
 
-```python:title=app.py
+A *naive* approach to solving this problem is to delete successful records from the queue before redriving's phase. The `PartialSQSProcessor` class offers this solution both as context manager and middleware, removing all successful messages from the queue case one or more failures ocurred during lambda's execution. Two examples are provided below, displaying the behavior of this class.
+
+**Examples:**
+
+```python:title=context_manager.py
+from aws_lambda_powertools.utilities.batch import batch_processor, PartialSQSProcessor
+
+def record_handler(record):
+    return record["body"]
+
+def lambda_handler(event, context):
+    records = event["Records"]
+
+    # highlight-start
+    with processor(records, record_handler):
+        result = processor.process()
+    # highlight-end
+
+    return result
+```
+
+```python:title=middleware.py
 from aws_lambda_powertools.utilities.batch import batch_processor, PartialSQSProcessor
 
 def record_handler(record):
@@ -48,48 +68,63 @@ def lambda_handler(event, context):
 You can create your own batch processor by inheriting the `BaseProcessor` class, and implementing `_prepare()`, `_clean` and `_process_record()`.
 It's also possible to inherit the `BasePartialProcessor` which contains additional logic to handle a partial failure and keep track of record status.
 
-Here is an example implementation of a DynamoDBStream custom processor:
+**Example:**
 
 ```python:title=custom_processor.py
-import json
+from uuid import uuid4
 
 from aws_lambda_powertools.utilities.batch import BaseProcessor, batch_processor
 import boto3
 
-class DynamoDBProcessor(BaseProcessor):
+def record_handler(record):
+    return {"Id": str(uuid4()), "MessageBody": record["body"]}
 
-    def __init__(self, queue_url: str):
-        self.queue_url = queue_url
+
+class DDBStreamProcessor(BaseProcessor):
+    """
+    1. Listens to streams from table A;
+    2. Process each record;
+    3. Send a batch message to a Queue with the result.
+
+    Parameters
+    ----------
+    queue_name: str
+        QueueName to send the results
+    """
+
+    def __init__(self, queue_name: str):
+        self.queue_name = queue_name
+        self.queue_url = None
         self.client = boto3.client("sqs")
+        self.results = []
 
     def _prepare(self):
-        pass
+        # It's called once, *before* processing
+        # Formats queue_url given a name
+        # E.g.:
+        self.queue_url = f"https://queue.amazonaws.com/123456789012/{self.queue_name}"
 
     def _clean(self):
-        pass
+        # It's called once, *after* closing processing all records (closing the context manager)
+        # Here we're sending at once all messages to the queue, and cleaning 'results' for future invocations
+        # E.g.:
+        self.client.send_message_batch(QueueUrl=self.queue_url, Entries=[self.results])
+        self.results.clear()
 
     def _process_record(self, record):
-        """
-        Process record and send result to sqs
-        """
+        # It handles how you process your record
+        # Here we're storing the result of each record in a list
+        # E.g.:
         result = self.handler(record)
-        body = json.dumps(result)
-        self.client.send_message(QueueUrl=self.queue_url, MessageBody=body)
+        self.results.append(result)
         return result
 
-def record_handler(record):
-    return record["Keys"]
 
-# As context
-
-processor = DynamoDBProcessor("dummy")
-records = {"Records": []}
-
-with processor(records=records, handler=record_handler) as ctx:
-    result = ctx.process()
-
-# As middleware
-@batch.batch_processor(record_handler=record_handler, processor=DynamoDBProcessor("dummy"))
+@batch_processor(record_handler=record_handler, processor=DDBStreamProcessor("dummy-queue"))
 def lambda_handler(event, context):
     return {"statusCode": 200}
 ```
+
+[1]: https://aws.amazon.com/eventbridge/integrations/
+[2]: https://docs.aws.amazon.com/lambda/latest/dg/API_CreateEventSourceMapping.html
+[3]: https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html

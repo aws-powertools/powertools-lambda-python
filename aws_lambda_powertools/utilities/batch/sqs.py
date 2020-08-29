@@ -37,8 +37,8 @@ class PartialSQSProcessor(BasePartialProcessor):
         >>>     records = event["Records"]
         >>>     processor = PartialSQSProcessor()
         >>>
-        >>>     with processor(records=records, handler=record_handler) as ctx:
-        >>>         result = ctx.process()
+        >>>     with processor(records=records, handler=record_handler):
+        >>>         result = processor.process()
         >>>
         >>>     # Case a partial failure occurred, all successful executions
         >>>     # have been deleted from the queue after context's exit.

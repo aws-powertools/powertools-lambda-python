@@ -3,6 +3,7 @@
 """
 Middlewares for batch utilities
 """
+
 from typing import Callable, Dict
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
@@ -49,7 +50,7 @@ def batch_processor(
     """
     records = event["Records"]
 
-    with processor(records, record_handler) as ctx:
-        ctx.process()
+    with processor(records, record_handler):
+        processor.process()
 
     return handler(event, context)
