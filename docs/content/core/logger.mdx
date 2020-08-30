@@ -47,7 +47,7 @@ Logger(service="payment", level="INFO")
 
 ## Standard structured keys
 
-Your Logger will always include the following keys to your structured logging:
+Your Logger will include the following keys to your structured logging, by default:
 
 Key | Type | Example | Description
 ------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
@@ -57,6 +57,7 @@ Key | Type | Example | Description
 **service** | str | "payment" | Service name defined. "service_undefined" will be used if unknown
 **sampling_rate** | int |  0.1 | Debug logging sampling rate in percentage e.g. 10% in this case
 **message** | any |  "Collecting payment" | Log statement value. Unserializable JSON values will be casted to string
+**xray_trace_id** | str | "1-5759e988-bd862e3fe1be46a994272793" | X-Ray Trace ID when Lambda function has enabled Tracing
 
 ## Capturing Lambda context info
 
@@ -304,7 +305,7 @@ This can be fixed by either ensuring both has the `service` value as `payment`, 
 
 You might want to continue to use the same date formatting style, or override `location` to display the `package.function_name:line_number` as you previously had.
 
-Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, and `datefmt`
+Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, `xray_trace_id`, and `datefmt`
 
 ```python
 from aws_lambda_powertools import Logger
@@ -316,7 +317,7 @@ logger = Logger(stream=stdout, location="[%(funcName)s] %(module)s", datefmt="fa
 logger = Logger(stream=stdout, location=None) # highlight-line
 ```
 
-Alternatively, you can also change the order of the following log record keys via the `log_record_order` parameter: `level`, location`, message`, and timestamp`
+Alternatively, you can also change the order of the following log record keys via the `log_record_order` parameter: `level`, `location`, `message`, `xray_trace_id`, and `timestamp`
 
 ```python
 from aws_lambda_powertools import Logger
