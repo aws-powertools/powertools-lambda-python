@@ -69,6 +69,9 @@ opensource-codeofconduct@amazon.com with any additional questions or comments.
 ## Security issue notifications
 If you discover a potential security issue in this project we ask that you notify AWS/Amazon Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public github issue.
 
+## Troubleshooting
+
+* The local **API reference** throws a `Module aws_lambda_powertools not found` error when an exception is raised in the code-base, when you run `poetry run pdoc --pdf aws_lambda_powertools` the exception is shown.
 
 ## Licensing
 
