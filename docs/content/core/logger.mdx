@@ -305,7 +305,7 @@ This can be fixed by either ensuring both has the `service` value as `payment`, 
 
 You might want to continue to use the same date formatting style, or override `location` to display the `package.function_name:line_number` as you previously had.
 
-Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, `xray_trace_id`, and `datefmt`
+Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, and `datefmt`
 
 ```python
 from aws_lambda_powertools import Logger
@@ -317,7 +317,7 @@ logger = Logger(stream=stdout, location="[%(funcName)s] %(module)s", datefmt="fa
 logger = Logger(stream=stdout, location=None) # highlight-line
 ```
 
-Alternatively, you can also change the order of the following log record keys via the `log_record_order` parameter: `level`, `location`, `message`, `xray_trace_id`, and `timestamp`
+Alternatively, you can also change the order of the following log record keys via the `log_record_order` parameter: `level`, `location`, `message`, and `timestamp`
 
 ```python
 from aws_lambda_powertools import Logger

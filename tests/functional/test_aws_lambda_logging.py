@@ -201,3 +201,29 @@ def test_log_dict_xray_is_not_present_when_tracing_is_disabled(stdout, monkeypat
 
     # THEN `xray_trace_id`` key should not be present
     assert "xray_trace_id" not in log_dict
+
+
+def test_log_dict_xray_is_updated_when_tracing_id_changes(stdout, monkeypatch):
+    # GIVEN a logger is initialized within a Lambda function with X-Ray enabled
+    trace_id = "1-5759e988-bd862e3fe1be46a994272793"
+    trace_header = f"Root={trace_id};Parent=53995c3f42cd8ad8;Sampled=1"
+    monkeypatch.setenv(name="_X_AMZN_TRACE_ID", value=trace_header)
+    logger = Logger(stream=stdout)
+
+    # WHEN logging a message
+    logger.info("foo")
+
+    # and Trace ID changes to mimick a new invocation
+    trace_id_2 = "1-5759e988-bd862e3fe1be46a949393982437"
+    trace_header_2 = f"Root={trace_id_2};Parent=53995c3f42cd8ad8;Sampled=1"
+    monkeypatch.setenv(name="_X_AMZN_TRACE_ID", value=trace_header_2)
+
+    logger.info("foo bar")
+
+    log_dict, log_dict_2 = [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
+
+    # THEN `xray_trace_id`` key should be different in both invocations
+    assert log_dict["xray_trace_id"] == trace_id
+    assert log_dict_2["xray_trace_id"] == trace_id_2
+
+    monkeypatch.delenv(name="_X_AMZN_TRACE_ID")
