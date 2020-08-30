@@ -2,4 +2,4 @@
 
 from typing import Any, Dict
 
-LambdaDict = Dict[str, Any]
+LambdaEvent = Dict[str, Any]
