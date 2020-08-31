@@ -62,7 +62,7 @@ class MetricManager:
 
     Environment variables
     ---------------------
-    POWERTOOLS_METRICS_NAMESPACE : str
+    POWERTOOLS_NAMESPACE or POWERTOOLS_METRICS_NAMESPACE : str
         metric namespace to be set for all metrics
     POWERTOOLS_SERVICE_NAME : str
         service name used for default dimension
@@ -87,7 +87,11 @@ class MetricManager:
     ):
         self.metric_set = metric_set if metric_set is not None else {}
         self.dimension_set = dimension_set if dimension_set is not None else {}
-        self.namespace = namespace or os.getenv("POWERTOOLS_METRICS_NAMESPACE")
+        self.namespace = (
+            namespace
+            or os.getenv("POWERTOOLS_NAMESPACE")
+            or os.getenv("POWERTOOLS_METRICS_NAMESPACE", "namespace_undefined")
+        )
         self.service = service or os.environ.get("POWERTOOLS_SERVICE_NAME")
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_options = list(MetricUnit.__members__)

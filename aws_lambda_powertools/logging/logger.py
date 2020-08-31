@@ -114,6 +114,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
     def __init__(
         self,
+        namespace: str = None,
         service: str = None,
         level: Union[str, int] = None,
         child: bool = False,
@@ -121,12 +122,17 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         stream: sys.stdout = None,
         **kwargs,
     ):
+        self.namespace = namespace or os.getenv("POWERTOOLS_NAMESPACE") or "namespace_undefined"
         self.service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
         self.sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or 0.0
         self.log_level = self._get_log_level(level)
         self.child = child
         self._handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
-        self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
+        self._default_log_keys = {
+            "namespace": self.namespace,
+            "service": self.service,
+            "sampling_rate": self.sampling_rate,
+        }
         self._logger = self._get_logger()
 
         self._init_logger(**kwargs)
@@ -138,9 +144,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
     def _get_logger(self):
         """ Returns a Logger named {self.service}, or {self.service.filename} for child loggers"""
-        logger_name = self.service
+        logger_name = f"{self.namespace}.{self.service}"
         if self.child:
-            logger_name = f"{self.service}.{self._get_caller_filename()}"
+            logger_name = f"{self.namespace}.{self.service}.{self._get_caller_filename()}"
 
         return logging.getLogger(logger_name)
 

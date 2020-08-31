@@ -125,6 +125,7 @@ class Tracer:
     """
 
     _default_config = {
+        "namespace": "namespace_undefined",
         "service": "service_undefined",
         "disabled": False,
         "auto_patch": True,
@@ -135,6 +136,7 @@ class Tracer:
 
     def __init__(
         self,
+        namespace: str = None,
         service: str = None,
         disabled: bool = None,
         auto_patch: bool = None,
@@ -142,10 +144,16 @@ class Tracer:
         provider: aws_xray_sdk.core.xray_recorder = None,
     ):
         self.__build_config(
-            service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
+            namespace=namespace,
+            service=service,
+            disabled=disabled,
+            auto_patch=auto_patch,
+            patch_modules=patch_modules,
+            provider=provider,
         )
         self.provider = self._config["provider"]
         self.disabled = self._config["disabled"]
+        self.namespace = self._config["namespace"]
         self.service = self._config["service"]
         self.auto_patch = self._config["auto_patch"]
 
@@ -276,6 +284,10 @@ class Tracer:
                     logger.debug("Annotating cold start")
                     subsegment.put_annotation(key="ColdStart", value=True)
                     is_cold_start = False
+
+                logger.debug("Annotating namespace and service")
+                subsegment.put_annotation(key="Namespace", value=self.namespace)
+                subsegment.put_annotation(key="Service", value=self.service)
 
                 try:
                     logger.debug("Calling lambda handler")
@@ -637,6 +649,7 @@ class Tracer:
 
     def __build_config(
         self,
+        namespace: str = None,
         service: str = None,
         disabled: bool = None,
         auto_patch: bool = None,
@@ -645,10 +658,12 @@ class Tracer:
     ):
         """ Populates Tracer config for new and existing initializations """
         is_disabled = disabled if disabled is not None else self._is_tracer_disabled()
+        is_namespace = namespace if namespace is not None else os.getenv("POWERTOOLS_NAMESPACE")
         is_service = service if service is not None else os.getenv("POWERTOOLS_SERVICE_NAME")
 
         self._config["provider"] = provider if provider is not None else self._config["provider"]
         self._config["auto_patch"] = auto_patch if auto_patch is not None else self._config["auto_patch"]
+        self._config["namespace"] = is_namespace if is_namespace else self._config["namespace"]
         self._config["service"] = is_service if is_service else self._config["service"]
         self._config["disabled"] = is_disabled if is_disabled else self._config["disabled"]
         self._config["patch_modules"] = patch_modules if patch_modules else self._config["patch_modules"]
