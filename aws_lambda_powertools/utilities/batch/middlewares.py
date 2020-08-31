@@ -8,12 +8,12 @@ from typing import Callable, Dict
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
-from .base import BaseProcessor
+from .base import BasePartialProcessor
 
 
 @lambda_handler_decorator
 def batch_processor(
-    handler: Callable, event: Dict, context: Dict, record_handler: Callable, processor: BaseProcessor = None
+    handler: Callable, event: Dict, context: Dict, record_handler: Callable, processor: BasePartialProcessor = None
 ):
     """
     Middleware to handle batch event processing

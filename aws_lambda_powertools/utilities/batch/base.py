@@ -5,13 +5,17 @@ Batch processing utilities
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Iterable, List, MutableSequence, Tuple
+from typing import Any, Callable, Iterable, List, Tuple
 
 
-class BaseProcessor(ABC):
+class BasePartialProcessor(ABC):
     """
     Abstract class for batch processors.
     """
+
+    def __init__(self):
+        self.success_messages: List = []
+        self.fail_messages: List = []
 
     @abstractmethod
     def _prepare(self):
@@ -62,12 +66,6 @@ class BaseProcessor(ABC):
         self.handler = handler
         return self
 
-
-class BasePartialProcessor(BaseProcessor):
-
-    success_messages: MutableSequence = None
-    fail_messages: MutableSequence = None
-
     def success_handler(self, record: Any, result: Any):
         """
         Success callback
@@ -75,7 +73,7 @@ class BasePartialProcessor(BaseProcessor):
         Returns
         -------
         tuple
-            "success", record processing result and original record
+            "success", result, original record
         """
         entry = ("success", result, record)
         self.success_messages.append(record)

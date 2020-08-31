@@ -47,7 +47,7 @@ def test_partial_sqs_get_entries_to_clean_with_success(mocker, sqs_event, partia
     expected_entries = [{"Id": sqs_event["messageId"], "ReceiptHandle": sqs_event["receiptHandle"]}]
 
     success_messages_mock = mocker.patch.object(
-        PartialSQSProcessor, "success_messages", new_callable=mocker.PropertyMock
+        PartialSQSProcessor, "success_messages", create=True, new_callable=mocker.PropertyMock
     )
     success_messages_mock.return_value = [sqs_event]
 
@@ -60,7 +60,7 @@ def test_partial_sqs_get_entries_to_clean_without_success(mocker, partial_sqs_pr
     expected_entries = []
 
     success_messages_mock = mocker.patch.object(
-        PartialSQSProcessor, "success_messages", new_callable=mocker.PropertyMock
+        PartialSQSProcessor, "success_messages", create=True, new_callable=mocker.PropertyMock
     )
     success_messages_mock.return_value = []
 

@@ -48,14 +48,10 @@ class PartialSQSProcessor(BasePartialProcessor):
 
     def __init__(self, config: Optional[Config] = None):
         """
-        Initializes sqs client and also success and failure lists
-        to keep track of record's execution status.
+        Initializes sqs client.
         """
         config = config or Config()
         self.client = boto3.client("sqs", config=config)
-
-        self.success_messages: List = []
-        self.fail_messages: List = []
 
         super().__init__()
 
