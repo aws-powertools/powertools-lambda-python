@@ -10,9 +10,9 @@ class LambdaContext(object):
     -------
     **A Lambda function using LambdaContext**
 
-        >>> from aws_lambda_powertools.utilities.typing import LambdaEvent, LambdaContext
+        >>> from aws_lambda_powertools.utilities.typing import LambdaContext
         >>>
-        >>> def handler(event: LambdaEvent, context: LambdaContext) -> LambdaEvent:
+        >>> def handler(event: Dict[str, Any], context: LambdaContext) -> Dict[str, Any]:
         >>>     # Insert business logic
         >>>     return event
 

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-from aws_lambda_powertools.utilities.typing import LambdaEvent
+from typing import Any, Dict
+
 from aws_lambda_powertools.utilities.typing.lambda_client_context_mobile_client import LambdaClientContextMobileClient
 
 
 class LambdaClientContext(object):
     _client: LambdaClientContextMobileClient
-    _custom: LambdaEvent
-    _env: LambdaEvent
+    _custom: Dict[str, Any]
+    _env: Dict[str, Any]
 
     @property
     def client(self) -> LambdaClientContextMobileClient:
@@ -14,11 +15,11 @@ class LambdaClientContext(object):
         return self._client
 
     @property
-    def custom(self) -> LambdaEvent:
+    def custom(self) -> Dict[str, Any]:
         """A dict of custom values set by the mobile client application."""
         return self._custom
 
     @property
-    def env(self) -> LambdaEvent:
+    def env(self) -> Dict[str, Any]:
         """A dict of environment information provided by the AWS SDK."""
         return self._env
