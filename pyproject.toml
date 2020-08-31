@@ -20,8 +20,14 @@ license = "MIT-0"
 [tool.poetry.dependencies]
 python = "^3.6"
 aws-xray-sdk = "^2.5.0"
-fastjsonschema = "~=2.14.4"
+fastjsonschema = "^2.14.5"
 boto3 = "^1.12"
+
+# optional dependency to allow envelope feature in validator utility
+jmespath = {version = "^0.10.0", optional = true }
+
+[tool.poetry.extras]
+jmespath = ["jmespath"]
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^5.0.3"}
