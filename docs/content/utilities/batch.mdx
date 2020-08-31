@@ -7,8 +7,7 @@ import Note from "../../src/components/Note"
 
 One very attractive feature of Lambda functions is the ability to integrate them with a plethora of internal and external [event sources][1]. Some of these event providers allows a feature called "Batch processing" in which [predefined number][2] of events is sent to lambda function at once.
 
-The proposed batch utility aims to provide an abstraction to process batch events, providing base classes (`BaseProcessor`, `BasePartialProcessor`) allowing you to create your **own** batch processor.
-It also provides a useful implementation to handle partial batch failures from the SQS provider.
+The proposed batch utility aims to provide an abstraction to handle a partial failure during a batch execution from a SQS event source, providing a base class (`BasePartialProcessor`) allowing you to create your **own** batch processor.
 
 **Key Features**
 
@@ -63,64 +62,72 @@ def lambda_handler(event, context):
     return {"statusCode": 200}
 ```
 
-## Create your own processor
+## Create your own partial processor
 
-You can create your own batch processor by inheriting the `BaseProcessor` class, and implementing `_prepare()`, `_clean` and `_process_record()`.
-It's also possible to inherit the `BasePartialProcessor` which contains additional logic to handle a partial failure and keep track of record status.
+You can create your own partial batch processor by inheriting the `BasePartialProcessor` class, and implementing `_prepare()`, `_clean()` and `_process_record()`.
+
+All processing logic is handled by `_process_record()` whilst `_prepare()` and `clean()` take care of doing a setup/teardown of the processor, being called at start/end of processor's execution, respectively.
 
 **Example:**
 
 ```python:title=custom_processor.py
-from uuid import uuid4
+from random import randint
 
-from aws_lambda_powertools.utilities.batch import BaseProcessor, batch_processor
+from aws_lambda_powertools.utilities.batch import BasePartialProcessor, batch_processor
 import boto3
 
 def record_handler(record):
-    return {"Id": str(uuid4()), "MessageBody": record["body"]}
+    return randint(0, 100)
 
 
-class DDBStreamProcessor(BaseProcessor):
+class MyPartialProcessor(BasePartialProcessor):
     """
-    1. Listens to streams from table A;
-    2. Process each record;
-    3. Send a batch message to a Queue with the result.
+    Process a record and stores successful results at a DDB Table
 
     Parameters
     ----------
-    queue_name: str
-        QueueName to send the results
+    table_name: str
+        Table name to write results
     """
 
-    def __init__(self, queue_name: str):
-        self.queue_name = queue_name
-        self.queue_url = None
-        self.client = boto3.client("sqs")
-        self.results = []
+    def __init__(self, table_name: str):
+        self.table_name = table_name
+
+        super().__init__()
 
     def _prepare(self):
         # It's called once, *before* processing
-        # Formats queue_url given a name
+        # Creates table resource and clean previous results
         # E.g.:
-        self.queue_url = f"https://queue.amazonaws.com/123456789012/{self.queue_name}"
+        self.ddb_table = boto3.resource("dynamodb").Table(self.table_name)
+        self.success_messages.clear()
 
     def _clean(self):
         # It's called once, *after* closing processing all records (closing the context manager)
-        # Here we're sending at once all messages to the queue, and cleaning 'results' for future invocations
+        # Here we're sending, at once, all successful messages to a ddb table
         # E.g.:
-        self.client.send_message_batch(QueueUrl=self.queue_url, Entries=[self.results])
-        self.results.clear()
+        with ddb_table.batch_writer() as batch:
+            for result in self.success_messages:
+                batch.put_item(Item=result)
 
     def _process_record(self, record):
-        # It handles how you process your record
-        # Here we're storing the result of each record in a list
+        # It handles how your record is processed
+        # Here we're keeping the status of each run
         # E.g.:
-        result = self.handler(record)
-        self.results.append(result)
-        return result
+        try:
+            result = self.handler(record)
+            return self.success_handler(record, result)
+        except Exception as exc:
+            return self.failure_handler(record, exc)
+
+    def success_handler(self, record):
+        entry = ("success", result, record)
+        message = {"age": result}
+        self.success_messages.append(message)
+        return entry
 
 
-@batch_processor(record_handler=record_handler, processor=DDBStreamProcessor("dummy-queue"))
+@batch_processor(record_handler=record_handler, processor=MyPartialProcessor("dummy-table"))
 def lambda_handler(event, context):
     return {"statusCode": 200}
 ```
