@@ -166,7 +166,7 @@ class BaseProvider(ABC):
         raise NotImplementedError()
 
 
-def get_transform_method(key: str, transform: str) -> Optional[str]:
+def get_transform_method(key: str, transform: Optional[str] = None) -> Optional[str]:
     """
     Determine the transform method
 
@@ -180,12 +180,14 @@ def get_transform_method(key: str, transform: str) -> Optional[str]:
         'binary'
         >>> get_transform_method("key", "auto")
         None
+        >>> get_transform_method("key", None)
+        None
 
     Parameters
     ---------
     key: str
         Only used when the tranform is "auto".
-    transform: str
+    transform: str, optional
         Original transform method, only "auto" will try to detect the transform method by the key
 
     Returns

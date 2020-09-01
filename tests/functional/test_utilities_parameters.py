@@ -1525,7 +1525,7 @@ def test_transform_value_ignore_error(mock_value):
     assert value is None
 
 
-@pytest.mark.parametrize("original_transform", ["json", "binary", "other", "Auto"])
+@pytest.mark.parametrize("original_transform", ["json", "binary", "other", "Auto", None])
 def test_get_transform_method_preserve_original(original_transform):
     """
     Check if original transform method is returned for anything other than "auto"
