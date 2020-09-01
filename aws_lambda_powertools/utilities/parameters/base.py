@@ -15,6 +15,9 @@ DEFAULT_MAX_AGE_SECS = 5
 ExpirableValue = namedtuple("ExpirableValue", ["value", "ttl"])
 # These providers will be dynamically initialized on first use of the helper functions
 DEFAULT_PROVIDERS = {}
+TRANSFORM_METHOD_JSON = "json"
+TRANSFORM_METHOD_BINARY = "binary"
+SUPPORTED_TRANSFORM_METHODS = [TRANSFORM_METHOD_JSON, TRANSFORM_METHOD_BINARY]
 
 
 class BaseProvider(ABC):
@@ -194,12 +197,10 @@ def get_transform_method(key: str, transform: str) -> Optional[str]:
     if transform != "auto":
         return transform
 
-    if key.endswith(".json"):
-        return "json"
-    elif key.endswith(".binary"):
-        return "binary"
-    else:
-        return None
+    for transform_method in SUPPORTED_TRANSFORM_METHODS:
+        if key.endswith("." + transform_method):
+            return transform_method
+    return None
 
 
 def transform_value(value: str, transform: str, raise_on_transform_error: bool = True) -> Union[dict, bytes, None]:
@@ -223,9 +224,9 @@ def transform_value(value: str, transform: str, raise_on_transform_error: bool =
     """
 
     try:
-        if transform == "json":
+        if transform == TRANSFORM_METHOD_JSON:
             return json.loads(value)
-        elif transform == "binary":
+        elif transform == TRANSFORM_METHOD_BINARY:
             return base64.b64decode(value)
         else:
             raise ValueError(f"Invalid transform type '{transform}'")
