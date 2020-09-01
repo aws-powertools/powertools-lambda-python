@@ -27,7 +27,7 @@ class SecretsProvider(BaseProvider):
         >>> from aws_lambda_powertools.utilities.parameters import SecretsProvider
         >>> secrets_provider = SecretsProvider()
         >>>
-        >>> value secrets_provider.get("my-parameter")
+        >>> value = secrets_provider.get("my-parameter")
         >>>
         >>> print(value)
         My parameter value
