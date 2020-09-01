@@ -24,6 +24,12 @@ Powertools is available in PyPi. You can use your favourite dependency managemen
 ```bash:title=hello_world.sh
 sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 ```
+* [Tracing](./core/tracer) - Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions
+* [Logging](./core/logger) - Structured logging made easier, and decorator to enrich structured logging with key Lambda context details
+* [Metrics](./core/metrics) - Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
+* [Bring your own middleware](./utilities/middleware_factory) - Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
+* [Parameters utility](./utilities/parameters) - Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time
+* [Batch utility](./utilities/batch) - Batch processing for AWS SQS, handles partial failure.
 
 ### Lambda Layer
 

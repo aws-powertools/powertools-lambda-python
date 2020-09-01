@@ -69,6 +69,19 @@ opensource-codeofconduct@amazon.com with any additional questions or comments.
 ## Security issue notifications
 If you discover a potential security issue in this project we ask that you notify AWS/Amazon Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public github issue.
 
+## Troubleshooting
+
+### API reference documentation
+
+When you are working on the codebase and you use the local API reference documentation to preview your changes, you might see the following message: `Module aws_lambda_powertools not found`.
+
+This happens when:
+
+* You did not install the local dev environment yet
+    - You can install dev deps with `make dev` command
+* The code in the repository is raising an exception while the `pdoc` is scanning the codebase
+    - Unfortunately, this exception is not shown to you, but if you run, `poetry run pdoc --pdf aws_lambda_powertools`, the exception is shown and you can prevent the exception from being raised
+    - Once resolved the documentation should load correctly again
 
 ## Licensing
 
