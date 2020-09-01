@@ -14,7 +14,7 @@ from aws_lambda_powertools.tracing import aiohttp_trace_config
 set_package_logger()  # Enable package diagnostics (DEBUG log)
 
 # tracer = Tracer() # patches all available modules # noqa: E800
-tracer = Tracer(patch_modules=("aioboto3", "boto3", "requests"))  # ~90-100ms faster in perf depending on set of libs
+tracer = Tracer(patch_modules=["aioboto3", "boto3", "requests"])  # ~90-100ms faster in perf depending on set of libs
 logger = Logger()
 metrics = Metrics()
 
@@ -114,13 +114,13 @@ def lambda_handler(event, context):
 
     try:
         ip = requests.get("http://checkip.amazonaws.com/")
-        metrics.add_metric(name="SuccessfulLocations", unit="Count", value=1)
+        metrics.add_metric(name="SuccessfulLocations", unit=MetricUnit.Count, value=1)
     except requests.RequestException as e:
         # Send some context about this error to Lambda Logs
         logger.exception(e)
         raise
 
-    with single_metric(name="UniqueMetricDimension", unit="Seconds", value=1) as metric:
+    with single_metric(name="UniqueMetricDimension", unit=MetricUnit.Seconds, value=1) as metric:
         metric.add_dimension(name="unique_dimension", value="for_unique_metric")
 
     resp = {"message": "hello world", "location": ip.text.replace("\n", ""), "async_http": async_http_ret}

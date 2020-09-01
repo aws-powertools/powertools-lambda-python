@@ -112,7 +112,7 @@ class MetricManager:
             Metric name
         unit : MetricUnit
             `aws_lambda_powertools.helper.models.MetricUnit`
-        value : float
+        value : Union[float, int]
             Metric value
 
         Raises
@@ -146,6 +146,8 @@ class MetricManager:
             Dictionary of metrics to serialize, by default None
         dimensions : Dict, optional
             Dictionary of dimensions to serialize, by default None
+        metadata: Dict, optional
+            Dictionary of metadata to serialize, by default None
 
         Example
         -------
@@ -183,7 +185,7 @@ class MetricManager:
         metric_names_and_values: Dict[str, str] = {}  # { "metric_name": 1.0 }
 
         for metric_name in metrics:
-            metric: str = metrics[metric_name]
+            metric: dict = metrics[metric_name]
             metric_value: int = metric.get("Value", 0)
             metric_unit: str = metric.get("Unit", "")
 
@@ -257,7 +259,7 @@ class MetricManager:
 
         Parameters
         ----------
-        name : str
+        key : str
             Metadata key
         value : any
             Metadata value

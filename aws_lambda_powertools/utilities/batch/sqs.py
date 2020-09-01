@@ -55,7 +55,7 @@ class PartialSQSProcessor(BasePartialProcessor):
 
         super().__init__()
 
-    def _get_queue_url(self) -> str:
+    def _get_queue_url(self) -> Optional[str]:
         """
         Format QueueUrl from first records entry
         """
