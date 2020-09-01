@@ -17,6 +17,8 @@ Resources:
       CodeUri: hello_world/
       Handler: app.lambda_handler
       Runtime: python3.8
+      Layers:
+        - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
       Tracing: Active                                 # enables X-Ray tracing
       Environment:
         Variables:
@@ -32,6 +34,13 @@ Resources:
           Properties:
             Path: /hello
             Method: get
+
+  AwsLambdaPowertoolsPythonLayer:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+        SemanticVersion: 1.3.1 # change to latest semantic version available in SAR
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
