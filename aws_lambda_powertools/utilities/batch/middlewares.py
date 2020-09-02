@@ -3,12 +3,13 @@
 """
 Middlewares for batch utilities
 """
-
+import functools
 from typing import Callable, Dict
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
 from .base import BasePartialProcessor
+from .sqs import PartialSQSProcessor
 
 
 @lambda_handler_decorator
@@ -54,3 +55,6 @@ def batch_processor(
         processor.process()
 
     return handler(event, context)
+
+
+sqs_batch_processor = functools.partial(batch_processor, processor=PartialSQSProcessor())
