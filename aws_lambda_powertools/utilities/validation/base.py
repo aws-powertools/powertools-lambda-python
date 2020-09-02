@@ -1,9 +1,12 @@
 import json
+import logging
 from typing import Dict
 
 import fastjsonschema
 
 from .exceptions import InvalidEnvelopeExpressionError, InvalidSchemaError, SchemaValidationError
+
+logger = logging.getLogger(__name__)
 
 try:
     import jmespath
@@ -36,6 +39,7 @@ def unwrap_event_from_envelope(data: Dict, envelope: str, jmespath_options: Dict
         jmespath_options = {"custom_functions": PowertoolsJson()}
 
     try:
+        logger.debug(f"Envelope detected: {envelope}. JMESPath options: {jmespath_options}")
         return jmespath.search(envelope, data, options=jmespath.Options(**jmespath_options))
     except jmespath.exceptions.LexerError as e:
         raise InvalidEnvelopeExpressionError(e)

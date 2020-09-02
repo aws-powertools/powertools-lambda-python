@@ -1,4 +1,3 @@
-import json
 import logging
 from typing import Any, Callable, Dict, Union
 
@@ -18,9 +17,6 @@ def validator(
     envelope: str = None,
     jmespath_options: Dict = None,
 ):
-    if isinstance(event, str):
-        event = json.loads(event)
-
     if envelope:
         event = unwrap_event_from_envelope(data=event, envelope=envelope, jmespath_options=jmespath_options)
 
@@ -40,8 +36,5 @@ def validator(
 def validate(event: Dict, schema: Dict = None, envelope: str = None, jmespath_options: Dict = None):
     if envelope:
         event = unwrap_event_from_envelope(data=event, envelope=envelope, jmespath_options=jmespath_options)
-
-    if isinstance(event, str):
-        event = json.loads(event)
 
     validate_data_against_schema(data=event, schema=schema)
