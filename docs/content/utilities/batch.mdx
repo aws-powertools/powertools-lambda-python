@@ -1,65 +1,81 @@
 ---
-title: Batch
+title: SQS Batch Processing
 description: Utility
 ---
 
 import Note from "../../src/components/Note"
 
-One very attractive feature of Lambda functions is the ability to integrate them with a plethora of internal and external [event sources][1]. Some of these event providers allows a feature called "Batch processing" in which [predefined number][2] of events is sent to lambda function at once.
-
-The proposed batch utility aims to provide an abstraction to handle a partial failure during a batch execution from a SQS event source, providing a base class (`BasePartialProcessor`) allowing you to create your **own** batch processor.
+The SQS batch processing utility provides a way to handle partial failures when processing batches of messages from SQS.
 
 **Key Features**
 
-* Removal of successful messages for [AWS SQS](https://aws.amazon.com/sqs/) batch - in case of partial failure;
-* Build your own batch processor using the base classes.
+* Prevent succesfully processed messages being returned to SQS
+* Simple interface for individually processing messages from a batch
+* Build your own batch processor using the base classes
+
+**Background**
+
+When using SQS as a Lambda event source mapping, functions can be triggered with a batch of messages from SQS. If the Lambda function fails when processing the batch,
+all messages in the batch will be returned to the queue. With this utility, messages within a batch are handled individually - only messages that were not successfully processed
+are returned to the queue. More details on how Lambda works with SQS can be found in the [AWS documentation](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html).
+
+<Note type="warning">
+  While this utility lowers the chance of processing messages more than once, it is not guaranteed. We recommend implementing processing logic in an idempotent manner wherever possible.
+</Note><br/>
+
 
 **IAM Permissions**
 
-This utility requires additional permissions to work as expected. See the following table:
+This utility requires additional permissions to work as expected. Lambda functions using this utility require the `sqs:DeleteMessageBatch` permission.
 
-Processor | Function/Method | IAM Permission
-|---------|-----------------|---------------|
-PartialSQSProcessor | `_clean` | `sqs:DeleteMessageBatch`
+## Processing messages from SQS
 
-### PartialSQSProcessor
+There are 2 ways to use this utility for processing SQS messages:
 
-SQS integration with Lambda is one of the most well established ones and pretty useful when building asynchronous applications. One common approach to maximize the performance of this integration is to enable the batch processing feature, resulting in higher throughput with less invocations.
+**With a decorator:**
 
-As any function call, you may face errors during execution, in one or more records belonging to a batch. SQS's native behavior is to redrive the **whole** batch to the queue again, reprocessing all of them again, including successful ones. This cycle can happen multiple times depending on your [configuration][3], until the whole batch succeeds or the maximum number of attempts is reached. Your application may face some problems with such behavior, especially if there's no idempotency.
+Using the `sqs_batch_processor` decorator with your lambda handler function, you provide a `record_handler` which is responsible for processing individual messages. It should raise an exception if
+it is unable to process the record - this will lead to the message returning to the queue. If the function does not return an exception, the message will be deleted from the queue. When using the decorator, you
+will not have accessed to the processed messages within the lambda handler - all processing should be handled from the `record_handler` function.
 
-A *naive* approach to solving this problem is to delete successful records from the queue before redriving's phase. The `PartialSQSProcessor` class offers this solution both as context manager and middleware, removing all successful messages from the queue case one or more failures occurred during lambda's execution. Two examples are provided below, displaying the behavior of this class.
-
-**Examples:**
-
-```python:title=context_manager.py
-from aws_lambda_powertools.utilities.batch import batch_processor, PartialSQSProcessor
+```python:title=app.py
+from aws_lambda_powertools.utilities.batch import sqs_batch_processor
 
 def record_handler(record):
-    return record["body"]
+    # This will be called for each individual message from a batch
+    # It should raise an exception if the message was not processed successfully
+    return_value = do_something_with(record["body"])
+    return return_value
+
+@sqs_batch_processor(record_handler=record_handler)
+def lambda_handler(event, context):
+    return {"statusCode": 200}
+```
+
+**With a context manager:**
+
+If you require access to the result of processed messages, you can use the context manager. The result from calling `process()` on the context manager will be a list of
+all the return values from your `record_handler` function.
+
+```python:title=app.py
+from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
+
+def record_handler(record):
+    # This will be called for each individual message from a batch
+    # It should raise an exception if the message was not processed successfully
+    return_value = do_something_with(record["body"])
+    return return_value
+
 
 def lambda_handler(event, context):
     records = event["Records"]
 
-    # highlight-start
+    processor = PartialSQSProcessor()
+
     with processor(records, record_handler):
-        result = processor.process()
-    # highlight-end
+        result = processor.process()  # Returns a list of all results from record_handler
 
     return result
-```
-
-```python:title=middleware.py
-from aws_lambda_powertools.utilities.batch import batch_processor, PartialSQSProcessor
-
-def record_handler(record):
-    return record["body"]
-
-# highlight-start
-@batch_processor(record_handler=record_handler, processor=PartialSQSProcessor())
-# highlight-end
-def lambda_handler(event, context):
-    return {"statusCode": 200}
 ```
 
 ## Create your own partial processor
@@ -67,6 +83,8 @@ def lambda_handler(event, context):
 You can create your own partial batch processor by inheriting the `BasePartialProcessor` class, and implementing `_prepare()`, `_clean()` and `_process_record()`.
 
 All processing logic is handled by `_process_record()` whilst `_prepare()` and `clean()` take care of doing a setup/teardown of the processor, being called at start/end of processor's execution, respectively.
+
+You can then use this class as a context manager, or pass it to `batch_processor` to use as a decorator on your Lambda handler function.
 
 **Example:**
 
@@ -131,7 +149,3 @@ class MyPartialProcessor(BasePartialProcessor):
 def lambda_handler(event, context):
     return {"statusCode": 200}
 ```
-
-[1]: https://aws.amazon.com/eventbridge/integrations/
-[2]: https://docs.aws.amazon.com/lambda/latest/dg/API_CreateEventSourceMapping.html
-[3]: https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html
