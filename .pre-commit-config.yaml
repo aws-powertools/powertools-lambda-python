@@ -1,5 +1,5 @@
 # We use poetry to run formatting and linting before commit/push
-# Longers checks such as tests, security and complexity baseline
+# Longer checks such as tests, security and complexity baseline
 # are run as part of CI to prevent slower feedback loop
 # All checks can be run locally via `make pr`
 
