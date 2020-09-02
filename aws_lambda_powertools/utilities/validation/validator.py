@@ -16,12 +16,13 @@ def validator(
     inbound_schema: Dict = None,
     outbound_schema: Dict = None,
     envelope: str = None,
+    jmespath_options: Dict = None,
 ):
     if isinstance(event, str):
         event = json.loads(event)
 
     if envelope:
-        event = unwrap_event_from_envelope(data=event, envelope=envelope)
+        event = unwrap_event_from_envelope(data=event, envelope=envelope, jmespath_options=jmespath_options)
 
     if inbound_schema:
         logger.debug("Validating inbound event")
@@ -36,9 +37,9 @@ def validator(
     return response
 
 
-def validate(event: Dict, schema: Dict = None, envelope: str = None):
+def validate(event: Dict, schema: Dict = None, envelope: str = None, jmespath_options: Dict = None):
     if envelope:
-        event = unwrap_event_from_envelope(data=event, envelope=envelope)
+        event = unwrap_event_from_envelope(data=event, envelope=envelope, jmespath_options=jmespath_options)
 
     if isinstance(event, str):
         event = json.loads(event)

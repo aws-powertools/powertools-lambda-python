@@ -1,3 +1,4 @@
+import json
 from typing import Dict
 
 import fastjsonschema
@@ -6,6 +7,13 @@ from .exceptions import InvalidEnvelopeExpressionError, InvalidSchemaError, Sche
 
 try:
     import jmespath
+
+    class PowertoolsJson(jmespath.functions.Functions):
+        @jmespath.functions.signature({"types": ["string"]})
+        def _func_powertools_json(self, value):
+            return json.loads(value)
+
+
 except ModuleNotFoundError:
     jmespath = None
 
@@ -20,11 +28,14 @@ def validate_data_against_schema(data: Dict, schema: Dict):
         raise InvalidSchemaError(e)
 
 
-def unwrap_event_from_envelope(data: Dict, envelope: str):
+def unwrap_event_from_envelope(data: Dict, envelope: str, jmespath_options: Dict):
     if not jmespath:
         raise ModuleNotFoundError("This feature require aws-lambda-powertools[jmespath] extra package")
 
+    if not jmespath_options:
+        jmespath_options = {"custom_functions": PowertoolsJson()}
+
     try:
-        return jmespath.search(envelope, data)
+        return jmespath.search(envelope, data, options=jmespath.Options(**jmespath_options))
     except jmespath.exceptions.LexerError as e:
         raise InvalidEnvelopeExpressionError(e)
