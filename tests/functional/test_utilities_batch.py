@@ -1,10 +1,11 @@
 from typing import Callable
+from unittest.mock import patch
 
 import pytest
 from botocore.config import Config
 from botocore.stub import Stubber
 
-from aws_lambda_powertools.utilities.batch import PartialSQSProcessor, batch_processor
+from aws_lambda_powertools.utilities.batch import PartialSQSProcessor, batch_processor, sqs_batch_processor
 
 
 @pytest.fixture(scope="module")
@@ -44,6 +45,13 @@ def config() -> Config:
 @pytest.fixture(scope="function")
 def partial_processor(config) -> PartialSQSProcessor:
     return PartialSQSProcessor(config=config)
+
+
+@pytest.fixture(scope="function")
+def stubbed_partial_processor(config) -> PartialSQSProcessor:
+    processor = PartialSQSProcessor(config=config)
+    with Stubber(processor.client) as stubber:
+        yield stubber, processor
 
 
 def test_partial_sqs_processor_context_with_failure(sqs_event_factory, record_handler, partial_processor):
@@ -127,6 +135,32 @@ def test_batch_processor_middleware_with_partial_sqs_processor(sqs_event_factory
         result = lambda_handler(event, {})
 
         stubber.assert_no_pending_responses()
+
+    assert result is True
+
+
+@patch("aws_lambda_powertools.utilities.batch.middlewares.PartialSQSProcessor")
+def test_sqs_batch_processor_middleware(
+    patched_sqs_processor, sqs_event_factory, record_handler, stubbed_partial_processor
+):
+    """
+    Test middleware's integration with PartialSQSProcessor
+    """
+
+    @sqs_batch_processor(record_handler=record_handler)
+    def lambda_handler(event, context):
+        return True
+
+    stubber, processor = stubbed_partial_processor
+    patched_sqs_processor.return_value = processor
+
+    fail_record = sqs_event_factory("fail")
+
+    event = {"Records": [sqs_event_factory("fail"), sqs_event_factory("success")]}
+    response = {"Successful": [{"Id": fail_record["messageId"]}], "Failed": []}
+    stubber.add_response("delete_message_batch", response)
+    result = lambda_handler(event, {})
+    stubber.assert_no_pending_responses()
 
     assert result is True
 
