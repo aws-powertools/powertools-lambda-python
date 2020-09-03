@@ -4,10 +4,13 @@
 Batch processing utilities
 """
 
+import logging
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Iterable, List, Tuple
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+
+logger = logging.getLogger(__name__)
 
 
 class BasePartialProcessor(ABC):
@@ -92,6 +95,7 @@ class BasePartialProcessor(ABC):
             "fail", exceptions args, original record
         """
         entry = ("fail", exception.args, record)
+        logger.debug("Record processing exception: ", exception)
         self.exceptions.append(exception)
         self.fail_messages.append(record)
         return entry

@@ -3,6 +3,7 @@
 """
 Batch SQS utilities
 """
+import logging
 from typing import Callable, Dict, List, Optional, Tuple
 
 import boto3
@@ -11,6 +12,8 @@ from botocore.config import Config
 from ...middleware_factory import lambda_handler_decorator
 from .base import BasePartialProcessor
 from .exceptions import SQSBatchProcessingError
+
+logger = logging.getLogger(__name__)
 
 
 class PartialSQSProcessor(BasePartialProcessor):
@@ -106,6 +109,7 @@ class PartialSQSProcessor(BasePartialProcessor):
         # If all messages were successful, fall back to the default SQS -
         # Lambda behaviour which deletes messages if Lambda responds successfully
         if not self.fail_messages:
+            logger.debug(f"All {len(self.success_messages)} records successfully processed")
             return
 
         queue_url = self._get_queue_url()
@@ -113,7 +117,10 @@ class PartialSQSProcessor(BasePartialProcessor):
 
         delete_message_response = self.client.delete_message_batch(QueueUrl=queue_url, Entries=entries_to_remove)
 
-        if self.fail_messages and not self.suppress_exception:
+        if self.suppress_exception:
+            logger.debug(f"{len(self.fail_messages)} records failed processing, but exceptions are suppressed")
+        else:
+            logger.debug(f"{len(self.fail_messages)} records failed processing, raising exception")
             raise SQSBatchProcessingError(list(self.exceptions))
 
         return delete_message_response
