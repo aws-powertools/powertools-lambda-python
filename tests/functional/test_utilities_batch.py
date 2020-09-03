@@ -148,7 +148,7 @@ def test_batch_processor_middleware_with_partial_sqs_processor(sqs_event_factory
         stubber.assert_no_pending_responses()
 
 
-@patch("aws_lambda_powertools.utilities.batch.middlewares.PartialSQSProcessor")
+@patch("aws_lambda_powertools.utilities.batch.sqs.PartialSQSProcessor")
 def test_sqs_batch_processor_middleware(
     patched_sqs_processor, sqs_event_factory, record_handler, stubbed_partial_processor
 ):
@@ -251,7 +251,7 @@ def test_partial_sqs_processor_suppressed_exceptions(sqs_event_factory, record_h
     assert partial_processor_suppressed.success_messages == [first_record]
 
 
-@patch("aws_lambda_powertools.utilities.batch.middlewares.PartialSQSProcessor")
+@patch("aws_lambda_powertools.utilities.batch.sqs.PartialSQSProcessor")
 def test_sqs_batch_processor_middleware_suppressed_exception(
     patched_sqs_processor, sqs_event_factory, record_handler, stubbed_partial_processor_suppressed
 ):
