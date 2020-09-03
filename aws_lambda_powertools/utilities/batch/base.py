@@ -6,7 +6,7 @@ Batch processing utilities
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Iterable, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
@@ -57,14 +57,14 @@ class BasePartialProcessor(ABC):
     def __exit__(self, exception_type, exception_value, traceback):
         self._clean()
 
-    def __call__(self, records: Iterable[Any], handler: Callable):
+    def __call__(self, records: List[Any], handler: Callable):
         """
         Set instance attributes before execution
 
         Parameters
         ----------
-        records: Iterable[Any]
-            Iterable with objects to be processed.
+        records: List[Any]
+            List with objects to be processed.
         handler: Callable
             Callable to process "records" entries.
         """
@@ -95,7 +95,7 @@ class BasePartialProcessor(ABC):
             "fail", exceptions args, original record
         """
         entry = ("fail", exception.args, record)
-        logger.debug("Record processing exception: ", exception)
+        logger.debug(f"Record processing exception: {exception}")
         self.exceptions.append(exception)
         self.fail_messages.append(record)
         return entry
@@ -124,7 +124,7 @@ def batch_processor(
     Examples
     --------
     **Processes Lambda's event with PartialSQSProcessor**
-        >>> from aws_lambda_powertools.utilities.batch import batch_processor
+        >>> from aws_lambda_powertools.utilities.batch import batch_processor, PartialSQSProcessor
         >>>
         >>> def record_handler(record):
         >>>     return record["body"]
