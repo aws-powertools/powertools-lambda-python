@@ -2,6 +2,7 @@ import pytest
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
+from aws_lambda_powertools.utilities.batch.exceptions import SQSBatchProcessingError
 
 
 @pytest.fixture(scope="function")
@@ -126,8 +127,8 @@ def test_partial_sqs_clean(monkeypatch, mocker, partial_sqs_processor):
     entries_to_clean_mock.return_value = mocker.sentinel.entries_to_clean
 
     client_mock = mocker.patch.object(partial_sqs_processor, "client", autospec=True)
-
-    partial_sqs_processor._clean()
+    with pytest.raises(SQSBatchProcessingError):
+        partial_sqs_processor._clean()
 
     client_mock.delete_message_batch.assert_called_once_with(
         QueueUrl=mocker.sentinel.queue_url, Entries=mocker.sentinel.entries_to_clean

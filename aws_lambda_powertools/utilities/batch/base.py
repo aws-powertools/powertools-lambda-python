@@ -4,8 +4,13 @@
 Batch processing utilities
 """
 
+import logging
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Iterable, List, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Tuple
+
+from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+
+logger = logging.getLogger(__name__)
 
 
 class BasePartialProcessor(ABC):
@@ -16,6 +21,7 @@ class BasePartialProcessor(ABC):
     def __init__(self):
         self.success_messages: List = []
         self.fail_messages: List = []
+        self.exceptions: List = []
 
     @abstractmethod
     def _prepare(self):
@@ -89,5 +95,52 @@ class BasePartialProcessor(ABC):
             "fail", exceptions args, original record
         """
         entry = ("fail", exception.args, record)
+        logger.debug("Record processing exception: ", exception)
+        self.exceptions.append(exception)
         self.fail_messages.append(record)
         return entry
+
+
+@lambda_handler_decorator
+def batch_processor(
+    handler: Callable, event: Dict, context: Dict, record_handler: Callable, processor: BasePartialProcessor = None
+):
+    """
+    Middleware to handle batch event processing
+
+    Parameters
+    ----------
+    handler: Callable
+        Lambda's handler
+    event: Dict
+        Lambda's Event
+    context: Dict
+        Lambda's Context
+    record_handler: Callable
+        Callable to process each record from the batch
+    processor: PartialSQSProcessor
+        Batch Processor to handle partial failure cases
+
+    Examples
+    --------
+    **Processes Lambda's event with PartialSQSProcessor**
+        >>> from aws_lambda_powertools.utilities.batch import batch_processor
+        >>>
+        >>> def record_handler(record):
+        >>>     return record["body"]
+        >>>
+        >>> @batch_processor(record_handler=record_handler, processor=PartialSQSProcessor())
+        >>> def handler(event, context):
+        >>>     return {"StatusCode": 200}
+
+    Limitations
+    -----------
+    * Async batch processors
+
+    """
+    records = event["Records"]
+
+    with processor(records, record_handler):
+        processor.process()
+
+    return handler(event, context)
