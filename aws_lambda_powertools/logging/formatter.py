@@ -37,7 +37,8 @@ class JsonFormatter(logging.Formatter):
 
         self.format_dict.update(self._build_root_keys(**kwargs))
 
-    def _build_root_keys(self, **kwargs):
+    @staticmethod
+    def _build_root_keys(**kwargs):
         return {
             "level": "%(levelname)s",
             "location": "%(funcName)s:%(lineno)d",
