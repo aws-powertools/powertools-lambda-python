@@ -95,7 +95,7 @@ class BasePartialProcessor(ABC):
             "fail", exceptions args, original record
         """
         entry = ("fail", exception.args, record)
-        logger.debug("Record processing exception: %s", exception)
+        logger.debug(f"Record processing exception: {exception}")
         self.exceptions.append(exception)
         self.fail_messages.append(record)
         return entry
