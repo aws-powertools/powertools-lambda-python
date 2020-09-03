@@ -2,9 +2,7 @@
 
 
 class LambdaCognitoIdentity(object):
-    """
-    Information about the Amazon Cognito identity that authorized the request.
-    """
+    """Information about the Amazon Cognito identity that authorized the request."""
 
     _cognito_identity_id: str
     _cognito_identity_pool_id: str
