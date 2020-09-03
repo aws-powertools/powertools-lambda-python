@@ -35,8 +35,9 @@ There are 2 ways to use this utility for processing SQS messages:
 **With a decorator:**
 
 Using the `sqs_batch_processor` decorator with your lambda handler function, you provide a `record_handler` which is responsible for processing individual messages. It should raise an exception if
-it is unable to process the record - this will lead to the message returning to the queue. If the function does not return an exception, the message will be deleted from the queue. When using the decorator, you
-will not have accessed to the processed messages within the lambda handler - all processing should be handled from the `record_handler` function.
+it is unable to process the record. All records in the batch will be passed to this handler for processing, even if exceptions are thrown. After all messages are processed, any successfully processed
+ones will be deleted from the queue. If there were any messages the `record_handler` couldn't process, `SQSBatchProcessingError` will be raised. You will not have accessed to the _processed_ messages
+within the lambda handler - all processing logic should be performed by the `record_handler` function.
 
 ```python:title=app.py
 from aws_lambda_powertools.utilities.batch import sqs_batch_processor
@@ -76,6 +77,77 @@ def lambda_handler(event, context):
         result = processor.process()  # Returns a list of all results from record_handler
 
     return result
+```
+
+## Passing custom boto3 config
+
+If you need to pass custom configuration such as region to the SDK, you can pass your own [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) to
+the `sqs_batch_processor` decorator:
+
+```python:title=app.py
+from aws_lambda_powertools.utilities.batch import sqs_batch_processor
+from botocore.config import Config
+
+config = Config(region_name="us-east-1")  # highlight-line
+
+def record_handler(record):
+    # This will be called for each individual message from a batch
+    # It should raise an exception if the message was not processed successfully
+    return_value = do_something_with(record["body"])
+    return return_value
+
+@sqs_batch_processor(record_handler=record_handler, config=config)  # highlight-line
+def lambda_handler(event, context):
+    return {"statusCode": 200}
+```
+
+Or to the `PartialSQSProcessor` class:
+```python:title=app.py
+from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
+
+from botocore.config import Config
+
+config = Config(region_name="us-east-1")  # highlight-line
+
+def record_handler(record):
+    # This will be called for each individual message from a batch
+    # It should raise an exception if the message was not processed successfully
+    return_value = do_something_with(record["body"])
+    return return_value
+
+
+def lambda_handler(event, context):
+    records = event["Records"]
+
+    processor = PartialSQSProcessor(config=config)  # highlight-line
+
+    with processor(records, record_handler):
+        result = processor.process()
+
+    return result
+```
+
+
+## Suppressing exceptions
+
+If you want to disable the defualt behavior where `SQSBatchProcessingError` is raised if there are any errors, you can pass the `suppress_exception` argument.
+
+<Note type="warning">
+If your Lambda function executes successfully and returns a response, all messages in the batch will be deleted from the queue.
+</Note><br/>
+
+```python:title=app.py
+...
+@sqs_batch_processor(record_handler=record_handler, config=config, suppress_exception=True)  # highlight-line
+def lambda_handler(event, context):
+    return {"statusCode": 200}
+```
+or
+```python:title=app.py
+processor = PartialSQSProcessor(config=config, suppress_exception=True)  # highlight-line
+
+with processor(records, record_handler):
+    result = processor.process()
 ```
 
 ## Create your own partial processor
