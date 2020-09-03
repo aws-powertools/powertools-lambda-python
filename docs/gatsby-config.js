@@ -33,6 +33,7 @@ module.exports = {
                         'utilities/middleware_factory',
                         'utilities/parameters',
                         'utilities/batch',
+                        'utilities/typing',
                     ],
                 },
                 navConfig: {
