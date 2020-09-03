@@ -16,6 +16,7 @@ class BasePartialProcessor(ABC):
     def __init__(self):
         self.success_messages: List = []
         self.fail_messages: List = []
+        self.exceptions: List = []
 
     @abstractmethod
     def _prepare(self):
@@ -89,5 +90,6 @@ class BasePartialProcessor(ABC):
             "fail", exceptions args, original record
         """
         entry = ("fail", exception.args, record)
+        self.exceptions.append(exception)
         self.fail_messages.append(record)
         return entry

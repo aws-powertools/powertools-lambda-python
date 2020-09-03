@@ -60,10 +60,15 @@ def batch_processor(
 
 @lambda_handler_decorator
 def sqs_batch_processor(
-    handler: Callable, event: Dict, context: Dict, record_handler: Callable, config: Optional[Config] = None
+    handler: Callable,
+    event: Dict,
+    context: Dict,
+    record_handler: Callable,
+    config: Optional[Config] = None,
+    suppress_exception: bool = False,
 ):
     """
-    Middleware to handle batch event processing
+    Middleware to handle SQS batch event processing
 
     Parameters
     ----------
@@ -77,6 +82,8 @@ def sqs_batch_processor(
         Callable to process each record from the batch
     config: Config
             botocore config object
+    suppress_exception: bool, optional
+        Supress exception raised if any messages fail processing, by default False
 
     Examples
     --------
@@ -96,7 +103,7 @@ def sqs_batch_processor(
 
     """
     config = config or Config()
-    processor = PartialSQSProcessor(config=config)
+    processor = PartialSQSProcessor(config=config, suppress_exception=suppress_exception)
 
     records = event["Records"]
 

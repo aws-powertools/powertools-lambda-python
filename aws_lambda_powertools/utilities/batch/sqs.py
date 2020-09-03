@@ -9,20 +9,24 @@ import boto3
 from botocore.config import Config
 
 from .base import BasePartialProcessor
+from .exceptions import SQSBatchProcessingError
 
 
 class PartialSQSProcessor(BasePartialProcessor):
     """
     Amazon SQS batch processor to delete successes from the Queue.
 
-    Only the **special** case of partial failure is handled, thus a batch in
-    which all records failed is **not** going to be removed from the queue, and
-    the same is valid for a full success.
+    The whole batch will be processed, even if failures occur. After all records are processed,
+    SQSBatchProcessingError will be raised if there were any failures, causing messages to
+    be returned to the SQS queue. This behaviour can be disabled by passing suppress_exception.
 
     Parameters
     ----------
     config: Config
         botocore config object
+    suppress_exception: bool, optional
+        Supress exception raised if any messages fail processing, by default False
+
 
     Example
     -------
@@ -46,12 +50,13 @@ class PartialSQSProcessor(BasePartialProcessor):
         >>>     return result
     """
 
-    def __init__(self, config: Optional[Config] = None):
+    def __init__(self, config: Optional[Config] = None, suppress_exception: bool = False):
         """
         Initializes sqs client.
         """
         config = config or Config()
         self.client = boto3.client("sqs", config=config)
+        self.suppress_exception = suppress_exception
 
         super().__init__()
 
@@ -97,10 +102,17 @@ class PartialSQSProcessor(BasePartialProcessor):
         """
         Delete messages from Queue in case of partial failure.
         """
-        if not (self.fail_messages and self.success_messages):
+        # If all messages were successful, fall back to the default SQS -
+        # Lambda behaviour which deletes messages if Lambda responds successfully
+        if not self.fail_messages:
             return
 
         queue_url = self._get_queue_url()
         entries_to_remove = self._get_entries_to_clean()
 
-        return self.client.delete_message_batch(QueueUrl=queue_url, Entries=entries_to_remove)
+        delete_message_response = self.client.delete_message_batch(QueueUrl=queue_url, Entries=entries_to_remove)
+
+        if self.fail_messages and not self.suppress_exception:
+            raise SQSBatchProcessingError(list(self.exceptions))
+
+        return delete_message_response
