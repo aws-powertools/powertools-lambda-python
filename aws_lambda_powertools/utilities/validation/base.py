@@ -6,7 +6,7 @@ import jmespath
 from jmespath.exceptions import LexerError
 
 from .exceptions import InvalidEnvelopeExpressionError, InvalidSchemaError, SchemaValidationError
-from .jmespath_functions import PowertoolsJson
+from .jmespath_functions import PowertoolsFunctions
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ def validate_data_against_schema(data: Dict, schema: Dict):
 
 def unwrap_event_from_envelope(data: Dict, envelope: str, jmespath_options: Dict):
     if not jmespath_options:
-        jmespath_options = {"custom_functions": PowertoolsJson()}
+        jmespath_options = {"custom_functions": PowertoolsFunctions()}
 
     try:
         logger.debug(f"Envelope detected: {envelope}. JMESPath options: {jmespath_options}")
