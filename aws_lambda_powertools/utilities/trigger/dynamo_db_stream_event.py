@@ -1,12 +1,5 @@
-from __future__ import annotations
-
 from enum import Enum
 from typing import Dict, Iterator, List, Optional
-
-
-def _attribute_value(values: dict, key: str) -> Optional[Dict[str, AttributeValue]]:
-    item: dict = values.get(key)
-    return None if item is None else {k: AttributeValue(v) for k, v in item.items()}
 
 
 class AttributeValue(dict):
@@ -32,13 +25,13 @@ class AttributeValue(dict):
         return None if item is None else bool(item)
 
     @property
-    def list_value(self) -> Optional[List[AttributeValue]]:
+    def list_value(self) -> Optional[List["AttributeValue"]]:
         """An attribute of type Array of AttributeValue objects"""
         item = self.get("L")
         return None if item is None else [AttributeValue(i) for i in item]
 
     @property
-    def map_value(self) -> Optional[Dict[str, AttributeValue]]:
+    def map_value(self) -> Optional[Dict[str, "AttributeValue"]]:
         """An attribute of type String to AttributeValue object map"""
         return _attribute_value(self, "M")
 
@@ -67,6 +60,11 @@ class AttributeValue(dict):
     def ss_value(self) -> Optional[List[str]]:
         """An attribute of type Array of strings"""
         return self.get("SS")
+
+
+def _attribute_value(values: dict, key: str) -> Optional[Dict[str, AttributeValue]]:
+    item: dict = values.get(key)
+    return None if item is None else {k: AttributeValue(v) for k, v in item.items()}
 
 
 class StreamViewType(Enum):
