@@ -76,7 +76,8 @@ class SESReceiptStatus(dict):
 
 class SESReceiptAction(dict):
     @property
-    def type(self) -> str:  # noqa: A003
+    def action_type(self) -> str:
+        """Get the `type` property"""
         return self["type"]
 
     @property

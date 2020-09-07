@@ -6,19 +6,23 @@ from typing import Dict, List, Optional
 
 class CloudWatchLogsLogEvent(dict):
     @property
-    def id(self) -> str:  # noqa: A003
+    def log_event_id(self) -> str:
+        """Get the `id` property"""
         return self["id"]
 
     @property
     def timestamp(self) -> int:
+        """Get the `timestamp` property"""
         return self["timestamp"]
 
     @property
     def message(self) -> str:
+        """Get the `message` property"""
         return self["message"]
 
     @property
     def extracted_fields(self) -> Optional[Dict[str, str]]:
+        """Get the `extractedFields` property"""
         return self.get("extractedFields")
 
 

@@ -3,7 +3,8 @@ from typing import Dict, Iterator
 
 class SNSMessageAttribute(dict):
     @property
-    def type(self) -> str:  # noqa: A003
+    def attribute_type(self) -> str:
+        """Get the `type` property"""
         return self["Type"]
 
     @property
@@ -41,7 +42,8 @@ class SNSMessage(dict):
         return {k: SNSMessageAttribute(v) for (k, v) in self["MessageAttributes"].items()}
 
     @property
-    def type(self) -> str:  # noqa: A003
+    def message_type(self) -> str:
+        """Get the `type` property"""
         return self["Type"]
 
     @property

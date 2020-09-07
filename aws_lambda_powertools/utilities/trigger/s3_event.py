@@ -63,7 +63,8 @@ class S3Message(dict):
         return S3Bucket(self["bucket"])
 
     @property
-    def object(self) -> S3Object:  # noqa: A003
+    def s3_object(self) -> S3Object:
+        """Get the `object` property as an S3Object"""
         return S3Object(self["object"])
 
 
