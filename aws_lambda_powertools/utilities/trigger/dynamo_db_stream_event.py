@@ -10,55 +10,98 @@ class AttributeValue(dict):
 
     @property
     def b_value(self) -> Optional[str]:
-        """An attribute of type Base64-encoded binary data object"""
+        """An attribute of type Base64-encoded binary data object
+
+        Example:
+            >>> {"B": "dGhpcyB0ZXh0IGlzIGJhc2U2NC1lbmNvZGVk"}
+        """
         return self.get("B")
 
     @property
     def bs_value(self) -> Optional[List[str]]:
-        """An attribute of type Array of Base64-encoded binary data objects"""
+        """An attribute of type Array of Base64-encoded binary data objects
+
+        Example:
+            >>> {"BS": ["U3Vubnk=", "UmFpbnk=", "U25vd3k="]}
+        """
         return self.get("BS")
 
     @property
     def bool_value(self) -> Optional[bool]:
-        """An attribute of type Boolean"""
+        """An attribute of type Boolean
+
+        Example:
+            >>> {"BOOL": True}
+        """
         item = self.get("bool")
         return None if item is None else bool(item)
 
     @property
     def list_value(self) -> Optional[List["AttributeValue"]]:
-        """An attribute of type Array of AttributeValue objects"""
+        """An attribute of type Array of AttributeValue objects
+
+        Example:
+            >>> {"L": [ {"S": "Cookies"} , {"S": "Coffee"}, {"N": "3.14159"}]}
+        """
         item = self.get("L")
         return None if item is None else [AttributeValue(i) for i in item]
 
     @property
     def map_value(self) -> Optional[Dict[str, "AttributeValue"]]:
-        """An attribute of type String to AttributeValue object map"""
+        """An attribute of type String to AttributeValue object map
+
+        Example:
+            >>> {"M": {"Name": {"S": "Joe"}, "Age": {"N": "35"}}}
+        """
         return _attribute_value(self, "M")
 
     @property
     def n_value(self) -> Optional[str]:
-        """An attribute of type Number"""
+        """An attribute of type Number
+
+        Numbers are sent across the network to DynamoDB as strings, to maximize compatibility across languages
+        and libraries. However, DynamoDB treats them as number type attributes for mathematical operations.
+
+        Example:
+            >>> {"N": "123.45"}
+        """
         return self.get("N")
 
     @property
     def ns_value(self) -> Optional[List[str]]:
-        """An attribute of type Number Set"""
+        """An attribute of type Number Set
+
+        Example:
+            >>> {"NS": ["42.2", "-19", "7.5", "3.14"]}
+        """
         return self.get("NS")
 
     @property
     def null_value(self) -> Optional[bool]:
-        """An attribute of type Null."""
+        """An attribute of type Null.
+
+        Example:
+            >>> {"NULL": True}
+        """
         item = self.get("NULL")
         return None if item is None else bool(item)
 
     @property
     def s_value(self) -> Optional[str]:
-        """An attribute of type String"""
+        """An attribute of type String
+
+        Example:
+            >>> {"S": "Hello"}
+        """
         return self.get("S")
 
     @property
     def ss_value(self) -> Optional[List[str]]:
-        """An attribute of type Array of strings"""
+        """An attribute of type Array of strings
+
+        Example:
+            >>> {"SS": ["Giraffe", "Hippo" ,"Zebra"]}
+        """
         return self.get("SS")
 
 

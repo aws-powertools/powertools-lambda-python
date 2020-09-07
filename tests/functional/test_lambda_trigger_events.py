@@ -19,7 +19,7 @@ def load_event(file_name: str) -> dict:
 def test_cloud_watch_trigger_event():
     event = CloudWatchLogsEvent(load_event("cloudWatchLogEvent.json"))
 
-    decoded_data = event.cloud_watch_logs_decoded_data()
+    decoded_data = event.decode_cloud_watch_logs_data()
     log_events = decoded_data.log_events
     log_event = log_events[0]
 
