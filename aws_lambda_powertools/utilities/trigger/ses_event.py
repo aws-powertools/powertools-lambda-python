@@ -17,8 +17,10 @@ class SESMailCommonHeaders(dict):
         return self["returnPath"]
 
     @property
-    def form(self) -> List[str]:
-        return self["form"]
+    def from_header(self) -> List[str]:
+        """Get the `from` common header as a list"""
+        # Note: this conflicts with existing python builtins
+        return self["from"]
 
     @property
     def date(self) -> List[str]:
@@ -78,6 +80,7 @@ class SESReceiptAction(dict):
     @property
     def action_type(self) -> str:
         """Get the `type` property"""
+        # Note: this conflicts with existing python builtins
         return self["type"]
 
     @property
@@ -99,7 +102,7 @@ class SESReceipt(dict):
         return int(self["processingTimeMillis"])
 
     @property
-    def recipients(self) -> Iterator[str]:
+    def recipients(self) -> List[str]:
         return self["recipients"]
 
     @property

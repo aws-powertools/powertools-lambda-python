@@ -3,6 +3,7 @@ import os
 
 from aws_lambda_powertools.utilities.trigger import CloudWatchLogsEvent, S3Event, SESEvent, SNSEvent, SQSEvent
 from aws_lambda_powertools.utilities.trigger.dynamo_db_stream_event import (
+    AttributeValue,
     DynamoDBRecordEventName,
     DynamoDBStreamEvent,
     StreamViewType,
@@ -71,6 +72,24 @@ def test_dynamo_db_stream_trigger_event():
     assert record.user_identity is None
 
 
+def test_dynamo_attribute_value_list_value():
+    example_attribute_value = {"L": [{"S": "Cookies"}, {"S": "Coffee"}, {"N": "3.14159"}]}
+    attribute_value = AttributeValue(example_attribute_value)
+    list_value = attribute_value.list_value
+    assert list_value is not None
+    item = list_value[0]
+    assert item.s_value == "Cookies"
+
+
+def test_dynamo_attribute_value_map_value():
+    example_attribute_value = {"M": {"Name": {"S": "Joe"}, "Age": {"N": "35"}}}
+    attribute_value = AttributeValue(example_attribute_value)
+    map_value = attribute_value.map_value
+    assert map_value is not None
+    item = map_value["Name"]
+    assert item.s_value == "Joe"
+
+
 def test_s3_trigger_event():
     event = S3Event(load_event("s3Event.json"))
     records = list(event.records)
@@ -101,13 +120,64 @@ def test_s3_trigger_event():
     assert record.glacier_event_data is None
 
 
+def test_s3_glacier_event():
+    example_event = {
+        "Records": [
+            {
+                "glacierEventData": {
+                    "restoreEventData": {
+                        "lifecycleRestorationExpiryTime": "1970-01-01T00:01:00.000Z",
+                        "lifecycleRestoreStorageClass": "standard",
+                    }
+                }
+            }
+        ]
+    }
+    event = S3Event(example_event)
+    record = next(event.records)
+    glacier_event_data = record.glacier_event_data
+    assert glacier_event_data is not None
+    assert glacier_event_data.restore_event_data.lifecycle_restoration_expiry_time == "1970-01-01T00:01:00.000Z"
+    assert glacier_event_data.restore_event_data.lifecycle_restore_storage_class == "standard"
+
+
 def test_ses_trigger_event():
     event = SESEvent(load_event("sesEvent.json"))
 
+    expected_address = "johndoe@example.com"
     records = list(event.records)
     record = records[0]
-    print(record)
     assert record.event_source == "aws:ses"
+    assert record.event_version == "1.0"
+    mail = record.ses.mail
+    assert mail.timestamp == "1970-01-01T00:00:00.000Z"
+    assert mail.source == "janedoe@example.com"
+    assert mail.message_id == "o3vrnil0e2ic28tr"
+    assert mail.destination == [expected_address]
+    assert mail.headers_truncated is False
+    headers = list(mail.headers)
+    assert len(headers) == 10
+    assert headers[0].name == "Return-Path"
+    assert headers[0].value == "<janedoe@example.com>"
+    common_headers = mail.common_headers
+    assert common_headers.return_path == "janedoe@example.com"
+    assert common_headers.from_header == common_headers["from"]
+    assert common_headers.date == "Wed, 7 Oct 2015 12:34:56 -0700"
+    assert common_headers.to == [expected_address]
+    assert common_headers.message_id == "<0123456789example.com>"
+    assert common_headers.subject == "Test Subject"
+    receipt = record.ses.receipt
+    assert receipt.timestamp == "1970-01-01T00:00:00.000Z"
+    assert receipt.processing_time_millis == 574
+    assert receipt.recipients == [expected_address]
+    assert receipt.spam_verdict.status == "PASS"
+    assert receipt.virus_verdict.status == "PASS"
+    assert receipt.spf_verdict.status == "PASS"
+    assert receipt.dmarc_verdict.status == "PASS"
+    action = receipt.action
+    assert action.action_type == action["type"]
+    assert action.function_arn == action["functionArn"]
+    assert action.invocation_type == action["invocationType"]
 
 
 def test_sns_trigger_event():
