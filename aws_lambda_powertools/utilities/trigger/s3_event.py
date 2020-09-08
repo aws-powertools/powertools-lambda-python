@@ -10,70 +10,71 @@ class S3Identity(dict):
 class S3RequestParameters(dict):
     @property
     def source_ip_address(self) -> str:
-        return self["sourceIPAddress"]
+        return self["requestParameters"]["sourceIPAddress"]
 
 
 class S3Bucket(dict):
     @property
     def name(self) -> str:
-        return self["name"]
+        return self["s3"]["bucket"]["name"]
 
     @property
     def owner_identity(self) -> S3Identity:
-        return S3Identity(self["ownerIdentity"])
+        return S3Identity(self["s3"]["bucket"]["ownerIdentity"])
 
     @property
     def arn(self) -> str:
-        return self["arn"]
+        return self["s3"]["bucket"]["arn"]
 
 
 class S3Object(dict):
     @property
     def key(self) -> str:
         """Object key"""
-        return self["key"]
+        return self["s3"]["object"]["key"]
 
     @property
     def size(self) -> int:
         """Object byte size"""
-        return int(self["size"])
+        return int(self["s3"]["object"]["size"])
 
     @property
     def etag(self) -> str:
         """object eTag"""
-        return self["eTag"]
+        return self["s3"]["object"]["eTag"]
 
     @property
     def version_id(self) -> Optional[str]:
         """Object version if bucket is versioning-enabled, otherwise null"""
-        return self.get("versionId")
+        return self["s3"]["object"].get("versionId")
 
     @property
     def sequencer(self) -> str:
         """A string representation of a hexadecimal value used to determine event sequence,
         only used with PUTs and DELETEs
         """
-        return self["sequencer"]
+        return self["s3"]["object"]["sequencer"]
 
 
 class S3Message(dict):
     @property
     def s3_schema_version(self) -> str:
-        return self["s3SchemaVersion"]
+        return self["s3"]["s3SchemaVersion"]
 
     @property
     def configuration_id(self) -> str:
         """ID found in the bucket notification configuration"""
-        return self["configurationId"]
+        return self["s3"]["configurationId"]
 
     @property
     def bucket(self) -> S3Bucket:
-        return S3Bucket(self["bucket"])
+        return S3Bucket(self)
 
     @property
-    def s3_object(self) -> S3Object:
+    def get_object(self) -> S3Object:
         """Get the `object` property as an S3Object"""
-        return S3Object(self["object"])
+        # Note: this name conflicts with existing python builtins
+        return S3Object(self)
 
 
 class S3EventRecordGlacierRestoreEventData(dict):
@@ -125,7 +126,7 @@ class S3EventRecord(dict):
 
     @property
     def request_parameters(self) -> S3RequestParameters:
-        return S3RequestParameters(self["requestParameters"])
+        return S3RequestParameters(self)
 
     @property
     def response_elements(self) -> Dict[str, str]:
@@ -139,7 +140,7 @@ class S3EventRecord(dict):
 
     @property
     def s3(self) -> S3Message:
-        return S3Message(self["s3"])
+        return S3Message(self)
 
     @property
     def glacier_event_data(self) -> Optional[S3EventRecordGlacierEventData]:

@@ -6,8 +6,9 @@ from typing import Dict, List, Optional
 
 class CloudWatchLogsLogEvent(dict):
     @property
-    def log_event_id(self) -> str:
+    def get_id(self) -> str:
         """The ID property is a unique identifier for every log event."""
+        # Note: this name conflicts with existing python builtins
         return self["id"]
 
     @property

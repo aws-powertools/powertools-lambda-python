@@ -18,9 +18,9 @@ class SESMailCommonHeaders(dict):
         return self["returnPath"]
 
     @property
-    def from_header(self) -> List[str]:
+    def get_from(self) -> List[str]:
         """The values in the From header of the email."""
-        # Note: this conflicts with existing python builtins
+        # Note: this name conflicts with existing python builtins
         return self["from"]
 
     @property
@@ -97,12 +97,12 @@ class SESReceiptStatus(dict):
 
 class SESReceiptAction(dict):
     @property
-    def action_type(self) -> str:
+    def get_type(self) -> str:
         """String that indicates the type of action that was executed.
 
         Possible values are S3, SNS, Bounce, Lambda, Stop, and WorkMail
         """
-        # Note: this conflicts with existing python builtins
+        # Note: this name conflicts with existing python builtins
         return self["type"]
 
     @property

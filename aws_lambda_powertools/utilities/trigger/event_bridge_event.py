@@ -9,9 +9,10 @@ class EventBridgeEvent(dict):
     """
 
     @property
-    def event_id(self) -> str:
+    def get_id(self) -> str:
         """A unique value is generated for every event. This can be helpful in tracing events as
         they move through rules to targets, and are processed."""
+        # Note: this name conflicts with existing python builtins
         return self["id"]
 
     @property

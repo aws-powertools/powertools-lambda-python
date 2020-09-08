@@ -38,7 +38,7 @@ def test_cloud_watch_trigger_event():
     assert decoded_data.subscription_filters == ["testFilter"]
     assert decoded_data.message_type == "DATA_MESSAGE"
 
-    assert log_event.log_event_id == "eventId1"
+    assert log_event.get_id == "eventId1"
     assert log_event.timestamp == 1440442987000
     assert log_event.message == "[ERROR] First test message"
     assert log_event.extracted_fields is None
@@ -136,7 +136,7 @@ def test_dynamo_attribute_value_map_value():
 def test_event_bridge_event():
     event = EventBridgeEvent(load_event("eventBridgeEvent.json"))
 
-    assert event.event_id == event["id"]
+    assert event.get_id == event["id"]
     assert event.version == event["version"]
     assert event.account == event["account"]
     assert event.time == event["time"]
@@ -169,11 +169,11 @@ def test_s3_trigger_event():
     assert bucket.name == "lambda-artifacts-deafc19498e3f2df"
     assert bucket.owner_identity.principal_id == "A3I5XTEXAMAI3E"
     assert bucket.arn == "arn:aws:s3:::lambda-artifacts-deafc19498e3f2df"
-    assert s3.s3_object.key == "b21b84d653bb07b05b1e6b33684dc11b"
-    assert s3.s3_object.size == 1305107
-    assert s3.s3_object.etag == "b21b84d653bb07b05b1e6b33684dc11b"
-    assert s3.s3_object.version_id is None
-    assert s3.s3_object.sequencer == "0C0F6F405D6ED209E1"
+    assert s3.get_object.key == "b21b84d653bb07b05b1e6b33684dc11b"
+    assert s3.get_object.size == 1305107
+    assert s3.get_object.etag == "b21b84d653bb07b05b1e6b33684dc11b"
+    assert s3.get_object.version_id is None
+    assert s3.get_object.sequencer == "0C0F6F405D6ED209E1"
     assert record.glacier_event_data is None
 
 
@@ -218,7 +218,7 @@ def test_ses_trigger_event():
     assert headers[0].value == "<janedoe@example.com>"
     common_headers = mail.common_headers
     assert common_headers.return_path == "janedoe@example.com"
-    assert common_headers.from_header == common_headers["from"]
+    assert common_headers.get_from == common_headers["from"]
     assert common_headers.date == "Wed, 7 Oct 2015 12:34:56 -0700"
     assert common_headers.to == [expected_address]
     assert common_headers.message_id == "<0123456789example.com>"
@@ -232,7 +232,7 @@ def test_ses_trigger_event():
     assert receipt.spf_verdict.status == "PASS"
     assert receipt.dmarc_verdict.status == "PASS"
     action = receipt.action
-    assert action.action_type == action["type"]
+    assert action.get_type == action["type"]
     assert action.function_arn == action["functionArn"]
     assert action.invocation_type == action["invocationType"]
 
@@ -254,9 +254,9 @@ def test_sns_trigger_event():
     assert sns.message == "Hello from SNS!"
     message_attributes = sns.message_attributes
     test_message_attribute = message_attributes["Test"]
-    assert test_message_attribute.attribute_type == "String"
+    assert test_message_attribute.get_type == "String"
     assert test_message_attribute.value == "TestString"
-    assert sns.message_type == "Notification"
+    assert sns.get_type == "Notification"
     assert sns.unsubscribe_url == "https://sns.us-east-2.amazonaws.com/?Action=Unsubscri ..."
     assert sns.topic_arn == "arn:aws:sns:us-east-2:123456789012:sns-lambda"
     assert sns.subject == "TestInvoke"
