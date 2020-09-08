@@ -3,6 +3,7 @@ import os
 
 from aws_lambda_powertools.utilities.trigger import (
     CloudWatchLogsEvent,
+    EventBridgeEvent,
     PostConfirmationTriggerEvent,
     PreSignUpTriggerEvent,
     S3Event,
@@ -130,6 +131,20 @@ def test_dynamo_attribute_value_map_value():
     assert map_value is not None
     item = map_value["Name"]
     assert item.s_value == "Joe"
+
+
+def test_event_bridge_event():
+    event = EventBridgeEvent(load_event("eventBridgeEvent.json"))
+
+    assert event.event_id == event["id"]
+    assert event.version == event["version"]
+    assert event.account == event["account"]
+    assert event.time == event["time"]
+    assert event.region == event["region"]
+    assert event.resources == event["resources"]
+    assert event.source == event["source"]
+    assert event.detail_type == event["detail-type"]
+    assert event.detail == event["detail"]
 
 
 def test_s3_trigger_event():
