@@ -167,11 +167,11 @@ class SESReceipt(dict):
 class SESMessage(dict):
     @property
     def mail(self) -> SESMail:
-        return SESMail(self["mail"])
+        return SESMail(self["ses"]["mail"])
 
     @property
     def receipt(self) -> SESReceipt:
-        return SESReceipt(self["receipt"])
+        return SESReceipt(self["ses"]["receipt"])
 
 
 class SESEventRecord(dict):
@@ -186,7 +186,7 @@ class SESEventRecord(dict):
 
     @property
     def ses(self) -> SESMessage:
-        return SESMessage(self["ses"])
+        return SESMessage(self)
 
 
 class SESEvent(dict):

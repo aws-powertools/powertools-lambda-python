@@ -16,49 +16,49 @@ class SNSMessageAttribute(dict):
 class SNSMessage(dict):
     @property
     def signature_version(self) -> str:
-        return self["SignatureVersion"]
+        return self["Sns"]["SignatureVersion"]
 
     @property
     def timestamp(self) -> str:
-        return self["Timestamp"]
+        return self["Sns"]["Timestamp"]
 
     @property
     def signature(self) -> str:
-        return self["Signature"]
+        return self["Sns"]["Signature"]
 
     @property
     def signing_cert_url(self) -> str:
-        return self["SigningCertUrl"]
+        return self["Sns"]["SigningCertUrl"]
 
     @property
     def message_id(self) -> str:
-        return self["MessageId"]
+        return self["Sns"]["MessageId"]
 
     @property
     def message(self) -> str:
-        return self["Message"]
+        return self["Sns"]["Message"]
 
     @property
     def message_attributes(self) -> Dict[str, SNSMessageAttribute]:
-        return {k: SNSMessageAttribute(v) for (k, v) in self["MessageAttributes"].items()}
+        return {k: SNSMessageAttribute(v) for (k, v) in self["Sns"]["MessageAttributes"].items()}
 
     @property
     def get_type(self) -> str:
         """Get the `type` property"""
         # Note: this name conflicts with existing python builtins
-        return self["Type"]
+        return self["Sns"]["Type"]
 
     @property
     def unsubscribe_url(self) -> str:
-        return self["UnsubscribeUrl"]
+        return self["Sns"]["UnsubscribeUrl"]
 
     @property
     def topic_arn(self) -> str:
-        return self["TopicArn"]
+        return self["Sns"]["TopicArn"]
 
     @property
     def subject(self) -> str:
-        return self["Subject"]
+        return self["Sns"]["Subject"]
 
 
 class SNSEventRecord(dict):
@@ -76,7 +76,7 @@ class SNSEventRecord(dict):
 
     @property
     def sns(self) -> SNSMessage:
-        return SNSMessage(self["Sns"])
+        return SNSMessage(self)
 
 
 class SNSEvent(dict):

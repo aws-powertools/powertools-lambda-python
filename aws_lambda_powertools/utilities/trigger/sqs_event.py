@@ -4,27 +4,27 @@ from typing import Dict, Iterator, Optional
 class SQSRecordAttributes(dict):
     @property
     def aws_trace_header(self) -> Optional[str]:
-        return self.get("AWSTraceHeader")
+        return self["attributes"].get("AWSTraceHeader")
 
     @property
     def approximate_receive_count(self) -> str:
-        return self["ApproximateReceiveCount"]
+        return self["attributes"]["ApproximateReceiveCount"]
 
     @property
     def sent_timestamp(self) -> str:
-        return self["SentTimestamp"]
+        return self["attributes"]["SentTimestamp"]
 
     @property
     def sender_id(self) -> str:
-        return self["SenderId"]
+        return self["attributes"]["SenderId"]
 
     @property
     def approximate_first_receive_timestamp(self) -> str:
-        return self["ApproximateFirstReceiveTimestamp"]
+        return self["attributes"]["ApproximateFirstReceiveTimestamp"]
 
     @property
     def sequence_number(self) -> Optional[str]:
-        return self.get("SequenceNumber")
+        return self["attributes"].get("SequenceNumber")
 
     @property
     def message_group_id(self) -> Optional[str]:
@@ -32,7 +32,7 @@ class SQSRecordAttributes(dict):
 
     @property
     def message_deduplication_id(self) -> Optional[str]:
-        return self.get("MessageDeduplicationId")
+        return self["attributes"].get("MessageDeduplicationId")
 
 
 class SQSMessageAttribute(dict):
@@ -70,7 +70,7 @@ class SQSRecord(dict):
 
     @property
     def attributes(self) -> SQSRecordAttributes:
-        return SQSRecordAttributes(self["attributes"])
+        return SQSRecordAttributes(self)
 
     @property
     def message_attributes(self) -> SQSMessageAttributes:

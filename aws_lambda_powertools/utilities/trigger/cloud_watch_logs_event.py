@@ -70,7 +70,7 @@ class CloudWatchLogsEventData(dict):
     @property
     def data(self) -> str:
         """The value of the `data` field is a Base64 encoded ZIP archive."""
-        return self["data"]
+        return self["awslogs"]["data"]
 
 
 class CloudWatchLogsEvent(dict):
@@ -81,7 +81,7 @@ class CloudWatchLogsEvent(dict):
 
     @property
     def aws_logs(self) -> CloudWatchLogsEventData:
-        return CloudWatchLogsEventData(self["awslogs"])
+        return CloudWatchLogsEventData(self)
 
     def decode_cloud_watch_logs_data(self) -> CloudWatchLogsDecodedData:
         """Gzip and parse json data"""
