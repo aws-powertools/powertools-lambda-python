@@ -1,7 +1,15 @@
 import json
 import os
 
-from aws_lambda_powertools.utilities.trigger import CloudWatchLogsEvent, S3Event, SESEvent, SNSEvent, SQSEvent
+from aws_lambda_powertools.utilities.trigger import (
+    CloudWatchLogsEvent,
+    PostConfirmationTriggerEvent,
+    PreSignUpTriggerEvent,
+    S3Event,
+    SESEvent,
+    SNSEvent,
+    SQSEvent,
+)
 from aws_lambda_powertools.utilities.trigger.dynamo_db_stream_event import (
     AttributeValue,
     DynamoDBRecordEventName,
@@ -33,6 +41,40 @@ def test_cloud_watch_trigger_event():
     assert log_event.timestamp == 1440442987000
     assert log_event.message == "[ERROR] First test message"
     assert log_event.extracted_fields is None
+
+
+def test_cognito_pre_signup_trigger_event():
+    event = PreSignUpTriggerEvent(load_event("cognitoPreSignUpTriggerEvent.json"))
+
+    assert event.version == "string"
+    assert event.trigger_source == "PreSignUp_SignUp"
+    assert event.region == "us-east-1"
+    assert event.user_pool_id == "string"
+    assert event.user_name == "userName"
+    caller_context = event.caller_context
+    assert caller_context.aws_sdk_version == "awsSdkVersion"
+    assert caller_context.client_id == "clientId"
+
+    user_attributes = event.request.user_attributes
+    assert user_attributes["email"] == "user@example.com"
+
+    assert event.request.validation_data is None
+    assert event.request.client_metadata is None
+
+    event.response.auto_confirm_user = True
+    assert event.response.auto_confirm_user is True
+    event.response.auto_verify_phone = True
+    assert event.response.auto_verify_phone is True
+    event.response.auto_verify_email = True
+    assert event.response.auto_verify_email is True
+
+
+def test_cognito_post_confirmation_trigger_event():
+    event = PostConfirmationTriggerEvent(load_event("cognitoPostConfirmationTriggerEvent.json"))
+
+    user_attributes = event.request.user_attributes
+    assert user_attributes["email"] == "user@example.com"
+    assert event.request.client_metadata is None
 
 
 def test_dynamo_db_stream_trigger_event():
