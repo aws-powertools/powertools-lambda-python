@@ -1,5 +1,5 @@
 from .cloud_watch_logs_event import CloudWatchLogsEvent
-from .cognito_user_pool_event import PostConfirmationTriggerEvent, PreSignUpTriggerEvent
+from .cognito_user_pool_event import PostConfirmationTriggerEvent, PreSignUpTriggerEvent, UserMigrationTriggerEvent
 from .dynamo_db_stream_event import DynamoDBStreamEvent
 from .event_bridge_event import EventBridgeEvent
 from .s3_event import S3Event
@@ -11,6 +11,7 @@ __all__ = [
     "CloudWatchLogsEvent",
     "PreSignUpTriggerEvent",
     "PostConfirmationTriggerEvent",
+    "UserMigrationTriggerEvent",
     "DynamoDBStreamEvent",
     "EventBridgeEvent",
     "S3Event",

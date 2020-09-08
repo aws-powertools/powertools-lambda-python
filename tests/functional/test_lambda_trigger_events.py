@@ -1,5 +1,6 @@
 import json
 import os
+from secrets import compare_digest
 
 from aws_lambda_powertools.utilities.trigger import (
     CloudWatchLogsEvent,
@@ -10,6 +11,7 @@ from aws_lambda_powertools.utilities.trigger import (
     SESEvent,
     SNSEvent,
     SQSEvent,
+    UserMigrationTriggerEvent,
 )
 from aws_lambda_powertools.utilities.trigger.dynamo_db_stream_event import (
     AttributeValue,
@@ -76,6 +78,28 @@ def test_cognito_post_confirmation_trigger_event():
     user_attributes = event.request.user_attributes
     assert user_attributes["email"] == "user@example.com"
     assert event.request.client_metadata is None
+
+
+def test_cognito_user_migration_trigger_event():
+    event = UserMigrationTriggerEvent(load_event("cognitoUserMigrationTriggerEvent.json"))
+
+    assert compare_digest(event.request.password, event["request"]["password"])
+    assert event.request.validation_data is None
+    assert event.request.client_metadata is None
+
+    event.response.user_attributes = {"username": "username"}
+    assert event.response.user_attributes == event["response"]["userAttributes"]
+    assert event.response.user_attributes == {"username": "username"}
+    assert event.response.final_user_status is None
+    assert event.response.message_action is None
+    assert event.response.force_alias_creation is None
+
+    event.response.final_user_status = "CONFIRMED"
+    assert event.response.final_user_status == "CONFIRMED"
+    event.response.message_action = "SUPPRESS"
+    assert event.response.message_action == "SUPPRESS"
+    event.response.force_alias_creation = True
+    assert event.response.force_alias_creation is True
 
 
 def test_dynamo_db_stream_trigger_event():
