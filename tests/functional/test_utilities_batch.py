@@ -1,11 +1,18 @@
-from typing import Callable
-from unittest.mock import patch
+import json
+from datetime import datetime
+from typing import Callable, Dict, Union
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 from botocore.config import Config
 from botocore.stub import Stubber
 
-from aws_lambda_powertools.utilities.batch import PartialSQSProcessor, batch_processor, sqs_batch_processor
+from aws_lambda_powertools.utilities.batch import (
+    PartialSQSProcessor,
+    SNSProcessor,
+    batch_processor,
+    sqs_batch_processor,
+)
 from aws_lambda_powertools.utilities.batch.exceptions import SQSBatchProcessingError
 
 
@@ -22,6 +29,31 @@ def sqs_event_factory() -> Callable:
             "eventSource": "aws:sqs",
             "eventSourceARN": "arn:aws:sqs:us-east-2:123456789012:my-queue",
             "awsRegion": "us-east-1",
+        }
+
+    return factory
+
+
+@pytest.fixture(scope="module")
+def sns_event_factory() -> Callable:
+    def factory(message: Union[str, Dict]):
+        return {
+            "EventSource": "aws:sns",
+            "EventVersion": "1.0",
+            "EventSubscriptionArn": "arn:aws:sns:us-east-1:XXXXXXXXXX:Topic:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+            "Sns": {
+                "Type": "Notification",
+                "MessageId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+                "TopicArn": "arn:aws:sns:us-east-1:XXXXXXXXXX:Topic-XXXXXXXXXXXXX",
+                "Subject": "Amazon S3 Notification",
+                "Message": message if isinstance(message, str) else json.dumps(message),
+                "Timestamp": str(datetime.utcnow()),
+                "SignatureVersion": "1",
+                "Signature": "...",
+                "SigningCertUrl": "...",
+                "UnsubscribeUrl": "...",
+                "MessageAttributes": {},
+            },
         }
 
     return factory
@@ -46,6 +78,11 @@ def config() -> Config:
 @pytest.fixture(scope="function")
 def partial_processor(config) -> PartialSQSProcessor:
     return PartialSQSProcessor(config=config)
+
+
+@pytest.fixture(scope="function")
+def sns_processor(config) -> SNSProcessor:
+    return SNSProcessor()
 
 
 @pytest.fixture(scope="function")
@@ -275,3 +312,45 @@ def test_sqs_batch_processor_middleware_suppressed_exception(
 
     stubber.assert_no_pending_responses()
     assert result is True
+
+
+def test_sns_processor_context_multiple_calls(sns_event_factory, sns_processor):
+    """
+    Test SNSProcessor multiple calls
+    """
+    sns_handler = MagicMock(return_value="OK")
+
+    with sns_processor([sns_event_factory("message 1"), sns_event_factory("message 2")], sns_handler) as ctx:
+        assert ["OK", "OK"] == ctx.process()
+
+    with sns_processor([sns_event_factory("message 3")], sns_handler) as ctx:
+        assert ["OK"] == ctx.process()
+
+    sns_handler.assert_has_calls(calls=[call("message 1"), call("message 2"), call("message 3")])
+
+
+def test_sns_processor_context_with_failure(sns_event_factory, sns_processor):
+    """
+    Test SNSProcessor with a failing record
+    """
+    sns_handler = MagicMock(side_effect=Exception("Failure"))
+
+    with sns_processor([sns_event_factory("message 1")], sns_handler) as ctx:
+        assert [None] == ctx.process()
+
+    sns_handler.assert_has_calls(calls=[call("message 1")])
+
+
+def test_batch_processor_middleware_with_sns_processor(sns_event_factory, sns_processor):
+    """
+    Test middleware's integration with SNSProcessor
+    """
+    sns_handler = MagicMock()
+
+    @batch_processor(record_handler=sns_handler, processor=sns_processor)
+    def lambda_handler(event, context):
+        return True
+
+    event = {"Records": [sns_event_factory("message 1"), sns_event_factory({"message": "Ok"})]}
+    assert True is lambda_handler(event, {})
+    sns_handler.assert_has_calls(calls=[call("message 1"), call('{"message": "Ok"}')])
