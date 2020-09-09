@@ -4,15 +4,19 @@ from secrets import compare_digest
 
 from aws_lambda_powertools.utilities.trigger import (
     CloudWatchLogsEvent,
-    CustomMessageTriggerEvent,
     EventBridgeEvent,
-    PostConfirmationTriggerEvent,
-    PreAuthenticationTriggerEvent,
-    PreSignUpTriggerEvent,
     S3Event,
     SESEvent,
     SNSEvent,
     SQSEvent,
+)
+from aws_lambda_powertools.utilities.trigger.cognito_user_pool_event import (
+    CustomMessageTriggerEvent,
+    PostAuthenticationTriggerEvent,
+    PostConfirmationTriggerEvent,
+    PreAuthenticationTriggerEvent,
+    PreSignUpTriggerEvent,
+    PreTokenGenerationTriggerEvent,
     UserMigrationTriggerEvent,
 )
 from aws_lambda_powertools.utilities.trigger.dynamo_db_stream_event import (
@@ -131,6 +135,52 @@ def test_cognito_pre_authentication_trigger_event():
     assert event.request.user_not_found is True
     assert event.request.user_attributes["email"] == "test@mail.com"
     assert event.request.validation_data is None
+
+
+def test_cognito_post_authentication_trigger_event():
+    event = PostAuthenticationTriggerEvent(load_event("cognitoPostAuthenticationTriggerEvent.json"))
+
+    assert event.request.new_device_used is True
+    assert event.request.user_attributes["email"] == "test@mail.com"
+    assert event.request.client_metadata is None
+
+
+def test_cognito_pre_token_generation_trigger_event():
+    event = PreTokenGenerationTriggerEvent(load_event("cognitoPreTokenGenerationTriggerEvent.json"))
+
+    group_configuration = event.request.group_configuration
+    assert group_configuration.groups_to_override == []
+    assert group_configuration.iam_roles_to_override == []
+    assert group_configuration.preferred_role is None
+    assert event.request.user_attributes["email"] == "test@mail.com"
+    assert event.request.client_metadata is None
+
+    event["request"]["groupConfiguration"]["preferredRole"] = "temp"
+    group_configuration = event.request.group_configuration
+    assert group_configuration.preferred_role == "temp"
+
+    claims_override_details = event.response.claims_override_details
+    assert claims_override_details.claims_to_add_or_override is None
+    assert claims_override_details.claims_to_suppress is None
+    assert claims_override_details.group_configuration is None
+
+    claims_override_details.claims_to_add_or_override = {"test": "value"}
+    assert claims_override_details.claims_to_add_or_override["test"] == "value"
+
+    claims_override_details.claims_to_suppress = ["email"]
+    assert claims_override_details.claims_to_suppress[0] == "email"
+
+    claims_override_details.set_group_configuration_groups_to_override(["group-A", "group-B"])
+    assert claims_override_details.group_configuration.groups_to_override == ["group-A", "group-B"]
+
+    claims_override_details.set_group_configuration_iam_roles_to_override(["role"])
+    assert claims_override_details.group_configuration.iam_roles_to_override == ["role"]
+
+    claims_override_details.set_group_configuration_preferred_role("role_name")
+    assert claims_override_details.group_configuration.preferred_role == "role_name"
+
+    claims_override_details.group_configuration = {}
+    assert claims_override_details.group_configuration == {}
 
 
 def test_dynamo_db_stream_trigger_event():

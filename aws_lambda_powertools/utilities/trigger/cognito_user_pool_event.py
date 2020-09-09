@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class CallerContext(dict):
@@ -132,8 +132,8 @@ class PostConfirmationTriggerEventRequest(dict):
 
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
-        """One or more key-value pairs that you can provide as custom input to the Lambda function that you
-        specify for the post confirmation trigger."""
+        """One or more key-value pairs that you can provide as custom input to the Lambda function
+        that you specify for the post confirmation trigger."""
         return self["request"].get("clientMetadata")
 
 
@@ -385,3 +385,172 @@ class PreAuthenticationTriggerEvent(BaseTriggerEvent):
     def request(self) -> PreAuthenticationTriggerEventRequest:
         """Pre Authentication Request Parameters"""
         return PreAuthenticationTriggerEventRequest(self)
+
+
+class PostAuthenticationTriggerEventRequest(dict):
+    @property
+    def new_device_used(self) -> bool:
+        """This flag indicates if the user has signed in on a new device.
+        It is set only if the remembered devices value of the user pool is set to `Always` or User `Opt-In`."""
+        return self["request"]["newDeviceUsed"]
+
+    @property
+    def user_attributes(self) -> Dict[str, str]:
+        """One or more name-value pairs representing user attributes."""
+        return self["request"]["userAttributes"]
+
+    @property
+    def client_metadata(self) -> Optional[Dict[str, str]]:
+        """One or more key-value pairs that you can provide as custom input to the Lambda function
+        that you specify for the post authentication trigger."""
+        return self["request"].get("clientMetadata")
+
+
+class PostAuthenticationTriggerEvent(BaseTriggerEvent):
+    """Post Authentication Lambda Trigger
+
+    Amazon Cognito invokes this trigger after signing in a user, allowing you to add custom logic after authentication.
+
+    Notes:
+    ----
+    `triggerSource` can be one of the following:
+
+    - `PostAuthentication_Authentication` Post authentication.
+
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-post-authentication.html
+    """
+
+    @property
+    def request(self) -> PostAuthenticationTriggerEventRequest:
+        """Post Authentication Request Parameters"""
+        return PostAuthenticationTriggerEventRequest(self)
+
+
+class GroupOverrideDetails(dict):
+    @property
+    def groups_to_override(self) -> Optional[List[str]]:
+        """A list of the group names that are associated with the user that the identity token is issued for."""
+        return self.get("groupsToOverride")
+
+    @property
+    def iam_roles_to_override(self) -> Optional[List[str]]:
+        """A list of the current IAM roles associated with these groups."""
+        return self.get("iamRolesToOverride")
+
+    @property
+    def preferred_role(self) -> Optional[str]:
+        """A string indicating the preferred IAM role."""
+        return self.get("preferredRole")
+
+
+class PreTokenGenerationTriggerEventRequest(dict):
+    @property
+    def group_configuration(self) -> GroupOverrideDetails:
+        """The input object containing the current group configuration"""
+        return GroupOverrideDetails(self["request"]["groupConfiguration"])
+
+    @property
+    def user_attributes(self) -> Dict[str, str]:
+        """One or more name-value pairs representing user attributes."""
+        return self["request"]["userAttributes"]
+
+    @property
+    def client_metadata(self) -> Optional[Dict[str, str]]:
+        """One or more key-value pairs that you can provide as custom input to the Lambda function
+        that you specify for the pre token generation trigger."""
+        return self["request"].get("clientMetadata")
+
+
+class ClaimsOverrideDetails(dict):
+    @property
+    def claims_to_add_or_override(self) -> Optional[Dict[str, str]]:
+        return self["response"]["claimsOverrideDetails"].get("claimsToAddOrOverride")
+
+    @property
+    def claims_to_suppress(self) -> Optional[List[str]]:
+        return self["response"]["claimsOverrideDetails"].get("claimsToSuppress")
+
+    @property
+    def group_configuration(self) -> Optional[GroupOverrideDetails]:
+        group_override_details = self["response"]["claimsOverrideDetails"].get("groupOverrideDetails")
+        return None if group_override_details is None else GroupOverrideDetails(group_override_details)
+
+    @claims_to_add_or_override.setter
+    def claims_to_add_or_override(self, value: Dict[str, str]):
+        """A map of one or more key-value pairs of claims to add or override.
+        For group related claims, use groupOverrideDetails instead."""
+        self["response"]["claimsOverrideDetails"]["claimsToAddOrOverride"] = value
+
+    @claims_to_suppress.setter
+    def claims_to_suppress(self, value: List[str]):
+        """A list that contains claims to be suppressed from the identity token."""
+        self["response"]["claimsOverrideDetails"]["claimsToSuppress"] = value
+
+    @group_configuration.setter
+    def group_configuration(self, value: Dict[str, Any]):
+        """The output object containing the current group configuration.
+
+        It includes groupsToOverride, iamRolesToOverride, and preferredRole.
+
+        The groupOverrideDetails object is replaced with the one you provide. If you provide an empty or null
+        object in the response, then the groups are suppressed. To leave the existing group configuration
+        as is, copy the value of the request's groupConfiguration object to the groupOverrideDetails object
+        in the response, and pass it back to the service.
+        """
+        self["response"]["claimsOverrideDetails"]["groupOverrideDetails"] = value
+
+    def set_group_configuration_groups_to_override(self, value: List[str]):
+        """A list of the group names that are associated with the user that the identity token is issued for."""
+        self["response"]["claimsOverrideDetails"].setdefault("groupOverrideDetails", {})
+        self["response"]["claimsOverrideDetails"]["groupOverrideDetails"]["groupsToOverride"] = value
+
+    def set_group_configuration_iam_roles_to_override(self, value: List[str]):
+        """A list of the current IAM roles associated with these groups."""
+        self["response"]["claimsOverrideDetails"].setdefault("groupOverrideDetails", {})
+        self["response"]["claimsOverrideDetails"]["groupOverrideDetails"]["iamRolesToOverride"] = value
+
+    def set_group_configuration_preferred_role(self, value: str):
+        """A string indicating the preferred IAM role."""
+        self["response"]["claimsOverrideDetails"].setdefault("groupOverrideDetails", {})
+        self["response"]["claimsOverrideDetails"]["groupOverrideDetails"]["preferredRole"] = value
+
+
+class PreTokenGenerationTriggerEventResponse(dict):
+    @property
+    def claims_override_details(self) -> ClaimsOverrideDetails:
+        self["response"].setdefault("claimsOverrideDetails", {})
+        return ClaimsOverrideDetails(self)
+
+
+class PreTokenGenerationTriggerEvent(BaseTriggerEvent):
+    """Pre Token Generation Lambda Trigger
+
+    Amazon Cognito invokes this trigger before token generation allowing you to customize identity token claims.
+
+    Notes:
+    ----
+    `triggerSource` can be one of the following:
+
+    - `TokenGeneration_HostedAuth` Called during authentication from the Amazon Cognito hosted UI sign-in page.
+    - `TokenGeneration_Authentication` Called after user authentication flows have completed.
+    - `TokenGeneration_NewPasswordChallenge` Called after the user is created by an admin. This flow is invoked
+       when the user has to change a temporary password.
+    - `TokenGeneration_AuthenticateDevice` Called at the end of the authentication of a user device.
+    - `TokenGeneration_RefreshTokens` Called when a user tries to refresh the identity and access tokens.
+
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-pre-token-generation.html
+    """
+
+    @property
+    def request(self) -> PreTokenGenerationTriggerEventRequest:
+        """Pre Token Generation Request Parameters"""
+        return PreTokenGenerationTriggerEventRequest(self)
+
+    @property
+    def response(self) -> PreTokenGenerationTriggerEventResponse:
+        """Pre Token Generation Response Parameters"""
+        return PreTokenGenerationTriggerEventResponse(self)
