@@ -260,3 +260,128 @@ class UserMigrationTriggerEvent(BaseTriggerEvent):
     @property
     def response(self) -> UserMigrationTriggerEventResponse:
         return UserMigrationTriggerEventResponse(self)
+
+
+class CustomMessageTriggerEventRequest(dict):
+    @property
+    def code_parameter(self) -> str:
+        """A string for you to use as the placeholder for the verification code in the custom message."""
+        return self["request"]["codeParameter"]
+
+    @property
+    def username_parameter(self) -> str:
+        """The username parameter. It is a required request parameter for the admin create user flow."""
+        return self["request"]["usernameParameter"]
+
+    @property
+    def user_attributes(self) -> Dict[str, str]:
+        """One or more name-value pairs representing user attributes. The attribute names are the keys."""
+        return self["request"]["userAttributes"]
+
+    @property
+    def client_metadata(self) -> Optional[Dict[str, str]]:
+        """One or more key-value pairs that you can provide as custom input to the Lambda function
+        that you specify for the pre sign-up trigger."""
+        return self["request"].get("clientMetadata")
+
+
+class CustomMessageTriggerEventResponse(dict):
+    @property
+    def sms_message(self) -> str:
+        return self["response"]["smsMessage"]
+
+    @sms_message.setter
+    def sms_message(self, value: str):
+        """The custom SMS message to be sent to your users.
+        Must include the codeParameter value received in the request."""
+        self["response"]["smsMessage"] = value
+
+    @property
+    def email_message(self) -> str:
+        return self["response"]["emailMessage"]
+
+    @email_message.setter
+    def email_message(self, value: str):
+        """The custom email message to be sent to your users.
+        Must include the codeParameter value received in the request."""
+        self["response"]["emailMessage"] = value
+
+    @property
+    def email_subject(self) -> str:
+        return self["response"]["emailSubject"]
+
+    @email_subject.setter
+    def email_subject(self, value: str):
+        """The subject line for the custom message."""
+        self["response"]["emailSubject"] = value
+
+
+class CustomMessageTriggerEvent(BaseTriggerEvent):
+    """Custom Message Lambda Trigger
+
+    Notes:
+    ----
+    `triggerSource` can be one of the following:
+
+    - `CustomMessage_SignUp` To send the confirmation code post sign-up.
+    - `CustomMessage_AdminCreateUser` To send the temporary password to a new user.
+    - `CustomMessage_ResendCode` To resend the confirmation code to an existing user.
+    - `CustomMessage_ForgotPassword` To send the confirmation code for Forgot Password request.
+    - `CustomMessage_UpdateUserAttribute` When a user's email or phone number is changed, this trigger sends a
+       verification code automatically to the user. Cannot be used for other attributes.
+    - `CustomMessage_VerifyUserAttribute`  This trigger sends a verification code to the user when they manually
+       request it for a new email or phone number.
+    - `CustomMessage_Authentication` To send MFA code during authentication.
+
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-custom-message.html
+    """
+
+    @property
+    def request(self) -> CustomMessageTriggerEventRequest:
+        return CustomMessageTriggerEventRequest(self)
+
+    @property
+    def response(self) -> CustomMessageTriggerEventResponse:
+        return CustomMessageTriggerEventResponse(self)
+
+
+class PreAuthenticationTriggerEventRequest(dict):
+    @property
+    def user_not_found(self) -> Optional[bool]:
+        """This boolean is populated when PreventUserExistenceErrors is set to ENABLED for your User Pool client."""
+        return self["request"].get("userNotFound")
+
+    @property
+    def user_attributes(self) -> Dict[str, str]:
+        """One or more name-value pairs representing user attributes."""
+        return self["request"]["userAttributes"]
+
+    @property
+    def validation_data(self) -> Optional[Dict[str, str]]:
+        """One or more key-value pairs containing the validation data in the user's sign-in request."""
+        return self["request"].get("validationData")
+
+
+class PreAuthenticationTriggerEvent(BaseTriggerEvent):
+    """Pre Authentication Lambda Trigger
+
+    Amazon Cognito invokes this trigger when a user attempts to sign in, allowing custom validation
+    to accept or deny the authentication request.
+
+    Notes:
+    ----
+    `triggerSource` can be one of the following:
+
+    - `PreAuthentication_Authentication` Pre authentication.
+
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-pre-authentication.html
+    """
+
+    @property
+    def request(self) -> PreAuthenticationTriggerEventRequest:
+        """Pre Authentication Request Parameters"""
+        return PreAuthenticationTriggerEventRequest(self)

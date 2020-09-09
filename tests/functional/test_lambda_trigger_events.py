@@ -4,8 +4,10 @@ from secrets import compare_digest
 
 from aws_lambda_powertools.utilities.trigger import (
     CloudWatchLogsEvent,
+    CustomMessageTriggerEvent,
     EventBridgeEvent,
     PostConfirmationTriggerEvent,
+    PreAuthenticationTriggerEvent,
     PreSignUpTriggerEvent,
     S3Event,
     SESEvent,
@@ -93,6 +95,7 @@ def test_cognito_user_migration_trigger_event():
     assert event.response.final_user_status is None
     assert event.response.message_action is None
     assert event.response.force_alias_creation is None
+    assert event.response.desired_delivery_mediums is None
 
     event.response.final_user_status = "CONFIRMED"
     assert event.response.final_user_status == "CONFIRMED"
@@ -100,6 +103,34 @@ def test_cognito_user_migration_trigger_event():
     assert event.response.message_action == "SUPPRESS"
     event.response.force_alias_creation = True
     assert event.response.force_alias_creation is True
+    event.response.desired_delivery_mediums = ["EMAIL"]
+    assert event.response.desired_delivery_mediums == ["EMAIL"]
+
+
+def test_cognito_custom_message_trigger_event():
+    event = CustomMessageTriggerEvent(load_event("cognitoCustomMessageTriggerEvent.json"))
+
+    assert event.request.code_parameter == "####"
+    assert event.request.username_parameter == "username"
+    assert event.request.user_attributes["phone_number_verified"] is False
+    assert event.request.client_metadata is None
+
+    event.response.sms_message = "sms"
+    assert event.response.sms_message == event["response"]["smsMessage"]
+    event.response.email_message = "email"
+    assert event.response.email_message == event["response"]["emailMessage"]
+    event.response.email_subject = "subject"
+    assert event.response.email_subject == event["response"]["emailSubject"]
+
+
+def test_cognito_pre_authentication_trigger_event():
+    event = PreAuthenticationTriggerEvent(load_event("cognitoPreAuthenticationTriggerEvent.json"))
+
+    assert event.request.user_not_found is None
+    event["request"]["userNotFound"] = True
+    assert event.request.user_not_found is True
+    assert event.request.user_attributes["email"] == "test@mail.com"
+    assert event.request.validation_data is None
 
 
 def test_dynamo_db_stream_trigger_event():
