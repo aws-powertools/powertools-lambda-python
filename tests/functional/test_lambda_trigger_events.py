@@ -159,28 +159,38 @@ def test_cognito_pre_token_generation_trigger_event():
     group_configuration = event.request.group_configuration
     assert group_configuration.preferred_role == "temp"
 
+    assert event["response"].get("claimsOverrideDetails") is None
     claims_override_details = event.response.claims_override_details
+    assert event["response"]["claimsOverrideDetails"] == {}
+
     assert claims_override_details.claims_to_add_or_override is None
     assert claims_override_details.claims_to_suppress is None
     assert claims_override_details.group_configuration is None
 
-    claims_override_details.claims_to_add_or_override = {"test": "value"}
+    claims_override_details.group_configuration = {}
+    assert claims_override_details.group_configuration == {}
+
+    expected_claims = {"test": "value"}
+    claims_override_details.claims_to_add_or_override = expected_claims
     assert claims_override_details.claims_to_add_or_override["test"] == "value"
+    assert event["response"]["claimsOverrideDetails"]["claimsToAddOrOverride"] == expected_claims
 
     claims_override_details.claims_to_suppress = ["email"]
     assert claims_override_details.claims_to_suppress[0] == "email"
+    assert event["response"]["claimsOverrideDetails"]["claimsToSuppress"] == ["email"]
 
-    claims_override_details.set_group_configuration_groups_to_override(["group-A", "group-B"])
-    assert claims_override_details.group_configuration.groups_to_override == ["group-A", "group-B"]
+    expected_groups = ["group-A", "group-B"]
+    claims_override_details.set_group_configuration_groups_to_override(expected_groups)
+    assert claims_override_details.group_configuration.groups_to_override == expected_groups
+    assert event["response"]["claimsOverrideDetails"]["groupOverrideDetails"]["groupsToOverride"] == expected_groups
 
     claims_override_details.set_group_configuration_iam_roles_to_override(["role"])
     assert claims_override_details.group_configuration.iam_roles_to_override == ["role"]
+    assert event["response"]["claimsOverrideDetails"]["groupOverrideDetails"]["iamRolesToOverride"] == ["role"]
 
     claims_override_details.set_group_configuration_preferred_role("role_name")
     assert claims_override_details.group_configuration.preferred_role == "role_name"
-
-    claims_override_details.group_configuration = {}
-    assert claims_override_details.group_configuration == {}
+    assert event["response"]["claimsOverrideDetails"]["groupOverrideDetails"]["preferredRole"] == "role_name"
 
 
 def test_dynamo_db_stream_trigger_event():
