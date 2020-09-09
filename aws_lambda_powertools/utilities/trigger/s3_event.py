@@ -80,18 +80,18 @@ class S3Message(dict):
 class S3EventRecordGlacierRestoreEventData(dict):
     @property
     def lifecycle_restoration_expiry_time(self) -> str:
-        return self["lifecycleRestorationExpiryTime"]
+        return self["restoreEventData"]["lifecycleRestorationExpiryTime"]
 
     @property
     def lifecycle_restore_storage_class(self) -> str:
-        return self["lifecycleRestoreStorageClass"]
+        return self["restoreEventData"]["lifecycleRestoreStorageClass"]
 
 
 class S3EventRecordGlacierEventData(dict):
     @property
     def restore_event_data(self) -> S3EventRecordGlacierRestoreEventData:
         """The restoreEventData key contains attributes related to your restore request."""
-        return S3EventRecordGlacierRestoreEventData(self["restoreEventData"])
+        return S3EventRecordGlacierRestoreEventData(self)
 
 
 class S3EventRecord(dict):
@@ -107,6 +107,7 @@ class S3EventRecord(dict):
 
     @property
     def aws_region(self) -> str:
+        """aws region eg: us-east-1"""
         return self["awsRegion"]
 
     @property
@@ -153,9 +154,10 @@ class S3Event(dict):
     """S3 event notification
 
     Documentation:
-        https://docs.aws.amazon.com/lambda/latest/dg/with-s3.html
-        https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html
-        https://docs.aws.amazon.com/AmazonS3/latest/dev/notification-content-structure.html
+    -------------
+    - https://docs.aws.amazon.com/lambda/latest/dg/with-s3.html
+    - https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html
+    - https://docs.aws.amazon.com/AmazonS3/latest/dev/notification-content-structure.html
     """
 
     @property

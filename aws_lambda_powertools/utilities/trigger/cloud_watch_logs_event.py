@@ -66,25 +66,23 @@ class CloudWatchLogsDecodedData(dict):
         return [CloudWatchLogsLogEvent(i) for i in self["logEvents"]]
 
 
-class CloudWatchLogsEventData(dict):
-    @property
-    def data(self) -> str:
-        """The value of the `data` field is a Base64 encoded ZIP archive."""
-        return self["awslogs"]["data"]
-
-
 class CloudWatchLogsEvent(dict):
     """CloudWatch Logs log stream event
 
-    Documentation: https://docs.aws.amazon.com/lambda/latest/dg/services-cloudwatchlogs.html
+    You can use a Lambda function to monitor and analyze logs from an Amazon CloudWatch Logs log stream.
+
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/lambda/latest/dg/services-cloudwatchlogs.html
     """
 
     @property
-    def aws_logs(self) -> CloudWatchLogsEventData:
-        return CloudWatchLogsEventData(self)
+    def aws_logs_data(self) -> str:
+        """The value of the `data` field is a Base64 encoded ZIP archive."""
+        return self["awslogs"]["data"]
 
     def decode_cloud_watch_logs_data(self) -> CloudWatchLogsDecodedData:
         """Gzip and parse json data"""
-        payload = base64.b64decode(self.aws_logs.data)
+        payload = base64.b64decode(self.aws_logs_data)
         decoded: dict = json.loads(zlib.decompress(payload, zlib.MAX_WBITS | 32).decode("UTF-8"))
         return CloudWatchLogsDecodedData(decoded)

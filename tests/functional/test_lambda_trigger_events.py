@@ -197,6 +197,7 @@ def test_dynamo_db_stream_trigger_event():
     event = DynamoDBStreamEvent(load_event("dynamoStreamEvent.json"))
 
     records = list(event.records)
+
     record = records[0]
     assert record.aws_region == "us-west-2"
     dynamodb = record.dynamodb
@@ -241,7 +242,9 @@ def test_dynamo_attribute_value_list_value():
 
 def test_dynamo_attribute_value_map_value():
     example_attribute_value = {"M": {"Name": {"S": "Joe"}, "Age": {"N": "35"}}}
+
     attribute_value = AttributeValue(example_attribute_value)
+
     map_value = attribute_value.map_value
     assert map_value is not None
     item = map_value["Name"]

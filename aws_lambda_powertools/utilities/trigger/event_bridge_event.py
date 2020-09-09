@@ -5,7 +5,8 @@ class EventBridgeEvent(dict):
     """Amazon EventBridge Event
 
     Documentation:
-        https://docs.aws.amazon.com/eventbridge/latest/userguide/aws-events.html
+    --------------
+    - https://docs.aws.amazon.com/eventbridge/latest/userguide/aws-events.html
     """
 
     @property

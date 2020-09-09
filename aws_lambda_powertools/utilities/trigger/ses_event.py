@@ -195,8 +195,9 @@ class SESEvent(dict):
     NOTE: There is a 30-second timeout on RequestResponse invocations.
 
     Documentation:
-        https://docs.aws.amazon.com/lambda/latest/dg/services-ses.html
-        https://docs.aws.amazon.com/ses/latest/DeveloperGuide/receiving-email-action-lambda.html
+    --------------
+    - https://docs.aws.amazon.com/lambda/latest/dg/services-ses.html
+    - https://docs.aws.amazon.com/ses/latest/DeveloperGuide/receiving-email-action-lambda.html
     """
 
     @property
