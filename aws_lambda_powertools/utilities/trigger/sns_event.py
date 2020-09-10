@@ -89,6 +89,7 @@ class SNSEventRecord(dict):
 
     @property
     def event_source(self) -> str:
+        """The AWS service from which the SNS event record originated. For SNS, this is aws:sns"""
         return self["EventSource"]
 
     @property

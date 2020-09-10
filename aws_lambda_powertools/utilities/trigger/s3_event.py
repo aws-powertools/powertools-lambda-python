@@ -107,7 +107,7 @@ class S3EventRecord(dict):
 
     @property
     def event_source(self) -> str:
-        """aws:s3"""
+        """The AWS service from which the S3 event originated. For S3, this is aws:s3"""
         return self["eventSource"]
 
     @property

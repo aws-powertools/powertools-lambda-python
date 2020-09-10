@@ -211,6 +211,7 @@ class DynamoDBRecord:
 
     @property
     def event_source_arn(self) -> Optional[str]:
+        """The Amazon Resource Name (ARN) of the event source"""
         return self._val.get("eventSourceARN")
 
     @property

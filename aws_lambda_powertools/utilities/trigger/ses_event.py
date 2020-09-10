@@ -177,7 +177,7 @@ class SESMessage(dict):
 class SESEventRecord(dict):
     @property
     def event_source(self) -> str:
-        """event source will be: aws:ses"""
+        """The AWS service from which the SES event record originated. For SES, this is aws:ses"""
         return self["eventSource"]
 
     @property

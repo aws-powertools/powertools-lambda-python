@@ -127,14 +127,17 @@ class SQSRecord:
 
     @property
     def event_source(self) -> str:
+        """The AWS service from which the SQS record originated. For SQS, this is `aws:sqs` """
         return self._val["eventSource"]
 
     @property
     def event_source_arn(self) -> str:
+        """The Amazon Resource Name (ARN) of the event source"""
         return self._val["eventSourceARN"]
 
     @property
     def aws_region(self) -> str:
+        """aws region eg: us-east-1"""
         return self._val["awsRegion"]
 
 
