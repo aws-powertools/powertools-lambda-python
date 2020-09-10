@@ -53,7 +53,7 @@ def test_cloud_watch_trigger_event():
 
 
 def test_cognito_pre_signup_trigger_event():
-    event = PreSignUpTriggerEvent(load_event("cognitoPreSignUpTriggerEvent.json"))
+    event = PreSignUpTriggerEvent(load_event("cognitoPreSignUpEvent.json"))
 
     assert event.version == "string"
     assert event.trigger_source == "PreSignUp_SignUp"
@@ -79,7 +79,7 @@ def test_cognito_pre_signup_trigger_event():
 
 
 def test_cognito_post_confirmation_trigger_event():
-    event = PostConfirmationTriggerEvent(load_event("cognitoPostConfirmationTriggerEvent.json"))
+    event = PostConfirmationTriggerEvent(load_event("cognitoPostConfirmationEvent.json"))
 
     user_attributes = event.request.user_attributes
     assert user_attributes["email"] == "user@example.com"
@@ -87,7 +87,7 @@ def test_cognito_post_confirmation_trigger_event():
 
 
 def test_cognito_user_migration_trigger_event():
-    event = UserMigrationTriggerEvent(load_event("cognitoUserMigrationTriggerEvent.json"))
+    event = UserMigrationTriggerEvent(load_event("cognitoUserMigrationEvent.json"))
 
     assert compare_digest(event.request.password, event["request"]["password"])
     assert event.request.validation_data is None
@@ -112,7 +112,7 @@ def test_cognito_user_migration_trigger_event():
 
 
 def test_cognito_custom_message_trigger_event():
-    event = CustomMessageTriggerEvent(load_event("cognitoCustomMessageTriggerEvent.json"))
+    event = CustomMessageTriggerEvent(load_event("cognitoCustomMessageEvent.json"))
 
     assert event.request.code_parameter == "####"
     assert event.request.username_parameter == "username"
@@ -128,7 +128,7 @@ def test_cognito_custom_message_trigger_event():
 
 
 def test_cognito_pre_authentication_trigger_event():
-    event = PreAuthenticationTriggerEvent(load_event("cognitoPreAuthenticationTriggerEvent.json"))
+    event = PreAuthenticationTriggerEvent(load_event("cognitoPreAuthenticationEvent.json"))
 
     assert event.request.user_not_found is None
     event["request"]["userNotFound"] = True
@@ -138,7 +138,7 @@ def test_cognito_pre_authentication_trigger_event():
 
 
 def test_cognito_post_authentication_trigger_event():
-    event = PostAuthenticationTriggerEvent(load_event("cognitoPostAuthenticationTriggerEvent.json"))
+    event = PostAuthenticationTriggerEvent(load_event("cognitoPostAuthenticationEvent.json"))
 
     assert event.request.new_device_used is True
     assert event.request.user_attributes["email"] == "test@mail.com"
@@ -146,7 +146,7 @@ def test_cognito_post_authentication_trigger_event():
 
 
 def test_cognito_pre_token_generation_trigger_event():
-    event = PreTokenGenerationTriggerEvent(load_event("cognitoPreTokenGenerationTriggerEvent.json"))
+    event = PreTokenGenerationTriggerEvent(load_event("cognitoPreTokenGenerationEvent.json"))
 
     group_configuration = event.request.group_configuration
     assert group_configuration.groups_to_override == []

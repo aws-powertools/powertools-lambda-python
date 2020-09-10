@@ -293,25 +293,25 @@ class CustomMessageTriggerEventResponse(dict):
     def sms_message(self) -> str:
         return self["response"]["smsMessage"]
 
+    @property
+    def email_message(self) -> str:
+        return self["response"]["emailMessage"]
+
+    @property
+    def email_subject(self) -> str:
+        return self["response"]["emailSubject"]
+
     @sms_message.setter
     def sms_message(self, value: str):
         """The custom SMS message to be sent to your users.
         Must include the codeParameter value received in the request."""
         self["response"]["smsMessage"] = value
 
-    @property
-    def email_message(self) -> str:
-        return self["response"]["emailMessage"]
-
     @email_message.setter
     def email_message(self, value: str):
         """The custom email message to be sent to your users.
         Must include the codeParameter value received in the request."""
         self["response"]["emailMessage"] = value
-
-    @property
-    def email_subject(self) -> str:
-        return self["response"]["emailSubject"]
 
     @email_subject.setter
     def email_subject(self, value: str):
@@ -448,51 +448,54 @@ class GroupOverrideDetails(dict):
         return self.get("preferredRole")
 
 
-class PreTokenGenerationTriggerEventRequest(dict):
+class PreTokenGenerationTriggerEventRequest:
+    def __init__(self, event: dict):
+        self._val = event
+
     @property
     def group_configuration(self) -> GroupOverrideDetails:
         """The input object containing the current group configuration"""
-        return GroupOverrideDetails(self["request"]["groupConfiguration"])
+        return GroupOverrideDetails(self._val["request"]["groupConfiguration"])
 
     @property
     def user_attributes(self) -> Dict[str, str]:
         """One or more name-value pairs representing user attributes."""
-        return self["request"]["userAttributes"]
+        return self._val["request"]["userAttributes"]
 
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
         that you specify for the pre token generation trigger."""
-        return self["request"].get("clientMetadata")
+        return self._val["request"].get("clientMetadata")
 
 
 class ClaimsOverrideDetails:
     def __init__(self, event: dict):
-        self._claims_override_details = event["response"]["claimsOverrideDetails"]
+        self._val = event["response"]["claimsOverrideDetails"]
 
     @property
     def claims_to_add_or_override(self) -> Optional[Dict[str, str]]:
-        return self._claims_override_details.get("claimsToAddOrOverride")
+        return self._val.get("claimsToAddOrOverride")
 
     @property
     def claims_to_suppress(self) -> Optional[List[str]]:
-        return self._claims_override_details.get("claimsToSuppress")
+        return self._val.get("claimsToSuppress")
 
     @property
     def group_configuration(self) -> Optional[GroupOverrideDetails]:
-        group_override_details = self._claims_override_details.get("groupOverrideDetails")
+        group_override_details = self._val.get("groupOverrideDetails")
         return None if group_override_details is None else GroupOverrideDetails(group_override_details)
 
     @claims_to_add_or_override.setter
     def claims_to_add_or_override(self, value: Dict[str, str]):
         """A map of one or more key-value pairs of claims to add or override.
         For group related claims, use groupOverrideDetails instead."""
-        self._claims_override_details["claimsToAddOrOverride"] = value
+        self._val["claimsToAddOrOverride"] = value
 
     @claims_to_suppress.setter
     def claims_to_suppress(self, value: List[str]):
         """A list that contains claims to be suppressed from the identity token."""
-        self._claims_override_details["claimsToSuppress"] = value
+        self._val["claimsToSuppress"] = value
 
     @group_configuration.setter
     def group_configuration(self, value: Dict[str, Any]):
@@ -505,33 +508,33 @@ class ClaimsOverrideDetails:
         as is, copy the value of the request's groupConfiguration object to the groupOverrideDetails object
         in the response, and pass it back to the service.
         """
-        self._claims_override_details["groupOverrideDetails"] = value
+        self._val["groupOverrideDetails"] = value
 
     def set_group_configuration_groups_to_override(self, value: List[str]):
         """A list of the group names that are associated with the user that the identity token is issued for."""
-        self._claims_override_details.setdefault("groupOverrideDetails", {})
-        self._claims_override_details["groupOverrideDetails"]["groupsToOverride"] = value
+        self._val.setdefault("groupOverrideDetails", {})
+        self._val["groupOverrideDetails"]["groupsToOverride"] = value
 
     def set_group_configuration_iam_roles_to_override(self, value: List[str]):
         """A list of the current IAM roles associated with these groups."""
-        self._claims_override_details.setdefault("groupOverrideDetails", {})
-        self._claims_override_details["groupOverrideDetails"]["iamRolesToOverride"] = value
+        self._val.setdefault("groupOverrideDetails", {})
+        self._val["groupOverrideDetails"]["iamRolesToOverride"] = value
 
     def set_group_configuration_preferred_role(self, value: str):
         """A string indicating the preferred IAM role."""
-        self._claims_override_details.setdefault("groupOverrideDetails", {})
-        self._claims_override_details["groupOverrideDetails"]["preferredRole"] = value
+        self._val.setdefault("groupOverrideDetails", {})
+        self._val["groupOverrideDetails"]["preferredRole"] = value
 
 
 class PreTokenGenerationTriggerEventResponse:
     def __init__(self, event: dict):
-        self._event = event
+        self._val = event
 
     @property
     def claims_override_details(self) -> ClaimsOverrideDetails:
         # Ensure we have a `claimsOverrideDetails` element
-        self._event["response"].setdefault("claimsOverrideDetails", {})
-        return ClaimsOverrideDetails(self._event)
+        self._val["response"].setdefault("claimsOverrideDetails", {})
+        return ClaimsOverrideDetails(self._val)
 
 
 class PreTokenGenerationTriggerEvent(BaseTriggerEvent):

@@ -4,27 +4,30 @@ import zlib
 from typing import Dict, List, Optional
 
 
-class CloudWatchLogsLogEvent(dict):
+class CloudWatchLogsLogEvent:
+    def __init__(self, log_event: dict):
+        self._val = log_event
+
     @property
     def get_id(self) -> str:
         """The ID property is a unique identifier for every log event."""
         # Note: this name conflicts with existing python builtins
-        return self["id"]
+        return self._val["id"]
 
     @property
     def timestamp(self) -> int:
         """Get the `timestamp` property"""
-        return self["timestamp"]
+        return self._val["timestamp"]
 
     @property
     def message(self) -> str:
         """Get the `message` property"""
-        return self["message"]
+        return self._val["message"]
 
     @property
     def extracted_fields(self) -> Optional[Dict[str, str]]:
         """Get the `extractedFields` property"""
-        return self.get("extractedFields")
+        return self._val.get("extractedFields")
 
 
 class CloudWatchLogsDecodedData(dict):
@@ -82,7 +85,7 @@ class CloudWatchLogsEvent(dict):
         return self["awslogs"]["data"]
 
     def decode_cloud_watch_logs_data(self) -> CloudWatchLogsDecodedData:
-        """Gzip and parse json data"""
+        """Decode, unzip and parse json data"""
         payload = base64.b64decode(self.aws_logs_data)
         decoded: dict = json.loads(zlib.decompress(payload, zlib.MAX_WBITS | 32).decode("UTF-8"))
         return CloudWatchLogsDecodedData(decoded)

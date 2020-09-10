@@ -80,17 +80,22 @@ class S3Message(dict):
 class S3EventRecordGlacierRestoreEventData(dict):
     @property
     def lifecycle_restoration_expiry_time(self) -> str:
+        """Time when the object restoration will be expired."""
         return self["restoreEventData"]["lifecycleRestorationExpiryTime"]
 
     @property
     def lifecycle_restore_storage_class(self) -> str:
+        """Source storage class for restore"""
         return self["restoreEventData"]["lifecycleRestoreStorageClass"]
 
 
 class S3EventRecordGlacierEventData(dict):
     @property
     def restore_event_data(self) -> S3EventRecordGlacierRestoreEventData:
-        """The restoreEventData key contains attributes related to your restore request."""
+        """The restoreEventData key contains attributes related to your restore request.
+
+        The glacierEventData key is only visible for s3:ObjectRestore:Completed events
+        """
         return S3EventRecordGlacierRestoreEventData(self)
 
 
