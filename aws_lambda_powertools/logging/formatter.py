@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 
 
 class JsonFormatter(logging.Formatter):
@@ -30,13 +31,27 @@ class JsonFormatter(logging.Formatter):
         self.default_json_formatter = kwargs.pop("json_default", str)
         # Set the insertion order for the log messages
         self.format_dict = dict.fromkeys(kwargs.pop("log_record_order", ["level", "location", "message", "timestamp"]))
+        self.reserved_keys = ["timestamp", "level", "location"]
         # Set the date format used by `asctime`
         super(JsonFormatter, self).__init__(datefmt=kwargs.pop("datefmt", None))
 
-        self.reserved_keys = ["timestamp", "level", "location"]
-        self.format_dict.update(
-            {"level": "%(levelname)s", "location": "%(funcName)s:%(lineno)d", "timestamp": "%(asctime)s", **kwargs}
-        )
+        self.format_dict.update(self._build_root_keys(**kwargs))
+
+    @staticmethod
+    def _build_root_keys(**kwargs):
+        return {
+            "level": "%(levelname)s",
+            "location": "%(funcName)s:%(lineno)d",
+            "timestamp": "%(asctime)s",
+            **kwargs,
+        }
+
+    @staticmethod
+    def _get_latest_trace_id():
+        xray_trace_id = os.getenv("_X_AMZN_TRACE_ID")
+        trace_id = xray_trace_id.split(";")[0].replace("Root=", "") if xray_trace_id else None
+
+        return trace_id
 
     def update_formatter(self, **kwargs):
         self.format_dict.update(kwargs)
@@ -75,6 +90,9 @@ class JsonFormatter(logging.Formatter):
 
         if record.exc_text:
             log_dict["exception"] = record.exc_text
+
+        # fetch latest X-Ray Trace ID, if any
+        log_dict.update({"xray_trace_id": self._get_latest_trace_id()})
 
         # Filter out top level key with values that are None
         log_dict = {k: v for k, v in log_dict.items() if v is not None}

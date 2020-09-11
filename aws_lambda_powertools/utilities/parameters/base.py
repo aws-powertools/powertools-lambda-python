@@ -15,6 +15,9 @@ DEFAULT_MAX_AGE_SECS = 5
 ExpirableValue = namedtuple("ExpirableValue", ["value", "ttl"])
 # These providers will be dynamically initialized on first use of the helper functions
 DEFAULT_PROVIDERS = {}
+TRANSFORM_METHOD_JSON = "json"
+TRANSFORM_METHOD_BINARY = "binary"
+SUPPORTED_TRANSFORM_METHODS = [TRANSFORM_METHOD_JSON, TRANSFORM_METHOD_BINARY]
 
 
 class BaseProvider(ABC):
@@ -115,8 +118,8 @@ class BaseProvider(ABC):
             Maximum age of the cached value
         transform: str, optional
             Optional transformation of the parameter value. Supported values
-            are "json" for JSON strings and "binary" for base 64 encoded
-            values.
+            are "json" for JSON strings, "binary" for base 64 encoded
+            values or "auto" which looks at the attribute key to determine the type.
         raise_on_transform_error: bool, optional
             Raises an exception if any transform fails, otherwise this will
             return a None value for each transform that failed
@@ -145,7 +148,11 @@ class BaseProvider(ABC):
 
         if transform is not None:
             for (key, value) in values.items():
-                values[key] = transform_value(value, transform, raise_on_transform_error)
+                _transform = get_transform_method(key, transform)
+                if _transform is None:
+                    continue
+
+                values[key] = transform_value(value, _transform, raise_on_transform_error)
 
         self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age),)
 
@@ -157,6 +164,45 @@ class BaseProvider(ABC):
         Retrieve multiple parameter values from the underlying parameter store
         """
         raise NotImplementedError()
+
+
+def get_transform_method(key: str, transform: Optional[str] = None) -> Optional[str]:
+    """
+    Determine the transform method
+
+    Examples
+    -------
+        >>> get_transform_method("key", "any_other_value")
+        'any_other_value'
+        >>> get_transform_method("key.json", "auto")
+        'json'
+        >>> get_transform_method("key.binary", "auto")
+        'binary'
+        >>> get_transform_method("key", "auto")
+        None
+        >>> get_transform_method("key", None)
+        None
+
+    Parameters
+    ---------
+    key: str
+        Only used when the tranform is "auto".
+    transform: str, optional
+        Original transform method, only "auto" will try to detect the transform method by the key
+
+    Returns
+    ------
+    Optional[str]:
+        The transform method either when transform is "auto" then None, "json" or "binary" is returned
+        or the original transform method
+    """
+    if transform != "auto":
+        return transform
+
+    for transform_method in SUPPORTED_TRANSFORM_METHODS:
+        if key.endswith("." + transform_method):
+            return transform_method
+    return None
 
 
 def transform_value(value: str, transform: str, raise_on_transform_error: bool = True) -> Union[dict, bytes, None]:
@@ -180,9 +226,9 @@ def transform_value(value: str, transform: str, raise_on_transform_error: bool =
     """
 
     try:
-        if transform == "json":
+        if transform == TRANSFORM_METHOD_JSON:
             return json.loads(value)
-        elif transform == "binary":
+        elif transform == TRANSFORM_METHOD_BINARY:
             return base64.b64decode(value)
         else:
             raise ValueError(f"Invalid transform type '{transform}'")

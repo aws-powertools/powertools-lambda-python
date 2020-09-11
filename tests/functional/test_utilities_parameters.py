@@ -233,6 +233,48 @@ def test_dynamodb_provider_get_multiple(mock_name, mock_value, config):
         stubber.deactivate()
 
 
+def test_dynamodb_provider_get_multiple_auto(mock_name, mock_value, config):
+    """
+    Test DynamoDBProvider.get_multiple() with transform = "auto"
+    """
+    mock_binary = mock_value.encode()
+    mock_binary_data = base64.b64encode(mock_binary).decode()
+    mock_json_data = json.dumps({mock_name: mock_value})
+    mock_params = {"D.json": mock_json_data, "E.binary": mock_binary_data, "F": mock_value}
+    table_name = "TEST_TABLE_AUTO"
+
+    # Create a new provider
+    provider = parameters.DynamoDBProvider(table_name, config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.table.meta.client)
+    response = {
+        "Items": [
+            {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": value}} for (name, value) in mock_params.items()
+        ]
+    }
+    expected_params = {"TableName": table_name, "KeyConditionExpression": Key("id").eq(mock_name)}
+    stubber.add_response("query", response, expected_params)
+    stubber.activate()
+
+    try:
+        values = provider.get_multiple(mock_name, transform="auto")
+
+        stubber.assert_no_pending_responses()
+
+        assert len(values) == len(mock_params)
+        for key in mock_params.keys():
+            assert key in values
+            if key.endswith(".json"):
+                assert values[key][mock_name] == mock_value
+            elif key.endswith(".binary"):
+                assert values[key] == mock_binary
+            else:
+                assert values[key] == mock_value
+    finally:
+        stubber.deactivate()
+
+
 def test_dynamodb_provider_get_multiple_next_token(mock_name, mock_value, config):
     """
     Test DynamoDBProvider.get_multiple() with a non-cached path
@@ -1481,3 +1523,34 @@ def test_transform_value_ignore_error(mock_value):
     value = parameters.base.transform_value(mock_value, "INCORRECT", raise_on_transform_error=False)
 
     assert value is None
+
+
+@pytest.mark.parametrize("original_transform", ["json", "binary", "other", "Auto", None])
+def test_get_transform_method_preserve_original(original_transform):
+    """
+    Check if original transform method is returned for anything other than "auto"
+    """
+    transform = parameters.base.get_transform_method("key", original_transform)
+
+    assert transform == original_transform
+
+
+@pytest.mark.parametrize("extension", ["json", "binary"])
+def test_get_transform_method_preserve_auto(extension, mock_name):
+    """
+    Check if we can auto detect the transform method by the support extensions json / binary
+    """
+    transform = parameters.base.get_transform_method(f"{mock_name}.{extension}", "auto")
+
+    assert transform == extension
+
+
+@pytest.mark.parametrize("key", ["json", "binary", "example", "example.jsonp"])
+def test_get_transform_method_preserve_auto_unhandled(key):
+    """
+    Check if any key that does not end with a supported extension returns None when
+    using the transform="auto"
+    """
+    transform = parameters.base.get_transform_method(key, "auto")
+
+    assert transform is None
