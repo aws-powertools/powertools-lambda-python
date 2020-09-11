@@ -4,7 +4,7 @@ class SchemaValidationError(Exception):
     pass
 
 
-class InvalidSchemaError(Exception):
+class InvalidSchemaFormatError(Exception):
     """When JSON Schema is in invalid format"""
 
     pass
