@@ -338,7 +338,7 @@ def test_ses_trigger_event():
     assert headers[0].value == "<janedoe@example.com>"
     common_headers = mail.common_headers
     assert common_headers.return_path == "janedoe@example.com"
-    assert common_headers.get_from == common_headers["from"]
+    assert common_headers.get_from == common_headers._v["from"]
     assert common_headers.date == "Wed, 7 Oct 2015 12:34:56 -0700"
     assert common_headers.to == [expected_address]
     assert common_headers.message_id == "<0123456789example.com>"
@@ -352,9 +352,9 @@ def test_ses_trigger_event():
     assert receipt.spf_verdict.status == "PASS"
     assert receipt.dmarc_verdict.status == "PASS"
     action = receipt.action
-    assert action.get_type == action["type"]
-    assert action.function_arn == action["functionArn"]
-    assert action.invocation_type == action["invocationType"]
+    assert action.get_type == action._v["type"]
+    assert action.function_arn == action._v["functionArn"]
+    assert action.invocation_type == action._v["invocationType"]
 
 
 def test_sns_trigger_event():

@@ -1,33 +1,33 @@
 import base64
 import json
 import zlib
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class CloudWatchLogsLogEvent:
-    def __init__(self, log_event: dict):
-        self._val = log_event
+    def __init__(self, log_event: Dict[str, Any]):
+        self._v = log_event
 
     @property
     def get_id(self) -> str:
         """The ID property is a unique identifier for every log event."""
         # Note: this name conflicts with existing python builtins
-        return self._val["id"]
+        return self._v["id"]
 
     @property
     def timestamp(self) -> int:
         """Get the `timestamp` property"""
-        return self._val["timestamp"]
+        return self._v["timestamp"]
 
     @property
     def message(self) -> str:
         """Get the `message` property"""
-        return self._val["message"]
+        return self._v["message"]
 
     @property
     def extracted_fields(self) -> Optional[Dict[str, str]]:
         """Get the `extractedFields` property"""
-        return self._val.get("extractedFields")
+        return self._v.get("extractedFields")
 
 
 class CloudWatchLogsDecodedData(dict):

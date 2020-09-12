@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterator, List, Optional
 
 
 class AttributeValue:
@@ -8,8 +8,8 @@ class AttributeValue:
     Documentation: https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_streams_AttributeValue.html
     """
 
-    def __init__(self, attr_value: dict):
-        self._val = attr_value
+    def __init__(self, attr_value: Dict[str, Any]):
+        self._v = attr_value
 
     @property
     def b_value(self) -> Optional[str]:
@@ -18,7 +18,7 @@ class AttributeValue:
         Example:
             >>> {"B": "dGhpcyB0ZXh0IGlzIGJhc2U2NC1lbmNvZGVk"}
         """
-        return self._val.get("B")
+        return self._v.get("B")
 
     @property
     def bs_value(self) -> Optional[List[str]]:
@@ -27,7 +27,7 @@ class AttributeValue:
         Example:
             >>> {"BS": ["U3Vubnk=", "UmFpbnk=", "U25vd3k="]}
         """
-        return self._val.get("BS")
+        return self._v.get("BS")
 
     @property
     def bool_value(self) -> Optional[bool]:
@@ -36,7 +36,7 @@ class AttributeValue:
         Example:
             >>> {"BOOL": True}
         """
-        item = self._val.get("bool")
+        item = self._v.get("bool")
         return None if item is None else bool(item)
 
     @property
@@ -46,7 +46,7 @@ class AttributeValue:
         Example:
             >>> {"L": [ {"S": "Cookies"} , {"S": "Coffee"}, {"N": "3.14159"}]}
         """
-        item = self._val.get("L")
+        item = self._v.get("L")
         return None if item is None else [AttributeValue(v) for v in item]
 
     @property
@@ -56,7 +56,7 @@ class AttributeValue:
         Example:
             >>> {"M": {"Name": {"S": "Joe"}, "Age": {"N": "35"}}}
         """
-        return _attribute_value_dict(self._val, "M")
+        return _attribute_value_dict(self._v, "M")
 
     @property
     def n_value(self) -> Optional[str]:
@@ -68,7 +68,7 @@ class AttributeValue:
         Example:
             >>> {"N": "123.45"}
         """
-        return self._val.get("N")
+        return self._v.get("N")
 
     @property
     def ns_value(self) -> Optional[List[str]]:
@@ -77,7 +77,7 @@ class AttributeValue:
         Example:
             >>> {"NS": ["42.2", "-19", "7.5", "3.14"]}
         """
-        return self._val.get("NS")
+        return self._v.get("NS")
 
     @property
     def null_value(self) -> Optional[bool]:
@@ -86,7 +86,7 @@ class AttributeValue:
         Example:
             >>> {"NULL": True}
         """
-        item = self._val.get("NULL")
+        item = self._v.get("NULL")
         return None if item is None else bool(item)
 
     @property
@@ -96,7 +96,7 @@ class AttributeValue:
         Example:
             >>> {"S": "Hello"}
         """
-        return self._val.get("S")
+        return self._v.get("S")
 
     @property
     def ss_value(self) -> Optional[List[str]]:
@@ -105,7 +105,7 @@ class AttributeValue:
         Example:
             >>> {"SS": ["Giraffe", "Hippo" ,"Zebra"]}
         """
-        return self._val.get("SS")
+        return self._v.get("SS")
 
 
 def _attribute_value_dict(attr_values: Dict[str, dict], key: str) -> Optional[Dict[str, AttributeValue]]:
@@ -128,45 +128,45 @@ class StreamViewType(Enum):
 
 
 class StreamRecord:
-    def __init__(self, stream_record: dict):
-        self._val = stream_record
+    def __init__(self, stream_record: Dict[str, Any]):
+        self._v = stream_record
 
     @property
     def approximate_creation_date_time(self) -> Optional[int]:
         """The approximate date and time when the stream record was created, in UNIX epoch time format."""
-        item = self._val.get("ApproximateCreationDateTime")
+        item = self._v.get("ApproximateCreationDateTime")
         return None if item is None else int(item)
 
     @property
     def keys(self) -> Optional[Dict[str, AttributeValue]]:
         """The primary key attribute(s) for the DynamoDB item that was modified."""
-        return _attribute_value_dict(self._val, "Keys")
+        return _attribute_value_dict(self._v, "Keys")
 
     @property
     def new_image(self) -> Optional[Dict[str, AttributeValue]]:
         """The item in the DynamoDB table as it appeared after it was modified."""
-        return _attribute_value_dict(self._val, "NewImage")
+        return _attribute_value_dict(self._v, "NewImage")
 
     @property
     def old_image(self) -> Optional[Dict[str, AttributeValue]]:
         """The item in the DynamoDB table as it appeared before it was modified."""
-        return _attribute_value_dict(self._val, "OldImage")
+        return _attribute_value_dict(self._v, "OldImage")
 
     @property
     def sequence_number(self) -> Optional[str]:
         """The sequence number of the stream record."""
-        return self._val.get("SequenceNumber")
+        return self._v.get("SequenceNumber")
 
     @property
     def size_bytes(self) -> Optional[int]:
         """The size of the stream record, in bytes."""
-        item = self._val.get("SizeBytes")
+        item = self._v.get("SizeBytes")
         return None if item is None else int(item)
 
     @property
     def stream_view_type(self) -> Optional[StreamViewType]:
         """The type of data from the modified DynamoDB item that was captured in this stream record"""
-        item = self._val.get("StreamViewType")
+        item = self._v.get("StreamViewType")
         return None if item is None else StreamViewType[str(item)]
 
 
@@ -179,50 +179,50 @@ class DynamoDBRecordEventName(Enum):
 class DynamoDBRecord:
     """A description of a unique event within a stream"""
 
-    def __init__(self, record: dict):
-        self._val = record
+    def __init__(self, record: Dict[str, Any]):
+        self._v = record
 
     @property
     def aws_region(self) -> Optional[str]:
         """The region in which the GetRecords request was received"""
-        return self._val.get("awsRegion")
+        return self._v.get("awsRegion")
 
     @property
     def dynamodb(self) -> Optional[StreamRecord]:
         """The main body of the stream record, containing all of the DynamoDB-specific fields."""
-        stream_record = self._val.get("dynamodb")
+        stream_record = self._v.get("dynamodb")
         return None if stream_record is None else StreamRecord(stream_record)
 
     @property
     def event_id(self) -> Optional[str]:
         """A globally unique identifier for the event that was recorded in this stream record."""
-        return self._val.get("eventID")
+        return self._v.get("eventID")
 
     @property
     def event_name(self) -> Optional[DynamoDBRecordEventName]:
         """The type of data modification that was performed on the DynamoDB table"""
-        item = self._val.get("eventName")
+        item = self._v.get("eventName")
         return None if item is None else DynamoDBRecordEventName[item]
 
     @property
     def event_source(self) -> Optional[str]:
         """The AWS service from which the stream record originated. For DynamoDB Streams, this is aws:dynamodb."""
-        return self._val.get("eventSource")
+        return self._v.get("eventSource")
 
     @property
     def event_source_arn(self) -> Optional[str]:
         """The Amazon Resource Name (ARN) of the event source"""
-        return self._val.get("eventSourceARN")
+        return self._v.get("eventSourceARN")
 
     @property
     def event_version(self) -> Optional[str]:
         """The version number of the stream record format."""
-        return self._val.get("eventVersion")
+        return self._v.get("eventVersion")
 
     @property
     def user_identity(self) -> Optional[dict]:
         """Contains details about the type of identity that made the request"""
-        return self._val.get("userIdentity")
+        return self._v.get("userIdentity")
 
 
 class DynamoDBStreamEvent(dict):
