@@ -118,3 +118,13 @@ class SNSEvent(dict):
     def records(self) -> Iterator[SNSEventRecord]:
         for record in self["Records"]:
             yield SNSEventRecord(record)
+
+    @property
+    def record(self) -> SNSEventRecord:
+        """Return the first SNS event record"""
+        return next(self.records)
+
+    @property
+    def sns_message(self) -> str:
+        """Return the message for the first sns event record"""
+        return self.record.sns.message

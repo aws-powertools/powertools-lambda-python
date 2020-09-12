@@ -295,6 +295,9 @@ def test_s3_trigger_event():
     assert s3.get_object.version_id is None
     assert s3.get_object.sequencer == "0C0F6F405D6ED209E1"
     assert record.glacier_event_data is None
+    assert event.record._v == event["Records"][0]
+    assert event.bucket_name == "lambda-artifacts-deafc19498e3f2df"
+    assert event.object_key == "b21b84d653bb07b05b1e6b33684dc11b"
 
 
 def test_s3_glacier_event():
@@ -380,6 +383,8 @@ def test_sns_trigger_event():
     assert sns.unsubscribe_url == "https://sns.us-east-2.amazonaws.com/?Action=Unsubscri ..."
     assert sns.topic_arn == "arn:aws:sns:us-east-2:123456789012:sns-lambda"
     assert sns.subject == "TestInvoke"
+    assert event.record._v == event["Records"][0]
+    assert event.sns_message == "Hello from SNS!"
 
 
 def test_seq_trigger_event():

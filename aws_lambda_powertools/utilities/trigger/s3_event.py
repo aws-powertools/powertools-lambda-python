@@ -193,3 +193,18 @@ class S3Event(dict):
     def records(self) -> Iterator[S3EventRecord]:
         for record in self["Records"]:
             yield S3EventRecord(record)
+
+    @property
+    def record(self) -> S3EventRecord:
+        """Get the first s3 event record"""
+        return next(self.records)
+
+    @property
+    def bucket_name(self) -> str:
+        """Get the bucket name for the first s3 event record"""
+        return self.record.s3.bucket.name
+
+    @property
+    def object_key(self) -> str:
+        """Get the object key for the first s3 event record"""
+        return self.record.s3.get_object.key
