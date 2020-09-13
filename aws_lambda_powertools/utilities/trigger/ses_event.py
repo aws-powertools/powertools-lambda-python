@@ -1,69 +1,62 @@
-from typing import Any, Dict, Iterator, List
+from typing import Iterator, List
+
+from aws_lambda_powertools.utilities.trigger.common import DictWrapper
 
 
-class SESMailHeader:
-    def __init__(self, header: Dict[str, str]):
-        self._v = header
-
+class SESMailHeader(DictWrapper):
     @property
     def name(self) -> str:
-        return self._v["name"]
+        return self["name"]
 
     @property
     def value(self) -> str:
-        return self._v["value"]
+        return self["value"]
 
 
-class SESMailCommonHeaders:
-    def __init__(self, common_headers: Dict[str, Any]):
-        self._v = common_headers
-
+class SESMailCommonHeaders(DictWrapper):
     @property
     def return_path(self) -> str:
         """The values in the Return-Path header of the email."""
-        return self._v["returnPath"]
+        return self["returnPath"]
 
     @property
     def get_from(self) -> List[str]:
         """The values in the From header of the email."""
         # Note: this name conflicts with existing python builtins
-        return self._v["from"]
+        return self["from"]
 
     @property
     def date(self) -> List[str]:
         """The date and time when Amazon SES received the message."""
-        return self._v["date"]
+        return self["date"]
 
     @property
     def to(self) -> List[str]:
         """The values in the To header of the email."""
-        return self._v["to"]
+        return self["to"]
 
     @property
     def message_id(self) -> str:
         """The ID of the original message."""
-        return str(self._v["messageId"])
+        return str(self["messageId"])
 
     @property
     def subject(self) -> str:
         """The value of the Subject header for the email."""
-        return str(self._v["subject"])
+        return str(self["subject"])
 
 
-class SESMail:
-    def __init__(self, mail: Dict[str, Any]):
-        self._v = mail
-
+class SESMail(DictWrapper):
     @property
     def timestamp(self) -> str:
         """String that contains the time at which the email was received, in ISO8601 format."""
-        return self._v["timestamp"]
+        return self["timestamp"]
 
     @property
     def source(self) -> str:
         """String that contains the email address (specifically, the envelope MAIL FROM address)
         that the email was sent from."""
-        return self._v["source"]
+        return self["source"]
 
     @property
     def message_id(self) -> str:
@@ -71,46 +64,40 @@ class SESMail:
 
         If the email was delivered to Amazon S3, the message ID is also the Amazon S3 object key that was
         used to write the message to your Amazon S3 bucket."""
-        return self._v["messageId"]
+        return self["messageId"]
 
     @property
     def destination(self) -> List[str]:
         """A complete list of all recipient addresses (including To: and CC: recipients)
         from the MIME headers of the incoming email."""
-        return self._v["destination"]
+        return self["destination"]
 
     @property
     def headers_truncated(self) -> bool:
         """String that specifies whether the headers were truncated in the notification, which will happen
         if the headers are larger than 10 KB. Possible values are true and false."""
-        return bool(self._v["headersTruncated"])
+        return bool(self["headersTruncated"])
 
     @property
     def headers(self) -> Iterator[SESMailHeader]:
         """A list of Amazon SES headers and your custom headers.
         Each header in the list has a name field and a value field"""
-        for header in self._v["headers"]:
+        for header in self["headers"]:
             yield SESMailHeader(header)
 
     @property
     def common_headers(self) -> SESMailCommonHeaders:
         """A list of headers common to all emails. Each header in the list is composed of a name and a value."""
-        return SESMailCommonHeaders(self._v["commonHeaders"])
+        return SESMailCommonHeaders(self["commonHeaders"])
 
 
-class SESReceiptStatus:
-    def __init__(self, receipt_status: Dict[str, str]):
-        self._v = receipt_status
-
+class SESReceiptStatus(DictWrapper):
     @property
     def status(self) -> str:
-        return str(self._v["status"])
+        return str(self["status"])
 
 
-class SESReceiptAction:
-    def __init__(self, receipt_action: Dict[str, str]):
-        self._v = receipt_action
-
+class SESReceiptAction(DictWrapper):
     @property
     def get_type(self) -> str:
         """String that indicates the type of action that was executed.
@@ -118,99 +105,90 @@ class SESReceiptAction:
         Possible values are S3, SNS, Bounce, Lambda, Stop, and WorkMail
         """
         # Note: this name conflicts with existing python builtins
-        return self._v["type"]
+        return self["type"]
 
     @property
     def function_arn(self) -> str:
         """String that contains the ARN of the Lambda function that was triggered.
         Present only for the Lambda action type."""
-        return self._v["functionArn"]
+        return self["functionArn"]
 
     @property
     def invocation_type(self) -> str:
         """String that contains the invocation type of the Lambda function. Possible values are RequestResponse
         and Event. Present only for the Lambda action type."""
-        return self._v["invocationType"]
+        return self["invocationType"]
 
 
-class SESReceipt:
-    def __init__(self, receipt: Dict[str, Any]):
-        self._v = receipt
-
+class SESReceipt(DictWrapper):
     @property
     def timestamp(self) -> str:
         """String that specifies the date and time at which the action was triggered, in ISO 8601 format."""
-        return self._v["timestamp"]
+        return self["timestamp"]
 
     @property
     def processing_time_millis(self) -> int:
         """String that specifies the period, in milliseconds, from the time Amazon SES received the message
         to the time it triggered the action."""
-        return int(self._v["processingTimeMillis"])
+        return int(self["processingTimeMillis"])
 
     @property
     def recipients(self) -> List[str]:
         """A list of recipients (specifically, the envelope RCPT TO addresses) that were matched by the
         active receipt rule. The addresses listed here may differ from those listed by the destination
         field in the mail object."""
-        return self._v["recipients"]
+        return self["recipients"]
 
     @property
     def spam_verdict(self) -> SESReceiptStatus:
         """Object that indicates whether the message is spam."""
-        return SESReceiptStatus(self._v["spamVerdict"])
+        return SESReceiptStatus(self["spamVerdict"])
 
     @property
     def virus_verdict(self) -> SESReceiptStatus:
         """Object that indicates whether the message contains a virus."""
-        return SESReceiptStatus(self._v["virusVerdict"])
+        return SESReceiptStatus(self["virusVerdict"])
 
     @property
     def spf_verdict(self) -> SESReceiptStatus:
         """Object that indicates whether the Sender Policy Framework (SPF) check passed."""
-        return SESReceiptStatus(self._v["spfVerdict"])
+        return SESReceiptStatus(self["spfVerdict"])
 
     @property
     def dmarc_verdict(self) -> SESReceiptStatus:
         """Object that indicates whether the Domain-based Message Authentication,
         Reporting & Conformance (DMARC) check passed."""
-        return SESReceiptStatus(self._v["dmarcVerdict"])
+        return SESReceiptStatus(self["dmarcVerdict"])
 
     @property
     def action(self) -> SESReceiptAction:
         """Object that encapsulates information about the action that was executed."""
-        return SESReceiptAction(self._v["action"])
+        return SESReceiptAction(self["action"])
 
 
-class SESMessage:
-    def __init__(self, record: Dict[str, Any]):
-        self._v = record
-
+class SESMessage(DictWrapper):
     @property
     def mail(self) -> SESMail:
-        return SESMail(self._v["ses"]["mail"])
+        return SESMail(self["ses"]["mail"])
 
     @property
     def receipt(self) -> SESReceipt:
-        return SESReceipt(self._v["ses"]["receipt"])
+        return SESReceipt(self["ses"]["receipt"])
 
 
-class SESEventRecord:
-    def __init__(self, record: Dict[str, Any]):
-        self._v = record
-
+class SESEventRecord(DictWrapper):
     @property
     def event_source(self) -> str:
         """The AWS service from which the SES event record originated. For SES, this is aws:ses"""
-        return self._v["eventSource"]
+        return self["eventSource"]
 
     @property
     def event_version(self) -> str:
-        return self._v["eventVersion"]
+        return self["eventVersion"]
 
     @property
     def ses(self) -> SESMessage:
-        return SESMessage(self._v)
+        return SESMessage(self._data)
 
 
 class SESEvent(dict):
@@ -228,3 +206,15 @@ class SESEvent(dict):
     def records(self) -> Iterator[SESEventRecord]:
         for record in self["Records"]:
             yield SESEventRecord(record)
+
+    @property
+    def record(self) -> SESEventRecord:
+        return next(self.records)
+
+    @property
+    def mail(self) -> SESMail:
+        return self.record.ses.mail
+
+    @property
+    def receipt(self) -> SESReceipt:
+        return self.record.ses.receipt

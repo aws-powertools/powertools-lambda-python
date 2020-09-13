@@ -78,6 +78,7 @@ def test_cognito_pre_signup_trigger_event():
     assert event.response.auto_verify_phone is True
     event.response.auto_verify_email = True
     assert event.response.auto_verify_email is True
+    assert event["response"]["autoVerifyEmail"] is True
 
 
 def test_cognito_post_confirmation_trigger_event():
@@ -170,7 +171,8 @@ def test_cognito_pre_token_generation_trigger_event():
     assert claims_override_details.group_configuration is None
 
     claims_override_details.group_configuration = {}
-    assert claims_override_details.group_configuration == {}
+    assert claims_override_details.group_configuration._data == {}
+    assert event["response"]["claimsOverrideDetails"]["groupOverrideDetails"] == {}
 
     expected_claims = {"test": "value"}
     claims_override_details.claims_to_add_or_override = expected_claims
@@ -295,7 +297,7 @@ def test_s3_trigger_event():
     assert s3.get_object.version_id is None
     assert s3.get_object.sequencer == "0C0F6F405D6ED209E1"
     assert record.glacier_event_data is None
-    assert event.record._v == event["Records"][0]
+    assert event.record._data == event["Records"][0]
     assert event.bucket_name == "lambda-artifacts-deafc19498e3f2df"
     assert event.object_key == "b21b84d653bb07b05b1e6b33684dc11b"
 
@@ -341,7 +343,7 @@ def test_ses_trigger_event():
     assert headers[0].value == "<janedoe@example.com>"
     common_headers = mail.common_headers
     assert common_headers.return_path == "janedoe@example.com"
-    assert common_headers.get_from == common_headers._v["from"]
+    assert common_headers.get_from == common_headers._data["from"]
     assert common_headers.date == "Wed, 7 Oct 2015 12:34:56 -0700"
     assert common_headers.to == [expected_address]
     assert common_headers.message_id == "<0123456789example.com>"
@@ -355,9 +357,12 @@ def test_ses_trigger_event():
     assert receipt.spf_verdict.status == "PASS"
     assert receipt.dmarc_verdict.status == "PASS"
     action = receipt.action
-    assert action.get_type == action._v["type"]
-    assert action.function_arn == action._v["functionArn"]
-    assert action.invocation_type == action._v["invocationType"]
+    assert action.get_type == action._data["type"]
+    assert action.function_arn == action._data["functionArn"]
+    assert action.invocation_type == action._data["invocationType"]
+    assert event.record._data == event["Records"][0]
+    assert event.mail._data == event["Records"][0]["ses"]["mail"]
+    assert event.receipt._data == event["Records"][0]["ses"]["receipt"]
 
 
 def test_sns_trigger_event():
@@ -383,7 +388,7 @@ def test_sns_trigger_event():
     assert sns.unsubscribe_url == "https://sns.us-east-2.amazonaws.com/?Action=Unsubscri ..."
     assert sns.topic_arn == "arn:aws:sns:us-east-2:123456789012:sns-lambda"
     assert sns.subject == "TestInvoke"
-    assert event.record._v == event["Records"][0]
+    assert event.record._data == event["Records"][0]
     assert event.sns_message == "Hello from SNS!"
 
 

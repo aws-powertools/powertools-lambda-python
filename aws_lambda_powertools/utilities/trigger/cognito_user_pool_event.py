@@ -1,19 +1,18 @@
 from typing import Any, Dict, List, Optional
 
+from aws_lambda_powertools.utilities.trigger.common import DictWrapper
 
-class CallerContext:
-    def __init__(self, event: Dict[str, Any]):
-        self._v = event
 
+class CallerContext(DictWrapper):
     @property
     def aws_sdk_version(self) -> str:
         """The AWS SDK version number."""
-        return self._v["callerContext"]["awsSdkVersion"]
+        return self["callerContext"]["awsSdkVersion"]
 
     @property
     def client_id(self) -> str:
         """The ID of the client associated with the user pool."""
-        return self._v["callerContext"]["clientId"]
+        return self["callerContext"]["clientId"]
 
 
 class BaseTriggerEvent(dict):
@@ -55,7 +54,7 @@ class BaseTriggerEvent(dict):
         return CallerContext(self)
 
 
-class PreSignUpTriggerEventRequest(dict):
+class PreSignUpTriggerEventRequest(DictWrapper):
     @property
     def user_attributes(self) -> Dict[str, str]:
         """One or more name-value pairs representing user attributes. The attribute names are the keys."""
@@ -73,7 +72,7 @@ class PreSignUpTriggerEventRequest(dict):
         return self["request"].get("clientMetadata")
 
 
-class PreSignUpTriggerEventResponse(dict):
+class PreSignUpTriggerEventResponse(DictWrapper):
     @property
     def auto_confirm_user(self) -> bool:
         return bool(self["response"]["autoConfirmUser"])
@@ -127,7 +126,7 @@ class PreSignUpTriggerEvent(BaseTriggerEvent):
         return PreSignUpTriggerEventResponse(self)
 
 
-class PostConfirmationTriggerEventRequest(dict):
+class PostConfirmationTriggerEventRequest(DictWrapper):
     @property
     def user_attributes(self) -> Dict[str, str]:
         """One or more name-value pairs representing user attributes. The attribute names are the keys."""
@@ -160,7 +159,7 @@ class PostConfirmationTriggerEvent(BaseTriggerEvent):
         return PostConfirmationTriggerEventRequest(self)
 
 
-class UserMigrationTriggerEventRequest(dict):
+class UserMigrationTriggerEventRequest(DictWrapper):
     @property
     def password(self) -> str:
         return self["request"]["password"]
@@ -177,7 +176,7 @@ class UserMigrationTriggerEventRequest(dict):
         return self["request"].get("clientMetadata")
 
 
-class UserMigrationTriggerEventResponse(dict):
+class UserMigrationTriggerEventResponse(DictWrapper):
     @property
     def user_attributes(self) -> Dict[str, str]:
         return self["response"]["userAttributes"]
@@ -265,7 +264,7 @@ class UserMigrationTriggerEvent(BaseTriggerEvent):
         return UserMigrationTriggerEventResponse(self)
 
 
-class CustomMessageTriggerEventRequest(dict):
+class CustomMessageTriggerEventRequest(DictWrapper):
     @property
     def code_parameter(self) -> str:
         """A string for you to use as the placeholder for the verification code in the custom message."""
@@ -288,7 +287,7 @@ class CustomMessageTriggerEventRequest(dict):
         return self["request"].get("clientMetadata")
 
 
-class CustomMessageTriggerEventResponse(dict):
+class CustomMessageTriggerEventResponse(DictWrapper):
     @property
     def sms_message(self) -> str:
         return self["response"]["smsMessage"]
@@ -350,7 +349,7 @@ class CustomMessageTriggerEvent(BaseTriggerEvent):
         return CustomMessageTriggerEventResponse(self)
 
 
-class PreAuthenticationTriggerEventRequest(dict):
+class PreAuthenticationTriggerEventRequest(DictWrapper):
     @property
     def user_not_found(self) -> Optional[bool]:
         """This boolean is populated when PreventUserExistenceErrors is set to ENABLED for your User Pool client."""
@@ -390,7 +389,7 @@ class PreAuthenticationTriggerEvent(BaseTriggerEvent):
         return PreAuthenticationTriggerEventRequest(self)
 
 
-class PostAuthenticationTriggerEventRequest(dict):
+class PostAuthenticationTriggerEventRequest(DictWrapper):
     @property
     def new_device_used(self) -> bool:
         """This flag indicates if the user has signed in on a new device.
@@ -431,7 +430,7 @@ class PostAuthenticationTriggerEvent(BaseTriggerEvent):
         return PostAuthenticationTriggerEventRequest(self)
 
 
-class GroupOverrideDetails(dict):
+class GroupOverrideDetails(DictWrapper):
     @property
     def groups_to_override(self) -> Optional[List[str]]:
         """A list of the group names that are associated with the user that the identity token is issued for."""
@@ -448,54 +447,48 @@ class GroupOverrideDetails(dict):
         return self.get("preferredRole")
 
 
-class PreTokenGenerationTriggerEventRequest:
-    def __init__(self, event: Dict[str, Any]):
-        self._v = event
-
+class PreTokenGenerationTriggerEventRequest(DictWrapper):
     @property
     def group_configuration(self) -> GroupOverrideDetails:
         """The input object containing the current group configuration"""
-        return GroupOverrideDetails(self._v["request"]["groupConfiguration"])
+        return GroupOverrideDetails(self["request"]["groupConfiguration"])
 
     @property
     def user_attributes(self) -> Dict[str, str]:
         """One or more name-value pairs representing user attributes."""
-        return self._v["request"]["userAttributes"]
+        return self["request"]["userAttributes"]
 
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
         that you specify for the pre token generation trigger."""
-        return self._v["request"].get("clientMetadata")
+        return self["request"].get("clientMetadata")
 
 
-class ClaimsOverrideDetails:
-    def __init__(self, event: Dict[str, Any]):
-        self._v = event["response"]["claimsOverrideDetails"]
-
+class ClaimsOverrideDetails(DictWrapper):
     @property
     def claims_to_add_or_override(self) -> Optional[Dict[str, str]]:
-        return self._v.get("claimsToAddOrOverride")
+        return self.get("claimsToAddOrOverride")
 
     @property
     def claims_to_suppress(self) -> Optional[List[str]]:
-        return self._v.get("claimsToSuppress")
+        return self.get("claimsToSuppress")
 
     @property
     def group_configuration(self) -> Optional[GroupOverrideDetails]:
-        group_override_details = self._v.get("groupOverrideDetails")
+        group_override_details = self.get("groupOverrideDetails")
         return None if group_override_details is None else GroupOverrideDetails(group_override_details)
 
     @claims_to_add_or_override.setter
     def claims_to_add_or_override(self, value: Dict[str, str]):
         """A map of one or more key-value pairs of claims to add or override.
         For group related claims, use groupOverrideDetails instead."""
-        self._v["claimsToAddOrOverride"] = value
+        self._data["claimsToAddOrOverride"] = value
 
     @claims_to_suppress.setter
     def claims_to_suppress(self, value: List[str]):
         """A list that contains claims to be suppressed from the identity token."""
-        self._v["claimsToSuppress"] = value
+        self._data["claimsToSuppress"] = value
 
     @group_configuration.setter
     def group_configuration(self, value: Dict[str, Any]):
@@ -508,33 +501,30 @@ class ClaimsOverrideDetails:
         as is, copy the value of the request's groupConfiguration object to the groupOverrideDetails object
         in the response, and pass it back to the service.
         """
-        self._v["groupOverrideDetails"] = value
+        self._data["groupOverrideDetails"] = value
 
     def set_group_configuration_groups_to_override(self, value: List[str]):
         """A list of the group names that are associated with the user that the identity token is issued for."""
-        self._v.setdefault("groupOverrideDetails", {})
-        self._v["groupOverrideDetails"]["groupsToOverride"] = value
+        self._data.setdefault("groupOverrideDetails", {})
+        self["groupOverrideDetails"]["groupsToOverride"] = value
 
     def set_group_configuration_iam_roles_to_override(self, value: List[str]):
         """A list of the current IAM roles associated with these groups."""
-        self._v.setdefault("groupOverrideDetails", {})
-        self._v["groupOverrideDetails"]["iamRolesToOverride"] = value
+        self._data.setdefault("groupOverrideDetails", {})
+        self["groupOverrideDetails"]["iamRolesToOverride"] = value
 
     def set_group_configuration_preferred_role(self, value: str):
         """A string indicating the preferred IAM role."""
-        self._v.setdefault("groupOverrideDetails", {})
-        self._v["groupOverrideDetails"]["preferredRole"] = value
+        self._data.setdefault("groupOverrideDetails", {})
+        self["groupOverrideDetails"]["preferredRole"] = value
 
 
-class PreTokenGenerationTriggerEventResponse:
-    def __init__(self, event: Dict[str, Any]):
-        self._v = event
-
+class PreTokenGenerationTriggerEventResponse(DictWrapper):
     @property
     def claims_override_details(self) -> ClaimsOverrideDetails:
         # Ensure we have a `claimsOverrideDetails` element
-        self._v["response"].setdefault("claimsOverrideDetails", {})
-        return ClaimsOverrideDetails(self._v)
+        self._data["response"].setdefault("claimsOverrideDetails", {})
+        return ClaimsOverrideDetails(self._data["response"]["claimsOverrideDetails"])
 
 
 class PreTokenGenerationTriggerEvent(BaseTriggerEvent):

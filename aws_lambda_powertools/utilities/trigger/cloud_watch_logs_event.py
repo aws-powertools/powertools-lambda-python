@@ -1,33 +1,32 @@
 import base64
 import json
 import zlib
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
+
+from aws_lambda_powertools.utilities.trigger.common import DictWrapper
 
 
-class CloudWatchLogsLogEvent:
-    def __init__(self, log_event: Dict[str, Any]):
-        self._v = log_event
-
+class CloudWatchLogsLogEvent(DictWrapper):
     @property
     def get_id(self) -> str:
         """The ID property is a unique identifier for every log event."""
         # Note: this name conflicts with existing python builtins
-        return self._v["id"]
+        return self["id"]
 
     @property
     def timestamp(self) -> int:
         """Get the `timestamp` property"""
-        return self._v["timestamp"]
+        return self["timestamp"]
 
     @property
     def message(self) -> str:
         """Get the `message` property"""
-        return self._v["message"]
+        return self["message"]
 
     @property
     def extracted_fields(self) -> Optional[Dict[str, str]]:
         """Get the `extractedFields` property"""
-        return self._v.get("extractedFields")
+        return self.get("extractedFields")
 
 
 class CloudWatchLogsDecodedData(dict):
