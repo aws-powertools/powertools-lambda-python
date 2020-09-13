@@ -527,3 +527,79 @@ def test_api_gateway_proxy_v2_event():
     assert event.path_parameters == event["pathParameters"]
     assert event.is_base64_encoded == event["isBase64Encoded"]
     assert event.stage_variables == event["stageVariables"]
+
+
+def test_api_gateway_proxy_get_query_string_value():
+    default_value = "default"
+    set_value = "value"
+
+    event = APIGatewayProxyEvent({})
+    value = event.get_query_string_value("test", default_value)
+    assert value == default_value
+
+    event["queryStringParameters"] = {"test": set_value}
+    value = event.get_query_string_value("test", default_value)
+    assert value == set_value
+
+    value = event.get_query_string_value("unknown", default_value)
+    assert value == default_value
+
+    value = event.get_query_string_value("unknown")
+    assert value is None
+
+
+def test_api_gateway_proxy_v2_get_query_string_value():
+    default_value = "default"
+    set_value = "value"
+
+    event = APIGatewayProxyEventV2({})
+    value = event.get_query_string_value("test", default_value)
+    assert value == default_value
+
+    event["queryStringParameters"] = {"test": set_value}
+    value = event.get_query_string_value("test", default_value)
+    assert value == set_value
+
+    value = event.get_query_string_value("unknown", default_value)
+    assert value == default_value
+
+    value = event.get_query_string_value("unknown")
+    assert value is None
+
+
+def test_api_gateway_proxy_get_header_value():
+    default_value = "default"
+    set_value = "value"
+
+    event = APIGatewayProxyEvent({"headers": {}})
+    value = event.get_header_value("test", default_value)
+    assert value == default_value
+
+    event["headers"] = {"test": set_value}
+    value = event.get_header_value("test", default_value)
+    assert value == set_value
+
+    value = event.get_header_value("unknown", default_value)
+    assert value == default_value
+
+    value = event.get_header_value("unknown")
+    assert value is None
+
+
+def test_api_gateway_proxy_v2_get_header_value():
+    default_value = "default"
+    set_value = "value"
+
+    event = APIGatewayProxyEventV2({"headers": {}})
+    value = event.get_header_value("test", default_value)
+    assert value == default_value
+
+    event["headers"] = {"test": set_value}
+    value = event.get_header_value("test", default_value)
+    assert value == set_value
+
+    value = event.get_header_value("unknown", default_value)
+    assert value == default_value
+
+    value = event.get_header_value("unknown")
+    assert value is None
