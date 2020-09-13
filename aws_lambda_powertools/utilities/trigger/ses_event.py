@@ -184,6 +184,7 @@ class SESEventRecord(DictWrapper):
 
     @property
     def event_version(self) -> str:
+        """The eventVersion key value contains a major and minor version in the form <major>.<minor>."""
         return self["eventVersion"]
 
     @property
