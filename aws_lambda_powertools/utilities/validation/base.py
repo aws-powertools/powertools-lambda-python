@@ -28,5 +28,6 @@ def unwrap_event_from_envelope(data: Dict, envelope: str, jmespath_options: Dict
     try:
         logger.debug(f"Envelope detected: {envelope}. JMESPath options: {jmespath_options}")
         return jmespath.search(envelope, data, options=jmespath.Options(**jmespath_options))
-    except (LexerError, TypeError) as e:
-        raise InvalidEnvelopeExpressionError(e)
+    except (LexerError, TypeError, UnicodeError) as e:
+        message = f"Failed to unwrap event from envelope using expression. Error: {e} Exp: {envelope}, Data: {data}"  # noqa: B306, E501
+        raise InvalidEnvelopeExpressionError(message)

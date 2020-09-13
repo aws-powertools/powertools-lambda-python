@@ -1,6 +1,6 @@
 import pytest
 
-from aws_lambda_powertools.utilities.validation import exceptions, validate
+from aws_lambda_powertools.utilities.validation import envelopes, exceptions, validate
 
 
 def test_validate_raw_event(schema, raw_event):
@@ -46,36 +46,30 @@ def test_validate_invalid_event(schema):
         validate(event=b64_event, schema=schema)
 
 
-def test_apigateway_http_envelope():
-    raise NotImplementedError()
+def test_apigateway_envelope(schema, apigateway_event):
+    # Payload v1 and v2 remains consistent where the payload is (body)
+    validate(event=apigateway_event, schema=schema, envelope=envelopes.API_GATEWAY_REST)
+    validate(event=apigateway_event, schema=schema, envelope=envelopes.API_GATEWAY_HTTP)
 
 
-def test_apigateway_rest_envelope():
-    raise NotImplementedError()
+def test_sqs_envelope(sqs_event, schema_array):
+    validate(event=sqs_event, schema=schema_array, envelope=envelopes.SQS)
 
 
-def test_eventbridge_envelope():
-    raise NotImplementedError()
+def test_sns_envelope(schema, sns_event):
+    validate(event=sns_event, schema=schema, envelope=envelopes.SNS)
 
 
-def test_sqs_envelope():
-    raise NotImplementedError()
+def test_eventbridge_envelope(schema, eventbridge_event):
+    validate(event=eventbridge_event, schema=schema, envelope=envelopes.EVENTBRIDGE)
 
 
-def test_sns_envelope():
-    raise NotImplementedError()
+def test_kinesis_data_stream_envelope(schema, kinesis_event):
+    validate(event=kinesis_event, schema=schema, envelope=envelopes.KINESIS_DATA_STREAM)
 
 
-def test_cloudwatch_events_schedule_envelope():
-    raise NotImplementedError()
-
-
-def test_kinesis_data_stream_envelope():
-    raise NotImplementedError()
-
-
-def test_cloudwatch_logs_envelope():
-    raise NotImplementedError()
+def test_cloudwatch_logs_envelope(cloudwatch_logs_schema, cloudwatch_logs_event):
+    validate(event=cloudwatch_logs_event, schema=cloudwatch_logs_schema, envelope=envelopes.CLOUDWATCH_LOGS)
 
 
 def test_validator_incoming():
