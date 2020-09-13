@@ -1,6 +1,6 @@
 import pytest
 
-from aws_lambda_powertools.utilities.validation import envelopes, exceptions, validate
+from aws_lambda_powertools.utilities.validation import envelopes, exceptions, validate, validator
 
 
 def test_validate_raw_event(schema, raw_event):
@@ -72,13 +72,34 @@ def test_cloudwatch_logs_envelope(cloudwatch_logs_schema, cloudwatch_logs_event)
     validate(event=cloudwatch_logs_event, schema=cloudwatch_logs_schema, envelope=envelopes.CLOUDWATCH_LOGS)
 
 
-def test_validator_incoming():
-    raise NotImplementedError()
+def test_validator_incoming(schema, raw_event):
+    @validator(inbound_schema=schema)
+    def lambda_handler(evt, context):
+        pass
+
+    lambda_handler(raw_event, {})
 
 
-def test_validator_outgoing():
-    raise NotImplementedError()
+def test_validator_outgoing(schema_response, raw_response):
+    @validator(outbound_schema=schema_response)
+    def lambda_handler(evt, context):
+        return raw_response
+
+    lambda_handler({}, {})
 
 
-def test_validator_incoming_and_outgoing():
-    raise NotImplementedError()
+def test_validator_incoming_and_outgoing(schema, schema_response, raw_event, raw_response):
+    @validator(inbound_schema=schema, outbound_schema=schema_response)
+    def lambda_handler(evt, context):
+        return raw_response
+
+    lambda_handler(raw_event, {})
+
+
+def test_validator_propagates_exception(schema, raw_event, schema_response):
+    @validator(inbound_schema=schema, outbound_schema=schema_response)
+    def lambda_handler(evt, context):
+        raise ValueError("Bubble up")
+
+    with pytest.raises(ValueError):
+        lambda_handler(raw_event, {})

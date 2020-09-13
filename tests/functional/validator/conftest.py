@@ -69,6 +69,23 @@ def schema_array():
 
 
 @pytest.fixture
+def schema_response():
+    return {
+        "$schema": "http://json-schema.org/draft-07/schema",
+        "$id": "http://example.com/example.json",
+        "type": "object",
+        "title": "Sample outgoing schema",
+        "description": "The root schema comprises the entire JSON document.",
+        "examples": [{"statusCode": 200, "body": "response"}],
+        "required": ["statusCode", "body"],
+        "properties": {
+            "statusCode": {"$id": "#/properties/statusCode", "type": "integer", "title": "The statusCode"},
+            "body": {"$id": "#/properties/body", "type": "string", "title": "The response"},
+        },
+    }
+
+
+@pytest.fixture
 def raw_event():
     return {"message": "hello hello", "username": "blah blah"}
 
@@ -86,6 +103,11 @@ def wrapped_event_json_string():
 @pytest.fixture
 def wrapped_event_base64_json_string():
     return {"data": "eyJtZXNzYWdlIjogImhlbGxvIGhlbGxvIiwgInVzZXJuYW1lIjogImJsYWggYmxhaCJ9="}
+
+
+@pytest.fixture
+def raw_response():
+    return {"statusCode": 200, "body": "response"}
 
 
 @pytest.fixture

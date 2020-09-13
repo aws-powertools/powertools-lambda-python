@@ -28,7 +28,7 @@ def validator(
 
     if outbound_schema:
         logger.debug("Validating outbound event")
-        validate_data_against_schema(data=event, schema=outbound_schema)
+        validate_data_against_schema(data=response, schema=outbound_schema)
 
     return response
 
