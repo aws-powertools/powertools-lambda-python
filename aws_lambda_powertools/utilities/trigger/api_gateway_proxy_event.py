@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from aws_lambda_powertools.utilities.trigger.common import DictWrapper
+from aws_lambda_powertools.utilities.trigger.common import BaseProxyEvent, DictWrapper
 
 
 class APIGatewayEventIdentity(DictWrapper):
@@ -196,7 +196,7 @@ class APIGatewayEventRequestContext(DictWrapper):
         return self["requestContext"].get("routeKey")
 
 
-class APIGatewayProxyEvent(dict):
+class APIGatewayProxyEvent(BaseProxyEvent):
     """AWS Lambda proxy V1
 
     Documentation:
@@ -222,16 +222,8 @@ class APIGatewayProxyEvent(dict):
         return self["httpMethod"]
 
     @property
-    def headers(self) -> Dict[str, str]:
-        return self["headers"]
-
-    @property
     def multi_value_headers(self) -> Dict[str, List[str]]:
         return self["multiValueHeaders"]
-
-    @property
-    def query_string_parameters(self) -> Optional[Dict[str, str]]:
-        return self.get("queryStringParameters")
 
     @property
     def multi_value_query_string_parameters(self) -> Optional[Dict[str, List[str]]]:
@@ -248,47 +240,6 @@ class APIGatewayProxyEvent(dict):
     @property
     def stage_variables(self) -> Optional[Dict[str, str]]:
         return self.get("stageVariables")
-
-    @property
-    def body(self) -> Optional[str]:
-        return self.get("body")
-
-    @property
-    def is_base64_encoded(self) -> bool:
-        return self["isBase64Encoded"]
-
-    def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
-        """Get query string value by name
-
-        Parameters
-        ----------
-        name: str
-            Query string parameter name
-        default_value: str, optional
-            Default value if no value was found by name
-        Returns
-        -------
-        str, optional
-            Query string parameter value
-        """
-        params = self.query_string_parameters
-        return default_value if params is None else params.get(name, default_value)
-
-    def get_header_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
-        """Get header value by name
-
-        Parameters
-        ----------
-        name: str
-            Header name
-        default_value: str, optional
-            Default value if no value was found by name
-        Returns
-        -------
-        str, optional
-            Header value
-        """
-        return self.headers.get(name, default_value)
 
 
 class RequestContextV2Http(DictWrapper):
@@ -381,7 +332,7 @@ class RequestContextV2(DictWrapper):
         return self["requestContext"]["timeEpoch"]
 
 
-class APIGatewayProxyEventV2(dict):
+class APIGatewayProxyEventV2(BaseProxyEvent):
     """AWS Lambda proxy V2 event
 
     Notes:
@@ -419,62 +370,13 @@ class APIGatewayProxyEventV2(dict):
         return self.get("cookies")
 
     @property
-    def headers(self) -> Dict[str, str]:
-        return self["headers"]
-
-    @property
-    def query_string_parameters(self) -> Optional[Dict[str, str]]:
-        return self.get("queryStringParameters")
-
-    @property
     def request_context(self) -> RequestContextV2:
         return RequestContextV2(self)
-
-    @property
-    def body(self) -> Optional[str]:
-        return self.get("body")
 
     @property
     def path_parameters(self) -> Optional[Dict[str, str]]:
         return self.get("pathParameters")
 
     @property
-    def is_base64_encoded(self) -> bool:
-        return self["isBase64Encoded"]
-
-    @property
     def stage_variables(self) -> Optional[Dict[str, str]]:
         return self.get("stageVariables")
-
-    def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
-        """Get query string value by name
-
-        Parameters
-        ----------
-        name: str
-            Query string parameter name
-        default_value: str, optional
-            Default value if no value was found by name
-        Returns
-        -------
-        str, optional
-            Query string parameter value
-        """
-        params = self.query_string_parameters
-        return default_value if params is None else params.get(name, default_value)
-
-    def get_header_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
-        """Get header value by name
-
-        Parameters
-        ----------
-        name: str
-            Header name
-        default_value: str, optional
-            Default value if no value was found by name
-        Returns
-        -------
-        str, optional
-            Header value
-        """
-        return self.headers.get(name, default_value)

@@ -4,6 +4,7 @@ import os
 from secrets import compare_digest
 
 from aws_lambda_powertools.utilities.trigger import (
+    ALBEvent,
     APIGatewayProxyEvent,
     APIGatewayProxyEventV2,
     CloudWatchLogsEvent,
@@ -23,6 +24,7 @@ from aws_lambda_powertools.utilities.trigger.cognito_user_pool_event import (
     PreTokenGenerationTriggerEvent,
     UserMigrationTriggerEvent,
 )
+from aws_lambda_powertools.utilities.trigger.common import BaseProxyEvent
 from aws_lambda_powertools.utilities.trigger.dynamo_db_stream_event import (
     AttributeValue,
     DynamoDBRecordEventName,
@@ -531,11 +533,11 @@ def test_api_gateway_proxy_v2_event():
     assert event.stage_variables == event["stageVariables"]
 
 
-def test_api_gateway_proxy_get_query_string_value():
+def test_base_proxy_event_get_query_string_value():
     default_value = "default"
     set_value = "value"
 
-    event = APIGatewayProxyEvent({})
+    event = BaseProxyEvent({})
     value = event.get_query_string_value("test", default_value)
     assert value == default_value
 
@@ -550,49 +552,11 @@ def test_api_gateway_proxy_get_query_string_value():
     assert value is None
 
 
-def test_api_gateway_proxy_v2_get_query_string_value():
+def test_base_proxy_event_get_header_value():
     default_value = "default"
     set_value = "value"
 
-    event = APIGatewayProxyEventV2({})
-    value = event.get_query_string_value("test", default_value)
-    assert value == default_value
-
-    event["queryStringParameters"] = {"test": set_value}
-    value = event.get_query_string_value("test", default_value)
-    assert value == set_value
-
-    value = event.get_query_string_value("unknown", default_value)
-    assert value == default_value
-
-    value = event.get_query_string_value("unknown")
-    assert value is None
-
-
-def test_api_gateway_proxy_get_header_value():
-    default_value = "default"
-    set_value = "value"
-
-    event = APIGatewayProxyEvent({"headers": {}})
-    value = event.get_header_value("test", default_value)
-    assert value == default_value
-
-    event["headers"] = {"test": set_value}
-    value = event.get_header_value("test", default_value)
-    assert value == set_value
-
-    value = event.get_header_value("unknown", default_value)
-    assert value == default_value
-
-    value = event.get_header_value("unknown")
-    assert value is None
-
-
-def test_api_gateway_proxy_v2_get_header_value():
-    default_value = "default"
-    set_value = "value"
-
-    event = APIGatewayProxyEventV2({"headers": {}})
+    event = BaseProxyEvent({"headers": {}})
     value = event.get_header_value("test", default_value)
     assert value == default_value
 
@@ -639,3 +603,16 @@ def test_kinesis_stream_event_json_data():
     data = base64.b64encode(bytes(json.dumps(json_value), "utf-8")).decode("utf-8")
     event = KinesisStreamEvent({"Records": [{"kinesis": {"data": data}}]})
     assert next(event.records).kinesis.data_as_json() == json_value
+
+
+def test_alb_event():
+    event = ALBEvent(load_event("albEvent.json"))
+    assert event.request_context.elb_target_group_arn == event["requestContext"]["elb"]["targetGroupArn"]
+    assert event.http_method == event["httpMethod"]
+    assert event.path == event["path"]
+    assert event.query_string_parameters == event["queryStringParameters"]
+    assert event.headers == event["headers"]
+    assert event.multi_value_query_string_parameters == event.get("multiValueQueryStringParameters")
+    assert event.multi_value_headers == event.get("multiValueHeaders")
+    assert event.body == event["body"]
+    assert event.is_base64_encoded == event["isBase64Encoded"]
