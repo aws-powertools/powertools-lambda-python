@@ -81,6 +81,9 @@ class CloudWatchLogsEvent(dict):
     _decompressed_logs_data = None
     _json_logs_data = None
 
+    def __eq__(self, other):
+        return super(CloudWatchLogsEvent, self).__eq__(other)
+
     @property
     def raw_logs_data(self) -> str:
         """The value of the `data` field is a Base64 encoded ZIP archive."""
