@@ -42,15 +42,19 @@ def load_event(file_name: str) -> dict:
 def test_cloud_watch_trigger_event():
     event = CloudWatchLogsEvent(load_event("cloudWatchLogEvent.json"))
 
-    decoded_data = event.parse_logs_data()
-    log_events = decoded_data.log_events
+    decompressed_logs_data = event.decompress_logs_data
+    assert event.decompress_logs_data == decompressed_logs_data
+
+    json_logs_data = event.parse_logs_data()
+    assert event.parse_logs_data() == json_logs_data
+    log_events = json_logs_data.log_events
     log_event = log_events[0]
 
-    assert decoded_data.owner == "123456789123"
-    assert decoded_data.log_group == "testLogGroup"
-    assert decoded_data.log_stream == "testLogStream"
-    assert decoded_data.subscription_filters == ["testFilter"]
-    assert decoded_data.message_type == "DATA_MESSAGE"
+    assert json_logs_data.owner == "123456789123"
+    assert json_logs_data.log_group == "testLogGroup"
+    assert json_logs_data.log_stream == "testLogStream"
+    assert json_logs_data.subscription_filters == ["testFilter"]
+    assert json_logs_data.message_type == "DATA_MESSAGE"
 
     assert log_event.get_id == "eventId1"
     assert log_event.timestamp == 1440442987000

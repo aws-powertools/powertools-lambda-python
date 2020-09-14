@@ -1,7 +1,7 @@
 import base64
 import json
 import zlib
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from aws_lambda_powertools.utilities.trigger.common import DictWrapper
 
@@ -78,17 +78,26 @@ class CloudWatchLogsEvent(dict):
     - https://docs.aws.amazon.com/lambda/latest/dg/services-cloudwatchlogs.html
     """
 
+    def __init__(self, event: Dict[str, Any]):
+        super().__init__(event)
+        self._decompressed_logs_data = None
+        self._json_logs_data = None
+
     @property
-    def aws_logs_data(self) -> str:
+    def raw_logs_data(self) -> str:
         """The value of the `data` field is a Base64 encoded ZIP archive."""
         return self["awslogs"]["data"]
 
     @property
     def decompress_logs_data(self) -> bytes:
         """Decode and decompress log data"""
-        payload = base64.b64decode(self.aws_logs_data)
-        return zlib.decompress(payload, zlib.MAX_WBITS | 32)
+        if self._decompressed_logs_data is None:
+            payload = base64.b64decode(self.raw_logs_data)
+            self._decompressed_logs_data = zlib.decompress(payload, zlib.MAX_WBITS | 32)
+        return self._decompressed_logs_data
 
     def parse_logs_data(self) -> CloudWatchLogsDecodedData:
         """Decode, decompress and parse json data as CloudWatchLogsDecodedData"""
-        return CloudWatchLogsDecodedData(json.loads(self.decompress_logs_data.decode("UTF-8")))
+        if self._json_logs_data is None:
+            self._json_logs_data = json.loads(self.decompress_logs_data.decode("UTF-8"))
+        return CloudWatchLogsDecodedData(self._json_logs_data)
