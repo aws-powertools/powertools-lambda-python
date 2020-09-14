@@ -64,8 +64,8 @@ def test_eventbridge_envelope(schema, eventbridge_event):
     validate(event=eventbridge_event, schema=schema, envelope=envelopes.EVENTBRIDGE)
 
 
-def test_kinesis_data_stream_envelope(schema, kinesis_event):
-    validate(event=kinesis_event, schema=schema, envelope=envelopes.KINESIS_DATA_STREAM)
+def test_kinesis_data_stream_envelope(schema_array, kinesis_event):
+    validate(event=kinesis_event, schema=schema_array, envelope=envelopes.KINESIS_DATA_STREAM)
 
 
 def test_cloudwatch_logs_envelope(cloudwatch_logs_schema, cloudwatch_logs_event):
