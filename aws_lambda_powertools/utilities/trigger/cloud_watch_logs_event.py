@@ -83,8 +83,12 @@ class CloudWatchLogsEvent(dict):
         """The value of the `data` field is a Base64 encoded ZIP archive."""
         return self["awslogs"]["data"]
 
-    def decode_cloud_watch_logs_data(self) -> CloudWatchLogsDecodedData:
-        """Decode, unzip and parse json data"""
+    @property
+    def decompress_logs_data(self) -> bytes:
+        """Decode and decompress log data"""
         payload = base64.b64decode(self.aws_logs_data)
-        decoded: dict = json.loads(zlib.decompress(payload, zlib.MAX_WBITS | 32).decode("UTF-8"))
-        return CloudWatchLogsDecodedData(decoded)
+        return zlib.decompress(payload, zlib.MAX_WBITS | 32)
+
+    def parse_logs_data(self) -> CloudWatchLogsDecodedData:
+        """Decode, decompress and parse json data as CloudWatchLogsDecodedData"""
+        return CloudWatchLogsDecodedData(json.loads(self.decompress_logs_data.decode("UTF-8")))
