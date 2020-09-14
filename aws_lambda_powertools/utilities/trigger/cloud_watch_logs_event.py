@@ -1,7 +1,7 @@
 import base64
 import json
 import zlib
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from aws_lambda_powertools.utilities.trigger.common import DictWrapper
 
@@ -78,10 +78,8 @@ class CloudWatchLogsEvent(dict):
     - https://docs.aws.amazon.com/lambda/latest/dg/services-cloudwatchlogs.html
     """
 
-    def __init__(self, event: Dict[str, Any]):
-        super().__init__(event)
-        self._decompressed_logs_data = None
-        self._json_logs_data = None
+    _decompressed_logs_data = None
+    _json_logs_data = None
 
     @property
     def raw_logs_data(self) -> str:
