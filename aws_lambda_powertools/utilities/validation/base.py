@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Any, Dict
 
 import fastjsonschema
 import jmespath
@@ -12,6 +12,22 @@ logger = logging.getLogger(__name__)
 
 
 def validate_data_against_schema(data: Dict, schema: Dict):
+    """Validate dict data against given JSON Schema
+
+    Parameters
+    ----------
+    data : Dict
+        Data set to be validated
+    schema : Dict
+        JSON Schema to validate against
+
+    Raises
+    ------
+    SchemaValidationError
+        When schema validation fails against data set
+    InvalidSchemaFormatError
+        When JSON schema provided is invalid
+    """
     try:
         fastjsonschema.validate(definition=schema, data=data)
     except fastjsonschema.JsonSchemaException as e:
@@ -21,7 +37,23 @@ def validate_data_against_schema(data: Dict, schema: Dict):
         raise InvalidSchemaFormatError(f"Schema received: {schema}. Error: {e}")
 
 
-def unwrap_event_from_envelope(data: Dict, envelope: str, jmespath_options: Dict):
+def unwrap_event_from_envelope(data: Dict, envelope: str, jmespath_options: Dict) -> Any:
+    """Searches data using JMESPath expression
+
+    Parameters
+    ----------
+    data : Dict
+        Data set to be filtered
+    envelope : str
+        JMESPath expression to filter data against
+    jmespath_options : Dict
+        Alternative JMESPath options to be included when filtering expr
+
+    Returns
+    -------
+    Any
+        Data found using JMESPath expression given in envelope
+    """
     if not jmespath_options:
         jmespath_options = {"custom_functions": PowertoolsFunctions()}
 
