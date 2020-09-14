@@ -2,6 +2,7 @@ import base64
 import json
 import os
 from secrets import compare_digest
+from urllib.parse import quote_plus
 
 from aws_lambda_powertools.utilities.trigger import (
     ALBEvent,
@@ -311,6 +312,13 @@ def test_s3_trigger_event():
     assert event.record._data == event["Records"][0]
     assert event.bucket_name == "lambda-artifacts-deafc19498e3f2df"
     assert event.object_key == "b21b84d653bb07b05b1e6b33684dc11b"
+
+
+def test_s3_key_unquote_plus():
+    tricky_name = "foo name+value"
+    event_dict = {"Records": [{"s3": {"object": {"key": quote_plus(tricky_name)}}}]}
+    event = S3Event(event_dict)
+    assert event.object_key == tricky_name
 
 
 def test_s3_glacier_event():

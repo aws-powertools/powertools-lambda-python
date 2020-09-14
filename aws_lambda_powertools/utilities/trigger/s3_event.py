@@ -1,4 +1,5 @@
 from typing import Dict, Iterator, Optional
+from urllib.parse import unquote_plus
 
 from aws_lambda_powertools.utilities.trigger.common import DictWrapper
 
@@ -180,9 +181,9 @@ class S3Event(dict):
     @property
     def bucket_name(self) -> str:
         """Get the bucket name for the first s3 event record"""
-        return self.record.s3.bucket.name
+        return self["Records"][0]["s3"]["bucket"]["name"]
 
     @property
     def object_key(self) -> str:
-        """Get the object key for the first s3 event record"""
-        return self.record.s3.get_object.key
+        """Get the object key for the first s3 event record and unquote plus"""
+        return unquote_plus(self["Records"][0]["s3"]["object"]["key"])
