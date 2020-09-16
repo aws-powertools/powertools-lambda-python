@@ -69,7 +69,6 @@ def validator(
 
     **Unwrap, decode base64 and deserialize JSON string event before validating against actual payload - using built-in functions** # noqa: E501
 
-        import json
         from aws_lambda_powertools.utilities.validation import validator
 
         @validator(inbound_schema=json_schema_dict, envelope="Records[*].kinesis.powertools_json(powertools_base64(data))")
@@ -78,7 +77,6 @@ def validator(
 
     **Unwrap, decompress ZIP archive and deserialize JSON string event before validating against actual payload - using built-in functions** # noqa: E501
 
-        import json
         from aws_lambda_powertools.utilities.validation import validator
 
         @validator(inbound_schema=json_schema_dict, envelope="awslogs.powertools_base64_gzip(data) | powertools_json(@).logEvents[*]")
@@ -139,7 +137,6 @@ def validate(event: Dict, schema: Dict = None, envelope: str = None, jmespath_op
 
     **Validate event**
 
-        import json
         from aws_lambda_powertools.utilities.validation import validate
 
         def handler(event, context):
@@ -148,7 +145,6 @@ def validate(event: Dict, schema: Dict = None, envelope: str = None, jmespath_op
 
     **Unwrap event before validating against actual payload - using built-in envelopes**
 
-        import json
         from aws_lambda_powertools.utilities.validation import validate, envelopes
 
         def handler(event, context):
@@ -157,7 +153,6 @@ def validate(event: Dict, schema: Dict = None, envelope: str = None, jmespath_op
 
     **Unwrap event before validating against actual payload - using custom JMESPath expression**
 
-        import json
         from aws_lambda_powertools.utilities.validation import validate
 
         def handler(event, context):
@@ -166,7 +161,6 @@ def validate(event: Dict, schema: Dict = None, envelope: str = None, jmespath_op
 
     **Unwrap and deserialize JSON string event before validating against actual payload - using built-in functions**
 
-        import json
         from aws_lambda_powertools.utilities.validation import validate
 
         def handler(event, context):
@@ -175,7 +169,6 @@ def validate(event: Dict, schema: Dict = None, envelope: str = None, jmespath_op
 
     **Unwrap, decode base64 and deserialize JSON string event before validating against actual payload - using built-in functions**
 
-        import json
         from aws_lambda_powertools.utilities.validation import validate
 
         def handler(event, context):
@@ -184,7 +177,6 @@ def validate(event: Dict, schema: Dict = None, envelope: str = None, jmespath_op
 
     **Unwrap, decompress ZIP archive and deserialize JSON string event before validating against actual payload - using built-in functions** # noqa: E501
 
-        import json
         from aws_lambda_powertools.utilities.validation import validate
 
         def handler(event, context):
