@@ -689,7 +689,7 @@ def test_log_multiple_metrics(capsys, metrics_same_name, dimensions, namespace):
         my_metrics.add_dimension(**dimension)
 
     # WHEN we utilize log_metrics to serialize
-    # and flush all metrics at the end of a function execution
+    # and flush multiple metrics with the same name at the end of a function execution
     @my_metrics.log_metrics
     def lambda_handler(evt, ctx):
         for metric in metrics_same_name:
@@ -725,7 +725,7 @@ def test_serialize_metric_set_metric_definition_multiple_values(
         "test_dimension": "test",
     }
 
-    # GIVEN Metrics is initialized
+    # GIVEN Metrics is initialized and multiple metrics are added with the same name
     my_metrics = Metrics(service=service, namespace=namespace)
     for metric in metrics_same_name:
         my_metrics.add_metric(**metric)
