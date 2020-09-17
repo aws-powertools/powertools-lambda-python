@@ -94,7 +94,7 @@ class MetricManager:
         self._metric_unit_options = list(MetricUnit.__members__)
         self.metadata_set = self.metadata_set if metadata_set is not None else {}
 
-    def add_metric(self, name: str, unit: MetricUnit, value: Union[float, int]):
+    def add_metric(self, name: str, unit: Union[MetricUnit, str], value: Union[float, int]):
         """Adds given metric
 
         Example
@@ -111,7 +111,7 @@ class MetricManager:
         ----------
         name : str
             Metric name
-        unit : MetricUnit
+        unit : Union[MetricUnit, str]
             `aws_lambda_powertools.helper.models.MetricUnit`
         value : Union[float, int]
             Metric value
