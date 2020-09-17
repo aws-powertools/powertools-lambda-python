@@ -2,7 +2,7 @@ import base64
 import json
 from typing import Iterator
 
-from aws_lambda_powertools.utilities.trigger.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
 class KinesisStreamRecordPayload(DictWrapper):

@@ -3,7 +3,7 @@ import json
 import zlib
 from typing import Dict, List, Optional
 
-from aws_lambda_powertools.utilities.trigger.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
 class CloudWatchLogsLogEvent(DictWrapper):

@@ -1,6 +1,6 @@
 from typing import Dict, Iterator
 
-from aws_lambda_powertools.utilities.trigger.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
 class SNSMessageAttribute(DictWrapper):

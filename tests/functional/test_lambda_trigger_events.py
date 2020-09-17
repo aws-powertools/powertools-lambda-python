@@ -4,7 +4,7 @@ import os
 from secrets import compare_digest
 from urllib.parse import quote_plus
 
-from aws_lambda_powertools.utilities.trigger import (
+from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
     APIGatewayProxyEvent,
     APIGatewayProxyEventV2,
@@ -16,7 +16,7 @@ from aws_lambda_powertools.utilities.trigger import (
     SNSEvent,
     SQSEvent,
 )
-from aws_lambda_powertools.utilities.trigger.cognito_user_pool_event import (
+from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import (
     CustomMessageTriggerEvent,
     PostAuthenticationTriggerEvent,
     PostConfirmationTriggerEvent,
@@ -25,8 +25,8 @@ from aws_lambda_powertools.utilities.trigger.cognito_user_pool_event import (
     PreTokenGenerationTriggerEvent,
     UserMigrationTriggerEvent,
 )
-from aws_lambda_powertools.utilities.trigger.common import BaseProxyEvent
-from aws_lambda_powertools.utilities.trigger.dynamo_db_stream_event import (
+from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
+from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
     AttributeValue,
     DynamoDBRecordEventName,
     DynamoDBStreamEvent,

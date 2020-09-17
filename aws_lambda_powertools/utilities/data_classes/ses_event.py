@@ -1,6 +1,6 @@
 from typing import Iterator, List
 
-from aws_lambda_powertools.utilities.trigger.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
 class SESMailHeader(DictWrapper):
@@ -193,7 +193,7 @@ class SESEventRecord(DictWrapper):
 
 
 class SESEvent(dict):
-    """Amazon SES to receive message event trigger
+    """Amazon SES to receive message event data_classes
 
     NOTE: There is a 30-second timeout on RequestResponse invocations.
 

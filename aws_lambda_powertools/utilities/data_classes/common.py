@@ -1,8 +1,7 @@
-from abc import ABC
 from typing import Any, Dict, Optional
 
 
-class DictWrapper(ABC):
+class DictWrapper:
     def __init__(self, data: Dict[str, Any]):
         self._data = data
 

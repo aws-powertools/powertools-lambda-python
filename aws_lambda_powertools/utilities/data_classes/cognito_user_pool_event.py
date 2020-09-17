@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from aws_lambda_powertools.utilities.trigger.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
 class CallerContext(DictWrapper):
@@ -68,7 +68,7 @@ class PreSignUpTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
-        that you specify for the pre sign-up trigger."""
+        that you specify for the pre sign-up data_classes."""
         return self["request"].get("clientMetadata")
 
 
@@ -135,7 +135,7 @@ class PostConfirmationTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
-        that you specify for the post confirmation trigger."""
+        that you specify for the post confirmation data_classes."""
         return self["request"].get("clientMetadata")
 
 
@@ -172,7 +172,7 @@ class UserMigrationTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
-        that you specify for the pre sign-up trigger."""
+        that you specify for the pre sign-up data_classes."""
         return self["request"].get("clientMetadata")
 
 
@@ -283,7 +283,7 @@ class CustomMessageTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
-        that you specify for the pre sign-up trigger."""
+        that you specify for the pre sign-up data_classes."""
         return self["request"].get("clientMetadata")
 
 
@@ -329,9 +329,9 @@ class CustomMessageTriggerEvent(BaseTriggerEvent):
     - `CustomMessage_AdminCreateUser` To send the temporary password to a new user.
     - `CustomMessage_ResendCode` To resend the confirmation code to an existing user.
     - `CustomMessage_ForgotPassword` To send the confirmation code for Forgot Password request.
-    - `CustomMessage_UpdateUserAttribute` When a user's email or phone number is changed, this trigger sends a
+    - `CustomMessage_UpdateUserAttribute` When a user's email or phone number is changed, this data_classes sends a
        verification code automatically to the user. Cannot be used for other attributes.
-    - `CustomMessage_VerifyUserAttribute`  This trigger sends a verification code to the user when they manually
+    - `CustomMessage_VerifyUserAttribute`  This data_classes sends a verification code to the user when they manually
        request it for a new email or phone number.
     - `CustomMessage_Authentication` To send MFA code during authentication.
 
@@ -369,7 +369,7 @@ class PreAuthenticationTriggerEventRequest(DictWrapper):
 class PreAuthenticationTriggerEvent(BaseTriggerEvent):
     """Pre Authentication Lambda Trigger
 
-    Amazon Cognito invokes this trigger when a user attempts to sign in, allowing custom validation
+    Amazon Cognito invokes this data_classes when a user attempts to sign in, allowing custom validation
     to accept or deny the authentication request.
 
     Notes:
@@ -404,14 +404,15 @@ class PostAuthenticationTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
-        that you specify for the post authentication trigger."""
+        that you specify for the post authentication data_classes."""
         return self["request"].get("clientMetadata")
 
 
 class PostAuthenticationTriggerEvent(BaseTriggerEvent):
     """Post Authentication Lambda Trigger
 
-    Amazon Cognito invokes this trigger after signing in a user, allowing you to add custom logic after authentication.
+    Amazon Cognito invokes this data_classes after signing in a user, allowing you to add custom logic
+    after authentication.
 
     Notes:
     ----
@@ -461,7 +462,7 @@ class PreTokenGenerationTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
-        that you specify for the pre token generation trigger."""
+        that you specify for the pre token generation data_classes."""
         return self["request"].get("clientMetadata")
 
 
@@ -530,7 +531,7 @@ class PreTokenGenerationTriggerEventResponse(DictWrapper):
 class PreTokenGenerationTriggerEvent(BaseTriggerEvent):
     """Pre Token Generation Lambda Trigger
 
-    Amazon Cognito invokes this trigger before token generation allowing you to customize identity token claims.
+    Amazon Cognito invokes this data_classes before token generation allowing you to customize identity token claims.
 
     Notes:
     ----
