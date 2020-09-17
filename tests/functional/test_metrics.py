@@ -33,6 +33,14 @@ def metrics() -> List[Dict[str, str]]:
 
 
 @pytest.fixture
+def metrics_same_name() -> List[Dict[str, str]]:
+    return [
+        {"name": "metric_one", "unit": MetricUnit.Count, "value": 1},
+        {"name": "metric_one", "unit": MetricUnit.Count, "value": 5},
+    ]
+
+
+@pytest.fixture
 def dimension() -> Dict[str, str]:
     return {"name": "test_dimension", "value": "test"}
 
@@ -485,7 +493,7 @@ def test_log_metrics_capture_cold_start_metric(capsys, namespace, service):
     output = capture_metrics_output(capsys)
 
     # THEN ColdStart metric and function_name dimension should be logged
-    assert output["ColdStart"] == 1
+    assert output["ColdStart"] == [1.0]
     assert output["function_name"] == "example_fn"
 
 
@@ -607,7 +615,7 @@ def test_log_metrics_with_metadata(capsys, metric, dimension, namespace, service
 
 def test_serialize_metric_set_metric_definition(metric, dimension, namespace, service, metadata):
     expected_metric_definition = {
-        "single_metric": 1.0,
+        "single_metric": [1.0],
         "_aws": {
             "Timestamp": 1592237875494,
             "CloudWatchMetrics": [
@@ -655,7 +663,7 @@ def test_log_metrics_capture_cold_start_metric_separately(capsys, namespace, ser
 
     # THEN ColdStart metric and function_name dimension should be logged
     # in a separate EMF blob than the application metrics
-    assert cold_start_blob["ColdStart"] == 1
+    assert cold_start_blob["ColdStart"] == [1.0]
     assert cold_start_blob["function_name"] == "example_fn"
     assert cold_start_blob["service"] == service
 
@@ -669,5 +677,65 @@ def test_log_metrics_capture_cold_start_metric_separately(capsys, namespace, ser
 
     # and that application metrics are recorded as normal
     assert custom_metrics_blob["service"] == service
-    assert custom_metrics_blob["single_metric"] == metric["value"]
+    assert custom_metrics_blob["single_metric"] == [float(metric["value"])]
     assert custom_metrics_blob["test_dimension"] == dimension["value"]
+
+
+def test_log_multiple_metrics(capsys, metrics_same_name, dimensions, namespace):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(namespace=namespace)
+
+    for dimension in dimensions:
+        my_metrics.add_dimension(**dimension)
+
+    # WHEN we utilize log_metrics to serialize
+    # and flush all metrics at the end of a function execution
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        for metric in metrics_same_name:
+            my_metrics.add_metric(**metric)
+
+    lambda_handler({}, {})
+    output = capture_metrics_output(capsys)
+    expected = serialize_metrics(metrics=metrics_same_name, dimensions=dimensions, namespace=namespace)
+
+    # THEN we should have no exceptions
+    # and a valid EMF object should be flushed correctly
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
+def test_serialize_metric_set_metric_definition_multiple_values(
+    metrics_same_name, dimension, namespace, service, metadata
+):
+    expected_metric_definition = {
+        "metric_one": [1.0, 5.0],
+        "_aws": {
+            "Timestamp": 1592237875494,
+            "CloudWatchMetrics": [
+                {
+                    "Namespace": "test_namespace",
+                    "Dimensions": [["test_dimension", "service"]],
+                    "Metrics": [{"Name": "metric_one", "Unit": "Count"}],
+                }
+            ],
+        },
+        "service": "test_service",
+        "username": "test",
+        "test_dimension": "test",
+    }
+
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(service=service, namespace=namespace)
+    for metric in metrics_same_name:
+        my_metrics.add_metric(**metric)
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_metadata(**metadata)
+
+    # WHEN metrics are serialized manually
+    metric_definition_output = my_metrics.serialize_metric_set()
+
+    # THEN we should emit a valid embedded metric definition object
+    assert "Timestamp" in metric_definition_output["_aws"]
+    remove_timestamp(metrics=[metric_definition_output, expected_metric_definition])
+    assert metric_definition_output == expected_metric_definition

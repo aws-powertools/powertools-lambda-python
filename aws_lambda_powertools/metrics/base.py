@@ -4,6 +4,7 @@ import logging
 import numbers
 import os
 import pathlib
+from collections import defaultdict
 from enum import Enum
 from typing import Any, Dict, List, Union
 
@@ -124,7 +125,9 @@ class MetricManager:
             raise MetricValueError(f"{value} is not a valid number")
 
         unit = self.__extract_metric_unit_value(unit=unit)
-        metric = {"Unit": unit, "Value": float(value)}
+        metric = self.metric_set.get(name, defaultdict(list))
+        metric["Unit"] = unit
+        metric["Value"].append(float(value))
         logger.debug(f"Adding metric: {name} with {metric}")
         self.metric_set[name] = metric
 
