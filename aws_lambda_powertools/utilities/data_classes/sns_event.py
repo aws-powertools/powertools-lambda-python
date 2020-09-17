@@ -99,7 +99,7 @@ class SNSEventRecord(DictWrapper):
         return SNSMessage(self._data)
 
 
-class SNSEvent(dict):
+class SNSEvent(DictWrapper):
     """SNS Event
 
     Documentation:

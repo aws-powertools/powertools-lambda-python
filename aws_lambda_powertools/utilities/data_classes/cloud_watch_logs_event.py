@@ -29,7 +29,7 @@ class CloudWatchLogsLogEvent(DictWrapper):
         return self.get("extractedFields")
 
 
-class CloudWatchLogsDecodedData(dict):
+class CloudWatchLogsDecodedData(DictWrapper):
     @property
     def owner(self) -> str:
         """The AWS Account ID of the originating log data."""
@@ -68,7 +68,7 @@ class CloudWatchLogsDecodedData(dict):
         return [CloudWatchLogsLogEvent(i) for i in self["logEvents"]]
 
 
-class CloudWatchLogsEvent(dict):
+class CloudWatchLogsEvent(DictWrapper):
     """CloudWatch Logs log stream event
 
     You can use a Lambda function to monitor and analyze logs from an Amazon CloudWatch Logs log stream.
@@ -80,9 +80,6 @@ class CloudWatchLogsEvent(dict):
 
     _decompressed_logs_data = None
     _json_logs_data = None
-
-    def __eq__(self, other):
-        return super(CloudWatchLogsEvent, self).__eq__(other)
 
     @property
     def raw_logs_data(self) -> str:

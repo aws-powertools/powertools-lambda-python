@@ -47,7 +47,7 @@ def test_cloud_watch_trigger_event():
     assert event.decompress_logs_data == decompressed_logs_data
 
     json_logs_data = event.parse_logs_data()
-    assert event.parse_logs_data() == json_logs_data
+    assert event.parse_logs_data()._data == json_logs_data._data
     log_events = json_logs_data.log_events
     log_event = log_events[0]
 
@@ -63,7 +63,7 @@ def test_cloud_watch_trigger_event():
     assert log_event.extracted_fields is None
 
     event2 = CloudWatchLogsEvent(load_event("cloudWatchLogEvent.json"))
-    assert event == event2
+    assert event._data == event2._data
 
 
 def test_cognito_pre_signup_trigger_event():
@@ -556,7 +556,7 @@ def test_base_proxy_event_get_query_string_value():
     value = event.get_query_string_value("test", default_value)
     assert value == default_value
 
-    event["queryStringParameters"] = {"test": set_value}
+    event._data["queryStringParameters"] = {"test": set_value}
     value = event.get_query_string_value("test", default_value)
     assert value == set_value
 
@@ -575,7 +575,7 @@ def test_base_proxy_event_get_header_value():
     value = event.get_header_value("test", default_value)
     assert value == default_value
 
-    event["headers"] = {"test": set_value}
+    event._data["headers"] = {"test": set_value}
     value = event.get_header_value("test", default_value)
     assert value == set_value
 

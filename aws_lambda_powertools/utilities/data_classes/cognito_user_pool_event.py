@@ -15,7 +15,7 @@ class CallerContext(DictWrapper):
         return self["callerContext"]["clientId"]
 
 
-class BaseTriggerEvent(dict):
+class BaseTriggerEvent(DictWrapper):
     """Common attributes shared by all User Pool Lambda Trigger Events
 
     Documentation:

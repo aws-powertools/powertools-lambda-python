@@ -158,7 +158,7 @@ class S3EventRecord(DictWrapper):
         return None if item is None else S3EventRecordGlacierEventData(item)
 
 
-class S3Event(dict):
+class S3Event(DictWrapper):
     """S3 event notification
 
     Documentation:

@@ -192,7 +192,7 @@ class SESEventRecord(DictWrapper):
         return SESMessage(self._data)
 
 
-class SESEvent(dict):
+class SESEvent(DictWrapper):
     """Amazon SES to receive message event data_classes
 
     NOTE: There is a 30-second timeout on RequestResponse invocations.

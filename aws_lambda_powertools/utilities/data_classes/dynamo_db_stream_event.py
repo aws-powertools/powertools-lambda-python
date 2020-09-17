@@ -218,7 +218,7 @@ class DynamoDBRecord(DictWrapper):
         return self.get("userIdentity")
 
 
-class DynamoDBStreamEvent(dict):
+class DynamoDBStreamEvent(DictWrapper):
     """Dynamo DB Stream Event
 
     Documentation:

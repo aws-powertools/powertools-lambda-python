@@ -82,7 +82,7 @@ class KinesisStreamRecord(DictWrapper):
         return KinesisStreamRecordPayload(self._data)
 
 
-class KinesisStreamEvent(dict):
+class KinesisStreamEvent(DictWrapper):
     """Kinesis stream event
 
     Documentation:

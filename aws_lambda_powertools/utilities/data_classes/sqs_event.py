@@ -134,7 +134,7 @@ class SQSRecord(DictWrapper):
         return self["awsRegion"]
 
 
-class SQSEvent(dict):
+class SQSEvent(DictWrapper):
     """SQS Event
 
     Documentation:

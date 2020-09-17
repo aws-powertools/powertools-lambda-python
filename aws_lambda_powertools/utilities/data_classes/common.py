@@ -2,6 +2,8 @@ from typing import Any, Dict, Optional
 
 
 class DictWrapper:
+    """Provides a single read only access to a wrapper dict"""
+
     def __init__(self, data: Dict[str, Any]):
         self._data = data
 
@@ -12,7 +14,7 @@ class DictWrapper:
         return self._data.get(key)
 
 
-class BaseProxyEvent(dict):
+class BaseProxyEvent(DictWrapper):
     @property
     def headers(self) -> Dict[str, str]:
         return self["headers"]
