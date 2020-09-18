@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Metrics**: Support adding multiple metric values to a metric name
+
 ## [1.5.0] - 2020-09-04
 
 ### Added
