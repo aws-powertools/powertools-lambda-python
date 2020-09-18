@@ -4,6 +4,7 @@ import logging
 import numbers
 import os
 import pathlib
+from collections import defaultdict
 from enum import Enum
 from typing import Any, Dict, List, Union
 
@@ -93,7 +94,7 @@ class MetricManager:
         self._metric_unit_options = list(MetricUnit.__members__)
         self.metadata_set = self.metadata_set if metadata_set is not None else {}
 
-    def add_metric(self, name: str, unit: MetricUnit, value: Union[float, int]):
+    def add_metric(self, name: str, unit: Union[MetricUnit, str], value: float):
         """Adds given metric
 
         Example
@@ -110,9 +111,9 @@ class MetricManager:
         ----------
         name : str
             Metric name
-        unit : MetricUnit
+        unit : Union[MetricUnit, str]
             `aws_lambda_powertools.helper.models.MetricUnit`
-        value : Union[float, int]
+        value : float
             Metric value
 
         Raises
@@ -124,7 +125,9 @@ class MetricManager:
             raise MetricValueError(f"{value} is not a valid number")
 
         unit = self.__extract_metric_unit_value(unit=unit)
-        metric = {"Unit": unit, "Value": float(value)}
+        metric = self.metric_set.get(name, defaultdict(list))
+        metric["Unit"] = unit
+        metric["Value"].append(float(value))
         logger.debug(f"Adding metric: {name} with {metric}")
         self.metric_set[name] = metric
 
