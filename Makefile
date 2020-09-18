@@ -4,7 +4,7 @@ target:
 
 dev:
 	pip install --upgrade pip poetry pre-commit
-	poetry install
+	poetry install --extras "jmespath"
 	pre-commit install
 
 dev-docs:
