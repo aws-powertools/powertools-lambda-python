@@ -211,7 +211,7 @@ handler(event=sample_event, context={})
 <Note type="warning">
     This should only be used for advanced use cases where you have special formats not covered by the built-in functions.
     <br/><br/>
-    This will <strong>replace all built-in functions provided with what you provide</strong>.
+    This will <strong>replace all provided built-in functions such as `powertools_json`, so you will no longer be able to use them</strong>.
 </Note>
 
 For special binary formats that you want to decode before applying JSON Schema validation, you can bring your own [JMESPath function](https://github.com/jmespath/jmespath.py#custom-functions) and any additional option via `jmespath_options` param.
