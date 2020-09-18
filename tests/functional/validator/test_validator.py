@@ -1,4 +1,6 @@
+import jmespath
 import pytest
+from jmespath import functions
 
 from aws_lambda_powertools.utilities.validation import envelopes, exceptions, validate, validator
 
@@ -32,7 +34,7 @@ def test_validate_json_string_no_envelope(schema, wrapped_event_json_string):
 
 def test_validate_invalid_schema_format(raw_event):
     with pytest.raises(exceptions.InvalidSchemaFormatError):
-        validate(event=raw_event, schema="")
+        validate(event=raw_event, schema="schema.json")
 
 
 def test_validate_invalid_envelope_expression(schema, wrapped_event):
@@ -103,3 +105,19 @@ def test_validator_propagates_exception(schema, raw_event, schema_response):
 
     with pytest.raises(ValueError):
         lambda_handler(raw_event, {})
+
+
+def test_custom_jmespath_function_overrides_builtin_functions(schema, wrapped_event_json_string):
+    class CustomFunctions(functions.Functions):
+        @functions.signature({"types": ["string"]})
+        def _func_echo_decoder(self, value):
+            return value
+
+    jmespath_opts = {"custom_functions": CustomFunctions()}
+    with pytest.raises(jmespath.exceptions.UnknownFunctionError, match="Unknown function: powertools_json()"):
+        validate(
+            event=wrapped_event_json_string,
+            schema=schema,
+            envelope="powertools_json(data).payload",
+            jmespath_options=jmespath_opts,
+        )

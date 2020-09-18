@@ -24,7 +24,6 @@ def validator(
 
     **Validate incoming event**
 
-        import json
         from aws_lambda_powertools.utilities.validation import validator
 
         @validator(inbound_schema=json_schema_dict)
@@ -33,7 +32,6 @@ def validator(
 
     **Validate incoming and outgoing event**
 
-        import json
         from aws_lambda_powertools.utilities.validation import validator
 
         @validator(inbound_schema=json_schema_dict, outbound_schema=response_json_schema_dict)
@@ -42,7 +40,6 @@ def validator(
 
     **Unwrap event before validating against actual payload - using built-in envelopes**
 
-        import json
         from aws_lambda_powertools.utilities.validation import validator, envelopes
 
         @validator(inbound_schema=json_schema_dict, envelope=envelopes.API_GATEWAY_REST)
@@ -51,7 +48,6 @@ def validator(
 
     **Unwrap event before validating against actual payload - using custom JMESPath expression**
 
-        import json
         from aws_lambda_powertools.utilities.validation import validator
 
         @validator(inbound_schema=json_schema_dict, envelope="payload[*].my_data")
@@ -60,7 +56,6 @@ def validator(
 
     **Unwrap and deserialize JSON string event before validating against actual payload - using built-in functions**
 
-        import json
         from aws_lambda_powertools.utilities.validation import validator
 
         @validator(inbound_schema=json_schema_dict, envelope="Records[*].powertools_json(body)")
