@@ -25,3 +25,7 @@ tr > td {
 .token.property {
     color: darkmagenta !important
 }
+
+blockquote {
+	font-size: 1.15em
+}
