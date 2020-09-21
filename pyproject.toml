@@ -24,9 +24,6 @@ fastjsonschema = "^2.14.5"
 boto3 = "^1.12"
 jmespath = "^0.10.0"
 
-[tool.poetry.extras]
-pydantic = "^1.6.1"
-
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^5.0.3"}
 pytest = "^5.2"
@@ -52,6 +49,11 @@ xenon = "^0.7.0"
 flake8-eradicate = "^0.3.0"
 dataclasses = {version = "*", python = "~3.6"}
 flake8-bugbear = "^20.1.4"
+pydantic = ">1.6.0"
+
+
+[tool.poetry.extras]
+advanced_parser = ["pydantic"]
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]

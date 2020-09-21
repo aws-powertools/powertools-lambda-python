@@ -2,7 +2,6 @@ from http import HTTPStatus
 from typing import Any, Dict, Optional
 
 import pytest
-from aws_lambda_context import LambdaContext
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError
 
@@ -14,6 +13,7 @@ from aws_lambda_powertools.utilities.advanced_parser import (
     validate,
     validator,
 )
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 class MyMessage(BaseModel):
