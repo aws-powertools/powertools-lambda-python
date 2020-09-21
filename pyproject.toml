@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "1.4.0"
+version = "1.5.0"
 description = "Python utilities for AWS Lambda functions including but not limited to tracing, logging and custom metric"
 authors = ["Amazon Web Services"]
 classifiers=[
@@ -20,8 +20,11 @@ license = "MIT-0"
 [tool.poetry.dependencies]
 python = "^3.6"
 aws-xray-sdk = "^2.5.0"
-fastjsonschema = "~=2.14.4"
+fastjsonschema = "^2.14.5"
 boto3 = "^1.12"
+jmespath = "^0.10.0"
+
+[tool.poetry.extras]
 pydantic = "^1.6.1"
 
 [tool.poetry.dev-dependencies]
@@ -49,7 +52,6 @@ xenon = "^0.7.0"
 flake8-eradicate = "^0.3.0"
 dataclasses = {version = "*", python = "~3.6"}
 flake8-bugbear = "^20.1.4"
-aws_lambda_context = "^1.1.0"
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]

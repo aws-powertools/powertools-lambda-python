@@ -6,6 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Metrics**: Support adding multiple metric values to a metric name
+- **Utilities**: Add new `Validator` utility to validate inbound events and responses using JSON Schema
+
+## [1.5.0] - 2020-09-04
+
+### Added
+- **Logger**: Add `xray_trace_id` to log output to improve integration with CloudWatch Service Lens
+- **Logger**: Allow reordering of logged output
+- **Utilities**: Add new `SQS batch processing` utility to handle partial failures in processing message batches
+- **Utilities**: Add typing utility providing static type for lambda context object
+- **Utilities**: Add `transform=auto` in parameters utility to deserialize parameter values based on the key name
+
+### Fixed
+- **Logger**: The value of `json_default` formatter is no longer written to logs
+
 ## [1.4.0] - 2020-08-25
 
 ### Added

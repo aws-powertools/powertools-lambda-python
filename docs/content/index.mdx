@@ -5,7 +5,7 @@ description: AWS Lambda Powertools Python
 
 import Note from "../src/components/Note"
 
-Powertools is a suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier.
+Powertools is a suite of utilities for AWS Lambda functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier.
 
 <Note type="info">
 	<strong>Looking for a quick run through of the core utilities?</strong><br/><br/>
@@ -24,6 +24,12 @@ Powertools is available in PyPi. You can use your favourite dependency managemen
 ```bash:title=hello_world.sh
 sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 ```
+* [Tracing](./core/tracer) - Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions
+* [Logging](./core/logger) - Structured logging made easier, and decorator to enrich structured logging with key Lambda context details
+* [Metrics](./core/metrics) - Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
+* [Bring your own middleware](./utilities/middleware_factory) - Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
+* [Parameters utility](./utilities/parameters) - Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time
+* [Batch utility](./utilities/batch) - Batch processing for AWS SQS, handles partial failure.
 
 ### Lambda Layer
 
@@ -44,6 +50,19 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
         SemanticVersion: 1.3.1 # change to latest semantic version available in SAR
 ```
 
+This will add a nested app stack with an output parameter `LayerVersionArn`, that you can reference inside your Lambda function definition:
+
+```yaml
+  Layers:
+    - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
+```
+
+You can fetch the available versions via the API with:
+
+  ```bash
+ aws serverlessrepo list-application-versions --application-id arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+ ```
+
 ## Features
 
 Utility | Description
@@ -53,6 +72,7 @@ Utility | Description
 [Metrics](./core/metrics) | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
 [Bring your own middleware](.//utilities/middleware_factory) | Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
 [Parameters utility](./utilities/parameters) | Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time
+[Typing utility](./utilities/typing) | Static typing classes to speedup development in your IDE
 
 ## Environment variables
 

@@ -1,27 +1,6 @@
 import json
 import logging
-from typing import Any
-
-
-def json_formatter(unserializable_value: Any):
-    """JSON custom serializer to cast unserializable values to strings.
-
-    Example
-    -------
-
-    **Serialize unserializable value to string**
-
-        class X: pass
-        value = {"x": X()}
-
-        json.dumps(value, default=json_formatter)
-
-    Parameters
-    ----------
-    unserializable_value: Any
-        Python object unserializable by JSON
-    """
-    return str(unserializable_value)
+import os
 
 
 class JsonFormatter(logging.Formatter):
@@ -42,19 +21,37 @@ class JsonFormatter(logging.Formatter):
         unserializable values.  It must not throw.  Defaults to a function that
         coerces the value to a string.
 
+        The `log_record_order` kwarg is used to specify the order of the keys used in
+        the structured json logs. By default the order is: "level", "location", "message", "timestamp",
+        "service" and "sampling_rate".
+
         Other kwargs are used to specify log field format strings.
         """
-        self.default_json_formatter = kwargs.pop("json_default", json_formatter)
-        datefmt = kwargs.pop("datefmt", None)
-
-        super(JsonFormatter, self).__init__(datefmt=datefmt)
+        # Set the default unserializable function, by default values will be cast as str.
+        self.default_json_formatter = kwargs.pop("json_default", str)
+        # Set the insertion order for the log messages
+        self.format_dict = dict.fromkeys(kwargs.pop("log_record_order", ["level", "location", "message", "timestamp"]))
         self.reserved_keys = ["timestamp", "level", "location"]
-        self.format_dict = {
-            "timestamp": "%(asctime)s",
+        # Set the date format used by `asctime`
+        super(JsonFormatter, self).__init__(datefmt=kwargs.pop("datefmt", None))
+
+        self.format_dict.update(self._build_root_keys(**kwargs))
+
+    @staticmethod
+    def _build_root_keys(**kwargs):
+        return {
             "level": "%(levelname)s",
             "location": "%(funcName)s:%(lineno)d",
+            "timestamp": "%(asctime)s",
+            **kwargs,
         }
-        self.format_dict.update(kwargs)
+
+    @staticmethod
+    def _get_latest_trace_id():
+        xray_trace_id = os.getenv("_X_AMZN_TRACE_ID")
+        trace_id = xray_trace_id.split(";")[0].replace("Root=", "") if xray_trace_id else None
+
+        return trace_id
 
     def update_formatter(self, **kwargs):
         self.format_dict.update(kwargs)
@@ -93,5 +90,11 @@ class JsonFormatter(logging.Formatter):
 
         if record.exc_text:
             log_dict["exception"] = record.exc_text
+
+        # fetch latest X-Ray Trace ID, if any
+        log_dict.update({"xray_trace_id": self._get_latest_trace_id()})
+
+        # Filter out top level key with values that are None
+        log_dict = {k: v for k, v in log_dict.items() if v is not None}
 
         return json.dumps(log_dict, default=self.default_json_formatter)

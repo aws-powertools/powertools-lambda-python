@@ -116,3 +116,114 @@ def test_with_unserializable_value_in_message_custom(stdout):
     # THEN json_default should not be in the log message and the custom unserializable handler should be used
     assert log_dict["message"]["x"] == "<non-serializable: Unserializable>"
     assert "json_default" not in log_dict
+
+
+def test_log_dict_key_seq(stdout):
+    # GIVEN the default logger configuration
+    logger = Logger(stream=stdout)
+
+    # WHEN logging a message
+    logger.info("Message")
+
+    log_dict: dict = json.loads(stdout.getvalue())
+
+    # THEN the beginning key sequence must be `level,location,message,timestamp`
+    assert ",".join(list(log_dict.keys())[:4]) == "level,location,message,timestamp"
+
+
+def test_log_dict_key_custom_seq(stdout):
+    # GIVEN a logger configuration with log_record_order set to ["message"]
+    logger = Logger(stream=stdout, log_record_order=["message"])
+
+    # WHEN logging a message
+    logger.info("Message")
+
+    log_dict: dict = json.loads(stdout.getvalue())
+
+    # THEN the first key should be "message"
+    assert list(log_dict.keys())[0] == "message"
+
+
+def test_log_custom_formatting(stdout):
+    # GIVEN a logger where we have a custom `location`, 'datefmt' format
+    logger = Logger(stream=stdout, location="[%(funcName)s] %(module)s", datefmt="fake-datefmt")
+
+    # WHEN logging a message
+    logger.info("foo")
+
+    log_dict: dict = json.loads(stdout.getvalue())
+
+    # THEN the `location` and "timestamp" should match the formatting
+    assert log_dict["location"] == "[test_log_custom_formatting] test_aws_lambda_logging"
+    assert log_dict["timestamp"] == "fake-datefmt"
+
+
+def test_log_dict_key_strip_nones(stdout):
+    # GIVEN a logger confirmation where we set `location` and `timestamp` to None
+    # Note: level, sampling_rate and service can not be suppressed
+    logger = Logger(stream=stdout, level=None, location=None, timestamp=None, sampling_rate=None, service=None)
+
+    # WHEN logging a message
+    logger.info("foo")
+
+    log_dict: dict = json.loads(stdout.getvalue())
+
+    # THEN the keys should only include `level`, `message`, `service`, `sampling_rate`
+    assert sorted(log_dict.keys()) == ["level", "message", "sampling_rate", "service"]
+
+
+def test_log_dict_xray_is_present_when_tracing_is_enabled(stdout, monkeypatch):
+    # GIVEN a logger is initialized within a Lambda function with X-Ray enabled
+    trace_id = "1-5759e988-bd862e3fe1be46a994272793"
+    trace_header = f"Root={trace_id};Parent=53995c3f42cd8ad8;Sampled=1"
+    monkeypatch.setenv(name="_X_AMZN_TRACE_ID", value=trace_header)
+    logger = Logger(stream=stdout)
+
+    # WHEN logging a message
+    logger.info("foo")
+
+    log_dict: dict = json.loads(stdout.getvalue())
+
+    # THEN `xray_trace_id`` key should be present
+    assert log_dict["xray_trace_id"] == trace_id
+
+    monkeypatch.delenv(name="_X_AMZN_TRACE_ID")
+
+
+def test_log_dict_xray_is_not_present_when_tracing_is_disabled(stdout, monkeypatch):
+    # GIVEN a logger is initialized within a Lambda function with X-Ray disabled (default)
+    logger = Logger(stream=stdout)
+
+    # WHEN logging a message
+    logger.info("foo")
+
+    log_dict: dict = json.loads(stdout.getvalue())
+
+    # THEN `xray_trace_id`` key should not be present
+    assert "xray_trace_id" not in log_dict
+
+
+def test_log_dict_xray_is_updated_when_tracing_id_changes(stdout, monkeypatch):
+    # GIVEN a logger is initialized within a Lambda function with X-Ray enabled
+    trace_id = "1-5759e988-bd862e3fe1be46a994272793"
+    trace_header = f"Root={trace_id};Parent=53995c3f42cd8ad8;Sampled=1"
+    monkeypatch.setenv(name="_X_AMZN_TRACE_ID", value=trace_header)
+    logger = Logger(stream=stdout)
+
+    # WHEN logging a message
+    logger.info("foo")
+
+    # and Trace ID changes to mimick a new invocation
+    trace_id_2 = "1-5759e988-bd862e3fe1be46a949393982437"
+    trace_header_2 = f"Root={trace_id_2};Parent=53995c3f42cd8ad8;Sampled=1"
+    monkeypatch.setenv(name="_X_AMZN_TRACE_ID", value=trace_header_2)
+
+    logger.info("foo bar")
+
+    log_dict, log_dict_2 = [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
+
+    # THEN `xray_trace_id`` key should be different in both invocations
+    assert log_dict["xray_trace_id"] == trace_id
+    assert log_dict_2["xray_trace_id"] == trace_id_2
+
+    monkeypatch.delenv(name="_X_AMZN_TRACE_ID")

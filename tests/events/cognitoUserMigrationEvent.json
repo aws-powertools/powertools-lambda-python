@@ -1,0 +1,15 @@
+{
+  "version": "string",
+  "triggerSource": "UserMigration_Authentication",
+  "region": "us-east-1",
+  "userPoolId": "string",
+  "userName": "userName",
+  "callerContext": {
+    "awsSdkVersion": "awsSdkVersion",
+    "clientId": "clientId"
+  },
+  "request": {
+    "password": "password"
+  },
+  "response": {}
+}
