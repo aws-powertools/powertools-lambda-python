@@ -80,7 +80,7 @@ class MetricManager:
 
     def __init__(
         self,
-        metric_set: Dict[str, str] = None,
+        metric_set: Dict[str, Any] = None,
         dimension_set: Dict = None,
         namespace: str = None,
         metadata_set: Dict[str, Any] = None,
@@ -125,7 +125,7 @@ class MetricManager:
             raise MetricValueError(f"{value} is not a valid number")
 
         unit = self.__extract_metric_unit_value(unit=unit)
-        metric = self.metric_set.get(name, defaultdict(list))
+        metric: dict = self.metric_set.get(name, defaultdict(list))
         metric["Unit"] = unit
         metric["Value"].append(float(value))
         logger.debug(f"Adding metric: {name} with {metric}")
@@ -185,7 +185,7 @@ class MetricManager:
         logger.debug({"details": "Serializing metrics", "metrics": metrics, "dimensions": dimensions})
 
         metric_names_and_units: List[Dict[str, str]] = []  # [ { "Name": "metric_name", "Unit": "Count" } ]
-        metric_names_and_values: Dict[str, str] = {}  # { "metric_name": 1.0 }
+        metric_names_and_values: Dict[str, int] = {}  # { "metric_name": 1.0 }
 
         for metric_name in metrics:
             metric: dict = metrics[metric_name]
