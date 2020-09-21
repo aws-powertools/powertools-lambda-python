@@ -6,7 +6,7 @@ from aws_lambda_context import LambdaContext
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError
 
-from aws_lambda_powertools.utilities.validation import (
+from aws_lambda_powertools.utilities.advanced_parser import (
     DynamoDBEnvelope,
     EventBridgeEnvelope,
     SqsEnvelope,

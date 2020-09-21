@@ -1,0 +1,45 @@
+[
+    {
+        "Records": [
+            {
+                "EventSource": "aws:sns",
+                "EventVersion": "1.0",
+                "EventSubscriptionArn": "arn:aws:sns:eu-west-1:195361640859:GuildTopic:c760f7b8-a747-4c91-9740-7b4870dfe075",
+                "Sns": {
+                    "Type": "Notification",
+                    "MessageId": "6981dbc3-5042-5e5b-9521-8c7e30010350",
+                    "TopicArn": "arn:aws:sns:eu-west-1:195361640859:GuildTopic",
+                    "Subject": "cool subject",
+                    "Message": "this is my message",
+                    "Timestamp": "2020-08-24T06:28:19.623Z",
+                    "SignatureVersion": "1",
+                    "Signature": "EvSQbV2Et92E4Bbs7Qq6xDSPDLAAgI5gaCT3ReyjxsAqPboLy18EwGoHiNdB7AHsP2wN2cBX/sUw7TLHbob0pQ6to+VDWONDt033CKPv+jYGhrA5sL59gMd6Fd42mbzYPg87jHqKonkMwKK/mQq2q6bYpA1SBVU1RVvZZbCtvft43teoWIJGVHITKni4YAlLQJV1HUrgoDRpXcC/oA4FHWf84ekBQ+RTIXQcPWcsDI5uTHQuVbFFs61WJNNAzUhCZb7/1ITe/TR3ZZNC6iAMYN7eBD8rG8uHeeD+hWwQskO+cmgMjgP/neqYxFEJi5mopkYi+zI5bAs8eE+c8LJh/Q==",
+                    "SigningCertUrl": "https://sns.eu-west-1.amazonaws.com/SimpleNotificationService-a86cb10b4e1f29c941702d737128f7b6.pem",
+                    "UnsubscribeUrl": "https://sns.eu-west-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:eu-west-1:195361640859:GuildTopic:c760f7b8-a747-4c91-9740-7b4870dfe075",
+                    "MessageAttributes": {
+                        "fsdf": {
+                            "Type": "String",
+                            "Value": "yay"
+                        }
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "Records": [
+            {
+                "EventSource": "aws:sns",
+                "EventVersion": "1.0",
+                "EventSubscriptionArn": "arn:aws:sns:eu-west-1: 195361640859:GuildTopic:c760f7b8-a747-4c91-9740-7b4870dfe075",
+                "Sns": {
+                    "Type": "Notification",
+                    "MessageId": "04e7f2ae-42f8-537d-bb9b-a51329041193",
+                    "TopicArn": "arn:aws:sns:eu-west-1: 195361640859:GuildTopic",
+                    "Subject": "a short subject for your message",
+                    "Message": "{\"foo\": \"bar\"}"
+                }
+            }
+        ]
+    }
+]
