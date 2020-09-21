@@ -185,7 +185,7 @@ class MetricManager:
         logger.debug({"details": "Serializing metrics", "metrics": metrics, "dimensions": dimensions})
 
         metric_names_and_units: List[Dict[str, str]] = []  # [ { "Name": "metric_name", "Unit": "Count" } ]
-        metric_names_and_values: Dict[str, int] = {}  # { "metric_name": 1.0 }
+        metric_names_and_values: Dict[str, float] = {}  # { "metric_name": 1.0 }
 
         for metric_name in metrics:
             metric: dict = metrics[metric_name]
