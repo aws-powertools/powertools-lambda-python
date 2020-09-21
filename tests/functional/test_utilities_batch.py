@@ -275,3 +275,18 @@ def test_sqs_batch_processor_middleware_suppressed_exception(
 
     stubber.assert_no_pending_responses()
     assert result is True
+
+
+def test_partial_sqs_processor_context_only_failure(sqs_event_factory, record_handler, partial_processor):
+    """
+    Test processor with only failures
+    """
+    first_record = sqs_event_factory("fail")
+    second_record = sqs_event_factory("fail")
+
+    records = [first_record, second_record]
+    with pytest.raises(SQSBatchProcessingError) as error:
+        with partial_processor(records, record_handler) as ctx:
+            ctx.process()
+
+    assert len(error.value.args[0]) == 2
