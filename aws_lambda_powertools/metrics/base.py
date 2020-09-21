@@ -125,7 +125,7 @@ class MetricManager:
             raise MetricValueError(f"{value} is not a valid number")
 
         unit = self.__extract_metric_unit_value(unit=unit)
-        metric: dict = self.metric_set.get(name, defaultdict(list))
+        metric: Dict = self.metric_set.get(name, defaultdict(list))
         metric["Unit"] = unit
         metric["Value"].append(float(value))
         logger.debug(f"Adding metric: {name} with {metric}")
