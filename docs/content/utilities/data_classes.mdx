@@ -30,18 +30,37 @@ For example, if your Lambda function is being triggered by an API Gateway proxy 
 
 
 ## Supported event sources
+
+Event Source | Data_class
+------------------------------------------------- | ---------------------------------------------------------------------------------
+[API Gateway Proxy](#api-gateway-proxy) | APIGatewayProxyEvent
+[API Gateway Proxy event v2](#api-gateway-proxy-v2) | APIGatewayProxyEventV2
+[CloudWatch Logs](#cloudWatch-logs) | CloudWatchLogsEvent
+[Cognito User Pool](#cognito-user-pool-triggers) |
+[DynamoDB streams](#dynamoDB-streams) | DynamoDBStreamEvent, DynamoDBRecordEventName
+[EventBridge](#eventbridge) | EventBridgeEvent
+[Kinesis Data Stream](#kinesis-streams) | KinesisStreamEvent
+[S3](#S3) | S3Event
+[SES](#SES) | SESEvent
+[SNS](#SNS) | SNSEvent
+[SQS](#SQS) | SQSEvent
+
+
 <Note type="info">
     The examples provided below are far from exhaustive - the data classes themselves are designed to provide a form of
     documentation inherently (via autocompletion, types and docstrings).
 </Note>
 
 
-### API Gateway Proxy V1 (REST API)
+## API Gateway Proxy
+
+Typically used for API Gateway REST API or HTTP API using v1 proxy event.
+
 ```python:title=lambda_app.py
 from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
 
 def lambda_handler(event, context):
-    event = APIGatewayProxyEvent(event)
+    event: APIGatewayProxyEvent = APIGatewayProxyEvent(event)
     request_context = event.request_context
     identity = request_context.identity
 
@@ -50,7 +69,8 @@ def lambda_handler(event, context):
         do_something_with(event.body, user)
 ```
 
-### API Gateway Proxy V2 (HTTP API)
+## API Gateway Proxy v2
+
 ```python:title=lambda_app.py
 from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2
 
@@ -63,8 +83,9 @@ def lambda_handler(event, context):
         do_something_with(event.body, query_string_parameters)
 ```
 
-### CloudWatch logs
-CloudWatch logs events by default are compressed and base64 encoded. You can use the helper function provided to decode,
+## CloudWatch Logs
+
+CloudWatch Logs events by default are compressed and base64 encoded. You can use the helper function provided to decode,
 decompress and parse json data from the event.
 
 ```python:title=lambda_app.py
@@ -79,7 +100,8 @@ def lambda_handler(event, context):
         do_something_with(event.timestamp, event.message)
 ```
 
-### Cognito user pool triggers
+## Cognito User Pool
+
 Cognito User Pools have several [different Lambda trigger sources](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html#cognito-user-identity-pools-working-with-aws-lambda-trigger-sources), all of which map to a different data class, which
 can be imported from `aws_lambda_powertools.data_classes.cognito_user_pool_event`:
 
@@ -103,7 +125,8 @@ def lambda_handler(event, context):
     do_something_with(user_attributes)
 ```
 
-### DynamoDB streams
+## DynamoDB Streams
+
 The DynamoDB data class utility provides the base class for `DynamoDBStreamEvent`, a typed class for
 attributes values (`AttributeValue`), as well as enums for stream view type (`StreamViewType`) and event type
 (`DynamoDBRecordEventName`).
@@ -121,7 +144,8 @@ def lambda_handler(event, context):
             do_something_with(record.dynamodb.old_image)
 ```
 
-### EventBridge
+## EventBridge
+
 ```python:title=lambda_app.py
 from aws_lambda_powertools.utilities.data_classes import EventBridgeEvent
 
@@ -131,9 +155,11 @@ def lambda_handler(event, context):
 
 ```
 
-### Kinesis streams
+## Kinesis streams
+
 Kinesis events by default contain base64 encoded data. You can use the helper function to access the data either as json
 or plain text, depending on the original payload.
+
 ```python:title=lambda_app.py
 from aws_lambda_powertools.utilities.data_classes import KinesisStreamEvent
 
@@ -150,7 +176,8 @@ def lambda_handler(event, context):
 
 ```
 
-### S3 events
+## S3
+
 ```python:title=lambda_app.py
 from aws_lambda_powertools.utilities.data_classes import S3Event
 
@@ -166,7 +193,8 @@ def lambda_handler(event, context):
 
 ```
 
-### SES events
+## SES
+
 ```python:title=lambda_app.py
 from aws_lambda_powertools.utilities.data_classes import SESEvent
 
@@ -182,7 +210,8 @@ def lambda_handler(event, context):
 
 ```
 
-### SNS
+## SNS
+
 ```python:title=lambda_app.py
 from aws_lambda_powertools.utilities.data_classes import SNSEvent
 
@@ -197,7 +226,8 @@ def lambda_handler(event, context):
         do_something_with(subject, message)
 ```
 
-### SQS
+## SQS
+
 ```python:title=lambda_app.py
 from aws_lambda_powertools.utilities.data_classes import SQSEvent
 
