@@ -35,7 +35,7 @@ class AttributeValue(DictWrapper):
         Example:
             >>> {"BOOL": True}
         """
-        item = self.get("bool")
+        item = self.get("BOOL")
         return None if item is None else bool(item)
 
     @property
