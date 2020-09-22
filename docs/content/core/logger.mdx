@@ -222,21 +222,24 @@ If you ever forget to use `child` param, we will return an existing `Logger` wit
 
 ## Sampling debug logs
 
-You can dynamically set a percentage of your logs to **DEBUG** level using `sample_rate` param or via env var `POWERTOOLS_LOGGER_SAMPLE_RATE`.
+Sampling allows you to set your Logger Log Level as DEBUG based on a percentage of your concurrent/cold start invocations. You can set a sampling value of `0.0` to `1` (100%) using either `sample_rate` parameter or `POWERTOOLS_LOGGER_SAMPLE_RATE` env var.
 
-Sampling calculation happens at the Logger class initialization. This means, when configured it, sampling it's more likely to happen during concurrent requests, or infrequent invocations as [new Lambda execution contexts are created](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html), not reused.
+This is useful when you want to troubleshoot an issue, say a sudden increase in concurrency, and you might not have enough information in your logs as Logger log level was understandably set as INFO.
+
+Sampling calculation happens at the Logger class initialization. This means sampling will unlikely if you have a steady low number of invocations, depending on what you configured it.
 
 <Note type="info">
-  If you want this logic to happen on every invocation regardless whether Lambda reuses the execution environment or not, then create your Logger inside your Lambda handler.
+  If you want Logger to calculate sampling on every invocation, then please open a feature request.
 </Note><br/>
 
 ```python:title=collect.py
 from aws_lambda_powertools import Logger
 
 # Sample 10% of debug logs e.g. 0.1
-logger = Logger(sample_rate=0.1) # highlight-line
+logger = Logger(sample_rate=0.1, level="INFO") # highlight-line
 
 def handler(event, context):
+   logger.debug("Verifying whether order_id is present")
    if "order_id" in event:
       logger.info("Collecting payment")
       ...
@@ -245,7 +248,21 @@ def handler(event, context):
 <details>
 <summary><strong>Excerpt output in CloudWatch Logs</strong></summary>
 
-```json:title=cloudwatch_logs.json
+```json:title=sampled_log_request_as_debug.json
+{
+   "timestamp": "2020-05-24 18:17:33,774",
+   "level": "DEBUG", // highlight-line
+   "location": "collect.handler:1",
+   "service": "payment",
+   "lambda_function_name": "test",
+   "lambda_function_memory_size": 128,
+   "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
+   "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
+   "cold_start": true,
+   "sampling_rate": 0.1, // highlight-line
+   "message": "Verifying whether order_id is present"
+}
+
 {
    "timestamp": "2020-05-24 18:17:33,774",
    "level": "INFO",
@@ -260,6 +277,7 @@ def handler(event, context):
    "message": "Collecting payment"
 }
 ```
+
 </details>
 
 
@@ -305,7 +323,7 @@ This can be fixed by either ensuring both has the `service` value as `payment`, 
 
 You might want to continue to use the same date formatting style, or override `location` to display the `package.function_name:line_number` as you previously had.
 
-Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, and `datefmt`
+Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, `xray_trace_id`, and `datefmt`
 
 ```python
 from aws_lambda_powertools import Logger
@@ -317,7 +335,7 @@ logger = Logger(stream=stdout, location="[%(funcName)s] %(module)s", datefmt="fa
 logger = Logger(stream=stdout, location=None) # highlight-line
 ```
 
-Alternatively, you can also change the order of the following log record keys via the `log_record_order` parameter: `level`, `location`, `message`, and `timestamp`
+Alternatively, you can also change the order of the following log record keys via the `log_record_order` parameter: `level`, `location`, `message`, `xray_trace_id`, and `timestamp`
 
 ```python
 from aws_lambda_powertools import Logger
