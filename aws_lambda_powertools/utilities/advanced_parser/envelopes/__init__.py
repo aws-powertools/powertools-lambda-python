@@ -1,7 +1,3 @@
-from .base import UserEnvelope
-from .dynamodb import DynamoDBEnvelope
-from .event_bridge import EventBridgeEnvelope
-from .sns import SnsEnvelope
-from .sqs import SqsEnvelope
+from .envelopes import Envelope, InvalidEnvelopeError, parse_envelope
 
-__all__ = ["UserEnvelope", "DynamoDBEnvelope", "EventBridgeEnvelope", "SqsEnvelope", "SnsEnvelope"]
+__all__ = ["InvalidEnvelopeError", "Envelope", "parse_envelope"]

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from pydantic import BaseModel, ValidationError
 
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class SqsEnvelope(BaseEnvelope):
-    def parse(self, event: Dict[str, Any], inbound_schema_model: BaseModel) -> Any:
+    def parse(self, event: Dict[str, Any], schema: BaseModel) -> List[BaseModel]:
         try:
             parsed_envelope = SqsSchema(**event)
         except (ValidationError, TypeError):
@@ -18,6 +18,5 @@ class SqsEnvelope(BaseEnvelope):
             raise
         output = []
         for record in parsed_envelope.Records:
-            parsed_msg = self._parse_user_json_string_schema(record.body, inbound_schema_model)
-            output.append({"body": parsed_msg, "attributes": record.messageAttributes})
+            output.append(self._parse_user_json_string_schema(record.body, schema))
         return output

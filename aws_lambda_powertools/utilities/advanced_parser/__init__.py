@@ -1,14 +1,6 @@
-"""Validation utility
+"""Advanced parser utility
 """
-from .envelopes import DynamoDBEnvelope, EventBridgeEnvelope, SnsEnvelope, SqsEnvelope, UserEnvelope
-from .validator import validate, validator
+from .envelopes import Envelope, InvalidEnvelopeError, parse_envelope
+from .parser import parser
 
-__all__ = [
-    "UserEnvelope",
-    "DynamoDBEnvelope",
-    "EventBridgeEnvelope",
-    "SnsEnvelope",
-    "SqsEnvelope",
-    "validate",
-    "validator",
-]
+__all__ = ["InvalidEnvelopeError", "Envelope", "parse_envelope", "parser"]

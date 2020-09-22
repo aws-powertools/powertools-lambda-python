@@ -14,6 +14,7 @@ class SqsAttributesSchema(BaseModel):
     SenderId: str
     SentTimestamp: datetime
     SequenceNumber: Optional[str]
+    AWSTraceHeader: Optional[str]
 
 
 class SqsMsgAttributeSchema(BaseModel):
@@ -50,7 +51,7 @@ class SqsRecordSchema(BaseModel):
     attributes: SqsAttributesSchema
     messageAttributes: Dict[str, SqsMsgAttributeSchema]
     md5OfBody: str
-    md5OfMessageAttributes: str
+    md5OfMessageAttributes: Optional[str]
     eventSource: Literal["aws:sqs"]
     eventSourceARN: str
     awsRegion: str

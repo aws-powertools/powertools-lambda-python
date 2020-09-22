@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class DynamoDBEnvelope(BaseEnvelope):
-    def parse(self, event: Dict[str, Any], inbound_schema_model: BaseModel) -> Any:
+    def parse(self, event: Dict[str, Any], schema: BaseModel) -> Any:
         try:
             parsed_envelope = DynamoDBSchema(**event)
         except (ValidationError, TypeError):
@@ -19,14 +19,10 @@ class DynamoDBEnvelope(BaseEnvelope):
         output = []
         for record in parsed_envelope.Records:
             parsed_new_image = (
-                {}
-                if not record.dynamodb.NewImage
-                else self._parse_user_dict_schema(record.dynamodb.NewImage, inbound_schema_model)
+                None if not record.dynamodb.NewImage else self._parse_user_dict_schema(record.dynamodb.NewImage, schema)
             )  # noqa: E501
             parsed_old_image = (
-                {}
-                if not record.dynamodb.OldImage
-                else self._parse_user_dict_schema(record.dynamodb.OldImage, inbound_schema_model)
+                None if not record.dynamodb.OldImage else self._parse_user_dict_schema(record.dynamodb.OldImage, schema)
             )  # noqa: E501
-            output.append({"new": parsed_new_image, "old": parsed_old_image})
+            output.append({"NewImage": parsed_new_image, "OldImage": parsed_old_image})
         return output

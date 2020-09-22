@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 class EventBridgeEnvelope(BaseEnvelope):
-    def parse(self, event: Dict[str, Any], inbound_schema_model: BaseModel) -> Any:
+    def parse(self, event: Dict[str, Any], schema: BaseModel) -> Any:
         try:
             parsed_envelope = EventBridgeSchema(**event)
         except (ValidationError, TypeError):
             logger.exception("Validation exception received from input eventbridge event")
             raise
-        return self._parse_user_dict_schema(parsed_envelope.detail, inbound_schema_model)
+        return self._parse_user_dict_schema(parsed_envelope.detail, schema)

@@ -6,10 +6,10 @@ from typing_extensions import Literal
 
 
 class DynamoScheme(BaseModel):
-    ApproximateCreationDateTime: date
-    Keys: Dict[Literal["id"], Dict[Literal["S"], str]]
-    NewImage: Optional[Dict[str, Any]] = {}
-    OldImage: Optional[Dict[str, Any]] = {}
+    ApproximateCreationDateTime: Optional[date]
+    Keys: Dict[str, Dict[str, Any]]
+    NewImage: Optional[Dict[str, Any]]
+    OldImage: Optional[Dict[str, Any]]
     SequenceNumber: str
     SizeBytes: int
     StreamViewType: Literal["NEW_AND_OLD_IMAGES", "KEYS_ONLY", "NEW_IMAGE", "OLD_IMAGE"]
@@ -23,6 +23,11 @@ class DynamoScheme(BaseModel):
         return values
 
 
+class UserIdentity(BaseModel):
+    type: Literal["Service"]  # noqa: VNE003, A003
+    principalId: Literal["dynamodb.amazonaws.com"]
+
+
 class DynamoRecordSchema(BaseModel):
     eventID: str
     eventName: Literal["INSERT", "MODIFY", "REMOVE"]
@@ -31,6 +36,7 @@ class DynamoRecordSchema(BaseModel):
     awsRegion: str
     eventSourceARN: str
     dynamodb: DynamoScheme
+    userIdentity: Optional[UserIdentity]
 
 
 class DynamoDBSchema(BaseModel):
