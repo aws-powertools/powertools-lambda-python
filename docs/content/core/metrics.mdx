@@ -251,11 +251,37 @@ This has the advantage of keeping cold start metric separate from your applicati
 
 ## Testing your code
 
+### Environment variables
+
 Use `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` env vars when unit testing your code to ensure metric namespace and dimension objects are created, and your code doesn't fail validation.
 
 ```bash:title=pytest_metric_namespace.sh
-
 POWERTOOLS_SERVICE_NAME="Example" POWERTOOLS_METRICS_NAMESPACE="Application" python -m pytest
 ```
 
-You can ignore this if you are explicitly setting namespace/default dimension by passing the `namespace` and `service` parameters when initializing Metrics: `metrics = Metrics(namespace=ApplicationName, service=ServiceName)`.
+If you prefer setting environment variable for specific tests, and are using Pytest, you can use [monkeypatch](https://docs.pytest.org/en/latest/monkeypatch.html) fixture:
+
+```python:title=pytest_env_var.py
+def test_namespace_env_var(monkeypatch):
+    # Set POWERTOOLS_METRICS_NAMESPACE before initializating Metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_NAMESPACE", namespace)
+
+    metrics = Metrics()
+    ...
+```
+
+> Ignore this, if you are explicitly setting namespace/default dimension via `namespace` and `service` parameters: `metrics = Metrics(namespace=ApplicationName, service=ServiceName)`
+
+### Clearing metrics
+
+`Metrics` keep metrics in memory across multiple instances. If you need to test this behaviour, you can use the following Pytest fixture to ensure metrics are reset incl. cold start:
+
+```python:title=pytest_metrics_reset_fixture.py
+@pytest.fixture(scope="function", autouse=True)
+def reset_metric_set():
+    # Clear out every metric data prior to every test
+    metrics = Metrics()
+    metrics.clear_metrics()
+    metrics_global.is_cold_start = True  # ensure each test has cold start
+    yield
+```
