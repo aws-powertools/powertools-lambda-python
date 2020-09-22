@@ -5,7 +5,7 @@ description: AWS Lambda Powertools Python
 
 import Note from "../src/components/Note"
 
-Powertools is a suite of utilities for AWS Lambda functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier.
+A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, and more.
 
 <Note type="info">
 	<strong>Looking for a quick run through of the core utilities?</strong><br/><br/>
@@ -54,7 +54,8 @@ This will add a nested app stack with an output parameter `LayerVersionArn`, tha
 You can fetch the available versions via the API with:
 
 ```bash
-aws serverlessrepo list-application-versions --application-id arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+aws serverlessrepo list-application-versions \
+  --application-id arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
 ```
 
 ## Features
