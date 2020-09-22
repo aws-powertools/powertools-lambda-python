@@ -33,17 +33,17 @@ For example, if your Lambda function is being triggered by an API Gateway proxy 
 
 Event Source | Data_class
 ------------------------------------------------- | ---------------------------------------------------------------------------------
-[API Gateway Proxy](#api-gateway-proxy) | APIGatewayProxyEvent
-[API Gateway Proxy event v2](#api-gateway-proxy-v2) | APIGatewayProxyEventV2
-[CloudWatch Logs](#cloudWatch-logs) | CloudWatchLogsEvent
-[Cognito User Pool](#cognito-user-pool-triggers) |
-[DynamoDB streams](#dynamoDB-streams) | DynamoDBStreamEvent, DynamoDBRecordEventName
-[EventBridge](#eventbridge) | EventBridgeEvent
-[Kinesis Data Stream](#kinesis-streams) | KinesisStreamEvent
-[S3](#S3) | S3Event
-[SES](#SES) | SESEvent
-[SNS](#SNS) | SNSEvent
-[SQS](#SQS) | SQSEvent
+[API Gateway Proxy](#api-gateway-proxy) | `APIGatewayProxyEvent`
+[API Gateway Proxy event v2](#api-gateway-proxy-v2) | `APIGatewayProxyEventV2`
+[CloudWatch Logs](#cloudWatch-logs) | `CloudWatchLogsEvent`
+[Cognito User Pool](#cognito-user-pool-triggers) | Multiple available under `cognito_user_pool_event`
+[DynamoDB streams](#dynamoDB-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName`
+[EventBridge](#eventbridge) | `EventBridgeEvent`
+[Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent`
+[S3](#S3) | `S3Event`
+[SES](#SES) | `SESEvent`
+[SNS](#SNS) | `SNSEvent`
+[SQS](#SQS) | `SQSEvent`
 
 
 <Note type="info">
@@ -75,7 +75,7 @@ def lambda_handler(event, context):
 from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2
 
 def lambda_handler(event, context):
-    event = APIGatewayProxyEventV2(event)
+    event: APIGatewayProxyEventV2 = APIGatewayProxyEventV2(event)
     request_context = event.request_context
     query_string_parameters = event.query_string_parameters
 
@@ -92,7 +92,7 @@ decompress and parse json data from the event.
 from aws_lambda_powertools.utilities.data_classes import CloudWatchLogsEvent
 
 def lambda_handler(event, context):
-    event = CloudWatchLogsEvent(event)
+    event: CloudWatchLogsEvent = CloudWatchLogsEvent(event)
 
     decompressed_log = event.parse_logs_data
     log_events = decompressed_log.log_events
@@ -119,7 +119,7 @@ User migration | `data_classes.cognito_user_pool_event.UserMigrationTriggerEvent
 from aws_lambda_powertools.utilities.cognito_user_pool_event import PostConfirmationTriggerEvent
 
 def lambda_handler(event, context):
-    event = PostConfirmationTriggerEvent(event)
+    event: PostConfirmationTriggerEvent = PostConfirmationTriggerEvent(event)
 
     user_attributes = user_attributes = event.request.user_attributes
     do_something_with(user_attributes)
@@ -135,7 +135,7 @@ attributes values (`AttributeValue`), as well as enums for stream view type (`St
 from aws_lambda_powertools.utilities.data_classes import DynamoDBStreamEvent, DynamoDBRecordEventName
 
 def lambda_handler(event, context):
-    event = DynamoDBStreamEvent(event)
+    event: DynamoDBStreamEvent = DynamoDBStreamEvent(event)
 
     # Multiple records can be delivered in a single event
     for record in event.records:
@@ -150,7 +150,7 @@ def lambda_handler(event, context):
 from aws_lambda_powertools.utilities.data_classes import EventBridgeEvent
 
 def lambda_handler(event, context):
-    event = EventBridgeEvent(event)
+    event: EventBridgeEvent = EventBridgeEvent(event)
     do_something_with(event.detail)
 
 ```
@@ -164,7 +164,7 @@ or plain text, depending on the original payload.
 from aws_lambda_powertools.utilities.data_classes import KinesisStreamEvent
 
 def lambda_handler(event, context):
-    event = KinesisStreamEvent(event)
+    event: KinesisStreamEvent = KinesisStreamEvent(event)
 
     # if data was delivered as json
     data = event.data_as_text()
@@ -182,7 +182,7 @@ def lambda_handler(event, context):
 from aws_lambda_powertools.utilities.data_classes import S3Event
 
 def lambda_handler(event, context):
-    event = S3Event(event)
+    event: S3Event = S3Event(event)
     bucket_name = event.bucket_name
 
     # Multiple records can be delivered in a single event
@@ -199,7 +199,7 @@ def lambda_handler(event, context):
 from aws_lambda_powertools.utilities.data_classes import SESEvent
 
 def lambda_handler(event, context):
-    event = SESEvent(event)
+    event: SESEvent = SESEvent(event)
 
     # Multiple records can be delivered in a single event
     for record in event.records:
@@ -216,7 +216,7 @@ def lambda_handler(event, context):
 from aws_lambda_powertools.utilities.data_classes import SNSEvent
 
 def lambda_handler(event, context):
-    event = SNSEvent(event)
+    event: SNSEvent = SNSEvent(event)
 
     # Multiple records can be delivered in a single event
     for record in event.records:
@@ -232,7 +232,7 @@ def lambda_handler(event, context):
 from aws_lambda_powertools.utilities.data_classes import SQSEvent
 
 def lambda_handler(event, context):
-    event = SQSEvent(event)
+    event: SQSEvent = SQSEvent(event)
 
     # Multiple records can be delivered in a single event
     for record in event.records:
