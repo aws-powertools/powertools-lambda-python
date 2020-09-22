@@ -6,9 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2020-09-22
+
 ### Added
-- **Metrics**: Support adding multiple metric values to a metric name
+- **Metrics**: Support adding multiple metric values to a single metric name
 - **Utilities**: Add new `Validator` utility to validate inbound events and responses using JSON Schema
+- **Utilities**: Add new `Event source data classes` utility to easily describe event schema of popular event sources
+- **Docs**: Add new `Testing your code` section to both Logger and Metrics page, and content width is now wider
+- **Tracer**: Support for automatically disable Tracer when running a Chalice app
+
+### Fixed
+- **Docs**: Improve wording on log sampling feature in Logger, and removed duplicate content on main page
+- **Utilities**: Remove DeleteMessageBatch API call when there are no messages to delete
 
 ## [1.5.0] - 2020-09-04
 
