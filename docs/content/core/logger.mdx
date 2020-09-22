@@ -376,3 +376,27 @@ except Exception:
 }
 ```
 </details>
+
+
+## Testing your code
+
+When unit testing your code that makes use of `inject_lambda_context` decorator, you need to pass a dummy Lambda Context, or else Logger will fail.
+
+This is a Pytest sample that provides the minimum information necessary for Logger to succeed:
+
+```python:title=fake_lambda_context_for_logger.py
+@pytest.fixture
+def lambda_context():
+    lambda_context = {
+        "function_name": "test",
+        "memory_limit_in_mb": 128,
+        "invoked_function_arn": "arn:aws:lambda:eu-west-1:809313241:function:test",
+        "aws_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
+    }
+
+    return namedtuple("LambdaContext", lambda_context.keys())(*lambda_context.values())
+
+def test_lambda_handler(lambda_handler, lambda_context):
+    test_event = {'test': 'event'}
+    lambda_handler(test_event, lambda_context) # this will now have a Context object populated
+```
