@@ -226,7 +226,7 @@ Sampling allows you to set your Logger Log Level as DEBUG based on a percentage 
 
 This is useful when you want to troubleshoot an issue, say a sudden increase in concurrency, and you might not have enough information in your logs as Logger log level was understandably set as INFO.
 
-Sampling calculation happens at the Logger class initialization. This means sampling will unlikely if you have a steady low number of invocations, depending on what you configured it.
+Sampling decision happens at the Logger class initialization, which only happens during a cold start. This means sampling may happen significant more or less than you expect if you have a steady low number of invocations and thus few cold starts.
 
 <Note type="info">
   If you want Logger to calculate sampling on every invocation, then please open a feature request.
