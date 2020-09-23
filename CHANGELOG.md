@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.1] - 2020-09-23
+
+### Fixed
+- **Utilities**: Fix issue with boolean values in DynamoDB stream event data class.
+
 ## [1.6.0] - 2020-09-22
 
 ### Added
