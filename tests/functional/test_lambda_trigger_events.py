@@ -17,13 +17,16 @@ from aws_lambda_powertools.utilities.data_classes import (
     SQSEvent,
 )
 from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import (
+    CreateAuthChallengeTriggerEvent,
     CustomMessageTriggerEvent,
+    DefineAuthChallengeTriggerEvent,
     PostAuthenticationTriggerEvent,
     PostConfirmationTriggerEvent,
     PreAuthenticationTriggerEvent,
     PreSignUpTriggerEvent,
     PreTokenGenerationTriggerEvent,
     UserMigrationTriggerEvent,
+    VerifyAuthChallengeResponseTriggerEvent,
 )
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
@@ -207,6 +210,76 @@ def test_cognito_pre_token_generation_trigger_event():
     claims_override_details.set_group_configuration_preferred_role("role_name")
     assert claims_override_details.group_configuration.preferred_role == "role_name"
     assert event["response"]["claimsOverrideDetails"]["groupOverrideDetails"]["preferredRole"] == "role_name"
+
+
+def test_cognito_define_auth_challenge_trigger_event():
+    event = DefineAuthChallengeTriggerEvent(load_event("cognitoDefineAuthChallengeEvent.json"))
+
+    # Verify properties
+    assert event.request.user_attributes["email"] == "define-auth@mail.com"
+    assert event.request.user_not_found is True
+    session = event.request.session
+    assert len(session) == 2
+    assert session[0].challenge_name == "PASSWORD_VERIFIER"
+    assert session[0].challenge_result is True
+    assert session[0].challenge_metadata is None
+    assert session[1].challenge_metadata == "CAPTCHA_CHALLENGE"
+    assert event.request.client_metadata is None
+
+    # Verify setters
+    event.response.challenge_name = "CUSTOM_CHALLENGE"
+    assert event.response.challenge_name == event["response"]["challengeName"]
+    assert event.response.challenge_name == "CUSTOM_CHALLENGE"
+    event.response.fail_authentication = True
+    assert event.response.fail_authentication is True
+    assert event.response.fail_authentication == event["response"]["failAuthentication"]
+    event.response.issue_tokens = True
+    assert event.response.issue_tokens is True
+    assert event.response.issue_tokens == event["response"]["issueTokens"]
+
+
+def test_create_auth_challenge_trigger_event():
+    event = CreateAuthChallengeTriggerEvent(load_event("cognitoCreateAuthChallengeEvent.json"))
+
+    # Verify properties
+    assert event.request.user_attributes["email"] == "create-auth@mail.com"
+    assert event.request.user_not_found is False
+    assert event.request.challenge_name == "PASSWORD_VERIFIER"
+    session = event.request.session
+    assert len(session) == 1
+    assert session[0].challenge_name == "CUSTOM_CHALLENGE"
+    assert session[0].challenge_metadata == "CAPTCHA_CHALLENGE"
+    assert event.request.client_metadata is None
+
+    # Verify setters
+    event.response.public_challenge_parameters = {"test": "value"}
+    assert event.response.public_challenge_parameters == event["response"]["publicChallengeParameters"]
+    assert event.response.public_challenge_parameters["test"] == "value"
+    event.response.private_challenge_parameters = {"private": "value"}
+    assert event.response.private_challenge_parameters == event["response"]["privateChallengeParameters"]
+    assert event.response.private_challenge_parameters["private"] == "value"
+    event.response.challenge_metadata = "meta"
+    assert event.response.challenge_metadata == event["response"]["challengeMetadata"]
+    assert event.response.challenge_metadata == "meta"
+
+
+def test_verify_auth_challenge_response_trigger_event():
+    event = VerifyAuthChallengeResponseTriggerEvent(load_event("cognitoVerifyAuthChallengeResponseEvent.json"))
+
+    event.trigger_source == ""
+
+    # Verify properties
+    assert event.request.user_attributes["email"] == "verify-auth@mail.com"
+    assert event.request.private_challenge_parameters["answer"] == "challengeAnswer"
+    assert event.request.challenge_answer == "challengeAnswer"
+    assert event.request.client_metadata is not None
+    assert event.request.client_metadata["foo"] == "value"
+    assert event.request.user_not_found is True
+
+    # Verify setters
+    event.response.answer_correct = True
+    assert event.response.answer_correct == event["response"]["answerCorrect"]
+    assert event.response.answer_correct is True
 
 
 def test_dynamo_db_stream_trigger_event():

@@ -114,6 +114,9 @@ Pre authentication | `data_classes.cognito_user_pool_event.PreAuthenticationTrig
 Pre sign-up | `data_classes.cognito_user_pool_event.PreSignUpTriggerEvent`
 Pre token generation | `data_classes.cognito_user_pool_event.PreTokenGenerationTriggerEvent`
 User migration | `data_classes.cognito_user_pool_event.UserMigrationTriggerEvent`
+Define Auth Challenge | `data_classes.cognito_user_pool_event.DefineAuthChallengeTriggerEvent`
+Create Auth Challenge | `data_classes.cognito_user_pool_event.CreateAuthChallengeTriggerEvent`
+Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChallengeResponseTriggerEvent`
 
 ```python:title=lambda_app.py
 from aws_lambda_powertools.utilities.cognito_user_pool_event import PostConfirmationTriggerEvent

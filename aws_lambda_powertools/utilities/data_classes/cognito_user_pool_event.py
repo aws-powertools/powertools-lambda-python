@@ -68,7 +68,7 @@ class PreSignUpTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
-        that you specify for the pre sign-up data_classes."""
+        that you specify for the pre sign-up trigger."""
         return self["request"].get("clientMetadata")
 
 
@@ -135,7 +135,7 @@ class PostConfirmationTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
-        that you specify for the post confirmation data_classes."""
+        that you specify for the post confirmation trigger."""
         return self["request"].get("clientMetadata")
 
 
@@ -172,7 +172,7 @@ class UserMigrationTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
-        that you specify for the pre sign-up data_classes."""
+        that you specify for the pre sign-up trigger."""
         return self["request"].get("clientMetadata")
 
 
@@ -283,7 +283,7 @@ class CustomMessageTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
-        that you specify for the pre sign-up data_classes."""
+        that you specify for the pre sign-up trigger."""
         return self["request"].get("clientMetadata")
 
 
@@ -329,9 +329,9 @@ class CustomMessageTriggerEvent(BaseTriggerEvent):
     - `CustomMessage_AdminCreateUser` To send the temporary password to a new user.
     - `CustomMessage_ResendCode` To resend the confirmation code to an existing user.
     - `CustomMessage_ForgotPassword` To send the confirmation code for Forgot Password request.
-    - `CustomMessage_UpdateUserAttribute` When a user's email or phone number is changed, this data_classes sends a
+    - `CustomMessage_UpdateUserAttribute` When a user's email or phone number is changed, this trigger sends a
        verification code automatically to the user. Cannot be used for other attributes.
-    - `CustomMessage_VerifyUserAttribute`  This data_classes sends a verification code to the user when they manually
+    - `CustomMessage_VerifyUserAttribute`  This trigger sends a verification code to the user when they manually
        request it for a new email or phone number.
     - `CustomMessage_Authentication` To send MFA code during authentication.
 
@@ -369,7 +369,7 @@ class PreAuthenticationTriggerEventRequest(DictWrapper):
 class PreAuthenticationTriggerEvent(BaseTriggerEvent):
     """Pre Authentication Lambda Trigger
 
-    Amazon Cognito invokes this data_classes when a user attempts to sign in, allowing custom validation
+    Amazon Cognito invokes this trigger when a user attempts to sign in, allowing custom validation
     to accept or deny the authentication request.
 
     Notes:
@@ -404,14 +404,14 @@ class PostAuthenticationTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
-        that you specify for the post authentication data_classes."""
+        that you specify for the post authentication trigger."""
         return self["request"].get("clientMetadata")
 
 
 class PostAuthenticationTriggerEvent(BaseTriggerEvent):
     """Post Authentication Lambda Trigger
 
-    Amazon Cognito invokes this data_classes after signing in a user, allowing you to add custom logic
+    Amazon Cognito invokes this trigger after signing in a user, allowing you to add custom logic
     after authentication.
 
     Notes:
@@ -462,7 +462,7 @@ class PreTokenGenerationTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
-        that you specify for the pre token generation data_classes."""
+        that you specify for the pre token generation trigger."""
         return self["request"].get("clientMetadata")
 
 
@@ -531,7 +531,7 @@ class PreTokenGenerationTriggerEventResponse(DictWrapper):
 class PreTokenGenerationTriggerEvent(BaseTriggerEvent):
     """Pre Token Generation Lambda Trigger
 
-    Amazon Cognito invokes this data_classes before token generation allowing you to customize identity token claims.
+    Amazon Cognito invokes this trigger before token generation allowing you to customize identity token claims.
 
     Notes:
     ----
@@ -558,3 +558,266 @@ class PreTokenGenerationTriggerEvent(BaseTriggerEvent):
     def response(self) -> PreTokenGenerationTriggerEventResponse:
         """Pre Token Generation Response Parameters"""
         return PreTokenGenerationTriggerEventResponse(self._data)
+
+
+class ChallengeResult(DictWrapper):
+    @property
+    def challenge_name(self) -> str:
+        """The challenge type.
+
+        One of: CUSTOM_CHALLENGE, SRP_A, PASSWORD_VERIFIER, SMS_MFA, DEVICE_SRP_AUTH,
+        DEVICE_PASSWORD_VERIFIER, or ADMIN_NO_SRP_AUTH."""
+        return self["challengeName"]
+
+    @property
+    def challenge_result(self) -> bool:
+        """Set to true if the user successfully completed the challenge, or false otherwise."""
+        return bool(self["challengeResult"])
+
+    @property
+    def challenge_metadata(self) -> Optional[str]:
+        """Your name for the custom challenge. Used only if challengeName is CUSTOM_CHALLENGE."""
+        return self.get("challengeMetadata")
+
+
+class DefineAuthChallengeTriggerEventRequest(DictWrapper):
+    @property
+    def user_attributes(self) -> Dict[str, str]:
+        """One or more name-value pairs representing user attributes. The attribute names are the keys."""
+        return self["request"]["userAttributes"]
+
+    @property
+    def user_not_found(self) -> Optional[bool]:
+        """A Boolean that is populated when PreventUserExistenceErrors is set to ENABLED for your user pool client.
+        A value of true means that the user id (user name, email address, etc.) did not match any existing users. """
+        return self["request"].get("userNotFound")
+
+    @property
+    def session(self) -> List[ChallengeResult]:
+        """An array of ChallengeResult elements, each of which contains the following elements:"""
+        return [ChallengeResult(result) for result in self["request"]["session"]]
+
+    @property
+    def client_metadata(self) -> Optional[Dict[str, str]]:
+        """OOne or more key-value pairs that you can provide as custom input to the Lambda function that you specify
+        for the define auth challenge trigger."""
+        return self["request"].get("clientMetadata")
+
+
+class DefineAuthChallengeTriggerEventResponse(DictWrapper):
+    @property
+    def challenge_name(self) -> str:
+        return self["response"]["challengeName"]
+
+    @property
+    def fail_authentication(self) -> bool:
+        return bool(self["response"]["failAuthentication"])
+
+    @property
+    def issue_tokens(self) -> bool:
+        return bool(self["response"]["issueTokens"])
+
+    @challenge_name.setter
+    def challenge_name(self, value: str):
+        """A string containing the name of the next challenge.
+        If you want to present a new challenge to your user, specify the challenge name here."""
+        self["response"]["challengeName"] = value
+
+    @fail_authentication.setter
+    def fail_authentication(self, value: bool):
+        """Set to true if you want to terminate the current authentication process, or false otherwise."""
+        self["response"]["failAuthentication"] = value
+
+    @issue_tokens.setter
+    def issue_tokens(self, value: bool):
+        """Set to true if you determine that the user has been sufficiently authenticated by
+        completing the challenges, or false otherwise."""
+        self["response"]["issueTokens"] = value
+
+
+class DefineAuthChallengeTriggerEvent(BaseTriggerEvent):
+    """Define Auth Challenge Lambda Trigger
+
+    Amazon Cognito invokes this trigger to initiate the custom authentication flow.
+
+    Notes:
+    ----
+    `triggerSource` can be one of the following:
+
+    - `DefineAuthChallenge_Authentication` Define Auth Challenge.
+
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-define-auth-challenge.html
+    """
+
+    @property
+    def request(self) -> DefineAuthChallengeTriggerEventRequest:
+        """Define Auth Challenge Request Parameters"""
+        return DefineAuthChallengeTriggerEventRequest(self._data)
+
+    @property
+    def response(self) -> DefineAuthChallengeTriggerEventResponse:
+        """Define Auth Challenge Response Parameters"""
+        return DefineAuthChallengeTriggerEventResponse(self._data)
+
+
+class CreateAuthChallengeTriggerEventRequest(DictWrapper):
+    @property
+    def user_attributes(self) -> Dict[str, str]:
+        """One or more name-value pairs representing user attributes. The attribute names are the keys."""
+        return self["request"]["userAttributes"]
+
+    @property
+    def user_not_found(self) -> Optional[bool]:
+        """This boolean is populated when PreventUserExistenceErrors is set to ENABLED for your User Pool client."""
+        return self["request"].get("userNotFound")
+
+    @property
+    def challenge_name(self) -> str:
+        """The name of the new challenge."""
+        return self["request"]["challengeName"]
+
+    @property
+    def session(self) -> List[ChallengeResult]:
+        """An array of ChallengeResult elements, each of which contains the following elements:"""
+        return [ChallengeResult(result) for result in self["request"]["session"]]
+
+    @property
+    def client_metadata(self) -> Optional[Dict[str, str]]:
+        """One or more key-value pairs that you can provide as custom input to the Lambda function that you
+        specify for the create auth challenge trigger.."""
+        return self["request"].get("clientMetadata")
+
+
+class CreateAuthChallengeTriggerEventResponse(DictWrapper):
+    @property
+    def public_challenge_parameters(self) -> Dict[str, str]:
+        return self["response"]["publicChallengeParameters"]
+
+    @property
+    def private_challenge_parameters(self) -> Dict[str, str]:
+        return self["response"]["privateChallengeParameters"]
+
+    @property
+    def challenge_metadata(self) -> str:
+        return self["response"]["challengeMetadata"]
+
+    @public_challenge_parameters.setter
+    def public_challenge_parameters(self, value: Dict[str, str]):
+        """One or more key-value pairs for the client app to use in the challenge to be presented to the user.
+        This parameter should contain all of the necessary information to accurately present the challenge to
+        the user."""
+        self["response"]["publicChallengeParameters"] = value
+
+    @private_challenge_parameters.setter
+    def private_challenge_parameters(self, value: Dict[str, str]):
+        """This parameter is only used by the Verify Auth Challenge Response Lambda trigger.
+        This parameter should contain all of the information that is required to validate the user's
+        response to the challenge. In other words, the publicChallengeParameters parameter contains the
+        question that is presented to the user and privateChallengeParameters contains the valid answers
+        for the question."""
+        self["response"]["privateChallengeParameters"] = value
+
+    @challenge_metadata.setter
+    def challenge_metadata(self, value: str):
+        """Your name for the custom challenge, if this is a custom challenge."""
+        self["response"]["challengeMetadata"] = value
+
+
+class CreateAuthChallengeTriggerEvent(BaseTriggerEvent):
+    """Create Auth Challenge Lambda Trigger
+
+    Amazon Cognito invokes this trigger after Define Auth Challenge if a custom challenge has been
+    specified as part of the Define Auth Challenge trigger.
+    It creates a custom authentication flow.
+
+    Notes:
+    ----
+    `triggerSource` can be one of the following:
+
+    - `CreateAuthChallenge_Authentication` Create Auth Challenge.
+
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-create-auth-challenge.html
+    """
+
+    @property
+    def request(self) -> CreateAuthChallengeTriggerEventRequest:
+        """Create Auth Challenge Request Parameters"""
+        return CreateAuthChallengeTriggerEventRequest(self._data)
+
+    @property
+    def response(self) -> CreateAuthChallengeTriggerEventResponse:
+        """Create Auth Challenge Response Parameters"""
+        return CreateAuthChallengeTriggerEventResponse(self._data)
+
+
+class VerifyAuthChallengeResponseTriggerEventRequest(DictWrapper):
+    @property
+    def user_attributes(self) -> Dict[str, str]:
+        """One or more name-value pairs representing user attributes. The attribute names are the keys."""
+        return self["request"]["userAttributes"]
+
+    @property
+    def private_challenge_parameters(self) -> Dict[str, str]:
+        """This parameter comes from the Create Auth Challenge trigger, and is
+        compared against a user’s challengeAnswer to determine whether the user passed the challenge."""
+        return self["request"]["privateChallengeParameters"]
+
+    @property
+    def challenge_answer(self) -> Any:
+        """The answer from the user's response to the challenge."""
+        return self["request"]["challengeAnswer"]
+
+    @property
+    def client_metadata(self) -> Optional[Dict[str, str]]:
+        """One or more key-value pairs that you can provide as custom input to the Lambda function that
+        you specify for the verify auth challenge trigger."""
+        return self["request"].get("clientMetadata")
+
+    @property
+    def user_not_found(self) -> Optional[bool]:
+        """This boolean is populated when PreventUserExistenceErrors is set to ENABLED for your User Pool client."""
+        return self["request"].get("userNotFound")
+
+
+class VerifyAuthChallengeResponseTriggerEventResponse(DictWrapper):
+    @property
+    def answer_correct(self) -> bool:
+        return bool(self["response"]["answerCorrect"])
+
+    @answer_correct.setter
+    def answer_correct(self, value: bool):
+        """Set to true if the user has successfully completed the challenge, or false otherwise."""
+        self["response"]["answerCorrect"] = value
+
+
+class VerifyAuthChallengeResponseTriggerEvent(BaseTriggerEvent):
+    """Verify Auth Challenge Response Lambda Trigger
+
+    Amazon Cognito invokes this trigger to verify if the response from the end user for a custom
+    Auth Challenge is valid or not.
+    It is part of a user pool custom authentication flow.
+
+    Notes:
+    ----
+    `triggerSource` can be one of the following:
+
+    - `VerifyAuthChallengeResponse_Authentication` Verify Auth Challenge Response.
+
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-verify-auth-challenge-response.html
+    """
+
+    @property
+    def request(self) -> VerifyAuthChallengeResponseTriggerEventRequest:
+        """Verify Auth Challenge Request Parameters"""
+        return VerifyAuthChallengeResponseTriggerEventRequest(self._data)
+
+    @property
+    def response(self) -> VerifyAuthChallengeResponseTriggerEventResponse:
+        """Verify Auth Challenge Response Parameters"""
+        return VerifyAuthChallengeResponseTriggerEventResponse(self._data)
