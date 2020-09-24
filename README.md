@@ -16,7 +16,6 @@ A suite of utilities for AWS Lambda functions to ease adopting best practices su
 * **[Metrics](https://awslabs.github.io/aws-lambda-powertools-python/core/metrics/)** - Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
 * **[Bring your own middleware](https://awslabs.github.io/aws-lambda-powertools-python/utilities/middleware_factory/)** - Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
 * **[Parameters utility](https://awslabs.github.io/aws-lambda-powertools-python/utilities/parameters/)** - Retrieve and cache parameter values from Parameter Store, Secrets Manager, or DynamoDB
-* **[Validation](https://)** - 
 
 ### Installation
 
