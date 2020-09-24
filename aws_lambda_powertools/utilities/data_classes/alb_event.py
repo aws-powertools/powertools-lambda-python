@@ -19,7 +19,7 @@ class ALBEvent(BaseProxyEvent):
 
     @property
     def request_context(self) -> ALBEventRequestContext:
-        return ALBEventRequestContext(self)
+        return ALBEventRequestContext(self._data)
 
     @property
     def http_method(self) -> str:

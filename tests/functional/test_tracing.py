@@ -61,6 +61,20 @@ def test_tracer_lambda_emulator(monkeypatch, dummy_response):
     handler({}, {})
 
 
+def test_tracer_chalice_cli_mode(monkeypatch, dummy_response):
+    # GIVEN tracer runs locally
+    monkeypatch.setenv("AWS_CHALICE_CLI_MODE", "true")
+    tracer = Tracer()
+
+    # WHEN a lambda function is run through the Chalice CLI.
+    @tracer.capture_lambda_handler
+    def handler(event, context):
+        return dummy_response
+
+    # THEN tracer should run in disabled mode, and not raise an Exception
+    handler({}, {})
+
+
 def test_tracer_metadata_disabled(dummy_response):
     # GIVEN tracer is disabled, and annotations/metadata are used
     tracer = Tracer(disabled=True)

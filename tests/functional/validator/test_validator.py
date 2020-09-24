@@ -82,6 +82,14 @@ def test_validator_incoming(schema, raw_event):
     lambda_handler(raw_event, {})
 
 
+def test_validator_incoming_envelope(schema, apigateway_event):
+    @validator(inbound_schema=schema, envelope=envelopes.API_GATEWAY_REST)
+    def lambda_handler(evt, context):
+        pass
+
+    lambda_handler(apigateway_event, {})
+
+
 def test_validator_outgoing(schema_response, raw_response):
     @validator(outbound_schema=schema_response)
     def lambda_handler(evt, context):

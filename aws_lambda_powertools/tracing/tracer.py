@@ -622,6 +622,7 @@ class Tracer:
         """
         logger.debug("Verifying whether Tracing has been disabled")
         is_lambda_sam_cli = os.getenv("AWS_SAM_LOCAL")
+        is_chalice_cli = os.getenv("AWS_CHALICE_CLI_MODE")
         env_option = str(os.getenv("POWERTOOLS_TRACE_DISABLED", "false"))
         disabled_env = strtobool(env_option)
 
@@ -629,7 +630,7 @@ class Tracer:
             logger.debug("Tracing has been disabled via env var POWERTOOLS_TRACE_DISABLED")
             return disabled_env
 
-        if is_lambda_sam_cli:
+        if is_lambda_sam_cli or is_chalice_cli:
             logger.debug("Running under SAM CLI env or not in Lambda env; disabling Tracing")
             return True
 

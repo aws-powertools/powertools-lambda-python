@@ -51,7 +51,7 @@ class BaseTriggerEvent(DictWrapper):
     @property
     def caller_context(self) -> CallerContext:
         """The caller context"""
-        return CallerContext(self)
+        return CallerContext(self._data)
 
 
 class PreSignUpTriggerEventRequest(DictWrapper):
@@ -119,11 +119,11 @@ class PreSignUpTriggerEvent(BaseTriggerEvent):
 
     @property
     def request(self) -> PreSignUpTriggerEventRequest:
-        return PreSignUpTriggerEventRequest(self)
+        return PreSignUpTriggerEventRequest(self._data)
 
     @property
     def response(self) -> PreSignUpTriggerEventResponse:
-        return PreSignUpTriggerEventResponse(self)
+        return PreSignUpTriggerEventResponse(self._data)
 
 
 class PostConfirmationTriggerEventRequest(DictWrapper):
@@ -156,7 +156,7 @@ class PostConfirmationTriggerEvent(BaseTriggerEvent):
 
     @property
     def request(self) -> PostConfirmationTriggerEventRequest:
-        return PostConfirmationTriggerEventRequest(self)
+        return PostConfirmationTriggerEventRequest(self._data)
 
 
 class UserMigrationTriggerEventRequest(DictWrapper):
@@ -257,11 +257,11 @@ class UserMigrationTriggerEvent(BaseTriggerEvent):
 
     @property
     def request(self) -> UserMigrationTriggerEventRequest:
-        return UserMigrationTriggerEventRequest(self)
+        return UserMigrationTriggerEventRequest(self._data)
 
     @property
     def response(self) -> UserMigrationTriggerEventResponse:
-        return UserMigrationTriggerEventResponse(self)
+        return UserMigrationTriggerEventResponse(self._data)
 
 
 class CustomMessageTriggerEventRequest(DictWrapper):
@@ -342,11 +342,11 @@ class CustomMessageTriggerEvent(BaseTriggerEvent):
 
     @property
     def request(self) -> CustomMessageTriggerEventRequest:
-        return CustomMessageTriggerEventRequest(self)
+        return CustomMessageTriggerEventRequest(self._data)
 
     @property
     def response(self) -> CustomMessageTriggerEventResponse:
-        return CustomMessageTriggerEventResponse(self)
+        return CustomMessageTriggerEventResponse(self._data)
 
 
 class PreAuthenticationTriggerEventRequest(DictWrapper):
@@ -386,7 +386,7 @@ class PreAuthenticationTriggerEvent(BaseTriggerEvent):
     @property
     def request(self) -> PreAuthenticationTriggerEventRequest:
         """Pre Authentication Request Parameters"""
-        return PreAuthenticationTriggerEventRequest(self)
+        return PreAuthenticationTriggerEventRequest(self._data)
 
 
 class PostAuthenticationTriggerEventRequest(DictWrapper):
@@ -428,7 +428,7 @@ class PostAuthenticationTriggerEvent(BaseTriggerEvent):
     @property
     def request(self) -> PostAuthenticationTriggerEventRequest:
         """Post Authentication Request Parameters"""
-        return PostAuthenticationTriggerEventRequest(self)
+        return PostAuthenticationTriggerEventRequest(self._data)
 
 
 class GroupOverrideDetails(DictWrapper):
@@ -552,9 +552,9 @@ class PreTokenGenerationTriggerEvent(BaseTriggerEvent):
     @property
     def request(self) -> PreTokenGenerationTriggerEventRequest:
         """Pre Token Generation Request Parameters"""
-        return PreTokenGenerationTriggerEventRequest(self)
+        return PreTokenGenerationTriggerEventRequest(self._data)
 
     @property
     def response(self) -> PreTokenGenerationTriggerEventResponse:
         """Pre Token Generation Response Parameters"""
-        return PreTokenGenerationTriggerEventResponse(self)
+        return PreTokenGenerationTriggerEventResponse(self._data)

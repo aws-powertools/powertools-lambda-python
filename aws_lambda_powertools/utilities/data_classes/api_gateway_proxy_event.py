@@ -231,7 +231,7 @@ class APIGatewayProxyEvent(BaseProxyEvent):
 
     @property
     def request_context(self) -> APIGatewayEventRequestContext:
-        return APIGatewayEventRequestContext(self)
+        return APIGatewayEventRequestContext(self._data)
 
     @property
     def path_parameters(self) -> Optional[Dict[str, str]]:
@@ -371,7 +371,7 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
 
     @property
     def request_context(self) -> RequestContextV2:
-        return RequestContextV2(self)
+        return RequestContextV2(self._data)
 
     @property
     def path_parameters(self) -> Optional[Dict[str, str]]:
