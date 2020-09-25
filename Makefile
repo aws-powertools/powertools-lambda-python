@@ -12,11 +12,11 @@ dev-docs:
 	cd docs && npm install
 
 format:
-	poetry run isort -rc aws_lambda_powertools tests example
+	poetry run isort -rc aws_lambda_powertools tests
 	poetry run black aws_lambda_powertools tests
 
 lint: format
-	poetry run flake8 aws_lambda_powertools/* tests/* example/*
+	poetry run flake8 aws_lambda_powertools/* tests/*
 
 test:
 	poetry run pytest -vvv --cov=./ --cov-report=xml
