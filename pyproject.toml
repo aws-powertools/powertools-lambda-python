@@ -49,7 +49,7 @@ xenon = "^0.7.0"
 flake8-eradicate = "^0.3.0"
 dataclasses = {version = "*", python = "~3.6"}
 flake8-bugbear = "^20.1.4"
-pydantic = ">1.6.0"
+pydantic = {version = "^1.6.0", optional = true }
 
 
 [tool.poetry.extras]
