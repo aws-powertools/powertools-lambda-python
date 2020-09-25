@@ -9,6 +9,8 @@ logger = logging.getLogger(__name__)
 
 class BaseEnvelope(ABC):
     def _parse_user_dict_schema(self, user_event: Dict[str, Any], schema: BaseModel) -> Any:
+        if user_event is None:
+            return None
         logger.debug("parsing user dictionary schema")
         try:
             return schema(**user_event)
@@ -17,6 +19,8 @@ class BaseEnvelope(ABC):
             raise
 
     def _parse_user_json_string_schema(self, user_event: str, schema: BaseModel) -> Any:
+        if user_event is None:
+            return None
         logger.debug("parsing user dictionary schema")
         if schema == str:
             logger.debug("input is string, returning")

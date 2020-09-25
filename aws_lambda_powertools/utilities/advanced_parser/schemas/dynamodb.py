@@ -2,7 +2,6 @@ from datetime import date
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, root_validator
-
 from typing_extensions import Literal
 
 
