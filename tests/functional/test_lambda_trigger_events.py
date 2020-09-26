@@ -72,6 +72,7 @@ def test_cloud_watch_trigger_event():
 def test_cognito_pre_signup_trigger_event():
     event = PreSignUpTriggerEvent(load_event("cognitoPreSignUpEvent.json"))
 
+    # Verify BaseTriggerEvent properties
     assert event.version == "string"
     assert event.trigger_source == "PreSignUp_SignUp"
     assert event.region == "us-east-1"
@@ -81,12 +82,13 @@ def test_cognito_pre_signup_trigger_event():
     assert caller_context.aws_sdk_version == "awsSdkVersion"
     assert caller_context.client_id == "clientId"
 
+    # Verify properties
     user_attributes = event.request.user_attributes
     assert user_attributes["email"] == "user@example.com"
-
     assert event.request.validation_data is None
     assert event.request.client_metadata is None
 
+    # Verify setters
     event.response.auto_confirm_user = True
     assert event.response.auto_confirm_user is True
     event.response.auto_verify_phone = True
@@ -99,6 +101,8 @@ def test_cognito_pre_signup_trigger_event():
 def test_cognito_post_confirmation_trigger_event():
     event = PostConfirmationTriggerEvent(load_event("cognitoPostConfirmationEvent.json"))
 
+    assert event.trigger_source == "PostConfirmation_ConfirmSignUp"
+
     user_attributes = event.request.user_attributes
     assert user_attributes["email"] == "user@example.com"
     assert event.request.client_metadata is None
@@ -106,6 +110,8 @@ def test_cognito_post_confirmation_trigger_event():
 
 def test_cognito_user_migration_trigger_event():
     event = UserMigrationTriggerEvent(load_event("cognitoUserMigrationEvent.json"))
+
+    assert event.trigger_source == "UserMigration_Authentication"
 
     assert compare_digest(event.request.password, event["request"]["password"])
     assert event.request.validation_data is None
@@ -132,6 +138,8 @@ def test_cognito_user_migration_trigger_event():
 def test_cognito_custom_message_trigger_event():
     event = CustomMessageTriggerEvent(load_event("cognitoCustomMessageEvent.json"))
 
+    assert event.trigger_source == "CustomMessage_AdminCreateUser"
+
     assert event.request.code_parameter == "####"
     assert event.request.username_parameter == "username"
     assert event.request.user_attributes["phone_number_verified"] is False
@@ -148,23 +156,29 @@ def test_cognito_custom_message_trigger_event():
 def test_cognito_pre_authentication_trigger_event():
     event = PreAuthenticationTriggerEvent(load_event("cognitoPreAuthenticationEvent.json"))
 
+    assert event.trigger_source == "PreAuthentication_Authentication"
+
     assert event.request.user_not_found is None
     event["request"]["userNotFound"] = True
     assert event.request.user_not_found is True
-    assert event.request.user_attributes["email"] == "test@mail.com"
+    assert event.request.user_attributes["email"] == "pre-auth@mail.com"
     assert event.request.validation_data is None
 
 
 def test_cognito_post_authentication_trigger_event():
     event = PostAuthenticationTriggerEvent(load_event("cognitoPostAuthenticationEvent.json"))
 
+    assert event.trigger_source == "PostAuthentication_Authentication"
+
     assert event.request.new_device_used is True
-    assert event.request.user_attributes["email"] == "test@mail.com"
+    assert event.request.user_attributes["email"] == "post-auth@mail.com"
     assert event.request.client_metadata is None
 
 
 def test_cognito_pre_token_generation_trigger_event():
     event = PreTokenGenerationTriggerEvent(load_event("cognitoPreTokenGenerationEvent.json"))
+
+    assert event.trigger_source == "TokenGeneration_Authentication"
 
     group_configuration = event.request.group_configuration
     assert group_configuration.groups_to_override == []
@@ -215,6 +229,8 @@ def test_cognito_pre_token_generation_trigger_event():
 def test_cognito_define_auth_challenge_trigger_event():
     event = DefineAuthChallengeTriggerEvent(load_event("cognitoDefineAuthChallengeEvent.json"))
 
+    assert event.trigger_source == "DefineAuthChallenge_Authentication"
+
     # Verify properties
     assert event.request.user_attributes["email"] == "define-auth@mail.com"
     assert event.request.user_not_found is True
@@ -241,6 +257,8 @@ def test_cognito_define_auth_challenge_trigger_event():
 def test_create_auth_challenge_trigger_event():
     event = CreateAuthChallengeTriggerEvent(load_event("cognitoCreateAuthChallengeEvent.json"))
 
+    assert event.trigger_source == "CreateAuthChallenge_Authentication"
+
     # Verify properties
     assert event.request.user_attributes["email"] == "create-auth@mail.com"
     assert event.request.user_not_found is False
@@ -266,7 +284,7 @@ def test_create_auth_challenge_trigger_event():
 def test_verify_auth_challenge_response_trigger_event():
     event = VerifyAuthChallengeResponseTriggerEvent(load_event("cognitoVerifyAuthChallengeResponseEvent.json"))
 
-    event.trigger_source == ""
+    assert event.trigger_source == "VerifyAuthChallengeResponse_Authentication"
 
     # Verify properties
     assert event.request.user_attributes["email"] == "verify-auth@mail.com"
