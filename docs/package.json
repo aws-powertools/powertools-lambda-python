@@ -4,15 +4,15 @@
         "build": "gatsby build --prefix-paths"
     },
     "dependencies": {
-        "@aws-amplify/analytics": "^3.2.0",
-        "antd": "^4.2.4",
-        "aws-amplify": "^3.0.17",
-        "gatsby": "^2.22.9",
+        "@aws-amplify/analytics": "^3.3.5",
+        "antd": "^4.6.5",
+        "aws-amplify": "^3.3.2",
+        "gatsby": "^2.24.65",
         "gatsby-plugin-antd": "^2.2.0",
-        "gatsby-plugin-catch-links": "^2.3.2",
-        "gatsby-plugin-sitemap": "^2.4.3",
-        "gatsby-remark-autolink-headers": "^2.3.3",
-        "gatsby-theme-apollo-docs": "^4.2.3",
+        "gatsby-plugin-catch-links": "^2.3.12",
+        "gatsby-plugin-sitemap": "^2.4.13",
+        "gatsby-remark-autolink-headers": "^2.3.13",
+        "gatsby-theme-apollo-docs": "^4.4.3",
         "react": "^16.13.1",
         "react-dom": "^16.13.1"
     },
