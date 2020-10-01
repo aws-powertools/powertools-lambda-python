@@ -48,7 +48,9 @@ class BaseProxyEvent(DictWrapper):
         params = self.query_string_parameters
         return default_value if params is None else params.get(name, default_value)
 
-    def get_header_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
+    def get_header_value(
+        self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
+    ) -> Optional[str]:
         """Get header value by name
 
         Parameters
@@ -57,9 +59,14 @@ class BaseProxyEvent(DictWrapper):
             Header name
         default_value: str, optional
             Default value if no value was found by name
+        case_sensitive: bool
+            Whether to use a case sensitive look up
         Returns
         -------
         str, optional
             Header value
         """
-        return self.headers.get(name, default_value)
+        if case_sensitive:
+            return self.headers.get(name, default_value)
+
+        return next((value for key, value in self.headers.items() if name.lower() == key.lower()), default_value)
