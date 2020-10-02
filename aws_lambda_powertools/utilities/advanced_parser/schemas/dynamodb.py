@@ -14,6 +14,8 @@ class DynamoScheme(BaseModel):
     SizeBytes: int
     StreamViewType: Literal["NEW_AND_OLD_IMAGES", "KEYS_ONLY", "NEW_IMAGE", "OLD_IMAGE"]
 
+    # since both images are optional, they can both be None. However, at least one must
+    # exist in a legal schema of NEW_AND_OLD_IMAGES type
     @root_validator
     def check_one_image_exists(cls, values):
         newimg, oldimg = values.get("NewImage"), values.get("OldImage")

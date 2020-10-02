@@ -24,6 +24,9 @@ class SqsMsgAttributeSchema(BaseModel):
     binaryListValues: List[str] = []
     dataType: str
 
+    # Amazon SQS supports the logical data types String, Number, and Binary with optional custom data type
+    # labels with the format .custom-data-type.
+    # https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-metadata.html#sqs-message-attributes
     @validator("dataType")
     def valid_type(cls, v):  # noqa: VNE001
         pattern = re.compile("Number.*|String.*|Binary.*")
@@ -31,6 +34,7 @@ class SqsMsgAttributeSchema(BaseModel):
             raise TypeError("data type is invalid")
         return v
 
+    # validate that dataType and value are not None and match 
     @root_validator
     def check_str_and_binary_values(cls, values):
         binary_val, str_val = values.get("binaryValue", ""), values.get("stringValue", "")

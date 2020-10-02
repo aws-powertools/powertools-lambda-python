@@ -21,24 +21,36 @@ def parser(
 
         As Lambda follows (event, context) signature we can remove some of the boilerplate
         and also capture any exception any Lambda function throws as metadata.
-        Event will be the parsed & validated BaseModel pydantic object of the input type "schema"
+        event will be the parsed and passed as a BaseModel pydantic class of the input type "schema" 
+        to the lambda handler.
+        event will be extracted from the envelope in case envelope is not None.
+        In case envelope is None, the complete event is parsed to match the schema parameter BaseModel definition.
+        In case envelope is not None, first the event is parsed as the envelope's schema definition, and the user 
+        message is extracted and parsed again as the schema parameter's definition.
 
         Example
         -------
         **Lambda function using validation decorator**
 
             @parser(schema=MyBusiness, envelope=envelopes.EVENTBRIDGE)
-            def handler(event: inbound_schema_model , context: LambdaContext):
+            def handler(event: MyBusiness , context: LambdaContext):
                 ...
 
         Parameters
         ----------
-        todo add
+        handler:  input for lambda_handler_decorator, wraps the handler lambda
+        event:    AWS event dictionary
+        context:  AWS lambda context
+        schema:   pydantic BaseModel class. This is the user data schema that will replace the event. 
+                  event parameter will be parsed and a new schema object will be created from it.
+        envelope: what envelope to extract the schema from, can be any AWS service that is currently 
+                  supported in the envelopes module. Can be None.
 
         Raises
         ------
         err
-            TypeError or pydantic.ValidationError or any exception raised by the lambda handler itself
+            TypeError - in case event is None
+            pydantic.ValidationError - event fails validation, either of the envelope
     """
     lambda_handler_name = handler.__name__
     parsed_event = None
@@ -53,4 +65,4 @@ def parser(
         parsed_event = parse_envelope(event, envelope, schema)
 
     logger.debug(f"Calling handler {lambda_handler_name}")
-    handler(parsed_event, context)
+    return handler(parsed_event, context)

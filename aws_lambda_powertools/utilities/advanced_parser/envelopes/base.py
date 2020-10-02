@@ -21,7 +21,8 @@ class BaseEnvelope(ABC):
     def _parse_user_json_string_schema(self, user_event: str, schema: BaseModel) -> Any:
         if user_event is None:
             return None
-        logger.debug("parsing user dictionary schema")
+        # this is used in cases where the underlying schema is not a Dict that can be parsed as baseModel
+        # but a plain string i.e SQS has plain string payload
         if schema == str:
             logger.debug("input is string, returning")
             return user_event

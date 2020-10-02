@@ -9,8 +9,9 @@ from aws_lambda_powertools.utilities.advanced_parser.schemas import EventBridgeS
 logger = logging.getLogger(__name__)
 
 
+# returns a parsed BaseModel object according to schema type
 class EventBridgeEnvelope(BaseEnvelope):
-    def parse(self, event: Dict[str, Any], schema: BaseModel) -> Any:
+    def parse(self, event: Dict[str, Any], schema: BaseModel) -> BaseModel:
         try:
             parsed_envelope = EventBridgeSchema(**event)
         except (ValidationError, TypeError):
