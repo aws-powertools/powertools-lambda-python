@@ -26,7 +26,7 @@ coverage-html:
 pr: lint test security-baseline complexity-baseline
 
 build: pr
-	poetry run build
+	poetry build
 
 build-docs:
 	@$(MAKE) build-docs-website
