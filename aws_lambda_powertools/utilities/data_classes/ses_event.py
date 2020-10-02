@@ -193,7 +193,7 @@ class SESEventRecord(DictWrapper):
 
 
 class SESEvent(DictWrapper):
-    """Amazon SES to receive message event data_classes
+    """Amazon SES to receive message event trigger
 
     NOTE: There is a 30-second timeout on RequestResponse invocations.
 
