@@ -1,4 +1,7 @@
-from typing import List
+from typing import Any, List
+
+import pytest
+from pydantic import ValidationError
 
 from aws_lambda_powertools.utilities.advanced_parser.envelopes.envelopes import Envelope
 from aws_lambda_powertools.utilities.advanced_parser.parser import parser
@@ -9,7 +12,7 @@ from tests.functional.validator.conftest import sqs_event  # noqa: F401
 
 
 @parser(schema=str, envelope=Envelope.SQS)
-def handle_sqs_str_body(event: List[str], context: LambdaContext):
+def handle_sqs_str_body(event: List[str], _: LambdaContext):
     assert len(event) == 2
     assert event[0] == "Test message."
     assert event[1] == "Test message2."
@@ -21,18 +24,53 @@ def test_handle_sqs_trigger_event_str_body():
 
 
 @parser(schema=MySqsBusiness, envelope=Envelope.SQS)
-def handle_sqs_json_body(event: List[MySqsBusiness], context: LambdaContext):
+def handle_sqs_json_body(event: List[MySqsBusiness], _: LambdaContext):
     assert len(event) == 1
     assert event[0].message == "hello world"
     assert event[0].username == "lessa"
 
 
-def test_handle_sqs_trigger_evemt_json_body(sqs_event):  # noqa: F811
+def test_handle_sqs_trigger_event_json_body(sqs_event):  # noqa: F811
     handle_sqs_json_body(sqs_event, LambdaContext())
 
 
+def test_validate_event_does_not_conform_with_schema():
+    event: Any = {"invalid": "event"}
+
+    with pytest.raises(ValidationError):
+        handle_sqs_json_body(event, LambdaContext())
+
+
+def test_validate_event_does_not_conform_user_json_string_with_schema():
+    event: Any = {
+        "Records": [
+            {
+                "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
+                "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a...",
+                "body": "Not valid json",
+                "attributes": {
+                    "ApproximateReceiveCount": "1",
+                    "SentTimestamp": "1545082649183",
+                    "SenderId": "AIDAIENQZJOLO23YVJ4VO",
+                    "ApproximateFirstReceiveTimestamp": "1545082649185",
+                },
+                "messageAttributes": {
+                    "testAttr": {"stringValue": "100", "binaryValue": "base64Str", "dataType": "Number"}
+                },
+                "md5OfBody": "e4e68fb7bd0e697a0ae8f1bb342846b3",
+                "eventSource": "aws:sqs",
+                "eventSourceARN": "arn:aws:sqs:us-east-2:123456789012:my-queue",
+                "awsRegion": "us-east-2",
+            }
+        ]
+    }
+
+    with pytest.raises(ValidationError):
+        handle_sqs_json_body(event, LambdaContext())
+
+
 @parser(schema=MyAdvancedSqsBusiness)
-def handle_sqs_no_envelope(event: MyAdvancedSqsBusiness, context: LambdaContext):
+def handle_sqs_no_envelope(event: MyAdvancedSqsBusiness, _: LambdaContext):
     records = event.Records
     record = records[0]
     attributes = record.attributes

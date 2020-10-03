@@ -1,8 +1,8 @@
 import logging
 from typing import Any, Dict, List
-from typing_extensions import Literal
 
 from pydantic import BaseModel, ValidationError
+from typing_extensions import Literal
 
 from aws_lambda_powertools.utilities.advanced_parser.envelopes.base import BaseEnvelope
 from aws_lambda_powertools.utilities.advanced_parser.schemas import DynamoDBSchema

@@ -8,7 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 class BaseEnvelope(ABC):
-    def _parse_user_dict_schema(self, user_event: Dict[str, Any], schema: BaseModel) -> Any:
+    @staticmethod
+    def _parse_user_dict_schema(user_event: Dict[str, Any], schema: BaseModel) -> Any:
         if user_event is None:
             return None
         logger.debug("parsing user dictionary schema")
@@ -18,7 +19,8 @@ class BaseEnvelope(ABC):
             logger.exception("Validation exception while extracting user custom schema")
             raise
 
-    def _parse_user_json_string_schema(self, user_event: str, schema: BaseModel) -> Any:
+    @staticmethod
+    def _parse_user_json_string_schema(user_event: str, schema: BaseModel) -> Any:
         if user_event is None:
             return None
         # this is used in cases where the underlying schema is not a Dict that can be parsed as baseModel
