@@ -4,7 +4,7 @@ target:
 
 dev:
 	pip install --upgrade pip poetry pre-commit
-	poetry install
+	poetry install --extras "pydantic"
 	pre-commit install
 
 dev-docs:
@@ -26,7 +26,7 @@ coverage-html:
 pr: lint test security-baseline complexity-baseline
 
 build: pr
-	poetry run build
+	poetry build
 
 build-docs:
 	@$(MAKE) build-docs-website

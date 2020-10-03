@@ -11,7 +11,7 @@
   "request": {
     "newDeviceUsed": true,
     "userAttributes": {
-      "email": "test@mail.com"
+      "email": "post-auth@mail.com"
     }
   },
   "response": {}

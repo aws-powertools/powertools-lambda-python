@@ -7,14 +7,23 @@
     "awsSdkVersion": "awsSdkVersion",
     "clientId": "clientId"
   },
-  "triggerSource": "PreAuthentication_Authentication",
+  "triggerSource": "CreateAuthChallenge_Authentication",
   "request": {
     "userAttributes": {
       "sub": "4A709A36-7D63-4785-829D-4198EF10EBDA",
       "email_verified": "true",
       "name": "First Last",
-      "email": "pre-auth@mail.com"
-    }
+      "email": "create-auth@mail.com"
+    },
+    "challengeName": "PASSWORD_VERIFIER",
+    "session" : [
+      {
+        "challengeName": "CUSTOM_CHALLENGE",
+        "challengeResult": true,
+        "challengeMetadata": "CAPTCHA_CHALLENGE"
+      }
+    ],
+    "userNotFound": false
   },
   "response": {}
 }
