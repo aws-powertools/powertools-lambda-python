@@ -69,31 +69,3 @@ def test_validate_event_does_not_conform_with_schema():
     event_dict: Any = {"hello": "s"}
     with pytest.raises(ValidationError):
         handle_dynamodb(event_dict, LambdaContext())
-
-
-def test_validate_event_neither_image_exists_with_schema():
-    event_dict: Any = {
-        "Records": [
-            {
-                "eventID": "1",
-                "eventName": "INSERT",
-                "eventVersion": "1.0",
-                "eventSourceARN": "eventsource_arn",
-                "awsRegion": "us-west-2",
-                "eventSource": "aws:dynamodb",
-                "dynamodb": {
-                    "StreamViewType": "NEW_AND_OLD_IMAGES",
-                    "SequenceNumber": "111",
-                    "SizeBytes": 26,
-                    "Keys": {"Id": {"N": "101"}},
-                },
-            }
-        ]
-    }
-    with pytest.raises(ValidationError) as exc_info:
-        handle_dynamodb(event_dict, LambdaContext())
-
-    validation_error: ValidationError = exc_info.value
-    assert len(validation_error.errors()) == 1
-    error = validation_error.errors()[0]
-    assert error["msg"] == "DynamoDB streams schema failed validation, missing both new & old stream images"
