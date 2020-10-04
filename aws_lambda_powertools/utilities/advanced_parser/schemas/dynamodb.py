@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel
 from typing_extensions import Literal
 
 
@@ -14,15 +14,16 @@ class DynamoScheme(BaseModel):
     SizeBytes: int
     StreamViewType: Literal["NEW_AND_OLD_IMAGES", "KEYS_ONLY", "NEW_IMAGE", "OLD_IMAGE"]
 
+    # context on why it's commented: https://github.com/awslabs/aws-lambda-powertools-python/pull/118
     # since both images are optional, they can both be None. However, at least one must
     # exist in a legal schema of NEW_AND_OLD_IMAGES type
-    @root_validator
-    def check_one_image_exists(cls, values):
-        new_img, old_img = values.get("NewImage"), values.get("OldImage")
-        stream_type = values.get("StreamViewType")
-        if stream_type == "NEW_AND_OLD_IMAGES" and not new_img and not old_img:
-            raise TypeError("DynamoDB streams schema failed validation, missing both new & old stream images")
-        return values
+    # @root_validator
+    # def check_one_image_exists(cls, values): # noqa: E800
+    #     new_img, old_img = values.get("NewImage"), values.get("OldImage") # noqa: E800
+    #     stream_type = values.get("StreamViewType") # noqa: E800
+    #     if stream_type == "NEW_AND_OLD_IMAGES" and not new_img and not old_img: # noqa: E800
+    #         raise TypeError("DynamoDB streams schema failed validation, missing both new & old stream images") # noqa: E800,E501
+    #     return values # noqa: E800
 
 
 class UserIdentity(BaseModel):
