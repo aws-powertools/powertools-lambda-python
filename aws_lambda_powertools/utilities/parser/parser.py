@@ -4,7 +4,8 @@ from typing import Any, Callable, Dict, Optional
 from pydantic import BaseModel, ValidationError
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.utilities.parser.envelopes import Envelope, parse_envelope
+
+from .envelopes.base import BaseEnvelope, parse_envelope
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ def parser(
     event: Dict[str, Any],
     context: Dict[str, Any],
     schema: BaseModel,
-    envelope: Optional[Envelope] = None,
+    envelope: Optional[BaseEnvelope] = None,
 ) -> Any:
     """Decorator to conduct advanced parsing & validation for lambda handlers events
 

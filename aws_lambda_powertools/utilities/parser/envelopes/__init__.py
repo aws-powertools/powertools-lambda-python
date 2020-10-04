@@ -1,3 +1,7 @@
-from .envelopes import Envelope, InvalidEnvelopeError, parse_envelope
+from .dynamodb import DynamoDBEnvelope
+from .event_bridge import EventBridgeEnvelope
+from .sqs import SqsEnvelope
 
-__all__ = ["InvalidEnvelopeError", "Envelope", "parse_envelope"]
+SQS = SqsEnvelope
+DYNAMODB_STREAM = DynamoDBEnvelope
+EVENTBRIDGE = EventBridgeEnvelope

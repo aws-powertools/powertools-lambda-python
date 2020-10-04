@@ -3,19 +3,37 @@ from typing import Any, Dict, List, Union
 
 from pydantic import BaseModel, ValidationError
 
-from aws_lambda_powertools.utilities.parser.envelopes.base import BaseEnvelope
-from aws_lambda_powertools.utilities.parser.schemas import SqsSchema
+from ..schemas import SqsSchema
+from .base import BaseEnvelope
 
 logger = logging.getLogger(__name__)
 
 
-# returns a list of parsed schemas of type BaseModel or plain string.
-# The record's body parameter is a string. However, it can also be a JSON encoded string which
-# can then be parsed into a BaseModel object.
-# Note that all records will be parsed the same way so if schema is str,
-# all the items in the list will be parsed as str and npt as JSON (and vice versa).
 class SqsEnvelope(BaseEnvelope):
+    """SQS Envelope to extract array of Records
+
+    The record's body parameter is a string, though it can also be a JSON encoded string.
+    Regardless of it's type it'll be parsed into a BaseModel object.
+
+    Note: Records will be parsed the same way so if schema is str,
+    all items in the list will be parsed as str and npt as JSON (and vice versa)
+    """
+
     def parse(self, event: Dict[str, Any], schema: Union[BaseModel, str]) -> List[Union[BaseModel, str]]:
+        """Parses records found with schema provided
+
+        Parameters
+        ----------
+        event : Dict
+            Lambda event to be parsed
+        schema : BaseModel
+            User schema provided to parse after extracting data using envelope
+
+        Returns
+        -------
+        List
+            List of records parsed with schema provided
+        """
         try:
             parsed_envelope = SqsSchema(**event)
         except (ValidationError, TypeError):

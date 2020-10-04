@@ -3,7 +3,7 @@ from typing import Any, List
 import pytest
 from pydantic import ValidationError
 
-from aws_lambda_powertools.utilities.parser.envelopes.envelopes import Envelope
+from aws_lambda_powertools.utilities.parser import envelopes
 from aws_lambda_powertools.utilities.parser.parser import parser
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedSqsBusiness, MySqsBusiness
@@ -11,7 +11,7 @@ from tests.functional.parser.utils import load_event
 from tests.functional.validator.conftest import sqs_event  # noqa: F401
 
 
-@parser(schema=str, envelope=Envelope.SQS)
+@parser(schema=str, envelope=envelopes.SQS)
 def handle_sqs_str_body(event: List[str], _: LambdaContext):
     assert len(event) == 2
     assert event[0] == "Test message."
@@ -23,7 +23,7 @@ def test_handle_sqs_trigger_event_str_body():
     handle_sqs_str_body(event_dict, LambdaContext())
 
 
-@parser(schema=MySqsBusiness, envelope=Envelope.SQS)
+@parser(schema=MySqsBusiness, envelope=envelopes.SQS)
 def handle_sqs_json_body(event: List[MySqsBusiness], _: LambdaContext):
     assert len(event) == 1
     assert event[0].message == "hello world"

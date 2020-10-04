@@ -4,6 +4,8 @@ from typing import Any, Dict
 
 from pydantic import BaseModel, ValidationError
 
+from ..exceptions import InvalidEnvelopeError
+
 logger = logging.getLogger(__name__)
 
 
@@ -38,3 +40,11 @@ class BaseEnvelope(ABC):
     @abstractmethod
     def parse(self, event: Dict[str, Any], schema: BaseModel):
         return NotImplemented
+
+
+def parse_envelope(event: Dict[str, Any], envelope: BaseEnvelope, schema: BaseModel):
+    if not callable(envelope) and not isinstance(BaseEnvelope):
+        logger.exception("envelope must be a callable and instance of BaseEnvelope")
+        raise InvalidEnvelopeError("envelope must be a callable and instance of BaseEnvelope")
+    logger.debug(f"Parsing and validating event schema, envelope={envelope}")
+    return envelope().parse(event=event, schema=schema)

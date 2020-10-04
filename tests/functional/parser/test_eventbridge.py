@@ -3,14 +3,13 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from aws_lambda_powertools.utilities.parser.envelopes.envelopes import Envelope
-from aws_lambda_powertools.utilities.parser.parser import parser
+from aws_lambda_powertools.utilities.parser import envelopes, parser
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedEventbridgeBusiness, MyEventbridgeBusiness
 from tests.functional.parser.utils import load_event
 
 
-@parser(schema=MyEventbridgeBusiness, envelope=Envelope.EVENTBRIDGE)
+@parser(schema=MyEventbridgeBusiness, envelope=envelopes.EVENTBRIDGE)
 def handle_eventbridge(event: MyEventbridgeBusiness, _: LambdaContext):
     assert event.instance_id == "i-1234567890abcdef0"
     assert event.state == "terminated"
