@@ -670,10 +670,37 @@ def test_base_proxy_event_get_header_value():
     value = event.get_header_value("test", default_value)
     assert value == set_value
 
+    # Verify that the default look is case insensitive
+    value = event.get_header_value("Test")
+    assert value == set_value
+
     value = event.get_header_value("unknown", default_value)
     assert value == default_value
 
     value = event.get_header_value("unknown")
+    assert value is None
+
+
+def test_base_proxy_event_get_header_value_case_insensitive():
+    default_value = "default"
+    set_value = "value"
+
+    event = BaseProxyEvent({"headers": {}})
+
+    event._data["headers"] = {"Test": set_value}
+    value = event.get_header_value("test", case_sensitive=True)
+    assert value is None
+
+    value = event.get_header_value("test", default_value=default_value, case_sensitive=True)
+    assert value == default_value
+
+    value = event.get_header_value("Test", case_sensitive=True)
+    assert value == set_value
+
+    value = event.get_header_value("unknown", default_value, case_sensitive=True)
+    assert value == default_value
+
+    value = event.get_header_value("unknown", case_sensitive=True)
     assert value is None
 
 
