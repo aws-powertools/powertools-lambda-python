@@ -18,9 +18,9 @@ class DynamoScheme(BaseModel):
     # exist in a legal schema of NEW_AND_OLD_IMAGES type
     @root_validator
     def check_one_image_exists(cls, values):
-        newimg, oldimg = values.get("NewImage"), values.get("OldImage")
+        new_img, old_img = values.get("NewImage"), values.get("OldImage")
         stream_type = values.get("StreamViewType")
-        if stream_type == "NEW_AND_OLD_IMAGES" and not newimg and not oldimg:
+        if stream_type == "NEW_AND_OLD_IMAGES" and not new_img and not old_img:
             raise TypeError("DynamoDB streams schema failed validation, missing both new & old stream images")
         return values
 
