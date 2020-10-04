@@ -12,5 +12,5 @@ class EventBridgeSchema(BaseModel):
     time: datetime
     region: str
     resources: List[str]
-    detailtype: str = Field(None, alias="detail-type")
+    detail_type: str = Field(None, alias="detail-type")
     detail: Dict[str, Any]
