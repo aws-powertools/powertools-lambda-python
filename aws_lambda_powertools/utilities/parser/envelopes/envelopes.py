@@ -4,10 +4,10 @@ from typing import Any, Dict
 
 from pydantic import BaseModel
 
-from aws_lambda_powertools.utilities.advanced_parser.envelopes.base import BaseEnvelope
-from aws_lambda_powertools.utilities.advanced_parser.envelopes.dynamodb import DynamoDBEnvelope
-from aws_lambda_powertools.utilities.advanced_parser.envelopes.event_bridge import EventBridgeEnvelope
-from aws_lambda_powertools.utilities.advanced_parser.envelopes.sqs import SqsEnvelope
+from aws_lambda_powertools.utilities.parser.envelopes.base import BaseEnvelope
+from aws_lambda_powertools.utilities.parser.envelopes.dynamodb import DynamoDBEnvelope
+from aws_lambda_powertools.utilities.parser.envelopes.event_bridge import EventBridgeEnvelope
+from aws_lambda_powertools.utilities.parser.envelopes.sqs import SqsEnvelope
 
 logger = logging.getLogger(__name__)
 

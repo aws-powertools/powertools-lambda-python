@@ -4,8 +4,8 @@ from typing import Any, Dict, List
 from pydantic import BaseModel, ValidationError
 from typing_extensions import Literal
 
-from aws_lambda_powertools.utilities.advanced_parser.envelopes.base import BaseEnvelope
-from aws_lambda_powertools.utilities.advanced_parser.schemas import DynamoDBSchema
+from aws_lambda_powertools.utilities.parser.envelopes.base import BaseEnvelope
+from aws_lambda_powertools.utilities.parser.schemas import DynamoDBSchema
 
 logger = logging.getLogger(__name__)
 

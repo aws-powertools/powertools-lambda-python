@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel
 from typing_extensions import Literal
 
-from aws_lambda_powertools.utilities.advanced_parser.schemas import (
+from aws_lambda_powertools.utilities.parser.schemas import (
     DynamoDBSchema,
     DynamoRecordSchema,
     DynamoScheme,

@@ -3,8 +3,8 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from aws_lambda_powertools.utilities.advanced_parser.envelopes.envelopes import Envelope
-from aws_lambda_powertools.utilities.advanced_parser.parser import parser
+from aws_lambda_powertools.utilities.parser.envelopes.envelopes import Envelope
+from aws_lambda_powertools.utilities.parser.parser import parser
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedEventbridgeBusiness, MyEventbridgeBusiness
 from tests.functional.parser.utils import load_event

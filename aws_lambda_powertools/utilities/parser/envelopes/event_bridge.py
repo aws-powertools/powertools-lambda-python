@@ -3,8 +3,8 @@ from typing import Any, Dict
 
 from pydantic import BaseModel, ValidationError
 
-from aws_lambda_powertools.utilities.advanced_parser.envelopes.base import BaseEnvelope
-from aws_lambda_powertools.utilities.advanced_parser.schemas import EventBridgeSchema
+from aws_lambda_powertools.utilities.parser.envelopes.base import BaseEnvelope
+from aws_lambda_powertools.utilities.parser.schemas import EventBridgeSchema
 
 logger = logging.getLogger(__name__)
 
