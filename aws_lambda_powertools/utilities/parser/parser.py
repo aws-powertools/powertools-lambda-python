@@ -6,6 +6,7 @@ from pydantic import BaseModel, ValidationError
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
 from .envelopes.base import BaseEnvelope, parse_envelope
+from .exceptions import SchemaValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -49,19 +50,16 @@ def parser(
 
         Raises
         ------
-        err
-            TypeError - in case event is None
-            pydantic.ValidationError - event fails validation, either of the envelope
+        SchemaValidationError
+            When input event doesn't conform with schema provided
     """
     lambda_handler_name = handler.__name__
-    parsed_event = None
     if envelope is None:
         try:
-            logger.debug("Parsing and validating event schema, no envelope is used")
+            logger.debug("Parsing and validating event schema; no envelope used")
             parsed_event = schema(**event)
-        except (ValidationError, TypeError):
-            logger.exception("Validation exception received from input event")
-            raise
+        except (ValidationError, TypeError) as e:
+            raise SchemaValidationError("Input event doesn't conform with schema") from e
     else:
         parsed_event = parse_envelope(event, envelope, schema)
 

@@ -1,10 +1,8 @@
 from typing import Any, List
 
 import pytest
-from pydantic import ValidationError
 
-from aws_lambda_powertools.utilities.parser import envelopes
-from aws_lambda_powertools.utilities.parser.parser import parser
+from aws_lambda_powertools.utilities.parser import envelopes, exceptions, parser
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedSqsBusiness, MySqsBusiness
 from tests.functional.parser.utils import load_event
@@ -37,7 +35,7 @@ def test_handle_sqs_trigger_event_json_body(sqs_event):  # noqa: F811
 def test_validate_event_does_not_conform_with_schema():
     event: Any = {"invalid": "event"}
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(exceptions.SchemaValidationError):
         handle_sqs_json_body(event, LambdaContext())
 
 
@@ -65,7 +63,7 @@ def test_validate_event_does_not_conform_user_json_string_with_schema():
         ]
     }
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(exceptions.SchemaValidationError):
         handle_sqs_json_body(event, LambdaContext())
 
 

@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 from pydantic import BaseModel, ValidationError
 
-from ..exceptions import InvalidEnvelopeError
+from ..exceptions import InvalidEnvelopeError, SchemaValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -14,28 +14,29 @@ class BaseEnvelope(ABC):
     def _parse_user_dict_schema(user_event: Dict[str, Any], schema: BaseModel) -> Any:
         if user_event is None:
             return None
-        logger.debug("parsing user dictionary schema")
         try:
+            logger.debug("parsing user dictionary schema")
             return schema(**user_event)
-        except (ValidationError, TypeError):
+        except (ValidationError, TypeError) as e:
             logger.exception("Validation exception while extracting user custom schema")
-            raise
+            raise SchemaValidationError("Failed to extract custom schema") from e
 
     @staticmethod
     def _parse_user_json_string_schema(user_event: str, schema: BaseModel) -> Any:
         if user_event is None:
             return None
+
         # this is used in cases where the underlying schema is not a Dict that can be parsed as baseModel
-        # but a plain string i.e SQS has plain string payload
-        if schema == str:
+        # but a plain string as payload i.e. SQS: "body": "Test message."
+        if schema is str:
             logger.debug("input is string, returning")
             return user_event
-        logger.debug("trying to parse as json encoded string")
+
         try:
+            logger.debug("trying to parse as json encoded string")
             return schema.parse_raw(user_event)
-        except (ValidationError, TypeError):
-            logger.exception("Validation exception while extracting user custom schema")
-            raise
+        except (ValidationError, TypeError) as e:
+            raise SchemaValidationError("Failed to extract custom schema from JSON string") from e
 
     @abstractmethod
     def parse(self, event: Dict[str, Any], schema: BaseModel):
@@ -44,7 +45,7 @@ class BaseEnvelope(ABC):
 
 def parse_envelope(event: Dict[str, Any], envelope: BaseEnvelope, schema: BaseModel):
     if not callable(envelope) and not isinstance(BaseEnvelope):
-        logger.exception("envelope must be a callable and instance of BaseEnvelope")
-        raise InvalidEnvelopeError("envelope must be a callable and instance of BaseEnvelope")
+        raise InvalidEnvelopeError(f"envelope must be a callable and instance of BaseEnvelope, envelope={envelope}")
+
     logger.debug(f"Parsing and validating event schema, envelope={envelope}")
     return envelope().parse(event=event, schema=schema)
