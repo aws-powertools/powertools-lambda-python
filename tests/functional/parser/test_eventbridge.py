@@ -54,3 +54,8 @@ def test_validate_event_does_not_conform_with_user_dict_schema():
 def test_handle_eventbridge_trigger_event_no_envelope():
     event_dict = load_event("eventBridgeEvent.json")
     handle_eventbridge_no_envelope(event_dict, LambdaContext())
+
+
+def test_handle_invalid_event_with_eventbridge_envelope():
+    with pytest.raises(exceptions.SchemaValidationError):
+        handle_eventbridge(event={}, context=LambdaContext())
