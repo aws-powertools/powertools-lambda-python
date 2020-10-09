@@ -53,15 +53,16 @@ def parser(
         SchemaValidationError
             When input event doesn't conform with schema provided
     """
-    lambda_handler_name = handler.__name__
     if envelope is None:
         try:
             logger.debug("Parsing and validating event schema; no envelope used")
             parsed_event = schema(**event)
-        except (ValidationError, TypeError) as e:
+        except ValidationError as e:
             raise SchemaValidationError("Input event doesn't conform with schema") from e
+
     else:
         parsed_event = parse_envelope(event, envelope, schema)
 
+    lambda_handler_name = handler.__name__
     logger.debug(f"Calling handler {lambda_handler_name}")
     return handler(parsed_event, context)

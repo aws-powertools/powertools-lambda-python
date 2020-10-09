@@ -23,9 +23,6 @@ class BaseEnvelope(ABC):
 
     @staticmethod
     def _parse_user_json_string_schema(user_event: str, schema: BaseModel) -> Any:
-        if user_event is None:
-            return None
-
         # this is used in cases where the underlying schema is not a Dict that can be parsed as baseModel
         # but a plain string as payload i.e. SQS: "body": "Test message."
         if schema is str:
@@ -40,7 +37,7 @@ class BaseEnvelope(ABC):
 
     @abstractmethod
     def parse(self, event: Dict[str, Any], schema: BaseModel):
-        return NotImplemented
+        return NotImplemented  # pragma: no cover
 
 
 def parse_envelope(event: Dict[str, Any], envelope: BaseEnvelope, schema: BaseModel):
