@@ -36,6 +36,6 @@ class EventBridgeEnvelope(BaseEnvelope):
         """
         try:
             parsed_envelope = EventBridgeSchema(**event)
+            return self._parse(parsed_envelope.detail, schema)
         except ValidationError as e:
             raise SchemaValidationError("EventBridge input doesn't conform with schema") from e
-        return self._parse(parsed_envelope.detail, schema)
