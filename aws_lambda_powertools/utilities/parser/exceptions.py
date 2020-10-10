@@ -4,3 +4,7 @@ class InvalidEnvelopeError(Exception):
 
 class SchemaValidationError(Exception):
     """Input data does not conform with schema"""
+
+
+class InvalidSchemaTypeError(Exception):
+    """Input schema does not implement BaseModel"""

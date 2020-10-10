@@ -9,18 +9,6 @@ from tests.functional.parser.utils import load_event
 from tests.functional.validator.conftest import sqs_event  # noqa: F401
 
 
-@parser(schema=str, envelope=envelopes.SQS)
-def handle_sqs_str_body(event: List[str], _: LambdaContext):
-    assert len(event) == 2
-    assert event[0] == "Test message."
-    assert event[1] == "Test message2."
-
-
-def test_handle_sqs_trigger_event_str_body():
-    event_dict = load_event("sqsEvent.json")
-    handle_sqs_str_body(event_dict, LambdaContext())
-
-
 @parser(schema=MySqsBusiness, envelope=envelopes.SQS)
 def handle_sqs_json_body(event: List[MySqsBusiness], _: LambdaContext):
     assert len(event) == 1

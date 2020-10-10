@@ -11,29 +11,20 @@ logger = logging.getLogger(__name__)
 
 class BaseEnvelope(ABC):
     @staticmethod
-    def _parse_user_dict_schema(user_event: Dict[str, Any], schema: BaseModel) -> Any:
-        if user_event is None:
-            return None
+    def _parse(event: Dict[str, Any], schema: BaseModel) -> Any:
+        if event is None:
+            logger.debug("Skipping parsing as event is None")
+            return event
 
         try:
-            logger.debug("parsing user dictionary schema")
-            return schema(**user_event)
+            logger.debug("parsing event against schema")
+            if isinstance(event, str):
+                logger.debug("parsing event as string")
+                return schema.parse_raw(event)
+            else:
+                return schema.parse_obj(event)
         except (ValidationError, TypeError) as e:
             raise SchemaValidationError("Failed to extract custom schema") from e
-
-    @staticmethod
-    def _parse_user_json_string_schema(user_event: str, schema: BaseModel) -> Any:
-        # this is used in cases where the underlying schema is not a Dict that can be parsed as baseModel
-        # but a plain string as payload i.e. SQS: "body": "Test message."
-        if schema is str:
-            logger.debug("input is string, returning")
-            return user_event
-
-        try:
-            logger.debug("trying to parse as json encoded string")
-            return schema.parse_raw(user_event)
-        except (ValidationError, TypeError) as e:
-            raise SchemaValidationError("Failed to extract custom schema from JSON string") from e
 
     @abstractmethod
     def parse(self, event: Dict[str, Any], schema: BaseModel):

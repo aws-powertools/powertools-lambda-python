@@ -47,8 +47,8 @@ class DynamoDBEnvelope(BaseEnvelope):
         for record in parsed_envelope.Records:
             output.append(
                 {
-                    "NewImage": self._parse_user_dict_schema(record.dynamodb.NewImage, schema),
-                    "OldImage": self._parse_user_dict_schema(record.dynamodb.OldImage, schema),
+                    "NewImage": self._parse(record.dynamodb.NewImage, schema),
+                    "OldImage": self._parse(record.dynamodb.OldImage, schema),
                 }
             )
         return output
