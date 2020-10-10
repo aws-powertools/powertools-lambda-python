@@ -65,7 +65,7 @@ def parser(
         except AttributeError:
             raise InvalidSchemaTypeError("Input schema must implement BaseModel")
     else:
-        parsed_event = parse_envelope(event, envelope, schema)
+        parsed_event = parse_envelope(event=event, envelope=envelope, schema=schema)
 
     logger.debug(f"Calling handler {handler.__name__}")
     return handler(parsed_event, context)
