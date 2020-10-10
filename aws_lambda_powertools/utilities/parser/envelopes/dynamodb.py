@@ -51,4 +51,5 @@ class DynamoDBEnvelope(BaseEnvelope):
                     "OldImage": self._parse(record.dynamodb.OldImage, schema),
                 }
             )
+        # noinspection PyTypeChecker
         return output

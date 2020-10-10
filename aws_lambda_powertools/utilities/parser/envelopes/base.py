@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 from pydantic import BaseModel, ValidationError
 
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class BaseEnvelope(ABC):
     @staticmethod
-    def _parse(event: Dict[str, Any], schema: BaseModel) -> Any:
+    def _parse(event: Union[Dict[str, Any], str], schema: BaseModel) -> Any:
         if event is None:
             logger.debug("Skipping parsing as event is None")
             return event

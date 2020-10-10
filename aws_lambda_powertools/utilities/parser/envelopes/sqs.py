@@ -44,5 +44,7 @@ class SqsEnvelope(BaseEnvelope):
             parsed_envelope = SqsSchema(**event)
         except (ValidationError, TypeError) as e:
             raise SchemaValidationError("SQS input doesn't conform with schema") from e
-        output = [self._parse(record.body, schema) for record in parsed_envelope.Records]
+        output = []
+        for record in parsed_envelope.Records:
+            output.append(self._parse(record.body, schema))
         return output
