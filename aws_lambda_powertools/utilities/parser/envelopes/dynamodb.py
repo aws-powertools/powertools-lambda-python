@@ -17,12 +17,12 @@ class DynamoDBEnvelope(BaseEnvelope):
     length of the list is the record's amount in the original event.
     """
 
-    def parse(self, event: Dict[str, Any], schema: BaseModel) -> List[Dict[Literal["NewImage", "OldImage"], BaseModel]]:
+    def parse(self, data: Dict[str, Any], schema: BaseModel) -> List[Dict[Literal["NewImage", "OldImage"], BaseModel]]:
         """Parses DynamoDB Stream records found in either NewImage and OldImage with schema provided
 
         Parameters
         ----------
-        event : Dict
+        data : Dict
             Lambda event to be parsed
         schema : BaseModel
             User schema provided to parse after extracting data using envelope
@@ -32,7 +32,7 @@ class DynamoDBEnvelope(BaseEnvelope):
         List
             List of records parsed with schema provided
         """
-        parsed_envelope = DynamoDBSchema(**event)
+        parsed_envelope = DynamoDBSchema(**data)
         output = []
         for record in parsed_envelope.Records:
             output.append(

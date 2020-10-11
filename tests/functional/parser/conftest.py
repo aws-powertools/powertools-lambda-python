@@ -37,11 +37,11 @@ def dummy_envelope(dummy_envelope_schema):
     class MyDummyEnvelope(BaseEnvelope):
         """Unwrap dummy event within payload key"""
 
-        def parse(self, event: Dict[str, Any], schema: BaseModel):
+        def parse(self, data: Dict[str, Any], schema: BaseModel):
             try:
-                parsed_enveloped = dummy_envelope_schema(**event)
+                parsed_enveloped = dummy_envelope_schema(**data)
             except (ValidationError, TypeError) as e:
                 raise SchemaValidationError("Dummy input does not conform with schema") from e
-            return self._parse(event=parsed_enveloped.payload, schema=schema)
+            return self._parse(data=parsed_enveloped.payload, schema=schema)
 
     return MyDummyEnvelope

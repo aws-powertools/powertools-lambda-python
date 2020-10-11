@@ -5,6 +5,7 @@ from pydantic import BaseModel, ValidationError
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
+from ..typing import LambdaContext
 from .envelopes.base import BaseEnvelope
 from .exceptions import InvalidEnvelopeError, InvalidSchemaTypeError, SchemaValidationError
 
@@ -15,38 +16,60 @@ logger = logging.getLogger(__name__)
 def parser(
     handler: Callable[[Dict, Any], Any],
     event: Dict[str, Any],
-    context: Dict[str, Any],
+    context: LambdaContext,
     schema: BaseModel,
     envelope: Optional[BaseEnvelope] = None,
 ) -> Any:
-    """Decorator to conduct advanced parsing & validation for lambda handlers events
+    """Lambda handler decorator to parse & validate events using Pydantic models
 
-    As Lambda follows (event, context) signature we can remove some of the boilerplate
-    and also capture any exception any Lambda function throws as metadata.
-    event will be the parsed and passed as a BaseModel Pydantic class of the input type "schema"
-    to the lambda handler.
-    event will be extracted from the envelope in case envelope is not None.
-    In case envelope is None, the complete event is parsed to match the schema parameter BaseModel definition.
-    In case envelope is not None, first the event is parsed as the envelope's schema definition, and the user
-    message is extracted and parsed again as the schema parameter's definition.
+    It requires a schema that implements Pydantic BaseModel to parse & validate the event.
+
+    When an envelope is given, it'll use the following logic:
+
+    1. Parse the event against envelope schema first e.g. EnvelopeSchema(**event)
+    2. Envelope will extract a given key to be parsed against the schema e.g. event.detail
+
+    This is useful when you need to confirm event wrapper structure, and
+    b) selectively extract a portion of your payload for parsing & validation.
+
+    NOTE: If envelope is omitted, the complete event is parsed to match the schema parameter BaseModel definition.
 
     Example
     -------
-    **Lambda function using validation decorator**
+    **Lambda handler decorator to parse & validate event**
 
-        @parser(schema=MyBusiness, envelope=envelopes.EVENTBRIDGE)
-        def handler(event: MyBusiness , context: LambdaContext):
+        class Order(BaseModel):
+            id: int
+            description: str
+            ...
+
+        @parser(schema=Order)
+        def handler(event: Order, context: LambdaContext):
+            ...
+
+    **Lambda handler decorator to parse & validate event - using built-in envelope**
+
+        class Order(BaseModel):
+            id: int
+            description: str
+            ...
+
+        @parser(schema=Order, envelope=envelopes.EVENTBRIDGE)
+        def handler(event: Order, context: LambdaContext):
             ...
 
     Parameters
     ----------
-    handler:  input for lambda_handler_decorator, wraps the handler lambda
-    event:    AWS event dictionary
-    context:  AWS lambda context
-    schema:   pydantic BaseModel class. This is the user data schema that will replace the event.
-              event parameter will be parsed and a new schema object will be created from it.
-    envelope: what envelope to extract the schema from, can be any AWS service that is currently
-              supported in the envelopes module. Can be None.
+    handler:  Callable
+        Method to annotate on
+    event:    Dict
+        Lambda event to be parsed & validated
+    context:  LambdaContext
+        Lambda context object
+    schema:   BaseModel
+        Your data schema that will replace the event.
+    envelope: BaseEnvelope
+        Optional envelope to extract the schema from
 
     Raises
     ------
@@ -54,6 +77,8 @@ def parser(
         When input event does not conform with schema provided
     InvalidSchemaTypeError
         When schema given does not implement BaseModel
+    InvalidEnvelopeError
+        When envelope given does not implement BaseEnvelope
     """
     parsed_event = parse(event=event, schema=schema, envelope=envelope)
     logger.debug(f"Calling handler {handler.__name__}")
@@ -61,33 +86,49 @@ def parser(
 
 
 def parse(event: Dict[str, Any], schema: BaseModel, envelope: Optional[BaseEnvelope] = None) -> Any:
-    """
-    Standalone parse function to conduct advanced parsing & validation for lambda handlers events
+    """Standalone function to parse & validate events using Pydantic models
 
-    As Lambda follows (event, context) signature we can remove some of the boilerplate
-    and also capture any exception any Lambda function throws as metadata.
-    event will be the parsed and passed as a BaseModel Pydantic class of the input type "schema"
-    to the lambda handler.
-    event will be extracted from the envelope in case envelope is not None.
-    In case envelope is None, the complete event is parsed to match the schema parameter BaseModel definition.
-    In case envelope is not None, first the event is parsed as the envelope's schema definition, and the user
-    message is extracted and parsed again as the schema parameter's definition.
+    Typically used when you need fine-grained control over error handling compared to parser decorator.
 
     Example
     -------
-    **Lambda function using standalone parse**
 
-        def handler(event: MyBusiness , context: LambdaContext):
-            parse(event=event, schema=MyBusiness, envelope=envelopes.EVENTBRIDGE)
+    **Lambda handler decorator to parse & validate event**
+
+        from aws_lambda_powertools.utilities.parser.exceptions import SchemaValidationError
+
+        class Order(BaseModel):
+            id: int
+            description: str
             ...
+
+        def handler(event: Order, context: LambdaContext):
+            try:
+                parse(schema=Order)
+            except SchemaValidationError:
+                ...
+
+    **Lambda handler decorator to parse & validate event - using built-in envelope**
+
+        class Order(BaseModel):
+            id: int
+            description: str
+            ...
+
+        def handler(event: Order, context: LambdaContext):
+            try:
+                parse(schema=Order, envelope=envelopes.EVENTBRIDGE)
+            except SchemaValidationError:
+                ...
 
     Parameters
     ----------
-    event:    AWS event dictionary
-    schema:   pydantic BaseModel class. This is the user data schema that will replace the event.
-              event parameter will be parsed and a new schema object will be created from it.
-    envelope: what envelope to extract the schema from, can be any AWS service that is currently
-              supported in the envelopes module. Can be None.
+    event:    Dict
+        Lambda event to be parsed & validated
+    schema:   BaseModel
+        Your data schema that will replace the event.
+    envelope: BaseEnvelope
+        Optional envelope to extract the schema from
 
     Raises
     ------
@@ -101,7 +142,7 @@ def parse(event: Dict[str, Any], schema: BaseModel, envelope: Optional[BaseEnvel
     if envelope and callable(envelope):
         try:
             logger.debug(f"Parsing and validating event schema with envelope={envelope}")
-            return envelope().parse(event=event, schema=schema)
+            return envelope().parse(data=event, schema=schema)
         except AttributeError:
             raise InvalidEnvelopeError(f"Envelope must implement BaseEnvelope, envelope={envelope}")
         except (ValidationError, TypeError) as e:
