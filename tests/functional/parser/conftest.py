@@ -41,7 +41,7 @@ def dummy_envelope(dummy_envelope_schema):
             try:
                 parsed_enveloped = dummy_envelope_schema(**event)
             except (ValidationError, TypeError) as e:
-                raise SchemaValidationError("Dummy input doesn't conform with schema") from e
+                raise SchemaValidationError("Dummy input does not conform with schema") from e
             return self._parse(event=parsed_enveloped.payload, schema=schema)
 
     return MyDummyEnvelope

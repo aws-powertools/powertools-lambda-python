@@ -16,13 +16,18 @@ def test_parser_unsupported_event(dummy_schema, invalid_value):
         handle_no_envelope(event=invalid_value, context=LambdaContext())
 
 
-@pytest.mark.parametrize("invalid_envelope", [True, ["dummy"], ("dummy"), object])
-def test_parser_invalid_envelope_type(dummy_event, dummy_schema, invalid_envelope):
+@pytest.mark.parametrize(
+    "invalid_envelope,expected", [(True, ""), (["dummy"], ""), (object, exceptions.InvalidEnvelopeError)]
+)
+def test_parser_invalid_envelope_type(dummy_event, dummy_schema, invalid_envelope, expected):
     @parser(schema=dummy_schema, envelope=invalid_envelope)
     def handle_no_envelope(event: Dict, _: LambdaContext):
         return event
 
-    with pytest.raises(exceptions.InvalidEnvelopeError):
+    if hasattr(expected, "__cause__"):
+        with pytest.raises(expected):
+            handle_no_envelope(event=dummy_event["payload"], context=LambdaContext())
+    else:
         handle_no_envelope(event=dummy_event["payload"], context=LambdaContext())
 
 

@@ -51,7 +51,7 @@ def parser(
     Raises
     ------
     SchemaValidationError
-        When input event doesn't conform with schema provided
+        When input event does not conform with schema provided
     InvalidSchemaTypeError
         When schema given does not implement BaseModel
     """
@@ -92,23 +92,25 @@ def parse(event: Dict[str, Any], schema: BaseModel, envelope: Optional[BaseEnvel
     Raises
     ------
     SchemaValidationError
-        When input event doesn't conform with schema provided
+        When input event does not conform with schema provided
     InvalidSchemaTypeError
         When schema given does not implement BaseModel
-
+    InvalidEnvelopeError
+        When envelope given does not implement BaseEnvelope
     """
-    if envelope:
+    if envelope and callable(envelope):
         try:
-            logger.debug(f"Parsing and validating event schema, envelope={envelope}")
-            # noinspection PyCallingNonCallable
+            logger.debug(f"Parsing and validating event schema with envelope={envelope}")
             return envelope().parse(event=event, schema=schema)
-        except (TypeError, AttributeError):
-            raise InvalidEnvelopeError(f"envelope must be a callable and instance of BaseEnvelope, envelope={envelope}")
+        except AttributeError:
+            raise InvalidEnvelopeError(f"Envelope must implement BaseEnvelope, envelope={envelope}")
+        except (ValidationError, TypeError) as e:
+            raise SchemaValidationError(f"Input event does not conform with schema, envelope={envelope}") from e
 
     try:
         logger.debug("Parsing and validating event schema; no envelope used")
         return schema.parse_obj(event)
     except (ValidationError, TypeError) as e:
-        raise SchemaValidationError("Input event doesn't conform with schema") from e
+        raise SchemaValidationError("Input event does not conform with schema") from e
     except AttributeError:
         raise InvalidSchemaTypeError("Input schema must implement BaseModel")

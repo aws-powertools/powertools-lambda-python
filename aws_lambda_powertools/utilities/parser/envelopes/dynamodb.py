@@ -1,10 +1,9 @@
 import logging
 from typing import Any, Dict, List
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 from typing_extensions import Literal
 
-from ..exceptions import SchemaValidationError
 from ..schemas import DynamoDBSchema
 from .base import BaseEnvelope
 
@@ -32,17 +31,8 @@ class DynamoDBEnvelope(BaseEnvelope):
         -------
         List
             List of records parsed with schema provided
-
-        Raises
-        ------
-        SchemaValidationError
-            When input event doesn't conform with schema provided
         """
-        try:
-            parsed_envelope = DynamoDBSchema(**event)
-        except (ValidationError, TypeError) as e:
-            raise SchemaValidationError("DynamoDB input doesn't conform with schema") from e
-
+        parsed_envelope = DynamoDBSchema(**event)
         output = []
         for record in parsed_envelope.Records:
             output.append(

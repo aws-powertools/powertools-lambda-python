@@ -1,12 +1,10 @@
 import logging
 from typing import Any, Dict
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from aws_lambda_powertools.utilities.parser.envelopes.base import BaseEnvelope
 from aws_lambda_powertools.utilities.parser.schemas import EventBridgeSchema
-
-from ..exceptions import SchemaValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -28,14 +26,6 @@ class EventBridgeEnvelope(BaseEnvelope):
         -------
         Any
             Parsed detail payload with schema provided
-
-        Raises
-        ------
-        SchemaValidationError
-            When input event doesn't conform with schema provided
         """
-        try:
-            parsed_envelope = EventBridgeSchema(**event)
-            return self._parse(parsed_envelope.detail, schema)
-        except ValidationError as e:
-            raise SchemaValidationError("EventBridge input doesn't conform with schema") from e
+        parsed_envelope = EventBridgeSchema(**event)
+        return self._parse(parsed_envelope.detail, schema)

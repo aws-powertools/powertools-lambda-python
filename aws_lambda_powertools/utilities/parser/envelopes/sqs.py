@@ -1,9 +1,8 @@
 import logging
 from typing import Any, Dict, List, Union
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
-from ..exceptions import SchemaValidationError
 from ..schemas import SqsSchema
 from .base import BaseEnvelope
 
@@ -34,16 +33,8 @@ class SqsEnvelope(BaseEnvelope):
         -------
         List
             List of records parsed with schema provided
-
-        Raises
-        ------
-        SchemaValidationError
-            When input event doesn't conform with schema provided
         """
-        try:
-            parsed_envelope = SqsSchema(**event)
-        except (ValidationError, TypeError) as e:
-            raise SchemaValidationError("SQS input doesn't conform with schema") from e
+        parsed_envelope = SqsSchema(**event)
         output = []
         for record in parsed_envelope.Records:
             output.append(self._parse(record.body, schema))
