@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 from pydantic import BaseModel
 from typing_extensions import Literal
 
-from ..schemas import DynamoDBSchema
+from ..schemas import DynamoDBStreamSchema
 from .base import BaseEnvelope
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ class DynamoDBEnvelope(BaseEnvelope):
         List
             List of records parsed with schema provided
         """
-        parsed_envelope = DynamoDBSchema(**data)
+        parsed_envelope = DynamoDBStreamSchema(**data)
         output = []
         for record in parsed_envelope.Records:
             output.append(

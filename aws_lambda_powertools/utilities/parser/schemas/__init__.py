@@ -1,12 +1,12 @@
-from .dynamodb import DynamoDBSchema, DynamoRecordSchema, DynamoScheme
+from .dynamodb import DynamoDBStreamChangedRecordSchema, DynamoDBStreamRecordSchema, DynamoDBStreamSchema
 from .event_bridge import EventBridgeSchema
 from .sqs import SqsRecordSchema, SqsSchema
 
 __all__ = [
-    "DynamoDBSchema",
+    "DynamoDBStreamSchema",
     "EventBridgeSchema",
-    "DynamoScheme",
-    "DynamoRecordSchema",
+    "DynamoDBStreamChangedRecordSchema",
+    "DynamoDBStreamRecordSchema",
     "SqsSchema",
     "SqsRecordSchema",
 ]

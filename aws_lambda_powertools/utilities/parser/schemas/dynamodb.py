@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing_extensions import Literal
 
 
-class DynamoScheme(BaseModel):
+class DynamoDBStreamChangedRecordSchema(BaseModel):
     ApproximateCreationDateTime: Optional[date]
     Keys: Dict[str, Dict[str, Any]]
     NewImage: Optional[Dict[str, Any]]
@@ -31,16 +31,16 @@ class UserIdentity(BaseModel):
     principalId: Literal["dynamodb.amazonaws.com"]
 
 
-class DynamoRecordSchema(BaseModel):
+class DynamoDBStreamRecordSchema(BaseModel):
     eventID: str
     eventName: Literal["INSERT", "MODIFY", "REMOVE"]
     eventVersion: float
     eventSource: Literal["aws:dynamodb"]
     awsRegion: str
     eventSourceARN: str
-    dynamodb: DynamoScheme
+    dynamodb: DynamoDBStreamChangedRecordSchema
     userIdentity: Optional[UserIdentity]
 
 
-class DynamoDBSchema(BaseModel):
-    Records: List[DynamoRecordSchema]
+class DynamoDBStreamSchema(BaseModel):
+    Records: List[DynamoDBStreamRecordSchema]

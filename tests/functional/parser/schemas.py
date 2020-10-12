@@ -4,9 +4,9 @@ from pydantic import BaseModel
 from typing_extensions import Literal
 
 from aws_lambda_powertools.utilities.parser.schemas import (
-    DynamoDBSchema,
-    DynamoRecordSchema,
-    DynamoScheme,
+    DynamoDBStreamChangedRecordSchema,
+    DynamoDBStreamRecordSchema,
+    DynamoDBStreamSchema,
     EventBridgeSchema,
     SqsRecordSchema,
     SqsSchema,
@@ -18,17 +18,17 @@ class MyDynamoBusiness(BaseModel):
     Id: Dict[Literal["N"], int]
 
 
-class MyDynamoScheme(DynamoScheme):
+class MyDynamoScheme(DynamoDBStreamChangedRecordSchema):
     NewImage: Optional[MyDynamoBusiness]
     OldImage: Optional[MyDynamoBusiness]
 
 
-class MyDynamoRecordSchema(DynamoRecordSchema):
+class MyDynamoDBStreamRecordSchema(DynamoDBStreamRecordSchema):
     dynamodb: MyDynamoScheme
 
 
-class MyAdvancedDynamoBusiness(DynamoDBSchema):
-    Records: List[MyDynamoRecordSchema]
+class MyAdvancedDynamoBusiness(DynamoDBStreamSchema):
+    Records: List[MyDynamoDBStreamRecordSchema]
 
 
 class MyEventbridgeBusiness(BaseModel):
