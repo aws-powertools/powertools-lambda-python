@@ -9,7 +9,7 @@ from tests.functional.parser.utils import load_event
 from tests.functional.validator.conftest import sqs_event  # noqa: F401
 
 
-@parser(schema=MySqsBusiness, envelope=envelopes.SQS)
+@parser(schema=MySqsBusiness, envelope=envelopes.SqsEnvelope)
 def handle_sqs_json_body(event: List[MySqsBusiness], _: LambdaContext):
     assert len(event) == 1
     assert event[0].message == "hello world"

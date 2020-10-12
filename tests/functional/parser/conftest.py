@@ -3,8 +3,7 @@ from typing import Any, Dict
 import pytest
 from pydantic import BaseModel, ValidationError
 
-from aws_lambda_powertools.utilities.parser.envelopes.base import BaseEnvelope
-from aws_lambda_powertools.utilities.parser.exceptions import SchemaValidationError
+from aws_lambda_powertools.utilities.parser import BaseEnvelope, SchemaValidationError
 
 
 @pytest.fixture

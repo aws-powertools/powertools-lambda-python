@@ -3,8 +3,8 @@ from typing import Any, Dict
 
 from pydantic import BaseModel
 
-from aws_lambda_powertools.utilities.parser.envelopes.base import BaseEnvelope
-from aws_lambda_powertools.utilities.parser.schemas import EventBridgeSchema
+from ..schemas import EventBridgeSchema
+from .base import BaseEnvelope
 
 logger = logging.getLogger(__name__)
 

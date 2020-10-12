@@ -8,7 +8,7 @@ from tests.functional.parser.schemas import MyAdvancedEventbridgeBusiness, MyEve
 from tests.functional.parser.utils import load_event
 
 
-@parser(schema=MyEventbridgeBusiness, envelope=envelopes.EVENTBRIDGE)
+@parser(schema=MyEventbridgeBusiness, envelope=envelopes.EventBridgeEnvelope)
 def handle_eventbridge(event: MyEventbridgeBusiness, _: LambdaContext):
     assert event.instance_id == "i-1234567890abcdef0"
     assert event.state == "terminated"

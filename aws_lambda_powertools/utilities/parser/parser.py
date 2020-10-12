@@ -3,8 +3,7 @@ from typing import Any, Callable, Dict, Optional
 
 from pydantic import BaseModel, ValidationError
 
-from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-
+from ...middleware_factory import lambda_handler_decorator
 from ..typing import LambdaContext
 from .envelopes.base import BaseEnvelope
 from .exceptions import InvalidEnvelopeError, InvalidSchemaTypeError, SchemaValidationError

@@ -8,7 +8,7 @@ from tests.functional.parser.schemas import MyAdvancedDynamoBusiness, MyDynamoBu
 from tests.functional.parser.utils import load_event
 
 
-@parser(schema=MyDynamoBusiness, envelope=envelopes.DYNAMODB_STREAM)
+@parser(schema=MyDynamoBusiness, envelope=envelopes.DynamoDBEnvelope)
 def handle_dynamodb(event: List[Dict[str, MyDynamoBusiness]], _: LambdaContext):
     assert len(event) == 2
     assert event[0]["OldImage"] is None
