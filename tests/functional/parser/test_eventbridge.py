@@ -2,19 +2,19 @@ from typing import Any
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import envelopes, exceptions, parser
+from aws_lambda_powertools.utilities.parser import envelopes, event_parser, exceptions
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedEventbridgeBusiness, MyEventbridgeBusiness
 from tests.functional.parser.utils import load_event
 
 
-@parser(schema=MyEventbridgeBusiness, envelope=envelopes.EventBridgeEnvelope)
+@event_parser(schema=MyEventbridgeBusiness, envelope=envelopes.EventBridgeEnvelope)
 def handle_eventbridge(event: MyEventbridgeBusiness, _: LambdaContext):
     assert event.instance_id == "i-1234567890abcdef0"
     assert event.state == "terminated"
 
 
-@parser(schema=MyAdvancedEventbridgeBusiness)
+@event_parser(schema=MyAdvancedEventbridgeBusiness)
 def handle_eventbridge_no_envelope(event: MyAdvancedEventbridgeBusiness, _: LambdaContext):
     assert event.detail.instance_id == "i-1234567890abcdef0"
     assert event.detail.state == "terminated"

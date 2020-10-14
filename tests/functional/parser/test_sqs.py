@@ -2,14 +2,14 @@ from typing import Any, List
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import envelopes, exceptions, parser
+from aws_lambda_powertools.utilities.parser import envelopes, event_parser, exceptions
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedSqsBusiness, MySqsBusiness
 from tests.functional.parser.utils import load_event
 from tests.functional.validator.conftest import sqs_event  # noqa: F401
 
 
-@parser(schema=MySqsBusiness, envelope=envelopes.SqsEnvelope)
+@event_parser(schema=MySqsBusiness, envelope=envelopes.SqsEnvelope)
 def handle_sqs_json_body(event: List[MySqsBusiness], _: LambdaContext):
     assert len(event) == 1
     assert event[0].message == "hello world"
@@ -55,7 +55,7 @@ def test_validate_event_does_not_conform_user_json_string_with_schema():
         handle_sqs_json_body(event, LambdaContext())
 
 
-@parser(schema=MyAdvancedSqsBusiness)
+@event_parser(schema=MyAdvancedSqsBusiness)
 def handle_sqs_no_envelope(event: MyAdvancedSqsBusiness, _: LambdaContext):
     records = event.Records
     record = records[0]

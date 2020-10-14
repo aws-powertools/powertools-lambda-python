@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 @lambda_handler_decorator
-def parser(
+def event_parser(
     handler: Callable[[Dict, Any], Any],
     event: Dict[str, Any],
     context: LambdaContext,
@@ -42,7 +42,7 @@ def parser(
             description: str
             ...
 
-        @parser(schema=Order)
+        @event_parser(schema=Order)
         def handler(event: Order, context: LambdaContext):
             ...
 
@@ -53,7 +53,7 @@ def parser(
             description: str
             ...
 
-        @parser(schema=Order, envelope=envelopes.EVENTBRIDGE)
+        @event_parser(schema=Order, envelope=envelopes.EVENTBRIDGE)
         def handler(event: Order, context: LambdaContext):
             ...
 
@@ -87,7 +87,7 @@ def parser(
 def parse(event: Dict[str, Any], schema: BaseModel, envelope: Optional[BaseEnvelope] = None) -> Any:
     """Standalone function to parse & validate events using Pydantic models
 
-    Typically used when you need fine-grained control over error handling compared to parser decorator.
+    Typically used when you need fine-grained control over error handling compared to event_parser decorator.
 
     Example
     -------

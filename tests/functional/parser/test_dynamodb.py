@@ -2,13 +2,13 @@ from typing import Any, Dict, List
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import envelopes, exceptions, parser
+from aws_lambda_powertools.utilities.parser import envelopes, event_parser, exceptions
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedDynamoBusiness, MyDynamoBusiness
 from tests.functional.parser.utils import load_event
 
 
-@parser(schema=MyDynamoBusiness, envelope=envelopes.DynamoDBEnvelope)
+@event_parser(schema=MyDynamoBusiness, envelope=envelopes.DynamoDBEnvelope)
 def handle_dynamodb(event: List[Dict[str, MyDynamoBusiness]], _: LambdaContext):
     assert len(event) == 2
     assert event[0]["OldImage"] is None
@@ -20,7 +20,7 @@ def handle_dynamodb(event: List[Dict[str, MyDynamoBusiness]], _: LambdaContext):
     assert event[1]["NewImage"].Id["N"] == 101
 
 
-@parser(schema=MyAdvancedDynamoBusiness)
+@event_parser(schema=MyAdvancedDynamoBusiness)
 def handle_dynamodb_no_envelope(event: MyAdvancedDynamoBusiness, _: LambdaContext):
     records = event.Records
     record = records[0]

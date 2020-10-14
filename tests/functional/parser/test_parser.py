@@ -2,13 +2,13 @@ from typing import Dict
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import exceptions, parser
+from aws_lambda_powertools.utilities.parser import event_parser, exceptions
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 @pytest.mark.parametrize("invalid_value", [None, bool(), [], (), object])
 def test_parser_unsupported_event(dummy_schema, invalid_value):
-    @parser(schema=dummy_schema)
+    @event_parser(schema=dummy_schema)
     def handle_no_envelope(event: Dict, _: LambdaContext):
         return event
 
@@ -20,7 +20,7 @@ def test_parser_unsupported_event(dummy_schema, invalid_value):
     "invalid_envelope,expected", [(True, ""), (["dummy"], ""), (object, exceptions.InvalidEnvelopeError)]
 )
 def test_parser_invalid_envelope_type(dummy_event, dummy_schema, invalid_envelope, expected):
-    @parser(schema=dummy_schema, envelope=invalid_envelope)
+    @event_parser(schema=dummy_schema, envelope=invalid_envelope)
     def handle_no_envelope(event: Dict, _: LambdaContext):
         return event
 
@@ -32,7 +32,7 @@ def test_parser_invalid_envelope_type(dummy_event, dummy_schema, invalid_envelop
 
 
 def test_parser_schema_with_envelope(dummy_event, dummy_schema, dummy_envelope):
-    @parser(schema=dummy_schema, envelope=dummy_envelope)
+    @event_parser(schema=dummy_schema, envelope=dummy_envelope)
     def handle_no_envelope(event: Dict, _: LambdaContext):
         return event
 
@@ -40,7 +40,7 @@ def test_parser_schema_with_envelope(dummy_event, dummy_schema, dummy_envelope):
 
 
 def test_parser_schema_no_envelope(dummy_event, dummy_schema):
-    @parser(schema=dummy_schema)
+    @event_parser(schema=dummy_schema)
     def handle_no_envelope(event: Dict, _: LambdaContext):
         return event
 
@@ -49,7 +49,7 @@ def test_parser_schema_no_envelope(dummy_event, dummy_schema):
 
 @pytest.mark.parametrize("invalid_schema", [None, str, bool(), [], (), object])
 def test_parser_with_invalid_schema_type(dummy_event, invalid_schema):
-    @parser(schema=invalid_schema)
+    @event_parser(schema=invalid_schema)
     def handle_no_envelope(event: Dict, _: LambdaContext):
         return event
 
