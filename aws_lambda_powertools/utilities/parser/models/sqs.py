@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing_extensions import Literal
 
 
-class SqsAttributesSchema(BaseModel):
+class SqsAttributesModel(BaseModel):
     ApproximateReceiveCount: str
     ApproximateFirstReceiveTimestamp: datetime
     MessageDeduplicationId: Optional[str]
@@ -16,7 +16,7 @@ class SqsAttributesSchema(BaseModel):
     AWSTraceHeader: Optional[str]
 
 
-class SqsMsgAttributeSchema(BaseModel):
+class SqsMsgAttributeModel(BaseModel):
     stringValue: Optional[str]
     binaryValue: Optional[str]
     stringListValues: List[str] = []
@@ -48,12 +48,12 @@ class SqsMsgAttributeSchema(BaseModel):
     #     return values # noqa: E800
 
 
-class SqsRecordSchema(BaseModel):
+class SqsRecordModel(BaseModel):
     messageId: str
     receiptHandle: str
     body: str
-    attributes: SqsAttributesSchema
-    messageAttributes: Dict[str, SqsMsgAttributeSchema]
+    attributes: SqsAttributesModel
+    messageAttributes: Dict[str, SqsMsgAttributeModel]
     md5OfBody: str
     md5OfMessageAttributes: Optional[str]
     eventSource: Literal["aws:sqs"]
@@ -61,5 +61,5 @@ class SqsRecordSchema(BaseModel):
     awsRegion: str
 
 
-class SqsSchema(BaseModel):
-    Records: List[SqsRecordSchema]
+class SqsModel(BaseModel):
+    Records: List[SqsRecordModel]

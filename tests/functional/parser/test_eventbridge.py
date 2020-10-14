@@ -8,13 +8,13 @@ from tests.functional.parser.schemas import MyAdvancedEventbridgeBusiness, MyEve
 from tests.functional.parser.utils import load_event
 
 
-@event_parser(schema=MyEventbridgeBusiness, envelope=envelopes.EventBridgeEnvelope)
+@event_parser(model=MyEventbridgeBusiness, envelope=envelopes.EventBridgeEnvelope)
 def handle_eventbridge(event: MyEventbridgeBusiness, _: LambdaContext):
     assert event.instance_id == "i-1234567890abcdef0"
     assert event.state == "terminated"
 
 
-@event_parser(schema=MyAdvancedEventbridgeBusiness)
+@event_parser(model=MyAdvancedEventbridgeBusiness)
 def handle_eventbridge_no_envelope(event: MyAdvancedEventbridgeBusiness, _: LambdaContext):
     assert event.detail.instance_id == "i-1234567890abcdef0"
     assert event.detail.state == "terminated"
@@ -34,7 +34,7 @@ def test_handle_eventbridge_trigger_event():
     handle_eventbridge(event_dict, LambdaContext())
 
 
-def test_validate_event_does_not_conform_with_user_dict_schema():
+def test_validate_event_does_not_conform_with_user_dict_model():
     event_dict: Any = {
         "version": "0",
         "id": "6a7e8feb-b491-4cf7-a9f1-bf3703467718",
@@ -46,7 +46,7 @@ def test_validate_event_does_not_conform_with_user_dict_schema():
         "resources": ["arn:aws:ec2:us-west-1:123456789012:instance/i-1234567890abcdef0"],
         "detail": {},
     }
-    with pytest.raises(exceptions.SchemaValidationError) as e:
+    with pytest.raises(exceptions.ModelValidationError) as e:
         handle_eventbridge(event_dict, LambdaContext())
     print(e.exconly())
 
@@ -57,5 +57,5 @@ def test_handle_eventbridge_trigger_event_no_envelope():
 
 
 def test_handle_invalid_event_with_eventbridge_envelope():
-    with pytest.raises(exceptions.SchemaValidationError):
+    with pytest.raises(exceptions.ModelValidationError):
         handle_eventbridge(event={}, context=LambdaContext())

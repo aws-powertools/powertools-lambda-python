@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 from pydantic import BaseModel, Field
 
 
-class EventBridgeSchema(BaseModel):
+class EventBridgeModel(BaseModel):
     version: str
     id: str  # noqa: A003,VNE003
     source: str

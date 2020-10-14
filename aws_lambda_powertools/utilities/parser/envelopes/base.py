@@ -11,15 +11,15 @@ class BaseEnvelope(ABC):
     """ABC implementation for creating a supported Envelope"""
 
     @staticmethod
-    def _parse(data: Union[Dict[str, Any], str], schema: BaseModel) -> Any:
-        """Parses envelope data against schema provided
+    def _parse(data: Union[Dict[str, Any], str], model: BaseModel) -> Any:
+        """Parses envelope data against model provided
 
         Parameters
         ----------
         data : Dict
             Data to be parsed and validated
-        schema
-            Schema to parse and validate data against
+        model
+            Data model to parse and validate data against
 
         Returns
         -------
@@ -30,18 +30,18 @@ class BaseEnvelope(ABC):
             logger.debug("Skipping parsing as event is None")
             return data
 
-        logger.debug("parsing event against schema")
+        logger.debug("parsing event against model")
         if isinstance(data, str):
             logger.debug("parsing event as string")
-            return schema.parse_raw(data)
+            return model.parse_raw(data)
 
-        return schema.parse_obj(data)
+        return model.parse_obj(data)
 
     @abstractmethod
-    def parse(self, data: Dict[str, Any], schema: BaseModel):
-        """Implementation to parse data against envelope schema, then against the schema
+    def parse(self, data: Dict[str, Any], model: BaseModel):
+        """Implementation to parse data against envelope model, then against the data model
 
-        NOTE: Call `_parse` method to fully parse data with schema provided.
+        NOTE: Call `_parse` method to fully parse data with model provided.
 
         Example
         -------
@@ -49,10 +49,10 @@ class BaseEnvelope(ABC):
         **EventBridge envelope implementation example**
 
         def parse(...):
-            # 1. parses data against envelope schema
-            parsed_envelope = EventBridgeSchema(**data)
+            # 1. parses data against envelope model
+            parsed_envelope = EventBridgeModel(**data)
 
-            # 2. parses portion of data within the envelope against schema
-            return self._parse(data=parsed_envelope.detail, schema=schema)
+            # 2. parses portion of data within the envelope against model
+            return self._parse(data=parsed_envelope.detail, model=data_model)
         """
         return NotImplemented  # pragma: no cover

@@ -6,7 +6,7 @@ from pydantic import BaseModel, ValidationError
 from ...middleware_factory import lambda_handler_decorator
 from ..typing import LambdaContext
 from .envelopes.base import BaseEnvelope
-from .exceptions import InvalidEnvelopeError, InvalidSchemaTypeError, SchemaValidationError
+from .exceptions import InvalidEnvelopeError, InvalidModelTypeError, ModelValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -16,22 +16,22 @@ def event_parser(
     handler: Callable[[Dict, Any], Any],
     event: Dict[str, Any],
     context: LambdaContext,
-    schema: BaseModel,
+    model: BaseModel,
     envelope: Optional[BaseEnvelope] = None,
 ) -> Any:
     """Lambda handler decorator to parse & validate events using Pydantic models
 
-    It requires a schema that implements Pydantic BaseModel to parse & validate the event.
+    It requires a model that implements Pydantic BaseModel to parse & validate the event.
 
     When an envelope is given, it'll use the following logic:
 
-    1. Parse the event against envelope schema first e.g. EnvelopeSchema(**event)
-    2. Envelope will extract a given key to be parsed against the schema e.g. event.detail
+    1. Parse the event against the envelope model first e.g. EnvelopeModel(**event)
+    2. Envelope will extract a given key to be parsed against the model e.g. event.detail
 
     This is useful when you need to confirm event wrapper structure, and
     b) selectively extract a portion of your payload for parsing & validation.
 
-    NOTE: If envelope is omitted, the complete event is parsed to match the schema parameter BaseModel definition.
+    NOTE: If envelope is omitted, the complete event is parsed to match the model parameter BaseModel definition.
 
     Example
     -------
@@ -42,7 +42,7 @@ def event_parser(
             description: str
             ...
 
-        @event_parser(schema=Order)
+        @event_parser(model=Order)
         def handler(event: Order, context: LambdaContext):
             ...
 
@@ -53,7 +53,7 @@ def event_parser(
             description: str
             ...
 
-        @event_parser(schema=Order, envelope=envelopes.EVENTBRIDGE)
+        @event_parser(model=Order, envelope=envelopes.EVENTBRIDGE)
         def handler(event: Order, context: LambdaContext):
             ...
 
@@ -65,26 +65,26 @@ def event_parser(
         Lambda event to be parsed & validated
     context:  LambdaContext
         Lambda context object
-    schema:   BaseModel
-        Your data schema that will replace the event.
+    model:   BaseModel
+        Your data model that will replace the event.
     envelope: BaseEnvelope
-        Optional envelope to extract the schema from
+        Optional envelope to extract the model from
 
     Raises
     ------
-    SchemaValidationError
-        When input event does not conform with schema provided
-    InvalidSchemaTypeError
-        When schema given does not implement BaseModel
+    ModelValidationError
+        When input event does not conform with model provided
+    InvalidModelTypeError
+        When model given does not implement BaseModel
     InvalidEnvelopeError
         When envelope given does not implement BaseEnvelope
     """
-    parsed_event = parse(event=event, schema=schema, envelope=envelope)
+    parsed_event = parse(event=event, model=model, envelope=envelope)
     logger.debug(f"Calling handler {handler.__name__}")
     return handler(parsed_event, context)
 
 
-def parse(event: Dict[str, Any], schema: BaseModel, envelope: Optional[BaseEnvelope] = None) -> Any:
+def parse(event: Dict[str, Any], model: BaseModel, envelope: Optional[BaseEnvelope] = None) -> Any:
     """Standalone function to parse & validate events using Pydantic models
 
     Typically used when you need fine-grained control over error handling compared to event_parser decorator.
@@ -94,7 +94,7 @@ def parse(event: Dict[str, Any], schema: BaseModel, envelope: Optional[BaseEnvel
 
     **Lambda handler decorator to parse & validate event**
 
-        from aws_lambda_powertools.utilities.parser.exceptions import SchemaValidationError
+        from aws_lambda_powertools.utilities.parser.exceptions import ModelValidationError
 
         class Order(BaseModel):
             id: int
@@ -103,8 +103,8 @@ def parse(event: Dict[str, Any], schema: BaseModel, envelope: Optional[BaseEnvel
 
         def handler(event: Order, context: LambdaContext):
             try:
-                parse(schema=Order)
-            except SchemaValidationError:
+                parse(model=Order)
+            except ModelValidationError:
                 ...
 
     **Lambda handler decorator to parse & validate event - using built-in envelope**
@@ -116,41 +116,41 @@ def parse(event: Dict[str, Any], schema: BaseModel, envelope: Optional[BaseEnvel
 
         def handler(event: Order, context: LambdaContext):
             try:
-                parse(schema=Order, envelope=envelopes.EVENTBRIDGE)
-            except SchemaValidationError:
+                parse(model=Order, envelope=envelopes.EVENTBRIDGE)
+            except ModelValidationError:
                 ...
 
     Parameters
     ----------
     event:    Dict
         Lambda event to be parsed & validated
-    schema:   BaseModel
-        Your data schema that will replace the event.
+    model:   BaseModel
+        Your data model that will replace the event
     envelope: BaseEnvelope
-        Optional envelope to extract the schema from
+        Optional envelope to extract the model from
 
     Raises
     ------
-    SchemaValidationError
-        When input event does not conform with schema provided
-    InvalidSchemaTypeError
-        When schema given does not implement BaseModel
+    ModelValidationError
+        When input event does not conform with model provided
+    InvalidModelTypeError
+        When model given does not implement BaseModel
     InvalidEnvelopeError
         When envelope given does not implement BaseEnvelope
     """
     if envelope and callable(envelope):
         try:
-            logger.debug(f"Parsing and validating event schema with envelope={envelope}")
-            return envelope().parse(data=event, schema=schema)
+            logger.debug(f"Parsing and validating event model with envelope={envelope}")
+            return envelope().parse(data=event, model=model)
         except AttributeError:
             raise InvalidEnvelopeError(f"Envelope must implement BaseEnvelope, envelope={envelope}")
         except (ValidationError, TypeError) as e:
-            raise SchemaValidationError(f"Input event does not conform with schema, envelope={envelope}") from e
+            raise ModelValidationError(f"Input event does not conform with model, envelope={envelope}") from e
 
     try:
-        logger.debug("Parsing and validating event schema; no envelope used")
-        return schema.parse_obj(event)
+        logger.debug("Parsing and validating event model; no envelope used")
+        return model.parse_obj(event)
     except (ValidationError, TypeError) as e:
-        raise SchemaValidationError("Input event does not conform with schema") from e
+        raise ModelValidationError("Input event does not conform with model") from e
     except AttributeError:
-        raise InvalidSchemaTypeError("Input schema must implement BaseModel")
+        raise InvalidModelTypeError("Input model must implement BaseModel")

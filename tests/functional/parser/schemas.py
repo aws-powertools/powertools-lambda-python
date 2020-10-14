@@ -3,13 +3,13 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel
 from typing_extensions import Literal
 
-from aws_lambda_powertools.utilities.parser.schemas import (
-    DynamoDBStreamChangedRecordSchema,
-    DynamoDBStreamRecordSchema,
-    DynamoDBStreamSchema,
-    EventBridgeSchema,
-    SqsRecordSchema,
-    SqsSchema,
+from aws_lambda_powertools.utilities.parser.models import (
+    DynamoDBStreamChangedRecordModel,
+    DynamoDBStreamModel,
+    DynamoDBStreamRecordModel,
+    EventBridgeModel,
+    SqsModel,
+    SqsRecordModel,
 )
 
 
@@ -18,17 +18,17 @@ class MyDynamoBusiness(BaseModel):
     Id: Dict[Literal["N"], int]
 
 
-class MyDynamoScheme(DynamoDBStreamChangedRecordSchema):
+class MyDynamoScheme(DynamoDBStreamChangedRecordModel):
     NewImage: Optional[MyDynamoBusiness]
     OldImage: Optional[MyDynamoBusiness]
 
 
-class MyDynamoDBStreamRecordSchema(DynamoDBStreamRecordSchema):
+class MyDynamoDBStreamRecordModel(DynamoDBStreamRecordModel):
     dynamodb: MyDynamoScheme
 
 
-class MyAdvancedDynamoBusiness(DynamoDBStreamSchema):
-    Records: List[MyDynamoDBStreamRecordSchema]
+class MyAdvancedDynamoBusiness(DynamoDBStreamModel):
+    Records: List[MyDynamoDBStreamRecordModel]
 
 
 class MyEventbridgeBusiness(BaseModel):
@@ -36,7 +36,7 @@ class MyEventbridgeBusiness(BaseModel):
     state: str
 
 
-class MyAdvancedEventbridgeBusiness(EventBridgeSchema):
+class MyAdvancedEventbridgeBusiness(EventBridgeModel):
     detail: MyEventbridgeBusiness
 
 
@@ -45,9 +45,9 @@ class MySqsBusiness(BaseModel):
     username: str
 
 
-class MyAdvancedSqsRecordSchema(SqsRecordSchema):
+class MyAdvancedSqsRecordModel(SqsRecordModel):
     body: str
 
 
-class MyAdvancedSqsBusiness(SqsSchema):
-    Records: List[MyAdvancedSqsRecordSchema]
+class MyAdvancedSqsBusiness(SqsModel):
+    Records: List[MyAdvancedSqsRecordModel]

@@ -8,7 +8,7 @@ from tests.functional.parser.schemas import MyAdvancedDynamoBusiness, MyDynamoBu
 from tests.functional.parser.utils import load_event
 
 
-@event_parser(schema=MyDynamoBusiness, envelope=envelopes.DynamoDBEnvelope)
+@event_parser(model=MyDynamoBusiness, envelope=envelopes.DynamoDBEnvelope)
 def handle_dynamodb(event: List[Dict[str, MyDynamoBusiness]], _: LambdaContext):
     assert len(event) == 2
     assert event[0]["OldImage"] is None
@@ -20,7 +20,7 @@ def handle_dynamodb(event: List[Dict[str, MyDynamoBusiness]], _: LambdaContext):
     assert event[1]["NewImage"].Id["N"] == 101
 
 
-@event_parser(schema=MyAdvancedDynamoBusiness)
+@event_parser(model=MyAdvancedDynamoBusiness)
 def handle_dynamodb_no_envelope(event: MyAdvancedDynamoBusiness, _: LambdaContext):
     records = event.Records
     record = records[0]
@@ -57,13 +57,13 @@ def test_dynamo_db_stream_trigger_event_no_envelope():
     handle_dynamodb_no_envelope(event_dict, LambdaContext())
 
 
-def test_validate_event_does_not_conform_with_schema_no_envelope():
+def test_validate_event_does_not_conform_with_model_no_envelope():
     event_dict: Any = {"hello": "s"}
-    with pytest.raises(exceptions.SchemaValidationError):
+    with pytest.raises(exceptions.ModelValidationError):
         handle_dynamodb_no_envelope(event_dict, LambdaContext())
 
 
-def test_validate_event_does_not_conform_with_schema():
+def test_validate_event_does_not_conform_with_model():
     event_dict: Any = {"hello": "s"}
-    with pytest.raises(exceptions.SchemaValidationError):
+    with pytest.raises(exceptions.ModelValidationError):
         handle_dynamodb(event_dict, LambdaContext())
