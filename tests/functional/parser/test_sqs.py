@@ -1,29 +1,15 @@
 from typing import Any, List
 
 import pytest
-from pydantic import ValidationError
 
-from aws_lambda_powertools.utilities.advanced_parser.envelopes.envelopes import Envelope
-from aws_lambda_powertools.utilities.advanced_parser.parser import parser
+from aws_lambda_powertools.utilities.parser import envelopes, event_parser, exceptions
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedSqsBusiness, MySqsBusiness
 from tests.functional.parser.utils import load_event
 from tests.functional.validator.conftest import sqs_event  # noqa: F401
 
 
-@parser(schema=str, envelope=Envelope.SQS)
-def handle_sqs_str_body(event: List[str], _: LambdaContext):
-    assert len(event) == 2
-    assert event[0] == "Test message."
-    assert event[1] == "Test message2."
-
-
-def test_handle_sqs_trigger_event_str_body():
-    event_dict = load_event("sqsEvent.json")
-    handle_sqs_str_body(event_dict, LambdaContext())
-
-
-@parser(schema=MySqsBusiness, envelope=Envelope.SQS)
+@event_parser(model=MySqsBusiness, envelope=envelopes.SqsEnvelope)
 def handle_sqs_json_body(event: List[MySqsBusiness], _: LambdaContext):
     assert len(event) == 1
     assert event[0].message == "hello world"
@@ -34,14 +20,14 @@ def test_handle_sqs_trigger_event_json_body(sqs_event):  # noqa: F811
     handle_sqs_json_body(sqs_event, LambdaContext())
 
 
-def test_validate_event_does_not_conform_with_schema():
+def test_validate_event_does_not_conform_with_model():
     event: Any = {"invalid": "event"}
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(exceptions.ModelValidationError):
         handle_sqs_json_body(event, LambdaContext())
 
 
-def test_validate_event_does_not_conform_user_json_string_with_schema():
+def test_validate_event_does_not_conform_user_json_string_with_model():
     event: Any = {
         "Records": [
             {
@@ -65,11 +51,11 @@ def test_validate_event_does_not_conform_user_json_string_with_schema():
         ]
     }
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(exceptions.ModelValidationError):
         handle_sqs_json_body(event, LambdaContext())
 
 
-@parser(schema=MyAdvancedSqsBusiness)
+@event_parser(model=MyAdvancedSqsBusiness)
 def handle_sqs_no_envelope(event: MyAdvancedSqsBusiness, _: LambdaContext):
     records = event.Records
     record = records[0]
