@@ -1,0 +1,53 @@
+---
+title: Parser
+description: Utility
+---
+
+
+import Note from "../../src/components/Note"
+
+<Note type="warning">
+    It requires an extra dependency before using it.
+</Note><br/>
+
+This utility provides data parsing and deep validation using [Pydantic](https://pydantic-docs.helpmanual.io/).
+
+**Key features**
+
+* Defines data in pure Python classes, then parse, validate and extract only what you want
+* Built-in envelopes to unwrap, extend, and validate popular event sources payloads
+* Enforces type hints at runtime with user friendly errors
+
+**Extra dependency**
+
+<Note type="info">
+    This will install <a href="https://github.com/samuelcolvin/pydantic">pydantic</a> and <a href="https://github.com/python/typing/tree/master/typing_extensions).">typing_extensions</a>
+</Note><br/>
+
+Install parser's extra dependencies using **`pip install aws-lambda-powertools[pydantic]`**.
+
+## Defining models
+
+You can define models to parse incoming events by inheriting from `BaseModel`.
+
+```python:title=hello_world_model.py
+from aws_lambda_powertools.utilities.parser import BaseModel
+
+class HelloWorldModel(BaseModel):
+    message: str
+
+payload = {"message": "hello world"}
+parsed_payload = HelloWorldModel(**payload)
+
+assert parsed_payload.message == payload["message"]
+```
+
+These are simply Python classes that inherit from BaseModel, and use type hints to instruct **parser** to enforce it at runtime. The advantage here is that they can be [recursive, dumped as JSON, JSON Schema, Dicts, have validation and more](https://pydantic-docs.helpmanual.io/usage/models/).
+
+You can also even use [a code generator tool](https://github.com/koxudaxi/datamodel-code-generator/) to create models from JSON Schemas, OpenAPI, etc.
+
+## Parsing events
+
+You can parse inbound events using **parser** decorator.
+
+You can also use the standalone **parse** function, if you want more control over data validation process such as handling data that doesn't conform with your model.

@@ -35,7 +35,8 @@ module.exports = {
                         'utilities/batch',
                         'utilities/typing',
                         'utilities/validation',
-                        'utilities/data_classes'
+                        'utilities/data_classes',
+                        'utilities/parser'
                     ],
                 },
                 navConfig: {
