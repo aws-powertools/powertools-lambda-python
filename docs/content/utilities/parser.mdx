@@ -36,31 +36,62 @@ from aws_lambda_powertools.utilities.parser import BaseModel
 class HelloWorldModel(BaseModel):
     message: str
 
-payload = {"message": "hello world"}
-parsed_payload = HelloWorldModel(**payload)
-
-assert parsed_payload.message == payload["message"]
+class NestedHelloWorldModel(BaseModel):
+    payload: HelloWorldModel
 ```
 
-These are simply Python classes that inherit from BaseModel, and use type hints to instruct **parser** to enforce it at runtime. The advantage here is that they can be [recursive, dumped as JSON, JSON Schema, Dicts, have validation and more](https://pydantic-docs.helpmanual.io/usage/models/).
+These are simply Python classes that inherit from BaseModel. **Parser** enforces type hints declared in your model at runtime.
 
-You can also even use [a code generator tool](https://github.com/koxudaxi/datamodel-code-generator/) to create models from JSON Schemas, OpenAPI, etc.
+<!-- TODO: We need a dedicated section to expand on these great features from Pydantic -->
+<!-- The advantage here is that they can be [recursive, dumped as JSON, JSON Schema, Dicts, have validation and more](https://pydantic-docs.helpmanual.io/usage/models/). -->
+
+<Note type="info">
+    <strong>Looking to auto-generate models from JSON, YAML, JSON Schemas, OpenApi, etc?</strong>
+    <br/><br/>
+    Use Koudai Aono's <a href="https://github.com/koxudaxi/datamodel-code-generator">data model code generator tool for Pydantic</a>
+</Note><br/>
 
 ## Parsing events
 
-You can parse inbound events using **event_parser** decorator.
-
-You can also use the standalone **parse** function, if you want more control over data validation process such as handling data that doesn't conform with your model.
-
-**TBW**
+You can parse inbound events using **event_parser** decorator, or the standalone `parse` function.
 
 ### event_parser decorator
 
-**TBW**
+Use the decorator for fail fast scenarios where you want your Lambda function to raise an exception in the event of a malformed payload.
 
-### Parse function
+`event_parser` decorator will throw a `ModelValidationError` if your event cannot be parsed according to the model.
 
-**TBW**
+```python=:title=event_parser_decorator.py
+from aws_lambda_powertools.utilities.parser import parse, ModelValidationError
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
+@event_parser(model=HelloWorldModel)
+def handler(event, context: LambdaContext):
+    pass
+
+handler(event=payload, context=LambdaContext()
+```
+
+### parse function
+
+Use this standalone function when you want more control over the data validation process, for example returning a 400 error for malformed payloads.
+
+```python:title=parse_standalone_example.py
+from aws_lambda_powertools.utilities.parser import parse, ModelValidationError
+
+payload = {"message": "hello world"}
+
+def my_function():
+    try:
+        parsed_payload = parse(event=payload, model=HelloWorldModel) # highlight-line
+        # payload dict is now parsed into our model
+        return assert parsed_payload.message == payload["message"]
+    except ModelValidationError:
+        return {
+            "status_code": 400,
+            "message": "Invalid input"
+        }
+```
 
 ## Built-in envelopes
 
