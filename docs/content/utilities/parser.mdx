@@ -130,18 +130,106 @@ def my_function():
         }
 ```
 
-### Error handling
+### Data model validation
 
-**TBW**
+<Note type="warning">
+    This is radically different from the <strong>Validator utility</strong> which validates events against JSON Schema.
+</Note><br/>
+
+You can use parser's validator for deep inspection of object values and complex relationships.
+
+There are two types of class method decorators you can use:
+
+* **`validator`** - Useful to quickly validate an individual field and its value
+* **`root_validator`** - Useful to validate the entire model's data
+
+Keep the following in mind regardless of which decorator you end up using it:
+
+* You must raise either `ValueError`, `TypeError`, or `AssertionError` when value is not compliant
+* You must return the value(s) itself if compliant
+
+#### Validating fields
+
+Quick validation to verify whether the field `message` has the value of `hello world`.
+
+```python:title=deep_data_validation.py
+from aws_lambda_powertools.utilities.parser import parse, BaseModel, validator
+
+class HelloWorldModel(BaseModel):
+    message: str
+
+    @validator('message') # highlight-line
+    def is_hello_world(cls, v):
+        if v != "hello world":
+            raise ValueError("Message must be hello world!")
+        return v
+
+parse(model=HelloWorldModel, event={"message": "hello universe"})
+```
+
+If you run as-is, you should expect the following error with the message we provided in our exception:
+
+```
+message
+  Message must be hello world! (type=value_error)
+```
+
+Alternatively, you can pass `'*'` as an argument for the decorator so that you can validate every value available.
+
+```python:title=validate_all_field_values.py
+from aws_lambda_powertools.utilities.parser import parse, BaseModel, validator
+
+class HelloWorldModel(BaseModel):
+    message: str
+    sender: str
+
+    @validator('*') # highlight-line
+    def has_whitespace(cls, v):
+        if ' ' not in v:
+            raise ValueError("Must have whitespace...")
+
+        return v
+
+parse(model=HelloWorldModel, event={"message": "hello universe", "sender": "universe"})
+```
+
+#### Validating entire model
+
+`root_validator` can help when you have a complex validation mechanism. For example finding whether data has been omitted, comparing field values, etc.
+
+```python:title=validate_all_field_values.py
+from aws_lambda_powertools.utilities.parser import parse, BaseModel, validator
+
+class UserModel(BaseModel):
+    username: str
+    password1: str
+    password2: str
+
+    @root_validator
+    def check_passwords_match(cls, values):
+        pw1, pw2 = values.get('password1'), values.get('password2')
+        if pw1 is not None and pw2 is not None and pw1 != pw2:
+            raise ValueError('passwords do not match')
+        return values
+
+payload = {
+    "username": "universe",
+    "password1": "myp@ssword",
+    "password2": "repeat password"
+}
+
+parse(model=UserModel, event=payload)
+```
+
+<Note type="info">
+    You can read more about validating list items, reusing validators, validating raw inputs, and a lot more in <a href="https://pydantic-docs.helpmanual.io/usage/validators/">Pydantic's documentation</a>.
+</Note><br/>
+
 
 ## Built-in envelopes
 
 **TBW**
 
 ## Extending built-in models
-
-**TBW**
-
-## Deep model validation
 
 **TBW**
