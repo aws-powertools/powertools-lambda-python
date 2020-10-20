@@ -32,12 +32,18 @@ You can define models to parse incoming events by inheriting from `BaseModel`.
 
 ```python:title=hello_world_model.py
 from aws_lambda_powertools.utilities.parser import BaseModel
+from typing import List, Optional
 
-class HelloWorldModel(BaseModel):
-    message: str
+class OrderItem(BaseModel):
+    id: int
+    quantity: int
+    description: str
 
-class NestedHelloWorldModel(BaseModel):
-    payload: HelloWorldModel
+class Order(BaseModel):
+    id: int
+    description: str
+    items: List[OrderItem] # nesting models are supported
+    optional_field: Optional[str] # this field may or may not be available when parsing
 ```
 
 These are simply Python classes that inherit from BaseModel. **Parser** enforces type hints declared in your model at runtime.
@@ -65,11 +71,14 @@ Use the decorator for fail fast scenarios where you want your Lambda function to
 from aws_lambda_powertools.utilities.parser import parse, ModelValidationError
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-@event_parser(model=HelloWorldModel)
-def handler(event, context: LambdaContext):
-    pass
+@event_parser(model=Order) # highlight-line
+def handler(event: Order, context: LambdaContext):
+    print(event.id)
+    print(event.description)
+    print(event.items)
 
-handler(event=payload, context=LambdaContext()
+    order_items = [items for item in event.items]
+    ...
 ```
 
 ### parse function
@@ -79,17 +88,28 @@ Use this standalone function when you want more control over the data validation
 ```python:title=parse_standalone_example.py
 from aws_lambda_powertools.utilities.parser import parse, ModelValidationError
 
-payload = {"message": "hello world"}
+# Raw event for the Order model we've defined earlier
+payload = {
+    "id": 10876546789,
+    "description": "My order",
+    "items": [
+        {
+            "id": 1015938732,
+            "quantity": 1,
+            "description": "item xpto"
+        }
+    ]
+}
 
 def my_function():
     try:
-        parsed_payload = parse(event=payload, model=HelloWorldModel) # highlight-line
+        parsed_payload: Order = parse(event=payload, model=HelloWorldModel) # highlight-line
         # payload dict is now parsed into our model
-        return assert parsed_payload.message == payload["message"]
+        return parsed_payload.items
     except ModelValidationError:
         return {
             "status_code": 400,
-            "message": "Invalid input"
+            "message": "Invalid order"
         }
 ```
 
