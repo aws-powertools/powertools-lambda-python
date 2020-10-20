@@ -59,7 +59,7 @@ These are simply Python classes that inherit from BaseModel. **Parser** enforces
 
 ## Parsing events
 
-You can parse inbound events using **event_parser** decorator, or the standalone `parse` function.
+You can parse inbound events using **event_parser** decorator, or the standalone `parse` function. Both are also able to parse either dictionary or JSON string as an input.
 
 ### event_parser decorator
 
@@ -70,6 +70,20 @@ Use the decorator for fail fast scenarios where you want your Lambda function to
 ```python=:title=event_parser_decorator.py
 from aws_lambda_powertools.utilities.parser import parse, ModelValidationError
 from aws_lambda_powertools.utilities.typing import LambdaContext
+import json
+
+# Raw event for the Order model we've defined earlier
+payload = {
+    "id": 10876546789,
+    "description": "My order",
+    "items": [
+        {
+            "id": 1015938732,
+            "quantity": 1,
+            "description": "item xpto"
+        }
+    ]
+}
 
 @event_parser(model=Order) # highlight-line
 def handler(event: Order, context: LambdaContext):
@@ -79,6 +93,9 @@ def handler(event: Order, context: LambdaContext):
 
     order_items = [items for item in event.items]
     ...
+
+handler(event=payload, context=LambdaContext())
+handler(event=json.dumps(payload), context=LambdaContext()) # also works if event is a JSON string
 ```
 
 ### parse function
@@ -112,6 +129,10 @@ def my_function():
             "message": "Invalid order"
         }
 ```
+
+### Error handling
+
+**TBW**
 
 ## Built-in envelopes
 

@@ -149,6 +149,9 @@ def parse(event: Dict[str, Any], model: BaseModel, envelope: Optional[BaseEnvelo
 
     try:
         logger.debug("Parsing and validating event model; no envelope used")
+        if isinstance(event, str):
+            return model.parse_raw(event)
+
         return model.parse_obj(event)
     except (ValidationError, TypeError) as e:
         raise ModelValidationError("Input event does not conform with model") from e
