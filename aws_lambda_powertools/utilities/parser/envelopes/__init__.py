@@ -1,6 +1,6 @@
 from .base import BaseEnvelope
-from .dynamodb import DynamoDBEnvelope
+from .dynamodb import DynamoDBStreamEnvelope
 from .event_bridge import EventBridgeEnvelope
 from .sqs import SqsEnvelope
 
-__all__ = ["DynamoDBEnvelope", "EventBridgeEnvelope", "SqsEnvelope", "BaseEnvelope"]
+__all__ = ["DynamoDBStreamEnvelope", "EventBridgeEnvelope", "SqsEnvelope", "BaseEnvelope"]

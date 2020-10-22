@@ -10,7 +10,7 @@ from .base import BaseEnvelope
 logger = logging.getLogger(__name__)
 
 
-class DynamoDBEnvelope(BaseEnvelope):
+class DynamoDBStreamEnvelope(BaseEnvelope):
     """ DynamoDB Stream Envelope to extract data within NewImage/OldImage
 
     Note: Values are the parsed models. Images' values can also be None, and
@@ -31,6 +31,8 @@ class DynamoDBEnvelope(BaseEnvelope):
         -------
         List
             List of records parsed with model provided
+
+
         """
         parsed_envelope = DynamoDBStreamModel(**data)
         output = []

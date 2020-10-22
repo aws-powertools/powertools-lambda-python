@@ -19,7 +19,7 @@ class SqsEnvelope(BaseEnvelope):
     all items in the list will be parsed as str and npt as JSON (and vice versa)
     """
 
-    def parse(self, data: Dict[str, Any], model: Union[BaseModel, str]) -> List[Union[BaseModel, str]]:
+    def parse(self, data: Dict[str, Any], model: Union[BaseModel, str]) -> List[BaseModel]:
         """Parses records found with model provided
 
         Parameters

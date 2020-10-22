@@ -57,6 +57,10 @@ These are simply Python classes that inherit from BaseModel. **Parser** enforces
     Use Koudai Aono's <a href="https://github.com/koxudaxi/datamodel-code-generator">data model code generation tool for Pydantic</a>
 </Note><br/>
 
+### Extending built-in models
+
+**TBW**
+
 ## Parsing events
 
 You can parse inbound events using **event_parser** decorator, or the standalone `parse` function. Both are also able to parse either dictionary or JSON string as an input.
@@ -226,10 +230,120 @@ parse(model=UserModel, event=payload)
 </Note><br/>
 
 
-## Built-in envelopes
+## Envelopes
 
-**TBW**
+Envelope parameter is useful when your actual payload is wrapped around a known structure, for example Lambda Event Sources like Amazon EventBridge.
 
-## Extending built-in models
+Example of parsing a model found in an event coming from EventBridge, where all you want is what's inside the `detail` key.
 
-**TBW**
+```python:title=parse_eventbridge_payload.py
+from aws_lambda_powertools.utilities.parser import parse, BaseModel, envelopes
+
+class UserModel(BaseModel):
+    username: str
+    password1: str
+    password2: str
+
+payload = {
+    "version": "0",
+    "id": "6a7e8feb-b491-4cf7-a9f1-bf3703467718",
+    "detail-type": "CustomerSignedUp",
+    "source": "CustomerService",
+    "account": "111122223333",
+    "time": "2020-10-22T18:43:48Z",
+    "region": "us-west-1",
+    "resources": ["some_additional_"],
+    # highlight-start
+    "detail": {
+        "username": "universe",
+        "password1": "myp@ssword",
+        "password2": "repeat password"
+    }
+    # highlight-end
+}
+
+ret = parse(model=UserModel, envelope=envelopes.EventBridgeModel, payload=payload) # highlight-line
+
+# Parsed model only contains our actual model, not the entire EventBridge + Payload parsed
+assert ret.password1 == ret.password2
+```
+
+**What's going on here, you might ask**:
+
+1. We imported built-in `models` from the parser utility
+2. Used `envelopes.EventBridgeModel` as the envelope for our `UserModel` model
+3. Parser parsed the original event against the EventBridge model
+4  Parser then parsed the `detail` key using `UserModel`
+
+### Built-in envelopes
+
+Parser comes with the following built-in envelopes, where `BaseModel` in the return section is your given model.
+
+Envelope name | Behaviour | Return
+------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------
+**DynamoDBStreamEnvelope** | 1. Parses data using `DynamoDBStreamModel`. <br/> 2. Parses records in `NewImage` and `OldImage` keys using your model. <br/> 3. Returns a list with a dictionary containing `NewImage` and `OldImage` keys | `List[Dict[Literal["NewImage", "OldImage"], BaseModel]]`
+**EventBridgeEnvelope** | 1. Parses data using `EventBridgeModel`. <br/> 2. Parses `detail` key using your model and returns it. | `BaseModel`
+**SqsEnvelope** | 1. Parses data using `SqsModel`. <br/> 2. Parses records in `body` key using your model and return them in a list. | `List[BaseModel]`
+
+### Bringing your own envelope model
+
+You can create your own Envelope model and logic by inheriting from `BaseEnvelope`, and implementing the `parse` method.
+
+Here's an snippet of how the EventBridge Envelope we demonstrated previously is implemented.
+
+**EventBridge Model**
+
+```python:title=eventbridge_model.py
+from datetime import datetime
+from typing import Any, Dict, List
+
+from aws_lambda_powertools.utilities.parser import BaseModel, Field
+
+
+class EventBridgeModel(BaseModel):
+    version: str
+    id: str  # noqa: A003,VNE003
+    source: str
+    account: str
+    time: datetime
+    region: str
+    resources: List[str]
+    detail_type: str = Field(None, alias="detail-type")
+    detail: Dict[str, Any]
+```
+
+**EventBridge Envelope**
+
+```python:title=eventbridge_envelope.py
+from aws_lambda_powertools.utilities.parser import BaseEnvelope, BaseModel
+from typing import Any, Dict
+from ..models import EventBridgeModel
+
+class EventBridgeEnvelope(BaseEnvelope): # highlight-line
+
+    def parse(self, data: Dict[str, Any], model: BaseModel) -> BaseModel: # highlight-line
+        """Parses data found with model provided
+
+        Parameters
+        ----------
+        data : Dict
+            Lambda event to be parsed
+        model : BaseModel
+            Data model provided to parse after extracting data using envelope
+
+        Returns
+        -------
+        Any
+            Parsed detail payload with model provided
+        """
+        parsed_envelope = EventBridgeModel(**data) # highlight-line
+        return self._parse(data=parsed_envelope.detail, model=model) # highlight-line
+```
+
+**What's going on here, you might ask**:
+
+1. We defined an envelope named `EventBridgeEnvelope` inheriting from `BaseEnvelope`
+2. Implemented the `parse` abstract method taking `data` and `model` as parameters
+3. Then, we parsed the incoming data with our envelope model (EventBridgeModel)
+3.1. This confirms that data received conforms with how EventBridge wraps events
+4. Lastly, we call `_parse` from `BaseEnvelope` to parse the data in our envelope (.detail) using the customer model
