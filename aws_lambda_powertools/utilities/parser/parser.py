@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Type, TypeVar
 
 from pydantic import BaseModel
 
@@ -8,6 +8,8 @@ from ..typing import LambdaContext
 from .envelopes.base import BaseEnvelope
 from .exceptions import InvalidEnvelopeError, InvalidModelTypeError
 
+Model = TypeVar("Model", bound=BaseModel)
+Envelope = TypeVar("Envelope", bound=BaseEnvelope)
 logger = logging.getLogger(__name__)
 
 
@@ -16,8 +18,8 @@ def event_parser(
     handler: Callable[[Dict, Any], Any],
     event: Dict[str, Any],
     context: LambdaContext,
-    model: BaseModel,
-    envelope: Optional[BaseEnvelope] = None,
+    model: Type[Model],
+    envelope: Optional[Type[Envelope]] = None,
 ) -> Any:
     """Lambda handler decorator to parse & validate events using Pydantic models
 
@@ -84,7 +86,7 @@ def event_parser(
     return handler(parsed_event, context)
 
 
-def parse(event: Dict[str, Any], model: BaseModel, envelope: Optional[BaseEnvelope] = None) -> Any:
+def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Envelope]] = None) -> Any:
     """Standalone function to parse & validate events using Pydantic models
 
     Typically used when you need fine-grained control over error handling compared to event_parser decorator.
@@ -152,4 +154,4 @@ def parse(event: Dict[str, Any], model: BaseModel, envelope: Optional[BaseEnvelo
 
         return model.parse_obj(event)
     except AttributeError:
-        raise InvalidModelTypeError("Input model must implement BaseModel")
+        raise InvalidModelTypeError(f"Input model must implement BaseModel, model={model}")
