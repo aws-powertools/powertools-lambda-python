@@ -13,7 +13,7 @@ on:
     types: [published] # update Docs upon new release
 
 jobs:
-  docs:
+  api-docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -21,6 +21,9 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: "3.8"
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12'
       - name: Capture branch and tag
         id: branch_name
         run: |
