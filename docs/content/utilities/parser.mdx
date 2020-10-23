@@ -59,7 +59,77 @@ These are simply Python classes that inherit from BaseModel. **Parser** enforces
 
 ### Extending built-in models
 
-**TBW**
+Parser comes with the following built-in models:
+
+Model name | Description
+------------------------------------------------- | ----------------------------------------------------------------------------------------------------------
+**DynamoDBStreamModel** | Lambda Event Source payload for Amazon DynamoDB Streams
+**EventBridgeModel** | Lambda Event Source payload for Amazon EventBridge
+**SqsModel** | Lambda Event Source payload for Amazon SQS
+
+You can extend them to include your own models, and yet have all other known fields parsed along the way.
+
+**EventBridge example**
+
+```python:title=extending_builtin_models.py
+from aws_lambda_powertools.utilities.parser import parse, BaseModel
+from aws_lambda_powertools.utilities.parser.models import EventBridgeModel
+
+from typing import List, Optional
+
+class OrderItem(BaseModel):
+    id: int
+    quantity: int
+    description: str
+
+class Order(BaseModel):
+    id: int
+    description: str
+    items: List[OrderItem]
+
+# highlight-start
+class OrderEventModel(EventBridgeModel):
+    detail: Order
+# highlight-end
+
+payload = {
+    "version": "0",
+    "id": "6a7e8feb-b491-4cf7-a9f1-bf3703467718",
+    "detail-type": "OrderPurchased",
+    "source": "OrderService",
+    "account": "111122223333",
+    "time": "2020-10-22T18:43:48Z",
+    "region": "us-west-1",
+    "resources": ["some_additional"],
+    "detail": { # highlight-line
+        "id": 10876546789,
+        "description": "My order",
+        "items": [
+            {
+                "id": 1015938732,
+                "quantity": 1,
+                "description": "item xpto"
+            }
+        ]
+    }
+}
+
+ret = parse(model=OrderEventModel, event=payload) # highlight-line
+
+assert ret.source == "OrderService"
+assert ret.detail.description == "My order"
+assert ret.detail_type == "OrderPurchased" # we rename it to snake_case
+
+for order_item in ret.detail.items:
+    ...
+```
+
+**What's going on here, you might ask**:
+
+1. We imported our built-in model `EventBridgeModel` from the parser utility
+2. Defined how our `Order` should look like
+3. Defined how part of our EventBridge event should look like by overriding `detail` key within our `OrderEventModel`
+4. Parser parsed the original event against `OrderEventModel`
 
 ## Parsing events
 
@@ -232,7 +302,7 @@ parse(model=UserModel, event=payload)
 
 ## Envelopes
 
-Envelope parameter is useful when your actual payload is wrapped around a known structure, for example Lambda Event Sources like Amazon EventBridge.
+Envelope parameter is useful when your actual payload is wrapped around a known structure, for example Lambda Event Sources like EventBridge.
 
 Example of parsing a model found in an event coming from EventBridge, where all you want is what's inside the `detail` key.
 
@@ -262,7 +332,7 @@ payload = {
     # highlight-end
 }
 
-ret = parse(model=UserModel, envelope=envelopes.EventBridgeModel, payload=payload) # highlight-line
+ret = parse(model=UserModel, envelope=envelopes.EventBridgeModel, event=payload) # highlight-line
 
 # Parsed model only contains our actual model, not the entire EventBridge + Payload parsed
 assert ret.password1 == ret.password2
@@ -270,7 +340,7 @@ assert ret.password1 == ret.password2
 
 **What's going on here, you might ask**:
 
-1. We imported built-in `models` from the parser utility
+1. We imported built-in `envelopes` from the parser utility
 2. Used `envelopes.EventBridgeModel` as the envelope for our `UserModel` model
 3. Parser parsed the original event against the EventBridge model
 4  Parser then parsed the `detail` key using `UserModel`
