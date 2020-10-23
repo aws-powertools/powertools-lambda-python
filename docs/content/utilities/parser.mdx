@@ -118,7 +118,7 @@ ret = parse(model=OrderEventModel, event=payload) # highlight-line
 
 assert ret.source == "OrderService"
 assert ret.detail.description == "My order"
-assert ret.detail_type == "OrderPurchased" # we rename it to snake_case
+assert ret.detail_type == "OrderPurchased" # we rename it to snake_case since detail-type is an invalid name
 
 for order_item in ret.detail.items:
     ...
@@ -142,11 +142,21 @@ Use the decorator for fail fast scenarios where you want your Lambda function to
 `event_parser` decorator will throw a `ModelValidationError` if your event cannot be parsed according to the model.
 
 ```python=:title=event_parser_decorator.py
-from aws_lambda_powertools.utilities.parser import parse, ModelValidationError
+from aws_lambda_powertools.utilities.parser import event_parser, BaseModel, ModelValidationError
 from aws_lambda_powertools.utilities.typing import LambdaContext
 import json
 
-# Raw event for the Order model we've defined earlier
+class OrderItem(BaseModel):
+    id: int
+    quantity: int
+    description: str
+
+class Order(BaseModel):
+    id: int
+    description: str
+    items: List[OrderItem] # nesting models are supported
+    optional_field: Optional[str] # this field may or may not be available when parsing
+
 payload = {
     "id": 10876546789,
     "description": "My order",
@@ -177,15 +187,27 @@ handler(event=json.dumps(payload), context=LambdaContext()) # also works if even
 Use this standalone function when you want more control over the data validation process, for example returning a 400 error for malformed payloads.
 
 ```python:title=parse_standalone_example.py
-from aws_lambda_powertools.utilities.parser import parse, ModelValidationError
+from aws_lambda_powertools.utilities.parser import parse, BaseModel, ModelValidationError
 
-# Raw event for the Order model we've defined earlier
+class OrderItem(BaseModel):
+    id: int
+    quantity: int
+    description: str
+
+class Order(BaseModel):
+    id: int
+    description: str
+    items: List[OrderItem] # nesting models are supported
+    optional_field: Optional[str] # this field may or may not be available when parsing
+
+
 payload = {
     "id": 10876546789,
     "description": "My order",
     "items": [
         {
-            "id": 1015938732,
+            # this will cause a validation error
+            "id": [1015938732], # highlight-line
             "quantity": 1,
             "description": "item xpto"
         }
@@ -194,7 +216,7 @@ payload = {
 
 def my_function():
     try:
-        parsed_payload: Order = parse(event=payload, model=HelloWorldModel) # highlight-line
+        parsed_payload: Order = parse(event=payload, model=Order) # highlight-line
         # payload dict is now parsed into our model
         return parsed_payload.items
     except ModelValidationError:
