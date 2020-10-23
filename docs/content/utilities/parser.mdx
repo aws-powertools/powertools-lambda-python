@@ -456,3 +456,53 @@ If what's your trying to use isn't available as part of the high level import sy
 ```python:title=escape_hatch.py
 from aws_lambda_powertools.utilities.parser.pydantic import <what you'd like to import'>
 ```
+
+**What is the cold start impact in bringing this additional dependency?**
+
+No significant cold start impact. It does increase the final uncompressed package by **71M**, when you bring the additional dependency that parser requires.
+
+Artillery load test sample against a [hello world sample](https://github.com/aws-samples/cookiecutter-aws-sam-python) using Tracer, Metrics, and Logger with and without parser.
+
+**No parser**
+
+> **Uncompressed package size**: 55M, **p99**: 180.3ms
+
+```
+Summary report @ 14:36:07(+0200) 2020-10-23
+  Scenarios launched:  10
+  Scenarios completed: 10
+  Requests completed:  2000
+  Mean response/sec: 114.81
+  Response time (msec):
+    min: 54.9
+    max: 1684.9
+    median: 68
+    p95: 109.1
+    p99: 180.3
+  Scenario counts:
+    0: 10 (100%)
+  Codes:
+    200: 2000
+```
+
+**With parser**
+
+> **Uncompressed package size**: 128M, **p99**: 193.1ms
+
+```
+Summary report @ 14:29:23(+0200) 2020-10-23
+  Scenarios launched:  10
+  Scenarios completed: 10
+  Requests completed:  2000
+  Mean response/sec: 111.67
+  Response time (msec):
+    min: 54.3
+    max: 1887.2
+    median: 66.1
+    p95: 113.3
+    p99: 193.1
+  Scenario counts:
+    0: 10 (100%)
+  Codes:
+    200: 2000
+```
