@@ -436,6 +436,5 @@ class EventBridgeEnvelope(BaseEnvelope): # highlight-line
 
 1. We defined an envelope named `EventBridgeEnvelope` inheriting from `BaseEnvelope`
 2. Implemented the `parse` abstract method taking `data` and `model` as parameters
-3. Then, we parsed the incoming data with our envelope model (EventBridgeModel)
-3.1. This confirms that data received conforms with how EventBridge wraps events
+3. Then, we parsed the incoming data with our envelope to confirm it matches EventBridge's structure defined in `EventBridgeModel`
 4. Lastly, we call `_parse` from `BaseEnvelope` to parse the data in our envelope (.detail) using the customer model
