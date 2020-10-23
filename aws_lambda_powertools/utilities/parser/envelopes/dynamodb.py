@@ -31,8 +31,6 @@ class DynamoDBStreamEnvelope(BaseEnvelope):
         -------
         List
             List of records parsed with model provided
-
-
         """
         logger.debug(f"Parsing incoming data with DynamoDB Stream model {DynamoDBStreamModel}")
         parsed_envelope = DynamoDBStreamModel(**data)
