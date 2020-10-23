@@ -17,7 +17,10 @@
         "react-dom": "^16.13.1"
     },
     "resolutions": {
-        "graphql": "^14.7.0"
+        "graphql": "^14.7.0",
+	    "bl": "^4.0.3",
+	  	"semver": "^7.3.2",
+	    "node-fetch": "^2.6.1"
     },
     "keywords": [],
     "license": "MIT-0",
