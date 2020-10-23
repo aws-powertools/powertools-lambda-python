@@ -8,7 +8,7 @@ dev:
 	pre-commit install
 
 dev-docs:
-	cd docs && npm install
+	cd docs && yarn install
 
 format:
 	poetry run isort -rc aws_lambda_powertools tests
@@ -40,11 +40,11 @@ build-docs-api: dev
 
 build-docs-website: dev-docs
 	mkdir -p dist
-	cd docs && npm run build
+	cd docs && yarn build
 	cp -R docs/public/* dist/
 
-docs-local:
-	cd docs && npm run start
+docs-local: dev-docs
+	cd docs && yarn start
 
 docs-api-local:
 	poetry run pdoc --http : aws_lambda_powertools
