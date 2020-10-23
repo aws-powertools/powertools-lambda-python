@@ -34,8 +34,10 @@ class DynamoDBStreamEnvelope(BaseEnvelope):
 
 
         """
+        logger.debug(f"Parsing incoming data with DynamoDB Stream model {DynamoDBStreamModel}")
         parsed_envelope = DynamoDBStreamModel(**data)
         output = []
+        logger.debug(f"Parsing DynamoDB Stream new and old records with {model}")
         for record in parsed_envelope.Records:
             output.append(
                 {

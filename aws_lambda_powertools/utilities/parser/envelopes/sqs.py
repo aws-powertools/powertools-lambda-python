@@ -34,8 +34,10 @@ class SqsEnvelope(BaseEnvelope):
         List
             List of records parsed with model provided
         """
+        logger.debug(f"Parsing incoming data with SQS model {SqsModel}")
         parsed_envelope = SqsModel(**data)
         output = []
+        logger.debug(f"Parsing SQS records in `body` with {model}")
         for record in parsed_envelope.Records:
             output.append(self._parse(record.body, model))
         return output

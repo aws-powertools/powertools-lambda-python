@@ -27,5 +27,7 @@ class EventBridgeEnvelope(BaseEnvelope):
         Any
             Parsed detail payload with model provided
         """
+        logger.debug(f"Parsing incoming data with EventBridge model {EventBridgeModel}")
         parsed_envelope = EventBridgeModel(**data)
+        logger.debug(f"Parsing event payload in `detail` with {model}")
         return self._parse(data=parsed_envelope.detail, model=model)
