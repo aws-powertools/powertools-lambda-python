@@ -139,10 +139,10 @@ You can parse inbound events using **event_parser** decorator, or the standalone
 
 Use the decorator for fail fast scenarios where you want your Lambda function to raise an exception in the event of a malformed payload.
 
-`event_parser` decorator will throw a `ModelValidationError` if your event cannot be parsed according to the model.
+`event_parser` decorator will throw a `ValidationError` if your event cannot be parsed according to the model.
 
 ```python=:title=event_parser_decorator.py
-from aws_lambda_powertools.utilities.parser import event_parser, BaseModel, ModelValidationError
+from aws_lambda_powertools.utilities.parser import event_parser, BaseModel, ValidationError
 from aws_lambda_powertools.utilities.typing import LambdaContext
 import json
 
@@ -187,7 +187,7 @@ handler(event=json.dumps(payload), context=LambdaContext()) # also works if even
 Use this standalone function when you want more control over the data validation process, for example returning a 400 error for malformed payloads.
 
 ```python:title=parse_standalone_example.py
-from aws_lambda_powertools.utilities.parser import parse, BaseModel, ModelValidationError
+from aws_lambda_powertools.utilities.parser import parse, BaseModel, ValidationError
 
 class OrderItem(BaseModel):
     id: int
@@ -219,7 +219,7 @@ def my_function():
         parsed_payload: Order = parse(event=payload, model=Order) # highlight-line
         # payload dict is now parsed into our model
         return parsed_payload.items
-    except ModelValidationError:
+    except ValidationError:
         return {
             "status_code": 400,
             "message": "Invalid order"

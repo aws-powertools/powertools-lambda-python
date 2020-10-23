@@ -1,12 +1,12 @@
 import logging
 from typing import Any, Callable, Dict, Optional
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from ...middleware_factory import lambda_handler_decorator
 from ..typing import LambdaContext
 from .envelopes.base import BaseEnvelope
-from .exceptions import InvalidEnvelopeError, InvalidModelTypeError, ModelValidationError
+from .exceptions import InvalidEnvelopeError, InvalidModelTypeError
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ def event_parser(
 
     Raises
     ------
-    ModelValidationError
+    ValidationError
         When input event does not conform with model provided
     InvalidModelTypeError
         When model given does not implement BaseModel
@@ -94,7 +94,7 @@ def parse(event: Dict[str, Any], model: BaseModel, envelope: Optional[BaseEnvelo
 
     **Lambda handler decorator to parse & validate event**
 
-        from aws_lambda_powertools.utilities.parser.exceptions import ModelValidationError
+        from aws_lambda_powertools.utilities.parser import ValidationError
 
         class Order(BaseModel):
             id: int
@@ -104,7 +104,7 @@ def parse(event: Dict[str, Any], model: BaseModel, envelope: Optional[BaseEnvelo
         def handler(event: Order, context: LambdaContext):
             try:
                 parse(model=Order)
-            except ModelValidationError:
+            except ValidationError:
                 ...
 
     **Lambda handler decorator to parse & validate event - using built-in envelope**
@@ -117,7 +117,7 @@ def parse(event: Dict[str, Any], model: BaseModel, envelope: Optional[BaseEnvelo
         def handler(event: Order, context: LambdaContext):
             try:
                 parse(model=Order, envelope=envelopes.EVENTBRIDGE)
-            except ModelValidationError:
+            except ValidationError:
                 ...
 
     Parameters
@@ -131,7 +131,7 @@ def parse(event: Dict[str, Any], model: BaseModel, envelope: Optional[BaseEnvelo
 
     Raises
     ------
-    ModelValidationError
+    ValidationError
         When input event does not conform with model provided
     InvalidModelTypeError
         When model given does not implement BaseModel
@@ -144,8 +144,6 @@ def parse(event: Dict[str, Any], model: BaseModel, envelope: Optional[BaseEnvelo
             return envelope().parse(data=event, model=model)
         except AttributeError:
             raise InvalidEnvelopeError(f"Envelope must implement BaseEnvelope, envelope={envelope}")
-        except (ValidationError, TypeError) as e:
-            raise ModelValidationError(f"Input event does not conform with model, envelope={envelope}") from e
 
     try:
         logger.debug("Parsing and validating event model; no envelope used")
@@ -153,7 +151,5 @@ def parse(event: Dict[str, Any], model: BaseModel, envelope: Optional[BaseEnvelo
             return model.parse_raw(event)
 
         return model.parse_obj(event)
-    except (ValidationError, TypeError) as e:
-        raise ModelValidationError("Input event does not conform with model") from e
     except AttributeError:
         raise InvalidModelTypeError("Input model must implement BaseModel")

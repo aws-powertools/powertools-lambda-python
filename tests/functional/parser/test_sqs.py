@@ -2,7 +2,7 @@ from typing import Any, List
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import envelopes, event_parser, exceptions
+from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, event_parser
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedSqsBusiness, MySqsBusiness
 from tests.functional.parser.utils import load_event
@@ -23,7 +23,7 @@ def test_handle_sqs_trigger_event_json_body(sqs_event):  # noqa: F811
 def test_validate_event_does_not_conform_with_model():
     event: Any = {"invalid": "event"}
 
-    with pytest.raises(exceptions.ModelValidationError):
+    with pytest.raises(ValidationError):
         handle_sqs_json_body(event, LambdaContext())
 
 
@@ -51,7 +51,7 @@ def test_validate_event_does_not_conform_user_json_string_with_model():
         ]
     }
 
-    with pytest.raises(exceptions.ModelValidationError):
+    with pytest.raises(ValidationError):
         handle_sqs_json_body(event, LambdaContext())
 
 

@@ -3,7 +3,7 @@ from typing import Dict, Union
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import event_parser, exceptions
+from aws_lambda_powertools.utilities.parser import ValidationError, event_parser, exceptions
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
@@ -13,7 +13,7 @@ def test_parser_unsupported_event(dummy_schema, invalid_value):
     def handle_no_envelope(event: Dict, _: LambdaContext):
         return event
 
-    with pytest.raises(exceptions.ModelValidationError):
+    with pytest.raises(ValidationError):
         handle_no_envelope(event=invalid_value, context=LambdaContext())
 
 

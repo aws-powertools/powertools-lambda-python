@@ -2,9 +2,8 @@
 """
 from . import envelopes
 from .envelopes import BaseEnvelope
-from .exceptions import ModelValidationError
 from .parser import event_parser, parse
-from .pydantic import BaseModel, Field, root_validator, validator
+from .pydantic import BaseModel, Field, ValidationError, root_validator, validator
 
 __all__ = [
     "event_parser",
@@ -15,5 +14,5 @@ __all__ = [
     "Field",
     "validator",
     "root_validator",
-    "ModelValidationError",
+    "ValidationError",
 ]

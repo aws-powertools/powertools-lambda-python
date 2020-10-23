@@ -2,7 +2,7 @@ from typing import Any, Dict, List
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import envelopes, event_parser, exceptions
+from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, event_parser
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedDynamoBusiness, MyDynamoBusiness
 from tests.functional.parser.utils import load_event
@@ -59,11 +59,11 @@ def test_dynamo_db_stream_trigger_event_no_envelope():
 
 def test_validate_event_does_not_conform_with_model_no_envelope():
     event_dict: Any = {"hello": "s"}
-    with pytest.raises(exceptions.ModelValidationError):
+    with pytest.raises(ValidationError):
         handle_dynamodb_no_envelope(event_dict, LambdaContext())
 
 
 def test_validate_event_does_not_conform_with_model():
     event_dict: Any = {"hello": "s"}
-    with pytest.raises(exceptions.ModelValidationError):
+    with pytest.raises(ValidationError):
         handle_dynamodb(event_dict, LambdaContext())
