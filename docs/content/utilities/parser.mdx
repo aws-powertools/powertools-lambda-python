@@ -438,3 +438,21 @@ class EventBridgeEnvelope(BaseEnvelope): # highlight-line
 2. Implemented the `parse` abstract method taking `data` and `model` as parameters
 3. Then, we parsed the incoming data with our envelope to confirm it matches EventBridge's structure defined in `EventBridgeModel`
 4. Lastly, we call `_parse` from `BaseEnvelope` to parse the data in our envelope (.detail) using the customer model
+
+## FAQ
+
+**When should I use parser vs data_classes utility?**
+
+Use data classes utility when you're after autocomplete, self-documented attributes and helpers to extract data from common event sources.
+
+Parser is best suited for those looking for a trade-off between defining their models for deep validation, parsing and autocomplete for an additional dependency to be brought in.
+
+**How do I import X from Pydantic?**
+
+We export most common classes, exceptions, and utilities from Pydantic as part of parser e.g. `from aws_lambda_powertools.utilities.parser import BaseModel`.
+
+If what's your trying to use isn't available as part of the high level import system, use the following escape hatch mechanism:
+
+```python:title=escape_hatch.py
+from aws_lambda_powertools.utilities.parser.pydantic import <what you'd like to import'>
+```
