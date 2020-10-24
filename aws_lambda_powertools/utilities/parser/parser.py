@@ -1,15 +1,12 @@
 import logging
-from typing import Any, Callable, Dict, Optional, Type, TypeVar
-
-from pydantic import BaseModel
+from typing import Any, Callable, Dict, Optional
 
 from ...middleware_factory import lambda_handler_decorator
 from ..typing import LambdaContext
-from .envelopes.base import BaseEnvelope
+from .envelopes.base import Envelope
 from .exceptions import InvalidEnvelopeError, InvalidModelTypeError
+from .types import Model
 
-Model = TypeVar("Model", bound=BaseModel)
-Envelope = TypeVar("Envelope", bound=BaseEnvelope)
 logger = logging.getLogger(__name__)
 
 
@@ -18,8 +15,8 @@ def event_parser(
     handler: Callable[[Dict, Any], Any],
     event: Dict[str, Any],
     context: LambdaContext,
-    model: Type[Model],
-    envelope: Optional[Type[Envelope]] = None,
+    model: Model,
+    envelope: Optional[Envelope] = None,
 ) -> Any:
     """Lambda handler decorator to parse & validate events using Pydantic models
 
@@ -67,9 +64,9 @@ def event_parser(
         Lambda event to be parsed & validated
     context:  LambdaContext
         Lambda context object
-    model:   BaseModel
+    model:   Model
         Your data model that will replace the event.
-    envelope: BaseEnvelope
+    envelope: Envelope
         Optional envelope to extract the model from
 
     Raises
@@ -86,7 +83,7 @@ def event_parser(
     return handler(parsed_event, context)
 
 
-def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Envelope]] = None) -> Any:
+def parse(event: Dict[str, Any], model: Model, envelope: Optional[Envelope] = None) -> Model:
     """Standalone function to parse & validate events using Pydantic models
 
     Typically used when you need fine-grained control over error handling compared to event_parser decorator.
@@ -126,9 +123,9 @@ def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Env
     ----------
     event:    Dict
         Lambda event to be parsed & validated
-    model:   BaseModel
+    model:   Model
         Your data model that will replace the event
-    envelope: BaseEnvelope
+    envelope: Envelope
         Optional envelope to extract the model from
 
     Raises
