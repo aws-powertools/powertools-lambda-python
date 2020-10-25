@@ -361,18 +361,18 @@ def test_logger_record_caller_location(stdout):
     assert caller_fn_name in log["location"]
 
 
-def test_logger_do_not_log_twice(stdout):
+def test_logger_do_not_log_twice_when_root_logger_is_setup(stdout):
     # GIVEN Lambda configures the root logger with a handler
-    logging.basicConfig(format="%(asctime)-15s %(clientip)s %(user)-8s %(message)s", level="INFO")
     root_logger = logging.getLogger()
     root_logger.addHandler(logging.StreamHandler(stream=stdout))
 
-    # WHEN we create a new Logger
+    # WHEN we create a new Logger and child Logger
     logger = Logger(stream=stdout)
+    child_logger = Logger(child=True, stream=stdout)
     logger.info("hello")
+    child_logger.info("hello again")
 
-    # THEN it should fail to unpack because root logger handler
-    # should be removed as part of our Logger initialization
-    assert not root_logger.handlers
-    with pytest.raises(ValueError, match=r".*expected 2, got 1.*"):
-        [log_one, log_two] = stdout.getvalue().strip().split("\n")
+    # THEN it should only contain only two log entries
+    # since child's log records propagated to root logger should be rejected
+    logs = list(stdout.getvalue().strip().split("\n"))
+    assert len(logs) == 2

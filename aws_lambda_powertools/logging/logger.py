@@ -8,6 +8,7 @@ from distutils.util import strtobool
 from typing import Any, Callable, Dict, Union
 
 from .exceptions import InvalidLoggerSamplingRateError
+from .filters import SuppressFilter
 from .formatter import JsonFormatter
 from .lambda_context import build_lambda_context_model
 
@@ -147,13 +148,6 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     def _init_logger(self, **kwargs):
         """Configures new logger"""
 
-        # Lambda by default configures the root logger handler
-        # therefore, we need to remove it to prevent messages being logged twice
-        # when customers use our Logger
-        logger.debug("Removing Lambda root handler whether it exists")
-        root_logger = logging.getLogger()
-        root_logger.handlers.clear()
-
         # Skip configuration if it's a child logger to prevent
         # multiple handlers being attached as well as different sampling mechanisms
         # and multiple messages from being logged as handlers can be duplicated
@@ -162,6 +156,13 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             self._logger.setLevel(self.log_level)
             self._logger.addHandler(self._handler)
             self.structure_logs(**kwargs)
+
+            logger.debug("Adding filter in root logger to suppress child logger records to bubble up")
+            for handler in logging.root.handlers:
+                # It'll add a filter to suppress any child logger from self.service
+                # Where service is Order, it'll reject parent logger Order,
+                # and child loggers such as Order.checkout, Order.shared
+                handler.addFilter(SuppressFilter(self.service))
 
     def _configure_sampling(self):
         """Dynamically set log level based on sampling rate
