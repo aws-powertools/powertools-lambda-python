@@ -57,80 +57,6 @@ These are simply Python classes that inherit from BaseModel. **Parser** enforces
     Use Koudai Aono's <a href="https://github.com/koxudaxi/datamodel-code-generator">data model code generation tool for Pydantic</a>
 </Note><br/>
 
-### Extending built-in models
-
-Parser comes with the following built-in models:
-
-Model name | Description
-------------------------------------------------- | ----------------------------------------------------------------------------------------------------------
-**DynamoDBStreamModel** | Lambda Event Source payload for Amazon DynamoDB Streams
-**EventBridgeModel** | Lambda Event Source payload for Amazon EventBridge
-**SqsModel** | Lambda Event Source payload for Amazon SQS
-
-You can extend them to include your own models, and yet have all other known fields parsed along the way.
-
-**EventBridge example**
-
-```python:title=extending_builtin_models.py
-from aws_lambda_powertools.utilities.parser import parse, BaseModel
-from aws_lambda_powertools.utilities.parser.models import EventBridgeModel
-
-from typing import List, Optional
-
-class OrderItem(BaseModel):
-    id: int
-    quantity: int
-    description: str
-
-class Order(BaseModel):
-    id: int
-    description: str
-    items: List[OrderItem]
-
-# highlight-start
-class OrderEventModel(EventBridgeModel):
-    detail: Order
-# highlight-end
-
-payload = {
-    "version": "0",
-    "id": "6a7e8feb-b491-4cf7-a9f1-bf3703467718",
-    "detail-type": "OrderPurchased",
-    "source": "OrderService",
-    "account": "111122223333",
-    "time": "2020-10-22T18:43:48Z",
-    "region": "us-west-1",
-    "resources": ["some_additional"],
-    "detail": { # highlight-line
-        "id": 10876546789,
-        "description": "My order",
-        "items": [
-            {
-                "id": 1015938732,
-                "quantity": 1,
-                "description": "item xpto"
-            }
-        ]
-    }
-}
-
-ret = parse(model=OrderEventModel, event=payload) # highlight-line
-
-assert ret.source == "OrderService"
-assert ret.detail.description == "My order"
-assert ret.detail_type == "OrderPurchased" # we rename it to snake_case since detail-type is an invalid name
-
-for order_item in ret.detail.items:
-    ...
-```
-
-**What's going on here, you might ask**:
-
-1. We imported our built-in model `EventBridgeModel` from the parser utility
-2. Defined how our `Order` should look like
-3. Defined how part of our EventBridge event should look like by overriding `detail` key within our `OrderEventModel`
-4. Parser parsed the original event against `OrderEventModel`
-
 ## Parsing events
 
 You can parse inbound events using **event_parser** decorator, or the standalone `parse` function. Both are also able to parse either dictionary or JSON string as an input.
@@ -141,7 +67,7 @@ Use the decorator for fail fast scenarios where you want your Lambda function to
 
 `event_parser` decorator will throw a `ValidationError` if your event cannot be parsed according to the model.
 
-```python=:title=event_parser_decorator.py
+```python:title=event_parser_decorator.py
 from aws_lambda_powertools.utilities.parser import event_parser, BaseModel, ValidationError
 from aws_lambda_powertools.utilities.typing import LambdaContext
 import json
@@ -320,6 +246,80 @@ parse(model=UserModel, event=payload)
 <Note type="info">
     You can read more about validating list items, reusing validators, validating raw inputs, and a lot more in <a href="https://pydantic-docs.helpmanual.io/usage/validators/">Pydantic's documentation</a>.
 </Note><br/>
+
+## Extending built-in models
+
+Parser comes with the following built-in models:
+
+Model name | Description
+------------------------------------------------- | ----------------------------------------------------------------------------------------------------------
+**DynamoDBStreamModel** | Lambda Event Source payload for Amazon DynamoDB Streams
+**EventBridgeModel** | Lambda Event Source payload for Amazon EventBridge
+**SqsModel** | Lambda Event Source payload for Amazon SQS
+
+You can extend them to include your own models, and yet have all other known fields parsed along the way.
+
+**EventBridge example**
+
+```python:title=extending_builtin_models.py
+from aws_lambda_powertools.utilities.parser import parse, BaseModel
+from aws_lambda_powertools.utilities.parser.models import EventBridgeModel
+
+from typing import List, Optional
+
+class OrderItem(BaseModel):
+    id: int
+    quantity: int
+    description: str
+
+class Order(BaseModel):
+    id: int
+    description: str
+    items: List[OrderItem]
+
+# highlight-start
+class OrderEventModel(EventBridgeModel):
+    detail: Order
+# highlight-end
+
+payload = {
+    "version": "0",
+    "id": "6a7e8feb-b491-4cf7-a9f1-bf3703467718",
+    "detail-type": "OrderPurchased",
+    "source": "OrderService",
+    "account": "111122223333",
+    "time": "2020-10-22T18:43:48Z",
+    "region": "us-west-1",
+    "resources": ["some_additional"],
+    "detail": { # highlight-line
+        "id": 10876546789,
+        "description": "My order",
+        "items": [
+            {
+                "id": 1015938732,
+                "quantity": 1,
+                "description": "item xpto"
+            }
+        ]
+    }
+}
+
+ret = parse(model=OrderEventModel, event=payload) # highlight-line
+
+assert ret.source == "OrderService"
+assert ret.detail.description == "My order"
+assert ret.detail_type == "OrderPurchased" # we rename it to snake_case since detail-type is an invalid name
+
+for order_item in ret.detail.items:
+    ...
+```
+
+**What's going on here, you might ask**:
+
+1. We imported our built-in model `EventBridgeModel` from the parser utility
+2. Defined how our `Order` should look like
+3. Defined how part of our EventBridge event should look like by overriding `detail` key within our `OrderEventModel`
+4. Parser parsed the original event against `OrderEventModel`
 
 
 ## Envelopes
