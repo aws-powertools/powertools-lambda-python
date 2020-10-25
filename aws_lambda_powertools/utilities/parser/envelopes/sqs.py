@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Union
 
 from ..models import SqsModel
 from ..types import Model
@@ -18,7 +18,7 @@ class SqsEnvelope(BaseEnvelope):
     all items in the list will be parsed as str and npt as JSON (and vice versa)
     """
 
-    def parse(self, data: Dict[str, Any], model: Model) -> List[Model]:
+    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Model) -> List[Optional[Model]]:
         """Parses records found with model provided
 
         Parameters

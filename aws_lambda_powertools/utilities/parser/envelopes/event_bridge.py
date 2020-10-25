@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Union
 
 from ..models import EventBridgeModel
 from ..types import Model
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class EventBridgeEnvelope(BaseEnvelope):
     """EventBridge envelope to extract data within detail key"""
 
-    def parse(self, data: Dict[str, Any], model: Model) -> Model:
+    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Model) -> Optional[Model]:
         """Parses data found with model provided
 
         Parameters

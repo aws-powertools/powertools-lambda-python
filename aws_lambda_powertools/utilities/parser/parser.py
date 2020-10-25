@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 @lambda_handler_decorator
 def event_parser(
-    handler: Callable[[Dict, Any], Any],
+    handler: Callable[[Any, LambdaContext], Any],
     event: Dict[str, Any],
     context: LambdaContext,
     model: Model,

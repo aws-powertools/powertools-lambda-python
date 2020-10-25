@@ -1,7 +1,5 @@
 import logging
-from typing import Any, Dict, List
-
-from typing_extensions import Literal
+from typing import Any, Dict, List, Optional, Union
 
 from ..models import DynamoDBStreamModel
 from ..types import Model
@@ -17,7 +15,7 @@ class DynamoDBStreamEnvelope(BaseEnvelope):
     length of the list is the record's amount in the original event.
     """
 
-    def parse(self, data: Dict[str, Any], model: Model) -> List[Dict[Literal["NewImage", "OldImage"], Model]]:
+    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Model) -> List[Dict[str, Optional[Model]]]:
         """Parses DynamoDB Stream records found in either NewImage and OldImage with model provided
 
         Parameters
@@ -30,7 +28,7 @@ class DynamoDBStreamEnvelope(BaseEnvelope):
         Returns
         -------
         List
-            List of records parsed with model provided
+            List of dictionaries with NewImage and OldImage records parsed with model provided
         """
         logger.debug(f"Parsing incoming data with DynamoDB Stream model {DynamoDBStreamModel}")
         parsed_envelope = DynamoDBStreamModel.parse_obj(data)
@@ -43,5 +41,4 @@ class DynamoDBStreamEnvelope(BaseEnvelope):
                     "OldImage": self._parse(data=record.dynamodb.OldImage, model=model),
                 }
             )
-        # noinspection PyTypeChecker
         return output
