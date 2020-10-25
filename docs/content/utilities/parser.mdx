@@ -58,6 +58,8 @@ Use the decorator for fail fast scenarios where you want your Lambda function to
 
 `event_parser` decorator will throw a `ValidationError` if your event cannot be parsed according to the model.
 
+> NOTE: **This decorator will replace the `event` object with the parsed model if successful**. This means you might be careful when nesting other decorators that expect `event` to be a `dict`.
+
 ```python:title=event_parser_decorator.py
 from aws_lambda_powertools.utilities.parser import event_parser, BaseModel, ValidationError
 from aws_lambda_powertools.utilities.typing import LambdaContext
