@@ -159,6 +159,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
             logger.debug("Adding filter in root logger to suppress child logger records to bubble up")
             for handler in logging.root.handlers:
+                # It'll add a filter to suppress any child logger from self.service
+                # Where service is Order, it'll reject parent logger Order,
+                # and child loggers such as Order.checkout, Order.shared
                 handler.addFilter(SuppressFilter(self.service))
 
     def _configure_sampling(self):
