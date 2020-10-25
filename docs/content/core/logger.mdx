@@ -158,11 +158,17 @@ from aws_lambda_powertools import Logger
 logger = Logger()
 
 def handler(event, context):
-   if "order_id" in event:
-      logger.structure_logs(append=True, order_id=event["order_id"]) # highlight-line
-      logger.info("Collecting payment")
+   order_id = event.get("order_id")
+   logger.structure_logs(append=True, order_id=order_id) # highlight-line
+   logger.info("Collecting payment")
       ...
 ```
+
+> Note: Logger will automatically reject any key with a None value.
+
+If you conditionally add keys depending on the payload, you can use the highlighted line above as an example.
+
+This example will add `order_id` if its value is not empty, and in subsequent invocations where `order_id` might not be present it'll remove it from the logger.
 
 <details>
 <summary><strong>Excerpt output in CloudWatch Logs</strong></summary>
