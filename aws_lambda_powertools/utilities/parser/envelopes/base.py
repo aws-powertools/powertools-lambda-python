@@ -1,8 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, TypeVar, Union
 
-from pydantic import BaseModel
+from ..types import Model
 
 logger = logging.getLogger(__name__)
 
@@ -11,14 +11,14 @@ class BaseEnvelope(ABC):
     """ABC implementation for creating a supported Envelope"""
 
     @staticmethod
-    def _parse(data: Union[Dict[str, Any], str], model: BaseModel) -> Any:
+    def _parse(data: Optional[Union[Dict[str, Any], Any]], model: Model) -> Union[Model, None]:
         """Parses envelope data against model provided
 
         Parameters
         ----------
         data : Dict
             Data to be parsed and validated
-        model
+        model : Model
             Data model to parse and validate data against
 
         Returns
@@ -38,7 +38,7 @@ class BaseEnvelope(ABC):
         return model.parse_obj(data)
 
     @abstractmethod
-    def parse(self, data: Dict[str, Any], model: BaseModel):
+    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Model):
         """Implementation to parse data against envelope model, then against the data model
 
         NOTE: Call `_parse` method to fully parse data with model provided.
@@ -56,3 +56,8 @@ class BaseEnvelope(ABC):
             return self._parse(data=parsed_envelope.detail, model=data_model)
         """
         return NotImplemented  # pragma: no cover
+
+
+# Generic to support type annotations throughout parser
+# Note: Can't be defined under types.py due to circular dependency
+Envelope = TypeVar("Envelope", bound=BaseEnvelope)

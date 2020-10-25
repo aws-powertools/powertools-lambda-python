@@ -1,8 +1,9 @@
-from typing import Dict
+import json
+from typing import Dict, Union
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import event_parser, exceptions
+from aws_lambda_powertools.utilities.parser import ValidationError, event_parser, exceptions
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
@@ -12,7 +13,7 @@ def test_parser_unsupported_event(dummy_schema, invalid_value):
     def handle_no_envelope(event: Dict, _: LambdaContext):
         return event
 
-    with pytest.raises(exceptions.ModelValidationError):
+    with pytest.raises(ValidationError):
         handle_no_envelope(event=invalid_value, context=LambdaContext())
 
 
@@ -55,3 +56,13 @@ def test_parser_with_invalid_schema_type(dummy_event, invalid_schema):
 
     with pytest.raises(exceptions.InvalidModelTypeError):
         handle_no_envelope(event=dummy_event, context=LambdaContext())
+
+
+def test_parser_event_as_json_string(dummy_event, dummy_schema):
+    dummy_event = json.dumps(dummy_event["payload"])
+
+    @event_parser(model=dummy_schema)
+    def handle_no_envelope(event: Union[Dict, str], _: LambdaContext):
+        return event
+
+    handle_no_envelope(dummy_event, LambdaContext())

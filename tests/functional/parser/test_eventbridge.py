@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import envelopes, event_parser, exceptions
+from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, event_parser
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedEventbridgeBusiness, MyEventbridgeBusiness
 from tests.functional.parser.utils import load_event
@@ -46,7 +46,7 @@ def test_validate_event_does_not_conform_with_user_dict_model():
         "resources": ["arn:aws:ec2:us-west-1:123456789012:instance/i-1234567890abcdef0"],
         "detail": {},
     }
-    with pytest.raises(exceptions.ModelValidationError) as e:
+    with pytest.raises(ValidationError) as e:
         handle_eventbridge(event_dict, LambdaContext())
     print(e.exconly())
 
@@ -57,5 +57,5 @@ def test_handle_eventbridge_trigger_event_no_envelope():
 
 
 def test_handle_invalid_event_with_eventbridge_envelope():
-    with pytest.raises(exceptions.ModelValidationError):
+    with pytest.raises(ValidationError):
         handle_eventbridge(event={}, context=LambdaContext())

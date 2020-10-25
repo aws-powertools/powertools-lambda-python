@@ -1,9 +1,8 @@
 import logging
-from typing import Any, Dict, List, Union
-
-from pydantic import BaseModel
+from typing import Any, Dict, List, Optional, Union
 
 from ..models import SqsModel
+from ..types import Model
 from .base import BaseEnvelope
 
 logger = logging.getLogger(__name__)
@@ -19,14 +18,14 @@ class SqsEnvelope(BaseEnvelope):
     all items in the list will be parsed as str and npt as JSON (and vice versa)
     """
 
-    def parse(self, data: Dict[str, Any], model: Union[BaseModel, str]) -> List[Union[BaseModel, str]]:
+    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Model) -> List[Optional[Model]]:
         """Parses records found with model provided
 
         Parameters
         ----------
         data : Dict
             Lambda event to be parsed
-        model : BaseModel
+        model : Model
             Data model provided to parse after extracting data using envelope
 
         Returns
@@ -34,8 +33,10 @@ class SqsEnvelope(BaseEnvelope):
         List
             List of records parsed with model provided
         """
-        parsed_envelope = SqsModel(**data)
+        logger.debug(f"Parsing incoming data with SQS model {SqsModel}")
+        parsed_envelope = SqsModel.parse_obj(data)
         output = []
+        logger.debug(f"Parsing SQS records in `body` with {model}")
         for record in parsed_envelope.Records:
-            output.append(self._parse(record.body, model))
+            output.append(self._parse(data=record.body, model=model))
         return output

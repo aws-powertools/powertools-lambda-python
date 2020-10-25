@@ -1,9 +1,9 @@
 from typing import Any, Dict
 
 import pytest
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
-from aws_lambda_powertools.utilities.parser import BaseEnvelope, ModelValidationError
+from aws_lambda_powertools.utilities.parser import BaseEnvelope
 
 
 @pytest.fixture
@@ -37,10 +37,7 @@ def dummy_envelope(dummy_envelope_schema):
         """Unwrap dummy event within payload key"""
 
         def parse(self, data: Dict[str, Any], model: BaseModel):
-            try:
-                parsed_enveloped = dummy_envelope_schema(**data)
-            except (ValidationError, TypeError) as e:
-                raise ModelValidationError("Dummy input does not conform with schema") from e
+            parsed_enveloped = dummy_envelope_schema(**data)
             return self._parse(data=parsed_enveloped.payload, model=model)
 
     return MyDummyEnvelope
