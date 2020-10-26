@@ -12,7 +12,7 @@ classifiers=[
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
 ]
-repository="https://github.com/awslabs/aws-lambda-powertools/"
+repository="https://github.com/awslabs/aws-lambda-powertools-python"
 readme = "README.md"
 keywords = ["aws_lambda_powertools", "aws", "tracing", "logging", "lambda", "powertools"]
 license = "MIT-0"
