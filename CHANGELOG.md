@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2020-10-26
+
+### Added
+- **Utilities**: Add new `Parser` utility to provide parsing and deep data validation using Pydantic Models
+- **Utilities**: Add case insensitive header lookup, and Cognito custom auth triggers to `Event source data classes`
+
+### Fixed
+- **Logger**: keeps Lambda root logger handler, and add log filter instead to prevent child log records duplication
+- **Docs**: Improve wording on adding log keys conditionally
+
 ## [1.6.1] - 2020-09-23
 
 ### Fixed
