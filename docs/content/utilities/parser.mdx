@@ -77,6 +77,16 @@ class Order(BaseModel):
     items: List[OrderItem] # nesting models are supported
     optional_field: Optional[str] # this field may or may not be available when parsing
 
+
+@event_parser(model=Order) # highlight-line
+def handler(event: Order, context: LambdaContext):
+    print(event.id)
+    print(event.description)
+    print(event.items)
+
+    order_items = [items for item in event.items]
+    ...
+
 payload = {
     "id": 10876546789,
     "description": "My order",
@@ -88,15 +98,6 @@ payload = {
         }
     ]
 }
-
-@event_parser(model=Order) # highlight-line
-def handler(event: Order, context: LambdaContext):
-    print(event.id)
-    print(event.description)
-    print(event.items)
-
-    order_items = [items for item in event.items]
-    ...
 
 handler(event=payload, context=LambdaContext())
 handler(event=json.dumps(payload), context=LambdaContext()) # also works if event is a JSON string
