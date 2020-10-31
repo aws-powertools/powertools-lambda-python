@@ -639,6 +639,32 @@ def test_api_gateway_proxy_v2_event():
     assert event.stage_variables == event["stageVariables"]
 
 
+def test_api_gateway_proxy_v2_lambda_authorizer_event():
+    event = APIGatewayProxyEventV2(load_event("apiGatewayProxyV2LambdaAuthorizerEvent.json"))
+
+    request_context = event.request_context
+    assert request_context is not None
+    lambda_props = request_context.authorizer.get_lambda
+    assert lambda_props is not None
+    assert lambda_props["key"] == "value"
+
+
+def test_api_gateway_proxy_v2_iam_event():
+    event = APIGatewayProxyEventV2(load_event("apiGatewayProxyV2IamEvent.json"))
+
+    iam = event.request_context.authorizer.iam
+    assert iam is not None
+    assert iam.access_key == "ARIA2ZJZYVUEREEIHAKY"
+    assert iam.account_id == "1234567890"
+    assert iam.caller_id == "AROA7ZJZYVRE7C3DUXHH6:CognitoIdentityCredentials"
+    assert iam.cognito_amr == ["foo"]
+    assert iam.cognito_identity_id == "us-east-1:3f291106-8703-466b-8f2b-3ecee1ca56ce"
+    assert iam.cognito_identity_pool_id == "us-east-1:4f291106-8703-466b-8f2b-3ecee1ca56ce"
+    assert iam.principal_org_id == "AwsOrgId"
+    assert iam.user_arn == "arn:aws:iam::1234567890:user/Admin"
+    assert iam.user_id == "AROA2ZJZYVRE7Y3TUXHH6"
+
+
 def test_base_proxy_event_get_query_string_value():
     default_value = "default"
     set_value = "value"
