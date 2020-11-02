@@ -270,6 +270,7 @@ class RequestContextV2Http(DictWrapper):
 class RequestContextV2AuthorizerIam(DictWrapper):
     @property
     def access_key(self) -> Optional[str]:
+        """The IAM user access key associated with the request."""
         return self.get("accessKey")
 
     @property
@@ -284,6 +285,8 @@ class RequestContextV2AuthorizerIam(DictWrapper):
 
     @property
     def cognito_amr(self) -> Optional[List[str]]:
+        """This represents how the user was authenticated.
+        AMR stands for  Authentication Methods References as per the openid spec"""
         return self["cognitoIdentity"].get("amr")
 
     @property
@@ -310,6 +313,7 @@ class RequestContextV2AuthorizerIam(DictWrapper):
 
     @property
     def user_id(self) -> Optional[str]:
+        """The IAM user ID of the effective user identified after authentication."""
         return self.get("userId")
 
 
@@ -324,10 +328,12 @@ class RequestContextV2Authorizer(DictWrapper):
 
     @property
     def get_lambda(self) -> Optional[Dict[str, Any]]:
+        """Lambda authorization context details"""
         return self.get("lambda")
 
     @property
     def iam(self) -> Optional[RequestContextV2AuthorizerIam]:
+        """IAM authorization details used for making the request."""
         iam = self.get("iam")
         return None if iam is None else RequestContextV2AuthorizerIam(iam)
 
