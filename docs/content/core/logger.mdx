@@ -406,3 +406,29 @@ def test_lambda_handler(lambda_handler, lambda_context):
     test_event = {'test': 'event'}
     lambda_handler(test_event, lambda_context) # this will now have a Context object populated
 ```
+
+## FAQ
+
+**How can I enable boto3 and botocore library logging?**
+
+You can enable the `botocore` and `boto3` logs by using the `set_stream_logger` method, this method will add a stream handler
+for the given name and level to the logging module. By default, this logs all boto3 messages to stdout.
+
+```python:title=log_botocore_and_boto3.py
+from typing import Dict, List
+from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools import Logger
+
+import boto3
+boto3.set_stream_logger() # highlight-line
+boto3.set_stream_logger('botocore') # highlight-line
+
+logger = Logger()
+client = boto3.client('s3')
+
+
+def handler(event: Dict, context: LambdaContext) -> List:
+    response = client.list_buckets()
+
+    return response.get("Buckets", [])
+```
