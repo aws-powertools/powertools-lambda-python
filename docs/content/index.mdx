@@ -51,6 +51,47 @@ This will add a nested app stack with an output parameter `LayerVersionArn`, tha
     - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
 ```
 
+Here is the list of IAM permissions that you need to add to your deployment IAM role to use the layer:
+
+```yaml
+Version: '2012-10-17'
+Statement:
+  - Sid: CloudFormationTransform
+    Effect: Allow
+    Action: cloudformation:CreateChangeSet
+    Resource:
+      - arn:aws:cloudformation:us-east-1:aws:transform/Serverless-2016-10-31
+  - Sid: GetCfnTemplate
+    Effect: Allow
+    Action:
+      - serverlessrepo:CreateCloudFormationTemplate
+      - serverlessrepo:GetCloudFormationTemplate
+    Resource:
+      # this is arn of the powertools SAR app
+      - arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+  - Sid: S3AccessLayer
+    Effect: Allow
+    Action:
+      - s3:GetObject
+    Resource:
+      # AWS publishes to an external S3 bucket locked down to your account ID
+      # The below example is us publishing lambda powertools
+      # Bucket: awsserverlessrepo-changesets-plntc6bfnfj
+      # Key: *****/arn:aws:serverlessrepo:eu-west-1:057560766410:applications-aws-lambda-powertools-python-layer-versions-1.6.0/aeeccf50-****-****-****-*********
+      - arn:aws:s3:::awsserverlessrepo-changesets-*/*
+  - Sid: GetLayerVersion
+    Effect: Allow
+    Action:
+      - lambda:PublishLayerVersion
+      - lambda:GetLayerVersion
+    Resource:
+      - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccoundId}:layer:aws-lambda-powertools-python-layer*
+```
+
+> Credits to [mwarkentin](https://github.com/mwarkentin) for providing the scoped down IAM permissions.
+
+The region and the account id for `CloudFormationTransform` and `GetCfnTemplat` are fixed.
+
 You can fetch the available versions via the API with:
 
 ```bash
