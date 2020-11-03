@@ -267,6 +267,56 @@ class RequestContextV2Http(DictWrapper):
         return self["requestContext"]["http"]["userAgent"]
 
 
+class RequestContextV2AuthorizerIam(DictWrapper):
+    @property
+    def access_key(self) -> Optional[str]:
+        """The IAM user access key associated with the request."""
+        return self.get("accessKey")
+
+    @property
+    def account_id(self) -> Optional[str]:
+        """The AWS account ID associated with the request."""
+        return self.get("accountId")
+
+    @property
+    def caller_id(self) -> Optional[str]:
+        """The principal identifier of the caller making the request."""
+        return self.get("callerId")
+
+    @property
+    def cognito_amr(self) -> Optional[List[str]]:
+        """This represents how the user was authenticated.
+        AMR stands for  Authentication Methods References as per the openid spec"""
+        return self["cognitoIdentity"].get("amr")
+
+    @property
+    def cognito_identity_id(self) -> Optional[str]:
+        """The Amazon Cognito identity ID of the caller making the request.
+        Available only if the request was signed with Amazon Cognito credentials."""
+        return self["cognitoIdentity"].get("identityId")
+
+    @property
+    def cognito_identity_pool_id(self) -> Optional[str]:
+        """The Amazon Cognito identity pool ID of the caller making the request.
+        Available only if the request was signed with Amazon Cognito credentials."""
+        return self["cognitoIdentity"].get("identityPoolId")
+
+    @property
+    def principal_org_id(self) -> Optional[str]:
+        """The AWS organization ID."""
+        return self.get("principalOrgId")
+
+    @property
+    def user_arn(self) -> Optional[str]:
+        """The Amazon Resource Name (ARN) of the effective user identified after authentication."""
+        return self.get("userArn")
+
+    @property
+    def user_id(self) -> Optional[str]:
+        """The IAM user ID of the effective user identified after authentication."""
+        return self.get("userId")
+
+
 class RequestContextV2Authorizer(DictWrapper):
     @property
     def jwt_claim(self) -> Dict[str, Any]:
@@ -275,6 +325,17 @@ class RequestContextV2Authorizer(DictWrapper):
     @property
     def jwt_scopes(self) -> List[str]:
         return self["jwt"]["scopes"]
+
+    @property
+    def get_lambda(self) -> Optional[Dict[str, Any]]:
+        """Lambda authorization context details"""
+        return self.get("lambda")
+
+    @property
+    def iam(self) -> Optional[RequestContextV2AuthorizerIam]:
+        """IAM authorization details used for making the request."""
+        iam = self.get("iam")
+        return None if iam is None else RequestContextV2AuthorizerIam(iam)
 
 
 class RequestContextV2(DictWrapper):
