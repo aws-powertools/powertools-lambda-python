@@ -195,8 +195,8 @@ def sns_event():
                     "Timestamp": "1970-01-01T00:00:00.000Z",
                     "SignatureVersion": "1",
                     "Signature": "EXAMPLE",
-                    "SigningCertUrl": "EXAMPLE",
-                    "UnsubscribeUrl": "EXAMPLE",
+                    "SigningCertUrl": "https://www.example.com",
+                    "UnsubscribeUrl": "https://www.example.com",
                     "MessageAttributes": {
                         "Test": {"Type": "String", "Value": "TestString"},
                         "TestBinary": {"Type": "Binary", "Value": "TestBinary"},

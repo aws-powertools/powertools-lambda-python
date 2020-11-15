@@ -487,7 +487,7 @@ def test_sns_trigger_event():
     assert sns.signature_version == "1"
     assert sns.timestamp == "2019-01-02T12:45:07.000Z"
     assert sns.signature == "tcc6faL2yUC6dgZdmrwh1Y4cGa/ebXEkAi6RibDsvpi+tE/1+82j...65r=="
-    assert sns.signing_cert_url == "https://sns.us-east-2.amazonaws.com/SimpleNotificat ..."
+    assert sns.signing_cert_url == "https://sns.us-east-2.amazonaws.com/SimpleNotification"
     assert sns.message_id == "95df01b4-ee98-5cb9-9903-4c221d41eb5e"
     assert sns.message == "Hello from SNS!"
     message_attributes = sns.message_attributes
@@ -495,7 +495,7 @@ def test_sns_trigger_event():
     assert test_message_attribute.get_type == "String"
     assert test_message_attribute.value == "TestString"
     assert sns.get_type == "Notification"
-    assert sns.unsubscribe_url == "https://sns.us-east-2.amazonaws.com/?Action=Unsubscri ..."
+    assert sns.unsubscribe_url == "https://sns.us-east-2.amazonaws.com/?Action=Unsubscribe"
     assert sns.topic_arn == "arn:aws:sns:us-east-2:123456789012:sns-lambda"
     assert sns.subject == "TestInvoke"
     assert event.record._data == event["Records"][0]
