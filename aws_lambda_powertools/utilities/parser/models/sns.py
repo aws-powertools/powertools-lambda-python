@@ -6,7 +6,7 @@ from pydantic.networks import HttpUrl
 from typing_extensions import Literal
 
 
-class SqsMsgAttributeModel(BaseModel):
+class SnsMsgAttributeModel(BaseModel):
     Type: str
     Value: str
 
@@ -16,7 +16,7 @@ class SnsNotificationModel(BaseModel):
     TopicArn: str
     UnsubscribeUrl: HttpUrl
     Type: Literal["Notification"]
-    MessageAttributes: Dict[str, SqsMsgAttributeModel]
+    MessageAttributes: Dict[str, SnsMsgAttributeModel]
     Message: str
     MessageId: str
     SigningCertUrl: HttpUrl
