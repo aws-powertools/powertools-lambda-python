@@ -8,6 +8,9 @@ from aws_lambda_powertools.utilities.parser.models import (
     DynamoDBStreamModel,
     DynamoDBStreamRecordModel,
     EventBridgeModel,
+    SnsModel,
+    SnsNotificationModel,
+    SnsRecordModel,
     SqsModel,
     SqsRecordModel,
 )
@@ -51,3 +54,20 @@ class MyAdvancedSqsRecordModel(SqsRecordModel):
 
 class MyAdvancedSqsBusiness(SqsModel):
     Records: List[MyAdvancedSqsRecordModel]
+
+
+class MySnsBusiness(BaseModel):
+    message: str
+    username: str
+
+
+class MySnsNotificationModel(SnsNotificationModel):
+    Message: str
+
+
+class MyAdvancedSnsRecordModel(SnsRecordModel):
+    Sns: MySnsNotificationModel
+
+
+class MyAdvancedSnsBusiness(SnsModel):
+    Records: List[MyAdvancedSnsRecordModel]
