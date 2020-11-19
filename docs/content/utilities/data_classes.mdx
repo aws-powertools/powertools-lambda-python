@@ -207,7 +207,7 @@ def lambda_handler(event, context):
     # Multiple records can be delivered in a single event
     for record in event.records:
         mail = record.ses.mail
-        common_headers = list(mail.common_headers)
+        common_headers = mail.common_headers
 
         do_something_with(common_headers.to, common_headers.subject)
 
