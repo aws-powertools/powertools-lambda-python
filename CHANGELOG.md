@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2020-11-20
+
+### Added
+- **Utilities**: Added support for new EventBridge Replay field in `Parser` and `Event source data classes`
+- **Utilities**: Added SNS support in `Parser`
+- **Utilities**: Added API Gateway HTTP API data class support for new IAM and Lambda authorizer in `Event source data classes`
+- **Docs**: Add new FAQ section for Logger on how to enable debug logging for boto3
+- **Docs**: Add explicit minimal set of permissions required to use Layers provided by Serverless Application Repository (SAR)
+
+### Fixed
+- **Docs**: Fix typo in Dataclasses example for SES when fetching common email headers
+
 ## [1.7.0] - 2020-10-26
 
 ### Added

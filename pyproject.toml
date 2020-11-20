@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "1.7.0"
+version = "1.8.0"
 description = "Python utilities for AWS Lambda functions including but not limited to tracing, logging and custom metric"
 authors = ["Amazon Web Services"]
 classifiers=[
