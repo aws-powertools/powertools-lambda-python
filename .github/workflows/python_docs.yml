@@ -27,8 +27,8 @@ jobs:
       - name: Capture branch and tag
         id: branch_name
         run: |
-          echo ::set-env name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
-          echo ::set-env name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
+          echo "SOURCE_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+          echo "SOURCE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
       - name: Build docs website
         run: make build-docs-website
       - name: Build docs API reference
