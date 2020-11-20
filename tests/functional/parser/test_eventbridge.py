@@ -27,6 +27,7 @@ def handle_eventbridge_no_envelope(event: MyAdvancedEventbridgeBusiness, _: Lamb
     assert event.resources == ["arn:aws:ec2:us-west-1:123456789012:instance/i-1234567890abcdef0"]
     assert event.source == "aws.ec2"
     assert event.detail_type == "EC2 Instance State-change Notification"
+    assert event.replay_name == "replay_archive"
 
 
 def test_handle_eventbridge_trigger_event():
