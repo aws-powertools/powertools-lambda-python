@@ -12,5 +12,6 @@
   "detail": {
     "instance_id": "i-1234567890abcdef0",
     "state": "terminated"
-  }
+  },
+  "replay-name": "replay_archive"
 }

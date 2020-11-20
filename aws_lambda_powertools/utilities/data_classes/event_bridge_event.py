@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -62,3 +62,8 @@ class EventBridgeEvent(DictWrapper):
     def detail(self) -> Dict[str, Any]:
         """A JSON object, whose content is at the discretion of the service originating the event. """
         return self["detail"]
+
+    @property
+    def replay_name(self) -> Optional[str]:
+        """Identifies whether the event is being replayed and what is the name of the replay."""
+        return self["replay-name"]

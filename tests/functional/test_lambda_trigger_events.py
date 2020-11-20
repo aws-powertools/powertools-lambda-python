@@ -370,6 +370,7 @@ def test_event_bridge_event():
     assert event.source == event["source"]
     assert event.detail_type == event["detail-type"]
     assert event.detail == event["detail"]
+    assert event.replay_name == "replay_archive"
 
 
 def test_s3_trigger_event():
