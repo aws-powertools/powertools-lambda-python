@@ -24,6 +24,7 @@ fastjsonschema = "^2.14.5"
 boto3 = "^1.12"
 jmespath = "^0.10.0"
 pydantic = {version = "^1.6.0", optional = true }
+email-validator = {version = "*", optional = true }
 typing_extensions = {version = "^3.7.4.2", optional = true }
 
 [tool.poetry.dev-dependencies]
@@ -51,7 +52,7 @@ flake8-bugbear = "^20.1.4"
 
 
 [tool.poetry.extras]
-pydantic = ["pydantic", "typing_extensions"]
+pydantic = ["pydantic", "typing_extensions", "email-validator"]
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]
