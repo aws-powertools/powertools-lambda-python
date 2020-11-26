@@ -353,6 +353,8 @@ logger = Logger(stream=stdout, log_record_order=["message"]) # highlight-line
 logger = Logger(stream=stdout, log_record_order=["level","location","message","timestamp"]) # highlight-line
 ```
 
+Some keys cannot be supressed in the Log records: `sampling_rate` is part of the specification and cannot be supressed; `xray_trace_id` is supressed automatically if X-Ray is not enabled in the Lambda function, and added automatically if it is.
+
 ### Logging exceptions
 
 When logging exceptions, Logger will add a new key named `exception`, and will serialize the full traceback as a string.
