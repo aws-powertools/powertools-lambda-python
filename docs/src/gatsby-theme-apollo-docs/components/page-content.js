@@ -179,7 +179,9 @@ export default function PageContent(props) {
         );
     });
 
-    const githubUrl = props.githubUrl.replace("master", "master/docs")
+   const githubUrl = props.githubUrl.replace("tree/", "blob/")
+        .replace("/content/", "/docs/content/")
+
     const editLink = githubUrl && (
         <AsideLink href={githubUrl}>
             <IconGithub /> Edit on GitHub
