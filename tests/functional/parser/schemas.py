@@ -71,3 +71,8 @@ class MyAdvancedSnsRecordModel(SnsRecordModel):
 
 class MyAdvancedSnsBusiness(SnsModel):
     Records: List[MyAdvancedSnsRecordModel]
+
+
+class MyCloudWatchBusiness(BaseModel):
+    my_message: str
+    user: str
