@@ -8,7 +8,7 @@ from .base import BaseEnvelope
 logger = logging.getLogger(__name__)
 
 
-class CloudatchEnvelope(BaseEnvelope):
+class CloudatchLogsEnvelope(BaseEnvelope):
     """Cloudatch Envelope to extract a List of log records.
 
     The record's body parameter is a string (after being base64 decoded and gzipped), 

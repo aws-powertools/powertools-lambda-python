@@ -1,10 +1,13 @@
 import base64
 import json
+import logging
 import zlib
 from datetime import datetime
 from typing import List
 
 from pydantic import BaseModel, Field, validator
+
+logger = logging.getLogger(__name__)
 
 
 class CloudWatchLogsLogEvent(BaseModel):
@@ -28,9 +31,11 @@ class CloudWatchLogsData(BaseModel):
     @validator("decoded_data", pre=True)
     def prepare_data(cls, value):
         try:
+            logger.debug("Decoding base64 cloudwatch log data before parsing")
             payload = base64.b64decode(value)
+            logger.debug("Decompressing cloudwatch log data before parsing")
             uncompressed = zlib.decompress(payload, zlib.MAX_WBITS | 32)
-            return json.loads(uncompressed.decode("UTF-8"))
+            return json.loads(uncompressed.decode("utf-8"))
         except Exception:
             raise ValueError("unable to decompress data")
 
