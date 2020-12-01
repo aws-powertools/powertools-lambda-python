@@ -8,8 +8,8 @@ from .base import BaseEnvelope
 logger = logging.getLogger(__name__)
 
 
-class KinesisEnvelope(BaseEnvelope):
-    """Kinesis Envelope to extract array of Records
+class KinesisDataStreamEnvelope(BaseEnvelope):
+    """Kinesis Data Stream Envelope to extract array of Records
 
     The record's data parameter is a base64 encoded string which is parsed into a bytes array, 
     though it can also be a JSON encoded string.

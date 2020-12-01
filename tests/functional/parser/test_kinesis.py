@@ -3,13 +3,13 @@ from typing import Any, List
 import pytest
 
 from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, event_parser
-from aws_lambda_powertools.utilities.parser.models import KinesisStreamModel, KinesisStreamRecordPayload
+from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecordPayload, KinesisStreamModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyKinesisBusiness
 from tests.functional.parser.utils import load_event
 
 
-@event_parser(model=MyKinesisBusiness, envelope=envelopes.KinesisEnvelope)
+@event_parser(model=MyKinesisBusiness, envelope=envelopes.KinesisDataStreamEnvelope)
 def handle_kinesis(event: List[MyKinesisBusiness], _: LambdaContext):
     assert len(event) == 1
     record: KinesisStreamModel = event[0]
@@ -31,7 +31,7 @@ def handle_kinesis_no_envelope(event: KinesisStreamModel, _: LambdaContext):
     assert record.eventVersion == "1.0"
     assert record.invokeIdentityArn == "arn:aws:iam::123456789012:role/lambda-role"
 
-    kinesis: KinesisStreamRecordPayload = record.kinesis
+    kinesis: KinesisDataStreamRecordPayload = record.kinesis
     assert kinesis.approximateArrivalTimestamp == 1545084650.987
     assert kinesis.kinesisSchemaVersion == "1.0"
     assert kinesis.partitionKey == "1"

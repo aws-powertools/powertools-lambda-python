@@ -1,4 +1,5 @@
 import base64
+import logging
 from binascii import Error as BinAsciiError
 from typing import List
 
@@ -6,8 +7,10 @@ from pydantic import BaseModel, validator
 from pydantic.types import PositiveInt
 from typing_extensions import Literal
 
+logger = logging.getLogger(__name__)
 
-class KinesisStreamRecordPayload(BaseModel):
+
+class KinesisDataStreamRecordPayload(BaseModel):
     kinesisSchemaVersion: str
     partitionKey: str
     sequenceNumber: PositiveInt
@@ -17,6 +20,7 @@ class KinesisStreamRecordPayload(BaseModel):
     @validator("data", pre=True)
     def data_base64_decode(cls, value):
         try:
+            logger.debug("Decoding base64 Kinesis data record before parsing")
             return base64.b64decode(value)
         except (BinAsciiError, TypeError):
             raise ValueError("base64 decode failed")
@@ -30,7 +34,7 @@ class KinesisStreamRecord(BaseModel):
     invokeIdentityArn: str
     awsRegion: str
     eventSourceARN: str
-    kinesis: KinesisStreamRecordPayload
+    kinesis: KinesisDataStreamRecordPayload
 
 
 class KinesisStreamModel(BaseModel):

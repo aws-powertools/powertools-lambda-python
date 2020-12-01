@@ -1,6 +1,6 @@
 from .dynamodb import DynamoDBStreamChangedRecordModel, DynamoDBStreamModel, DynamoDBStreamRecordModel
 from .event_bridge import EventBridgeModel
-from .kinesis import KinesisStreamModel, KinesisStreamRecord, KinesisStreamRecordPayload
+from .kinesis import KinesisDataStreamRecordPayload, KinesisStreamModel, KinesisStreamRecord
 from .ses import SesModel, SesRecordModel
 from .sns import SnsModel, SnsNotificationModel, SnsRecordModel
 from .sqs import SqsModel, SqsRecordModel
@@ -12,7 +12,7 @@ __all__ = [
     "DynamoDBStreamRecordModel",
     "KinesisStreamModel",
     "KinesisStreamRecord",
-    "KinesisStreamRecordPayload",
+    "KinesisDataStreamRecordPayload",
     "SesModel",
     "SesRecordModel",
     "SnsModel",
