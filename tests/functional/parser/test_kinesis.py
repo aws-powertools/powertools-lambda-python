@@ -3,7 +3,7 @@ from typing import Any, List
 import pytest
 
 from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, event_parser
-from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecordPayload, KinesisStreamModel
+from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamModel, KinesisDataStreamRecordPayload
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyKinesisBusiness
 from tests.functional.parser.utils import load_event
@@ -12,16 +12,16 @@ from tests.functional.parser.utils import load_event
 @event_parser(model=MyKinesisBusiness, envelope=envelopes.KinesisDataStreamEnvelope)
 def handle_kinesis(event: List[MyKinesisBusiness], _: LambdaContext):
     assert len(event) == 1
-    record: KinesisStreamModel = event[0]
+    record: KinesisDataStreamModel = event[0]
     assert record.message == "test message"
     assert record.username == "test"
 
 
-@event_parser(model=KinesisStreamModel)
-def handle_kinesis_no_envelope(event: KinesisStreamModel, _: LambdaContext):
+@event_parser(model=KinesisDataStreamModel)
+def handle_kinesis_no_envelope(event: KinesisDataStreamModel, _: LambdaContext):
     records = event.Records
     assert len(records) == 2
-    record: KinesisStreamModel = records[0]
+    record: KinesisDataStreamModel = records[0]
 
     assert record.awsRegion == "us-east-2"
     assert record.eventID == "shardId-000000000006:49590338271490256608559692538361571095921575989136588898"

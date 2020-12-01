@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, List, Optional, Union
 
-from ..models import KinesisStreamModel
+from ..models import KinesisDataStreamModel
 from ..types import Model
 from .base import BaseEnvelope
 
@@ -34,8 +34,8 @@ class KinesisDataStreamEnvelope(BaseEnvelope):
         List
             List of records parsed with model provided
         """
-        logger.debug(f"Parsing incoming data with Kinesis model {KinesisStreamModel}")
-        parsed_envelope: KinesisStreamModel = KinesisStreamModel.parse_obj(data)
+        logger.debug(f"Parsing incoming data with Kinesis model {KinesisDataStreamModel}")
+        parsed_envelope: KinesisDataStreamModel = KinesisDataStreamModel.parse_obj(data)
         output = []
         logger.debug(f"Parsing Kinesis records in `body` with {model}")
         for record in parsed_envelope.Records:

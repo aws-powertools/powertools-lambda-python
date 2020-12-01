@@ -26,7 +26,7 @@ class KinesisDataStreamRecordPayload(BaseModel):
             raise ValueError("base64 decode failed")
 
 
-class KinesisStreamRecord(BaseModel):
+class KinesisDataStreamRecord(BaseModel):
     eventSource: Literal["aws:kinesis"]
     eventVersion: str
     eventID: str
@@ -37,5 +37,5 @@ class KinesisStreamRecord(BaseModel):
     kinesis: KinesisDataStreamRecordPayload
 
 
-class KinesisStreamModel(BaseModel):
-    Records: List[KinesisStreamRecord]
+class KinesisDataStreamModel(BaseModel):
+    Records: List[KinesisDataStreamRecord]
