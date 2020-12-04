@@ -3,6 +3,7 @@ from .cloudwatch import CloudWatchLogsData, CloudWatchLogsDecode, CloudWatchLogs
 from .dynamodb import DynamoDBStreamChangedRecordModel, DynamoDBStreamModel, DynamoDBStreamRecordModel
 from .event_bridge import EventBridgeModel
 from .kinesis import KinesisDataStreamModel, KinesisDataStreamRecord, KinesisDataStreamRecordPayload
+from .s3 import S3Model, S3RecordModel
 from .ses import SesModel, SesRecordModel
 from .sns import SnsModel, SnsNotificationModel, SnsRecordModel
 from .sqs import SqsModel, SqsRecordModel
