@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] - 2020-12-04
+
+### Added
+- **Utilities**: Added Kinesis, S3, CloudWatch Logs, Application Load Balancer, and SES support in `Parser`
+- **Docs**: Sidebar menu are now always expanded
+
+### Fixed
+- **Docs**: Broken link to GitHub to homepage
+
 ## [1.8.0] - 2020-11-20
 
 ### Added
