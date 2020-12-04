@@ -57,19 +57,19 @@ def reset_tracing_config(mocker):
 
 @pytest.fixture
 def in_subsegment_mock():
-    class Async_context_manager(mock.MagicMock):
+    class AsyncContextManager(mock.MagicMock):
         async def __aenter__(self, *args, **kwargs):
             return self.__enter__()
 
         async def __aexit__(self, *args, **kwargs):
             return self.__exit__(*args, **kwargs)
 
-    class In_subsegment(NamedTuple):
-        in_subsegment: mock.MagicMock = Async_context_manager()
+    class InSubsegment(NamedTuple):
+        in_subsegment: mock.MagicMock = AsyncContextManager()
         put_annotation: mock.MagicMock = mock.MagicMock()
         put_metadata: mock.MagicMock = mock.MagicMock()
 
-    in_subsegment = In_subsegment()
+    in_subsegment = InSubsegment()
     in_subsegment.in_subsegment.return_value.__enter__.return_value.put_annotation = in_subsegment.put_annotation
     in_subsegment.in_subsegment.return_value.__enter__.return_value.put_metadata = in_subsegment.put_metadata
 

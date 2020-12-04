@@ -413,6 +413,11 @@ def test_s3_key_unquote_plus():
     assert event.object_key == tricky_name
 
 
+def test_s3_key_url_decoded_key():
+    event = S3Event(load_event("s3EventDecodedKey.json"))
+    assert event.object_key == event.record["s3"]["object"]["urlDecodedKey"]
+
+
 def test_s3_glacier_event():
     example_event = {
         "Records": [
@@ -429,6 +434,14 @@ def test_s3_glacier_event():
     event = S3Event(example_event)
     record = next(event.records)
     glacier_event_data = record.glacier_event_data
+    assert glacier_event_data is not None
+    assert glacier_event_data.restore_event_data.lifecycle_restoration_expiry_time == "1970-01-01T00:01:00.000Z"
+    assert glacier_event_data.restore_event_data.lifecycle_restore_storage_class == "standard"
+
+
+def test_s3_glacier_event_json():
+    event = S3Event(load_event("s3EventGlacier.json"))
+    glacier_event_data = event.record.glacier_event_data
     assert glacier_event_data is not None
     assert glacier_event_data.restore_event_data.lifecycle_restoration_expiry_time == "1970-01-01T00:01:00.000Z"
     assert glacier_event_data.restore_event_data.lifecycle_restore_storage_class == "standard"

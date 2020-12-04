@@ -1,7 +1,7 @@
 import base64
 import json
 import zlib
-from typing import List
+from typing import Any, List
 
 import pytest
 
@@ -67,6 +67,14 @@ def test_validate_event_does_not_conform_with_user_dict_model():
 def test_handle_cloudwatch_trigger_event_no_envelope():
     event_dict = load_event("cloudWatchLogEvent.json")
     handle_cloudwatch_logs_no_envelope(event_dict, LambdaContext())
+
+
+def test_handle_invalid_cloudwatch_trigger_event_no_envelope():
+    event_dict: Any = {"awslogs": {"data": "invalid_data"}}
+    with pytest.raises(ValidationError) as context:
+        handle_cloudwatch_logs_no_envelope(event_dict, LambdaContext())
+
+    assert context.value.errors()[0]["msg"] == "unable to decompress data"
 
 
 def test_handle_invalid_event_with_envelope():
