@@ -156,6 +156,9 @@ Model name | Description
 **DynamoDBStreamModel** | Lambda Event Source payload for Amazon DynamoDB Streams
 **EventBridgeModel** | Lambda Event Source payload for Amazon EventBridge
 **SqsModel** | Lambda Event Source payload for Amazon SQS
+**AlbModel** | Lambda Event Source payload for Amazon Application Load Balancer
+**CloudwatchLogsModel** | Lambda Event Source payload for Amazon CloudWatch Logs
+**S3Model** | Lambda Event Source payload for Amazon S3
 
 You can extend them to include your own models, and yet have all other known fields parsed along the way.
 
@@ -292,6 +295,7 @@ Envelope name | Behaviour | Return
 **DynamoDBStreamEnvelope** | 1. Parses data using `DynamoDBStreamModel`. <br/> 2. Parses records in `NewImage` and `OldImage` keys using your model. <br/> 3. Returns a list with a dictionary containing `NewImage` and `OldImage` keys | `List[Dict[str, Optional[Model]]]`
 **EventBridgeEnvelope** | 1. Parses data using `EventBridgeModel`. <br/> 2. Parses `detail` key using your model and returns it. | `Model`
 **SqsEnvelope** | 1. Parses data using `SqsModel`. <br/> 2. Parses records in `body` key using your model and return them in a list. | `List[Model]`
+**CloudWatchLogsEnvelope** | 1. Parses data using `CloudwatchLogsModel` which will base64 decode and decompress it. <br/> 2. Parses records in `message` key using your model and return them in a list. | `List[Model]`
 
 ### Bringing your own envelope
 

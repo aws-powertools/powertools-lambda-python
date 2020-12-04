@@ -76,3 +76,8 @@ class MyAdvancedSnsBusiness(SnsModel):
 class MyKinesisBusiness(BaseModel):
     message: str
     username: str
+
+
+class MyCloudWatchBusiness(BaseModel):
+    my_message: str
+    user: str
