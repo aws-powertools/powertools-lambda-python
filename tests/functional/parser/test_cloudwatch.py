@@ -12,7 +12,7 @@ from tests.functional.parser.schemas import MyCloudWatchBusiness
 from tests.functional.parser.utils import load_event
 
 
-@event_parser(model=MyCloudWatchBusiness, envelope=envelopes.CloudatchLogsEnvelope)
+@event_parser(model=MyCloudWatchBusiness, envelope=envelopes.CloudWatchLogsEnvelope)
 def handle_cloudwatch_logs(event: List[MyCloudWatchBusiness], _: LambdaContext):
     assert len(event) == 1
     log: MyCloudWatchBusiness = event[0]
