@@ -10,6 +10,12 @@ class DictWrapper:
     def __getitem__(self, key: str) -> Any:
         return self._data[key]
 
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, DictWrapper):
+            return False
+
+        return self._data == other._data
+
     def get(self, key: str) -> Optional[Any]:
         return self._data.get(key)
 
