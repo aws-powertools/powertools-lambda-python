@@ -12,7 +12,7 @@ class DictWrapper:
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, DictWrapper):
-            return NotImplemented
+            return False
 
         return self._data == other._data
 
