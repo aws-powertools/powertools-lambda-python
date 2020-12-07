@@ -49,10 +49,13 @@ def test_dict_wrapper_equals():
         def message(self) -> str:
             return self.get("message")
 
-    assert DataClassSample({"message": "foo1"}) == DataClassSample({"message": "foo1"})
-    assert DataClassSample({"message": "foo1"}) != DataClassSample({"message": "foo2"})
-    assert DataClassSample({"message": "foo1"}) is not object()
-    assert object() is not DataClassSample({"message": "foo1"})
+    data1 = {"message": "foo1"}
+    data2 = {"message": "foo2"}
+
+    assert DataClassSample(data1) == DataClassSample(data1)
+    assert DataClassSample(data1) != DataClassSample(data2)
+    assert DataClassSample(data1) is not data1
+    assert data1 is not DataClassSample(data1)
 
 
 def test_cloud_watch_trigger_event():
