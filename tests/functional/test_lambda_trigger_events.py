@@ -28,7 +28,7 @@ from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import
     UserMigrationTriggerEvent,
     VerifyAuthChallengeResponseTriggerEvent,
 )
-from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
+from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
     AttributeValue,
     DynamoDBRecordEventName,
@@ -41,6 +41,16 @@ def load_event(file_name: str) -> dict:
     full_file_name = os.path.dirname(os.path.realpath(__file__)) + "/../events/" + file_name
     with open(full_file_name) as fp:
         return json.load(fp)
+
+
+def test_dict_wrapper_equals():
+    class DataClassSample(DictWrapper):
+        @property
+        def message(self) -> str:
+            return self.get("message")
+
+    assert DataClassSample({"message": "foo1"}) == DataClassSample({"message": "foo1"})
+    assert DataClassSample({"message": "foo1"}) != DataClassSample({"message": "foo2"})
 
 
 def test_cloud_watch_trigger_event():
