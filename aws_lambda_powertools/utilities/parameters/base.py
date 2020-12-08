@@ -17,6 +17,7 @@ ExpirableValue = namedtuple("ExpirableValue", ["value", "ttl"])
 DEFAULT_PROVIDERS = {}
 TRANSFORM_METHOD_JSON = "json"
 TRANSFORM_METHOD_BINARY = "binary"
+TRANSFORM_METHOD_YAML = "yaml"
 SUPPORTED_TRANSFORM_METHODS = [TRANSFORM_METHOD_JSON, TRANSFORM_METHOD_BINARY]
 
 
@@ -230,6 +231,8 @@ def transform_value(value: str, transform: str, raise_on_transform_error: bool =
             return json.loads(value)
         elif transform == TRANSFORM_METHOD_BINARY:
             return base64.b64decode(value)
+        elif transform == TRANSFORM_METHOD_YAML:
+            raise NotImplementedError
         else:
             raise ValueError(f"Invalid transform type '{transform}'")
 
