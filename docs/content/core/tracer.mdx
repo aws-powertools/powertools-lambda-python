@@ -142,7 +142,7 @@ def sensitive_information_to_be_processed():
 def get_s3_object(bucket_name, object_key):
     s3 = boto3.client("s3")
     s3_object = get_object(Bucket=bucket_name, Key=object_key)
-	return s3_object
+    return s3_object
 ```
 
 ## Asynchronous and generator functions
