@@ -71,6 +71,7 @@ def handler(event, context):
   You can disable Tracer from capturing their responses as tracing metadata with <strong><code>capture_response=False</code></strong> parameter in both capture_lambda_handler and capture_method decorators.
 </Note><br/>
 
+
 ```python:title=do_not_capture_response_as_metadata.py
 # Disables Tracer from capturing response and adding as metadata
 # Useful when dealing with sensitive data
@@ -116,6 +117,14 @@ def handler(event, context):
 
 You can trace a synchronous function using the `capture_method`.
 
+<Note type="warning">
+    <strong>When <code>capture_response</code> is enabled, the function response will be read and serialized as json.</strong>
+    <br/><br/>
+    The serialization is performed by the aws-xray-sdk which uses the <code>jsonpickle</code> module. This can cause
+    unintended consequences if there are side effects to recursively reading the returned value, for example if the
+    decorated function response contains a file-like object or a <a href="https://botocore.amazonaws.com/v1/documentation/api/latest/reference/response.html#botocore.response.StreamingBody"><code>StreamingBody</code></a> for S3 objects.
+</Note><br/>
+
 ```python:title=app.py
 @tracer.capture_method
 def collect_payment(charge_id):
@@ -126,6 +135,14 @@ def collect_payment(charge_id):
 @tracer.capture_method(capture_response=False) # highlight-line
 def sensitive_information_to_be_processed():
 	return "sensitive_information"
+
+# If we capture response, the s3_object["Body"].read() method will be called by x-ray-sdk when
+# trying to serialize the object. This will cause it to return empty next time it is called.
+@tracer.capture_method(capture_response=False) # highlight-line
+def get_s3_object(bucket_name, object_key):
+    s3 = boto3.client("s3")
+    s3_object = get_object(Bucket=bucket_name, Key=object_key)
+    return s3_object
 ```
 
 ## Asynchronous and generator functions
