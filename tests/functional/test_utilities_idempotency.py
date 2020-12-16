@@ -80,14 +80,19 @@ def md5hashed_idempotency_key():
     return "e730b8578240b31b9a999c7fabf5f9bb"
 
 
+@pytest.fixture
+def persistence_store(config):
+    persistence_store = DynamoDBPersistenceLayer(event_key="body", table_name=TABLE_NAME, boto_config=config)
+    return persistence_store
+
+
 def test_idempotent_lambda_already_completed(
-    config, lambda_apigw_event, timestamp_future, lambda_response, md5hashed_idempotency_key
+    persistence_store, lambda_apigw_event, timestamp_future, lambda_response, md5hashed_idempotency_key,
 ):
     """
     Test idempotent decorator where event with matching event key has already been succesfully processed
     """
 
-    persistence_store = DynamoDBPersistenceLayer(event_key="body", table_name=TABLE_NAME)
     stubber = stub.Stubber(persistence_store.table.meta.client)
     ddb_response = {
         "Item": {
@@ -118,13 +123,12 @@ def test_idempotent_lambda_already_completed(
 
 
 def test_idempotent_lambda_in_progress(
-    config, lambda_apigw_event, lambda_response, timestamp_future, md5hashed_idempotency_key
+    persistence_store, lambda_apigw_event, lambda_response, timestamp_future, md5hashed_idempotency_key
 ):
     """
     Test idempotent decorator where lambda_handler is already processing an event with matching event key
     """
 
-    persistence_store = DynamoDBPersistenceLayer(event_key="body", table_name=TABLE_NAME)
     stubber = stub.Stubber(persistence_store.table.meta.client)
 
     expected_params = {
@@ -161,13 +165,11 @@ def test_idempotent_lambda_in_progress(
 
 
 def test_idempotent_lambda_first_execution(
-    config, lambda_apigw_event, expected_params_update_item, lambda_response, md5hashed_idempotency_key
+    persistence_store, lambda_apigw_event, expected_params_update_item, lambda_response, md5hashed_idempotency_key
 ):
     """
     Test idempotent decorator when lambda is executed with an event with a previously unknown event key
     """
-
-    persistence_store = DynamoDBPersistenceLayer(event_key="body", table_name=TABLE_NAME)
 
     stubber = stub.Stubber(persistence_store.table.meta.client)
     ddb_response = {}
@@ -200,7 +202,7 @@ def test_idempotent_lambda_first_execution(
 
 
 def test_idempotent_lambda_expired(
-    config,
+    persistence_store,
     lambda_apigw_event,
     timestamp_expired,
     lambda_response,
@@ -212,7 +214,6 @@ def test_idempotent_lambda_expired(
     expiry window
     """
 
-    persistence_store = DynamoDBPersistenceLayer(event_key="body", table_name=TABLE_NAME)
     stubber = stub.Stubber(persistence_store.table.meta.client)
 
     ddb_response = {}
@@ -246,7 +247,7 @@ def test_idempotent_lambda_expired(
 
 # Note - this test will need to change depending on how we define event handling behavior
 def test_idempotent_lambda_exception_retryable_error(
-    config, lambda_apigw_event, timestamp_future, lambda_response, md5hashed_idempotency_key
+    persistence_store, lambda_apigw_event, timestamp_future, lambda_response, md5hashed_idempotency_key
 ):
     """
     Test idempotent decorator when lambda is executed with an event with a previously unknown event key, but
@@ -254,7 +255,6 @@ def test_idempotent_lambda_exception_retryable_error(
     """
 
     # Create a new provider
-    persistence_store = DynamoDBPersistenceLayer(event_key="body", table_name=TABLE_NAME)
 
     # Stub the boto3 client
     stubber = stub.Stubber(persistence_store.table.meta.client)
@@ -299,7 +299,7 @@ def test_idempotent_lambda_exception_non_retryable_error(
     """
 
     persistence_store = DynamoDBPersistenceLayer(
-        event_key="body", table_name=TABLE_NAME, non_retryable_errors=(CustomException1,)
+        event_key="body", table_name=TABLE_NAME, non_retryable_errors=(CustomException1,), boto_config=config
     )
 
     stubber = stub.Stubber(persistence_store.table.meta.client)
