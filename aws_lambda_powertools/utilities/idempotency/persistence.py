@@ -147,7 +147,10 @@ class BasePersistenceLayer(ABC):
 
         """
         data = self.event_key_jmespath.search(lambda_event)
-        hashed_data = hashlib.md5(json.dumps(data).encode())
+
+        # The following hash is not used in any security context. It is only used
+        # to generate unique values.
+        hashed_data = hashlib.md5(json.dumps(data).encode())  # nosec
         return hashed_data.hexdigest()
 
     def _get_expiry_timestamp(self) -> int:
