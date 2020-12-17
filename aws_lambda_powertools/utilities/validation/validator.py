@@ -125,7 +125,7 @@ def validator(
     return response
 
 
-def validate(event: Dict, schema: Dict = None, envelope: str = None, jmespath_options: Dict = None):
+def validate(event: Dict, schema: Dict = None, formats: Dict = {}, envelope: str = None, jmespath_options: Dict = None):
     """Standalone function to validate event data using a JSON Schema
 
      Typically used when you need more control over the validation process.
@@ -201,4 +201,4 @@ def validate(event: Dict, schema: Dict = None, envelope: str = None, jmespath_op
     if envelope:
         event = unwrap_event_from_envelope(data=event, envelope=envelope, jmespath_options=jmespath_options)
 
-    validate_data_against_schema(data=event, schema=schema)
+    validate_data_against_schema(data=event, schema=schema, formats=formats)

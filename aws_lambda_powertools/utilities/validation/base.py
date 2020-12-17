@@ -11,7 +11,7 @@ from .jmespath_functions import PowertoolsFunctions
 logger = logging.getLogger(__name__)
 
 
-def validate_data_against_schema(data: Dict, schema: Dict):
+def validate_data_against_schema(data: Dict, schema: Dict, formats: Dict):
     """Validate dict data against given JSON Schema
 
     Parameters
@@ -29,7 +29,7 @@ def validate_data_against_schema(data: Dict, schema: Dict):
         When JSON schema provided is invalid
     """
     try:
-        fastjsonschema.validate(definition=schema, data=data)
+        fastjsonschema.validate(definition=schema, data=data, formats=formats)
     except fastjsonschema.JsonSchemaException as e:
         message = f"Failed schema validation. Error: {e.message}, Path: {e.path}, Data: {e.value}"  # noqa: B306, E501
         raise SchemaValidationError(message)
