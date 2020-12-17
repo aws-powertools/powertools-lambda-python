@@ -13,7 +13,9 @@ def validator(
     event: Union[Dict, str],
     context: Any,
     inbound_schema: Dict = None,
+    inbound_formats: Dict = {},
     outbound_schema: Dict = None,
+    outbound_formats: Dict = {},
     envelope: str = None,
     jmespath_options: Dict = None,
 ) -> Any:
@@ -114,13 +116,13 @@ def validator(
 
     if inbound_schema:
         logger.debug("Validating inbound event")
-        validate_data_against_schema(data=event, schema=inbound_schema)
+        validate_data_against_schema(data=event, schema=inbound_schema, formats=inbound_formats)
 
     response = handler(event, context)
 
     if outbound_schema:
         logger.debug("Validating outbound event")
-        validate_data_against_schema(data=response, schema=outbound_schema)
+        validate_data_against_schema(data=response, schema=outbound_schema, formats=outbound_formats)
 
     return response
 

@@ -11,7 +11,7 @@ from .jmespath_functions import PowertoolsFunctions
 logger = logging.getLogger(__name__)
 
 
-def validate_data_against_schema(data: Dict, schema: Dict, formats: Dict):
+def validate_data_against_schema(data: Dict, schema: Dict, formats: Dict = {}):
     """Validate dict data against given JSON Schema
 
     Parameters
