@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Logger**: Bugfix to prevent parent loggers with the same name being configured more than once
+
 ## [1.9.0] - 2020-12-04
 
 ### Added
