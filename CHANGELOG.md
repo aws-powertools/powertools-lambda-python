@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - **Docs**: Add clarification to Tracer docs for how `capture_method` decorator can cause function responses to be read and serialized.
 
+### Fixed
+- **Logger**: Bugfix to prevent parent loggers with the same name being configured more than once
+
 ## [1.9.0] - 2020-12-04
 
 ### Added
