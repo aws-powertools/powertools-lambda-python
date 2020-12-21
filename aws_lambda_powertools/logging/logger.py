@@ -148,21 +148,32 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     def _init_logger(self, **kwargs):
         """Configures new logger"""
 
-        # Skip configuration if it's a child logger to prevent
-        # multiple handlers being attached as well as different sampling mechanisms
-        # and multiple messages from being logged as handlers can be duplicated
-        if not self.child:
-            self._configure_sampling()
-            self._logger.setLevel(self.log_level)
-            self._logger.addHandler(self._handler)
-            self.structure_logs(**kwargs)
+        # Skip configuration if it's a child logger or a pre-configured logger
+        # to prevent the following:
+        #   a) multiple handlers being attached
+        #   b) different sampling mechanisms
+        #   c) multiple messages from being logged as handlers can be duplicated
+        is_logger_preconfigured = getattr(self._logger, "init", False)
+        if self.child or is_logger_preconfigured:
+            return
 
-            logger.debug("Adding filter in root logger to suppress child logger records to bubble up")
-            for handler in logging.root.handlers:
-                # It'll add a filter to suppress any child logger from self.service
-                # Where service is Order, it'll reject parent logger Order,
-                # and child loggers such as Order.checkout, Order.shared
-                handler.addFilter(SuppressFilter(self.service))
+        self._configure_sampling()
+        self._logger.setLevel(self.log_level)
+        self._logger.addHandler(self._handler)
+        self.structure_logs(**kwargs)
+
+        logger.debug("Adding filter in root logger to suppress child logger records to bubble up")
+        for handler in logging.root.handlers:
+            # It'll add a filter to suppress any child logger from self.service
+            # Where service is Order, it'll reject parent logger Order,
+            # and child loggers such as Order.checkout, Order.shared
+            handler.addFilter(SuppressFilter(self.service))
+
+        # as per bug in #249, we should not be pre-configuring an existing logger
+        # therefore we set a custom attribute in the Logger that will be returned
+        # std logging will return the same Logger with our attribute if name is reused
+        logger.debug(f"Marking logger {self.service} as preconfigured")
+        self._logger.init = True
 
     def _configure_sampling(self):
         """Dynamically set log level based on sampling rate
