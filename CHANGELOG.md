@@ -5,10 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- **Docs**: Add clarification to Tracer docs for how `capture_method` decorator can cause function responses to be read and serialized.
+
+## [1.9.1] - 2020-12-21
 
 ### Fixed
 - **Logger**: Bugfix to prevent parent loggers with the same name being configured more than once
+
+### Added
+- **Docs**: Add clarification to Tracer docs for how `capture_method` decorator can cause function responses to be read and serialized.
+- **Utilities**: Added equality to ease testing Event source data classes
+- **Package**: Added `py.typed` for initial work needed for PEP 561 compliance
 
 ## [1.9.0] - 2020-12-04
 
