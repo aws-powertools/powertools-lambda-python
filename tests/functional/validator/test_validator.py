@@ -37,6 +37,14 @@ def test_validate_invalid_schema_format(raw_event):
         validate(event=raw_event, schema="schema.json")
 
 
+def test_validate_accept_schema_customn_format(
+    eventbridge_schema_registry_aws_s3_AWSAPICallViaCloudTrail_v2,
+    eventbridge_s3_HeadObject_event):
+    validate(event=eventbridge_s3_HeadObject_event,
+    schema=eventbridge_schema_registry_aws_s3_AWSAPICallViaCloudTrail_v2,
+    formats={'int64': lambda v: True})
+
+
 def test_validate_invalid_envelope_expression(schema, wrapped_event):
     with pytest.raises(exceptions.InvalidEnvelopeExpressionError):
         validate(event=wrapped_event, schema=schema, envelope=True)
