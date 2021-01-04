@@ -291,7 +291,6 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             return level
 
       log_level: str = level or os.getenv("LOG_LEVEL", logging.INFO)
-
       return log_level.upper()
 
     @staticmethod
