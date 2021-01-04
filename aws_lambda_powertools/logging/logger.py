@@ -290,7 +290,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         if isinstance(level, int):
             return level
 
-        log_level: str = level or os.getenv("LOG_LEVEL", logging.INFO)
+        log_level: str = level or os.getenv("LOG_LEVEL", "INFO")
         return log_level.upper()
 
     @staticmethod
