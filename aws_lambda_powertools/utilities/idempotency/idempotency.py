@@ -1,7 +1,7 @@
 """
 Primary interface for idempotent Lambda functions utility
 """
-
+import logging
 from typing import Any, Callable, Dict
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
@@ -9,6 +9,8 @@ from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from ..typing import LambdaContext
 from .exceptions import AlreadyInProgressError, ItemNotFoundError
 from .persistence import STATUS_CONSTANTS, BasePersistenceLayer
+
+logger = logging.getLogger(__name__)
 
 
 def default_error_callback():

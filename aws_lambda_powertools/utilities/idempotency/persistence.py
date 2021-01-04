@@ -5,6 +5,7 @@ Persistence layers supporting idempotency
 import datetime
 import hashlib
 import json
+import logging
 import pickle
 from abc import ABC, abstractmethod
 from base64 import b64decode, b64encode
@@ -15,6 +16,8 @@ import jmespath
 from botocore.config import Config
 
 from .exceptions import InvalidStatusError, ItemAlreadyExistsError, ItemNotFoundError
+
+logger = logging.getLogger(__name__)
 
 STATUS_CONSTANTS = {
     "NOTEXISTING": "DOESNOTEXIST",
@@ -185,6 +188,10 @@ class BasePersistenceLayer(ABC):
             expiry_timestamp=self._get_expiry_timestamp(),
             response_data=response_data,
         )
+        logger.debug(
+            f"Lambda successfully executed. Saving record to persistence store with "
+            f"idempotency key: {data_record.idempotency_key}"
+        )
         self._update_record(data_record=data_record)
 
     def save_inprogress(self, event: Dict[str, Any]) -> None:
@@ -201,6 +208,7 @@ class BasePersistenceLayer(ABC):
             status=STATUS_CONSTANTS["INPROGRESS"],
             expiry_timestamp=self._get_expiry_timestamp(),
         )
+        logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")
         self._put_record(data_record)
 
     def save_error(self, event: Dict[str, Any], exception: Exception):
@@ -224,9 +232,18 @@ class BasePersistenceLayer(ABC):
         # error classes
         if not self._is_retryable(exception):
             data_record.response_data = b64encode(pickle.dumps(exception)).decode()
+            logger.debug(
+                f"Lambda raised an exception ({type(exception).__name__}). The error is not retryable, "
+                f"updating pesistence store for idempotency key: {data_record.idempotency_key}"
+            )
             self._update_record(data_record)
         else:
             # If the error is retryable, delete the in progress record from the store
+            logger.debug(
+                f"Lambda raised an exception ({type(exception).__name__}), but the error is retryable. "
+                f"Not updating persistence store for idempotency key: "
+                f"{data_record.idempotency_key}"
+            )
             self._delete_record(data_record)
 
     def _is_retryable(self, exception: Exception):
@@ -395,6 +412,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         """
         Check if DynamoDB table exists already, create it if not
         """
+        logger.debug("Checking if DynamoDB table exists already")
         try:
             client = self._ddb_resource.meta.client
             table_ttl_description = client.describe_time_to_live(TableName=self.table_name)
@@ -403,6 +421,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
                 self._set_table_ttl()
 
         except self._ddb_resource.meta.client.exceptions.ResourceNotFoundException:
+            logger.debug(f'Table "{self.table_name}" does not exist')
             if self.create_table_if_not_existing:
                 self._create_table()
                 self._wait_for_table()
@@ -412,6 +431,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         """
         Create DynamoDB table
         """
+        logger.debug(f'Creating table "{self.table_name}"')
         self._ddb_resource.create_table(
             TableName=self.table_name,
             KeySchema=[{"AttributeName": self.key_attr, "KeyType": "HASH"}],
@@ -423,6 +443,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         """
         Wait for table to finish being created
         """
+        logger.debug(f'Waiting for creation of table "{self.table_name}" to complete')
         waiter = self._ddb_resource.meta.client.get_waiter("table_exists")
         waiter.wait(TableName=self.table_name, WaiterConfig={"Delay": 5, "MaxAttempts": 6})
 
@@ -430,6 +451,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         """
         Set TTL on table to track the expiry attribute
         """
+        logger.debug(f'Applying TTL settings to table "{self.table_name}"')
         self._ddb_resource.meta.client.update_time_to_live(
             TableName=self.table_name, TimeToLiveSpecification={"Enabled": True, "AttributeName": self.expiry_attr}
         )
@@ -475,6 +497,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
     def _put_record(self, data_record: DataRecord) -> None:
         now = datetime.datetime.now()
         try:
+            logger.debug(f"Putting record for idempotency key: {data_record.idempotency_key}")
             self.table.put_item(
                 Item={
                     self.key_attr: data_record.idempotency_key,
@@ -485,10 +508,11 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
                 ExpressionAttributeValues={":now": int(now.timestamp())},
             )
         except self._ddb_resource.meta.client.exceptions.ConditionalCheckFailedException:
+            logger.debug(f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}")
             raise ItemAlreadyExistsError
 
     def _update_record(self, data_record: DataRecord):
-
+        logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
         self.table.update_item(
             Key={self.key_attr: data_record.idempotency_key},
             UpdateExpression="SET #response_data = :response_data, #expiry = :expiry, #status = :status",
@@ -505,4 +529,5 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         )
 
     def _delete_record(self, data_record: DataRecord) -> None:
+        logger.debug(f"Deleting record for idempotency key: {data_record.idempotency_key}")
         self.table.delete_item(Key={self.key_attr: data_record.idempotency_key},)
