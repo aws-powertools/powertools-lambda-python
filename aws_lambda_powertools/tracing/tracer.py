@@ -269,7 +269,7 @@ class Tracer:
         lambda_handler_name = lambda_handler.__name__
 
         @functools.wraps(lambda_handler)
-        def decorate(event, context):
+        def decorate(event, context, **kwargs):
             with self.provider.in_subsegment(name=f"## {lambda_handler_name}") as subsegment:
                 global is_cold_start
                 if is_cold_start:
@@ -279,7 +279,7 @@ class Tracer:
 
                 try:
                     logger.debug("Calling lambda handler")
-                    response = lambda_handler(event, context)
+                    response = lambda_handler(event, context, **kwargs)
                     logger.debug("Received lambda handler response successfully")
                     self._add_response_as_metadata(
                         method_name=lambda_handler_name,
