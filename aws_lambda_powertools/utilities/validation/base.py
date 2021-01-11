@@ -32,11 +32,11 @@ def validate_data_against_schema(data: Dict, schema: Dict, formats: Optional[Dic
     """
     try:
         fastjsonschema.validate(definition=schema, data=data, formats=formats)
+    except (TypeError, AttributeError, fastjsonschema.JsonSchemaDefinitionException) as e:
+        raise InvalidSchemaFormatError(f"Schema received: {schema}, Formats: {formats}. Error: {e}")
     except fastjsonschema.JsonSchemaException as e:
         message = f"Failed schema validation. Error: {e.message}, Path: {e.path}, Data: {e.value}"  # noqa: B306, E501
         raise SchemaValidationError(message)
-    except (TypeError, AttributeError) as e:
-        raise InvalidSchemaFormatError(f"Schema received: {schema}. Error: {e}")
 
 
 def unwrap_event_from_envelope(data: Dict, envelope: str, jmespath_options: Dict) -> Any:
