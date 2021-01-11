@@ -86,6 +86,14 @@ def persistence_store(config):
     return persistence_store
 
 
+@pytest.fixture
+def persistence_store_with_cache(config):
+    persistence_store = DynamoDBPersistenceLayer(
+        event_key="body", table_name=TABLE_NAME, boto_config=config, use_local_cache=True
+    )
+    return persistence_store
+
+
 def test_idempotent_lambda_already_completed(
     persistence_store, lambda_apigw_event, timestamp_future, lambda_response, md5hashed_idempotency_key,
 ):
@@ -197,6 +205,54 @@ def test_idempotent_lambda_first_execution(
 
     lambda_handler(lambda_apigw_event, {})
 
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+def test_idempotent_lambda_first_execution_cached(
+    persistence_store_with_cache,
+    lambda_apigw_event,
+    expected_params_update_item,
+    lambda_response,
+    md5hashed_idempotency_key,
+):
+    """
+    Test idempotent decorator when lambda is executed with an event with a previously unknown event key. Ensure
+    result is cached locally on the persistence store instance.
+    """
+
+    stubber = stub.Stubber(persistence_store_with_cache.table.meta.client)
+    ddb_response = {}
+
+    expected_params_get_item = {
+        "TableName": TABLE_NAME,
+        "Key": {"id": md5hashed_idempotency_key},
+        "ConsistentRead": True,
+    }
+    expected_params_put_item = {
+        "ConditionExpression": "attribute_not_exists(id) OR expiration < :now",
+        "ExpressionAttributeValues": {":now": stub.ANY},
+        "Item": {"expiration": stub.ANY, "id": md5hashed_idempotency_key, "status": "INPROGRESS"},
+        "TableName": "TEST_TABLE",
+    }
+
+    stubber.add_response("get_item", ddb_response, expected_params_get_item)
+    stubber.add_response("put_item", ddb_response, expected_params_put_item)
+    stubber.add_response("update_item", ddb_response, expected_params_update_item)
+    stubber.activate()
+
+    @idempotent(persistence=persistence_store_with_cache)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    lambda_handler(lambda_apigw_event, {})
+
+    assert persistence_store_with_cache._cache.get(md5hashed_idempotency_key)
+
+    # This lambda call should not call AWS API
+    lambda_handler(lambda_apigw_event, {})
+
+    # This assertion fails if an AWS API operation was called more than once
     stubber.assert_no_pending_responses()
     stubber.deactivate()
 

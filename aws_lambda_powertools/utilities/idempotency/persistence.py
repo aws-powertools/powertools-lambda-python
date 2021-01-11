@@ -115,7 +115,11 @@ class BasePersistenceLayer(ABC):
     """
 
     def __init__(
-        self, event_key: str, expires_after: int = 3600, non_retryable_errors: Optional[Iterable[Exception]] = None
+        self,
+        event_key: str,
+        expires_after: int = 3600,
+        non_retryable_errors: Optional[Iterable[Exception]] = None,
+        use_local_cache: bool = False,
     ) -> None:
         """
         Initialize the base persistence layer
@@ -128,11 +132,15 @@ class BasePersistenceLayer(ABC):
             The number of milliseconds to wait before a record is expired
         non_retryable_errors: Iterable, optional
             An interable of exception classes which should not be retried after being raised, by default []
+        use_local_cache: bool, optional
+            Whether to locally cache idempotency results, by default False
         """
         self.event_key = event_key
         self.event_key_jmespath = jmespath.compile(event_key)
         self.expires_after = expires_after
         self.non_retryable_errors = non_retryable_errors or []
+        self.use_local_cache = use_local_cache
+        self._cache = {}
 
     def get_hashed_idempotency_key(self, lambda_event: Dict[str, Any]) -> str:
         """
@@ -169,6 +177,20 @@ class BasePersistenceLayer(ABC):
         period = datetime.timedelta(seconds=self.expires_after)
         return int((now + period).timestamp())
 
+    def _save_to_cache(self, data_record: DataRecord):
+        self._cache[data_record.idempotency_key] = data_record
+
+    def _retrieve_from_cache(self, idempotency_key: str):
+        cached_record = self._cache.get(idempotency_key)
+        if cached_record:
+            if not cached_record.is_expired:
+                return cached_record
+            else:
+                self._delete_from_cache(idempotency_key)
+
+    def _delete_from_cache(self, idempotency_key: str):
+        self._cache.pop(idempotency_key)
+
     def save_success(self, event: Dict[str, Any], result: dict) -> None:
         """
         Save record of function's execution completing succesfully
@@ -194,6 +216,9 @@ class BasePersistenceLayer(ABC):
         )
         self._update_record(data_record=data_record)
 
+        if self.use_local_cache:
+            self._save_to_cache(data_record)
+
     def save_inprogress(self, event: Dict[str, Any]) -> None:
         """
         Save record of function's execution being in progress
@@ -208,8 +233,12 @@ class BasePersistenceLayer(ABC):
             status=STATUS_CONSTANTS["INPROGRESS"],
             expiry_timestamp=self._get_expiry_timestamp(),
         )
+
         logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")
         self._put_record(data_record)
+
+        if self.use_local_cache:
+            self._save_to_cache(data_record)
 
     def save_error(self, event: Dict[str, Any], exception: Exception):
         """
@@ -236,15 +265,24 @@ class BasePersistenceLayer(ABC):
                 f"Lambda raised an exception ({type(exception).__name__}). The error is not retryable, "
                 f"updating pesistence store for idempotency key: {data_record.idempotency_key}"
             )
+
             self._update_record(data_record)
+
+            if self.use_local_cache:
+                self._save_to_cache(data_record)
+
         else:
             # If the error is retryable, delete the in progress record from the store
+
             logger.debug(
                 f"Lambda raised an exception ({type(exception).__name__}), but the error is retryable. "
                 f"Not updating persistence store for idempotency key: "
                 f"{data_record.idempotency_key}"
             )
             self._delete_record(data_record)
+
+            if self.use_local_cache:
+                self._delete_from_cache(data_record.idempotency_key)
 
     def _is_retryable(self, exception: Exception):
         """
@@ -283,6 +321,15 @@ class BasePersistenceLayer(ABC):
         """
 
         idempotency_key = self.get_hashed_idempotency_key(lambda_event)
+
+        if self.use_local_cache:
+            cached_record = self._retrieve_from_cache(idempotency_key)
+            if cached_record:
+                if cached_record.is_expired:
+                    self._delete_from_cache(idempotency_key)
+                else:
+                    logger.debug(f"Idempotency record found in cache with idempotency key: {idempotency_key}")
+                    return cached_record
 
         return self._get_record(idempotency_key)
 
