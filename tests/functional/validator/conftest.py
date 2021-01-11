@@ -244,18 +244,19 @@ def eventbridge_event():
         "detail": {"message": "hello hello", "username": "blah blah"},
     }
 
+
 @pytest.fixture
-def eventbridge_s3_HeadObject_event():
+def eventbridge_cloudtrail_s3_head_object_event():
     return {
         "account": "123456789012",
         "detail": {
             "additionalEventData": {
-            "AuthenticationMethod": "AuthHeader",
-            "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
-            "SignatureVersion": "SigV4",
-            "bytesTransferredIn": 0,
-            "bytesTransferredOut": 0,
-            "x-amz-id-2": "ejUr9Nd/4IO1juF/a6GOcu+PKrVX6dOH6jDjQOeCJvtARUqzxrhHGrhEt04cqYtAZVqcSEXYqo0="
+                "AuthenticationMethod": "AuthHeader",
+                "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+                "SignatureVersion": "SigV4",
+                "bytesTransferredIn": 0,
+                "bytesTransferredOut": 0,
+                "x-amz-id-2": "ejUr9Nd/4IO1juF/a6GOcu+PKrVX6dOH6jDjQOeCJvtARUqzxrhHGrhEt04cqYtAZVqcSEXYqo0=",
             },
             "awsRegion": "us-west-1",
             "eventCategory": "Data",
@@ -270,46 +271,43 @@ def eventbridge_s3_HeadObject_event():
             "recipientAccountId": "123456789012",
             "requestID": "A123B1C123D1E123",
             "requestParameters": {
-            "Host": "lambda-artifacts-deafc19498e3f2df.s3.us-west-1.amazonaws.com",
-            "bucketName": "lambda-artifacts-deafc19498e3f2df",
-            "key": "path1/path2/path3/file.zip"
+                "Host": "lambda-artifacts-deafc19498e3f2df.s3.us-west-1.amazonaws.com",
+                "bucketName": "lambda-artifacts-deafc19498e3f2df",
+                "key": "path1/path2/path3/file.zip",
             },
             "resources": [
-            {
-                "ARN": "arn:aws:s3:::lambda-artifacts-deafc19498e3f2df/path1/path2/path3/file.zip",
-                "type": "AWS::S3::Object"
-            },
-            {
-                "ARN": "arn:aws:s3:::lambda-artifacts-deafc19498e3f2df",
-                "accountId": "123456789012",
-                "type": "AWS::S3::Bucket"
-            }
+                {
+                    "ARN": "arn:aws:s3:::lambda-artifacts-deafc19498e3f2df/path1/path2/path3/file.zip",
+                    "type": "AWS::S3::Object",
+                },
+                {
+                    "ARN": "arn:aws:s3:::lambda-artifacts-deafc19498e3f2df",
+                    "accountId": "123456789012",
+                    "type": "AWS::S3::Bucket",
+                },
             ],
             "responseElements": None,
             "sourceIPAddress": "AWS Internal",
             "userAgent": "AWS Internal",
             "userIdentity": {
-            "accessKeyId": "ABCDEFGHIJKLMNOPQR12",
-            "accountId": "123456789012",
-            "arn": "arn:aws:sts::123456789012:assumed-role/role-name1/1234567890123",
-            "invokedBy": "AWS Internal",
-            "principalId": "ABCDEFGHIJKLMN1OPQRST:1234567890123",
-            "sessionContext": {
-                "attributes": {
-                "creationDate": "2020-12-09T09:58:24Z",
-                "mfaAuthenticated": "false"
-                },
-                "sessionIssuer": {
+                "accessKeyId": "ABCDEFGHIJKLMNOPQR12",
                 "accountId": "123456789012",
-                "arn": "arn:aws:iam::123456789012:role/role-name1",
-                "principalId": "ABCDEFGHIJKLMN1OPQRST",
-                "type": "Role",
-                "userName": "role-name1"
-                }
+                "arn": "arn:aws:sts::123456789012:assumed-role/role-name1/1234567890123",
+                "invokedBy": "AWS Internal",
+                "principalId": "ABCDEFGHIJKLMN1OPQRST:1234567890123",
+                "sessionContext": {
+                    "attributes": {"creationDate": "2020-12-09T09:58:24Z", "mfaAuthenticated": "false"},
+                    "sessionIssuer": {
+                        "accountId": "123456789012",
+                        "arn": "arn:aws:iam::123456789012:role/role-name1",
+                        "principalId": "ABCDEFGHIJKLMN1OPQRST",
+                        "type": "Role",
+                        "userName": "role-name1",
+                    },
+                },
+                "type": "AssumedRole",
             },
-            "type": "AssumedRole"
-            },
-            "vpcEndpointId": "vpce-a123cdef"
+            "vpcEndpointId": "vpce-a123cdef",
         },
         "detail-type": "AWS API Call via CloudTrail",
         "id": "e0bad426-0a70-4424-b53a-eb902ebf5786",
@@ -317,8 +315,9 @@ def eventbridge_s3_HeadObject_event():
         "resources": [],
         "source": "aws.s3",
         "time": "2020-12-22T10:05:29Z",
-        "version": "0"
+        "version": "0",
     }
+
 
 @pytest.fixture
 def sqs_event():
@@ -432,282 +431,137 @@ def cloudwatch_logs_schema():
         },
     }
 
+
 @pytest.fixture
-def eventbridge_schema_registry_aws_s3_AWSAPICallViaCloudTrail_v2():
+def eventbridge_schema_registry_cloudtrail_v2_s3():
     return {
         "$schema": "http://json-schema.org/draft-04/schema#",
         "definitions": {
             "AWSAPICallViaCloudTrail": {
-            "properties": {
-                "additionalEventData": {
-                "$ref": "#/definitions/AdditionalEventData"
+                "properties": {
+                    "additionalEventData": {"$ref": "#/definitions/AdditionalEventData"},
+                    "awsRegion": {"type": "string"},
+                    "errorCode": {"type": "string"},
+                    "errorMessage": {"type": "string"},
+                    "eventID": {"type": "string"},
+                    "eventName": {"type": "string"},
+                    "eventSource": {"type": "string"},
+                    "eventTime": {"format": "date-time", "type": "string"},
+                    "eventType": {"type": "string"},
+                    "eventVersion": {"type": "string"},
+                    "recipientAccountId": {"type": "string"},
+                    "requestID": {"type": "string"},
+                    "requestParameters": {"$ref": "#/definitions/RequestParameters"},
+                    "resources": {"items": {"type": "object"}, "type": "array"},
+                    "responseElements": {"type": ["object", "null"]},
+                    "sourceIPAddress": {"type": "string"},
+                    "userAgent": {"type": "string"},
+                    "userIdentity": {"$ref": "#/definitions/UserIdentity"},
+                    "vpcEndpointId": {"type": "string"},
+                    "x-amazon-open-api-schema-readOnly": {"type": "boolean"},
                 },
-                "awsRegion": {
-                "type": "string"
-                },
-                "errorCode": {
-                "type": "string"
-                },
-                "errorMessage": {
-                "type": "string"
-                },
-                "eventID": {
-                "type": "string"
-                },
-                "eventName": {
-                "type": "string"
-                },
-                "eventSource": {
-                "type": "string"
-                },
-                "eventTime": {
-                "format": "date-time",
-                "type": "string"
-                },
-                "eventType": {
-                "type": "string"
-                },
-                "eventVersion": {
-                "type": "string"
-                },
-                "recipientAccountId": {
-                "type": "string"
-                },
-                "requestID": {
-                "type": "string"
-                },
-                "requestParameters": {
-                "$ref": "#/definitions/RequestParameters"
-                },
-                "resources": {
-                "items": {
-                    "type": "object"
-                },
-                "type": "array"
-                },
-                "responseElements": {
-                "type": [
-                    "object",
-                    "null"
-                ]
-                },
-                "sourceIPAddress": {
-                "type": "string"
-                },
-                "userAgent": {
-                "type": "string"
-                },
-                "userIdentity": {
-                "$ref": "#/definitions/UserIdentity"
-                },
-                "vpcEndpointId": {
-                "type": "string"
-                },
-                "x-amazon-open-api-schema-readOnly": {
-                "type": "boolean"
-                }
-            },
-            "required": [
-                "eventID",
-                "awsRegion",
-                "eventVersion",
-                "responseElements",
-                "sourceIPAddress",
-                "eventSource",
-                "requestParameters",
-                "resources",
-                "userAgent",
-                "readOnly",
-                "userIdentity",
-                "eventType",
-                "additionalEventData",
-                "vpcEndpointId",
-                "requestID",
-                "eventTime",
-                "eventName",
-                "recipientAccountId"
-            ],
-            "type": "object"
+                "required": [
+                    "eventID",
+                    "awsRegion",
+                    "eventVersion",
+                    "responseElements",
+                    "sourceIPAddress",
+                    "eventSource",
+                    "requestParameters",
+                    "resources",
+                    "userAgent",
+                    "readOnly",
+                    "userIdentity",
+                    "eventType",
+                    "additionalEventData",
+                    "vpcEndpointId",
+                    "requestID",
+                    "eventTime",
+                    "eventName",
+                    "recipientAccountId",
+                ],
+                "type": "object",
             },
             "AdditionalEventData": {
-            "properties": {
-                "objectRetentionInfo": {
-                "$ref": "#/definitions/ObjectRetentionInfo"
+                "properties": {
+                    "objectRetentionInfo": {"$ref": "#/definitions/ObjectRetentionInfo"},
+                    "x-amz-id-2": {"type": "string"},
                 },
-                "x-amz-id-2": {
-                "type": "string"
-                }
-            },
-            "required": [
-                "x-amz-id-2"
-            ],
-            "type": "object"
+                "required": ["x-amz-id-2"],
+                "type": "object",
             },
             "Attributes": {
-            "properties": {
-                "creationDate": {
-                "format": "date-time",
-                "type": "string"
+                "properties": {
+                    "creationDate": {"format": "date-time", "type": "string"},
+                    "mfaAuthenticated": {"type": "string"},
                 },
-                "mfaAuthenticated": {
-                "type": "string"
-                }
-            },
-            "required": [
-                "mfaAuthenticated",
-                "creationDate"
-            ],
-            "type": "object"
+                "required": ["mfaAuthenticated", "creationDate"],
+                "type": "object",
             },
             "LegalHoldInfo": {
-            "properties": {
-                "isUnderLegalHold": {
-                "type": "boolean"
+                "properties": {
+                    "isUnderLegalHold": {"type": "boolean"},
+                    "lastModifiedTime": {"format": "int64", "type": "integer"},
                 },
-                "lastModifiedTime": {
-                "format": "int64",
-                "type": "integer"
-                }
-            },
-            "type": "object"
+                "type": "object",
             },
             "ObjectRetentionInfo": {
-            "properties": {
-                "legalHoldInfo": {
-                "$ref": "#/definitions/LegalHoldInfo"
+                "properties": {
+                    "legalHoldInfo": {"$ref": "#/definitions/LegalHoldInfo"},
+                    "retentionInfo": {"$ref": "#/definitions/RetentionInfo"},
                 },
-                "retentionInfo": {
-                "$ref": "#/definitions/RetentionInfo"
-                }
-            },
-            "type": "object"
+                "type": "object",
             },
             "RequestParameters": {
-            "properties": {
-                "bucketName": {
-                "type": "string"
+                "properties": {
+                    "bucketName": {"type": "string"},
+                    "key": {"type": "string"},
+                    "legal-hold": {"type": "string"},
+                    "retention": {"type": "string"},
                 },
-                "key": {
-                "type": "string"
-                },
-                "legal-hold": {
-                "type": "string"
-                },
-                "retention": {
-                "type": "string"
-                }
-            },
-            "required": [
-                "bucketName",
-                "key"
-            ],
-            "type": "object"
+                "required": ["bucketName", "key"],
+                "type": "object",
             },
             "RetentionInfo": {
-            "properties": {
-                "lastModifiedTime": {
-                "format": "int64",
-                "type": "integer"
+                "properties": {
+                    "lastModifiedTime": {"format": "int64", "type": "integer"},
+                    "retainUntilMode": {"type": "string"},
+                    "retainUntilTime": {"format": "int64", "type": "integer"},
                 },
-                "retainUntilMode": {
-                "type": "string"
-                },
-                "retainUntilTime": {
-                "format": "int64",
-                "type": "integer"
-                }
-            },
-            "type": "object"
+                "type": "object",
             },
             "SessionContext": {
-            "properties": {
-                "attributes": {
-                "$ref": "#/definitions/Attributes"
-                }
-            },
-            "required": [
-                "attributes"
-            ],
-            "type": "object"
+                "properties": {"attributes": {"$ref": "#/definitions/Attributes"}},
+                "required": ["attributes"],
+                "type": "object",
             },
             "UserIdentity": {
-            "properties": {
-                "accessKeyId": {
-                "type": "string"
+                "properties": {
+                    "accessKeyId": {"type": "string"},
+                    "accountId": {"type": "string"},
+                    "arn": {"type": "string"},
+                    "principalId": {"type": "string"},
+                    "sessionContext": {"$ref": "#/definitions/SessionContext"},
+                    "type": {"type": "string"},
                 },
-                "accountId": {
-                "type": "string"
-                },
-                "arn": {
-                "type": "string"
-                },
-                "principalId": {
-                "type": "string"
-                },
-                "sessionContext": {
-                "$ref": "#/definitions/SessionContext"
-                },
-                "type": {
-                "type": "string"
-                }
+                "required": ["accessKeyId", "sessionContext", "accountId", "principalId", "type", "arn"],
+                "type": "object",
             },
-            "required": [
-                "accessKeyId",
-                "sessionContext",
-                "accountId",
-                "principalId",
-                "type",
-                "arn"
-            ],
-            "type": "object"
-            }
         },
         "properties": {
-            "account": {
-            "type": "string"
-            },
-            "detail": {
-            "$ref": "#/definitions/AWSAPICallViaCloudTrail"
-            },
-            "detail-type": {
-            "type": "string"
-            },
-            "id": {
-            "type": "string"
-            },
-            "region": {
-            "type": "string"
-            },
-            "resources": {
-            "items": {
-                "type": "string"
-            },
-            "type": "array"
-            },
-            "source": {
-            "type": "string"
-            },
-            "time": {
-            "format": "date-time",
-            "type": "string"
-            },
-            "version": {
-            "type": "string"
-            }
+            "account": {"type": "string"},
+            "detail": {"$ref": "#/definitions/AWSAPICallViaCloudTrail"},
+            "detail-type": {"type": "string"},
+            "id": {"type": "string"},
+            "region": {"type": "string"},
+            "resources": {"items": {"type": "string"}, "type": "array"},
+            "source": {"type": "string"},
+            "time": {"format": "date-time", "type": "string"},
+            "version": {"type": "string"},
         },
-        "required": [
-            "detail-type",
-            "resources",
-            "id",
-            "source",
-            "time",
-            "detail",
-            "region",
-            "version",
-            "account"
-        ],
+        "required": ["detail-type", "resources", "id", "source", "time", "detail", "region", "version", "account"],
         "title": "AWSAPICallViaCloudTrail",
         "type": "object",
         "x-amazon-events-detail-type": "AWS API Call via CloudTrail",
-        "x-amazon-events-source": "aws.s3"
+        "x-amazon-events-source": "aws.s3",
     }
