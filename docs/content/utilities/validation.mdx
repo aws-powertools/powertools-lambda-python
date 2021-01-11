@@ -72,6 +72,7 @@ def handler(event, context):
 ### Validating custom formats
 
 > New in 1.10.0
+>
 > **NOTE**: JSON Schema DRAFT 7 [has many new built-in formats](https://json-schema.org/understanding-json-schema/reference/string.html#format) such as date, time, and specifically a regex format which might be a better replacement for a custom format, if you do have control over the schema.
 
 If you have JSON Schemas with custom formats, for example having a `int64` for high precision integers, you can pass an optional validation to handle each type using `formats` parameter - Otherwise it'll fail validation:
