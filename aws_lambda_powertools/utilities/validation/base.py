@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import fastjsonschema
 import jmespath
@@ -11,7 +11,7 @@ from .jmespath_functions import PowertoolsFunctions
 logger = logging.getLogger(__name__)
 
 
-def validate_data_against_schema(data: Dict, schema: Dict, formats: Dict = {}):
+def validate_data_against_schema(data: Dict, schema: Dict, formats: Optional[Dict] = None):
     """Validate dict data against given JSON Schema
 
     Parameters
@@ -20,6 +20,8 @@ def validate_data_against_schema(data: Dict, schema: Dict, formats: Dict = {}):
         Data set to be validated
     schema : Dict
         JSON Schema to validate against
+    formats: Dict
+        Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool
 
     Raises
     ------
