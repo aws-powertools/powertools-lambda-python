@@ -3,6 +3,30 @@ import logging
 import os
 from typing import Dict, Iterable, Optional, Union
 
+STD_LOGGING_KEYS = (
+    "name",
+    "msg",
+    "args",
+    "levelname",
+    "levelno",
+    "pathname",
+    "filename",
+    "module",
+    "exc_info",
+    "exc_text",
+    "stack_info",
+    "lineno",
+    "funcName",
+    "created",
+    "msecs",
+    "relativeCreated",
+    "thread",
+    "threadName",
+    "processName",
+    "process",
+    "asctime",
+)
+
 
 class JsonFormatter(logging.Formatter):
     """AWS Lambda Logging formatter.
@@ -120,13 +144,19 @@ class JsonFormatter(logging.Formatter):
 
         formatted_log = {}
 
-        # Iterate over new or existing log structure
-        # replace reserved logging expression e.g. '%(level)s' to 'INFO'
-        # lastly, add or replace non-reserved keys
+        # We have to iterate over a default or existing log structure
+        # then replace any logging expression for reserved keys e.g. '%(level)s' to 'INFO'
+        # and lastly add or replace incoming keys (those added within the constructor or .structure_logs method)
         for key, value in self.log_format.items():
             if value and key in self.reserved_keys:
                 formatted_log[key] = value % record_dict
             else:
+                formatted_log[key] = value
+
+        # pick up extra keys when logging a new message e.g. log.info("my message", extra={"additional_key": "value"}
+        # these messages will be added to the root of the final structure not within `message` key
+        for key, value in record_dict.items():
+            if key not in STD_LOGGING_KEYS:
                 formatted_log[key] = value
 
         return formatted_log
