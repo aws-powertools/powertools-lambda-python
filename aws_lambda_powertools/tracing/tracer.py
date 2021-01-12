@@ -454,23 +454,21 @@ class Tracer:
         method_name = f"{method.__name__}"
 
         if inspect.iscoroutinefunction(method):
-            decorate = self._decorate_async_function(
+            return self._decorate_async_function(
                 method=method, capture_response=capture_response, method_name=method_name
             )
         elif inspect.isgeneratorfunction(method):
-            decorate = self._decorate_generator_function(
+            return self._decorate_generator_function(
                 method=method, capture_response=capture_response, method_name=method_name
             )
         elif hasattr(method, "__wrapped__") and inspect.isgeneratorfunction(method.__wrapped__):
-            decorate = self._decorate_generator_function_with_context_manager(
+            return self._decorate_generator_function_with_context_manager(
                 method=method, capture_response=capture_response, method_name=method_name
             )
         else:
-            decorate = self._decorate_sync_function(
+            return self._decorate_sync_function(
                 method=method, capture_response=capture_response, method_name=method_name
             )
-
-        return decorate
 
     def _decorate_async_function(self, method: Callable = None, capture_response: bool = True, method_name: str = None):
         @functools.wraps(method)
@@ -650,9 +648,9 @@ class Tracer:
 
         self._config["provider"] = provider if provider is not None else self._config["provider"]
         self._config["auto_patch"] = auto_patch if auto_patch is not None else self._config["auto_patch"]
-        self._config["service"] = is_service if is_service else self._config["service"]
-        self._config["disabled"] = is_disabled if is_disabled else self._config["disabled"]
-        self._config["patch_modules"] = patch_modules if patch_modules else self._config["patch_modules"]
+        self._config["service"] = is_service or self._config["service"]
+        self._config["disabled"] = is_disabled or self._config["disabled"]
+        self._config["patch_modules"] = patch_modules or self._config["patch_modules"]
 
     @classmethod
     def _reset_config(cls):

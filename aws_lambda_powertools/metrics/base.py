@@ -240,10 +240,7 @@ class MetricManager:
         # Cast value to str according to EMF spec
         # Majority of values are expected to be string already, so
         # checking before casting improves performance in most cases
-        if isinstance(value, str):
-            self.dimension_set[name] = value
-        else:
-            self.dimension_set[name] = str(value)
+        self.dimension_set[name] = value if isinstance(value, str) else str(value)
 
     def add_metadata(self, key: str, value: Any):
         """Adds high cardinal metadata for metrics object

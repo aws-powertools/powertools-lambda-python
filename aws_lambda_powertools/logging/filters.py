@@ -13,4 +13,4 @@ class SuppressFilter(logging.Filter):
         created by loggers who don't have a handler.
         """
         logger = record.name
-        return False if self.logger in logger else True
+        return self.logger not in logger

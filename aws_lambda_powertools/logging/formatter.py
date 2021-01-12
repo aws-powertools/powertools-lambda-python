@@ -74,9 +74,7 @@ class JsonFormatter(logging.Formatter):
     @staticmethod
     def _get_latest_trace_id():
         xray_trace_id = os.getenv("_X_AMZN_TRACE_ID")
-        trace_id = xray_trace_id.split(";")[0].replace("Root=", "") if xray_trace_id else None
-
-        return trace_id
+        return xray_trace_id.split(";")[0].replace("Root=", "") if xray_trace_id else None
 
     def update_formatter(self, **kwargs):
         self.log_format.update(kwargs)

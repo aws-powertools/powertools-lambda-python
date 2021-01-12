@@ -35,8 +35,5 @@ class SnsEnvelope(BaseEnvelope):
         """
         logger.debug(f"Parsing incoming data with SNS model {SnsModel}")
         parsed_envelope = SnsModel.parse_obj(data)
-        output = []
         logger.debug(f"Parsing SNS records in `body` with {model}")
-        for record in parsed_envelope.Records:
-            output.append(self._parse(data=record.Sns.Message, model=model))
-        return output
+        return [self._parse(data=record.Sns.Message, model=model) for record in parsed_envelope.Records]

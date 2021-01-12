@@ -206,8 +206,4 @@ class DynamoDBProvider(BaseProvider):
             response = self.table.query(**sdk_options)
             items.extend(response.get("Items", []))
 
-        retval = {}
-        for item in items:
-            retval[item[self.sort_attr]] = item[self.value_attr]
-
-        return retval
+        return {item[self.sort_attr]: item[self.value_attr] for item in items}
