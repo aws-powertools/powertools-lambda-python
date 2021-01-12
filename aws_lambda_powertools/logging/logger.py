@@ -291,9 +291,10 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             return level
 
         log_level: str = level or os.getenv("LOG_LEVEL")
-        log_level = log_level.upper() if log_level is not None else logging.INFO
+        if log_level is None:
+            return logging.INFO
 
-        return log_level
+        return log_level.upper()
 
     @staticmethod
     def _get_caller_filename():
@@ -303,9 +304,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         # Before previous frame => Caller
         frame = inspect.currentframe()
         caller_frame = frame.f_back.f_back.f_back
-        filename = caller_frame.f_globals["__name__"]
-
-        return filename
+        return caller_frame.f_globals["__name__"]
 
 
 def set_package_logger(
