@@ -5,10 +5,13 @@ import inspect
 import logging
 import os
 from distutils.util import strtobool
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import aws_xray_sdk
 import aws_xray_sdk.core
+
+from aws_lambda_powertools.shared.constants import TRACER_CAPTURE_ERROR_ENV, TRACER_CAPTURE_RESPONSE_ENV
+from aws_lambda_powertools.shared.functions import resolve_env_var_choice
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
@@ -233,8 +236,8 @@ class Tracer:
     def capture_lambda_handler(
         self,
         lambda_handler: Callable[[Dict, Any], Any] = None,
-        capture_response: bool = True,
-        capture_error: bool = True,
+        capture_response: Optional[bool] = None,
+        capture_error: Optional[bool] = None,
     ):
         """Decorator to create subsegment for lambda handlers
 
@@ -246,7 +249,7 @@ class Tracer:
         lambda_handler : Callable
             Method to annotate on
         capture_response : bool, optional
-            Instructs tracer to not include handler's response as metadata, by default True
+            Instructs tracer to not include handler's response as metadata
         capture_error : bool, optional
             Instructs tracer to not include handler's error as metadata, by default True
 
@@ -281,10 +284,8 @@ class Tracer:
 
         lambda_handler_name = lambda_handler.__name__
 
-        capture_response_env_option = str(os.getenv("POWERTOOLS_TRACER_CAPTURE_RESPONSE", "false"))
-        capture_error_env_option = str(os.getenv("POWERTOOLS_TRACER_CAPTURE_ERROR", "false"))
-        capture_response = strtobool(capture_response_env_option) or capture_response
-        capture_error = strtobool(capture_error_env_option) or capture_error
+        capture_response = resolve_env_var_choice(env=TRACER_CAPTURE_RESPONSE_ENV, choice=capture_response)
+        capture_error = resolve_env_var_choice(env=TRACER_CAPTURE_ERROR_ENV, choice=capture_error)
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
@@ -316,7 +317,9 @@ class Tracer:
 
         return decorate
 
-    def capture_method(self, method: Callable = None, capture_response: bool = True, capture_error: bool = True):
+    def capture_method(
+        self, method: Callable = None, capture_response: Optional[bool] = None, capture_error: Optional[bool] = None
+    ):
         """Decorator to create subsegment for arbitrary functions
 
         It also captures both response and exceptions as metadata
@@ -335,7 +338,7 @@ class Tracer:
         method : Callable
             Method to annotate on
         capture_response : bool, optional
-            Instructs tracer to not include method's response as metadata, by default True
+            Instructs tracer to not include method's response as metadata
         capture_error : bool, optional
             Instructs tracer to not include handler's error as metadata, by default True
 
@@ -475,28 +478,31 @@ class Tracer:
 
         method_name = f"{method.__name__}"
 
+        capture_response = resolve_env_var_choice(env=TRACER_CAPTURE_RESPONSE_ENV, choice=capture_response)
+        capture_error = resolve_env_var_choice(env=TRACER_CAPTURE_ERROR_ENV, choice=capture_error)
+
         if inspect.iscoroutinefunction(method):
             return self._decorate_async_function(
-                method=method, capture_response=capture_response, capture_error=True, method_name=method_name
+                method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
             )
         elif inspect.isgeneratorfunction(method):
             return self._decorate_generator_function(
-                method=method, capture_response=capture_response, capture_error=True, method_name=method_name
+                method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
             )
         elif hasattr(method, "__wrapped__") and inspect.isgeneratorfunction(method.__wrapped__):
             return self._decorate_generator_function_with_context_manager(
-                method=method, capture_response=capture_response, capture_error=True, method_name=method_name
+                method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
             )
         else:
             return self._decorate_sync_function(
-                method=method, capture_response=capture_response, capture_error=True, method_name=method_name
+                method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
             )
 
     def _decorate_async_function(
         self,
         method: Callable = None,
-        capture_response: bool = True,
-        capture_error: bool = True,
+        capture_response: Optional[bool] = None,
+        capture_error: Optional[bool] = None,
         method_name: str = None,
     ):
         @functools.wraps(method)
@@ -522,8 +528,8 @@ class Tracer:
     def _decorate_generator_function(
         self,
         method: Callable = None,
-        capture_response: bool = True,
-        capture_error: bool = True,
+        capture_response: Optional[bool] = None,
+        capture_error: Optional[bool] = None,
         method_name: str = None,
     ):
         @functools.wraps(method)
@@ -549,8 +555,8 @@ class Tracer:
     def _decorate_generator_function_with_context_manager(
         self,
         method: Callable = None,
-        capture_response: bool = True,
-        capture_error: bool = True,
+        capture_response: Optional[bool] = None,
+        capture_error: Optional[bool] = None,
         method_name: str = None,
     ):
         @functools.wraps(method)
@@ -577,8 +583,8 @@ class Tracer:
     def _decorate_sync_function(
         self,
         method: Callable = None,
-        capture_response: bool = True,
-        capture_error: bool = True,
+        capture_response: Optional[bool] = None,
+        capture_error: Optional[bool] = None,
         method_name: str = None,
     ):
         @functools.wraps(method)
@@ -609,7 +615,7 @@ class Tracer:
         method_name: str = None,
         data: Any = None,
         subsegment: aws_xray_sdk.core.models.subsegment = None,
-        capture_response: bool = True,
+        capture_response: Optional[bool] = None,
     ):
         """Add response as metadata for given subsegment
 
@@ -622,7 +628,7 @@ class Tracer:
         subsegment : aws_xray_sdk.core.models.subsegment, optional
             existing subsegment to add metadata on, by default None
         capture_response : bool, optional
-            Do not include response as metadata, by default True
+            Do not include response as metadata
         """
         if data is None or not capture_response or subsegment is None:
             return
@@ -634,7 +640,7 @@ class Tracer:
         method_name: str = None,
         error: Exception = None,
         subsegment: aws_xray_sdk.core.models.subsegment = None,
-        capture_error: bool = True,
+        capture_error: Optional[bool] = None,
     ):
         """Add full exception object as metadata for given subsegment
 
@@ -649,7 +655,7 @@ class Tracer:
         capture_error : bool, optional
             Do not include error as metadata, by default True
         """
-        if error is None or not capture_error or subsegment is None:
+        if not capture_error:
             return
 
         subsegment.put_metadata(key=f"{method_name} error", value=error, namespace=self._config["service"])
