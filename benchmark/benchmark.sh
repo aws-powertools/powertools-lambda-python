@@ -21,7 +21,7 @@ function run_function {
 # Retrieve statistics
 function get_stats {
     # Gather results from CloudWatch Logs Insights
-    query_id=$(aws logs start-query --log-group-name $1 --query-string 'filter @type = "REPORT" | stats avg(@initDuration) as init_duration, avg(@duration) as duration' --start-time $(expr $(date +%s) - 86400) --end-time $(expr $(date +%s) + 0) --query 'queryId' --output text)
+    query_id=$(aws logs start-query --log-group-name $1 --query-string 'filter @type = "REPORT" | stats pct(@initDuration, 50) as init_duration, pct(@duration, 50) as duration' --start-time $(expr $(date +%s) - 86400) --end-time $(expr $(date +%s) + 0) --query 'queryId' --output text)
     while true; do
         result=$(aws logs get-query-results --query-id $query_id --query 'status' --output text)
         if [ $result == "Complete" ]; then
