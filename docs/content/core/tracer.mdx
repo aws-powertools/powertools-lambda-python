@@ -95,8 +95,8 @@ def handler(event, context):
 
 You can disable Tracer from capturing their exceptions as tracing metadata with <strong><code>capture_error=False</code></strong> parameter in both capture_lambda_handler and capture_method decorators.
 
-```python:title=do_not_capture_response_as_metadata.py
-# Disables Tracer from capturing response and adding as metadata
+```python:title=do_not_capture_exception_as_metadata.py
+# Disables Tracer from capturing exception and adding as metadata
 # Useful when dealing with sensitive data
 @tracer.capture_lambda_handler(capture_error=False) # highlight-line
 def handler(event, context):
