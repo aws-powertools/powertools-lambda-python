@@ -28,10 +28,13 @@ sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 ### Lambda Layer
 
 Powertools is also available as a Lambda Layer. It is distributed via the [AWS Serverless Application Repository (SAR)](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/what-is-serverlessrepo.html).
+We have two layers available, one with core dependencies `aws-lambda-powertools-python-layer` and one with extras `aws-lambda-powertools-python-layer-extras` such as `pydantic` which is required for the parser.
+The extras layer is 22.4MB zipped and ~155MB unzipped big.
 
 App | ARN
 ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------
 [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer) | arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+[aws-lambda-powertools-python-layer-extras](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-extras) | arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-extras
 
 If using SAM, you can include this SAR App as part of your shared Layers stack, and lock to a specific semantic version. Once deployed, it'll be available across the account this is deployed to.
 
@@ -41,8 +44,9 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-        SemanticVersion: 1.3.1 # change to latest semantic version available in SAR
+        SemanticVersion: 1.9.0 # change to latest semantic version available in SAR
 ```
+
 
 This will add a nested app stack with an output parameter `LayerVersionArn`, that you can reference inside your Lambda function definition:
 
@@ -50,6 +54,8 @@ This will add a nested app stack with an output parameter `LayerVersionArn`, tha
   Layers:
     - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
 ```
+
+The layer for the co
 
 Here is the list of IAM permissions that you need to add to your deployment IAM role to use the layer:
 
