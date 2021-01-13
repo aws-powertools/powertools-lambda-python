@@ -502,13 +502,15 @@ def test_tracer_yield_from_generator_exception_metadata(mocker, provider_stub, i
     assert str(put_metadata_mock_args["value"]) == "test"
 
 
-def test_tracer_lambda_handler_does_not_add_response_as_metadata(mocker, provider_stub, in_subsegment_mock):
+def test_tracer_lambda_handler_override_response_as_metadata(mocker, provider_stub, in_subsegment_mock):
     # GIVEN tracer is initialized
     provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
+
+    mocker.patch("aws_lambda_powertools.tracing.tracer.TRACER_CAPTURE_RESPONSE_ENV", return_value=True)
     tracer = Tracer(provider=provider, auto_patch=False)
 
     # WHEN capture_lambda_handler decorator is used
-    # and the handler response is empty
+    # with capture_response set to False
     @tracer.capture_lambda_handler(capture_response=False)
     def handler(event, context):
         return "response"
@@ -519,7 +521,7 @@ def test_tracer_lambda_handler_does_not_add_response_as_metadata(mocker, provide
     assert in_subsegment_mock.put_metadata.call_count == 0
 
 
-def test_tracer_method_does_not_add_response_as_metadata(mocker, provider_stub, in_subsegment_mock):
+def test_tracer_method_override_response_as_metadata(provider_stub, in_subsegment_mock):
     # GIVEN tracer is initialized
     provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
     tracer = Tracer(provider=provider, auto_patch=False)
