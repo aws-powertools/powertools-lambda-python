@@ -118,15 +118,16 @@ Utility | Description
 
 **Environment variables** used across suite of utilities.
 
-Environment variable | Description | Utility
-------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
-**POWERTOOLS_SERVICE_NAME** | Sets service name used for tracing namespace, metrics dimension and structured logging | All
-**POWERTOOLS_METRICS_NAMESPACE** | Sets namespace used for metrics | [Metrics](./core/metrics)
-**POWERTOOLS_TRACE_DISABLED** | Disables tracing | [Tracing](./core/tracer)
-**POWERTOOLS_TRACE_MIDDLEWARES** | Creates sub-segment for each custom middleware | [Middleware factory](./utilities/middleware_factory)
-**POWERTOOLS_LOGGER_LOG_EVENT** | Logs incoming event | [Logging](./core/logger)
-**POWERTOOLS_LOGGER_SAMPLE_RATE** | Debug log sampling | [Logging](./core/logger)
-**LOG_LEVEL** | Sets logging level | [Logging](./core/logger)
+Environment variable | Description | Utility | Default
+------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------
+**POWERTOOLS_SERVICE_NAME** | Sets service name used for tracing namespace, metrics dimension and structured logging | All | `"service_undefined"`
+**POWERTOOLS_METRICS_NAMESPACE** | Sets namespace used for metrics | [Metrics](./core/metrics) | `None`
+**POWERTOOLS_TRACE_DISABLED** | Disables tracing | [Tracing](./core/tracer) | `false`
+**POWERTOOLS_TRACER_CAPTURE_RESPONSE** | Overrides tracer from auto-capturing response as metadata | [Tracing](./core/tracer) | `true`
+**POWERTOOLS_TRACE_MIDDLEWARES** | Creates sub-segment for each custom middleware | [Middleware factory](./utilities/middleware_factory) | `false`
+**POWERTOOLS_LOGGER_LOG_EVENT** | Logs incoming event | [Logging](./core/logger) | `false`
+**POWERTOOLS_LOGGER_SAMPLE_RATE** | Debug log sampling | [Logging](./core/logger) | `0`
+**LOG_LEVEL** | Sets logging level | [Logging](./core/logger) | `INFO`
 
 ## Debug mode
 
