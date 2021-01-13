@@ -29,7 +29,8 @@ sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 
 Powertools is also available as a Lambda Layer. It is distributed via the [AWS Serverless Application Repository (SAR)](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/what-is-serverlessrepo.html).
 We have two layers available, one with core dependencies `aws-lambda-powertools-python-layer` and one with extras `aws-lambda-powertools-python-layer-extras` such as `pydantic` which is required for the parser.
-The extras layer is 22.4MB zipped and ~155MB unzipped big.
+
+> **NOTE**: Extras layer support does not support Python 3.6 runtime. This layer is also  includes all extra dependencies and is 22.4MB zipped, ~155MB unzipped big.
 
 App | ARN
 ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------
