@@ -1,11 +1,9 @@
-import os
-
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
 
 
-def test_explicit_wins_over_env_var():
-    choice_env = os.getenv("CHOICE", True)
+def test_resolve_env_var_choice_explicit_wins_over_env_var():
+    assert resolve_env_var_choice(env="true", choice=False) is False
 
-    choice = resolve_env_var_choice(env=choice_env, choice=False)
 
-    assert choice is False
+def test_resolve_env_var_choice_env_wins_over_absent_explicit():
+    assert resolve_env_var_choice(env="true") == 1
