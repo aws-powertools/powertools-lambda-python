@@ -351,7 +351,6 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         status_attr: Optional[str] = "status",
         data_attr: Optional[str] = "data",
         boto_config: Optional[Config] = None,
-        create_table_if_not_existing: Optional[bool] = False,
         *args,
         **kwargs,
     ):
@@ -372,8 +371,6 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             DynamoDB attribute name for response data, by default "data"
         boto_config: botocore.config.Config, optional
             Botocore configuration to pass during client initialization
-        create_table_if_not_existing: bool, optional
-            Whether to create the dynamodb table if it doesn't already exist, by default False
         args
         kwargs
 
@@ -397,59 +394,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         self.expiry_attr = expiry_attr
         self.status_attr = status_attr
         self.data_attr = data_attr
-        self.create_table_if_not_existing = create_table_if_not_existing
         super(DynamoDBPersistenceLayer, self).__init__(*args, **kwargs)
-
-        if self.create_table_if_not_existing:
-            self._check_and_create_table()
-
-    def _check_and_create_table(self) -> None:
-        """
-        Check if DynamoDB table exists already, create it if not
-        """
-        logger.debug("Checking if DynamoDB table exists already")
-        try:
-            client = self._ddb_resource.meta.client
-            table_ttl_description = client.describe_time_to_live(TableName=self.table_name)
-            ttl_setting = table_ttl_description["TimeToLiveDescription"]["TimeToLiveStatus"]
-            if ttl_setting == "DISABLED":
-                self._set_table_ttl()
-
-        except self._ddb_resource.meta.client.exceptions.ResourceNotFoundException:
-            logger.debug(f'Table "{self.table_name}" does not exist')
-            if self.create_table_if_not_existing:
-                self._create_table()
-                self._wait_for_table()
-                self._set_table_ttl()
-
-    def _create_table(self) -> None:
-        """
-        Create DynamoDB table
-        """
-        logger.debug(f'Creating table "{self.table_name}"')
-        self._ddb_resource.create_table(
-            TableName=self.table_name,
-            KeySchema=[{"AttributeName": self.key_attr, "KeyType": "HASH"}],
-            AttributeDefinitions=[{"AttributeName": self.key_attr, "AttributeType": "S"}],
-            BillingMode="PAY_PER_REQUEST",
-        )
-
-    def _wait_for_table(self) -> None:
-        """
-        Wait for table to finish being created
-        """
-        logger.debug(f'Waiting for creation of table "{self.table_name}" to complete')
-        waiter = self._ddb_resource.meta.client.get_waiter("table_exists")
-        waiter.wait(TableName=self.table_name, WaiterConfig={"Delay": 5, "MaxAttempts": 6})
-
-    def _set_table_ttl(self) -> None:
-        """
-        Set TTL on table to track the expiry attribute
-        """
-        logger.debug(f'Applying TTL settings to table "{self.table_name}"')
-        self._ddb_resource.meta.client.update_time_to_live(
-            TableName=self.table_name, TimeToLiveSpecification={"Enabled": True, "AttributeName": self.expiry_attr}
-        )
 
     def _item_to_data_record(self, item: Dict[str, Union[str, int]]) -> DataRecord:
         """
