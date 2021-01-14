@@ -6,10 +6,8 @@ import datetime
 import hashlib
 import json
 import logging
-import pickle
 from abc import ABC, abstractmethod
-from base64 import b64decode, b64encode
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 import boto3
 import jmespath
@@ -98,17 +96,6 @@ class DataRecord:
         """
         return json.loads(self.response_data)
 
-    def raise_stored_exception(self):
-        """
-        Raises
-        ------
-        Exception
-            Decoded and unpickled Exception from persistent store
-        """
-
-        decoded_exception = pickle.loads(b64decode(self.response_data.encode()))
-        raise decoded_exception
-
 
 class BasePersistenceLayer(ABC):
     """
@@ -116,12 +103,7 @@ class BasePersistenceLayer(ABC):
     """
 
     def __init__(
-        self,
-        event_key: str,
-        expires_after: int = 3600,
-        non_retryable_errors: Optional[Iterable[Exception]] = None,
-        use_local_cache: bool = False,
-        local_cache_maxsize: int = 1024,
+        self, event_key: str, expires_after: int = 3600, use_local_cache: bool = False, local_cache_maxsize: int = 1024,
     ) -> None:
         """
         Initialize the base persistence layer
@@ -132,8 +114,6 @@ class BasePersistenceLayer(ABC):
             A jmespath expression to extract the idempotency key from the event record
         expires_after: int
             The number of milliseconds to wait before a record is expired
-        non_retryable_errors: Iterable, optional
-            An interable of exception classes which should not be retried after being raised, by default []
         use_local_cache: bool, optional
             Whether to locally cache idempotency results, by default False
         local_cache_maxsize: int, optional
@@ -142,7 +122,6 @@ class BasePersistenceLayer(ABC):
         self.event_key = event_key
         self.event_key_jmespath = jmespath.compile(event_key)
         self.expires_after = expires_after
-        self.non_retryable_errors = non_retryable_errors or []
         self.use_local_cache = use_local_cache
         if self.use_local_cache:
             self._cache = LRUDict(max_size=local_cache_maxsize)
@@ -263,48 +242,14 @@ class BasePersistenceLayer(ABC):
             expiry_timestamp=self._get_expiry_timestamp(),
         )
 
-        # Only write a record of the error to the persistent store if it is not a subclass of any of the non retryable
-        # error classes
-        if not self._is_retryable(exception):
-            data_record.response_data = b64encode(pickle.dumps(exception)).decode()
-            logger.debug(
-                f"Lambda raised an exception ({type(exception).__name__}). The error is not retryable, "
-                f"updating pesistence store for idempotency key: {data_record.idempotency_key}"
-            )
+        logger.debug(
+            f"Lambda raised an exception ({type(exception).__name__}). Clearing in progress record in persistence "
+            f"store for idempotency key: {data_record.idempotency_key}"
+        )
+        self._delete_record(data_record)
 
-            self._update_record(data_record)
-
-            if self.use_local_cache:
-                self._save_to_cache(data_record)
-
-        else:
-            # If the error is retryable, delete the in progress record from the store
-
-            logger.debug(
-                f"Lambda raised an exception ({type(exception).__name__}), but the error is retryable. "
-                f"Not updating persistence store for idempotency key: "
-                f"{data_record.idempotency_key}"
-            )
-            self._delete_record(data_record)
-
-            if self.use_local_cache:
-                self._delete_from_cache(data_record.idempotency_key)
-
-    def _is_retryable(self, exception: Exception):
-        """
-        Check whether the exception is retryable or not
-
-        Parameters
-        ----------
-        exception: Exception
-            exception instance raised by lambda handler
-
-        Returns
-        -------
-        bool
-            Whether exception should be retried in the future or not
-        """
-        return not any((issubclass(exception.__class__, nr) for nr in self.non_retryable_errors))
+        if self.use_local_cache:
+            self._delete_from_cache(data_record.idempotency_key)
 
     def get_record(self, lambda_event) -> DataRecord:
         """

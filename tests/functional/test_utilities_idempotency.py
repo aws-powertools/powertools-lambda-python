@@ -302,7 +302,7 @@ def test_idempotent_lambda_expired(
 
 
 # Note - this test will need to change depending on how we define event handling behavior
-def test_idempotent_lambda_exception_retryable_error(
+def test_idempotent_lambda_exception(
     persistence_store, lambda_apigw_event, timestamp_future, lambda_response, md5hashed_idempotency_key
 ):
     """
@@ -344,49 +344,3 @@ def test_idempotent_lambda_exception_retryable_error(
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
-
-
-def test_idempotent_lambda_exception_non_retryable_error(
-    config, lambda_apigw_event, timestamp_future, lambda_response, b64encoded_picked_error, md5hashed_idempotency_key
-):
-    """
-    Test idempotent decorator when lambda is executed with an event with a previously unknown event key, but
-    lambda_handler raises an exception.
-    """
-
-    persistence_store = DynamoDBPersistenceLayer(
-        event_key="body", table_name=TABLE_NAME, non_retryable_errors=(CustomException1,), boto_config=config
-    )
-
-    stubber = stub.Stubber(persistence_store.table.meta.client)
-
-    ddb_response_get_item = {
-        "Item": {
-            "id": {"S": md5hashed_idempotency_key},
-            "expiration": {"N": timestamp_future},
-            "data": {"S": b64encoded_picked_error},
-            "status": {"S": "ERROR"},
-        }
-    }
-    expected_params_get_item = {
-        "TableName": TABLE_NAME,
-        "Key": {"id": md5hashed_idempotency_key},
-        "ConsistentRead": True,
-    }
-
-    stubber.add_response("get_item", ddb_response_get_item, expected_params_get_item)
-    stubber.activate()
-
-    @idempotent(persistence=persistence_store)
-    def lambda_handler(event, context):
-        raise CustomException1("Somthing went wrong!")
-
-    with pytest.raises(CustomException1):
-        lambda_handler(lambda_apigw_event, {})
-
-    stubber.assert_no_pending_responses()
-    stubber.deactivate()
-
-
-def test_create_table():
-    pass
