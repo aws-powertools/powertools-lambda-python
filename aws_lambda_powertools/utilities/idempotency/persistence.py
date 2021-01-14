@@ -15,6 +15,7 @@ import boto3
 import jmespath
 from botocore.config import Config
 
+from .cache_dict import LRUDict
 from .exceptions import InvalidStatusError, ItemAlreadyExistsError, ItemNotFoundError
 
 logger = logging.getLogger(__name__)
@@ -120,6 +121,7 @@ class BasePersistenceLayer(ABC):
         expires_after: int = 3600,
         non_retryable_errors: Optional[Iterable[Exception]] = None,
         use_local_cache: bool = False,
+        local_cache_maxsize: int = 1024,
     ) -> None:
         """
         Initialize the base persistence layer
@@ -134,13 +136,16 @@ class BasePersistenceLayer(ABC):
             An interable of exception classes which should not be retried after being raised, by default []
         use_local_cache: bool, optional
             Whether to locally cache idempotency results, by default False
+        local_cache_maxsize: int, optional
+            Max number of items to store in local cache, by default 1024
         """
         self.event_key = event_key
         self.event_key_jmespath = jmespath.compile(event_key)
         self.expires_after = expires_after
         self.non_retryable_errors = non_retryable_errors or []
         self.use_local_cache = use_local_cache
-        self._cache = {}
+        if self.use_local_cache:
+            self._cache = LRUDict(max_size=local_cache_maxsize)
 
     def get_hashed_idempotency_key(self, lambda_event: Dict[str, Any]) -> str:
         """
@@ -183,13 +188,14 @@ class BasePersistenceLayer(ABC):
     def _retrieve_from_cache(self, idempotency_key: str):
         cached_record = self._cache.get(idempotency_key)
         if cached_record:
-            if not cached_record.is_expired:
-                return cached_record
-            else:
+            if cached_record.is_expired:
+                logger.debug(f"Removing expired local cache record for idempotency key: {idempotency_key}")
                 self._delete_from_cache(idempotency_key)
+            else:
+                return cached_record
 
     def _delete_from_cache(self, idempotency_key: str):
-        self._cache.pop(idempotency_key)
+        del self._cache[idempotency_key]
 
     def save_success(self, event: Dict[str, Any], result: dict) -> None:
         """
@@ -325,11 +331,8 @@ class BasePersistenceLayer(ABC):
         if self.use_local_cache:
             cached_record = self._retrieve_from_cache(idempotency_key)
             if cached_record:
-                if cached_record.is_expired:
-                    self._delete_from_cache(idempotency_key)
-                else:
-                    logger.debug(f"Idempotency record found in cache with idempotency key: {idempotency_key}")
-                    return cached_record
+                logger.debug(f"Idempotency record found in cache with idempotency key: {idempotency_key}")
+                return cached_record
 
         return self._get_record(idempotency_key)
 
