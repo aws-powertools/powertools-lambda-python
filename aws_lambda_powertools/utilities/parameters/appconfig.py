@@ -153,6 +153,6 @@ def get_app_config(
     if "appconfig" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["appconfig"] = AppConfigProvider(environment=environment, application=application)
 
-        sdk_options["ClientId"] = CLIENT_ID
+    sdk_options["ClientId"] = CLIENT_ID
 
     return DEFAULT_PROVIDERS["appconfig"].get(name, transform=transform, **sdk_options)
