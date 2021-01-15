@@ -67,6 +67,8 @@ wait $!
 echo
 
 # Gather statistics
+# Waiting 2.5 minutes to make sure the data propagates from CloudWatch Logs
+# into CloudWatch Logs Insights.
 sleep 150
 return_code=0
 echo -n "INSTRUMENTED="

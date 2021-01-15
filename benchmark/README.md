@@ -1,0 +1,20 @@
+# Cold Start Benchmark
+
+The [benchmark.sh script](./benchmark.sh) is a bash script to compare the cold-start time of using the AWS Lambda Powertools in a semi-automated way. It does so by deploying two Lambda functions which both have the aws-lambda-powertools module installed. One Lambda function will import and initialize the three main utilities (`Metrics`, `Logger`, `Tracer`), while the other one will not.
+
+## Usage
+
+To use the script, you should move into the benchmark folder and run the benchmark script:
+
+```
+cd benchmark
+./benchmark.sh
+```
+
+This will:
+
+* Deploy a CloudFormation stack using guided SAM deployment (*you will need to answer a few questions*).
+* Run loops to update the memory setting of the functions to force a cold start, then invoke them. This process is repeated a number of time to get more consistent results.
+* Wait for the data to propagate from CloudWatch Logs to CloudWatch Logs Insights.
+* Run a query on CloudWatch Logs insights, looking at the **REPORT** line from the logs.
+* Delete the CloudFormation stack.
