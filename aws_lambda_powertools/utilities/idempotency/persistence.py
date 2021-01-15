@@ -419,14 +419,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         )
 
     def _get_record(self, idempotency_key) -> DataRecord:
-        try:
-            response = self.table.get_item(Key={self.key_attr: idempotency_key}, ConsistentRead=True)
-        except self._ddb_resource.meta.client.exceptions.ResourceNotFoundException:
-            if self.create_table_if_not_existing:
-                self._create_table()
-                response = {}
-            else:
-                raise
+        response = self.table.get_item(Key={self.key_attr: idempotency_key}, ConsistentRead=True)
 
         try:
             item = response["Item"]
