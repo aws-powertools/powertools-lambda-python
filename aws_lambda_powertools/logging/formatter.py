@@ -3,6 +3,8 @@ import logging
 import os
 from typing import Dict, Iterable, Optional, Union
 
+from ..shared import constants
+
 STD_LOGGING_KEYS = (
     "name",
     "msg",
@@ -73,7 +75,7 @@ class JsonFormatter(logging.Formatter):
 
     @staticmethod
     def _get_latest_trace_id():
-        xray_trace_id = os.getenv("_X_AMZN_TRACE_ID")
+        xray_trace_id = os.getenv(constants.XRAY_TRACE_ID_ENV)
         return xray_trace_id.split(";")[0].replace("Root=", "") if xray_trace_id else None
 
     def update_formatter(self, **kwargs):

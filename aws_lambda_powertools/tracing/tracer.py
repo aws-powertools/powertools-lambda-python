@@ -4,14 +4,13 @@ import functools
 import inspect
 import logging
 import os
-from distutils.util import strtobool
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import aws_xray_sdk
 import aws_xray_sdk.core
 
-from aws_lambda_powertools.shared.constants import TRACER_CAPTURE_ERROR_ENV, TRACER_CAPTURE_RESPONSE_ENV
-from aws_lambda_powertools.shared.functions import resolve_env_var_choice
+from ..shared import constants
+from ..shared.functions import resolve_truthy_env_var_choice
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
@@ -283,9 +282,12 @@ class Tracer:
             )
 
         lambda_handler_name = lambda_handler.__name__
-
-        capture_response = resolve_env_var_choice(env=TRACER_CAPTURE_RESPONSE_ENV, choice=capture_response)
-        capture_error = resolve_env_var_choice(env=TRACER_CAPTURE_ERROR_ENV, choice=capture_error)
+        capture_response = resolve_truthy_env_var_choice(
+            env=os.getenv(constants.TRACER_CAPTURE_RESPONSE_ENV, "true"), choice=capture_response
+        )
+        capture_error = resolve_truthy_env_var_choice(
+            env=os.getenv(constants.TRACER_CAPTURE_ERROR_ENV, "true"), choice=capture_error
+        )
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
@@ -478,8 +480,12 @@ class Tracer:
 
         method_name = f"{method.__name__}"
 
-        capture_response = resolve_env_var_choice(env=TRACER_CAPTURE_RESPONSE_ENV, choice=capture_response)
-        capture_error = resolve_env_var_choice(env=TRACER_CAPTURE_ERROR_ENV, choice=capture_error)
+        capture_response = resolve_truthy_env_var_choice(
+            env=os.getenv(constants.TRACER_CAPTURE_RESPONSE_ENV, "true"), choice=capture_response
+        )
+        capture_error = resolve_truthy_env_var_choice(
+            env=os.getenv(constants.TRACER_CAPTURE_ERROR_ENV, "true"), choice=capture_error
+        )
 
         if inspect.iscoroutinefunction(method):
             return self._decorate_async_function(
@@ -681,14 +687,13 @@ class Tracer:
         bool
         """
         logger.debug("Verifying whether Tracing has been disabled")
-        is_lambda_sam_cli = os.getenv("AWS_SAM_LOCAL")
-        is_chalice_cli = os.getenv("AWS_CHALICE_CLI_MODE")
-        env_option = str(os.getenv("POWERTOOLS_TRACE_DISABLED", "false"))
-        disabled_env = strtobool(env_option)
+        is_lambda_sam_cli = os.getenv(constants.SAM_LOCAL_ENV)
+        is_chalice_cli = os.getenv(constants.CHALICE_LOCAL_ENV)
+        is_disabled = resolve_truthy_env_var_choice(env=os.getenv(constants.TRACER_DISABLED_ENV, "false"))
 
-        if disabled_env:
+        if is_disabled:
             logger.debug("Tracing has been disabled via env var POWERTOOLS_TRACE_DISABLED")
-            return disabled_env
+            return is_disabled
 
         if is_lambda_sam_cli or is_chalice_cli:
             logger.debug("Running under SAM CLI env or not in Lambda env; disabling Tracing")
@@ -706,7 +711,7 @@ class Tracer:
     ):
         """ Populates Tracer config for new and existing initializations """
         is_disabled = disabled if disabled is not None else self._is_tracer_disabled()
-        is_service = service if service is not None else os.getenv("POWERTOOLS_SERVICE_NAME")
+        is_service = service if service is not None else os.getenv(constants.SERVICE_NAME_ENV)
 
         self._config["provider"] = provider if provider is not None else self._config["provider"]
         self._config["auto_patch"] = auto_patch if auto_patch is not None else self._config["auto_patch"]
