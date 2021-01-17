@@ -439,6 +439,18 @@ def test_lambda_handler(lambda_handler, lambda_context):
     lambda_handler(test_event, lambda_context) # this will now have a Context object populated
 ```
 
+### pytest live log feature
+
+Pytest Live Log feature duplicates emitted log messages in order to style log statements according to their levels, for this to work use `POWERTOOLS_LOG_DEDUPLICATION_DISABLED` env var.
+
+```bash:title=pytest_live_log.sh
+POWERTOOLS_LOG_DEDUPLICATION_DISABLED="1" pytest -o log_cli=1
+```
+
+<Note type="warning">
+  This feature should be used with care, as it explicitly disables our ability to filter propagated messages to the root logger (if configured).
+</Note><br/>
+
 ## FAQ
 
 **How can I enable boto3 and botocore library logging?**
