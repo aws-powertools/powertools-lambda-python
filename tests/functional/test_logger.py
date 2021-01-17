@@ -11,6 +11,7 @@ import pytest
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
 from aws_lambda_powertools.logging.logger import set_package_logger
+from aws_lambda_powertools.shared import constants
 
 
 @pytest.fixture
@@ -376,6 +377,7 @@ def test_logger_do_not_log_twice_when_root_logger_is_setup(stdout, service_name)
     child_logger = Logger(service=service_name, child=True, stream=stdout)
     logger.info("PARENT")
     child_logger.info("CHILD")
+    root_logger.info("ROOT")
 
     # THEN it should only contain only two log entries
     # since child's log records propagated to root logger should be rejected
@@ -400,3 +402,23 @@ def test_logger_extra_kwargs(stdout, service_name):
 
     # THEN second log should not have request_id in the root structure
     assert "request_id" not in no_extra_fields_log
+
+
+def test_logger_log_twice_when_log_filter_isnt_present_and_root_logger_is_setup(monkeypatch, stdout, service_name):
+    # GIVEN Lambda configures the root logger with a handler
+    root_logger = logging.getLogger()
+    root_logger.addHandler(logging.StreamHandler(stream=stdout))
+
+    # WHEN we create a new Logger and child Logger
+    # and log deduplication filter for child messages are disabled
+    # see #262 for more details on why this is needed for Pytest Live Log feature
+    monkeypatch.setenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "true")
+    logger = Logger(service=service_name, stream=stdout)
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+    logger.info("PARENT")
+    child_logger.info("CHILD")
+
+    # THEN it should only contain only two log entries
+    # since child's log records propagated to root logger should be rejected
+    logs = list(stdout.getvalue().strip().split("\n"))
+    assert len(logs) == 4
