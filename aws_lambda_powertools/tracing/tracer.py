@@ -487,6 +487,7 @@ class Tracer:
             env=os.getenv(constants.TRACER_CAPTURE_ERROR_ENV, "true"), choice=capture_error
         )
 
+        # Maintenance: Need a factory/builder here to simplify this now
         if inspect.iscoroutinefunction(method):
             return self._decorate_async_function(
                 method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
