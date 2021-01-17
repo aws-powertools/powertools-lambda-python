@@ -34,6 +34,19 @@ def test_capture_lambda_handler(dummy_response):
     handler({}, {})
 
 
+def test_capture_lambda_handler_with_additional_kwargs(dummy_response):
+    # GIVEN tracer lambda handler decorator is used
+    tracer = Tracer(disabled=True)
+
+    # WHEN a lambda handler signature has additional keyword arguments
+    @tracer.capture_lambda_handler
+    def handler(event, context, my_extra_option=None, **kwargs):
+        return dummy_response
+
+    # THEN tracer should not raise an Exception
+    handler({}, {}, blah="blah")
+
+
 def test_capture_method(dummy_response):
     # GIVEN tracer method decorator is used
     tracer = Tracer(disabled=True)
