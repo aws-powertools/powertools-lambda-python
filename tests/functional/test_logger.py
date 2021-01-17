@@ -373,9 +373,9 @@ def test_logger_do_not_log_twice_when_root_logger_is_setup(stdout, service_name)
 
     # WHEN we create a new Logger and child Logger
     logger = Logger(service=service_name, stream=stdout)
-    child_logger = Logger(child=True, stream=stdout)
-    logger.info("hello")
-    child_logger.info("hello again")
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+    logger.info("PARENT")
+    child_logger.info("CHILD")
 
     # THEN it should only contain only two log entries
     # since child's log records propagated to root logger should be rejected

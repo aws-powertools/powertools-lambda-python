@@ -2,16 +2,17 @@ import functools
 import inspect
 import logging
 import os
-from distutils.util import strtobool
 from typing import Callable
 
+from ..shared import constants
+from ..shared.functions import resolve_truthy_env_var_choice
 from ..tracing import Tracer
 from .exceptions import MiddlewareInvalidArgumentError
 
 logger = logging.getLogger(__name__)
 
 
-def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
+def lambda_handler_decorator(decorator: Callable = None, trace_execution: bool = None):
     """Decorator factory for decorating Lambda handlers.
 
     You can use lambda_handler_decorator to create your own middlewares,
@@ -104,7 +105,9 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution=False):
     if decorator is None:
         return functools.partial(lambda_handler_decorator, trace_execution=trace_execution)
 
-    trace_execution = trace_execution or strtobool(str(os.getenv("POWERTOOLS_TRACE_MIDDLEWARES", False)))
+    trace_execution = resolve_truthy_env_var_choice(
+        choice=trace_execution, env=os.getenv(constants.MIDDLEWARE_FACTORY_TRACE_ENV, "false")
+    )
 
     @functools.wraps(decorator)
     def final_decorator(func: Callable = None, **kwargs):
