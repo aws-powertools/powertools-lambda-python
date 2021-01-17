@@ -65,12 +65,16 @@ def handler(event, context):
     ...
 ```
 
+### disabling response auto-capture
+
+> New in 1.9.0
+
 <Note type="warning">
   <strong>Returning sensitive information from your Lambda handler or functions, where Tracer is used?</strong>
   <br/><br/>
-  You can disable Tracer from capturing their responses as tracing metadata with <strong><code>capture_response=False</code></strong> parameter in both capture_lambda_handler and capture_method decorators.
 </Note><br/>
 
+You can disable Tracer from capturing their responses as tracing metadata with <strong><code>capture_response=False</code></strong> parameter in both capture_lambda_handler and capture_method decorators.
 
 ```python:title=do_not_capture_response_as_metadata.py
 # Disables Tracer from capturing response and adding as metadata
@@ -78,6 +82,25 @@ def handler(event, context):
 @tracer.capture_lambda_handler(capture_response=False) # highlight-line
 def handler(event, context):
 	return "sensitive_information"
+```
+
+### disabling exception auto-capture
+
+> New in 1.10.0
+
+<Note type="warning">
+  <strong>Can exceptions contain sensitive information from your Lambda handler or functions, where Tracer is used?</strong>
+  <br/><br/>
+</Note><br/>
+
+You can disable Tracer from capturing their exceptions as tracing metadata with <strong><code>capture_error=False</code></strong> parameter in both capture_lambda_handler and capture_method decorators.
+
+```python:title=do_not_capture_exception_as_metadata.py
+# Disables Tracer from capturing exception and adding as metadata
+# Useful when dealing with sensitive data
+@tracer.capture_lambda_handler(capture_error=False) # highlight-line
+def handler(event, context):
+	raise ValueError("some sensitive info in the stack trace...")
 ```
 
 ### Annotations

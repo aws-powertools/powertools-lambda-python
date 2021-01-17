@@ -3,12 +3,14 @@ import json
 import random
 import string
 from datetime import datetime, timedelta
+from io import BytesIO
 from typing import Dict
 
 import pytest
 from boto3.dynamodb.conditions import Key
 from botocore import stub
 from botocore.config import Config
+from botocore.response import StreamingBody
 
 from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.utilities.parameters.base import BaseProvider, ExpirableValue
@@ -1449,6 +1451,87 @@ def test_get_secret_new(monkeypatch, mock_name, mock_value):
     value = parameters.get_secret(mock_name)
 
     assert value == mock_value
+
+
+def test_appconf_provider_get_configuration_json_content_type(mock_name, config):
+    """
+    Test get_configuration.get with default values
+    """
+
+    # Create a new provider
+    environment = "dev"
+    application = "myapp"
+    provider = parameters.AppConfigProvider(environment=environment, application=application, config=config)
+
+    mock_body_json = {"myenvvar1": "Black Panther", "myenvvar2": 3}
+    encoded_message = json.dumps(mock_body_json).encode("utf-8")
+    mock_value = StreamingBody(BytesIO(encoded_message), len(encoded_message))
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {"Content": mock_value, "ConfigurationVersion": "1", "ContentType": "application/json"}
+    stubber.add_response("get_configuration", response)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name, transform="json", ClientConfigurationVersion="2")
+
+        assert value == mock_body_json
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_appconf_provider_get_configuration_no_transform(mock_name, config):
+    """
+    Test appconfigprovider.get with default values
+    """
+
+    # Create a new provider
+    environment = "dev"
+    application = "myapp"
+    provider = parameters.AppConfigProvider(environment=environment, application=application, config=config)
+
+    mock_body_json = {"myenvvar1": "Black Panther", "myenvvar2": 3}
+    encoded_message = json.dumps(mock_body_json).encode("utf-8")
+    mock_value = StreamingBody(BytesIO(encoded_message), len(encoded_message))
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {"Content": mock_value, "ConfigurationVersion": "1", "ContentType": "application/json"}
+    stubber.add_response("get_configuration", response)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name)
+        str_value = value.decode("utf-8")
+        assert str_value == json.dumps(mock_body_json)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_appconf_get_app_config_no_transform(monkeypatch, mock_name):
+    """
+    Test get_app_config()
+    """
+    mock_body_json = {"myenvvar1": "Black Panther", "myenvvar2": 3}
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            assert name == mock_name
+            return json.dumps(mock_body_json).encode("utf-8")
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig", TestProvider())
+
+    environment = "dev"
+    application = "myapp"
+    value = parameters.get_app_config(mock_name, environment=environment, application=application)
+    str_value = value.decode("utf-8")
+    assert str_value == json.dumps(mock_body_json)
 
 
 def test_transform_value_json(mock_value):

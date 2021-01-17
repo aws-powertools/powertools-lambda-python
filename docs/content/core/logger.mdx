@@ -150,6 +150,13 @@ def handler(event, context):
 
 ## Appending additional keys
 
+You can append additional keys using either mechanism:
+
+* Persist new keys across all future log messages via `structure_logs`
+* Add additional keys on a per log message basis via `extra` parameter
+
+### structure_logs
+
 You can append your own keys to your existing Logger via `structure_logs` with **append** param.
 
 ```python:title=collect.py
@@ -179,13 +186,36 @@ This example will add `order_id` if its value is not empty, and in subsequent in
    "level": "INFO",
    "location": "collect.handler:1",
    "service": "payment",
-   "lambda_function_name": "test",
-   "lambda_function_memory_size": 128,
-   "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
-   "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
-   "cold_start": true,
    "sampling_rate": 0.0,
    "order_id": "order_id_value", // highlight-line
+   "message": "Collecting payment"
+}
+```
+</details>
+
+### extra parameter
+
+Extra parameter is available for all log levels, as implemented in the standard logging library. It accepts any dictionary, and it'll be added as part of the root structure of the logs.
+
+```python:title=extra_parameter.py
+logger = Logger(service="payment")
+
+fields = { "request_id": "1123" }
+
+logger.info("Hello", extra=fields) # highlight-line
+```
+
+<details>
+<summary><strong>Excerpt output in CloudWatch Logs</strong></summary>
+
+```json:title=cloudwatch_logs.json
+{
+   "timestamp": "2021-01-12 14:08:12,357",
+   "level": "INFO",
+   "location": "collect.handler:1",
+   "service": "payment",
+   "sampling_rate": 0.0,
+   "request_id": "1123", // highlight-line
    "message": "Collecting payment"
 }
 ```
@@ -291,13 +321,13 @@ def handler(event, context):
 
 If you're migrating from other Loggers, there are few key points to be aware of: **Service parameter**, **Inheriting Loggers**, **Overriding Log records**, and **Logging exceptions**.
 
-### The service parameter
+### service parameter
 
 Service is what defines what the function is responsible for, or part of (e.g payment service), and the name of the Logger.
 
 For Logger, the `service` is the logging key customers can use to search log operations for one or more functions - For example, **search for all errors, or messages like X, where service is payment**.
 
-### Inheriting Loggers
+### inheriting Loggers
 
 > Python Logging hierarchy happens via the dot notation: `service`, `service.child`, `service.child_2`.
 
@@ -325,7 +355,7 @@ In this case, Logger will register a Logger named `payment`, and a Logger named 
 
 This can be fixed by either ensuring both has the `service` value as `payment`, or simply use the environment variable `POWERTOOLS_SERVICE_NAME` to ensure service value will be the same across all Loggers when not explicitly set.
 
-### Overriding Log records
+### overriding Log records
 
 You might want to continue to use the same date formatting style, or override `location` to display the `package.function_name:line_number` as you previously had.
 
@@ -355,7 +385,7 @@ logger = Logger(stream=stdout, log_record_order=["level","location","message","t
 
 Some keys cannot be supressed in the Log records: `sampling_rate` is part of the specification and cannot be supressed; `xray_trace_id` is supressed automatically if X-Ray is not enabled in the Lambda function, and added automatically if it is.
 
-### Logging exceptions
+### logging exceptions
 
 When logging exceptions, Logger will add a new key named `exception`, and will serialize the full traceback as a string.
 
@@ -433,4 +463,49 @@ def handler(event: Dict, context: LambdaContext) -> List:
     response = client.list_buckets()
 
     return response.get("Buckets", [])
+```
+
+**What's the difference between `structure_log` and `extra`?**
+
+Keys added with `structure_log` will persist across multiple log messages while keys added via `extra` will only be available in a given log message operation.
+
+**Example - Persisting payment_id not request_id**
+
+```python
+from aws_lambda_powertools import Logger
+
+logger = Logger(service="payment")
+logger.structure_logs(append=True, payment_id="123456789")
+
+try:
+    booking_id = book_flight()
+    logger.info("Flight booked successfully", extra={ "booking_id": booking_id})
+except BookingReservationError:
+    ...
+
+logger.info("goodbye")
+```
+
+Note that `payment_id` remains in both log messages while `booking_id` is only available in the first message.
+
+```json
+{
+    "level": "INFO",
+    "location": "<module>:5",
+    "message": "Flight booked successfully",
+    "timestamp": "2021-01-12 14:09:10,859",
+    "service": "payment",
+    "sampling_rate": 0.0,
+    "payment_id": "123456789",
+    "booking_id": "75edbad0-0857-4fc9-b547-6180e2f7959b"
+},
+{
+    "level": "INFO",
+    "location": "<module>:6",
+    "message": "goodbye",
+    "timestamp": "2021-01-12 14:09:10,860",
+    "service": "payment",
+    "sampling_rate": 0.0,
+    "payment_id": "123456789"
+}
 ```

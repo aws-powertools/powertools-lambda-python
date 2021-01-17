@@ -373,11 +373,30 @@ def test_logger_do_not_log_twice_when_root_logger_is_setup(stdout, service_name)
 
     # WHEN we create a new Logger and child Logger
     logger = Logger(service=service_name, stream=stdout)
-    child_logger = Logger(child=True, stream=stdout)
-    logger.info("hello")
-    child_logger.info("hello again")
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+    logger.info("PARENT")
+    child_logger.info("CHILD")
 
     # THEN it should only contain only two log entries
     # since child's log records propagated to root logger should be rejected
     logs = list(stdout.getvalue().strip().split("\n"))
     assert len(logs) == 2
+
+
+def test_logger_extra_kwargs(stdout, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN `request_id` is an extra field in a log message to the existing structured log
+    fields = {"request_id": "blah"}
+
+    logger.info("with extra fields", extra=fields)
+    logger.info("without extra fields")
+
+    extra_fields_log, no_extra_fields_log = capture_multiple_logging_statements_output(stdout)
+
+    # THEN first log should have request_id field in the root structure
+    assert "request_id" in extra_fields_log
+
+    # THEN second log should not have request_id in the root structure
+    assert "request_id" not in no_extra_fields_log

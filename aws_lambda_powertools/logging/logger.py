@@ -4,9 +4,10 @@ import logging
 import os
 import random
 import sys
-from distutils.util import strtobool
 from typing import Any, Callable, Dict, Union
 
+from ..shared import constants
+from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
 from .exceptions import InvalidLoggerSamplingRateError
 from .filters import SuppressFilter
 from .formatter import JsonFormatter
@@ -122,8 +123,12 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         stream: sys.stdout = None,
         **kwargs,
     ):
-        self.service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
-        self.sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or 0.0
+        self.service = resolve_env_var_choice(
+            choice=service, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
+        )
+        self.sampling_rate = resolve_env_var_choice(
+            choice=sampling_rate, env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE, 0.0)
+        )
         self.log_level = self._get_log_level(level)
         self.child = child
         self._handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
@@ -193,7 +198,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
                 f"Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
             )
 
-    def inject_lambda_context(self, lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False):
+    def inject_lambda_context(self, lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = None):
         """Decorator to capture Lambda contextual info and inject into logger
 
         Parameters
@@ -242,8 +247,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             logger.debug("Decorator called with parameters")
             return functools.partial(self.inject_lambda_context, log_event=log_event)
 
-        log_event_env_option = str(os.getenv("POWERTOOLS_LOGGER_LOG_EVENT", "false"))
-        log_event = strtobool(log_event_env_option) or log_event
+        log_event = resolve_truthy_env_var_choice(
+            choice=log_event, env=os.getenv(constants.LOGGER_LOG_EVENT_ENV, "false")
+        )
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
@@ -291,9 +297,10 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             return level
 
         log_level: str = level or os.getenv("LOG_LEVEL")
-        log_level = log_level.upper() if log_level is not None else logging.INFO
+        if log_level is None:
+            return logging.INFO
 
-        return log_level
+        return log_level.upper()
 
     @staticmethod
     def _get_caller_filename():
@@ -303,9 +310,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         # Before previous frame => Caller
         frame = inspect.currentframe()
         caller_frame = frame.f_back.f_back.f_back
-        filename = caller_frame.f_globals["__name__"]
-
-        return filename
+        return caller_frame.f_globals["__name__"]
 
 
 def set_package_logger(
