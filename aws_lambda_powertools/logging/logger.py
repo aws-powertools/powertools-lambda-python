@@ -176,8 +176,8 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             logger.debug("Adding filter in root logger to suppress child logger records to bubble up")
             for handler in logging.root.handlers:
                 # It'll add a filter to suppress any child logger from self.service
-                # Where service is Order, it'll reject parent logger Order,
-                # and child loggers such as Order.checkout, Order.shared
+                # Example: `Logger(service="order")`, where service is Order
+                # It'll reject all loggers starting with `order` e.g. order.checkout, order.shared
                 handler.addFilter(SuppressFilter(self.service))
 
         # as per bug in #249, we should not be pre-configuring an existing logger
