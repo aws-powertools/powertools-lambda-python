@@ -207,6 +207,8 @@ def handler(event, context):
 
 ## App Config
 
+> New in 1.10.0
+
 For configurations stored in App Config, use `get_app_config`.
 The following will retrieve the latest version and store it in the cache.
 
@@ -233,7 +235,7 @@ appconf_provider = parameters.AppConfigProvider(environment="my_env", applicatio
 
 def handler(event, context):
     # Retrieve a single secret
-    value : bytes = appconf_provider.get("my_conf")
+    value: bytes = appconf_provider.get("my_conf")
 ```
 
 ## Create your own provider
