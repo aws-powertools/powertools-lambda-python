@@ -69,9 +69,6 @@ def idempotent(
     if event_record.status == STATUS_CONSTANTS["COMPLETED"]:
         return event_record.response_json_as_dict()
 
-    if event_record.status == STATUS_CONSTANTS["ERROR"]:
-        event_record.raise_stored_exception()
-
 
 def _call_lambda(
     handler: Callable, persistence_instance: BasePersistenceLayer, event: Dict[str, Any], context: LambdaContext
