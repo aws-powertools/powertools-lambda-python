@@ -25,3 +25,9 @@ class InvalidStatusError(Exception):
     """
     An invalid status was provided
     """
+
+
+class IdempotencyValidationerror(Exception):
+    """
+    Payload does not match stored idempotency record
+    """

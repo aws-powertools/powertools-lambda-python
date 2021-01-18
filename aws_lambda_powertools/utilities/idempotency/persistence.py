@@ -14,7 +14,7 @@ import jmespath
 from botocore.config import Config
 
 from .cache_dict import LRUDict
-from .exceptions import InvalidStatusError, ItemAlreadyExistsError, ItemNotFoundError
+from .exceptions import IdempotencyValidationerror, InvalidStatusError, ItemAlreadyExistsError, ItemNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,12 @@ class DataRecord:
     """
 
     def __init__(
-        self, idempotency_key, status: str = None, expiry_timestamp: int = None, response_data: str = None
+        self,
+        idempotency_key,
+        status: str = None,
+        expiry_timestamp: int = None,
+        response_data: str = None,
+        payload_hash: str = None,
     ) -> None:
         """
 
@@ -45,10 +50,13 @@ class DataRecord:
             status of the idempotent record
         expiry_timestamp: int, optional
             time before the record should expire, in milliseconds
+        payload_hash: str, optional
+            hashed representation of payload
         response_data: str, optional
             response data from previous executions using the record
         """
         self.idempotency_key = idempotency_key
+        self.payload_hash = payload_hash
         self.expiry_timestamp = expiry_timestamp
         self._status = status
         self.response_data = response_data
@@ -103,30 +111,45 @@ class BasePersistenceLayer(ABC):
     """
 
     def __init__(
-        self, event_key: str, expires_after: int = 3600, use_local_cache: bool = False, local_cache_maxsize: int = 1024,
+        self,
+        event_key_jmespath: str,
+        payload_validation_jmespath: str = "",
+        expires_after: int = 3600,
+        use_local_cache: bool = False,
+        local_cache_maxsize: int = 1024,
+        hash_function: str = "md5",
     ) -> None:
         """
         Initialize the base persistence layer
 
         Parameters
         ----------
-        event_key: str
+        event_key_jmespath: str
             A jmespath expression to extract the idempotency key from the event record
+        payload_validation_jmespath: str
+            A jmespath expression to extract the payload to be validated from the event record
         expires_after: int
             The number of milliseconds to wait before a record is expired
         use_local_cache: bool, optional
             Whether to locally cache idempotency results, by default False
         local_cache_maxsize: int, optional
             Max number of items to store in local cache, by default 1024
+        hash_function: str, optional
+            Function to use for calculating hashes, by default md5.
         """
-        self.event_key = event_key
-        self.event_key_jmespath = jmespath.compile(event_key)
+        self.event_key = event_key_jmespath
+        self.event_key_jmespath = jmespath.compile(event_key_jmespath)
         self.expires_after = expires_after
         self.use_local_cache = use_local_cache
         if self.use_local_cache:
             self._cache = LRUDict(max_size=local_cache_maxsize)
+        self.payload_validation_enabled = False
+        if payload_validation_jmespath:
+            self.validation_key_jmespath = jmespath.compile(payload_validation_jmespath)
+            self.payload_validation_enabled = True
+        self.hash_function = hash_function
 
-    def get_hashed_idempotency_key(self, lambda_event: Dict[str, Any]) -> str:
+    def _get_hashed_idempotency_key(self, lambda_event: Dict[str, Any]) -> str:
         """
         Extract data from lambda event using event key jmespath, and return a hashed representation
 
@@ -138,15 +161,67 @@ class BasePersistenceLayer(ABC):
         Returns
         -------
         str
-            md5 hash of the data extracted by the jmespath expression
+            Hashed representation of the data extracted by the jmespath expression
 
         """
         data = self.event_key_jmespath.search(lambda_event)
+        return self._generate_hash(data)
 
-        # The following hash is not used in any security context. It is only used
-        # to generate unique values.
-        hashed_data = hashlib.md5(json.dumps(data).encode())  # nosec
+    def _get_hashed_payload(self, lambda_event: Dict[str, Any]) -> str:
+        """
+        Extract data from lambda event using validation key jmespath, and return a hashed representation
+
+        Parameters
+        ----------
+        lambda_event: Dict[str, Any]
+            Lambda event
+
+        Returns
+        -------
+        str
+            Hashed representation of the data extracted by the jmespath expression
+
+        """
+        if not self.payload_validation_enabled:
+            return ""
+        data = self.validation_key_jmespath.search(lambda_event)
+        return self._generate_hash(data)
+
+    def _generate_hash(self, data: Any) -> str:
+        """
+        Generate a hash value from the provided data
+
+        Parameters
+        ----------
+        data: Any
+            The data to hash
+
+        Returns
+        -------
+        str
+            Hashed representation of the provided data
+
+        """
+        hash_func = getattr(hashlib, self.hash_function)
+        hashed_data = hash_func(json.dumps(data).encode())
         return hashed_data.hexdigest()
+
+    def _validate_payload(self, lambda_event: Dict[str, Any], data_record: DataRecord) -> None:
+        """
+        Validate that the hashed payload matches in the lambda event and stored data record
+
+        Parameters
+        ----------
+        lambda_event: Dict[str, Any]
+            Lambda event
+        data_record: DataRecord
+            DataRecord instance
+
+        """
+        if self.payload_validation_enabled:
+            lambda_payload_hash = self._get_hashed_payload(lambda_event)
+            if not data_record.payload_hash == lambda_payload_hash:
+                raise IdempotencyValidationerror("Payload does not match stored record for this event key")
 
     def _get_expiry_timestamp(self) -> int:
         """
@@ -190,10 +265,11 @@ class BasePersistenceLayer(ABC):
         response_data = json.dumps(result)
 
         data_record = DataRecord(
-            idempotency_key=self.get_hashed_idempotency_key(event),
+            idempotency_key=self._get_hashed_idempotency_key(event),
             status=STATUS_CONSTANTS["COMPLETED"],
             expiry_timestamp=self._get_expiry_timestamp(),
             response_data=response_data,
+            payload_hash=self._get_hashed_payload(event),
         )
         logger.debug(
             f"Lambda successfully executed. Saving record to persistence store with "
@@ -214,9 +290,10 @@ class BasePersistenceLayer(ABC):
             Lambda event
         """
         data_record = DataRecord(
-            idempotency_key=self.get_hashed_idempotency_key(event),
+            idempotency_key=self._get_hashed_idempotency_key(event),
             status=STATUS_CONSTANTS["INPROGRESS"],
             expiry_timestamp=self._get_expiry_timestamp(),
+            payload_hash=self._get_hashed_payload(event),
         )
 
         logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")
@@ -236,11 +313,7 @@ class BasePersistenceLayer(ABC):
         exception
             The exception raised by the lambda handler
         """
-        data_record = DataRecord(
-            idempotency_key=self.get_hashed_idempotency_key(event),
-            status=STATUS_CONSTANTS["ERROR"],
-            expiry_timestamp=self._get_expiry_timestamp(),
-        )
+        data_record = DataRecord(idempotency_key=self._get_hashed_idempotency_key(event))
 
         logger.debug(
             f"Lambda raised an exception ({type(exception).__name__}). Clearing in progress record in persistence "
@@ -271,15 +344,18 @@ class BasePersistenceLayer(ABC):
             Exception raised if no record exists in persistence store with the idempotency key
         """
 
-        idempotency_key = self.get_hashed_idempotency_key(lambda_event)
+        idempotency_key = self._get_hashed_idempotency_key(lambda_event)
 
         if self.use_local_cache:
             cached_record = self._retrieve_from_cache(idempotency_key)
             if cached_record:
                 logger.debug(f"Idempotency record found in cache with idempotency key: {idempotency_key}")
+                self._validate_payload(lambda_event, cached_record)
                 return cached_record
 
-        return self._get_record(idempotency_key)
+        record = self._get_record(idempotency_key)
+        self._validate_payload(lambda_event, record)
+        return record
 
     @abstractmethod
     def _get_record(self, idempotency_key) -> DataRecord:
@@ -350,6 +426,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         expiry_attr: Optional[str] = "expiration",
         status_attr: Optional[str] = "status",
         data_attr: Optional[str] = "data",
+        validation_key_attr: Optional[str] = "validation",
         boto_config: Optional[Config] = None,
         *args,
         **kwargs,
@@ -394,6 +471,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         self.expiry_attr = expiry_attr
         self.status_attr = status_attr
         self.data_attr = data_attr
+        self.validation_key_attr = validation_key_attr
         super(DynamoDBPersistenceLayer, self).__init__(*args, **kwargs)
 
     def _item_to_data_record(self, item: Dict[str, Union[str, int]]) -> DataRecord:
@@ -416,6 +494,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             status=item[self.status_attr],
             expiry_timestamp=item[self.expiry_attr],
             response_data=item.get(self.data_attr),
+            payload_hash=item.get(self.validation_key_attr),
         )
 
     def _get_record(self, idempotency_key) -> DataRecord:
@@ -428,15 +507,21 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         return self._item_to_data_record(item)
 
     def _put_record(self, data_record: DataRecord) -> None:
+
+        item = {
+            self.key_attr: data_record.idempotency_key,
+            self.expiry_attr: data_record.expiry_timestamp,
+            self.status_attr: STATUS_CONSTANTS["INPROGRESS"],
+        }
+
+        if self.payload_validation_enabled:
+            item[self.validation_key_attr] = data_record.payload_hash
+
         now = datetime.datetime.now()
         try:
             logger.debug(f"Putting record for idempotency key: {data_record.idempotency_key}")
             self.table.put_item(
-                Item={
-                    self.key_attr: data_record.idempotency_key,
-                    "expiration": data_record.expiry_timestamp,
-                    "status": STATUS_CONSTANTS["INPROGRESS"],
-                },
+                Item=item,
                 ConditionExpression=f"attribute_not_exists({self.key_attr}) OR expiration < :now",
                 ExpressionAttributeValues={":now": int(now.timestamp())},
             )
@@ -446,19 +531,28 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
     def _update_record(self, data_record: DataRecord):
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
+        update_expression = "SET #response_data = :response_data, #expiry = :expiry, #status = :status"
+        expression_attr_values = {
+            ":expiry": data_record.expiry_timestamp,
+            ":response_data": data_record.response_data,
+            ":status": data_record.status,
+        }
+        expression_attr_names = {
+            "#response_data": self.data_attr,
+            "#expiry": self.expiry_attr,
+            "#status": self.status_attr,
+        }
+
+        if self.payload_validation_enabled:
+            update_expression += ", #validation_key = :validation_key"
+            expression_attr_values[":validation_key"] = data_record.payload_hash
+            expression_attr_names["#validation_key"] = self.validation_key_attr
+
         self.table.update_item(
             Key={self.key_attr: data_record.idempotency_key},
-            UpdateExpression="SET #response_data = :response_data, #expiry = :expiry, #status = :status",
-            ExpressionAttributeValues={
-                ":expiry": data_record.expiry_timestamp,
-                ":response_data": data_record.response_data,
-                ":status": data_record.status,
-            },
-            ExpressionAttributeNames={
-                "#response_data": self.data_attr,
-                "#expiry": self.expiry_attr,
-                "#status": self.status_attr,
-            },
+            UpdateExpression=update_expression,
+            ExpressionAttributeValues=expression_attr_values,
+            ExpressionAttributeNames=expression_attr_names,
         )
 
     def _delete_record(self, data_record: DataRecord) -> None:
