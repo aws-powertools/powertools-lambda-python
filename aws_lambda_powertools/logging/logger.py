@@ -129,12 +129,14 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self.sampling_rate = resolve_env_var_choice(
             choice=sampling_rate, env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE, 0.0)
         )
+        self._is_deduplication_disabled = resolve_truthy_env_var_choice(
+            env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false")
+        )
         self.log_level = self._get_log_level(level)
         self.child = child
         self._handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
-
         self._init_logger(**kwargs)
 
     def __getattr__(self, name):
@@ -167,12 +169,16 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self._logger.addHandler(self._handler)
         self.structure_logs(**kwargs)
 
-        logger.debug("Adding filter in root logger to suppress child logger records to bubble up")
-        for handler in logging.root.handlers:
-            # It'll add a filter to suppress any child logger from self.service
-            # Where service is Order, it'll reject parent logger Order,
-            # and child loggers such as Order.checkout, Order.shared
-            handler.addFilter(SuppressFilter(self.service))
+        # Pytest Live Log feature duplicates log records for colored output
+        # but we explicitly add a filter for log deduplication.
+        # This flag disables this protection when you explicit want logs to be duplicated (#262)
+        if not self._is_deduplication_disabled:
+            logger.debug("Adding filter in root logger to suppress child logger records to bubble up")
+            for handler in logging.root.handlers:
+                # It'll add a filter to suppress any child logger from self.service
+                # Example: `Logger(service="order")`, where service is Order
+                # It'll reject all loggers starting with `order` e.g. order.checkout, order.shared
+                handler.addFilter(SuppressFilter(self.service))
 
         # as per bug in #249, we should not be pre-configuring an existing logger
         # therefore we set a custom attribute in the Logger that will be returned
