@@ -1,10 +1,26 @@
-# Changelog
+.# Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.10.0] - 2021-01-18
+
+### Added
+- **Utilities**: Added support for AppConfig in Parameters utility
+- **Logger**: Added support for `extra` parameter to add additional root fields when logging messages
+- **Logger**: Added support to Pytest Live Log feat. via feature toggle `POWERTOOLS_LOG_DEDUPLICATION_DISABLED`
+- **Tracer**: Added support to disable auto-capturing response and exception as metadata
+- **Utilities**: Added support to handle custom string/integer formats in JSON Schema in Validator utility
+- **Install**: Added new Lambda Layer with all extra dependencies installed, available in Serverless Application Repository (SAR)
+
+### Fixed
+
+- **Docs**: Added missing SNS parser model
+- **Docs**: Added new environment variables for toggling features in Logger and Tracer: `POWERTOOLS_LOG_DEDUPLICATION_DISABLED`, `POWERTOOLS_TRACER_CAPTURE_RESPONSE`, `POWERTOOLS_TRACER_CAPTURE_ERROR`
+- **Docs**: Fixed incorrect import for Cognito data classes in Event Sources utility
 
 ## [1.9.1] - 2020-12-21
 
