@@ -2,7 +2,9 @@
 Utility for adding idempotency to lambda functions
 """
 
+from aws_lambda_powertools.utilities.idempotency.persistence.base import BasePersistenceLayer
+from aws_lambda_powertools.utilities.idempotency.persistence.dynamodb import DynamoDBPersistenceLayer
+
 from .idempotency import idempotent
-from .persistence import BasePersistenceLayer, DynamoDBPersistenceLayer
 
 __all__ = ("DynamoDBPersistenceLayer", "BasePersistenceLayer", "idempotent")

@@ -1,5 +1,3 @@
-import copy
-
 import pytest
 from botocore import stub
 
@@ -31,10 +29,11 @@ def test_idempotent_lambda_already_completed(
         "Key": {"id": hashed_idempotency_key},
         "ConsistentRead": True,
     }
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
     stubber.add_response("get_item", ddb_response, expected_params)
     stubber.activate()
 
-    @idempotent(persistence=persistence_store)
+    @idempotent(persistence_store=persistence_store)
     def lambda_handler(event, context):
         raise Exception
 
@@ -68,10 +67,11 @@ def test_idempotent_lambda_in_progress(
         }
     }
 
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
     stubber.add_response("get_item", ddb_response, expected_params)
     stubber.activate()
 
-    @idempotent(persistence=persistence_store)
+    @idempotent(persistence_store=persistence_store)
     def lambda_handler(event, context):
         return lambda_response
 
@@ -97,24 +97,17 @@ def test_idempotent_lambda_first_execution(
     stubber = stub.Stubber(persistence_store.table.meta.client)
     ddb_response = {}
 
-    expected_params_get_item = {
-        "TableName": TABLE_NAME,
-        "Key": {"id": hashed_idempotency_key},
-        "ConsistentRead": True,
-    }
     expected_params_put_item = {
         "ConditionExpression": "attribute_not_exists(id) OR expiration < :now",
         "ExpressionAttributeValues": {":now": stub.ANY},
         "Item": {"expiration": stub.ANY, "id": hashed_idempotency_key, "status": "INPROGRESS"},
         "TableName": "TEST_TABLE",
     }
-
-    stubber.add_response("get_item", ddb_response, expected_params_get_item)
     stubber.add_response("put_item", ddb_response, expected_params_put_item)
     stubber.add_response("update_item", ddb_response, expected_params_update_item)
     stubber.activate()
 
-    @idempotent(persistence=persistence_store)
+    @idempotent(persistence_store=persistence_store)
     def lambda_handler(event, context):
         return lambda_response
 
@@ -139,11 +132,6 @@ def test_idempotent_lambda_first_execution_cached(
     stubber = stub.Stubber(persistence_store_with_cache.table.meta.client)
     ddb_response = {}
 
-    expected_params_get_item = {
-        "TableName": TABLE_NAME,
-        "Key": {"id": hashed_idempotency_key},
-        "ConsistentRead": True,
-    }
     expected_params_put_item = {
         "ConditionExpression": "attribute_not_exists(id) OR expiration < :now",
         "ExpressionAttributeValues": {":now": stub.ANY},
@@ -151,12 +139,11 @@ def test_idempotent_lambda_first_execution_cached(
         "TableName": "TEST_TABLE",
     }
 
-    stubber.add_response("get_item", ddb_response, expected_params_get_item)
     stubber.add_response("put_item", ddb_response, expected_params_put_item)
     stubber.add_response("update_item", ddb_response, expected_params_update_item)
     stubber.activate()
 
-    @idempotent(persistence=persistence_store_with_cache)
+    @idempotent(persistence_store=persistence_store_with_cache)
     def lambda_handler(event, context):
         return lambda_response
 
@@ -202,11 +189,12 @@ def test_idempotent_lambda_expired(
         "ConsistentRead": True,
     }
 
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
     stubber.add_response("get_item", ddb_response_get_item, expected_params_get_item)
     stubber.add_response("update_item", ddb_response, expected_params_update_item)
     stubber.activate()
 
-    @idempotent(persistence=persistence_store)
+    @idempotent(persistence_store=persistence_store)
     def lambda_handler(event, context):
         return lambda_response
 
@@ -231,12 +219,6 @@ def test_idempotent_lambda_exception(
     stubber = stub.Stubber(persistence_store.table.meta.client)
 
     ddb_response = {}
-    ddb_response_get_item = {}
-    expected_params_get_item = {
-        "TableName": TABLE_NAME,
-        "Key": {"id": hashed_idempotency_key},
-        "ConsistentRead": True,
-    }
     expected_params_put_item = {
         "ConditionExpression": "attribute_not_exists(id) OR expiration < :now",
         "ExpressionAttributeValues": {":now": stub.ANY},
@@ -245,12 +227,11 @@ def test_idempotent_lambda_exception(
     }
     expected_params_delete_item = {"TableName": TABLE_NAME, "Key": {"id": hashed_idempotency_key}}
 
-    stubber.add_response("get_item", ddb_response_get_item, expected_params_get_item)
     stubber.add_response("put_item", ddb_response, expected_params_put_item)
     stubber.add_response("delete_item", ddb_response, expected_params_delete_item)
     stubber.activate()
 
-    @idempotent(persistence=persistence_store)
+    @idempotent(persistence_store=persistence_store)
     def lambda_handler(event, context):
         raise Exception("Something went wrong!")
 
@@ -286,16 +267,13 @@ def test_idempotent_lambda_already_completed_bad_payload(
 
     expected_params = {"TableName": TABLE_NAME, "Key": {"id": hashed_idempotency_key}, "ConsistentRead": True}
 
-    @idempotent(persistence=persistence_store_with_validation)
-    def lambda_handler(event, context):
-        return lambda_response
-
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
     stubber.add_response("get_item", ddb_response, expected_params)
-    stubber.add_response("get_item", copy.deepcopy(ddb_response), copy.deepcopy(expected_params))
     stubber.activate()
 
-    response = lambda_handler(lambda_apigw_event, {})
-    assert response == lambda_response
+    @idempotent(persistence_store=persistence_store_with_validation)
+    def lambda_handler(event, context):
+        return lambda_response
 
     with pytest.raises(IdempotencyValidationerror):
         lambda_apigw_event["requestContext"]["accountId"] += "1"  # Alter the request payload

@@ -7,7 +7,7 @@ import pytest
 from botocore import stub
 from botocore.config import Config
 
-from aws_lambda_powertools.utilities.idempotency.persistence import DynamoDBPersistenceLayer
+from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
 
 TABLE_NAME = "TEST_TABLE"
 
