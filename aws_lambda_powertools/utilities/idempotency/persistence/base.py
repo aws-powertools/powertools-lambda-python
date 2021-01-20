@@ -37,9 +37,9 @@ class DataRecord:
     def __init__(
         self,
         idempotency_key,
-        status: str = None,
+        status: str = "",
         expiry_timestamp: int = None,
-        response_data: str = None,
+        response_data: str = "",
         payload_hash: str = None,
     ) -> None:
         """

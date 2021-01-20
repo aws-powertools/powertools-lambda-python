@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Dict, Optional, Union
+from typing import Any, Dict, Optional
 
 import boto3
 from botocore.config import Config
@@ -16,11 +16,11 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
     def __init__(
         self,
         table_name: str,  # Can we use the lambda function name?
-        key_attr: Optional[str] = "id",
-        expiry_attr: Optional[str] = "expiration",
-        status_attr: Optional[str] = "status",
-        data_attr: Optional[str] = "data",
-        validation_key_attr: Optional[str] = "validation",
+        key_attr: str = "id",
+        expiry_attr: str = "expiration",
+        status_attr: str = "status",
+        data_attr: str = "data",
+        validation_key_attr: str = "validation",
         boto_config: Optional[Config] = None,
         *args,
         **kwargs,
@@ -68,7 +68,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         self.validation_key_attr = validation_key_attr
         super(DynamoDBPersistenceLayer, self).__init__(*args, **kwargs)
 
-    def _item_to_data_record(self, item: Dict[str, Union[str, int]]) -> DataRecord:
+    def _item_to_data_record(self, item: Dict[str, Any]) -> DataRecord:
         """
         Translate raw item records from DynamoDB to DataRecord
 
@@ -87,7 +87,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             idempotency_key=item[self.key_attr],
             status=item[self.status_attr],
             expiry_timestamp=item[self.expiry_attr],
-            response_data=item.get(self.data_attr),
+            response_data=item[self.data_attr],
             payload_hash=item.get(self.validation_key_attr),
         )
 
