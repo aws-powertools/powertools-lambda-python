@@ -33,9 +33,9 @@ class AppConfigProvider(BaseProvider):
     **Retrieves the latest configuration value from App Config**
 
         >>> from aws_lambda_powertools.utilities import parameters
-        >>> provider = parameters.AppConfigProvider(environment="my_env", application="my_app")
+        >>> appconf_provider = parameters.AppConfigProvider(environment="my_env", application="my_app")
         >>>
-        >>> value : bytes = provider.get("my_conf")
+        >>> value : bytes = appconf_provider.get("my_conf")
         >>>
         >>> print(value)
         My configuration value
@@ -46,9 +46,9 @@ class AppConfigProvider(BaseProvider):
         >>> from aws_lambda_powertools.utilities import parameters
         >>>
         >>> config = Config(region_name="us-west-1")
-        >>> provider = parameters.AppConfigProvider(environment="my_env", application="my_app", config=config)
+        >>> appconf_provider = parameters.AppConfigProvider(environment="my_env", application="my_app", config=config)
         >>>
-        >>> value : bytes = provider.get("my_conf")
+        >>> value : bytes = appconf_provider.get("my_conf")
         >>>
         >>> print(value)
         My configuration value
