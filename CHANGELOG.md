@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.1] - 2021-01-19
+
+### Fixed
+
+* **Utilities**: Added `SnsSqsEnvelope` in `parser` to dynamically adjust model mismatch when customers use SNS + SQS instead of SNS + Lambda, since we've discovered three payload keys are slightly different.
+
 ## [1.10.0] - 2021-01-18
 
 ### Added
