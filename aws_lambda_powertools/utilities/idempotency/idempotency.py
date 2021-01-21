@@ -58,9 +58,17 @@ def idempotent(
         try:
             event_record = persistence_store.get_record(event)
         except ItemNotFoundError:
+            logger.debug(
+                "An existing idempotency record was deleted before we could retrieve it. Proceeding with lambda "
+                "handler"
+            )
             return _call_lambda(handler=handler, persistence_store=persistence_store, event=event, context=context)
 
         if event_record.status == STATUS_CONSTANTS["EXPIRED"]:
+            logger.debug(
+                f"Record is expired for idempotency key: {event_record.idempotency_key}. Proceeding with lambda "
+                f"handler"
+            )
             return _call_lambda(handler=handler, persistence_store=persistence_store, event=event, context=context)
 
         if event_record.status == STATUS_CONSTANTS["INPROGRESS"]:
