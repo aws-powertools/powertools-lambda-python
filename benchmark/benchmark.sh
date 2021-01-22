@@ -3,6 +3,11 @@
 set -e
 trap cleanup EXIT
 
+if [ -z "S3_BUCKET" ]; then
+    echo "Missing S3_BUCKET environment variabe"
+    exit 1
+fi
+
 export BENCHMARK_STACK_NAME=${BENCHMARK_STACK_NAME:-"powertools-benchmark"}
 
 function cleanup {
@@ -39,7 +44,7 @@ function get_stats {
 # Build and deploy the benchmark stack
 echo "Building and deploying..."
 sam build
-sam deploy --stack-name $BENCHMARK_STACK_NAME --guided
+sam deploy --stack-name $BENCHMARK_STACK_NAME --s3-bucket $S3_BUCKET --capabilities CAPABILITY_IAM
 
 # Retrieve output values
 echo "Retrieve values..."
@@ -69,11 +74,10 @@ echo
 # Gather statistics
 # Waiting 2.5 minutes to make sure the data propagates from CloudWatch Logs
 # into CloudWatch Logs Insights.
+echo "Waiting for data to propagate in CloudWatch Logs Insights..."
 sleep 150
 return_code=0
-echo -n "INSTRUMENTED="
-get_stats $INSTRUMENTED_LOG_GROUP
-echo -n "REFERENCE="
-get_stats $REFERENCE_LOG_GROUP
+echo "INSTRUMENTED=$(get_stats $INSTRUMENTED_LOG_GROUP)"
+echo "REFERENCE=$(get_stats $REFERENCE_LOG_GROUP)"
 
 exit $return_code
