@@ -1,7 +1,13 @@
+import copy
+
 import pytest
 from botocore import stub
 
-from aws_lambda_powertools.utilities.idempotency.exceptions import AlreadyInProgressError, IdempotencyValidationerror
+from aws_lambda_powertools.utilities.idempotency.exceptions import (
+    AlreadyInProgressError,
+    IdempotencyInconsistentStateError,
+    IdempotencyValidationerror,
+)
 from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent
 
 TABLE_NAME = "TEST_TABLE"
@@ -277,6 +283,59 @@ def test_idempotent_lambda_already_completed_bad_payload(
 
     with pytest.raises(IdempotencyValidationerror):
         lambda_apigw_event["requestContext"]["accountId"] += "1"  # Alter the request payload
+        lambda_handler(lambda_apigw_event, {})
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+def test_idempotent_lambda_expired_during_request(
+    persistence_store,
+    lambda_apigw_event,
+    timestamp_expired,
+    lambda_response,
+    expected_params_update_item,
+    hashed_idempotency_key,
+):
+    """
+    Test idempotent decorator when lambda is called with an event it succesfully handled already. Persistence store
+    returns inconsistent/rapidly changing result between put_item and get_item calls.
+    """
+
+    stubber = stub.Stubber(persistence_store.table.meta.client)
+
+    ddb_response_get_item = {
+        "Item": {
+            "id": {"S": hashed_idempotency_key},
+            "expiration": {"N": timestamp_expired},
+            "data": {"S": '{"message": "test", "statusCode": 200}'},
+            "status": {"S": "INPROGRESS"},
+        }
+    }
+    expected_params_get_item = {
+        "TableName": TABLE_NAME,
+        "Key": {"id": hashed_idempotency_key},
+        "ConsistentRead": True,
+    }
+
+    # Record repeatedly changes between put_item and get_item
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
+    stubber.add_response("get_item", ddb_response_get_item, expected_params_get_item)
+
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
+    stubber.add_response("get_item", copy.deepcopy(ddb_response_get_item), copy.deepcopy(expected_params_get_item))
+
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
+    stubber.add_response("get_item", copy.deepcopy(ddb_response_get_item), copy.deepcopy(expected_params_get_item))
+
+    stubber.activate()
+
+    @idempotent(persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    # max retries exceeded before get_item and put_item agree on item state, so exception gets raised
+    with pytest.raises(IdempotencyInconsistentStateError):
         lambda_handler(lambda_apigw_event, {})
 
     stubber.assert_no_pending_responses()

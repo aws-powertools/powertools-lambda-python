@@ -8,7 +8,12 @@ from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities.idempotency.persistence.base import STATUS_CONSTANTS, BasePersistenceLayer
 
 from ..typing import LambdaContext
-from .exceptions import AlreadyInProgressError, ItemAlreadyExistsError, ItemNotFoundError
+from .exceptions import (
+    AlreadyInProgressError,
+    IdempotencyInconsistentStateError,
+    ItemAlreadyExistsError,
+    ItemNotFoundError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +55,25 @@ def idempotent(
         >>>     return {"StatusCode": 200}
     """
 
+    # IdempotencyStateError can happen under normal operation when persistent state changes in the small time between
+    # requests. Retry a few times in case we see inconsistency before raising exception.
+    max_persistence_layer_attempts = 3
+    for i in range(max_persistence_layer_attempts):
+        try:
+            return idempotency_handler(handler, event, context, persistence_store)
+        except IdempotencyInconsistentStateError:
+            if i < max_persistence_layer_attempts - 1:
+                continue
+            else:
+                raise
+
+
+def idempotency_handler(
+    handler: Callable[[Any, LambdaContext], Any],
+    event: Dict[str, Any],
+    context: LambdaContext,
+    persistence_store: BasePersistenceLayer,
+):
     try:
         # We call save_inprogress first as an optimization for the most common case where no idempotent record already
         # exists. If it succeeds, there's no need to call get_record.
@@ -58,18 +82,20 @@ def idempotent(
         try:
             event_record = persistence_store.get_record(event)
         except ItemNotFoundError:
+            # This code path will only be triggered if the record is removed between save_inprogress and get_record.
             logger.debug(
                 "An existing idempotency record was deleted before we could retrieve it. Proceeding with lambda "
                 "handler"
             )
-            return _call_lambda(handler=handler, persistence_store=persistence_store, event=event, context=context)
+            raise IdempotencyInconsistentStateError("save_inprogress and get_record return inconsistent results.")
 
+        # This code path will only be triggered if the record becomes expired between the save_inprogress call and here
         if event_record.status == STATUS_CONSTANTS["EXPIRED"]:
             logger.debug(
                 f"Record is expired for idempotency key: {event_record.idempotency_key}. Proceeding with lambda "
                 f"handler"
             )
-            return _call_lambda(handler=handler, persistence_store=persistence_store, event=event, context=context)
+            raise IdempotencyInconsistentStateError("save_inprogress and get_record return inconsistent results.")
 
         if event_record.status == STATUS_CONSTANTS["INPROGRESS"]:
             raise AlreadyInProgressError(

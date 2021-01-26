@@ -31,3 +31,9 @@ class IdempotencyValidationerror(Exception):
     """
     Payload does not match stored idempotency record
     """
+
+
+class IdempotencyInconsistentStateError(Exception):
+    """
+    State is inconsistent across multiple requests to persistence store
+    """
