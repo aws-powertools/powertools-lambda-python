@@ -396,7 +396,7 @@ class BasePersistenceLayer(ABC):
     def _put_record(self, data_record: DataRecord) -> None:
         """
         Add a DataRecord to persistence store if it does not already exist with that key. Raise ItemAlreadyExists
-        if an entry already exists.
+        if a non-expired entry already exists.
 
         Parameters
         ----------
