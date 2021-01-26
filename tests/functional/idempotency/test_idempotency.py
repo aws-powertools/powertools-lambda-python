@@ -181,22 +181,15 @@ def test_idempotent_lambda_expired(
     stubber = stub.Stubber(persistence_store.table.meta.client)
 
     ddb_response = {}
-    ddb_response_get_item = {
-        "Item": {
-            "id": {"S": hashed_idempotency_key},
-            "expiration": {"N": timestamp_expired},
-            "data": {"S": '{"message": "test", "statusCode": 200}'},
-            "status": {"S": "INPROGRESS"},
-        }
-    }
-    expected_params_get_item = {
-        "TableName": TABLE_NAME,
-        "Key": {"id": hashed_idempotency_key},
-        "ConsistentRead": True,
+
+    expected_params_put_item = {
+        "ConditionExpression": "attribute_not_exists(id) OR expiration < :now",
+        "ExpressionAttributeValues": {":now": stub.ANY},
+        "Item": {"expiration": stub.ANY, "id": hashed_idempotency_key, "status": "INPROGRESS"},
+        "TableName": "TEST_TABLE",
     }
 
-    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
-    stubber.add_response("get_item", ddb_response_get_item, expected_params_get_item)
+    stubber.add_response("put_item", ddb_response, expected_params_put_item)
     stubber.add_response("update_item", ddb_response, expected_params_update_item)
     stubber.activate()
 
