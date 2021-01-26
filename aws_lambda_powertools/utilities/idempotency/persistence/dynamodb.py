@@ -116,7 +116,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             logger.debug(f"Putting record for idempotency key: {data_record.idempotency_key}")
             self.table.put_item(
                 Item=item,
-                ConditionExpression=f"attribute_not_exists({self.key_attr}) OR expiration < :now",
+                ConditionExpression=f"attribute_not_exists({self.key_attr}) OR {self.expiry_attr} < :now",
                 ExpressionAttributeValues={":now": int(now.timestamp())},
             )
         except self._ddb_resource.meta.client.exceptions.ConditionalCheckFailedException:
