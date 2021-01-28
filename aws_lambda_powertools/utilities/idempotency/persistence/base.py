@@ -13,9 +13,9 @@ import jmespath
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
-    IdempotencyValidationerror,
-    InvalidStatusError,
-    ItemAlreadyExistsError,
+    IdempotencyInvalidStatusError,
+    IdempotencyItemAlreadyExistsError,
+    IdempotencyValidationError,
 )
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ class DataRecord:
         status: str, optional
             status of the idempotent record
         expiry_timestamp: int, optional
-            time before the record should expire, in milliseconds
+            time before the record should expire, in seconds
         payload_hash: str, optional
             hashed representation of payload
         response_data: str, optional
@@ -93,7 +93,7 @@ class DataRecord:
         if self._status in STATUS_CONSTANTS.values():
             return self._status
         else:
-            raise InvalidStatusError(self._status)
+            raise IdempotencyInvalidStatusError(self._status)
 
     def response_json_as_dict(self) -> dict:
         """
@@ -116,9 +116,9 @@ class BasePersistenceLayer(ABC):
         self,
         event_key_jmespath: str,
         payload_validation_jmespath: str = "",
-        expires_after: int = 3600,
+        expires_after_seconds: int = 60 * 60,  # 1 hour default
         use_local_cache: bool = False,
-        local_cache_maxsize: int = 1024,
+        local_cache_max_items: int = 256,
         hash_function: str = "md5",
     ) -> None:
         """
@@ -130,26 +130,26 @@ class BasePersistenceLayer(ABC):
             A jmespath expression to extract the idempotency key from the event record
         payload_validation_jmespath: str
             A jmespath expression to extract the payload to be validated from the event record
-        expires_after: int
-            The number of milliseconds to wait before a record is expired
+        expires_after_seconds: int
+            The number of seconds to wait before a record is expired
         use_local_cache: bool, optional
             Whether to locally cache idempotency results, by default False
-        local_cache_maxsize: int, optional
+        local_cache_max_items: int, optional
             Max number of items to store in local cache, by default 1024
         hash_function: str, optional
             Function to use for calculating hashes, by default md5.
         """
-        self.event_key = event_key_jmespath
-        self.event_key_jmespath = jmespath.compile(event_key_jmespath)
-        self.expires_after = expires_after
+        self.event_key_jmespath = event_key_jmespath
+        self.event_key_compiled_jmespath = jmespath.compile(event_key_jmespath)
+        self.expires_after_seconds = expires_after_seconds
         self.use_local_cache = use_local_cache
         if self.use_local_cache:
-            self._cache = LRUDict(max_size=local_cache_maxsize)
+            self._cache = LRUDict(max_items=local_cache_max_items)
         self.payload_validation_enabled = False
         if payload_validation_jmespath:
             self.validation_key_jmespath = jmespath.compile(payload_validation_jmespath)
             self.payload_validation_enabled = True
-        self.hash_function = hash_function
+        self.hash_function = getattr(hashlib, hash_function)
 
     def _get_hashed_idempotency_key(self, lambda_event: Dict[str, Any]) -> str:
         """
@@ -166,7 +166,7 @@ class BasePersistenceLayer(ABC):
             Hashed representation of the data extracted by the jmespath expression
 
         """
-        data = self.event_key_jmespath.search(lambda_event)
+        data = self.event_key_compiled_jmespath.search(lambda_event)
         return self._generate_hash(data)
 
     def _get_hashed_payload(self, lambda_event: Dict[str, Any]) -> str:
@@ -204,8 +204,7 @@ class BasePersistenceLayer(ABC):
             Hashed representation of the provided data
 
         """
-        hash_func = getattr(hashlib, self.hash_function)
-        hashed_data = hash_func(json.dumps(data).encode())
+        hashed_data = self.hash_function(json.dumps(data).encode())
         return hashed_data.hexdigest()
 
     def _validate_payload(self, lambda_event: Dict[str, Any], data_record: DataRecord) -> None:
@@ -219,11 +218,16 @@ class BasePersistenceLayer(ABC):
         data_record: DataRecord
             DataRecord instance
 
+        Raises
+        ______
+        IdempotencyValidationError
+            Event payload doesn't match the stored record for the given idempotency key
+
         """
         if self.payload_validation_enabled:
             lambda_payload_hash = self._get_hashed_payload(lambda_event)
             if not data_record.payload_hash == lambda_payload_hash:
-                raise IdempotencyValidationerror("Payload does not match stored record for this event key")
+                raise IdempotencyValidationError("Payload does not match stored record for this event key")
 
     def _get_expiry_timestamp(self) -> int:
         """
@@ -235,7 +239,7 @@ class BasePersistenceLayer(ABC):
 
         """
         now = datetime.datetime.now()
-        period = datetime.timedelta(seconds=self.expires_after)
+        period = datetime.timedelta(seconds=self.expires_after_seconds)
         return int((now + period).timestamp())
 
     def _save_to_cache(self, data_record: DataRecord):
@@ -303,7 +307,7 @@ class BasePersistenceLayer(ABC):
         if self.use_local_cache:
             record = self._retrieve_from_cache(idempotency_key=data_record.idempotency_key)
             if record:
-                raise ItemAlreadyExistsError
+                raise IdempotencyItemAlreadyExistsError
 
         self._put_record(data_record)
 
@@ -312,9 +316,9 @@ class BasePersistenceLayer(ABC):
         if self.use_local_cache:
             self._save_to_cache(data_record)
 
-    def save_error(self, event: Dict[str, Any], exception: Exception):
+    def delete_record(self, event: Dict[str, Any], exception: Exception):
         """
-        Save record of lambda handler raising an exception
+        Delete record from the persistence store
 
         Parameters
         ----------
@@ -334,14 +338,14 @@ class BasePersistenceLayer(ABC):
         if self.use_local_cache:
             self._delete_from_cache(data_record.idempotency_key)
 
-    def get_record(self, lambda_event) -> DataRecord:
+    def get_record(self, event: Dict[str, Any]) -> DataRecord:
         """
         Calculate idempotency key for lambda_event, then retrieve item from persistence store using idempotency key
         and return it as a DataRecord instance.and return it as a DataRecord instance.
 
         Parameters
         ----------
-        lambda_event: Dict[str, Any]
+        event: Dict[str, Any]
 
         Returns
         -------
@@ -350,17 +354,19 @@ class BasePersistenceLayer(ABC):
 
         Raises
         ------
-        ItemNotFound
+        IdempotencyItemNotFoundError
             Exception raised if no record exists in persistence store with the idempotency key
+        IdempotencyValidationError
+            Event payload doesn't match the stored record for the given idempotency key
         """
 
-        idempotency_key = self._get_hashed_idempotency_key(lambda_event)
+        idempotency_key = self._get_hashed_idempotency_key(event)
 
         if self.use_local_cache:
             cached_record = self._retrieve_from_cache(idempotency_key)
             if cached_record:
                 logger.debug(f"Idempotency record found in cache with idempotency key: {idempotency_key}")
-                self._validate_payload(lambda_event, cached_record)
+                self._validate_payload(event, cached_record)
                 return cached_record
 
         record = self._get_record(idempotency_key)
@@ -368,7 +374,7 @@ class BasePersistenceLayer(ABC):
         if self.use_local_cache:
             self._save_to_cache(data_record=record)
 
-        self._validate_payload(lambda_event, record)
+        self._validate_payload(event, record)
         return record
 
     @abstractmethod
@@ -387,7 +393,7 @@ class BasePersistenceLayer(ABC):
 
         Raises
         ------
-        ItemNotFound
+        IdempotencyItemNotFoundError
             Exception raised if no record exists in persistence store with the idempotency key
         """
         raise NotImplementedError

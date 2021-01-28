@@ -6,8 +6,11 @@ import boto3
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
-from aws_lambda_powertools.utilities.idempotency.exceptions import ItemAlreadyExistsError, ItemNotFoundError
-from aws_lambda_powertools.utilities.idempotency.persistence.base import STATUS_CONSTANTS, DataRecord
+from aws_lambda_powertools.utilities.idempotency.exceptions import (
+    IdempotencyItemAlreadyExistsError,
+    IdempotencyItemNotFoundError,
+)
+from aws_lambda_powertools.utilities.idempotency.persistence.base import DataRecord
 
 logger = logging.getLogger(__name__)
 
@@ -102,15 +105,14 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         try:
             item = response["Item"]
         except KeyError:
-            raise ItemNotFoundError
+            raise IdempotencyItemNotFoundError
         return self._item_to_data_record(item)
 
     def _put_record(self, data_record: DataRecord) -> None:
-
         item = {
             self.key_attr: data_record.idempotency_key,
             self.expiry_attr: data_record.expiry_timestamp,
-            self.status_attr: STATUS_CONSTANTS["INPROGRESS"],
+            self.status_attr: data_record.status,
         }
 
         if self.payload_validation_enabled:
@@ -126,7 +128,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             )
         except self._ddb_resource.meta.client.exceptions.ConditionalCheckFailedException:
             logger.debug(f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}")
-            raise ItemAlreadyExistsError
+            raise IdempotencyItemAlreadyExistsError
 
     def _update_record(self, data_record: DataRecord, check_for_existence=False):
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")

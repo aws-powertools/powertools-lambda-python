@@ -3,31 +3,31 @@ Idempotency errors
 """
 
 
-class ItemAlreadyExistsError(Exception):
+class IdempotencyItemAlreadyExistsError(Exception):
     """
-    Item attempting to be inserted into persistence store already exists
+    Item attempting to be inserted into persistence store already exists and is not expired
     """
 
 
-class ItemNotFoundError(Exception):
+class IdempotencyItemNotFoundError(Exception):
     """
     Item does not exist in persistence store
     """
 
 
-class AlreadyInProgressError(Exception):
+class IdempotencyAlreadyInProgressError(Exception):
     """
     Execution with idempotency key is already in progress
     """
 
 
-class InvalidStatusError(Exception):
+class IdempotencyInvalidStatusError(Exception):
     """
     An invalid status was provided
     """
 
 
-class IdempotencyValidationerror(Exception):
+class IdempotencyValidationError(Exception):
     """
     Payload does not match stored idempotency record
     """
@@ -36,4 +36,10 @@ class IdempotencyValidationerror(Exception):
 class IdempotencyInconsistentStateError(Exception):
     """
     State is inconsistent across multiple requests to persistence store
+    """
+
+
+class IdempotencyPersistenceLayerError(Exception):
+    """
+    Unrecoverable error from the data store
     """

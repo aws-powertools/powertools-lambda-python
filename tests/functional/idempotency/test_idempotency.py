@@ -4,9 +4,10 @@ import pytest
 from botocore import stub
 
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
-    AlreadyInProgressError,
+    IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
-    IdempotencyValidationerror,
+    IdempotencyPersistenceLayerError,
+    IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent
 
@@ -81,7 +82,7 @@ def test_idempotent_lambda_in_progress(
     def lambda_handler(event, context):
         return lambda_response
 
-    with pytest.raises(AlreadyInProgressError) as ex:
+    with pytest.raises(IdempotencyAlreadyInProgressError) as ex:
         lambda_handler(lambda_apigw_event, {})
         assert (
             ex.value.args[0] == "Execution already in progress with idempotency key: "
@@ -274,7 +275,7 @@ def test_idempotent_lambda_already_completed_bad_payload(
     def lambda_handler(event, context):
         return lambda_response
 
-    with pytest.raises(IdempotencyValidationerror):
+    with pytest.raises(IdempotencyValidationError):
         lambda_apigw_event["requestContext"]["accountId"] += "1"  # Alter the request payload
         lambda_handler(lambda_apigw_event, {})
 
@@ -329,6 +330,40 @@ def test_idempotent_lambda_expired_during_request(
 
     # max retries exceeded before get_item and put_item agree on item state, so exception gets raised
     with pytest.raises(IdempotencyInconsistentStateError):
+        lambda_handler(lambda_apigw_event, {})
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+def test_idempotent_persistence_exception(
+    persistence_store, lambda_apigw_event, timestamp_future, lambda_response, hashed_idempotency_key
+):
+    """
+    Test idempotent decorator when lambda is executed with an event with a previously unknown event key, but
+    lambda_handler raises an exception which is retryable.
+    """
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(persistence_store.table.meta.client)
+
+    ddb_response = {}
+    expected_params_put_item = {
+        "ConditionExpression": "attribute_not_exists(id) OR expiration < :now",
+        "ExpressionAttributeValues": {":now": stub.ANY},
+        "Item": {"expiration": stub.ANY, "id": hashed_idempotency_key, "status": "INPROGRESS"},
+        "TableName": "TEST_TABLE",
+    }
+
+    stubber.add_response("put_item", ddb_response, expected_params_put_item)
+    stubber.add_client_error("delete_item", "UnrecoverableError")
+    stubber.activate()
+
+    @idempotent(persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        raise Exception("Something went wrong!")
+
+    with pytest.raises(IdempotencyPersistenceLayerError):
         lambda_handler(lambda_apigw_event, {})
 
     stubber.assert_no_pending_responses()

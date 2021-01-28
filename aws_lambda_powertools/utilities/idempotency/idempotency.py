@@ -2,18 +2,23 @@
 Primary interface for idempotent Lambda functions utility
 """
 import logging
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.utilities.idempotency.persistence.base import STATUS_CONSTANTS, BasePersistenceLayer
-
-from ..typing import LambdaContext
-from .exceptions import (
-    AlreadyInProgressError,
+from aws_lambda_powertools.utilities.idempotency.exceptions import (
+    IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
-    ItemAlreadyExistsError,
-    ItemNotFoundError,
+    IdempotencyItemAlreadyExistsError,
+    IdempotencyItemNotFoundError,
+    IdempotencyPersistenceLayerError,
+    IdempotencyValidationError,
 )
+from aws_lambda_powertools.utilities.idempotency.persistence.base import (
+    STATUS_CONSTANTS,
+    BasePersistenceLayer,
+    DataRecord,
+)
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
@@ -55,33 +60,88 @@ def idempotent(
         >>>     return {"StatusCode": 200}
     """
 
-    # IdempotencyStateError can happen under normal operation when persistent state changes in the small time between
-    # requests. Retry a few times in case we see inconsistency before raising exception.
-    max_persistence_layer_attempts = 3
-    for i in range(max_persistence_layer_attempts):
+    idempotency_handler = IdempotencyHandler(handler, event, context, persistence_store)
+
+    # IdempotencyInconsistentStateError can happen under rare but expected cases when persistent state changes in the
+    # small time between put & get requests. In most cases we can retry successfully on this exception.
+    max_handler_retries = 2
+    for i in range(max_handler_retries + 1):
         try:
-            return idempotency_handler(handler, event, context, persistence_store)
+            return idempotency_handler.handle()
         except IdempotencyInconsistentStateError:
-            if i < max_persistence_layer_attempts - 1:
+            if i < max_handler_retries:
                 continue
             else:
+                # Allow the exception to bubble up after max retries exceeded
                 raise
 
 
-def idempotency_handler(
-    handler: Callable[[Any, LambdaContext], Any],
-    event: Dict[str, Any],
-    context: LambdaContext,
-    persistence_store: BasePersistenceLayer,
-):
-    try:
-        # We call save_inprogress first as an optimization for the most common case where no idempotent record already
-        # exists. If it succeeds, there's no need to call get_record.
-        persistence_store.save_inprogress(event=event)
-    except ItemAlreadyExistsError:
+class IdempotencyHandler:
+    """
+    Class to orchestrate calls to persistence layer.
+    """
+
+    def __init__(
+        self,
+        lambda_handler: Callable[[Any, LambdaContext], Any],
+        event: Dict[str, Any],
+        context: LambdaContext,
+        persistence_store: BasePersistenceLayer,
+    ):
+        """
+        Initialize the IdempotencyHandler
+
+        Parameters
+        ----------
+        lambda_handler : Callable[[Any, LambdaContext], Any]
+            Lambda function handler
+        event : Dict[str, Any]
+            Event payload lambda handler will be called with
+        context : LambdaContext
+            Context object which will be passed to lambda handler
+        persistence_store : BasePersistenceLayer
+            Instance of persistence layer to store idempotency records
+        """
+        self.persistence_store = persistence_store
+        self.context = context
+        self.event = event
+        self.lambda_handler = lambda_handler
+        self.max_handler_retries = 2
+        self.idempotency_key: Optional[str] = None
+
+    def handle(self) -> Any:
+        """
+        Main entry point for handling idempotent execution of lambda handler.
+
+        Returns
+        -------
+        Any
+            lambda handler response
+
+        """
         try:
-            event_record = persistence_store.get_record(event)
-        except ItemNotFoundError:
+            # We call save_inprogress first as an optimization for the most common case where no idempotent record
+            # already exists. If it succeeds, there's no need to call get_record.
+            self.persistence_store.save_inprogress(event=self.event)
+        except IdempotencyItemAlreadyExistsError:
+            # Now we know the item already exists, we can retrieve it
+            record = self._get_idempotency_record()
+            return self._handle_for_status(record)
+
+        return self._call_lambda()
+
+    def _get_idempotency_record(self) -> DataRecord:
+        """
+        Retrieve the idempotency record from the persistence layer.
+
+        Raises
+        ----------
+        IdempotencyInconsistentStateError
+
+        """
+        try:
+            event_record = self.persistence_store.get_record(self.event)
+        except IdempotencyItemNotFoundError:
             # This code path will only be triggered if the record is removed between save_inprogress and get_record.
             logger.debug(
                 "An existing idempotency record was deleted before we could retrieve it. Proceeding with lambda "
@@ -89,47 +149,79 @@ def idempotency_handler(
             )
             raise IdempotencyInconsistentStateError("save_inprogress and get_record return inconsistent results.")
 
+        # Allow this exception to bubble up
+        except IdempotencyValidationError:
+            raise
+
+        # Wrap remaining unhandled exceptions with IdempotencyPersistenceLayerError to ease exception handling for
+        # clients
+        except Exception as exc:
+            raise IdempotencyPersistenceLayerError("Failed to get record from idempotency store") from exc
+
+        self.idempotency_key = event_record.idempotency_key
+        return event_record
+
+    def _handle_for_status(self, event_record: DataRecord) -> Optional[Dict[Any, Any]]:
+        """
+        Take appropriate action based on event_record's status
+
+        Parameters
+        ----------
+        event_record: DataRecord
+
+        Returns
+        -------
+        Optional[Dict[Any, Any]
+            Lambda response previously used for this idempotency key, if it has successfully executed already.
+
+        Raises
+        ------
+        AlreadyInProgressError
+            A lambda execution is already in progress
+        IdempotencyInconsistentStateError
+            The persistence store reports inconsistent states across different requests. Retryable.
+        """
         # This code path will only be triggered if the record becomes expired between the save_inprogress call and here
         if event_record.status == STATUS_CONSTANTS["EXPIRED"]:
-            logger.debug(
-                f"Record is expired for idempotency key: {event_record.idempotency_key}. Proceeding with lambda "
-                f"handler"
-            )
             raise IdempotencyInconsistentStateError("save_inprogress and get_record return inconsistent results.")
 
         if event_record.status == STATUS_CONSTANTS["INPROGRESS"]:
-            raise AlreadyInProgressError(
+            raise IdempotencyAlreadyInProgressError(
                 f"Execution already in progress with idempotency key: "
-                f"{persistence_store.event_key}={event_record.idempotency_key}"
+                f"{self.persistence_store.event_key_jmespath}={event_record.idempotency_key}"
             )
 
-        if event_record.status == STATUS_CONSTANTS["COMPLETED"]:
-            return event_record.response_json_as_dict()
+        return event_record.response_json_as_dict()
 
-    return _call_lambda(handler=handler, persistence_store=persistence_store, event=event, context=context)
+    def _call_lambda(self) -> Any:
+        """
+        Call the lambda handler function and update the persistence store appropriate depending on the output
 
+        Returns
+        -------
+        Any
+            lambda handler response
 
-def _call_lambda(
-    handler: Callable, persistence_store: BasePersistenceLayer, event: Dict[str, Any], context: LambdaContext
-) -> Any:
-    """
+        """
+        try:
+            handler_response = self.lambda_handler(self.event, self.context)
+        except Exception as handler_exception:
+            # We need these nested blocks to preserve lambda handler exception in case the persistence store operation
+            # also raises an exception
+            try:
+                self.persistence_store.delete_record(event=self.event, exception=handler_exception)
+            except Exception as delete_exception:
+                raise IdempotencyPersistenceLayerError(
+                    f"Failed to delete record with idempotency key: {self.idempotency_key}"
+                ) from delete_exception
+            raise
 
-    Parameters
-    ----------
-    handler: Callable
-        Lambda handler
-    persistence_store: BasePersistenceLayer
-        Instance of persistence layer
-    event
-        Lambda event
-    context
-        Lambda context
-    """
-    try:
-        handler_response = handler(event, context)
-    except Exception as ex:
-        persistence_store.save_error(event=event, exception=ex)
-        raise
-    else:
-        persistence_store.save_success(event=event, result=handler_response)
-    return handler_response
+        else:
+            try:
+                self.persistence_store.save_success(event=self.event, result=handler_response)
+            except Exception as save_exception:
+                raise IdempotencyPersistenceLayerError(
+                    f"Failed to update record state to success with " f"idempotency key: {self.idempotency_key}"
+                ) from save_exception
+
+        return handler_response

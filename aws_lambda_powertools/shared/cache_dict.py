@@ -2,8 +2,8 @@ from collections import OrderedDict
 
 
 class LRUDict(OrderedDict):
-    def __init__(self, max_size=1024, *args, **kwds):
-        self.max_size = max_size
+    def __init__(self, max_items=1024, *args, **kwds):
+        self.max_items = max_items
         super().__init__(*args, **kwds)
 
     def __getitem__(self, key):
@@ -15,7 +15,7 @@ class LRUDict(OrderedDict):
         if key in self:
             self.move_to_end(key)
         super().__setitem__(key, value)
-        if len(self) > self.max_size:
+        if len(self) > self.max_items:
             oldest = next(iter(self))
             del self[oldest]
 
