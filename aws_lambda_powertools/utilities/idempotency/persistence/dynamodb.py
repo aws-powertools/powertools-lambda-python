@@ -15,13 +15,14 @@ logger = logging.getLogger(__name__)
 class DynamoDBPersistenceLayer(BasePersistenceLayer):
     def __init__(
         self,
-        table_name: str,  # Can we use the lambda function name?
+        table_name: str,
         key_attr: str = "id",
         expiry_attr: str = "expiration",
         status_attr: str = "status",
         data_attr: str = "data",
         validation_key_attr: str = "validation",
         boto_config: Optional[Config] = None,
+        boto3_session: Optional[boto3.session.Session] = None,
         *args,
         **kwargs,
     ):
@@ -42,6 +43,9 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             DynamoDB attribute name for response data, by default "data"
         boto_config: botocore.config.Config, optional
             Botocore configuration to pass during client initialization
+        boto3_session : boto3.session.Session, optional
+            Boto3 session to use for AWS API communication
+
         args
         kwargs
 
@@ -58,7 +62,8 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         """
 
         boto_config = boto_config or Config()
-        self._ddb_resource = boto3.resource("dynamodb", config=boto_config)
+        session = boto3_session or boto3.session.Session()
+        self._ddb_resource = session.resource("dynamodb", config=boto_config)
         self.table_name = table_name
         self.table = self._ddb_resource.Table(self.table_name)
         self.key_attr = key_attr
