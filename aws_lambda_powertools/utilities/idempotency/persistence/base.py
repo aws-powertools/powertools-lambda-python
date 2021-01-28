@@ -11,7 +11,7 @@ from typing import Any, Dict
 
 import jmespath
 
-from aws_lambda_powertools.utilities.idempotency.cache_dict import LRUDict
+from aws_lambda_powertools.shared.cache_dict import LRUDict
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyValidationerror,
     InvalidStatusError,
