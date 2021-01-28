@@ -28,7 +28,7 @@ from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import
     UserMigrationTriggerEvent,
     VerifyAuthChallengeResponseTriggerEvent,
 )
-from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
+from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
     AttributeValue,
     DynamoDBRecordEventName,
@@ -41,6 +41,21 @@ def load_event(file_name: str) -> dict:
     full_file_name = os.path.dirname(os.path.realpath(__file__)) + "/../events/" + file_name
     with open(full_file_name) as fp:
         return json.load(fp)
+
+
+def test_dict_wrapper_equals():
+    class DataClassSample(DictWrapper):
+        @property
+        def message(self) -> str:
+            return self.get("message")
+
+    data1 = {"message": "foo1"}
+    data2 = {"message": "foo2"}
+
+    assert DataClassSample(data1) == DataClassSample(data1)
+    assert DataClassSample(data1) != DataClassSample(data2)
+    assert DataClassSample(data1) is not data1
+    assert data1 is not DataClassSample(data1)
 
 
 def test_cloud_watch_trigger_event():
@@ -413,6 +428,11 @@ def test_s3_key_unquote_plus():
     assert event.object_key == tricky_name
 
 
+def test_s3_key_url_decoded_key():
+    event = S3Event(load_event("s3EventDecodedKey.json"))
+    assert event.object_key == event.record["s3"]["object"]["urlDecodedKey"]
+
+
 def test_s3_glacier_event():
     example_event = {
         "Records": [
@@ -429,6 +449,14 @@ def test_s3_glacier_event():
     event = S3Event(example_event)
     record = next(event.records)
     glacier_event_data = record.glacier_event_data
+    assert glacier_event_data is not None
+    assert glacier_event_data.restore_event_data.lifecycle_restoration_expiry_time == "1970-01-01T00:01:00.000Z"
+    assert glacier_event_data.restore_event_data.lifecycle_restore_storage_class == "standard"
+
+
+def test_s3_glacier_event_json():
+    event = S3Event(load_event("s3EventGlacier.json"))
+    glacier_event_data = event.record.glacier_event_data
     assert glacier_event_data is not None
     assert glacier_event_data.restore_event_data.lifecycle_restoration_expiry_time == "1970-01-01T00:01:00.000Z"
     assert glacier_event_data.restore_event_data.lifecycle_restore_storage_class == "standard"

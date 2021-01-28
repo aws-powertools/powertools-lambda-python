@@ -4,9 +4,10 @@ import logging
 import os
 import random
 import sys
-from distutils.util import strtobool
 from typing import Any, Callable, Dict, Union
 
+from ..shared import constants
+from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
 from .exceptions import InvalidLoggerSamplingRateError
 from .filters import SuppressFilter
 from .formatter import JsonFormatter
@@ -122,14 +123,20 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         stream: sys.stdout = None,
         **kwargs,
     ):
-        self.service = service or os.getenv("POWERTOOLS_SERVICE_NAME") or "service_undefined"
-        self.sampling_rate = sampling_rate or os.getenv("POWERTOOLS_LOGGER_SAMPLE_RATE") or 0.0
+        self.service = resolve_env_var_choice(
+            choice=service, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
+        )
+        self.sampling_rate = resolve_env_var_choice(
+            choice=sampling_rate, env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE, 0.0)
+        )
+        self._is_deduplication_disabled = resolve_truthy_env_var_choice(
+            env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false")
+        )
         self.log_level = self._get_log_level(level)
         self.child = child
         self._handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
-
         self._init_logger(**kwargs)
 
     def __getattr__(self, name):
@@ -148,21 +155,36 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     def _init_logger(self, **kwargs):
         """Configures new logger"""
 
-        # Skip configuration if it's a child logger to prevent
-        # multiple handlers being attached as well as different sampling mechanisms
-        # and multiple messages from being logged as handlers can be duplicated
-        if not self.child:
-            self._configure_sampling()
-            self._logger.setLevel(self.log_level)
-            self._logger.addHandler(self._handler)
-            self.structure_logs(**kwargs)
+        # Skip configuration if it's a child logger or a pre-configured logger
+        # to prevent the following:
+        #   a) multiple handlers being attached
+        #   b) different sampling mechanisms
+        #   c) multiple messages from being logged as handlers can be duplicated
+        is_logger_preconfigured = getattr(self._logger, "init", False)
+        if self.child or is_logger_preconfigured:
+            return
 
+        self._configure_sampling()
+        self._logger.setLevel(self.log_level)
+        self._logger.addHandler(self._handler)
+        self.structure_logs(**kwargs)
+
+        # Pytest Live Log feature duplicates log records for colored output
+        # but we explicitly add a filter for log deduplication.
+        # This flag disables this protection when you explicit want logs to be duplicated (#262)
+        if not self._is_deduplication_disabled:
             logger.debug("Adding filter in root logger to suppress child logger records to bubble up")
             for handler in logging.root.handlers:
                 # It'll add a filter to suppress any child logger from self.service
-                # Where service is Order, it'll reject parent logger Order,
-                # and child loggers such as Order.checkout, Order.shared
+                # Example: `Logger(service="order")`, where service is Order
+                # It'll reject all loggers starting with `order` e.g. order.checkout, order.shared
                 handler.addFilter(SuppressFilter(self.service))
+
+        # as per bug in #249, we should not be pre-configuring an existing logger
+        # therefore we set a custom attribute in the Logger that will be returned
+        # std logging will return the same Logger with our attribute if name is reused
+        logger.debug(f"Marking logger {self.service} as preconfigured")
+        self._logger.init = True
 
     def _configure_sampling(self):
         """Dynamically set log level based on sampling rate
@@ -182,7 +204,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
                 f"Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
             )
 
-    def inject_lambda_context(self, lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False):
+    def inject_lambda_context(self, lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = None):
         """Decorator to capture Lambda contextual info and inject into logger
 
         Parameters
@@ -231,8 +253,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             logger.debug("Decorator called with parameters")
             return functools.partial(self.inject_lambda_context, log_event=log_event)
 
-        log_event_env_option = str(os.getenv("POWERTOOLS_LOGGER_LOG_EVENT", "false"))
-        log_event = strtobool(log_event_env_option) or log_event
+        log_event = resolve_truthy_env_var_choice(
+            choice=log_event, env=os.getenv(constants.LOGGER_LOG_EVENT_ENV, "false")
+        )
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
@@ -280,9 +303,10 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             return level
 
         log_level: str = level or os.getenv("LOG_LEVEL")
-        log_level = log_level.upper() if log_level is not None else logging.INFO
+        if log_level is None:
+            return logging.INFO
 
-        return log_level
+        return log_level.upper()
 
     @staticmethod
     def _get_caller_filename():
@@ -292,9 +316,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         # Before previous frame => Caller
         frame = inspect.currentframe()
         caller_frame = frame.f_back.f_back.f_back
-        filename = caller_frame.f_globals["__name__"]
-
-        return filename
+        return caller_frame.f_globals["__name__"]
 
 
 def set_package_logger(

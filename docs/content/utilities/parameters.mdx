@@ -24,6 +24,7 @@ SSM Parameter Store | `get_parameters`, `SSMProvider.get_multiple` | `ssm:GetPar
 Secrets Manager | `get_secret`, `SecretsManager.get` | `secretsmanager:GetSecretValue`
 DynamoDB | `DynamoDBProvider.get` | `dynamodb:GetItem`
 DynamoDB | `DynamoDBProvider.get_multiple` | `dynamodb:Query`
+App Config | `AppConfigProvider.get_app_config`, `get_app_config` | `appconfig:GetConfiguration`
 
 ## SSM Parameter Store
 
@@ -204,6 +205,39 @@ def handler(event, context):
     value = dynamodb_provider.get("my-parameter")
 ```
 
+## App Config
+
+> New in 1.10.0
+
+For configurations stored in App Config, use `get_app_config`.
+The following will retrieve the latest version and store it in the cache.
+
+```python:title=appconfig.py
+from aws_lambda_powertools.utilities import parameters
+
+def handler(event, context):
+    # Retrieve a single configuration, latest version
+    value: bytes = parameters.get_app_config(name="my_configuration", environment="my_env", application="my_app")
+```
+
+### AppConfigProvider class
+
+Alternatively, you can use the `AppConfigProvider` class, which give more flexibility, such as the ability to configure the underlying SDK client.
+
+This can be used to retrieve values from other regions, change the retry behavior, etc.
+
+```python:title=appconfig.py
+from aws_lambda_powertools.utilities import parameters
+from botocore.config import Config
+
+config = Config(region_name="us-west-1")
+appconf_provider = parameters.AppConfigProvider(environment="my_env", application="my_app", config=config)
+
+def handler(event, context):
+    # Retrieve a single secret
+    value: bytes = appconf_provider.get("my_conf")
+```
+
 ## Create your own provider
 
 You can create your own custom parameter store provider by inheriting the `BaseProvider` class, and implementing both `_get()` and `_get_multiple()` methods to retrieve a single, or multiple parameters from your custom store.
@@ -334,13 +368,14 @@ def handler(event, context):
 
 Here is the mapping between this utility's functions and methods and the underlying SDK:
 
-| Provider            | Function/Method                 | Client name | Function name |
-|---------------------|---------------------------------|-------------|---------------|
-| SSM Parameter Store | `get_parameter`                 | `ssm`       | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter) |
-| SSM Parameter Store | `get_parameters`                | `ssm`       | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path) |
-| SSM Parameter Store | `SSMProvider.get`               | `ssm`       | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter) |
-| SSM Parameter Store | `SSMProvider.get_multiple`      | `ssm`       | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path) |
+| Provider            | Function/Method                 | Client name      | Function name |
+|---------------------|---------------------------------|------------------|----------------|
+| SSM Parameter Store | `get_parameter`                 | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter) |
+| SSM Parameter Store | `get_parameters`                | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path) |
+| SSM Parameter Store | `SSMProvider.get`               | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter) |
+| SSM Parameter Store | `SSMProvider.get_multiple`      | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path) |
 | Secrets Manager     | `get_secret`                    | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value) |
 | Secrets Manager     | `SecretsManager.get`            | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value) |
-| DynamoDB            | `DynamoDBProvider.get`          | `dynamodb` ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table)) | [get_item](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.get_item)
-| DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb` ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table)) | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)
+| DynamoDB            | `DynamoDBProvider.get`          | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table)) | [get_item](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.get_item)
+| DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table)) | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)
+| App Config           | `get_app_config`                 | `appconfig`       | [get_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfig.html#AppConfig.Client.get_configuration) |

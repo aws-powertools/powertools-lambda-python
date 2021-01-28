@@ -37,6 +37,28 @@ def test_validate_invalid_schema_format(raw_event):
         validate(event=raw_event, schema="schema.json")
 
 
+def test_validate_accept_schema_custom_format(
+    eventbridge_schema_registry_cloudtrail_v2_s3, eventbridge_cloudtrail_s3_head_object_event
+):
+    validate(
+        event=eventbridge_cloudtrail_s3_head_object_event,
+        schema=eventbridge_schema_registry_cloudtrail_v2_s3,
+        formats={"int64": lambda v: True},
+    )
+
+
+@pytest.mark.parametrize("invalid_format", [None, bool(), {}, [], object])
+def test_validate_invalid_custom_format(
+    eventbridge_schema_registry_cloudtrail_v2_s3, eventbridge_cloudtrail_s3_head_object_event, invalid_format
+):
+    with pytest.raises(exceptions.InvalidSchemaFormatError):
+        validate(
+            event=eventbridge_cloudtrail_s3_head_object_event,
+            schema=eventbridge_schema_registry_cloudtrail_v2_s3,
+            formats=invalid_format,
+        )
+
+
 def test_validate_invalid_envelope_expression(schema, wrapped_event):
     with pytest.raises(exceptions.InvalidEnvelopeExpressionError):
         validate(event=wrapped_event, schema=schema, envelope=True)

@@ -147,7 +147,7 @@ def my_function():
         }
 ```
 
-## Extending built-in models
+## Built-in models
 
 Parser comes with the following built-in models:
 
@@ -156,6 +156,14 @@ Model name | Description
 **DynamoDBStreamModel** | Lambda Event Source payload for Amazon DynamoDB Streams
 **EventBridgeModel** | Lambda Event Source payload for Amazon EventBridge
 **SqsModel** | Lambda Event Source payload for Amazon SQS
+**AlbModel** | Lambda Event Source payload for Amazon Application Load Balancer
+**CloudwatchLogsModel** | Lambda Event Source payload for Amazon CloudWatch Logs
+**S3Model** | Lambda Event Source payload for Amazon S3
+**KinesisDataStreamModel** | Lambda Event Source payload for Amazon Kinesis Data Streams
+**SesModel** |  Lambda Event Source payload for Amazon Simple Email Service
+**SnsModel** |  Lambda Event Source payload for Amazon Simple Notification Service
+
+### extending built-in models
 
 You can extend them to include your own models, and yet have all other known fields parsed along the way.
 
@@ -283,7 +291,7 @@ def handler(event: UserModel, context: LambdaContext):
 4. Parser then parsed the `detail` key using `UserModel`
 
 
-### Built-in envelopes
+### built-in envelopes
 
 Parser comes with the following built-in envelopes, where `Model` in the return section is your given model.
 
@@ -292,8 +300,12 @@ Envelope name | Behaviour | Return
 **DynamoDBStreamEnvelope** | 1. Parses data using `DynamoDBStreamModel`. <br/> 2. Parses records in `NewImage` and `OldImage` keys using your model. <br/> 3. Returns a list with a dictionary containing `NewImage` and `OldImage` keys | `List[Dict[str, Optional[Model]]]`
 **EventBridgeEnvelope** | 1. Parses data using `EventBridgeModel`. <br/> 2. Parses `detail` key using your model and returns it. | `Model`
 **SqsEnvelope** | 1. Parses data using `SqsModel`. <br/> 2. Parses records in `body` key using your model and return them in a list. | `List[Model]`
+**CloudWatchLogsEnvelope** | 1. Parses data using `CloudwatchLogsModel` which will base64 decode and decompress it. <br/> 2. Parses records in `message` key using your model and return them in a list. | `List[Model]`
+**KinesisDataStreamEnvelope** | 1. Parses data using `KinesisDataStreamModel` which will base64 decode it. <br/> 2. Parses records in in `Records` key using your model and returns them in a list. | `List[Model]`
+**SnsEnvelope** | 1. Parses data using `SnsModel`. <br/> 2. Parses records in `body` key using your model and return them in a list. | `List[Model]`
+**SnsSqsEnvelope** | 1. Parses data using `SqsModel`. <br/> 2. Parses SNS records in `body` key using `SnsNotificationModel`. <br/> 3. Parses data in `Message` key using your model and return them in a list. | `List[Model]`
 
-### Bringing your own envelope
+### bringing your own envelope
 
 You can create your own Envelope model and logic by inheriting from `BaseEnvelope`, and implementing the `parse` method.
 
@@ -358,7 +370,7 @@ class EventBridgeEnvelope(BaseEnvelope): # highlight-line
 3. Then, we parsed the incoming data with our envelope to confirm it matches EventBridge's structure defined in `EventBridgeModel`
 4. Lastly, we call `_parse` from `BaseEnvelope` to parse the data in our envelope (.detail) using the customer model
 
-### Data model validation
+## Data model validation
 
 <Note type="warning">
     This is radically different from the <strong>Validator utility</strong> which validates events against JSON Schema.
@@ -376,7 +388,7 @@ Keep the following in mind regardless of which decorator you end up using it:
 * You must raise either `ValueError`, `TypeError`, or `AssertionError` when value is not compliant
 * You must return the value(s) itself if compliant
 
-#### Validating fields
+### validating fields
 
 Quick validation to verify whether the field `message` has the value of `hello world`.
 
@@ -421,7 +433,7 @@ class HelloWorldModel(BaseModel):
 parse(model=HelloWorldModel, event={"message": "hello universe", "sender": "universe"})
 ```
 
-#### Validating entire model
+### validating entire model
 
 `root_validator` can help when you have a complex validation mechanism. For example finding whether data has been omitted, comparing field values, etc.
 

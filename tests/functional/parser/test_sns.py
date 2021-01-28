@@ -91,3 +91,15 @@ def handle_sns_no_envelope(event: MyAdvancedSnsBusiness, _: LambdaContext):
 def test_handle_sns_trigger_event_no_envelope():
     event_dict = load_event("snsEvent.json")
     handle_sns_no_envelope(event_dict, LambdaContext())
+
+
+@event_parser(model=MySnsBusiness, envelope=envelopes.SnsSqsEnvelope)
+def handle_sns_sqs_json_body(event: List[MySnsBusiness], _: LambdaContext):
+    assert len(event) == 1
+    assert event[0].message == "hello world"
+    assert event[0].username == "lessa"
+
+
+def test_handle_sns_sqs_trigger_event_json_body():  # noqa: F811
+    event_dict = load_event("snsSqsEvent.json")
+    handle_sns_sqs_json_body(event_dict, LambdaContext())

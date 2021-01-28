@@ -1,6 +1,8 @@
 """aws_lambda_logging tests."""
 import io
 import json
+import random
+import string
 
 import pytest
 
@@ -12,9 +14,15 @@ def stdout():
     return io.StringIO()
 
 
+@pytest.fixture
+def service_name():
+    chars = string.ascii_letters + string.digits
+    return "".join(random.SystemRandom().choice(chars) for _ in range(15))
+
+
 @pytest.mark.parametrize("level", ["DEBUG", "WARNING", "ERROR", "INFO", "CRITICAL"])
-def test_setup_with_valid_log_levels(stdout, level):
-    logger = Logger(level=level, stream=stdout, request_id="request id!", another="value")
+def test_setup_with_valid_log_levels(stdout, level, service_name):
+    logger = Logger(service=service_name, level=level, stream=stdout, request_id="request id!", another="value")
     msg = "This is a test"
     log_command = {
         "INFO": logger.info,
@@ -37,8 +45,8 @@ def test_setup_with_valid_log_levels(stdout, level):
     assert "exception" not in log_dict
 
 
-def test_logging_exception_traceback(stdout):
-    logger = Logger(level="DEBUG", stream=stdout)
+def test_logging_exception_traceback(stdout, service_name):
+    logger = Logger(service=service_name, level="DEBUG", stream=stdout)
 
     try:
         raise ValueError("Boom")
@@ -52,9 +60,9 @@ def test_logging_exception_traceback(stdout):
     assert "exception" in log_dict
 
 
-def test_setup_with_invalid_log_level(stdout):
+def test_setup_with_invalid_log_level(stdout, service_name):
     with pytest.raises(ValueError) as e:
-        Logger(level="not a valid log level")
+        Logger(service=service_name, level="not a valid log level")
         assert "Unknown level" in e.value.args[0]
 
 
@@ -65,8 +73,8 @@ def check_log_dict(log_dict):
     assert "message" in log_dict
 
 
-def test_with_dict_message(stdout):
-    logger = Logger(level="DEBUG", stream=stdout)
+def test_with_dict_message(stdout, service_name):
+    logger = Logger(service=service_name, level="DEBUG", stream=stdout)
 
     msg = {"x": "isx"}
     logger.critical(msg)
@@ -76,8 +84,8 @@ def test_with_dict_message(stdout):
     assert msg == log_dict["message"]
 
 
-def test_with_json_message(stdout):
-    logger = Logger(stream=stdout)
+def test_with_json_message(stdout, service_name):
+    logger = Logger(service=service_name, stream=stdout)
 
     msg = {"x": "isx"}
     logger.info(json.dumps(msg))
@@ -87,8 +95,8 @@ def test_with_json_message(stdout):
     assert msg == log_dict["message"]
 
 
-def test_with_unserializable_value_in_message(stdout):
-    logger = Logger(level="DEBUG", stream=stdout)
+def test_with_unserializable_value_in_message(stdout, service_name):
+    logger = Logger(service=service_name, level="DEBUG", stream=stdout)
 
     class Unserializable:
         pass
@@ -101,12 +109,17 @@ def test_with_unserializable_value_in_message(stdout):
     assert log_dict["message"]["x"].startswith("<")
 
 
-def test_with_unserializable_value_in_message_custom(stdout):
+def test_with_unserializable_value_in_message_custom(stdout, service_name):
     class Unserializable:
         pass
 
     # GIVEN a custom json_default
-    logger = Logger(level="DEBUG", stream=stdout, json_default=lambda o: f"<non-serializable: {type(o).__name__}>")
+    logger = Logger(
+        service=service_name,
+        level="DEBUG",
+        stream=stdout,
+        json_default=lambda o: f"<non-serializable: {type(o).__name__}>",
+    )
 
     # WHEN we log a message
     logger.debug({"x": Unserializable()})
@@ -118,9 +131,9 @@ def test_with_unserializable_value_in_message_custom(stdout):
     assert "json_default" not in log_dict
 
 
-def test_log_dict_key_seq(stdout):
+def test_log_dict_key_seq(stdout, service_name):
     # GIVEN the default logger configuration
-    logger = Logger(stream=stdout)
+    logger = Logger(service=service_name, stream=stdout)
 
     # WHEN logging a message
     logger.info("Message")
@@ -131,9 +144,9 @@ def test_log_dict_key_seq(stdout):
     assert ",".join(list(log_dict.keys())[:4]) == "level,location,message,timestamp"
 
 
-def test_log_dict_key_custom_seq(stdout):
+def test_log_dict_key_custom_seq(stdout, service_name):
     # GIVEN a logger configuration with log_record_order set to ["message"]
-    logger = Logger(stream=stdout, log_record_order=["message"])
+    logger = Logger(service=service_name, stream=stdout, log_record_order=["message"])
 
     # WHEN logging a message
     logger.info("Message")
@@ -144,9 +157,9 @@ def test_log_dict_key_custom_seq(stdout):
     assert list(log_dict.keys())[0] == "message"
 
 
-def test_log_custom_formatting(stdout):
+def test_log_custom_formatting(stdout, service_name):
     # GIVEN a logger where we have a custom `location`, 'datefmt' format
-    logger = Logger(stream=stdout, location="[%(funcName)s] %(module)s", datefmt="fake-datefmt")
+    logger = Logger(service=service_name, stream=stdout, location="[%(funcName)s] %(module)s", datefmt="fake-datefmt")
 
     # WHEN logging a message
     logger.info("foo")
@@ -158,7 +171,7 @@ def test_log_custom_formatting(stdout):
     assert log_dict["timestamp"] == "fake-datefmt"
 
 
-def test_log_dict_key_strip_nones(stdout):
+def test_log_dict_key_strip_nones(stdout, service_name):
     # GIVEN a logger confirmation where we set `location` and `timestamp` to None
     # Note: level, sampling_rate and service can not be suppressed
     logger = Logger(stream=stdout, level=None, location=None, timestamp=None, sampling_rate=None, service=None)
@@ -170,14 +183,15 @@ def test_log_dict_key_strip_nones(stdout):
 
     # THEN the keys should only include `level`, `message`, `service`, `sampling_rate`
     assert sorted(log_dict.keys()) == ["level", "message", "sampling_rate", "service"]
+    assert log_dict["service"] == "service_undefined"
 
 
-def test_log_dict_xray_is_present_when_tracing_is_enabled(stdout, monkeypatch):
+def test_log_dict_xray_is_present_when_tracing_is_enabled(stdout, monkeypatch, service_name):
     # GIVEN a logger is initialized within a Lambda function with X-Ray enabled
     trace_id = "1-5759e988-bd862e3fe1be46a994272793"
     trace_header = f"Root={trace_id};Parent=53995c3f42cd8ad8;Sampled=1"
     monkeypatch.setenv(name="_X_AMZN_TRACE_ID", value=trace_header)
-    logger = Logger(stream=stdout)
+    logger = Logger(service=service_name, stream=stdout)
 
     # WHEN logging a message
     logger.info("foo")
@@ -190,9 +204,9 @@ def test_log_dict_xray_is_present_when_tracing_is_enabled(stdout, monkeypatch):
     monkeypatch.delenv(name="_X_AMZN_TRACE_ID")
 
 
-def test_log_dict_xray_is_not_present_when_tracing_is_disabled(stdout, monkeypatch):
+def test_log_dict_xray_is_not_present_when_tracing_is_disabled(stdout, monkeypatch, service_name):
     # GIVEN a logger is initialized within a Lambda function with X-Ray disabled (default)
-    logger = Logger(stream=stdout)
+    logger = Logger(service=service_name, stream=stdout)
 
     # WHEN logging a message
     logger.info("foo")
@@ -203,12 +217,12 @@ def test_log_dict_xray_is_not_present_when_tracing_is_disabled(stdout, monkeypat
     assert "xray_trace_id" not in log_dict
 
 
-def test_log_dict_xray_is_updated_when_tracing_id_changes(stdout, monkeypatch):
+def test_log_dict_xray_is_updated_when_tracing_id_changes(stdout, monkeypatch, service_name):
     # GIVEN a logger is initialized within a Lambda function with X-Ray enabled
     trace_id = "1-5759e988-bd862e3fe1be46a994272793"
     trace_header = f"Root={trace_id};Parent=53995c3f42cd8ad8;Sampled=1"
     monkeypatch.setenv(name="_X_AMZN_TRACE_ID", value=trace_header)
-    logger = Logger(stream=stdout)
+    logger = Logger(service=service_name, stream=stdout)
 
     # WHEN logging a message
     logger.info("foo")

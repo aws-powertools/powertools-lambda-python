@@ -1,17 +1,18 @@
 import logging
 from typing import Any, Dict, List, Optional, Union
 
-from ..models import SqsModel
+from ..models import KinesisDataStreamModel
 from ..types import Model
 from .base import BaseEnvelope
 
 logger = logging.getLogger(__name__)
 
 
-class SqsEnvelope(BaseEnvelope):
-    """SQS Envelope to extract array of Records
+class KinesisDataStreamEnvelope(BaseEnvelope):
+    """Kinesis Data Stream Envelope to extract array of Records
 
-    The record's body parameter is a string, though it can also be a JSON encoded string.
+    The record's data parameter is a base64 encoded string which is parsed into a bytes array,
+    though it can also be a JSON encoded string.
     Regardless of its type it'll be parsed into a BaseModel object.
 
     Note: Records will be parsed the same way so if model is str,
@@ -33,7 +34,9 @@ class SqsEnvelope(BaseEnvelope):
         List
             List of records parsed with model provided
         """
-        logger.debug(f"Parsing incoming data with SQS model {SqsModel}")
-        parsed_envelope = SqsModel.parse_obj(data)
-        logger.debug(f"Parsing SQS records in `body` with {model}")
-        return [self._parse(data=record.body, model=model) for record in parsed_envelope.Records]
+        logger.debug(f"Parsing incoming data with Kinesis model {KinesisDataStreamModel}")
+        parsed_envelope: KinesisDataStreamModel = KinesisDataStreamModel.parse_obj(data)
+        logger.debug(f"Parsing Kinesis records in `body` with {model}")
+        return [
+            self._parse(data=record.kinesis.data.decode("utf-8"), model=model) for record in parsed_envelope.Records
+        ]

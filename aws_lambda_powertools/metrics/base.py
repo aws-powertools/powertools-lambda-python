@@ -10,6 +10,8 @@ from typing import Any, Dict, List, Union
 
 import fastjsonschema
 
+from ..shared import constants
+from ..shared.functions import resolve_env_var_choice
 from .exceptions import MetricUnitError, MetricValueError, SchemaValidationError
 
 logger = logging.getLogger(__name__)
@@ -88,8 +90,8 @@ class MetricManager:
     ):
         self.metric_set = metric_set if metric_set is not None else {}
         self.dimension_set = dimension_set if dimension_set is not None else {}
-        self.namespace = namespace or os.getenv("POWERTOOLS_METRICS_NAMESPACE")
-        self.service = service or os.environ.get("POWERTOOLS_SERVICE_NAME")
+        self.namespace = resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
+        self.service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_options = list(MetricUnit.__members__)
         self.metadata_set = self.metadata_set if metadata_set is not None else {}
@@ -240,10 +242,7 @@ class MetricManager:
         # Cast value to str according to EMF spec
         # Majority of values are expected to be string already, so
         # checking before casting improves performance in most cases
-        if isinstance(value, str):
-            self.dimension_set[name] = value
-        else:
-            self.dimension_set[name] = str(value)
+        self.dimension_set[name] = value if isinstance(value, str) else str(value)
 
     def add_metadata(self, key: str, value: Any):
         """Adds high cardinal metadata for metrics object

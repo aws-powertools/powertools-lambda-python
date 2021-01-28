@@ -28,10 +28,14 @@ sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 ### Lambda Layer
 
 Powertools is also available as a Lambda Layer. It is distributed via the [AWS Serverless Application Repository (SAR)](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/what-is-serverlessrepo.html).
+We have two layers available, one with core dependencies `aws-lambda-powertools-python-layer` and one with extras `aws-lambda-powertools-python-layer-extras` such as `pydantic` which is required for the parser.
+
+> **NOTE**: Extras layer support does not support Python 3.6 runtime. This layer is also  includes all extra dependencies and is 22.4MB zipped, ~155MB unzipped big.
 
 App | ARN
 ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------
 [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer) | arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+[aws-lambda-powertools-python-layer-extras](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-extras) | arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-extras
 
 If using SAM, you can include this SAR App as part of your shared Layers stack, and lock to a specific semantic version. Once deployed, it'll be available across the account this is deployed to.
 
@@ -41,8 +45,9 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-        SemanticVersion: 1.3.1 # change to latest semantic version available in SAR
+        SemanticVersion: 1.9.0 # change to latest semantic version available in SAR
 ```
+
 
 This will add a nested app stack with an output parameter `LayerVersionArn`, that you can reference inside your Lambda function definition:
 
@@ -50,6 +55,7 @@ This will add a nested app stack with an output parameter `LayerVersionArn`, tha
   Layers:
     - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
 ```
+
 
 Here is the list of IAM permissions that you need to add to your deployment IAM role to use the layer:
 
@@ -116,17 +122,24 @@ Utility | Description
 
 ## Environment variables
 
+<Note type="info">
+	<strong>Explicit parameters take precedence over environment variables.</strong><br/><br/>
+</Note>
+
 **Environment variables** used across suite of utilities.
 
-Environment variable | Description | Utility
-------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
-**POWERTOOLS_SERVICE_NAME** | Sets service name used for tracing namespace, metrics dimension and structured logging | All
-**POWERTOOLS_METRICS_NAMESPACE** | Sets namespace used for metrics | [Metrics](./core/metrics)
-**POWERTOOLS_TRACE_DISABLED** | Disables tracing | [Tracing](./core/tracer)
-**POWERTOOLS_TRACE_MIDDLEWARES** | Creates sub-segment for each custom middleware | [Middleware factory](./utilities/middleware_factory)
-**POWERTOOLS_LOGGER_LOG_EVENT** | Logs incoming event | [Logging](./core/logger)
-**POWERTOOLS_LOGGER_SAMPLE_RATE** | Debug log sampling | [Logging](./core/logger)
-**LOG_LEVEL** | Sets logging level | [Logging](./core/logger)
+Environment variable | Description | Utility | Default
+------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------
+**POWERTOOLS_SERVICE_NAME** | Sets service name used for tracing namespace, metrics dimension and structured logging | All | `"service_undefined"`
+**POWERTOOLS_METRICS_NAMESPACE** | Sets namespace used for metrics | [Metrics](./core/metrics) | `None`
+**POWERTOOLS_TRACE_DISABLED** | Disables tracing | [Tracing](./core/tracer) | `false`
+**POWERTOOLS_TRACER_CAPTURE_RESPONSE** | Captures Lambda or method return as metadata. | [Tracing](./core/tracer) | `true`
+**POWERTOOLS_TRACER_CAPTURE_ERROR** | Captures Lambda or method exception as metadata. | [Tracing](./core/tracer) | `true`
+**POWERTOOLS_TRACE_MIDDLEWARES** | Creates sub-segment for each custom middleware | [Middleware factory](./utilities/middleware_factory) | `false`
+**POWERTOOLS_LOGGER_LOG_EVENT** | Logs incoming event | [Logging](./core/logger) | `false`
+**POWERTOOLS_LOGGER_SAMPLE_RATE** | Debug log sampling | [Logging](./core/logger) | `0`
+**POWERTOOLS_LOG_DEDUPLICATION_DISABLED** | Disables log deduplication filter protection to use Pytest Live Log feature | [Logging](./core/logger) | `false`
+**LOG_LEVEL** | Sets logging level | [Logging](./core/logger) | `INFO`
 
 ## Debug mode
 

@@ -119,7 +119,7 @@ Create Auth Challenge | `data_classes.cognito_user_pool_event.CreateAuthChalleng
 Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChallengeResponseTriggerEvent`
 
 ```python:title=lambda_app.py
-from aws_lambda_powertools.utilities.cognito_user_pool_event import PostConfirmationTriggerEvent
+from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import PostConfirmationTriggerEvent
 
 def lambda_handler(event, context):
     event: PostConfirmationTriggerEvent = PostConfirmationTriggerEvent(event)

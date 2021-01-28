@@ -32,13 +32,11 @@ class DynamoDBStreamEnvelope(BaseEnvelope):
         """
         logger.debug(f"Parsing incoming data with DynamoDB Stream model {DynamoDBStreamModel}")
         parsed_envelope = DynamoDBStreamModel.parse_obj(data)
-        output = []
         logger.debug(f"Parsing DynamoDB Stream new and old records with {model}")
-        for record in parsed_envelope.Records:
-            output.append(
-                {
-                    "NewImage": self._parse(data=record.dynamodb.NewImage, model=model),
-                    "OldImage": self._parse(data=record.dynamodb.OldImage, model=model),
-                }
-            )
-        return output
+        return [
+            {
+                "NewImage": self._parse(data=record.dynamodb.NewImage, model=model),
+                "OldImage": self._parse(data=record.dynamodb.OldImage, model=model),
+            }
+            for record in parsed_envelope.Records
+        ]
