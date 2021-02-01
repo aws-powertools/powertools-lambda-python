@@ -21,7 +21,7 @@
         "bl": "^4.0.3",
         "semver": "^7.3.2",
         "node-fetch": "^2.6.1",
-	  	"axios": "^0.21.1"
+        "axios": "^0.21.1"
     },
     "keywords": [],
     "license": "MIT-0",
