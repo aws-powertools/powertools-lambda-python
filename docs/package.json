@@ -4,9 +4,9 @@
         "build": "gatsby build --prefix-paths"
     },
     "dependencies": {
-        "@aws-amplify/analytics": "^3.3.6",
+        "@aws-amplify/analytics": "^4.0.6",
         "antd": "^4.7.0",
-        "aws-amplify": "^3.3.3",
+        "aws-amplify": "^3.3.15",
         "gatsby": "^2.24.77",
         "gatsby-plugin-antd": "^2.2.0",
         "gatsby-plugin-catch-links": "^2.3.15",
@@ -21,7 +21,7 @@
         "bl": "^4.0.3",
         "semver": "^7.3.2",
         "node-fetch": "^2.6.1",
-	  	"axios": "^0.21.1"
+        "axios": "^0.21.1"
     },
     "keywords": [],
     "license": "MIT-0",
