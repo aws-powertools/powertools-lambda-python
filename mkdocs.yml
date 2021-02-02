@@ -1,23 +1,28 @@
 site_name: AWS Lambda Powertools Python
 nav:
-    - Homepage: index.md
-    - Core utilities:
-        - core/tracer.md
-        - core/logger.md
-        - core/metrics.md
-    - Utilities:
-        - utilities/middleware_factory.md
-        - utilities/parameters.md
-        - utilities/batch.md
-        - utilities/typing.md
-        - utilities/validation.md
-        - utilities/data_classes.md
-        - utilities/parser.md
+  - Homepage: index.md
+  - Core utilities:
+      - core/tracer.md
+      - core/logger.md
+      - core/metrics.md
+  - Utilities:
+      - utilities/middleware_factory.md
+      - utilities/parameters.md
+      - utilities/batch.md
+      - utilities/typing.md
+      - utilities/validation.md
+      - utilities/data_classes.md
+      - utilities/parser.md
 
 theme:
   name: material
+  palette:
+    primary: deep purple
   features:
     - navigation.sections
+  icon:
+    repo: fontawesome/brands/github
+  logo: media/aws-logo-light.svg
 
 markdown_extensions:
   - admonition
@@ -27,8 +32,5 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.details
 
-extra_javascript:
-  - https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js
-  - javascripts/config.js
-extra_css:
-  - https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css
+
+repo_url: https://github.com/awslabs/aws-lambda-powertools-python
