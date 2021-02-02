@@ -96,7 +96,7 @@ CloudWatch EMF uses the same dimensions across all your metrics. Use `single_met
 
 ## Adding metadata
 
-You can use `add_metadata` for advanced use cases, where you want to metadata as part of the serialized metrics object.
+You can use `add_metadata` for advanced use cases, where you want to metadata as part of the serialized metrics object. This will be available in CloudWatch Logs to ease operations on high cardinal data.
 
 !!! info
     **This will not be available during metrics visualization** - Use **dimensions** for this purpose
@@ -112,10 +112,7 @@ You can use `add_metadata` for advanced use cases, where you want to metadata as
     metrics.add_metadata(key="booking_id", value="booking_uuid")
     ```
 
-This will be available in CloudWatch Logs to ease operations on high cardinal data.
-
-
-??? example "Excerpt output in CloudWatch Logs"
+=== "CloudWatch Logs"
 
     ```json hl_lines="23"
     {

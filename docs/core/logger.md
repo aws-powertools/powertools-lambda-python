@@ -65,13 +65,13 @@ You can enrich your structured logs with key Lambda context information via `inj
 
 === "collect.py"
 
-  ```python
-  from aws_lambda_powertools import Logger
+    ```python
+    from aws_lambda_powertools import Logger
 
-  logger = Logger()
+    logger = Logger()
 
-  @logger.inject_lambda_context
-  def handler(event, context):
+    @logger.inject_lambda_context
+    def handler(event, context):
      logger.info("Collecting payment")
      ...
      # You can log entire objects too
@@ -80,7 +80,41 @@ You can enrich your structured logs with key Lambda context information via `inj
         "charge_id": event['charge_id']
      })
      ...
-  ```
+    ```
+
+=== "CloudWatch Logs"
+
+    ```json hl_lines="6-10 26-27"
+        {
+           "timestamp":"2020-05-24 18:17:33,774",
+           "level":"INFO",
+           "location":"collect.handler:1",
+           "service":"payment",
+           "lambda_function_name":"test",
+           "lambda_function_memory_size": 128,
+           "lambda_function_arn":"arn:aws:lambda:eu-west-1:12345678910:function:test",
+           "lambda_request_id":"52fdfc07-2182-154f-163f-5f0f9a621d72",
+           "cold_start": true,
+           "sampling_rate": 0.0,
+           "message": "Collecting payment"
+        },
+        {
+           "timestamp":"2020-05-24 18:17:33,774",
+           "level":"INFO",
+           "location":"collect.handler:15",
+           "service":"payment",
+           "lambda_function_name":"test",
+           "lambda_function_memory_size": 128,
+           "lambda_function_arn":"arn:aws:lambda:eu-west-1:12345678910:function:test",
+           "lambda_request_id":"52fdfc07-2182-154f-163f-5f0f9a621d72",
+           "cold_start": true,
+           "sampling_rate": 0.0,
+           "message":{
+              "operation":"collect_payment",
+              "charge_id": "ch_AZFlk2345C0"
+           }
+        }
+    ```
 
 When used, this will include the following keys:
 
@@ -91,42 +125,6 @@ Key | Type | Example
 **function_memory_size**| int | 128
 **function_arn**| str | "arn:aws:lambda:eu-west-1:012345678910:function:example-powertools-HelloWorldFunction-1P1Z6B39FLU73"
 **function_request_id**| str | "899856cb-83d1-40d7-8611-9e78f15f32f4"
-
-
-??? example "Excerpt output in CloudWatch Logs"
-
-    ```json hl_lines="6-10 26-28"
-    {
-       "timestamp":"2020-05-24 18:17:33,774",
-       "level":"INFO",
-       "location":"collect.handler:1",
-       "service":"payment",
-       "lambda_function_name":"test",
-       "lambda_function_memory_size": 128,
-       "lambda_function_arn":"arn:aws:lambda:eu-west-1:12345678910:function:test",
-       "lambda_request_id":"52fdfc07-2182-154f-163f-5f0f9a621d72",
-       "cold_start": true,
-       "sampling_rate": 0.0,
-       "message": "Collecting payment"
-    }
-
-    {
-       "timestamp":"2020-05-24 18:17:33,774",
-       "level":"INFO",
-       "location":"collect.handler:15",
-       "service":"payment",
-       "lambda_function_name":"test",
-       "lambda_function_memory_size": 128,
-       "lambda_function_arn":"arn:aws:lambda:eu-west-1:12345678910:function:test",
-       "lambda_request_id":"52fdfc07-2182-154f-163f-5f0f9a621d72",
-       "cold_start": true,
-       "sampling_rate": 0.0,
-       "message":{
-          "operation":"collect_payment",
-          "charge_id": "ch_AZFlk2345C0"
-       }
-    }
-    ```
 
 You can also explicitly log any incoming event using `log_event` param or via `POWERTOOLS_LOGGER_LOG_EVENT` env var.
 
@@ -158,25 +156,18 @@ You can append your own keys to your existing Logger via `structure_logs` with *
 
 === "collect.py"
 
-  ```python hl_lines="7"
-  from aws_lambda_powertools import Logger
+    ```python hl_lines="7"
+    from aws_lambda_powertools import Logger
 
-  logger = Logger()
+    logger = Logger()
 
-  def handler(event, context):
+    def handler(event, context):
      order_id = event.get("order_id")
      logger.structure_logs(append=True, order_id=order_id) # highlight-line
      logger.info("Collecting payment")
         ...
-  ```
-
-> Note: Logger will automatically reject any key with a None value.
-
-If you conditionally add keys depending on the payload, you can use the highlighted line above as an example.
-
-This example will add `order_id` if its value is not empty, and in subsequent invocations where `order_id` might not be present it'll remove it from the logger.
-
-??? example "Excerpt output in CloudWatch Logs"
+    ```
+=== "CloudWatch Logs"
 
     ```json hl_lines="7"
     {
@@ -185,10 +176,16 @@ This example will add `order_id` if its value is not empty, and in subsequent in
        "location": "collect.handler:1",
        "service": "payment",
        "sampling_rate": 0.0,
-       "order_id": "order_id_value", // highlight-line
+       "order_id": "order_id_value",
        "message": "Collecting payment"
     }
     ```
+
+> Note: Logger will automatically reject any key with a None value.
+
+If you conditionally add keys depending on the payload, you can use the highlighted line above as an example.
+
+This example will add `order_id` if its value is not empty, and in subsequent invocations where `order_id` might not be present it'll remove it from the logger.
 
 ### extra parameter
 
@@ -196,15 +193,14 @@ Extra parameter is available for all log levels, as implemented in the standard 
 
 === "extra_parameter.py"
 
-  ```python hl_lines="6"
-  logger = Logger(service="payment")
+    ```python hl_lines="6"
+    logger = Logger(service="payment")
 
-  fields = { "request_id": "1123" }
+    fields = { "request_id": "1123" }
 
-  logger.info("Hello", extra=fields)
-  ```
-
-??? example "Excerpt output in CloudWatch Logs"
+    logger.info("Hello", extra=fields)
+    ```
+=== "CloudWatch Logs"
 
     ```json hl_lines="7"
     {
@@ -217,7 +213,6 @@ Extra parameter is available for all log levels, as implemented in the standard 
        "message": "Collecting payment"
     }
     ```
-
 
 ## Reusing Logger across your code
 
@@ -270,20 +265,20 @@ Sampling decision happens at the Logger class initialization, which only happens
 
 === "collect.py"
 
-  ```python hl_lines="4"
-  from aws_lambda_powertools import Logger
+    ```python hl_lines="4"
+    from aws_lambda_powertools import Logger
 
-  # Sample 10% of debug logs e.g. 0.1
-  logger = Logger(sample_rate=0.1, level="INFO")
+    # Sample 10% of debug logs e.g. 0.1
+    logger = Logger(sample_rate=0.1, level="INFO")
 
-  def handler(event, context):
+    def handler(event, context):
      logger.debug("Verifying whether order_id is present")
      if "order_id" in event:
         logger.info("Collecting payment")
         ...
-  ```
+    ```
 
-??? example "Excerpt output in CloudWatch Logs"
+=== "CloudWatch Logs"
 
     ```json hl_lines="3 11 25"
     {
@@ -314,7 +309,6 @@ Sampling decision happens at the Logger class initialization, which only happens
        "message": "Collecting payment"
     }
     ```
-
 
 ## Migrating from other Loggers
 
@@ -405,7 +399,7 @@ When logging exceptions, Logger will add a new key named `exception`, and will s
          logger.exception("Received an exception") # highlight-line
     ```
 
-??? example "Excerpt output in CloudWatch Logs"
+=== "CloudWatch Logs"
 
     ```json
     {
@@ -418,7 +412,6 @@ When logging exceptions, Logger will add a new key named `exception`, and will s
        "exception": "Traceback (most recent call last):\n  File \"<input>\", line 2, in <module>\nValueError: something went wrong"
     }
     ```
-
 
 ## Testing your code
 

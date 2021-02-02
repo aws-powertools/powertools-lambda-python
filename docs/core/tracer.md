@@ -151,7 +151,7 @@ def sensitive_information_to_be_processed():
 
 # If we capture response, the s3_object["Body"].read() method will be called by x-ray-sdk when
 # trying to serialize the object. This will cause it to return empty next time it is called.
-@tracer.capture_method(capture_response=False) # highlight-line
+@tracer.capture_method(capture_response=False)
 def get_s3_object(bucket_name, object_key):
     s3 = boto3.client("s3")
     s3_object = get_object(Bucket=bucket_name, Key=object_key)
@@ -242,7 +242,7 @@ from aws_lambda_powertools.tracing import aiohttp_trace_config
 tracer = Tracer()
 
 async def aiohttp_task():
-    async with aiohttp.ClientSession(trace_configs=[aiohttp_trace_config()]) as session: # highlight-line
+    async with aiohttp.ClientSession(trace_configs=[aiohttp_trace_config()]) as session:
         async with session.get("https://httpbin.org/json") as resp:
             resp = await resp.json()
             return resp
