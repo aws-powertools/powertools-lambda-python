@@ -1,10 +1,5 @@
----
-title: Validation
-description: Utility
----
-
-
-import Note from "../../src/components/Note"
+# Validation
+## Utility
 
 This utility provides JSON Schema validation for events and responses, including JMESPath support to unwrap events before validation.
 
@@ -22,9 +17,8 @@ You can also use the standalone `validate` function, if you want more control ov
 
 We support any JSONSchema draft supported by [fastjsonschema](https://horejsek.github.io/python-fastjsonschema/) library.
 
-<Note type="warning">
-    Both <code>validator</code> decorator and <code>validate</code> standalone function expects your JSON Schema to be
-    a <strong>dictionary</strong>, not a filename.
+!!! warning
+    Both `validator` decorator and `validate` standalone function expects your JSON Schema to be a **dictionary**, not a filename.
 </Note>
 
 
@@ -34,16 +28,18 @@ We support any JSONSchema draft supported by [fastjsonschema](https://horejsek.g
 
 It will fail fast with `SchemaValidationError` exception if event or response doesn't conform with given JSON Schema.
 
-```python:title=validator_decorator.py
-from aws_lambda_powertools.utilities.validation import validator
+=== "validator_decorator.py"
 
-json_schema_dict = {..}
-response_json_schema_dict = {..}
+    ```python
+    from aws_lambda_powertools.utilities.validation import validator
 
-@validator(inbound_schema=json_schema_dict, outbound_schema=response_json_schema_dict)
-def handler(event, context):
-	return event
-```
+    json_schema_dict = {..}
+    response_json_schema_dict = {..}
+
+    @validator(inbound_schema=json_schema_dict, outbound_schema=response_json_schema_dict)
+    def handler(event, context):
+        return event
+    ```
 
 **NOTE**: It's not a requirement to validate both inbound and outbound schemas - You can either use one, or both.
 
@@ -53,27 +49,28 @@ def handler(event, context):
 
 You can also gracefully handle schema validation errors by catching `SchemaValidationError` exception.
 
-```python:title=validator_decorator.py
-from aws_lambda_powertools.utilities.validation import validate
-from aws_lambda_powertools.utilities.validation.exceptions import SchemaValidationError
+=== "validator_decorator.py"
 
-json_schema_dict = {..}
+    ```python
+    from aws_lambda_powertools.utilities.validation import validate
+    from aws_lambda_powertools.utilities.validation.exceptions import SchemaValidationError
 
-def handler(event, context):
-	try:
-	    validate(event=event, schema=json_schema_dict)
-    except SchemaValidationError as e:
-        # do something before re-raising
-        raise
+    json_schema_dict = {..}
 
-	return event
-```
+    def handler(event, context):
+        try:
+            validate(event=event, schema=json_schema_dict)
+        except SchemaValidationError as e:
+            # do something before re-raising
+            raise
+
+        return event
+    ```
 
 ### Validating custom formats
 
-> New in 1.10.0
->
-> **NOTE**: JSON Schema DRAFT 7 [has many new built-in formats](https://json-schema.org/understanding-json-schema/reference/string.html#format) such as date, time, and specifically a regex format which might be a better replacement for a custom format, if you do have control over the schema.
+!!! note "New in 1.10.0"
+    JSON Schema DRAFT 7 [has many new built-in formats](https://json-schema.org/understanding-json-schema/reference/string.html#format) such as date, time, and specifically a regex format which might be a better replacement for a custom format, if you do have control over the schema.
 
 If you have JSON Schemas with custom formats, for example having a `int64` for high precision integers, you can pass an optional validation to handle each type using `formats` parameter - Otherwise it'll fail validation:
 
@@ -112,31 +109,35 @@ Envelopes are [JMESPath expressions](https://jmespath.org/tutorial.html) to extr
 
 Here is a sample custom EventBridge event, where we only validate what's inside the `detail` key:
 
-```json:title=sample_wrapped_event.json
-{
-    "id": "cdc73f9d-aea9-11e3-9d5a-835b769c0d9c",
-    "detail-type": "Scheduled Event",
-    "source": "aws.events",
-    "account": "123456789012",
-    "time": "1970-01-01T00:00:00Z",
-    "region": "us-east-1",
-    "resources": ["arn:aws:events:us-east-1:123456789012:rule/ExampleRule"],
-    "detail": {"message": "hello hello", "username": "blah blah"}, // highlight-line
-}
-```
+=== "sample_wrapped_event.json"
+
+    ```json hl_lines="9"
+    {
+        "id": "cdc73f9d-aea9-11e3-9d5a-835b769c0d9c",
+        "detail-type": "Scheduled Event",
+        "source": "aws.events",
+        "account": "123456789012",
+        "time": "1970-01-01T00:00:00Z",
+        "region": "us-east-1",
+        "resources": ["arn:aws:events:us-east-1:123456789012:rule/ExampleRule"],
+        "detail": {"message": "hello hello", "username": "blah blah"}
+    }
+    ```
 
 Here is how you'd use the `envelope` parameter to extract the payload inside the `detail` key before validating:
 
-```python:title=unwrapping_events.py
-from aws_lambda_powertools.utilities.validation import validator, validate
+=== "unwrapping_events.py"
 
-json_schema_dict = {..}
+    ```python hl_lines="5 7"
+    from aws_lambda_powertools.utilities.validation import validator, validate
 
-@validator(inbound_schema=json_schema_dict, envelope="detail") # highlight-line
-def handler(event, context):
-	validate(event=event, schema=json_schema_dict, envelope="detail") # highlight-line
-	return event
-```
+    json_schema_dict = {..}
+
+    @validator(inbound_schema=json_schema_dict, envelope="detail") # highlight-line
+    def handler(event, context):
+        validate(event=event, schema=json_schema_dict, envelope="detail") # highlight-line
+        return event
+    ```
 
 This is quite powerful because you can use JMESPath Query language to extract records from [arrays, slice and dice](https://jmespath.org/tutorial.html#list-and-slice-projections), to [pipe expressions](https://jmespath.org/tutorial.html#pipe-expressions) and [function expressions](https://jmespath.org/tutorial.html#functions), where you'd extract what you need before validating the actual payload.
 
@@ -144,16 +145,18 @@ This is quite powerful because you can use JMESPath Query language to extract re
 
 This utility comes with built-in envelopes to easily extract the payload from popular event sources.
 
-```python:title=unwrapping_popular_event_sources.py
-from aws_lambda_powertools.utilities.validation import envelopes, validate, validator
+=== "unwrapping_popular_event_sources.py"
 
-json_schema_dict = {..}
+    ```python hl_lines="5 7"
+    from aws_lambda_powertools.utilities.validation import envelopes, validate, validator
 
-@validator(inbound_schema=json_schema_dict, envelope=envelopes.EVENTBRIDGE) # highlight-line
-def handler(event, context):
-	validate(event=event, schema=json_schema_dict, envelope=envelopes.EVENTBRIDGE) # highlight-line
-	return event
-```
+    json_schema_dict = {..}
+
+    @validator(inbound_schema=json_schema_dict, envelope=envelopes.EVENTBRIDGE)
+    def handler(event, context):
+        validate(event=event, schema=json_schema_dict, envelope=envelopes.EVENTBRIDGE)
+        return event
+    ```
 
 Here is a handy table with built-in envelopes along with their JMESPath expressions in case you want to build your own.
 
@@ -174,9 +177,8 @@ You might have events or responses that contain non-encoded JSON, where you need
 
 You can use our built-in JMESPath functions within your expressions to do exactly that to decode JSON Strings, base64, and uncompress gzip data.
 
-<Note type="info">
+!!! info
     We use these for built-in envelopes to easily to decode and unwrap events from sources like Kinesis, CloudWatch Logs, etc.
-</Note>
 
 ### powertools_json function
 
@@ -184,20 +186,22 @@ Use `powertools_json` function to decode any JSON String.
 
 This sample will decode the value within the `data` key into a valid JSON before we can validate it.
 
-```python:title=powertools_json_jmespath_function.py
-from aws_lambda_powertools.utilities.validation import validate
+=== "powertools_json_jmespath_function.py"
 
-json_schema_dict = {..}
-sample_event = {
-    'data': '{"payload": {"message": "hello hello", "username": "blah blah"}}'
-}
+    ```python hl_lines="9"
+    from aws_lambda_powertools.utilities.validation import validate
 
-def handler(event, context):
-	validate(event=event, schema=json_schema_dict, envelope="powertools_json(data)") # highlight-line
-	return event
+    json_schema_dict = {..}
+    sample_event = {
+        'data': '{"payload": {"message": "hello hello", "username": "blah blah"}}'
+    }
 
-handler(event=sample_event, context={})
-```
+    def handler(event, context):
+        validate(event=event, schema=json_schema_dict, envelope="powertools_json(data)")
+        return event
+
+    handler(event=sample_event, context={})
+    ```
 
 ### powertools_base64 function
 
@@ -205,20 +209,22 @@ Use `powertools_base64` function to decode any base64 data.
 
 This sample will decode the base64 value within the `data` key, and decode the JSON string into a valid JSON before we can validate it.
 
-```python:title=powertools_json_jmespath_function.py
-from aws_lambda_powertools.utilities.validation import validate
+=== "powertools_json_jmespath_function.py"
 
-json_schema_dict = {..}
-sample_event = {
-    "data": "eyJtZXNzYWdlIjogImhlbGxvIGhlbGxvIiwgInVzZXJuYW1lIjogImJsYWggYmxhaCJ9="
-}
+    ```python hl_lines="9"
+    from aws_lambda_powertools.utilities.validation import validate
 
-def handler(event, context):
-	validate(event=event, schema=json_schema_dict, envelope="powertools_json(powertools_base64(data))") # highlight-line
-	return event
+    json_schema_dict = {..}
+    sample_event = {
+        "data": "eyJtZXNzYWdlIjogImhlbGxvIGhlbGxvIiwgInVzZXJuYW1lIjogImJsYWggYmxhaCJ9="
+    }
 
-handler(event=sample_event, context={})
-```
+    def handler(event, context):
+        validate(event=event, schema=json_schema_dict, envelope="powertools_json(powertools_base64(data))")
+        return event
+
+    handler(event=sample_event, context={})
+    ```
 
 ### powertools_base64_gzip function
 
@@ -226,46 +232,49 @@ Use `powertools_base64_gzip` function to decompress and decode base64 data.
 
 This sample will decompress and decode base64 data, then use JMESPath pipeline expression to pass the result for decoding its JSON string.
 
-```python:title=powertools_json_jmespath_function.py
-from aws_lambda_powertools.utilities.validation import validate
+=== "powertools_json_jmespath_function.py"
 
-json_schema_dict = {..}
-sample_event = {
-    "data": "H4sIACZAXl8C/52PzUrEMBhFX2UILpX8tPbHXWHqIOiq3Q1F0ubrWEiakqTWofTdTYYB0YWL2d5zvnuTFellBIOedoiyKH5M0iwnlKH7HZL6dDB6ngLDfLFYctUKjie9gHFaS/sAX1xNEq525QxwFXRGGMEkx4Th491rUZdV3YiIZ6Ljfd+lfSyAtZloacQgAkqSJCGhxM6t7cwwuUGPz4N0YKyvO6I9WDeMPMSo8Z4Ca/kJ6vMEYW5f1MX7W1lVxaG8vqX8hNFdjlc0iCBBSF4ERT/3Pl7RbMGMXF2KZMh/C+gDpNS7RRsp0OaRGzx0/t8e0jgmcczyLCWEePhni/23JWalzjdu0a3ZvgEaNLXeugEAAA=="
-}
+    ```python hl_lines="9"
+    from aws_lambda_powertools.utilities.validation import validate
 
-def handler(event, context):
-	validate(event=event, schema=json_schema_dict, envelope="powertools_base64_gzip(data) | powertools_json(@)") # highlight-line
-	return event
+    json_schema_dict = {..}
+    sample_event = {
+        "data": "H4sIACZAXl8C/52PzUrEMBhFX2UILpX8tPbHXWHqIOiq3Q1F0ubrWEiakqTWofTdTYYB0YWL2d5zvnuTFellBIOedoiyKH5M0iwnlKH7HZL6dDB6ngLDfLFYctUKjie9gHFaS/sAX1xNEq525QxwFXRGGMEkx4Th491rUZdV3YiIZ6Ljfd+lfSyAtZloacQgAkqSJCGhxM6t7cwwuUGPz4N0YKyvO6I9WDeMPMSo8Z4Ca/kJ6vMEYW5f1MX7W1lVxaG8vqX8hNFdjlc0iCBBSF4ERT/3Pl7RbMGMXF2KZMh/C+gDpNS7RRsp0OaRGzx0/t8e0jgmcczyLCWEePhni/23JWalzjdu0a3ZvgEaNLXeugEAAA=="
+    }
 
-handler(event=sample_event, context={})
-```
+    def handler(event, context):
+        validate(event=event, schema=json_schema_dict, envelope="powertools_base64_gzip(data) | powertools_json(@)")
+        return event
+
+    handler(event=sample_event, context={})
+    ```
 
 ## Bring your own JMESPath function
 
-<Note type="warning">
+!!! warning
     This should only be used for advanced use cases where you have special formats not covered by the built-in functions.
-    <br/><br/>
-    This will <strong>replace all provided built-in functions such as `powertools_json`, so you will no longer be able to use them</strong>.
-</Note>
+
+    This will **replace all provided built-in functions such as `powertools_json`, so you will no longer be able to use them**.
 
 For special binary formats that you want to decode before applying JSON Schema validation, you can bring your own [JMESPath function](https://github.com/jmespath/jmespath.py#custom-functions) and any additional option via `jmespath_options` param.
 
-```python:title=custom_jmespath_function
-from aws_lambda_powertools.utilities.validation import validate
-from jmespath import functions
+=== "custom_jmespath_function.py"
 
-json_schema_dict = {..}
+    ```python hl_lines="15"
+    from aws_lambda_powertools.utilities.validation import validate
+    from jmespath import functions
 
-class CustomFunctions(functions.Functions):
+    json_schema_dict = {..}
 
-    @functions.signature({'types': ['string']})
-    def _func_special_decoder(self, s):
-        return my_custom_decoder_logic(s)
+    class CustomFunctions(functions.Functions):
 
-custom_jmespath_options = {"custom_functions": CustomFunctions()}
+        @functions.signature({'types': ['string']})
+        def _func_special_decoder(self, s):
+            return my_custom_decoder_logic(s)
 
-def handler(event, context):
-	validate(event=event, schema=json_schema_dict, envelope="", jmespath_options=**custom_jmespath_options) # highlight-line
-	return event
-```
+    custom_jmespath_options = {"custom_functions": CustomFunctions()}
+
+    def handler(event, context):
+        validate(event=event, schema=json_schema_dict, envelope="", jmespath_options=**custom_jmespath_options)
+        return event
+    ```
