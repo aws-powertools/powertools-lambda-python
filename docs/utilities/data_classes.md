@@ -1,9 +1,6 @@
+# Event Source Data Classes
+## Utility
 ---
-title: Event Source Data Classes
-description: Utility
----
-
-import Note from "../../src/components/Note"
 
 The event source data classes utility provides classes describing the schema of common Lambda events triggers.
 
@@ -46,59 +43,64 @@ Event Source | Data_class
 [SQS](#SQS) | `SQSEvent`
 
 
-<Note type="info">
+!!! info
     The examples provided below are far from exhaustive - the data classes themselves are designed to provide a form of
     documentation inherently (via autocompletion, types and docstrings).
-</Note>
 
 
 ## API Gateway Proxy
 
 Typically used for API Gateway REST API or HTTP API using v1 proxy event.
 
-```python:title=lambda_app.py
-from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
+=== "lambda_app.py"
 
-def lambda_handler(event, context):
-    event: APIGatewayProxyEvent = APIGatewayProxyEvent(event)
-    request_context = event.request_context
-    identity = request_context.identity
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
 
-    if 'helloworld' in event.path && event.http_method == 'GET':
-        user = identity.user
-        do_something_with(event.body, user)
-```
+    def lambda_handler(event, context):
+        event: APIGatewayProxyEvent = APIGatewayProxyEvent(event)
+        request_context = event.request_context
+        identity = request_context.identity
+
+        if 'helloworld' in event.path && event.http_method == 'GET':
+            user = identity.user
+            do_something_with(event.body, user)
+    ```
 
 ## API Gateway Proxy v2
 
-```python:title=lambda_app.py
-from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2
+=== "lambda_app.py"
 
-def lambda_handler(event, context):
-    event: APIGatewayProxyEventV2 = APIGatewayProxyEventV2(event)
-    request_context = event.request_context
-    query_string_parameters = event.query_string_parameters
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2
 
-    if 'helloworld' in event.raw_path && request_context.http.method == 'POST':
-        do_something_with(event.body, query_string_parameters)
-```
+    def lambda_handler(event, context):
+        event: APIGatewayProxyEventV2 = APIGatewayProxyEventV2(event)
+        request_context = event.request_context
+        query_string_parameters = event.query_string_parameters
+
+        if 'helloworld' in event.raw_path && request_context.http.method == 'POST':
+            do_something_with(event.body, query_string_parameters)
+    ```
 
 ## CloudWatch Logs
 
 CloudWatch Logs events by default are compressed and base64 encoded. You can use the helper function provided to decode,
 decompress and parse json data from the event.
 
-```python:title=lambda_app.py
-from aws_lambda_powertools.utilities.data_classes import CloudWatchLogsEvent
+=== "lambda_app.py"
 
-def lambda_handler(event, context):
-    event: CloudWatchLogsEvent = CloudWatchLogsEvent(event)
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import CloudWatchLogsEvent
 
-    decompressed_log = event.parse_logs_data
-    log_events = decompressed_log.log_events
-    for event in log_events:
-        do_something_with(event.timestamp, event.message)
-```
+    def lambda_handler(event, context):
+        event: CloudWatchLogsEvent = CloudWatchLogsEvent(event)
+
+        decompressed_log = event.parse_logs_data
+        log_events = decompressed_log.log_events
+        for event in log_events:
+            do_something_with(event.timestamp, event.message)
+    ```
 
 ## Cognito User Pool
 
@@ -118,15 +120,17 @@ Define Auth Challenge | `data_classes.cognito_user_pool_event.DefineAuthChalleng
 Create Auth Challenge | `data_classes.cognito_user_pool_event.CreateAuthChallengeTriggerEvent`
 Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChallengeResponseTriggerEvent`
 
-```python:title=lambda_app.py
-from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import PostConfirmationTriggerEvent
+=== "lambda_app.py"
 
-def lambda_handler(event, context):
-    event: PostConfirmationTriggerEvent = PostConfirmationTriggerEvent(event)
+    ```python
+    from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import PostConfirmationTriggerEvent
 
-    user_attributes = user_attributes = event.request.user_attributes
-    do_something_with(user_attributes)
-```
+    def lambda_handler(event, context):
+        event: PostConfirmationTriggerEvent = PostConfirmationTriggerEvent(event)
+
+        user_attributes = user_attributes = event.request.user_attributes
+        do_something_with(user_attributes)
+    ```
 
 ## DynamoDB Streams
 
@@ -134,110 +138,121 @@ The DynamoDB data class utility provides the base class for `DynamoDBStreamEvent
 attributes values (`AttributeValue`), as well as enums for stream view type (`StreamViewType`) and event type
 (`DynamoDBRecordEventName`).
 
-```python:title=lambda_app.py
-from aws_lambda_powertools.utilities.data_classes import DynamoDBStreamEvent, DynamoDBRecordEventName
+=== "lambda_app.py"
 
-def lambda_handler(event, context):
-    event: DynamoDBStreamEvent = DynamoDBStreamEvent(event)
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import DynamoDBStreamEvent, DynamoDBRecordEventName
 
-    # Multiple records can be delivered in a single event
-    for record in event.records:
-        if record.event_name == DynamoDBRecordEventName.MODIFY:
-            do_something_with(record.dynamodb.new_image)
-            do_something_with(record.dynamodb.old_image)
-```
+    def lambda_handler(event, context):
+        event: DynamoDBStreamEvent = DynamoDBStreamEvent(event)
+
+        # Multiple records can be delivered in a single event
+        for record in event.records:
+            if record.event_name == DynamoDBRecordEventName.MODIFY:
+                do_something_with(record.dynamodb.new_image)
+                do_something_with(record.dynamodb.old_image)
+    ```
 
 ## EventBridge
 
-```python:title=lambda_app.py
-from aws_lambda_powertools.utilities.data_classes import EventBridgeEvent
+=== "lambda_app.py"
 
-def lambda_handler(event, context):
-    event: EventBridgeEvent = EventBridgeEvent(event)
-    do_something_with(event.detail)
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import EventBridgeEvent
 
-```
+    def lambda_handler(event, context):
+        event: EventBridgeEvent = EventBridgeEvent(event)
+        do_something_with(event.detail)
+
+    ```
 
 ## Kinesis streams
 
 Kinesis events by default contain base64 encoded data. You can use the helper function to access the data either as json
 or plain text, depending on the original payload.
 
-```python:title=lambda_app.py
-from aws_lambda_powertools.utilities.data_classes import KinesisStreamEvent
+=== "lambda_app.py"
 
-def lambda_handler(event, context):
-    event: KinesisStreamEvent = KinesisStreamEvent(event)
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import KinesisStreamEvent
 
-    # if data was delivered as json
-    data = event.data_as_text()
+    def lambda_handler(event, context):
+        event: KinesisStreamEvent = KinesisStreamEvent(event)
 
-    # if data was delivered as text
-    data = event.data_as_json()
+        # if data was delivered as json
+        data = event.data_as_text()
 
-    do_something_with(data)
+        # if data was delivered as text
+        data = event.data_as_json()
 
-```
+        do_something_with(data)
+    ```
 
 ## S3
 
-```python:title=lambda_app.py
-from aws_lambda_powertools.utilities.data_classes import S3Event
+=== "lambda_app.py"
 
-def lambda_handler(event, context):
-    event: S3Event = S3Event(event)
-    bucket_name = event.bucket_name
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import S3Event
 
-    # Multiple records can be delivered in a single event
-    for record in event.records:
-        object_key = record.s3.get_object.key
+    def lambda_handler(event, context):
+        event: S3Event = S3Event(event)
+        bucket_name = event.bucket_name
 
-        do_something_with(f'{bucket_name}/{object_key}')
+        # Multiple records can be delivered in a single event
+        for record in event.records:
+            object_key = record.s3.get_object.key
 
-```
+            do_something_with(f'{bucket_name}/{object_key}')
+    ```
 
 ## SES
 
-```python:title=lambda_app.py
-from aws_lambda_powertools.utilities.data_classes import SESEvent
+=== "lambda_app.py"
 
-def lambda_handler(event, context):
-    event: SESEvent = SESEvent(event)
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import SESEvent
 
-    # Multiple records can be delivered in a single event
-    for record in event.records:
-        mail = record.ses.mail
-        common_headers = mail.common_headers
+    def lambda_handler(event, context):
+        event: SESEvent = SESEvent(event)
 
-        do_something_with(common_headers.to, common_headers.subject)
+        # Multiple records can be delivered in a single event
+        for record in event.records:
+            mail = record.ses.mail
+            common_headers = mail.common_headers
 
-```
+            do_something_with(common_headers.to, common_headers.subject)
+    ```
 
 ## SNS
 
-```python:title=lambda_app.py
-from aws_lambda_powertools.utilities.data_classes import SNSEvent
+=== "lambda_app.py"
 
-def lambda_handler(event, context):
-    event: SNSEvent = SNSEvent(event)
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import SNSEvent
 
-    # Multiple records can be delivered in a single event
-    for record in event.records:
-        message = record.sns.message
-        subject = record.sns.subject
+    def lambda_handler(event, context):
+        event: SNSEvent = SNSEvent(event)
 
-        do_something_with(subject, message)
-```
+        # Multiple records can be delivered in a single event
+        for record in event.records:
+            message = record.sns.message
+            subject = record.sns.subject
+
+            do_something_with(subject, message)
+    ```
 
 ## SQS
 
-```python:title=lambda_app.py
-from aws_lambda_powertools.utilities.data_classes import SQSEvent
+=== "lambda_app.py"
 
-def lambda_handler(event, context):
-    event: SQSEvent = SQSEvent(event)
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import SQSEvent
 
-    # Multiple records can be delivered in a single event
-    for record in event.records:
-        do_something_with(record.body)
-```
+    def lambda_handler(event, context):
+        event: SQSEvent = SQSEvent(event)
+
+        # Multiple records can be delivered in a single event
+        for record in event.records:
+            do_something_with(record.body)
+    ```
