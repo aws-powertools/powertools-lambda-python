@@ -31,6 +31,7 @@ markdown_extensions:
       linenums: true
   - pymdownx.superfences
   - pymdownx.details
+  - meta
 
 
 repo_url: https://github.com/awslabs/aws-lambda-powertools-python
