@@ -1,0 +1,34 @@
+site_name: AWS Lambda Powertools Python
+nav:
+    - Homepage: index.md
+    - Core utilities:
+        - core/tracer.md
+        - core/logger.md
+        - core/metrics.md
+    - Utilities:
+        - utilities/middleware_factory.md
+        - utilities/parameters.md
+        - utilities/batch.md
+        - utilities/typing.md
+        - utilities/validation.md
+        - utilities/data_classes.md
+        - utilities/parser.md
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+
+markdown_extensions:
+  - admonition
+  - pymdownx.tabbed
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.superfences
+  - pymdownx.details
+
+extra_javascript:
+  - https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js
+  - javascripts/config.js
+extra_css:
+  - https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css

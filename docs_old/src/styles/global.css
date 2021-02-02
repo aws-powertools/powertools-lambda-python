@@ -1,0 +1,31 @@
+tr > td {
+    font-size: 0.95rem
+}
+
+/* Override Ant default styles */
+.ant-alert-with-description .ant-alert-message {
+    font-size: 1.125rem !important
+}
+
+.ant-alert-description {
+    font-size: 1rem !important
+}
+
+.language-text {
+    font-weight: 700;
+    color: #5A6270 !important
+}
+
+.token.variable,
+.token.boolean,
+.token.number,
+.language-bash > .variable,
+.token.function,
+.token.decorator,
+.token.property {
+    color: darkmagenta !important
+}
+
+blockquote {
+	font-size: 1.15em
+}
