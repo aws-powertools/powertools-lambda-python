@@ -5,7 +5,8 @@ from typing import List
 
 from pydantic import BaseModel, validator
 from pydantic.types import PositiveInt
-from typing_extensions import Literal
+
+from ..types import Literal
 
 logger = logging.getLogger(__name__)
 

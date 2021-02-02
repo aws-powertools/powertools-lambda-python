@@ -4,7 +4,8 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 from pydantic.networks import EmailStr
 from pydantic.types import PositiveInt
-from typing_extensions import Literal
+
+from ..types import Literal
 
 
 class SesReceiptVerdict(BaseModel):

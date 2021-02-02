@@ -2,7 +2,8 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 from pydantic import BaseModel
-from typing_extensions import Literal
+
+from ..types import Literal
 
 
 class SqsAttributesModel(BaseModel):
