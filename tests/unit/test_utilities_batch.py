@@ -81,8 +81,8 @@ def test_partial_sqs_process_record_success(mocker, partial_sqs_processor):
 
     result = partial_sqs_processor._process_record(record)
 
-    handler_mock.assert_called_once_with(record)
-    success_handler_mock.assert_called_once_with(record, success_result)
+    handler_mock.assert_called_once_with(record=record)
+    success_handler_mock.assert_called_once_with(record=record, result=success_result)
 
     assert result == expected_value
 
@@ -98,13 +98,13 @@ def test_partial_sqs_process_record_failure(mocker, partial_sqs_processor):
 
     result = partial_sqs_processor._process_record(record)
 
-    handler_mock.assert_called_once_with(record)
+    handler_mock.assert_called_once_with(record=record)
 
-    failure_handler_called_with_args, _ = failure_handler_mock.call_args
+    _, failure_handler_called_with_args = failure_handler_mock.call_args
     failure_handler_mock.assert_called_once()
-    assert (failure_handler_called_with_args[0]) == record
-    assert isinstance(failure_handler_called_with_args[1], tuple)
-    assert failure_handler_called_with_args[1][1] == failure_result
+    assert (failure_handler_called_with_args["record"]) == record
+    assert isinstance(failure_handler_called_with_args["exception"], tuple)
+    assert failure_handler_called_with_args["exception"][1] == failure_result
     assert result == expected_value
 
 
