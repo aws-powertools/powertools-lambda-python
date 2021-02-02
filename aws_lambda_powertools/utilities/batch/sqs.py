@@ -91,10 +91,10 @@ class PartialSQSProcessor(BasePartialProcessor):
             An object to be processed.
         """
         try:
-            result = self.handler(record)
-            return self.success_handler(record, result)
+            result = self.handler(record=record)
+            return self.success_handler(record=record, result=result)
         except Exception:
-            return self.failure_handler(record, sys.exc_info())
+            return self.failure_handler(record=record, exception=sys.exc_info())
 
     def _prepare(self):
         """

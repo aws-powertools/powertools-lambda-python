@@ -12,6 +12,8 @@ class SQSBatchProcessingError(Exception):
         self.msg = msg
         self.child_exceptions = child_exceptions
 
+    # Overriding this method so we can output all child exception tracebacks when we raise this exception to prevent
+    # errors being lost. See https://github.com/awslabs/aws-lambda-powertools-python/issues/275
     def __str__(self):
         parent_exception_str = super(SQSBatchProcessingError, self).__str__()
         exception_list = [f"{parent_exception_str}\n"]
