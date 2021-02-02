@@ -111,7 +111,7 @@ The result from calling `process()` on the context manager will be a list of all
 If you need to pass custom configuration such as region to the SDK, you can pass your own [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) to
 the `sqs_batch_processor` decorator:
 
-=== "app.py"
+=== "Decorator"
 
     ```python  hl_lines="4 12"
     from aws_lambda_powertools.utilities.batch import sqs_batch_processor
@@ -130,13 +130,10 @@ the `sqs_batch_processor` decorator:
         return {"statusCode": 200}
     ```
 
-Or to the `PartialSQSProcessor` class:
+=== "Class"
 
-=== "app.py"
-
-    ```python  hl_lines="5 17"
+    ```python  hl_lines="4 16"
     from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
-
     from botocore.config import Config
 
     config = Config(region_name="us-east-1")
@@ -164,9 +161,7 @@ Or to the `PartialSQSProcessor` class:
 
 If you want to disable the default behavior where `SQSBatchProcessingError` is raised if there are any errors, you can pass the `suppress_exception` boolean argument.
 
-**Within the decorator**
-
-=== "app.py"
+=== "Decorator"
 
     ```python hl_lines="2"
     ...
@@ -175,11 +170,10 @@ If you want to disable the default behavior where `SQSBatchProcessingError` is r
         return {"statusCode": 200}
     ```
 
-**Within the context manager**
+=== "Context manager"
 
-=== "app.py"
-
-    ```python
+    ```python hl_lines="2"
+    ...
     processor = PartialSQSProcessor(config=config, suppress_exception=True)
 
     with processor(records, record_handler):
