@@ -10,7 +10,7 @@ dev:
 	pre-commit install
 
 dev-docs:
-	cd docs && yarn install
+	pip install "mkdocs-material"
 
 format:
 	poetry run isort -rc aws_lambda_powertools tests
@@ -42,11 +42,11 @@ build-docs-api: dev
 
 build-docs-website: dev-docs
 	mkdir -p dist
-	cd docs && yarn build
-	cp -R docs/public/* dist/
+	mkdocs build
+	cp -R site/* dist/
 
 docs-local: dev-docs
-	cd docs && yarn start
+	mkdocs serve
 
 docs-api-local:
 	poetry run pdoc --http : aws_lambda_powertools
