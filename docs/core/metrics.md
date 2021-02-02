@@ -1,5 +1,7 @@
-# Metrics
-## Core utility
+---
+title: Metrics
+description: Core utility
+---
 
 Metrics creates custom metrics asynchronously by logging metrics to standard output following Amazon CloudWatch Embedded Metric Format (EMF).
 

@@ -1,5 +1,8 @@
-# Logger
-## Core utility
+---
+title: Logger
+description: Core utility
+---
+
 
 Logger provides an opinionated logger with output structured as JSON.
 

@@ -1,6 +1,7 @@
-# Typing
-## Utility
-
+---
+title: Typing
+description: Utility
+---
 
 This typing utility provides static typing classes that can be used to ease the development by providing the IDE type hints.
 

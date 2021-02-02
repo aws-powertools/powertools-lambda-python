@@ -1,5 +1,6 @@
-# Event Source Data Classes
-## Utility
+---
+title: Event Source Data Classes
+description: Utility
 ---
 
 The event source data classes utility provides classes describing the schema of common Lambda events triggers.

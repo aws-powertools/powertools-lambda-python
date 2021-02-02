@@ -1,5 +1,7 @@
-# SQS Batch Processing
-## Utility
+---
+title: SQS Batch Processing
+description: Utility
+---
 
 The SQS batch processing utility provides a way to handle partial failures when processing batches of messages from SQS.
 

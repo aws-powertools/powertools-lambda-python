@@ -1,5 +1,7 @@
-# Tracer
-## Core utility
+---
+title: Tracer
+description: Core utility
+---
 
 Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.com/aws/aws-xray-sdk-python/).
 
