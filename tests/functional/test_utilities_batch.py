@@ -85,7 +85,7 @@ def test_partial_sqs_processor_context_with_failure(sqs_event_factory, record_ha
             with partial_processor(records, record_handler) as ctx:
                 ctx.process()
 
-        assert len(error.value.args[0]) == 1
+        assert len(error.value.child_exceptions) == 1
         stubber.assert_no_pending_responses()
 
 
@@ -144,7 +144,7 @@ def test_batch_processor_middleware_with_partial_sqs_processor(sqs_event_factory
         with pytest.raises(SQSBatchProcessingError) as error:
             lambda_handler(event, {})
 
-        assert len(error.value.args[0]) == 2
+        assert len(error.value.child_exceptions) == 2
         stubber.assert_no_pending_responses()
 
 
@@ -171,7 +171,7 @@ def test_sqs_batch_processor_middleware(
     with pytest.raises(SQSBatchProcessingError) as error:
         lambda_handler(event, {})
 
-    assert len(error.value.args[0]) == 1
+    assert len(error.value.child_exceptions) == 1
     stubber.assert_no_pending_responses()
 
 
@@ -203,7 +203,7 @@ def test_batch_processor_middleware_with_custom_processor(capsys, sqs_event_fact
 
         stubber.assert_no_pending_responses()
 
-    assert len(error.value.args[0]) == 1
+    assert len(error.value.child_exceptions) == 1
     assert capsys.readouterr().out == "Oh no ! It's a failure.\n"
 
 
@@ -289,4 +289,4 @@ def test_partial_sqs_processor_context_only_failure(sqs_event_factory, record_ha
         with partial_processor(records, record_handler) as ctx:
             ctx.process()
 
-    assert len(error.value.args[0]) == 2
+    assert len(error.value.child_exceptions) == 2
