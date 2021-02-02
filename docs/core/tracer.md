@@ -97,38 +97,35 @@ def handler(event, context):
 	raise ValueError("some sensitive info in the stack trace...")
 ```
 
-### Annotations
+### Annotations & Metadata
 
 Annotations are key-values indexed by AWS X-Ray on a per trace basis. You can use them to filter traces as well as to create [Trace Groups](https://aws.amazon.com/about-aws/whats-new/2018/11/aws-xray-adds-the-ability-to-group-traces/).
-
 You can add annotations using `put_annotation` method from Tracer.
 
-```python hl_lines="7"
-from aws_lambda_powertools import Tracer
-tracer = Tracer()
-
-@tracer.capture_lambda_handler
-def handler(event, context):
-    ...
-    tracer.put_annotation(key="PaymentStatus", value="SUCCESS")
-```
-
-### Metadata
-
 Metadata are non-indexed values that can add additional context for an operation.
-
 You can add metadata using `put_metadata` method from Tracer.
 
-```python hl_lines="8"
-from aws_lambda_powertools import Tracer
-tracer = Tracer()
+=== "Annotations"
+    ```python hl_lines="7"
+    from aws_lambda_powertools import Tracer
+    tracer = Tracer()
 
-@tracer.capture_lambda_handler
-def handler(event, context):
-    ...
-    ret = some_logic()
-    tracer.put_metadata(key="payment_response", value=ret)
-```
+    @tracer.capture_lambda_handler
+    def handler(event, context):
+        ...
+        tracer.put_annotation(key="PaymentStatus", value="SUCCESS")
+    ```
+=== "Metadata"
+    ```python hl_lines="8"
+    from aws_lambda_powertools import Tracer
+    tracer = Tracer()
+
+    @tracer.capture_lambda_handler
+    def handler(event, context):
+        ...
+        ret = some_logic()
+        tracer.put_metadata(key="payment_response", value=ret)
+    ```
 
 ## Synchronous functions
 
@@ -167,29 +164,42 @@ def get_s3_object(bucket_name, object_key):
     **We do not support async Lambda handler** - Lambda handler itself must be synchronous
 
 You can trace asynchronous functions and generator functions (including context managers) using `capture_method`.
+
+
+=== "Async"
+    ```python
+    import asyncio
+    import contextlib
+    from aws_lambda_powertools import Tracer
+    tracer = Tracer()
+
+    @tracer.capture_method
+    async def collect_payment():
+        ...
+    ```
+
+=== "Context manager"
+
+    ```python
+    @contextlib.contextmanager
+    @tracer.capture_method
+    def collect_payment_ctxman():
+        yield result
+        ...
+    ```
+
+=== "Generators"
+
+    ```python
+    @tracer.capture_method
+    def collect_payment_gen():
+        yield result
+        ...
+    ```
+
 The decorator will detect whether your function is asynchronous, a generator, or a  context manager and adapt its behaviour accordingly.
 
-```python hl_lines="6-8 10-14 16-19 22"
-import asyncio
-import contextlib
-from aws_lambda_powertools import Tracer
-tracer = Tracer()
-
-@tracer.capture_method
-async def collect_payment():
-    ...
-
-@contextlib.contextmanager
-@tracer.capture_method
-def collect_payment_ctxman():
-    yield result
-    ...
-
-@tracer.capture_method
-def collect_payment_gen():
-    yield result
-    ...
-
+```python
 @tracer.capture_lambda_handler
 def handler(evt, ctx):
     asyncio.run(collect_payment())
