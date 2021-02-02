@@ -19,7 +19,7 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
 
 === "app.py"
 
-    ```python hl_lines="3-4"
+    ```python hl_lines="3-4 10"
     from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
     @lambda_handler_decorator
@@ -29,7 +29,7 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
         # logic_after_handler_execution()
         return response
 
-    @middleware_before_after # highlight-line
+    @middleware_before_after
     def lambda_handler(event, context):
         ...
     ```

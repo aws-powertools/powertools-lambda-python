@@ -163,7 +163,7 @@ You can append your own keys to your existing Logger via `structure_logs` with *
 
     def handler(event, context):
      order_id = event.get("order_id")
-     logger.structure_logs(append=True, order_id=order_id) # highlight-line
+     logger.structure_logs(append=True, order_id=order_id)
      logger.info("Collecting payment")
         ...
     ```
@@ -357,28 +357,28 @@ Logger allows you to either change the format or suppress the following keys alt
 
 === "lambda_handler.py"
 
-    ```python
+    ```python hl_lines="4 7"
     from aws_lambda_powertools import Logger
 
     # override default values for location and timestamp format
-    logger = Logger(stream=stdout, location="[%(funcName)s] %(module)s", datefmt="fake-datefmt") # highlight-line
+    logger = Logger(stream=stdout, location="[%(funcName)s] %(module)s", datefmt="fake-datefmt")
 
     # suppress location key
-    logger = Logger(stream=stdout, location=None) # highlight-line
+    logger = Logger(stream=stdout, location=None)
     ```
 
 Alternatively, you can also change the order of the following log record keys via the `log_record_order` parameter: `level`, `location`, `message`, `xray_trace_id`, and `timestamp`
 
 === "lambda_handler.py"
 
-    ```python
+    ```python hl_lines="4 7"
     from aws_lambda_powertools import Logger
 
     # make message as the first key
-    logger = Logger(stream=stdout, log_record_order=["message"]) # highlight-line
+    logger = Logger(stream=stdout, log_record_order=["message"])
 
     # Default key sorting order
-    logger = Logger(stream=stdout, log_record_order=["level","location","message","timestamp"]) # highlight-line
+    logger = Logger(stream=stdout, log_record_order=["level","location","message","timestamp"])
     ```
 
 Some keys cannot be supressed in the Log records: `sampling_rate` is part of the specification and cannot be supressed; `xray_trace_id` is supressed automatically if X-Ray is not enabled in the Lambda function, and added automatically if it is.
@@ -389,14 +389,14 @@ When logging exceptions, Logger will add a new key named `exception`, and will s
 
 === "logging_an_exception.py"
 
-    ```python
+    ```python hl_lines="7"
     from aws_lambda_powertools import Logger
     logger = Logger()
 
     try:
          raise ValueError("something went wrong")
     except Exception:
-         logger.exception("Received an exception") # highlight-line
+         logger.exception("Received an exception")
     ```
 
 === "CloudWatch Logs"

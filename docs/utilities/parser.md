@@ -76,7 +76,7 @@ Use the decorator for fail fast scenarios where you want your Lambda function to
         optional_field: Optional[str] # this field may or may not be available when parsing
 
 
-    @event_parser(model=Order) # highlight-line
+    @event_parser(model=Order)
     def handler(event: Order, context: LambdaContext):
         print(event.id)
         print(event.description)
@@ -128,7 +128,7 @@ Use this standalone function when you want more control over the data validation
         "items": [
             {
                 # this will cause a validation error
-                "id": [1015938732], # highlight-line
+                "id": [1015938732],
                 "quantity": 1,
                 "description": "item xpto"
             }
@@ -137,7 +137,7 @@ Use this standalone function when you want more control over the data validation
 
     def my_function():
         try:
-            parsed_payload: Order = parse(event=payload, model=Order) # highlight-line
+            parsed_payload: Order = parse(event=payload, model=Order)
             # payload dict is now parsed into our model
             return parsed_payload.items
         except ValidationError:

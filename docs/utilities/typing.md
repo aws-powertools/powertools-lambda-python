@@ -12,13 +12,11 @@ The `LambdaContext` typing is typically used in the handler method for the Lambd
 
 === "index.py"
 
-    ```python
+    ```python hl_lines="4"
     from typing import Any, Dict
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
-    # highlight-start
     def handler(event: Dict[str, Any], context: LambdaContext) -> Dict[str, Any]:
-    # highlight-end
         # Insert business logic
         return event
     ```

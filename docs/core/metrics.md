@@ -44,7 +44,7 @@ You can also pass a service name via `service` param or `POWERTOOLS_SERVICE_NAME
     from aws_lambda_powertools.metrics import MetricUnit
 
     # POWERTOOLS_METRICS_NAMESPACE and POWERTOOLS_SERVICE_NAME defined
-    metrics = Metrics() # highlight-line
+    metrics = Metrics()
 
     # Explicit definition
     Metrics(namespace="ServerlessAirline", service="orders")  # creates a default dimension {"service": "orders"} under the namespace "ServerlessAirline"
@@ -89,7 +89,7 @@ CloudWatch EMF uses the same dimensions across all your metrics. Use `single_met
     from aws_lambda_powertools import single_metric
     from aws_lambda_powertools.metrics import MetricUnit
 
-    with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace="ExampleApplication") as metric: # highlight-line
+    with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace="ExampleApplication") as metric:
         metric.add_dimension(name="function_context", value="$LATEST")
         ...
     ```
@@ -177,7 +177,7 @@ If you want to ensure that at least one metric is emitted, you can pass `raise_o
     ```python hl_lines="3"
     from aws_lambda_powertools.metrics import Metrics
 
-    @metrics.log_metrics(raise_on_empty_metrics=True) # highlight-line
+    @metrics.log_metrics(raise_on_empty_metrics=True)
     def lambda_handler(evt, ctx):
         ...
     ```

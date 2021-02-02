@@ -133,9 +133,9 @@ Here is how you'd use the `envelope` parameter to extract the payload inside the
 
     json_schema_dict = {..}
 
-    @validator(inbound_schema=json_schema_dict, envelope="detail") # highlight-line
+    @validator(inbound_schema=json_schema_dict, envelope="detail")
     def handler(event, context):
-        validate(event=event, schema=json_schema_dict, envelope="detail") # highlight-line
+        validate(event=event, schema=json_schema_dict, envelope="detail")
         return event
     ```
 
