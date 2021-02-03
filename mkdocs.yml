@@ -33,5 +33,7 @@ markdown_extensions:
   - pymdownx.details
   - meta
 
+extra_css:
+  - stylesheets/extra.css
 
 repo_url: https://github.com/awslabs/aws-lambda-powertools-python
