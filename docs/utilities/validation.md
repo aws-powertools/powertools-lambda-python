@@ -22,7 +22,6 @@ We support any JSONSchema draft supported by [fastjsonschema](https://horejsek.g
 
 !!! warning
     Both `validator` decorator and `validate` standalone function expects your JSON Schema to be a **dictionary**, not a filename.
-</Note>
 
 
 ### Validator decorator
