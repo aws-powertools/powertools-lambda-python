@@ -138,7 +138,7 @@ The DynamoDB Provider does not have any high-level functions, as it needs to kno
 
 When using the default options, if you want to retrieve only single parameters, your table should be structured as such, assuming a parameter named **my-parameter** with a value of **my-value**. The `id` attribute should be the [partition key](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html#HowItWorks.CoreComponents.PrimaryKey) for that table.
 
-| `id`         | `value`  |
+| id         | value  |
 |--------------|----------|
 | my-parameter | my-value |
 
@@ -160,7 +160,7 @@ With this table, when you do a `dynamodb_provider.get("my-param")` call, this wi
 
 If you want to be able to retrieve multiple parameters at once sharing the same `id`, your table needs to contain a sort key name `sk`. For example, if you want to retrieve multiple parameters having `my-hash-key` as ID:
 
-| `id`        | `sk`    |   `value`  |
+| id        | sk    |   value  |
 |-------------|---------|------------|
 | my-hash-key | param-a | my-value-a |
 | my-hash-key | param-b | my-value-b |
