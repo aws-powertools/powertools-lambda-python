@@ -85,7 +85,7 @@ You can enrich your structured logs with key Lambda context information via `inj
      ...
     ```
 
-=== "CloudWatch Logs"
+=== "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="6-10 26-27"
         {
@@ -132,7 +132,7 @@ Key | Type | Example
 You can also explicitly log any incoming event using `log_event` param or via `POWERTOOLS_LOGGER_LOG_EVENT` env var.
 
 !!! warning
-  This is disabled by default to prevent sensitive info being logged.
+    This is disabled by default to prevent sensitive info being logged.
 
 === "log_handler_event.py"
 

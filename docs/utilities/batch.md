@@ -132,7 +132,7 @@ the `sqs_batch_processor` decorator:
         return {"statusCode": 200}
     ```
 
-=== "Class"
+=== "Context manager"
 
     ```python  hl_lines="4 16"
     from aws_lambda_powertools.utilities.batch import PartialSQSProcessor

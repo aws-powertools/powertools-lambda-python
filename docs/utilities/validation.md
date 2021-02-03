@@ -22,7 +22,6 @@ We support any JSONSchema draft supported by [fastjsonschema](https://horejsek.g
 
 !!! warning
     Both `validator` decorator and `validate` standalone function expects your JSON Schema to be a **dictionary**, not a filename.
-</Note>
 
 
 ### Validator decorator
@@ -44,7 +43,8 @@ It will fail fast with `SchemaValidationError` exception if event or response do
         return event
     ```
 
-**NOTE**: It's not a requirement to validate both inbound and outbound schemas - You can either use one, or both.
+!!! note
+    It's not a requirement to validate both inbound and outbound schemas - You can either use one, or both.
 
 ### Validate function
 

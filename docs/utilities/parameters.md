@@ -47,7 +47,7 @@ You can retrieve a single parameter using `get_parameter` high-level function. F
 
 ### SSMProvider class
 
-Alternatively, you can use the `SSMProvider` class, which give more flexibility, such as the ability to configure the underlying SDK client.
+Alternatively, you can use the `SSMProvider` class, which gives more flexibility, such as the ability to configure the underlying SDK client.
 
 This can be used to retrieve values from other regions, change the retry behavior, etc.
 

@@ -99,7 +99,7 @@ Here is the list of IAM permissions that you need to add to your deployment IAM 
 
 > Credits to [mwarkentin](https://github.com/mwarkentin) for providing the scoped down IAM permissions.
 
-The region and the account id for `CloudFormationTransform` and `GetCfnTemplat` are fixed.
+The region and the account id for `CloudFormationTransform` and `GetCfnTemplate` are fixed.
 
 You can fetch the available versions via the API with:
 
