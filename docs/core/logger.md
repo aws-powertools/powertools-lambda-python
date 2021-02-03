@@ -85,7 +85,7 @@ You can enrich your structured logs with key Lambda context information via `inj
      ...
     ```
 
-=== "CloudWatch Logs"
+=== "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="6-10 26-27"
         {
