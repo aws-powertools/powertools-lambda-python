@@ -307,6 +307,7 @@ def handler(event, context):
 ```
 
 ```python hl_lines="2 3"
+# another_file.py
 from aws_lambda_powertools import Tracer
 # new instance using existing configuration
 tracer = Tracer(service="payment")
