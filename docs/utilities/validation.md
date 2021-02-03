@@ -43,7 +43,8 @@ It will fail fast with `SchemaValidationError` exception if event or response do
         return event
     ```
 
-**NOTE**: It's not a requirement to validate both inbound and outbound schemas - You can either use one, or both.
+!!! note
+    It's not a requirement to validate both inbound and outbound schemas - You can either use one, or both.
 
 ### Validate function
 
