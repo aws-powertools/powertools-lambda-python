@@ -14,6 +14,10 @@ from ..shared.functions import resolve_truthy_env_var_choice
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
+# Set the streaming threshold to 0 on the default recorder to force sending
+# subsegments individually, rather than batching them.
+# See https://github.com/awslabs/aws-lambda-powertools-python/issues/283
+aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0)
 
 
 class Tracer:
