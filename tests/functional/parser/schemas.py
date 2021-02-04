@@ -1,7 +1,6 @@
 from typing import Dict, List, Optional
 
 from pydantic import BaseModel
-from typing_extensions import Literal
 
 from aws_lambda_powertools.utilities.parser.models import (
     DynamoDBStreamChangedRecordModel,
@@ -14,6 +13,7 @@ from aws_lambda_powertools.utilities.parser.models import (
     SqsModel,
     SqsRecordModel,
 )
+from aws_lambda_powertools.utilities.parser.types import Literal
 
 
 class MyDynamoBusiness(BaseModel):

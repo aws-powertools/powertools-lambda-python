@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * **Utilities**: Correctly handle and list multiple exceptions in SQS batch processing utility.
 * **Docs*:: Fix typos on AppConfig docstring import, and `SnsModel` typo in parser.
+* **Utilities**: `typing_extensions` package is now only installed in Python < 3.8
 
 ## [1.10.1] - 2021-01-19
 

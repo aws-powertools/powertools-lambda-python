@@ -5,7 +5,8 @@ from pydantic import BaseModel
 from pydantic.fields import Field
 from pydantic.networks import IPvAnyNetwork
 from pydantic.types import PositiveInt
-from typing_extensions import Literal
+
+from ..types import Literal
 
 
 class S3EventRecordGlacierRestoreEventData(BaseModel):
