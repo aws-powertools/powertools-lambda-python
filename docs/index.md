@@ -41,60 +41,82 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 === "template.yml"
 
     ``` yaml
-      AwsLambdaPowertoolsPythonLayer:
-        Type: AWS::Serverless::Application
-        Properties:
-          Location:
-            ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-            SemanticVersion: 1.9.0 # change to latest semantic version available in SAR
-    ```
+    AwsLambdaPowertoolsPythonLayer:
+      Type: AWS::Serverless::Application
+      Properties:
+        Location:
+          ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+          SemanticVersion: 1.9.0 # change to latest semantic version available in SAR
+```
 
 
 This will add a nested app stack with an output parameter `LayerVersionArn`, that you can reference inside your Lambda function definition:
 
 ```yaml
-  Layers:
-    - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
+Layers:
+  - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
 ```
 
 
-Here is the list of IAM permissions that you need to add to your deployment IAM role to use the layer:
+Here is an example of an IAM role for CloudFormation with the list of IAM permissions that you need to deploy the layer:
 
 === "template.yml"
 
     ```yaml
-    Version: '2012-10-17'
-    Statement:
-      - Sid: CloudFormationTransform
-        Effect: Allow
-        Action: cloudformation:CreateChangeSet
-        Resource:
-          - arn:aws:cloudformation:us-east-1:aws:transform/Serverless-2016-10-31
-      - Sid: GetCfnTemplate
-        Effect: Allow
-        Action:
-          - serverlessrepo:CreateCloudFormationTemplate
-          - serverlessrepo:GetCloudFormationTemplate
-        Resource:
-          # this is arn of the powertools SAR app
-          - arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-      - Sid: S3AccessLayer
-        Effect: Allow
-        Action:
-          - s3:GetObject
-        Resource:
-          # AWS publishes to an external S3 bucket locked down to your account ID
-          # The below example is us publishing lambda powertools
-          # Bucket: awsserverlessrepo-changesets-plntc6bfnfj
-          # Key: *****/arn:aws:serverlessrepo:eu-west-1:057560766410:applications-aws-lambda-powertools-python-layer-versions-1.6.0/aeeccf50-****-****-****-*********
-          - arn:aws:s3:::awsserverlessrepo-changesets-*/*
-      - Sid: GetLayerVersion
-        Effect: Allow
-        Action:
-          - lambda:PublishLayerVersion
-          - lambda:GetLayerVersion
-        Resource:
-          - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccoundId}:layer:aws-lambda-powertools-python-layer*
+    AWSTemplateFormatVersion: "2010-09-09"
+    Resources:
+      PowertoolsLayerIamRole:
+        Type: "AWS::IAM::Role"
+        Properties:
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Principal:
+                  Service:
+                    - "cloudformation.amazonaws.com"
+                Action:
+                  - "sts:AssumeRole"
+          Path: "/"
+      PowertoolsLayerIamPolicy:
+        Type: "AWS::IAM::Policy"
+        Properties:
+          PolicyName: PowertoolsLambdaLayerPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: CloudFormationTransform
+                Effect: Allow
+                Action: cloudformation:CreateChangeSet
+                Resource:
+                  - arn:aws:cloudformation:us-east-1:aws:transform/Serverless-2016-10-31
+              - Sid: GetCfnTemplate
+                Effect: Allow
+                Action:
+                  - serverlessrepo:CreateCloudFormationTemplate
+                  - serverlessrepo:GetCloudFormationTemplate
+                Resource:
+                  # this is arn of the powertools SAR app
+                  - arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+              - Sid: S3AccessLayer
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  # AWS publishes to an external S3 bucket locked down to your account ID
+                  # The below example is us publishing lambda powertools
+                  # Bucket: awsserverlessrepo-changesets-plntc6bfnfj
+                  # Key: *****/arn:aws:serverlessrepo:eu-west-1:057560766410:applications-aws-lambda-powertools-python-layer-versions-1.6.0/aeeccf50-****-****-****-*********
+                  - arn:aws:s3:::awsserverlessrepo-changesets-*/*
+              - Sid: GetLayerVersion
+                Effect: Allow
+                Action:
+                  - lambda:PublishLayerVersion
+                  - lambda:GetLayerVersion
+                Resource:
+                  - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:aws-lambda-powertools-python-layer*
+          Roles:
+            - Ref: "PowertoolsLayerIamRole"
     ```
 
 > Credits to [mwarkentin](https://github.com/mwarkentin) for providing the scoped down IAM permissions.
@@ -133,16 +155,16 @@ aws serverlessrepo list-application-versions \
 
 | Environment variable | Description | Utility | Default |
 | ------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------- |
-| `POWERTOOLS_SERVICE_NAME` | Sets service name used for tracing namespace, metrics dimension and structured logging | All | `"service_undefined"` |
-| `POWERTOOLS_METRICS_NAMESPACE` | Sets namespace used for metrics | [Metrics](./core/metrics) | `None` |
-| `POWERTOOLS_TRACE_DISABLED` | Disables tracing | [Tracing](./core/tracer) | `false` |
-| `POWERTOOLS_TRACER_CAPTURE_RESPONSE` | Captures Lambda or method return as metadata. | [Tracing](./core/tracer) | `true` |
-| `POWERTOOLS_TRACER_CAPTURE_ERROR` | Captures Lambda or method exception as metadata. | [Tracing](./core/tracer) | `true` |
-| `POWERTOOLS_TRACE_MIDDLEWARES` | Creates sub-segment for each custom middleware | [Middleware factory](./utilities/middleware_factory) | `false` |
-| `POWERTOOLS_LOGGER_LOG_EVENT` | Logs incoming event | [Logging](./core/logger) | `false` |
-| `POWERTOOLS_LOGGER_SAMPLE_RATE` | Debug log sampling | [Logging](./core/logger) | `0` |
-| `POWERTOOLS_LOG_DEDUPLICATION_DISABLED` | Disables log deduplication filter protection to use Pytest Live Log feature | [Logging](./core/logger) | `false` |
-| `LOG_LEVEL` | Sets logging level | [Logging](./core/logger) | `INFO` |
+| **POWERTOOLS_SERVICE_NAME** | Sets service name used for tracing namespace, metrics dimension and structured logging | All | `"service_undefined"` |
+| **POWERTOOLS_METRICS_NAMESPACE** | Sets namespace used for metrics | [Metrics](./core/metrics) | `None` |
+| **POWERTOOLS_TRACE_DISABLED** | Disables tracing | [Tracing](./core/tracer) | `false` |
+| **POWERTOOLS_TRACER_CAPTURE_RESPONSE** | Captures Lambda or method return as metadata. | [Tracing](./core/tracer) | `true` |
+| **POWERTOOLS_TRACER_CAPTURE_ERROR** | Captures Lambda or method exception as metadata. | [Tracing](./core/tracer) | `true` |
+| **POWERTOOLS_TRACE_MIDDLEWARES** | Creates sub-segment for each custom middleware | [Middleware factory](./utilities/middleware_factory) | `false` |
+| **POWERTOOLS_LOGGER_LOG_EVENT** | Logs incoming event | [Logging](./core/logger) | `false` |
+| **POWERTOOLS_LOGGER_SAMPLE_RATE** | Debug log sampling | [Logging](./core/logger) | `0` |
+| **POWERTOOLS_LOG_DEDUPLICATION_DISABLED** | Disables log deduplication filter protection to use Pytest Live Log feature | [Logging](./core/logger) | `false` |
+| **LOG_LEVEL** | Sets logging level | [Logging](./core/logger) | `INFO` |
 
 ## Debug mode
 

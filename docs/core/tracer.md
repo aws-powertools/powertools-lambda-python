@@ -22,15 +22,15 @@ Your AWS Lambda function must have permission to send traces to AWS X-Ray - Here
 === "template.yml"
     ```yaml hl_lines="7"
     Resources:
-        HelloWorldFunction:
-            Type: AWS::Serverless::Function
-            Properties:
-            ...
-            Runtime: python3.8
-            Tracing: Active
-            Environment:
-                Variables:
-                    POWERTOOLS_SERVICE_NAME: example
+      HelloWorldFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+        ...
+        Runtime: python3.8
+        Tracing: Active
+        Environment:
+          Variables:
+            POWERTOOLS_SERVICE_NAME: example
     ```
 
 You can either explicitly pass using `service` param or via `POWERTOOLS_SERVICE_NAME` environment variable. The service name is utilized for exceptions, metadata, and namespace data.
@@ -87,7 +87,7 @@ def handler(event, context):
 > New in 1.10.0
 
 !!! warning
-    **Can exceptions contain sensitive information from your Lambda handler or functions, where Tracer is used?**
+    **Where Tracer is used, can your exceptions contain any sensitive information from your Lambda handler or functions?**
 
 You can disable Tracer from capturing their exceptions as tracing metadata with **`capture_error=False`** parameter in both capture_lambda_handler and capture_method decorators.
 
@@ -101,10 +101,10 @@ def handler(event, context):
 
 ### Annotations & Metadata
 
-Annotations are key-values indexed by AWS X-Ray on a per trace basis. You can use them to filter traces as well as to create [Trace Groups](https://aws.amazon.com/about-aws/whats-new/2018/11/aws-xray-adds-the-ability-to-group-traces/).
+**Annotations** are key-values indexed by AWS X-Ray on a per trace basis. You can use them to filter traces as well as to create [Trace Groups](https://aws.amazon.com/about-aws/whats-new/2018/11/aws-xray-adds-the-ability-to-group-traces/).
 You can add annotations using `put_annotation` method from Tracer.
 
-Metadata are non-indexed values that can add additional context for an operation.
+**Metadata** are non-indexed values that can add additional context for an operation.
 You can add metadata using `put_metadata` method from Tracer.
 
 === "Annotations"

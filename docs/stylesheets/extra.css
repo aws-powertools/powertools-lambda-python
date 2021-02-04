@@ -1,3 +1,24 @@
 .md-grid {
-    max-width: 75rem
+    max-width: 90vw
+}
+
+.highlight .hll {
+    background-color: lavender
+}
+
+.md-typeset table:not([class]) {
+    font-size: 0.75rem
+}
+
+
+.md-typeset table:not([class]) {
+    font-size: 0.75rem
+}
+
+.md-nav__link--active {
+    font-weight: bold
+}
+
+.md-typeset .admonition, .md-typeset details {
+    font-size: 0.70rem
 }
