@@ -4,6 +4,7 @@
 Batch SQS utilities
 """
 import logging
+import sys
 from typing import Callable, Dict, List, Optional, Tuple
 
 import boto3
@@ -90,10 +91,10 @@ class PartialSQSProcessor(BasePartialProcessor):
             An object to be processed.
         """
         try:
-            result = self.handler(record)
-            return self.success_handler(record, result)
-        except Exception as exc:
-            return self.failure_handler(record, exc)
+            result = self.handler(record=record)
+            return self.success_handler(record=record, result=result)
+        except Exception:
+            return self.failure_handler(record=record, exception=sys.exc_info())
 
     def _prepare(self):
         """
@@ -123,7 +124,11 @@ class PartialSQSProcessor(BasePartialProcessor):
             logger.debug(f"{len(self.fail_messages)} records failed processing, but exceptions are suppressed")
         else:
             logger.debug(f"{len(self.fail_messages)} records failed processing, raising exception")
-            raise SQSBatchProcessingError(list(self.exceptions))
+            raise SQSBatchProcessingError(
+                msg=f"Not all records processed succesfully. {len(self.exceptions)} individual errors logged "
+                f"separately below.",
+                child_exceptions=self.exceptions,
+            )
 
         return delete_message_response
 
