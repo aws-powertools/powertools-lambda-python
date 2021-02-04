@@ -40,13 +40,13 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 
 === "template.yml"
 
-    ``` yaml
-    AwsLambdaPowertoolsPythonLayer:
-      Type: AWS::Serverless::Application
-      Properties:
-        Location:
-          ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-          SemanticVersion: 1.9.0 # change to latest semantic version available in SAR
+``` yaml
+AwsLambdaPowertoolsPythonLayer:
+  Type: AWS::Serverless::Application
+  Properties:
+	Location:
+	  ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+	  SemanticVersion: 1.9.0 # change to latest semantic version available in SAR
 ```
 
 
