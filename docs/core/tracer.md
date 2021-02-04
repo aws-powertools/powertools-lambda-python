@@ -169,10 +169,11 @@ You can trace asynchronous functions and generator functions (including context 
 
 
 === "Async"
-    ```python
+    ```python hl_lines="8"
     import asyncio
     import contextlib
     from aws_lambda_powertools import Tracer
+
     tracer = Tracer()
 
     @tracer.capture_method
@@ -182,7 +183,13 @@ You can trace asynchronous functions and generator functions (including context 
 
 === "Context manager"
 
-    ```python
+    ```python hl_lines="7-8"
+    import asyncio
+    import contextlib
+    from aws_lambda_powertools import Tracer
+
+    tracer = Tracer()
+
     @contextlib.contextmanager
     @tracer.capture_method
     def collect_payment_ctxman():
@@ -192,7 +199,13 @@ You can trace asynchronous functions and generator functions (including context 
 
 === "Generators"
 
-    ```python
+    ```python hl_lines="9"
+    import asyncio
+    import contextlib
+    from aws_lambda_powertools import Tracer
+
+    tracer = Tracer()
+
     @tracer.capture_method
     def collect_payment_gen():
         yield result
