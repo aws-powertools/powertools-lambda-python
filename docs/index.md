@@ -25,109 +25,108 @@ sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 
 ### Lambda Layer
 
-Powertools is also available as a Lambda Layer. It is distributed via the [AWS Serverless Application Repository (SAR)](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/what-is-serverlessrepo.html).
-We have two layers available, one with core dependencies `aws-lambda-powertools-python-layer` and one with extras `aws-lambda-powertools-python-layer-extras` such as `pydantic` which is required for the parser.
+Powertools is also available as a Lambda Layer, and it is distributed via the [AWS Serverless Application Repository (SAR)](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/what-is-serverlessrepo.html) to support semantic versioning.
 
-!!! note
-    Extras layer does not support Python 3.6 runtime. This layer is also includes all extra dependencies and is 22.4MB zipped, ~155MB unzipped.
+| App | ARN | Description
+|----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------
+| [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer) | arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer | Core dependencies only; sufficient for nearly all utilities.
+| [aws-lambda-powertools-python-layer-extras](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-extras) | arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-extras | Core plus extra dependencies such as `pydantic` that is required by `parser` utility.
 
-| App | ARN
-|----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------
-| [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer) | arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-| [aws-lambda-powertools-python-layer-extras](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-extras) | arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-extras
+!!! warning
+    **Layer-extras** does not support Python 3.6 runtime. This layer also includes all extra dependencies: `22.4MB zipped`, `~155MB unzipped`.
+
 
 If using SAM, you can include this SAR App as part of your shared Layers stack, and lock to a specific semantic version. Once deployed, it'll be available across the account this is deployed to.
 
 === "template.yml"
 
-``` yaml
+``` yaml hl_lines="6"
 AwsLambdaPowertoolsPythonLayer:
   Type: AWS::Serverless::Application
   Properties:
 	Location:
 	  ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-	  SemanticVersion: 1.9.0 # change to latest semantic version available in SAR
+	  SemanticVersion: 1.10.2 # change to latest semantic version available in SAR
 ```
 
 
 This will add a nested app stack with an output parameter `LayerVersionArn`, that you can reference inside your Lambda function definition:
 
-```yaml
+```yaml hl_lines="2"
 Layers:
   - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
 ```
 
+??? multiple optional-class "Example IAM permissions to deploy layer"
 
-Here is an example of an IAM role for CloudFormation with the list of IAM permissions that you need to deploy the layer:
+	> Credits to [mwarkentin](https://github.com/mwarkentin) for providing the scoped down IAM permissions.
 
-=== "template.yml"
+	The region and the account id for `CloudFormationTransform` and `GetCfnTemplate` are fixed.
 
-    ```yaml
-    AWSTemplateFormatVersion: "2010-09-09"
-    Resources:
-      PowertoolsLayerIamRole:
-        Type: "AWS::IAM::Role"
-        Properties:
-          AssumeRolePolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Principal:
-                  Service:
-                    - "cloudformation.amazonaws.com"
-                Action:
-                  - "sts:AssumeRole"
-          Path: "/"
-      PowertoolsLayerIamPolicy:
-        Type: "AWS::IAM::Policy"
-        Properties:
-          PolicyName: PowertoolsLambdaLayerPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Sid: CloudFormationTransform
-                Effect: Allow
-                Action: cloudformation:CreateChangeSet
-                Resource:
-                  - arn:aws:cloudformation:us-east-1:aws:transform/Serverless-2016-10-31
-              - Sid: GetCfnTemplate
-                Effect: Allow
-                Action:
-                  - serverlessrepo:CreateCloudFormationTemplate
-                  - serverlessrepo:GetCloudFormationTemplate
-                Resource:
-                  # this is arn of the powertools SAR app
-                  - arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-              - Sid: S3AccessLayer
-                Effect: Allow
-                Action:
-                  - s3:GetObject
-                Resource:
-                  # AWS publishes to an external S3 bucket locked down to your account ID
-                  # The below example is us publishing lambda powertools
-                  # Bucket: awsserverlessrepo-changesets-plntc6bfnfj
-                  # Key: *****/arn:aws:serverlessrepo:eu-west-1:057560766410:applications-aws-lambda-powertools-python-layer-versions-1.6.0/aeeccf50-****-****-****-*********
-                  - arn:aws:s3:::awsserverlessrepo-changesets-*/*
-              - Sid: GetLayerVersion
-                Effect: Allow
-                Action:
-                  - lambda:PublishLayerVersion
-                  - lambda:GetLayerVersion
-                Resource:
-                  - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:aws-lambda-powertools-python-layer*
-          Roles:
-            - Ref: "PowertoolsLayerIamRole"
-    ```
+	=== "template.yml"
 
-> Credits to [mwarkentin](https://github.com/mwarkentin) for providing the scoped down IAM permissions.
+		```yaml
+		AWSTemplateFormatVersion: "2010-09-09"
+		Resources:
+		  PowertoolsLayerIamRole:
+			Type: "AWS::IAM::Role"
+			Properties:
+			  AssumeRolePolicyDocument:
+				Version: "2012-10-17"
+				Statement:
+				  - Effect: "Allow"
+					Principal:
+					  Service:
+						- "cloudformation.amazonaws.com"
+					Action:
+					  - "sts:AssumeRole"
+			  Path: "/"
+		  PowertoolsLayerIamPolicy:
+			Type: "AWS::IAM::Policy"
+			Properties:
+			  PolicyName: PowertoolsLambdaLayerPolicy
+			  PolicyDocument:
+				Version: "2012-10-17"
+				Statement:
+				  - Sid: CloudFormationTransform
+					Effect: Allow
+					Action: cloudformation:CreateChangeSet
+					Resource:
+					  - arn:aws:cloudformation:us-east-1:aws:transform/Serverless-2016-10-31
+				  - Sid: GetCfnTemplate
+					Effect: Allow
+					Action:
+					  - serverlessrepo:CreateCloudFormationTemplate
+					  - serverlessrepo:GetCloudFormationTemplate
+					Resource:
+					  # this is arn of the powertools SAR app
+					  - arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+				  - Sid: S3AccessLayer
+					Effect: Allow
+					Action:
+					  - s3:GetObject
+					Resource:
+					  # AWS publishes to an external S3 bucket locked down to your account ID
+					  # The below example is us publishing lambda powertools
+					  # Bucket: awsserverlessrepo-changesets-plntc6bfnfj
+					  # Key: *****/arn:aws:serverlessrepo:eu-west-1:057560766410:applications-aws-lambda-powertools-python-layer-versions-1.10.2/aeeccf50-****-****-****-*********
+					  - arn:aws:s3:::awsserverlessrepo-changesets-*/*
+				  - Sid: GetLayerVersion
+					Effect: Allow
+					Action:
+					  - lambda:PublishLayerVersion
+					  - lambda:GetLayerVersion
+					Resource:
+					  - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:aws-lambda-powertools-python-layer*
+			  Roles:
+				- Ref: "PowertoolsLayerIamRole"
+		```
 
-The region and the account id for `CloudFormationTransform` and `GetCfnTemplate` are fixed.
-
-You can fetch the available versions via the API with:
+You can fetch available versions via SAR API with:
 
 ```bash
 aws serverlessrepo list-application-versions \
-  --application-id arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+	--application-id arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
 ```
 
 ## Features
@@ -179,11 +178,11 @@ As a best practice, AWS Lambda Powertools logging statements are suppressed. If 
 
 ## Tenets
 
-* **AWS Lambda only** – We optimise for AWS Lambda function environments and supported runtimes only. Utilities might work with web frameworks and non-Lambda environments, though they are not officially supported.
-* **Eases the adoption of best practices** – The main priority of the utilities is to facilitate best practices adoption, as defined in the AWS Well-Architected Serverless Lens; all other functionality is optional.
-* **Keep it lean** – Additional dependencies are carefully considered for security and ease of maintenance, and prevent negatively impacting startup time.
-* **We strive for backwards compatibility** – New features and changes should keep backwards compatibility. If a breaking change cannot be avoided, the deprecation and migration process should be clearly defined.
-* **We work backwards from the community** – We aim to strike a balance of what would work best for 80% of customers. Emerging practices are considered and discussed via Requests for Comment (RFCs)
-* **Idiomatic** – Utilities follow programming language idioms and language-specific best practices.
+* **AWS Lambda only**. We optimise for AWS Lambda function environments and supported runtimes only. Utilities might work with web frameworks and non-Lambda environments, though they are not officially supported.
+* **Eases the adoption of best practices**. The main priority of the utilities is to facilitate best practices adoption, as defined in the AWS Well-Architected Serverless Lens; all other functionality is optional.
+* **Keep it lean**. Additional dependencies are carefully considered for security and ease of maintenance, and prevent negatively impacting startup time.
+* **We strive for backwards compatibility**. New features and changes should keep backwards compatibility. If a breaking change cannot be avoided, the deprecation and migration process should be clearly defined.
+* **We work backwards from the community**. We aim to strike a balance of what would work best for 80% of customers. Emerging practices are considered and discussed via Requests for Comment (RFCs)
+* **Idiomatic**. Utilities follow programming language idioms and language-specific best practices.
 
 _`*` Core utilities are Tracer, Logger and Metrics. Optional utilities may vary across languages._
