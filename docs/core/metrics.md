@@ -114,7 +114,7 @@ You can use `add_metadata` for advanced use cases, where you want to metadata as
     metrics.add_metadata(key="booking_id", value="booking_uuid")
     ```
 
-=== "CloudWatch Logs"
+=== "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="23"
     {

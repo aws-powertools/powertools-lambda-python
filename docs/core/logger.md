@@ -170,7 +170,7 @@ You can append your own keys to your existing Logger via `structure_logs` with *
      logger.info("Collecting payment")
         ...
     ```
-=== "CloudWatch Logs"
+=== "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="7"
     {
@@ -203,7 +203,7 @@ Extra parameter is available for all log levels, as implemented in the standard 
 
     logger.info("Hello", extra=fields)
     ```
-=== "CloudWatch Logs"
+=== "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="7"
     {
@@ -281,7 +281,7 @@ Sampling decision happens at the Logger class initialization, which only happens
         ...
     ```
 
-=== "CloudWatch Logs"
+=== "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="3 11 25"
     {
@@ -402,7 +402,7 @@ When logging exceptions, Logger will add a new key named `exception`, and will s
          logger.exception("Received an exception")
     ```
 
-=== "CloudWatch Logs"
+=== "Example CloudWatch Logs excerpt"
 
     ```json
     {
