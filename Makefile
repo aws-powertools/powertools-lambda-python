@@ -39,7 +39,7 @@ build-docs-api: dev
 
 build-docs-website: dev
 	mkdir -p dist
-	mkdocs build
+	poetry run mkdocs build
 	cp -R site/* dist/
 
 docs-local: dev
