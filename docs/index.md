@@ -40,21 +40,21 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 
 === "template.yml"
 
-``` yaml hl_lines="6"
+```yaml hl_lines="5-6 12-14"
 AwsLambdaPowertoolsPythonLayer:
   Type: AWS::Serverless::Application
   Properties:
 	Location:
 	  ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
 	  SemanticVersion: 1.10.2 # change to latest semantic version available in SAR
-```
 
-
-This will add a nested app stack with an output parameter `LayerVersionArn`, that you can reference inside your Lambda function definition:
-
-```yaml hl_lines="2"
-Layers:
-  - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
+MyLambdaFunction:
+  Type: AWS::Serverless::Function
+  Properties:
+	Location:
+	  Layers:
+	     # fetch Layer ARN from SAR App stack output
+	     - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
 ```
 
 ??? multiple optional-class "Example IAM permissions to deploy layer"
@@ -148,9 +148,6 @@ aws serverlessrepo list-application-versions \
 
 !!! info
     **Explicit parameters take precedence over environment variables.**
-
-**Environment variables** used across suite of utilities.
-
 
 | Environment variable | Description | Utility | Default |
 | ------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------- |
