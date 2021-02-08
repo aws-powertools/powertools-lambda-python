@@ -6,7 +6,7 @@ description: Core utility
 
 Logger provides an opinionated logger with output structured as JSON.
 
-**Key features**
+## Key features
 
 * Capture key fields from Lambda context, cold start and structures logging output as JSON
 * Log Lambda event when instructed (disabled by default)
@@ -15,38 +15,37 @@ Logger provides an opinionated logger with output structured as JSON.
     - Enable via `POWERTOOLS_LOGGER_SAMPLE_RATE=0.1`, ranges from 0 to 1, where 0.1 is 10% and 1 is 100%
 * Append additional keys to structured log at any point in time
 
-## Initialization
+## Getting started
 
-Set `LOG_LEVEL` env var as a start - Here is an example using AWS Serverless Application Model (SAM)
+Logger requires two settings:
+
+Setting | Description | Environment variable | Constructor parameter
+------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------
+**Logging level** | Sets how verbose Logger should be (INFO, by default) |  `LOG_LEVEL` | `level`
+**Service** | Sets **service** key that will be present across all log statements | `POWERTOOLS_SERVICE_NAME` | `service`
+
+> Example using AWS Serverless Application Model (SAM)
 
 === "template.yaml"
-
-  ```yaml hl_lines="9"
-  Resources:
-      HelloWorldFunction:
-          Type: AWS::Serverless::Function
-          Properties:
-          ...
-          Runtime: python3.8
-          Environment:
-              Variables:
-                  LOG_LEVEL: INFO
-  ```
-
-By default, Logger uses **INFO** log level. You can either change log level via `level` param or via env var.
-
-You can also explicitly set a service name via `service` param or via `POWERTOOLS_SERVICE_NAME` env var. This sets **service** key that will be present across all log statements.
-
+	```yaml hl_lines="9 10"
+	Resources:
+	  HelloWorldFunction:
+		  Type: AWS::Serverless::Function
+		  Properties:
+		  ...
+		  Runtime: python3.8
+		  Environment:
+			  Variables:
+				  LOG_LEVEL: INFO
+				  POWERTOOLS_SERVICE_NAME: example
+	```
 === "app.py"
+	```python hl_lines="2 4"
+	from aws_lambda_powertools import Logger
+	logger = Logger() # Sets service via env var
 
-  ```python hl_lines="3"
-  from aws_lambda_powertools import Logger
-  # POWERTOOLS_SERVICE_NAME defined
-  logger = Logger()
-
-  # Explicit definition
-  Logger(service="payment", level="INFO")
-  ```
+	logger = Logger(service="example") # Sets service via parameter explicitly
+	```
 
 ## Standard structured keys
 
