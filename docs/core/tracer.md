@@ -258,20 +258,22 @@ Use **`capture_error=False`** parameter in both `capture_lambda_handler` and `ca
 
 You can use `aiohttp_trace_config` function to create a valid [aiohttp trace_config object](https://docs.aiohttp.org/en/stable/tracing_reference.html). This is necessary since X-Ray utilizes aiohttp trace hooks to capture requests end-to-end.
 
-```python hl_lines="5 9"
-import asyncio
-import aiohttp
+=== "aiohttp_example.py"
+	```python hl_lines="5 10"
+	import asyncio
+	import aiohttp
 
-from aws_lambda_powertools import Tracer
-from aws_lambda_powertools.tracing import aiohttp_trace_config
-tracer = Tracer()
+	from aws_lambda_powertools import Tracer
+	from aws_lambda_powertools.tracing import aiohttp_trace_config
 
-async def aiohttp_task():
-    async with aiohttp.ClientSession(trace_configs=[aiohttp_trace_config()]) as session:
-        async with session.get("https://httpbin.org/json") as resp:
-            resp = await resp.json()
-            return resp
-```
+	tracer = Tracer()
+
+	async def aiohttp_task():
+		async with aiohttp.ClientSession(trace_configs=[aiohttp_trace_config()]) as session:
+			async with session.get("https://httpbin.org/json") as resp:
+				resp = await resp.json()
+				return resp
+	```
 
 ### Escape hatch mechanism
 
@@ -279,33 +281,47 @@ You can use `tracer.provider` attribute to access all methods provided by AWS X-
 
 This is useful when you need a feature available in X-Ray that is not available in the Tracer utility, for example [thread-safe](https://github.com/aws/aws-xray-sdk-python/#user-content-trace-threadpoolexecutor), or [context managers](https://github.com/aws/aws-xray-sdk-python/#user-content-start-a-custom-segmentsubsegment).
 
+=== "escape_hatch_context_manager_example.py"
+	```python hl_lines="7"
+	from aws_lambda_powertools import Tracer
+
+	tracer = Tracer()
+
+	@tracer.capture_lambda_handler
+	def handler(event, context):
+		with tracer.provider.in_subsegment('## custom subsegment') as subsegment:
+			ret = some_work()
+			subsegment.put_metadata('response', ret)
+	```
+
 ### Concurrent asynchronous functions
 
-!!! info
+!!! warning
     [As of now, X-Ray SDK will raise an exception when async functions are run and traced concurrently](https://github.com/aws/aws-xray-sdk-python/issues/164)
 
 A safe workaround mechanism is to use `in_subsegment_async` available via Tracer escape hatch (`tracer.provider`).
 
-```python hl_lines="7-10 17"
-import asyncio
+=== "concurrent_async_workaround.py"
+	```python hl_lines="6 7 12 15 17"
+	import asyncio
 
-from aws_lambda_powertools import Tracer
-tracer = Tracer()
+	from aws_lambda_powertools import Tracer
+	tracer = Tracer()
 
-async def another_async_task():
-    async with tracer.provider.in_subsegment_async("## another_async_task") as subsegment:
-        subsegment.put_annotation(key="key", value="value")
-        subsegment.put_metadata(key="key", value="value", namespace="namespace")
-        ...
+	async def another_async_task():
+		async with tracer.provider.in_subsegment_async("## another_async_task") as subsegment:
+			subsegment.put_annotation(key="key", value="value")
+			subsegment.put_metadata(key="key", value="value", namespace="namespace")
+			...
 
-async def another_async_task_2():
-    ...
+	async def another_async_task_2():
+		...
 
-@tracer.capture_method
-async def collect_payment(charge_id):
-    asyncio.gather(another_async_task(), another_async_task_2())
-    ...
-```
+	@tracer.capture_method
+	async def collect_payment(charge_id):
+		asyncio.gather(another_async_task(), another_async_task_2())
+		...
+	```
 
 ### Reusing Tracer across your code
 
@@ -316,24 +332,30 @@ Tracer keeps a copy of its configuration after the first initialization. This is
 
     This can result in the first Tracer config being inherited by new instances, and their modules not being patched.
 
-```python
-# handler.py
-from aws_lambda_powertools import Tracer
-tracer = Tracer(service="payment")
+=== "handler.py"
+	```python hl_lines="2 4 9"
+	from aws_lambda_powertools import Tracer
+	from payment import collect_payment
 
-@tracer.capture_lambda_handler
-def handler(event, context):
-    charge_id = event.get('charge_id')
-    payment = collect_payment(charge_id)
-...
-```
+	tracer = Tracer(service="payment")
 
-```python hl_lines="2 3"
-# another_file.py
-from aws_lambda_powertools import Tracer
-# new instance using existing configuration
-tracer = Tracer(service="payment")
-```
+	@tracer.capture_lambda_handler
+	def handler(event, context):
+		charge_id = event.get('charge_id')
+		payment = collect_payment(charge_id)
+	```
+=== "payment.py"
+	A new instance of Tracer will be created but will reuse the previous Tracer instance configuration, similar to a Singleton.
+
+	```python hl_lines="3 5"
+	from aws_lambda_powertools import Tracer
+
+	tracer = Tracer(service="payment")
+
+	@tracer.capture_method
+    def collect_payment(charge_id: str):
+        ...
+	```
 
 ## Testing your code
 
