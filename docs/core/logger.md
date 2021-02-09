@@ -258,18 +258,23 @@ In this example, `Logger` will create a parent logger named `payment` and a chil
 
 ### Sampling debug logs
 
-Sampling allows you to set your Logger Log Level as DEBUG based on a percentage of your concurrent/cold start invocations. You can set a sampling value of `0.0` to `1` (100%) using either `sample_rate` parameter or `POWERTOOLS_LOGGER_SAMPLE_RATE` env var.
+Use sampling when you want to dynamically change your log level to DEBUG based on a **percentage of your concurrent/cold start invocations**.
 
-This is useful when you want to troubleshoot an issue, say a sudden increase in concurrency, and you might not have enough information in your logs as Logger log level was understandably set as INFO.
+You can set using `POWERTOOLS_LOGGER_SAMPLE_RATE` env var or explicitly with `sample_rate` parameter: Values range from `0.0` to `1` (100%)
 
-Sampling decision happens at the Logger class initialization, which only happens during a cold start. This means sampling may happen significantly more or less than you expect if you have a steady low number of invocations and thus few cold starts.
+!!! tip "When is this useful?"
+	Take for example a sudden increase in concurrency. When looking into logs you might not have enough information, and while you can adjust log levels it might not happen again.
+
+	This feature takes into account transient issues where additional debugging information can be useful.
+
+Sampling decision happens at the Logger class initialization. This means sampling may happen significantly more or less than you expect if you have a steady low number of invocations and thus few cold starts.
 
 !!! note
-    If you want Logger to calculate sampling on every invocation, then please open a feature request.
+    If you want Logger to calculate sampling upon every invocation, please open a [feature request](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=).
 
 === "collect.py"
 
-    ```python hl_lines="4"
+    ```python hl_lines="4 7"
     from aws_lambda_powertools import Logger
 
     # Sample 10% of debug logs e.g. 0.1
@@ -316,17 +321,34 @@ Sampling decision happens at the Logger class initialization, which only happens
 
 ### Migrating from other Loggers
 
-If you're migrating from other Loggers, there are few key points to be aware of: **Service parameter**, **Inheriting Loggers**, **Overriding Log records**, and **Logging exceptions**.
+If you're migrating from other Loggers, there are few key points to be aware of: [Service parameter](#the-service-parameter), [Inheriting Loggers](#inheriting-loggers), [Overriding Log records](#overriding-log-records), and [Logging exceptions](#logging-exceptions).
 
 #### The service parameter
 
-Service is what defines what the function is responsible for, or part of (e.g payment service), and the name of the Logger.
+Service is what defines the Logger name, including what the Lambda function is responsible for, or part of (e.g payment service).
 
 For Logger, the `service` is the logging key customers can use to search log operations for one or more functions - For example, **search for all errors, or messages like X, where service is payment**.
 
+??? tip "Logging output example"
+    ```json hl_lines="5"
+    {
+       "timestamp": "2020-05-24 18:17:33,774",
+       "level": "DEBUG",
+       "location": "collect.handler:1",
+       "service": "payment",
+       "lambda_function_name": "test",
+       "lambda_function_memory_size": 128,
+       "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
+       "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
+       "cold_start": true,
+       "sampling_rate": 0.1,
+       "message": "Verifying whether order_id is present"
+    }
+	```
+
 #### Inheriting Loggers
 
-> Python Logging hierarchy happens via the dot notation: `service`, `service.child`, `service.child_2`.
+> Python Logging hierarchy happens via the dot notation: `service`, `service.child`, `service.child_2`
 
 For inheritance, Logger uses a `child=True` parameter along with `service` being the same value across Loggers.
 
@@ -348,30 +370,63 @@ A common issue when migrating from other Loggers is that `service` might be defi
 
     logger = Logger(child=True)
     ```
+=== "correct_logger_inheritance.py"
 
-In this case, Logger will register a Logger named `payment`, and a Logger named `service_undefined`. The latter isn't inheriting from the parent, and will have no handler, thus no message being logged to standard output.
+    ```python hl_lines="4 10"
+    import my_module
+    from aws_lambda_powertools import Logger
 
-This can be fixed by either ensuring both has the `service` value as `payment`, or simply use the environment variable `POWERTOOLS_SERVICE_NAME` to ensure service value will be the same across all Loggers when not explicitly set.
+    logger = Logger(service="payment")
+    ...
+
+    # my_module.py
+    from aws_lambda_powertools import Logger
+
+    logger = Logger(service="payment", child=True)
+    ```
+
+In this case, Logger will register a Logger named `payment`, and a Logger named `service_undefined`. The latter isn't inheriting from the parent, and will have no handler, resulting in no message being logged to standard output.
+
+!!! tip
+	This can be fixed by either ensuring both has the `service` value as `payment`, or simply use the environment variable `POWERTOOLS_SERVICE_NAME` to ensure service value will be the same across all Loggers when not explicitly set.
 
 #### Overriding Log records
 
 You might want to continue to use the same date formatting style, or override `location` to display the `package.function_name:line_number` as you previously had.
 
-Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, `xray_trace_id`, and `datefmt`
+Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, `xray_trace_id`, and `datefmt`. However, `sampling_rate` key is part of the specification and cannot be suppressed.
+
+!!! note "`xray_trace_id` logging key"
+	This key is only added if X-Ray Tracing is enabled for your Lambda function. Once enabled, this key allows the integration between CloudWatch Logs and Service Lens.
 
 === "lambda_handler.py"
+	> We honour standard [logging library string formats](https://docs.python.org/3/howto/logging.html#displaying-the-date-time-in-messages).
 
     ```python hl_lines="4 7"
     from aws_lambda_powertools import Logger
 
     # override default values for location and timestamp format
-    logger = Logger(stream=stdout, location="[%(funcName)s] %(module)s", datefmt="fake-datefmt")
+    logger = Logger(location="[%(funcName)s] %(module)s", datefmt="%m/%d/%Y %I:%M:%S %p")
 
     # suppress location key
     logger = Logger(stream=stdout, location=None)
     ```
+=== "Example CloudWatch Logs excerpt"
+	```json hl_lines="3 5"
+	{
+		"level": "INFO",
+		"location": "[<module>] scratch",
+		"message": "hello world",
+		"timestamp": "02/09/2021 09:25:17 AM",
+		"service": "service_undefined",
+		"sampling_rate": 0.0
+	}
+	```
 
-Alternatively, you can also change the order of the following log record keys via the `log_record_order` parameter: `level`, `location`, `message`, `xray_trace_id`, and `timestamp`
+
+##### Reordering log records position
+
+You can also change the order of the following log record keys via the `log_record_order` parameter: `level`, `location`, `message`, `xray_trace_id`, and `timestamp`
 
 === "lambda_handler.py"
 
@@ -382,10 +437,19 @@ Alternatively, you can also change the order of the following log record keys vi
     logger = Logger(stream=stdout, log_record_order=["message"])
 
     # Default key sorting order
-    logger = Logger(stream=stdout, log_record_order=["level","location","message","timestamp"])
+    # Logger(stream=stdout, log_record_order=["level","location","message","timestamp"])
     ```
-
-Some keys cannot be supressed in the Log records: `sampling_rate` is part of the specification and cannot be supressed; `xray_trace_id` is supressed automatically if X-Ray is not enabled in the Lambda function, and added automatically if it is.
+=== "Example CloudWatch Logs excerpt"
+	```json hl_lines="3 5"
+	{
+		"message": "hello world",
+		"level": "INFO",
+		"location": "[<module>]:6",
+		"timestamp": "2021-02-09 09:36:12,280",
+		"service": "service_undefined",
+		"sampling_rate": 0.0
+	}
+	```
 
 #### Logging exceptions
 
@@ -444,7 +508,7 @@ This is a Pytest sample that provides the minimum information necessary for Logg
 
     def test_lambda_handler(lambda_context):
         test_event = {'test': 'event'}
-        lambda_handler(test_event, lambda_context) # this will now have a Context object populated
+        your_lambda_handler(test_event, lambda_context) # this will now have a Context object populated
     ```
 === "fake_lambda_context_for_logger_py36.py"
     ```python
@@ -513,11 +577,11 @@ for the given name and level to the logging module. By default, this logs all bo
 
 Keys added with `structure_log` will persist across multiple log messages while keys added via `extra` will only be available in a given log message operation.
 
-**Example - Persisting payment_id not request_id**
+Here's an example where we persist payment_id not request_id. Note that payment_id remains in both log messages while booking_id is only available in the first message.
 
 === "lambda_handler.py"
 
-    ```python
+    ```python hl_lines="4 8"
     from aws_lambda_powertools import Logger
 
     logger = Logger(service="payment")
@@ -531,27 +595,26 @@ Keys added with `structure_log` will persist across multiple log messages while 
 
     logger.info("goodbye")
     ```
+=== "Example CloudWatch Logs excerpt"
 
-Note that `payment_id` remains in both log messages while `booking_id` is only available in the first message.
-
-```json
-{
-    "level": "INFO",
-    "location": "<module>:5",
-    "message": "Flight booked successfully",
-    "timestamp": "2021-01-12 14:09:10,859",
-    "service": "payment",
-    "sampling_rate": 0.0,
-    "payment_id": "123456789",
-    "booking_id": "75edbad0-0857-4fc9-b547-6180e2f7959b"
-},
-{
-    "level": "INFO",
-    "location": "<module>:6",
-    "message": "goodbye",
-    "timestamp": "2021-01-12 14:09:10,860",
-    "service": "payment",
-    "sampling_rate": 0.0,
-    "payment_id": "123456789"
-}
-```
+	```json hl_lines="8-9 18"
+	{
+		"level": "INFO",
+		"location": "<module>:5",
+		"message": "Flight booked successfully",
+		"timestamp": "2021-01-12 14:09:10,859",
+		"service": "payment",
+		"sampling_rate": 0.0,
+		"payment_id": "123456789",
+		"booking_id": "75edbad0-0857-4fc9-b547-6180e2f7959b"
+	},
+	{
+		"level": "INFO",
+		"location": "<module>:6",
+		"message": "goodbye",
+		"timestamp": "2021-01-12 14:09:10,860",
+		"service": "payment",
+		"sampling_rate": 0.0,
+		"payment_id": "123456789"
+	}
+	```
