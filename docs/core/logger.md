@@ -577,7 +577,7 @@ for the given name and level to the logging module. By default, this logs all bo
 
 Keys added with `structure_log` will persist across multiple log messages while keys added via `extra` will only be available in a given log message operation.
 
-Here's an example where we persist payment_id not request_id. Note that payment_id remains in both log messages while booking_id is only available in the first message.
+Here's an example where we persist `payment_id` not `request_id`. Note that `payment_id` remains in both log messages while `booking_id` is only available in the first message.
 
 === "lambda_handler.py"
 
