@@ -43,8 +43,7 @@ Setting | Description | Environment variable | Constructor parameter
 	```python hl_lines="2 4"
 	from aws_lambda_powertools import Logger
 	logger = Logger() # Sets service via env var
-
-	logger = Logger(service="example") # Sets service via parameter explicitly
+	# OR logger = Logger(service="example")
 	```
 
 ### Standard structured keys
