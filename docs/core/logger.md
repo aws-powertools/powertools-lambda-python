@@ -47,7 +47,7 @@ Setting | Description | Environment variable | Constructor parameter
 	logger = Logger(service="example") # Sets service via parameter explicitly
 	```
 
-## Standard structured keys
+### Standard structured keys
 
 Your Logger will include the following keys to your structured logging, by default:
 
@@ -61,7 +61,7 @@ Key | Type | Example | Description
 **message** | any |  "Collecting payment" | Log statement value. Unserializable JSON values will be casted to string
 **xray_trace_id** | str | "1-5759e988-bd862e3fe1be46a994272793" | X-Ray Trace ID when Lambda function has enabled Tracing
 
-## Capturing Lambda context info
+### Capturing Lambda context info
 
 You can enrich your structured logs with key Lambda context information via `inject_lambda_context`.
 
@@ -145,16 +145,18 @@ You can also explicitly log any incoming event using `log_event` param or via `P
        ...
     ```
 
-## Appending additional keys
+### Appending additional keys
 
 You can append additional keys using either mechanism:
 
-* Persist new keys across all future log messages via `structure_logs`
+* Persist new keys across all future log messages via `structure_logs` method
 * Add additional keys on a per log message basis via `extra` parameter
 
-### structure_logs
+#### structure_logs method
 
-You can append your own keys to your existing Logger via `structure_logs` with **append** param.
+You can append your own keys to your existing Logger via `structure_logs(append=True, **kwargs)` method.
+
+> Omitting `append=True` will reset the existing structured logs to standard keys + keys provided as arguments
 
 === "collect.py"
 
@@ -183,15 +185,18 @@ You can append your own keys to your existing Logger via `structure_logs` with *
     }
     ```
 
-> Note: Logger will automatically reject any key with a None value.
+!!! tip "Logger will automatically reject any key with a None value"
+	If you conditionally add keys depending on the payload, you can use the highlighted line above as an example.
 
-If you conditionally add keys depending on the payload, you can use the highlighted line above as an example.
+	This example will add `order_id` if its value is not empty, and in subsequent invocations where `order_id` might not be present it'll remove it from the logger.
 
-This example will add `order_id` if its value is not empty, and in subsequent invocations where `order_id` might not be present it'll remove it from the logger.
+#### extra parameter
 
-### extra parameter
+Extra parameter is available for all log levels' methods, as implemented in the standard logging library - e.g. `logger.info, logger.warning`.
 
-Extra parameter is available for all log levels, as implemented in the standard logging library. It accepts any dictionary, and it'll be added as part of the root structure of the logs.
+It accepts any dictionary, and all keyword arguments will be added as part of the root structure of the logs for that log statement.
+
+!!! info "Any keyword argument added using `extra` will not be persisted for subsequent messages."
 
 === "extra_parameter.py"
 
@@ -216,7 +221,9 @@ Extra parameter is available for all log levels, as implemented in the standard 
     }
     ```
 
-## Reusing Logger across your code
+## Advanced
+
+### Reusing Logger across your code
 
 Logger supports inheritance via `child` parameter. This allows you to create multiple Loggers across your code base, and propagate changes such as new keys to all Loggers.
 
@@ -254,7 +261,7 @@ If you ever forget to use `child` param, we will return an existing `Logger` wit
 !!! note
     Child loggers will be named after the following convention `service.filename`.
 
-## Sampling debug logs
+### Sampling debug logs
 
 Sampling allows you to set your Logger Log Level as DEBUG based on a percentage of your concurrent/cold start invocations. You can set a sampling value of `0.0` to `1` (100%) using either `sample_rate` parameter or `POWERTOOLS_LOGGER_SAMPLE_RATE` env var.
 
@@ -312,17 +319,17 @@ Sampling decision happens at the Logger class initialization, which only happens
     }
     ```
 
-## Migrating from other Loggers
+### Migrating from other Loggers
 
 If you're migrating from other Loggers, there are few key points to be aware of: **Service parameter**, **Inheriting Loggers**, **Overriding Log records**, and **Logging exceptions**.
 
-### service parameter
+#### The service parameter
 
 Service is what defines what the function is responsible for, or part of (e.g payment service), and the name of the Logger.
 
 For Logger, the `service` is the logging key customers can use to search log operations for one or more functions - For example, **search for all errors, or messages like X, where service is payment**.
 
-### inheriting Loggers
+#### Inheriting Loggers
 
 > Python Logging hierarchy happens via the dot notation: `service`, `service.child`, `service.child_2`.
 
@@ -351,7 +358,7 @@ In this case, Logger will register a Logger named `payment`, and a Logger named 
 
 This can be fixed by either ensuring both has the `service` value as `payment`, or simply use the environment variable `POWERTOOLS_SERVICE_NAME` to ensure service value will be the same across all Loggers when not explicitly set.
 
-### overriding Log records
+#### Overriding Log records
 
 You might want to continue to use the same date formatting style, or override `location` to display the `package.function_name:line_number` as you previously had.
 
@@ -385,7 +392,7 @@ Alternatively, you can also change the order of the following log record keys vi
 
 Some keys cannot be supressed in the Log records: `sampling_rate` is part of the specification and cannot be supressed; `xray_trace_id` is supressed automatically if X-Ray is not enabled in the Lambda function, and added automatically if it is.
 
-### logging exceptions
+#### Logging exceptions
 
 When logging exceptions, Logger will add a new key named `exception`, and will serialize the full traceback as a string.
 
@@ -422,8 +429,34 @@ When unit testing your code that makes use of `inject_lambda_context` decorator,
 This is a Pytest sample that provides the minimum information necessary for Logger to succeed:
 
 === "fake_lambda_context_for_logger.py"
+	Note that dataclasses are available in Python 3.7+ only.
 
     ```python
+	from dataclasses import dataclass
+
+	import pytest
+
+    @pytest.fixture
+    def lambda_context():
+		@dataclass
+		class LambdaContext:
+			function_name: str = "test"
+			memory_limit_in_mb: int = 128
+			invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
+			aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
+
+        return LambdaContext()
+
+    def test_lambda_handler(lambda_context):
+        test_event = {'test': 'event'}
+        lambda_handler(test_event, lambda_context) # this will now have a Context object populated
+    ```
+=== "fake_lambda_context_for_logger_py36.py"
+    ```python
+	from collections import namedtuple
+
+	import pytest
+
     @pytest.fixture
     def lambda_context():
         lambda_context = {
@@ -435,12 +468,14 @@ This is a Pytest sample that provides the minimum information necessary for Logg
 
         return namedtuple("LambdaContext", lambda_context.keys())(*lambda_context.values())
 
-    def test_lambda_handler(lambda_handler, lambda_context):
+    def test_lambda_handler(lambda_context):
         test_event = {'test': 'event'}
-        lambda_handler(test_event, lambda_context) # this will now have a Context object populated
+
+		# this will now have a Context object populated
+		your_lambda_handler(test_event, lambda_context)
     ```
 
-### pytest live log feature
+### Pytest live log feature
 
 Pytest Live Log feature duplicates emitted log messages in order to style log statements according to their levels, for this to work use `POWERTOOLS_LOG_DEDUPLICATION_DISABLED` env var.
 
