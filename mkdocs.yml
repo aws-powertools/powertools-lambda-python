@@ -24,6 +24,7 @@ theme:
   icon:
     repo: fontawesome/brands/github
   logo: media/aws-logo-light.svg
+  favicon: media/aws-logo-light.svg
 
 markdown_extensions:
   - admonition
