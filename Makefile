@@ -45,9 +45,6 @@ build-docs-website: dev
 docs-local: dev
 	poetry run mkdocs serve
 
-docs-local-docker: dev
-	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs squidfunk/mkdocs-material
-
 docs-api-local:
 	poetry run pdoc --http : aws_lambda_powertools
 
