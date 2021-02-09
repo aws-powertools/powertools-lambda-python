@@ -556,6 +556,19 @@ PyYAML = ">=3.10"
 tornado = ">=5.0"
 
 [[package]]
+name = "mkdocs-git-revision-date-plugin"
+version = "0.3.1"
+description = "MkDocs plugin for setting revision date from git per markdown file."
+category = "dev"
+optional = false
+python-versions = ">=3.4"
+
+[package.dependencies]
+GitPython = "*"
+jinja2 = "*"
+mkdocs = ">=0.17"
+
+[[package]]
 name = "mkdocs-material"
 version = "6.2.7"
 description = "A Material Design theme for MkDocs"
@@ -1016,7 +1029,7 @@ pydantic = ["pydantic", "typing_extensions", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "cad179f014e62575cd423c6f5b2fef37e539e890c04f4cf1e2c256dd487c5171"
+content-hash = "9c967dd4ada2788799ce868acf31c73849603495047390e4e94e88f8693e40ae"
 
 [metadata.files]
 appdirs = [
@@ -1263,6 +1276,10 @@ mccabe = [
 mkdocs = [
     {file = "mkdocs-1.1.2-py3-none-any.whl", hash = "sha256:096f52ff52c02c7e90332d2e53da862fde5c062086e1b5356a6e392d5d60f5e9"},
     {file = "mkdocs-1.1.2.tar.gz", hash = "sha256:f0b61e5402b99d7789efa032c7a74c90a20220a9c81749da06dbfbcbd52ffb39"},
+]
+mkdocs-git-revision-date-plugin = [
+    {file = "mkdocs-git-revision-date-plugin-0.3.1.tar.gz", hash = "sha256:4abaef720763a64c952bed6829dcc180f67c97c60dd73914e90715e05d1cfb23"},
+    {file = "mkdocs_git_revision_date_plugin-0.3.1-py3-none-any.whl", hash = "sha256:8ae50b45eb75d07b150a69726041860801615aae5f4adbd6b1cf4d51abaa03d5"},
 ]
 mkdocs-material = [
     {file = "mkdocs-material-6.2.7.tar.gz", hash = "sha256:6bef9077527be75a60883c60b07a41e59f33b5400009ea10485337f07b981e24"},

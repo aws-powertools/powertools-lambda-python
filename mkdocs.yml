@@ -21,6 +21,7 @@ theme:
     primary: deep purple
   features:
     - navigation.sections
+    - navigation.expand
   icon:
     repo: fontawesome/brands/github
   logo: media/aws-logo-light.svg
@@ -37,6 +38,15 @@ markdown_extensions:
       base_path: '.'
       check_paths: true
   - meta
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - attr_list
+
+copyright: Copyright &copy; 2020 - Present by Amazon Web Services
+
+plugins:
+  - git-revision-date
 
 extra_css:
   - stylesheets/extra.css
