@@ -92,7 +92,7 @@ When using this `capture_lambda_handler` decorator, Tracer performs these additi
         tracer.put_metadata(key="payment_response", value=ret)
     ```
 
-## Synchronous functions
+### Synchronous functions
 
 You can trace synchronous functions using the `capture_method` decorator.
 
