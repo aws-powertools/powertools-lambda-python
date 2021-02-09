@@ -111,7 +111,7 @@ def collect_payment(charge_id):
     return ret
 ```
 
-## Asynchronous and generator functions
+### Asynchronous and generator functions
 
 !!! warning
     **We do not support async Lambda handler** - Lambda handler itself must be synchronous
