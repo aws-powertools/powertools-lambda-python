@@ -19,6 +19,6 @@ This will:
 
 * Deploy a CloudFormation stack using guided SAM deployment (*you will need to answer a few questions*).
 * Run loops to update the memory setting of the functions to force a cold start, then invoke them. This process is repeated a number of time to get more consistent results.
-* Wait for the data to propagate from CloudWatch Logs to CloudWatch Logs Insights.
+* Wait 2.5 minutes to ensure data propagates from CloudWatch Logs to CloudWatch Logs Insights.
 * Run a query on CloudWatch Logs insights, looking at the **REPORT** line from the logs.
 * Delete the CloudFormation stack.
