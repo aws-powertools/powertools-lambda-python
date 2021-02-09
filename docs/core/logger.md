@@ -229,37 +229,32 @@ Logger supports inheritance via `child` parameter. This allows you to create mul
 
 === "collect.py"
 
-    ```python hl_lines="8-9"
-    # POWERTOOLS_SERVICE_NAME: "payment"
+    ```python hl_lines="1 7"
     import shared # Creates a child logger named "payment.shared"
     from aws_lambda_powertools import Logger
 
-    logger = Logger()
+    logger = Logger() # POWERTOOLS_SERVICE_NAME: "payment"
 
     def handler(event, context):
-      shared.inject_payment_id(event)
-      logger.structure_logs(append=True, order_id=event["order_id"])
-          ...
+      	shared.inject_payment_id(event)
+		...
     ```
 
 === "shared.py"
 
-    ```python hl_lines="4"
-    # POWERTOOLS_SERVICE_NAME: "payment"
+    ```python hl_lines="6"
     from aws_lambda_powertools import Logger
 
-    logger = Logger(child=True)
+    logger = Logger(child=True) # POWERTOOLS_SERVICE_NAME: "payment"
 
     def inject_payment_id(event):
-        logger.structure_logs(append=True, payment_id=event["payment_id"])
+        logger.structure_logs(append=True, payment_id=event.get("payment_id"))
     ```
 
-In this example, `Logger` will create a parent logger named `payment` and a child logger named `payment.shared`. Any changes in the parent and child `Loggers` will be propagated among them.
+In this example, `Logger` will create a parent logger named `payment` and a child logger named `payment.shared`. Changes in either parent or child logger will be propagated bi-directionally.
 
-If you ever forget to use `child` param, we will return an existing `Logger` with the same `service` name.
-
-!!! note
-    Child loggers will be named after the following convention `service.filename`.
+!!! info "Child loggers will be named after the following convention `{service}.{filename}`"
+	If you forget to use `child` param but the `service` name is the same of the parent, we will return the existing parent `Logger` instead.
 
 ### Sampling debug logs
 
