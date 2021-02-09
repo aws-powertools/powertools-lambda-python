@@ -6,6 +6,8 @@ Please note that this requires the [SAM CLI](https://github.com/aws/aws-sam-cli)
 
 ## Usage
 
+> **NOTE**: This script is expected to run in Unix-based systems only, and can incur charges on your AWS account.
+
 To use the script, you should move into the benchmark folder and run the benchmark script:
 
 ```
