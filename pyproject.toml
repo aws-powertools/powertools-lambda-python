@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "1.10.1"
+version = "1.10.2"
 description = "Python utilities for AWS Lambda functions including but not limited to tracing, logging and custom metric"
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed"]
@@ -26,7 +26,7 @@ boto3 = "^1.12"
 jmespath = "^0.10.0"
 pydantic = {version = "^1.6.0", optional = true }
 email-validator = {version = "*", optional = true }
-typing_extensions = {version = "^3.7.4.2", optional = true }
+typing_extensions = {version = "^3.7.4.2", optional = true, python= "<3.8" }
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^5.0.3"}

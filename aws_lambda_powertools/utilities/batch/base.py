@@ -85,7 +85,7 @@ class BasePartialProcessor(ABC):
         self.success_messages.append(record)
         return entry
 
-    def failure_handler(self, record: Any, exception: Exception):
+    def failure_handler(self, record: Any, exception: Tuple):
         """
         Failure callback
 
@@ -94,8 +94,9 @@ class BasePartialProcessor(ABC):
         tuple
             "fail", exceptions args, original record
         """
-        entry = ("fail", exception.args, record)
-        logger.debug(f"Record processing exception: {exception}")
+        exception_string = f"{exception[0]}:{exception[1]}"
+        entry = ("fail", exception_string, record)
+        logger.debug(f"Record processing exception: {exception_string}")
         self.exceptions.append(exception)
         self.fail_messages.append(record)
         return entry
