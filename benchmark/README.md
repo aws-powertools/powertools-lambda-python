@@ -1,6 +1,6 @@
 # Cold Start Benchmark
 
-The [benchmark.sh script](./benchmark.sh) is a bash script to compare the cold-start time of using the AWS Lambda Powertools in a semi-automated way. It does so by deploying two Lambda functions which both have the aws-lambda-powertools module installed. One Lambda function will import and initialize the three main utilities (`Metrics`, `Logger`, `Tracer`), while the other one will not.
+The [benchmark.sh script](./benchmark.sh) is a bash script to compare the cold-start time of using the AWS Lambda Powertools in a semi-automated way. It does so by deploying two Lambda functions which both have the aws-lambda-powertools module installed. One Lambda function will import and initialize the three core utilities (`Metrics`, `Logger`, `Tracer`), while the other one will not.
 
 Please note that this requires the [SAM CLI](https://github.com/aws/aws-sam-cli) version 1.2.0 or later.
 
