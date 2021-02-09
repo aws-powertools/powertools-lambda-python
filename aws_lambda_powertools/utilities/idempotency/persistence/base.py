@@ -305,8 +305,8 @@ class BasePersistenceLayer(ABC):
         logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")
 
         if self.use_local_cache:
-            record = self._retrieve_from_cache(idempotency_key=data_record.idempotency_key)
-            if record:
+            cached_record = self._retrieve_from_cache(idempotency_key=data_record.idempotency_key)
+            if cached_record:
                 raise IdempotencyItemAlreadyExistsError
 
         self._put_record(data_record)
@@ -363,7 +363,7 @@ class BasePersistenceLayer(ABC):
         idempotency_key = self._get_hashed_idempotency_key(event)
 
         if self.use_local_cache:
-            cached_record = self._retrieve_from_cache(idempotency_key)
+            cached_record = self._retrieve_from_cache(idempotency_key=idempotency_key)
             if cached_record:
                 logger.debug(f"Idempotency record found in cache with idempotency key: {idempotency_key}")
                 self._validate_payload(event, cached_record)

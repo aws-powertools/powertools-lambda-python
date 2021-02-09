@@ -130,7 +130,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             logger.debug(f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}")
             raise IdempotencyItemAlreadyExistsError
 
-    def _update_record(self, data_record: DataRecord, check_for_existence=False):
+    def _update_record(self, data_record: DataRecord):
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
         update_expression = "SET #response_data = :response_data, #expiry = :expiry, #status = :status"
         expression_attr_values = {
@@ -155,9 +155,6 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             "ExpressionAttributeValues": expression_attr_values,
             "ExpressionAttributeNames": expression_attr_names,
         }
-
-        if check_for_existence:
-            kwargs["ConditionExpression"] = "attribute_not_exists(id)"
 
         self.table.update_item(**kwargs)
 
