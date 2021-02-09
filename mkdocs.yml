@@ -1,6 +1,7 @@
 site_name: AWS Lambda Powertools Python
 nav:
   - Homepage: index.md
+  - Changelog: changelog.md
   - Core utilities:
       - core/tracer.md
       - core/logger.md
@@ -31,6 +32,9 @@ markdown_extensions:
       linenums: true
   - pymdownx.superfences
   - pymdownx.details
+  - pymdownx.snippets:
+      base_path: '.'
+      check_paths: true
   - meta
 
 extra_css:
