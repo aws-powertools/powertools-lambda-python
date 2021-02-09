@@ -1,4 +1,5 @@
 import copy
+import sys
 
 import pytest
 from botocore import stub
@@ -97,6 +98,7 @@ def test_idempotent_lambda_in_progress(
     stubber.deactivate()
 
 
+@pytest.mark.skipif(sys.version_info < (3, 8), reason="issue with pytest mock lib for < 3.8")
 @pytest.mark.parametrize("persistence_store", [{"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_in_progress_with_cache(
     persistence_store, lambda_apigw_event, lambda_response, timestamp_future, hashed_idempotency_key, mocker
@@ -183,6 +185,7 @@ def test_idempotent_lambda_first_execution(
     stubber.deactivate()
 
 
+@pytest.mark.skipif(sys.version_info < (3, 8), reason="issue with pytest mock lib for < 3.8")
 @pytest.mark.parametrize("persistence_store", [{"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_first_execution_cached(
     persistence_store,
