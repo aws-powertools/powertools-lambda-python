@@ -26,6 +26,7 @@ theme:
     repo: fontawesome/brands/github
   logo: media/aws-logo-light.svg
   favicon: media/aws-logo-light.svg
+  custom_dir: docs/overrides
 
 markdown_extensions:
   - admonition
