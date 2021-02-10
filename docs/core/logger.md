@@ -32,12 +32,12 @@ Setting | Description | Environment variable | Constructor parameter
       HelloWorldFunction:
         Type: AWS::Serverless::Function
         Properties:
-          ...
           Runtime: python3.8
+          ...
           Environment:
             Variables:
-            LOG_LEVEL: INFO
-            POWERTOOLS_SERVICE_NAME: example
+              LOG_LEVEL: INFO
+              POWERTOOLS_SERVICE_NAME: example
 	```
 === "app.py"
 	```python hl_lines="2 4"
