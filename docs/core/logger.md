@@ -10,9 +10,7 @@ Logger provides an opinionated logger with output structured as JSON.
 
 * Capture key fields from Lambda context, cold start and structures logging output as JSON
 * Log Lambda event when instructed (disabled by default)
-    - Enable via `POWERTOOLS_LOGGER_LOG_EVENT="true"` or explicitly via decorator param
 * Log sampling enables DEBUG log level for a percentage of requests (disabled by default)
-    - Enable via `POWERTOOLS_LOGGER_SAMPLE_RATE=0.1`, ranges from 0 to 1, where 0.1 is 10% and 1 is 100%
 * Append additional keys to structured log at any point in time
 
 ## Getting started
@@ -126,7 +124,9 @@ Key | Type | Example
 **function_arn**| str | "arn:aws:lambda:eu-west-1:012345678910:function:example-powertools-HelloWorldFunction-1P1Z6B39FLU73"
 **function_request_id**| str | "899856cb-83d1-40d7-8611-9e78f15f32f4"
 
-You can also explicitly log any incoming event using `log_event` param or via `POWERTOOLS_LOGGER_LOG_EVENT` env var.
+### Logging incoming event
+
+When debugging in non-production environments, you can instruct Logger to log the incoming event with `log_event` param or via `POWERTOOLS_LOGGER_LOG_EVENT` env var.
 
 !!! warning
     This is disabled by default to prevent sensitive info being logged.
