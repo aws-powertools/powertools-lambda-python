@@ -269,7 +269,7 @@ You can add high-cardinality data as part of your Metrics log with `add_metadata
 CloudWatch EMF uses the same dimensions across all your metrics. Use `single_metric` if you have a metric that should have different dimensions.
 
 !!! info
-    Generally, this would be an edge case since you [pay for unique metric](https://aws.amazon.com/cloudwatch/pricing/"). Keep the following formula in mind:
+    Generally, this would be an edge case since you [pay for unique metric](https://aws.amazon.com/cloudwatch/pricing). Keep the following formula in mind:
 
     **unique metric = (metric_name + dimension_name + dimension_value)**
 

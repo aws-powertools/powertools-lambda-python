@@ -25,3 +25,12 @@
 .md-typeset .admonition, .md-typeset details {
     font-size: 0.70rem
 }
+
+/*Resume transition fix after completing migration*/
+.md-search__inner {
+	width: 53vw;
+}
+
+/*[data-md-toggle="search"]:checked ~ .md-header .md-search__inner {*/
+/*	!*margin-right: 10vw,*!*/
+/*}*/
