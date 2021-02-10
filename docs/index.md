@@ -66,7 +66,7 @@ MyLambdaFunction:
 	     - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
 ```
 
-??? multiple optional-class "Example IAM permissions to deploy layer"
+??? tip "Example of least-privileged IAM permissions to deploy Layer"
 
 	> Credits to [mwarkentin](https://github.com/mwarkentin) for providing the scoped down IAM permissions.
 
@@ -74,7 +74,7 @@ MyLambdaFunction:
 
 	=== "template.yml"
 
-		```yaml
+		```yaml hl_lines="21-52"
 		AWSTemplateFormatVersion: "2010-09-09"
 		Resources:
 		  PowertoolsLayerIamRole:
