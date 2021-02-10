@@ -62,7 +62,7 @@ You can also have your own keyword arguments after the mandatory arguments.
 
 ## Tracing middleware execution
 
-If you are making use of [Tracer](../core/tracer), you can trace the execution of your middleware to ease operations.
+If you are making use of [Tracer](../core/tracer.md), you can trace the execution of your middleware to ease operations.
 
 This makes use of an existing Tracer instance that you may have initialized anywhere in your code.
 
