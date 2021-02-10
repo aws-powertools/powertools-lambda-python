@@ -42,7 +42,8 @@ GitHub provides additional document on [forking a repository](https://help.githu
 You might find useful to run both the documentation website and the API reference locally while contributing:
 
 * **API reference**: `make docs-api-local`
-* **Docs website**: `make dev-docs` to install deps, and `make docs-local` to run it thereafter
+* **Docs website**: `make docs-local`
+	- If you prefer using Docker: `make docs-local-docker`
 
 ### Conventions
 

@@ -42,8 +42,12 @@ build-docs-website: dev
 	poetry run mkdocs build
 	cp -R site/* dist/
 
-docs-local: dev
+docs-local:
 	poetry run mkdocs serve
+
+docs-local-docker:
+	docker build -t squidfunk/mkdocs-material ./docs/
+	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs squidfunk/mkdocs-material
 
 docs-api-local:
 	poetry run pdoc --http : aws_lambda_powertools

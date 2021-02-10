@@ -55,4 +55,4 @@ extra_css:
 
 repo_url: https://github.com/awslabs/aws-lambda-powertools-python
 
-strict: true
+#strict: true
