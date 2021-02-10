@@ -22,9 +22,10 @@ If you're new to Amazon CloudWatch, there are two terminologies you must be awar
 * **Dimensions**. Metrics metadata in key-value format. They help you slice and dice metrics visualization, for example `ColdStart` metric by Payment `service`.
 
 <figure>
-  <img src="https://d2908q01vomqb2.cloudfront.net/ca3512f4dfa95a03169c5a670a4c91a19b3077b4/2020/06/18/metrics-namespace_sm.png" />
+  <img src="../../media/metrics_terminology.png" />
   <figcaption>Metric terminology, visually explained</figcaption>
 </figure>
+
 
 ## Getting started
 
