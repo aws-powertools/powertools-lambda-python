@@ -27,8 +27,6 @@ theme:
   logo: media/aws-logo-light.svg
   favicon: media/aws-logo-light.svg
   custom_dir: docs/overrides
-#  font:
-#    text: Montserat
 
 markdown_extensions:
   - admonition
@@ -56,5 +54,6 @@ extra_css:
   - stylesheets/extra.css
 
 repo_url: https://github.com/awslabs/aws-lambda-powertools-python
+edit_uri: edit/develop/docs
 
 #strict: true
