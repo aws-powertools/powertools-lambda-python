@@ -131,18 +131,18 @@ aws serverlessrepo list-application-versions \
 
 ## Features
 
-| Utility | Description |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------|
-| [Tracing](./core/tracer) | Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions |
-| [Logging](./core/logger) | Structured logging made easier, and decorator to enrich structured logging with key Lambda context details |
-| [Metrics](./core/metrics) | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF) |
-| [Middleware factory](./utilities/middleware_factory) | Decorator factory to create your own middleware to run logic before, and after each Lambda invocation |
-| [Parameters](./utilities/parameters) | Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time |
-| [Typing](./utilities/typing) | Static typing classes to speedup development in your IDE |
-| [Batch](./utilities/batch) | Handle partial failures for AWS SQS batch processing |
-| [Validation](./utilities/validation) | JSON Schema validator for inbound events and responses |
-| [Event source data classes](./utilities/data_classes) | Data classes describing the schema of common Lambda event triggers |
-
+| Utility | Description
+| ------------------------------------------------- | ---------------------------------------------------------------------------------
+| [Tracing](./core/tracer) | Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions
+| [Logger](./core/logger) | Structured logging made easier, and decorator to enrich structured logging with key Lambda context details
+| [Metrics](./core/metrics) | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
+| [Middleware factory](./utilities/middleware_factory) | Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
+| [Parameters](./utilities/parameters) | Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time
+| [Batch processing](./utilities/batch) | Handle partial failures for AWS SQS batch processing
+| [Typing](./utilities/typing) | Static typing classes to speedup development in your IDE
+| [Validation](./utilities/validation) | JSON Schema validator for inbound events and responses
+| [Event source data classes](./utilities/data_classes) | Data classes describing the schema of common Lambda event triggers
+| [Parser](./utilities/parser) | Data parsing and deep validation using Pydantic
 
 ## Environment variables
 
