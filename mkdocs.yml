@@ -48,6 +48,7 @@ copyright: Copyright &copy; 2020 - Present by Amazon Web Services
 
 plugins:
   - git-revision-date
+  - search
 
 extra_css:
   - stylesheets/extra.css
