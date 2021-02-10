@@ -63,7 +63,7 @@ You can enrich your structured logs with key Lambda context information via `inj
 
 === "collect.py"
 
-    ```python
+    ```python hl_lines="5"
     from aws_lambda_powertools import Logger
 
     logger = Logger()
@@ -124,7 +124,7 @@ Key | Type | Example
 **function_arn**| str | "arn:aws:lambda:eu-west-1:012345678910:function:example-powertools-HelloWorldFunction-1P1Z6B39FLU73"
 **function_request_id**| str | "899856cb-83d1-40d7-8611-9e78f15f32f4"
 
-### Logging incoming event
+#### Logging incoming event
 
 When debugging in non-production environments, you can instruct Logger to log the incoming event with `log_event` param or via `POWERTOOLS_LOGGER_LOG_EVENT` env var.
 
