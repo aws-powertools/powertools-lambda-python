@@ -28,16 +28,16 @@ Setting | Description | Environment variable | Constructor parameter
 
 === "template.yaml"
 	```yaml hl_lines="9 10"
-	Resources:
-	  HelloWorldFunction:
-		  Type: AWS::Serverless::Function
-		  Properties:
-		  ...
-		  Runtime: python3.8
-		  Environment:
-			  Variables:
-				  LOG_LEVEL: INFO
-				  POWERTOOLS_SERVICE_NAME: example
+    Resources:
+      HelloWorldFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+          Runtime: python3.8
+          ...
+          Environment:
+            Variables:
+              LOG_LEVEL: INFO
+              POWERTOOLS_SERVICE_NAME: example
 	```
 === "app.py"
 	```python hl_lines="2 4"
@@ -86,35 +86,35 @@ You can enrich your structured logs with key Lambda context information via `inj
 === "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="6-10 26-27"
-        {
-           "timestamp":"2020-05-24 18:17:33,774",
-           "level":"INFO",
-           "location":"collect.handler:1",
-           "service":"payment",
-           "lambda_function_name":"test",
-           "lambda_function_memory_size": 128,
-           "lambda_function_arn":"arn:aws:lambda:eu-west-1:12345678910:function:test",
-           "lambda_request_id":"52fdfc07-2182-154f-163f-5f0f9a621d72",
-           "cold_start": true,
-           "sampling_rate": 0.0,
-           "message": "Collecting payment"
-        },
-        {
-           "timestamp":"2020-05-24 18:17:33,774",
-           "level":"INFO",
-           "location":"collect.handler:15",
-           "service":"payment",
-           "lambda_function_name":"test",
-           "lambda_function_memory_size": 128,
-           "lambda_function_arn":"arn:aws:lambda:eu-west-1:12345678910:function:test",
-           "lambda_request_id":"52fdfc07-2182-154f-163f-5f0f9a621d72",
-           "cold_start": true,
-           "sampling_rate": 0.0,
-           "message":{
-              "operation":"collect_payment",
-              "charge_id": "ch_AZFlk2345C0"
-           }
-        }
+	{
+	  "timestamp": "2020-05-24 18:17:33,774",
+	  "level": "INFO",
+	  "location": "collect.handler:1",
+	  "service": "payment",
+	  "lambda_function_name": "test",
+	  "lambda_function_memory_size": 128,
+	  "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
+	  "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
+	  "cold_start": true,
+	  "sampling_rate": 0.0,
+	  "message": "Collecting payment"
+	},
+	{
+	  "timestamp": "2020-05-24 18:17:33,774",
+	  "level": "INFO",
+	  "location": "collect.handler:15",
+	  "service": "payment",
+	  "lambda_function_name": "test",
+	  "lambda_function_memory_size": 128,
+	  "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
+	  "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
+	  "cold_start": true,
+	  "sampling_rate": 0.0,
+	  "message": {
+		"operation": "collect_payment",
+		"charge_id": "ch_AZFlk2345C0"
+	  }
+	}
     ```
 
 When used, this will include the following keys:
@@ -173,15 +173,15 @@ You can append your own keys to your existing Logger via `structure_logs(append=
 === "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="7"
-    {
-       "timestamp": "2020-05-24 18:17:33,774",
-       "level": "INFO",
-       "location": "collect.handler:1",
-       "service": "payment",
-       "sampling_rate": 0.0,
-       "order_id": "order_id_value",
-       "message": "Collecting payment"
-    }
+	{
+	  "timestamp": "2020-05-24 18:17:33,774",
+	  "level": "INFO",
+	  "location": "collect.handler:1",
+	  "service": "payment",
+	  "sampling_rate": 0.0,
+	  "order_id": "order_id_value",
+	  "message": "Collecting payment"
+	}
     ```
 
 !!! tip "Logger will automatically reject any key with a None value"
@@ -209,15 +209,15 @@ It accepts any dictionary, and all keyword arguments will be added as part of th
 === "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="7"
-    {
-       "timestamp": "2021-01-12 14:08:12,357",
-       "level": "INFO",
-       "location": "collect.handler:1",
-       "service": "payment",
-       "sampling_rate": 0.0,
-       "request_id": "1123",
-       "message": "Collecting payment"
-    }
+	{
+	  "timestamp": "2021-01-12 14:08:12,357",
+	  "level": "INFO",
+	  "location": "collect.handler:1",
+	  "service": "payment",
+	  "sampling_rate": 0.0,
+	  "request_id": "1123",
+	  "message": "Collecting payment"
+	}
     ```
 
 ## Advanced

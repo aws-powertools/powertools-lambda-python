@@ -43,15 +43,15 @@ Setting | Description | Environment variable | Constructor parameter
 
     ```yaml hl_lines="9 10"
     Resources:
-        HelloWorldFunction:
-            Type: AWS::Serverless::Function
-            Properties:
-            ...
-            Runtime: python3.8
-            Environment:
-                Variables:
-                    POWERTOOLS_SERVICE_NAME: payment
-                    POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
+      HelloWorldFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+          Runtime: python3.8
+          ...
+          Environment:
+          Variables:
+            POWERTOOLS_SERVICE_NAME: payment
+            POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
     ```
 
 
@@ -120,29 +120,29 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 === "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="2 7 10 15 22"
-    {
-        "BookingConfirmation": 1.0,
-        "_aws": {
-            "Timestamp": 1592234975665,
-            "CloudWatchMetrics": [
-                {
-                    "Namespace": "ExampleApplication",
-                    "Dimensions": [
-                        [
-                            "service"
-                        ]
-                    ],
-                    "Metrics": [
-                        {
-                            "Name": "BookingConfirmation",
-                            "Unit": "Count"
-                        }
-                    ]
-                }
-            ]
-        },
-        "service": "ExampleService"
-    }
+	{
+	  "BookingConfirmation": 1.0,
+	  "_aws": {
+		"Timestamp": 1592234975665,
+		"CloudWatchMetrics": [
+		  {
+			"Namespace": "ExampleApplication",
+			"Dimensions": [
+			  [
+				"service"
+			  ]
+			],
+			"Metrics": [
+			  {
+				"Name": "BookingConfirmation",
+				"Unit": "Count"
+			  }
+			]
+		  }
+		]
+	  },
+	  "service": "ExampleService"
+	}
     ```
 
 !!! tip "Metric validation"
@@ -239,30 +239,30 @@ You can add high-cardinality data as part of your Metrics log with `add_metadata
 === "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="23"
-    {
-        "SuccessfulBooking": 1.0,
-        "_aws": {
-            "Timestamp": 1592234975665,
-            "CloudWatchMetrics": [
-                {
-                    "Namespace": "ExampleApplication",
-                    "Dimensions": [
-                        [
-                            "service"
-                        ]
-                    ],
-                    "Metrics": [
-                        {
-                            "Name": "SuccessfulBooking",
-                            "Unit": "Count"
-                        }
-                    ]
-                }
-            ]
-        },
-        "service": "booking",
-        "booking_id": "booking_uuid"
-    }
+	{
+	  "SuccessfulBooking": 1.0,
+	  "_aws": {
+		"Timestamp": 1592234975665,
+		"CloudWatchMetrics": [
+		  {
+			"Namespace": "ExampleApplication",
+			"Dimensions": [
+			  [
+				"service"
+			  ]
+			],
+			"Metrics": [
+			  {
+				"Name": "SuccessfulBooking",
+				"Unit": "Count"
+			  }
+			]
+		  }
+		]
+	  },
+	  "service": "booking",
+	  "booking_id": "booking_uuid"
+	}
     ```
 
 ### Single metric with a different dimension

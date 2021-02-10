@@ -29,12 +29,12 @@ Before your use this utility, your AWS Lambda function [must have permissions](h
       HelloWorldFunction:
         Type: AWS::Serverless::Function
         Properties:
-			...
-			Runtime: python3.8
-			Tracing: Active
-			Environment:
-			  Variables:
-				POWERTOOLS_SERVICE_NAME: example
+          Runtime: python3.8
+          ...
+          Tracing: Active
+          Environment:
+            Variables:
+              POWERTOOLS_SERVICE_NAME: example
     ```
 
 ### Lambda handler
@@ -92,7 +92,7 @@ When using this `capture_lambda_handler` decorator, Tracer performs these additi
         tracer.put_metadata(key="payment_response", value=ret)
     ```
 
-## Synchronous functions
+### Synchronous functions
 
 You can trace synchronous functions using the `capture_method` decorator.
 
@@ -111,7 +111,7 @@ def collect_payment(charge_id):
     return ret
 ```
 
-## Asynchronous and generator functions
+### Asynchronous and generator functions
 
 !!! warning
     **We do not support async Lambda handler** - Lambda handler itself must be synchronous
