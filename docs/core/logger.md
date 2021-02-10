@@ -28,16 +28,16 @@ Setting | Description | Environment variable | Constructor parameter
 
 === "template.yaml"
 	```yaml hl_lines="9 10"
-	Resources:
-	  HelloWorldFunction:
-		Type: AWS::Serverless::Function
-		Properties:
-		...
-		Runtime: python3.8
-		Environment:
-		  Variables:
-			LOG_LEVEL: INFO
-			POWERTOOLS_SERVICE_NAME: example
+    Resources:
+      HelloWorldFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+          ...
+          Runtime: python3.8
+          Environment:
+            Variables:
+            LOG_LEVEL: INFO
+            POWERTOOLS_SERVICE_NAME: example
 	```
 === "app.py"
 	```python hl_lines="2 4"

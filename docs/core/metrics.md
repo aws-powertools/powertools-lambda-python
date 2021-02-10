@@ -44,14 +44,14 @@ Setting | Description | Environment variable | Constructor parameter
     ```yaml hl_lines="9 10"
     Resources:
       HelloWorldFunction:
-	  	Type: AWS::Serverless::Function
-	  	Properties:
-	  	...
-	  	Runtime: python3.8
-	  	Environment:
-		  Variables:
-		    POWERTOOLS_SERVICE_NAME: payment
-		    POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
+        Type: AWS::Serverless::Function
+        Properties:
+          ...
+          Runtime: python3.8
+          Environment:
+          Variables:
+            POWERTOOLS_SERVICE_NAME: payment
+            POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
     ```
 
 
