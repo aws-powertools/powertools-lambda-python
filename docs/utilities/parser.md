@@ -3,9 +3,6 @@ title: Parser
 description: Utility
 ---
 
-!!! warning
-    It requires an extra dependency before using it.
-
 This utility provides data parsing and deep validation using [Pydantic](https://pydantic-docs.helpmanual.io/).
 
 **Key features**
@@ -16,8 +13,8 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 
 **Extra dependency**
 
-!!! info
-    This will install [pydantic](https://github.com/samuelcolvin/pydantic) and [typing_extensions](https://github.com/python/typing/tree/master/typing_extensions)
+!!! warning
+    This will increase the overall package size by approximately 75MB due to Pydantic dependency.
 
 Install parser's extra dependencies using **`pip install aws-lambda-powertools[pydantic]`**.
 
