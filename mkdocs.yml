@@ -27,6 +27,8 @@ theme:
   logo: media/aws-logo-light.svg
   favicon: media/aws-logo-light.svg
   custom_dir: docs/overrides
+#  font:
+#    text: Montserat
 
 markdown_extensions:
   - admonition
@@ -44,7 +46,7 @@ markdown_extensions:
       toc_depth: 3
   - attr_list
 
-copyright: Copyright &copy; 2020 - Present by Amazon Web Services
+copyright: Copyright &copy; 2021 Amazon Web Services
 
 plugins:
   - git-revision-date
