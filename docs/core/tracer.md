@@ -30,7 +30,6 @@ Before your use this utility, your AWS Lambda function [must have permissions](h
         Type: AWS::Serverless::Function
         Properties:
           Runtime: python3.8
-          ...
           Tracing: Active
           Environment:
             Variables:

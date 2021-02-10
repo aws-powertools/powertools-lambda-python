@@ -47,7 +47,6 @@ Setting | Description | Environment variable | Constructor parameter
         Type: AWS::Serverless::Function
         Properties:
           Runtime: python3.8
-          ...
           Environment:
           Variables:
             POWERTOOLS_SERVICE_NAME: payment
