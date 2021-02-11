@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 from ..models import KinesisDataStreamModel
 from ..types import Model
@@ -19,14 +19,14 @@ class KinesisDataStreamEnvelope(BaseEnvelope):
     all items in the list will be parsed as str and npt as JSON (and vice versa)
     """
 
-    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Model) -> List[Optional[Model]]:
+    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]) -> List[Optional[Model]]:
         """Parses records found with model provided
 
         Parameters
         ----------
         data : Dict
             Lambda event to be parsed
-        model : Model
+        model : Type[Model]
             Data model provided to parse after extracting data using envelope
 
         Returns
