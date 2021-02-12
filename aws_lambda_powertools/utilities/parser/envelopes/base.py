@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, TypeVar, Union
+from typing import Any, Dict, Optional, Type, TypeVar, Union
 
 from ..types import Model
 
@@ -11,14 +11,14 @@ class BaseEnvelope(ABC):
     """ABC implementation for creating a supported Envelope"""
 
     @staticmethod
-    def _parse(data: Optional[Union[Dict[str, Any], Any]], model: Model) -> Union[Model, None]:
+    def _parse(data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]) -> Union[Model, None]:
         """Parses envelope data against model provided
 
         Parameters
         ----------
         data : Dict
             Data to be parsed and validated
-        model : Model
+        model : Type[Model]
             Data model to parse and validate data against
 
         Returns
@@ -38,7 +38,7 @@ class BaseEnvelope(ABC):
         return model.parse_obj(data)
 
     @abstractmethod
-    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Model):
+    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]):
         """Implementation to parse data against envelope model, then against the data model
 
         NOTE: Call `_parse` method to fully parse data with model provided.
