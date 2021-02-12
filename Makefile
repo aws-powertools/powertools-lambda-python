@@ -1,4 +1,4 @@
-.PHONY: target dev dev-docs format lint test coverage-html pr  build build-docs build-docs-api build-docs-website
+.PHONY: target dev format lint test coverage-html pr  build build-docs build-docs-api build-docs-website
 .PHONY: docs-local docs-api-local security-baseline complexity-baseline release-prod release-test release
 
 target:
@@ -8,9 +8,6 @@ dev:
 	pip install --upgrade pip poetry pre-commit
 	poetry install --extras "pydantic"
 	pre-commit install
-
-dev-docs:
-	cd docs && yarn install
 
 format:
 	poetry run isort -rc aws_lambda_powertools tests
@@ -40,13 +37,17 @@ build-docs-api: dev
 	mv -f dist/api/aws_lambda_powertools/* dist/api/
 	rm -rf dist/api/aws_lambda_powertools
 
-build-docs-website: dev-docs
+build-docs-website: dev
 	mkdir -p dist
-	cd docs && yarn build
-	cp -R docs/public/* dist/
+	poetry run mkdocs build
+	cp -R site/* dist/
 
-docs-local: dev-docs
-	cd docs && yarn start
+docs-local:
+	poetry run mkdocs serve
+
+docs-local-docker:
+	docker build -t squidfunk/mkdocs-material ./docs/
+	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs squidfunk/mkdocs-material
 
 docs-api-local:
 	poetry run pdoc --http : aws_lambda_powertools
