@@ -2,6 +2,7 @@ site_name: AWS Lambda Powertools Python
 nav:
   - Homepage: index.md
   - Changelog: changelog.md
+  - API reference: 'https://awslabs.github.io/aws-lambda-powertools-python/api/'
   - Core utilities:
       - core/tracer.md
       - core/logger.md
