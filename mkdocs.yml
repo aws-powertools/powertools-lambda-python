@@ -52,6 +52,10 @@ plugins:
 
 extra_css:
   - stylesheets/extra.css
+extra_javascript:
+  - javascript/aws-amplify.min.js
+  - javascript/extra.js
+
 
 repo_url: https://github.com/awslabs/aws-lambda-powertools-python
 edit_uri: edit/develop/docs
