@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 from ..models import CloudWatchLogsModel
 from ..types import Model
@@ -18,14 +18,14 @@ class CloudWatchLogsEnvelope(BaseEnvelope):
     Note: The record will be parsed the same way so if model is str
     """
 
-    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Model) -> List[Optional[Model]]:
+    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]) -> List[Optional[Model]]:
         """Parses records found with model provided
 
         Parameters
         ----------
         data : Dict
             Lambda event to be parsed
-        model : Model
+        model : Type[Model]
             Data model provided to parse after extracting data using envelope
 
         Returns

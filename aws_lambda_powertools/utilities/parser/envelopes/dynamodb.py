@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 from ..models import DynamoDBStreamModel
 from ..types import Model
@@ -15,14 +15,14 @@ class DynamoDBStreamEnvelope(BaseEnvelope):
     length of the list is the record's amount in the original event.
     """
 
-    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Model) -> List[Dict[str, Optional[Model]]]:
+    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]) -> List[Dict[str, Optional[Model]]]:
         """Parses DynamoDB Stream records found in either NewImage and OldImage with model provided
 
         Parameters
         ----------
         data : Dict
             Lambda event to be parsed
-        model : Model
+        model : Type[Model]
             Data model provided to parse after extracting data using envelope
 
         Returns
