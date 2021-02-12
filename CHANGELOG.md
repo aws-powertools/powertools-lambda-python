@@ -8,6 +8,18 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## [1.10.3] - 2021-02-04
+
+### Added
+
+* **Docs**: Migrated from Gatsby to MKdocs documentation system
+* **Docs**: Included Getting started and Advanced sections in Core utilities, including additional examples
+
+### Fixed
+
+* **Tracer**: Disabled batching segments as X-Ray SDK does not flush traces upon reaching limits
+* **Parser**: Model type is now compliant with mypy
+
 ## [1.10.2] - 2021-02-04
 
 ### Fixed
