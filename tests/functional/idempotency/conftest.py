@@ -3,6 +3,7 @@ import hashlib
 import json
 import os
 
+import jmespath
 import pytest
 from botocore import stub
 from botocore.config import Config
@@ -41,6 +42,11 @@ def timestamp_expired():
 @pytest.fixture(scope="module")
 def lambda_response():
     return {"message": "test", "statusCode": 200}
+
+
+@pytest.fixture
+def default_jmespath():
+    return "[body, queryStringParameters]"
 
 
 @pytest.fixture
@@ -107,8 +113,10 @@ def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_vali
 
 
 @pytest.fixture
-def hashed_idempotency_key(lambda_apigw_event):
-    return hashlib.md5(json.dumps(lambda_apigw_event["body"]).encode()).hexdigest()
+def hashed_idempotency_key(lambda_apigw_event, default_jmespath):
+    compiled_jmespath = jmespath.compile(default_jmespath)
+    data = compiled_jmespath.search(lambda_apigw_event)
+    return hashlib.md5(json.dumps(data).encode()).hexdigest()
 
 
 @pytest.fixture
@@ -117,9 +125,9 @@ def hashed_validation_key(lambda_apigw_event):
 
 
 @pytest.fixture
-def persistence_store(config, request):
+def persistence_store(config, request, default_jmespath):
     persistence_store = DynamoDBPersistenceLayer(
-        event_key_jmespath="body",
+        event_key_jmespath=default_jmespath,
         table_name=TABLE_NAME,
         boto_config=config,
         use_local_cache=request.param["use_local_cache"],
@@ -128,9 +136,9 @@ def persistence_store(config, request):
 
 
 @pytest.fixture
-def persistence_store_with_validation(config, request):
+def persistence_store_with_validation(config, request, default_jmespath):
     persistence_store = DynamoDBPersistenceLayer(
-        event_key_jmespath="body",
+        event_key_jmespath=default_jmespath,
         table_name=TABLE_NAME,
         boto_config=config,
         use_local_cache=request.param,
