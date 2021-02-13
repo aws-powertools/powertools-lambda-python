@@ -35,13 +35,13 @@ Event Source | Data_class
 [API Gateway Proxy event v2](#api-gateway-proxy-v2) | `APIGatewayProxyEventV2`
 [CloudWatch Logs](#cloudWatch-logs) | `CloudWatchLogsEvent`
 [Cognito User Pool](#cognito-user-pool-triggers) | Multiple available under `cognito_user_pool_event`
-[DynamoDB streams](#dynamoDB-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName`
+[DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName`
 [EventBridge](#eventbridge) | `EventBridgeEvent`
 [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent`
-[S3](#S3) | `S3Event`
-[SES](#SES) | `SESEvent`
-[SNS](#SNS) | `SNSEvent`
-[SQS](#SQS) | `SQSEvent`
+[S3](#s3) | `S3Event`
+[SES](#ses) | `SESEvent`
+[SNS](#sns) | `SNSEvent`
+[SQS](#sqs) | `SQSEvent`
 
 
 !!! info
