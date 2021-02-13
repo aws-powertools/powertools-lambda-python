@@ -15,6 +15,7 @@ nav:
       - utilities/validation.md
       - utilities/data_classes.md
       - utilities/parser.md
+      - utilities/idempotency.md
 
 theme:
   name: material

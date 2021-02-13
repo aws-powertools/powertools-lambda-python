@@ -1,0 +1,29 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+participant Client
+participant Lambda
+participant "Persistence layer"
+
+
+group initial request
+Client->Lambda:Invoke (event)
+Lambda->"Persistence layer":Get or set (id=event.search(payload))
+activate "Persistence layer"
+note right of "Persistence layer":Locked during this time. Prevents \nmultiple Lambda invocations with the \nsame payload running concurrently.
+Lambda-->Lambda:Run Lambda handler (event)
+Lambda->"Persistence layer":Update record with Lambda handler result¹
+deactivate "Persistence layer"
+"Persistence layer"-->"Persistence layer": Update record with result¹
+Client x<--Lambda:Response not received by client
+end
+
+group retried request
+
+Client->Lambda: Invoke (event)
+Lambda->"Persistence layer":Get or set (id=event.search(payload))
+Lambda<--"Persistence layer":Already exists in persistence layer. Return result¹
+Client<--Lambda:Response sent to client
+end
+
+@enduml

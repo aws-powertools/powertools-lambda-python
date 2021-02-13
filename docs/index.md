@@ -152,6 +152,7 @@ aws serverlessrepo list-application-versions \
 | [Validation](./utilities/validation) | JSON Schema validator for inbound events and responses
 | [Event source data classes](./utilities/data_classes) | Data classes describing the schema of common Lambda event triggers
 | [Parser](./utilities/parser) | Data parsing and deep validation using Pydantic
+| [Idempotency](./utilities/idempotency) | Idempotent Lambda handler
 
 ## Environment variables
 
