@@ -33,8 +33,8 @@ Event Source | Data_class
 ------------------------------------------------- | ---------------------------------------------------------------------------------
 [API Gateway Proxy](#api-gateway-proxy) | `APIGatewayProxyEvent`
 [API Gateway Proxy event v2](#api-gateway-proxy-v2) | `APIGatewayProxyEventV2`
-[CloudWatch Logs](#cloudWatch-logs) | `CloudWatchLogsEvent`
-[Cognito User Pool](#cognito-user-pool-triggers) | Multiple available under `cognito_user_pool_event`
+[CloudWatch Logs](#cloudwatch-logs) | `CloudWatchLogsEvent`
+[Cognito User Pool](#cognito-user-pool) | Multiple available under `cognito_user_pool_event`
 [DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName`
 [EventBridge](#eventbridge) | `EventBridgeEvent`
 [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent`
