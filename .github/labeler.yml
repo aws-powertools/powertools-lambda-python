@@ -15,7 +15,7 @@ area/metrics:
   - aws_lambda_powertools_python/metrics/*
  
 documentation:
-  - aws_lambda_powertools_python/docs/*
+  - docs/*
   - ./mkdocs.yml
  
 internal:
