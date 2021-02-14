@@ -318,6 +318,34 @@ You can inherit from the `BasePersistenceLayer` class and implement the abstract
 checks inside these methods to ensure the idempotency guarantees remain intact. For example, the `_put_record` method
 needs to raise an exception if a non-expired record already exists in the data store with a matching key.
 
+## Compatibility with other utilities
+
+### Validation utility
+
+The idempotency utility can be used with the `validator` decorator. Ensure that idempotency is the innermost decorator.
+
+!!! warning
+    If you use an envelope with the validator, the event received by the idempotency utility will be the unwrapped
+    event - not the "raw" event Lambda was invoked with. You will need to account for this if you set the
+    `event_key_jmespath`.
+
+=== "app.py"
+    ```python hl_lines="9 10"
+    from aws_lambda_powertools.utilities.validation import validator, envelopes
+    from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent
+
+    persistence_layer = DynamoDBPersistenceLayer(
+        event_key_jmespath="[message, username]",
+        table_name="IdempotencyTable",
+        )
+
+    @validator(envelope=envelopes.API_GATEWAY_HTTP)
+    @idempotent(persistence_store=persistence_layer)
+    def lambda_handler(event, context):
+        cause_some_side_effects(event['username')
+        return {"message": event['message'], "statusCode": 200}
+    ```
+
 ## Extra resources
 If you're interested in a deep dive on how Amazon uses idempotency when building our APIs, check out
 [this article](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/).
