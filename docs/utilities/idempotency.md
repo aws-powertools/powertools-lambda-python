@@ -66,12 +66,12 @@ Resources:
 ### Lambda handler
 
 You can quickly start by initializing the `DynamoDBPersistenceLayer` class outside the Lambda handler, and using it
-with the `idempotent` decorator on your lambda handler. There are 2 required parameters to initialize the persistence
-layer:
+with the `idempotent` decorator on your lambda handler. The only required parameter is `table_name`, but you likely
+want to specify `event_key_jmespath` as well.
 
-`table_name`: The name of the DynamoDB table to use.
 `event_key_jmespath`: A JMESpath expression which will be used to extract the payload from the event your Lambda hander
-is called with. This payload will be used as the key to decide if future invocations are duplicates.
+is called with. This payload will be used as the key to decide if future invocations are duplicates. If you don't pass
+this parameter, the entire event will be used as the key.
 
 === "app.py"
 

@@ -114,7 +114,7 @@ class BasePersistenceLayer(ABC):
 
     def __init__(
         self,
-        event_key_jmespath: str,
+        event_key_jmespath: str = "",
         payload_validation_jmespath: str = "",
         expires_after_seconds: int = 60 * 60,  # 1 hour default
         use_local_cache: bool = False,
@@ -140,7 +140,8 @@ class BasePersistenceLayer(ABC):
             Function to use for calculating hashes, by default md5.
         """
         self.event_key_jmespath = event_key_jmespath
-        self.event_key_compiled_jmespath = jmespath.compile(event_key_jmespath)
+        if self.event_key_jmespath:
+            self.event_key_compiled_jmespath = jmespath.compile(event_key_jmespath)
         self.expires_after_seconds = expires_after_seconds
         self.use_local_cache = use_local_cache
         if self.use_local_cache:
@@ -166,7 +167,9 @@ class BasePersistenceLayer(ABC):
             Hashed representation of the data extracted by the jmespath expression
 
         """
-        data = self.event_key_compiled_jmespath.search(lambda_event)
+        data = lambda_event
+        if self.event_key_jmespath:
+            data = self.event_key_compiled_jmespath.search(lambda_event)
         return self._generate_hash(data)
 
     def _get_hashed_payload(self, lambda_event: Dict[str, Any]) -> str:
