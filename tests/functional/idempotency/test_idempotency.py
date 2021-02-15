@@ -11,6 +11,7 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent
+from aws_lambda_powertools.utilities.validation import envelopes, validator
 
 TABLE_NAME = "TEST_TABLE"
 
@@ -402,7 +403,7 @@ def test_idempotent_lambda_expired_during_request(
 
 
 @pytest.mark.parametrize("persistence_store", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
-def test_idempotent_persistence_exception_updating(
+def test_idempotent_persistence_exception_deleting(
     persistence_store,
     lambda_apigw_event,
     timestamp_future,
@@ -426,15 +427,16 @@ def test_idempotent_persistence_exception_updating(
     def lambda_handler(event, context):
         raise Exception("Something went wrong!")
 
-    with pytest.raises(IdempotencyPersistenceLayerError):
+    with pytest.raises(IdempotencyPersistenceLayerError) as exc:
         lambda_handler(lambda_apigw_event, {})
 
+    assert exc.value.args[0] == "Failed to delete record from idempotency store"
     stubber.assert_no_pending_responses()
     stubber.deactivate()
 
 
 @pytest.mark.parametrize("persistence_store", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
-def test_idempotent_persistence_exception_deleting(
+def test_idempotent_persistence_exception_updating(
     persistence_store,
     lambda_apigw_event,
     timestamp_future,
@@ -458,9 +460,41 @@ def test_idempotent_persistence_exception_deleting(
     def lambda_handler(event, context):
         return {"message": "success!"}
 
-    with pytest.raises(IdempotencyPersistenceLayerError):
+    with pytest.raises(IdempotencyPersistenceLayerError) as exc:
         lambda_handler(lambda_apigw_event, {})
 
+    assert exc.value.args[0] == "Failed to update record state to success in idempotency store"
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+@pytest.mark.parametrize("persistence_store", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
+def test_idempotent_persistence_exception_getting(
+    persistence_store,
+    lambda_apigw_event,
+    timestamp_future,
+    lambda_response,
+    hashed_idempotency_key,
+    expected_params_put_item,
+):
+    """
+    Test idempotent decorator when lambda is executed with an event with a previously unknown event key, but
+    lambda_handler raises an exception which is retryable.
+    """
+    stubber = stub.Stubber(persistence_store.table.meta.client)
+
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
+    stubber.add_client_error("get_item", "UnexpectedException")
+    stubber.activate()
+
+    @idempotent(persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return {"message": "success!"}
+
+    with pytest.raises(IdempotencyPersistenceLayerError) as exc:
+        lambda_handler(lambda_apigw_event, {})
+
+    assert exc.value.args[0] == "Failed to get record from idempotency store"
     stubber.assert_no_pending_responses()
     stubber.deactivate()
 
@@ -492,6 +526,55 @@ def test_idempotent_lambda_first_execution_with_validation(
         return lambda_response
 
     lambda_handler(lambda_apigw_event, {})
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+@pytest.mark.parametrize(
+    "persistence_store_without_jmespath", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True
+)
+def test_idempotent_lambda_with_validator_util(
+    persistence_store_without_jmespath,
+    lambda_apigw_event,
+    timestamp_future,
+    lambda_response,
+    hashed_idempotency_key_with_envelope,
+    mock_function,
+):
+    """
+    Test idempotent decorator where event with matching event key has already been succesfully processed, using the
+    validator utility to unwrap the event
+    """
+
+    stubber = stub.Stubber(persistence_store_without_jmespath.table.meta.client)
+    ddb_response = {
+        "Item": {
+            "id": {"S": hashed_idempotency_key_with_envelope},
+            "expiration": {"N": timestamp_future},
+            "data": {"S": '{"message": "test", "statusCode": 200}'},
+            "status": {"S": "COMPLETED"},
+        }
+    }
+
+    expected_params = {
+        "TableName": TABLE_NAME,
+        "Key": {"id": hashed_idempotency_key_with_envelope},
+        "ConsistentRead": True,
+    }
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
+    stubber.add_response("get_item", ddb_response, expected_params)
+    stubber.activate()
+
+    @validator(envelope=envelopes.API_GATEWAY_HTTP)
+    @idempotent(persistence_store=persistence_store_without_jmespath)
+    def lambda_handler(event, context):
+        mock_function()
+        return "shouldn't get here!"
+
+    mock_function.assert_not_called()
+    lambda_resp = lambda_handler(lambda_apigw_event, {})
+    assert lambda_resp == lambda_response
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()

@@ -2,6 +2,7 @@ import datetime
 import hashlib
 import json
 import os
+from unittest import mock
 
 import jmespath
 import pytest
@@ -9,6 +10,8 @@ from botocore import stub
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
+from aws_lambda_powertools.utilities.validation import envelopes
+from aws_lambda_powertools.utilities.validation.base import unwrap_event_from_envelope
 
 TABLE_NAME = "TEST_TABLE"
 
@@ -120,6 +123,14 @@ def hashed_idempotency_key(lambda_apigw_event, default_jmespath):
 
 
 @pytest.fixture
+def hashed_idempotency_key_with_envelope(lambda_apigw_event):
+    event = unwrap_event_from_envelope(
+        data=lambda_apigw_event, envelope=envelopes.API_GATEWAY_HTTP, jmespath_options={}
+    )
+    return hashlib.md5(json.dumps(event).encode()).hexdigest()
+
+
+@pytest.fixture
 def hashed_validation_key(lambda_apigw_event):
     return hashlib.md5(json.dumps(lambda_apigw_event["requestContext"]).encode()).hexdigest()
 
@@ -136,6 +147,14 @@ def persistence_store(config, request, default_jmespath):
 
 
 @pytest.fixture
+def persistence_store_without_jmespath(config, request):
+    persistence_store = DynamoDBPersistenceLayer(
+        table_name=TABLE_NAME, boto_config=config, use_local_cache=request.param["use_local_cache"],
+    )
+    return persistence_store
+
+
+@pytest.fixture
 def persistence_store_with_validation(config, request, default_jmespath):
     persistence_store = DynamoDBPersistenceLayer(
         event_key_jmespath=default_jmespath,
@@ -145,3 +164,8 @@ def persistence_store_with_validation(config, request, default_jmespath):
         payload_validation_jmespath="requestContext",
     )
     return persistence_store
+
+
+@pytest.fixture
+def mock_function():
+    return mock.MagicMock()

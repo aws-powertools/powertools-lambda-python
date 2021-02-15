@@ -23,10 +23,6 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger = logging.getLogger(__name__)
 
 
-def default_error_callback():
-    raise
-
-
 @lambda_handler_decorator
 def idempotent(
     handler: Callable[[Any, LambdaContext], Any],
@@ -107,7 +103,6 @@ class IdempotencyHandler:
         self.event = event
         self.lambda_handler = lambda_handler
         self.max_handler_retries = 2
-        self.idempotency_key: Optional[str] = None
 
     def handle(self) -> Any:
         """
@@ -158,7 +153,6 @@ class IdempotencyHandler:
         except Exception as exc:
             raise IdempotencyPersistenceLayerError("Failed to get record from idempotency store") from exc
 
-        self.idempotency_key = event_record.idempotency_key
         return event_record
 
     def _handle_for_status(self, event_record: DataRecord) -> Optional[Dict[Any, Any]]:
@@ -212,7 +206,7 @@ class IdempotencyHandler:
                 self.persistence_store.delete_record(event=self.event, exception=handler_exception)
             except Exception as delete_exception:
                 raise IdempotencyPersistenceLayerError(
-                    f"Failed to delete record with idempotency key: {self.idempotency_key}"
+                    "Failed to delete record from idempotency store"
                 ) from delete_exception
             raise
 
@@ -221,7 +215,7 @@ class IdempotencyHandler:
                 self.persistence_store.save_success(event=self.event, result=handler_response)
             except Exception as save_exception:
                 raise IdempotencyPersistenceLayerError(
-                    f"Failed to update record state to success with " f"idempotency key: {self.idempotency_key}"
+                    "Failed to update record state to success in idempotency store"
                 ) from save_exception
 
         return handler_response
