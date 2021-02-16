@@ -16,6 +16,11 @@ A suite of Python utilities for AWS Lambda functions to ease adopting best pract
 * **[Metrics](https://awslabs.github.io/aws-lambda-powertools-python/core/metrics/)** - Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
 * **[Bring your own middleware](https://awslabs.github.io/aws-lambda-powertools-python/utilities/middleware_factory/)** - Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
 * **[Parameters utility](https://awslabs.github.io/aws-lambda-powertools-python/utilities/parameters/)** - Retrieve and cache parameter values from Parameter Store, Secrets Manager, or DynamoDB
+* **[Batch processing](https://awslabs.github.io/aws-lambda-powertools-python/utilities/batch)** - Handle partial failures for AWS SQS batch processing
+* **[Typing](https://awslabs.github.io/aws-lambda-powertools-python/utilities/typing)** - Static typing classes to speedup development in your IDE
+* **[Validation](https://awslabs.github.io/aws-lambda-powertools-python/utilities/validation)** - JSON Schema validator for inbound events and responses
+* **[Event source data classes](https://awslabs.github.io/aws-lambda-powertools-python/utilities/data_classes)** - Data classes describing the schema of common Lambda event triggers
+* **[Parser](https://awslabs.github.io/aws-lambda-powertools-python/utilities/parser)** - Data parsing and deep validation using Pydantic
 
 ### Installation
 
