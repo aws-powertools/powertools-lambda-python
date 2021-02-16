@@ -9,6 +9,8 @@ const awsconfig = {
 	"aws_kinesis_firehose_stream_name": "ClickStreamKinesisFirehose-OGX7PQdrynUo",
 };
 
+const RUNTIME = "python"
+
 const attachListeners = () => {
 	/* Register handler to log search on blur */
 	document.addEventListener("DOMContentLoaded", function () {
@@ -59,7 +61,8 @@ const recordPageView = ({prevLocation, searchPattern}) => {
 			url: searchPattern ? null : window.location.href,
 			section: searchPattern ? null : location.pathname,
 			previous: prevLocation || null,
-			search: searchPattern || null
+			search: searchPattern || null,
+			language: RUNTIME
 		},
 		streamName: awsconfig.aws_kinesis_firehose_stream_name
 	}, 'AWSKinesisFirehose')
