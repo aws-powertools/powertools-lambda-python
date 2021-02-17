@@ -8,6 +8,13 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## [1.10.4] - 2021-02-17
+
+### Fixed
+
+* **Docs**: Fix anchor tags to be lower case
+* **Docs**: Correct the docs location for the labeller
+
 ## [1.10.3] - 2021-02-04
 
 ### Added
