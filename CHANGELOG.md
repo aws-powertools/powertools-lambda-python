@@ -8,6 +8,10 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## [1.10.5] - 2021-02-17
+
+No changes. Bumped version to trigger new pipeline build for layer publishing.
+
 ## [1.10.4] - 2021-02-17
 
 ### Fixed
