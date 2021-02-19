@@ -123,7 +123,7 @@ class IdempotencyHandler:
             record = self._get_idempotency_record()
             return self._handle_for_status(record)
 
-        return self._call_lambda()
+        return self._call_lambda_handler()
 
     def _get_idempotency_record(self) -> DataRecord:
         """
@@ -187,7 +187,7 @@ class IdempotencyHandler:
 
         return event_record.response_json_as_dict()
 
-    def _call_lambda(self) -> Any:
+    def _call_lambda_handler(self) -> Any:
         """
         Call the lambda handler function and update the persistence store appropriate depending on the output
 
