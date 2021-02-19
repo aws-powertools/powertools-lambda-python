@@ -7,7 +7,7 @@ class LRUDict(OrderedDict):
     first. Currently used by idempotency utility.
     """
 
-    def __init__(self, max_items=1024, *args, **kwds):
+    def __init__(self, max_items=1024, *args, **kwargs):
         self.max_items = max_items
         super().__init__(*args, **kwargs)
 
