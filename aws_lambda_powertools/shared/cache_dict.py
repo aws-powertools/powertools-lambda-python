@@ -9,7 +9,7 @@ class LRUDict(OrderedDict):
 
     def __init__(self, max_items=1024, *args, **kwds):
         self.max_items = max_items
-        super().__init__(*args, **kwds)
+        super().__init__(*args, **kwargs)
 
     def __getitem__(self, key):
         value = super().__getitem__(key)
