@@ -133,6 +133,12 @@ def test_idempotent_lambda_in_progress_with_cache(
 
     stubber.add_client_error("put_item", "ConditionalCheckFailedException")
     stubber.add_response("get_item", ddb_response, expected_params)
+
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
+    stubber.add_response("get_item", copy.deepcopy(ddb_response), copy.deepcopy(expected_params))
+
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
+    stubber.add_response("get_item", copy.deepcopy(ddb_response), copy.deepcopy(expected_params))
     stubber.activate()
 
     @idempotent(persistence_store=persistence_store)
@@ -151,11 +157,8 @@ def test_idempotent_lambda_in_progress_with_cache(
     assert retrieve_from_cache_spy.call_count == 2 * loops
     retrieve_from_cache_spy.assert_called_with(idempotency_key=hashed_idempotency_key)
 
-    assert save_to_cache_spy.call_count == 1
-    first_call_args_data_record = save_to_cache_spy.call_args_list[0].kwargs["data_record"]
-    assert first_call_args_data_record.idempotency_key == hashed_idempotency_key
-    assert first_call_args_data_record.status == "INPROGRESS"
-    assert persistence_store._cache.get(hashed_idempotency_key)
+    save_to_cache_spy.assert_not_called()
+    assert persistence_store._cache.get(hashed_idempotency_key) is None
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
@@ -223,12 +226,10 @@ def test_idempotent_lambda_first_execution_cached(
 
     lambda_handler(lambda_apigw_event, {})
 
-    assert retrieve_from_cache_spy.call_count == 1
-    assert save_to_cache_spy.call_count == 2
-    first_call_args, second_call_args = save_to_cache_spy.call_args_list
-    assert first_call_args.args[0].status == "INPROGRESS"
-    assert second_call_args.args[0].status == "COMPLETED"
-    assert persistence_store._cache.get(hashed_idempotency_key)
+    retrieve_from_cache_spy.assert_called_once()
+    save_to_cache_spy.assert_called_once()
+    assert save_to_cache_spy.call_args[0][0].status == "COMPLETED"
+    assert persistence_store._cache.get(hashed_idempotency_key).status == "COMPLETED"
 
     # This lambda call should not call AWS API
     lambda_handler(lambda_apigw_event, {})

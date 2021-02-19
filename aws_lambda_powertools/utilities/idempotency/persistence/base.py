@@ -243,7 +243,7 @@ class BasePersistenceLayer(ABC):
     def _retrieve_from_cache(self, idempotency_key: str):
         cached_record = self._cache.get(idempotency_key)
         if cached_record:
-            if not cached_record.is_expired:
+            if all((not cached_record.is_expired, not cached_record.status == "INPROGRESS")):
                 return cached_record
             logger.debug(f"Removing expired local cache record for idempotency key: {idempotency_key}")
             self._delete_from_cache(idempotency_key)
@@ -305,11 +305,6 @@ class BasePersistenceLayer(ABC):
 
         self._put_record(data_record)
 
-        # This has to come after _put_record. If _put_record call raises ItemAlreadyExists we shouldn't populate the
-        # cache with an "INPROGRESS" record as we don't know the status in the data store at this point.
-        if self.use_local_cache:
-            self._save_to_cache(data_record)
-
     def delete_record(self, event: Dict[str, Any], exception: Exception):
         """
         Delete record from the persistence store
@@ -365,7 +360,9 @@ class BasePersistenceLayer(ABC):
 
         record = self._get_record(idempotency_key)
 
-        if self.use_local_cache:
+        # We can't cache "INPROGRESS" records as we have no way to reflect updates that can happen outside of the
+        # execution environment
+        if self.use_local_cache and not record.status == STATUS_CONSTANTS["INPROGRESS"]:
             self._save_to_cache(data_record=record)
 
         self._validate_payload(event, record)
