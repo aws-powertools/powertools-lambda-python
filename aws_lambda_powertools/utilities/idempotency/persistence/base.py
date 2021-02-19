@@ -68,10 +68,7 @@ class DataRecord:
         bool
             Whether the record is currently expired or not
         """
-        if self.expiry_timestamp:
-            if int(datetime.datetime.now().timestamp()) > self.expiry_timestamp:
-                return True
-        return False
+        return bool(self.expiry_timestamp and int(datetime.datetime.now().timestamp()) > self.expiry_timestamp)
 
     @property
     def status(self) -> str:
