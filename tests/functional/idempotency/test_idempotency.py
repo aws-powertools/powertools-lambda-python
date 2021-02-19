@@ -7,10 +7,12 @@ from botocore import stub
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
+    IdempotencyInvalidStatusError,
     IdempotencyPersistenceLayerError,
     IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent
+from aws_lambda_powertools.utilities.idempotency.persistence.base import DataRecord
 from aws_lambda_powertools.utilities.validation import envelopes, validator
 
 TABLE_NAME = "TEST_TABLE"
@@ -584,3 +586,11 @@ def test_idempotent_lambda_with_validator_util(
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
+
+
+def test_data_record_invalid_status_value():
+    data_record = DataRecord("key", status="UNSUPPORTED_STATUS")
+    with pytest.raises(IdempotencyInvalidStatusError) as e:
+        _ = data_record.status
+
+    assert e.value.args[0] == "UNSUPPORTED_STATUS"
