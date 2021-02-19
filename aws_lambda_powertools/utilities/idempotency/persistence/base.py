@@ -246,11 +246,10 @@ class BasePersistenceLayer(ABC):
     def _retrieve_from_cache(self, idempotency_key: str):
         cached_record = self._cache.get(idempotency_key)
         if cached_record:
-            if cached_record.is_expired:
-                logger.debug(f"Removing expired local cache record for idempotency key: {idempotency_key}")
-                self._delete_from_cache(idempotency_key)
-            else:
+            if not cached_record.is_expired:
                 return cached_record
+            logger.debug(f"Removing expired local cache record for idempotency key: {idempotency_key}")
+            self._delete_from_cache(idempotency_key)
 
     def _delete_from_cache(self, idempotency_key: str):
         del self._cache[idempotency_key]
