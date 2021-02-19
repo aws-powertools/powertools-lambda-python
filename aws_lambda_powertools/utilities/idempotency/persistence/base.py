@@ -21,13 +21,7 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
 
 logger = logging.getLogger(__name__)
 
-STATUS_CONSTANTS = {
-    "NOTEXISTING": "DOESNOTEXIST",
-    "INPROGRESS": "INPROGRESS",
-    "COMPLETED": "COMPLETED",
-    "EXPIRED": "EXPIRED",
-    "ERROR": "ERROR",
-}
+STATUS_CONSTANTS = {"INPROGRESS": "INPROGRESS", "COMPLETED": "COMPLETED", "EXPIRED": "EXPIRED"}
 
 
 class DataRecord:
