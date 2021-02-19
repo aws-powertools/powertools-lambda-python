@@ -2,6 +2,7 @@ import datetime
 import hashlib
 import json
 import os
+from decimal import Decimal
 from unittest import mock
 
 import jmespath
@@ -9,6 +10,7 @@ import pytest
 from botocore import stub
 from botocore.config import Config
 
+from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
 from aws_lambda_powertools.utilities.validation import envelopes
 from aws_lambda_powertools.utilities.validation.base import unwrap_event_from_envelope
@@ -44,7 +46,17 @@ def timestamp_expired():
 
 @pytest.fixture(scope="module")
 def lambda_response():
-    return {"message": "test", "statusCode": 200}
+    return {"message": "test", "statusCode": 200, "decimal_val": Decimal("2.5"), "decimal_NaN": Decimal("NaN")}
+
+
+@pytest.fixture(scope="module")
+def serialized_lambda_response(lambda_response):
+    return json.dumps(lambda_response, cls=Encoder)
+
+
+@pytest.fixture(scope="module")
+def deserialized_lambda_response(lambda_response):
+    return json.loads(json.dumps(lambda_response, cls=Encoder))
 
 
 @pytest.fixture
@@ -53,12 +65,12 @@ def default_jmespath():
 
 
 @pytest.fixture
-def expected_params_update_item(lambda_response, hashed_idempotency_key):
+def expected_params_update_item(serialized_lambda_response, hashed_idempotency_key):
     return {
         "ExpressionAttributeNames": {"#expiry": "expiration", "#response_data": "data", "#status": "status"},
         "ExpressionAttributeValues": {
             ":expiry": stub.ANY,
-            ":response_data": json.dumps(lambda_response),
+            ":response_data": serialized_lambda_response,
             ":status": "COMPLETED",
         },
         "Key": {"id": hashed_idempotency_key},
@@ -68,7 +80,9 @@ def expected_params_update_item(lambda_response, hashed_idempotency_key):
 
 
 @pytest.fixture
-def expected_params_update_item_with_validation(lambda_response, hashed_idempotency_key, hashed_validation_key):
+def expected_params_update_item_with_validation(
+    serialized_lambda_response, hashed_idempotency_key, hashed_validation_key
+):
     return {
         "ExpressionAttributeNames": {
             "#expiry": "expiration",
@@ -78,7 +92,7 @@ def expected_params_update_item_with_validation(lambda_response, hashed_idempote
         },
         "ExpressionAttributeValues": {
             ":expiry": stub.ANY,
-            ":response_data": json.dumps(lambda_response),
+            ":response_data": serialized_lambda_response,
             ":status": "COMPLETED",
             ":validation_key": hashed_validation_key,
         },

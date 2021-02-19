@@ -20,7 +20,12 @@ TABLE_NAME = "TEST_TABLE"
 # enabled, and one without.
 @pytest.mark.parametrize("persistence_store", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_already_completed(
-    persistence_store, lambda_apigw_event, timestamp_future, lambda_response, hashed_idempotency_key,
+    persistence_store,
+    lambda_apigw_event,
+    timestamp_future,
+    hashed_idempotency_key,
+    serialized_lambda_response,
+    deserialized_lambda_response,
 ):
     """
     Test idempotent decorator where event with matching event key has already been succesfully processed
@@ -31,7 +36,7 @@ def test_idempotent_lambda_already_completed(
         "Item": {
             "id": {"S": hashed_idempotency_key},
             "expiration": {"N": timestamp_future},
-            "data": {"S": '{"message": "test", "statusCode": 200}'},
+            "data": {"S": serialized_lambda_response},
             "status": {"S": "COMPLETED"},
         }
     }
@@ -50,7 +55,7 @@ def test_idempotent_lambda_already_completed(
         raise Exception
 
     lambda_resp = lambda_handler(lambda_apigw_event, {})
-    assert lambda_resp == lambda_response
+    assert lambda_resp == deserialized_lambda_response
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
@@ -163,6 +168,8 @@ def test_idempotent_lambda_first_execution(
     expected_params_update_item,
     expected_params_put_item,
     lambda_response,
+    serialized_lambda_response,
+    deserialized_lambda_response,
     hashed_idempotency_key,
 ):
     """
@@ -538,7 +545,8 @@ def test_idempotent_lambda_with_validator_util(
     persistence_store_without_jmespath,
     lambda_apigw_event,
     timestamp_future,
-    lambda_response,
+    serialized_lambda_response,
+    deserialized_lambda_response,
     hashed_idempotency_key_with_envelope,
     mock_function,
 ):
@@ -552,7 +560,7 @@ def test_idempotent_lambda_with_validator_util(
         "Item": {
             "id": {"S": hashed_idempotency_key_with_envelope},
             "expiration": {"N": timestamp_future},
-            "data": {"S": '{"message": "test", "statusCode": 200}'},
+            "data": {"S": serialized_lambda_response},
             "status": {"S": "COMPLETED"},
         }
     }
@@ -574,7 +582,7 @@ def test_idempotent_lambda_with_validator_util(
 
     mock_function.assert_not_called()
     lambda_resp = lambda_handler(lambda_apigw_event, {})
-    assert lambda_resp == lambda_response
+    assert lambda_resp == deserialized_lambda_response
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()

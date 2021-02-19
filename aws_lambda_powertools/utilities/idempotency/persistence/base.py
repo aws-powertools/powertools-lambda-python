@@ -12,6 +12,7 @@ from typing import Any, Dict
 import jmespath
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
+from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyInvalidStatusError,
     IdempotencyItemAlreadyExistsError,
@@ -207,7 +208,7 @@ class BasePersistenceLayer(ABC):
             Hashed representation of the provided data
 
         """
-        hashed_data = self.hash_function(json.dumps(data).encode())
+        hashed_data = self.hash_function(json.dumps(data, cls=Encoder).encode())
         return hashed_data.hexdigest()
 
     def _validate_payload(self, lambda_event: Dict[str, Any], data_record: DataRecord) -> None:
@@ -271,7 +272,7 @@ class BasePersistenceLayer(ABC):
         result: dict
             The response from lambda handler
         """
-        response_data = json.dumps(result)
+        response_data = json.dumps(result, cls=Encoder)
 
         data_record = DataRecord(
             idempotency_key=self._get_hashed_idempotency_key(event),
