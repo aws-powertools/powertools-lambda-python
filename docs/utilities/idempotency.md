@@ -24,8 +24,9 @@ times with the same parameters. This makes idempotent operations safe to retry.
 
 ### Required resources
 
-Before getting started, you need to create a DynamoDB table to store state used by the idempotency utility. Your lambda
-functions will need read and write access to this table.
+Before getting started, you need to create a persistent storage layer where the idempotency utility can store its
+state. Your lambda functions will need read and write access to it. DynamoDB is currently the only supported persistent
+storage layer, so you'll need to create a table first.
 
 > Example using AWS Serverless Application Model (SAM)
 
@@ -56,12 +57,15 @@ Resources:
         Enabled: true
 ```
 
-!!! note
-    When using this utility, each function invocation will generally make 2 requests to DynamoDB. If the result
-    returned by your Lambda is less than 1kb, you can expect 2 WCUs per invocation. For retried invocations, you will
+!!! warning
+    When using this utility with DynamoDB, your lambda responses must always be smaller than 400kb. Larger items cannot
+    be written to DynamoDB and will cause exceptions.
+
+!!! info
+    Each function invocation will generally make 2 requests to DynamoDB. If the
+    result returned by your Lambda is less than 1kb, you can expect 2 WCUs per invocation. For retried invocations, you will
     see 1WCU and 1RCU. Review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/) to
     estimate the cost.
-
 
 ### Lambda handler
 
@@ -172,9 +176,16 @@ DynamoDBPersistenceLayer(
     )
 
 ```
-This will mark any records older than 5 minutes expired, and the lambda handler will be executed as normal if it is
+This will mark any records older than 5 minutes as expired, and the lambda handler will be executed as normal if it is
 invoked with a matching payload. If you have set the TTL field in DynamoDB like in the SAM example above, the record
 will be automatically deleted from the table after a period of itme.
+
+
+### Handling concurrent executions
+If you invoke a Lambda function with a given payload, then try to invoke it again with the same payload before the
+first invocation has finished, we'll raise an `IdempotencyAlreadyInProgressError` exception. This is the utility's
+locking mechanism at work. Since we don't know the result from the first invocation yet, we can't safely allow another
+concurrent execution. If you receive this error, you can safely retry the operation.
 
 
 ### Using local cache
