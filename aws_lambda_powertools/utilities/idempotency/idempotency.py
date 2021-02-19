@@ -49,7 +49,7 @@ def idempotent(
     **Processes Lambda's event in an idempotent manner**
         >>> from aws_lambda_powertools.utilities.idempotency import idempotent, DynamoDBPersistenceLayer
         >>>
-        >>> persistence_store = DynamoDBPersistenceLayer(event_key="body", table_name="idempotency_store")
+        >>> persistence_store = DynamoDBPersistenceLayer(event_key_jmespath="body", table_name="idempotency_store")
         >>>
         >>> @idempotent(persistence_store=persistence_store)
         >>> def handler(event, context):
