@@ -3,8 +3,11 @@ title: Idempotency
 description: Utility
 ---
 
-This utility provides a simple solution to convert your Lambda functions into idempotent operations which are safe to
-retry.
+!!! attention
+    **This utility is currently in beta**. Please open an [issue in GitHub](https://github.com/awslabs/aws-lambda-powertools-python/issues/new/choose) for any bugs or feature requests.
+
+The idempotency utility provides a simple solution to convert your Lambda functions into idempotent operations which
+are safe to retry.
 
 ## Terminology
 
@@ -31,31 +34,31 @@ storage layer, so you'll need to create a table first.
 > Example using AWS Serverless Application Model (SAM)
 
 === "template.yml"
-```yaml
-Resources:
-  HelloWorldFunction:
-  Type: AWS::Serverless::Function
-  Properties:
-    Runtime: python3.8
-    ...
-    Policies:
-      - DynamoDBCrudPolicy:
-          TableName: !Ref IdempotencyTable
-  IdempotencyTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      AttributeDefinitions:
-        -   AttributeName: id
-            AttributeType: S
-      BillingMode: PAY_PER_REQUEST
-      KeySchema:
-        -   AttributeName: id
-            KeyType: HASH
-      TableName: "IdempotencyTable"
-      TimeToLiveSpecification:
-        AttributeName: expiration
-        Enabled: true
-```
+    ```yaml
+    Resources:
+      HelloWorldFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Runtime: python3.8
+        ...
+        Policies:
+          - DynamoDBCrudPolicy:
+              TableName: !Ref IdempotencyTable
+      IdempotencyTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+          AttributeDefinitions:
+            -   AttributeName: id
+                AttributeType: S
+          BillingMode: PAY_PER_REQUEST
+          KeySchema:
+            -   AttributeName: id
+                KeyType: HASH
+          TableName: "IdempotencyTable"
+          TimeToLiveSpecification:
+            AttributeName: expiration
+            Enabled: true
+    ```
 
 !!! warning
     When using this utility with DynamoDB, your lambda responses must always be smaller than 400kb. Larger items cannot
