@@ -80,7 +80,6 @@ def test_idempotent_lambda_in_progress(
         "Item": {
             "id": {"S": hashed_idempotency_key},
             "expiration": {"N": timestamp_future},
-            "data": {"S": '{"message": "test", "statusCode": 200}'},
             "status": {"S": "INPROGRESS"},
         }
     }
@@ -126,7 +125,6 @@ def test_idempotent_lambda_in_progress_with_cache(
         "Item": {
             "id": {"S": hashed_idempotency_key},
             "expiration": {"N": timestamp_future},
-            "data": {"S": '{"message": "test", "statusCode": 200}'},
             "status": {"S": "INPROGRESS"},
         }
     }
