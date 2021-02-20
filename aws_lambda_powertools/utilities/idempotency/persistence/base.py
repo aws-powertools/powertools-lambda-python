@@ -7,6 +7,7 @@ import hashlib
 import json
 import logging
 from abc import ABC, abstractmethod
+from types import MappingProxyType
 from typing import Any, Dict
 
 import jmespath
@@ -21,7 +22,7 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
 
 logger = logging.getLogger(__name__)
 
-STATUS_CONSTANTS = {"INPROGRESS": "INPROGRESS", "COMPLETED": "COMPLETED", "EXPIRED": "EXPIRED"}
+STATUS_CONSTANTS = MappingProxyType({"INPROGRESS": "INPROGRESS", "COMPLETED": "COMPLETED", "EXPIRED": "EXPIRED"})
 
 
 class DataRecord:
@@ -81,8 +82,7 @@ class DataRecord:
         """
         if self.is_expired:
             return STATUS_CONSTANTS["EXPIRED"]
-
-        if self._status in STATUS_CONSTANTS.values():
+        elif self._status in STATUS_CONSTANTS.values():
             return self._status
         else:
             raise IdempotencyInvalidStatusError(self._status)
@@ -214,14 +214,14 @@ class BasePersistenceLayer(ABC):
             DataRecord instance
 
         Raises
-        ______
+        ----------
         IdempotencyValidationError
             Event payload doesn't match the stored record for the given idempotency key
 
         """
         if self.payload_validation_enabled:
             lambda_payload_hash = self._get_hashed_payload(lambda_event)
-            if not data_record.payload_hash == lambda_payload_hash:
+            if data_record.payload_hash != lambda_payload_hash:
                 raise IdempotencyValidationError("Payload does not match stored record for this event key")
 
     def _get_expiry_timestamp(self) -> int:
@@ -238,9 +238,30 @@ class BasePersistenceLayer(ABC):
         return int((now + period).timestamp())
 
     def _save_to_cache(self, data_record: DataRecord):
+        """
+        Save data_record to local cache except when status is "INPROGRESS"
+
+        NOTE: We can't cache "INPROGRESS" records as we have no way to reflect updates that can happen outside of the
+        execution environment
+
+        Parameters
+        ----------
+        data_record: DataRecord
+            DataRecord instance
+
+        Returns
+        -------
+
+        """
+        if not self.use_local_cache:
+            return
+        if data_record.status == STATUS_CONSTANTS["INPROGRESS"]:
+            return
         self._cache[data_record.idempotency_key] = data_record
 
     def _retrieve_from_cache(self, idempotency_key: str):
+        if not self.use_local_cache:
+            return
         cached_record = self._cache.get(idempotency_key)
         if cached_record:
             if not cached_record.is_expired:
@@ -249,11 +270,13 @@ class BasePersistenceLayer(ABC):
             self._delete_from_cache(idempotency_key)
 
     def _delete_from_cache(self, idempotency_key: str):
+        if not self.use_local_cache:
+            return
         del self._cache[idempotency_key]
 
     def save_success(self, event: Dict[str, Any], result: dict) -> None:
         """
-        Save record of function's execution completing succesfully
+        Save record of function's execution completing successfully
 
         Parameters
         ----------
@@ -277,8 +300,7 @@ class BasePersistenceLayer(ABC):
         )
         self._update_record(data_record=data_record)
 
-        if self.use_local_cache:
-            self._save_to_cache(data_record)
+        self._save_to_cache(data_record)
 
     def save_inprogress(self, event: Dict[str, Any]) -> None:
         """
@@ -298,17 +320,10 @@ class BasePersistenceLayer(ABC):
 
         logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")
 
-        if self.use_local_cache:
-            cached_record = self._retrieve_from_cache(idempotency_key=data_record.idempotency_key)
-            if cached_record:
-                raise IdempotencyItemAlreadyExistsError
+        if self._retrieve_from_cache(idempotency_key=data_record.idempotency_key):
+            raise IdempotencyItemAlreadyExistsError
 
         self._put_record(data_record)
-
-        # This has to come after _put_record. If _put_record call raises ItemAlreadyExists we shouldn't populate the
-        # cache with an "INPROGRESS" record as we don't know the status in the data store at this point.
-        if self.use_local_cache:
-            self._save_to_cache(data_record)
 
     def delete_record(self, event: Dict[str, Any], exception: Exception):
         """
@@ -329,8 +344,7 @@ class BasePersistenceLayer(ABC):
         )
         self._delete_record(data_record)
 
-        if self.use_local_cache:
-            self._delete_from_cache(data_record.idempotency_key)
+        self._delete_from_cache(data_record.idempotency_key)
 
     def get_record(self, event: Dict[str, Any]) -> DataRecord:
         """
@@ -356,17 +370,15 @@ class BasePersistenceLayer(ABC):
 
         idempotency_key = self._get_hashed_idempotency_key(event)
 
-        if self.use_local_cache:
-            cached_record = self._retrieve_from_cache(idempotency_key=idempotency_key)
-            if cached_record:
-                logger.debug(f"Idempotency record found in cache with idempotency key: {idempotency_key}")
-                self._validate_payload(event, cached_record)
-                return cached_record
+        cached_record = self._retrieve_from_cache(idempotency_key=idempotency_key)
+        if cached_record:
+            logger.debug(f"Idempotency record found in cache with idempotency key: {idempotency_key}")
+            self._validate_payload(event, cached_record)
+            return cached_record
 
         record = self._get_record(idempotency_key)
 
-        if self.use_local_cache:
-            self._save_to_cache(data_record=record)
+        self._save_to_cache(data_record=record)
 
         self._validate_payload(event, record)
         return record
