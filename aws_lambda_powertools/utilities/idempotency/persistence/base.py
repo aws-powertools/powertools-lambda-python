@@ -215,7 +215,7 @@ class BasePersistenceLayer(ABC):
             DataRecord instance
 
         Raises
-        ______
+        ----------
         IdempotencyValidationError
             Event payload doesn't match the stored record for the given idempotency key
 
@@ -239,6 +239,25 @@ class BasePersistenceLayer(ABC):
         return int((now + period).timestamp())
 
     def _save_to_cache(self, data_record: DataRecord):
+        """
+        Save data_record to local cache except when status is "INPROGRESS"
+
+        NOTE: We can't cache "INPROGRESS" records as we have no way to reflect updates that can happen outside of the
+        execution environment
+
+        Parameters
+        ----------
+        data_record: DataRecord
+            DataRecord instance
+
+        Returns
+        -------
+
+        """
+        if not self.use_local_cache:
+            return
+        if data_record.status == STATUS_CONSTANTS["INPROGRESS"]:
+            return
         self._cache[data_record.idempotency_key] = data_record
 
     def _retrieve_from_cache(self, idempotency_key: str):
@@ -254,7 +273,7 @@ class BasePersistenceLayer(ABC):
 
     def save_success(self, event: Dict[str, Any], result: dict) -> None:
         """
-        Save record of function's execution completing succesfully
+        Save record of function's execution completing successfully
 
         Parameters
         ----------
