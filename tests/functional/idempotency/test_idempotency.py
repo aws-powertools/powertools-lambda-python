@@ -157,7 +157,7 @@ def test_idempotent_lambda_in_progress_with_cache(
     assert retrieve_from_cache_spy.call_count == 2 * loops
     retrieve_from_cache_spy.assert_called_with(idempotency_key=hashed_idempotency_key)
 
-    save_to_cache_spy.assert_not_called()
+    save_to_cache_spy.assert_called()
     assert persistence_store._cache.get(hashed_idempotency_key) is None
 
     stubber.assert_no_pending_responses()
@@ -595,3 +595,35 @@ def test_data_record_invalid_status_value():
         _ = data_record.status
 
     assert e.value.args[0] == "UNSUPPORTED_STATUS"
+
+
+@pytest.mark.parametrize("persistence_store", [{"use_local_cache": True}], indirect=True)
+def test_in_progress_never_saved_to_cache(persistence_store):
+    # GIVEN a data record with status "INPROGRESS"
+    # and persistence_store has use_local_cache = True
+    data_record = DataRecord("key", status="INPROGRESS")
+
+    # WHEN saving to local cache
+    persistence_store._save_to_cache(data_record)
+
+    # THEN don't save to local cache
+    assert persistence_store._cache.get("key") is None
+
+
+@pytest.mark.parametrize("persistence_store", [{"use_local_cache": False}], indirect=True)
+def test_user_local_disabled(persistence_store):
+    # GIVEN a persistence_store with use_local_cache = False
+
+    # WHEN calling any local cache options
+    data_record = DataRecord("key", status="COMPLETED")
+    try:
+        persistence_store._save_to_cache(data_record)
+        cache_value = persistence_store._retrieve_from_cache("key")
+        assert cache_value is None
+        persistence_store._delete_from_cache("key")
+    except AttributeError as e:
+        pytest.fail(f"AttributeError should not be raised: {e}")
+
+    # THEN raise AttributeError
+    # AND don't have a _cache attribute
+    assert not hasattr("persistence_store", "_cache")
