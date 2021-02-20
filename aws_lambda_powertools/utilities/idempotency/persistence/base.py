@@ -7,6 +7,7 @@ import hashlib
 import json
 import logging
 from abc import ABC, abstractmethod
+from types import MappingProxyType
 from typing import Any, Dict
 
 import jmespath
@@ -21,7 +22,7 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
 
 logger = logging.getLogger(__name__)
 
-STATUS_CONSTANTS = {"INPROGRESS": "INPROGRESS", "COMPLETED": "COMPLETED", "EXPIRED": "EXPIRED"}
+STATUS_CONSTANTS = MappingProxyType({"INPROGRESS": "INPROGRESS", "COMPLETED": "COMPLETED", "EXPIRED": "EXPIRED"})
 
 
 class DataRecord:
