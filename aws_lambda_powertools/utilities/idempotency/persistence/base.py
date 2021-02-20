@@ -82,8 +82,7 @@ class DataRecord:
         """
         if self.is_expired:
             return STATUS_CONSTANTS["EXPIRED"]
-
-        if self._status in STATUS_CONSTANTS.values():
+        elif self._status in STATUS_CONSTANTS.values():
             return self._status
         else:
             raise IdempotencyInvalidStatusError(self._status)
@@ -222,7 +221,7 @@ class BasePersistenceLayer(ABC):
         """
         if self.payload_validation_enabled:
             lambda_payload_hash = self._get_hashed_payload(lambda_event)
-            if not data_record.payload_hash == lambda_payload_hash:
+            if data_record.payload_hash != lambda_payload_hash:
                 raise IdempotencyValidationError("Payload does not match stored record for this event key")
 
     def _get_expiry_timestamp(self) -> int:
@@ -263,7 +262,7 @@ class BasePersistenceLayer(ABC):
     def _retrieve_from_cache(self, idempotency_key: str):
         cached_record = self._cache.get(idempotency_key)
         if cached_record:
-            if all((not cached_record.is_expired, not cached_record.status == "INPROGRESS")):
+            if not cached_record.is_expired:
                 return cached_record
             logger.debug(f"Removing expired local cache record for idempotency key: {idempotency_key}")
             self._delete_from_cache(idempotency_key)
