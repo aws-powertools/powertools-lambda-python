@@ -54,6 +54,9 @@ def test_dict_wrapper_equals():
 
     assert DataClassSample(data1) == DataClassSample(data1)
     assert DataClassSample(data1) != DataClassSample(data2)
+    # Comparing against a dict should not be equals
+    assert DataClassSample(data1) != data1
+    assert data1 != DataClassSample(data1)
     assert DataClassSample(data1) is not data1
     assert data1 is not DataClassSample(data1)
 

@@ -1,4 +1,6 @@
 import contextlib
+import sys
+from unittest.mock import Mock
 
 import pytest
 
@@ -212,3 +214,15 @@ def test_tracer_yield_with_capture():
     result = handler({}, {})
     assert "testresult" in result
     assert "testresult2" in result
+
+
+def test_aiohttp_trace_config():
+    aiohttp_mock = Mock()
+    sys.modules["aiohttp"] = aiohttp_mock
+    from aws_lambda_powertools.tracing import aiohttp_trace_config
+
+    aiohttp_trace_config()
+
+    from aws_xray_sdk.ext.aiohttp.client import aws_xray_trace_config
+
+    assert aws_xray_trace_config.__doc__ == "aiohttp extension for X-Ray (aws_xray_trace_config)"
