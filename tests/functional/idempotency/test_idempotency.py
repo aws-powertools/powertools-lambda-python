@@ -627,3 +627,17 @@ def test_user_local_disabled(persistence_store):
     # THEN raise AttributeError
     # AND don't have a _cache attribute
     assert not hasattr("persistence_store", "_cache")
+
+
+@pytest.mark.parametrize("persistence_store", [{"use_local_cache": False, "event_key_jmespath": "body"}], indirect=True)
+def test_no_data_for_generate_hash(persistence_store):
+    # GIVEN a persistence_store with use_local_cache = False and event_key_jmespath = "body"
+    assert persistence_store.use_local_cache is False
+    assert "body" in persistence_store.event_key_jmespath
+
+    # WHEN getting the hashed idempotency key for an event with no `body` key
+    with pytest.raises(IdempotencyValidationError) as excinfo:
+        persistence_store._get_hashed_idempotency_key({})
+
+    # THEN raise IdempotencyValidationError error
+    assert "No data found to create a hashed idempotency_key" in str(excinfo.value)

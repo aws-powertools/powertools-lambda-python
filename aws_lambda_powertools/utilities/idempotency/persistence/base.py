@@ -162,6 +162,10 @@ class BasePersistenceLayer(ABC):
         data = lambda_event
         if self.event_key_jmespath:
             data = self.event_key_compiled_jmespath.search(lambda_event)
+
+        if data is None:
+            raise IdempotencyValidationError("No data found to create a hashed idempotency_key")
+
         return self._generate_hash(data)
 
     def _get_hashed_payload(self, lambda_event: Dict[str, Any]) -> str:
