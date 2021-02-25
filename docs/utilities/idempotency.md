@@ -259,6 +259,20 @@ payload validation, we would have returned the same result as we did for the ini
 returning an amount in the response, this could be quite confusing for the client. By using payload validation on the
 amount field, we prevent this potentially confusing behaviour and instead raise an Exception.
 
+### Making idempotency key required
+
+By default, events without any idempotency key don't raise any exception and just trigger a warning.
+If you want to ensure that at an idempotency is found, you can pass in `raise_on_no_idempotency_key` as True and an
+`IdempotencyKeyError` will be raised.
+
+```python hl_lines="4"
+DynamoDBPersistenceLayer(
+    event_key_jmespath="body",
+    table_name="IdempotencyTable",
+    raise_on_no_idempotency_key=True
+    )
+```
+
 ### Changing dynamoDB attribute names
 If you want to use an existing DynamoDB table, or wish to change the name of the attributes used to store items in the
 table, you can do so when you construct the `DynamoDBPersistenceLayer` instance.
@@ -278,7 +292,7 @@ This example demonstrates changing the attribute names to custom values:
     ```python hl_lines="5-10"
     persistence_layer = DynamoDBPersistenceLayer(
         event_key_jmespath="[userDetail, productId]",
-        table_name="IdempotencyTable",)
+        table_name="IdempotencyTable",
         key_attr="idempotency_key",
         expiry_attr="expires_at",
         status_attr="current_status",
