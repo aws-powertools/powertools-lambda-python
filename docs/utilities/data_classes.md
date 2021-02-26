@@ -142,7 +142,7 @@ attributes values (`AttributeValue`), as well as enums for stream view type (`St
 === "lambda_app.py"
 
     ```python
-    from aws_lambda_powertools.utilities.data_classes import DynamoDBStreamEvent, DynamoDBRecordEventName
+    from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBStreamEvent, DynamoDBRecordEventName
 
     def lambda_handler(event, context):
         event: DynamoDBStreamEvent = DynamoDBStreamEvent(event)
