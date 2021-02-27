@@ -1539,6 +1539,7 @@ def test_appconf_get_app_config_new(monkeypatch, mock_name, mock_value):
     Test get_app_config() without a default provider
     """
 
+    # GIVEN
     class TestProvider(BaseProvider):
         def __init__(self, environment: str, application: str):
             super().__init__()
@@ -1555,10 +1556,11 @@ def test_appconf_get_app_config_new(monkeypatch, mock_name, mock_value):
     monkeypatch.setattr(parameters.appconfig, "DEFAULT_PROVIDERS", {})
     monkeypatch.setattr(parameters.appconfig, "AppConfigProvider", TestProvider)
 
-    _environment = "dev"
-    _application = "myapp"
-    value = parameters.get_app_config(mock_name, environment=_environment, application=_application)
+    # WHEN
+    value = parameters.get_app_config(mock_name, environment="dev", application="myapp")
 
+    # THEN
+    assert parameters.appconfig.DEFAULT_PROVIDERS["appconfig"] is not None
     assert value == mock_value
 
 
