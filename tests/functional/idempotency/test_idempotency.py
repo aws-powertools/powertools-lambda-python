@@ -627,3 +627,14 @@ def test_user_local_disabled(persistence_store):
     # THEN raise AttributeError
     # AND don't have a _cache attribute
     assert not hasattr("persistence_store", "_cache")
+
+
+@pytest.mark.parametrize("persistence_store", [{"use_local_cache": True}], indirect=True)
+def test_delete_from_cache_when_empty(persistence_store):
+    # GIVEN use_local_cache is True AND the local cache is empty
+    try:
+        # WHEN we _delete_from_cache
+        persistence_store._delete_from_cache("key_does_not_exist")
+    except KeyError:
+        # THEN we should not get a KeyError
+        pytest.fail("KeyError should not happen")
