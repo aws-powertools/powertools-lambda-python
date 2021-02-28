@@ -4,10 +4,8 @@ import functools
 import inspect
 import logging
 import os
+from importlib import import_module
 from typing import Any, Callable, Dict, List, Optional, Tuple
-
-import aws_xray_sdk
-import aws_xray_sdk.core
 
 from ..shared import constants
 from ..shared.functions import resolve_truthy_env_var_choice
@@ -17,7 +15,18 @@ logger = logging.getLogger(__name__)
 # Set the streaming threshold to 0 on the default recorder to force sending
 # subsegments individually, rather than batching them.
 # See https://github.com/awslabs/aws-lambda-powertools-python/issues/283
-aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0)
+# aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0) # noqa: E800
+
+XRAY_SDK_MOD = "aws_xray_sdk"
+XRAY_SDK_CORE_MOD = "aws_xray_sdk.core"
+
+
+def _import_xray():
+    xray_sdk = import_module(XRAY_SDK_MOD)
+    xray_sdk_core = import_module(XRAY_SDK_CORE_MOD)
+
+    globals()[XRAY_SDK_MOD] = xray_sdk
+    globals()[XRAY_SDK_CORE_MOD] = xray_sdk_core
 
 
 class Tracer:
@@ -134,12 +143,18 @@ class Tracer:
     * Async handler not supported
     """
 
+    # aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0) # noqa: E800
+    # Types
+    # https://github.com/aws/aws-xray-sdk-python/blob/96134f6d5b0a0be1dc51a9171c3a478a9fe07f79/aws_xray_sdk/core/models/subsegment.py
+    # https://github.com/aws/aws-xray-sdk-python/blob/96134f6d5b0a0be1dc51a9171c3a478a9fe07f79/aws_xray_sdk/core/async_recorder.py
+    # Add attr to avoid double importing
+
     _default_config = {
         "service": "service_undefined",
         "disabled": False,
         "auto_patch": True,
         "patch_modules": None,
-        "provider": aws_xray_sdk.core.xray_recorder,
+        "provider": None,
     }
     _config = copy.copy(_default_config)
 
@@ -149,8 +164,13 @@ class Tracer:
         disabled: bool = None,
         auto_patch: bool = None,
         patch_modules: List = None,
-        provider: aws_xray_sdk.core.xray_recorder = None,
+        provider: Any = None,
+        # provider: aws_xray_sdk.core.xray_recorder = None,
     ):
+
+        _import_xray()  # use return to allow code completion
+        self._config["provider"] = aws_xray_sdk.core.xray_recorder  # noqa: F821
+
         self.__build_config(
             service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
         )
@@ -232,9 +252,9 @@ class Tracer:
             return
 
         if modules is None:
-            aws_xray_sdk.core.patch_all()
+            aws_xray_sdk.core.patch_all()  # noqa: F821
         else:
-            aws_xray_sdk.core.patch(modules)
+            aws_xray_sdk.core.patch(modules)  # noqa: F821
 
     def capture_lambda_handler(
         self,
@@ -625,7 +645,8 @@ class Tracer:
         self,
         method_name: str = None,
         data: Any = None,
-        subsegment: aws_xray_sdk.core.models.subsegment = None,
+        subsegment: Any = None,
+        # subsegment: aws_xray_sdk.core.models.subsegment = None,
         capture_response: Optional[bool] = None,
     ):
         """Add response as metadata for given subsegment
@@ -650,7 +671,8 @@ class Tracer:
         self,
         method_name: str = None,
         error: Exception = None,
-        subsegment: aws_xray_sdk.core.models.subsegment = None,
+        subsegment: Any = None,
+        # subsegment: aws_xray_sdk.core.models.subsegment = None,
         capture_error: Optional[bool] = None,
     ):
         """Add full exception object as metadata for given subsegment
@@ -675,7 +697,7 @@ class Tracer:
     def _disable_tracer_provider():
         """Forcefully disables tracing"""
         logger.debug("Disabling tracer provider...")
-        aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)
+        aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)  # noqa: F821
 
     @staticmethod
     def _is_tracer_disabled() -> bool:
@@ -712,7 +734,8 @@ class Tracer:
         disabled: bool = None,
         auto_patch: bool = None,
         patch_modules: List = None,
-        provider: aws_xray_sdk.core.xray_recorder = None,
+        provider: Any = None,
+        # provider: aws_xray_sdk.core.xray_recorder = None,
     ):
         """ Populates Tracer config for new and existing initializations """
         is_disabled = disabled if disabled is not None else self._is_tracer_disabled()
