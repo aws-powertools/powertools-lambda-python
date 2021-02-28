@@ -1,31 +1,32 @@
 from collections import OrderedDict
 
 
-class LRUDict(OrderedDict):
+class LRUDict:
     """
     Cache implementation based on ordered dict with a maximum number of items. Last accessed item will be evicted
-    first. Currently used by idempotency utility.
+    first, unless the item is None which will be evicted first. Currently used only by idempotency utility.
     """
 
     def __init__(self, max_items=1024, *args, **kwargs):
         self.max_items = max_items
-        super().__init__(*args, **kwargs)
+        self._cache = OrderedDict(*args, **kwargs)
 
-    def __getitem__(self, key):
-        value = super().__getitem__(key)
-        self.move_to_end(key)
+    def __getitem__(self, key: str):
+        value = self._cache.__getitem__(key)
+        if value:
+            self._cache.move_to_end(key)
         return value
 
-    def __setitem__(self, key, value):
-        if key in self:
-            self.move_to_end(key)
-        super().__setitem__(key, value)
-        if len(self) > self.max_items:
-            oldest = next(iter(self))
-            del self[oldest]
+    def __setitem__(self, key: str, value):
+        self._cache.__setitem__(key, value)
+        if key in self._cache:
+            self._cache.move_to_end(key, last=value is not None)
+        if len(self._cache) > self.max_items:
+            oldest = next(iter(self._cache))
+            del self._cache[oldest]
 
-    def get(self, key, *args, **kwargs):
-        item = super(LRUDict, self).get(key, *args, **kwargs)
-        if item:
-            self.move_to_end(key=key)
-        return item
+    def get(self, key: str):
+        value = self._cache.get(key)
+        if value:
+            self._cache.move_to_end(key)
+        return value

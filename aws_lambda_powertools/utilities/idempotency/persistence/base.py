@@ -272,8 +272,7 @@ class BasePersistenceLayer(ABC):
     def _delete_from_cache(self, idempotency_key: str):
         if not self.use_local_cache:
             return
-        if idempotency_key in self._cache:
-            del self._cache[idempotency_key]
+        self._cache[idempotency_key] = None
 
     def save_success(self, event: Dict[str, Any], result: dict) -> None:
         """
