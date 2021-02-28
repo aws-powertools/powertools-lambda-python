@@ -67,3 +67,14 @@ def test_lru_pop_failing():
         pytest.fail("GitHub #300: LRUDict pop bug has been fixed :)")
     except KeyError as e:
         assert e.args[0] == key
+
+
+def test_lru_del():
+    cache = LRUDict()
+    key = "test"
+    cache[key] = "value"
+    assert len(cache) == 1
+    if key in cache:
+        del cache[key]
+    assert key not in cache
+    assert len(cache) == 0
