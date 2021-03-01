@@ -685,7 +685,7 @@ class Tracer:
     def _disable_tracer_provider():
         """Forcefully disables tracing"""
         logger.debug("Disabling tracer provider...")
-        aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)
+        aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)  # noqa: F821
 
     @staticmethod
     def _is_tracer_disabled() -> bool:
@@ -729,7 +729,7 @@ class Tracer:
         is_disabled = disabled if disabled is not None else self._is_tracer_disabled()
         is_service = service if service is not None else os.getenv(constants.SERVICE_NAME_ENV)
 
-        self._config["provider"] = provider if provider is not None else self._config["provider"]
+        self._config["provider"] = provider or self._config["provider"] or aws_xray_sdk.core.xray_recorder
         self._config["auto_patch"] = auto_patch if auto_patch is not None else self._config["auto_patch"]
         self._config["service"] = is_service or self._config["service"]
         self._config["disabled"] = is_disabled or self._config["disabled"]
