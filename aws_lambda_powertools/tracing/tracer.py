@@ -4,11 +4,11 @@ import functools
 import inspect
 import logging
 import os
-from importlib import import_module
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from ..shared import constants
 from ..shared.functions import resolve_truthy_env_var_choice
+from ..shared.lazy_import import LazyLoader
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
@@ -17,16 +17,8 @@ logger = logging.getLogger(__name__)
 # See https://github.com/awslabs/aws-lambda-powertools-python/issues/283
 # aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0) # noqa: E800
 
-XRAY_SDK_MOD = "aws_xray_sdk"
-XRAY_SDK_CORE_MOD = "aws_xray_sdk.core"
-
-
-def _import_xray():
-    xray_sdk = import_module(XRAY_SDK_MOD)
-    xray_sdk_core = import_module(XRAY_SDK_CORE_MOD)
-
-    globals()[XRAY_SDK_MOD] = xray_sdk
-    globals()[XRAY_SDK_CORE_MOD] = xray_sdk_core
+aws_xray_sdk = LazyLoader(constants.XRAY_SDK_MODULE, globals(), constants.XRAY_SDK_MODULE)
+aws_xray_sdk.core = LazyLoader(constants.XRAY_SDK_CORE_MODULE, globals(), constants.XRAY_SDK_CORE_MODULE)
 
 
 class Tracer:
@@ -147,7 +139,6 @@ class Tracer:
     # Types
     # https://github.com/aws/aws-xray-sdk-python/blob/96134f6d5b0a0be1dc51a9171c3a478a9fe07f79/aws_xray_sdk/core/models/subsegment.py
     # https://github.com/aws/aws-xray-sdk-python/blob/96134f6d5b0a0be1dc51a9171c3a478a9fe07f79/aws_xray_sdk/core/async_recorder.py
-    # Add attr to avoid double importing
 
     _default_config = {
         "service": "service_undefined",
@@ -167,9 +158,6 @@ class Tracer:
         provider: Any = None,
         # provider: aws_xray_sdk.core.xray_recorder = None,
     ):
-
-        _import_xray()  # use return to allow code completion
-        self._config["provider"] = aws_xray_sdk.core.xray_recorder  # noqa: F821
 
         self.__build_config(
             service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
@@ -252,9 +240,9 @@ class Tracer:
             return
 
         if modules is None:
-            aws_xray_sdk.core.patch_all()  # noqa: F821
+            aws_xray_sdk.core.patch_all()
         else:
-            aws_xray_sdk.core.patch(modules)  # noqa: F821
+            aws_xray_sdk.core.patch(modules)
 
     def capture_lambda_handler(
         self,
@@ -697,7 +685,7 @@ class Tracer:
     def _disable_tracer_provider():
         """Forcefully disables tracing"""
         logger.debug("Disabling tracer provider...")
-        aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)  # noqa: F821
+        aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)
 
     @staticmethod
     def _is_tracer_disabled() -> bool:
