@@ -3,19 +3,17 @@ import copy
 import functools
 import inspect
 import logging
+import numbers
 import os
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from ..shared import constants
 from ..shared.functions import resolve_truthy_env_var_choice
 from ..shared.lazy_import import LazyLoader
+from .base import BaseProvider, BaseSegment
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
-# Set the streaming threshold to 0 on the default recorder to force sending
-# subsegments individually, rather than batching them.
-# See https://github.com/awslabs/aws-lambda-powertools-python/issues/283
-# aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0) # noqa: E800
 
 aws_xray_sdk = LazyLoader(constants.XRAY_SDK_MODULE, globals(), constants.XRAY_SDK_MODULE)
 aws_xray_sdk.core = LazyLoader(constants.XRAY_SDK_CORE_MODULE, globals(), constants.XRAY_SDK_CORE_MODULE)
@@ -135,11 +133,6 @@ class Tracer:
     * Async handler not supported
     """
 
-    # aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0) # noqa: E800
-    # Types
-    # https://github.com/aws/aws-xray-sdk-python/blob/96134f6d5b0a0be1dc51a9171c3a478a9fe07f79/aws_xray_sdk/core/models/subsegment.py
-    # https://github.com/aws/aws-xray-sdk-python/blob/96134f6d5b0a0be1dc51a9171c3a478a9fe07f79/aws_xray_sdk/core/async_recorder.py
-
     _default_config = {
         "service": "service_undefined",
         "disabled": False,
@@ -154,10 +147,9 @@ class Tracer:
         service: str = None,
         disabled: bool = None,
         auto_patch: bool = None,
-        patch_modules: List = None,
-        provider: Any = None,
+        patch_modules: Optional[Tuple[str]] = None,
+        provider: BaseProvider = None,
     ):
-
         self.__build_config(
             service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
         )
@@ -172,14 +164,19 @@ class Tracer:
         if self.auto_patch:
             self.patch(modules=patch_modules)
 
-    def put_annotation(self, key: str, value: Any):
+        # Set the streaming threshold to 0 on the default recorder to force sending
+        # subsegments individually, rather than batching them.
+        # See https://github.com/awslabs/aws-lambda-powertools-python/issues/283
+        aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0)  # noqa: E800
+
+    def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]):
         """Adds annotation to existing segment or subsegment
 
         Parameters
         ----------
         key : str
             Annotation key
-        value : any
+        value : Union[str, numbers.Number, bool]
             Value for annotation
 
         Example
@@ -632,8 +629,7 @@ class Tracer:
         self,
         method_name: str = None,
         data: Any = None,
-        subsegment: Any = None,
-        # subsegment: aws_xray_sdk.core.models.subsegment = None, # noqa: E800
+        subsegment: BaseSegment = None,
         capture_response: Optional[bool] = None,
     ):
         """Add response as metadata for given subsegment
@@ -644,7 +640,7 @@ class Tracer:
             method name to add as metadata key, by default None
         data : Any, optional
             data to add as subsegment metadata, by default None
-        subsegment : aws_xray_sdk.core.models.subsegment, optional
+        subsegment : BaseSegment, optional
             existing subsegment to add metadata on, by default None
         capture_response : bool, optional
             Do not include response as metadata
@@ -658,8 +654,7 @@ class Tracer:
         self,
         method_name: str = None,
         error: Exception = None,
-        subsegment: Any = None,
-        # subsegment: aws_xray_sdk.core.models.subsegment = None, # noqa: E800
+        subsegment: BaseSegment = None,
         capture_error: Optional[bool] = None,
     ):
         """Add full exception object as metadata for given subsegment
@@ -670,7 +665,7 @@ class Tracer:
             method name to add as metadata key, by default None
         error : Exception, optional
             error to add as subsegment metadata, by default None
-        subsegment : aws_xray_sdk.core.models.subsegment, optional
+        subsegment : BaseSegment, optional
             existing subsegment to add metadata on, by default None
         capture_error : bool, optional
             Do not include error as metadata, by default True
@@ -684,7 +679,7 @@ class Tracer:
     def _disable_tracer_provider():
         """Forcefully disables tracing"""
         logger.debug("Disabling tracer provider...")
-        aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)  # noqa: F821
+        aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)
 
     @staticmethod
     def _is_tracer_disabled() -> bool:
@@ -721,7 +716,7 @@ class Tracer:
         disabled: bool = None,
         auto_patch: bool = None,
         patch_modules: List = None,
-        provider: Any = None,
+        provider: BaseProvider = None,
     ):
         """ Populates Tracer config for new and existing initializations """
         is_disabled = disabled if disabled is not None else self._is_tracer_disabled()
