@@ -156,7 +156,6 @@ class Tracer:
         auto_patch: bool = None,
         patch_modules: List = None,
         provider: Any = None,
-        # provider: aws_xray_sdk.core.xray_recorder = None,
     ):
 
         self.__build_config(
@@ -634,7 +633,7 @@ class Tracer:
         method_name: str = None,
         data: Any = None,
         subsegment: Any = None,
-        # subsegment: aws_xray_sdk.core.models.subsegment = None,
+        # subsegment: aws_xray_sdk.core.models.subsegment = None, # noqa: E800
         capture_response: Optional[bool] = None,
     ):
         """Add response as metadata for given subsegment
@@ -660,7 +659,7 @@ class Tracer:
         method_name: str = None,
         error: Exception = None,
         subsegment: Any = None,
-        # subsegment: aws_xray_sdk.core.models.subsegment = None,
+        # subsegment: aws_xray_sdk.core.models.subsegment = None, # noqa: E800
         capture_error: Optional[bool] = None,
     ):
         """Add full exception object as metadata for given subsegment
@@ -723,7 +722,6 @@ class Tracer:
         auto_patch: bool = None,
         patch_modules: List = None,
         provider: Any = None,
-        # provider: aws_xray_sdk.core.xray_recorder = None,
     ):
         """ Populates Tracer config for new and existing initializations """
         is_disabled = disabled if disabled is not None else self._is_tracer_disabled()
