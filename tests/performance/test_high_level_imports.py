@@ -36,11 +36,13 @@ def test_import_times_ceiling():
     # GIVEN Core utilities are imported
     # WHEN none are used
     # THEN import and any global initialization perf should be below 30ms
+    # though we adjust to 35ms to take into account different CI machines, etc.
+    # instead of re-running tests which can lead to false positives
     with timing() as t:
         core_utilities()
 
     elapsed = t()
-    if elapsed > 0.030:
+    if elapsed > 0.035:
         pytest.fail(f"High level imports should be below 40ms: {elapsed}")
 
 
@@ -48,13 +50,15 @@ def test_import_times_ceiling():
 def test_tracer_init():
     # GIVEN Tracer is initialized
     # WHEN default options are used
-    # THEN initialization X-Ray SDK perf should be below 400ms
+    # THEN initialization X-Ray SDK perf should be below 450ms
+    # though we adjust to 500ms to take into account different CI machines, etc.
+    # instead of re-running tests which can lead to false positives
     with timing() as t:
         tracing, _, _ = core_utilities()
-        tracing.Tracer()  # boto3 takes ~200ms, and remaining is X-Ray SDK init
+        tracing.Tracer(disabled=True)  # boto3 takes ~200ms, and remaining is X-Ray SDK init
 
     elapsed = t()
-    if elapsed > 0.4:
+    if elapsed > 0.5:
         pytest.fail(f"High level imports should be below 40ms: {elapsed}")
 
 
