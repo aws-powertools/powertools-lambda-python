@@ -242,7 +242,7 @@ class Tracer:
 
     def capture_lambda_handler(
         self,
-        lambda_handler: Callable[[Dict, Any], Any] = None,
+        lambda_handler: Callable[[Dict, Any, Optional[Dict]], Any] = None,
         capture_response: Optional[bool] = None,
         capture_error: Optional[bool] = None,
     ):
@@ -516,8 +516,8 @@ class Tracer:
     def _decorate_async_function(
         self,
         method: Callable = None,
-        capture_response: Optional[bool] = None,
-        capture_error: Optional[bool] = None,
+        capture_response: Optional[Union[bool, str]] = None,
+        capture_error: Optional[Union[bool, str]] = None,
         method_name: str = None,
     ):
         @functools.wraps(method)
@@ -543,8 +543,8 @@ class Tracer:
     def _decorate_generator_function(
         self,
         method: Callable = None,
-        capture_response: Optional[bool] = None,
-        capture_error: Optional[bool] = None,
+        capture_response: Optional[Union[bool, str]] = None,
+        capture_error: Optional[Union[bool, str]] = None,
         method_name: str = None,
     ):
         @functools.wraps(method)
@@ -570,8 +570,8 @@ class Tracer:
     def _decorate_generator_function_with_context_manager(
         self,
         method: Callable = None,
-        capture_response: Optional[bool] = None,
-        capture_error: Optional[bool] = None,
+        capture_response: Optional[Union[bool, str]] = None,
+        capture_error: Optional[Union[bool, str]] = None,
         method_name: str = None,
     ):
         @functools.wraps(method)
@@ -598,8 +598,8 @@ class Tracer:
     def _decorate_sync_function(
         self,
         method: Callable = None,
-        capture_response: Optional[bool] = None,
-        capture_error: Optional[bool] = None,
+        capture_response: Optional[Union[bool, str]] = None,
+        capture_error: Optional[Union[bool, str]] = None,
         method_name: str = None,
     ):
         @functools.wraps(method)
@@ -630,7 +630,7 @@ class Tracer:
         method_name: str = None,
         data: Any = None,
         subsegment: BaseSegment = None,
-        capture_response: Optional[bool] = None,
+        capture_response: Optional[Union[bool, str]] = None,
     ):
         """Add response as metadata for given subsegment
 
@@ -682,7 +682,7 @@ class Tracer:
         aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)
 
     @staticmethod
-    def _is_tracer_disabled() -> bool:
+    def _is_tracer_disabled() -> Union[bool, str]:
         """Detects whether trace has been disabled
 
         Tracing is automatically disabled in the following conditions:
@@ -693,7 +693,7 @@ class Tracer:
 
         Returns
         -------
-        bool
+        Union[bool, str]
         """
         logger.debug("Verifying whether Tracing has been disabled")
         is_lambda_sam_cli = os.getenv(constants.SAM_LOCAL_ENV)
