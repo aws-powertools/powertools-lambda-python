@@ -258,8 +258,8 @@ def test_schema_validation_no_namespace(metric, dimension):
     # WHEN we attempt to serialize a valid EMF object
     # THEN it should fail namespace validation
     with pytest.raises(SchemaValidationError, match=".*Namespace must be string"):
-        with single_metric(**metric):
-            pass
+        with single_metric(**metric) as my_metric:
+            my_metric.add_dimension(**dimension)
 
 
 def test_schema_validation_incorrect_metric_value(metric, dimension, namespace):
@@ -268,7 +268,7 @@ def test_schema_validation_incorrect_metric_value(metric, dimension, namespace):
 
     # WHEN we attempt to serialize a valid EMF object
     # THEN it should fail validation and raise SchemaValidationError
-    with pytest.raises(MetricValueError):
+    with pytest.raises(MetricValueError, match=".*is not a valid number"):
         with single_metric(**metric):
             pass
 
