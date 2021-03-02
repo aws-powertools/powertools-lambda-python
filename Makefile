@@ -17,7 +17,8 @@ lint: format
 	poetry run flake8 aws_lambda_powertools/* tests/*
 
 test:
-	poetry run pytest -vvv --cov=./ --cov-report=xml
+	poetry run pytest -vvv -m "not perf" --cov=./ --cov-report=xml
+	poetry run pytest --cache-clear -vvv tests/performance
 
 coverage-html:
 	poetry run pytest --cov-report html
