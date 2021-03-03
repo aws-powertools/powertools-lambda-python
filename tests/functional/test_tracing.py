@@ -221,8 +221,6 @@ def test_aiohttp_trace_config():
     sys.modules["aiohttp"] = aiohttp_mock
     from aws_lambda_powertools.tracing import aiohttp_trace_config
 
-    aiohttp_trace_config()
+    trace_config: Mock = aiohttp_trace_config()
 
-    from aws_xray_sdk.ext.aiohttp.client import aws_xray_trace_config
-
-    assert aws_xray_trace_config.__doc__ == "aiohttp extension for X-Ray (aws_xray_trace_config)"
+    assert trace_config._extract_mock_name() == "mock.TraceConfig()"
