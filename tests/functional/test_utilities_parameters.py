@@ -1534,6 +1534,32 @@ def test_appconf_get_app_config_no_transform(monkeypatch, mock_name):
     assert str_value == json.dumps(mock_body_json)
 
 
+def test_appconf_get_app_config_new(monkeypatch, mock_name, mock_value):
+    # GIVEN
+    class TestProvider(BaseProvider):
+        def __init__(self, environment: str, application: str):
+            super().__init__()
+
+        def get(self, name: str, **kwargs) -> str:
+            return mock_value
+
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    monkeypatch.setattr(parameters.appconfig, "DEFAULT_PROVIDERS", {})
+    monkeypatch.setattr(parameters.appconfig, "AppConfigProvider", TestProvider)
+
+    # WHEN
+    value = parameters.get_app_config(mock_name, environment="dev", application="myapp")
+
+    # THEN
+    assert parameters.appconfig.DEFAULT_PROVIDERS["appconfig"] is not None
+    assert value == mock_value
+
+
 def test_transform_value_json(mock_value):
     """
     Test transform_value() with a json transform
