@@ -6,6 +6,7 @@ import datetime
 import hashlib
 import json
 import logging
+import warnings
 from abc import ABC, abstractmethod
 from types import MappingProxyType
 from typing import Any, Dict
@@ -17,6 +18,7 @@ from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyInvalidStatusError,
     IdempotencyItemAlreadyExistsError,
+    IdempotencyKeyError,
     IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.validation.jmespath_functions import PowertoolsFunctions
@@ -113,6 +115,7 @@ class BasePersistenceLayer(ABC):
         use_local_cache: bool = False,
         local_cache_max_items: int = 256,
         hash_function: str = "md5",
+        raise_on_no_idempotency_key: bool = False,
         jmespath_options: Dict = None,
     ) -> None:
         """
@@ -132,6 +135,8 @@ class BasePersistenceLayer(ABC):
             Max number of items to store in local cache, by default 1024
         hash_function: str, optional
             Function to use for calculating hashes, by default md5.
+        raise_on_no_idempotency_key: bool, optional
+            Raise exception if no idempotency key was found in the request, by default False
         jmespath_options : Dict
             Alternative JMESPath options to be included when filtering expr
         """
@@ -147,6 +152,7 @@ class BasePersistenceLayer(ABC):
             self.validation_key_jmespath = jmespath.compile(payload_validation_jmespath)
             self.payload_validation_enabled = True
         self.hash_function = getattr(hashlib, hash_function)
+        self.raise_on_no_idempotency_key = raise_on_no_idempotency_key
         if not jmespath_options:
             jmespath_options = {"custom_functions": PowertoolsFunctions()}
         self.jmespath_options = jmespath_options
@@ -173,7 +179,16 @@ class BasePersistenceLayer(ABC):
                 lambda_event, options=jmespath.Options(**self.jmespath_options)
             )
 
+        if self.is_missing_idempotency_key(data):
+            warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}")
+            if self.raise_on_no_idempotency_key:
+                raise IdempotencyKeyError("No data found to create a hashed idempotency_key")
+
         return self._generate_hash(data)
+
+    @staticmethod
+    def is_missing_idempotency_key(data) -> bool:
+        return data is None or not data or all(x is None for x in data)
 
     def _get_hashed_payload(self, lambda_event: Dict[str, Any]) -> str:
         """

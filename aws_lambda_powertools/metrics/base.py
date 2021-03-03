@@ -3,22 +3,18 @@ import json
 import logging
 import numbers
 import os
-import pathlib
 from collections import defaultdict
 from enum import Enum
 from typing import Any, Dict, List, Union
 
-import fastjsonschema
-
 from ..shared import constants
 from ..shared.functions import resolve_env_var_choice
+from ..shared.lazy_import import LazyLoader
 from .exceptions import MetricUnitError, MetricValueError, SchemaValidationError
+from .schema import CLOUDWATCH_EMF_SCHEMA
 
+fastjsonschema = LazyLoader("fastjsonschema", globals(), "fastjsonschema")
 logger = logging.getLogger(__name__)
-
-_schema_path = pathlib.Path(__file__).parent / "./schema.json"
-with _schema_path.open() as f:
-    CLOUDWATCH_EMF_SCHEMA = json.load(f)
 
 MAX_METRICS = 100
 

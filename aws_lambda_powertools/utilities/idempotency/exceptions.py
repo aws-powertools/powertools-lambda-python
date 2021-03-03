@@ -43,3 +43,9 @@ class IdempotencyPersistenceLayerError(Exception):
     """
     Unrecoverable error from the data store
     """
+
+
+class IdempotencyKeyError(Exception):
+    """
+    Payload does not contain a idempotent key
+    """

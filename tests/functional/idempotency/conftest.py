@@ -153,7 +153,7 @@ def hashed_validation_key(lambda_apigw_event):
 @pytest.fixture
 def persistence_store(config, request, default_jmespath):
     persistence_store = DynamoDBPersistenceLayer(
-        event_key_jmespath=default_jmespath,
+        event_key_jmespath=request.param.get("event_key_jmespath") or default_jmespath,
         table_name=TABLE_NAME,
         boto_config=config,
         use_local_cache=request.param["use_local_cache"],
