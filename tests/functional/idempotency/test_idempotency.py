@@ -5,7 +5,9 @@ import sys
 import jmespath
 import pytest
 from botocore import stub
+from jmespath import functions
 
+from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
@@ -660,3 +662,18 @@ def test_jmespath_with_powertools_json(persistence_store):
 
     # THEN the hashed idempotency key should match the extracted values generated hash
     assert result == persistence_store._generate_hash(expected_value)
+
+
+def test_custom_jmespath_function_overrides_builtin_functions():
+    class CustomFunctions(functions.Functions):
+        @functions.signature({"types": ["string"]})
+        def _func_echo_decoder(self, value):
+            return value
+
+    persistence_store = DynamoDBPersistenceLayer(
+        table_name="foo",
+        event_key_jmespath="powertools_json(data).payload",
+        jmespath_options={"custom_functions": CustomFunctions()},
+    )
+    with pytest.raises(jmespath.exceptions.UnknownFunctionError, match="Unknown function: powertools_json()"):
+        persistence_store._get_hashed_idempotency_key({})
