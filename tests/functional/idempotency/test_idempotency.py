@@ -653,6 +653,9 @@ def test_is_missing_idempotency_key():
     # GIVEN a str THEN is_missing_idempotency_key is false
     assert BasePersistenceLayer.is_missing_idempotency_key("Value") is False
 
+    assert BasePersistenceLayer.is_missing_idempotency_key(()) is False
+    # GIVEN an empty dictionary THEN is_missing_idempotency_key is false
+    assert BasePersistenceLayer.is_missing_idempotency_key({}) is False
 
 @pytest.mark.parametrize("persistence_store", [{"use_local_cache": False, "event_key_jmespath": "body"}], indirect=True)
 def test_default_no_raise_on_missing_idempotency_key(persistence_store):
