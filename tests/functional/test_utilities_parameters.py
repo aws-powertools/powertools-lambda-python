@@ -1535,9 +1535,6 @@ def test_appconf_get_app_config_no_transform(monkeypatch, mock_name):
 
 
 def test_appconf_get_app_config_new(monkeypatch, mock_name, mock_value):
-    """
-    Test get_app_config() without a default provider
-    """
 
     # GIVEN
     class TestProvider(BaseProvider):
