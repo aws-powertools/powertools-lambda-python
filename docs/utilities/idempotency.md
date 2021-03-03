@@ -254,16 +254,15 @@ idempotent invocations.
     ```
 
 In this example, the "userDetail" and "productId" keys are used as the payload to generate the idempotency key. If
-we try to send the same request but with a different amount, Lambda will raise `IdempotencyValidationError`. Without
+we try to send the same request but with a different amount, we will raise `IdempotencyValidationError`. Without
 payload validation, we would have returned the same result as we did for the initial request. Since we're also
 returning an amount in the response, this could be quite confusing for the client. By using payload validation on the
 amount field, we prevent this potentially confusing behaviour and instead raise an Exception.
 
 ### Making idempotency key required
 
-By default, events without any idempotency key don't raise any exception and just trigger a warning.
-If you want to ensure that at an idempotency is found, you can pass in `raise_on_no_idempotency_key` as True and an
-`IdempotencyKeyError` will be raised.
+If you want to enforce that an idempotency key is required, you can set `raise_on_no_idempotency_key` to `True`,
+and we will raise `IdempotencyKeyError` if none was found.
 
 ```python hl_lines="4"
 DynamoDBPersistenceLayer(
