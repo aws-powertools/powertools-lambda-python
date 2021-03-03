@@ -3,21 +3,20 @@ import copy
 import functools
 import inspect
 import logging
+import numbers
 import os
-from typing import Any, Callable, Dict, List, Optional, Tuple
-
-import aws_xray_sdk
-import aws_xray_sdk.core
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from ..shared import constants
 from ..shared.functions import resolve_truthy_env_var_choice
+from ..shared.lazy_import import LazyLoader
+from .base import BaseProvider, BaseSegment
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
-# Set the streaming threshold to 0 on the default recorder to force sending
-# subsegments individually, rather than batching them.
-# See https://github.com/awslabs/aws-lambda-powertools-python/issues/283
-aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0)
+
+aws_xray_sdk = LazyLoader(constants.XRAY_SDK_MODULE, globals(), constants.XRAY_SDK_MODULE)
+aws_xray_sdk.core = LazyLoader(constants.XRAY_SDK_CORE_MODULE, globals(), constants.XRAY_SDK_CORE_MODULE)
 
 
 class Tracer:
@@ -139,7 +138,7 @@ class Tracer:
         "disabled": False,
         "auto_patch": True,
         "patch_modules": None,
-        "provider": aws_xray_sdk.core.xray_recorder,
+        "provider": None,
     }
     _config = copy.copy(_default_config)
 
@@ -148,8 +147,8 @@ class Tracer:
         service: str = None,
         disabled: bool = None,
         auto_patch: bool = None,
-        patch_modules: List = None,
-        provider: aws_xray_sdk.core.xray_recorder = None,
+        patch_modules: Optional[Tuple[str]] = None,
+        provider: BaseProvider = None,
     ):
         self.__build_config(
             service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
@@ -165,14 +164,19 @@ class Tracer:
         if self.auto_patch:
             self.patch(modules=patch_modules)
 
-    def put_annotation(self, key: str, value: Any):
+        # Set the streaming threshold to 0 on the default recorder to force sending
+        # subsegments individually, rather than batching them.
+        # See https://github.com/awslabs/aws-lambda-powertools-python/issues/283
+        aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0)  # noqa: E800
+
+    def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]):
         """Adds annotation to existing segment or subsegment
 
         Parameters
         ----------
         key : str
             Annotation key
-        value : any
+        value : Union[str, numbers.Number, bool]
             Value for annotation
 
         Example
@@ -238,7 +242,7 @@ class Tracer:
 
     def capture_lambda_handler(
         self,
-        lambda_handler: Callable[[Dict, Any], Any] = None,
+        lambda_handler: Callable[[Dict, Any, Optional[Dict]], Any] = None,
         capture_response: Optional[bool] = None,
         capture_error: Optional[bool] = None,
     ):
@@ -512,8 +516,8 @@ class Tracer:
     def _decorate_async_function(
         self,
         method: Callable = None,
-        capture_response: Optional[bool] = None,
-        capture_error: Optional[bool] = None,
+        capture_response: Optional[Union[bool, str]] = None,
+        capture_error: Optional[Union[bool, str]] = None,
         method_name: str = None,
     ):
         @functools.wraps(method)
@@ -539,8 +543,8 @@ class Tracer:
     def _decorate_generator_function(
         self,
         method: Callable = None,
-        capture_response: Optional[bool] = None,
-        capture_error: Optional[bool] = None,
+        capture_response: Optional[Union[bool, str]] = None,
+        capture_error: Optional[Union[bool, str]] = None,
         method_name: str = None,
     ):
         @functools.wraps(method)
@@ -566,8 +570,8 @@ class Tracer:
     def _decorate_generator_function_with_context_manager(
         self,
         method: Callable = None,
-        capture_response: Optional[bool] = None,
-        capture_error: Optional[bool] = None,
+        capture_response: Optional[Union[bool, str]] = None,
+        capture_error: Optional[Union[bool, str]] = None,
         method_name: str = None,
     ):
         @functools.wraps(method)
@@ -594,8 +598,8 @@ class Tracer:
     def _decorate_sync_function(
         self,
         method: Callable = None,
-        capture_response: Optional[bool] = None,
-        capture_error: Optional[bool] = None,
+        capture_response: Optional[Union[bool, str]] = None,
+        capture_error: Optional[Union[bool, str]] = None,
         method_name: str = None,
     ):
         @functools.wraps(method)
@@ -625,8 +629,8 @@ class Tracer:
         self,
         method_name: str = None,
         data: Any = None,
-        subsegment: aws_xray_sdk.core.models.subsegment = None,
-        capture_response: Optional[bool] = None,
+        subsegment: BaseSegment = None,
+        capture_response: Optional[Union[bool, str]] = None,
     ):
         """Add response as metadata for given subsegment
 
@@ -636,7 +640,7 @@ class Tracer:
             method name to add as metadata key, by default None
         data : Any, optional
             data to add as subsegment metadata, by default None
-        subsegment : aws_xray_sdk.core.models.subsegment, optional
+        subsegment : BaseSegment, optional
             existing subsegment to add metadata on, by default None
         capture_response : bool, optional
             Do not include response as metadata
@@ -650,7 +654,7 @@ class Tracer:
         self,
         method_name: str = None,
         error: Exception = None,
-        subsegment: aws_xray_sdk.core.models.subsegment = None,
+        subsegment: BaseSegment = None,
         capture_error: Optional[bool] = None,
     ):
         """Add full exception object as metadata for given subsegment
@@ -661,7 +665,7 @@ class Tracer:
             method name to add as metadata key, by default None
         error : Exception, optional
             error to add as subsegment metadata, by default None
-        subsegment : aws_xray_sdk.core.models.subsegment, optional
+        subsegment : BaseSegment, optional
             existing subsegment to add metadata on, by default None
         capture_error : bool, optional
             Do not include error as metadata, by default True
@@ -678,7 +682,7 @@ class Tracer:
         aws_xray_sdk.global_sdk_config.set_sdk_enabled(False)
 
     @staticmethod
-    def _is_tracer_disabled() -> bool:
+    def _is_tracer_disabled() -> Union[bool, str]:
         """Detects whether trace has been disabled
 
         Tracing is automatically disabled in the following conditions:
@@ -689,7 +693,7 @@ class Tracer:
 
         Returns
         -------
-        bool
+        Union[bool, str]
         """
         logger.debug("Verifying whether Tracing has been disabled")
         is_lambda_sam_cli = os.getenv(constants.SAM_LOCAL_ENV)
@@ -712,13 +716,13 @@ class Tracer:
         disabled: bool = None,
         auto_patch: bool = None,
         patch_modules: List = None,
-        provider: aws_xray_sdk.core.xray_recorder = None,
+        provider: BaseProvider = None,
     ):
         """ Populates Tracer config for new and existing initializations """
         is_disabled = disabled if disabled is not None else self._is_tracer_disabled()
         is_service = service if service is not None else os.getenv(constants.SERVICE_NAME_ENV)
 
-        self._config["provider"] = provider if provider is not None else self._config["provider"]
+        self._config["provider"] = provider or self._config["provider"] or aws_xray_sdk.core.xray_recorder
         self._config["auto_patch"] = auto_patch if auto_patch is not None else self._config["auto_patch"]
         self._config["service"] = is_service or self._config["service"]
         self._config["disabled"] = is_disabled or self._config["disabled"]

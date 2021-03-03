@@ -254,10 +254,23 @@ idempotent invocations.
     ```
 
 In this example, the "userDetail" and "productId" keys are used as the payload to generate the idempotency key. If
-we try to send the same request but with a different amount, Lambda will raise `IdempotencyValidationError`. Without
+we try to send the same request but with a different amount, we will raise `IdempotencyValidationError`. Without
 payload validation, we would have returned the same result as we did for the initial request. Since we're also
 returning an amount in the response, this could be quite confusing for the client. By using payload validation on the
 amount field, we prevent this potentially confusing behaviour and instead raise an Exception.
+
+### Making idempotency key required
+
+If you want to enforce that an idempotency key is required, you can set `raise_on_no_idempotency_key` to `True`,
+and we will raise `IdempotencyKeyError` if none was found.
+
+```python hl_lines="4"
+DynamoDBPersistenceLayer(
+    event_key_jmespath="body",
+    table_name="IdempotencyTable",
+    raise_on_no_idempotency_key=True
+    )
+```
 
 ### Changing dynamoDB attribute names
 If you want to use an existing DynamoDB table, or wish to change the name of the attributes used to store items in the
@@ -278,7 +291,7 @@ This example demonstrates changing the attribute names to custom values:
     ```python hl_lines="5-10"
     persistence_layer = DynamoDBPersistenceLayer(
         event_key_jmespath="[userDetail, productId]",
-        table_name="IdempotencyTable",)
+        table_name="IdempotencyTable",
         key_attr="idempotency_key",
         expiry_attr="expires_at",
         status_attr="current_status",

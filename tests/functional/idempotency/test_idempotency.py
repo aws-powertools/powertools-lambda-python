@@ -1,5 +1,7 @@
 import copy
+import json
 import sys
+from hashlib import md5
 
 import pytest
 from botocore import stub
@@ -8,11 +10,12 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
     IdempotencyInvalidStatusError,
+    IdempotencyKeyError,
     IdempotencyPersistenceLayerError,
     IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent
-from aws_lambda_powertools.utilities.idempotency.persistence.base import DataRecord
+from aws_lambda_powertools.utilities.idempotency.persistence.base import BasePersistenceLayer, DataRecord
 from aws_lambda_powertools.utilities.validation import envelopes, validator
 
 TABLE_NAME = "TEST_TABLE"
@@ -638,3 +641,52 @@ def test_delete_from_cache_when_empty(persistence_store):
     except KeyError:
         # THEN we should not get a KeyError
         pytest.fail("KeyError should not happen")
+
+
+def test_is_missing_idempotency_key():
+    # GIVEN None THEN is_missing_idempotency_key is True
+    assert BasePersistenceLayer.is_missing_idempotency_key(None)
+    # GIVEN a list of Nones THEN is_missing_idempotency_key is True
+    assert BasePersistenceLayer.is_missing_idempotency_key([None, None])
+    # GIVEN a list of all not None THEN is_missing_idempotency_key is false
+    assert BasePersistenceLayer.is_missing_idempotency_key([None, "Value"]) is False
+    # GIVEN a str THEN is_missing_idempotency_key is false
+    assert BasePersistenceLayer.is_missing_idempotency_key("Value") is False
+    # GIVEN an empty tuple THEN is_missing_idempotency_key is false
+    assert BasePersistenceLayer.is_missing_idempotency_key(())
+    # GIVEN an empty list THEN is_missing_idempotency_key is false
+    assert BasePersistenceLayer.is_missing_idempotency_key([])
+    # GIVEN an empty dictionary THEN is_missing_idempotency_key is false
+    assert BasePersistenceLayer.is_missing_idempotency_key({})
+    # GIVEN an empty str THEN is_missing_idempotency_key is false
+    assert BasePersistenceLayer.is_missing_idempotency_key("")
+
+
+@pytest.mark.parametrize("persistence_store", [{"use_local_cache": False, "event_key_jmespath": "body"}], indirect=True)
+def test_default_no_raise_on_missing_idempotency_key(persistence_store):
+    # GIVEN a persistence_store with use_local_cache = False and event_key_jmespath = "body"
+    assert persistence_store.use_local_cache is False
+    assert "body" in persistence_store.event_key_jmespath
+
+    # WHEN getting the hashed idempotency key for an event with no `body` key
+    hashed_key = persistence_store._get_hashed_idempotency_key({})
+
+    # THEN return the hash of None
+    assert md5(json.dumps(None).encode()).hexdigest() == hashed_key
+
+
+@pytest.mark.parametrize(
+    "persistence_store", [{"use_local_cache": False, "event_key_jmespath": "[body, x]"}], indirect=True
+)
+def test_raise_on_no_idempotency_key(persistence_store):
+    # GIVEN a persistence_store with raise_on_no_idempotency_key and no idempotency key in the request
+    persistence_store.raise_on_no_idempotency_key = True
+    assert persistence_store.use_local_cache is False
+    assert "body" in persistence_store.event_key_jmespath
+
+    # WHEN getting the hashed idempotency key for an event with no `body` key
+    with pytest.raises(IdempotencyKeyError) as excinfo:
+        persistence_store._get_hashed_idempotency_key({})
+
+    # THEN raise IdempotencyKeyError error
+    assert "No data found to create a hashed idempotency_key" in str(excinfo.value)
