@@ -8,6 +8,11 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+### Fixed
+
+* **Tracer**: Lazy loads X-Ray SDK to improve import perf for those not instantiating Tracer
+* **Metrics**: Convert EMF JSON Schema as Dictionary to reduce I/O and improve import perf
+
 ## [1.10.5] - 2021-02-17
 
 No changes. Bumped version to trigger new pipeline build for layer publishing.
