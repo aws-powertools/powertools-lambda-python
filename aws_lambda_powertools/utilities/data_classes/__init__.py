@@ -1,6 +1,7 @@
 from .alb_event import ALBEvent
 from .api_gateway_proxy_event import APIGatewayProxyEvent, APIGatewayProxyEventV2
 from .cloud_watch_logs_event import CloudWatchLogsEvent
+from .connect_contact_flow_event import ConnectContactFlowEvent
 from .dynamo_db_stream_event import DynamoDBStreamEvent
 from .event_bridge_event import EventBridgeEvent
 from .kinesis_stream_event import KinesisStreamEvent
@@ -14,6 +15,7 @@ __all__ = [
     "APIGatewayProxyEventV2",
     "ALBEvent",
     "CloudWatchLogsEvent",
+    "ConnectContactFlowEvent",
     "DynamoDBStreamEvent",
     "EventBridgeEvent",
     "KinesisStreamEvent",
