@@ -19,6 +19,7 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyItemAlreadyExistsError,
     IdempotencyValidationError,
 )
+from aws_lambda_powertools.utilities.validation.jmespath_functions import PowertoolsFunctions
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +113,7 @@ class BasePersistenceLayer(ABC):
         use_local_cache: bool = False,
         local_cache_max_items: int = 256,
         hash_function: str = "md5",
+        jmespath_options: Dict = None,
     ) -> None:
         """
         Initialize the base persistence layer
@@ -130,6 +132,8 @@ class BasePersistenceLayer(ABC):
             Max number of items to store in local cache, by default 1024
         hash_function: str, optional
             Function to use for calculating hashes, by default md5.
+        jmespath_options : Dict
+            Alternative JMESPath options to be included when filtering expr
         """
         self.event_key_jmespath = event_key_jmespath
         if self.event_key_jmespath:
@@ -143,6 +147,9 @@ class BasePersistenceLayer(ABC):
             self.validation_key_jmespath = jmespath.compile(payload_validation_jmespath)
             self.payload_validation_enabled = True
         self.hash_function = getattr(hashlib, hash_function)
+        if not jmespath_options:
+            jmespath_options = {"custom_functions": PowertoolsFunctions()}
+        self.jmespath_options = jmespath_options
 
     def _get_hashed_idempotency_key(self, lambda_event: Dict[str, Any]) -> str:
         """
@@ -160,8 +167,12 @@ class BasePersistenceLayer(ABC):
 
         """
         data = lambda_event
+
         if self.event_key_jmespath:
-            data = self.event_key_compiled_jmespath.search(lambda_event)
+            data = self.event_key_compiled_jmespath.search(
+                lambda_event, options=jmespath.Options(**self.jmespath_options)
+            )
+
         return self._generate_hash(data)
 
     def _get_hashed_payload(self, lambda_event: Dict[str, Any]) -> str:

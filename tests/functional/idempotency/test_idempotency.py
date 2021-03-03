@@ -1,6 +1,8 @@
 import copy
+import json
 import sys
 
+import jmespath
 import pytest
 from botocore import stub
 
@@ -638,3 +640,23 @@ def test_delete_from_cache_when_empty(persistence_store):
     except KeyError:
         # THEN we should not get a KeyError
         pytest.fail("KeyError should not happen")
+
+
+@pytest.mark.parametrize("persistence_store", [{"use_local_cache": True}], indirect=True)
+def test_jmespath_with_powertools_json(persistence_store):
+    # GIVEN an event_key_jmespath with powertools_json custom function
+    persistence_store.event_key_jmespath = "[requestContext.authorizer.claims.sub, powertools_json(body).id]"
+    persistence_store.event_key_compiled_jmespath = jmespath.compile(persistence_store.event_key_jmespath)
+    sub_attr_value = "cognito_user"
+    key_attr_value = "some_key"
+    expected_value = [sub_attr_value, key_attr_value]
+    api_gateway_proxy_event = {
+        "requestContext": {"authorizer": {"claims": {"sub": sub_attr_value}}},
+        "body": json.dumps({"id": key_attr_value}),
+    }
+
+    # WHEN calling _get_hashed_idempotency_key
+    result = persistence_store._get_hashed_idempotency_key(api_gateway_proxy_event)
+
+    # THEN the hashed idempotency key should match the extracted values generated hash
+    assert result == persistence_store._generate_hash(expected_value)
