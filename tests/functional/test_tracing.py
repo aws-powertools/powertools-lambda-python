@@ -1,6 +1,4 @@
 import contextlib
-import sys
-from unittest.mock import Mock
 
 import pytest
 
@@ -214,13 +212,3 @@ def test_tracer_yield_with_capture():
     result = handler({}, {})
     assert "testresult" in result
     assert "testresult2" in result
-
-
-def test_aiohttp_trace_config():
-    aiohttp_mock = Mock()
-    sys.modules["aiohttp"] = aiohttp_mock
-    from aws_lambda_powertools.tracing import aiohttp_trace_config
-
-    trace_config: Mock = aiohttp_trace_config()
-
-    assert trace_config._extract_mock_name() == "mock.TraceConfig()"
