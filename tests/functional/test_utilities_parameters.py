@@ -1535,7 +1535,6 @@ def test_appconf_get_app_config_no_transform(monkeypatch, mock_name):
 
 
 def test_appconf_get_app_config_new(monkeypatch, mock_name, mock_value):
-
     # GIVEN
     class TestProvider(BaseProvider):
         def __init__(self, environment: str, application: str):
