@@ -14,6 +14,7 @@ from typing import Any, Dict
 import jmespath
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
+from aws_lambda_powertools.shared.jmespath_functions import PowertoolsFunctions
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyInvalidStatusError,
@@ -21,7 +22,6 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyKeyError,
     IdempotencyValidationError,
 )
-from aws_lambda_powertools.utilities.validation.jmespath_functions import PowertoolsFunctions
 
 logger = logging.getLogger(__name__)
 
