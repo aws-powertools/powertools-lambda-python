@@ -6,6 +6,11 @@ from typing import Generator, Tuple
 
 import pytest
 
+LOGGER_INIT_SLA: float = 0.001
+METRICS_INIT_SLA: float = 0.005
+TRACER_INIT_SLA: float = 0.5
+IMPORT_INIT_SLA: float = 0.035
+
 
 @contextmanager
 def timing() -> Generator:
@@ -42,8 +47,8 @@ def test_import_times_ceiling():
         core_utilities()
 
     elapsed = t()
-    if elapsed > 0.035:
-        pytest.fail(f"High level imports should be below 40ms: {elapsed}")
+    if elapsed > IMPORT_INIT_SLA:
+        pytest.fail(f"High level imports should be below 35ms: {elapsed}")
 
 
 @pytest.mark.perf
@@ -58,8 +63,8 @@ def test_tracer_init():
         tracing.Tracer(disabled=True)  # boto3 takes ~200ms, and remaining is X-Ray SDK init
 
     elapsed = t()
-    if elapsed > 0.5:
-        pytest.fail(f"High level imports should be below 40ms: {elapsed}")
+    if elapsed > TRACER_INIT_SLA:
+        pytest.fail(f"High level imports should be below 50ms: {elapsed}")
 
 
 @pytest.mark.perf
@@ -72,7 +77,7 @@ def test_metrics_init():
         metrics.Metrics()
 
     elapsed = t()
-    if elapsed > 0.005:
+    if elapsed > METRICS_INIT_SLA:
         pytest.fail(f"High level imports should be below 40ms: {elapsed}")
 
 
@@ -86,5 +91,5 @@ def test_logger_init():
         logging.Logger()
 
     elapsed = t()
-    if elapsed > 0.001:
+    if elapsed > LOGGER_INIT_SLA:
         pytest.fail(f"High level imports should be below 40ms: {elapsed}")
