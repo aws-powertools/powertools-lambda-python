@@ -83,18 +83,18 @@ this parameter, the entire event will be used as the key.
 
 === "app.py"
 
-    ```python hl_lines="2 6-9 11"
+    ```python hl_lines="2-4 8-9 11"
     import json
-    from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent
+    from aws_lambda_powertools.utilities.idempotency import (
+        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
+    )
 
     # Treat everything under the "body" key in
     # the event json object as our payload
-    persistence_layer = DynamoDBPersistenceLayer(
-        table_name="IdempotencyTable",
-        event_key_jmespath="body",
-    )
+    config = IdempotencyConfig(event_key_jmespath="body")
+    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 
-    @idempotent(persistence_store=persistence_layer)
+    @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event, context):
         body = json.loads(event['body'])
         payment = create_subscription_payment(
@@ -174,9 +174,8 @@ change this window with the `expires_after_seconds` parameter:
 
 === "app.py"
 
-    ```python hl_lines="4"
-    DynamoDBPersistenceLayer(
-        table_name="IdempotencyTable",
+    ```python hl_lines="3"
+    IdempotencyConfig(
         event_key_jmespath="body",
         expires_after_seconds=5*60,  # 5 minutes
     )
@@ -203,9 +202,8 @@ execution environment. You can change this with the `local_cache_max_items` para
 
 === "app.py"
 
-    ```python hl_lines="4 5"
-    DynamoDBPersistenceLayer(
-        table_name="IdempotencyTable",
+    ```python hl_lines="3 4"
+    IdempotencyConfig(
         event_key_jmespath="body",
         use_local_cache=True,
         local_cache_max_items=1000
@@ -224,16 +222,18 @@ idempotent invocations.
 
 === "app.py"
 
-    ```python hl_lines="6"
-    from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent
+    ```python hl_lines="7"
+    from aws_lambda_powertools.utilities.idempotency import (
+        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
+    )
 
-    persistence_layer = DynamoDBPersistenceLayer(
-        table_name="IdempotencyTable",
+    config = IdempotencyConfig(
         event_key_jmespath="[userDetail, productId]",
         payload_validation_jmespath="amount"
     )
+    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 
-    @idempotent(persistence_store=persistence_layer)
+    @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event, context):
         # Creating a subscription payment is a side
         # effect of calling this function!
@@ -274,7 +274,7 @@ and we will raise `IdempotencyKeyError` if none was found.
 === "app.py"
 
     ```python hl_lines="4"
-    DynamoDBPersistenceLayer(
+    IdempotencyConfig(
         table_name="IdempotencyTable",
         event_key_jmespath="body",
         raise_on_no_idempotency_key=True,
@@ -298,10 +298,9 @@ This example demonstrates changing the attribute names to custom values:
 
 === "app.py"
 
-    ```python hl_lines="4-8"
+    ```python hl_lines="3-7"
     persistence_layer = DynamoDBPersistenceLayer(
         table_name="IdempotencyTable",
-        event_key_jmespath="[userDetail, productId]",
         key_attr="idempotency_key",
         expiry_attr="expires_at",
         status_attr="current_status",
@@ -316,35 +315,39 @@ or `boto3_session` parameters when constructing the persistence store.
 
 === "Custom session"
 
-    ```python hl_lines="1 4 8"
+    ```python hl_lines="1 7 10"
     import boto3
-    from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent
+    from aws_lambda_powertools.utilities.idempotency import (
+        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
+    )
 
+    config = IdempotencyConfig(event_key_jmespath="body")
     boto3_session = boto3.session.Session()
     persistence_layer = DynamoDBPersistenceLayer(
         table_name="IdempotencyTable",
-        event_key_jmespath="body",
         boto3_session=boto3_session
     )
 
-    @idempotent(persistence_store=persistence_layer)
+    @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event, context):
        ...
     ```
 === "Custom config"
 
-    ```python hl_lines="1 4 8"
+    ```python hl_lines="1 7 10"
     from botocore.config import Config
-    from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent
+    from aws_lambda_powertools.utilities.idempotency import (
+        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
+    )
 
+    config = IdempotencyConfig(event_key_jmespath="body")
     boto_config = Config()
     persistence_layer = DynamoDBPersistenceLayer(
         table_name="IdempotencyTable",
-        event_key_jmespath="body",
         boto_config=boto_config
     )
 
-    @idempotent(persistence_store=persistence_layer)
+    @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event, context):
        ...
     ```
@@ -372,15 +375,15 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
 
     ```python hl_lines="9 10"
     from aws_lambda_powertools.utilities.validation import validator, envelopes
-    from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent
-
-    persistence_layer = DynamoDBPersistenceLayer(
-        table_name="IdempotencyTable",
-        event_key_jmespath="[message, username]",
+    from aws_lambda_powertools.utilities.idempotency import (
+        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
     )
 
+    config = IdempotencyConfig(event_key_jmespath="[message, username]")
+    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+
     @validator(envelope=envelopes.API_GATEWAY_HTTP)
-    @idempotent(persistence_store=persistence_layer)
+    @idempotent(config=config, persistence_store=persistence_layer)
     def lambda_handler(event, context):
         cause_some_side_effects(event['username')
         return {"message": event['message'], "statusCode": 200}
