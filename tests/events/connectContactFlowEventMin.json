@@ -1,0 +1,27 @@
+{
+    "Name": "ContactFlowEvent",
+    "Details": {
+        "ContactData": {
+            "Attributes": {},
+            "Channel": "VOICE",
+            "ContactId": "5ca32fbd-8f92-46af-92a5-6b0f970f0efe",
+            "CustomerEndpoint": null,
+            "InitialContactId": "5ca32fbd-8f92-46af-92a5-6b0f970f0efe",
+            "InitiationMethod": "API",
+            "InstanceARN": "arn:aws:connect:eu-central-1:123456789012:instance/9308c2a1-9bc6-4cea-8290-6c0b4a6d38fa",
+            "MediaStreams": {
+                "Customer": {
+                    "Audio": {
+                        "StartFragmentNumber": null,
+                        "StartTimestamp": null,
+                        "StreamARN": null
+                    }
+                }
+            },
+            "PreviousContactId": "5ca32fbd-8f92-46af-92a5-6b0f970f0efe",
+            "Queue": null,
+            "SystemEndpoint": null
+        },
+        "Parameters": {}
+    }
+}
