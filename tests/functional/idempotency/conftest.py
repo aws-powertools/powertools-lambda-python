@@ -9,6 +9,7 @@ import jmespath
 import pytest
 from botocore import stub
 from botocore.config import Config
+from jmespath import functions
 
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
@@ -176,6 +177,23 @@ def persistence_store_with_validation(config, request, default_jmespath):
         boto_config=config,
         use_local_cache=request.param,
         payload_validation_jmespath="requestContext",
+    )
+    return persistence_store
+
+
+@pytest.fixture
+def persistence_store_with_jmespath_options(config, request):
+    class CustomFunctions(functions.Functions):
+        @functions.signature({"types": ["string"]})
+        def _func_echo_decoder(self, value):
+            return value
+
+    persistence_store = DynamoDBPersistenceLayer(
+        table_name=TABLE_NAME,
+        boto_config=config,
+        use_local_cache=False,
+        event_key_jmespath=request.param,
+        jmespath_options={"custom_functions": CustomFunctions()},
     )
     return persistence_store
 

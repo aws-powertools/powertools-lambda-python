@@ -3,6 +3,7 @@ import json
 import sys
 from hashlib import md5
 
+import jmespath
 import pytest
 from botocore import stub
 
@@ -690,3 +691,33 @@ def test_raise_on_no_idempotency_key(persistence_store):
 
     # THEN raise IdempotencyKeyError error
     assert "No data found to create a hashed idempotency_key" in str(excinfo.value)
+
+
+@pytest.mark.parametrize("persistence_store", [{"use_local_cache": True}], indirect=True)
+def test_jmespath_with_powertools_json(persistence_store):
+    # GIVEN an event_key_jmespath with powertools_json custom function
+    persistence_store.event_key_jmespath = "[requestContext.authorizer.claims.sub, powertools_json(body).id]"
+    persistence_store.event_key_compiled_jmespath = jmespath.compile(persistence_store.event_key_jmespath)
+    sub_attr_value = "cognito_user"
+    key_attr_value = "some_key"
+    expected_value = [sub_attr_value, key_attr_value]
+    api_gateway_proxy_event = {
+        "requestContext": {"authorizer": {"claims": {"sub": sub_attr_value}}},
+        "body": json.dumps({"id": key_attr_value}),
+    }
+
+    # WHEN calling _get_hashed_idempotency_key
+    result = persistence_store._get_hashed_idempotency_key(api_gateway_proxy_event)
+
+    # THEN the hashed idempotency key should match the extracted values generated hash
+    assert result == persistence_store._generate_hash(expected_value)
+
+
+@pytest.mark.parametrize("persistence_store_with_jmespath_options", ["powertools_json(data).payload"], indirect=True)
+def test_custom_jmespath_function_overrides_builtin_functions(persistence_store_with_jmespath_options):
+    # GIVEN an persistence store with a custom jmespath_options
+    # AND use a builtin powertools custom function
+    with pytest.raises(jmespath.exceptions.UnknownFunctionError, match="Unknown function: powertools_json()"):
+        # WHEN calling _get_hashed_idempotency_key
+        # THEN raise unknown function
+        persistence_store_with_jmespath_options._get_hashed_idempotency_key({})
