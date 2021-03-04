@@ -138,7 +138,9 @@ class MetricManager:
             # since we could have more than 100 metrics
             self.metric_set.clear()
 
-    def serialize_metric_set(self, metrics: Dict = None, dimensions: Dict = None, metadata: Dict = None) -> Dict:
+    def serialize_metric_set(
+        self, metrics: Dict = None, dimensions: Dict = None, metadata: Dict = None, validate_metrics: bool = True
+    ) -> Dict:
         """Serializes metric and dimensions set
 
         Parameters
@@ -149,6 +151,8 @@ class MetricManager:
             Dictionary of dimensions to serialize, by default None
         metadata: Dict, optional
             Dictionary of metadata to serialize, by default None
+        validate_metrics: bool, optional
+            Whether to validate metrics against schema
 
         Example
         -------
@@ -209,13 +213,19 @@ class MetricManager:
             **metric_names_and_values,  # "single_metric": 1.0
         }
 
+        if validate_metrics:
+            self._validate_metrics(metrics=embedded_metrics_object)
+
+        return embedded_metrics_object
+
+    @staticmethod
+    def _validate_metrics(metrics: Dict, schema: Dict = CLOUDWATCH_EMF_SCHEMA):
         try:
             logger.debug("Validating serialized metrics against CloudWatch EMF schema")
-            fastjsonschema.validate(definition=CLOUDWATCH_EMF_SCHEMA, data=embedded_metrics_object)
+            fastjsonschema.validate(definition=schema, data=metrics)
         except fastjsonschema.JsonSchemaException as e:
             message = f"Invalid format. Error: {e.message}, Invalid item: {e.name}"  # noqa: B306, E501
             raise SchemaValidationError(message)
-        return embedded_metrics_object
 
     def add_dimension(self, name: str, value: str):
         """Adds given dimension to all metrics

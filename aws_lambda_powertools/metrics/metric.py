@@ -61,7 +61,7 @@ class SingleMetric(MetricManager):
 
 
 @contextmanager
-def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = None):
+def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = None, validate_metrics: bool = True):
     """Context manager to simplify creation of a single metric
 
     Example
@@ -94,6 +94,8 @@ def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = No
         Metric value
     namespace: str
         Namespace for metrics
+    validate_metrics: bool, optional
+        Whether to validate metrics against schema, by default True
 
     Yields
     -------
@@ -102,14 +104,18 @@ def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = No
 
     Raises
     ------
-    e
-        Propagate error received
+    MetricUnitError
+        When metric metric isn't supported by CloudWatch
+    MetricValueError
+        When metric value isn't a number
+    SchemaValidationError
+        When metric object fails EMF schema validation
     """
     metric_set = None
     try:
         metric: SingleMetric = SingleMetric(namespace=namespace)
         metric.add_metric(name=name, unit=unit, value=value)
         yield metric
-        metric_set: Dict = metric.serialize_metric_set()
+        metric_set: Dict = metric.serialize_metric_set(validate_metrics=validate_metrics)
     finally:
         print(json.dumps(metric_set))
