@@ -75,7 +75,7 @@ storage layer, so you'll need to create a table first.
 
 You can quickly start by initializing the `DynamoDBPersistenceLayer` class outside the Lambda handler, and using it
 with the `idempotent` decorator on your lambda handler. The only required parameter is `table_name`, but you likely
-want to specify `event_key_jmespath` as well.
+want to specify `event_key_jmespath` via `IdempotencyConfig`.
 
 `event_key_jmespath`: A JMESpath expression which will be used to extract the payload from the event your Lambda handler
 is called with. This payload will be used as the key to decide if future invocations are duplicates. If you don't pass
@@ -100,7 +100,7 @@ this parameter, the entire event will be used as the key.
         payment = create_subscription_payment(
             user=body['user'],
             product=body['product_id']
-            )
+        )
         ...
         return {"message": "success", "statusCode": 200, "payment_id": payment.id}
     ```
@@ -273,12 +273,42 @@ and we will raise `IdempotencyKeyError` if none was found.
 
 === "app.py"
 
-    ```python hl_lines="4"
-    IdempotencyConfig(
-        table_name="IdempotencyTable",
-        event_key_jmespath="body",
+    ```python hl_lines="8"
+    from aws_lambda_powertools.utilities.idempotency import (
+        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
+    )
+
+    # Requires "user"."uid" and from the "body" json parsed "order_id" to be present
+    config = IdempotencyConfig(
+        event_key_jmespath="[user.uid, powertools_json(body).order_id]",
         raise_on_no_idempotency_key=True,
     )
+    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+
+    @idempotent(config=config, persistence_store=persistence_layer)
+    def handler(event, context):
+        pass
+    ```
+=== "Success Event"
+
+    ```json
+    {
+        "user": {
+            "uid": "BB0D045C-8878-40C8-889E-38B3CB0A61B1",
+            "name": "Foo"
+        },
+        "body": "{\"order_id\": 10000}"
+    }
+    ```
+=== "Failure Event"
+
+    ```json
+    {
+        "user": {
+            "name": "Foo"
+        },
+        "body": "{\"total_amount\": 10000}"
+    }
     ```
 
 ### Changing dynamoDB attribute names
