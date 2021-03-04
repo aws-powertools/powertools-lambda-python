@@ -34,6 +34,7 @@ storage layer, so you'll need to create a table first.
 > Example using AWS Serverless Application Model (SAM)
 
 === "template.yml"
+
     ```yaml
     Resources:
       HelloWorldFunction:
@@ -76,32 +77,32 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class outsi
 with the `idempotent` decorator on your lambda handler. The only required parameter is `table_name`, but you likely
 want to specify `event_key_jmespath` as well.
 
-`event_key_jmespath`: A JMESpath expression which will be used to extract the payload from the event your Lambda hander
+`event_key_jmespath`: A JMESpath expression which will be used to extract the payload from the event your Lambda handler
 is called with. This payload will be used as the key to decide if future invocations are duplicates. If you don't pass
 this parameter, the entire event will be used as the key.
 
 === "app.py"
 
     ```python hl_lines="2 6-9 11"
-        import json
-        from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent
+    import json
+    from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent
 
-        # Treat everything under the "body" key in
-        # the event json object as our payload
-        persistence_layer = DynamoDBPersistenceLayer(
-            event_key_jmespath="body",
-            table_name="IdempotencyTable"
+    # Treat everything under the "body" key in
+    # the event json object as our payload
+    persistence_layer = DynamoDBPersistenceLayer(
+        table_name="IdempotencyTable",
+        event_key_jmespath="body",
+    )
+
+    @idempotent(persistence_store=persistence_layer)
+    def handler(event, context):
+        body = json.loads(event['body'])
+        payment = create_subscription_payment(
+            user=body['user'],
+            product=body['product_id']
             )
-
-        @idempotent(persistence_store=persistence_layer)
-        def handler(event, context):
-            body = json.loads(event['body'])
-            payment = create_subscription_payment(
-                user=body['user'],
-                product=body['product_id']
-                )
-            ...
-            return {"message": "success", "statusCode": 200, "payment_id": payment.id}
+        ...
+        return {"message": "success", "statusCode": 200, "payment_id": payment.id}
     ```
 === "Example event"
 
@@ -171,17 +172,19 @@ In most cases, it is not desirable to store the idempotency records forever. Rat
 same payload won't be executed within a period of time. By default, the period is set to 1 hour (3600 seconds). You can
 change this window with the `expires_after_seconds` parameter:
 
-```python hl_lines="4"
-DynamoDBPersistenceLayer(
-    event_key_jmespath="body",
-    table_name="IdempotencyTable",
-    expires_after_seconds=5*60  # 5 minutes
-    )
+=== "app.py"
 
-```
+    ```python hl_lines="4"
+    DynamoDBPersistenceLayer(
+        table_name="IdempotencyTable",
+        event_key_jmespath="body",
+        expires_after_seconds=5*60,  # 5 minutes
+    )
+    ```
+
 This will mark any records older than 5 minutes as expired, and the lambda handler will be executed as normal if it is
 invoked with a matching payload. If you have set the TTL field in DynamoDB like in the SAM example above, the record
-will be automatically deleted from the table after a period of itme.
+will be automatically deleted from the table after a period of time.
 
 
 ### Handling concurrent executions
@@ -195,17 +198,19 @@ concurrent execution. If you receive this error, you can safely retry the operat
 To reduce the number of lookups to the persistence storage layer, you can enable in memory caching with the
 `use_local_cache` parameter, which is disabled by default. This cache is local to each Lambda execution environment.
 This means it will be effective in cases where your function's concurrency is low in comparison to the number of
-"retry" invocations with the same payload. When enabled, the default is to cache a maxmum of 256 records in each Lambda
+"retry" invocations with the same payload. When enabled, the default is to cache a maximum of 256 records in each Lambda
 execution environment. You can change this with the `local_cache_max_items` parameter.
 
-```python hl_lines="4 5"
-DynamoDBPersistenceLayer(
-    event_key_jmespath="body",
-    table_name="IdempotencyTable",
-    use_local_cache=True,
-    local_cache_max_items=1000
+=== "app.py"
+
+    ```python hl_lines="4 5"
+    DynamoDBPersistenceLayer(
+        table_name="IdempotencyTable",
+        event_key_jmespath="body",
+        use_local_cache=True,
+        local_cache_max_items=1000
     )
-```
+    ```
 
 
 ## Advanced
@@ -218,35 +223,37 @@ with the `payload_validation_jmespath` to specify which part of the event body s
 idempotent invocations.
 
 === "app.py"
+
     ```python hl_lines="6"
     from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent
 
-        persistence_layer = DynamoDBPersistenceLayer(
-            event_key_jmespath="[userDetail, productId]",
-            table_name="IdempotencyTable",)
-            payload_validation_jmespath="amount"
-            )
+    persistence_layer = DynamoDBPersistenceLayer(
+        table_name="IdempotencyTable",
+        event_key_jmespath="[userDetail, productId]",
+        payload_validation_jmespath="amount"
+    )
 
-        @idempotent(persistence_store=persistence_layer)
-        def handler(event, context):
-            # Creating a subscription payment is a side
-            # effect of calling this function!
-            payment = create_subscription_payment(
-            user=event['userDetail']['username'],
-            product=event['product_id'],
-            amount=event['amount']
-            )
-            ...
-            return {"message": "success", "statusCode": 200,
-                    "payment_id": payment.id, "amount": payment.amount}
+    @idempotent(persistence_store=persistence_layer)
+    def handler(event, context):
+        # Creating a subscription payment is a side
+        # effect of calling this function!
+        payment = create_subscription_payment(
+        user=event['userDetail']['username'],
+        product=event['product_id'],
+        amount=event['amount']
+        )
+        ...
+        return {"message": "success", "statusCode": 200,
+                "payment_id": payment.id, "amount": payment.amount}
     ```
-=== "Event"
+=== "Example Event"
+
     ```json
     {
         "userDetail": {
             "username": "User1",
             "user_email": "user@example.com"
-            },
+        },
         "productId": 1500,
         "charge_type": "subscription",
         "amount": 500
@@ -264,13 +271,15 @@ amount field, we prevent this potentially confusing behaviour and instead raise 
 If you want to enforce that an idempotency key is required, you can set `raise_on_no_idempotency_key` to `True`,
 and we will raise `IdempotencyKeyError` if none was found.
 
-```python hl_lines="4"
-DynamoDBPersistenceLayer(
-    event_key_jmespath="body",
-    table_name="IdempotencyTable",
-    raise_on_no_idempotency_key=True
+=== "app.py"
+
+    ```python hl_lines="4"
+    DynamoDBPersistenceLayer(
+        table_name="IdempotencyTable",
+        event_key_jmespath="body",
+        raise_on_no_idempotency_key=True,
     )
-```
+    ```
 
 ### Changing dynamoDB attribute names
 If you want to use an existing DynamoDB table, or wish to change the name of the attributes used to store items in the
@@ -288,16 +297,17 @@ validation_key_attr | "validation"   | Hashed representation of the parts of the
 This example demonstrates changing the attribute names to custom values:
 
 === "app.py"
-    ```python hl_lines="5-10"
+
+    ```python hl_lines="4-8"
     persistence_layer = DynamoDBPersistenceLayer(
-        event_key_jmespath="[userDetail, productId]",
         table_name="IdempotencyTable",
+        event_key_jmespath="[userDetail, productId]",
         key_attr="idempotency_key",
         expiry_attr="expires_at",
         status_attr="current_status",
         data_attr="result_data",
         validation_key_attr="validation_key"
-        )
+    )
     ```
 
 ### Customizing boto configuration
@@ -305,36 +315,38 @@ You can provide custom boto configuration or event bring your own boto3 session 
 or `boto3_session` parameters when constructing the persistence store.
 
 === "Custom session"
+
     ```python hl_lines="1 4 8"
-       import boto3
-       from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent
+    import boto3
+    from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent
 
-       boto3_session = boto3.session.Session()
-       persistence_layer = DynamoDBPersistenceLayer(
-            event_key_jmespath="body",
-            table_name="IdempotencyTable",
-            boto3_session=boto3_session
-            )
+    boto3_session = boto3.session.Session()
+    persistence_layer = DynamoDBPersistenceLayer(
+        table_name="IdempotencyTable",
+        event_key_jmespath="body",
+        boto3_session=boto3_session
+    )
 
-       @idempotent(persistence_store=persistence_layer)
-       def handler(event, context):
-           ...
+    @idempotent(persistence_store=persistence_layer)
+    def handler(event, context):
+       ...
     ```
 === "Custom config"
+
     ```python hl_lines="1 4 8"
-       from botocore.config import Config
-       from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent
+    from botocore.config import Config
+    from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent
 
-       boto_config = Config()
-       persistence_layer = DynamoDBPersistenceLayer(
-           event_key_jmespath="body",
-           table_name="IdempotencyTable",
-           boto_config=boto_config
-           )
+    boto_config = Config()
+    persistence_layer = DynamoDBPersistenceLayer(
+        table_name="IdempotencyTable",
+        event_key_jmespath="body",
+        boto_config=boto_config
+    )
 
-       @idempotent(persistence_store=persistence_layer)
-       def handler(event, context):
-           ...
+    @idempotent(persistence_store=persistence_layer)
+    def handler(event, context):
+       ...
     ```
 
 ### Bring your own persistent store
@@ -357,14 +369,15 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
     `event_key_jmespath`.
 
 === "app.py"
+
     ```python hl_lines="9 10"
     from aws_lambda_powertools.utilities.validation import validator, envelopes
     from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent
 
     persistence_layer = DynamoDBPersistenceLayer(
-        event_key_jmespath="[message, username]",
         table_name="IdempotencyTable",
-        )
+        event_key_jmespath="[message, username]",
+    )
 
     @validator(envelope=envelopes.API_GATEWAY_HTTP)
     @idempotent(persistence_store=persistence_layer)

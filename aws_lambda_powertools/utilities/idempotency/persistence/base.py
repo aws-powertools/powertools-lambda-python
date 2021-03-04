@@ -14,6 +14,7 @@ from typing import Any, Dict, Optional
 import jmespath
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
+from aws_lambda_powertools.shared.jmespath_functions import PowertoolsFunctions
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
@@ -112,6 +113,7 @@ class BasePersistenceLayer(ABC):
 
         self.event_key_jmespath: Optional[str] = None
         self.event_key_compiled_jmespath = None
+        self.jmespath_options: Optional[dict] = None
         self.payload_validation_enabled = False
         self.validation_key_jmespath = None
         self.raise_on_no_idempotency_key = False
@@ -136,6 +138,9 @@ class BasePersistenceLayer(ABC):
         self.event_key_jmespath = config.event_key_jmespath
         if config.event_key_jmespath:
             self.event_key_compiled_jmespath = jmespath.compile(config.event_key_jmespath)
+        self.jmespath_options = config.jmespath_options
+        if not self.jmespath_options:
+            self.jmespath_options = {"custom_functions": PowertoolsFunctions()}
         if config.payload_validation_jmespath:
             self.validation_key_jmespath = jmespath.compile(config.payload_validation_jmespath)
             self.payload_validation_enabled = True
@@ -162,8 +167,11 @@ class BasePersistenceLayer(ABC):
 
         """
         data = lambda_event
+
         if self.event_key_jmespath:
-            data = self.event_key_compiled_jmespath.search(lambda_event)
+            data = self.event_key_compiled_jmespath.search(
+                lambda_event, options=jmespath.Options(**self.jmespath_options)
+            )
 
         if self.is_missing_idempotency_key(data):
             warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}")

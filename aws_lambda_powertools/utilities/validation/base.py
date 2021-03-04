@@ -5,8 +5,9 @@ import fastjsonschema
 import jmespath
 from jmespath.exceptions import LexerError
 
+from aws_lambda_powertools.shared.jmespath_functions import PowertoolsFunctions
+
 from .exceptions import InvalidEnvelopeExpressionError, InvalidSchemaFormatError, SchemaValidationError
-from .jmespath_functions import PowertoolsFunctions
 
 logger = logging.getLogger(__name__)
 

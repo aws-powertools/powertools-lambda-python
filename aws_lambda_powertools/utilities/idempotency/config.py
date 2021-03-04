@@ -1,8 +1,12 @@
+from typing import Dict
+
+
 class IdempotencyConfig:
     def __init__(
         self,
         event_key_jmespath: str = "",
         payload_validation_jmespath: str = "",
+        jmespath_options: Dict = None,
         raise_on_no_idempotency_key: bool = False,
         expires_after_seconds: int = 60 * 60,  # 1 hour default
         use_local_cache: bool = False,
@@ -31,6 +35,7 @@ class IdempotencyConfig:
         """
         self.event_key_jmespath = event_key_jmespath
         self.payload_validation_jmespath = payload_validation_jmespath
+        self.jmespath_options = jmespath_options
         self.raise_on_no_idempotency_key = raise_on_no_idempotency_key
         self.expires_after_seconds = expires_after_seconds
         self.use_local_cache = use_local_cache

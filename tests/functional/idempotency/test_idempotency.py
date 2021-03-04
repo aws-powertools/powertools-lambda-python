@@ -3,9 +3,11 @@ import json
 import sys
 from hashlib import md5
 
+import jmespath
 import pytest
 from botocore import stub
 
+from aws_lambda_powertools.utilities.idempotency import IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
@@ -717,3 +719,33 @@ def test_raise_on_no_idempotency_key(idempotency_config, persistence_store):
 
     # THEN raise IdempotencyKeyError error
     assert "No data found to create a hashed idempotency_key" in str(excinfo.value)
+
+
+def test_jmespath_with_powertools_json(persistence_store):
+    # GIVEN an event_key_jmespath with powertools_json custom function
+    config = IdempotencyConfig(event_key_jmespath="[requestContext.authorizer.claims.sub, powertools_json(body).id]")
+    persistence_store.configure(config)
+    sub_attr_value = "cognito_user"
+    key_attr_value = "some_key"
+    expected_value = [sub_attr_value, key_attr_value]
+    api_gateway_proxy_event = {
+        "requestContext": {"authorizer": {"claims": {"sub": sub_attr_value}}},
+        "body": json.dumps({"id": key_attr_value}),
+    }
+
+    # WHEN calling _get_hashed_idempotency_key
+    result = persistence_store._get_hashed_idempotency_key(api_gateway_proxy_event)
+
+    # THEN the hashed idempotency key should match the extracted values generated hash
+    assert result == persistence_store._generate_hash(expected_value)
+
+
+@pytest.mark.parametrize("config_with_jmespath_options", ["powertools_json(data).payload"], indirect=True)
+def test_custom_jmespath_function_overrides_builtin_functions(config_with_jmespath_options, persistence_store):
+    # GIVEN an persistence store with a custom jmespath_options
+    # AND use a builtin powertools custom function
+    persistence_store.configure(config_with_jmespath_options)
+    with pytest.raises(jmespath.exceptions.UnknownFunctionError, match="Unknown function: powertools_json()"):
+        # WHEN calling _get_hashed_idempotency_key
+        # THEN raise unknown function
+        persistence_store._get_hashed_idempotency_key({})

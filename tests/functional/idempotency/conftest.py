@@ -9,6 +9,7 @@ import jmespath
 import pytest
 from botocore import stub
 from botocore.config import Config
+from jmespath import functions
 
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
@@ -174,6 +175,20 @@ def config_with_validation(config, request, default_jmespath):
         event_key_jmespath=default_jmespath,
         use_local_cache=request.param,
         payload_validation_jmespath="requestContext",
+    )
+
+
+@pytest.fixture
+def config_with_jmespath_options(config, request):
+    class CustomFunctions(functions.Functions):
+        @functions.signature({"types": ["string"]})
+        def _func_echo_decoder(self, value):
+            return value
+
+    return IdempotencyConfig(
+        use_local_cache=False,
+        event_key_jmespath=request.param,
+        jmespath_options={"custom_functions": CustomFunctions()},
     )
 
 
