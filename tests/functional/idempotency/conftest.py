@@ -152,7 +152,7 @@ def hashed_validation_key(lambda_apigw_event):
 
 @pytest.fixture
 def persistence_store(config):
-    return DynamoDBPersistenceLayer(table_name=TABLE_NAME, boto_config=config,)
+    return DynamoDBPersistenceLayer(table_name=TABLE_NAME, boto_config=config)
 
 
 @pytest.fixture

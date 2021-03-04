@@ -207,6 +207,53 @@ def test_idempotent_lambda_first_execution(
     stubber.deactivate()
 
 
+@pytest.mark.skipif(sys.version_info < (3, 8), reason="issue with pytest mock lib for < 3.8")
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
+def test_idempotent_lambda_first_execution_cached(
+    idempotency_config,
+    persistence_store,
+    lambda_apigw_event,
+    expected_params_update_item,
+    expected_params_put_item,
+    lambda_response,
+    hashed_idempotency_key,
+    mocker,
+):
+    """
+    Test idempotent decorator when lambda is executed with an event with a previously unknown event key. Ensure
+    result is cached locally on the persistence store instance.
+    """
+    persistence_store.configure(idempotency_config)
+    save_to_cache_spy = mocker.spy(persistence_store, "_save_to_cache")
+    retrieve_from_cache_spy = mocker.spy(persistence_store, "_retrieve_from_cache")
+    stubber = stub.Stubber(persistence_store.table.meta.client)
+    ddb_response = {}
+
+    stubber.add_response("put_item", ddb_response, expected_params_put_item)
+    stubber.add_response("update_item", ddb_response, expected_params_update_item)
+    stubber.activate()
+
+    @idempotent(persistence_store=persistence_store, config=idempotency_config)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    lambda_handler(lambda_apigw_event, {})
+
+    retrieve_from_cache_spy.assert_called_once()
+    save_to_cache_spy.assert_called_once()
+    assert save_to_cache_spy.call_args[0][0].status == "COMPLETED"
+    assert persistence_store._cache.get(hashed_idempotency_key).status == "COMPLETED"
+
+    # This lambda call should not call AWS API
+    lambda_handler(lambda_apigw_event, {})
+    assert retrieve_from_cache_spy.call_count == 3
+    retrieve_from_cache_spy.assert_called_with(idempotency_key=hashed_idempotency_key)
+
+    # This assertion fails if an AWS API operation was called more than once
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_expired(
     idempotency_config,

@@ -9,19 +9,19 @@ import logging
 import warnings
 from abc import ABC, abstractmethod
 from types import MappingProxyType
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import jmespath
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
 from aws_lambda_powertools.shared.json_encoder import Encoder
+from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyInvalidStatusError,
     IdempotencyItemAlreadyExistsError,
     IdempotencyKeyError,
     IdempotencyValidationError,
 )
-from aws_lambda_powertools.utilities.idempotency.idempotency import IdempotencyConfig
 
 logger = logging.getLogger(__name__)
 
@@ -108,14 +108,16 @@ class BasePersistenceLayer(ABC):
     """
 
     def __init__(self):
-        self.event_key_jmespath = None
+        self.configured = False
+
+        self.event_key_jmespath: Optional[str] = None
         self.event_key_compiled_jmespath = None
-        self.payload_validation_enabled = None
+        self.payload_validation_enabled = False
         self.validation_key_jmespath = None
-        self.raise_on_no_idempotency_key = None
+        self.raise_on_no_idempotency_key = False
         self.expires_after_seconds = None
-        self.use_local_cache = None
-        self._cache = None
+        self.use_local_cache = False
+        self._cache: Optional[LRUDict] = None
         self.hash_function = None
 
     def configure(self, config: IdempotencyConfig,) -> None:
@@ -127,10 +129,13 @@ class BasePersistenceLayer(ABC):
         config: IdempotencyConfig
             Configuration settings
         """
+        if self.configured:
+            # Temp hack to prevent being reconfigured.
+            return
+        self.configured = True
         self.event_key_jmespath = config.event_key_jmespath
-        if self.event_key_jmespath:
+        if config.event_key_jmespath:
             self.event_key_compiled_jmespath = jmespath.compile(config.event_key_jmespath)
-        self.payload_validation_enabled = False
         if config.payload_validation_jmespath:
             self.validation_key_jmespath = jmespath.compile(config.payload_validation_jmespath)
             self.payload_validation_enabled = True
