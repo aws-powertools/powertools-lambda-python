@@ -57,13 +57,19 @@ class Metrics(MetricManager):
 
     Parameters
     ----------
-    MetricManager : MetricManager
-        Inherits from `aws_lambda_powertools.metrics.base.MetricManager`
+    service : str, optional
+        service name to be used as metric dimension, by default "service_undefined"
+    namespace : str
+        Namespace for metrics
 
     Raises
     ------
-    e
-        Propagate error received
+    MetricUnitError
+        When metric metric isn't supported by CloudWatch
+    MetricValueError
+        When metric value isn't a number
+    SchemaValidationError
+        When metric object fails EMF schema validation
     """
 
     _metrics = {}
@@ -150,7 +156,7 @@ class Metrics(MetricManager):
                 else:
                     metrics = self.serialize_metric_set()
                     self.clear_metrics()
-                    print(json.dumps(metrics))
+                    print(json.dumps(metrics, separators=(",", ":")))
 
             return response
 

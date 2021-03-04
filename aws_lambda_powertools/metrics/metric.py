@@ -102,8 +102,12 @@ def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = No
 
     Raises
     ------
-    e
-        Propagate error received
+    MetricUnitError
+        When metric metric isn't supported by CloudWatch
+    MetricValueError
+        When metric value isn't a number
+    SchemaValidationError
+        When metric object fails EMF schema validation
     """
     metric_set = None
     try:
@@ -112,4 +116,4 @@ def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = No
         yield metric
         metric_set: Dict = metric.serialize_metric_set()
     finally:
-        print(json.dumps(metric_set))
+        print(json.dumps(metric_set, separators=(",", ":")))

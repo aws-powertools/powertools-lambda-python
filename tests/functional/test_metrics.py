@@ -77,7 +77,7 @@ def metadata() -> Dict[str, str]:
 
 
 @pytest.fixture
-def a_hundred_metrics(namespace=namespace) -> List[Dict[str, str]]:
+def a_hundred_metrics() -> List[Dict[str, str]]:
     return [{"name": f"metric_{i}", "unit": "Count", "value": 1} for i in range(100)]
 
 
@@ -257,7 +257,7 @@ def test_schema_validation_no_namespace(metric, dimension):
     # GIVEN we don't add any namespace
     # WHEN we attempt to serialize a valid EMF object
     # THEN it should fail namespace validation
-    with pytest.raises(SchemaValidationError, match=".*Namespace must be string"):
+    with pytest.raises(SchemaValidationError, match="Must contain a metric namespace."):
         with single_metric(**metric) as my_metric:
             my_metric.add_dimension(**dimension)
 
@@ -278,7 +278,7 @@ def test_schema_no_metrics(service, namespace):
     my_metrics = Metrics(service=service, namespace=namespace)
 
     # THEN it should fail validation and raise SchemaValidationError
-    with pytest.raises(SchemaValidationError, match=".*Metrics must contain at least 1 items"):
+    with pytest.raises(SchemaValidationError, match="Must contain at least one metric."):
         my_metrics.serialize_metric_set()
 
 
@@ -288,7 +288,7 @@ def test_exceed_number_of_dimensions(metric, namespace):
 
     # WHEN we attempt to serialize them into a valid EMF object
     # THEN it should fail validation and raise SchemaValidationError
-    with pytest.raises(SchemaValidationError, match="must contain less than or equal to 9 items"):
+    with pytest.raises(SchemaValidationError, match="Maximum number of dimensions exceeded.*"):
         with single_metric(**metric, namespace=namespace) as my_metric:
             for dimension in dimensions:
                 my_metric.add_dimension(**dimension)
@@ -328,7 +328,7 @@ def test_log_metrics_raise_on_empty_metrics(capsys, metric, dimension, namespace
 
     # THEN the raised exception should be SchemaValidationError
     # and specifically about the lack of Metrics
-    with pytest.raises(SchemaValidationError, match=".*Metrics must contain at least 1 items"):
+    with pytest.raises(SchemaValidationError, match="Must contain at least one metric."):
         lambda_handler({}, {})
 
 

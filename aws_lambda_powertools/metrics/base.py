@@ -9,14 +9,12 @@ from typing import Any, Dict, List, Union
 
 from ..shared import constants
 from ..shared.functions import resolve_env_var_choice
-from ..shared.lazy_import import LazyLoader
 from .exceptions import MetricUnitError, MetricValueError, SchemaValidationError
-from .schema import CLOUDWATCH_EMF_SCHEMA
 
-fastjsonschema = LazyLoader("fastjsonschema", globals(), "fastjsonschema")
 logger = logging.getLogger(__name__)
 
 MAX_METRICS = 100
+MAX_DIMENSIONS = 9
 
 
 class MetricUnit(Enum):
@@ -180,6 +178,12 @@ class MetricManager:
         if self.service and not self.dimension_set.get("service"):
             self.dimension_set["service"] = self.service
 
+        if len(metrics) == 0:
+            raise SchemaValidationError("Must contain at least one metric.")
+
+        if self.namespace is None:
+            raise SchemaValidationError("Must contain a metric namespace.")
+
         logger.debug({"details": "Serializing metrics", "metrics": metrics, "dimensions": dimensions})
 
         metric_names_and_units: List[Dict[str, str]] = []  # [ { "Name": "metric_name", "Unit": "Count" } ]
@@ -209,12 +213,6 @@ class MetricManager:
             **metric_names_and_values,  # "single_metric": 1.0
         }
 
-        try:
-            logger.debug("Validating serialized metrics against CloudWatch EMF schema")
-            fastjsonschema.validate(definition=CLOUDWATCH_EMF_SCHEMA, data=embedded_metrics_object)
-        except fastjsonschema.JsonSchemaException as e:
-            message = f"Invalid format. Error: {e.message}, Invalid item: {e.name}"  # noqa: B306, E501
-            raise SchemaValidationError(message)
         return embedded_metrics_object
 
     def add_dimension(self, name: str, value: str):
@@ -234,7 +232,10 @@ class MetricManager:
             Dimension value
         """
         logger.debug(f"Adding dimension: {name}:{value}")
-
+        if len(self.dimension_set) == 9:
+            raise SchemaValidationError(
+                f"Maximum number of dimensions exceeded ({MAX_DIMENSIONS}): Unable to add dimension {name}."
+            )
         # Cast value to str according to EMF spec
         # Majority of values are expected to be string already, so
         # checking before casting improves performance in most cases
@@ -295,7 +296,7 @@ class MetricManager:
             if unit in self._metric_unit_options:
                 unit = MetricUnit[unit].value
 
-            if unit not in self._metric_units:  # str correta
+            if unit not in self._metric_units:
                 raise MetricUnitError(
                     f"Invalid metric unit '{unit}', expected either option: {self._metric_unit_options}"
                 )
