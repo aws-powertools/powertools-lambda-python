@@ -291,3 +291,24 @@ You can then use this class as a context manager, or pass it to `batch_processor
     def lambda_handler(event, context):
         return {"statusCode": 200}
     ```
+
+### Integrating exception handling with Sentry.io
+
+When using Sentry.io for error monitoring, you can override `failure_handler` to include to capture each processing exception:
+
+> Credits to [Charles-Axel Dein](https://github.com/awslabs/aws-lambda-powertools-python/issues/293#issuecomment-781961732)
+
+=== "sentry_integration.py"
+
+	```python hl_lines="4 7-8"
+	from typing import Tuple
+
+	from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
+	from sentry_sdk import capture_exception
+
+	class SQSProcessor(PartialSQSProcessor):
+		def failure_handler(self, record: Event, exception: Tuple) -> Tuple:  # type: ignore
+			capture_exception()  # send exception to Sentry
+			logger.exception("got exception while processing SQS message")
+			return super().failure_handler(record, exception)  # type: ignore
+	```
