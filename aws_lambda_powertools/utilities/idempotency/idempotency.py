@@ -52,7 +52,7 @@ def idempotent(
     --------
     **Processes Lambda's event in an idempotent manner**
         >>> from aws_lambda_powertools.utilities.idempotency import (
-        >>>    idempotent, DynamoDBPersistenceLayer
+        >>>    idempotent, DynamoDBPersistenceLayer, IdempotencyConfig
         >>> )
         >>>
         >>> persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency_store")
@@ -62,7 +62,7 @@ def idempotent(
         >>>     return {"StatusCode": 200}
     """
 
-    idempotency_handler = IdempotencyHandler(handler, event, context, config, persistence_store)
+    idempotency_handler = IdempotencyHandler(handler, event, context, config or IdempotencyConfig(), persistence_store)
 
     # IdempotencyInconsistentStateError can happen under rare but expected cases when persistent state changes in the
     # small time between put & get requests. In most cases we can retry successfully on this exception.
@@ -105,7 +105,7 @@ class IdempotencyHandler:
         persistence_store : BasePersistenceLayer
             Instance of persistence layer to store idempotency records
         """
-        persistence_store.configure(config)
+        persistence_store._configure(config)
         self.persistence_store = persistence_store
         self.context = context
         self.event = event

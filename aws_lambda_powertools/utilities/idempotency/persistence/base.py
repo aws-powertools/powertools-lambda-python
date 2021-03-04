@@ -109,32 +109,33 @@ class BasePersistenceLayer(ABC):
     """
 
     def __init__(self):
+        """Initialize the defaults """
         self.configured = False
-
         self.event_key_jmespath: Optional[str] = None
         self.event_key_compiled_jmespath = None
         self.jmespath_options: Optional[dict] = None
         self.payload_validation_enabled = False
         self.validation_key_jmespath = None
         self.raise_on_no_idempotency_key = False
-        self.expires_after_seconds = None
+        self.expires_after_seconds: int = 60 * 60  # 1 hour default
         self.use_local_cache = False
         self._cache: Optional[LRUDict] = None
         self.hash_function = None
 
-    def configure(self, config: IdempotencyConfig,) -> None:
+    def _configure(self, config: IdempotencyConfig) -> None:
         """
-        Initialize the base persistence layer
+        Initialize the base persistence layer from the configuration settings
 
         Parameters
         ----------
         config: IdempotencyConfig
-            Configuration settings
+            Idempotency configuration settings
         """
         if self.configured:
-            # Temp hack to prevent being reconfigured.
+            # Prevent being reconfigured.
             return
         self.configured = True
+
         self.event_key_jmespath = config.event_key_jmespath
         if config.event_key_jmespath:
             self.event_key_compiled_jmespath = jmespath.compile(config.event_key_jmespath)
@@ -174,9 +175,9 @@ class BasePersistenceLayer(ABC):
             )
 
         if self.is_missing_idempotency_key(data):
-            warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}")
             if self.raise_on_no_idempotency_key:
                 raise IdempotencyKeyError("No data found to create a hashed idempotency_key")
+            warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}")
 
         return self._generate_hash(data)
 
