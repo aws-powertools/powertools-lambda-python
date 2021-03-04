@@ -21,6 +21,7 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyKeyError,
     IdempotencyValidationError,
 )
+from aws_lambda_powertools.utilities.idempotency.idempotency import IdempotencyConfig
 
 logger = logging.getLogger(__name__)
 
@@ -106,49 +107,39 @@ class BasePersistenceLayer(ABC):
     Abstract Base Class for Idempotency persistence layer.
     """
 
-    def __init__(
-        self,
-        event_key_jmespath: str = "",
-        payload_validation_jmespath: str = "",
-        expires_after_seconds: int = 60 * 60,  # 1 hour default
-        use_local_cache: bool = False,
-        local_cache_max_items: int = 256,
-        hash_function: str = "md5",
-        raise_on_no_idempotency_key: bool = False,
-    ) -> None:
+    def __init__(self):
+        self.event_key_jmespath = None
+        self.event_key_compiled_jmespath = None
+        self.payload_validation_enabled = None
+        self.validation_key_jmespath = None
+        self.raise_on_no_idempotency_key = None
+        self.expires_after_seconds = None
+        self.use_local_cache = None
+        self._cache = None
+        self.hash_function = None
+
+    def configure(self, config: IdempotencyConfig,) -> None:
         """
         Initialize the base persistence layer
 
         Parameters
         ----------
-        event_key_jmespath: str
-            A jmespath expression to extract the idempotency key from the event record
-        payload_validation_jmespath: str
-            A jmespath expression to extract the payload to be validated from the event record
-        expires_after_seconds: int
-            The number of seconds to wait before a record is expired
-        use_local_cache: bool, optional
-            Whether to locally cache idempotency results, by default False
-        local_cache_max_items: int, optional
-            Max number of items to store in local cache, by default 1024
-        hash_function: str, optional
-            Function to use for calculating hashes, by default md5.
-        raise_on_no_idempotency_key: bool, optional
-            Raise exception if no idempotency key was found in the request, by default False
+        config: IdempotencyConfig
+            Configuration settings
         """
-        self.event_key_jmespath = event_key_jmespath
+        self.event_key_jmespath = config.event_key_jmespath
         if self.event_key_jmespath:
-            self.event_key_compiled_jmespath = jmespath.compile(event_key_jmespath)
-        self.expires_after_seconds = expires_after_seconds
-        self.use_local_cache = use_local_cache
-        if self.use_local_cache:
-            self._cache = LRUDict(max_items=local_cache_max_items)
+            self.event_key_compiled_jmespath = jmespath.compile(config.event_key_jmespath)
         self.payload_validation_enabled = False
-        if payload_validation_jmespath:
-            self.validation_key_jmespath = jmespath.compile(payload_validation_jmespath)
+        if config.payload_validation_jmespath:
+            self.validation_key_jmespath = jmespath.compile(config.payload_validation_jmespath)
             self.payload_validation_enabled = True
-        self.hash_function = getattr(hashlib, hash_function)
-        self.raise_on_no_idempotency_key = raise_on_no_idempotency_key
+        self.raise_on_no_idempotency_key = config.raise_on_no_idempotency_key
+        self.expires_after_seconds = config.expires_after_seconds
+        self.use_local_cache = config.use_local_cache
+        if self.use_local_cache:
+            self._cache = LRUDict(max_items=config.local_cache_max_items)
+        self.hash_function = getattr(hashlib, config.hash_function)
 
     def _get_hashed_idempotency_key(self, lambda_event: Dict[str, Any]) -> str:
         """
