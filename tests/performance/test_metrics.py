@@ -1,3 +1,4 @@
+import json
 import time
 from contextlib import contextmanager
 from typing import Dict, Generator
@@ -8,8 +9,8 @@ from aws_lambda_powertools import Metrics
 from aws_lambda_powertools.metrics import MetricUnit
 from aws_lambda_powertools.metrics import metrics as metrics_global
 
-METRICS_VALIDATION_SLA: float = 0.01
-METRICS_SERIALIZATION_SLA: float = 0.01
+METRICS_VALIDATION_SLA: float = 0.001
+METRICS_SERIALIZATION_SLA: float = 0.001
 
 
 @contextmanager
@@ -45,37 +46,41 @@ def metric() -> Dict[str, str]:
     return {"name": "single_metric", "unit": MetricUnit.Count, "value": 1}
 
 
-def time_large_metric_set_operation(metrics_instance: Metrics, validate_metrics: bool = True) -> float:
+def add_max_metrics_before_serialization(metrics_instance: Metrics):
     metrics_instance.add_dimension(name="test_dimension", value="test")
 
     for i in range(99):
         metrics_instance.add_metric(name=f"metric_{i}", unit="Count", value=1)
 
-    with timing() as t:
-        metrics_instance.serialize_metric_set(validate_metrics=validate_metrics)
-
-    return t()
-
 
 @pytest.mark.perf
-def test_metrics_validation_sla(namespace):
+def test_metrics_large_operation_without_json_serialization_sla(namespace):
     # GIVEN Metrics is initialized
     my_metrics = Metrics(namespace=namespace)
+
     # WHEN we add and serialize 99 metrics
-    elapsed = time_large_metric_set_operation(metrics_instance=my_metrics)
+    with timing() as t:
+        add_max_metrics_before_serialization(metrics_instance=my_metrics)
+        my_metrics.serialize_metric_set()
 
     # THEN completion time should be below our validation SLA
+    elapsed = t()
     if elapsed > METRICS_VALIDATION_SLA:
         pytest.fail(f"Metric validation should be below {METRICS_VALIDATION_SLA}s: {elapsed}")
 
 
 @pytest.mark.perf
-def test_metrics_serialization_sla(namespace):
+def test_metrics_large_operation_and_json_serialization_sla(namespace):
     # GIVEN Metrics is initialized with validation disabled
-    my_metrics = Metrics(namespace=namespace, validate_metrics=False)
+    my_metrics = Metrics(namespace=namespace)
+
     # WHEN we add and serialize 99 metrics
-    elapsed = time_large_metric_set_operation(metrics_instance=my_metrics, validate_metrics=False)
+    with timing() as t:
+        add_max_metrics_before_serialization(metrics_instance=my_metrics)
+        metrics = my_metrics.serialize_metric_set()
+        print(json.dumps(metrics, separators=(",", ":")))
 
     # THEN completion time should be below our serialization SLA
+    elapsed = t()
     if elapsed > METRICS_SERIALIZATION_SLA:
         pytest.fail(f"Metric serialization should be below {METRICS_SERIALIZATION_SLA}s: {elapsed}")

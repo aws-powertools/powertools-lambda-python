@@ -61,7 +61,7 @@ class SingleMetric(MetricManager):
 
 
 @contextmanager
-def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = None, validate_metrics: bool = True):
+def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = None):
     """Context manager to simplify creation of a single metric
 
     Example
@@ -94,8 +94,6 @@ def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = No
         Metric value
     namespace: str
         Namespace for metrics
-    validate_metrics: bool, optional
-        Whether to validate metrics against schema, by default True
 
     Yields
     -------
@@ -116,6 +114,6 @@ def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = No
         metric: SingleMetric = SingleMetric(namespace=namespace)
         metric.add_metric(name=name, unit=unit, value=value)
         yield metric
-        metric_set: Dict = metric.serialize_metric_set(validate_metrics=validate_metrics)
+        metric_set: Dict = metric.serialize_metric_set()
     finally:
-        print(json.dumps(metric_set))
+        print(json.dumps(metric_set, separators=(",", ":")))

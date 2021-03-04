@@ -61,8 +61,6 @@ class Metrics(MetricManager):
         service name to be used as metric dimension, by default "service_undefined"
     namespace : str
         Namespace for metrics
-    validate_metrics: bool, optional
-        Whether to validate metrics against schema, by default True
 
     Raises
     ------
@@ -78,13 +76,12 @@ class Metrics(MetricManager):
     _dimensions = {}
     _metadata = {}
 
-    def __init__(self, service: str = None, namespace: str = None, validate_metrics: bool = True):
+    def __init__(self, service: str = None, namespace: str = None):
         self.metric_set = self._metrics
         self.dimension_set = self._dimensions
         self.service = service
         self.namespace = namespace
         self.metadata_set = self._metadata
-        self.validate_metrics = validate_metrics
 
         super().__init__(
             metric_set=self.metric_set,
@@ -159,7 +156,7 @@ class Metrics(MetricManager):
                 else:
                     metrics = self.serialize_metric_set()
                     self.clear_metrics()
-                    print(json.dumps(metrics))
+                    print(json.dumps(metrics, separators=(",", ":")))
 
             return response
 
