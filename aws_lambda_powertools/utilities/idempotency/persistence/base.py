@@ -9,13 +9,14 @@ import logging
 import warnings
 from abc import ABC, abstractmethod
 from types import MappingProxyType
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import jmespath
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
 from aws_lambda_powertools.shared.jmespath_functions import PowertoolsFunctions
 from aws_lambda_powertools.shared.json_encoder import Encoder
+from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyInvalidStatusError,
     IdempotencyItemAlreadyExistsError,
@@ -107,55 +108,49 @@ class BasePersistenceLayer(ABC):
     Abstract Base Class for Idempotency persistence layer.
     """
 
-    def __init__(
-        self,
-        event_key_jmespath: str = "",
-        payload_validation_jmespath: str = "",
-        expires_after_seconds: int = 60 * 60,  # 1 hour default
-        use_local_cache: bool = False,
-        local_cache_max_items: int = 256,
-        hash_function: str = "md5",
-        raise_on_no_idempotency_key: bool = False,
-        jmespath_options: Dict = None,
-    ) -> None:
+    def __init__(self):
+        """Initialize the defaults """
+        self.configured = False
+        self.event_key_jmespath: Optional[str] = None
+        self.event_key_compiled_jmespath = None
+        self.jmespath_options: Optional[dict] = None
+        self.payload_validation_enabled = False
+        self.validation_key_jmespath = None
+        self.raise_on_no_idempotency_key = False
+        self.expires_after_seconds: int = 60 * 60  # 1 hour default
+        self.use_local_cache = False
+        self._cache: Optional[LRUDict] = None
+        self.hash_function = None
+
+    def configure(self, config: IdempotencyConfig) -> None:
         """
-        Initialize the base persistence layer
+        Initialize the base persistence layer from the configuration settings
 
         Parameters
         ----------
-        event_key_jmespath: str
-            A jmespath expression to extract the idempotency key from the event record
-        payload_validation_jmespath: str
-            A jmespath expression to extract the payload to be validated from the event record
-        expires_after_seconds: int
-            The number of seconds to wait before a record is expired
-        use_local_cache: bool, optional
-            Whether to locally cache idempotency results, by default False
-        local_cache_max_items: int, optional
-            Max number of items to store in local cache, by default 1024
-        hash_function: str, optional
-            Function to use for calculating hashes, by default md5.
-        raise_on_no_idempotency_key: bool, optional
-            Raise exception if no idempotency key was found in the request, by default False
-        jmespath_options : Dict
-            Alternative JMESPath options to be included when filtering expr
+        config: IdempotencyConfig
+            Idempotency configuration settings
         """
-        self.event_key_jmespath = event_key_jmespath
-        if self.event_key_jmespath:
-            self.event_key_compiled_jmespath = jmespath.compile(event_key_jmespath)
-        self.expires_after_seconds = expires_after_seconds
-        self.use_local_cache = use_local_cache
-        if self.use_local_cache:
-            self._cache = LRUDict(max_items=local_cache_max_items)
-        self.payload_validation_enabled = False
-        if payload_validation_jmespath:
-            self.validation_key_jmespath = jmespath.compile(payload_validation_jmespath)
+        if self.configured:
+            # Prevent being reconfigured multiple times
+            return
+        self.configured = True
+
+        self.event_key_jmespath = config.event_key_jmespath
+        if config.event_key_jmespath:
+            self.event_key_compiled_jmespath = jmespath.compile(config.event_key_jmespath)
+        self.jmespath_options = config.jmespath_options
+        if not self.jmespath_options:
+            self.jmespath_options = {"custom_functions": PowertoolsFunctions()}
+        if config.payload_validation_jmespath:
+            self.validation_key_jmespath = jmespath.compile(config.payload_validation_jmespath)
             self.payload_validation_enabled = True
-        self.hash_function = getattr(hashlib, hash_function)
-        self.raise_on_no_idempotency_key = raise_on_no_idempotency_key
-        if not jmespath_options:
-            jmespath_options = {"custom_functions": PowertoolsFunctions()}
-        self.jmespath_options = jmespath_options
+        self.raise_on_no_idempotency_key = config.raise_on_no_idempotency_key
+        self.expires_after_seconds = config.expires_after_seconds
+        self.use_local_cache = config.use_local_cache
+        if self.use_local_cache:
+            self._cache = LRUDict(max_items=config.local_cache_max_items)
+        self.hash_function = getattr(hashlib, config.hash_function)
 
     def _get_hashed_idempotency_key(self, lambda_event: Dict[str, Any]) -> str:
         """
@@ -180,9 +175,9 @@ class BasePersistenceLayer(ABC):
             )
 
         if self.is_missing_idempotency_key(data):
-            warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}")
             if self.raise_on_no_idempotency_key:
                 raise IdempotencyKeyError("No data found to create a hashed idempotency_key")
+            warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}")
 
         return self._generate_hash(data)
 

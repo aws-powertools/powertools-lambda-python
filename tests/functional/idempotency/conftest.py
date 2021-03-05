@@ -13,6 +13,7 @@ from jmespath import functions
 
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
+from aws_lambda_powertools.utilities.idempotency.idempotency import IdempotencyConfig
 from aws_lambda_powertools.utilities.validation import envelopes
 from aws_lambda_powertools.utilities.validation.base import unwrap_event_from_envelope
 
@@ -151,51 +152,44 @@ def hashed_validation_key(lambda_apigw_event):
 
 
 @pytest.fixture
-def persistence_store(config, request, default_jmespath):
-    persistence_store = DynamoDBPersistenceLayer(
+def persistence_store(config):
+    return DynamoDBPersistenceLayer(table_name=TABLE_NAME, boto_config=config)
+
+
+@pytest.fixture
+def idempotency_config(config, request, default_jmespath):
+    return IdempotencyConfig(
         event_key_jmespath=request.param.get("event_key_jmespath") or default_jmespath,
-        table_name=TABLE_NAME,
-        boto_config=config,
         use_local_cache=request.param["use_local_cache"],
     )
-    return persistence_store
 
 
 @pytest.fixture
-def persistence_store_without_jmespath(config, request):
-    persistence_store = DynamoDBPersistenceLayer(
-        table_name=TABLE_NAME, boto_config=config, use_local_cache=request.param["use_local_cache"],
-    )
-    return persistence_store
+def config_without_jmespath(config, request):
+    return IdempotencyConfig(use_local_cache=request.param["use_local_cache"])
 
 
 @pytest.fixture
-def persistence_store_with_validation(config, request, default_jmespath):
-    persistence_store = DynamoDBPersistenceLayer(
+def config_with_validation(config, request, default_jmespath):
+    return IdempotencyConfig(
         event_key_jmespath=default_jmespath,
-        table_name=TABLE_NAME,
-        boto_config=config,
         use_local_cache=request.param,
         payload_validation_jmespath="requestContext",
     )
-    return persistence_store
 
 
 @pytest.fixture
-def persistence_store_with_jmespath_options(config, request):
+def config_with_jmespath_options(config, request):
     class CustomFunctions(functions.Functions):
         @functions.signature({"types": ["string"]})
         def _func_echo_decoder(self, value):
             return value
 
-    persistence_store = DynamoDBPersistenceLayer(
-        table_name=TABLE_NAME,
-        boto_config=config,
+    return IdempotencyConfig(
         use_local_cache=False,
         event_key_jmespath=request.param,
         jmespath_options={"custom_functions": CustomFunctions()},
     )
-    return persistence_store
 
 
 @pytest.fixture

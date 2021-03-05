@@ -26,8 +26,6 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         validation_key_attr: str = "validation",
         boto_config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
-        *args,
-        **kwargs,
     ):
         """
         Initialize the DynamoDB client
@@ -57,9 +55,9 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         **Create a DynamoDB persistence layer with custom settings**
             >>> from aws_lambda_powertools.utilities.idempotency import idempotent, DynamoDBPersistenceLayer
             >>>
-            >>> persistence_store = DynamoDBPersistenceLayer(event_key="body", table_name="idempotency_store")
+            >>> persistence_store = DynamoDBPersistenceLayer(table_name="idempotency_store")
             >>>
-            >>> @idempotent(persistence_store=persistence_store)
+            >>> @idempotent(persistence_store=persistence_store, event_key="body")
             >>> def handler(event, context):
             >>>     return {"StatusCode": 200}
         """
@@ -74,7 +72,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         self.status_attr = status_attr
         self.data_attr = data_attr
         self.validation_key_attr = validation_key_attr
-        super(DynamoDBPersistenceLayer, self).__init__(*args, **kwargs)
+        super(DynamoDBPersistenceLayer, self).__init__()
 
     def _item_to_data_record(self, item: Dict[str, Any]) -> DataRecord:
         """
