@@ -12,15 +12,17 @@ are safe to retry.
 ## Terminology
 
 The property of idempotency means that an operation does not cause additional side effects if it is called more than
-once with the same input parameters. Idempotent operations will return the same result when they are called multiple
-times with the same parameters. This makes idempotent operations safe to retry.
+once with the same input parameters.
+
+**Idempotent operations will return the same result when they are called multiple
+times with the same parameters**. This makes idempotent operations safe to retry.
 
 
 ## Key features
 
-* Prevent Lambda handler code executing more than once on the same event payload during a time window
+* Prevent Lambda handler from executing more than once on the same event payload during a time window
 * Ensure Lambda handler returns the same result when called with the same payload
-* Select a subset of the event as the idempotency key using JMESpath expressions
+* Select a subset of the event as the idempotency key using JMESPath expressions
 * Set a time window in which records with the same payload should be considered duplicates
 
 ## Getting started
@@ -28,15 +30,30 @@ times with the same parameters. This makes idempotent operations safe to retry.
 ### Required resources
 
 Before getting started, you need to create a persistent storage layer where the idempotency utility can store its
-state. Your lambda functions will need read and write access to it. DynamoDB is currently the only supported persistent
-storage layer, so you'll need to create a table first.
+state - your lambda functions will need read and write access to it.
+
+As of now, Amazon DynamoDB is the only supported persistent storage layer, so you'll need to create a table first.
 
 > Example using AWS Serverless Application Model (SAM)
 
 === "template.yml"
 
-    ```yaml
+    ```yaml hl_lines="5-13 21-23"
     Resources:
+      IdempotencyTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+          AttributeDefinitions:
+            -   AttributeName: id
+                AttributeType: S
+          KeySchema:
+            -   AttributeName: id
+                KeyType: HASH
+          TimeToLiveSpecification:
+            AttributeName: expiration
+            Enabled: true
+          BillingMode: PAY_PER_REQUEST
+
       HelloWorldFunction:
       Type: AWS::Serverless::Function
       Properties:
@@ -45,54 +62,83 @@ storage layer, so you'll need to create a table first.
         Policies:
           - DynamoDBCrudPolicy:
               TableName: !Ref IdempotencyTable
-      IdempotencyTable:
-        Type: AWS::DynamoDB::Table
-        Properties:
-          AttributeDefinitions:
-            -   AttributeName: id
-                AttributeType: S
-          BillingMode: PAY_PER_REQUEST
-          KeySchema:
-            -   AttributeName: id
-                KeyType: HASH
-          TableName: "IdempotencyTable"
-          TimeToLiveSpecification:
-            AttributeName: expiration
-            Enabled: true
     ```
 
-!!! warning
-    When using this utility with DynamoDB, your lambda responses must always be smaller than 400kb. Larger items cannot
-    be written to DynamoDB and will cause exceptions.
+!!! warning "Large responses with DynamoDB persistence layer"
+    When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items).
 
-!!! info
+	Larger items cannot be written to DynamoDB and will cause exceptions.
+
+!!! info "DynamoDB "
     Each function invocation will generally make 2 requests to DynamoDB. If the
     result returned by your Lambda is less than 1kb, you can expect 2 WCUs per invocation. For retried invocations, you will
     see 1WCU and 1RCU. Review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/) to
     estimate the cost.
 
-### Lambda handler
+!!! danger "CREATE SECTION FOR PERSISTENCE LAYERS"
 
-You can quickly start by initializing the `DynamoDBPersistenceLayer` class outside the Lambda handler, and using it
-with the `idempotent` decorator on your lambda handler. The only required parameter is `table_name`, but you likely
-want to specify `event_key_jmespath` via `IdempotencyConfig` class.
+### Idempotent decorator
 
-`event_key_jmespath`: A JMESpath expression which will be used to extract the payload from the event your Lambda handler
-is called with. This payload will be used as the key to decide if future invocations are duplicates. If you don't pass
-this parameter, the entire event will be used as the key.
+You can quickly start by initializing the `DynamoDBPersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler.
 
 === "app.py"
 
-    ```python hl_lines="2-4 8-9 11"
+    ```python hl_lines="1 5 7 14"
+    from aws_lambda_powertools.utilities.idempotency import (
+        DynamoDBPersistenceLayer, idempotent
+    )
+
+    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+
+    @idempotent(persistence_store=persistence_layer)
+    def handler(event, context):
+        payment = create_subscription_payment(
+            user=event['user'],
+            product=event['product_id']
+        )
+        ...
+        return {
+            "payment_id": payment.id
+            "message": "success",
+            "statusCode": 200,
+        }
+    ```
+
+=== "Example event"
+
+    ```json
+    {
+      "username": "xyz",
+      "product_id": "123456789"
+    }
+    ```
+
+#### Choosing a payload subset for idempotency
+
+!!! tip "Dealing with always changing payloads"
+    When dealing with a more elaborate payload, where parts of the payload always change, you should use **`event_key_jmespath`** parameter.
+
+Use [`IdempotencyConfig`](#customizing-the-default-behaviour) to instruct the idempotent decorator to only use a portion of your payload to verify whether a request is idempotent, and therefore it should not be retried.
+
+> **Payment scenario**
+
+In this example, we have a Lambda handler that creates a payment for a user subscribing to a product. We want to ensure that we don't accidentally charge our customer by subscribing them more than once.
+
+Imagine the function executes successfully, but the client never receives the response due to a connection issue. It is safe to retry in this instance, as the idempotent decorator will return a previously saved response.
+
+=== "payment.py"
+
+    ```python hl_lines="2-4 10 12 15 20"
     import json
     from aws_lambda_powertools.utilities.idempotency import (
         IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
     )
 
-    # Treat everything under the "body" key in
-    # the event json object as our payload
-    config = IdempotencyConfig(event_key_jmespath="body")
     persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+
+    # Treat everything under the "body" key
+    # in the event json object as our payload
+    config = IdempotencyConfig(event_key_jmespath="body")
 
     @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event, context):
@@ -102,11 +148,16 @@ this parameter, the entire event will be used as the key.
             product=body['product_id']
         )
         ...
-        return {"message": "success", "statusCode": 200, "payment_id": payment.id}
+        return {
+            "payment_id": payment.id,
+            "message": "success",
+            "statusCode": 200
+        }
     ```
+
 === "Example event"
 
-    ```json
+    ```json hl_lines="28"
     {
       "version":"2.0",
       "routeKey":"ANY /createpayment",
@@ -139,90 +190,163 @@ this parameter, the entire event will be used as the key.
     }
     ```
 
-In this example, we have a Lambda handler that creates a payment for a user subscribing to a product. We want to ensure
-that we don't accidentally charge our customer by subscribing them more than once. Imagine the function executes
-successfully, but the client never receives the response. When we're using the idempotent decorator, we can safely
-retry. This sequence diagram shows an example flow of what happens in this case:
+#### Sequence diagram
+
+This sequence diagram shows an example flow of what happens in the payment scenario:
 
 ![Idempotent sequence](../media/idempotent_sequence.png)
 
+The client was successful in receiving the result after the retry. Since the Lambda handler was only executed once, our customer hasn't been charged twice.
 
-The client was successful in receiving the result after the retry. Since the Lambda handler was only executed once, our
-customer hasn't been charged twice.
+#### WORD ABOUT SERIALIZATION AND IDEMPOTENCY KEY CLARIFICATION
 
 !!! note
-    Bear in mind that the entire Lambda handler is treated as a single idempotent operation. If your Lambda handler can
-    cause multiple side effects, consider splitting it into separate functions.
+    Bear in mind that the entire Lambda handler is treated as a single idempotent operation. If your Lambda handler can cause multiple side effects, consider splitting it into separate functions.
+
+### Persistence layers
+
+#### DynamoDBPersistenceLayer
+
+This persistence layer is built-in, and you can either use an existing DynamoDB table or create a new one dedicated for idempotency state (recommended).
+
+=== "app.py"
+
+    ```python hl_lines="3-7"
+    from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
+
+    persistence_layer = DynamoDBPersistenceLayer(
+        table_name="IdempotencyTable",
+        key_attr="idempotency_key",
+        expiry_attr="expires_at",
+        status_attr="current_status",
+        data_attr="result_data",
+        validation_key_attr="validation_key"
+    )
+    ```
+
+These are knobs you can use when using DynamoDB as a persistence layer:
+
+Parameter | Required | Default | Description
+------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
+**table_name** | :heavy_check_mark: | | Table name to store state
+**key_attr** |  | `id` | Primary key of the table. Hashed representation of the payload
+**expiry_attr** |  | `expiration` | Unix timestamp of when record expires
+**status_attr** |  | `status` | Stores status of the lambda execution during and after invocation
+**data_attr** |  | `data`  | Stores results of successfully executed Lambda handlers
+**validation_key_attr** |  | `validation` | Hashed representation of the parts of the event used for validation
+
+
 
 ### Handling exceptions
 
-If your Lambda handler raises an unhandled exception, the record in the persistence layer will be deleted. This means
-that if the client retries, your Lambda handler will be free to execute again. If you don't want the record to be
-deleted, you need to catch Exceptions within the handler and return a successful response.
+**The record in the persistence layer will be deleted** if your Lambda handler returns an exception. This means that new invocations will execute again despite having the same payload.
 
+If you don't want the record to be deleted, you need to catch exceptions within the handler and return a successful response.
 
 ![Idempotent sequence exception](../media/idempotent_sequence_exception.png)
 
 !!! warning
-    If any of the calls to the persistence layer unexpectedly fail, `IdempotencyPersistenceLayerError` will be raised.
-    As this happens outside the scope of your Lambda handler, you are not able to catch it.
+    **We will raise `IdempotencyPersistenceLayerError`** if any of the calls to the persistence layer  fail unexpectedly.
 
-### Setting a time window
-In most cases, it is not desirable to store the idempotency records forever. Rather, you want to guarantee that the
-same payload won't be executed within a period of time. By default, the period is set to 1 hour (3600 seconds). You can
-change this window with the `expires_after_seconds` parameter:
-
-=== "app.py"
-
-    ```python hl_lines="3"
-    IdempotencyConfig(
-        event_key_jmespath="body",
-        expires_after_seconds=5*60,  # 5 minutes
-    )
-    ```
-
-This will mark any records older than 5 minutes as expired, and the lambda handler will be executed as normal if it is
-invoked with a matching payload. If you have set the TTL field in DynamoDB like in the SAM example above, the record
-will be automatically deleted from the table after a period of time.
-
-
-### Handling concurrent executions
-If you invoke a Lambda function with a given payload, then try to invoke it again with the same payload before the
-first invocation has finished, we'll raise an `IdempotencyAlreadyInProgressError` exception. This is the utility's
-locking mechanism at work. Since we don't know the result from the first invocation yet, we can't safely allow another
-concurrent execution. If you receive this error, you can safely retry the operation.
-
-
-### Using local cache
-To reduce the number of lookups to the persistence storage layer, you can enable in memory caching with the
-`use_local_cache` parameter, which is disabled by default. This cache is local to each Lambda execution environment.
-This means it will be effective in cases where your function's concurrency is low in comparison to the number of
-"retry" invocations with the same payload. When enabled, the default is to cache a maximum of 256 records in each Lambda
-execution environment. You can change this with the `local_cache_max_items` parameter.
-
-=== "app.py"
-
-    ```python hl_lines="3 4"
-    IdempotencyConfig(
-        event_key_jmespath="body",
-        use_local_cache=True,
-        local_cache_max_items=1000
-    )
-    ```
-
+    As this happens outside the scope of your Lambda handler, you are not going to be able to catch it.
 
 ## Advanced
 
-### Payload validation
-What happens if lambda is invoked with a payload that it has seen before, but some parameters which are not part of the
-payload have changed? By default, lambda will return the same result as it returned before, which may be misleading.
-Payload validation provides a solution to that. You can provide another JMESpath expression to the persistence store
-with the `payload_validation_jmespath` to specify which part of the event body should be validated against previous
-idempotent invocations.
+### Customizing the default behavior
+
+Idempotent decorator can be further configured with **`IdempotencyConfig`** as seen in the previous example. These are the available options for further configuration
+
+Parameter | Default | Description
+------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
+**event_key_jmespath** | `""` | JMESPath expression to extract the idempotency key from the event record
+**payload_validation_jmespath** | `""` | JMESPath expression to validate whether certain parameters have changed in the event while the event payload
+**raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request
+**expires_after_seconds** | 3600 | The number of seconds to wait before a record is expired
+**use_local_cache** | `False` | Whether to locally cache idempotency results
+**local_cache_max_items** | 1024 | Max number of items to store in local cache
+**hash_function** | `md5` | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html) in the standard library.
+
+### Handling concurrent executions with the same payload
+
+This utility will raise an **`IdempotencyAlreadyInProgressError`** exception if you receive **multiple invocations with the same payload while the first invocation hasn't completed yet**.
+
+!!! info "If you receive `IdempotencyAlreadyInProgressError`, you can safely retry the operation."
+
+This is a locking mechanism for correctness. Since we don't know the result from the first invocation yet, we can't safely allow another concurrent execution.
+
+### Using in-memory cache
+
+**By default, in-memory local caching is disabled**, since we don't know how much memory you consume per invocation compared to the maximum configured in your Lambda function.
+
+!!! note "This in-memory cache is local to each Lambda execution environment"
+    This means it will be effective in cases where your function's concurrency is low in comparison to the number of "retry" invocations with the same payload, because cache might be empty.
+
+You can enable in-memory caching with the **`use_local_cache`** parameter:
 
 === "app.py"
 
-    ```python hl_lines="7"
+    ```python hl_lines="6 8 11"
+    from aws_lambda_powertools.utilities.idempotency import (
+        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
+    )
+
+    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+    config =  IdempotencyConfig(
+        event_key_jmespath="body",
+        expires_after_seconds=5*60,  # 5 minutes
+        use_local_cache=True
+    )
+
+    @idempotent(config=config, persistence_store=persistence_layer)
+    def handler(event, context):
+        ...
+    ```
+
+When enabled, the default is to cache a maximum of 256 records in each Lambda execution environment - You can change it with the **`local_cache_max_items`** parameter.
+### Expiring idempotency records
+
+!!! note
+    By default, we expire idempotency records after **an hour** (3600 seconds).
+
+In most cases, it is not desirable to store the idempotency records forever. Rather, you want to guarantee that the same payload won't be executed within a period of time.
+
+You can change this window with the **`expires_after_seconds`** parameter:
+
+=== "app.py"
+
+    ```python hl_lines="6 8 11"
+    from aws_lambda_powertools.utilities.idempotency import (
+        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
+    )
+
+    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+    config =  IdempotencyConfig(
+        event_key_jmespath="body",
+        expires_after_seconds=5*60,  # 5 minutes
+    )
+
+    @idempotent(config=config, persistence_store=persistence_layer)
+    def handler(event, context):
+        ...
+    ```
+
+This will mark any records older than 5 minutes as expired, and the lambda handler will be executed as normal if it is invoked with a matching payload.
+
+!!! note "DynamoDB time-to-live field"
+    This utility uses **`expiration`** as the TTL field in DynamoDB, as [demonstrated in the SAM example earlier](#required-resources).
+
+### Payload validation
+
+!!! question "What if your function is invoked with the same payload except some outer parameters have changed?"
+    Example: A payment transaction for a given productID was requested twice for the same customer, **however the amount to be paid has changed in the second transaction**.
+
+By default, we will return the same result as it returned before, however in this instance it may be misleading - We provide a fail fast payload validation to address this edge case.
+
+With **`payload_validation_jmespath`**, you can provide an additional JMESPath expression to specify which part of the event body should be validated against previous idempotent invocations
+
+=== "app.py"
+
+    ```python hl_lines="7 11 18 25"
     from aws_lambda_powertools.utilities.idempotency import (
         IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
     )
@@ -238,17 +362,22 @@ idempotent invocations.
         # Creating a subscription payment is a side
         # effect of calling this function!
         payment = create_subscription_payment(
-        user=event['userDetail']['username'],
-        product=event['product_id'],
-        amount=event['amount']
+          user=event['userDetail']['username'],
+          product=event['product_id'],
+          amount=event['amount']
         )
         ...
-        return {"message": "success", "statusCode": 200,
-                "payment_id": payment.id, "amount": payment.amount}
+        return {
+            "message": "success",
+            "statusCode": 200,
+            "payment_id": payment.id,
+            "amount": payment.amount
+        }
     ```
-=== "Example Event"
 
-    ```json
+=== "Example Event 1"
+
+    ```json hl_lines="8"
     {
         "userDetail": {
             "username": "User1",
@@ -260,103 +389,100 @@ idempotent invocations.
     }
     ```
 
-In this example, the "userDetail" and "productId" keys are used as the payload to generate the idempotency key. If
-we try to send the same request but with a different amount, we will raise `IdempotencyValidationError`. Without
-payload validation, we would have returned the same result as we did for the initial request. Since we're also
-returning an amount in the response, this could be quite confusing for the client. By using payload validation on the
-amount field, we prevent this potentially confusing behaviour and instead raise an Exception.
+=== "Example Event 2"
+
+    ```json hl_lines="8"
+    {
+        "userDetail": {
+            "username": "User1",
+            "user_email": "user@example.com"
+        },
+        "productId": 1500,
+        "charge_type": "subscription",
+        "amount": 1
+    }
+    ```
+
+In this example, the **`userDetail`** and **`productId`** keys are used as the payload to generate the idempotency key, as per **`event_key_jmespath`** parameter.
+
+!!! note
+    If we try to send the same request but with a different amount, we will raise **`IdempotencyValidationError`**.
+
+Without payload validation, we would have returned the same result as we did for the initial request. Since we're also returning an amount in the response, this could be quite confusing for the client.
+
+By using **`payload_validation_jmespath="amount"`**, we prevent this potentially confusing behavior and instead raise an Exception.
 
 ### Making idempotency key required
 
-If you want to enforce that an idempotency key is required, you can set `raise_on_no_idempotency_key` to `True`,
-and we will raise `IdempotencyKeyError` if none was found.
+If you want to enforce that an idempotency key is required, you can set **`raise_on_no_idempotency_key`** to `True`.
+
+This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`event_key_jmespath`** is `None`.
 
 === "app.py"
 
-    ```python hl_lines="8"
+    ```python hl_lines="9-10 13"
     from aws_lambda_powertools.utilities.idempotency import (
         IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
     )
 
-    # Requires "user"."uid" and from the "body" json parsed "order_id" to be present
+    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+
+    # Requires "user"."uid" and "order_id" to be present
     config = IdempotencyConfig(
-        event_key_jmespath="[user.uid, powertools_json(body).order_id]",
+        event_key_jmespath="[user.uid, order_id]",
         raise_on_no_idempotency_key=True,
     )
-    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 
     @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event, context):
         pass
     ```
+
 === "Success Event"
 
-    ```json
+    ```json hl_lines="3 6"
     {
         "user": {
             "uid": "BB0D045C-8878-40C8-889E-38B3CB0A61B1",
             "name": "Foo"
         },
-        "body": "{\"order_id\": 10000}"
+        "order_id": 10000
     }
     ```
+
 === "Failure Event"
 
-    ```json
+    Notice that `order_id` is now accidentally within `user` key
+
+    ```json hl_lines="3 5"
     {
         "user": {
-            "name": "Joe Bloggs"
+            "uid": "DE0D000E-1234-10D1-991E-EAC1DD1D52C8",
+            "name": "Joe Bloggs",
+            "order_id": 10000
         },
-        "body": "{\"total_amount\": 10000}"
     }
-    ```
-
-### Changing dynamoDB attribute names
-If you want to use an existing DynamoDB table, or wish to change the name of the attributes used to store items in the
-table, you can do so when you construct the `DynamoDBPersistenceLayer` instance.
-
-
-Parameter           | Default value  | Description
-------------------- |--------------- | ------------
-key_attr            | "id"           | Primary key of the table. Hashed representation of the payload
-expiry_attr         | "expiration"   | Unix timestamp of when record expires
-status_attr         | "status"       | Stores status of the lambda execution during and after invocation
-data_attr           | "data"         | Stores results of successfully executed Lambda handlers
-validation_key_attr | "validation"   | Hashed representation of the parts of the event used for validation
-
-This example demonstrates changing the attribute names to custom values:
-
-=== "app.py"
-
-    ```python hl_lines="3-7"
-    persistence_layer = DynamoDBPersistenceLayer(
-        table_name="IdempotencyTable",
-        key_attr="idempotency_key",
-        expiry_attr="expires_at",
-        status_attr="current_status",
-        data_attr="result_data",
-        validation_key_attr="validation_key"
-    )
     ```
 
 ### Customizing boto configuration
-You can provide custom boto configuration or event bring your own boto3 session if required by using the `boto_config`
-or `boto3_session` parameters when constructing the persistence store.
+
+You can provide a custom boto configuration via **`boto_config`**, or an existing boto session via **`boto3_session`** parameters, when constructing the persistence store.
 
 === "Custom session"
 
-    ```python hl_lines="1 7 10"
+    ```python hl_lines="1 6 9 14"
     import boto3
     from aws_lambda_powertools.utilities.idempotency import (
         IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
     )
 
-    config = IdempotencyConfig(event_key_jmespath="body")
     boto3_session = boto3.session.Session()
     persistence_layer = DynamoDBPersistenceLayer(
         table_name="IdempotencyTable",
         boto3_session=boto3_session
     )
+
+    config = IdempotencyConfig(event_key_jmespath="body")
 
     @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event, context):
@@ -384,11 +510,16 @@ or `boto3_session` parameters when constructing the persistence store.
 
 ### Bring your own persistent store
 
-The utility provides an abstract base class which can be used to implement your choice of persistent storage layers.
+This utility provides an abstract base class (ABC), so that you can implement your choice of persistent storage layer.
+
 You can inherit from the `BasePersistenceLayer` class and implement the abstract methods `_get_record`, `_put_record`,
-`_update_record` and `_delete_record`. Pay attention to the documentation for each - you may need to perform additional
-checks inside these methods to ensure the idempotency guarantees remain intact. For example, the `_put_record` method
-needs to raise an exception if a non-expired record already exists in the data store with a matching key.
+`_update_record` and `_delete_record`.
+
+!!! danger
+    Pay attention to the documentation for each - you may need to perform additional
+    checks inside these methods to ensure the idempotency guarantees remain intact.
+
+For example, the `_put_record` method needs to raise an exception if a non-expired record already exists in the data store with a matching key.
 
 ## Compatibility with other utilities
 
@@ -420,5 +551,6 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
     ```
 
 ## Extra resources
+
 If you're interested in a deep dive on how Amazon uses idempotency when building our APIs, check out
 [this article](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/).
