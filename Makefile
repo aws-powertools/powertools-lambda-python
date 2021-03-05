@@ -21,7 +21,7 @@ test:
 	poetry run pytest --cache-clear tests/performance
 
 coverage-html:
-	poetry run pytest -m "not perf" --cov-report html
+	poetry run pytest -m "not perf" --cov-report=html
 
 pr: lint test security-baseline complexity-baseline
 
