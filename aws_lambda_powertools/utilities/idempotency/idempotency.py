@@ -55,9 +55,10 @@ def idempotent(
         >>>    idempotent, DynamoDBPersistenceLayer, IdempotencyConfig
         >>> )
         >>>
+        >>> idem_config=IdempotencyConfig(event_key_jmespath="body")
         >>> persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency_store")
         >>>
-        >>> @idempotent(persistence_store=persistence_layer, config=IdempotencyConfig(event_key_jmespath="body"))
+        >>> @idempotent(config=idem_config, persistence_store=persistence_layer)
         >>> def handler(event, context):
         >>>     return {"StatusCode": 200}
     """

@@ -132,7 +132,7 @@ class BasePersistenceLayer(ABC):
             Idempotency configuration settings
         """
         if self.configured:
-            # Prevent being reconfigured.
+            # Prevent being reconfigured multiple times
             return
         self.configured = True
 

@@ -166,7 +166,7 @@ def idempotency_config(config, request, default_jmespath):
 
 @pytest.fixture
 def config_without_jmespath(config, request):
-    return IdempotencyConfig(use_local_cache=request.param["use_local_cache"],)
+    return IdempotencyConfig(use_local_cache=request.param["use_local_cache"])
 
 
 @pytest.fixture

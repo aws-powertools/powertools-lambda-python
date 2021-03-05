@@ -75,7 +75,7 @@ storage layer, so you'll need to create a table first.
 
 You can quickly start by initializing the `DynamoDBPersistenceLayer` class outside the Lambda handler, and using it
 with the `idempotent` decorator on your lambda handler. The only required parameter is `table_name`, but you likely
-want to specify `event_key_jmespath` via `IdempotencyConfig`.
+want to specify `event_key_jmespath` via `IdempotencyConfig` class.
 
 `event_key_jmespath`: A JMESpath expression which will be used to extract the payload from the event your Lambda handler
 is called with. This payload will be used as the key to decide if future invocations are duplicates. If you don't pass
