@@ -8,10 +8,18 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## [1.11.0] - 2021-03-05
 ### Fixed
 
-* **Tracer**: Lazy loads X-Ray SDK to improve import perf for those not instantiating Tracer
-* **Metrics**: Convert EMF JSON Schema as Dictionary to reduce I/O and improve import perf
+* **Tracer**: Lazy loads X-Ray SDK to increase perf by 75% for those not instantiating Tracer
+* **Metrics**: Optimize validation and serialization to increase perf by nearly 50% for large operations (<1ms)
+
+### Added
+
+* **Dataclass**: Add new Amazon Connect contact flow event
+* **Idempotency**: New Idempotency utility
+* **Docs**: Add example on how to integrate Batch utility with Sentry.io
+* **Internal**: Added performance SLA tests for high level imports and Metrics validation/serialization
 
 ## [1.10.5] - 2021-02-17
 
