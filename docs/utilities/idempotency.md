@@ -17,6 +17,7 @@ once with the same input parameters.
 **Idempotent operations will return the same result when they are called multiple
 times with the same parameters**. This makes idempotent operations safe to retry.
 
+**Idempotency key** is a hash representation of either the entire event or a specific configured subset of the event, and invocation results are **JSON serialized** and stored in your persistence storage layer.
 
 ## Key features
 
@@ -190,7 +191,7 @@ Imagine the function executes successfully, but the client never receives the re
     }
     ```
 
-#### Sequence diagram
+#### Idempotency request flow
 
 This sequence diagram shows an example flow of what happens in the payment scenario:
 
@@ -198,10 +199,21 @@ This sequence diagram shows an example flow of what happens in the payment scena
 
 The client was successful in receiving the result after the retry. Since the Lambda handler was only executed once, our customer hasn't been charged twice.
 
-#### WORD ABOUT SERIALIZATION AND IDEMPOTENCY KEY CLARIFICATION
-
 !!! note
     Bear in mind that the entire Lambda handler is treated as a single idempotent operation. If your Lambda handler can cause multiple side effects, consider splitting it into separate functions.
+
+### Handling exceptions
+
+**The record in the persistence layer will be deleted** if your Lambda handler returns an exception. This means that new invocations will execute again despite having the same payload.
+
+If you don't want the record to be deleted, you need to catch exceptions within the handler and return a successful response.
+
+![Idempotent sequence exception](../media/idempotent_sequence_exception.png)
+
+!!! warning
+    **We will raise `IdempotencyPersistenceLayerError`** if any of the calls to the persistence layer  fail unexpectedly.
+
+    As this happens outside the scope of your Lambda handler, you are not going to be able to catch it.
 
 ### Persistence layers
 
@@ -234,22 +246,6 @@ Parameter | Required | Default | Description
 **status_attr** |  | `status` | Stores status of the lambda execution during and after invocation
 **data_attr** |  | `data`  | Stores results of successfully executed Lambda handlers
 **validation_key_attr** |  | `validation` | Hashed representation of the parts of the event used for validation
-
-
-
-### Handling exceptions
-
-**The record in the persistence layer will be deleted** if your Lambda handler returns an exception. This means that new invocations will execute again despite having the same payload.
-
-If you don't want the record to be deleted, you need to catch exceptions within the handler and return a successful response.
-
-![Idempotent sequence exception](../media/idempotent_sequence_exception.png)
-
-!!! warning
-    **We will raise `IdempotencyPersistenceLayerError`** if any of the calls to the persistence layer  fail unexpectedly.
-
-    As this happens outside the scope of your Lambda handler, you are not going to be able to catch it.
-
 ## Advanced
 
 ### Customizing the default behavior

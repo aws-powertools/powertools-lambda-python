@@ -46,7 +46,7 @@ def idempotent(
     persistence_store: BasePersistenceLayer
         Instance of BasePersistenceLayer to store data
     config: IdempotencyConfig
-        Configutation
+        Configuration
 
     Examples
     --------
