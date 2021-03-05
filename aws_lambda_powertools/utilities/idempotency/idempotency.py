@@ -106,7 +106,7 @@ class IdempotencyHandler:
         persistence_store : BasePersistenceLayer
             Instance of persistence layer to store idempotency records
         """
-        persistence_store._configure(config)
+        persistence_store.configure(config)
         self.persistence_store = persistence_store
         self.context = context
         self.event = event

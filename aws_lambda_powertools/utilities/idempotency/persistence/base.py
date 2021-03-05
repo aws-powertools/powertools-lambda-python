@@ -122,7 +122,7 @@ class BasePersistenceLayer(ABC):
         self._cache: Optional[LRUDict] = None
         self.hash_function = None
 
-    def _configure(self, config: IdempotencyConfig) -> None:
+    def configure(self, config: IdempotencyConfig) -> None:
         """
         Initialize the base persistence layer from the configuration settings
 
