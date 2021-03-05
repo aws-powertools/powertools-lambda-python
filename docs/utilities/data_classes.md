@@ -5,7 +5,7 @@ description: Utility
 
 The event source data classes utility provides classes describing the schema of common Lambda events triggers.
 
-**Key Features**
+## Key Features
 
 * Type hinting and code completion for common event types
 * Helper functions for decoding/deserializing nested fields
@@ -17,12 +17,29 @@ When authoring Lambda functions, you often need to understand the schema of the 
 handler. There are several common event types which follow a specific schema, depending on the service triggering the
 Lambda function.
 
+## Getting started
 
-## Utilizing the data classes
+### Utilizing the data classes
 
 The classes are initialized by passing in the Lambda event object into the constructor of the appropriate data class.
+
 For example, if your Lambda function is being triggered by an API Gateway proxy integration, you can use the
 `APIGatewayProxyEvent` class.
+
+=== "app.py"
+
+    ```python hl_lines="1 4"
+    from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
+
+    def lambda_handler(event, context):
+        event: APIGatewayProxyEvent = APIGatewayProxyEvent(event)
+
+        if 'helloworld' in event.path && event.http_method == 'GET':
+            do_something_with(event.body, user)
+    ```
+
+**Autocomplete with self-documented properties and methods**
+
 
 ![Utilities Data Classes](../media/utilities_data_classes.png)
 
@@ -49,7 +66,7 @@ Event Source | Data_class
     documentation inherently (via autocompletion, types and docstrings).
 
 
-## API Gateway Proxy
+### API Gateway Proxy
 
 Typically used for API Gateway REST API or HTTP API using v1 proxy event.
 
@@ -68,7 +85,7 @@ Typically used for API Gateway REST API or HTTP API using v1 proxy event.
             do_something_with(event.body, user)
     ```
 
-## API Gateway Proxy v2
+### API Gateway Proxy v2
 
 === "lambda_app.py"
 
@@ -84,7 +101,7 @@ Typically used for API Gateway REST API or HTTP API using v1 proxy event.
             do_something_with(event.body, query_string_parameters)
     ```
 
-## CloudWatch Logs
+### CloudWatch Logs
 
 CloudWatch Logs events by default are compressed and base64 encoded. You can use the helper function provided to decode,
 decompress and parse json data from the event.
@@ -103,7 +120,7 @@ decompress and parse json data from the event.
             do_something_with(event.timestamp, event.message)
     ```
 
-## Cognito User Pool
+### Cognito User Pool
 
 Cognito User Pools have several [different Lambda trigger sources](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html#cognito-user-identity-pools-working-with-aws-lambda-trigger-sources), all of which map to a different data class, which
 can be imported from `aws_lambda_powertools.data_classes.cognito_user_pool_event`:
@@ -133,7 +150,7 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
         do_something_with(user_attributes)
     ```
 
-## DynamoDB Streams
+### DynamoDB Streams
 
 The DynamoDB data class utility provides the base class for `DynamoDBStreamEvent`, a typed class for
 attributes values (`AttributeValue`), as well as enums for stream view type (`StreamViewType`) and event type
@@ -154,7 +171,7 @@ attributes values (`AttributeValue`), as well as enums for stream view type (`St
                 do_something_with(record.dynamodb.old_image)
     ```
 
-## EventBridge
+### EventBridge
 
 === "lambda_app.py"
 
@@ -167,7 +184,7 @@ attributes values (`AttributeValue`), as well as enums for stream view type (`St
 
     ```
 
-## Kinesis streams
+### Kinesis streams
 
 Kinesis events by default contain base64 encoded data. You can use the helper function to access the data either as json
 or plain text, depending on the original payload.
@@ -189,7 +206,7 @@ or plain text, depending on the original payload.
         do_something_with(data)
     ```
 
-## S3
+### S3
 
 === "lambda_app.py"
 
@@ -207,7 +224,7 @@ or plain text, depending on the original payload.
             do_something_with(f'{bucket_name}/{object_key}')
     ```
 
-## SES
+### SES
 
 === "lambda_app.py"
 
@@ -225,7 +242,7 @@ or plain text, depending on the original payload.
             do_something_with(common_headers.to, common_headers.subject)
     ```
 
-## SNS
+### SNS
 
 === "lambda_app.py"
 
@@ -243,7 +260,7 @@ or plain text, depending on the original payload.
             do_something_with(subject, message)
     ```
 
-## SQS
+### SQS
 
 === "lambda_app.py"
 
