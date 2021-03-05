@@ -305,7 +305,7 @@ and we will raise `IdempotencyKeyError` if none was found.
     ```json
     {
         "user": {
-            "name": "Foo"
+            "name": "Joe Bloggs"
         },
         "body": "{\"total_amount\": 10000}"
     }
