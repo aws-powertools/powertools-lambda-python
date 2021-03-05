@@ -345,7 +345,7 @@ def test_idempotent_lambda_already_completed_with_validation_bad_payload(
     hashed_validation_key,
 ):
     """
-    Test idempotent decorator where event with matching event key has already been succesfully processed
+    Test idempotent decorator where event with matching event key has already been successfully processed
     """
 
     stubber = stub.Stubber(persistence_store.table.meta.client)

@@ -47,6 +47,7 @@ markdown_extensions:
       permalink: true
       toc_depth: 4
   - attr_list
+  - pymdownx.emoji
 
 copyright: Copyright &copy; 2021 Amazon Web Services
 
