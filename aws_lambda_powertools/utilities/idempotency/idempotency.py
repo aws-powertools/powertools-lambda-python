@@ -63,10 +63,14 @@ def idempotent(
         >>>     return {"StatusCode": 200}
     """
 
-    idempotency_handler = IdempotencyHandler(handler, event, context, config or IdempotencyConfig(), persistence_store)
+    config = config or IdempotencyConfig()
+    idempotency_handler = IdempotencyHandler(
+        lambda_handler=handler, event=event, context=context, persistence_store=persistence_store, config=config
+    )
 
     # IdempotencyInconsistentStateError can happen under rare but expected cases when persistent state changes in the
     # small time between put & get requests. In most cases we can retry successfully on this exception.
+    # Maintenance: Allow customers to specify number of retries
     max_handler_retries = 2
     for i in range(max_handler_retries + 1):
         try:
