@@ -550,6 +550,9 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
         return {"message": event['message'], "statusCode": 200}
     ```
 
+!!! tip "JMESPath Powertools functions are also available"
+    Built-in functions known in the validation utility like `powertools_json`, `powertools_base64`, `powertools_base64_gzip` are also available to use in this utility.
+
 ## Extra resources
 
 If you're interested in a deep dive on how Amazon uses idempotency when building our APIs, check out
