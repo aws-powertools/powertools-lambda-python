@@ -10,8 +10,8 @@ from aws_lambda_powertools.metrics import MetricUnit
 from aws_lambda_powertools.metrics import metrics as metrics_global
 
 # adjusted for slower machines in CI too
-METRICS_VALIDATION_SLA: float = 0.0013
-METRICS_SERIALIZATION_SLA: float = 0.0013
+METRICS_VALIDATION_SLA: float = 0.0019
+METRICS_SERIALIZATION_SLA: float = 0.0019
 
 
 @contextmanager
