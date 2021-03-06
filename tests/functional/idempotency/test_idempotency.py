@@ -775,3 +775,27 @@ def test_custom_jmespath_function_overrides_builtin_functions(
         # WHEN calling _get_hashed_idempotency_key
         # THEN raise unknown function
         persistence_store._get_hashed_idempotency_key({})
+
+
+@pytest.mark.parametrize("config_with_validation", [{"use_local_cache": False}], indirect=True)
+def test_idempotent_lambda_save_inprogress_error(
+    config_with_validation: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+):
+    """
+    Test idempotent decorator where event with matching event key has already been successfully processed
+    """
+
+    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber.add_client_error("put_item", "ClientError")
+    stubber.activate()
+
+    @idempotent(config=config_with_validation, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return {}
+
+    with pytest.raises(IdempotencyPersistenceLayerError) as e:
+        lambda_handler({}, {})
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+    assert "Failed to save in progress record to idempotency store" == e.value.args[0]
