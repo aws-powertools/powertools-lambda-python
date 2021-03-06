@@ -84,7 +84,7 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
 
 === "app.py"
 
-    ```python hl_lines="1 5 7 14"
+    ```python hl_lines="1-3 5 7 14"
     from aws_lambda_powertools.utilities.idempotency import (
         DynamoDBPersistenceLayer, idempotent
     )
@@ -186,7 +186,7 @@ Imagine the function executes successfully, but the client never receives the re
         "time":"10/Feb/2021:13:40:43 +0000",
         "timeEpoch":1612964443723
       },
-      "body":"{\"username\":\"xyz\",\"product_id\":\"123456789\"}",
+      "body":"{\"user\":\"xyz\",\"product_id\":\"123456789\"}",
       "isBase64Encoded":false
     }
     ```
@@ -223,7 +223,7 @@ This persistence layer is built-in, and you can either use an existing DynamoDB 
 
 === "app.py"
 
-    ```python hl_lines="3-7"
+    ```python hl_lines="5-9"
     from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
 
     persistence_layer = DynamoDBPersistenceLayer(
@@ -232,7 +232,7 @@ This persistence layer is built-in, and you can either use an existing DynamoDB 
         expiry_attr="expires_at",
         status_attr="current_status",
         data_attr="result_data",
-        validation_key_attr="validation_key"
+        validation_key_attr="validation_key",
     )
     ```
 
@@ -246,6 +246,7 @@ Parameter | Required | Default | Description
 **status_attr** |  | `status` | Stores status of the lambda execution during and after invocation
 **data_attr** |  | `data`  | Stores results of successfully executed Lambda handlers
 **validation_key_attr** |  | `validation` | Hashed representation of the parts of the event used for validation
+
 ## Advanced
 
 ### Customizing the default behavior
@@ -259,7 +260,7 @@ Parameter | Default | Description
 **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request
 **expires_after_seconds** | 3600 | The number of seconds to wait before a record is expired
 **use_local_cache** | `False` | Whether to locally cache idempotency results
-**local_cache_max_items** | 1024 | Max number of items to store in local cache
+**local_cache_max_items** | 256 | Max number of items to store in local cache
 **hash_function** | `md5` | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html) in the standard library.
 
 ### Handling concurrent executions with the same payload
@@ -281,7 +282,7 @@ You can enable in-memory caching with the **`use_local_cache`** parameter:
 
 === "app.py"
 
-    ```python hl_lines="6 8 11"
+    ```python hl_lines="8 11"
     from aws_lambda_powertools.utilities.idempotency import (
         IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
     )
@@ -289,8 +290,7 @@ You can enable in-memory caching with the **`use_local_cache`** parameter:
     persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
     config =  IdempotencyConfig(
         event_key_jmespath="body",
-        expires_after_seconds=5*60,  # 5 minutes
-        use_local_cache=True
+        use_local_cache=True,
     )
 
     @idempotent(config=config, persistence_store=persistence_layer)
@@ -310,7 +310,7 @@ You can change this window with the **`expires_after_seconds`** parameter:
 
 === "app.py"
 
-    ```python hl_lines="6 8 11"
+    ```python hl_lines="8 11"
     from aws_lambda_powertools.utilities.idempotency import (
         IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
     )
