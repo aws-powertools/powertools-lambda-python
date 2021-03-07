@@ -696,6 +696,8 @@ def test_is_missing_idempotency_key():
     assert BasePersistenceLayer.is_missing_idempotency_key([None, None])
     # GIVEN a tuples of Nones THEN is_missing_idempotency_key is True
     assert BasePersistenceLayer.is_missing_idempotency_key((None, None))
+    # GIVEN a dict of Nones THEN is_missing_idempotency_key is True
+    assert BasePersistenceLayer.is_missing_idempotency_key({None: None})
 
     # GIVEN a str THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key("Value") is False
