@@ -183,7 +183,9 @@ class BasePersistenceLayer(ABC):
 
     @staticmethod
     def is_missing_idempotency_key(data) -> bool:
-        return data is None or not data or all(x is None for x in data)
+        if type(data).__name__ in ("tuple", "list", "dict"):
+            return all(x is None for x in data)
+        return not data
 
     def _get_hashed_payload(self, lambda_event: Dict[str, Any]) -> str:
         """
