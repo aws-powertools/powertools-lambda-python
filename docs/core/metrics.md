@@ -114,7 +114,7 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 
     @metrics.log_metrics
     def lambda_handler(evt, ctx):
-        metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
+        metrics.add_metric(name="BookingConfirmation", unit=MetricUnit.Count, value=1)
         ...
     ```
 === "Example CloudWatch Logs excerpt"
@@ -162,6 +162,8 @@ If you want to ensure that at least one metric is emitted, you can pass `raise_o
     ```python hl_lines="3"
     from aws_lambda_powertools.metrics import Metrics
 
+    metrics = Metrics()
+
     @metrics.log_metrics(raise_on_empty_metrics=True)
     def lambda_handler(evt, ctx):
         ...
@@ -183,12 +185,12 @@ When using multiple middlewares, use `log_metrics` as your **last decorator** wr
 	tracer = Tracer(service="booking")
     metrics = Metrics(namespace="ExampleApplication", service="booking")
 
-	metrics.add_metric(name="ColdStart", unit="Count", value=1)
+	metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
 
     @metrics.log_metrics
     @tracer.capture_lambda_handler
     def lambda_handler(evt, ctx):
-        metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
+        metrics.add_metric(name="BookingConfirmation", unit=MetricUnit.Count, value=1)
         ...
     ```
 
@@ -200,7 +202,6 @@ You can optionally capture cold start metrics with `log_metrics` decorator via `
 
     ```python hl_lines="6"
     from aws_lambda_powertools import Metrics
-    from aws_lambda_powertools.metrics import MetricUnit
 
     metrics = Metrics(service="ExampleService")
 
@@ -300,7 +301,7 @@ If you prefer not to use `log_metrics` because you might want to encapsulate add
     from aws_lambda_powertools.metrics import MetricUnit
 
     metrics = Metrics(namespace="ExampleApplication", service="booking")
-    metrics.add_metric(name="ColdStart", unit="Count", value=1)
+    metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
 
     your_metrics_object = metrics.serialize_metric_set()
     metrics.clear_metrics()
