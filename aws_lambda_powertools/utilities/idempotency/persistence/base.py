@@ -183,7 +183,7 @@ class BasePersistenceLayer(ABC):
 
     @staticmethod
     def is_missing_idempotency_key(data) -> bool:
-        if data is None or not data:
+        if not data:
             return True
         if type(data).__name__ in ("tuple", "list", "dict"):
             return all(x is None for x in data)
