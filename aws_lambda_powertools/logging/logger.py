@@ -53,7 +53,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     LOG_LEVEL: str
         logging level (e.g. INFO, DEBUG)
     POWERTOOLS_LOGGER_SAMPLE_RATE: float
-        samping rate ranging from 0 to 1, 1 being 100% sampling
+        sampling rate ranging from 0 to 1, 1 being 100% sampling
 
     Parameters
     ----------
