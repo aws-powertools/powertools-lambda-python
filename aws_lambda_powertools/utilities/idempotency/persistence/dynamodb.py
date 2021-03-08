@@ -53,11 +53,14 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         Examples
         --------
         **Create a DynamoDB persistence layer with custom settings**
-            >>> from aws_lambda_powertools.utilities.idempotency import idempotent, DynamoDBPersistenceLayer
+
+            >>> from aws_lambda_powertools.utilities.idempotency import (
+            >>>    idempotent, DynamoDBPersistenceLayer
+            >>> )
             >>>
             >>> persistence_store = DynamoDBPersistenceLayer(table_name="idempotency_store")
             >>>
-            >>> @idempotent(persistence_store=persistence_store, event_key="body")
+            >>> @idempotent(persistence_store=persistence_store)
             >>> def handler(event, context):
             >>>     return {"StatusCode": 200}
         """

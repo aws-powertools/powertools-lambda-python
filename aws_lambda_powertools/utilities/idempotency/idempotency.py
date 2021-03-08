@@ -51,6 +51,7 @@ def idempotent(
     Examples
     --------
     **Processes Lambda's event in an idempotent manner**
+
         >>> from aws_lambda_powertools.utilities.idempotency import (
         >>>    idempotent, DynamoDBPersistenceLayer, IdempotencyConfig
         >>> )

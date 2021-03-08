@@ -53,6 +53,7 @@ class PartialSQSProcessor(BasePartialProcessor):
         >>>     # have been deleted from the queue after context's exit.
         >>>
         >>>     return result
+
     """
 
     def __init__(self, config: Optional[Config] = None, suppress_exception: bool = False):
@@ -163,10 +164,11 @@ def sqs_batch_processor(
     Examples
     --------
     **Processes Lambda's event with PartialSQSProcessor**
+
         >>> from aws_lambda_powertools.utilities.batch import sqs_batch_processor
         >>>
         >>> def record_handler(record):
-        >>>     return record["body"]
+        >>>      return record["body"]
         >>>
         >>> @sqs_batch_processor(record_handler=record_handler)
         >>> def handler(event, context):

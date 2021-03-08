@@ -125,6 +125,7 @@ def batch_processor(
     Examples
     --------
     **Processes Lambda's event with PartialSQSProcessor**
+
         >>> from aws_lambda_powertools.utilities.batch import batch_processor, PartialSQSProcessor
         >>>
         >>> def record_handler(record):
