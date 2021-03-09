@@ -4,7 +4,9 @@ import logging
 import os
 import random
 import sys
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Dict, Optional, Union
+
+import jmespath
 
 from ..shared import constants
 from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
@@ -34,6 +36,27 @@ def _is_cold_start() -> bool:
         is_cold_start = False
 
     return cold_start
+
+
+def _get_correlation_id_path(path: Union[str, int]) -> Optional[str]:
+    """
+
+    Parameters
+    ----------
+    path :
+        JMESPath
+    Returns
+    -------
+    str, optional
+        Returns the JMESPath
+    """
+    if path is None:
+        return None
+
+    # NOTE: We could have a enum of standard event types
+    # like "requestContext.requestId" or API Gateway Proxy Events
+
+    return path
 
 
 # PyCharm does not support autocomplete via getattr
@@ -204,7 +227,12 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
                 f"Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
             )
 
-    def inject_lambda_context(self, lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = None):
+    def inject_lambda_context(
+        self,
+        lambda_handler: Callable[[Dict, Any], Any] = None,
+        log_event: bool = None,
+        correlation_id_path: Union[str, int] = None,
+    ):
         """Decorator to capture Lambda contextual info and inject into logger
 
         Parameters
@@ -213,6 +241,8 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             Method to inject the lambda context
         log_event : bool, optional
             Instructs logger to log Lambda Event, by default False
+        correlation_id_path: str, optional
+            Can be a JMESPath or one of the standard ones
 
         Environment variables
         ---------------------
@@ -251,17 +281,23 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         # Return a partial function with args filled
         if lambda_handler is None:
             logger.debug("Decorator called with parameters")
-            return functools.partial(self.inject_lambda_context, log_event=log_event)
+            return functools.partial(
+                self.inject_lambda_context, log_event=log_event, correlation_id_path=correlation_id_path
+            )
 
         log_event = resolve_truthy_env_var_choice(
             choice=log_event, env=os.getenv(constants.LOGGER_LOG_EVENT_ENV, "false")
         )
+        correlation_id_path = _get_correlation_id_path(correlation_id_path)
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
             lambda_context = build_lambda_context_model(context)
             cold_start = _is_cold_start()
             self.structure_logs(append=True, cold_start=cold_start, **lambda_context.__dict__)
+
+            if correlation_id_path:
+                self.structure_logs(append=True, correlation_id=jmespath.search(correlation_id_path, event))
 
             if log_event:
                 logger.debug("Event received")

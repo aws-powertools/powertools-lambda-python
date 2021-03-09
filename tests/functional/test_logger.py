@@ -437,3 +437,21 @@ def test_logger_exception_extract_exception_name(stdout, service_name):
     # THEN we expect a "exception_name" to be "ValueError"
     log = capture_logging_output(stdout)
     assert "ValueError" == log["exception_name"]
+
+
+def test_logger_correlation_id(lambda_context, stdout, service_name):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout)
+    request_id = "xxx"
+    mock_event = {"requestContext": {"requestId": request_id}}
+
+    @logger.inject_lambda_context(correlation_id_path="requestContext.requestId")
+    def handler(_1, _2):
+        logger.info("Foo")
+
+    # WHEN
+    handler(mock_event, lambda_context)
+
+    # THEN
+    log = capture_logging_output(stdout)
+    assert request_id == log["correlation_id"]
