@@ -10,6 +10,8 @@ from uuid import uuid4
 import boto3
 from botocore.config import Config
 
+from ...shared import constants
+from ...shared.functions import resolve_env_var_choice
 from .base import DEFAULT_PROVIDERS, BaseProvider
 
 CLIENT_ID = str(uuid4())
@@ -33,6 +35,7 @@ class AppConfigProvider(BaseProvider):
     **Retrieves the latest configuration value from App Config**
 
         >>> from aws_lambda_powertools.utilities import parameters
+        >>>
         >>> appconf_provider = parameters.AppConfigProvider(environment="my_env", application="my_app")
         >>>
         >>> value : bytes = appconf_provider.get("my_conf")
@@ -66,7 +69,9 @@ class AppConfigProvider(BaseProvider):
 
         config = config or Config()
         self.client = boto3.client("appconfig", config=config)
-        self.application = application or os.getenv("POWERTOOLS_SERVICE_NAME") or "application_undefined"
+        self.application = resolve_env_var_choice(
+            choice=application, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
+        )
         self.environment = environment
         self.current_version = ""
 
