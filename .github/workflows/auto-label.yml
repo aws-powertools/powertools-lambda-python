@@ -12,3 +12,12 @@ jobs:
       - uses: banyan/auto-label@1.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  size-label:
+    name: PR diff size label
+    runs-on: ubuntu-latest
+    steps:
+      - name: size-label
+        uses: "pascalgn/size-label-action@v0.4.2"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          IGNORED: "\npoetry.lock"
