@@ -68,7 +68,7 @@ class AppConfigProvider(BaseProvider):
 
         config = config or Config()
         self.client = boto3.client("appconfig", config=config)
-        self.application = application or os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
+        self.application = resolve_env_var_choice(choice=application, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined"))
         self.environment = environment
         self.current_version = ""
 
