@@ -37,7 +37,6 @@ With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip insta
 
 * Structured logging initial implementation from [aws-lambda-logging](https://gitlab.com/hadrien/aws_lambda_logging)
 * Powertools idea [DAZN Powertools](https://github.com/getndazn/dazn-lambda-powertools/)
-* [Gatsby Apollo Theme for Docs](https://github.com/apollographql/gatsby-theme-apollo/tree/master/packages/gatsby-theme-apollo-docs)
 
 ## License
 
