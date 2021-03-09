@@ -11,6 +11,7 @@ import boto3
 from botocore.config import Config
 
 from ...shared import constants
+from ...shared.functions import resolve_env_var_choice
 from .base import DEFAULT_PROVIDERS, BaseProvider
 
 CLIENT_ID = str(uuid4())
@@ -68,7 +69,9 @@ class AppConfigProvider(BaseProvider):
 
         config = config or Config()
         self.client = boto3.client("appconfig", config=config)
-        self.application = resolve_env_var_choice(choice=application, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined"))
+        self.application = resolve_env_var_choice(
+            choice=application, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
+        )
         self.environment = environment
         self.current_version = ""
 
