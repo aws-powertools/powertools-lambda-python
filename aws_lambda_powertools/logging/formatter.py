@@ -126,6 +126,24 @@ class JsonFormatter(logging.Formatter):
 
         return None
 
+    def _extract_log_exception_name(self, log_record: logging.LogRecord) -> Optional[str]:
+        """Extract the exception name, if available
+
+        Parameters
+        ----------
+        log_record : logging.LogRecord
+            Log record to extract exception name from
+
+        Returns
+        -------
+        log_record: Optional[str]
+            Log record with exception name
+        """
+        if log_record.exc_info:
+            return log_record.exc_info[0].__name__
+
+        return None
+
     def _extract_log_keys(self, log_record: logging.LogRecord) -> Dict:
         """Extract and parse custom and reserved log keys
 
@@ -164,6 +182,7 @@ class JsonFormatter(logging.Formatter):
     def format(self, record):  # noqa: A003
         formatted_log = self._extract_log_keys(log_record=record)
         formatted_log["message"] = self._extract_log_message(log_record=record)
+        formatted_log["exception_name"] = self._extract_log_exception_name(log_record=record)
         formatted_log["exception"] = self._extract_log_exception(log_record=record)
         formatted_log.update({"xray_trace_id": self._get_latest_trace_id()})  # fetch latest Trace ID, if any
 
