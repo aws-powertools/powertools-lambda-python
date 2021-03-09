@@ -44,7 +44,7 @@ def _get_correlation_id_path(path: Union[str, int]) -> Optional[str]:
     Parameters
     ----------
     path :
-        JMESPath
+        JMESPath expression to find the correlation_id
     Returns
     -------
     str, optional
@@ -242,7 +242,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         log_event : bool, optional
             Instructs logger to log Lambda Event, by default False
         correlation_id_path: str, optional
-            Can be a JMESPath or one of the standard ones
+            JMESPath expression to find the correlation_id
 
         Environment variables
         ---------------------
