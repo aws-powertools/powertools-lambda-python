@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "area/utilities": ["aws_lambda_powertools_python/utilities/", "aws_lambda_powertools_python/utilities/", "aws_lambda_powertools_python/middleware_factory/"],
+    "area/logger": ["aws_lambda_powertools_python/logging/"],
+    "area/tracer": ["aws_lambda_powertools_python/tracing/"],
+    "area/metrics": ["aws_lambda_powertools_python/metrics/"],
+    "documentation": ["docs/", "mkdocs.yml"],
+    "internal": ["Makefile", "CHANGELOG.md", "CONTRIBUTING.md"]
+  }
+}
