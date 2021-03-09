@@ -148,7 +148,6 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 !!! tip "Metric validation"
 	If metrics are provided, and any of the following criteria are not met, **`SchemaValidationError`** exception will be raised:
 
-	* Minimum of 1 dimension
 	* Maximum of 9 dimensions
 	* Namespace is set, and no more than one
 	* Metric units must be [supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html)
