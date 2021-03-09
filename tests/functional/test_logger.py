@@ -422,3 +422,18 @@ def test_logger_log_twice_when_log_filter_isnt_present_and_root_logger_is_setup(
     # since child's log records propagated to root logger should be rejected
     logs = list(stdout.getvalue().strip().split("\n"))
     assert len(logs) == 4
+
+
+def test_logger_exception_extract_exception_name(stdout, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN calling a logger.exception with a ValueError
+    try:
+        raise ValueError("something went wrong")
+    except Exception:
+        logger.exception("Received an exception")
+
+    # THEN we expect a "exception_name" to be "ValueError"
+    log = capture_logging_output(stdout)
+    assert "ValueError" == log["exception_name"]

@@ -8,7 +8,7 @@ import os
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from ..shared import constants
-from ..shared.functions import resolve_truthy_env_var_choice
+from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
 from ..shared.lazy_import import LazyLoader
 from .base import BaseProvider, BaseSegment
 
@@ -720,7 +720,7 @@ class Tracer:
     ):
         """ Populates Tracer config for new and existing initializations """
         is_disabled = disabled if disabled is not None else self._is_tracer_disabled()
-        is_service = service if service is not None else os.getenv(constants.SERVICE_NAME_ENV)
+        is_service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
 
         self._config["provider"] = provider or self._config["provider"] or aws_xray_sdk.core.xray_recorder
         self._config["auto_patch"] = auto_patch if auto_patch is not None else self._config["auto_patch"]

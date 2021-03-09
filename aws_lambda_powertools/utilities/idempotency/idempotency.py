@@ -51,6 +51,7 @@ def idempotent(
     Examples
     --------
     **Processes Lambda's event in an idempotent manner**
+
         >>> from aws_lambda_powertools.utilities.idempotency import (
         >>>    idempotent, DynamoDBPersistenceLayer, IdempotencyConfig
         >>> )
@@ -135,6 +136,8 @@ class IdempotencyHandler:
             # Now we know the item already exists, we can retrieve it
             record = self._get_idempotency_record()
             return self._handle_for_status(record)
+        except Exception as exc:
+            raise IdempotencyPersistenceLayerError("Failed to save in progress record to idempotency store") from exc
 
         return self._call_lambda_handler()
 

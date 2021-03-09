@@ -451,7 +451,7 @@ You can also change the order of the following log record keys via the `log_reco
 
 #### Logging exceptions
 
-When logging exceptions, Logger will add a new key named `exception`, and will serialize the full traceback as a string.
+When logging exceptions, Logger will add new keys named `exception_name` and `exception` with the full traceback as a string.
 
 === "logging_an_exception.py"
 
@@ -475,6 +475,7 @@ When logging exceptions, Logger will add a new key named `exception`, and will s
        "timestamp": "2020-08-28 18:11:38,886",
        "service": "service_undefined",
        "sampling_rate": 0.0,
+       "exception_name":"ValueError",
        "exception": "Traceback (most recent call last):\n  File \"<input>\", line 2, in <module>\nValueError: something went wrong"
     }
     ```

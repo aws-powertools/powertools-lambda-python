@@ -34,7 +34,7 @@ For example, if your Lambda function is being triggered by an API Gateway proxy 
     def lambda_handler(event, context):
         event: APIGatewayProxyEvent = APIGatewayProxyEvent(event)
 
-        if 'helloworld' in event.path && event.http_method == 'GET':
+        if 'helloworld' in event.path and event.http_method == 'GET':
             do_something_with(event.body, user)
     ```
 
@@ -80,7 +80,7 @@ Typically used for API Gateway REST API or HTTP API using v1 proxy event.
         request_context = event.request_context
         identity = request_context.identity
 
-        if 'helloworld' in event.path && event.http_method == 'GET':
+        if 'helloworld' in event.path and event.http_method == 'GET':
             user = identity.user
             do_something_with(event.body, user)
     ```
@@ -97,7 +97,7 @@ Typically used for API Gateway REST API or HTTP API using v1 proxy event.
         request_context = event.request_context
         query_string_parameters = event.query_string_parameters
 
-        if 'helloworld' in event.raw_path && request_context.http.method == 'POST':
+        if 'helloworld' in event.raw_path and request_context.http.method == 'POST':
             do_something_with(event.body, query_string_parameters)
     ```
 
@@ -110,11 +110,12 @@ decompress and parse json data from the event.
 
     ```python
     from aws_lambda_powertools.utilities.data_classes import CloudWatchLogsEvent
+    from aws_lambda_powertools.utilities.data_classes.cloud_watch_logs_event import CloudWatchLogsDecodedData
 
     def lambda_handler(event, context):
         event: CloudWatchLogsEvent = CloudWatchLogsEvent(event)
 
-        decompressed_log = event.parse_logs_data
+        decompressed_log: CloudWatchLogsDecodedData = event.parse_logs_data
         log_events = decompressed_log.log_events
         for event in log_events:
             do_something_with(event.timestamp, event.message)
@@ -146,7 +147,7 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
     def lambda_handler(event, context):
         event: PostConfirmationTriggerEvent = PostConfirmationTriggerEvent(event)
 
-        user_attributes = user_attributes = event.request.user_attributes
+        user_attributes = event.request.user_attributes
         do_something_with(user_attributes)
     ```
 
@@ -159,7 +160,10 @@ attributes values (`AttributeValue`), as well as enums for stream view type (`St
 === "lambda_app.py"
 
     ```python
-    from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBStreamEvent, DynamoDBRecordEventName
+    from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
+        DynamoDBStreamEvent,
+        DynamoDBRecordEventName
+    )
 
     def lambda_handler(event, context):
         event: DynamoDBStreamEvent = DynamoDBStreamEvent(event)
@@ -194,14 +198,16 @@ or plain text, depending on the original payload.
     ```python
     from aws_lambda_powertools.utilities.data_classes import KinesisStreamEvent
 
+
     def lambda_handler(event, context):
         event: KinesisStreamEvent = KinesisStreamEvent(event)
-
-        # if data was delivered as json
-        data = event.data_as_text()
+        kinesis_record = next(event.records).kinesis
 
         # if data was delivered as text
-        data = event.data_as_json()
+        data = kinesis_record.data_as_text()
+
+        # if data was delivered as json
+        data = kinesis_record.data_as_json()
 
         do_something_with(data)
     ```

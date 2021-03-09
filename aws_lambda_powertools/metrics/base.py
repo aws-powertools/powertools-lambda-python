@@ -197,7 +197,7 @@ class MetricManager:
             metric_names_and_units.append({"Name": metric_name, "Unit": metric_unit})
             metric_names_and_values.update({metric_name: metric_value})
 
-        embedded_metrics_object = {
+        return {
             "_aws": {
                 "Timestamp": int(datetime.datetime.now().timestamp() * 1000),  # epoch
                 "CloudWatchMetrics": [
@@ -212,8 +212,6 @@ class MetricManager:
             **metadata,  # "username": "test"
             **metric_names_and_values,  # "single_metric": 1.0
         }
-
-        return embedded_metrics_object
 
     def add_dimension(self, name: str, value: str):
         """Adds given dimension to all metrics

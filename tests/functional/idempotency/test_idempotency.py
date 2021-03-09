@@ -677,22 +677,38 @@ def test_delete_from_cache_when_empty(
 
 
 def test_is_missing_idempotency_key():
+    # GIVEN an empty tuple THEN is_missing_idempotency_key is True
+    assert BasePersistenceLayer.is_missing_idempotency_key(())
+    # GIVEN an empty list THEN is_missing_idempotency_key is True
+    assert BasePersistenceLayer.is_missing_idempotency_key([])
+    # GIVEN an empty dictionary THEN is_missing_idempotency_key is True
+    assert BasePersistenceLayer.is_missing_idempotency_key({})
+    # GIVEN an empty str THEN is_missing_idempotency_key is True
+    assert BasePersistenceLayer.is_missing_idempotency_key("")
+    # GIVEN False THEN is_missing_idempotency_key is True
+    assert BasePersistenceLayer.is_missing_idempotency_key(False)
+    # GIVEN number 0 THEN is_missing_idempotency_key is True
+    assert BasePersistenceLayer.is_missing_idempotency_key(0)
+
     # GIVEN None THEN is_missing_idempotency_key is True
     assert BasePersistenceLayer.is_missing_idempotency_key(None)
     # GIVEN a list of Nones THEN is_missing_idempotency_key is True
     assert BasePersistenceLayer.is_missing_idempotency_key([None, None])
-    # GIVEN a list of all not None THEN is_missing_idempotency_key is false
-    assert BasePersistenceLayer.is_missing_idempotency_key([None, "Value"]) is False
-    # GIVEN a str THEN is_missing_idempotency_key is false
+    # GIVEN a tuples of Nones THEN is_missing_idempotency_key is True
+    assert BasePersistenceLayer.is_missing_idempotency_key((None, None))
+    # GIVEN a dict of Nones THEN is_missing_idempotency_key is True
+    assert BasePersistenceLayer.is_missing_idempotency_key({None: None})
+
+    # GIVEN a str THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key("Value") is False
-    # GIVEN an empty tuple THEN is_missing_idempotency_key is false
-    assert BasePersistenceLayer.is_missing_idempotency_key(())
-    # GIVEN an empty list THEN is_missing_idempotency_key is false
-    assert BasePersistenceLayer.is_missing_idempotency_key([])
-    # GIVEN an empty dictionary THEN is_missing_idempotency_key is false
-    assert BasePersistenceLayer.is_missing_idempotency_key({})
-    # GIVEN an empty str THEN is_missing_idempotency_key is false
-    assert BasePersistenceLayer.is_missing_idempotency_key("")
+    # GIVEN str "False" THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key("False") is False
+    # GIVEN an number THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key(1000) is False
+    # GIVEN a float THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key(10.01) is False
+    # GIVEN a list of all not None THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key([None, "Value"]) is False
 
 
 @pytest.mark.parametrize(
@@ -775,3 +791,25 @@ def test_custom_jmespath_function_overrides_builtin_functions(
         # WHEN calling _get_hashed_idempotency_key
         # THEN raise unknown function
         persistence_store._get_hashed_idempotency_key({})
+
+
+def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPersistenceLayer):
+    # GIVEN a miss configured persistence layer
+    # like no table was created for the idempotency persistence layer
+    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber.add_client_error("put_item", "ResourceNotFoundException")
+    stubber.activate()
+
+    @idempotent(persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return {}
+
+    # WHEN handling the idempotent call
+    # AND save_inprogress raises a ClientError
+    with pytest.raises(IdempotencyPersistenceLayerError) as e:
+        lambda_handler({}, {})
+
+    # THEN idempotent should raise an IdempotencyPersistenceLayerError
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+    assert "Failed to save in progress record to idempotency store" == e.value.args[0]

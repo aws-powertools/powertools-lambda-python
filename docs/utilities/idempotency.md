@@ -99,7 +99,7 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
         )
         ...
         return {
-            "payment_id": payment.id
+            "payment_id": payment.id,
             "message": "success",
             "statusCode": 200,
         }

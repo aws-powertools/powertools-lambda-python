@@ -27,9 +27,9 @@ class SingleMetric(MetricManager):
     -------
     **Creates cold start metric with function_version as dimension**
 
-        from aws_lambda_powertools.metrics import SingleMetric, MetricUnit
         import json
-        metric = Single_Metric(namespace="ServerlessAirline")
+        from aws_lambda_powertools.metrics import single_metric, MetricUnit
+        metric = single_metric(namespace="ServerlessAirline")
 
         metric.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
         metric.add_dimension(name="function_version", value=47)
@@ -72,7 +72,7 @@ def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = No
         from aws_lambda_powertools.metrics import MetricUnit
 
         with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace="ServerlessAirline") as metric:
-                metric.add_dimension(name="function_version", value=47)
+            metric.add_dimension(name="function_version", value="47")
 
     **Same as above but set namespace using environment variable**
 
@@ -82,7 +82,7 @@ def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = No
         from aws_lambda_powertools.metrics import MetricUnit
 
         with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric:
-                metric.add_dimension(name="function_version", value=47)
+            metric.add_dimension(name="function_version", value="47")
 
     Parameters
     ----------
