@@ -8,6 +8,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
     APIGatewayProxyEvent,
     APIGatewayProxyEventV2,
+    AppSyncResolverEvent,
     CloudWatchLogsEvent,
     EventBridgeEvent,
     KinesisStreamEvent,
@@ -16,7 +17,6 @@ from aws_lambda_powertools.utilities.data_classes import (
     SNSEvent,
     SQSEvent,
 )
-from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import (
     CreateAuthChallengeTriggerEvent,
     CustomMessageTriggerEvent,
