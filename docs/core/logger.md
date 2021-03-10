@@ -188,7 +188,7 @@ You can append your own keys to your existing Logger via `structure_logs(append=
 
 	This example will add `order_id` if its value is not empty, and in subsequent invocations where `order_id` might not be present it'll remove it from the logger.
 
-#### set_correlation_id method
+#### Setting correlation ID
 
 You can set a correlation_id to your existing Logger via `set_correlation_id(value)` method.
 
