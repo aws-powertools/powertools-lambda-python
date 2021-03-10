@@ -4,7 +4,7 @@ import logging
 import os
 import random
 import sys
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, Union
 
 from ..shared import constants
 from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
@@ -34,27 +34,6 @@ def _is_cold_start() -> bool:
         is_cold_start = False
 
     return cold_start
-
-
-def _get_correlation_id_path(path: Union[str, int]) -> Optional[str]:
-    """
-
-    Parameters
-    ----------
-    path :
-        JMESPath expression to find the correlation_id
-    Returns
-    -------
-    str, optional
-        Returns the JMESPath
-    """
-    if path is None:
-        return None
-
-    # NOTE: We could have a enum of standard event types
-    # like "requestContext.requestId" or API Gateway Proxy Events
-
-    return path
 
 
 # PyCharm does not support autocomplete via getattr
