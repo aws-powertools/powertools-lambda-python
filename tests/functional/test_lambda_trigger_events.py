@@ -16,6 +16,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     SNSEvent,
     SQSEvent,
 )
+from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import (
     CreateAuthChallengeTriggerEvent,
     CustomMessageTriggerEvent,
@@ -874,3 +875,14 @@ def test_alb_event():
     assert event.multi_value_headers == event.get("multiValueHeaders")
     assert event.body == event["body"]
     assert event.is_base64_encoded == event["isBase64Encoded"]
+
+
+def test_appsync_resolver_event():
+    event = AppSyncResolverEvent(load_event("appSyncResolverEvent.json"))
+    assert event.type_name == "Merchant"
+    assert event.field_name == "locations"
+    assert event.arguments["name"] == "value"
+    assert event.identity["claims"]["token_use"] == "id"
+    assert event.source["name"] == "Value"
+    assert event.request_headers["x-amzn-trace-id"] == "Root=1-60488877-0b0c4e6727ab2a1c545babd0"
+    assert event.prev_result == {}
