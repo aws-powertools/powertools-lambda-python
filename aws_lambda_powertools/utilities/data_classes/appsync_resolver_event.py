@@ -1,9 +1,9 @@
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, get_header_value
 
 
-def get_identity_object(identity_object: Optional[dict]) -> any:
+def get_identity_object(identity_object: Optional[dict]) -> Any:
     """Get the identity object with the best detected type"""
     # API_KEY authorization
     if identity_object is None:
@@ -91,8 +91,9 @@ class AppSyncIdentityCognito(DictWrapper):
         return self["defaultAuthStrategy"]
 
     @property
-    def groups(self) -> any:
-        return self.get("groups")
+    def groups(self) -> List[str]:
+        """Array of OIDC groups"""
+        return self["groups"]
 
     @property
     def issuer(self) -> str:
