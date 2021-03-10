@@ -188,6 +188,47 @@ You can append your own keys to your existing Logger via `structure_logs(append=
 
 	This example will add `order_id` if its value is not empty, and in subsequent invocations where `order_id` might not be present it'll remove it from the logger.
 
+#### set_correlation_id method
+
+You can set a correlation_id to your existing Logger via `set_correlation_id(value)` method.
+
+=== "collect.py"
+
+    ```python hl_lines="8"
+	from aws_lambda_powertools import Logger
+	from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
+
+	logger = Logger()
+
+	def handler(event, context):
+		event = APIGatewayProxyEvent(event)
+		logger.set_correlation_id(event.request_context.request_id)
+		logger.info("Collecting payment")
+        ...
+    ```
+=== "Example Event"
+
+	```json hl_lines="3"
+	{
+	  "requestContext": {
+		"requestId": "correlation_id_value"
+	  }
+	}
+	```
+=== "Example CloudWatch Logs excerpt"
+
+    ```json hl_lines="7"
+	{
+	  "timestamp": "2020-05-24 18:17:33,774",
+	  "level": "INFO",
+	  "location": "collect.handler:1",
+	  "service": "payment",
+	  "sampling_rate": 0.0,
+	  "correlation_id": "correlation_id_value",
+	  "message": "Collecting payment"
+	}
+    ```
+
 #### extra parameter
 
 Extra parameter is available for all log levels' methods, as implemented in the standard logging library - e.g. `logger.info, logger.warning`.

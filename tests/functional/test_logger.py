@@ -442,11 +442,11 @@ def test_logger_exception_extract_exception_name(stdout, service_name):
 def test_logger_correlation_id(lambda_context, stdout, service_name):
     # GIVEN
     logger = Logger(service=service_name, stream=stdout)
-    request_id = "xxx"
+    request_id = "xxx-111-222"
     mock_event = {"requestContext": {"requestId": request_id}}
 
-    @logger.inject_lambda_context(correlation_id_path="requestContext.requestId")
-    def handler(_1, _2):
+    def handler(event, _):
+        logger.set_correlation_id(event["requestContext"]["requestId"])
         logger.info("Foo")
 
     # WHEN
