@@ -47,6 +47,7 @@ class AppSyncIdentityIAM(DictWrapper):
 
     @property
     def user_arn(self) -> str:
+        """The ARN of the IAM user."""
         return self["userArn"]
 
     @property
@@ -105,6 +106,7 @@ class AppSyncResolverEvent(DictWrapper):
     Documentation:
     -------------
     - https://docs.aws.amazon.com/appsync/latest/devguide/resolver-context-reference.html
+    - https://docs.amplify.aws/cli/graphql-transformer/function#structure-of-the-function-event
     """
 
     @property
