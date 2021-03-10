@@ -9,6 +9,7 @@ from collections import namedtuple
 import pytest
 
 from aws_lambda_powertools import Logger, Tracer
+from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
 from aws_lambda_powertools.logging.logger import set_package_logger
 from aws_lambda_powertools.shared import constants
@@ -437,3 +438,39 @@ def test_logger_exception_extract_exception_name(stdout, service_name):
     # THEN we expect a "exception_name" to be "ValueError"
     log = capture_logging_output(stdout)
     assert "ValueError" == log["exception_name"]
+
+
+def test_logger_set_correlation_id(lambda_context, stdout, service_name):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout)
+    request_id = "xxx-111-222"
+    mock_event = {"requestContext": {"requestId": request_id}}
+
+    def handler(event, _):
+        logger.set_correlation_id(event["requestContext"]["requestId"])
+        logger.info("Foo")
+
+    # WHEN
+    handler(mock_event, lambda_context)
+
+    # THEN
+    log = capture_logging_output(stdout)
+    assert request_id == log["correlation_id"]
+
+
+def test_logger_set_correlation_id_path(lambda_context, stdout, service_name):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout)
+    request_id = "xxx-111-222"
+    mock_event = {"requestContext": {"requestId": request_id}}
+
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+    def handler(event, context):
+        logger.info("Foo")
+
+    # WHEN
+    handler(mock_event, lambda_context)
+
+    # THEN
+    log = capture_logging_output(stdout)
+    assert request_id == log["correlation_id"]

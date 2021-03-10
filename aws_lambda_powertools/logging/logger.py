@@ -6,6 +6,8 @@ import random
 import sys
 from typing import Any, Callable, Dict, Union
 
+import jmespath
+
 from ..shared import constants
 from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
 from .exceptions import InvalidLoggerSamplingRateError
@@ -204,7 +206,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
                 f"Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
             )
 
-    def inject_lambda_context(self, lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = None):
+    def inject_lambda_context(
+        self, lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = None, correlation_id_path: str = None
+    ):
         """Decorator to capture Lambda contextual info and inject into logger
 
         Parameters
@@ -213,6 +217,8 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             Method to inject the lambda context
         log_event : bool, optional
             Instructs logger to log Lambda Event, by default False
+        correlation_id_path: str, optional
+            Optional JMESPath for the correlation_id
 
         Environment variables
         ---------------------
@@ -251,7 +257,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         # Return a partial function with args filled
         if lambda_handler is None:
             logger.debug("Decorator called with parameters")
-            return functools.partial(self.inject_lambda_context, log_event=log_event)
+            return functools.partial(
+                self.inject_lambda_context, log_event=log_event, correlation_id_path=correlation_id_path
+            )
 
         log_event = resolve_truthy_env_var_choice(
             choice=log_event, env=os.getenv(constants.LOGGER_LOG_EVENT_ENV, "false")
@@ -262,6 +270,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             lambda_context = build_lambda_context_model(context)
             cold_start = _is_cold_start()
             self.structure_logs(append=True, cold_start=cold_start, **lambda_context.__dict__)
+
+            if correlation_id_path:
+                self.set_correlation_id(jmespath.search(correlation_id_path, event))
 
             if log_event:
                 logger.debug("Event received")
@@ -295,6 +306,16 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             else:
                 # Set a new formatter for a logger handler
                 handler.setFormatter(JsonFormatter(**self._default_log_keys, **kwargs))
+
+    def set_correlation_id(self, value: str):
+        """Sets the correlation_id in the logging json
+
+        Parameters
+        ----------
+        value : str
+            Value for the correlation id
+        """
+        self.structure_logs(append=True, correlation_id=value)
 
     @staticmethod
     def _get_log_level(level: Union[str, int]) -> Union[str, int]:
