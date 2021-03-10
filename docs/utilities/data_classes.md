@@ -50,8 +50,10 @@ Event Source | Data_class
 ------------------------------------------------- | ---------------------------------------------------------------------------------
 [API Gateway Proxy](#api-gateway-proxy) | `APIGatewayProxyEvent`
 [API Gateway Proxy event v2](#api-gateway-proxy-v2) | `APIGatewayProxyEventV2`
+[AppSync Resolver](#appsync-resolver) | `AppSyncResolverEvent`
 [CloudWatch Logs](#cloudwatch-logs) | `CloudWatchLogsEvent`
 [Cognito User Pool](#cognito-user-pool) | Multiple available under `cognito_user_pool_event`
+[Connect Contact Flow](#connect-contact-flow) | `ConnectContactFlowEvent`
 [DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName`
 [EventBridge](#eventbridge) | `EventBridgeEvent`
 [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent`
@@ -99,6 +101,69 @@ Typically used for API Gateway REST API or HTTP API using v1 proxy event.
 
         if 'helloworld' in event.raw_path and request_context.http.method == 'POST':
             do_something_with(event.body, query_string_parameters)
+    ```
+
+### AppSync Resolver
+
+Used when building a Lambda GraphQL Resolvers with [Amplify GraphQL Transform Library](https://docs.amplify.aws/cli/graphql-transformer/function)
+
+=== "lambda_app.py"
+
+    ```python
+    from aws_lambda_powertools.logging import Logger, correlation_paths
+    from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import (
+        AppSyncResolverEvent,
+        AppSyncIdentityCognito
+    )
+
+    logger = Logger()
+
+    def get_locations(name: str = None, size: int = 0, page: int = 0):
+        pass
+
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
+    def lambda_handler(event, context):
+        event = AppSyncResolverEvent(event)
+
+        # Case insensitive look up of request headers
+        x_forwarded_for = event.get_header_value("x-forwarded-for")
+
+        # Support for AppSyncIdentityCognito or AppSyncIdentityIAM identity types
+        assert isinstance(event.identity, AppSyncIdentityCognito)
+        identity: AppSyncIdentityCognito = event.identity
+
+        # Logging with correlation_id
+        logger.info({
+            "x-forwarded-for": x_forwarded_for,
+            "username": identity.username
+        })
+
+        if event.type_name == "Merchant" and event.field_name == "locations":
+            return get_locations(**event.arguments)
+
+        raise ValueError(f"Unsupported field resolver: {event.field_name}")
+
+    ```
+=== "CloudWatch Log"
+
+    ```json
+    {
+        "level":"INFO",
+        "location":"lambda_handler:22",
+        "message":{
+            "x-forwarded-for":"11.215.2.22, 64.44.173.11",
+            "username":"mike"
+        },
+        "timestamp":"2021-03-10 12:38:40,062",
+        "service":"service_undefined",
+        "sampling_rate":0.0,
+        "cold_start":true,
+        "function_name":"func_name",
+        "function_memory_size":512,
+        "function_arn":"func_arn",
+        "function_request_id":"6735a29c-c000-4ae3-94e6-1f1c934f7f94",
+        "correlation_id":"Root=1-60488877-0b0c4e6727ab2a1c545babd0"
+    }
     ```
 
 ### CloudWatch Logs
@@ -149,6 +214,26 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
 
         user_attributes = event.request.user_attributes
         do_something_with(user_attributes)
+    ```
+
+### Connect Contact Flow
+
+=== "lambda_app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes.connect_contact_flow_event import (
+        ConnectContactFlowChannel,
+        ConnectContactFlowEndpointType,
+        ConnectContactFlowEvent,
+        ConnectContactFlowInitiationMethod,
+    )
+
+    def lambda_handler(event, context):
+        event: ConnectContactFlowEvent = ConnectContactFlowEvent(event)
+        assert event.contact_data.attributes == {"Language": "en-US"}
+        assert event.contact_data.channel == ConnectContactFlowChannel.VOICE
+        assert event.contact_data.customer_endpoint.endpoint_type == ConnectContactFlowEndpointType.TELEPHONE_NUMBER
+        assert event.contact_data.initiation_method == ConnectContactFlowInitiationMethod.API
     ```
 
 ### DynamoDB Streams
@@ -279,26 +364,4 @@ or plain text, depending on the original payload.
         # Multiple records can be delivered in a single event
         for record in event.records:
             do_something_with(record.body)
-    ```
-
-### Connect
-
-**Connect Contact Flow**
-
-=== "lambda_app.py"
-
-    ```python
-    from aws_lambda_powertools.utilities.data_classes.connect_contact_flow_event import (
-        ConnectContactFlowChannel,
-        ConnectContactFlowEndpointType,
-        ConnectContactFlowEvent,
-        ConnectContactFlowInitiationMethod,
-    )
-
-    def lambda_handler(event, context):
-        event: ConnectContactFlowEvent = ConnectContactFlowEvent(event)
-        assert event.contact_data.attributes == {"Language": "en-US"}
-        assert event.contact_data.channel == ConnectContactFlowChannel.VOICE
-        assert event.contact_data.customer_endpoint.endpoint_type == ConnectContactFlowEndpointType.TELEPHONE_NUMBER
-        assert event.contact_data.initiation_method == ConnectContactFlowInitiationMethod.API
     ```
