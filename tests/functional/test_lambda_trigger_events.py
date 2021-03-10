@@ -20,6 +20,7 @@ from aws_lambda_powertools.utilities.data_classes import (
 from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import (
     AppSyncIdentityCognito,
     AppSyncIdentityIAM,
+    AppSyncResolverEventInfo,
     get_identity_object,
 )
 from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import (
@@ -884,6 +885,7 @@ def test_alb_event():
 
 def test_appsync_resolver_event():
     event = AppSyncResolverEvent(load_event("appSyncResolverEvent.json"))
+
     assert event.type_name == "Merchant"
     assert event.field_name == "locations"
     assert event.arguments["name"] == "value"
@@ -893,6 +895,7 @@ def test_appsync_resolver_event():
     assert event.get_header_value("X-amzn-trace-id", case_sensitive=True) is None
     assert event.get_header_value("missing", default_value="Foo") == "Foo"
     assert event.prev_result == {}
+    assert event.info is None
     assert isinstance(event.identity, AppSyncIdentityCognito)
     identity: AppSyncIdentityCognito = event.identity
     assert identity.claims is not None
@@ -906,6 +909,8 @@ def test_appsync_resolver_event():
 
 def test_get_identity_object_is_none():
     assert get_identity_object(None) is None
+    event = AppSyncResolverEvent({})
+    assert event.identity is None
 
 
 def test_get_identity_object_iam():
@@ -919,7 +924,9 @@ def test_get_identity_object_iam():
         "cognitoIdentityAuthType": "string",
         "cognitoIdentityAuthProvider": "string",
     }
+
     identity_object = get_identity_object(identity)
+
     assert isinstance(identity_object, AppSyncIdentityIAM)
     assert identity_object.account_id == identity["accountId"]
     assert identity_object.cognito_identity_pool_id == identity["cognitoIdentityPoolId"]
@@ -929,3 +936,28 @@ def test_get_identity_object_iam():
     assert identity_object.user_arn == identity["userArn"]
     assert identity_object.cognito_identity_auth_type == identity["cognitoIdentityAuthType"]
     assert identity_object.cognito_identity_auth_provider == identity["cognitoIdentityAuthProvider"]
+
+
+def test_appsync_resolver_event_info():
+    info_dict = {
+        "fieldName": "getPost",
+        "parentTypeName": "Query",
+        "variables": {"postId": "123", "authorId": "456"},
+        "selectionSetList": ["postId", "title"],
+        "selectionSetGraphQL": "{\n  getPost(id: $postId) {\n    postId\n  etc..",
+    }
+    event = {"info": info_dict}
+
+    event = AppSyncResolverEvent(event)
+
+    assert event.source is None
+    assert event.identity is None
+    assert event.info is not None
+    assert isinstance(event.info, AppSyncResolverEventInfo)
+    info: AppSyncResolverEventInfo = event.info
+    assert info.field_name == info_dict["fieldName"]
+    assert info.parent_type_name == info_dict["parentTypeName"]
+    assert info.variables == info_dict["variables"]
+    assert info.variables["postId"] == "123"
+    assert info.selection_set_list == info_dict["selectionSetList"]
+    assert info.selection_set_graphql == info_dict["selectionSetGraphQL"]

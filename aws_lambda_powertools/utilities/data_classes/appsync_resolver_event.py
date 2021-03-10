@@ -3,18 +3,18 @@ from typing import Any, Dict, List, Optional, Union
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, get_header_value
 
 
-def get_identity_object(identity_object: Optional[dict]) -> Any:
-    """Get the identity object with the best detected type"""
+def get_identity_object(identity: Optional[dict]) -> Any:
+    """Get the identity object based on the best detected type"""
     # API_KEY authorization
-    if identity_object is None:
+    if identity is None:
         return None
 
     # AMAZON_COGNITO_USER_POOLS authorization
-    if "sub" in identity_object:
-        return AppSyncIdentityCognito(identity_object)
+    if "sub" in identity:
+        return AppSyncIdentityCognito(identity)
 
     # AWS_IAM authorization
-    return AppSyncIdentityIAM(identity_object)
+    return AppSyncIdentityIAM(identity)
 
 
 class AppSyncIdentityIAM(DictWrapper):
@@ -101,8 +101,42 @@ class AppSyncIdentityCognito(DictWrapper):
         return self["issuer"]
 
 
+class AppSyncResolverEventInfo(DictWrapper):
+    """The info section contains information about the GraphQL request"""
+
+    @property
+    def field_name(self) -> str:
+        """The name of the field that is currently being resolved."""
+        return self["fieldName"]
+
+    @property
+    def parent_type_name(self) -> str:
+        """The name of the parent type for the field that is currently being resolved."""
+        return self["parentTypeName"]
+
+    @property
+    def variables(self) -> Dict[str, str]:
+        """A map which holds all variables that are passed into the GraphQL request."""
+        return self["variables"]
+
+    @property
+    def selection_set_list(self) -> List[str]:
+        """A list representation of the fields in the GraphQL selection set. Fields that are aliased will
+        only be referenced by the alias name, not the field name. The following example shows this in detail."""
+        return self.get("selectionSetList")
+
+    @property
+    def selection_set_graphql(self) -> Optional[str]:
+        """A string representation of the selection set, formatted as GraphQL schema definition language (SDL).
+        Although fragments are not be merged into the selection set, inline fragments are preserved."""
+        return self.get("selectionSetGraphQL")
+
+
 class AppSyncResolverEvent(DictWrapper):
     """AppSync resolver event
+
+    NOTE: AppSync Resolver Events can come in various shapes this data class supports what
+    Amplify GraphQL Transformer produces
 
     Documentation:
     -------------
@@ -127,13 +161,20 @@ class AppSyncResolverEvent(DictWrapper):
 
     @property
     def identity(self) -> Union[None, AppSyncIdentityIAM, AppSyncIdentityCognito]:
-        """An object that contains information about the caller."""
-        return get_identity_object(self["identity"])
+        """An object that contains information about the caller.
+
+        Depending of the type of identify found:
+
+        - API_KEY authorization - returns None
+        - AWS_IAM authorization - returns AppSyncIdentityIAM
+        - AMAZON_COGNITO_USER_POOLS authorization - returns AppSyncIdentityCognito
+        """
+        return get_identity_object(self.get("identity"))
 
     @property
     def source(self) -> Dict[str, any]:
         """A map that contains the resolution of the parent field."""
-        return self["source"]
+        return self.get("source")
 
     @property
     def request_headers(self) -> Dict[str, str]:
@@ -144,6 +185,17 @@ class AppSyncResolverEvent(DictWrapper):
     def prev_result(self) -> Dict[str, any]:
         """It represents the result of whatever previous operation was executed in a pipeline resolver."""
         return self["prev"]["result"]
+
+    @property
+    def info(self) -> Optional[AppSyncResolverEventInfo]:
+        """The info section contains information about the GraphQL request.
+
+        NOTE: This is not present for Amplify GraphQL Transformer functions
+        """
+        info_dict = self.get("info")
+        if info_dict is None:
+            return None
+        return AppSyncResolverEventInfo(info_dict)
 
     def get_header_value(
         self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
