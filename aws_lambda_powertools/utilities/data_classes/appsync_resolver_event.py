@@ -3,6 +3,20 @@ from typing import Dict, List, Optional, Union
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, get_header_value
 
 
+def get_identity_object(identity_object: Optional[dict]) -> any:
+    """Get the identity object with the best detected type"""
+    # API_KEY authorization
+    if identity_object is None:
+        return None
+
+    # AMAZON_COGNITO_USER_POOLS authorization
+    if "sub" in identity_object:
+        return AppSyncIdentityCognito(identity_object)
+
+    # AWS_IAM authorization
+    return AppSyncIdentityIAM(identity_object)
+
+
 class AppSyncIdentityIAM(DictWrapper):
     """AWS_IAM authorization"""
 
@@ -25,6 +39,11 @@ class AppSyncIdentityIAM(DictWrapper):
     def cognito_identity_pool_id(self) -> str:
         """The Amazon Cognito identity pool ID associated with the caller."""
         return self["cognitoIdentityPoolId"]
+
+    @property
+    def cognito_identity_id(self) -> str:
+        """The Amazon Cognito identity ID of the caller."""
+        return self["cognitoIdentityId"]
 
     @property
     def user_arn(self) -> str:
@@ -78,19 +97,6 @@ class AppSyncIdentityCognito(DictWrapper):
     def issuer(self) -> str:
         """The token issuer."""
         return self["issuer"]
-
-
-def get_identity_object(identity_object: Optional[dict]) -> any:
-    # API_KEY authorization
-    if identity_object is None:
-        return None
-
-    # AMAZON_COGNITO_USER_POOLS authorization
-    if "sub" in identity_object:
-        return AppSyncIdentityCognito(identity_object)
-
-    # AWS_IAM authorization
-    return AppSyncIdentityIAM(identity_object)
 
 
 class AppSyncResolverEvent(DictWrapper):

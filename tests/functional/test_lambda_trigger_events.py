@@ -17,7 +17,11 @@ from aws_lambda_powertools.utilities.data_classes import (
     SNSEvent,
     SQSEvent,
 )
-from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import AppSyncIdentityCognito
+from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import (
+    AppSyncIdentityCognito,
+    AppSyncIdentityIAM,
+    get_identity_object,
+)
 from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import (
     CreateAuthChallengeTriggerEvent,
     CustomMessageTriggerEvent,
@@ -893,3 +897,35 @@ def test_appsync_resolver_event():
     identity: AppSyncIdentityCognito = event.identity
     assert identity.claims is not None
     assert identity.sub == "07920713-4526-4642-9c88-2953512de441"
+    assert len(identity.source_ip) == 1
+    assert identity.username == "mike"
+    assert identity.default_auth_strategy == "ALLOW"
+    assert identity.groups is None
+    assert identity.issuer == identity["issuer"]
+
+
+def test_get_identity_object_is_none():
+    assert get_identity_object(None) is None
+
+
+def test_get_identity_object_iam():
+    identity = {
+        "accountId": "string",
+        "cognitoIdentityPoolId": "string",
+        "cognitoIdentityId": "string",
+        "sourceIp": ["string"],
+        "username": "string",
+        "userArn": "string",
+        "cognitoIdentityAuthType": "string",
+        "cognitoIdentityAuthProvider": "string",
+    }
+    identity_object = get_identity_object(identity)
+    assert isinstance(identity_object, AppSyncIdentityIAM)
+    assert identity_object.account_id == identity["accountId"]
+    assert identity_object.cognito_identity_pool_id == identity["cognitoIdentityPoolId"]
+    assert identity_object.cognito_identity_id == identity["cognitoIdentityId"]
+    assert identity_object.source_ip == identity["sourceIp"]
+    assert identity_object.username == identity["username"]
+    assert identity_object.user_arn == identity["userArn"]
+    assert identity_object.cognito_identity_auth_type == identity["cognitoIdentityAuthType"]
+    assert identity_object.cognito_identity_auth_provider == identity["cognitoIdentityAuthProvider"]
