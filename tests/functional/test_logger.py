@@ -9,6 +9,7 @@ from collections import namedtuple
 import pytest
 
 from aws_lambda_powertools import Logger, Tracer
+from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
 from aws_lambda_powertools.logging.logger import set_package_logger
 from aws_lambda_powertools.shared import constants
@@ -463,7 +464,7 @@ def test_logger_set_correlation_id_path(lambda_context, stdout, service_name):
     request_id = "xxx-111-222"
     mock_event = {"requestContext": {"requestId": request_id}}
 
-    @logger.inject_lambda_context(correlation_id_path="requestContext.requestId")
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
     def handler(event, context):
         logger.info("Foo")
 
