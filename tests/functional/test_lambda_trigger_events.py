@@ -938,6 +938,17 @@ def test_get_identity_object_iam():
     assert identity_object.cognito_identity_auth_provider == identity["cognitoIdentityAuthProvider"]
 
 
+def test_appsync_resolver_direct():
+    event = AppSyncResolverEvent(load_event("appSyncDirectResolver.json"))
+
+    assert event.source is None
+    assert event.arguments["id"] == "my identifier"
+    assert isinstance(event.identity, AppSyncIdentityCognito)
+    info = event.info
+    assert isinstance(info, AppSyncResolverEventInfo)
+    assert info.selection_set_list is not None
+
+
 def test_appsync_resolver_event_info():
     info_dict = {
         "fieldName": "getPost",
