@@ -17,6 +17,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     SNSEvent,
     SQSEvent,
 )
+from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import AppSyncIdentityCognito
 from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import (
     CreateAuthChallengeTriggerEvent,
     CustomMessageTriggerEvent,
@@ -888,3 +889,7 @@ def test_appsync_resolver_event():
     assert event.get_header_value("X-amzn-trace-id", case_sensitive=True) is None
     assert event.get_header_value("missing", default_value="Foo") == "Foo"
     assert event.prev_result == {}
+    assert isinstance(event.identity, AppSyncIdentityCognito)
+    identity: AppSyncIdentityCognito = event.identity
+    assert identity.claims is not None
+    assert identity.sub == "07920713-4526-4642-9c88-2953512de441"
