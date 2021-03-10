@@ -884,5 +884,7 @@ def test_appsync_resolver_event():
     assert event.arguments["name"] == "value"
     assert event.identity["claims"]["token_use"] == "id"
     assert event.source["name"] == "Value"
-    assert event.request_headers["x-amzn-trace-id"] == "Root=1-60488877-0b0c4e6727ab2a1c545babd0"
+    assert event.get_header_value("X-amzn-trace-id") == "Root=1-60488877-0b0c4e6727ab2a1c545babd0"
+    assert event.get_header_value("X-amzn-trace-id", case_sensitive=True) is None
+    assert event.get_header_value("missing", default_value="Foo") == "Foo"
     assert event.prev_result == {}

@@ -1,6 +1,6 @@
-from typing import Dict
+from typing import Dict, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, get_header_value
 
 
 class AppSyncResolverEvent(DictWrapper):
@@ -45,3 +45,23 @@ class AppSyncResolverEvent(DictWrapper):
     def prev_result(self) -> Dict[str, any]:
         """It represents the result of whatever previous operation was executed in a pipeline resolver."""
         return self["prev"]["result"]
+
+    def get_header_value(
+        self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
+    ) -> Optional[str]:
+        """Get header value by name
+
+        Parameters
+        ----------
+        name: str
+            Header name
+        default_value: str, optional
+            Default value if no value was found by name
+        case_sensitive: bool
+            Whether to use a case sensitive look up
+        Returns
+        -------
+        str, optional
+            Header value
+        """
+        return get_header_value(self.request_headers, name, default_value, case_sensitive)
