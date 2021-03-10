@@ -1,3 +1,5 @@
+# NOTE to self: Reason it doesn't work it's due to Org restrictions and how GitHub exposes token to forks
+
 name: PR Auto Label
 on: [pull_request]
 #on:
