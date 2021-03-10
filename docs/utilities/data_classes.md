@@ -106,6 +106,7 @@ Typically used for API Gateway REST API or HTTP API using v1 proxy event.
 ### AppSync Resolver
 
 Used when building a Lambda GraphQL Resolvers with [Amplify GraphQL Transform Library](https://docs.amplify.aws/cli/graphql-transformer/function)
+and can also be used for AppSync Direct Lambda Resolvers.
 
 === "lambda_app.py"
 
