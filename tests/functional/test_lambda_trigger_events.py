@@ -943,10 +943,16 @@ def test_appsync_resolver_direct():
 
     assert event.source is None
     assert event.arguments["id"] == "my identifier"
+    assert event.stash == {}
+    assert event.prev_result is None
     assert isinstance(event.identity, AppSyncIdentityCognito)
+
     info = event.info
     assert isinstance(info, AppSyncResolverEventInfo)
     assert info.selection_set_list is not None
+    assert info.selection_set_list == info["selectionSetList"]
+    assert info.selection_set_graphql == info["selectionSetGraphQL"]
+    assert info.parent_type_name == info["parentTypeName"]
 
 
 def test_appsync_resolver_event_info():
