@@ -40,7 +40,7 @@ def lambda_context():
     lambda_context = {
         "function_name": "test-func",
         "memory_limit_in_mb": 128,
-        "invoked_function_arn": "arn:aws:lambda:eu-west-1:809313241:function:test",
+        "invoked_function_arn": "arn:aws:lambda:eu-west-1:809313241234:function:test-func",
         "aws_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
     }
 
