@@ -895,7 +895,17 @@ def test_appsync_resolver_event():
     assert event.get_header_value("X-amzn-trace-id", case_sensitive=True) is None
     assert event.get_header_value("missing", default_value="Foo") == "Foo"
     assert event.prev_result == {}
-    assert event.info is None
+    assert event.stash is None
+
+    info = event.info
+    assert info is not None
+    assert isinstance(info, AppSyncResolverEventInfo)
+    assert info.field_name == event["fieldName"]
+    assert info.parent_type_name == event["typeName"]
+    assert info.variables is None
+    assert info.selection_set_list is None
+    assert info.selection_set_graphql is None
+
     assert isinstance(event.identity, AppSyncIdentityCognito)
     identity: AppSyncIdentityCognito = event.identity
     assert identity.claims is not None
@@ -909,6 +919,7 @@ def test_appsync_resolver_event():
 
 def test_get_identity_object_is_none():
     assert get_identity_object(None) is None
+
     event = AppSyncResolverEvent({})
     assert event.identity is None
 
@@ -948,11 +959,16 @@ def test_appsync_resolver_direct():
     assert isinstance(event.identity, AppSyncIdentityCognito)
 
     info = event.info
+    assert info is not None
     assert isinstance(info, AppSyncResolverEventInfo)
     assert info.selection_set_list is not None
     assert info.selection_set_list == info["selectionSetList"]
     assert info.selection_set_graphql == info["selectionSetGraphQL"]
     assert info.parent_type_name == info["parentTypeName"]
+    assert info.field_name == info["fieldName"]
+
+    assert event.type_name == info.parent_type_name
+    assert event.field_name == info.field_name
 
 
 def test_appsync_resolver_event_info():
@@ -973,8 +989,17 @@ def test_appsync_resolver_event_info():
     assert isinstance(event.info, AppSyncResolverEventInfo)
     info: AppSyncResolverEventInfo = event.info
     assert info.field_name == info_dict["fieldName"]
+    assert event.field_name == info.field_name
     assert info.parent_type_name == info_dict["parentTypeName"]
+    assert event.type_name == info.parent_type_name
     assert info.variables == info_dict["variables"]
     assert info.variables["postId"] == "123"
     assert info.selection_set_list == info_dict["selectionSetList"]
     assert info.selection_set_graphql == info_dict["selectionSetGraphQL"]
+
+
+def test_appsync_resolver_event_empty():
+    event = AppSyncResolverEvent({})
+
+    assert event.info.field_name is None
+    assert event.info.parent_type_name is None

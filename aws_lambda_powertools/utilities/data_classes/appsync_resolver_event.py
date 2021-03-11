@@ -117,7 +117,7 @@ class AppSyncResolverEventInfo(DictWrapper):
     @property
     def variables(self) -> Dict[str, str]:
         """A map which holds all variables that are passed into the GraphQL request."""
-        return self["variables"]
+        return self.get("variables")
 
     @property
     def selection_set_list(self) -> List[str]:
@@ -144,15 +144,24 @@ class AppSyncResolverEvent(DictWrapper):
     - https://docs.amplify.aws/cli/graphql-transformer/function#structure-of-the-function-event
     """
 
+    def __init__(self, data: dict):
+        super().__init__(data)
+
+        info: dict = data.get("info")
+        if not info:
+            info = {"fieldName": self.get("fieldName"), "parentTypeName": self.get("typeName")}
+
+        self._info = AppSyncResolverEventInfo(info)
+
     @property
     def type_name(self) -> str:
         """The name of the parent type for the field that is currently being resolved."""
-        return self["typeName"]
+        return self.info.parent_type_name
 
     @property
     def field_name(self) -> str:
         """The name of the field that is currently being resolved."""
-        return self["fieldName"]
+        return self.info.field_name
 
     @property
     def arguments(self) -> Dict[str, any]:
@@ -190,15 +199,12 @@ class AppSyncResolverEvent(DictWrapper):
         return prev.get("result")
 
     @property
-    def info(self) -> Optional[AppSyncResolverEventInfo]:
+    def info(self) -> AppSyncResolverEventInfo:
         """The info section contains information about the GraphQL request.
 
         NOTE: This is not present for Amplify GraphQL Transformer functions
         """
-        info_dict = self.get("info")
-        if info_dict is None:
-            return None
-        return AppSyncResolverEventInfo(info_dict)
+        return self._info
 
     @property
     def stash(self) -> Optional[dict]:

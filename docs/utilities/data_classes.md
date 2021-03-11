@@ -120,6 +120,7 @@ and can also be used for AppSync Direct Lambda Resolvers.
     logger = Logger()
 
     def get_locations(name: str = None, size: int = 0, page: int = 0):
+        """Your resolver logic here"""
         pass
 
     @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
@@ -134,7 +135,7 @@ and can also be used for AppSync Direct Lambda Resolvers.
         identity: AppSyncIdentityCognito = event.identity
 
         # Logging with correlation_id
-        logger.info({
+        logger.debug({
             "x-forwarded-for": x_forwarded_for,
             "username": identity.username
         })
@@ -149,7 +150,7 @@ and can also be used for AppSync Direct Lambda Resolvers.
 
     ```json
     {
-        "level":"INFO",
+        "level":"DEBUG",
         "location":"lambda_handler:22",
         "message":{
             "x-forwarded-for":"11.215.2.22, 64.44.173.11",
