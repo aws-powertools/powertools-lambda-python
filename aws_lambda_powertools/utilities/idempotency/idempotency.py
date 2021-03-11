@@ -151,7 +151,7 @@ class IdempotencyHandler:
 
         """
         try:
-            event_record = self.persistence_store.get_record(self.event, self.context)
+            event_record = self.persistence_store.get_record(event=self.event, context=self.context)
         except IdempotencyItemNotFoundError:
             # This code path will only be triggered if the record is removed between save_inprogress and get_record.
             logger.debug(
