@@ -135,7 +135,7 @@ class AppSyncResolverEventInfo(DictWrapper):
 class AppSyncResolverEvent(DictWrapper):
     """AppSync resolver event
 
-    NOTE: AppSync Resolver Events can come in various shapes this data class supports what
+    **NOTE:** AppSync Resolver Events can come in various shapes this data class supports what
     Amplify GraphQL Transformer produces
 
     Documentation:
@@ -200,10 +200,7 @@ class AppSyncResolverEvent(DictWrapper):
 
     @property
     def info(self) -> AppSyncResolverEventInfo:
-        """The info section contains information about the GraphQL request.
-
-        NOTE: This is not present for Amplify GraphQL Transformer functions
-        """
+        """The info section contains information about the GraphQL request."""
         return self._info
 
     @property
