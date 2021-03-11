@@ -70,7 +70,7 @@ Event Source | Data_class
 
 ### API Gateway Proxy
 
-Typically used for API Gateway REST API or HTTP API using v1 proxy event.
+Typically, used for API Gateway REST API or HTTP API using v1 proxy event.
 
 === "lambda_app.py"
 
@@ -105,12 +105,12 @@ Typically used for API Gateway REST API or HTTP API using v1 proxy event.
 
 ### AppSync Resolver
 
-Used when building a Lambda GraphQL Resolvers with [Amplify GraphQL Transform Library](https://docs.amplify.aws/cli/graphql-transformer/function)
-and can also be used for AppSync Direct Lambda Resolvers.
+Used when building a Lambda GraphQL Resolvers with [Amplify GraphQL Transform Library](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"}
+and can also be used for [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/){target="_blank"}.
 
 === "lambda_app.py"
 
-    ```python
+    ```python hl_lines="2-5 12 14 19 21 29-30"
     from aws_lambda_powertools.logging import Logger, correlation_paths
     from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import (
         AppSyncResolverEvent,
@@ -121,11 +121,10 @@ and can also be used for AppSync Direct Lambda Resolvers.
 
     def get_locations(name: str = None, size: int = 0, page: int = 0):
         """Your resolver logic here"""
-        pass
 
     @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
     def lambda_handler(event, context):
-        event = AppSyncResolverEvent(event)
+        event: AppSyncResolverEvent = AppSyncResolverEvent(event)
 
         # Case insensitive look up of request headers
         x_forwarded_for = event.get_header_value("x-forwarded-for")
@@ -146,14 +145,44 @@ and can also be used for AppSync Direct Lambda Resolvers.
         raise ValueError(f"Unsupported field resolver: {event.field_name}")
 
     ```
-=== "CloudWatch Log"
+=== "Example AppSync Event"
 
-    ```json
+    ```json hl_lines="2-8 14 19 20"
+    {
+      "typeName": "Merchant",
+      "fieldName": "locations",
+      "arguments": {
+        "page": 2,
+        "size": 1,
+        "name": "value"
+      },
+      "identity": {
+        "claims": {
+          "iat": 1615366261
+          ...
+        },
+        "username": "mike",
+        ...
+      },
+      "request": {
+        "headers": {
+          "x-amzn-trace-id": "Root=1-60488877-0b0c4e6727ab2a1c545babd0",
+          "x-forwarded-for": "127.0.0.1"
+          ...
+        }
+      },
+      ...
+    }
+    ```
+
+=== "Example CloudWatch Log"
+
+    ```json hl_lines="5 6 16"
     {
         "level":"DEBUG",
         "location":"lambda_handler:22",
         "message":{
-            "x-forwarded-for":"11.215.2.22, 64.44.173.11",
+            "x-forwarded-for":"127.0.0.1",
             "username":"mike"
         },
         "timestamp":"2021-03-10 12:38:40,062",
@@ -285,7 +314,6 @@ or plain text, depending on the original payload.
     ```python
     from aws_lambda_powertools.utilities.data_classes import KinesisStreamEvent
 
-
     def lambda_handler(event, context):
         event: KinesisStreamEvent = KinesisStreamEvent(event)
         kinesis_record = next(event.records).kinesis
@@ -304,6 +332,7 @@ or plain text, depending on the original payload.
 === "lambda_app.py"
 
     ```python
+    from urllib.parse import unquote_plus
     from aws_lambda_powertools.utilities.data_classes import S3Event
 
     def lambda_handler(event, context):
@@ -312,7 +341,7 @@ or plain text, depending on the original payload.
 
         # Multiple records can be delivered in a single event
         for record in event.records:
-            object_key = record.s3.get_object.key
+            object_key = unquote_plus(record.s3.get_object.key)
 
             do_something_with(f'{bucket_name}/{object_key}')
     ```
