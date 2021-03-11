@@ -2,6 +2,7 @@ import datetime
 import hashlib
 import json
 import os
+from collections import namedtuple
 from decimal import Decimal
 from unittest import mock
 
@@ -32,6 +33,18 @@ def lambda_apigw_event():
         event = json.load(fp)
 
     return event
+
+
+@pytest.fixture
+def lambda_context():
+    lambda_context = {
+        "function_name": "test-func",
+        "memory_limit_in_mb": 128,
+        "invoked_function_arn": "arn:aws:lambda:eu-west-1:809313241:function:test",
+        "aws_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
+    }
+
+    return namedtuple("LambdaContext", lambda_context.keys())(*lambda_context.values())
 
 
 @pytest.fixture
@@ -132,10 +145,10 @@ def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_vali
 
 
 @pytest.fixture
-def hashed_idempotency_key(lambda_apigw_event, default_jmespath):
+def hashed_idempotency_key(lambda_apigw_event, default_jmespath, lambda_context):
     compiled_jmespath = jmespath.compile(default_jmespath)
     data = compiled_jmespath.search(lambda_apigw_event)
-    return hashlib.md5(json.dumps(data).encode()).hexdigest()
+    return "test-func#" + hashlib.md5(json.dumps(data).encode()).hexdigest()
 
 
 @pytest.fixture
@@ -143,7 +156,7 @@ def hashed_idempotency_key_with_envelope(lambda_apigw_event):
     event = unwrap_event_from_envelope(
         data=lambda_apigw_event, envelope=envelopes.API_GATEWAY_HTTP, jmespath_options={}
     )
-    return hashlib.md5(json.dumps(event).encode()).hexdigest()
+    return "test-func#" + hashlib.md5(json.dumps(event).encode()).hexdigest()
 
 
 @pytest.fixture

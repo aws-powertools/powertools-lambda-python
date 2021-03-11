@@ -131,7 +131,7 @@ class IdempotencyHandler:
         try:
             # We call save_inprogress first as an optimization for the most common case where no idempotent record
             # already exists. If it succeeds, there's no need to call get_record.
-            self.persistence_store.save_inprogress(event=self.event)
+            self.persistence_store.save_inprogress(event=self.event, context=self.context)
         except IdempotencyItemAlreadyExistsError:
             # Now we know the item already exists, we can retrieve it
             record = self._get_idempotency_record()
@@ -151,7 +151,7 @@ class IdempotencyHandler:
 
         """
         try:
-            event_record = self.persistence_store.get_record(self.event)
+            event_record = self.persistence_store.get_record(self.event, self.context)
         except IdempotencyItemNotFoundError:
             # This code path will only be triggered if the record is removed between save_inprogress and get_record.
             logger.debug(
@@ -219,7 +219,9 @@ class IdempotencyHandler:
             # We need these nested blocks to preserve lambda handler exception in case the persistence store operation
             # also raises an exception
             try:
-                self.persistence_store.delete_record(event=self.event, exception=handler_exception)
+                self.persistence_store.delete_record(
+                    event=self.event, context=self.context, exception=handler_exception
+                )
             except Exception as delete_exception:
                 raise IdempotencyPersistenceLayerError(
                     "Failed to delete record from idempotency store"
@@ -228,7 +230,7 @@ class IdempotencyHandler:
 
         else:
             try:
-                self.persistence_store.save_success(event=self.event, result=handler_response)
+                self.persistence_store.save_success(event=self.event, context=self.context, result=handler_response)
             except Exception as save_exception:
                 raise IdempotencyPersistenceLayerError(
                     "Failed to update record state to success in idempotency store"
