@@ -12,7 +12,6 @@ class IdempotencyConfig:
         use_local_cache: bool = False,
         local_cache_max_items: int = 256,
         hash_function: str = "md5",
-        include_function_name: bool = True,
     ):
         """
         Initialize the base persistence layer
