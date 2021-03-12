@@ -20,6 +20,21 @@ class DictWrapper:
         return self._data.get(key)
 
 
+def get_header_value(headers: Dict[str, str], name: str, default_value: str, case_sensitive: bool) -> Optional[str]:
+    """Get header value by name"""
+    if case_sensitive:
+        return headers.get(name, default_value)
+
+    name_lower = name.lower()
+
+    return next(
+        # Iterate over the dict and do a case insensitive key comparison
+        (value for key, value in headers.items() if key.lower() == name_lower),
+        # Default value is returned if no matches was found
+        default_value,
+    )
+
+
 class BaseProxyEvent(DictWrapper):
     @property
     def headers(self) -> Dict[str, str]:
@@ -72,7 +87,4 @@ class BaseProxyEvent(DictWrapper):
         str, optional
             Header value
         """
-        if case_sensitive:
-            return self.headers.get(name, default_value)
-
-        return next((value for key, value in self.headers.items() if name.lower() == key.lower()), default_value)
+        return get_header_value(self.headers, name, default_value, case_sensitive)
