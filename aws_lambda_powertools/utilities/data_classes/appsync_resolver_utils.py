@@ -42,7 +42,14 @@ class AppSyncResolver:
     def __init__(self):
         self._resolvers: dict = {}
 
-    def resolver(self, type_name: str = "*", field_name: str = None, **kwargs):
+    def resolver(
+        self,
+        type_name: str = "*",
+        field_name: str = None,
+        include_event: bool = False,
+        include_context: bool = False,
+        **kwargs,
+    ):
         """Registers the resolver for field_name
 
         Parameters
@@ -51,11 +58,17 @@ class AppSyncResolver:
             Type name
         field_name : str
             Field name
+        include_event: bool
+            Whether to include the lambda event
+        include_context: bool
+            Whether to include the lambda context
         kwargs :
-            Keyword arguments
+            Extra options via kwargs
         """
 
         def register_resolver(func):
+            kwargs["include_event"] = include_event
+            kwargs["include_context"] = include_context
             self._resolvers[f"{type_name}.{field_name}"] = {
                 "func": func,
                 "config": kwargs,
