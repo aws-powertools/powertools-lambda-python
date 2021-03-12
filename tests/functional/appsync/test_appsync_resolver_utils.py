@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import json
 import os
+import sys
 
 import pytest
 
@@ -145,6 +146,7 @@ def test_resolver_yield():
     assert next(result) == "value"
 
 
+@pytest.mark.skipif(sys.version_info < (3, 8), reason="only for python versions that support asyncio.run")
 def test_resolver_async():
     # GIVEN
     app = AppSyncResolver()
