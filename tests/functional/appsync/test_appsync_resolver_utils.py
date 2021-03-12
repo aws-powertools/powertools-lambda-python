@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import json
 import os
@@ -124,6 +125,43 @@ def test_resolver_value_error():
 
     # THEN
     assert exp.value.args[0] == "No resolver found for 'type.field'"
+
+
+def test_resolver_yield():
+    # GIVEN
+    app = AppSyncResolver()
+
+    mock_event = {"typeName": "Customer", "fieldName": "field", "arguments": {}}
+
+    @app.resolver(field_name="field")
+    def func_yield():
+        yield "value"
+
+    # WHEN
+    mock_context = LambdaContext()
+    result = app.resolve(mock_event, mock_context)
+
+    # THEN
+    assert next(result) == "value"
+
+
+def test_resolver_async():
+    # GIVEN
+    app = AppSyncResolver()
+
+    mock_event = {"typeName": "Customer", "fieldName": "field", "arguments": {}}
+
+    @app.resolver(field_name="field")
+    async def get_async():
+        await asyncio.sleep(0.0001)
+        return "value"
+
+    # WHEN
+    mock_context = LambdaContext()
+    result = app.resolve(mock_event, mock_context)
+
+    # THEN
+    assert asyncio.run(result) == "value"
 
 
 def test_make_id():
