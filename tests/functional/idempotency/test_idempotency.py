@@ -34,6 +34,7 @@ def test_idempotent_lambda_already_completed(
     hashed_idempotency_key,
     serialized_lambda_response,
     deserialized_lambda_response,
+    lambda_context,
 ):
     """
     Test idempotent decorator where event with matching event key has already been succesfully processed
@@ -62,7 +63,7 @@ def test_idempotent_lambda_already_completed(
     def lambda_handler(event, context):
         raise Exception
 
-    lambda_resp = lambda_handler(lambda_apigw_event, {})
+    lambda_resp = lambda_handler(lambda_apigw_event, lambda_context)
     assert lambda_resp == deserialized_lambda_response
 
     stubber.assert_no_pending_responses()
@@ -77,6 +78,7 @@ def test_idempotent_lambda_in_progress(
     lambda_response,
     timestamp_future,
     hashed_idempotency_key,
+    lambda_context,
 ):
     """
     Test idempotent decorator where lambda_handler is already processing an event with matching event key
@@ -106,7 +108,7 @@ def test_idempotent_lambda_in_progress(
         return lambda_response
 
     with pytest.raises(IdempotencyAlreadyInProgressError) as ex:
-        lambda_handler(lambda_apigw_event, {})
+        lambda_handler(lambda_apigw_event, lambda_context)
         assert (
             ex.value.args[0] == "Execution already in progress with idempotency key: "
             "body=a3edd699125517bb49d562501179ecbd"
@@ -126,6 +128,7 @@ def test_idempotent_lambda_in_progress_with_cache(
     timestamp_future,
     hashed_idempotency_key,
     mocker,
+    lambda_context,
 ):
     """
     Test idempotent decorator where lambda_handler is already processing an event with matching event key, cache
@@ -165,7 +168,7 @@ def test_idempotent_lambda_in_progress_with_cache(
     loops = 3
     for _ in range(loops):
         with pytest.raises(IdempotencyAlreadyInProgressError) as ex:
-            lambda_handler(lambda_apigw_event, {})
+            lambda_handler(lambda_apigw_event, lambda_context)
             assert (
                 ex.value.args[0] == "Execution already in progress with idempotency key: "
                 "body=a3edd699125517bb49d562501179ecbd"
@@ -192,6 +195,7 @@ def test_idempotent_lambda_first_execution(
     serialized_lambda_response,
     deserialized_lambda_response,
     hashed_idempotency_key,
+    lambda_context,
 ):
     """
     Test idempotent decorator when lambda is executed with an event with a previously unknown event key
@@ -208,7 +212,7 @@ def test_idempotent_lambda_first_execution(
     def lambda_handler(event, context):
         return lambda_response
 
-    lambda_handler(lambda_apigw_event, {})
+    lambda_handler(lambda_apigw_event, lambda_context)
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
@@ -225,6 +229,7 @@ def test_idempotent_lambda_first_execution_cached(
     lambda_response,
     hashed_idempotency_key,
     mocker,
+    lambda_context,
 ):
     """
     Test idempotent decorator when lambda is executed with an event with a previously unknown event key. Ensure
@@ -243,7 +248,7 @@ def test_idempotent_lambda_first_execution_cached(
     def lambda_handler(event, context):
         return lambda_response
 
-    lambda_handler(lambda_apigw_event, {})
+    lambda_handler(lambda_apigw_event, lambda_context)
 
     retrieve_from_cache_spy.assert_called_once()
     save_to_cache_spy.assert_called_once()
@@ -251,7 +256,7 @@ def test_idempotent_lambda_first_execution_cached(
     assert persistence_store._cache.get(hashed_idempotency_key).status == "COMPLETED"
 
     # This lambda call should not call AWS API
-    lambda_handler(lambda_apigw_event, {})
+    lambda_handler(lambda_apigw_event, lambda_context)
     assert retrieve_from_cache_spy.call_count == 3
     retrieve_from_cache_spy.assert_called_with(idempotency_key=hashed_idempotency_key)
 
@@ -270,6 +275,7 @@ def test_idempotent_lambda_expired(
     expected_params_update_item,
     expected_params_put_item,
     hashed_idempotency_key,
+    lambda_context,
 ):
     """
     Test idempotent decorator when lambda is called with an event it succesfully handled already, but outside of the
@@ -288,7 +294,7 @@ def test_idempotent_lambda_expired(
     def lambda_handler(event, context):
         return lambda_response
 
-    lambda_handler(lambda_apigw_event, {})
+    lambda_handler(lambda_apigw_event, lambda_context)
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
@@ -303,6 +309,7 @@ def test_idempotent_lambda_exception(
     lambda_response,
     hashed_idempotency_key,
     expected_params_put_item,
+    lambda_context,
 ):
     """
     Test idempotent decorator when lambda is executed with an event with a previously unknown event key, but
@@ -326,7 +333,7 @@ def test_idempotent_lambda_exception(
         raise Exception("Something went wrong!")
 
     with pytest.raises(Exception):
-        lambda_handler(lambda_apigw_event, {})
+        lambda_handler(lambda_apigw_event, lambda_context)
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
@@ -343,6 +350,7 @@ def test_idempotent_lambda_already_completed_with_validation_bad_payload(
     lambda_response,
     hashed_idempotency_key,
     hashed_validation_key,
+    lambda_context,
 ):
     """
     Test idempotent decorator where event with matching event key has already been successfully processed
@@ -371,7 +379,7 @@ def test_idempotent_lambda_already_completed_with_validation_bad_payload(
 
     with pytest.raises(IdempotencyValidationError):
         lambda_apigw_event["requestContext"]["accountId"] += "1"  # Alter the request payload
-        lambda_handler(lambda_apigw_event, {})
+        lambda_handler(lambda_apigw_event, lambda_context)
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
@@ -386,6 +394,7 @@ def test_idempotent_lambda_expired_during_request(
     lambda_response,
     expected_params_update_item,
     hashed_idempotency_key,
+    lambda_context,
 ):
     """
     Test idempotent decorator when lambda is called with an event it succesfully handled already. Persistence store
@@ -427,7 +436,7 @@ def test_idempotent_lambda_expired_during_request(
 
     # max retries exceeded before get_item and put_item agree on item state, so exception gets raised
     with pytest.raises(IdempotencyInconsistentStateError):
-        lambda_handler(lambda_apigw_event, {})
+        lambda_handler(lambda_apigw_event, lambda_context)
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
@@ -442,6 +451,7 @@ def test_idempotent_persistence_exception_deleting(
     lambda_response,
     hashed_idempotency_key,
     expected_params_put_item,
+    lambda_context,
 ):
     """
     Test idempotent decorator when lambda is executed with an event with a previously unknown event key, but
@@ -460,7 +470,7 @@ def test_idempotent_persistence_exception_deleting(
         raise Exception("Something went wrong!")
 
     with pytest.raises(IdempotencyPersistenceLayerError) as exc:
-        lambda_handler(lambda_apigw_event, {})
+        lambda_handler(lambda_apigw_event, lambda_context)
 
     assert exc.value.args[0] == "Failed to delete record from idempotency store"
     stubber.assert_no_pending_responses()
@@ -476,6 +486,7 @@ def test_idempotent_persistence_exception_updating(
     lambda_response,
     hashed_idempotency_key,
     expected_params_put_item,
+    lambda_context,
 ):
     """
     Test idempotent decorator when lambda is executed with an event with a previously unknown event key, but
@@ -494,7 +505,7 @@ def test_idempotent_persistence_exception_updating(
         return {"message": "success!"}
 
     with pytest.raises(IdempotencyPersistenceLayerError) as exc:
-        lambda_handler(lambda_apigw_event, {})
+        lambda_handler(lambda_apigw_event, lambda_context)
 
     assert exc.value.args[0] == "Failed to update record state to success in idempotency store"
     stubber.assert_no_pending_responses()
@@ -510,6 +521,7 @@ def test_idempotent_persistence_exception_getting(
     lambda_response,
     hashed_idempotency_key,
     expected_params_put_item,
+    lambda_context,
 ):
     """
     Test idempotent decorator when lambda is executed with an event with a previously unknown event key, but
@@ -526,7 +538,7 @@ def test_idempotent_persistence_exception_getting(
         return {"message": "success!"}
 
     with pytest.raises(IdempotencyPersistenceLayerError) as exc:
-        lambda_handler(lambda_apigw_event, {})
+        lambda_handler(lambda_apigw_event, lambda_context)
 
     assert exc.value.args[0] == "Failed to get record from idempotency store"
     stubber.assert_no_pending_responses()
@@ -545,6 +557,7 @@ def test_idempotent_lambda_first_execution_with_validation(
     lambda_response,
     hashed_idempotency_key,
     hashed_validation_key,
+    lambda_context,
 ):
     """
     Test idempotent decorator when lambda is executed with an event with a previously unknown event key
@@ -560,7 +573,7 @@ def test_idempotent_lambda_first_execution_with_validation(
     def lambda_handler(event, context):
         return lambda_response
 
-    lambda_handler(lambda_apigw_event, {})
+    lambda_handler(lambda_apigw_event, lambda_context)
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
@@ -578,6 +591,7 @@ def test_idempotent_lambda_with_validator_util(
     deserialized_lambda_response,
     hashed_idempotency_key_with_envelope,
     mock_function,
+    lambda_context,
 ):
     """
     Test idempotent decorator where event with matching event key has already been succesfully processed, using the
@@ -610,7 +624,7 @@ def test_idempotent_lambda_with_validator_util(
         return "shouldn't get here!"
 
     mock_function.assert_not_called()
-    lambda_resp = lambda_handler(lambda_apigw_event, {})
+    lambda_resp = lambda_handler(lambda_apigw_event, lambda_context)
     assert lambda_resp == deserialized_lambda_response
 
     stubber.assert_no_pending_responses()
@@ -715,7 +729,7 @@ def test_is_missing_idempotency_key():
     "idempotency_config", [{"use_local_cache": False, "event_key_jmespath": "body"}], indirect=True
 )
 def test_default_no_raise_on_missing_idempotency_key(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
 ):
     # GIVEN a persistence_store with use_local_cache = False and event_key_jmespath = "body"
     persistence_store.configure(idempotency_config)
@@ -723,17 +737,18 @@ def test_default_no_raise_on_missing_idempotency_key(
     assert "body" in persistence_store.event_key_jmespath
 
     # WHEN getting the hashed idempotency key for an event with no `body` key
-    hashed_key = persistence_store._get_hashed_idempotency_key({})
+    hashed_key = persistence_store._get_hashed_idempotency_key({}, lambda_context)
 
     # THEN return the hash of None
-    assert md5(json.dumps(None).encode()).hexdigest() == hashed_key
+    expected_value = "test-func#" + md5(json.dumps(None).encode()).hexdigest()
+    assert expected_value == hashed_key
 
 
 @pytest.mark.parametrize(
     "idempotency_config", [{"use_local_cache": False, "event_key_jmespath": "[body, x]"}], indirect=True
 )
 def test_raise_on_no_idempotency_key(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
 ):
     # GIVEN a persistence_store with raise_on_no_idempotency_key and no idempotency key in the request
     persistence_store.configure(idempotency_config)
@@ -743,7 +758,7 @@ def test_raise_on_no_idempotency_key(
 
     # WHEN getting the hashed idempotency key for an event with no `body` key
     with pytest.raises(IdempotencyKeyError) as excinfo:
-        persistence_store._get_hashed_idempotency_key({})
+        persistence_store._get_hashed_idempotency_key({}, lambda_context)
 
     # THEN raise IdempotencyKeyError error
     assert "No data found to create a hashed idempotency_key" in str(excinfo.value)
@@ -760,7 +775,7 @@ def test_raise_on_no_idempotency_key(
     indirect=True,
 )
 def test_jmespath_with_powertools_json(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
 ):
     # GIVEN an event_key_jmespath with powertools_json custom function
     persistence_store.configure(idempotency_config)
@@ -773,15 +788,15 @@ def test_jmespath_with_powertools_json(
     }
 
     # WHEN calling _get_hashed_idempotency_key
-    result = persistence_store._get_hashed_idempotency_key(api_gateway_proxy_event)
+    result = persistence_store._get_hashed_idempotency_key(api_gateway_proxy_event, lambda_context)
 
     # THEN the hashed idempotency key should match the extracted values generated hash
-    assert result == persistence_store._generate_hash(expected_value)
+    assert result == "test-func#" + persistence_store._generate_hash(expected_value)
 
 
 @pytest.mark.parametrize("config_with_jmespath_options", ["powertools_json(data).payload"], indirect=True)
 def test_custom_jmespath_function_overrides_builtin_functions(
-    config_with_jmespath_options: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    config_with_jmespath_options: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
 ):
     # GIVEN an persistence store with a custom jmespath_options
     # AND use a builtin powertools custom function
@@ -790,10 +805,10 @@ def test_custom_jmespath_function_overrides_builtin_functions(
     with pytest.raises(jmespath.exceptions.UnknownFunctionError, match="Unknown function: powertools_json()"):
         # WHEN calling _get_hashed_idempotency_key
         # THEN raise unknown function
-        persistence_store._get_hashed_idempotency_key({})
+        persistence_store._get_hashed_idempotency_key({}, lambda_context)
 
 
-def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPersistenceLayer):
+def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPersistenceLayer, lambda_context):
     # GIVEN a miss configured persistence layer
     # like no table was created for the idempotency persistence layer
     stubber = stub.Stubber(persistence_store.table.meta.client)
@@ -807,7 +822,7 @@ def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPers
     # WHEN handling the idempotent call
     # AND save_inprogress raises a ClientError
     with pytest.raises(IdempotencyPersistenceLayerError) as e:
-        lambda_handler({}, {})
+        lambda_handler({}, lambda_context)
 
     # THEN idempotent should raise an IdempotencyPersistenceLayerError
     stubber.assert_no_pending_responses()
