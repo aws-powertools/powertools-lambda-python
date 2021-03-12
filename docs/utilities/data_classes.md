@@ -108,7 +108,7 @@ Typically, used for API Gateway REST API or HTTP API using v1 proxy event.
 Used when building a Lambda GraphQL Resolvers with [Amplify GraphQL Transform Library](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"}
 and can also be used for [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/){target="_blank"}.
 
-=== "lambda_app.py"
+=== "app.py"
 
     ```python hl_lines="2-5 12 14 19 21 29-30"
     from aws_lambda_powertools.logging import Logger, correlation_paths
