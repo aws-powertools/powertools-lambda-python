@@ -70,7 +70,7 @@ Event Source | Data_class
 
 ### API Gateway Proxy
 
-Typically, used for API Gateway REST API or HTTP API using v1 proxy event.
+It is used for either API Gateway REST API or HTTP API using v1 proxy event.
 
 === "lambda_app.py"
 
