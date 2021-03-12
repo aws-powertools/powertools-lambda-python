@@ -92,7 +92,7 @@ class AppSyncIdentityCognito(DictWrapper):
 
     @property
     def groups(self) -> List[str]:
-        """Array of OIDC groups"""
+        """List of OIDC groups"""
         return self["groups"]
 
     @property
