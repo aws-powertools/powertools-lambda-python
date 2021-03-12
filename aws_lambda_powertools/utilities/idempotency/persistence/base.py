@@ -182,11 +182,11 @@ class BasePersistenceLayer(ABC):
                 raise IdempotencyKeyError("No data found to create a hashed idempotency_key")
             warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}")
 
-        generated_hard = self._generate_hash(data)
+        generated_hash = self._generate_hash(data)
         if self.include_function_name:
-            return f"{context.function_name}#{generated_hard}"
+            return f"{context.function_name}#{generated_hash}"
         else:
-            return generated_hard
+            return generated_hash
 
     @staticmethod
     def is_missing_idempotency_key(data) -> bool:
