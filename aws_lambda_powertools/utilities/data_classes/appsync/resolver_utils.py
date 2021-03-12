@@ -57,12 +57,12 @@ class AppSyncResolver:
 
         @app.resolver(type_name="Merchant", field_name="extraInfo", include_event=True)
         def get_extra_info(event: AppSyncResolverEvent):
-            # Can use `event.source` to filter within the parent context
+            # Can use "event.source" to filter within the parent context
 
 
         @app.resolver(field_name="commonField")
         def common_field():
-            # Would match all fieldNames matching `commonField`
+            # Would match all fieldNames matching "commonField"
 
 
         def handle(event, context):
