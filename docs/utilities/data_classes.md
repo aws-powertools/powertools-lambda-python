@@ -3,7 +3,8 @@ title: Event Source Data Classes
 description: Utility
 ---
 
-The event source data classes utility provides classes describing the schema of common Lambda events triggers.
+Event Source Data Classes utility provides classes self-describing Lambda event sources, including API decorators when
+applicable.
 
 ## Key Features
 
@@ -72,7 +73,7 @@ Event Source | Data_class
 
 It is used for either API Gateway REST API or HTTP API using v1 proxy event.
 
-=== "lambda_app.py"
+=== "app.py"
 
     ```python
     from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
@@ -89,7 +90,7 @@ It is used for either API Gateway REST API or HTTP API using v1 proxy event.
 
 ### API Gateway Proxy v2
 
-=== "lambda_app.py"
+=== "app.py"
 
     ```python
     from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2
@@ -202,7 +203,7 @@ and can also be used for [AppSync Direct Lambda Resolvers](https://aws.amazon.co
 CloudWatch Logs events by default are compressed and base64 encoded. You can use the helper function provided to decode,
 decompress and parse json data from the event.
 
-=== "lambda_app.py"
+=== "app.py"
 
     ```python
     from aws_lambda_powertools.utilities.data_classes import CloudWatchLogsEvent
@@ -235,7 +236,7 @@ Define Auth Challenge | `data_classes.cognito_user_pool_event.DefineAuthChalleng
 Create Auth Challenge | `data_classes.cognito_user_pool_event.CreateAuthChallengeTriggerEvent`
 Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChallengeResponseTriggerEvent`
 
-=== "lambda_app.py"
+=== "app.py"
 
     ```python
     from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import PostConfirmationTriggerEvent
@@ -249,7 +250,7 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
 
 ### Connect Contact Flow
 
-=== "lambda_app.py"
+=== "app.py"
 
     ```python
     from aws_lambda_powertools.utilities.data_classes.connect_contact_flow_event import (
@@ -273,7 +274,7 @@ The DynamoDB data class utility provides the base class for `DynamoDBStreamEvent
 attributes values (`AttributeValue`), as well as enums for stream view type (`StreamViewType`) and event type
 (`DynamoDBRecordEventName`).
 
-=== "lambda_app.py"
+=== "app.py"
 
     ```python
     from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
@@ -293,7 +294,7 @@ attributes values (`AttributeValue`), as well as enums for stream view type (`St
 
 ### EventBridge
 
-=== "lambda_app.py"
+=== "app.py"
 
     ```python
     from aws_lambda_powertools.utilities.data_classes import EventBridgeEvent
@@ -309,7 +310,7 @@ attributes values (`AttributeValue`), as well as enums for stream view type (`St
 Kinesis events by default contain base64 encoded data. You can use the helper function to access the data either as json
 or plain text, depending on the original payload.
 
-=== "lambda_app.py"
+=== "app.py"
 
     ```python
     from aws_lambda_powertools.utilities.data_classes import KinesisStreamEvent
@@ -329,7 +330,7 @@ or plain text, depending on the original payload.
 
 ### S3
 
-=== "lambda_app.py"
+=== "app.py"
 
     ```python
     from urllib.parse import unquote_plus
@@ -348,7 +349,7 @@ or plain text, depending on the original payload.
 
 ### SES
 
-=== "lambda_app.py"
+=== "app.py"
 
     ```python
     from aws_lambda_powertools.utilities.data_classes import SESEvent
@@ -366,7 +367,7 @@ or plain text, depending on the original payload.
 
 ### SNS
 
-=== "lambda_app.py"
+=== "app.py"
 
     ```python
     from aws_lambda_powertools.utilities.data_classes import SNSEvent
@@ -384,7 +385,7 @@ or plain text, depending on the original payload.
 
 ### SQS
 
-=== "lambda_app.py"
+=== "app.py"
 
     ```python
     from aws_lambda_powertools.utilities.data_classes import SQSEvent
