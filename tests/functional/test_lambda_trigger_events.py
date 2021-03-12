@@ -17,7 +17,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     SNSEvent,
     SQSEvent,
 )
-from aws_lambda_powertools.utilities.data_classes.appsync.appsync_resolver_event import (
+from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import (
     AppSyncIdentityCognito,
     AppSyncIdentityIAM,
     AppSyncResolverEventInfo,
