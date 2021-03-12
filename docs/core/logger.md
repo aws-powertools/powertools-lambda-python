@@ -516,7 +516,7 @@ When logging exceptions, Logger will add new keys named `exception_name` and `ex
        "timestamp": "2020-08-28 18:11:38,886",
        "service": "service_undefined",
        "sampling_rate": 0.0,
-       "exception_name":"ValueError",
+       "exception_name": "ValueError",
        "exception": "Traceback (most recent call last):\n  File \"<input>\", line 2, in <module>\nValueError: something went wrong"
     }
     ```
