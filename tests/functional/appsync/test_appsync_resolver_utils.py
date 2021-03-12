@@ -146,6 +146,30 @@ def test_resolver_yield():
     assert next(result) == "value"
 
 
+def test_resolver_multiple_mappings():
+    # GIVEN
+    app = AppSyncResolver()
+
+    @app.resolver(field_name="listLocations")
+    @app.resolver(field_name="locations")
+    def get_locations(name: str, description: str = ""):
+        return name + description
+
+    # WHEN
+    mock_event1 = {"typeName": "Query", "fieldName": "listLocations", "arguments": {"name": "value"}}
+    mock_event2 = {
+        "typeName": "Merchant",
+        "fieldName": "locations",
+        "arguments": {"name": "value2", "description": "description"},
+    }
+    result1 = app.resolve(mock_event1, LambdaContext())
+    result2 = app.resolve(mock_event2, LambdaContext())
+
+    # THEN
+    assert result1 == "value"
+    assert result2 == "value2description"
+
+
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="only for python versions that support asyncio.run")
 def test_resolver_async():
     # GIVEN
