@@ -33,8 +33,6 @@ class IdempotencyConfig:
             Max number of items to store in local cache, by default 1024
         hash_function: str, optional
             Function to use for calculating hashes, by default md5.
-        include_function_name: bool, optional
-            Whether to include the function name in the idempotent key
         """
         self.event_key_jmespath = event_key_jmespath
         self.payload_validation_jmespath = payload_validation_jmespath
@@ -44,4 +42,3 @@ class IdempotencyConfig:
         self.use_local_cache = use_local_cache
         self.local_cache_max_items = local_cache_max_items
         self.hash_function = hash_function
-        self.include_function_name = include_function_name

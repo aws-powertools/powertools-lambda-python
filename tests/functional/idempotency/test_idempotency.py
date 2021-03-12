@@ -828,16 +828,3 @@ def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPers
     stubber.assert_no_pending_responses()
     stubber.deactivate()
     assert "Failed to save in progress record to idempotency store" == e.value.args[0]
-
-
-def test_include_function_name_false(persistence_store: DynamoDBPersistenceLayer):
-    # GIVEN include_function_name=False
-    persistence_store.configure(IdempotencyConfig(event_key_jmespath="body", include_function_name=False))
-    value = "true"
-    api_gateway_proxy_event = {"body": value}
-
-    # WHEN
-    result = persistence_store._get_hashed_idempotency_key(api_gateway_proxy_event, None)
-
-    # THEN
-    assert result == persistence_store._generate_hash(value)

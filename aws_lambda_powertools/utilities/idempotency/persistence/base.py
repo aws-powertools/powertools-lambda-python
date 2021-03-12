@@ -122,7 +122,6 @@ class BasePersistenceLayer(ABC):
         self.use_local_cache = False
         self._cache: Optional[LRUDict] = None
         self.hash_function = None
-        self.include_function_name = True
 
     def configure(self, config: IdempotencyConfig) -> None:
         """
@@ -153,7 +152,6 @@ class BasePersistenceLayer(ABC):
         if self.use_local_cache:
             self._cache = LRUDict(max_items=config.local_cache_max_items)
         self.hash_function = getattr(hashlib, config.hash_function)
-        self.include_function_name = config.include_function_name
 
     def _get_hashed_idempotency_key(self, event: Dict[str, Any], context: LambdaContext) -> str:
         """
@@ -183,10 +181,7 @@ class BasePersistenceLayer(ABC):
             warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}")
 
         generated_hash = self._generate_hash(data)
-        if self.include_function_name:
-            return f"{context.function_name}#{generated_hash}"
-        else:
-            return generated_hash
+        return f"{context.function_name}#{generated_hash}"
 
     @staticmethod
     def is_missing_idempotency_key(data) -> bool:
