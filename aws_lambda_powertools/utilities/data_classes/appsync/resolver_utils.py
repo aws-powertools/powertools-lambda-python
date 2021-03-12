@@ -37,7 +37,38 @@ def aws_timestamp():
 
 
 class AppSyncResolver:
-    """AppSync resolver decorator utility"""
+    """
+    AppSync resolver decorator utility
+
+    Example
+    -------
+    **Sample usage**
+
+        from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
+        from aws_lambda_powertools.utilities.data_classes.appsync.resolver_utils import AppSyncResolver
+
+        app = AppSyncResolver()
+
+
+        @app.resolver(type_name="Query", field_name="listLocations", include_event=True)
+        def list_locations(event: AppSyncResolverEvent, page: int = 0, size: int = 10):
+            # Your logic to fetch locations
+
+
+        @app.resolver(type_name="Merchant", field_name="extraInfo", include_event=True)
+        def get_extra_info(event: AppSyncResolverEvent):
+            # Can use `event.source` to filter within the parent context
+
+
+        @app.resolver(field_name="commonField")
+        def common_field():
+            # Would match all fieldNames matching `commonField`
+
+
+        def handle(event, context):
+            app.resolve(event, context)
+
+    """
 
     def __init__(self):
         self._resolvers: dict = {}
