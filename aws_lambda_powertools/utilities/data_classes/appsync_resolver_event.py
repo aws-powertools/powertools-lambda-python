@@ -135,8 +135,8 @@ class AppSyncResolverEventInfo(DictWrapper):
 class AppSyncResolverEvent(DictWrapper):
     """AppSync resolver event
 
-    **NOTE:** AppSync Resolver Events can come in various shapes this data class supports what
-    Amplify GraphQL Transformer produces
+    **NOTE:** AppSync Resolver Events can come in various shapes this data class
+    supports both Amplify GraphQL directive @function and Direct Lambda Resolver
 
     Documentation:
     -------------
