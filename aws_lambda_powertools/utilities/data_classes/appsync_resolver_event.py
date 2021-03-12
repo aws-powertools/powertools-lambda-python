@@ -122,7 +122,7 @@ class AppSyncResolverEventInfo(DictWrapper):
     @property
     def selection_set_list(self) -> List[str]:
         """A list representation of the fields in the GraphQL selection set. Fields that are aliased will
-        only be referenced by the alias name, not the field name. The following example shows this in detail."""
+        only be referenced by the alias name, not the field name."""
         return self.get("selectionSetList")
 
     @property
