@@ -7,7 +7,7 @@ import sys
 import pytest
 
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
-from aws_lambda_powertools.utilities.data_classes.appsync_resolver_utils import (
+from aws_lambda_powertools.utilities.data_classes.appsync.resolver_utils import (
     AppSyncResolver,
     aws_date,
     aws_datetime,

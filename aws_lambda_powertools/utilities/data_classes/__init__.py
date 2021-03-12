@@ -1,6 +1,6 @@
 from .alb_event import ALBEvent
 from .api_gateway_proxy_event import APIGatewayProxyEvent, APIGatewayProxyEventV2
-from .appsync_resolver_event import AppSyncResolverEvent
+from .appsync.appsync_resolver_event import AppSyncResolverEvent
 from .cloud_watch_logs_event import CloudWatchLogsEvent
 from .connect_contact_flow_event import ConnectContactFlowEvent
 from .dynamo_db_stream_event import DynamoDBStreamEvent
