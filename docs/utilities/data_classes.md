@@ -236,6 +236,8 @@ Define Auth Challenge | `data_classes.cognito_user_pool_event.DefineAuthChalleng
 Create Auth Challenge | `data_classes.cognito_user_pool_event.CreateAuthChallengeTriggerEvent`
 Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChallengeResponseTriggerEvent`
 
+#### Post Confirmation Example
+
 === "app.py"
 
     ```python
@@ -246,6 +248,189 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
 
         user_attributes = event.request.user_attributes
         do_something_with(user_attributes)
+    ```
+
+#### Define Auth Challenge Example
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import DefineAuthChallengeTriggerEvent
+
+    def handler(event, context):
+        _event: DefineAuthChallengeTriggerEvent = DefineAuthChallengeTriggerEvent(event)
+        if (
+            len(_event.request.session) == 1
+            and _event.request.session[0].challenge_name == "SRP_A"
+        ):
+            _event.response.issue_tokens = False
+            _event.response.fail_authentication = False
+            _event.response.challenge_name = "PASSWORD_VERIFIER"
+        elif (
+            len(_event.request.session) == 2
+            and _event.request.session[1].challenge_name == "PASSWORD_VERIFIER"
+            and _event.request.session[1].challenge_result
+        ):
+            _event.response.issue_tokens = False
+            _event.response.fail_authentication = False
+            _event.response.challenge_name = "CUSTOM_CHALLENGE"
+        elif (
+            len(_event.request.session) == 3
+            and _event.request.session[2].challenge_name == "CUSTOM_CHALLENGE"
+            and _event.request.session[2].challenge_result
+        ):
+            _event.response.issue_tokens = True
+            _event.response.fail_authentication = False
+        else:
+            _event.response.issue_tokens = False
+            _event.response.fail_authentication = True
+
+        return event
+    ```
+=== "SPR_A response"
+
+    ```json hl_lines="25-27"
+    {
+        "version": "1",
+        "region": "us-east-1",
+        "userPoolId": "us-east-1_example",
+        "userName": "UserName",
+        "callerContext": {
+            "awsSdkVersion": "awsSdkVersion",
+            "clientId": "clientId"
+        },
+        "triggerSource": "DefineAuthChallenge_Authentication",
+        "request": {
+            "userAttributes": {
+                "sub": "4A709A36-7D63-4785-829D-4198EF10EBDA",
+                "email_verified": "true",
+                "name": "First Last",
+                "email": "define-auth@mail.com"
+            },
+            "session": [
+                {
+                    "challengeName": "SRP_A",
+                    "challengeResult": true
+                }
+            ]
+        },
+        "response": {
+            "issueTokens": false,
+            "failAuthentication": false,
+            "challengeName": "PASSWORD_VERIFIER"
+        }
+    }
+    ```
+=== "PASSWORD_VERIFIER success response"
+
+    ```json hl_lines="30-32"
+    {
+        "version": "1",
+        "region": "us-east-1",
+        "userPoolId": "us-east-1_example",
+        "userName": "UserName",
+        "callerContext": {
+            "awsSdkVersion": "awsSdkVersion",
+            "clientId": "clientId"
+        },
+        "triggerSource": "DefineAuthChallenge_Authentication",
+        "request": {
+            "userAttributes": {
+                "sub": "4A709A36-7D63-4785-829D-4198EF10EBDA",
+                "email_verified": "true",
+                "name": "First Last",
+                "email": "define-auth@mail.com"
+            },
+            "session": [
+                {
+                    "challengeName": "SRP_A",
+                    "challengeResult": true
+                },
+                {
+                    "challengeName": "PASSWORD_VERIFIER",
+                    "challengeResult": true
+                }
+            ]
+        },
+        "response": {
+            "issueTokens": false,
+            "failAuthentication": false,
+            "challengeName": "CUSTOM_CHALLENGE"
+        }
+    }
+
+    ```
+=== "CUSTOM_CHALLENGE success response"
+
+    ```json hl_lines="34 35"
+    {
+        "version": "1",
+        "region": "us-east-1",
+        "userPoolId": "us-east-1_example",
+        "userName": "UserName",
+        "callerContext": {
+            "awsSdkVersion": "awsSdkVersion",
+            "clientId": "clientId"
+        },
+        "triggerSource": "DefineAuthChallenge_Authentication",
+        "request": {
+            "userAttributes": {
+                "sub": "4A709A36-7D63-4785-829D-4198EF10EBDA",
+                "email_verified": "true",
+                "name": "First Last",
+                "email": "define-auth@mail.com"
+            },
+            "session": [
+                {
+                    "challengeName": "SRP_A",
+                    "challengeResult": true
+                },
+                {
+                    "challengeName": "PASSWORD_VERIFIER",
+                    "challengeResult": true
+                },
+                {
+                    "challengeName": "CUSTOM_CHALLENGE",
+                    "challengeResult": true
+                }
+            ]
+        },
+        "response": {
+            "issueTokens": true,
+            "failAuthentication": false
+        }
+    }
+    ```
+
+#### Create Auth Challenge Example
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import CreateAuthChallengeTriggerEvent
+
+    def handler(event, context):
+        _event: CreateAuthChallengeTriggerEvent = CreateAuthChallengeTriggerEvent(event)
+        if _event.request.challenge_name == "CUSTOM_CHALLENGE":
+            _event.response.public_challenge_parameters = {"captchaUrl": "url/123.jpg"}
+            _event.response.private_challenge_parameters = {"answer": "5"}
+            _event.response.challenge_metadata = "CAPTCHA_CHALLENGE"
+        return event
+    ```
+
+#### Verify Auth Challenge Response Example
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import VerifyAuthChallengeResponseTriggerEvent
+
+    def handler(event, context):
+        _event: VerifyAuthChallengeResponseTriggerEvent = VerifyAuthChallengeResponseTriggerEvent(event)
+        _event.response.answer_correct = (
+            _event.request.private_challenge_parameters.get("answer") == _event.request.challenge_answer
+        )
+        return event
     ```
 
 ### Connect Contact Flow
