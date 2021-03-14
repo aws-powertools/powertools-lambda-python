@@ -188,7 +188,7 @@ class SSMProvider(BaseProvider):
 
 
 def get_parameter(
-    name: str, transform: Optional[str] = None, decrypt: bool = False, **sdk_options
+    name: str, transform: Optional[str] = None, decrypt: bool = False, force_update: bool = False, **sdk_options
 ) -> Union[str, list, dict, bytes]:
     """
     Retrieve a parameter value from AWS Systems Manager (SSM) Parameter Store
@@ -201,6 +201,8 @@ def get_parameter(
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
     decrypt: bool, optional
         If the parameter values should be decrypted
+    force_update: bool, optional
+        Force update even before a cached item has expired
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameter API call
 
@@ -240,7 +242,7 @@ def get_parameter(
     # Add to `decrypt` sdk_options to we can have an explicit option for this
     sdk_options["decrypt"] = decrypt
 
-    return DEFAULT_PROVIDERS["ssm"].get(name, transform=transform, **sdk_options)
+    return DEFAULT_PROVIDERS["ssm"].get(name, transform=transform, force_update=force_update, **sdk_options)
 
 
 def get_parameters(
