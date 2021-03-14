@@ -92,6 +92,7 @@ class SSMProvider(BaseProvider):
         max_age: int = DEFAULT_MAX_AGE_SECS,
         transform: Optional[str] = None,
         decrypt: bool = False,
+        force_update: bool = False,
         **sdk_options
     ) -> Union[str, list, dict, bytes]:
         """
@@ -109,6 +110,8 @@ class SSMProvider(BaseProvider):
             values.
         decrypt: bool, optional
             If the parameter value should be decrypted
+        force_update: bool, optional
+            Force update even before a cached item has expired
         sdk_options: dict, optional
             Arguments that will be passed directly to the underlying API call
 
@@ -124,7 +127,7 @@ class SSMProvider(BaseProvider):
         # Add to `decrypt` sdk_options to we can have an explicit option for this
         sdk_options["decrypt"] = decrypt
 
-        return super().get(name, max_age, transform, **sdk_options)
+        return super().get(name, max_age, transform, force_update, **sdk_options)
 
     def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
         """
