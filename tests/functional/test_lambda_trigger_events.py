@@ -73,6 +73,8 @@ def test_dict_wrapper_equals():
     assert DataClassSample(data1) is not data1
     assert data1 is not DataClassSample(data1)
 
+    assert DataClassSample(data1).raw_event is data1
+
 
 def test_cloud_watch_trigger_event():
     event = CloudWatchLogsEvent(load_event("cloudWatchLogEvent.json"))
@@ -81,7 +83,7 @@ def test_cloud_watch_trigger_event():
     assert event.decompress_logs_data == decompressed_logs_data
 
     json_logs_data = event.parse_logs_data()
-    assert event.parse_logs_data()._data == json_logs_data._data
+    assert event.parse_logs_data().raw_event == json_logs_data.raw_event
     log_events = json_logs_data.log_events
     log_event = log_events[0]
 
@@ -97,7 +99,7 @@ def test_cloud_watch_trigger_event():
     assert log_event.extracted_fields is None
 
     event2 = CloudWatchLogsEvent(load_event("cloudWatchLogEvent.json"))
-    assert event._data == event2._data
+    assert event.raw_event == event2.raw_event
 
 
 def test_cognito_pre_signup_trigger_event():
@@ -493,7 +495,7 @@ def test_s3_trigger_event():
     assert s3.get_object.version_id is None
     assert s3.get_object.sequencer == "0C0F6F405D6ED209E1"
     assert record.glacier_event_data is None
-    assert event.record._data == event["Records"][0]
+    assert event.record.raw_event == event["Records"][0]
     assert event.bucket_name == "lambda-artifacts-deafc19498e3f2df"
     assert event.object_key == "b21b84d653bb07b05b1e6b33684dc11b"
 
@@ -559,7 +561,7 @@ def test_ses_trigger_event():
     assert headers[0].value == "<janedoe@example.com>"
     common_headers = mail.common_headers
     assert common_headers.return_path == "janedoe@example.com"
-    assert common_headers.get_from == common_headers._data["from"]
+    assert common_headers.get_from == common_headers.raw_event["from"]
     assert common_headers.date == "Wed, 7 Oct 2015 12:34:56 -0700"
     assert common_headers.to == [expected_address]
     assert common_headers.message_id == "<0123456789example.com>"
@@ -573,12 +575,12 @@ def test_ses_trigger_event():
     assert receipt.spf_verdict.status == "PASS"
     assert receipt.dmarc_verdict.status == "PASS"
     action = receipt.action
-    assert action.get_type == action._data["type"]
-    assert action.function_arn == action._data["functionArn"]
-    assert action.invocation_type == action._data["invocationType"]
-    assert event.record._data == event["Records"][0]
-    assert event.mail._data == event["Records"][0]["ses"]["mail"]
-    assert event.receipt._data == event["Records"][0]["ses"]["receipt"]
+    assert action.get_type == action.raw_event["type"]
+    assert action.function_arn == action.raw_event["functionArn"]
+    assert action.invocation_type == action.raw_event["invocationType"]
+    assert event.record.raw_event == event["Records"][0]
+    assert event.mail.raw_event == event["Records"][0]["ses"]["mail"]
+    assert event.receipt.raw_event == event["Records"][0]["ses"]["receipt"]
 
 
 def test_sns_trigger_event():
@@ -604,7 +606,7 @@ def test_sns_trigger_event():
     assert sns.unsubscribe_url == "https://sns.us-east-2.amazonaws.com/?Action=Unsubscribe"
     assert sns.topic_arn == "arn:aws:sns:us-east-2:123456789012:sns-lambda"
     assert sns.subject == "TestInvoke"
-    assert event.record._data == event["Records"][0]
+    assert event.record.raw_event == event["Records"][0]
     assert event.sns_message == "Hello from SNS!"
 
 
