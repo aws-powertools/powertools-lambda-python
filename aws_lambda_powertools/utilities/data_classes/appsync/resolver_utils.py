@@ -1,33 +1,7 @@
-import datetime
-import time
-import uuid
 from typing import Any, Dict
 
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-def make_id():
-    return str(uuid.uuid4())
-
-
-def aws_date():
-    now = datetime.datetime.utcnow().date()
-    return now.strftime("%Y-%m-%d")
-
-
-def aws_time():
-    now = datetime.datetime.utcnow().time()
-    return now.strftime("%H:%M:%S")
-
-
-def aws_datetime():
-    now = datetime.datetime.utcnow()
-    return now.strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def aws_timestamp():
-    return int(time.time())
 
 
 class AppSyncResolver:
