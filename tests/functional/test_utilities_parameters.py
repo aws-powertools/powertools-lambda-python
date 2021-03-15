@@ -1663,3 +1663,48 @@ def test_get_transform_method_preserve_auto_unhandled(key):
     transform = parameters.base.get_transform_method(key, "auto")
 
     assert transform is None
+
+
+def test_base_provider_get_multiple_force_update(mock_name, mock_value):
+    """
+    Test BaseProvider.get_multiple()  with cached values and force_fetch is True
+    """
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            assert path == mock_name
+            return {"A": mock_value}
+
+    provider = TestProvider()
+
+    provider.store[(mock_name, None)] = ExpirableValue({"B": mock_value}, datetime.now() + timedelta(seconds=60))
+
+    value = provider.get_multiple(mock_name, force_fetch=True)
+
+    assert isinstance(value, dict)
+    assert value["A"] == mock_value
+
+
+def test_base_provider_get_force_update(mock_name, mock_value):
+    """
+    Test BaseProvider.get()  with cached values and force_fetch is True
+    """
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            return mock_value
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    provider = TestProvider()
+
+    provider.store[(mock_name, None)] = ExpirableValue("not-value", datetime.now() + timedelta(seconds=60))
+
+    value = provider.get(mock_name, force_fetch=True)
+
+    assert isinstance(value, str)
+    assert value == mock_value

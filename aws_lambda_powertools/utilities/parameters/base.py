@@ -38,7 +38,12 @@ class BaseProvider(ABC):
         return key in self.store and self.store[key].ttl >= datetime.now()
 
     def get(
-        self, name: str, max_age: int = DEFAULT_MAX_AGE_SECS, transform: Optional[str] = None, **sdk_options
+        self,
+        name: str,
+        max_age: int = DEFAULT_MAX_AGE_SECS,
+        transform: Optional[str] = None,
+        force_fetch: bool = False,
+        **sdk_options,
     ) -> Union[str, list, dict, bytes]:
         """
         Retrieve a parameter value or return the cached value
@@ -53,6 +58,8 @@ class BaseProvider(ABC):
             Optional transformation of the parameter value. Supported values
             are "json" for JSON strings and "binary" for base 64 encoded
             values.
+        force_fetch: bool, optional
+            Force update even before a cached item has expired, defaults to False
         sdk_options: dict, optional
             Arguments that will be passed directly to the underlying API call
 
@@ -76,7 +83,7 @@ class BaseProvider(ABC):
         # an acceptable tradeoff.
         key = (name, transform)
 
-        if self._has_not_expired(key):
+        if not force_fetch and self._has_not_expired(key):
             return self.store[key].value
 
         try:
@@ -105,6 +112,7 @@ class BaseProvider(ABC):
         max_age: int = DEFAULT_MAX_AGE_SECS,
         transform: Optional[str] = None,
         raise_on_transform_error: bool = False,
+        force_fetch: bool = False,
         **sdk_options,
     ) -> Union[Dict[str, str], Dict[str, dict], Dict[str, bytes]]:
         """
@@ -123,6 +131,8 @@ class BaseProvider(ABC):
         raise_on_transform_error: bool, optional
             Raises an exception if any transform fails, otherwise this will
             return a None value for each transform that failed
+        force_fetch: bool, optional
+            Force update even before a cached item has expired, defaults to False
         sdk_options: dict, optional
             Arguments that will be passed directly to the underlying API call
 
@@ -137,7 +147,7 @@ class BaseProvider(ABC):
 
         key = (path, transform)
 
-        if self._has_not_expired(key):
+        if not force_fetch and self._has_not_expired(key):
             return self.store[key].value
 
         try:

@@ -107,7 +107,12 @@ class AppConfigProvider(BaseProvider):
 
 
 def get_app_config(
-    name: str, environment: str, application: Optional[str] = None, transform: Optional[str] = None, **sdk_options
+    name: str,
+    environment: str,
+    application: Optional[str] = None,
+    transform: Optional[str] = None,
+    force_fetch: bool = False,
+    **sdk_options
 ) -> Union[str, list, dict, bytes]:
     """
     Retrieve a configuration value from AWS App Config.
@@ -122,6 +127,8 @@ def get_app_config(
         Application of the configuration
     transform: str, optional
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
+    force_fetch: bool, optional
+        Force update even before a cached item has expired, defaults to False
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameter API call
 
@@ -160,4 +167,4 @@ def get_app_config(
 
     sdk_options["ClientId"] = CLIENT_ID
 
-    return DEFAULT_PROVIDERS["appconfig"].get(name, transform=transform, **sdk_options)
+    return DEFAULT_PROVIDERS["appconfig"].get(name, transform=transform, force_fetch=force_fetch, **sdk_options)
