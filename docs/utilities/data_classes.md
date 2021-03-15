@@ -258,34 +258,34 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
     from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import DefineAuthChallengeTriggerEvent
 
     def handler(event, context):
-        _event: DefineAuthChallengeTriggerEvent = DefineAuthChallengeTriggerEvent(event)
+        event: DefineAuthChallengeTriggerEvent = DefineAuthChallengeTriggerEvent(event)
         if (
-            len(_event.request.session) == 1
-            and _event.request.session[0].challenge_name == "SRP_A"
+            len(event.request.session) == 1
+            and event.request.session[0].challenge_name == "SRP_A"
         ):
-            _event.response.issue_tokens = False
-            _event.response.fail_authentication = False
-            _event.response.challenge_name = "PASSWORD_VERIFIER"
+            event.response.issue_tokens = False
+            event.response.fail_authentication = False
+            event.response.challenge_name = "PASSWORD_VERIFIER"
         elif (
-            len(_event.request.session) == 2
-            and _event.request.session[1].challenge_name == "PASSWORD_VERIFIER"
-            and _event.request.session[1].challenge_result
+            len(event.request.session) == 2
+            and event.request.session[1].challenge_name == "PASSWORD_VERIFIER"
+            and event.request.session[1].challenge_result
         ):
-            _event.response.issue_tokens = False
-            _event.response.fail_authentication = False
-            _event.response.challenge_name = "CUSTOM_CHALLENGE"
+            event.response.issue_tokens = False
+            event.response.fail_authentication = False
+            event.response.challenge_name = "CUSTOM_CHALLENGE"
         elif (
-            len(_event.request.session) == 3
-            and _event.request.session[2].challenge_name == "CUSTOM_CHALLENGE"
-            and _event.request.session[2].challenge_result
+            len(event.request.session) == 3
+            and event.request.session[2].challenge_name == "CUSTOM_CHALLENGE"
+            and event.request.session[2].challenge_result
         ):
-            _event.response.issue_tokens = True
-            _event.response.fail_authentication = False
+            event.response.issue_tokens = True
+            event.response.fail_authentication = False
         else:
-            _event.response.issue_tokens = False
-            _event.response.fail_authentication = True
+            event.response.issue_tokens = False
+            event.response.fail_authentication = True
 
-        return event
+        return event.data
     ```
 === "SPR_A response"
 
@@ -410,12 +410,12 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
     from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import CreateAuthChallengeTriggerEvent
 
     def handler(event, context):
-        _event: CreateAuthChallengeTriggerEvent = CreateAuthChallengeTriggerEvent(event)
-        if _event.request.challenge_name == "CUSTOM_CHALLENGE":
-            _event.response.public_challenge_parameters = {"captchaUrl": "url/123.jpg"}
-            _event.response.private_challenge_parameters = {"answer": "5"}
-            _event.response.challenge_metadata = "CAPTCHA_CHALLENGE"
-        return event
+        event: CreateAuthChallengeTriggerEvent = CreateAuthChallengeTriggerEvent(event)
+        if event.request.challenge_name == "CUSTOM_CHALLENGE":
+            event.response.public_challenge_parameters = {"captchaUrl": "url/123.jpg"}
+            event.response.private_challenge_parameters = {"answer": "5"}
+            event.response.challenge_metadata = "CAPTCHA_CHALLENGE"
+        return event.data
     ```
 
 #### Verify Auth Challenge Response Example
@@ -426,11 +426,11 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
     from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import VerifyAuthChallengeResponseTriggerEvent
 
     def handler(event, context):
-        _event: VerifyAuthChallengeResponseTriggerEvent = VerifyAuthChallengeResponseTriggerEvent(event)
-        _event.response.answer_correct = (
-            _event.request.private_challenge_parameters.get("answer") == _event.request.challenge_answer
+        event: VerifyAuthChallengeResponseTriggerEvent = VerifyAuthChallengeResponseTriggerEvent(event)
+        event.response.answer_correct = (
+            event.request.private_challenge_parameters.get("answer") == event.request.challenge_answer
         )
-        return event
+        return event.data
     ```
 
 ### Connect Contact Flow

@@ -19,6 +19,11 @@ class DictWrapper:
     def get(self, key: str) -> Optional[Any]:
         return self._data.get(key)
 
+    @property
+    def data(self) -> Dict[str, Any]:
+        """The original event dict"""
+        return self._data
+
 
 def get_header_value(headers: Dict[str, str], name: str, default_value: str, case_sensitive: bool) -> Optional[str]:
     """Get header value by name"""
