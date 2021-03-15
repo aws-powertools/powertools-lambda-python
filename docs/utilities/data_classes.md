@@ -252,12 +252,15 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
 
 #### Define Auth Challenge Example
 
+> **NOTE:** In this example we are modifying the wrapped dict response fields, so we need to return the json serializable
+> wrapped `event.data`
+
 === "app.py"
 
     ```python
     from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import DefineAuthChallengeTriggerEvent
 
-    def handler(event, context):
+    def handler(event: dict, context) -> dict:
         event: DefineAuthChallengeTriggerEvent = DefineAuthChallengeTriggerEvent(event)
         if (
             len(event.request.session) == 1
@@ -409,7 +412,7 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
     ```python
     from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import CreateAuthChallengeTriggerEvent
 
-    def handler(event, context):
+    def handler(event: dict, context) -> dict:
         event: CreateAuthChallengeTriggerEvent = CreateAuthChallengeTriggerEvent(event)
         if event.request.challenge_name == "CUSTOM_CHALLENGE":
             event.response.public_challenge_parameters = {"captchaUrl": "url/123.jpg"}
@@ -425,7 +428,7 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
     ```python
     from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import VerifyAuthChallengeResponseTriggerEvent
 
-    def handler(event, context):
+    def handler(event: dict, context) -> dict:
         event: VerifyAuthChallengeResponseTriggerEvent = VerifyAuthChallengeResponseTriggerEvent(event)
         event.response.answer_correct = (
             event.request.private_challenge_parameters.get("answer") == event.request.challenge_answer
