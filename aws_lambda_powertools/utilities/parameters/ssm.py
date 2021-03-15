@@ -111,7 +111,7 @@ class SSMProvider(BaseProvider):
         decrypt: bool, optional
             If the parameter value should be decrypted
         force_update: bool, optional
-            Force update even before a cached item has expired
+            Force update even before a cached item has expired, defaults to False
         sdk_options: dict, optional
             Arguments that will be passed directly to the underlying API call
 
@@ -202,7 +202,7 @@ def get_parameter(
     decrypt: bool, optional
         If the parameter values should be decrypted
     force_update: bool, optional
-        Force update even before a cached item has expired
+        Force update even before a cached item has expired, defaults to False
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameter API call
 
@@ -246,7 +246,12 @@ def get_parameter(
 
 
 def get_parameters(
-    path: str, transform: Optional[str] = None, recursive: bool = True, decrypt: bool = False, **sdk_options
+    path: str,
+    transform: Optional[str] = None,
+    recursive: bool = True,
+    decrypt: bool = False,
+    force_update: bool = False,
+    **sdk_options
 ) -> Union[Dict[str, str], Dict[str, dict], Dict[str, bytes]]:
     """
     Retrieve multiple parameter values from AWS Systems Manager (SSM) Parameter Store
@@ -261,6 +266,8 @@ def get_parameters(
         If this should retrieve the parameter values recursively or not, defaults to True
     decrypt: bool, optional
         If the parameter values should be decrypted
+    force_update: bool, optional
+        Force update even before a cached item has expired, defaults to False
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameters_by_path API call
 
@@ -300,4 +307,4 @@ def get_parameters(
     sdk_options["recursive"] = recursive
     sdk_options["decrypt"] = decrypt
 
-    return DEFAULT_PROVIDERS["ssm"].get_multiple(path, transform=transform, **sdk_options)
+    return DEFAULT_PROVIDERS["ssm"].get_multiple(path, transform=transform, force_update=force_update, **sdk_options)

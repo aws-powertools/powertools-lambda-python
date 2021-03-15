@@ -93,7 +93,9 @@ class SecretsProvider(BaseProvider):
         raise NotImplementedError()
 
 
-def get_secret(name: str, transform: Optional[str] = None, **sdk_options) -> Union[str, dict, bytes]:
+def get_secret(
+    name: str, transform: Optional[str] = None, force_update: bool = False, **sdk_options
+) -> Union[str, dict, bytes]:
     """
     Retrieve a parameter value from AWS Secrets Manager
 
@@ -103,6 +105,8 @@ def get_secret(name: str, transform: Optional[str] = None, **sdk_options) -> Uni
         Name of the parameter
     transform: str, optional
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
+    force_update: bool, optional
+        Force update even before a cached item has expired, defaults to False
     sdk_options: dict, optional
         Dictionary of options that will be passed to the get_secret_value call
 
@@ -139,4 +143,4 @@ def get_secret(name: str, transform: Optional[str] = None, **sdk_options) -> Uni
     if "secrets" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["secrets"] = SecretsProvider()
 
-    return DEFAULT_PROVIDERS["secrets"].get(name, transform=transform, **sdk_options)
+    return DEFAULT_PROVIDERS["secrets"].get(name, transform=transform, force_update=force_update, **sdk_options)

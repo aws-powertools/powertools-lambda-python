@@ -59,7 +59,7 @@ class BaseProvider(ABC):
             are "json" for JSON strings and "binary" for base 64 encoded
             values.
         force_update: bool, optional
-            Force update even before a cached item has expired
+            Force update even before a cached item has expired, defaults to False
         sdk_options: dict, optional
             Arguments that will be passed directly to the underlying API call
 
@@ -132,7 +132,7 @@ class BaseProvider(ABC):
             Raises an exception if any transform fails, otherwise this will
             return a None value for each transform that failed
         force_update: bool, optional
-            Force update even before a cached item has expired
+            Force update even before a cached item has expired, defaults to False
         sdk_options: dict, optional
             Arguments that will be passed directly to the underlying API call
 
