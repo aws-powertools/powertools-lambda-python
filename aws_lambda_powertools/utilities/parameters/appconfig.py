@@ -111,7 +111,7 @@ def get_app_config(
     environment: str,
     application: Optional[str] = None,
     transform: Optional[str] = None,
-    force_update: bool = False,
+    force_fetch: bool = False,
     **sdk_options
 ) -> Union[str, list, dict, bytes]:
     """
@@ -127,7 +127,7 @@ def get_app_config(
         Application of the configuration
     transform: str, optional
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
-    force_update: bool, optional
+    force_fetch: bool, optional
         Force update even before a cached item has expired, defaults to False
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameter API call
@@ -167,4 +167,4 @@ def get_app_config(
 
     sdk_options["ClientId"] = CLIENT_ID
 
-    return DEFAULT_PROVIDERS["appconfig"].get(name, transform=transform, force_update=force_update, **sdk_options)
+    return DEFAULT_PROVIDERS["appconfig"].get(name, transform=transform, force_fetch=force_fetch, **sdk_options)

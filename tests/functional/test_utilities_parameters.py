@@ -1667,7 +1667,7 @@ def test_get_transform_method_preserve_auto_unhandled(key):
 
 def test_base_provider_get_multiple_force_update(mock_name, mock_value):
     """
-    Test BaseProvider.get_multiple()  with cached values and force_update is True
+    Test BaseProvider.get_multiple()  with cached values and force_fetch is True
     """
 
     class TestProvider(BaseProvider):
@@ -1682,7 +1682,7 @@ def test_base_provider_get_multiple_force_update(mock_name, mock_value):
 
     provider.store[(mock_name, None)] = ExpirableValue({"B": mock_value}, datetime.now() + timedelta(seconds=60))
 
-    value = provider.get_multiple(mock_name, force_update=True)
+    value = provider.get_multiple(mock_name, force_fetch=True)
 
     assert isinstance(value, dict)
     assert value["A"] == mock_value
@@ -1690,7 +1690,7 @@ def test_base_provider_get_multiple_force_update(mock_name, mock_value):
 
 def test_base_provider_get_force_update(mock_name, mock_value):
     """
-    Test BaseProvider.get()  with cached values and force_update is True
+    Test BaseProvider.get()  with cached values and force_fetch is True
     """
 
     class TestProvider(BaseProvider):
@@ -1704,7 +1704,7 @@ def test_base_provider_get_force_update(mock_name, mock_value):
 
     provider.store[(mock_name, None)] = ExpirableValue("not-value", datetime.now() + timedelta(seconds=60))
 
-    value = provider.get(mock_name, force_update=True)
+    value = provider.get(mock_name, force_fetch=True)
 
     assert isinstance(value, str)
     assert value == mock_value
