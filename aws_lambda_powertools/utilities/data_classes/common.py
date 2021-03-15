@@ -20,8 +20,8 @@ class DictWrapper:
         return self._data.get(key)
 
     @property
-    def data(self) -> Dict[str, Any]:
-        """The original event dict"""
+    def raw_event(self) -> Dict[str, Any]:
+        """The original raw event dict"""
         return self._data
 
 

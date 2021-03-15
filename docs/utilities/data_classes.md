@@ -253,7 +253,7 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
 #### Define Auth Challenge Example
 
 !!! warning "NOTE "
-    In this example we are modifying the wrapped dict response fields, so we need to return the json serializable wrapped `event.data`
+    In this example we are modifying the wrapped dict response fields, so we need to return the json serializable wrapped event in `event.raw_event`
 
 !!! info "NOTE "
     This example is based on the AWS Cognito docs for [Define Auth Challenge Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-define-auth-challenge.html){target="_blank"}
@@ -291,7 +291,7 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
             event.response.issue_tokens = False
             event.response.fail_authentication = True
 
-        return event.data
+        return event.raw_event
     ```
 === "SPR_A response"
 
@@ -424,7 +424,7 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
             event.response.public_challenge_parameters = {"captchaUrl": "url/123.jpg"}
             event.response.private_challenge_parameters = {"answer": "5"}
             event.response.challenge_metadata = "CAPTCHA_CHALLENGE"
-        return event.data
+        return event.raw_event
     ```
 
 #### Verify Auth Challenge Response Example
@@ -442,7 +442,7 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
         event.response.answer_correct = (
             event.request.private_challenge_parameters.get("answer") == event.request.challenge_answer
         )
-        return event.data
+        return event.raw_event
     ```
 
 ### Connect Contact Flow
