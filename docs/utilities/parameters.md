@@ -92,7 +92,7 @@ The following will retrieve the latest version and store it in the cache.
 
 By default, we cache parameters retrieved in-memory for 5 seconds.
 
-You can adjust how long we should keep values in cache by using the param `max_age`, when using  `get()` or `get_multiple` methods across all providers.
+You can adjust how long we should keep values in cache by using the param `max_age`, when using  `get()` or `get_multiple()` methods across all providers.
 
 === "app.py"
 
