@@ -55,6 +55,13 @@ class Tracer:
         `Env POWERTOOLS_TRACE_DISABLED="true"`
     patch_modules: Tuple[str]
         Tuple of modules supported by tracing provider to patch, by default all modules are patched
+    provider: BaseProvider
+        Tracing provider, by default it is aws_xray_sdk.core.xray_recorder
+
+    Returns
+    -------
+    Tracer
+        Tracer instance with imported modules patched
 
     Example
     -------
@@ -123,17 +130,12 @@ class Tracer:
         tracer = Tracer()
         ...
 
-    Returns
-    -------
-    Tracer
-        Tracer instance with imported modules patched
-
     Limitations
     -----------
     * Async handler not supported
     """
 
-    _default_config = {
+    _default_config: Dict[str, Any] = {
         "service": "service_undefined",
         "disabled": False,
         "auto_patch": True,
@@ -153,7 +155,7 @@ class Tracer:
         self.__build_config(
             service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
         )
-        self.provider = self._config["provider"]
+        self.provider: BaseProvider = self._config["provider"]
         self.disabled = self._config["disabled"]
         self.service = self._config["service"]
         self.auto_patch = self._config["auto_patch"]
