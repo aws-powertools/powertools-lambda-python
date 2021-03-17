@@ -256,11 +256,10 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
 
 #### Define Auth Challenge Example
 
-!!! warning "NOTE "
+!!! warning "NOTE"
     In this example we are modifying the wrapped dict response fields, so we need to return the json serializable wrapped event in `event.raw_event`
 
-!!! info "NOTE "
-    This example is based on the AWS Cognito docs for [Define Auth Challenge Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-define-auth-challenge.html){target="_blank"}
+This example is based on the AWS Cognito docs for [Define Auth Challenge Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-define-auth-challenge.html){target="_blank"}.
 
 === "app.py"
 
@@ -414,8 +413,7 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
 
 #### Create Auth Challenge Example
 
-!!! info "NOTE "
-    This example is based on the AWS Cognito docs for [Create Auth Challenge Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-create-auth-challenge.html){target="_blank"}
+This example is based on the AWS Cognito docs for [Create Auth Challenge Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-create-auth-challenge.html){target="_blank"}.
 
 === "app.py"
 
@@ -433,8 +431,7 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
 
 #### Verify Auth Challenge Response Example
 
-!!! info "NOTE "
-    This example is based on the AWS Cognito docs for [Verify Auth Challenge Response Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-verify-auth-challenge-response.html){target="_blank"}
+This example is based on the AWS Cognito docs for [Verify Auth Challenge Response Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-verify-auth-challenge-response.html){target="_blank"}.
 
 === "app.py"
 
@@ -450,6 +447,8 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
     ```
 
 ### Connect Contact Flow
+
+> New in 1.11.0
 
 === "app.py"
 
