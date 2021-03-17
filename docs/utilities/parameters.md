@@ -88,9 +88,34 @@ The following will retrieve the latest version and store it in the cache.
 
 ## Advanced
 
+### Adjusting cache TTL
+
+By default, we cache parameters retrieved in-memory for 5 seconds.
+
+You can adjust how long we should keep values in cache by using the param `max_age`, when using  `get()` or `get_multiple` methods across all providers.
+
+=== "app.py"
+
+    ```python hl_lines="9"
+    from aws_lambda_powertools.utilities import parameters
+    from botocore.config import Config
+
+    config = Config(region_name="us-west-1")
+    ssm_provider = parameters.SSMProvider(config=config)
+
+    def handler(event, context):
+        # Retrieve a single parameter
+        value = ssm_provider.get("/my/parameter", max_age=60) # 1 minute
+
+        # Retrieve multiple parameters from a path prefix
+        values = ssm_provider.get_multiple("/my/path/prefix")
+        for k, v in values.items():
+            print(f"{k}: {v}")
+    ```
+
 ### Always fetching the latest
 
-By default, we cache parameters retrieves for 5 seconds. If you'd like to override this behaviour and always fetch the latest parameter from the store, use `force_fetch` param.
+If you'd like to always ensure you fetch the latest parameter from the store regardless if already available in cache, use `force_fetch` param.
 
 === "app.py"
 
@@ -133,8 +158,8 @@ The AWS Systems Manager Parameter Store provider supports two additional argumen
 
 | Parameter     | Default | Description |
 |---------------|---------|-------------|
-| **decrypt**   | `False` | Will automatically decrypt the parameter. |
-| **recursive** | `True`  | For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix. |
+| **decrypt**   | `False` | Will automatically decrypt the parameter.
+| **recursive** | `True`  | For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix.
 
 > **Example**
 
