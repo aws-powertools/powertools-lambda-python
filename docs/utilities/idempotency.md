@@ -39,6 +39,11 @@ As of now, Amazon DynamoDB is the only supported persistent storage layer, so yo
 
 === "template.yml"
 
+	!!! tip "You can share a single state table for all functions"
+		> New in 1.12.0
+
+		You can reuse the same DynamoDB table to store idempotency state. We add your function_name in addition to the idempotency key as a hash key.
+
     ```yaml hl_lines="5-13 21-23"
     Resources:
       IdempotencyTable:

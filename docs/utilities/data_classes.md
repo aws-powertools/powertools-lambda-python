@@ -106,8 +106,12 @@ It is used for either API Gateway REST API or HTTP API using v1 proxy event.
 
 ### AppSync Resolver
 
-Used when building a Lambda GraphQL Resolvers with [Amplify GraphQL Transform Library](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"}
-and can also be used for [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/){target="_blank"}.
+> New in 1.12.0
+
+Used when building Lambda GraphQL Resolvers with [Amplify GraphQL Transform Library](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"} (`@function`),
+and [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/){target="_blank"}.
+
+In this example, we also use the new Logger `correlation_id` and built-in `correlation_paths` to extract, if available, X-Ray Trace ID in AppSync request headers:
 
 === "app.py"
 
@@ -252,11 +256,10 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
 
 #### Define Auth Challenge Example
 
-!!! warning "NOTE "
+!!! warning "NOTE"
     In this example we are modifying the wrapped dict response fields, so we need to return the json serializable wrapped event in `event.raw_event`
 
-!!! info "NOTE "
-    This example is based on the AWS Cognito docs for [Define Auth Challenge Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-define-auth-challenge.html){target="_blank"}
+This example is based on the AWS Cognito docs for [Define Auth Challenge Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-define-auth-challenge.html){target="_blank"}.
 
 === "app.py"
 
@@ -410,8 +413,7 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
 
 #### Create Auth Challenge Example
 
-!!! info "NOTE "
-    This example is based on the AWS Cognito docs for [Create Auth Challenge Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-create-auth-challenge.html){target="_blank"}
+This example is based on the AWS Cognito docs for [Create Auth Challenge Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-create-auth-challenge.html){target="_blank"}.
 
 === "app.py"
 
@@ -429,8 +431,7 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
 
 #### Verify Auth Challenge Response Example
 
-!!! info "NOTE "
-    This example is based on the AWS Cognito docs for [Verify Auth Challenge Response Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-verify-auth-challenge-response.html){target="_blank"}
+This example is based on the AWS Cognito docs for [Verify Auth Challenge Response Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-verify-auth-challenge-response.html){target="_blank"}.
 
 === "app.py"
 
@@ -446,6 +447,8 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
     ```
 
 ### Connect Contact Flow
+
+> New in 1.11.0
 
 === "app.py"
 

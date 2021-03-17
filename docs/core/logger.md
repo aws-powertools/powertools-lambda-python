@@ -143,6 +143,89 @@ When debugging in non-production environments, you can instruct Logger to log th
        ...
     ```
 
+#### Setting a Correlation ID
+
+> New in 1.12.0
+
+You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
+
+=== "collect.py"
+
+    ```python hl_lines="6"
+	from aws_lambda_powertools import Logger
+
+	logger = Logger()
+
+	@logger.inject_lambda_context(correlation_id_path="headers.my_request_id_header")
+	def handler(event, context):
+		logger.info("Collecting payment")
+        ...
+    ```
+
+=== "Example Event"
+
+	```json hl_lines="3"
+	{
+	  "headers": {
+		"my_request_id_header": "correlation_id_value"
+	  }
+	}
+	```
+
+=== "Example CloudWatch Logs excerpt"
+
+    ```json hl_lines="7"
+	{
+	  "timestamp": "2020-05-24 18:17:33,774",
+	  "level": "INFO",
+	  "location": "collect.handler:1",
+	  "service": "payment",
+	  "sampling_rate": 0.0,
+	  "correlation_id": "correlation_id_value",
+	  "message": "Collecting payment"
+	}
+    ```
+
+We provide [built-in JMESPath expressions](#built-in-correlation-id-expressions) for known event sources, where either a request ID or X-Ray Trace ID are present.
+
+=== "collect.py"
+
+    ```python hl_lines="2"
+	from aws_lambda_powertools import Logger
+	from aws_lambda_powertools.logging import correlation_paths
+
+	logger = Logger()
+
+	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+	def handler(event, context):
+		logger.info("Collecting payment")
+        ...
+    ```
+
+=== "Example Event"
+
+	```json hl_lines="3"
+	{
+	  "requestContext": {
+		"requestId": "correlation_id_value"
+	  }
+	}
+	```
+
+=== "Example CloudWatch Logs excerpt"
+
+    ```json hl_lines="7"
+	{
+	  "timestamp": "2020-05-24 18:17:33,774",
+	  "level": "INFO",
+	  "location": "collect.handler:1",
+	  "service": "payment",
+	  "sampling_rate": 0.0,
+	  "correlation_id": "correlation_id_value",
+	  "message": "Collecting payment"
+	}
+    ```
+
 ### Appending additional keys
 
 You can append additional keys using either mechanism:
@@ -188,48 +271,9 @@ You can append your own keys to your existing Logger via `structure_logs(append=
 
 	This example will add `order_id` if its value is not empty, and in subsequent invocations where `order_id` might not be present it'll remove it from the logger.
 
-#### Setting correlation ID
-
-You can set a correlation_id to your existing Logger via `set_correlation_id(value)` method.
-
-=== "collect.py"
-
-    ```python hl_lines="8"
-	from aws_lambda_powertools import Logger
-	from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
-
-	logger = Logger()
-
-	def handler(event, context):
-		event = APIGatewayProxyEvent(event)
-		logger.set_correlation_id(event.request_context.request_id)
-		logger.info("Collecting payment")
-        ...
-    ```
-=== "Example Event"
-
-	```json hl_lines="3"
-	{
-	  "requestContext": {
-		"requestId": "correlation_id_value"
-	  }
-	}
-	```
-=== "Example CloudWatch Logs excerpt"
-
-    ```json hl_lines="7"
-	{
-	  "timestamp": "2020-05-24 18:17:33,774",
-	  "level": "INFO",
-	  "location": "collect.handler:1",
-	  "service": "payment",
-	  "sampling_rate": 0.0,
-	  "correlation_id": "correlation_id_value",
-	  "message": "Collecting payment"
-	}
-    ```
-
 #### extra parameter
+
+> New in 1.10.0
 
 Extra parameter is available for all log levels' methods, as implemented in the standard logging library - e.g. `logger.info, logger.warning`.
 
@@ -258,6 +302,125 @@ It accepts any dictionary, and all keyword arguments will be added as part of th
 	  "request_id": "1123",
 	  "message": "Collecting payment"
 	}
+    ```
+
+#### set_correlation_id method
+
+> New in 1.12.0
+
+You can set a correlation_id to your existing Logger via `set_correlation_id(value)` method by passing any string value.
+
+=== "collect.py"
+
+    ```python hl_lines="6"
+	from aws_lambda_powertools import Logger
+
+	logger = Logger()
+
+	def handler(event, context):
+		logger.set_correlation_id(event["requestContext"]["requestId"])
+		logger.info("Collecting payment")
+        ...
+    ```
+
+=== "Example Event"
+
+	```json hl_lines="3"
+	{
+	  "requestContext": {
+		"requestId": "correlation_id_value"
+	  }
+	}
+	```
+
+=== "Example CloudWatch Logs excerpt"
+
+    ```json hl_lines="7"
+	{
+	  "timestamp": "2020-05-24 18:17:33,774",
+	  "level": "INFO",
+	  "location": "collect.handler:1",
+	  "service": "payment",
+	  "sampling_rate": 0.0,
+	  "correlation_id": "correlation_id_value",
+	  "message": "Collecting payment"
+	}
+    ```
+
+Alternatively, you can combine [Data Classes utility](../utilities/data_classes.md) with Logger to use dot notation object:
+
+=== "collect.py"
+
+    ```python hl_lines="2 7-8"
+	from aws_lambda_powertools import Logger
+	from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
+
+	logger = Logger()
+
+	def handler(event, context):
+		event = APIGatewayProxyEvent(event)
+		logger.set_correlation_id(event.request_context.request_id)
+		logger.info("Collecting payment")
+        ...
+    ```
+=== "Example Event"
+
+	```json hl_lines="3"
+	{
+	  "requestContext": {
+		"requestId": "correlation_id_value"
+	  }
+	}
+	```
+
+=== "Example CloudWatch Logs excerpt"
+
+    ```json hl_lines="7"
+	{
+	  "timestamp": "2020-05-24 18:17:33,774",
+	  "level": "INFO",
+	  "location": "collect.handler:1",
+	  "service": "payment",
+	  "sampling_rate": 0.0,
+	  "correlation_id": "correlation_id_value",
+	  "message": "Collecting payment"
+	}
+    ```
+
+### Logging exceptions
+
+When logging exceptions, Logger will add new keys named `exception_name` and `exception` with the full traceback as a string.
+
+!!! tip
+	> New in 1.12.0
+
+	You can use your preferred Log Analytics tool to enumerate exceptions across all your services using `exception_name` key.
+
+=== "logging_an_exception.py"
+
+    ```python hl_lines="7"
+    from aws_lambda_powertools import Logger
+    logger = Logger()
+
+    try:
+         raise ValueError("something went wrong")
+    except Exception:
+         logger.exception("Received an exception")
+    ```
+
+=== "Example CloudWatch Logs excerpt"
+
+    ```json
+    {
+       "level": "ERROR",
+       "location": "<module>:4",
+       "message": "Received an exception",
+       "timestamp": "2020-08-28 18:11:38,886",
+       "service": "service_undefined",
+       "sampling_rate": 0.0,
+       "exception_name": "ValueError",
+       "exception": "Traceback (most recent call last):\n  File \"<input>\", line 2, in <module>\nValueError: something went wrong"
+    }
     ```
 
 ## Advanced
@@ -490,37 +653,6 @@ You can also change the order of the following log record keys via the `log_reco
 	}
 	```
 
-#### Logging exceptions
-
-When logging exceptions, Logger will add new keys named `exception_name` and `exception` with the full traceback as a string.
-
-=== "logging_an_exception.py"
-
-    ```python hl_lines="7"
-    from aws_lambda_powertools import Logger
-    logger = Logger()
-
-    try:
-         raise ValueError("something went wrong")
-    except Exception:
-         logger.exception("Received an exception")
-    ```
-
-=== "Example CloudWatch Logs excerpt"
-
-    ```json
-    {
-       "level": "ERROR",
-       "location": "<module>:4",
-       "message": "Received an exception",
-       "timestamp": "2020-08-28 18:11:38,886",
-       "service": "service_undefined",
-       "sampling_rate": 0.0,
-       "exception_name": "ValueError",
-       "exception": "Traceback (most recent call last):\n  File \"<input>\", line 2, in <module>\nValueError: something went wrong"
-    }
-    ```
-
 ## Testing your code
 
 When unit testing your code that makes use of `inject_lambda_context` decorator, you need to pass a dummy Lambda Context, or else Logger will fail.
@@ -584,6 +716,23 @@ POWERTOOLS_LOG_DEDUPLICATION_DISABLED="1" pytest -o log_cli=1
 
 !!! warning
     This feature should be used with care, as it explicitly disables our ability to filter propagated messages to the root logger (if configured).
+
+## Built-in Correlation ID expressions
+
+> New in 1.12.0
+
+You can use any of the following built-in JMESPath expressions as part of [inject_lambda_context decorator](#setting-a-correlation-id).
+
+!!! note "Escaping necessary for the `-` character"
+	Any object key named with `-` must be escaped, for example **`request.headers."x-amzn-trace-id"`**.
+
+Name | Expression | Description
+------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
+**API_GATEWAY_REST** | `"requestContext.requestId"` | API Gateway REST API request ID
+**API_GATEWAY_HTTP** | `"requestContext.requestId"` | API Gateway HTTP API request ID
+**APPSYNC_RESOLVER** | `'request.headers."x-amzn-trace-id"'` | AppSync X-Ray Trace ID
+**APPLICATION_LOAD_BALANCER** | `'headers."x-amzn-trace-id"'` | ALB X-Ray Trace ID
+**EVENT_BRIDGE** | `"id"` | EventBridge Event ID
 
 ## FAQ
 
