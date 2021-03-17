@@ -8,6 +8,21 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## [1.12.0] - 2021-03-17
+
+### Added
+
+* **Parameters**: New `force_fetch` param to always fetch the latest and bypass cache, if available
+* **Data Classes**: New AppSync Lambda Resolver event covering both Direct Lambda Resolver and Amplify GraphQL Transformer Resolver `@function`
+* **Data Classes**: New AppSync scalar utilities to easily compose Lambda Resolvers with date utils, uuid, etc.
+* **Logger**: Support for Correlation ID both in `inject_lambda_context` decorator and `set_correlation_id` method
+* **Logger**: Include new `exception_name` key to help customers easily enumerate exceptions across all functions
+
+### Fixed
+
+* **Tracer**: Type hint on return instance that made PyCharm no longer recognize autocompletion
+* **Idempotency**: Error handling for missing idempotency key and `save_in_progress` errors
+
 ## [1.11.0] - 2021-03-05
 ### Fixed
 
