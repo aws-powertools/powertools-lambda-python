@@ -1,0 +1,20 @@
+{
+  "version": "1",
+  "region": "us-east-1",
+  "userPoolId": "us-east-1_example",
+  "userName": "UserName",
+  "callerContext": {
+    "awsSdkVersion": "awsSdkVersion",
+    "clientId": "clientId"
+  },
+  "triggerSource": "PreAuthentication_Authentication",
+  "request": {
+    "userAttributes": {
+      "sub": "4A709A36-7D63-4785-829D-4198EF10EBDA",
+      "email_verified": "true",
+      "name": "First Last",
+      "email": "pre-auth@mail.com"
+    }
+  },
+  "response": {}
+}

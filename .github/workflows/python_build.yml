@@ -1,0 +1,46 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - master
+  push:
+    branches:
+      - develop
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: make dev
+      - name: Formatting and Linting
+        run: make lint
+      - name: Test with pytest
+        run: make test
+      - name: Security baseline
+        run: make security-baseline
+      - name: Complexity baseline
+        run: make complexity-baseline
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage.xml
+          # flags: unittests
+          env_vars: OS,PYTHON
+          name: aws-lambda-powertools-python-codecov
+          fail_ci_if_error: true

@@ -1,0 +1,37 @@
+# We use poetry to run formatting and linting before commit/push
+# Longer checks such as tests, security and complexity baseline
+# are run as part of CI to prevent slower feedback loop
+# All checks can be run locally via `make pr`
+
+repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v2.4.0
+      hooks:
+          - id: check-merge-conflict
+          - id: trailing-whitespace
+          - id: end-of-file-fixer
+          - id: check-toml
+    - repo: https://github.com/pre-commit/pygrep-hooks
+      rev: v1.5.1
+      hooks:
+          - id: python-use-type-annotations
+    - repo: local
+      hooks:
+          - id: black
+            name: formatting::black
+            entry: poetry run black
+            language: system
+            types: [python]
+          - id: isort
+            name: formatting::isort
+            entry: poetry run isort -rc
+            language: system
+            types: [python]
+    - repo: local
+      hooks:
+          - id: flake8
+            name: linting::flake8
+            entry: poetry run flake8
+            language: system
+            types: [python]
+            exclude: example

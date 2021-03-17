@@ -1,0 +1,20 @@
+{
+  "version": "1",
+  "triggerSource": "CustomMessage_AdminCreateUser",
+  "region": "region",
+  "userPoolId": "userPoolId",
+  "userName": "userName",
+  "callerContext": {
+    "awsSdk": "awsSdkVersion",
+    "clientId": "clientId"
+  },
+  "request": {
+    "userAttributes": {
+      "phone_number_verified": false,
+      "email_verified": true
+    },
+    "codeParameter": "####",
+    "usernameParameter": "username"
+  },
+  "response": {}
+}

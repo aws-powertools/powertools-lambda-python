@@ -1,0 +1,12 @@
+[flake8]
+exclude = docs, .eggs, setup.py, example, .aws-sam, .git, dist, *.md, *.yaml, example/samconfig.toml, *.txt, *.ini
+ignore = E203, E266, W503, BLK100, W291, I004
+max-line-length = 120
+max-complexity = 15
+
+[isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 120

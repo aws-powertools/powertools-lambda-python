@@ -1,0 +1,59 @@
+name: Docs
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+      - docs/mkdocs
+      # Disabled until docs support versioning per branch/release
+      # - develop
+  release:
+    types: [published] # update Docs upon new release
+
+jobs:
+  api-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.8"
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12'
+      - name: Capture branch and tag
+        id: branch_name
+        run: |
+          echo "SOURCE_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+          echo "SOURCE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      - name: Build docs website
+        run: make build-docs-website
+      - name: Build docs API reference
+        # if: env.SOURCE_BRANCH == 'master' # Disabled until docs support versioning per branch/release
+        run: make build-docs-api
+      - name: Deploy all docs
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+
+      # Disabled until docs support versioning per branch/release
+      # - name: Deploy docs website
+      #   uses: peaceiris/actions-gh-pages@v3
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     publish_dir: ./dist
+      #     # when deploying docs website only
+      #     # we need to keep existing API docs checked in
+      #     # but only for dev branch
+      #     keep_files: true
+      # - name: Deploy all docs
+      #   uses: peaceiris/actions-gh-pages@v3
+      #   if: env.SOURCE_BRANCH == 'master'
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     publish_dir: ./dist

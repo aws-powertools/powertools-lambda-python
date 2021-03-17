@@ -1,0 +1,25 @@
+{
+  "version": "1",
+  "triggerSource": "TokenGeneration_Authentication",
+  "region": "us-west-2",
+  "userPoolId": "us-west-2_example",
+  "userName": "testqq",
+  "callerContext": {
+    "awsSdkVersion": "aws-sdk-unknown-unknown",
+    "clientId": "71ghuul37mresr7h373b704tua"
+  },
+  "request": {
+    "userAttributes": {
+      "sub": "0b0a57c5-f013-426a-81a1-f8ffbfba21f0",
+      "email_verified": "true",
+      "cognito:user_status": "CONFIRMED",
+      "email": "test@mail.com"
+    },
+    "groupConfiguration": {
+      "groupsToOverride": [],
+      "iamRolesToOverride": [],
+      "preferredRole": null
+    }
+  },
+  "response": {}
+}

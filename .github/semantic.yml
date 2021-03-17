@@ -1,0 +1,19 @@
+# conventional commit types: https://github.com/commitizen/conventional-commit-types/blob/v3.0.0/index.json
+types:
+  - feat
+  - fix
+  - docs
+  - style
+  - refactor
+  - perf
+  - test
+  - build
+  - ci
+  - chore
+  - revert
+  - improv
+
+# Always validate the PR title
+# and ignore the commits to lower the entry bar for contribution
+# while titles make up the Release notes to ease maintenance overhead
+titleOnly: true

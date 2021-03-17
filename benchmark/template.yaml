@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Handler: main.handler
+    Runtime: python3.8
+    MemorySize: 128
+    Tracing: Active
+    Environment:
+      Variables:
+        POWERTOOLS_SERVICE_NAME: benchmark
+        POWERTOOLS_METRICS_NAMESPACE: LambdaPowertools
+        POWERTOOLS_LOGGER_LOG_EVENT: "true"
+        LOG_LEVEL: INFO
+
+Resources:
+  InstrumentedFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/instrumented/
+
+  ReferenceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/reference/
+
+  InstrumentedLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${InstrumentedFunction}"
+      RetentionInDays: 7
+
+  ReferenceLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ReferenceFunction}"
+      RetentionInDays: 7
+
+Outputs:
+  InstrumentedFunction:
+    Value: !Ref InstrumentedFunction
+  ReferenceFunction:
+    Value: !Ref ReferenceFunction
+  InstrumentedLogGroup:
+    Value: !Ref InstrumentedLogGroup
+  ReferenceLogGroup:
+    Value: !Ref ReferenceLogGroup

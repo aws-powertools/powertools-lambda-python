@@ -1,0 +1,66 @@
+site_name: Lambda Powertools Python
+site_description: AWS Lambda Powertools for Python
+site_author: Amazon Web Services
+nav:
+  - Homepage: index.md
+  - Changelog: changelog.md
+  - API reference: https://awslabs.github.io/aws-lambda-powertools-python/api/" target="_blank
+  - Core utilities:
+      - core/tracer.md
+      - core/logger.md
+      - core/metrics.md
+  - Utilities:
+      - utilities/middleware_factory.md
+      - utilities/parameters.md
+      - utilities/batch.md
+      - utilities/typing.md
+      - utilities/validation.md
+      - utilities/data_classes.md
+      - utilities/parser.md
+      - utilities/idempotency.md
+
+theme:
+  name: material
+  palette:
+    primary: deep purple
+  features:
+    - navigation.sections
+    - navigation.expand
+  icon:
+    repo: fontawesome/brands/github
+  logo: media/aws-logo-light.svg
+  favicon: media/aws-logo-light.svg
+  custom_dir: docs/overrides
+
+markdown_extensions:
+  - admonition
+  - pymdownx.tabbed
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.snippets:
+      base_path: '.'
+      check_paths: true
+  - meta
+  - toc:
+      permalink: true
+      toc_depth: 4
+  - attr_list
+  - pymdownx.emoji
+
+copyright: Copyright &copy; 2021 Amazon Web Services
+
+plugins:
+  - git-revision-date
+  - search
+
+extra_css:
+  - stylesheets/extra.css
+extra_javascript:
+  - javascript/aws-amplify.min.js
+  - javascript/extra.js
+
+
+repo_url: https://github.com/awslabs/aws-lambda-powertools-python
+edit_uri: edit/develop/docs
