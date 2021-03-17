@@ -88,6 +88,20 @@ The following will retrieve the latest version and store it in the cache.
 
 ## Advanced
 
+### Always fetching the latest
+
+By default, we cache parameters retrieves for 5 seconds. If you'd like to override this behaviour and always fetch the latest parameter from the store, use `force_fetch` param.
+
+=== "app.py"
+
+    ```python hl_lines="5"
+    from aws_lambda_powertools.utilities import parameters
+
+    def handler(event, context):
+        # Retrieve a single parameter
+        value = parameters.get_parameter("/my/parameter", force_fetch=True)
+    ```
+
 ### Built-in provider class
 
 For greater flexibility such as configuring the underlying SDK client used by built-in providers, you can use their respective Provider Classes directly.
