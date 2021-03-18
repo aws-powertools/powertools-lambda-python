@@ -49,7 +49,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 
 === "template.yml"
 
-```yaml hl_lines="5-6 12-14"
+```yaml hl_lines="5-6 12-13"
 AwsLambdaPowertoolsPythonLayer:
   Type: AWS::Serverless::Application
   Properties:
@@ -60,10 +60,9 @@ AwsLambdaPowertoolsPythonLayer:
 MyLambdaFunction:
   Type: AWS::Serverless::Function
   Properties:
-	Location:
-	  Layers:
-	     # fetch Layer ARN from SAR App stack output
-	     - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
+  	Layers:
+      	  # fetch Layer ARN from SAR App stack output
+	  - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
 ```
 
 ??? tip "Example of least-privileged IAM permissions to deploy Layer"
