@@ -48,7 +48,7 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
     DynamoDBStreamEvent,
     StreamViewType,
 )
-from aws_lambda_powertools.utilities.data_classes.s3_event import S3ObjectLambdaEvent
+from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
 
 
 def load_event(file_name: str) -> dict:
@@ -1045,5 +1045,14 @@ def test_s3_object_event_temp_credentials():
     assert event.request_id == "requestId"
     session_context = event.user_identity.session_context
     assert session_context is not None
-    # NOTE: This can be a data class to like S3ObjectSessionContext
-    assert isinstance(session_context, dict)
+    session_issuer = session_context.session_issuer
+    assert session_issuer is not None
+    assert session_issuer.get_type == session_context["sessionIssuer"]["type"]
+    assert session_issuer.user_name == session_context["sessionIssuer"]["userName"]
+    assert session_issuer.principal_id == session_context["sessionIssuer"]["principalId"]
+    assert session_issuer.arn == session_context["sessionIssuer"]["arn"]
+    assert session_issuer.account_id == session_context["sessionIssuer"]["accountId"]
+    session_attributes = session_context.attributes
+    assert session_attributes is not None
+    assert session_attributes.mfa_authenticated == session_context["attributes"]["mfaAuthenticated"]
+    assert session_attributes.creation_date == session_context["attributes"]["creationDate"]

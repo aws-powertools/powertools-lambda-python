@@ -558,7 +558,7 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
     import requests
     from aws_lambda_powertools import Logger
     from aws_lambda_powertools.logging.correlation_paths import S3_OBJECT
-    from aws_lambda_powertools.utilities.data_classes.s3_event import S3ObjectLambdaEvent
+    from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
 
     logger = Logger()
 
