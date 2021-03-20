@@ -557,12 +557,12 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
     ```python  hl_lines="4 8 10"
     import requests
     from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.logging.correlation_paths import S3_OBJECT
+    from aws_lambda_powertools.logging.correlation_paths import S3_LAMBDA_OBJECT
     from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
 
     logger = Logger()
 
-    @logger.inject_lambda_context(correlation_id_path=S3_OBJECT, log_event=True)
+    @logger.inject_lambda_context(correlation_id_path=S3_LAMBDA_OBJECT, log_event=True)
     def lambda_handler(event, context):
         event = S3ObjectLambdaEvent(event)
 
