@@ -23,7 +23,8 @@
         "principalId": "...",
         "arn": "arn:aws:iam::123412341234:user/myuser",
         "accountId": "123412341234",
-        "accessKeyId": "..."
+        "accessKeyId": "...",
+        "userName": "Alice"
     },
     "protocolVersion": "1.00"
 }

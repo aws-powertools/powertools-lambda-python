@@ -59,6 +59,7 @@ Event Source | Data_class
 [EventBridge](#eventbridge) | `EventBridgeEvent`
 [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent`
 [S3](#s3) | `S3Event`
+[S3 Object](#s3-object) | `S3ObjectEvent`
 [SES](#ses) | `SESEvent`
 [SNS](#sns) | `SNSEvent`
 [SQS](#sqs) | `SQSEvent`
@@ -545,6 +546,43 @@ or plain text, depending on the original payload.
             object_key = unquote_plus(record.s3.get_object.key)
 
             do_something_with(f'{bucket_name}/{object_key}')
+    ```
+
+### S3 Object
+
+This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda – Use Your Code to Process Data as It Is Being Retrieved from S3](https://aws.amazon.com/blogs/aws/introducing-amazon-s3-object-lambda-use-your-code-to-process-data-as-it-is-being-retrieved-from-s3/){target="_blank"}.
+
+=== "app.py"
+
+    ```python  hl_lines="4 8 10"
+    import requests
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.logging.correlation_paths import S3_OBJECT
+    from aws_lambda_powertools.utilities.data_classes.s3_event import S3ObjectEvent
+
+    logger = Logger()
+
+    @logger.inject_lambda_context(correlation_id_path=S3_OBJECT, log_event=True)
+    def lambda_handler(event, context):
+        event = S3ObjectEvent(event)
+
+        object_context = event.object_context
+        request_route = object_context.output_route
+        request_token = object_context.output_token
+        s3_url = object_context.input_s3_url
+
+        # Get object from S3
+        response = requests.get(s3_url)
+        original_object = response.content.decode("utf-8")
+
+        # Transform object
+        transformed_object = original_object.upper()
+
+        # Write object back to S3 Object Lambda
+        s3 = boto3.client("s3")
+        s3.write_get_object_response(Body=transformed_object, RequestRoute=request_route, RequestToken=request_token)
+
+        return {"status_code": 200}
     ```
 
 ### SES
