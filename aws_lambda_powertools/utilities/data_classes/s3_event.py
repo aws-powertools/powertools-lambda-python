@@ -348,7 +348,7 @@ class S3ObjectUserIdentity(DictWrapper):
         return self.get("sessionContext")
 
 
-class S3ObjectEvent(DictWrapper):
+class S3ObjectLambdaEvent(DictWrapper):
     """S3 object event notification
 
     Documentation:

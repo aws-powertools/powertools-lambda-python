@@ -48,7 +48,7 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
     DynamoDBStreamEvent,
     StreamViewType,
 )
-from aws_lambda_powertools.utilities.data_classes.s3_event import S3ObjectEvent
+from aws_lambda_powertools.utilities.data_classes.s3_event import S3ObjectLambdaEvent
 
 
 def load_event(file_name: str) -> dict:
@@ -1009,7 +1009,7 @@ def test_appsync_resolver_event_empty():
 
 
 def test_s3_object_event_iam():
-    event = S3ObjectEvent(load_event("s3ObjectEventIAMUser.json"))
+    event = S3ObjectLambdaEvent(load_event("s3ObjectEventIAMUser.json"))
 
     assert event.request_id == "1a5ed718-5f53-471d-b6fe-5cf62d88d02a"
     assert event.object_context is not None
@@ -1040,7 +1040,7 @@ def test_s3_object_event_iam():
 
 
 def test_s3_object_event_temp_credentials():
-    event = S3ObjectEvent(load_event("s3ObjectEventTempCredentials.json"))
+    event = S3ObjectLambdaEvent(load_event("s3ObjectEventTempCredentials.json"))
 
     assert event.request_id == "requestId"
     session_context = event.user_identity.session_context

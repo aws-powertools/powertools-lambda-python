@@ -59,7 +59,7 @@ Event Source | Data_class
 [EventBridge](#eventbridge) | `EventBridgeEvent`
 [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent`
 [S3](#s3) | `S3Event`
-[S3 Object](#s3-object) | `S3ObjectEvent`
+[S3 Object Lambda](#s3-object-lambda) | `S3ObjectLambdaEvent`
 [SES](#ses) | `SESEvent`
 [SNS](#sns) | `SNSEvent`
 [SQS](#sqs) | `SQSEvent`
@@ -548,7 +548,7 @@ or plain text, depending on the original payload.
             do_something_with(f'{bucket_name}/{object_key}')
     ```
 
-### S3 Object
+### S3 Object Lambda
 
 This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda – Use Your Code to Process Data as It Is Being Retrieved from S3](https://aws.amazon.com/blogs/aws/introducing-amazon-s3-object-lambda-use-your-code-to-process-data-as-it-is-being-retrieved-from-s3/){target="_blank"}.
 
@@ -558,13 +558,13 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
     import requests
     from aws_lambda_powertools import Logger
     from aws_lambda_powertools.logging.correlation_paths import S3_OBJECT
-    from aws_lambda_powertools.utilities.data_classes.s3_event import S3ObjectEvent
+    from aws_lambda_powertools.utilities.data_classes.s3_event import S3ObjectLambdaEvent
 
     logger = Logger()
 
     @logger.inject_lambda_context(correlation_id_path=S3_OBJECT, log_event=True)
     def lambda_handler(event, context):
-        event = S3ObjectEvent(event)
+        event = S3ObjectLambdaEvent(event)
 
         object_context = event.object_context
         request_route = object_context.output_route
