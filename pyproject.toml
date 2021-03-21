@@ -114,10 +114,16 @@ exclude = '''
 )
 '''
 
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -vv"
+testpaths = "./tests"
+markers = "perf: marks perf tests to be deselected (deselect with '-m \"not perf\"')"
+
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
 
 # NOTE
-# As of now, Feb 2020, flake8 and pytest don't support pyproject
+# As of now, Feb 2020, flake8 don't support pyproject
 # For latest: https://github.com/flying-sheep/awesome-python-packaging
