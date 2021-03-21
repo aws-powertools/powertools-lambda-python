@@ -10,7 +10,7 @@ dev:
 	pre-commit install
 
 format:
-	poetry run isort -rc aws_lambda_powertools tests
+	poetry run isort aws_lambda_powertools tests
 	poetry run black aws_lambda_powertools tests
 
 lint: format
