@@ -9,6 +9,7 @@ class S3ObjectContext(DictWrapper):
     @property
     def input_s3_url(self) -> str:
         """A pre-signed URL that can be used to fetch the original object from Amazon S3.
+
         The URL is signed using the original caller’s identity, and their permissions
         will apply when the URL is used. If there are signed headers in the URL, the
         Lambda function must include these in the call to Amazon S3, except for the Host."""
@@ -45,6 +46,7 @@ class S3ObjectConfiguration(DictWrapper):
     @property
     def payload(self) -> str:
         """Custom data that is applied to the S3 Object Lambda access point configuration.
+
         S3 Object Lambda treats this as an opaque string, so it might need to be decoded
         before use."""
         return self["payload"]
@@ -138,7 +140,7 @@ class S3ObjectSessionContext(DictWrapper):
 
     @property
     def attributes(self) -> S3ObjectSessionAttributes:
-        """User session attributes. """
+        """Session attributes."""
         return S3ObjectSessionAttributes(self["attributes"])
 
 
@@ -176,6 +178,7 @@ class S3ObjectUserIdentity(DictWrapper):
     @property
     def account_id(self) -> str:
         """The account that owns the entity that granted permissions for the request.
+
         If the request was made with temporary security credentials, this is the account that owns the IAM
         user or role that was used to obtain credentials."""
         return self["accountId"]
@@ -222,7 +225,7 @@ class S3ObjectUserIdentity(DictWrapper):
 
 
 class S3ObjectLambdaEvent(DictWrapper):
-    """S3 object event notification
+    """S3 object lambda event
 
     Documentation:
     -------------

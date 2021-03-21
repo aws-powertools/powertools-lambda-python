@@ -554,7 +554,8 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
 
 === "app.py"
 
-    ```python  hl_lines="4 8 10"
+    ```python  hl_lines="5 9 11"
+    import boto3
     import requests
     from aws_lambda_powertools import Logger
     from aws_lambda_powertools.logging.correlation_paths import S3_OBJECT_LAMBDA
