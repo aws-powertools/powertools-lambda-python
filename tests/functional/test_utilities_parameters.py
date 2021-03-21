@@ -809,7 +809,7 @@ def test_ssm_provider_get_multiple_sdk_options_overwrite(mock_name, mock_value, 
 
     try:
         values = provider.get_multiple(
-            mock_name, Path="THIS_SHOULD_BE_OVERWRITTEN", Recursive=False, WithDecryption=True,
+            mock_name, Path="THIS_SHOULD_BE_OVERWRITTEN", Recursive=False, WithDecryption=True
         )
 
         stubber.assert_no_pending_responses()

@@ -74,9 +74,7 @@ class SSMProvider(BaseProvider):
 
     client = None
 
-    def __init__(
-        self, config: Optional[Config] = None,
-    ):
+    def __init__(self, config: Optional[Config] = None):
         """
         Initialize the SSM Parameter Store client
         """

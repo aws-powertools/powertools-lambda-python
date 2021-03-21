@@ -16,7 +16,7 @@ class SnsEnvelope(BaseEnvelope):
 
     Note: Records will be parsed the same way so if model is str,
     all items in the list will be parsed as str and npt as JSON (and vice versa)
-     """
+    """
 
     def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]) -> List[Optional[Model]]:
         """Parses records found with model provided

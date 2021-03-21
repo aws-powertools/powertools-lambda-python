@@ -31,7 +31,7 @@ typing_extensions = {version = "^3.7.4.2", optional = true, python= "<3.8" }
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^5.5"}
 pytest = "^6.2.2"
-black = "^19.10b0"
+black = "^20.8b1"
 flake8 = "^3.9.0"
 flake8-black = "^0.2.1"
 flake8-builtins = "^1.5.3"

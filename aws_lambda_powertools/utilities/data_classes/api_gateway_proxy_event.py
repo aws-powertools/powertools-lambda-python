@@ -16,7 +16,7 @@ class APIGatewayEventIdentity(DictWrapper):
     @property
     def api_key(self) -> Optional[str]:
         """For API methods that require an API key, this variable is the API key associated with the method request.
-        For methods that don't require an API key, this variable is null. """
+        For methods that don't require an API key, this variable is null."""
         return self["requestContext"]["identity"].get("apiKey")
 
     @property

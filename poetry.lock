@@ -59,7 +59,7 @@ stevedore = ">=1.20.0"
 
 [[package]]
 name = "black"
-version = "19.10b0"
+version = "20.8b1"
 description = "The uncompromising code formatter."
 category = "dev"
 optional = false
@@ -67,14 +67,17 @@ python-versions = ">=3.6"
 
 [package.dependencies]
 appdirs = "*"
-attrs = ">=18.1.0"
-click = ">=6.5"
+click = ">=7.1.2"
+dataclasses = {version = ">=0.6", markers = "python_version < \"3.7\""}
+mypy-extensions = ">=0.4.3"
 pathspec = ">=0.6,<1"
-regex = "*"
-toml = ">=0.9.4"
+regex = ">=2020.1.8"
+toml = ">=0.10.1"
 typed-ast = ">=1.4.0"
+typing-extensions = ">=3.7.4"
 
 [package.extras]
+colorama = ["colorama (>=0.4.3)"]
 d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
 
 [[package]]
@@ -157,7 +160,7 @@ name = "dataclasses"
 version = "0.8"
 description = "A backport of the dataclasses module for Python 3.6"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.6, <3.7"
 
 [[package]]
@@ -607,6 +610,14 @@ python-versions = ">=3.5"
 mkdocs-material = ">=5.0.0"
 
 [[package]]
+name = "mypy-extensions"
+version = "0.4.3"
+description = "Experimental type system extensions for programs checked with the mypy typechecker."
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "nltk"
 version = "3.5"
 description = "Natural Language Toolkit"
@@ -1024,7 +1035,7 @@ pydantic = ["pydantic", "typing_extensions", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "8449d304f490572cc5722c704a15903ad5d261ff54afa83402e71faa5ac372dc"
+content-hash = "c0a85833f33ef1addfe2aef991d7264761c7b0ac382da712e233a3da2a974ea3"
 
 [metadata.files]
 appdirs = [
@@ -1048,8 +1059,7 @@ bandit = [
     {file = "bandit-1.7.0.tar.gz", hash = "sha256:8a4c7415254d75df8ff3c3b15cfe9042ecee628a1e40b44c15a98890fbfc2608"},
 ]
 black = [
-    {file = "black-19.10b0-py36-none-any.whl", hash = "sha256:1b30e59be925fafc1ee4565e5e08abef6b03fe455102883820fe5ee2e4734e0b"},
-    {file = "black-19.10b0.tar.gz", hash = "sha256:c2edb73a08e9e0e6f65a0e6af18b059b8b1cdd5bef997d7a0b181df93dc81539"},
+    {file = "black-20.8b1.tar.gz", hash = "sha256:1c02557aa099101b9d21496f8a914e9ed2222ef70336404eeeac8edba836fbea"},
 ]
 boto3 = [
     {file = "boto3-1.17.33-py2.py3-none-any.whl", hash = "sha256:3306dad87f993703b102a0a70ca19c549b7f41e7f70fa7b4c579735c9f79351d"},
@@ -1325,6 +1335,10 @@ mkdocs-material = [
 mkdocs-material-extensions = [
     {file = "mkdocs-material-extensions-1.0.1.tar.gz", hash = "sha256:6947fb7f5e4291e3c61405bad3539d81e0b3cd62ae0d66ced018128af509c68f"},
     {file = "mkdocs_material_extensions-1.0.1-py3-none-any.whl", hash = "sha256:d90c807a88348aa6d1805657ec5c0b2d8d609c110e62b9dce4daf7fa981fa338"},
+]
+mypy-extensions = [
+    {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
+    {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
 ]
 nltk = [
     {file = "nltk-3.5.zip", hash = "sha256:845365449cd8c5f9731f7cb9f8bd6fd0767553b9d53af9eb1b3abf7700936b35"},
