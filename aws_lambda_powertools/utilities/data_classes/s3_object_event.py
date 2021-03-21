@@ -63,10 +63,11 @@ class S3ObjectUserRequest(DictWrapper):
 
     @property
     def headers(self) -> Dict[str, str]:
-        """A map of string to strings containing the HTTP headers and their values from the
-        original call, excluding any authorization-related headers. If the same header appears
-        multiple times, their values are combined into a comma-delimited list. The case of the
-        original headers is retained in this map."""
+        """A map of string to strings containing the HTTP headers and their values from the original call,
+        excluding any authorization-related headers.
+
+        If the same header appears multiple times, their values are combined into a comma-delimited list.
+        The case of the original headers is retained in this map."""
         return self["headers"]
 
     def get_header_value(
@@ -135,7 +136,7 @@ class S3ObjectSessionContext(DictWrapper):
     @property
     def session_issuer(self) -> S3ObjectSessionIssuer:
         """If the request was made with temporary security credentials, an element that provides information
-        about how the credentials were obtained. """
+        about how the credentials were obtained."""
         return S3ObjectSessionIssuer(self["sessionIssuer"])
 
     @property
@@ -214,7 +215,7 @@ class S3ObjectUserIdentity(DictWrapper):
 
     @property
     def session_context(self) -> Optional[S3ObjectSessionContext]:
-        """ If the request was made with temporary security credentials,
+        """If the request was made with temporary security credentials,
         this element provides information about the session that was created for those credentials."""
         session_context = self.get("sessionContext")
 
