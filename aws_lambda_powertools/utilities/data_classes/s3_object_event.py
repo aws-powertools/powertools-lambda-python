@@ -284,6 +284,41 @@ class S3ObjectLambdaEvent(DictWrapper):
     def user_identity(self) -> S3ObjectUserIdentity:
         """Details about the identity that made the call to S3 Object Lambda."""
         return S3ObjectUserIdentity(self["userIdentity"])
+    @property
+    def request_route(self) -> str:
+        """A routing token that is added to the S3 Object Lambda URL when the Lambda function
+        calls `WriteGetObjectResponse`."""
+        return S3ObjectContext(self["getObjectContext"]).output_route
+
+    @property
+    def request_token(self) -> str:
+        """An opaque token used by S3 Object Lambda to match the WriteGetObjectResponse call
+        with the original caller."""
+        return S3ObjectContext(self["getObjectContext"]).output_token
+
+    @property
+    def input_s3_url(self) -> str:
+        """A pre-signed URL that can be used to fetch the original object from Amazon S3.
+
+        The URL is signed using the original caller’s identity, and their permissions
+        will apply when the URL is used. If there are signed headers in the URL, the
+        Lambda function must include these in the call to Amazon S3, except for the Host.
+
+        Example
+        -------
+        **Fetch original object from Amazon S3**
+
+            import requests
+            from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
+
+            def lambda_handler(event, context):
+                event = S3ObjectLambdaEvent(event)
+
+                response = requests.get(event.input_s3_url)
+                original_object = response.content.decode("utf-8")
+                ...
+        """
+        return S3ObjectContext(self["getObjectContext"]).input_s3_url
 
     @property
     def protocol_version(self) -> str:
