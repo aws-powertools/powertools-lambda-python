@@ -1037,6 +1037,9 @@ def test_s3_object_event_iam():
     assert user_identity.user_name == event["userIdentity"]["userName"]
     assert user_identity.session_context is None
     assert event.protocol_version == event["protocolVersion"]
+    assert event.request_route == object_context.output_route
+    assert event.request_token == object_context.output_token
+    assert event.input_s3_url == object_context.input_s3_url
 
 
 def test_s3_object_event_temp_credentials():
