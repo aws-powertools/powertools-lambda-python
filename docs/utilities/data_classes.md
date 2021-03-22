@@ -554,34 +554,33 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
 
 === "app.py"
 
-    ```python  hl_lines="5 9 11"
+    ```python  hl_lines="4-5 10 12"
     import boto3
     import requests
+
     from aws_lambda_powertools import Logger
     from aws_lambda_powertools.logging.correlation_paths import S3_OBJECT_LAMBDA
     from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
 
     logger = Logger()
+    session = boto3.Session()
+    s3 = session.client("s3")
 
     @logger.inject_lambda_context(correlation_id_path=S3_OBJECT_LAMBDA, log_event=True)
     def lambda_handler(event, context):
         event = S3ObjectLambdaEvent(event)
 
-        object_context = event.object_context
-        request_route = object_context.output_route
-        request_token = object_context.output_token
-        s3_url = object_context.input_s3_url
-
         # Get object from S3
-        response = requests.get(s3_url)
+        response = requests.get(event.input_s3_url)
         original_object = response.content.decode("utf-8")
 
-        # Transform object
+        # Make changes to the object about to be returned
         transformed_object = original_object.upper()
 
         # Write object back to S3 Object Lambda
-        s3 = boto3.client("s3")
-        s3.write_get_object_response(Body=transformed_object, RequestRoute=request_route, RequestToken=request_token)
+        s3.write_get_object_response(
+            Body=transformed_object, RequestRoute=event.request_route, RequestToken=event.request_token
+        )
 
         return {"status_code": 200}
     ```

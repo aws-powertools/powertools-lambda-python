@@ -232,7 +232,6 @@ class S3ObjectLambdaEvent(DictWrapper):
     -------------
     - https://docs.aws.amazon.com/AmazonS3/latest/userguide/olap-writing-lambda.html
 
-
     Example
     -------
     **Fetch and transform original object from Amazon S3**
@@ -243,7 +242,7 @@ class S3ObjectLambdaEvent(DictWrapper):
 
         session = boto3.Session()
         s3 = session.client("s3")
-            
+
         def lambda_handler(event, context):
             event = S3ObjectLambdaEvent(event)
 
@@ -284,17 +283,18 @@ class S3ObjectLambdaEvent(DictWrapper):
     def user_identity(self) -> S3ObjectUserIdentity:
         """Details about the identity that made the call to S3 Object Lambda."""
         return S3ObjectUserIdentity(self["userIdentity"])
+
     @property
     def request_route(self) -> str:
         """A routing token that is added to the S3 Object Lambda URL when the Lambda function
         calls `WriteGetObjectResponse`."""
-        return S3ObjectContext(self["getObjectContext"]).output_route
+        return self.object_context.output_route
 
     @property
     def request_token(self) -> str:
         """An opaque token used by S3 Object Lambda to match the WriteGetObjectResponse call
         with the original caller."""
-        return S3ObjectContext(self["getObjectContext"]).output_token
+        return self.object_context.output_token
 
     @property
     def input_s3_url(self) -> str:
@@ -318,7 +318,7 @@ class S3ObjectLambdaEvent(DictWrapper):
                 original_object = response.content.decode("utf-8")
                 ...
         """
-        return S3ObjectContext(self["getObjectContext"]).input_s3_url
+        return self.object_context.input_s3_url
 
     @property
     def protocol_version(self) -> str:
