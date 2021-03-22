@@ -50,7 +50,7 @@ class BaseProxyEvent(DictWrapper):
         return self.get("queryStringParameters")
 
     @property
-    def is_base64_encoded(self) -> bool:
+    def is_base64_encoded(self) -> Optional[bool]:
         return self.get("isBase64Encoded")
 
     @property
