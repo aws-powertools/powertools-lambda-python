@@ -47,9 +47,6 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         boto3_session : boto3.session.Session, optional
             Boto3 session to use for AWS API communication
 
-        args
-        kwargs
-
         Examples
         --------
         **Create a DynamoDB persistence layer with custom settings**

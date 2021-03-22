@@ -29,7 +29,7 @@ class ConnectContactFlowEndpoint(DictWrapper):
 
     @property
     def endpoint_type(self) -> ConnectContactFlowEndpointType:
-        """The enpoint type."""
+        """The endpoint type."""
         return ConnectContactFlowEndpointType[self["Type"]]
 
 

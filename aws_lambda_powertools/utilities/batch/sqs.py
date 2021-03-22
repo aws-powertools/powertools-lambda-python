@@ -126,7 +126,7 @@ class PartialSQSProcessor(BasePartialProcessor):
         else:
             logger.debug(f"{len(self.fail_messages)} records failed processing, raising exception")
             raise SQSBatchProcessingError(
-                msg=f"Not all records processed succesfully. {len(self.exceptions)} individual errors logged "
+                msg=f"Not all records processed successfully. {len(self.exceptions)} individual errors logged "
                 f"separately below.",
                 child_exceptions=self.exceptions,
             )
