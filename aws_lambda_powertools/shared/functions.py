@@ -3,7 +3,7 @@ from typing import Any, Union
 
 
 def resolve_truthy_env_var_choice(env: Any, choice: bool = None) -> bool:
-    """ Pick explicit choice over truthy env value, if available, otherwise return truthy env value
+    """Pick explicit choice over truthy env value, if available, otherwise return truthy env value
 
     NOTE: Environment variable should be resolved by the caller.
 
@@ -23,7 +23,7 @@ def resolve_truthy_env_var_choice(env: Any, choice: bool = None) -> bool:
 
 
 def resolve_env_var_choice(env: Any, choice: bool = None) -> Union[bool, Any]:
-    """ Pick explicit choice over env, if available, otherwise return env value received
+    """Pick explicit choice over env, if available, otherwise return env value received
 
     NOTE: Environment variable should be resolved by the caller.
 

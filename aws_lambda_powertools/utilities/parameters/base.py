@@ -95,7 +95,7 @@ class BaseProvider(ABC):
         if transform is not None:
             value = transform_value(value, transform)
 
-        self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age),)
+        self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
 
         return value
 
@@ -164,7 +164,7 @@ class BaseProvider(ABC):
 
                 values[key] = transform_value(value, _transform, raise_on_transform_error)
 
-        self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age),)
+        self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age))
 
         return values
 

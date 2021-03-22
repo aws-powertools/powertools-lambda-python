@@ -589,7 +589,7 @@ class DefineAuthChallengeTriggerEventRequest(DictWrapper):
     @property
     def user_not_found(self) -> Optional[bool]:
         """A Boolean that is populated when PreventUserExistenceErrors is set to ENABLED for your user pool client.
-        A value of true means that the user id (user name, email address, etc.) did not match any existing users. """
+        A value of true means that the user id (user name, email address, etc.) did not match any existing users."""
         return self["request"].get("userNotFound")
 
     @property

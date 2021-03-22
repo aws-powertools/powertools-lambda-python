@@ -10,18 +10,18 @@ dev:
 	pre-commit install
 
 format:
-	poetry run isort -rc aws_lambda_powertools tests
+	poetry run isort aws_lambda_powertools tests
 	poetry run black aws_lambda_powertools tests
 
 lint: format
 	poetry run flake8 aws_lambda_powertools/* tests/*
 
 test:
-	poetry run pytest -m "not perf" --cov=./ --cov-report=xml
+	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=xml
 	poetry run pytest --cache-clear tests/performance
 
 coverage-html:
-	poetry run pytest -m "not perf" --cov-report=html
+	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=html
 
 pr: lint test security-baseline complexity-baseline
 

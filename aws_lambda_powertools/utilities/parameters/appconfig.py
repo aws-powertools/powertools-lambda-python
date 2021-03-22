@@ -60,9 +60,7 @@ class AppConfigProvider(BaseProvider):
 
     client = None
 
-    def __init__(
-        self, environment: str, application: Optional[str] = None, config: Optional[Config] = None,
-    ):
+    def __init__(self, environment: str, application: Optional[str] = None, config: Optional[Config] = None):
         """
         Initialize the App Config client
         """

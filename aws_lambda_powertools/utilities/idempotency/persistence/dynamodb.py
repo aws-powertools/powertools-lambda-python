@@ -47,9 +47,6 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         boto3_session : boto3.session.Session, optional
             Boto3 session to use for AWS API communication
 
-        args
-        kwargs
-
         Examples
         --------
         **Create a DynamoDB persistence layer with custom settings**
@@ -161,4 +158,4 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
     def _delete_record(self, data_record: DataRecord) -> None:
         logger.debug(f"Deleting record for idempotency key: {data_record.idempotency_key}")
-        self.table.delete_item(Key={self.key_attr: data_record.idempotency_key},)
+        self.table.delete_item(Key={self.key_attr: data_record.idempotency_key})

@@ -115,12 +115,12 @@ class AppSyncResolverEventInfo(DictWrapper):
         return self["parentTypeName"]
 
     @property
-    def variables(self) -> Dict[str, str]:
+    def variables(self) -> Optional[Dict[str, str]]:
         """A map which holds all variables that are passed into the GraphQL request."""
         return self.get("variables")
 
     @property
-    def selection_set_list(self) -> List[str]:
+    def selection_set_list(self) -> Optional[List[str]]:
         """A list representation of the fields in the GraphQL selection set. Fields that are aliased will
         only be referenced by the alias name, not the field name."""
         return self.get("selectionSetList")
@@ -147,7 +147,7 @@ class AppSyncResolverEvent(DictWrapper):
     def __init__(self, data: dict):
         super().__init__(data)
 
-        info: dict = data.get("info")
+        info: Optional[dict] = data.get("info")
         if not info:
             info = {"fieldName": self.get("fieldName"), "parentTypeName": self.get("typeName")}
 
@@ -164,7 +164,7 @@ class AppSyncResolverEvent(DictWrapper):
         return self.info.field_name
 
     @property
-    def arguments(self) -> Dict[str, any]:
+    def arguments(self) -> Dict[str, Any]:
         """A map that contains all GraphQL arguments for this field."""
         return self["arguments"]
 
@@ -181,7 +181,7 @@ class AppSyncResolverEvent(DictWrapper):
         return get_identity_object(self.get("identity"))
 
     @property
-    def source(self) -> Dict[str, any]:
+    def source(self) -> Optional[Dict[str, Any]]:
         """A map that contains the resolution of the parent field."""
         return self.get("source")
 
@@ -191,7 +191,7 @@ class AppSyncResolverEvent(DictWrapper):
         return self["request"]["headers"]
 
     @property
-    def prev_result(self) -> Optional[Dict[str, any]]:
+    def prev_result(self) -> Optional[Dict[str, Any]]:
         """It represents the result of whatever previous operation was executed in a pipeline resolver."""
         prev = self.get("prev")
         if not prev:
