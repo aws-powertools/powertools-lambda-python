@@ -5,7 +5,6 @@ title: 'RFC: '
 labels: RFC, triage
 assignees: ''
 approved by: ''
-
 ---
 
 ## Key information
@@ -14,6 +13,8 @@ approved by: ''
 * Related issue(s), if known:
 * Area: (i.e. Tracer, Metrics, Logger, etc.)
 * Meet [tenets](https://awslabs.github.io/aws-lambda-powertools-python/#tenets): (Yes/no)
+* Approved by: ''
+* Reviewed by: ''
 
 ## Summary
 [summary]: #summary
