@@ -8,6 +8,16 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## [1.13.0] - 2021-03-23
+
+### Added
+
+* **Data Classes**: New S3 Object Lambda event
+
+### Fixed
+
+* **Docs**: Lambda Layer SAM template reference example
+
 ## [1.12.0] - 2021-03-17
 
 ### Added
