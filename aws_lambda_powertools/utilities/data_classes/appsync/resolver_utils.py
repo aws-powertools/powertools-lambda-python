@@ -27,8 +27,8 @@ class AppSyncResolver:
 
         return register_resolver
 
-    def resolve(self, event: dict, context: LambdaContext) -> Any:
-        event = AppSyncResolverEvent(event)
+    def resolve(self, _event: dict, context: LambdaContext) -> Any:
+        event = AppSyncResolverEvent(_event)
         resolver, config = self._resolver(event.type_name, event.field_name)
         kwargs = self._kwargs(event, context, config)
         return resolver(**kwargs)

@@ -25,7 +25,9 @@ class DictWrapper:
         return self._data
 
 
-def get_header_value(headers: Dict[str, str], name: str, default_value: str, case_sensitive: bool) -> Optional[str]:
+def get_header_value(
+    headers: Dict[str, str], name: str, default_value: Optional[str], case_sensitive: Optional[bool]
+) -> Optional[str]:
     """Get header value by name"""
     if case_sensitive:
         return headers.get(name, default_value)
