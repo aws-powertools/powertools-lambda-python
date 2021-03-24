@@ -739,3 +739,13 @@ def test_serialize_metric_set_metric_definition_multiple_values(
     assert "Timestamp" in metric_definition_output["_aws"]
     remove_timestamp(metrics=[metric_definition_output, expected_metric_definition])
     assert metric_definition_output == expected_metric_definition
+
+
+def test_metric_manage_metadata_set():
+    expected_dict = {"setting": "On"}
+
+    try:
+        metric = MetricManager(metadata_set=expected_dict)
+        assert metric.metadata_set == expected_dict
+    except AttributeError:
+        pytest.fail("AttributeError should not be raised")
