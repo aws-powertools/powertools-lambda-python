@@ -1,10 +1,13 @@
 site_name: Lambda Powertools Python
 site_description: AWS Lambda Powertools for Python
 site_author: Amazon Web Services
+repo_url: https://github.com/awslabs/aws-lambda-powertools-python
+edit_uri: edit/develop/docs
+
 nav:
   - Homepage: index.md
   - Changelog: changelog.md
-  - API reference: https://awslabs.github.io/aws-lambda-powertools-python/api/" target="_blank
+  - API reference: api/" target="_blank
   - Core utilities:
       - core/tracer.md
       - core/logger.md
@@ -61,6 +64,6 @@ extra_javascript:
   - javascript/aws-amplify.min.js
   - javascript/extra.js
 
-
-repo_url: https://github.com/awslabs/aws-lambda-powertools-python
-edit_uri: edit/develop/docs
+extras:
+  version:
+    provider: mike
