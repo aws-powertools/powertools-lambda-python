@@ -3,8 +3,7 @@ title: Event Source Data Classes
 description: Utility
 ---
 
-Event Source Data Classes utility provides classes self-describing Lambda event sources, including API decorators when
-applicable.
+Event Source Data Classes utility provides classes self-describing Lambda event sources.
 
 ## Key Features
 

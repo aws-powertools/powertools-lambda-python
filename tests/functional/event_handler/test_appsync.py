@@ -1,5 +1,4 @@
 import asyncio
-import datetime
 import json
 import os
 import sys
@@ -7,15 +6,7 @@ import sys
 import pytest
 
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
-from aws_lambda_powertools.utilities.data_classes.appsync.resolver_utils import AppSyncResolver
-from aws_lambda_powertools.utilities.data_classes.appsync.scalar_types_utils import (
-    _formatted_time,
-    aws_date,
-    aws_datetime,
-    aws_time,
-    aws_timestamp,
-    make_id,
-)
+from aws_lambda_powertools.utilities.event_handler import AppSyncResolver
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
@@ -189,46 +180,3 @@ def test_resolver_async():
 
     # THEN
     assert asyncio.run(result) == "value"
-
-
-def test_make_id():
-    uuid: str = make_id()
-    assert isinstance(uuid, str)
-    assert len(uuid) == 36
-
-
-def test_aws_date_utc():
-    date_str = aws_date()
-    assert isinstance(date_str, str)
-    assert datetime.datetime.strptime(date_str, "%Y-%m-%dZ")
-
-
-def test_aws_time_utc():
-    time_str = aws_time()
-    assert isinstance(time_str, str)
-    assert datetime.datetime.strptime(time_str, "%H:%M:%SZ")
-
-
-def test_aws_datetime_utc():
-    datetime_str = aws_datetime()
-    assert isinstance(datetime_str, str)
-    assert datetime.datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%SZ")
-
-
-def test_aws_timestamp():
-    timestamp = aws_timestamp()
-    assert isinstance(timestamp, int)
-
-
-def test_format_time_positive():
-    now = datetime.datetime(2022, 1, 22)
-    datetime_str = _formatted_time(now, "%Y-%m-%d", 8)
-    assert isinstance(datetime_str, str)
-    assert datetime_str == "2022-01-22+08:00:00"
-
-
-def test_format_time_negative():
-    now = datetime.datetime(2022, 1, 22, 14, 22, 33)
-    datetime_str = _formatted_time(now, "%H:%M:%S", -12)
-    assert isinstance(datetime_str, str)
-    assert datetime_str == "02:22:33-12:00:00"
