@@ -244,7 +244,7 @@ class Tracer:
 
     def capture_lambda_handler(
         self,
-        lambda_handler: Callable[[Dict, Any, Optional[Dict]], Any] = None,
+        lambda_handler: Union[Callable[[Dict, Any], Any], Callable[[Dict, Any, Optional[Dict]], Any]] = None,
         capture_response: Optional[bool] = None,
         capture_error: Optional[bool] = None,
     ):
@@ -517,7 +517,7 @@ class Tracer:
 
     def _decorate_async_function(
         self,
-        method: Callable = None,
+        method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
         method_name: str = None,
@@ -544,7 +544,7 @@ class Tracer:
 
     def _decorate_generator_function(
         self,
-        method: Callable = None,
+        method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
         method_name: str = None,
@@ -571,7 +571,7 @@ class Tracer:
 
     def _decorate_generator_function_with_context_manager(
         self,
-        method: Callable = None,
+        method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
         method_name: str = None,
@@ -599,7 +599,7 @@ class Tracer:
 
     def _decorate_sync_function(
         self,
-        method: Callable = None,
+        method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
         method_name: str = None,
@@ -654,20 +654,20 @@ class Tracer:
 
     def _add_full_exception_as_metadata(
         self,
-        method_name: str = None,
-        error: Exception = None,
-        subsegment: BaseSegment = None,
+        method_name: str,
+        error: Exception,
+        subsegment: BaseSegment,
         capture_error: Optional[bool] = None,
     ):
         """Add full exception object as metadata for given subsegment
 
         Parameters
         ----------
-        method_name : str, optional
+        method_name : str
             method name to add as metadata key, by default None
-        error : Exception, optional
+        error : Exception
             error to add as subsegment metadata, by default None
-        subsegment : BaseSegment, optional
+        subsegment : BaseSegment
             existing subsegment to add metadata on, by default None
         capture_error : bool, optional
             Do not include error as metadata, by default True
@@ -717,7 +717,7 @@ class Tracer:
         service: str = None,
         disabled: bool = None,
         auto_patch: bool = None,
-        patch_modules: List = None,
+        patch_modules: Union[List, Tuple] = None,
         provider: BaseProvider = None,
     ):
         """ Populates Tracer config for new and existing initializations """
