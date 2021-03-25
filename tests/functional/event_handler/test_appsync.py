@@ -1,7 +1,7 @@
 import asyncio
 import json
-import os
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -11,9 +11,8 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 def load_event(file_name: str) -> dict:
-    full_file_name = os.path.dirname(os.path.realpath(__file__)) + "/../../events/" + file_name
-    with open(full_file_name) as fp:
-        return json.load(fp)
+    path = Path(str(Path(__file__).parent.parent.parent) + "/events/" + file_name)
+    return json.loads(path.read_text())
 
 
 def test_direct_resolver():
