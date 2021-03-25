@@ -72,7 +72,7 @@ class Metrics(MetricManager):
     """
 
     _metrics: Dict[str, Any] = {}
-    _dimensions: Dict[str, Any] = {}
+    _dimensions: Dict[str, str] = {}
     _metadata: Dict[str, Any] = {}
 
     def __init__(self, service: str = None, namespace: str = None):
