@@ -1,7 +1,7 @@
 import json
 import logging
 from contextlib import contextmanager
-from typing import Dict
+from typing import Dict, Optional, Union
 
 from .base import MetricManager, MetricUnit
 
@@ -42,7 +42,7 @@ class SingleMetric(MetricManager):
         Inherits from `aws_lambda_powertools.metrics.base.MetricManager`
     """
 
-    def add_metric(self, name: str, unit: MetricUnit, value: float):
+    def add_metric(self, name: str, unit: Union[MetricUnit, str], value: float):
         """Method to prevent more than one metric being created
 
         Parameters
@@ -109,11 +109,11 @@ def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = No
     SchemaValidationError
         When metric object fails EMF schema validation
     """
-    metric_set = None
+    metric_set: Optional[Dict] = None
     try:
         metric: SingleMetric = SingleMetric(namespace=namespace)
         metric.add_metric(name=name, unit=unit, value=value)
         yield metric
-        metric_set: Dict = metric.serialize_metric_set()
+        metric_set = metric.serialize_metric_set()
     finally:
         print(json.dumps(metric_set, separators=(",", ":")))

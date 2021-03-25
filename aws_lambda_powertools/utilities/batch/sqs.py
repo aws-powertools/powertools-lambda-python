@@ -71,7 +71,7 @@ class PartialSQSProcessor(BasePartialProcessor):
         Format QueueUrl from first records entry
         """
         if not getattr(self, "records", None):
-            return
+            return None
 
         *_, account_id, queue_name = self.records[0]["eventSourceARN"].split(":")
         return f"{self.client._endpoint.host}/{account_id}/{queue_name}"

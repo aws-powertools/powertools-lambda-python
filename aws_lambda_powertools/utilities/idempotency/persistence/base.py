@@ -40,7 +40,7 @@ class DataRecord:
         idempotency_key,
         status: str = "",
         expiry_timestamp: int = None,
-        response_data: str = "",
+        response_data: Optional[str] = "",
         payload_hash: str = None,
     ) -> None:
         """
