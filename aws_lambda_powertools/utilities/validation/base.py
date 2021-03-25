@@ -40,7 +40,7 @@ def validate_data_against_schema(data: Dict, schema: Dict, formats: Optional[Dic
         raise SchemaValidationError(message)
 
 
-def unwrap_event_from_envelope(data: Dict, envelope: str, jmespath_options: Dict) -> Any:
+def unwrap_event_from_envelope(data: Dict, envelope: str, jmespath_options: Optional[Dict]) -> Any:
     """Searches data using JMESPath expression
 
     Parameters

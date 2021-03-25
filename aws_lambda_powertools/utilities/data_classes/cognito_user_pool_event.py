@@ -292,25 +292,25 @@ class CustomMessageTriggerEventResponse(DictWrapper):
     def sms_message(self) -> str:
         return self["response"]["smsMessage"]
 
-    @property
-    def email_message(self) -> str:
-        return self["response"]["emailMessage"]
-
-    @property
-    def email_subject(self) -> str:
-        return self["response"]["emailSubject"]
-
     @sms_message.setter
     def sms_message(self, value: str):
         """The custom SMS message to be sent to your users.
         Must include the codeParameter value received in the request."""
         self["response"]["smsMessage"] = value
 
+    @property
+    def email_message(self) -> str:
+        return self["response"]["emailMessage"]
+
     @email_message.setter
     def email_message(self, value: str):
         """The custom email message to be sent to your users.
         Must include the codeParameter value received in the request."""
         self["response"]["emailMessage"] = value
+
+    @property
+    def email_subject(self) -> str:
+        return self["response"]["emailSubject"]
 
     @email_subject.setter
     def email_subject(self, value: str):
@@ -471,25 +471,25 @@ class ClaimsOverrideDetails(DictWrapper):
     def claims_to_add_or_override(self) -> Optional[Dict[str, str]]:
         return self.get("claimsToAddOrOverride")
 
-    @property
-    def claims_to_suppress(self) -> Optional[List[str]]:
-        return self.get("claimsToSuppress")
-
-    @property
-    def group_configuration(self) -> Optional[GroupOverrideDetails]:
-        group_override_details = self.get("groupOverrideDetails")
-        return None if group_override_details is None else GroupOverrideDetails(group_override_details)
-
     @claims_to_add_or_override.setter
     def claims_to_add_or_override(self, value: Dict[str, str]):
         """A map of one or more key-value pairs of claims to add or override.
         For group related claims, use groupOverrideDetails instead."""
         self._data["claimsToAddOrOverride"] = value
 
+    @property
+    def claims_to_suppress(self) -> Optional[List[str]]:
+        return self.get("claimsToSuppress")
+
     @claims_to_suppress.setter
     def claims_to_suppress(self, value: List[str]):
         """A list that contains claims to be suppressed from the identity token."""
         self._data["claimsToSuppress"] = value
+
+    @property
+    def group_configuration(self) -> Optional[GroupOverrideDetails]:
+        group_override_details = self.get("groupOverrideDetails")
+        return None if group_override_details is None else GroupOverrideDetails(group_override_details)
 
     @group_configuration.setter
     def group_configuration(self, value: Dict[str, Any]):
@@ -609,24 +609,24 @@ class DefineAuthChallengeTriggerEventResponse(DictWrapper):
     def challenge_name(self) -> str:
         return self["response"]["challengeName"]
 
-    @property
-    def fail_authentication(self) -> bool:
-        return bool(self["response"]["failAuthentication"])
-
-    @property
-    def issue_tokens(self) -> bool:
-        return bool(self["response"]["issueTokens"])
-
     @challenge_name.setter
     def challenge_name(self, value: str):
         """A string containing the name of the next challenge.
         If you want to present a new challenge to your user, specify the challenge name here."""
         self["response"]["challengeName"] = value
 
+    @property
+    def fail_authentication(self) -> bool:
+        return bool(self["response"]["failAuthentication"])
+
     @fail_authentication.setter
     def fail_authentication(self, value: bool):
         """Set to true if you want to terminate the current authentication process, or false otherwise."""
         self["response"]["failAuthentication"] = value
+
+    @property
+    def issue_tokens(self) -> bool:
+        return bool(self["response"]["issueTokens"])
 
     @issue_tokens.setter
     def issue_tokens(self, value: bool):
@@ -695,20 +695,16 @@ class CreateAuthChallengeTriggerEventResponse(DictWrapper):
     def public_challenge_parameters(self) -> Dict[str, str]:
         return self["response"]["publicChallengeParameters"]
 
-    @property
-    def private_challenge_parameters(self) -> Dict[str, str]:
-        return self["response"]["privateChallengeParameters"]
-
-    @property
-    def challenge_metadata(self) -> str:
-        return self["response"]["challengeMetadata"]
-
     @public_challenge_parameters.setter
     def public_challenge_parameters(self, value: Dict[str, str]):
         """One or more key-value pairs for the client app to use in the challenge to be presented to the user.
         This parameter should contain all of the necessary information to accurately present the challenge to
         the user."""
         self["response"]["publicChallengeParameters"] = value
+
+    @property
+    def private_challenge_parameters(self) -> Dict[str, str]:
+        return self["response"]["privateChallengeParameters"]
 
     @private_challenge_parameters.setter
     def private_challenge_parameters(self, value: Dict[str, str]):
@@ -718,6 +714,10 @@ class CreateAuthChallengeTriggerEventResponse(DictWrapper):
         question that is presented to the user and privateChallengeParameters contains the valid answers
         for the question."""
         self["response"]["privateChallengeParameters"] = value
+
+    @property
+    def challenge_metadata(self) -> str:
+        return self["response"]["challengeMetadata"]
 
     @challenge_metadata.setter
     def challenge_metadata(self, value: str):

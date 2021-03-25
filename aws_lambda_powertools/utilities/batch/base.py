@@ -104,7 +104,7 @@ class BasePartialProcessor(ABC):
 
 @lambda_handler_decorator
 def batch_processor(
-    handler: Callable, event: Dict, context: Dict, record_handler: Callable, processor: BasePartialProcessor = None
+    handler: Callable, event: Dict, context: Dict, record_handler: Callable, processor: BasePartialProcessor
 ):
     """
     Middleware to handle batch event processing

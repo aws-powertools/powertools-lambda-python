@@ -3,7 +3,7 @@ AWS Secrets Manager parameter retrieval and caching utility
 """
 
 
-from typing import Dict, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 import boto3
 from botocore.config import Config
@@ -56,7 +56,7 @@ class SecretsProvider(BaseProvider):
         My parameter value
     """
 
-    client = None
+    client: Any = None
 
     def __init__(self, config: Optional[Config] = None):
         """

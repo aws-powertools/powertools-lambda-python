@@ -88,7 +88,7 @@ class MetricManager:
         self.service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_options = list(MetricUnit.__members__)
-        self.metadata_set = self.metadata_set if metadata_set is not None else {}
+        self.metadata_set = metadata_set if metadata_set is not None else {}
 
     def add_metric(self, name: str, unit: Union[MetricUnit, str], value: float):
         """Adds given metric

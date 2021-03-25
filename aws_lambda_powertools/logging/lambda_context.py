@@ -1,3 +1,6 @@
+from typing import Any
+
+
 class LambdaContextModel:
     """A handful of Lambda Runtime Context fields
 
@@ -31,7 +34,7 @@ class LambdaContextModel:
         self.function_request_id = function_request_id
 
 
-def build_lambda_context_model(context: object) -> LambdaContextModel:
+def build_lambda_context_model(context: Any) -> LambdaContextModel:
     """Captures Lambda function runtime info to be used across all log statements
 
     Parameters
