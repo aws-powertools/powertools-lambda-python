@@ -3,7 +3,7 @@ AWS SSM Parameter retrieval and caching utility
 """
 
 
-from typing import Dict, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 import boto3
 from botocore.config import Config
@@ -72,7 +72,7 @@ class SSMProvider(BaseProvider):
         /my/path/prefix/c   Parameter value c
     """
 
-    client = None
+    client: Any = None
 
     def __init__(self, config: Optional[Config] = None):
         """

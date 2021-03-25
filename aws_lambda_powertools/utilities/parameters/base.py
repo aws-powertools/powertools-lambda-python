@@ -25,7 +25,7 @@ class BaseProvider(ABC):
     Abstract Base Class for Parameter providers
     """
 
-    store = None
+    store: Any = None
 
     def __init__(self):
         """
