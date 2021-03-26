@@ -1,3 +1,7 @@
+"""
+Event Source Data Classes utility provides classes self-describing Lambda event sources.
+"""
+
 from .alb_event import ALBEvent
 from .api_gateway_proxy_event import APIGatewayProxyEvent, APIGatewayProxyEventV2
 from .appsync_resolver_event import AppSyncResolverEvent

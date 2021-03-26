@@ -18,6 +18,7 @@ nav:
       - utilities/data_classes.md
       - utilities/parser.md
       - utilities/idempotency.md
+      - utilities/event_handler.md
 
 theme:
   name: material

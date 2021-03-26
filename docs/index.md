@@ -152,6 +152,7 @@ aws serverlessrepo list-application-versions \
 | [Event source data classes](./utilities/data_classes) | Data classes describing the schema of common Lambda event triggers
 | [Parser](./utilities/parser) | Data parsing and deep validation using Pydantic
 | [Idempotency](./utilities/idempotency) | Idempotent Lambda handler
+| [Event handler](./utilities/event_handler) | Event handler decorators for common Lambda events
 
 ## Environment variables
 
