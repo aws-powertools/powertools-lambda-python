@@ -26,10 +26,9 @@ def test_direct_resolver():
         assert context == {}
         return id
 
-    def handler(event, context):
-        return app.resolve(event, context)
+    # Call the implicit handler
+    result = app(mock_event, {})
 
-    result = handler(mock_event, {})
     assert result == "my identifier"
 
 
@@ -47,6 +46,7 @@ def test_amplify_resolver():
         return name
 
     def handler(event, context):
+        # Call the explicit resolve function
         return app.resolve(event, context)
 
     result = handler(mock_event, {})

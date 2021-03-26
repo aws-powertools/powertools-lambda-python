@@ -32,10 +32,6 @@ class AppSyncResolver:
         def common_field():
             # Would match all fieldNames matching 'commonField'
             ...
-
-        def handle(event, context):
-            app.resolve(event, context)
-
     """
 
     def __init__(self):
@@ -144,3 +140,7 @@ class AppSyncResolver:
         if config.get("include_context", False):
             kwargs["context"] = context
         return kwargs
+
+    def __call__(self, event, context) -> Any:
+        """Implicit AppSync handler"""
+        return self.resolve(event, context)
