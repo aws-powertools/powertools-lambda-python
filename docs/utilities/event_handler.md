@@ -10,6 +10,10 @@ Event handler decorators for common Lambda events
 
 > New in 1.14.0
 
+#### Amplify Example
+
+Create a new GraphQL api via `amplify add api` and add the following to the new `schema.graphql`
+
 === "schema.graphql"
 
     ```graphql hl_lines="7-10 17-18 22-25"
@@ -41,9 +45,10 @@ Event handler decorators for common Lambda events
     }
     ```
 
-Example lambda implementation
+Create two sample Python functions via `amplify add function` and run `pipenv install aws-lambda-powertools`. Add
+the following example lambda implementation
 
-=== "merchantInformation app.py"
+=== "merchantInformation/src/app.py"
 
     ```python hl_lines="1-3 6 8-9 13-14 18-19 23 25"
     from aws_lambda_powertools.logging import Logger, correlation_paths
@@ -72,7 +77,7 @@ Example lambda implementation
     def handle(event, context):
         app.resolve(event, context)
     ```
-=== "searchMerchant app.py"
+=== "searchMerchant/src/app.py"
 
     ```python hl_lines="1 3 5-6"
     from aws_lambda_powertools.utilities.event_handler import AppSyncResolver
@@ -118,7 +123,7 @@ Example AppSync resolver events
 
 === "Merchant.extraInfo event"
 
-    ```json hl_lines="2 3 14-17"
+    ```json hl_lines="2-5 14-17"
     {
       "typeName": "Merchant",
       "fieldName": "extraInfo",
@@ -147,7 +152,7 @@ Example AppSync resolver events
     }
     ```
 
-=== "commonField event"
+=== "*.commonField event"
 
     ```json hl_lines="2 3"
     {
@@ -182,6 +187,21 @@ Example AppSync resolver events
       "fieldName": "findMerchant",
       "arguments": {
         "search": "Brewers Coffee"
+      },
+      "identity": {
+        "claims": {
+          "iat": 1615366261
+          ...
+        },
+        "username": "mike",
+        ...
+      },
+      "request": {
+        "headers": {
+          "x-amzn-trace-id": "Root=1-60488877-0b0c4e6727ab2a1c545babd0",
+          "x-forwarded-for": "127.0.0.1"
+          ...
+        }
       },
       ...
     }
