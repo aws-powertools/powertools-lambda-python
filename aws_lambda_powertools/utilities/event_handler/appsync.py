@@ -142,5 +142,5 @@ class AppSyncResolver:
         return kwargs
 
     def __call__(self, event, context) -> Any:
-        """Implicit AppSync handler"""
+        """Implicit lambda handler which internally calls `resolve`"""
         return self.resolve(event, context)

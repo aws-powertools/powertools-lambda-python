@@ -10,13 +10,27 @@ Event handler decorators for common Lambda events
 
 > New in 1.14.0
 
-#### Amplify Example
+AppSync resolver decorator is a concise way to create lambda functions to handle AppSync resolvers for multiple
+`typeName` and `fieldName` declarations. This decorator builds on top of the
+[AppSync Resolver ](/utilities/data_classes#appsync-resolver) data class and therefore works with [Amplify GraphQL Transform Library](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"} (`@function`),
+and [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/){target="_blank"}
+
+#### Key Features
+
+* Works with any of the existing Powertools utilities by allow you to create your own `lambda_handler` function
+* Supports an implicit handler where in `app = AppSyncResolver()` can be invoked directly as `app(event, context)`
+* `resolver` decorator has flexible or strict matching against `fieldName`
+* Arguments are automatically passed into your function
+* `include_event` and `include_context` options can be used to pass in the original `AppSyncResolver` or `LambdaContext`
+ objects
+
+####  Amplify GraphQL Example
 
 Create a new GraphQL api via `amplify add api` and add the following to the new `schema.graphql`
 
 === "schema.graphql"
 
-    ```graphql hl_lines="7-10 17-18 22-25"
+    ```typescript hl_lines="7-10 17-18 22-25"
     @model
     type Merchant
     {
@@ -24,9 +38,9 @@ Create a new GraphQL api via `amplify add api` and add the following to the new 
         name: String!
         description: String
         # Resolves to `get_extra_info`
-        extraInfo: ExtraInfo @function(name: "merchantInformation-${env}")
+        extraInfo: ExtraInfo @function(name: "merchantInfo-${env}")
         # Resolves to `common_field`
-        commonField: String  @function(name: "merchantInformation-${env}")
+        commonField: String  @function(name: "merchantInfo-${env}")
     }
 
     type Location {
@@ -34,27 +48,28 @@ Create a new GraphQL api via `amplify add api` and add the following to the new 
         name: String!
         address: Address
         # Resolves to `common_field`
-        commonField: String  @function(name: "merchantInformation-${env}")
+        commonField: String  @function(name: "merchantInfo-${env}")
     }
 
     type Query {
       # List of locations resolves to `list_locations`
-      listLocations(page: Int, size: Int): [Location] @function(name: "merchantInformation-${env}")
+      listLocations(page: Int, size: Int): [Location] @function(name: "merchantInfo-${env}")
       # List of locations resolves to `list_locations`
       findMerchant(search: str): [Merchant] @function(name: "searchMerchant-${env}")
     }
     ```
 
-Create two sample Python functions via `amplify add function` and run `pipenv install aws-lambda-powertools`. Add
-the following example lambda implementation
+Create two new simple Python functions via `amplify add function` and run `pipenv install aws-lambda-powertools` to
+add Powertools as a dependency. Add the following example lambda implementation
 
-=== "merchantInformation/src/app.py"
+=== "merchantInfo/src/app.py"
 
-    ```python hl_lines="1-3 6 8-9 13-14 18-19 23 25"
-    from aws_lambda_powertools.logging import Logger, correlation_paths
+    ```python hl_lines="1-3 7 9-10 14-15 19-20 25 27"
+    from aws_lambda_powertools.logging import Logger, Tracer, correlation_paths
     from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
     from aws_lambda_powertools.utilities.event_handler import AppSyncResolver
 
+    tracer = Tracer()
     logger = Logger()
     app = AppSyncResolver()
 
@@ -73,8 +88,9 @@ the following example lambda implementation
         # Would match all fieldNames matching 'commonField'
         ...
 
+    @tracer.capture_lambda_handler
     @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-    def handle(event, context):
+    def lambda_handler(event, context):
         app.resolve(event, context)
     ```
 === "searchMerchant/src/app.py"
