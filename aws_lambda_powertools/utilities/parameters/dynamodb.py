@@ -150,6 +150,7 @@ class DynamoDBProvider(BaseProvider):
         key_attr: str = "id",
         sort_attr: str = "sk",
         value_attr: str = "value",
+        endpoint_url: Optional[str] = None,
         config: Optional[Config] = None,
     ):
         """
@@ -157,7 +158,7 @@ class DynamoDBProvider(BaseProvider):
         """
 
         config = config or Config()
-        self.table = boto3.resource("dynamodb", config=config).Table(table_name)
+        self.table = boto3.resource("dynamodb", endpoint_url=endpoint_url, config=config).Table(table_name)
 
         self.key_attr = key_attr
         self.sort_attr = sort_attr
