@@ -213,15 +213,6 @@ class APIGatewayProxyEvent(BaseProxyEvent):
         return self["resource"]
 
     @property
-    def path(self) -> str:
-        return self["path"]
-
-    @property
-    def http_method(self) -> str:
-        """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
-        return self["httpMethod"]
-
-    @property
     def multi_value_headers(self) -> Dict[str, List[str]]:
         return self["multiValueHeaders"]
 
@@ -441,3 +432,12 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
     @property
     def stage_variables(self) -> Optional[Dict[str, str]]:
         return self.get("stageVariables")
+
+    @property
+    def path(self) -> str:
+        return self.raw_path
+
+    @property
+    def http_method(self) -> str:
+        """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
+        return self.request_context.http.method

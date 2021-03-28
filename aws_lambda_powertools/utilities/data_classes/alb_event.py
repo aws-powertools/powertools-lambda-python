@@ -22,14 +22,6 @@ class ALBEvent(BaseProxyEvent):
         return ALBEventRequestContext(self._data)
 
     @property
-    def http_method(self) -> str:
-        return self["httpMethod"]
-
-    @property
-    def path(self) -> str:
-        return self["path"]
-
-    @property
     def multi_value_query_string_parameters(self) -> Optional[Dict[str, List[str]]]:
         return self.get("multiValueQueryStringParameters")
 
