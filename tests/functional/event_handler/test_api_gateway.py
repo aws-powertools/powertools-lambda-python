@@ -5,7 +5,6 @@ import pytest
 
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
 from aws_lambda_powertools.utilities.event_handler.api_gateway import ApiGatewayResolver, ProxyEventType
-from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 def load_event(file_name: str) -> dict:
@@ -17,10 +16,10 @@ def load_event(file_name: str) -> dict:
 def test_alb_event():
     app = ApiGatewayResolver(proxy_type=ProxyEventType.alb_event)
 
-    @app.get("/lambda", include_event=True, include_context=True)
-    def foo(event: ALBEvent, context: LambdaContext):
-        assert isinstance(event, ALBEvent)
-        assert context == {}
+    @app.get("/lambda")
+    def foo():
+        assert isinstance(app.current_request, ALBEvent)
+        assert app.lambda_context == {}
         return 200, "text/html", "foo"
 
     result = app(load_event("albEvent.json"), {})
@@ -33,10 +32,10 @@ def test_alb_event():
 def test_api_gateway_v1():
     app = ApiGatewayResolver(proxy_type=ProxyEventType.http_api_v1)
 
-    @app.get("/my/path", include_event=True, include_context=True)
-    def get_lambda(event: APIGatewayProxyEvent, context: LambdaContext):
-        assert isinstance(event, APIGatewayProxyEvent)
-        assert context == {}
+    @app.get("/my/path")
+    def get_lambda():
+        assert isinstance(app.current_request, APIGatewayProxyEvent)
+        assert app.lambda_context == {}
         return 200, "application/json", json.dumps({"foo": "value"})
 
     result = app(load_event("apiGatewayProxyEvent.json"), {})
@@ -75,10 +74,10 @@ def test_include_event_false():
 def test_api_gateway_v2():
     app = ApiGatewayResolver(proxy_type=ProxyEventType.http_api_v2)
 
-    @app.post("/my/path", include_event=True)
-    def my_path(event: APIGatewayProxyEventV2):
-        assert isinstance(event, APIGatewayProxyEventV2)
-        post_data = json.loads(event.body or "{}")
+    @app.post("/my/path")
+    def my_path():
+        assert isinstance(app.current_request, APIGatewayProxyEventV2)
+        post_data = app.current_request.json_body
         return 200, "plain/text", post_data["username"]
 
     result = app(load_event("apiGatewayProxyV2Event.json"), {})
