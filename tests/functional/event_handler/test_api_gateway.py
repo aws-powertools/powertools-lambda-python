@@ -45,6 +45,20 @@ def test_api_gateway_v1():
     assert result["headers"]["Content-Type"] == "application/json"
 
 
+def test_include_rule_matching():
+    app = ApiGatewayResolver()
+
+    @app.get("/<name>/<my_id>")
+    def get_lambda(my_id: str, name: str):
+        assert name == "my"
+        return 200, "plain/html", my_id
+
+    result = app(load_event("apiGatewayProxyEvent.json"), {})
+
+    assert result["statusCode"] == 200
+    assert result["body"] == "path"
+
+
 def test_include_event_false():
     app = ApiGatewayResolver()
 
@@ -74,7 +88,7 @@ def test_api_gateway_v2():
     assert result["body"] == "tom"
 
 
-def test_no_matching():
+def test_no_matches():
     app = ApiGatewayResolver()
 
     @app.get("/not_matching_get")
