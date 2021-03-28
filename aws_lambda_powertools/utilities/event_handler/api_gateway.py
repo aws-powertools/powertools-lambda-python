@@ -1,7 +1,6 @@
 import re
 from enum import Enum
-from re import Match, Pattern
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Tuple, Union
 
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
@@ -77,7 +76,7 @@ class ApiGatewayResolver:
         )
 
     @staticmethod
-    def _build_rule_pattern(rule: str) -> Pattern:
+    def _build_rule_pattern(rule: str):
         rule_regex: str = re.sub(r"(<\w+>)", r"(?P\1.+)", rule)
         return re.compile("^{}$".format(rule_regex))
 
@@ -94,7 +93,7 @@ class ApiGatewayResolver:
             if http_method != expected_method:
                 continue
 
-            match: Optional[Match] = resolver["rule_pattern"].match(path)
+            match = resolver["rule_pattern"].match(path)
             if match:
                 return resolver["func"], resolver["config"], match.groupdict()
 
