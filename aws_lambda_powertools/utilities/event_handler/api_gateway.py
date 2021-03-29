@@ -16,42 +16,32 @@ class ProxyEventType(Enum):
 class ApiGatewayResolver:
     current_request: BaseProxyEvent
     lambda_context: LambdaContext
+    _routes: List[Dict] = []
 
     def __init__(self, proxy_type: Enum = ProxyEventType.http_api_v1):
         self._proxy_type = proxy_type
-        self._resolvers: List[Dict] = []
 
     def get(self, rule: str):
-        return self.route("GET", rule)
+        return self.route(rule, "GET")
 
     def post(self, rule: str):
-        return self.route("POST", rule)
+        return self.route(rule, "POST")
 
     def put(self, rule: str):
-        return self.route("PUT", rule)
+        return self.route(rule, "PUT")
 
     def delete(self, rule: str):
-        return self.route("DELETE", rule)
+        return self.route(rule, "DELETE")
 
-    def route(self, method: str, rule: str):
+    def route(self, rule: str, method: str):
         def register_resolver(func: Callable[[Any, Any], Tuple[int, str, str]]):
-            self._register(func, method.upper(), rule)
+            self._register(func, method, rule)
             return func
 
         return register_resolver
 
-    def resolve(self, event: Dict, context: LambdaContext) -> Dict:
-        self.current_request = self._as_proxy_event(event)
-        self.lambda_context = context
-        resolver: Callable[[Any], Tuple[int, str, str]]
-        resolver, args = self._find_resolver(self.current_request.http_method.upper(), self.current_request.path)
-        result = resolver(**args)
-        return {"statusCode": result[0], "headers": {"Content-Type": result[1]}, "body": result[2]}
-
-    def _register(self, func: Callable[[Any, Any], Tuple[int, str, str]], http_method: str, rule: str):
-        self._resolvers.append(
-            {"http_method": http_method, "rule_pattern": self._build_rule_pattern(rule), "func": func}
-        )
+    def _register(self, func: Callable[[Any, Any], Tuple[int, str, str]], method: str, rule: str):
+        self._routes.append({"method": method.upper(), "rule_pattern": self._build_rule_pattern(rule), "func": func})
 
     @staticmethod
     def _build_rule_pattern(rule: str):
@@ -65,16 +55,27 @@ class ApiGatewayResolver:
             return APIGatewayProxyEventV2(event)
         return ALBEvent(event)
 
-    def _find_resolver(self, http_method: str, path: str) -> Tuple[Callable, Dict]:
-        for resolver in self._resolvers:
-            expected_method = resolver["http_method"]
-            if http_method != expected_method:
+    def _find_route(self, method: str, path: str) -> Tuple[Callable, Dict]:
+        method = method.upper()
+        for resolver in self._routes:
+            if method != resolver["method"]:
                 continue
             match = resolver["rule_pattern"].match(path)
             if match:
                 return resolver["func"], match.groupdict()
 
-        raise ValueError(f"No resolver found for '{http_method}.{path}'")
+        raise ValueError(f"No route found for '{method}.{path}'")
+
+    def resolve(self, event: Dict, context: LambdaContext) -> Dict:
+        self.current_request = self._as_proxy_event(event)
+        self.lambda_context = context
+
+        resolver: Callable[[Any], Tuple[int, str, str]]
+        resolver, args = self._find_route(self.current_request.http_method, self.current_request.path)
+
+        result = resolver(**args)
+
+        return {"statusCode": result[0], "headers": {"Content-Type": result[1]}, "body": result[2]}
 
     def __call__(self, event, context) -> Any:
         return self.resolve(event, context)
