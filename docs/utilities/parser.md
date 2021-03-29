@@ -149,17 +149,18 @@ Use this standalone function when you want more control over the data validation
 
 Parser comes with the following built-in models:
 
-Model name | Description
-------------------------------------------------- | ----------------------------------------------------------------------------------------------------------
-**DynamoDBStreamModel** | Lambda Event Source payload for Amazon DynamoDB Streams
-**EventBridgeModel** | Lambda Event Source payload for Amazon EventBridge
-**SqsModel** | Lambda Event Source payload for Amazon SQS
-**AlbModel** | Lambda Event Source payload for Amazon Application Load Balancer
-**CloudwatchLogsModel** | Lambda Event Source payload for Amazon CloudWatch Logs
-**S3Model** | Lambda Event Source payload for Amazon S3
-**KinesisDataStreamModel** | Lambda Event Source payload for Amazon Kinesis Data Streams
-**SesModel** |  Lambda Event Source payload for Amazon Simple Email Service
-**SnsModel** |  Lambda Event Source payload for Amazon Simple Notification Service
+| Model name                 | Description                                                        |
+| -------------------------- | ------------------------------------------------------------------ |
+| **DynamoDBStreamModel**    | Lambda Event Source payload for Amazon DynamoDB Streams            |
+| **EventBridgeModel**       | Lambda Event Source payload for Amazon EventBridge                 |
+| **SqsModel**               | Lambda Event Source payload for Amazon SQS                         |
+| **AlbModel**               | Lambda Event Source payload for Amazon Application Load Balancer   |
+| **CloudwatchLogsModel**    | Lambda Event Source payload for Amazon CloudWatch Logs             |
+| **S3Model**                | Lambda Event Source payload for Amazon S3                          |
+| **S3ObjectLambdaEvent**    | Lambda Event Source payload for Amazon S3 Object Lambda            |
+| **KinesisDataStreamModel** | Lambda Event Source payload for Amazon Kinesis Data Streams        |
+| **SesModel**               | Lambda Event Source payload for Amazon Simple Email Service        |
+| **SnsModel**               | Lambda Event Source payload for Amazon Simple Notification Service |
 
 ### extending built-in models
 
@@ -293,15 +294,15 @@ Here's an example of parsing a model found in an event coming from EventBridge, 
 
 Parser comes with the following built-in envelopes, where `Model` in the return section is your given model.
 
-Envelope name | Behaviour | Return
-------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------
-**DynamoDBStreamEnvelope** | 1. Parses data using `DynamoDBStreamModel`. <br/> 2. Parses records in `NewImage` and `OldImage` keys using your model. <br/> 3. Returns a list with a dictionary containing `NewImage` and `OldImage` keys | `List[Dict[str, Optional[Model]]]`
-**EventBridgeEnvelope** | 1. Parses data using `EventBridgeModel`. <br/> 2. Parses `detail` key using your model and returns it. | `Model`
-**SqsEnvelope** | 1. Parses data using `SqsModel`. <br/> 2. Parses records in `body` key using your model and return them in a list. | `List[Model]`
-**CloudWatchLogsEnvelope** | 1. Parses data using `CloudwatchLogsModel` which will base64 decode and decompress it. <br/> 2. Parses records in `message` key using your model and return them in a list. | `List[Model]`
-**KinesisDataStreamEnvelope** | 1. Parses data using `KinesisDataStreamModel` which will base64 decode it. <br/> 2. Parses records in in `Records` key using your model and returns them in a list. | `List[Model]`
-**SnsEnvelope** | 1. Parses data using `SnsModel`. <br/> 2. Parses records in `body` key using your model and return them in a list. | `List[Model]`
-**SnsSqsEnvelope** | 1. Parses data using `SqsModel`. <br/> 2. Parses SNS records in `body` key using `SnsNotificationModel`. <br/> 3. Parses data in `Message` key using your model and return them in a list. | `List[Model]`
+| Envelope name                 | Behaviour                                                                                                                                                                                                   | Return                             |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| **DynamoDBStreamEnvelope**    | 1. Parses data using `DynamoDBStreamModel`. <br/> 2. Parses records in `NewImage` and `OldImage` keys using your model. <br/> 3. Returns a list with a dictionary containing `NewImage` and `OldImage` keys | `List[Dict[str, Optional[Model]]]` |
+| **EventBridgeEnvelope**       | 1. Parses data using `EventBridgeModel`. <br/> 2. Parses `detail` key using your model and returns it.                                                                                                      | `Model`                            |
+| **SqsEnvelope**               | 1. Parses data using `SqsModel`. <br/> 2. Parses records in `body` key using your model and return them in a list.                                                                                          | `List[Model]`                      |
+| **CloudWatchLogsEnvelope**    | 1. Parses data using `CloudwatchLogsModel` which will base64 decode and decompress it. <br/> 2. Parses records in `message` key using your model and return them in a list.                                 | `List[Model]`                      |
+| **KinesisDataStreamEnvelope** | 1. Parses data using `KinesisDataStreamModel` which will base64 decode it. <br/> 2. Parses records in in `Records` key using your model and returns them in a list.                                         | `List[Model]`                      |
+| **SnsEnvelope**               | 1. Parses data using `SnsModel`. <br/> 2. Parses records in `body` key using your model and return them in a list.                                                                                          | `List[Model]`                      |
+| **SnsSqsEnvelope**            | 1. Parses data using `SqsModel`. <br/> 2. Parses SNS records in `body` key using `SnsNotificationModel`. <br/> 3. Parses data in `Message` key using your model and return them in a list.                  | `List[Model]`                      |
 
 ### bringing your own envelope
 
