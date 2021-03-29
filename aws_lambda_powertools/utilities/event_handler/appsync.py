@@ -34,6 +34,9 @@ class AppSyncResolver:
             ...
     """
 
+    current_event: AppSyncResolverEvent
+    lambda_context: LambdaContext
+
     def __init__(self):
         self._resolvers: dict = {}
 
@@ -92,9 +95,10 @@ class AppSyncResolver:
         ValueError
             If we could not find a field resolver
         """
-        event = AppSyncResolverEvent(_event)
-        resolver, config = self._resolver(event.type_name, event.field_name)
-        kwargs = self._kwargs(event, context, config)
+        self.current_event = AppSyncResolverEvent(_event)
+        self.lambda_context = context
+        resolver, config = self._resolver(self.current_event.type_name, self.current_event.field_name)
+        kwargs = self._kwargs(config)
         return resolver(**kwargs)
 
     def _resolver(self, type_name: str, field_name: str) -> tuple:
@@ -118,15 +122,10 @@ class AppSyncResolver:
             raise ValueError(f"No resolver found for '{full_name}'")
         return resolver["func"], resolver["config"]
 
-    @staticmethod
-    def _kwargs(event: AppSyncResolverEvent, context: LambdaContext, config: dict) -> Dict[str, Any]:
+    def _kwargs(self, config: dict) -> Dict[str, Any]:
         """Get the keyword arguments
         Parameters
         ----------
-        event : AppSyncResolverEvent
-            Lambda event
-        context : LambdaContext
-            Lambda context
         config : dict
             Configuration settings
         Returns
@@ -134,11 +133,11 @@ class AppSyncResolver:
         dict
             Returns keyword arguments
         """
-        kwargs = {**event.arguments}
+        kwargs = {**self.current_event.arguments}
         if config.get("include_event", False):
-            kwargs["event"] = event
+            kwargs["event"] = self.current_event
         if config.get("include_context", False):
-            kwargs["context"] = context
+            kwargs["context"] = self.lambda_context
         return kwargs
 
     def __call__(self, event, context) -> Any:

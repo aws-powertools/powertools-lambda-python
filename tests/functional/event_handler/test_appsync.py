@@ -24,6 +24,7 @@ def test_direct_resolver():
     @app.resolver(field_name="createSomething", include_context=True)
     def create_something(context, id: str):  # noqa AA03 VNE003
         assert context == {}
+        assert app.lambda_context == context
         return id
 
     # Call the implicit handler
@@ -41,6 +42,7 @@ def test_amplify_resolver():
     @app.resolver(type_name="Merchant", field_name="locations", include_event=True)
     def get_location(event: AppSyncResolverEvent, page: int, size: int, name: str):
         assert event is not None
+        assert app.current_event == event
         assert page == 2
         assert size == 1
         return name
