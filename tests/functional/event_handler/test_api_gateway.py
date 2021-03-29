@@ -18,7 +18,7 @@ def test_alb_event():
 
     @app.get("/lambda")
     def foo():
-        assert isinstance(app.current_request, ALBEvent)
+        assert isinstance(app.current_event, ALBEvent)
         assert app.lambda_context == {}
         return 200, "text/html", "foo"
 
@@ -34,7 +34,7 @@ def test_api_gateway_v1():
 
     @app.get("/my/path")
     def get_lambda():
-        assert isinstance(app.current_request, APIGatewayProxyEvent)
+        assert isinstance(app.current_event, APIGatewayProxyEvent)
         assert app.lambda_context == {}
         return 200, "application/json", json.dumps({"foo": "value"})
 
@@ -76,8 +76,8 @@ def test_api_gateway_v2():
 
     @app.post("/my/path")
     def my_path():
-        assert isinstance(app.current_request, APIGatewayProxyEventV2)
-        post_data = app.current_request.json_body
+        assert isinstance(app.current_event, APIGatewayProxyEventV2)
+        post_data = app.current_event.json_body
         return 200, "plain/text", post_data["username"]
 
     result = app(load_event("apiGatewayProxyV2Event.json"), {})
