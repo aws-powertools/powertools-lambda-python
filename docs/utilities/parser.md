@@ -157,7 +157,7 @@ Parser comes with the following built-in models:
 | **AlbModel**               | Lambda Event Source payload for Amazon Application Load Balancer   |
 | **CloudwatchLogsModel**    | Lambda Event Source payload for Amazon CloudWatch Logs             |
 | **S3Model**                | Lambda Event Source payload for Amazon S3                          |
-| **S3ObjectLambdaEvent**    | Lambda Event Source payload for Amazon S3 Object Access            |
+| **S3ObjectLambdaEvent**    | Lambda Event Source payload for Amazon S3 Object Lambda            |
 | **KinesisDataStreamModel** | Lambda Event Source payload for Amazon Kinesis Data Streams        |
 | **SesModel**               | Lambda Event Source payload for Amazon Simple Email Service        |
 | **SnsModel**               | Lambda Event Source payload for Amazon Simple Notification Service |
