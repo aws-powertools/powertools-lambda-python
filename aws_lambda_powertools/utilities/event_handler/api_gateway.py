@@ -16,10 +16,10 @@ class ProxyEventType(Enum):
 class ApiGatewayResolver:
     current_request: BaseProxyEvent
     lambda_context: LambdaContext
-    _routes: List[Dict] = []
 
     def __init__(self, proxy_type: Enum = ProxyEventType.http_api_v1):
         self._proxy_type = proxy_type
+        self._routes: List[Dict] = []
 
     def get(self, rule: str):
         return self.route(rule, "GET")
@@ -35,13 +35,13 @@ class ApiGatewayResolver:
 
     def route(self, rule: str, method: str):
         def register_resolver(func: Callable[[Any, Any], Tuple[int, str, str]]):
-            self._register(func, method, rule)
+            self._register(func, rule, method)
             return func
 
         return register_resolver
 
-    def _register(self, func: Callable[[Any, Any], Tuple[int, str, str]], method: str, rule: str):
-        self._routes.append({"method": method.upper(), "rule_pattern": self._build_rule_pattern(rule), "func": func})
+    def _register(self, func: Callable[[Any, Any], Tuple[int, str, str]], rule: str, method: str):
+        self._routes.append({"rule_pattern": self._build_rule_pattern(rule), "method": method.upper(), "func": func})
 
     @staticmethod
     def _build_rule_pattern(rule: str):
