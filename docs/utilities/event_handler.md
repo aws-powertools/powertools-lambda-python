@@ -21,7 +21,7 @@ and [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsyn
 * Supports an implicit handler where in `app = AppSyncResolver()` can be invoked directly as `app(event, context)`
 * `resolver` decorator has flexible or strict matching against `fieldName`
 * Arguments are automatically passed into your function
-* `include_event` and `include_context` options can be used to pass in the original `AppSyncResolver` or `LambdaContext`
+* AppSyncResolver includes `current_event` and `lambda_cotext` fields can be used to pass in the original `AppSyncResolver` or `LambdaContext`
  objects
 
 ####  Amplify GraphQL Example
@@ -73,14 +73,14 @@ add Powertools as a dependency. Add the following example lambda implementation
     logger = Logger()
     app = AppSyncResolver()
 
-    @app.resolver(type_name="Query", field_name="listLocations", include_event=True)
-    def list_locations(event: AppSyncResolverEvent, page: int = 0, size: int = 10):
+    @app.resolver(type_name="Query", field_name="listLocations")
+    def list_locations(page: int = 0, size: int = 10):
         # Your logic to fetch locations
         ...
 
-    @app.resolver(type_name="Merchant", field_name="extraInfo", include_event=True)
-    def get_extra_info(event: AppSyncResolverEvent):
-        # Can use `event.source["id"]` to filter within the Merchant context
+    @app.resolver(type_name="Merchant", field_name="extraInfo")
+    def get_extra_info():
+        # Can use `app.current_event.source["id"]` to filter within the Merchant context
         ...
 
     @app.resolver(field_name="commonField")

@@ -21,10 +21,9 @@ def test_direct_resolver():
 
     app = AppSyncResolver()
 
-    @app.resolver(field_name="createSomething", include_context=True)
-    def create_something(context, id: str):  # noqa AA03 VNE003
-        assert context == {}
-        assert app.lambda_context == context
+    @app.resolver(field_name="createSomething")
+    def create_something(id: str):  # noqa AA03 VNE003
+        assert app.lambda_context == {}
         return id
 
     # Call the implicit handler
@@ -39,10 +38,10 @@ def test_amplify_resolver():
 
     app = AppSyncResolver()
 
-    @app.resolver(type_name="Merchant", field_name="locations", include_event=True)
-    def get_location(event: AppSyncResolverEvent, page: int, size: int, name: str):
-        assert event is not None
-        assert app.current_event == event
+    @app.resolver(type_name="Merchant", field_name="locations")
+    def get_location(page: int, size: int, name: str):
+        assert app.current_event is not None
+        assert isinstance(app.current_event, AppSyncResolverEvent)
         assert page == 2
         assert size == 1
         return name
@@ -70,42 +69,6 @@ def test_resolver_no_params():
 
     # THEN
     assert result == "no_params has no params"
-
-
-def test_resolver_include_event():
-    # GIVEN
-    app = AppSyncResolver()
-
-    mock_event = {"typeName": "Query", "fieldName": "field", "arguments": {}}
-
-    @app.resolver(field_name="field", include_event=True)
-    def get_value(event: AppSyncResolverEvent):
-        return event
-
-    # WHEN
-    result = app.resolve(mock_event, LambdaContext())
-
-    # THEN
-    assert result._data == mock_event
-    assert isinstance(result, AppSyncResolverEvent)
-
-
-def test_resolver_include_context():
-    # GIVEN
-    app = AppSyncResolver()
-
-    mock_event = {"typeName": "Query", "fieldName": "field", "arguments": {}}
-
-    @app.resolver(field_name="field", include_context=True)
-    def get_value(context: LambdaContext):
-        return context
-
-    # WHEN
-    mock_context = LambdaContext()
-    result = app.resolve(mock_event, mock_context)
-
-    # THEN
-    assert result == mock_context
 
 
 def test_resolver_value_error():
