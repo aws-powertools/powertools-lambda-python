@@ -1,7 +1,10 @@
+import logging
 from typing import Any, Callable
 
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
+
+logger = logging.getLogger(__name__)
 
 
 class AppSyncResolver:
@@ -51,6 +54,7 @@ class AppSyncResolver:
         """
 
         def register_resolver(func):
+            logger.debug(f"Adding resolver `{func.__name__}` for field `{type_name}.{field_name}`")
             self._resolvers[f"{type_name}.{field_name}"] = {"func": func}
             return func
 
