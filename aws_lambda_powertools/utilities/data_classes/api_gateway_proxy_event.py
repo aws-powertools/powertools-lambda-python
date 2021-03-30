@@ -195,6 +195,11 @@ class APIGatewayEventRequestContext(DictWrapper):
         """The selected route key."""
         return self["requestContext"].get("routeKey")
 
+    @property
+    def operation_name(self) -> Optional[str]:
+        """The name of the operation being performed"""
+        return self["requestContext"].get("operationName")
+
 
 class APIGatewayProxyEvent(BaseProxyEvent):
     """AWS Lambda proxy V1
