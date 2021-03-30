@@ -6,7 +6,7 @@ from typing import Generator, Tuple
 
 import pytest
 
-LOGGER_INIT_SLA: float = 0.001
+LOGGER_INIT_SLA: float = 0.005
 METRICS_INIT_SLA: float = 0.005
 TRACER_INIT_SLA: float = 0.5
 IMPORT_INIT_SLA: float = 0.035
@@ -48,7 +48,7 @@ def test_import_times_ceiling():
 
     elapsed = t()
     if elapsed > IMPORT_INIT_SLA:
-        pytest.fail(f"High level imports should be below 35ms: {elapsed}")
+        pytest.fail(f"High level imports should be below ${IMPORT_INIT_SLA}s: {elapsed}")
 
 
 @pytest.mark.perf
@@ -64,7 +64,7 @@ def test_tracer_init():
 
     elapsed = t()
     if elapsed > TRACER_INIT_SLA:
-        pytest.fail(f"High level imports should be below 50ms: {elapsed}")
+        pytest.fail(f"High level imports should be below ${TRACER_INIT_SLA}s: {elapsed}")
 
 
 @pytest.mark.perf
@@ -78,7 +78,7 @@ def test_metrics_init():
 
     elapsed = t()
     if elapsed > METRICS_INIT_SLA:
-        pytest.fail(f"High level imports should be below 40ms: {elapsed}")
+        pytest.fail(f"High level imports should be below ${METRICS_INIT_SLA}s: {elapsed}")
 
 
 @pytest.mark.perf
@@ -92,4 +92,4 @@ def test_logger_init():
 
     elapsed = t()
     if elapsed > LOGGER_INIT_SLA:
-        pytest.fail(f"High level imports should be below 40ms: {elapsed}")
+        pytest.fail(f"High level imports should be below ${LOGGER_INIT_SLA}s: {elapsed}")
