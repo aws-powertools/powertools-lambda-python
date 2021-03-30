@@ -21,6 +21,7 @@ name: Publish to PyPi
 # 7. Kick off Lambda Layer pipeline to publish latest version with extra dependencies as a SAR App
 # 8. Builds a fresh version of docs including Changelog updates
 # 9. Push latest release source code to master using release title as the commit message
+# 10. Builds latest documentation for new release, and update latest alias pointing to the new release tag
 
 on:
   release:
