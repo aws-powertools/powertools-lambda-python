@@ -13,8 +13,7 @@ class AppSyncResolver:
 
     **Sample usage**
 
-        from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
-        from aws_lambda_powertools.utilities.event_handler import AppSyncResolver
+        from aws_lambda_powertools.event_handler import AppSyncResolver
 
         app = AppSyncResolver()
 

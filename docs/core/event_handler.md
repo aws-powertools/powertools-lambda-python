@@ -64,10 +64,9 @@ add Powertools as a dependency. Add the following example lambda implementation
 
 === "merchantInfo/src/app.py"
 
-    ```python hl_lines="1-3 7 9-10 14-15 19-20 25 27"
+    ```python hl_lines="1-2 6 8-9 13-14 18-19 24 26"
+    from aws_lambda_powertools.event_handler import AppSyncResolver
     from aws_lambda_powertools.logging import Logger, Tracer, correlation_paths
-    from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
-    from aws_lambda_powertools.utilities.event_handler import AppSyncResolver
 
     tracer = Tracer()
     logger = Logger()
@@ -96,7 +95,7 @@ add Powertools as a dependency. Add the following example lambda implementation
 === "searchMerchant/src/app.py"
 
     ```python hl_lines="1 3 5-6"
-    from aws_lambda_powertools.utilities.event_handler import AppSyncResolver
+    from aws_lambda_powertools.event_handler import AppSyncResolver
 
     app = AppSyncResolver()
 

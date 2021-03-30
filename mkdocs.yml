@@ -9,6 +9,7 @@ nav:
       - core/tracer.md
       - core/logger.md
       - core/metrics.md
+      - core/event_handler.md
   - Utilities:
       - utilities/middleware_factory.md
       - utilities/parameters.md
@@ -18,7 +19,6 @@ nav:
       - utilities/data_classes.md
       - utilities/parser.md
       - utilities/idempotency.md
-      - utilities/event_handler.md
 
 theme:
   name: material
