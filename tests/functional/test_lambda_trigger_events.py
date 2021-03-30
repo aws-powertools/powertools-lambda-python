@@ -704,6 +704,7 @@ def test_api_gateway_proxy_event():
     assert request_context.message_direction is None
     assert request_context.message_id is None
     assert request_context.route_key is None
+    assert request_context.operation_name is None
     assert identity.api_key is None
     assert identity.api_key_id is None
 
