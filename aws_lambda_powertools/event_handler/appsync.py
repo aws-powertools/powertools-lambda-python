@@ -21,19 +21,21 @@ class AppSyncResolver:
         app = AppSyncResolver()
 
         @app.resolver(type_name="Query", field_name="listLocations")
-        def list_locations(page: int = 0, size: int = 10):
-            # Your logic to fetch locations
-            ...
+        def list_locations(page: int = 0, size: int = 10) -> list:
+            # Your logic to fetch locations with arguments passed in
+            return [{"id": 100, "name": "Smooth Grooves"}]
 
         @app.resolver(type_name="Merchant", field_name="extraInfo")
-        def get_extra_info():
+        def get_extra_info() -> dict:
             # Can use "app.current_event.source" to filter within the parent context
-            ...
+            account_type = app.current_event.source["accountType"]
+            method = "BTC" if account_type == "NEW" else "USD"
+            return {"preferredPaymentMethod": method}
 
         @app.resolver(field_name="commonField")
-        def common_field():
+        def common_field() -> str:
             # Would match all fieldNames matching 'commonField'
-            ...
+            return str(uuid.uuid4())
     """
 
     current_event: AppSyncResolverEvent
