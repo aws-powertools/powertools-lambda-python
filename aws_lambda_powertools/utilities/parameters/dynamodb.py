@@ -26,6 +26,8 @@ class DynamoDBProvider(BaseProvider):
         Name of the DynamoDB table sort key (defaults to 'sk'), used only for get_multiple
     value_attr: str, optional
         Attribute that contains the values in the DynamoDB table (defaults to 'value')
+    endpoint_url: str, optional
+        Complete url to reference local DynamoDB instance
     config: botocore.config.Config, optional
         Botocore configuration to pass during client initialization
 
