@@ -76,9 +76,9 @@ jobs:
         git config --global user.name Docs deploy
         git config --global user.email docs@dummy.bot.com
     - name: Build docs website and API reference
-      run: make release-docs VERSION=${RELEASE_TAG_VERSION} ALIAS="latest"
-    - name: Update docs redirects
-      run: poetry run mike set-default --push latest
+      run: |
+        make release-docs VERSION=${RELEASE_TAG_VERSION} ALIAS="latest"
+        poetry run mike set-default --push latest
     - name: Deploy all docs
       uses: peaceiris/actions-gh-pages@v3
       with:
