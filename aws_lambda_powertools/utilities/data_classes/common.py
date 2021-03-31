@@ -27,10 +27,7 @@ class DictWrapper:
 
 
 def get_header_value(
-    headers: Dict[str, str],
-    name: str,
-    default_value: Optional[str],
-    case_sensitive: Optional[bool],
+    headers: Dict[str, str], name: str, default_value: Optional[str], case_sensitive: Optional[bool]
 ) -> Optional[str]:
     """Get header value by name"""
     if case_sensitive:
@@ -94,10 +91,7 @@ class BaseProxyEvent(DictWrapper):
         return default_value if params is None else params.get(name, default_value)
 
     def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: Optional[bool] = False,
+        self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
     ) -> Optional[str]:
         """Get header value by name
 
