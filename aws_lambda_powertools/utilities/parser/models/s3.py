@@ -4,7 +4,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 from pydantic.fields import Field
 from pydantic.networks import IPvAnyNetwork
-from pydantic.types import PositiveInt
+from pydantic.types import NonNegativeFloat
 
 from ..types import Literal
 
@@ -43,7 +43,7 @@ class S3Bucket(BaseModel):
 
 class S3Object(BaseModel):
     key: str
-    size: PositiveInt
+    size: NonNegativeFloat
     eTag: str
     sequencer: str
     versionId: Optional[str]
