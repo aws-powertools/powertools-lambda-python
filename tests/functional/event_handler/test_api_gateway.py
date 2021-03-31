@@ -3,8 +3,8 @@ import os
 
 import pytest
 
+from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, ProxyEventType
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
-from aws_lambda_powertools.utilities.event_handler.api_gateway import ApiGatewayResolver, ProxyEventType
 
 
 def load_event(file_name: str) -> dict:
