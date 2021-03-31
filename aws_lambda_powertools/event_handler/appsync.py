@@ -84,11 +84,11 @@ class AppSyncResolver:
         """
         self.current_event = AppSyncResolverEvent(event)
         self.lambda_context = context
-        resolver = self._resolver(self.current_event.type_name, self.current_event.field_name)
+        resolver = self._get_resolver(self.current_event.type_name, self.current_event.field_name)
         return resolver(**self.current_event.arguments)
 
-    def _resolver(self, type_name: str, field_name: str) -> Callable:
-        """Find resolver for field_name
+    def _get_resolver(self, type_name: str, field_name: str) -> Callable:
+        """Get resolver for field_name
 
         Parameters
         ----------
