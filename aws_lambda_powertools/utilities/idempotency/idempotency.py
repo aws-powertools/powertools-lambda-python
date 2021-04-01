@@ -11,6 +11,7 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyInconsistentStateError,
     IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
+    IdempotencyKeyError,
     IdempotencyPersistenceLayerError,
     IdempotencyValidationError,
 )
@@ -132,6 +133,8 @@ class IdempotencyHandler:
             # We call save_inprogress first as an optimization for the most common case where no idempotent record
             # already exists. If it succeeds, there's no need to call get_record.
             self.persistence_store.save_inprogress(event=self.event, context=self.context)
+        except IdempotencyKeyError as e:
+            raise e
         except IdempotencyItemAlreadyExistsError:
             # Now we know the item already exists, we can retrieve it
             record = self._get_idempotency_record()
