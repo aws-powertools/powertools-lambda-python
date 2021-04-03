@@ -55,19 +55,22 @@ def test_include_rule_matching():
     result = app(load_event("apiGatewayProxyEvent.json"), {})
 
     assert result["statusCode"] == 200
+    assert result["headers"]["Content-Type"] == "plain/html"
     assert result["body"] == "path"
 
 
-def test_include_event_false():
-    app = ApiGatewayResolver()
+def test_api_gateway():
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.api_gateway)
 
     @app.get("/my/path")
     def get_lambda():
+        assert isinstance(app.current_event, APIGatewayProxyEvent)
         return 200, "plain/html", "foo"
 
     result = app(load_event("apiGatewayProxyEvent.json"), {})
 
     assert result["statusCode"] == 200
+    assert result["headers"]["Content-Type"] == "plain/html"
     assert result["body"] == "foo"
 
 
