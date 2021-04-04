@@ -6,7 +6,7 @@ on:
       - develop
 
 jobs:
-  api-docs:
+  docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -16,11 +16,6 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: "3.8"
-      - name: Capture branch and tag
-        id: branch_name
-        run: |
-          echo "SOURCE_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-          echo "SOURCE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
       - name: Install dependencies
         run: make dev
       - name: Setup doc deploy
@@ -36,3 +31,11 @@ jobs:
           publish_dir: ./api
           keep_files: true
           destination_dir: develop/api
+      - name: Create redirect from old docs
+        run: |
+          git checkout gh-pages
+          test -f 404.html && echo "Redirect already set" && exit 0
+          git checkout develop -- 404.html
+          git add 404.html
+          git commit -m "chore: set docs redirect" --no-verify
+          git push origin gh-pages -f
