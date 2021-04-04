@@ -828,3 +828,20 @@ def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPers
     stubber.assert_no_pending_responses()
     stubber.deactivate()
     assert "Failed to save in progress record to idempotency store" == e.value.args[0]
+
+
+def test_handler_raise_idempotency_key_error(persistence_store: DynamoDBPersistenceLayer, lambda_context):
+    # GIVEN raise_on_no_idempotency_key is True
+    idempotency_config = IdempotencyConfig(event_key_jmespath="idemKey", raise_on_no_idempotency_key=True)
+
+    # WHEN handling the idempotent call
+    # AND save_inprogress raises a IdempotencyKeyError
+    @idempotent(persistence_store=persistence_store, config=idempotency_config)
+    def handler(event, context):
+        raise ValueError("Should not be raised")
+
+    # THEN idempotent should re-raise the IdempotencyKeyError
+    with pytest.raises(IdempotencyKeyError) as e:
+        handler({}, lambda_context)
+
+    assert "No data found to create a hashed idempotency_key" == e.value.args[0]

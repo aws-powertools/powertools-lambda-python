@@ -1,5 +1,5 @@
 from distutils.util import strtobool
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 
 def resolve_truthy_env_var_choice(env: Any, choice: bool = None) -> bool:
@@ -22,7 +22,7 @@ def resolve_truthy_env_var_choice(env: Any, choice: bool = None) -> bool:
     return choice if choice is not None else strtobool(env)
 
 
-def resolve_env_var_choice(env: Any, choice: bool = None) -> Union[bool, Any]:
+def resolve_env_var_choice(env: Any, choice: Optional[Any] = None) -> Union[bool, Any]:
     """Pick explicit choice over env, if available, otherwise return env value received
 
     NOTE: Environment variable should be resolved by the caller.

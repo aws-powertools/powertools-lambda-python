@@ -4,7 +4,7 @@ AWS App Config configuration retrieval and caching utility
 
 
 import os
-from typing import Dict, Optional, Union
+from typing import Any, Dict, Optional, Union
 from uuid import uuid4
 
 import boto3
@@ -58,7 +58,7 @@ class AppConfigProvider(BaseProvider):
 
     """
 
-    client = None
+    client: Any = None
 
     def __init__(self, environment: str, application: Optional[str] = None, config: Optional[Config] = None):
         """

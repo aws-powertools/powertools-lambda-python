@@ -3,7 +3,7 @@ Amazon DynamoDB parameter retrieval and caching utility
 """
 
 
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import boto3
 from boto3.dynamodb.conditions import Key
@@ -26,6 +26,8 @@ class DynamoDBProvider(BaseProvider):
         Name of the DynamoDB table sort key (defaults to 'sk'), used only for get_multiple
     value_attr: str, optional
         Attribute that contains the values in the DynamoDB table (defaults to 'value')
+    endpoint_url: str, optional
+        Complete url to reference local DynamoDB instance, e.g. http://localhost:8080
     config: botocore.config.Config, optional
         Botocore configuration to pass during client initialization
 
@@ -139,7 +141,7 @@ class DynamoDBProvider(BaseProvider):
         c   Parameter value c
     """
 
-    table = None
+    table: Any = None
     key_attr = None
     sort_attr = None
     value_attr = None
@@ -150,6 +152,7 @@ class DynamoDBProvider(BaseProvider):
         key_attr: str = "id",
         sort_attr: str = "sk",
         value_attr: str = "value",
+        endpoint_url: Optional[str] = None,
         config: Optional[Config] = None,
     ):
         """
@@ -157,7 +160,7 @@ class DynamoDBProvider(BaseProvider):
         """
 
         config = config or Config()
-        self.table = boto3.resource("dynamodb", config=config).Table(table_name)
+        self.table = boto3.resource("dynamodb", endpoint_url=endpoint_url, config=config).Table(table_name)
 
         self.key_attr = key_attr
         self.sort_attr = sort_attr

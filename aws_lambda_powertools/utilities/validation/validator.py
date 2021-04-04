@@ -133,7 +133,7 @@ def validator(
 
 def validate(
     event: Dict,
-    schema: Dict = None,
+    schema: Dict,
     formats: Optional[Dict] = None,
     envelope: str = None,
     jmespath_options: Dict = None,

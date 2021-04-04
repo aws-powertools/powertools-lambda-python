@@ -196,6 +196,17 @@ The AWS Systems Manager Parameter Store provider supports two additional argumen
 
 The DynamoDB Provider does not have any high-level functions, as it needs to know the name of the DynamoDB table containing the parameters.
 
+**Local testing with DynamoDB Local**
+
+You can initialize the DynamoDB provider pointing to [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html) using **`endpoint_url`** parameter:
+
+=== "dynamodb_local.py"
+	```python hl_lines="3"
+	from aws_lambda_powertools.utilities import parameters
+
+	dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table", endpoint_url="http://localhost:8000")
+	```
+
 **DynamoDB table structure for single parameters**
 
 For single parameters, you must use `id` as the [partition key](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html#HowItWorks.CoreComponents.PrimaryKey) for that table.

@@ -2,7 +2,7 @@ import functools
 import json
 import logging
 import warnings
-from typing import Any, Callable
+from typing import Any, Callable, Dict, Optional
 
 from .base import MetricManager, MetricUnit
 from .metric import single_metric
@@ -71,15 +71,15 @@ class Metrics(MetricManager):
         When metric object fails EMF schema validation
     """
 
-    _metrics = {}
-    _dimensions = {}
-    _metadata = {}
+    _metrics: Dict[str, Any] = {}
+    _dimensions: Dict[str, str] = {}
+    _metadata: Dict[str, Any] = {}
 
     def __init__(self, service: str = None, namespace: str = None):
         self.metric_set = self._metrics
         self.dimension_set = self._dimensions
         self.service = service
-        self.namespace = namespace
+        self.namespace: Optional[str] = namespace
         self.metadata_set = self._metadata
 
         super().__init__(

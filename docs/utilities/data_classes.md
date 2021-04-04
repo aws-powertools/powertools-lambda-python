@@ -3,8 +3,7 @@ title: Event Source Data Classes
 description: Utility
 ---
 
-Event Source Data Classes utility provides classes self-describing Lambda event sources, including API decorators when
-applicable.
+Event Source Data Classes utility provides classes self-describing Lambda event sources.
 
 ## Key Features
 
@@ -554,7 +553,7 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
 
 === "app.py"
 
-    ```python  hl_lines="4-5 10 12"
+    ```python  hl_lines="5-6 12 14"
     import boto3
     import requests
 

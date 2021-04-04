@@ -4,7 +4,7 @@ import logging
 import os
 import random
 import sys
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 import jmespath
 
@@ -318,12 +318,12 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self.structure_logs(append=True, correlation_id=value)
 
     @staticmethod
-    def _get_log_level(level: Union[str, int]) -> Union[str, int]:
+    def _get_log_level(level: Union[str, int, None]) -> Union[str, int]:
         """ Returns preferred log level set by the customer in upper case """
         if isinstance(level, int):
             return level
 
-        log_level: str = level or os.getenv("LOG_LEVEL")
+        log_level: Optional[str] = level or os.getenv("LOG_LEVEL")
         if log_level is None:
             return logging.INFO
 

@@ -12,6 +12,7 @@ nav:
       - core/tracer.md
       - core/logger.md
       - core/metrics.md
+      - core/event_handler.md
   - Utilities:
       - utilities/middleware_factory.md
       - utilities/parameters.md

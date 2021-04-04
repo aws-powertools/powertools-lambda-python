@@ -23,7 +23,10 @@ test:
 coverage-html:
 	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=html
 
-pr: lint test security-baseline complexity-baseline
+pre-commit:
+	pre-commit run --show-diff-on-failure
+
+pr: lint pre-commit test security-baseline complexity-baseline
 
 build: pr
 	poetry build

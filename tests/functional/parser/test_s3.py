@@ -1,4 +1,4 @@
-from aws_lambda_powertools.utilities.parser import event_parser
+from aws_lambda_powertools.utilities.parser import event_parser, parse
 from aws_lambda_powertools.utilities.parser.models import S3Model, S3RecordModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.utils import load_event
@@ -87,3 +87,9 @@ def test_s3_trigger_event():
 def test_s3_glacier_trigger_event():
     event_dict = load_event("s3EventGlacier.json")
     handle_s3_glacier(event_dict, LambdaContext())
+
+
+def test_s3_empty_object():
+    event_dict = load_event("s3Event.json")
+    event_dict["Records"][0]["s3"]["object"]["size"] = 0
+    parse(event=event_dict, model=S3Model)
