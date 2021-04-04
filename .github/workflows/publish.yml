@@ -28,7 +28,7 @@ on:
     types: [published]
 
 jobs:
-  upload:
+  release:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -85,8 +85,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./api
         keep_files: true
-        destination_dir: develop/api
-
+        destination_dir: ${{ env.RELEASE_TAG_VERSION }}/api
 
   sync_master:
     needs: upload
