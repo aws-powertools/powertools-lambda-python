@@ -41,7 +41,7 @@ Before your use this utility, your AWS Lambda function [must have permissions](h
 You can quickly start by importing the `Tracer` class, initialize it outside the Lambda handler, and use `capture_lambda_handler` decorator.
 
 === "app.py"
-	```python hl_lines="1 3 7"
+	```python hl_lines="1 3 6"
 	from aws_lambda_powertools import Tracer
 
 	tracer = Tracer() # Sets service via env var
