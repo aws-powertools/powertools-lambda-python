@@ -20,7 +20,7 @@ license = "MIT-0"
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
-aws-xray-sdk = "^2.5.0"
+aws-xray-sdk = "2.6.0"
 fastjsonschema = "^2.14.5"
 boto3 = "^1.12"
 jmespath = "^0.10.0"
