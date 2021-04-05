@@ -65,6 +65,6 @@ extra_javascript:
   - javascript/aws-amplify.min.js
   - javascript/extra.js
 
-extras:
+extra:
   version:
     provider: mike
