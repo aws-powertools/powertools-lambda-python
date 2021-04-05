@@ -31,20 +31,18 @@ pr: lint pre-commit test security-baseline complexity-baseline
 build: pr
 	poetry build
 
-build-docs:
-	@$(MAKE) build-docs-website
+release-docs:
+	@echo "Rebuilding docs"
+	rm -rf site api
+	@echo "Updating website docs"
+	poetry run mike deploy --push --update-aliases ${VERSION} ${ALIAS}
+	@echo "Building API docs"
 	@$(MAKE) build-docs-api
 
-build-docs-api: dev
-	mkdir -p dist/api
-	poetry run pdoc --html --output-dir dist/api/ ./aws_lambda_powertools --force
-	mv -f dist/api/aws_lambda_powertools/* dist/api/
-	rm -rf dist/api/aws_lambda_powertools
-
-build-docs-website: dev
-	mkdir -p dist
-	poetry run mkdocs build
-	cp -R site/* dist/
+build-docs-api:
+	poetry run pdoc --html --output-dir ./api/ ./aws_lambda_powertools --force
+	mv -f ./api/aws_lambda_powertools/* ./api/
+	rm -rf ./api/aws_lambda_powertools
 
 docs-local:
 	poetry run mkdocs serve
