@@ -1037,7 +1037,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.1"
-content-hash = "ec0d070deab60edf4f73dcf68dfce055724336b0eac3d4bbb1d28965a67de0d3"
+content-hash = "d35b6148814f0c6045ca597ed728e83876c7cbe7014fe6c87209fe9ff9826f1e"
 
 [metadata.files]
 appdirs = [
