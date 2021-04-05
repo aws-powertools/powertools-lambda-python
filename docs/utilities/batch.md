@@ -54,7 +54,7 @@ Before your use this utility, your AWS Lambda function must have `sqs:DeleteMess
 
 ### Processing messages from SQS
 
-You can use either **[sqs_batch_processor](#sqs_batch_processor-decorator)** decorator, or **[PartialSQSProcessor](#partialsqsprocessor-context-manager)** as a context manager if you'd like access to the processed results.
+You can use either `sqs_batch_processor` decorator, or `PartialSQSProcessor` as a context manager if you'd like access to the processed results.
 
 You need to create a function to handle each record from the batch - We call it `record_handler` from here on.
 

@@ -124,7 +124,7 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
 !!! tip "Dealing with always changing payloads"
     When dealing with a more elaborate payload, where parts of the payload always change, you should use **`event_key_jmespath`** parameter.
 
-Use [`IdempotencyConfig`](#customizing-the-default-behaviour) to instruct the idempotent decorator to only use a portion of your payload to verify whether a request is idempotent, and therefore it should not be retried.
+Use [`IdempotencyConfig`](#customizing-the-default-behavior) to instruct the idempotent decorator to only use a portion of your payload to verify whether a request is idempotent, and therefore it should not be retried.
 
 > **Payment scenario**
 

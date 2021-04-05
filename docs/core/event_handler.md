@@ -6,7 +6,7 @@ description: Utility
 Event handler decorators for common Lambda events
 
 
-### AppSync Resolver Decorator
+## AppSync Resolver Decorator
 
 > New in 1.14.0
 
@@ -15,7 +15,7 @@ AppSync resolver decorator is a concise way to create lambda functions to handle
 [AppSync Resolver ](/utilities/data_classes#appsync-resolver) data class and therefore works with [Amplify GraphQL Transform Library](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"} (`@function`),
 and [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/){target="_blank"}
 
-#### Key Features
+### Key Features
 
 * Works with any of the existing Powertools utilities by allow you to create your own `lambda_handler` function
 * Supports an implicit handler where in `app = AppSyncResolver()` can be invoked directly as `app(event, context)`
@@ -24,7 +24,7 @@ and [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsyn
 * AppSyncResolver includes `current_event` and `lambda_cotext` fields can be used to pass in the original `AppSyncResolver` or `LambdaContext`
  objects
 
-####  Amplify GraphQL Example
+###  Amplify GraphQL Example
 
 Create a new GraphQL api via `amplify add api` and add the following to the new `schema.graphql`
 

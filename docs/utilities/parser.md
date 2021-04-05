@@ -5,7 +5,7 @@ description: Utility
 
 This utility provides data parsing and deep validation using [Pydantic](https://pydantic-docs.helpmanual.io/).
 
-**Key features**
+## Key features
 
 * Defines data in pure Python classes, then parse, validate and extract only what you want
 * Built-in envelopes to unwrap, extend, and validate popular event sources payloads
