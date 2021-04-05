@@ -26,7 +26,6 @@ boto3 = "^1.12"
 jmespath = "^0.10.0"
 pydantic = {version = "^1.8.1", optional = true }
 email-validator = {version = "*", optional = true }
-# typing_extensions = {version = "^3.7.4.2", optional = true, python= "<3.8" }
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^5.5"}
@@ -57,7 +56,6 @@ mike = "^0.6.0"
 
 [tool.poetry.extras]
 pydantic = ["pydantic", "email-validator"]
-# pydantic = ["pydantic", "typing_extensions", "email-validator"]
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]
