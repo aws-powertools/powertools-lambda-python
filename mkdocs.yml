@@ -12,7 +12,8 @@ nav:
       - core/tracer.md
       - core/logger.md
       - core/metrics.md
-      - core/event_handler.md
+      - Event Handler:
+        - core/event_handler/appsync.md
   - Utilities:
       - utilities/middleware_factory.md
       - utilities/parameters.md

@@ -1,6 +1,6 @@
 ---
-title: Event Handler
-description: Utility
+title: Appsync
+description: Core utility
 ---
 
 Event handler decorators for common Lambda events
