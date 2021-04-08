@@ -599,3 +599,36 @@ Use the following code for `merchantInfo` and `searchMerchant` functions respect
       ...
     }
     ```
+
+## Testing your code
+
+You can test your resolvers by passing a mocked or actual AppSync Lambda event that you're expecting.
+
+You can use either `app.resolve(event, context)` or simply `app(event, context)`.
+
+Here's an example from our internal functional test.
+
+=== "test_direct_resolver.py"
+    ```python
+    def test_direct_resolver():
+      # Check whether we can handle an example appsync direct resolver
+      # load_event primarily deserialize the JSON event into a dict
+      mock_event = load_event("appSyncDirectResolver.json")
+
+      app = AppSyncResolver()
+
+      @app.resolver(field_name="createSomething")
+      def create_something(id: str):
+          assert app.lambda_context == {}
+          return id
+
+      # Call the implicit handler
+      result = app(mock_event, {})
+
+      assert result == "my identifier"
+    ```
+
+=== "appSyncDirectResolver.json"
+    ```json
+    --8<-- "tests/events/appSyncDirectResolver.json"
+    ```
