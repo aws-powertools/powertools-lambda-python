@@ -178,9 +178,6 @@ You can define your functions to match GraphQL types and fields with the `app.re
 
 Here's an example where we have two separate functions to resolve `getTodo` and `listTodos` fields within the `Query` type. For completion, we use Scalar type utilities to generate the right output based on our schema definition.
 
-!!! note "All type and field cases will be converted to snake_case to match Python idioms"
-    For example, `getTodo` field will match a function named `get_todo`.
-
 === "app.py"
 
     ```python hl_lines="3-4 8 30-31 38-39 46"
@@ -336,7 +333,89 @@ Here's an example where we have two separate functions to resolve `getTodo` and 
         "stash": {}
     }
     ```
+
 ## Advanced
+
+### Nested mappings
+
+You can nest `app.resolver()` decorator multiple times when resolving fields with the same return.
+
+=== "nested_mappings.py"
+
+    ```python hl_lines="4 8 10-12 18"
+      from aws_lambda_powertools import Logger, Tracer
+
+      from aws_lambda_powertools.logging import correlation_paths
+      from aws_lambda_powertools.event_handler import AppSyncResolver
+
+      tracer = Tracer(service="sample_resolver")
+      logger = Logger(service="sample_resolver")
+      app = AppSyncResolver()
+
+      @app.resolver(field_name="listLocations")
+      @app.resolver(field_name="locations")
+      def get_locations(name: str, description: str = ""):
+          return name + description
+
+      @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
+      @tracer.capture_lambda_handler
+      def lambda_handler(event, context):
+          return app.resolve(event, context)
+    ```
+
+=== "schema.graphql"
+
+    ```typescript hl_lines="6 20"
+    schema {
+        query: Query
+    }
+
+    type Query {
+        listLocations: [Todo]
+    }
+
+    type Location {
+        id: ID!
+        name: String!
+        description: String
+        address: String
+    }
+
+    type Merchant {
+        id: String!
+        name: String!
+        description: String
+        locations: [Location]
+    }
+    ```
+
+### Async functions
+
+For Lambda Python3.8+ runtime, this utility supports async functions when you use in conjunction with `asyncio.run`.
+
+=== "async_resolver.py"
+    ```python hl_lines="4 8 10-12 20"
+    from aws_lambda_powertools import Logger, Tracer
+
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler import AppSyncResolver
+
+    tracer = Tracer(service="sample_resolver")
+    logger = Logger(service="sample_resolver")
+    app = AppSyncResolver()
+
+    @app.resolver(type_name="Query", field_name="listTodos")
+    async def list_todos():
+        todos = await some_async_io_call()
+        return todos
+
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        result = app.resolve(event, context)
+
+        return asyncio.run(result)
+    ```
 
 ### Amplify GraphQL Transformer
 
@@ -348,8 +427,7 @@ Assuming you have [Amplify CLI installed](https://docs.amplify.aws/cli/start/ins
 
     ```typescript hl_lines="8 10 18 23 25"
     @model
-    type Merchant
-    {
+    type Merchant {
         id: String!
         name: String!
         description: String
@@ -360,7 +438,7 @@ Assuming you have [Amplify CLI installed](https://docs.amplify.aws/cli/start/ins
     type Location {
         id: ID!
         name: String!
-        address: Address
+        address: String
         # Resolves to `common_field`
         commonField: String  @function(name: "merchantInfo-${env}")
     }

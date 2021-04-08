@@ -3,8 +3,8 @@ schema {
 }
 
 type Query {
-    getTodo(id: ID!): Todo  # will match a `def get_todo(id: str)` function
-    listTodos: [Todo]       # will match a `def list_todos()` function
+    getTodo(id: ID!): Todo
+    listTodos: [Todo]
 }
 
 type Todo {
