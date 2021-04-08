@@ -12,7 +12,8 @@ nav:
       - core/tracer.md
       - core/logger.md
       - core/metrics.md
-      - core/event_handler.md
+      - Event Handler:
+        - core/event_handler/appsync.md
   - Utilities:
       - utilities/middleware_factory.md
       - utilities/parameters.md
@@ -30,6 +31,7 @@ theme:
   features:
     - navigation.sections
     - navigation.expand
+    - navigation.top
   icon:
     repo: fontawesome/brands/github
   logo: media/aws-logo-light.svg
@@ -52,6 +54,7 @@ markdown_extensions:
       toc_depth: 4
   - attr_list
   - pymdownx.emoji
+  - pymdownx.inlinehilite
 
 copyright: Copyright &copy; 2021 Amazon Web Services
 
