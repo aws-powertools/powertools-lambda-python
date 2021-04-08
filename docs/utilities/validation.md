@@ -14,7 +14,7 @@ This utility provides JSON Schema validation for events and responses, including
 ## Getting started
 
 !!! tip "Using JSON Schemas for the first time?"
-    Check this [step-by-step tour in the official JSON Schema website](https://json-schema.org/learn/getting-started-step-by-step.html){target="_blank"}
+    Check this [step-by-step tour in the official JSON Schema website](https://json-schema.org/learn/getting-started-step-by-step.html){target="_blank"}.
 
 You can validate inbound and outbound events using [`validator` decorator](#validator-decorator).
 
@@ -33,15 +33,29 @@ It will fail fast with `SchemaValidationError` exception if event or response do
 
 === "validator_decorator.py"
 
-    ```python
+    ```python hl_lines="3 5"
     from aws_lambda_powertools.utilities.validation import validator
 
-    json_schema_dict = {..}
-    response_json_schema_dict = {..}
+    import schemas
 
-    @validator(inbound_schema=json_schema_dict, outbound_schema=response_json_schema_dict)
+    @validator(inbound_schema=schemas.INPUT, outbound_schema=schemas.OUTPUT)
     def handler(event, context):
         return event
+    ```
+
+=== "event.json"
+
+    ```json
+    {
+        "message": "hello world",
+        "username": "lessa"
+    }
+    ```
+
+=== "schemas.py"
+
+    ```python hl_lines="7 14 16 23 39 45 47 52"
+    --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
 !!! note
@@ -55,20 +69,35 @@ You can also gracefully handle schema validation errors by catching `SchemaValid
 
 === "validator_decorator.py"
 
-    ```python
+    ```python hl_lines="8"
     from aws_lambda_powertools.utilities.validation import validate
     from aws_lambda_powertools.utilities.validation.exceptions import SchemaValidationError
 
-    json_schema_dict = {..}
+    import schemas
 
     def handler(event, context):
         try:
-            validate(event=event, schema=json_schema_dict)
+            validate(event=event, schema=schemas.INPUT)
         except SchemaValidationError as e:
             # do something before re-raising
             raise
 
         return event
+    ```
+
+=== "event.json"
+
+    ```json
+    {
+        "data": "hello world",
+        "username": "lessa"
+    }
+    ```
+
+=== "schemas.py"
+
+    ```python hl_lines="7 14 16 23 39 45 47 52"
+    --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
 ### Unwrapping events prior to validation
@@ -79,35 +108,32 @@ Envelopes are [JMESPath expressions](https://jmespath.org/tutorial.html) to extr
 
 Here is a sample custom EventBridge event, where we only validate what's inside the `detail` key:
 
-=== "sample_wrapped_event.json"
-
-    ```json hl_lines="9"
-    {
-      "id": "cdc73f9d-aea9-11e3-9d5a-835b769c0d9c",
-      "detail-type": "Scheduled Event",
-      "source": "aws.events",
-      "account": "123456789012",
-      "time": "1970-01-01T00:00:00Z",
-      "region": "us-east-1",
-      "resources": ["arn:aws:events:us-east-1:123456789012:rule/ExampleRule"],
-      "detail": {"message": "hello hello", "username": "blah blah"}
-    }
-    ```
-
-Here is how you'd use the `envelope` parameter to extract the payload inside the `detail` key before validating:
-
 === "unwrapping_events.py"
 
-    ```python hl_lines="5 7"
-    from aws_lambda_powertools.utilities.validation import validator, validate
+    We use the `envelope` parameter to extract the payload inside the `detail` key before validating.
 
-    json_schema_dict = {..}
+    ```python hl_lines="5"
+    from aws_lambda_powertools.utilities.validation import validator
 
-    @validator(inbound_schema=json_schema_dict, envelope="detail")
+    import schemas
+
+    @validator(inbound_schema=schemas.INPUT, envelope="detail")
     def handler(event, context):
-        validate(event=event, schema=json_schema_dict, envelope="detail")
         return event
     ```
+
+=== "sample_wrapped_event.json"
+
+    ```python hl_lines="11-14"
+    --8<-- "docs/shared/validation_basic_eventbridge_event.json"
+    ```
+
+=== "schemas.py"
+
+    ```python hl_lines="7 14 16 23 39 45 47 52"
+    --8<-- "docs/shared/validation_basic_jsonschema.py"
+    ```
+
 
 This is quite powerful because you can use JMESPath Query language to extract records from [arrays, slice and dice](https://jmespath.org/tutorial.html#list-and-slice-projections), to [pipe expressions](https://jmespath.org/tutorial.html#pipe-expressions) and [function expressions](https://jmespath.org/tutorial.html#functions), where you'd extract what you need before validating the actual payload.
 
@@ -118,15 +144,27 @@ This utility comes with built-in envelopes to easily extract the payload from po
 === "unwrapping_popular_event_sources.py"
 
     ```python hl_lines="5 7"
-    from aws_lambda_powertools.utilities.validation import envelopes, validate, validator
+    from aws_lambda_powertools.utilities.validation import envelopes, validator
 
-    json_schema_dict = {..}
+    import schemas
 
-    @validator(inbound_schema=json_schema_dict, envelope=envelopes.EVENTBRIDGE)
+    @validator(inbound_schema=schemas.INPUT, envelope=envelopes.EVENTBRIDGE)
     def handler(event, context):
-        validate(event=event, schema=json_schema_dict, envelope=envelopes.EVENTBRIDGE)
         return event
     ```
+
+=== "sample_wrapped_event.json"
+
+    ```python hl_lines="11-14"
+    --8<-- "docs/shared/validation_basic_eventbridge_event.json"
+    ```
+
+=== "schemas.py"
+
+    ```python hl_lines="7 14 16 23 39 45 47 52"
+    --8<-- "docs/shared/validation_basic_jsonschema.py"
+    ```
+
 
 Here is a handy table with built-in envelopes along with their JMESPath expressions in case you want to build your own.
 
@@ -148,34 +186,244 @@ Envelope name | JMESPath expression
 !!! note "New in 1.10.0"
     JSON Schema DRAFT 7 [has many new built-in formats](https://json-schema.org/understanding-json-schema/reference/string.html#format) such as date, time, and specifically a regex format which might be a better replacement for a custom format, if you do have control over the schema.
 
-If you have JSON Schemas with custom formats, for example having a `int64` for high precision integers, you can pass an optional validation to handle each type using `formats` parameter - Otherwise it'll fail validation:
+JSON Schemas with custom formats like `int64` will fail validation. If you have these, you can pass them using `formats` parameter:
 
-**Example of custom integer format**
-
-```json
-{
-	"lastModifiedTime": {
-	  "format": "int64",
-	  "type": "integer"
-	}
-}
-```
+=== "custom_json_schema_type_format.json"
+    ```json
+    {
+    	"lastModifiedTime": {
+    	  "format": "int64",
+    	  "type": "integer"
+    	}
+    }
+    ```
 
 For each format defined in a dictionary key, you must use a regex, or a function that returns a boolean to instruct the validator on how to proceed when encountering that type.
 
-```python
-from aws_lambda_powertools.utilities.validation import validate
+=== "validate_custom_format.py"
 
-event = {} # some event
-schema_with_custom_format = {} # some JSON schema that defines a custom format
+    ```python hl_lines="5-8 10"
+    from aws_lambda_powertools.utilities.validation import validate
 
-custom_format = {
-    "int64": True, # simply ignore it,
-	"positive": lambda x: False if x < 0 else True
-}
+    import schema
 
-validate(event=event, schema=schema_with_custom_format, formats=custom_format)
-```
+    custom_format = {
+        "int64": True, # simply ignore it,
+    	"positive": lambda x: False if x < 0 else True
+    }
+
+    validate(event=event, schema=schemas.INPUT, formats=custom_format)
+    ```
+
+=== "schemas.py"
+
+    ```python hl_lines="68" 91  93"
+    INPUT = {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "definitions": {
+            "AWSAPICallViaCloudTrail": {
+                "properties": {
+                    "additionalEventData": {"$ref": "#/definitions/AdditionalEventData"},
+                    "awsRegion": {"type": "string"},
+                    "errorCode": {"type": "string"},
+                    "errorMessage": {"type": "string"},
+                    "eventID": {"type": "string"},
+                    "eventName": {"type": "string"},
+                    "eventSource": {"type": "string"},
+                    "eventTime": {"format": "date-time", "type": "string"},
+                    "eventType": {"type": "string"},
+                    "eventVersion": {"type": "string"},
+                    "recipientAccountId": {"type": "string"},
+                    "requestID": {"type": "string"},
+                    "requestParameters": {"$ref": "#/definitions/RequestParameters"},
+                    "resources": {"items": {"type": "object"}, "type": "array"},
+                    "responseElements": {"type": ["object", "null"]},
+                    "sourceIPAddress": {"type": "string"},
+                    "userAgent": {"type": "string"},
+                    "userIdentity": {"$ref": "#/definitions/UserIdentity"},
+                    "vpcEndpointId": {"type": "string"},
+                    "x-amazon-open-api-schema-readOnly": {"type": "boolean"},
+                },
+                "required": [
+                    "eventID",
+                    "awsRegion",
+                    "eventVersion",
+                    "responseElements",
+                    "sourceIPAddress",
+                    "eventSource",
+                    "requestParameters",
+                    "resources",
+                    "userAgent",
+                    "readOnly",
+                    "userIdentity",
+                    "eventType",
+                    "additionalEventData",
+                    "vpcEndpointId",
+                    "requestID",
+                    "eventTime",
+                    "eventName",
+                    "recipientAccountId",
+                ],
+                "type": "object",
+            },
+            "AdditionalEventData": {
+                "properties": {
+                    "objectRetentionInfo": {"$ref": "#/definitions/ObjectRetentionInfo"},
+                    "x-amz-id-2": {"type": "string"},
+                },
+                "required": ["x-amz-id-2"],
+                "type": "object",
+            },
+            "Attributes": {
+                "properties": {
+                    "creationDate": {"format": "date-time", "type": "string"},
+                    "mfaAuthenticated": {"type": "string"},
+                },
+                "required": ["mfaAuthenticated", "creationDate"],
+                "type": "object",
+            },
+            "LegalHoldInfo": {
+                "properties": {
+                    "isUnderLegalHold": {"type": "boolean"},
+                    "lastModifiedTime": {"format": "int64", "type": "integer"},
+                },
+                "type": "object",
+            },
+            "ObjectRetentionInfo": {
+                "properties": {
+                    "legalHoldInfo": {"$ref": "#/definitions/LegalHoldInfo"},
+                    "retentionInfo": {"$ref": "#/definitions/RetentionInfo"},
+                },
+                "type": "object",
+            },
+            "RequestParameters": {
+                "properties": {
+                    "bucketName": {"type": "string"},
+                    "key": {"type": "string"},
+                    "legal-hold": {"type": "string"},
+                    "retention": {"type": "string"},
+                },
+                "required": ["bucketName", "key"],
+                "type": "object",
+            },
+            "RetentionInfo": {
+                "properties": {
+                    "lastModifiedTime": {"format": "int64", "type": "integer"},
+                    "retainUntilMode": {"type": "string"},
+                    "retainUntilTime": {"format": "int64", "type": "integer"},
+                },
+                "type": "object",
+            },
+            "SessionContext": {
+                "properties": {"attributes": {"$ref": "#/definitions/Attributes"}},
+                "required": ["attributes"],
+                "type": "object",
+            },
+            "UserIdentity": {
+                "properties": {
+                    "accessKeyId": {"type": "string"},
+                    "accountId": {"type": "string"},
+                    "arn": {"type": "string"},
+                    "principalId": {"type": "string"},
+                    "sessionContext": {"$ref": "#/definitions/SessionContext"},
+                    "type": {"type": "string"},
+                },
+                "required": ["accessKeyId", "sessionContext", "accountId", "principalId", "type", "arn"],
+                "type": "object",
+            },
+        },
+        "properties": {
+            "account": {"type": "string"},
+            "detail": {"$ref": "#/definitions/AWSAPICallViaCloudTrail"},
+            "detail-type": {"type": "string"},
+            "id": {"type": "string"},
+            "region": {"type": "string"},
+            "resources": {"items": {"type": "string"}, "type": "array"},
+            "source": {"type": "string"},
+            "time": {"format": "date-time", "type": "string"},
+            "version": {"type": "string"},
+        },
+        "required": ["detail-type", "resources", "id", "source", "time", "detail", "region", "version", "account"],
+        "title": "AWSAPICallViaCloudTrail",
+        "type": "object",
+        "x-amazon-events-detail-type": "AWS API Call via CloudTrail",
+        "x-amazon-events-source": "aws.s3",
+    }
+    ```
+
+=== "event.json"
+    ```json
+    {
+        "account": "123456789012",
+        "detail": {
+            "additionalEventData": {
+                "AuthenticationMethod": "AuthHeader",
+                "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+                "SignatureVersion": "SigV4",
+                "bytesTransferredIn": 0,
+                "bytesTransferredOut": 0,
+                "x-amz-id-2": "ejUr9Nd/4IO1juF/a6GOcu+PKrVX6dOH6jDjQOeCJvtARUqzxrhHGrhEt04cqYtAZVqcSEXYqo0=",
+            },
+            "awsRegion": "us-west-1",
+            "eventCategory": "Data",
+            "eventID": "be4fdb30-9508-4984-b071-7692221899ae",
+            "eventName": "HeadObject",
+            "eventSource": "s3.amazonaws.com",
+            "eventTime": "2020-12-22T10:05:29Z",
+            "eventType": "AwsApiCall",
+            "eventVersion": "1.07",
+            "managementEvent": False,
+            "readOnly": True,
+            "recipientAccountId": "123456789012",
+            "requestID": "A123B1C123D1E123",
+            "requestParameters": {
+                "Host": "lambda-artifacts-deafc19498e3f2df.s3.us-west-1.amazonaws.com",
+                "bucketName": "lambda-artifacts-deafc19498e3f2df",
+                "key": "path1/path2/path3/file.zip",
+            },
+            "resources": [
+                {
+                    "ARN": "arn:aws:s3:::lambda-artifacts-deafc19498e3f2df/path1/path2/path3/file.zip",
+                    "type": "AWS::S3::Object",
+                },
+                {
+                    "ARN": "arn:aws:s3:::lambda-artifacts-deafc19498e3f2df",
+                    "accountId": "123456789012",
+                    "type": "AWS::S3::Bucket",
+                },
+            ],
+            "responseElements": None,
+            "sourceIPAddress": "AWS Internal",
+            "userAgent": "AWS Internal",
+            "userIdentity": {
+                "accessKeyId": "ABCDEFGHIJKLMNOPQR12",
+                "accountId": "123456789012",
+                "arn": "arn:aws:sts::123456789012:assumed-role/role-name1/1234567890123",
+                "invokedBy": "AWS Internal",
+                "principalId": "ABCDEFGHIJKLMN1OPQRST:1234567890123",
+                "sessionContext": {
+                    "attributes": {"creationDate": "2020-12-09T09:58:24Z", "mfaAuthenticated": "false"},
+                    "sessionIssuer": {
+                        "accountId": "123456789012",
+                        "arn": "arn:aws:iam::123456789012:role/role-name1",
+                        "principalId": "ABCDEFGHIJKLMN1OPQRST",
+                        "type": "Role",
+                        "userName": "role-name1",
+                    },
+                },
+                "type": "AssumedRole",
+            },
+            "vpcEndpointId": "vpce-a123cdef",
+        },
+        "detail-type": "AWS API Call via CloudTrail",
+        "id": "e0bad426-0a70-4424-b53a-eb902ebf5786",
+        "region": "us-west-1",
+        "resources": [],
+        "source": "aws.s3",
+        "time": "2020-12-22T10:05:29Z",
+        "version": "0",
+    }
+    ```
 
 ### Built-in JMESPath functions
 
@@ -197,17 +445,21 @@ This sample will decode the value within the `data` key into a valid JSON before
     ```python hl_lines="9"
     from aws_lambda_powertools.utilities.validation import validate
 
-    json_schema_dict = {..}
+    import schemas
+
     sample_event = {
         'data': '{"payload": {"message": "hello hello", "username": "blah blah"}}'
     }
 
-    def handler(event, context):
-        validate(event=event, schema=json_schema_dict, envelope="powertools_json(data)")
-        return event
-
-    handler(event=sample_event, context={})
+    validate(event=sample_event, schema=schemas.INPUT, envelope="powertools_json(data)")
     ```
+
+=== "schemas.py"
+
+    ```python hl_lines="7 14 16 23 39 45 47 52"
+    --8<-- "docs/shared/validation_basic_jsonschema.py"
+    ```
+
 
 #### powertools_base64 function
 
@@ -217,19 +469,26 @@ This sample will decode the base64 value within the `data` key, and decode the J
 
 === "powertools_json_jmespath_function.py"
 
-    ```python hl_lines="9"
+    ```python hl_lines="12"
     from aws_lambda_powertools.utilities.validation import validate
 
-    json_schema_dict = {..}
+    import schemas
+
     sample_event = {
         "data": "eyJtZXNzYWdlIjogImhlbGxvIGhlbGxvIiwgInVzZXJuYW1lIjogImJsYWggYmxhaCJ9="
     }
 
-    def handler(event, context):
-        validate(event=event, schema=json_schema_dict, envelope="powertools_json(powertools_base64(data))")
-        return event
+    validate(
+          event=sample_event,
+          schema=schemas.INPUT,
+          envelope="powertools_json(powertools_base64(data))"
+    )
+    ```
 
-    handler(event=sample_event, context={})
+=== "schemas.py"
+
+    ```python hl_lines="7 14 16 23 39 45 47 52"
+    --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
 #### powertools_base64_gzip function
@@ -240,19 +499,26 @@ This sample will decompress and decode base64 data, then use JMESPath pipeline e
 
 === "powertools_json_jmespath_function.py"
 
-    ```python hl_lines="9"
+    ```python hl_lines="12"
     from aws_lambda_powertools.utilities.validation import validate
 
-    json_schema_dict = {..}
+    import schemas
+
     sample_event = {
         "data": "H4sIACZAXl8C/52PzUrEMBhFX2UILpX8tPbHXWHqIOiq3Q1F0ubrWEiakqTWofTdTYYB0YWL2d5zvnuTFellBIOedoiyKH5M0iwnlKH7HZL6dDB6ngLDfLFYctUKjie9gHFaS/sAX1xNEq525QxwFXRGGMEkx4Th491rUZdV3YiIZ6Ljfd+lfSyAtZloacQgAkqSJCGhxM6t7cwwuUGPz4N0YKyvO6I9WDeMPMSo8Z4Ca/kJ6vMEYW5f1MX7W1lVxaG8vqX8hNFdjlc0iCBBSF4ERT/3Pl7RbMGMXF2KZMh/C+gDpNS7RRsp0OaRGzx0/t8e0jgmcczyLCWEePhni/23JWalzjdu0a3ZvgEaNLXeugEAAA=="
     }
 
-    def handler(event, context):
-        validate(event=event, schema=json_schema_dict, envelope="powertools_base64_gzip(data) | powertools_json(@)")
-        return event
+    validate(
+        event=sample_event,
+        schema=schemas.INPUT,
+        envelope="powertools_base64_gzip(data) | powertools_json(@)"
+    )
+    ```
 
-    handler(event=sample_event, context={})
+=== "schemas.py"
+
+    ```python hl_lines="7 14 16 23 39 45 47 52"
+    --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
 ### Bring your own JMESPath function
@@ -266,11 +532,11 @@ For special binary formats that you want to decode before applying JSON Schema v
 
 === "custom_jmespath_function.py"
 
-    ```python hl_lines="15"
-    from aws_lambda_powertools.utilities.validation import validate
+    ```python hl_lines="2 6-10 14"
+    from aws_lambda_powertools.utilities.validation import validator
     from jmespath import functions
 
-    json_schema_dict = {..}
+    import schemas
 
     class CustomFunctions(functions.Functions):
 
@@ -280,7 +546,13 @@ For special binary formats that you want to decode before applying JSON Schema v
 
     custom_jmespath_options = {"custom_functions": CustomFunctions()}
 
+    @validator(schema=schemas.INPUT, jmespath_options=**custom_jmespath_options)
     def handler(event, context):
-        validate(event=event, schema=json_schema_dict, envelope="", jmespath_options=**custom_jmespath_options)
         return event
+    ```
+
+=== "schemas.py"
+
+    ```python hl_lines="7 14 16 23 39 45 47 52"
+    --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
