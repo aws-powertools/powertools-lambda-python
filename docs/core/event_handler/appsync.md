@@ -3,26 +3,197 @@ title: Appsync
 description: Core utility
 ---
 
-Event handler decorators for common Lambda events
-
-
-## AppSync Resolver Decorator
-
-> New in 1.14.0
-
-AppSync resolver decorator is a concise way to create lambda functions to handle AppSync resolvers for multiple
-`typeName` and `fieldName` declarations. This decorator builds on top of the
-[AppSync Resolver ](/utilities/data_classes#appsync-resolver) data class and therefore works with [Amplify GraphQL Transform Library](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"} (`@function`),
-and [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/){target="_blank"}
+Event handler for AWS AppSync Direct Lambda Resolver and Amplify GraphQL Transformer
 
 ### Key Features
 
-* Works with any of the existing Powertools utilities by allow you to create your own `lambda_handler` function
-* Supports an implicit handler where in `app = AppSyncResolver()` can be invoked directly as `app(event, context)`
-* `resolver` decorator has flexible or strict matching against `fieldName`
-* Arguments are automatically passed into your function
-* AppSyncResolver includes `current_event` and `lambda_cotext` fields can be used to pass in the original `AppSyncResolver` or `LambdaContext`
- objects
+<!-- * Supports an implicit handler where in `app = AppSyncResolver()` can be invoked directly as `app(event, context)` -->
+
+* Automatically parse API arguments to function arguments
+* Choose between strictly match a GraphQL field name or all of them to a function
+* Integrates with [Data classes utilities](../../utilities/data_classes.md) to access resolver and identity information
+
+## Terminology
+
+* **[Direct Lambda Resolver](https://docs.aws.amazon.com/appsync/latest/devguide/direct-lambda-reference.html)**. A custom AppSync Resolver to bypass the use of Apache Velocity Template (VTL) and automatically map your function's response to a GraphQL field.
+* **[Amplify GraphQL Transformer](https://docs.amplify.aws/cli/graphql-transformer/function)**. Custom GraphQL directives to define your application's data model using Schema Definition Language (SDL). Amplify CLI uses these directives to convert GraphQL SDL into full descriptive AWS CloudFormation templates.
+
+## Getting started
+
+### Required resources
+
+You must have an existing AppSync GraphQL API and IAM permissions to invoke your Lambda function. That said, there is no additional permissions to use this utility.
+
+This is the sample infrastructure we are using for the initial examples with a AppSync Direct Lambda Resolver.
+
+=== "schema.graphql"
+
+    !!! tip "Designing GraphQL Schemas for the first time"
+        Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html) for understanding how to define types, nesting, and pagination.
+
+    ```gql
+    schema {
+        query:Query
+    }
+
+    type Query {
+        getTodo(id: ID!): Todo
+        listTodos: [Todo]
+    }
+
+    type Todo {
+        id: ID!
+        title: String
+        description: String
+        done: Boolean
+    }
+    ```
+
+=== "template.yml"
+
+    ```yaml hl_lines="37-42 50-55 61-62 78-91 96-120"
+    AWSTemplateFormatVersion: '2010-09-09'
+    Transform: AWS::Serverless-2016-10-31
+    Description: Hello world Direct Lambda Resolver
+
+    Globals:
+      Function:
+        Timeout: 5
+        Runtime: python3.8
+        Tracing: Active
+        Environment:
+            Variables:
+                # Powertools env vars: https://awslabs.github.io/aws-lambda-powertools-python/latest/#environment-variables
+                LOG_LEVEL: INFO
+                POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
+                POWERTOOLS_LOGGER_LOG_EVENT: true
+                POWERTOOLS_SERVICE_NAME: sample_resolver
+
+    Resources:
+      HelloWorldFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            Handler: app.lambda_handler
+            CodeUri: hello_world
+            Description: Sample Lambda Powertools Direct Lambda Resolver
+            Tags:
+                SOLUTION: LambdaPowertoolsPython
+
+      # IAM Permissions and Roles
+
+      AppSyncServiceRole:
+        Type: "AWS::IAM::Role"
+        Properties:
+          AssumeRolePolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                  -
+                    Effect: "Allow"
+                    Principal:
+                        Service:
+                            - "appsync.amazonaws.com"
+                    Action:
+                        - "sts:AssumeRole"
+
+      InvokeLambdaResolverPolicy:
+        Type: "AWS::IAM::Policy"
+        Properties:
+          PolicyName: "DirectAppSyncLambda"
+          PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                  -
+                    Effect: "Allow"
+                    Action: "lambda:invokeFunction"
+                    Resource:
+                        - !GetAtt HelloWorldFunction.Arn
+          Roles:
+              - !Ref AppSyncServiceRole
+
+      # GraphQL API
+
+      HelloWorldApi:
+        Type: "AWS::AppSync::GraphQLApi"
+        Properties:
+            Name: HelloWorldApi
+            AuthenticationType: "API_KEY"
+            XrayEnabled: true
+
+      HelloWorldApiKey:
+        Type: AWS::AppSync::ApiKey
+        Properties:
+            ApiId: !GetAtt HelloWorldApi.ApiId
+
+      HelloWorldApiSchema:
+        Type: "AWS::AppSync::GraphQLSchema"
+        Properties:
+            ApiId: !GetAtt HelloWorldApi.ApiId
+            Definition: |
+                schema {
+                    query:Query
+                }
+
+                type Query {
+                    getTodo(id: ID!): Todo
+                    listTodos: [Todo]
+                }
+
+                type Todo {
+                    id: ID!
+                    title: String
+                    description: String
+                    done: Boolean
+                }
+
+      # Lambda Direct Data Source and Resolver
+
+      HelloWorldFunctionDataSource:
+        Type: "AWS::AppSync::DataSource"
+        Properties:
+            ApiId: !GetAtt HelloWorldApi.ApiId
+            Name: "HelloWorldLambdaDirectResolver"
+            Type: "AWS_LAMBDA"
+            ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
+            LambdaConfig:
+                LambdaFunctionArn: !GetAtt HelloWorldFunction.Arn
+
+      ListTodosResolver:
+        Type: "AWS::AppSync::Resolver"
+        Properties:
+            ApiId: !GetAtt HelloWorldApi.ApiId
+            TypeName: "Query"
+            FieldName: "listTodos"
+            DataSourceName: !GetAtt HelloWorldFunctionDataSource.Name
+
+      GetTodoResolver:
+        Type: "AWS::AppSync::Resolver"
+        Properties:
+            ApiId: !GetAtt HelloWorldApi.ApiId
+            TypeName: "Query"
+            FieldName: "getTodo"
+            DataSourceName: !GetAtt HelloWorldFunctionDataSource.Name
+
+
+    Outputs:
+      HelloWorldFunction:
+        Description: "Hello World Lambda Function ARN"
+        Value: !GetAtt HelloWorldFunction.Arn
+
+      HelloWorldAPI:
+        Value: !GetAtt HelloWorldApi.Arn
+    ```
+
+
+### Resolver decorator
+
+AppSync resolver decorator is a concise way to create lambda functions to handle AppSync resolvers for multiple `typeName` and `fieldName` declarations. This decorator builds on top of the [AppSync Resolver ](/utilities/data_classes#appsync-resolver) data class and therefore works with [Amplify GraphQL Transform Library](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"} (`@function`),
+and [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/){target="_blank"}
+
+
+## Advanced
+
+
+
 
 ###  Amplify GraphQL Example
 
