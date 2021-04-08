@@ -3,7 +3,7 @@ title: Appsync
 description: Core utility
 ---
 
-Event handler for AWS AppSync Direct Lambda Resolver and Amplify GraphQL Transformer
+Event handler for AWS AppSync Direct Lambda Resolver and Amplify GraphQL Transformer.
 
 ### Key Features
 
@@ -13,6 +13,7 @@ Event handler for AWS AppSync Direct Lambda Resolver and Amplify GraphQL Transfo
 * Choose between strictly match a GraphQL field name or all of them to a function
 * Integrates with [Data classes utilities](../../utilities/data_classes.md){target="_blank"} to access resolver and identity information
 * Works with both Direct Lambda Resolver and Amplify GraphQL Transformer `@function` directive
+* Support async Python 3.8+ functions, and generators
 
 ## Terminology
 
@@ -30,7 +31,7 @@ This is the sample infrastructure we are using for the initial examples with a A
 
 === "schema.graphql"
 
-    !!! tip "Designing GraphQL Schemas for the first time"
+    !!! tip "Designing GraphQL Schemas for the first time?"
         Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html) for understanding how to define types, nesting, and pagination.
 
     ```typescript
@@ -177,6 +178,8 @@ This is the sample infrastructure we are using for the initial examples with a A
 You can define your functions to match GraphQL types and fields with the `app.resolver()` decorator.
 
 Here's an example where we have two separate functions to resolve `getTodo` and `listTodos` fields within the `Query` type. For completion, we use Scalar type utilities to generate the right output based on our schema definition.
+
+!!! info "GraphQL arguments are passed as function arguments"
 
 === "app.py"
 
