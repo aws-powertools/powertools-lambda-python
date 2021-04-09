@@ -32,7 +32,7 @@ This is the sample infrastructure we are using for the initial examples with a A
 === "schema.graphql"
 
     !!! tip "Designing GraphQL Schemas for the first time?"
-        Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html) for understanding how to define types, nesting, and pagination.
+        Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html){target="_blank"} for understanding how to define types, nesting, and pagination.
 
     ```typescript
     --8<-- "docs/shared/getting_started_schema.graphql"
@@ -183,7 +183,7 @@ Here's an example where we have two separate functions to resolve `getTodo` and 
 
 === "app.py"
 
-    ```python hl_lines="3-4 8 30-31 38-39 46"
+    ```python hl_lines="3-5 9 31-32 39-40 47"
     from aws_lambda_powertools import Logger, Tracer
 
     from aws_lambda_powertools.logging import correlation_paths
@@ -428,7 +428,7 @@ Assuming you have [Amplify CLI installed](https://docs.amplify.aws/cli/start/ins
 
 === "schema.graphql"
 
-    ```typescript hl_lines="8 10 18 23 25"
+    ```typescript hl_lines="7 15 20 22"
     @model
     type Merchant {
         id: String!

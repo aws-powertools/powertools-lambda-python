@@ -20,7 +20,7 @@ You can validate inbound and outbound events using [`validator` decorator](#vali
 
 You can also use the standalone `validate` function, if you want more control over the validation process such as handling a validation error.
 
-We support any JSONSchema draft supported by [fastjsonschema](https://horejsek.github.io/python-fastjsonschema/) library.
+We support any JSONSchema draft supported by [fastjsonschema](https://horejsek.github.io/python-fastjsonschema/){target="_blank"} library.
 
 !!! warning
     Both `validator` decorator and `validate` standalone function expects your JSON Schema to be a **dictionary**, not a filename.
@@ -184,7 +184,7 @@ Envelope name | JMESPath expression
 ### Validating custom formats
 
 !!! note "New in 1.10.0"
-    JSON Schema DRAFT 7 [has many new built-in formats](https://json-schema.org/understanding-json-schema/reference/string.html#format) such as date, time, and specifically a regex format which might be a better replacement for a custom format, if you do have control over the schema.
+    JSON Schema DRAFT 7 [has many new built-in formats](https://json-schema.org/understanding-json-schema/reference/string.html#format){target="_blank"} such as date, time, and specifically a regex format which might be a better replacement for a custom format, if you do have control over the schema.
 
 JSON Schemas with custom formats like `int64` will fail validation. If you have these, you can pass them using `formats` parameter:
 
@@ -528,7 +528,7 @@ This sample will decompress and decode base64 data, then use JMESPath pipeline e
 
     This will **replace all provided built-in functions such as `powertools_json`, so you will no longer be able to use them**.
 
-For special binary formats that you want to decode before applying JSON Schema validation, you can bring your own [JMESPath function](https://github.com/jmespath/jmespath.py#custom-functions) and any additional option via `jmespath_options` param.
+For special binary formats that you want to decode before applying JSON Schema validation, you can bring your own [JMESPath function](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"} and any additional option via `jmespath_options` param.
 
 === "custom_jmespath_function.py"
 
