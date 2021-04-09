@@ -3,11 +3,9 @@ title: Middleware factory
 description: Utility
 ---
 
-
-
 Middleware factory provides a decorator factory to create your own middleware to run logic before, and after each Lambda invocation synchronously.
 
-**Key features**
+## Key features
 
 * Run logic before, after, and handle exceptions
 * Trace each middleware when requested

@@ -3,10 +3,9 @@ title: Validation
 description: Utility
 ---
 
-
 This utility provides JSON Schema validation for events and responses, including JMESPath support to unwrap events before validation.
 
-**Key features**
+## Key features
 
 * Validate incoming event and response
 * JMESPath support to unwrap events before validation applies

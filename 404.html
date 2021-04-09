@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        const websitePath = window.location.pathname;
+        const versionRegex = /(\w.+)\/(latest|([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?)/;
+
+        if (websitePath.search(versionRegex) === -1) {
+            let projectName = "aws-lambda-powertools-python"
+            // redirect old links to latest version alias
+            window.location = websitePath.replace(projectName, `${projectName}/latest`)
+        }
+    </script>
+</head>
+
+</html>
