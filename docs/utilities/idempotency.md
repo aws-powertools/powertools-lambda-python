@@ -30,19 +30,26 @@ times with the same parameters**. This makes idempotent operations safe to retry
 
 ### Required resources
 
-Before getting started, you need to create a persistent storage layer where the idempotency utility can store its
-state - your lambda functions will need read and write access to it.
+Before getting started, you need to create a persistent storage layer where the idempotency utility can store its state - your lambda functions will need read and write access to it.
 
 As of now, Amazon DynamoDB is the only supported persistent storage layer, so you'll need to create a table first.
+
+**Default table configuration**
+
+If you're not [changing the default configuration for the DynamoDB persistence layer](#dynamodbpersistencelayer), this is the expected default configuration:
+
+Configuration | Value | Notes
+------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------
+Partition key | `id` |
+TTL attribute name | `expiration` | This can only be configured after your table is created if you're using AWS Console
+
+
+!!! tip "You can share a single state table for all functions"
+    You can reuse the same DynamoDB table to store idempotency state. We add your `function_name` in addition to the idempotency key as a hash key.
 
 > Example using AWS Serverless Application Model (SAM)
 
 === "template.yml"
-
-	!!! tip "You can share a single state table for all functions"
-		> New in 1.12.0
-
-		You can reuse the same DynamoDB table to store idempotency state. We add your function_name in addition to the idempotency key as a hash key.
 
     ```yaml hl_lines="5-13 21-23"
     Resources:
