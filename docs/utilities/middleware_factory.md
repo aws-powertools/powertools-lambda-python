@@ -78,9 +78,9 @@ This makes use of an existing Tracer instance that you may have initialized anyw
         ...
     ```
 
-When executed, your middleware name will [appear in AWS X-Ray Trace details as](../core/tracer) `## middleware_name`.
+When executed, your middleware name will [appear in AWS X-Ray Trace details as](../core/tracer.md) `## middleware_name`.
 
-For advanced use cases, you can instantiate [Tracer](../core/tracer) inside your middleware, and add annotations as well as metadata for additional operational insights.
+For advanced use cases, you can instantiate [Tracer](../core/tracer.md) inside your middleware, and add annotations as well as metadata for additional operational insights.
 
 === "app.py"
 
@@ -100,7 +100,7 @@ For advanced use cases, you can instantiate [Tracer](../core/tracer) inside your
 
 * Use `trace_execution` to quickly understand the performance impact of your middlewares, and reduce or merge tasks when necessary
 * When nesting multiple middlewares, always return the handler with event and context, or response
-* Keep in mind [Python decorators execution order](https://realpython.com/primer-on-python-decorators/#nesting-decorators). Lambda handler is actually called once (top-down)
+* Keep in mind [Python decorators execution order](https://realpython.com/primer-on-python-decorators/#nesting-decorators){target="_blank"}. Lambda handler is actually called once (top-down)
 * Async middlewares are not supported
 
 ## Testing your code
