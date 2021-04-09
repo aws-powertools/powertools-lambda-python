@@ -8,6 +8,28 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## [1.14.0] - 2021-04-09
+
+### Added
+
+* **Event handlers**: New core utility to easily handle incoming requests tightly integrated with Data Classes; AppSync being the first as we gauge from the community what additional ones would be helpful
+* **Documentation**: Enabled versioning to access docs on a per release basis or staging docs (`develop` branch)
+* **Documentation**: Links now open in a new tab and improved snippet line highlights
+* **Documentation(validation)**: JSON Schema snippets and more complete examples
+* **Documentation(idempotency)**: Table with expected configuration values for hash key and TTL attribute name when using the default behaviour
+* **Documentation(logger)**: New example on how to set logging record timestamps in UTC
+* **Parser(S3)**: Support for the new S3 Object Lambda Event model (`S3ObjectLambdaEvent`)
+* **Parameters**: Support for DynamoDB Local via `endpoint_url` parameter, including docs
+* **Internal**: Include `make pr` in pre-commit hooks when contributing to shorten feedback loop on pre-commit specific linting
+
+### Fixed
+
+* **Parser**: S3Model now supports keys with 0 length
+* **Tracer**: Lock X-Ray SDK to 2.6.0 as there's been a regression upstream in 2.7.0 on serializing & capturing exceptions
+* **Data Classes(API Gateway)**: Add missing property `operationName` within request context
+* **Misc.**: Numerous typing fixes to better to support MyPy across all utilities
+* **Internal**: Downgraded poetry to 1.1.4 as there's been a regression with `importlib-metadata` in 1.1.5 not yet fixed
+
 ## [1.13.0] - 2021-03-23
 
 ### Added

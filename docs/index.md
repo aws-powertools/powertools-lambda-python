@@ -144,7 +144,7 @@ aws serverlessrepo list-application-versions \
 | [Tracing](./core/tracer.md) | Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions
 | [Logger](./core/logger.md) | Structured logging made easier, and decorator to enrich structured logging with key Lambda context details
 | [Metrics](./core/metrics.md) | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
-| [Event handler](./core/event_handler) | Event handler decorators for common Lambda events
+| [Event handler - AppSync](./core/event_handler/appsync.md) | AppSync event handler for Lambda Direct Resolver and Amplify GraphQL Transformer function
 | [Middleware factory](./utilities/middleware_factory.md) | Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
 | [Parameters](./utilities/parameters.md) | Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time
 | [Batch processing](./utilities/batch.md) | Handle partial failures for AWS SQS batch processing

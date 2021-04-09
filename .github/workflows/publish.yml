@@ -88,7 +88,7 @@ jobs:
         destination_dir: ${{ env.RELEASE_TAG_VERSION }}/api
 
   sync_master:
-    needs: upload
+    needs: release
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

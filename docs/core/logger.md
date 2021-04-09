@@ -531,6 +531,7 @@ Service is what defines the Logger name, including what the Lambda function is r
 For Logger, the `service` is the logging key customers can use to search log operations for one or more functions - For example, **search for all errors, or messages like X, where service is payment**.
 
 ??? tip "Logging output example"
+
     ```json hl_lines="5"
     {
        "timestamp": "2020-05-24 18:17:33,774",
@@ -571,6 +572,7 @@ A common issue when migrating from other Loggers is that `service` might be defi
 
     logger = Logger(child=True)
     ```
+
 === "correct_logger_inheritance.py"
 
     ```python hl_lines="4 10"
@@ -651,6 +653,26 @@ You can also change the order of the following log record keys via the `log_reco
 		"sampling_rate": 0.0
 	}
 	```
+
+#### Setting timestamp to UTC
+
+By default, this Logger and standard logging library emits records using local time timestamp. You can override this behaviour by updating the current converter set in our formatter:
+
+=== "app.py"
+
+    ```python hl_lines="1 3 9"
+    from aws_lambda_powertools import Logger
+
+    import time
+
+    logger = Logger(service="sample_service")
+
+    logger.info("Local time")
+
+    logger._logger.handlers[0].formatter.converter = time.gmtime
+
+    logger.info("GMT time")
+    ```
 
 ## Testing your code
 
