@@ -17,12 +17,15 @@ class ProxyEventType(Enum):
 
 
 class RouteEntry:
-    def __init__(self, method: str, rule: Any, func: Callable, cors: bool, compress: bool):
+    def __init__(
+        self, method: str, rule: Any, func: Callable, cors: bool, compress: bool, cache_control: Optional[str]
+    ):
         self.method = method.upper()
         self.rule = rule
         self.func = func
         self.cors = cors
         self.compress = compress
+        self.cache_control = cache_control
 
 
 class ApiGatewayResolver:
@@ -33,21 +36,21 @@ class ApiGatewayResolver:
         self._proxy_type = proxy_type
         self._routes: List[RouteEntry] = []
 
-    def get(self, rule: str, cors: bool = False, compress: bool = False):
-        return self.route(rule, "GET", cors, compress)
+    def get(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+        return self.route(rule, "GET", cors, compress, cache_control)
 
-    def post(self, rule: str, cors: bool = False, compress: bool = False):
-        return self.route(rule, "POST", cors, compress)
+    def post(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+        return self.route(rule, "POST", cors, compress, cache_control)
 
-    def put(self, rule: str, cors: bool = False, compress: bool = False):
-        return self.route(rule, "PUT", cors, compress)
+    def put(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+        return self.route(rule, "PUT", cors, compress, cache_control)
 
-    def delete(self, rule: str, cors: bool = False, compress: bool = False):
-        return self.route(rule, "DELETE", cors, compress)
+    def delete(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+        return self.route(rule, "DELETE", cors, compress, cache_control)
 
-    def route(self, rule: str, method: str, cors: bool = False, compress: bool = False):
+    def route(self, rule: str, method: str, cors: bool = False, compress: bool = False, cache_control: str = None):
         def register_resolver(func: Callable):
-            self._register(func, rule, method, cors, compress)
+            self._append(func, rule, method, cors, compress, cache_control)
             return func
 
         return register_resolver
@@ -58,11 +61,18 @@ class ApiGatewayResolver:
 
         route, args = self._find_route(self.current_event.http_method, self.current_event.path)
         result = route.func(**args)
+
+        status: int = result[0]
+        response: Dict[str, Any] = {"statusCode": status}
+
         headers = {"Content-Type": result[1]}
         if route.cors:
             headers["Access-Control-Allow-Origin"] = "*"
             headers["Access-Control-Allow-Methods"] = route.method
             headers["Access-Control-Allow-Credentials"] = "true"
+        if route.cache_control:
+            headers["Cache-Control"] = route.cache_control if status == 200 else "no-cache"
+        response["headers"] = headers
 
         body: Union[str, bytes] = result[2]
         if route.compress and "gzip" in (self.current_event.get_header_value("accept-encoding") or ""):
@@ -70,19 +80,15 @@ class ApiGatewayResolver:
             if isinstance(body, str):
                 body = bytes(body, "utf-8")
             body = gzip_compress.compress(body) + gzip_compress.flush()
-
-        response = {"statusCode": result[0], "headers": headers}
-
         if isinstance(body, bytes):
             response["isBase64Encoded"] = True
             body = base64.b64encode(body).decode()
-
         response["body"] = body
 
         return response
 
-    def _register(self, func: Callable, rule: str, method: str, cors: bool, compress: bool):
-        self._routes.append(RouteEntry(method, self._build_rule_pattern(rule), func, cors, compress))
+    def _append(self, func: Callable, rule: str, method: str, cors: bool, compress: bool, cache_control: Optional[str]):
+        self._routes.append(RouteEntry(method, self._build_rule_pattern(rule), func, cors, compress, cache_control))
 
     @staticmethod
     def _build_rule_pattern(rule: str):

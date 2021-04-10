@@ -154,3 +154,35 @@ def test_compress():
     assert isinstance(body, str)
     decompress = zlib.decompress(base64.b64decode(body), wbits=zlib.MAX_WBITS | 16).decode("UTF-8")
     assert decompress == expected_value
+
+
+def test_cache_control_200():
+    app = ApiGatewayResolver()
+
+    @app.get("/success", cache_control="max-age=600")
+    def with_cache_control():
+        return 200, "text/html", "has 200 response"
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    result = handler({"path": "/success", "httpMethod": "GET"}, None)
+
+    headers = result["headers"]
+    assert headers["Cache-Control"] == "max-age=600"
+
+
+def test_cache_control_non_200():
+    app = ApiGatewayResolver()
+
+    @app.delete("/fails", cache_control="max-age=600")
+    def with_cache_control_has_500():
+        return 503, "text/html", "has 503 response"
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    result = handler({"path": "/fails", "httpMethod": "DELETE"}, None)
+
+    headers = result["headers"]
+    assert headers["Cache-Control"] == "no-cache"
