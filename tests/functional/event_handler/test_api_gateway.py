@@ -158,6 +158,8 @@ def test_compress():
     assert isinstance(body, str)
     decompress = zlib.decompress(base64.b64decode(body), wbits=zlib.MAX_WBITS | 16).decode("UTF-8")
     assert decompress == expected_value
+    headers = result["headers"]
+    assert headers["Content-Encoding"] == "gzip"
 
 
 def test_base64_encode():
@@ -173,6 +175,22 @@ def test_base64_encode():
     assert result["isBase64Encoded"] is True
     body = result["body"]
     assert isinstance(body, str)
+    headers = result["headers"]
+    assert headers["Content-Encoding"] == "gzip"
+
+
+def test_compress_no_accept_encoding():
+    app = ApiGatewayResolver()
+    expected_value = "Foo"
+
+    @app.get("/my/path", compress=True)
+    def return_text():
+        return 200, "text/plain", expected_value
+
+    result = app({"path": "/my/path", "httpMethod": "GET", "headers": {}}, None)
+
+    assert result["isBase64Encoded"] is False
+    assert result["body"] == expected_value
 
 
 def test_cache_control_200():

@@ -75,10 +75,11 @@ class ApiGatewayResolver:
             headers["Cache-Control"] = route.cache_control if status_code == 200 else "no-cache"
 
         if route.compress and "gzip" in (self.current_event.get_header_value("accept-encoding") or ""):
+            headers["Content-Encoding"] = "gzip"
             if isinstance(body, str):
                 body = bytes(body, "utf-8")
-            gzip_compress = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS | 16)
-            body = gzip_compress.compress(body) + gzip_compress.flush()
+            gzip = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS | 16)
+            body = gzip.compress(body) + gzip.flush()
 
         base64_encoded = False
         if isinstance(body, bytes):
