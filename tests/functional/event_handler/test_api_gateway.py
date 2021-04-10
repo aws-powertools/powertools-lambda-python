@@ -1,7 +1,7 @@
 import base64
 import json
-import os
 import zlib
+from pathlib import Path
 
 import pytest
 
@@ -10,9 +10,13 @@ from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayPro
 
 
 def load_event(file_name: str) -> dict:
-    full_file_name = os.path.dirname(os.path.realpath(__file__)) + "/../../events/" + file_name
-    with open(full_file_name) as fp:
-        return json.load(fp)
+    path = Path(str(Path(__file__).parent.parent.parent) + "/events/" + file_name)
+    return json.loads(path.read_text())
+
+
+def read_media(file_name: str) -> bytes:
+    path = Path(str(Path(__file__).parent.parent.parent.parent) + "/docs/media/" + file_name)
+    return path.read_bytes()
 
 
 def test_alb_event():
@@ -156,6 +160,21 @@ def test_compress():
     assert decompress == expected_value
 
 
+def test_base64_encode():
+    app = ApiGatewayResolver()
+
+    @app.get("/my/path", compress=True)
+    def read_image():
+        return 200, "image/png", read_media("idempotent_sequence_exception.png")
+
+    mock_event = {"path": "/my/path", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+    result = app(mock_event, None)
+
+    assert result["isBase64Encoded"] is True
+    body = result["body"]
+    assert isinstance(body, str)
+
+
 def test_cache_control_200():
     app = ApiGatewayResolver()
 
@@ -169,6 +188,7 @@ def test_cache_control_200():
     result = handler({"path": "/success", "httpMethod": "GET"}, None)
 
     headers = result["headers"]
+    assert headers["Content-Type"] == "text/html"
     assert headers["Cache-Control"] == "max-age=600"
 
 
@@ -185,4 +205,5 @@ def test_cache_control_non_200():
     result = handler({"path": "/fails", "httpMethod": "DELETE"}, None)
 
     headers = result["headers"]
+    assert headers["Content-Type"] == "text/html"
     assert headers["Cache-Control"] == "no-cache"
