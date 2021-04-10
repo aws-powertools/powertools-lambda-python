@@ -61,31 +61,31 @@ class ApiGatewayResolver:
 
         route, args = self._find_route(self.current_event.http_method, self.current_event.path)
         result = route.func(**args)
+        status_code: int = result[0]
+        content_type: str = result[1]
+        body: Union[str, bytes] = result[2]
+        headers = {"Content-Type": content_type}
 
-        status: int = result[0]
-        response: Dict[str, Any] = {"statusCode": status}
-
-        headers = {"Content-Type": result[1]}
         if route.cors:
             headers["Access-Control-Allow-Origin"] = "*"
             headers["Access-Control-Allow-Methods"] = route.method
             headers["Access-Control-Allow-Credentials"] = "true"
-        if route.cache_control:
-            headers["Cache-Control"] = route.cache_control if status == 200 else "no-cache"
-        response["headers"] = headers
 
-        body: Union[str, bytes] = result[2]
+        if route.cache_control:
+            headers["Cache-Control"] = route.cache_control if status_code == 200 else "no-cache"
+
         if route.compress and "gzip" in (self.current_event.get_header_value("accept-encoding") or ""):
-            gzip_compress = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS | 16)
             if isinstance(body, str):
                 body = bytes(body, "utf-8")
+            gzip_compress = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS | 16)
             body = gzip_compress.compress(body) + gzip_compress.flush()
-        if isinstance(body, bytes):
-            response["isBase64Encoded"] = True
-            body = base64.b64encode(body).decode()
-        response["body"] = body
 
-        return response
+        base64_encoded = False
+        if isinstance(body, bytes):
+            base64_encoded = True
+            body = base64.b64encode(body).decode()
+
+        return {"statusCode": status_code, "headers": headers, "body": body, "isBase64Encoded": base64_encoded}
 
     def _append(self, func: Callable, rule: str, method: str, cors: bool, compress: bool, cache_control: Optional[str]):
         self._routes.append(RouteEntry(method, self._build_rule_pattern(rule), func, cors, compress, cache_control))
