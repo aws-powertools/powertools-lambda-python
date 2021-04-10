@@ -1,5 +1,7 @@
+import base64
 import json
 import os
+import zlib
 
 import pytest
 
@@ -130,3 +132,25 @@ def test_cors():
     assert headers["Access-Control-Allow-Origin"] == "*"
     assert headers["Access-Control-Allow-Methods"] == "GET"
     assert headers["Access-Control-Allow-Credentials"] == "true"
+
+
+def test_compress():
+    mock_event = {"path": "/my/request", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+    expected_value = '{"test": "value"}'
+
+    app = ApiGatewayResolver()
+
+    @app.get("/my/request", compress=True)
+    def with_compression():
+        return 200, "application/json", expected_value
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    result = handler(mock_event, None)
+
+    assert result["isBase64Encoded"] is True
+    body = result["body"]
+    assert isinstance(body, str)
+    decompress = zlib.decompress(base64.b64decode(body), wbits=zlib.MAX_WBITS | 16).decode("UTF-8")
+    assert decompress == expected_value

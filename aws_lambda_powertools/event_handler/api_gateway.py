@@ -1,6 +1,8 @@
+import base64
 import re
+import zlib
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
@@ -15,11 +17,12 @@ class ProxyEventType(Enum):
 
 
 class RouteEntry:
-    def __init__(self, method: str, rule: Any, func: Callable, cors: bool):
+    def __init__(self, method: str, rule: Any, func: Callable, cors: bool, compress: bool):
         self.method = method.upper()
         self.rule = rule
         self.func = func
         self.cors = cors
+        self.compress = compress
 
 
 class ApiGatewayResolver:
@@ -30,21 +33,21 @@ class ApiGatewayResolver:
         self._proxy_type = proxy_type
         self._routes: List[RouteEntry] = []
 
-    def get(self, rule: str, cors: bool = False):
-        return self.route(rule, "GET", cors)
+    def get(self, rule: str, cors: bool = False, compress: bool = False):
+        return self.route(rule, "GET", cors, compress)
 
-    def post(self, rule: str, cors: bool = False):
-        return self.route(rule, "POST", cors)
+    def post(self, rule: str, cors: bool = False, compress: bool = False):
+        return self.route(rule, "POST", cors, compress)
 
-    def put(self, rule: str, cors: bool = False):
-        return self.route(rule, "PUT", cors)
+    def put(self, rule: str, cors: bool = False, compress: bool = False):
+        return self.route(rule, "PUT", cors, compress)
 
-    def delete(self, rule: str, cors: bool = False):
-        return self.route(rule, "DELETE", cors)
+    def delete(self, rule: str, cors: bool = False, compress: bool = False):
+        return self.route(rule, "DELETE", cors, compress)
 
-    def route(self, rule: str, method: str, cors: bool = False):
+    def route(self, rule: str, method: str, cors: bool = False, compress: bool = False):
         def register_resolver(func: Callable):
-            self._register(func, rule, method, cors)
+            self._register(func, rule, method, cors, compress)
             return func
 
         return register_resolver
@@ -54,19 +57,32 @@ class ApiGatewayResolver:
         self.lambda_context = context
 
         route, args = self._find_route(self.current_event.http_method, self.current_event.path)
-
         result = route.func(**args)
-
         headers = {"Content-Type": result[1]}
         if route.cors:
             headers["Access-Control-Allow-Origin"] = "*"
             headers["Access-Control-Allow-Methods"] = route.method
             headers["Access-Control-Allow-Credentials"] = "true"
 
-        return {"statusCode": result[0], "headers": headers, "body": result[2]}
+        body: Union[str, bytes] = result[2]
+        if route.compress and "gzip" in (self.current_event.get_header_value("accept-encoding") or ""):
+            gzip_compress = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS | 16)
+            if isinstance(body, str):
+                body = bytes(body, "utf-8")
+            body = gzip_compress.compress(body) + gzip_compress.flush()
 
-    def _register(self, func: Callable, rule: str, method: str, cors: bool):
-        self._routes.append(RouteEntry(method, self._build_rule_pattern(rule), func, cors))
+        response = {"statusCode": result[0], "headers": headers}
+
+        if isinstance(body, bytes):
+            response["isBase64Encoded"] = True
+            body = base64.b64encode(body).decode()
+
+        response["body"] = body
+
+        return response
+
+    def _register(self, func: Callable, rule: str, method: str, cors: bool, compress: bool):
+        self._routes.append(RouteEntry(method, self._build_rule_pattern(rule), func, cors, compress))
 
     @staticmethod
     def _build_rule_pattern(rule: str):
@@ -82,12 +98,12 @@ class ApiGatewayResolver:
 
     def _find_route(self, method: str, path: str) -> Tuple[RouteEntry, Dict]:
         method = method.upper()
-        for resolver in self._routes:
-            if method != resolver.method:
+        for route in self._routes:
+            if method != route.method:
                 continue
-            match: Optional[re.Match] = resolver.rule.match(path)
+            match: Optional[re.Match] = route.rule.match(path)
             if match:
-                return resolver, match.groupdict()
+                return route, match.groupdict()
 
         raise ValueError(f"No route found for '{method}.{path}'")
 
