@@ -14,29 +14,37 @@ class ProxyEventType(Enum):
     api_gateway = http_api_v1
 
 
+class RouteEntry:
+    def __init__(self, method: str, rule: Any, func: Callable, cors: bool):
+        self.method = method.upper()
+        self.rule = rule
+        self.func = func
+        self.cors = cors
+
+
 class ApiGatewayResolver:
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
 
     def __init__(self, proxy_type: Enum = ProxyEventType.http_api_v1):
         self._proxy_type = proxy_type
-        self._routes: List[Dict] = []
+        self._routes: List[RouteEntry] = []
 
-    def get(self, rule: str):
-        return self.route(rule, "GET")
+    def get(self, rule: str, cors: bool = False):
+        return self.route(rule, "GET", cors)
 
-    def post(self, rule: str):
-        return self.route(rule, "POST")
+    def post(self, rule: str, cors: bool = False):
+        return self.route(rule, "POST", cors)
 
-    def put(self, rule: str):
-        return self.route(rule, "PUT")
+    def put(self, rule: str, cors: bool = False):
+        return self.route(rule, "PUT", cors)
 
-    def delete(self, rule: str):
-        return self.route(rule, "DELETE")
+    def delete(self, rule: str, cors: bool = False):
+        return self.route(rule, "DELETE", cors)
 
-    def route(self, rule: str, method: str):
-        def register_resolver(func: Callable[[Any, Any], Tuple[int, str, str]]):
-            self._register(func, rule, method)
+    def route(self, rule: str, method: str, cors: bool = False):
+        def register_resolver(func: Callable):
+            self._register(func, rule, method, cors)
             return func
 
         return register_resolver
@@ -45,15 +53,20 @@ class ApiGatewayResolver:
         self.current_event = self._as_data_class(event)
         self.lambda_context = context
 
-        resolver: Callable[[Any], Tuple[int, str, str]]
-        resolver, args = self._find_route(self.current_event.http_method, self.current_event.path)
+        route, args = self._find_route(self.current_event.http_method, self.current_event.path)
 
-        result = resolver(**args)
+        result = route.func(**args)
 
-        return {"statusCode": result[0], "headers": {"Content-Type": result[1]}, "body": result[2]}
+        headers = {"Content-Type": result[1]}
+        if route.cors:
+            headers["Access-Control-Allow-Origin"] = "*"
+            headers["Access-Control-Allow-Methods"] = route.method
+            headers["Access-Control-Allow-Credentials"] = "true"
 
-    def _register(self, func: Callable[[Any, Any], Tuple[int, str, str]], rule: str, method: str):
-        self._routes.append({"method": method.upper(), "rule": self._build_rule_pattern(rule), "func": func})
+        return {"statusCode": result[0], "headers": headers, "body": result[2]}
+
+    def _register(self, func: Callable, rule: str, method: str, cors: bool):
+        self._routes.append(RouteEntry(method, self._build_rule_pattern(rule), func, cors))
 
     @staticmethod
     def _build_rule_pattern(rule: str):
@@ -67,15 +80,14 @@ class ApiGatewayResolver:
             return APIGatewayProxyEventV2(event)
         return ALBEvent(event)
 
-    def _find_route(self, method: str, path: str) -> Tuple[Callable, Dict]:
+    def _find_route(self, method: str, path: str) -> Tuple[RouteEntry, Dict]:
         method = method.upper()
-
         for resolver in self._routes:
-            if method != resolver["method"]:
+            if method != resolver.method:
                 continue
-            match: Optional[re.Match] = resolver["rule"].match(path)
+            match: Optional[re.Match] = resolver.rule.match(path)
             if match:
-                return resolver["func"], match.groupdict()
+                return resolver, match.groupdict()
 
         raise ValueError(f"No route found for '{method}.{path}'")
 

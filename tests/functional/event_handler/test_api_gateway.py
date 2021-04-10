@@ -110,3 +110,23 @@ def test_no_matches():
 
     with pytest.raises(ValueError):
         handler(load_event("apiGatewayProxyEvent.json"), None)
+
+
+def test_cors():
+    app = ApiGatewayResolver()
+
+    @app.get("/my/path", cors=True)
+    def with_cors():
+        return 200, "text/html", "test"
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    result = handler(load_event("apiGatewayProxyEvent.json"), None)
+
+    assert "headers" in result
+    headers = result["headers"]
+    assert headers["Content-Type"] == "text/html"
+    assert headers["Access-Control-Allow-Origin"] == "*"
+    assert headers["Access-Control-Allow-Methods"] == "GET"
+    assert headers["Access-Control-Allow-Credentials"] == "true"
