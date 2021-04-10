@@ -50,21 +50,6 @@ def test_api_gateway_v1():
     assert result["headers"]["Content-Type"] == "application/json"
 
 
-def test_include_rule_matching():
-    app = ApiGatewayResolver()
-
-    @app.get("/<name>/<my_id>")
-    def get_lambda(my_id: str, name: str):
-        assert name == "my"
-        return 200, "plain/html", my_id
-
-    result = app(load_event("apiGatewayProxyEvent.json"), {})
-
-    assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == "plain/html"
-    assert result["body"] == "path"
-
-
 def test_api_gateway():
     app = ApiGatewayResolver(proxy_type=ProxyEventType.api_gateway)
 
@@ -96,6 +81,21 @@ def test_api_gateway_v2():
     assert result["body"] == "tom"
 
 
+def test_include_rule_matching():
+    app = ApiGatewayResolver()
+
+    @app.get("/<name>/<my_id>")
+    def get_lambda(my_id: str, name: str):
+        assert name == "my"
+        return 200, "plain/html", my_id
+
+    result = app(load_event("apiGatewayProxyEvent.json"), {})
+
+    assert result["statusCode"] == 200
+    assert result["headers"]["Content-Type"] == "plain/html"
+    assert result["body"] == "path"
+
+
 def test_no_matches():
     app = ApiGatewayResolver()
 
@@ -103,16 +103,38 @@ def test_no_matches():
     def no_get_matching():
         raise RuntimeError()
 
-    @app.put("/no_matching")
+    @app.post("/no_matching_post")
+    def no_post_matching():
+        raise RuntimeError()
+
+    @app.put("/no_matching_put")
     def no_put_matching():
         raise RuntimeError()
 
-    @app.delete("/no_matching")
+    @app.delete("/no_matching_delete")
     def no_delete_matching():
+        raise RuntimeError()
+
+    @app.patch("/no_matching_patch")
+    def no_patch_matching():
         raise RuntimeError()
 
     def handler(event, context):
         app.resolve(event, context)
+
+    routes = app._routes
+    assert len(routes) == 5
+    for route in routes:
+        if route.func == no_get_matching:
+            assert route.method == "GET"
+        if route.func == no_post_matching:
+            assert route.method == "POST"
+        if route.func == no_put_matching:
+            assert route.method == "PUT"
+        if route.func == no_delete_matching:
+            assert route.method == "DELETE"
+        if route.func == no_patch_matching:
+            assert route.method == "PATCH"
 
     with pytest.raises(ValueError):
         handler(load_event("apiGatewayProxyEvent.json"), None)

@@ -16,7 +16,7 @@ class ProxyEventType(Enum):
     api_gateway = http_api_v1
 
 
-class RouteEntry:
+class Route:
     def __init__(
         self, method: str, rule: Any, func: Callable, cors: bool, compress: bool, cache_control: Optional[str]
     ):
@@ -34,7 +34,7 @@ class ApiGatewayResolver:
 
     def __init__(self, proxy_type: Enum = ProxyEventType.http_api_v1):
         self._proxy_type = proxy_type
-        self._routes: List[RouteEntry] = []
+        self._routes: List[Route] = []
 
     def get(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
         return self.route(rule, "GET", cors, compress, cache_control)
@@ -48,14 +48,25 @@ class ApiGatewayResolver:
     def delete(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
         return self.route(rule, "DELETE", cors, compress, cache_control)
 
+    def patch(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+        return self.route(rule, "PATCH", cors, compress, cache_control)
+
     def route(self, rule: str, method: str, cors: bool = False, compress: bool = False, cache_control: str = None):
         def register_resolver(func: Callable):
-            self._append(func, rule, method, cors, compress, cache_control)
+            self._add(func, rule, method, cors, compress, cache_control)
             return func
 
         return register_resolver
 
-    def resolve(self, event: Dict, context: LambdaContext) -> Dict:
+    def _add(self, func: Callable, rule: str, method: str, cors: bool, compress: bool, cache_control: Optional[str]):
+        self._routes.append(Route(method, self._build_rule_pattern(rule), func, cors, compress, cache_control))
+
+    @staticmethod
+    def _build_rule_pattern(rule: str):
+        rule_regex: str = re.sub(r"(<\w+>)", r"(?P\1.+)", rule)
+        return re.compile("^{}$".format(rule_regex))
+
+    def resolve(self, event, context) -> Dict[str, Any]:
         self.current_event = self._as_data_class(event)
         self.lambda_context = context
 
@@ -88,14 +99,6 @@ class ApiGatewayResolver:
 
         return {"statusCode": status_code, "headers": headers, "body": body, "isBase64Encoded": base64_encoded}
 
-    def _append(self, func: Callable, rule: str, method: str, cors: bool, compress: bool, cache_control: Optional[str]):
-        self._routes.append(RouteEntry(method, self._build_rule_pattern(rule), func, cors, compress, cache_control))
-
-    @staticmethod
-    def _build_rule_pattern(rule: str):
-        rule_regex: str = re.sub(r"(<\w+>)", r"(?P\1.+)", rule)
-        return re.compile("^{}$".format(rule_regex))
-
     def _as_data_class(self, event: Dict) -> BaseProxyEvent:
         if self._proxy_type == ProxyEventType.http_api_v1:
             return APIGatewayProxyEvent(event)
@@ -103,7 +106,7 @@ class ApiGatewayResolver:
             return APIGatewayProxyEventV2(event)
         return ALBEvent(event)
 
-    def _find_route(self, method: str, path: str) -> Tuple[RouteEntry, Dict]:
+    def _find_route(self, method: str, path: str) -> Tuple[Route, Dict]:
         method = method.upper()
         for route in self._routes:
             if method != route.method:
