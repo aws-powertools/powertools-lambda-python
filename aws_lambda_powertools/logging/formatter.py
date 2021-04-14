@@ -181,10 +181,14 @@ class JsonFormatter(logging.Formatter):
 
     def format(self, record):  # noqa: A003
         formatted_log = self._extract_log_keys(log_record=record)
-        formatted_log["message"] = self._extract_log_message(log_record=record)
-        formatted_log["exception_name"] = self._extract_log_exception_name(log_record=record)
-        formatted_log["exception"] = self._extract_log_exception(log_record=record)
-        formatted_log.update({"xray_trace_id": self._get_latest_trace_id()})  # fetch latest Trace ID, if any
+        formatted_log.update(
+            {
+                "message": self._extract_log_message(log_record=record),
+                "exception_name": self._extract_log_exception_name(log_record=record),
+                "exception": self._extract_log_exception(log_record=record),
+                "xray_trace_id": self._get_latest_trace_id(),
+            }
+        )
 
         # Filter out top level key with values that are None
         formatted_log = {k: v for k, v in formatted_log.items() if v is not None}
