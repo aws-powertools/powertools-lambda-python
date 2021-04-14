@@ -136,7 +136,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         )
         self.log_level = self._get_log_level(level)
         self.child = child
-        self._handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
+        self._handler = logging.StreamHandler(stream) or logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
         self._init_logger(**kwargs)
