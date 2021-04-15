@@ -2,7 +2,7 @@ import json
 import logging
 import os
 from functools import partial
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from ..shared import constants
 
@@ -125,7 +125,7 @@ class LambdaPowertoolsFormatter(logging.Formatter):
 
         return message
 
-    def _extract_log_exception(self, log_record: logging.LogRecord) -> Optional[str]:
+    def _extract_log_exception(self, log_record: logging.LogRecord) -> Union[Tuple[str, str], Tuple[None, None]]:
         """Format traceback information, if available
 
         Parameters
@@ -135,31 +135,13 @@ class LambdaPowertoolsFormatter(logging.Formatter):
 
         Returns
         -------
-        log_record: Optional[str]
-            Log record with constant traceback info
+        log_record: Optional[Tuple[str, str]]
+            Log record with constant traceback info and exception name
         """
         if log_record.exc_info:
-            return self.formatException(log_record.exc_info)
+            return self.formatException(log_record.exc_info), log_record.exc_info[0].__name__
 
-        return None
-
-    def _extract_log_exception_name(self, log_record: logging.LogRecord) -> Optional[str]:
-        """Extract the exception name, if available
-
-        Parameters
-        ----------
-        log_record : logging.LogRecord
-            Log record to extract exception name from
-
-        Returns
-        -------
-        log_record: Optional[str]
-            Log record with exception name
-        """
-        if log_record.exc_info:
-            return log_record.exc_info[0].__name__
-
-        return None
+        return None, None
 
     def _extract_log_keys(self, log_record: logging.LogRecord) -> Dict:
         """Extract and parse custom and reserved log keys
@@ -199,14 +181,9 @@ class LambdaPowertoolsFormatter(logging.Formatter):
 
     def format(self, record):  # noqa: A003
         formatted_log = self._extract_log_keys(log_record=record)
-        formatted_log.update(
-            {
-                "message": self._extract_log_message(log_record=record),
-                "exception_name": self._extract_log_exception_name(log_record=record),
-                "exception": self._extract_log_exception(log_record=record),
-                "xray_trace_id": self._get_latest_trace_id(),
-            }
-        )
+        formatted_log["message"] = self._extract_log_message(log_record=record)
+        formatted_log["exception"], formatted_log["exception_name"] = self._extract_log_exception(log_record=record)
+        formatted_log["xray_trace_id"] = self._get_latest_trace_id()
 
         # Filter out top level key with values that are None
         formatted_log = {k: v for k, v in formatted_log.items() if v is not None}
