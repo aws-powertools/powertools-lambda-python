@@ -113,6 +113,8 @@ def test_with_unserializable_value_in_message_custom(stdout, service_name):
     class Unserializable:
         pass
 
+    # Refactor: Needs to decouple Formatter to allow a custom encoder w/ a default coercer
+
     # GIVEN a custom json_default
     logger = Logger(
         service=service_name,

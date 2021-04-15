@@ -12,7 +12,7 @@ from ..shared import constants
 from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
 from .exceptions import InvalidLoggerSamplingRateError
 from .filters import SuppressFilter
-from .formatter import JsonFormatter
+from .formatter import LambdaPowertoolsFormatter
 from .lambda_context import build_lambda_context_model
 
 logger = logging.getLogger(__name__)
@@ -305,7 +305,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
                 handler.formatter.update_formatter(**kwargs)
             else:
                 # Set a new formatter for a logger handler
-                handler.setFormatter(JsonFormatter(**self._default_log_keys, **kwargs))
+                handler.setFormatter(LambdaPowertoolsFormatter(**self._default_log_keys, **kwargs))
 
     def set_correlation_id(self, value: str):
         """Sets the correlation_id in the logging json

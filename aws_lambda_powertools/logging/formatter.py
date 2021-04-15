@@ -1,7 +1,8 @@
 import json
 import logging
 import os
-from typing import Dict, Iterable, Optional, Union
+from functools import partial
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 from ..shared import constants
 
@@ -30,47 +31,64 @@ STD_LOGGING_KEYS = (
 )
 
 
-class JsonFormatter(logging.Formatter):
-    """AWS Lambda Logging formatter.
+class LambdaPowertoolsFormatter(logging.Formatter):
+    """AWS Lambda Powertools Logging formatter.
 
-    Formats the log message as a JSON encoded string.  If the message is a
-    dict it will be used directly.  If the message can be parsed as JSON, then
-    the parse d value is used in the output record.
-
-    Originally taken from https://gitlab.com/hadrien/aws_lambda_logging/
-
+    Formats the log message as a JSON encoded string. If the message is a
+    dict it will be used directly.
     """
 
-    def __init__(self, **kwargs):
-        """Return a JsonFormatter instance.
-
-        The `json_default` kwarg is used to specify a formatter for otherwise
-        unserializable values.  It must not throw.  Defaults to a function that
-        coerces the value to a string.
+    def __init__(
+        self,
+        json_encoder: Optional[Callable[[Any], Any]] = None,
+        json_decoder: Optional[Callable[[Any], Any]] = None,
+        datefmt: str = None,
+        log_record_order: List = None,
+        **kwargs
+    ):
+        """Return a LambdaPowertoolsFormatter instance.
 
         The `log_record_order` kwarg is used to specify the order of the keys used in
         the structured json logs. By default the order is: "level", "location", "message", "timestamp",
         "service" and "sampling_rate".
 
         Other kwargs are used to specify log field format strings.
-        """
-        # Set the default unserializable function, by default values will be cast as str.
-        self.default_json_formatter = kwargs.pop("json_default", str)
-        # Set the insertion order for the log messages
-        self.log_format = dict.fromkeys(kwargs.pop("log_record_order", ["level", "location", "message", "timestamp"]))
-        self.reserved_keys = ["timestamp", "level", "location"]
-        # Set the date format used by `asctime`
-        super(JsonFormatter, self).__init__(datefmt=kwargs.pop("datefmt", None))
 
-        self.log_format.update(self._build_root_keys(**kwargs))
+        Parameters
+        ----------
+        json_encoder : Callable, optional
+            A function to serialize `obj` to a JSON formatted `str`, by default json.dumps
+        json_decoder : Callable, optional
+            A function to deserialize `str`, `bytes`, bytearray` containing a JSON document to a Python `obj`,
+            by default json.loads
+        datefmt : str, optional
+            String directives (strftime) to format log timestamp
+
+            See https://docs.python.org/3/library/time.html#time.strftime
+        kwargs
+            Key-value to be included in log messages
+
+        Examples
+        --------
+        Create examples
+        """
+        self.json_decoder = json_decoder or json.loads
+        self.json_encoder = json_encoder or partial(json.dumps, default=str, separators=(",", ":"))
+        self.datefmt = datefmt
+        self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
+        self.log_format = dict.fromkeys(self.log_record_order)  # Set the insertion order for the log messages
+        self.reserved_keys = ["timestamp", "level", "location"]
+
+        super(LambdaPowertoolsFormatter, self).__init__(datefmt=self.datefmt)
+
+        self.log_format.update(**self._build_default_keys(), **kwargs)
 
     @staticmethod
-    def _build_root_keys(**kwargs):
+    def _build_default_keys():
         return {
             "level": "%(levelname)s",
             "location": "%(funcName)s:%(lineno)d",
             "timestamp": "%(asctime)s",
-            **kwargs,
         }
 
     @staticmethod
@@ -81,8 +99,7 @@ class JsonFormatter(logging.Formatter):
     def update_formatter(self, **kwargs):
         self.log_format.update(kwargs)
 
-    @staticmethod
-    def _extract_log_message(log_record: logging.LogRecord) -> Union[Dict, str, bool, Iterable]:
+    def _extract_log_message(self, log_record: logging.LogRecord) -> Union[Dict, str, bool, Iterable]:
         """Extract message from log record and attempt to JSON decode it
 
         Parameters
@@ -100,9 +117,8 @@ class JsonFormatter(logging.Formatter):
 
         message: str = log_record.getMessage()
 
-        # Attempt to decode non-str messages e.g. msg = '{"x": "y"}'
         try:
-            message = json.loads(log_record.msg)
+            message = self.json_decoder(log_record.msg)
         except (json.decoder.JSONDecodeError, TypeError, ValueError):
             pass
 
@@ -162,6 +178,7 @@ class JsonFormatter(logging.Formatter):
 
         formatted_log = {}
 
+        # Refactor: Remove reserved keys and lookup string interpolation instead to allow other keys
         # We have to iterate over a default or existing log structure
         # then replace any logging expression for reserved keys e.g. '%(level)s' to 'INFO'
         # and lastly add or replace incoming keys (those added within the constructor or .structure_logs method)
@@ -193,4 +210,4 @@ class JsonFormatter(logging.Formatter):
         # Filter out top level key with values that are None
         formatted_log = {k: v for k, v in formatted_log.items() if v is not None}
 
-        return json.dumps(formatted_log, default=self.default_json_formatter)
+        return self.json_encoder(formatted_log)
