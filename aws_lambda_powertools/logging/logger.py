@@ -129,7 +129,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             choice=service, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
         )
         self.sampling_rate = resolve_env_var_choice(
-            choice=sampling_rate, env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE, 0.0)
+            choice=sampling_rate, env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE)
         )
         self._is_deduplication_disabled = resolve_truthy_env_var_choice(
             env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false")

@@ -175,7 +175,7 @@ def test_log_custom_formatting(stdout, service_name):
 
 def test_log_dict_key_strip_nones(stdout, service_name):
     # GIVEN a logger confirmation where we set `location` and `timestamp` to None
-    # Note: level, sampling_rate and service can not be suppressed
+    # Note: level and service cannot be suppressed
     logger = Logger(stream=stdout, level=None, location=None, timestamp=None, sampling_rate=None, service=None)
 
     # WHEN logging a message
@@ -183,8 +183,8 @@ def test_log_dict_key_strip_nones(stdout, service_name):
 
     log_dict: dict = json.loads(stdout.getvalue())
 
-    # THEN the keys should only include `level`, `message`, `service`, `sampling_rate`
-    assert sorted(log_dict.keys()) == ["level", "message", "sampling_rate", "service"]
+    # THEN the keys should only include `level`, `message`, `service`
+    assert sorted(log_dict.keys()) == ["level", "message", "service"]
     assert log_dict["service"] == "service_undefined"
 
 

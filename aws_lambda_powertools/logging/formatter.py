@@ -81,7 +81,8 @@ class LambdaPowertoolsFormatter(logging.Formatter):
 
         super(LambdaPowertoolsFormatter, self).__init__(datefmt=self.datefmt)
 
-        self.log_format.update(**self._build_default_keys(), **kwargs)
+        keys_combined = {**self._build_default_keys(), **kwargs}
+        self.log_format.update(**keys_combined)
 
     @staticmethod
     def _build_default_keys():
