@@ -42,6 +42,7 @@ class LambdaPowertoolsFormatter(logging.Formatter):
         self,
         json_encoder: Optional[Callable[[Any], Any]] = None,
         json_decoder: Optional[Callable[[Any], Any]] = None,
+        json_default: Optional[Callable[[Any], Any]] = None,
         datefmt: str = None,
         log_record_order: List = None,
         **kwargs
@@ -61,6 +62,11 @@ class LambdaPowertoolsFormatter(logging.Formatter):
         json_decoder : Callable, optional
             A function to deserialize `str`, `bytes`, bytearray` containing a JSON document to a Python `obj`,
             by default json.loads
+        json_default : Callable, optional
+            A function to coercer unserializable values, by default str
+
+            Only used when no custom JSON encoder is set
+
         datefmt : str, optional
             String directives (strftime) to format log timestamp
 
@@ -71,13 +77,16 @@ class LambdaPowertoolsFormatter(logging.Formatter):
         Examples
         --------
         Create examples
+
+        Add example of standard log attributes that use str interpolation e.g. %(process)d
+        Add example of JSON default fn for unserializable values
         """
         self.json_decoder = json_decoder or json.loads
-        self.json_encoder = json_encoder or partial(json.dumps, default=str, separators=(",", ":"))
+        self.json_default = json_default or str
+        self.json_encoder = json_encoder or partial(json.dumps, default=self.json_default, separators=(",", ":"))
         self.datefmt = datefmt
         self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
         self.log_format = dict.fromkeys(self.log_record_order)  # Set the insertion order for the log messages
-        self.reserved_keys = ["timestamp", "level", "location"]
 
         super(LambdaPowertoolsFormatter, self).__init__(datefmt=self.datefmt)
 
@@ -161,12 +170,11 @@ class LambdaPowertoolsFormatter(logging.Formatter):
 
         formatted_log = {}
 
-        # Refactor: Remove reserved keys and lookup string interpolation instead to allow other keys
         # We have to iterate over a default or existing log structure
-        # then replace any logging expression for reserved keys e.g. '%(level)s' to 'INFO'
-        # and lastly add or replace incoming keys (those added within the constructor or .structure_logs method)
+        # then replace any std log attribute e.g. '%(level)s' to 'INFO', '%(process)d to '4773'
+        # lastly add or replace incoming keys (those added within the constructor or .structure_logs method)
         for key, value in self.log_format.items():
-            if value and key in self.reserved_keys:
+            if isinstance(value, str) and value.startswith("%("):
                 formatted_log[key] = value % record_dict
             else:
                 formatted_log[key] = value

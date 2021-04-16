@@ -243,3 +243,17 @@ def test_log_dict_xray_is_updated_when_tracing_id_changes(stdout, monkeypatch, s
     assert log_dict_2["xray_trace_id"] == trace_id_2
 
     monkeypatch.delenv(name="_X_AMZN_TRACE_ID")
+
+
+def test_log_custom_std_log_attribute(stdout, service_name):
+    # GIVEN a logger where we have a standard log attr process
+    # https://docs.python.org/3/library/logging.html#logrecord-attributes
+    logger = Logger(service=service_name, stream=stdout, process="%(process)d")
+
+    # WHEN logging a message
+    logger.info("foo")
+
+    log_dict: dict = json.loads(stdout.getvalue())
+
+    # THEN process key should be evaluated
+    assert "%" not in log_dict["process"]
