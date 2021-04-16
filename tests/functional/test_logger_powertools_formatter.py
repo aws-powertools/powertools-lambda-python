@@ -3,6 +3,7 @@ import io
 import json
 import random
 import string
+import time
 
 import pytest
 
@@ -257,3 +258,11 @@ def test_log_custom_std_log_attribute(stdout, service_name):
 
     # THEN process key should be evaluated
     assert "%" not in log_dict["process"]
+
+
+def test_log_in_utc(stdout, service_name):
+    # GIVEN a logger where UTC TZ has been set
+    logger = Logger(service=service_name, stream=stdout, utc=True)
+
+    # THEN logging formatter time converter should use gmtime fn
+    assert logger._logger.handlers[0].formatter.converter == time.gmtime
