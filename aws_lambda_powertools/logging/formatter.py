@@ -164,7 +164,7 @@ class LambdaPowertoolsFormatter(logging.Formatter):
 
         return None, None
 
-    def _extract_log_keys(self, log_record: logging.LogRecord) -> Dict:
+    def _extract_log_keys(self, log_record: logging.LogRecord) -> Dict[str, Any]:
         """Extract and parse custom and reserved log keys
 
         Parameters
@@ -177,12 +177,13 @@ class LambdaPowertoolsFormatter(logging.Formatter):
         formatted_log: Dict
             Structured log as dictionary
         """
-        record_dict = log_record.__dict__.copy()  # has extra kwargs we are after
-        record_dict["asctime"] = self.formatTime(log_record, self.datefmt)
+        record_dict = log_record.__dict__.copy()
+        record_dict["asctime"] = self.formatTime(record=log_record, datefmt=self.datefmt)
+        extras = {k: v for k, v in record_dict.items() if k not in STD_LOGGING_KEYS}
 
-        formatted_log = {}
+        formatted_log = {**extras}
 
-        # We have to iterate over a default or existing log structure
+        # Iterate over a default or existing log structure
         # then replace any std log attribute e.g. '%(level)s' to 'INFO', '%(process)d to '4773'
         # lastly add or replace incoming keys (those added within the constructor or .structure_logs method)
         for key, value in self.log_format.items():
@@ -191,22 +192,19 @@ class LambdaPowertoolsFormatter(logging.Formatter):
             else:
                 formatted_log[key] = value
 
-        # pick up extra keys when logging a new message e.g. log.info("my message", extra={"additional_key": "value"}
-        # these messages will be added to the root of the final structure not within `message` key
-        for key, value in record_dict.items():
-            if key not in STD_LOGGING_KEYS:
-                formatted_log[key] = value
-
         return formatted_log
+
+    @staticmethod
+    def _strip_none_records(records: Dict[str, Any]) -> Dict[str, Any]:
+        """Remove any key with None as value"""
+        return {k: v for k, v in records.items() if v is not None}
 
     def format(self, record):  # noqa: A003
         formatted_log = self._extract_log_keys(log_record=record)
         formatted_log["message"] = self._extract_log_message(log_record=record)
         formatted_log["exception"], formatted_log["exception_name"] = self._extract_log_exception(log_record=record)
         formatted_log["xray_trace_id"] = self._get_latest_trace_id()
-
-        # Filter out top level key with values that are None
-        formatted_log = {k: v for k, v in formatted_log.items() if v is not None}
+        formatted_log = self._strip_none_records(records=formatted_log)
 
         return self.json_encoder(formatted_log)
 
