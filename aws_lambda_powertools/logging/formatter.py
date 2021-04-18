@@ -44,8 +44,8 @@ class LambdaPowertoolsFormatter(logging.Formatter):
 
     def __init__(
         self,
-        json_encoder: Optional[Callable[[Any], Any]] = None,
-        json_decoder: Optional[Callable[[Any], Any]] = None,
+        json_serializer: Optional[Callable[[Any], Any]] = None,
+        json_deserializer: Optional[Callable[[Any], Any]] = None,
         json_default: Optional[Callable[[Any], Any]] = None,
         datefmt: str = None,
         log_record_order: List = None,
@@ -62,9 +62,9 @@ class LambdaPowertoolsFormatter(logging.Formatter):
 
         Parameters
         ----------
-        json_encoder : Callable, optional
+        json_serializer : Callable, optional
             A function to serialize `obj` to a JSON formatted `str`, by default json.dumps
-        json_decoder : Callable, optional
+        json_deserializer : Callable, optional
             A function to deserialize `str`, `bytes`, bytearray` containing a JSON document to a Python `obj`,
             by default json.loads
         json_default : Callable, optional
@@ -89,9 +89,9 @@ class LambdaPowertoolsFormatter(logging.Formatter):
         Add example of JSON default fn for unserializable values
         Add example for UTC
         """
-        self.json_decoder = json_decoder or json.loads
+        self.json_deserializer = json_deserializer or json.loads
         self.json_default = json_default or str
-        self.json_encoder = json_encoder or partial(json.dumps, default=self.json_default, separators=(",", ":"))
+        self.json_serializer = json_serializer or partial(json.dumps, default=self.json_default, separators=(",", ":"))
         self.datefmt = datefmt
         self.utc = utc
         self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
@@ -140,7 +140,7 @@ class LambdaPowertoolsFormatter(logging.Formatter):
 
         if isinstance(message, str):  # could be a JSON string
             try:
-                message = self.json_decoder(message)
+                message = self.json_deserializer(message)
             except (json.decoder.JSONDecodeError, TypeError, ValueError):
                 pass
 
@@ -206,7 +206,7 @@ class LambdaPowertoolsFormatter(logging.Formatter):
         formatted_log["xray_trace_id"] = self._get_latest_trace_id()
         formatted_log = self._strip_none_records(records=formatted_log)
 
-        return self.json_encoder(formatted_log)
+        return self.json_serializer(formatted_log)
 
     def formatTime(self, record: logging.LogRecord, datefmt: Optional[str] = None) -> str:
         # NOTE: Pyhton time.strftime doesn't provide msec directives
