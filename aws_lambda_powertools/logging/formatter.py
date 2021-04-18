@@ -51,7 +51,7 @@ class LambdaPowertoolsFormatter(logging.Formatter):
         json_deserializer: Optional[Callable[[Any], Any]] = None,
         json_default: Optional[Callable[[Any], Any]] = None,
         datefmt: str = None,
-        log_record_order: List = None,
+        log_record_order: List[str] = None,
         utc: bool = False,
         **kwargs
     ):
@@ -99,6 +99,7 @@ class LambdaPowertoolsFormatter(logging.Formatter):
         self.utc = utc
         self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
         self.log_format = dict.fromkeys(self.log_record_order)  # Set the insertion order for the log messages
+        self.update_formatter = self.append_keys  # alias to previous method
 
         if self.utc:
             self.converter = time.gmtime
@@ -107,6 +108,13 @@ class LambdaPowertoolsFormatter(logging.Formatter):
 
         keys_combined = {**self._build_default_keys(), **kwargs}
         self.log_format.update(**keys_combined)
+
+    def append_keys(self, **additional_keys):
+        self.log_format.update(additional_keys)
+
+    def remove_keys(self, keys: Iterable[str]):
+        for key in keys:
+            self.log_format.pop(key, None)
 
     @staticmethod
     def _build_default_keys():
@@ -120,9 +128,6 @@ class LambdaPowertoolsFormatter(logging.Formatter):
     def _get_latest_trace_id():
         xray_trace_id = os.getenv(constants.XRAY_TRACE_ID_ENV)
         return xray_trace_id.split(";")[0].replace("Root=", "") if xray_trace_id else None
-
-    def update_formatter(self, **kwargs):
-        self.log_format.update(kwargs)
 
     def _extract_log_message(self, log_record: logging.LogRecord) -> Union[Dict[str, Any], str, bool, Iterable]:
         """Extract message from log record and attempt to JSON decode it if str

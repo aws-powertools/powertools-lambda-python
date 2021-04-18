@@ -4,7 +4,7 @@ import logging
 import os
 import random
 import sys
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, Iterable, Optional, Union
 
 import jmespath
 
@@ -42,6 +42,7 @@ def _is_cold_start() -> bool:
 # so we need to return to subclassing removed in #97
 # All methods/properties continue to be proxied to inner logger
 # https://github.com/awslabs/aws-lambda-powertools-python/issues/107
+# noinspection PyRedeclaration
 class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     """Creates and setups a logger to format statements in JSON.
 
@@ -96,7 +97,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         >>> logger = Logger(service="payment")
         >>>
         >>> def handler(event, context):
-                logger.structure_logs(append=True, payment_id=event["payment_id"])
+                logger.append_keys(payment_id=event["payment_id"])
                 logger.info("Hello")
 
     **Create child Logger using logging inheritance via child param**
@@ -139,6 +140,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self._handler = logging.StreamHandler(stream) or logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
+
         self._init_logger(**kwargs)
 
     def __getattr__(self, name):
@@ -282,12 +284,28 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
         return decorate
 
-    def structure_logs(self, append: bool = False, **kwargs):
+    def append_keys(self, **additional_keys):
+        self.registered_formatter.append_keys(**additional_keys)
+
+    def remove_keys(self, keys: Iterable[str]):
+        self.registered_formatter.remove_keys(keys)
+
+    @property
+    def registered_handler(self) -> logging.Handler:
+        """Registered Logger handler"""
+        handlers = self._logger.parent.handlers if self.child else self._logger.handlers
+        return handlers[0]
+
+    @property
+    def registered_formatter(self) -> Optional[LambdaPowertoolsFormatter]:
+        """Registered Logger formatter"""
+        return self.registered_handler.formatter
+
+    def structure_logs(self, append: bool = False, **keys):
         """Sets logging formatting to JSON.
 
         Optionally, it can append keyword arguments
-        to an existing logger so it is available
-        across future log statements.
+        to an existing logger so it is available across future log statements.
 
         Last keyword argument and value wins if duplicated.
 
@@ -297,15 +315,12 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             [description], by default False
         """
 
-        # Child loggers don't have handlers attached, use its parent handlers
-        handlers = self._logger.parent.handlers if self.child else self._logger.handlers
-        for handler in handlers:
-            if append:
-                # Update existing formatter in an existing logger handler
-                handler.formatter.update_formatter(**kwargs)
-            else:
-                # Set a new formatter for a logger handler
-                handler.setFormatter(LambdaPowertoolsFormatter(**self._default_log_keys, **kwargs))
+        if append:
+            # Maintenance: Add deprecation warning for major version, refer to append_keys() when docs are updated
+            self.append_keys(**keys)
+        else:
+            # Set a new formatter for a logger handler
+            self.registered_handler.setFormatter(LambdaPowertoolsFormatter(**self._default_log_keys, **keys))
 
     def set_correlation_id(self, value: str):
         """Sets the correlation_id in the logging json

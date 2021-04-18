@@ -474,3 +474,23 @@ def test_logger_set_correlation_id_path(lambda_context, stdout, service_name):
     # THEN
     log = capture_logging_output(stdout)
     assert request_id == log["correlation_id"]
+
+
+def test_logger_append_remove_keys(stdout, service_name):
+    # GIVEN a Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+    extra_keys = {"request_id": "id", "context": "value"}
+
+    # WHEN keys are updated
+    logger.append_keys(**extra_keys)
+    logger.info("message with new keys")
+
+    # And removed
+    logger.remove_keys(extra_keys.keys())
+    logger.info("message after keys being removed")
+
+    # THEN additional keys should only be present in the first log statement
+    extra_keys_log, keys_removed_log = capture_multiple_logging_statements_output(stdout)
+
+    assert extra_keys.items() <= extra_keys_log.items()
+    assert (extra_keys.items() <= keys_removed_log.items()) is False
