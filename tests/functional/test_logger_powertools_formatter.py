@@ -114,8 +114,6 @@ def test_with_unserializable_value_in_message_custom(stdout, service_name):
     class Unserializable:
         pass
 
-    # Refactor: Needs to decouple Formatter to allow a custom encoder w/ a default coercer
-
     # GIVEN a custom json_default
     logger = Logger(
         service=service_name,
@@ -266,3 +264,14 @@ def test_log_in_utc(stdout, service_name):
 
     # THEN logging formatter time converter should use gmtime fn
     assert logger._logger.handlers[0].formatter.converter == time.gmtime
+
+
+@pytest.mark.parametrize("message", ["hello", 1.10, {}, [], True, object()])
+def test_logging_various_primitives(stdout, service_name, message):
+    # GIVEN a logger with default settings
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN logging a message of multiple common types
+    # THEN it should raise no serialization/deserialization error
+    logger.info(message)
+    json.loads(stdout.getvalue())

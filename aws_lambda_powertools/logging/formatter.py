@@ -7,7 +7,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from ..shared import constants
 
-STD_LOGGING_KEYS = (
+RESERVED_LOG_ATTRS = (
     "name",
     "msg",
     "args",
@@ -121,8 +121,8 @@ class LambdaPowertoolsFormatter(logging.Formatter):
     def update_formatter(self, **kwargs):
         self.log_format.update(kwargs)
 
-    def _extract_log_message(self, log_record: logging.LogRecord) -> Union[Dict, str, bool, Iterable]:
-        """Extract message from log record and attempt to JSON decode it
+    def _extract_log_message(self, log_record: logging.LogRecord) -> Union[Dict[str, Any], str, bool, Iterable]:
+        """Extract message from log record and attempt to JSON decode it if str
 
         Parameters
         ----------
@@ -134,15 +134,15 @@ class LambdaPowertoolsFormatter(logging.Formatter):
         message: Union[Dict, str, bool, Iterable]
             Extracted message
         """
-        if isinstance(log_record.msg, dict):
-            return log_record.msg
+        message = log_record.msg
+        if isinstance(message, dict):
+            return message
 
-        message: str = log_record.getMessage()
-
-        try:
-            message = self.json_decoder(log_record.msg)
-        except (json.decoder.JSONDecodeError, TypeError, ValueError):
-            pass
+        if isinstance(message, str):  # could be a JSON string
+            try:
+                message = self.json_decoder(message)
+            except (json.decoder.JSONDecodeError, TypeError, ValueError):
+                pass
 
         return message
 
@@ -179,7 +179,7 @@ class LambdaPowertoolsFormatter(logging.Formatter):
         """
         record_dict = log_record.__dict__.copy()
         record_dict["asctime"] = self.formatTime(record=log_record, datefmt=self.datefmt)
-        extras = {k: v for k, v in record_dict.items() if k not in STD_LOGGING_KEYS}
+        extras = {k: v for k, v in record_dict.items() if k not in RESERVED_LOG_ATTRS}
 
         formatted_log = {**extras}
 
