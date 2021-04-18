@@ -168,7 +168,7 @@ def test_log_custom_formatting(stdout, service_name):
     log_dict: dict = json.loads(stdout.getvalue())
 
     # THEN the `location` and "timestamp" should match the formatting
-    assert log_dict["location"] == "[test_log_custom_formatting] test_aws_lambda_logging"
+    assert log_dict["location"] == "[test_log_custom_formatting] test_logger_powertools_formatter"
     assert log_dict["timestamp"] == "fake-datefmt"
 
 

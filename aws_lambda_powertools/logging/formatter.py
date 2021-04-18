@@ -11,6 +11,7 @@ RESERVED_LOG_ATTRS = (
     "name",
     "msg",
     "args",
+    "level",
     "levelname",
     "levelno",
     "pathname",
@@ -29,6 +30,8 @@ RESERVED_LOG_ATTRS = (
     "processName",
     "process",
     "asctime",
+    "location",
+    "timestamp",
 )
 
 
@@ -187,7 +190,7 @@ class LambdaPowertoolsFormatter(logging.Formatter):
         # then replace any std log attribute e.g. '%(level)s' to 'INFO', '%(process)d to '4773'
         # lastly add or replace incoming keys (those added within the constructor or .structure_logs method)
         for key, value in self.log_format.items():
-            if isinstance(value, str) and value.startswith("%("):
+            if value and key in RESERVED_LOG_ATTRS:
                 formatted_log[key] = value % record_dict
             else:
                 formatted_log[key] = value
