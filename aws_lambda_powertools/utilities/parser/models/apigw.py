@@ -1,8 +1,10 @@
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, root_validator
 from pydantic.networks import IPvAnyNetwork
+
+from ..types import Literal
 
 
 class ApiGatewayUserCertValidity(BaseModel):
