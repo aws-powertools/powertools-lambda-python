@@ -222,3 +222,6 @@ class LambdaPowertoolsFormatter(logging.Formatter):
             custom_fmt = self.default_time_format.replace(self.custom_ms_time_directive, msec)
             ts_formatted = time.strftime(custom_fmt, record_ts)
         return ts_formatted
+
+
+JsonFormatter = LambdaPowertoolsFormatter  # alias to previous formatter
