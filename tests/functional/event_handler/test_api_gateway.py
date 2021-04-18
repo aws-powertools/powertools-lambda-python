@@ -19,6 +19,11 @@ def read_media(file_name: str) -> bytes:
     return path.read_bytes()
 
 
+LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
+TEXT_HTML = "text/html"
+APPLICATION_JSON = "application/json"
+
+
 def test_alb_event():
     app = ApiGatewayResolver(proxy_type=ProxyEventType.alb_event)
 
@@ -26,12 +31,12 @@ def test_alb_event():
     def foo():
         assert isinstance(app.current_event, ALBEvent)
         assert app.lambda_context == {}
-        return 200, "text/html", "foo"
+        return 200, TEXT_HTML, "foo"
 
     result = app(load_event("albEvent.json"), {})
 
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == "text/html"
+    assert result["headers"]["Content-Type"] == TEXT_HTML
     assert result["body"] == "foo"
 
 
@@ -42,12 +47,12 @@ def test_api_gateway_v1():
     def get_lambda():
         assert isinstance(app.current_event, APIGatewayProxyEvent)
         assert app.lambda_context == {}
-        return 200, "application/json", json.dumps({"foo": "value"})
+        return 200, APPLICATION_JSON, json.dumps({"foo": "value"})
 
-    result = app(load_event("apiGatewayProxyEvent.json"), {})
+    result = app(LOAD_GW_EVENT, {})
 
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == "application/json"
+    assert result["headers"]["Content-Type"] == APPLICATION_JSON
 
 
 def test_api_gateway():
@@ -56,12 +61,12 @@ def test_api_gateway():
     @app.get("/my/path")
     def get_lambda():
         assert isinstance(app.current_event, APIGatewayProxyEvent)
-        return 200, "plain/html", "foo"
+        return 200, TEXT_HTML, "foo"
 
-    result = app(load_event("apiGatewayProxyEvent.json"), {})
+    result = app(LOAD_GW_EVENT, {})
 
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == "plain/html"
+    assert result["headers"]["Content-Type"] == TEXT_HTML
     assert result["body"] == "foo"
 
 
@@ -89,7 +94,7 @@ def test_include_rule_matching():
         assert name == "my"
         return 200, "plain/html", my_id
 
-    result = app(load_event("apiGatewayProxyEvent.json"), {})
+    result = app(LOAD_GW_EVENT, {})
 
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == "plain/html"
@@ -141,7 +146,7 @@ def test_no_matches():
     # WHEN calling the handler
     # THEN raise a ValueError
     with pytest.raises(ValueError):
-        handler(load_event("apiGatewayProxyEvent.json"), None)
+        handler(LOAD_GW_EVENT, None)
 
 
 def test_cors():
@@ -149,16 +154,16 @@ def test_cors():
 
     @app.get("/my/path", cors=True)
     def with_cors():
-        return 200, "text/html", "test"
+        return 200, TEXT_HTML, "test"
 
     def handler(event, context):
         return app.resolve(event, context)
 
-    result = handler(load_event("apiGatewayProxyEvent.json"), None)
+    result = handler(LOAD_GW_EVENT, None)
 
     assert "headers" in result
     headers = result["headers"]
-    assert headers["Content-Type"] == "text/html"
+    assert headers["Content-Type"] == TEXT_HTML
     assert headers["Access-Control-Allow-Origin"] == "*"
     assert headers["Access-Control-Allow-Methods"] == "GET"
     assert headers["Access-Control-Allow-Credentials"] == "true"
@@ -172,7 +177,7 @@ def test_compress():
 
     @app.get("/my/request", compress=True)
     def with_compression():
-        return 200, "application/json", expected_value
+        return 200, APPLICATION_JSON, expected_value
 
     def handler(event, context):
         return app.resolve(event, context)
@@ -224,7 +229,7 @@ def test_cache_control_200():
 
     @app.get("/success", cache_control="max-age=600")
     def with_cache_control():
-        return 200, "text/html", "has 200 response"
+        return 200, TEXT_HTML, "has 200 response"
 
     def handler(event, context):
         return app.resolve(event, context)
@@ -232,7 +237,7 @@ def test_cache_control_200():
     result = handler({"path": "/success", "httpMethod": "GET"}, None)
 
     headers = result["headers"]
-    assert headers["Content-Type"] == "text/html"
+    assert headers["Content-Type"] == TEXT_HTML
     assert headers["Cache-Control"] == "max-age=600"
 
 
@@ -241,7 +246,7 @@ def test_cache_control_non_200():
 
     @app.delete("/fails", cache_control="max-age=600")
     def with_cache_control_has_500():
-        return 503, "text/html", "has 503 response"
+        return 503, TEXT_HTML, "has 503 response"
 
     def handler(event, context):
         return app.resolve(event, context)
@@ -249,5 +254,19 @@ def test_cache_control_non_200():
     result = handler({"path": "/fails", "httpMethod": "DELETE"}, None)
 
     headers = result["headers"]
-    assert headers["Content-Type"] == "text/html"
+    assert headers["Content-Type"] == TEXT_HTML
     assert headers["Cache-Control"] == "no-cache"
+
+
+def test_rest_api():
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.http_api_v1)
+
+    @app.get("/my/path")
+    def rest_func():
+        return {"foo": "value"}
+
+    result = app(LOAD_GW_EVENT, {})
+
+    assert result["statusCode"] == 200
+    assert result["headers"]["Content-Type"] == APPLICATION_JSON
+    assert result["body"] == json.dumps({"foo": "value"})

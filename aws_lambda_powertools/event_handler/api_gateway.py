@@ -1,4 +1,5 @@
 import base64
+import json
 import re
 import zlib
 from enum import Enum
@@ -61,12 +62,15 @@ class ApiGatewayResolver:
     def resolve(self, event, context) -> Dict[str, Any]:
         self.current_event = self._as_data_class(event)
         self.lambda_context = context
-
         route, args = self._find_route(self.current_event.http_method, self.current_event.path)
         result = route.func(**args)
-        status_code: int = result[0]
-        content_type: str = result[1]
-        body: Union[str, bytes] = result[2]
+
+        if isinstance(result, dict):
+            status_code = 200
+            content_type = "application/json"
+            body: Union[str, bytes] = json.dumps(result)
+        else:
+            status_code, content_type, body = result
         headers = {"Content-Type": content_type}
 
         if route.cors:
