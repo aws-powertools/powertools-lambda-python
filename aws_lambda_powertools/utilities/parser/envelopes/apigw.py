@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, Optional, Type, Union
 
-from ..models import APIGatewayProxyEvent
+from ..models import APIGatewayProxyEventModel
 from ..types import Model
 from .base import BaseEnvelope
 
@@ -26,7 +26,7 @@ class ApiGatewayEnvelope(BaseEnvelope):
         Any
             Parsed detail payload with model provided
         """
-        logger.debug(f"Parsing incoming data with Api Gateway model {APIGatewayProxyEvent}")
-        parsed_envelope = APIGatewayProxyEvent.parse_obj(data)
+        logger.debug(f"Parsing incoming data with Api Gateway model {APIGatewayProxyEventModel}")
+        parsed_envelope = APIGatewayProxyEventModel.parse_obj(data)
         logger.debug(f"Parsing event payload in `detail` with {model}")
         return self._parse(data=parsed_envelope.body, model=model)
