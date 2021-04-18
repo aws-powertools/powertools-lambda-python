@@ -53,18 +53,10 @@ class ApiGatewayResolver:
 
     def route(self, rule: str, method: str, cors: bool = False, compress: bool = False, cache_control: str = None):
         def register_resolver(func: Callable):
-            self._add(func, rule, method, cors, compress, cache_control)
+            self._routes.append(Route(method, self._build_rule_pattern(rule), func, cors, compress, cache_control))
             return func
 
         return register_resolver
-
-    def _add(self, func: Callable, rule: str, method: str, cors: bool, compress: bool, cache_control: Optional[str]):
-        self._routes.append(Route(method, self._build_rule_pattern(rule), func, cors, compress, cache_control))
-
-    @staticmethod
-    def _build_rule_pattern(rule: str):
-        rule_regex: str = re.sub(r"(<\w+>)", r"(?P\1.+)", rule)
-        return re.compile("^{}$".format(rule_regex))
 
     def resolve(self, event, context) -> Dict[str, Any]:
         self.current_event = self._as_data_class(event)
@@ -98,6 +90,11 @@ class ApiGatewayResolver:
             body = base64.b64encode(body).decode()
 
         return {"statusCode": status_code, "headers": headers, "body": body, "isBase64Encoded": base64_encoded}
+
+    @staticmethod
+    def _build_rule_pattern(rule: str):
+        rule_regex: str = re.sub(r"(<\w+>)", r"(?P\1.+)", rule)
+        return re.compile("^{}$".format(rule_regex))
 
     def _as_data_class(self, event: Dict) -> BaseProxyEvent:
         if self._proxy_type == ProxyEventType.http_api_v1:

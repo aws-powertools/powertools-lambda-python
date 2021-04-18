@@ -97,45 +97,49 @@ def test_include_rule_matching():
 
 
 def test_no_matches():
+    # GIVEN an event that does not match any of the given routes
     app = ApiGatewayResolver()
 
     @app.get("/not_matching_get")
-    def no_get_matching():
+    def get_func():
         raise RuntimeError()
 
     @app.post("/no_matching_post")
-    def no_post_matching():
+    def post_func():
         raise RuntimeError()
 
     @app.put("/no_matching_put")
-    def no_put_matching():
+    def put_func():
         raise RuntimeError()
 
     @app.delete("/no_matching_delete")
-    def no_delete_matching():
+    def delete_func():
         raise RuntimeError()
 
     @app.patch("/no_matching_patch")
-    def no_patch_matching():
+    def patch_func():
         raise RuntimeError()
 
     def handler(event, context):
         app.resolve(event, context)
 
+    # Also check check the route configurations
     routes = app._routes
     assert len(routes) == 5
     for route in routes:
-        if route.func == no_get_matching:
+        if route.func == get_func:
             assert route.method == "GET"
-        if route.func == no_post_matching:
+        elif route.func == post_func:
             assert route.method == "POST"
-        if route.func == no_put_matching:
+        elif route.func == put_func:
             assert route.method == "PUT"
-        if route.func == no_delete_matching:
+        elif route.func == delete_func:
             assert route.method == "DELETE"
-        if route.func == no_patch_matching:
+        elif route.func == patch_func:
             assert route.method == "PATCH"
 
+    # WHEN calling the handler
+    # THEN raise a ValueError
     with pytest.raises(ValueError):
         handler(load_event("apiGatewayProxyEvent.json"), None)
 
