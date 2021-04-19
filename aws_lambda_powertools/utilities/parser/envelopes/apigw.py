@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class ApiGatewayEnvelope(BaseEnvelope):
-    """Api Gateway envelope to extract data within detail key"""
+    """API Gateway envelope to extract data within body key"""
 
     def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]) -> Optional[Model]:
         """Parses data found with model provided
