@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import time
+from abc import ABCMeta, abstractmethod
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -35,7 +36,17 @@ RESERVED_LOG_ATTRS = (
 )
 
 
-class LambdaPowertoolsFormatter(logging.Formatter):
+class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
+    @abstractmethod
+    def append_keys(self, **additional_keys):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def remove_keys(self, keys: Iterable[str]):
+        raise NotImplementedError()
+
+
+class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     """AWS Lambda Powertools Logging formatter.
 
     Formats the log message as a JSON encoded string. If the message is a

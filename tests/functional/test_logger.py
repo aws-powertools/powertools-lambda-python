@@ -5,12 +5,14 @@ import logging
 import random
 import string
 from collections import namedtuple
+from typing import Iterable
 
 import pytest
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
+from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter
 from aws_lambda_powertools.logging.logger import set_package_logger
 from aws_lambda_powertools.shared import constants
 
@@ -494,3 +496,51 @@ def test_logger_append_remove_keys(stdout, service_name):
 
     assert extra_keys.items() <= extra_keys_log.items()
     assert (extra_keys.items() <= keys_removed_log.items()) is False
+
+
+def test_logger_custom_formatter(stdout, service_name, lambda_context):
+    class CustomFormatter(BasePowertoolsFormatter):
+        custom_format = {}
+
+        def append_keys(self, **additional_keys):
+            self.custom_format.update(additional_keys)
+
+        def remove_keys(self, keys: Iterable[str]):
+            for key in keys:
+                self.custom_format.pop(key, None)
+
+        def format(self, record: logging.LogRecord) -> str:  # noqa: A003
+            return json.dumps(
+                {
+                    "message": super().format(record),
+                    "timestamp": self.formatTime(record),
+                    "my_default_key": "test",
+                    **self.custom_format,
+                }
+            )
+
+    custom_formatter = CustomFormatter()
+
+    # GIVEN a Logger is initialized with a custom formatter
+    logger = Logger(service=service_name, stream=stdout, logger_formatter=custom_formatter)
+
+    # WHEN a lambda function is decorated with logger
+    @logger.inject_lambda_context
+    def handler(event, context):
+        logger.info("Hello")
+
+    handler({}, lambda_context)
+
+    lambda_context_keys = (
+        "function_name",
+        "function_memory_size",
+        "function_arn",
+        "function_request_id",
+    )
+
+    log = capture_logging_output(stdout)
+
+    # THEN custom key should always be present
+    # and lambda contextual info should also be in the logs
+    assert "my_default_key" in log
+    assert all(k in log for k in lambda_context_keys)

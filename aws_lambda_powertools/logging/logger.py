@@ -12,7 +12,7 @@ from ..shared import constants
 from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
 from .exceptions import InvalidLoggerSamplingRateError
 from .filters import SuppressFilter
-from .formatter import LambdaPowertoolsFormatter
+from .formatter import BasePowertoolsFormatter, LambdaPowertoolsFormatter
 from .lambda_context import build_lambda_context_model
 
 logger = logging.getLogger(__name__)
@@ -124,6 +124,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         child: bool = False,
         sampling_rate: float = None,
         stream: sys.stdout = None,
+        logger_formatter: Optional[BasePowertoolsFormatter] = None,
         **kwargs,
     ):
         self.service = resolve_env_var_choice(
@@ -132,11 +133,12 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self.sampling_rate = resolve_env_var_choice(
             choice=sampling_rate, env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE)
         )
+        self.child = child
+        self.logger_formatter = logger_formatter
+        self.log_level = self._get_log_level(level)
         self._is_deduplication_disabled = resolve_truthy_env_var_choice(
             env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false")
         )
-        self.log_level = self._get_log_level(level)
-        self.child = child
         self._handler = logging.StreamHandler(stream) or logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
@@ -292,13 +294,13 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
     @property
     def registered_handler(self) -> logging.Handler:
-        """Registered Logger handler"""
+        """Convenience property to access logger handler"""
         handlers = self._logger.parent.handlers if self.child else self._logger.handlers
         return handlers[0]
 
     @property
-    def registered_formatter(self) -> Optional[LambdaPowertoolsFormatter]:
-        """Registered Logger formatter"""
+    def registered_formatter(self) -> Optional[BasePowertoolsFormatter]:
+        """Convenience property to access logger formatter"""
         return self.registered_handler.formatter
 
     def structure_logs(self, append: bool = False, **keys):
@@ -312,15 +314,16 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         Parameters
         ----------
         append : bool, optional
-            [description], by default False
+            append keys provided to logger formatter, by default False
         """
 
         if append:
             # Maintenance: Add deprecation warning for major version. Refer to append_keys() when docs are updated
             self.append_keys(**keys)
         else:
-            # Set a new formatter for a logger handler
-            self.registered_handler.setFormatter(LambdaPowertoolsFormatter(**self._default_log_keys, **keys))
+            log_keys = {**self._default_log_keys, **keys}
+            formatter = self.logger_formatter or LambdaPowertoolsFormatter(**log_keys)
+            self.registered_handler.setFormatter(formatter)
 
     def set_correlation_id(self, value: str):
         """Sets the correlation_id in the logging json
