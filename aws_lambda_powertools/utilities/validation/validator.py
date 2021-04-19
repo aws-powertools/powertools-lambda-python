@@ -132,7 +132,7 @@ def validator(
 
 
 def validate(
-    event: Dict,
+    event: Any,
     schema: Dict,
     formats: Optional[Dict] = None,
     envelope: str = None,
