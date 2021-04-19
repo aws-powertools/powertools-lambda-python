@@ -29,6 +29,42 @@ class Route:
         self.cache_control = cache_control
 
 
+class Response:
+    def __init__(self, status_code: int, content_type: str, body: Union[str, bytes], headers: Dict = None):
+        self.status_code = status_code
+        self.body = body
+        self.base64_encoded = False
+        self.headers: Dict = headers if headers is not None else {}
+        if "Content-Type" not in self.headers:
+            self.headers["Content-Type"] = content_type
+
+    def add_cors(self, method: str):
+        self.headers["Access-Control-Allow-Origin"] = "*"
+        self.headers["Access-Control-Allow-Methods"] = method
+        self.headers["Access-Control-Allow-Credentials"] = "true"
+
+    def add_cache_control(self, cache_control: str):
+        self.headers["Cache-Control"] = cache_control if self.status_code == 200 else "no-cache"
+
+    def compress(self):
+        self.headers["Content-Encoding"] = "gzip"
+        if isinstance(self.body, str):
+            self.body = bytes(self.body, "utf-8")
+        gzip = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS | 16)
+        self.body = gzip.compress(self.body) + gzip.flush()
+
+    def to_dict(self):
+        if isinstance(self.body, bytes):
+            self.base64_encoded = True
+            self.body = base64.b64encode(self.body).decode()
+        return {
+            "statusCode": self.status_code,
+            "headers": self.headers,
+            "body": self.body,
+            "isBase64Encoded": self.base64_encoded,
+        }
+
+
 class ApiGatewayResolver:
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
@@ -65,35 +101,21 @@ class ApiGatewayResolver:
         route, args = self._find_route(self.current_event.http_method, self.current_event.path)
         result = route.func(**args)
 
-        if isinstance(result, dict):
-            status_code = 200
-            content_type = "application/json"
-            body: Union[str, bytes] = json.dumps(result)
+        if isinstance(result, Response):
+            response = result
+        elif isinstance(result, dict):
+            response = Response(status_code=200, content_type="application/json", body=json.dumps(result))
         else:
-            status_code, content_type, body = result
-        headers = {"Content-Type": content_type}
+            response = Response(*result)
 
         if route.cors:
-            headers["Access-Control-Allow-Origin"] = "*"
-            headers["Access-Control-Allow-Methods"] = route.method
-            headers["Access-Control-Allow-Credentials"] = "true"
-
+            response.add_cors(route.method)
         if route.cache_control:
-            headers["Cache-Control"] = route.cache_control if status_code == 200 else "no-cache"
-
+            response.add_cache_control(route.cache_control)
         if route.compress and "gzip" in (self.current_event.get_header_value("accept-encoding") or ""):
-            headers["Content-Encoding"] = "gzip"
-            if isinstance(body, str):
-                body = bytes(body, "utf-8")
-            gzip = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS | 16)
-            body = gzip.compress(body) + gzip.flush()
+            response.compress()
 
-        base64_encoded = False
-        if isinstance(body, bytes):
-            base64_encoded = True
-            body = base64.b64encode(body).decode()
-
-        return {"statusCode": status_code, "headers": headers, "body": body, "isBase64Encoded": base64_encoded}
+        return response.to_dict()
 
     @staticmethod
     def _build_rule_pattern(rule: str):
