@@ -120,6 +120,29 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         keys_combined = {**self._build_default_keys(), **kwargs}
         self.log_format.update(**keys_combined)
 
+    def format(self, record: logging.LogRecord) -> str:  # noqa: A003
+        """Format logging record as structured JSON str"""
+        formatted_log = self._extract_log_keys(log_record=record)
+        formatted_log["message"] = self._extract_log_message(log_record=record)
+        formatted_log["exception"], formatted_log["exception_name"] = self._extract_log_exception(log_record=record)
+        formatted_log["xray_trace_id"] = self._get_latest_trace_id()
+        formatted_log = self._strip_none_records(records=formatted_log)
+
+        return self.json_serializer(formatted_log)
+
+    def formatTime(self, record: logging.LogRecord, datefmt: Optional[str] = None) -> str:
+        # NOTE: Pyhton time.strftime doesn't provide msec directives
+        # so we create a custom one (%F) and replace logging record ts
+        # Reason 2 is that std logging doesn't support msec after TZ
+        record_ts = self.converter(record.created)
+        if datefmt:
+            ts_formatted = time.strftime(datefmt, record_ts)
+        else:
+            msec = "%03d" % record.msecs
+            custom_fmt = self.default_time_format.replace(self.custom_ms_time_directive, msec)
+            ts_formatted = time.strftime(custom_fmt, record_ts)
+        return ts_formatted
+
     def append_keys(self, **additional_keys):
         self.log_format.update(additional_keys)
 
@@ -217,28 +240,6 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     def _strip_none_records(records: Dict[str, Any]) -> Dict[str, Any]:
         """Remove any key with None as value"""
         return {k: v for k, v in records.items() if v is not None}
-
-    def format(self, record):  # noqa: A003
-        formatted_log = self._extract_log_keys(log_record=record)
-        formatted_log["message"] = self._extract_log_message(log_record=record)
-        formatted_log["exception"], formatted_log["exception_name"] = self._extract_log_exception(log_record=record)
-        formatted_log["xray_trace_id"] = self._get_latest_trace_id()
-        formatted_log = self._strip_none_records(records=formatted_log)
-
-        return self.json_serializer(formatted_log)
-
-    def formatTime(self, record: logging.LogRecord, datefmt: Optional[str] = None) -> str:
-        # NOTE: Pyhton time.strftime doesn't provide msec directives
-        # so we create a custom one (%F) and replace logging record ts
-        # Reason 2 is that std logging doesn't support msec after TZ
-        record_ts = self.converter(record.created)
-        if datefmt:
-            ts_formatted = time.strftime(datefmt, record_ts)
-        else:
-            msec = "%03d" % record.msecs
-            custom_fmt = self.default_time_format.replace(self.custom_ms_time_directive, msec)
-            ts_formatted = time.strftime(custom_fmt, record_ts)
-        return ts_formatted
 
 
 JsonFormatter = LambdaPowertoolsFormatter  # alias to previous formatter

@@ -258,9 +258,9 @@ def test_log_custom_std_log_attribute(stdout, service_name):
     assert "%" not in log_dict["process"]
 
 
-def test_log_in_utc(stdout, service_name):
+def test_log_in_utc(service_name):
     # GIVEN a logger where UTC TZ has been set
-    logger = Logger(service=service_name, stream=stdout, utc=True)
+    logger = Logger(service=service_name, utc=True)
 
     # THEN logging formatter time converter should use gmtime fn
     assert logger._logger.handlers[0].formatter.converter == time.gmtime
