@@ -271,7 +271,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         def decorate(event, context):
             lambda_context = build_lambda_context_model(context)
             cold_start = _is_cold_start()
-            self.structure_logs(append=True, cold_start=cold_start, **lambda_context.__dict__)
+            self.append_keys(cold_start=cold_start, **lambda_context.__dict__)
 
             if correlation_id_path:
                 self.set_correlation_id(jmespath.search(correlation_id_path, event))
@@ -316,7 +316,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         """
 
         if append:
-            # Maintenance: Add deprecation warning for major version, refer to append_keys() when docs are updated
+            # Maintenance: Add deprecation warning for major version. Refer to append_keys() when docs are updated
             self.append_keys(**keys)
         else:
             # Set a new formatter for a logger handler
@@ -330,7 +330,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         value : str
             Value for the correlation id
         """
-        self.structure_logs(append=True, correlation_id=value)
+        self.append_keys(correlation_id=value)
 
     @staticmethod
     def _get_log_level(level: Union[str, int, None]) -> Union[str, int]:
