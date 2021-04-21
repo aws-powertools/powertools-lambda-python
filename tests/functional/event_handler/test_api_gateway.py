@@ -33,7 +33,7 @@ def test_alb_event():
         assert app.lambda_context == {}
         return 200, TEXT_HTML, "foo"
 
-    # WHEN
+    # WHEN calling the event handler
     result = app(load_event("albEvent.json"), {})
 
     # THEN process event correctly
@@ -53,7 +53,7 @@ def test_api_gateway_v1():
         assert app.lambda_context == {}
         return 200, APPLICATION_JSON, json.dumps({"foo": "value"})
 
-    # WHEN
+    # WHEN calling the event handler
     result = app(LOAD_GW_EVENT, {})
 
     # THEN process event correctly
@@ -71,7 +71,7 @@ def test_api_gateway():
         assert isinstance(app.current_event, APIGatewayProxyEvent)
         return 200, TEXT_HTML, "foo"
 
-    # WHEN
+    # WHEN calling the event handler
     result = app(LOAD_GW_EVENT, {})
 
     # THEN process event correctly
@@ -91,7 +91,7 @@ def test_api_gateway_v2():
         post_data = app.current_event.json_body
         return 200, "plain/text", post_data["username"]
 
-    # WHEN
+    # WHEN calling the event handler
     result = app(load_event("apiGatewayProxyV2Event.json"), {})
 
     # THEN process event correctly
@@ -110,7 +110,7 @@ def test_include_rule_matching():
         assert name == "my"
         return 200, "plain/html", my_id
 
-    # WHEN
+    # WHEN calling the event handler
     result = app(LOAD_GW_EVENT, {})
 
     # THEN
@@ -168,6 +168,8 @@ def test_no_matches():
 
 
 def test_cors():
+    # GIVEN a function with cors=True
+    # AND http method set to GET
     app = ApiGatewayResolver()
 
     @app.get("/my/path", cors=True)
@@ -177,8 +179,10 @@ def test_cors():
     def handler(event, context):
         return app.resolve(event, context)
 
+    # WHEN calling the event handler
     result = handler(LOAD_GW_EVENT, None)
 
+    # THEN the headers should include cors headers
     assert "headers" in result
     headers = result["headers"]
     assert headers["Content-Type"] == TEXT_HTML
@@ -188,10 +192,11 @@ def test_cors():
 
 
 def test_compress():
+    # GIVEN a function that has compress=True
+    # AND an event with a "Accept-Encoding" that include gzip
+    app = ApiGatewayResolver()
     mock_event = {"path": "/my/request", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
     expected_value = '{"test": "value"}'
-
-    app = ApiGatewayResolver()
 
     @app.get("/my/request", compress=True)
     def with_compression() -> Tuple[int, str, str]:
@@ -200,8 +205,10 @@ def test_compress():
     def handler(event, context):
         return app.resolve(event, context)
 
+    # WHEN calling the event handler
     result = handler(mock_event, None)
 
+    # THEN then gzip the response and base64 encode as a string
     assert result["isBase64Encoded"] is True
     body = result["body"]
     assert isinstance(body, str)
@@ -212,15 +219,18 @@ def test_compress():
 
 
 def test_base64_encode():
+    # GIVEN a function that returns bytes
     app = ApiGatewayResolver()
+    mock_event = {"path": "/my/path", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
 
     @app.get("/my/path", compress=True)
     def read_image() -> Tuple[int, str, bytes]:
         return 200, "image/png", read_media("idempotent_sequence_exception.png")
 
-    mock_event = {"path": "/my/path", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+    # WHEN calling the event handler
     result = app(mock_event, None)
 
+    # THEN return the body and a base64 encoded string
     assert result["isBase64Encoded"] is True
     body = result["body"]
     assert isinstance(body, str)
