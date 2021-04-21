@@ -5,6 +5,7 @@ import zlib
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -104,7 +105,11 @@ class ApiGatewayResolver:
         if isinstance(result, Response):
             response = result
         elif isinstance(result, dict):
-            response = Response(status_code=200, content_type="application/json", body=json.dumps(result))
+            response = Response(
+                status_code=200,
+                content_type="application/json",
+                body=json.dumps(result, separators=(",", ":"), cls=Encoder),
+            )
         else:
             response = Response(*result)
 

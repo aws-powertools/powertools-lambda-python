@@ -1,12 +1,14 @@
 import base64
 import json
 import zlib
+from decimal import Decimal
 from pathlib import Path
 from typing import Dict, Tuple
 
 import pytest
 
 from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, ProxyEventType, Response
+from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
 
 
@@ -293,10 +295,11 @@ def test_cache_control_non_200():
 def test_rest_api():
     # GIVEN a function that returns a Dict
     app = ApiGatewayResolver(proxy_type=ProxyEventType.http_api_v1)
+    expected_dict = {"foo": "value", "second": Decimal("100.01")}
 
     @app.get("/my/path")
     def rest_func() -> Dict:
-        return {"foo": "value"}
+        return expected_dict
 
     # WHEN calling the event handler
     result = app(LOAD_GW_EVENT, {})
@@ -304,7 +307,8 @@ def test_rest_api():
     # THEN automatically process this as a json rest api response
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == APPLICATION_JSON
-    assert result["body"] == json.dumps({"foo": "value"})
+    expected_str = json.dumps(expected_dict, separators=(",", ":"), indent=None, cls=Encoder)
+    assert result["body"] == expected_str
 
 
 def test_handling_response_type():
