@@ -49,10 +49,20 @@
       "cognitoIdentityId": null,
       "cognitoIdentityPoolId": null,
       "principalOrgId": null,
-      "sourceIp": "IP",
+      "sourceIp": "192.168.0.1/32",
       "user": null,
       "userAgent": "user-agent",
-      "userArn": null
+      "userArn": null,
+      "clientCert": {
+        "clientCertPem": "CERT_CONTENT",
+        "subjectDN": "www.example.com",
+        "issuerDN": "Example issuer",
+        "serialNumber": "a1:a1:a1:a1:a1:a1:a1:a1:a1:a1:a1:a1:a1:a1:a1:a1",
+        "validity": {
+          "notBefore": "May 28 12:30:02 2019 GMT",
+          "notAfter": "Aug  5 09:36:04 2021 GMT"
+        }
+      }
     },
     "path": "/my/path",
     "protocol": "HTTP/1.1",
