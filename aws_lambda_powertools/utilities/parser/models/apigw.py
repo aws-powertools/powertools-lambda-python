@@ -63,7 +63,6 @@ class APIGatewayEventRequestContext(BaseModel):
     connectedAt: Optional[datetime]
     connectionId: Optional[str]
     eventType: Optional[Literal["CONNECT", "MESSAGE", "DISCONNECT"]]
-    eventType: Optional[str]
     messageDirection: Optional[str]
     messageId: Optional[str]
     routeKey: Optional[str]
