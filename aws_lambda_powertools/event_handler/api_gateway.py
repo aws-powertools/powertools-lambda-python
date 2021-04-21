@@ -54,7 +54,7 @@ class Response:
         gzip = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS | 16)
         self.body = gzip.compress(self.body) + gzip.flush()
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         if isinstance(self.body, bytes):
             self.base64_encoded = True
             self.body = base64.b64encode(self.body).decode()
@@ -91,15 +91,16 @@ class ApiGatewayResolver:
 
     def route(self, rule: str, method: str, cors: bool = False, compress: bool = False, cache_control: str = None):
         def register_resolver(func: Callable):
-            self._routes.append(Route(method, self._build_rule_pattern(rule), func, cors, compress, cache_control))
+            self._routes.append(Route(method, self._compile_regex(rule), func, cors, compress, cache_control))
             return func
 
         return register_resolver
 
     def resolve(self, event, context) -> Dict[str, Any]:
-        self.current_event = self._as_data_class(event)
+        self.current_event = self._to_data_class(event)
         self.lambda_context = context
-        route, args = self._find_route(self.current_event.http_method, self.current_event.path)
+
+        route, args = self._find_route(self.current_event.http_method.upper(), self.current_event.path)
         result = route.func(**args)
 
         if isinstance(result, Response):
@@ -110,7 +111,7 @@ class ApiGatewayResolver:
                 content_type="application/json",
                 body=json.dumps(result, separators=(",", ":"), cls=Encoder),
             )
-        else:
+        else:  # Tuple[int, str, Union[bytes, str]]
             response = Response(*result)
 
         if route.cors:
@@ -123,11 +124,11 @@ class ApiGatewayResolver:
         return response.to_dict()
 
     @staticmethod
-    def _build_rule_pattern(rule: str):
+    def _compile_regex(rule: str):
         rule_regex: str = re.sub(r"(<\w+>)", r"(?P\1.+)", rule)
         return re.compile("^{}$".format(rule_regex))
 
-    def _as_data_class(self, event: Dict) -> BaseProxyEvent:
+    def _to_data_class(self, event: Dict) -> BaseProxyEvent:
         if self._proxy_type == ProxyEventType.http_api_v1:
             return APIGatewayProxyEvent(event)
         if self._proxy_type == ProxyEventType.http_api_v2:
@@ -135,7 +136,6 @@ class ApiGatewayResolver:
         return ALBEvent(event)
 
     def _find_route(self, method: str, path: str) -> Tuple[Route, Dict]:
-        method = method.upper()
         for route in self._routes:
             if method != route.method:
                 continue
