@@ -24,7 +24,7 @@ Before your use this utility, your AWS Lambda function [must have permissions](h
 > Example using AWS Serverless Application Model (SAM)
 
 === "template.yml"
-    ```yaml hl_lines="7 10"
+    ```yaml hl_lines="6 9"
     Resources:
       HelloWorldFunction:
         Type: AWS::Serverless::Function
@@ -119,7 +119,8 @@ You can trace asynchronous functions and generator functions (including context 
 
 
 === "Async"
-    ```python hl_lines="8"
+
+    ```python hl_lines="7"
     import asyncio
     import contextlib
     from aws_lambda_powertools import Tracer
