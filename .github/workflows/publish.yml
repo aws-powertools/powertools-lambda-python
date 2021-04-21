@@ -79,13 +79,20 @@ jobs:
       run: |
         make release-docs VERSION=${RELEASE_TAG_VERSION} ALIAS="latest"
         poetry run mike set-default --push latest
-    - name: Deploy all docs
+    - name: Release API docs to release version
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./api
         keep_files: true
         destination_dir: ${{ env.RELEASE_TAG_VERSION }}/api
+    - name: Release API docs to latest
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./api
+        keep_files: true
+        destination_dir: latest/api
 
   sync_master:
     needs: release
