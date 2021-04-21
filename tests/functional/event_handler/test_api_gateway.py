@@ -10,11 +10,7 @@ import pytest
 from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, ProxyEventType, Response
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
-
-
-def load_event(file_name: str) -> dict:
-    path = Path(str(Path(__file__).parent.parent.parent) + "/events/" + file_name)
-    return json.loads(path.read_text())
+from tests.functional.utils import load_event
 
 
 def read_media(file_name: str) -> bytes:

@@ -1,18 +1,12 @@
 import asyncio
-import json
 import sys
-from pathlib import Path
 
 import pytest
 
 from aws_lambda_powertools.event_handler import AppSyncResolver
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-def load_event(file_name: str) -> dict:
-    path = Path(str(Path(__file__).parent.parent.parent) + "/events/" + file_name)
-    return json.loads(path.read_text())
+from tests.functional.utils import load_event
 
 
 def test_direct_resolver():

@@ -1,7 +1,6 @@
 import datetime
 import hashlib
 import json
-import os
 from collections import namedtuple
 from decimal import Decimal
 from unittest import mock
@@ -17,6 +16,7 @@ from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.idempotency import IdempotencyConfig
 from aws_lambda_powertools.utilities.validation import envelopes
 from aws_lambda_powertools.utilities.validation.base import unwrap_event_from_envelope
+from tests.functional.utils import load_event
 
 TABLE_NAME = "TEST_TABLE"
 
@@ -28,11 +28,7 @@ def config() -> Config:
 
 @pytest.fixture(scope="module")
 def lambda_apigw_event():
-    full_file_name = os.path.dirname(os.path.realpath(__file__)) + "/../../events/" + "apiGatewayProxyV2Event.json"
-    with open(full_file_name) as fp:
-        event = json.load(fp)
-
-    return event
+    return load_event("apiGatewayProxyV2Event.json")
 
 
 @pytest.fixture

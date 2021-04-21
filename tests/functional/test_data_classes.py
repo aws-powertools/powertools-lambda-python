@@ -1,7 +1,6 @@
 import base64
 import datetime
 import json
-import os
 from secrets import compare_digest
 from urllib.parse import quote_plus
 
@@ -58,12 +57,7 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
     StreamViewType,
 )
 from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
-
-
-def load_event(file_name: str) -> dict:
-    full_file_name = os.path.dirname(os.path.realpath(__file__)) + "/../events/" + file_name
-    with open(full_file_name) as fp:
-        return json.load(fp)
+from tests.functional.utils import load_event
 
 
 def test_dict_wrapper_equals():
