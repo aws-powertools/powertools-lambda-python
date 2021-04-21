@@ -91,19 +91,3 @@ class APIGatewayProxyEventModel(BaseModel):
         if message_id is not None and event_type != "MESSAGE":
             raise TypeError("messageId is available only when the `eventType` is `MESSAGE`")
         return values
-
-    @root_validator(pre=True)
-    def check_both_http_methods(cls, values):
-        http_method, req_ctx_http_method = values.get("httpMethod"), values.get("requestContext", {}).get(
-            "httpMethod", ""
-        )
-        if http_method != req_ctx_http_method:
-            raise TypeError("httpMethods and requestContext.httpMethod must be equal")
-        return values
-
-    @root_validator(pre=True)
-    def check_both_paths(cls, values):
-        path, req_ctx_path = values.get("path"), values.get("requestContext", {}).get("path", "")
-        if path != req_ctx_path:
-            raise TypeError("path and requestContext.path must be equal")
-        return values
