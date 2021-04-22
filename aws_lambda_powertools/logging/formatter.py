@@ -77,12 +77,12 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         Parameters
         ----------
         json_serializer : Callable, optional
-            A function to serialize `obj` to a JSON formatted `str`, by default json.dumps
+            function to serialize `obj` to a JSON formatted `str`, by default json.dumps
         json_deserializer : Callable, optional
-            A function to deserialize `str`, `bytes`, bytearray` containing a JSON document to a Python `obj`,
+            function to deserialize `str`, `bytes`, bytearray` containing a JSON document to a Python `obj`,
             by default json.loads
         json_default : Callable, optional
-            A function to coercer unserializable values, by default str
+            function to coerce unserializable values, by default str
 
             Only used when no custom JSON encoder is set
 
@@ -91,17 +91,11 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
             See https://docs.python.org/3/library/time.html#time.strftime
         utc : bool, optional
-            Set logging timestamp to UTC, by default False to continue to use local time as per stdlib
+            set logging timestamp to UTC, by default False to continue to use local time as per stdlib
+        log_record_order : list, optional
+            set order of log keys when logging, by default ["level", "location", "message", "timestamp"]
         kwargs
             Key-value to be included in log messages
-
-        Examples
-        --------
-        Create examples
-
-        Add example of standard log attributes that use str interpolation e.g. %(process)d
-        Add example of JSON default fn for unserializable values
-        Add example for UTC
         """
         self.json_deserializer = json_deserializer or json.loads
         self.json_default = json_default or str
@@ -110,7 +104,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         self.utc = utc
         self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
         self.log_format = dict.fromkeys(self.log_record_order)  # Set the insertion order for the log messages
-        self.update_formatter = self.append_keys  # alias to previous method
+        self.update_formatter = self.append_keys  # alias to old method
 
         if self.utc:
             self.converter = time.gmtime
