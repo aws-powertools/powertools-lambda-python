@@ -108,9 +108,10 @@ class Metrics(MetricManager):
             def lambda_handler():
                    return True
         """
-        self.default_dimensions.update(**dimensions)
         for name, value in dimensions.items():
             self.add_dimension(name, value)
+
+        self.default_dimensions.update(**dimensions)
 
     def clear_default_dimensions(self):
         self.default_dimensions.clear()
@@ -120,8 +121,7 @@ class Metrics(MetricManager):
         self.metric_set.clear()
         self.dimension_set.clear()
         self.metadata_set.clear()
-        # re-add default dimensions
-        self.dimension_set.update(**self._default_dimensions)
+        self.set_default_dimensions(**self.default_dimensions)  # re-add default dimensions
 
     def log_metrics(
         self,
