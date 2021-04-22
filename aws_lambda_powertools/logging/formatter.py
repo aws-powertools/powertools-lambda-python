@@ -1,14 +1,18 @@
 import json
 import logging
 import os
-from typing import Dict, Iterable, Optional, Union
+import time
+from abc import ABCMeta, abstractmethod
+from functools import partial
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from ..shared import constants
 
-STD_LOGGING_KEYS = (
+RESERVED_LOG_ATTRS = (
     "name",
     "msg",
     "args",
+    "level",
     "levelname",
     "levelno",
     "pathname",
@@ -27,50 +31,124 @@ STD_LOGGING_KEYS = (
     "processName",
     "process",
     "asctime",
+    "location",
+    "timestamp",
 )
 
 
-class JsonFormatter(logging.Formatter):
-    """AWS Lambda Logging formatter.
+class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
+    @abstractmethod
+    def append_keys(self, **additional_keys):
+        raise NotImplementedError()
 
-    Formats the log message as a JSON encoded string.  If the message is a
-    dict it will be used directly.  If the message can be parsed as JSON, then
-    the parse d value is used in the output record.
+    @abstractmethod
+    def remove_keys(self, keys: Iterable[str]):
+        raise NotImplementedError()
 
-    Originally taken from https://gitlab.com/hadrien/aws_lambda_logging/
 
+class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
+    """AWS Lambda Powertools Logging formatter.
+
+    Formats the log message as a JSON encoded string. If the message is a
+    dict it will be used directly.
     """
 
-    def __init__(self, **kwargs):
-        """Return a JsonFormatter instance.
+    default_time_format = "%Y-%m-%d %H:%M:%S.%F%z"  # '2021-04-17 18:19:57.656+0200'
+    custom_ms_time_directive = "%F"
 
-        The `json_default` kwarg is used to specify a formatter for otherwise
-        unserializable values.  It must not throw.  Defaults to a function that
-        coerces the value to a string.
+    def __init__(
+        self,
+        json_serializer: Optional[Callable[[Any], Any]] = None,
+        json_deserializer: Optional[Callable[[Any], Any]] = None,
+        json_default: Optional[Callable[[Any], Any]] = None,
+        datefmt: str = None,
+        log_record_order: List[str] = None,
+        utc: bool = False,
+        **kwargs
+    ):
+        """Return a LambdaPowertoolsFormatter instance.
 
         The `log_record_order` kwarg is used to specify the order of the keys used in
         the structured json logs. By default the order is: "level", "location", "message", "timestamp",
         "service" and "sampling_rate".
 
         Other kwargs are used to specify log field format strings.
-        """
-        # Set the default unserializable function, by default values will be cast as str.
-        self.default_json_formatter = kwargs.pop("json_default", str)
-        # Set the insertion order for the log messages
-        self.log_format = dict.fromkeys(kwargs.pop("log_record_order", ["level", "location", "message", "timestamp"]))
-        self.reserved_keys = ["timestamp", "level", "location"]
-        # Set the date format used by `asctime`
-        super(JsonFormatter, self).__init__(datefmt=kwargs.pop("datefmt", None))
 
-        self.log_format.update(self._build_root_keys(**kwargs))
+        Parameters
+        ----------
+        json_serializer : Callable, optional
+            function to serialize `obj` to a JSON formatted `str`, by default json.dumps
+        json_deserializer : Callable, optional
+            function to deserialize `str`, `bytes`, bytearray` containing a JSON document to a Python `obj`,
+            by default json.loads
+        json_default : Callable, optional
+            function to coerce unserializable values, by default str
+
+            Only used when no custom JSON encoder is set
+
+        datefmt : str, optional
+            String directives (strftime) to format log timestamp
+
+            See https://docs.python.org/3/library/time.html#time.strftime
+        utc : bool, optional
+            set logging timestamp to UTC, by default False to continue to use local time as per stdlib
+        log_record_order : list, optional
+            set order of log keys when logging, by default ["level", "location", "message", "timestamp"]
+        kwargs
+            Key-value to be included in log messages
+        """
+        self.json_deserializer = json_deserializer or json.loads
+        self.json_default = json_default or str
+        self.json_serializer = json_serializer or partial(json.dumps, default=self.json_default, separators=(",", ":"))
+        self.datefmt = datefmt
+        self.utc = utc
+        self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
+        self.log_format = dict.fromkeys(self.log_record_order)  # Set the insertion order for the log messages
+        self.update_formatter = self.append_keys  # alias to old method
+
+        if self.utc:
+            self.converter = time.gmtime
+
+        super(LambdaPowertoolsFormatter, self).__init__(datefmt=self.datefmt)
+
+        keys_combined = {**self._build_default_keys(), **kwargs}
+        self.log_format.update(**keys_combined)
+
+    def format(self, record: logging.LogRecord) -> str:  # noqa: A003
+        """Format logging record as structured JSON str"""
+        formatted_log = self._extract_log_keys(log_record=record)
+        formatted_log["message"] = self._extract_log_message(log_record=record)
+        formatted_log["exception"], formatted_log["exception_name"] = self._extract_log_exception(log_record=record)
+        formatted_log["xray_trace_id"] = self._get_latest_trace_id()
+        formatted_log = self._strip_none_records(records=formatted_log)
+
+        return self.json_serializer(formatted_log)
+
+    def formatTime(self, record: logging.LogRecord, datefmt: Optional[str] = None) -> str:
+        record_ts = self.converter(record.created)
+        if datefmt:
+            return time.strftime(datefmt, record_ts)
+
+        # NOTE: Python `time.strftime` doesn't provide msec directives
+        # so we create a custom one (%F) and replace logging record ts
+        # Reason 2 is that std logging doesn't support msec after TZ
+        msecs = "%03d" % record.msecs
+        custom_fmt = self.default_time_format.replace(self.custom_ms_time_directive, msecs)
+        return time.strftime(custom_fmt, record_ts)
+
+    def append_keys(self, **additional_keys):
+        self.log_format.update(additional_keys)
+
+    def remove_keys(self, keys: Iterable[str]):
+        for key in keys:
+            self.log_format.pop(key, None)
 
     @staticmethod
-    def _build_root_keys(**kwargs):
+    def _build_default_keys():
         return {
             "level": "%(levelname)s",
             "location": "%(funcName)s:%(lineno)d",
             "timestamp": "%(asctime)s",
-            **kwargs,
         }
 
     @staticmethod
@@ -78,12 +156,8 @@ class JsonFormatter(logging.Formatter):
         xray_trace_id = os.getenv(constants.XRAY_TRACE_ID_ENV)
         return xray_trace_id.split(";")[0].replace("Root=", "") if xray_trace_id else None
 
-    def update_formatter(self, **kwargs):
-        self.log_format.update(kwargs)
-
-    @staticmethod
-    def _extract_log_message(log_record: logging.LogRecord) -> Union[Dict, str, bool, Iterable]:
-        """Extract message from log record and attempt to JSON decode it
+    def _extract_log_message(self, log_record: logging.LogRecord) -> Union[Dict[str, Any], str, bool, Iterable]:
+        """Extract message from log record and attempt to JSON decode it if str
 
         Parameters
         ----------
@@ -95,20 +169,19 @@ class JsonFormatter(logging.Formatter):
         message: Union[Dict, str, bool, Iterable]
             Extracted message
         """
-        if isinstance(log_record.msg, dict):
-            return log_record.msg
+        message = log_record.msg
+        if isinstance(message, dict):
+            return message
 
-        message: str = log_record.getMessage()
-
-        # Attempt to decode non-str messages e.g. msg = '{"x": "y"}'
-        try:
-            message = json.loads(log_record.msg)
-        except (json.decoder.JSONDecodeError, TypeError, ValueError):
-            pass
+        if isinstance(message, str):  # could be a JSON string
+            try:
+                message = self.json_deserializer(message)
+            except (json.decoder.JSONDecodeError, TypeError, ValueError):
+                pass
 
         return message
 
-    def _extract_log_exception(self, log_record: logging.LogRecord) -> Optional[str]:
+    def _extract_log_exception(self, log_record: logging.LogRecord) -> Union[Tuple[str, str], Tuple[None, None]]:
         """Format traceback information, if available
 
         Parameters
@@ -118,33 +191,15 @@ class JsonFormatter(logging.Formatter):
 
         Returns
         -------
-        log_record: Optional[str]
-            Log record with constant traceback info
+        log_record: Optional[Tuple[str, str]]
+            Log record with constant traceback info and exception name
         """
         if log_record.exc_info:
-            return self.formatException(log_record.exc_info)
+            return self.formatException(log_record.exc_info), log_record.exc_info[0].__name__
 
-        return None
+        return None, None
 
-    def _extract_log_exception_name(self, log_record: logging.LogRecord) -> Optional[str]:
-        """Extract the exception name, if available
-
-        Parameters
-        ----------
-        log_record : logging.LogRecord
-            Log record to extract exception name from
-
-        Returns
-        -------
-        log_record: Optional[str]
-            Log record with exception name
-        """
-        if log_record.exc_info:
-            return log_record.exc_info[0].__name__
-
-        return None
-
-    def _extract_log_keys(self, log_record: logging.LogRecord) -> Dict:
+    def _extract_log_keys(self, log_record: logging.LogRecord) -> Dict[str, Any]:
         """Extract and parse custom and reserved log keys
 
         Parameters
@@ -157,36 +212,27 @@ class JsonFormatter(logging.Formatter):
         formatted_log: Dict
             Structured log as dictionary
         """
-        record_dict = log_record.__dict__.copy()  # has extra kwargs we are after
-        record_dict["asctime"] = self.formatTime(log_record, self.datefmt)
+        record_dict = log_record.__dict__.copy()
+        record_dict["asctime"] = self.formatTime(record=log_record, datefmt=self.datefmt)
+        extras = {k: v for k, v in record_dict.items() if k not in RESERVED_LOG_ATTRS}
 
-        formatted_log = {}
+        formatted_log = {**extras}
 
-        # We have to iterate over a default or existing log structure
-        # then replace any logging expression for reserved keys e.g. '%(level)s' to 'INFO'
-        # and lastly add or replace incoming keys (those added within the constructor or .structure_logs method)
+        # Iterate over a default or existing log structure
+        # then replace any std log attribute e.g. '%(level)s' to 'INFO', '%(process)d to '4773'
+        # lastly add or replace incoming keys (those added within the constructor or .structure_logs method)
         for key, value in self.log_format.items():
-            if value and key in self.reserved_keys:
+            if value and key in RESERVED_LOG_ATTRS:
                 formatted_log[key] = value % record_dict
             else:
                 formatted_log[key] = value
 
-        # pick up extra keys when logging a new message e.g. log.info("my message", extra={"additional_key": "value"}
-        # these messages will be added to the root of the final structure not within `message` key
-        for key, value in record_dict.items():
-            if key not in STD_LOGGING_KEYS:
-                formatted_log[key] = value
-
         return formatted_log
 
-    def format(self, record):  # noqa: A003
-        formatted_log = self._extract_log_keys(log_record=record)
-        formatted_log["message"] = self._extract_log_message(log_record=record)
-        formatted_log["exception_name"] = self._extract_log_exception_name(log_record=record)
-        formatted_log["exception"] = self._extract_log_exception(log_record=record)
-        formatted_log.update({"xray_trace_id": self._get_latest_trace_id()})  # fetch latest Trace ID, if any
+    @staticmethod
+    def _strip_none_records(records: Dict[str, Any]) -> Dict[str, Any]:
+        """Remove any key with None as value"""
+        return {k: v for k, v in records.items() if v is not None}
 
-        # Filter out top level key with values that are None
-        formatted_log = {k: v for k, v in formatted_log.items() if v is not None}
 
-        return json.dumps(formatted_log, default=self.default_json_formatter)
+JsonFormatter = LambdaPowertoolsFormatter  # alias to previous formatter

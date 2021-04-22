@@ -4,7 +4,7 @@ import logging
 import os
 import random
 import sys
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, Iterable, Optional, Union
 
 import jmespath
 
@@ -12,7 +12,7 @@ from ..shared import constants
 from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
 from .exceptions import InvalidLoggerSamplingRateError
 from .filters import SuppressFilter
-from .formatter import JsonFormatter
+from .formatter import BasePowertoolsFormatter, LambdaPowertoolsFormatter
 from .lambda_context import build_lambda_context_model
 
 logger = logging.getLogger(__name__)
@@ -42,6 +42,7 @@ def _is_cold_start() -> bool:
 # so we need to return to subclassing removed in #97
 # All methods/properties continue to be proxied to inner logger
 # https://github.com/awslabs/aws-lambda-powertools-python/issues/107
+# noinspection PyRedeclaration
 class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     """Creates and setups a logger to format statements in JSON.
 
@@ -69,6 +70,28 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         sample rate for debug calls within execution context defaults to 0.0
     stream: sys.stdout, optional
         valid output for a logging stream, by default sys.stdout
+    logger_formatter: BasePowertoolsFormatter, optional
+        custom logging formatter that implements BasePowertoolsFormatter
+    logger_handler: logging.Handler, optional
+        custom logging handler e.g. logging.FileHandler("file.log")
+
+    Parameters propagated to LambdaPowertoolsFormatter
+    ---------------------------------------------
+    datefmt: str, optional
+        String directives (strftime) to format log timestamp, by default it uses RFC 3339.
+    json_serializer : Callable, optional
+        function to serialize `obj` to a JSON formatted `str`, by default json.dumps
+    json_deserializer : Callable, optional
+        function to deserialize `str`, `bytes`, bytearray` containing a JSON document to a Python `obj`,
+        by default json.loads
+    json_default : Callable, optional
+        function to coerce unserializable values, by default `str()`
+
+        Only used when no custom JSON encoder is set
+    utc : bool, optional
+        set logging timestamp to UTC, by default False to continue to use local time as per stdlib
+    log_record_order : list, optional
+        set order of log keys when logging, by default ["level", "location", "message", "timestamp"]
 
     Example
     -------
@@ -96,7 +119,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         >>> logger = Logger(service="payment")
         >>>
         >>> def handler(event, context):
-                logger.structure_logs(append=True, payment_id=event["payment_id"])
+                logger.append_keys(payment_id=event["payment_id"])
                 logger.info("Hello")
 
     **Create child Logger using logging inheritance via child param**
@@ -109,6 +132,30 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         >>> # another_file.py
         >>> from aws_lambda_powertools import Logger
         >>> logger = Logger(service="payment", child=True)
+
+    **Logging in UTC timezone**
+
+        >>> # app.py
+        >>> import logging
+        >>> from aws_lambda_powertools import Logger
+        >>>
+        >>> logger = Logger(service="payment", utc=True)
+
+    **Brings message as the first key in log statements**
+
+        >>> # app.py
+        >>> import logging
+        >>> from aws_lambda_powertools import Logger
+        >>>
+        >>> logger = Logger(service="payment", log_record_order=["message"])
+
+    **Logging to a file instead of standard output for testing**
+
+        >>> # app.py
+        >>> import logging
+        >>> from aws_lambda_powertools import Logger
+        >>>
+        >>> logger = Logger(service="payment", logger_handler=logging.FileHandler("log.json"))
 
     Raises
     ------
@@ -123,22 +170,26 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         child: bool = False,
         sampling_rate: float = None,
         stream: sys.stdout = None,
+        logger_formatter: Optional[BasePowertoolsFormatter] = None,
+        logger_handler: Optional[logging.Handler] = None,
         **kwargs,
     ):
         self.service = resolve_env_var_choice(
             choice=service, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
         )
         self.sampling_rate = resolve_env_var_choice(
-            choice=sampling_rate, env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE, 0.0)
+            choice=sampling_rate, env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE)
         )
+        self.child = child
+        self.logger_formatter = logger_formatter
+        self.logger_handler = logger_handler or logging.StreamHandler(stream)
+        self.log_level = self._get_log_level(level)
         self._is_deduplication_disabled = resolve_truthy_env_var_choice(
             env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false")
         )
-        self.log_level = self._get_log_level(level)
-        self.child = child
-        self._handler = logging.StreamHandler(stream) if stream is not None else logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
+
         self._init_logger(**kwargs)
 
     def __getattr__(self, name):
@@ -168,7 +219,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
         self._configure_sampling()
         self._logger.setLevel(self.log_level)
-        self._logger.addHandler(self._handler)
+        self._logger.addHandler(self.logger_handler)
         self.structure_logs(**kwargs)
 
         # Pytest Live Log feature duplicates log records for colored output
@@ -269,7 +320,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         def decorate(event, context):
             lambda_context = build_lambda_context_model(context)
             cold_start = _is_cold_start()
-            self.structure_logs(append=True, cold_start=cold_start, **lambda_context.__dict__)
+            self.append_keys(cold_start=cold_start, **lambda_context.__dict__)
 
             if correlation_id_path:
                 self.set_correlation_id(jmespath.search(correlation_id_path, event))
@@ -282,30 +333,44 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
         return decorate
 
-    def structure_logs(self, append: bool = False, **kwargs):
+    def append_keys(self, **additional_keys):
+        self.registered_formatter.append_keys(**additional_keys)
+
+    def remove_keys(self, keys: Iterable[str]):
+        self.registered_formatter.remove_keys(keys)
+
+    @property
+    def registered_handler(self) -> logging.Handler:
+        """Convenience property to access logger handler"""
+        handlers = self._logger.parent.handlers if self.child else self._logger.handlers
+        return handlers[0]
+
+    @property
+    def registered_formatter(self) -> Optional[BasePowertoolsFormatter]:
+        """Convenience property to access logger formatter"""
+        return self.registered_handler.formatter
+
+    def structure_logs(self, append: bool = False, **keys):
         """Sets logging formatting to JSON.
 
         Optionally, it can append keyword arguments
-        to an existing logger so it is available
-        across future log statements.
+        to an existing logger so it is available across future log statements.
 
         Last keyword argument and value wins if duplicated.
 
         Parameters
         ----------
         append : bool, optional
-            [description], by default False
+            append keys provided to logger formatter, by default False
         """
 
-        # Child loggers don't have handlers attached, use its parent handlers
-        handlers = self._logger.parent.handlers if self.child else self._logger.handlers
-        for handler in handlers:
-            if append:
-                # Update existing formatter in an existing logger handler
-                handler.formatter.update_formatter(**kwargs)
-            else:
-                # Set a new formatter for a logger handler
-                handler.setFormatter(JsonFormatter(**self._default_log_keys, **kwargs))
+        if append:
+            # Maintenance: Add deprecation warning for major version. Refer to append_keys() when docs are updated
+            self.append_keys(**keys)
+        else:
+            log_keys = {**self._default_log_keys, **keys}
+            formatter = self.logger_formatter or LambdaPowertoolsFormatter(**log_keys)
+            self.registered_handler.setFormatter(formatter)
 
     def set_correlation_id(self, value: str):
         """Sets the correlation_id in the logging json
@@ -315,7 +380,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         value : str
             Value for the correlation id
         """
-        self.structure_logs(append=True, correlation_id=value)
+        self.append_keys(correlation_id=value)
 
     @staticmethod
     def _get_log_level(level: Union[str, int, None]) -> Union[str, int]:

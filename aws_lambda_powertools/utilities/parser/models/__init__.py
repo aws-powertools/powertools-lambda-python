@@ -1,4 +1,10 @@
 from .alb import AlbModel, AlbRequestContext, AlbRequestContextData
+from .apigw import (
+    APIGatewayEventAuthorizer,
+    APIGatewayEventIdentity,
+    APIGatewayEventRequestContext,
+    APIGatewayProxyEventModel,
+)
 from .cloudwatch import CloudWatchLogsData, CloudWatchLogsDecode, CloudWatchLogsLogEvent, CloudWatchLogsModel
 from .dynamodb import DynamoDBStreamChangedRecordModel, DynamoDBStreamModel, DynamoDBStreamRecordModel
 from .event_bridge import EventBridgeModel
@@ -70,4 +76,8 @@ __all__ = [
     "SqsRecordModel",
     "SqsMsgAttributeModel",
     "SqsAttributesModel",
+    "APIGatewayProxyEventModel",
+    "APIGatewayEventRequestContext",
+    "APIGatewayEventAuthorizer",
+    "APIGatewayEventIdentity",
 ]

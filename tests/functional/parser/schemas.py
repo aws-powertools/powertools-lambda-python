@@ -81,3 +81,8 @@ class MyKinesisBusiness(BaseModel):
 class MyCloudWatchBusiness(BaseModel):
     my_message: str
     user: str
+
+
+class MyApiGatewayBusiness(BaseModel):
+    message: str
+    username: str
