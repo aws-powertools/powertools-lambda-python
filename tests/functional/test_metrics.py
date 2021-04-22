@@ -15,6 +15,7 @@ from aws_lambda_powertools.metrics.base import MetricManager
 def reset_metric_set():
     metrics = Metrics()
     metrics.clear_metrics()
+    metrics.clear_default_dimensions()
     metrics_global.is_cold_start = True  # ensure each test has cold start
     yield
 
