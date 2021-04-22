@@ -374,7 +374,7 @@ If you prefer setting environment variable for specific tests, and are using Pyt
         metrics = Metrics()
         metrics.clear_metrics()
         metrics_global.is_cold_start = True  # ensure each test has cold start
-		metrics.clear_default_dimensions()   # remove persisted default dimensions, if any
+        metrics.clear_default_dimensions()   # remove persisted default dimensions, if any
         yield
     ```
 
