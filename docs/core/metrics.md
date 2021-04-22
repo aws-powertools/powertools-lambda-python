@@ -74,22 +74,28 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 
 === "Metrics"
 
-    ```python hl_lines="5"
+    ```python hl_lines="8"
     from aws_lambda_powertools import Metrics
     from aws_lambda_powertools.metrics import MetricUnit
 
     metrics = Metrics(namespace="ExampleApplication", service="booking")
-    metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
+
+	@metrics.log_metrics
+	def lambda_handler(evt, ctx):
+    	metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
     ```
 === "Metrics with custom dimensions"
 
-    ```python hl_lines="5 6"
+    ```python hl_lines="8-9"
     from aws_lambda_powertools import Metrics
     from aws_lambda_powertools.metrics import MetricUnit
 
     metrics = Metrics(namespace="ExampleApplication", service="booking")
-    metrics.add_dimension(name="environment", value="prod")
-    metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
+
+	@metrics.log_metrics
+	def lambda_handler(evt, ctx):
+		metrics.add_dimension(name="environment", value="prod")
+		metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
     ```
 
 !!! tip "Autocomplete Metric Units"
@@ -106,7 +112,7 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 
 === "app.py"
 
-    ```python hl_lines="7"
+    ```python hl_lines="6"
     from aws_lambda_powertools import Metrics
     from aws_lambda_powertools.metrics import MetricUnit
 
@@ -115,7 +121,6 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
     @metrics.log_metrics
     def lambda_handler(evt, ctx):
         metrics.add_metric(name="BookingConfirmation", unit=MetricUnit.Count, value=1)
-        ...
     ```
 === "Example CloudWatch Logs excerpt"
 
@@ -158,7 +163,7 @@ If you want to ensure that at least one metric is emitted, you can pass `raise_o
 
 === "app.py"
 
-    ```python hl_lines="3"
+    ```python hl_lines="5"
     from aws_lambda_powertools.metrics import Metrics
 
     metrics = Metrics()
@@ -177,20 +182,17 @@ When using multiple middlewares, use `log_metrics` as your **last decorator** wr
 
 === "nested_middlewares.py"
 
-    ```python hl_lines="9-10"
+    ```python hl_lines="7-8"
     from aws_lambda_powertools import Metrics, Tracer
     from aws_lambda_powertools.metrics import MetricUnit
 
 	tracer = Tracer(service="booking")
     metrics = Metrics(namespace="ExampleApplication", service="booking")
 
-	metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
-
     @metrics.log_metrics
     @tracer.capture_lambda_handler
     def lambda_handler(evt, ctx):
         metrics.add_metric(name="BookingConfirmation", unit=MetricUnit.Count, value=1)
-        ...
     ```
 
 ### Capturing cold start metric
@@ -199,7 +201,7 @@ You can optionally capture cold start metrics with `log_metrics` decorator via `
 
 === "app.py"
 
-    ```python hl_lines="6"
+    ```python hl_lines="5"
     from aws_lambda_powertools import Metrics
 
     metrics = Metrics(service="ExampleService")
@@ -227,13 +229,16 @@ You can add high-cardinality data as part of your Metrics log with `add_metadata
 
 === "app.py"
 
-    ```python hl_lines="6"
+    ```python hl_lines="9"
     from aws_lambda_powertools import Metrics
     from aws_lambda_powertools.metrics import MetricUnit
 
     metrics = Metrics(namespace="ExampleApplication", service="booking")
-    metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
-    metrics.add_metadata(key="booking_id", value="booking_uuid")
+
+	@metrics.log_metrics
+	def lambda_handler(evt, ctx):
+		metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
+		metrics.add_metadata(key="booking_id", value="booking_uuid")
     ```
 
 === "Example CloudWatch Logs excerpt"
@@ -276,13 +281,15 @@ CloudWatch EMF uses the same dimensions across all your metrics. Use `single_met
 
 === "single_metric.py"
 
-    ```python hl_lines="4"
+    ```python hl_lines="6-7"
     from aws_lambda_powertools import single_metric
     from aws_lambda_powertools.metrics import MetricUnit
 
-    with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace="ExampleApplication") as metric:
-        metric.add_dimension(name="function_context", value="$LATEST")
-        ...
+
+	def lambda_handler(evt, ctx):
+		with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace="ExampleApplication") as metric:
+			metric.add_dimension(name="function_context", value="$LATEST")
+			...
     ```
 
 ### Flushing metrics manually
@@ -294,17 +301,18 @@ If you prefer not to use `log_metrics` because you might want to encapsulate add
 
 === "manual_metric_serialization.py"
 
-    ```python hl_lines="8-10"
+    ```python hl_lines="9-11"
     import json
     from aws_lambda_powertools import Metrics
     from aws_lambda_powertools.metrics import MetricUnit
 
     metrics = Metrics(namespace="ExampleApplication", service="booking")
-    metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
 
-    your_metrics_object = metrics.serialize_metric_set()
-    metrics.clear_metrics()
-    print(json.dumps(your_metrics_object))
+	def lambda_handler(evt, ctx):
+		metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
+		your_metrics_object = metrics.serialize_metric_set()
+		metrics.clear_metrics()
+		print(json.dumps(your_metrics_object))
     ```
 
 ## Testing your code
