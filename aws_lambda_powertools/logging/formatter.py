@@ -131,17 +131,16 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         return self.json_serializer(formatted_log)
 
     def formatTime(self, record: logging.LogRecord, datefmt: Optional[str] = None) -> str:
-        # NOTE: Pyhton time.strftime doesn't provide msec directives
-        # so we create a custom one (%F) and replace logging record ts
-        # Reason 2 is that std logging doesn't support msec after TZ
         record_ts = self.converter(record.created)
         if datefmt:
-            ts_formatted = time.strftime(datefmt, record_ts)
-        else:
-            msec = "%03d" % record.msecs
-            custom_fmt = self.default_time_format.replace(self.custom_ms_time_directive, msec)
-            ts_formatted = time.strftime(custom_fmt, record_ts)
-        return ts_formatted
+            return time.strftime(datefmt, record_ts)
+
+        # NOTE: Python `time.strftime` doesn't provide msec directives
+        # so we create a custom one (%F) and replace logging record ts
+        # Reason 2 is that std logging doesn't support msec after TZ
+        msecs = "%03d" % record.msecs
+        custom_fmt = self.default_time_format.replace(self.custom_ms_time_directive, msecs)
+        return time.strftime(custom_fmt, record_ts)
 
     def append_keys(self, **additional_keys):
         self.log_format.update(additional_keys)
