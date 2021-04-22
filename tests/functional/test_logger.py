@@ -544,3 +544,21 @@ def test_logger_custom_formatter(stdout, service_name, lambda_context):
     # and lambda contextual info should also be in the logs
     assert "my_default_key" in log
     assert all(k in log for k in lambda_context_keys)
+
+
+def test_logger_custom_handler(lambda_context, service_name, tmp_path):
+    # GIVEN a Logger is initialized with a FileHandler
+    log_file = tmp_path / "log.json"
+    handler = logging.FileHandler(filename=log_file)
+    logger = Logger(service=service_name, logger_handler=handler)
+
+    # WHEN a log statement happens
+    @logger.inject_lambda_context
+    def handler(event, context):
+        logger.info("custom handler")
+
+    handler({}, lambda_context)
+
+    # THEN we should output to a file not stdout
+    log = log_file.read_text()
+    assert "custom handler" in log

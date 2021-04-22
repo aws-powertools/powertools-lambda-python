@@ -125,6 +125,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         sampling_rate: float = None,
         stream: sys.stdout = None,
         logger_formatter: Optional[BasePowertoolsFormatter] = None,
+        logger_handler: Optional[logging.Handler] = None,
         **kwargs,
     ):
         self.service = resolve_env_var_choice(
@@ -135,11 +136,11 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         )
         self.child = child
         self.logger_formatter = logger_formatter
+        self.logger_handler = logger_handler or logging.StreamHandler(stream)
         self.log_level = self._get_log_level(level)
         self._is_deduplication_disabled = resolve_truthy_env_var_choice(
             env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false")
         )
-        self._handler = logging.StreamHandler(stream) or logging.StreamHandler(sys.stdout)
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
 
@@ -172,7 +173,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
         self._configure_sampling()
         self._logger.setLevel(self.log_level)
-        self._logger.addHandler(self._handler)
+        self._logger.addHandler(self.logger_handler)
         self.structure_logs(**kwargs)
 
         # Pytest Live Log feature duplicates log records for colored output
