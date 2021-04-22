@@ -3,6 +3,7 @@ import io
 import json
 import random
 import string
+import time
 
 import pytest
 
@@ -167,13 +168,13 @@ def test_log_custom_formatting(stdout, service_name):
     log_dict: dict = json.loads(stdout.getvalue())
 
     # THEN the `location` and "timestamp" should match the formatting
-    assert log_dict["location"] == "[test_log_custom_formatting] test_aws_lambda_logging"
+    assert log_dict["location"] == "[test_log_custom_formatting] test_logger_powertools_formatter"
     assert log_dict["timestamp"] == "fake-datefmt"
 
 
 def test_log_dict_key_strip_nones(stdout, service_name):
     # GIVEN a logger confirmation where we set `location` and `timestamp` to None
-    # Note: level, sampling_rate and service can not be suppressed
+    # Note: level and service cannot be suppressed
     logger = Logger(stream=stdout, level=None, location=None, timestamp=None, sampling_rate=None, service=None)
 
     # WHEN logging a message
@@ -181,8 +182,8 @@ def test_log_dict_key_strip_nones(stdout, service_name):
 
     log_dict: dict = json.loads(stdout.getvalue())
 
-    # THEN the keys should only include `level`, `message`, `service`, `sampling_rate`
-    assert sorted(log_dict.keys()) == ["level", "message", "sampling_rate", "service"]
+    # THEN the keys should only include `level`, `message`, `service`
+    assert sorted(log_dict.keys()) == ["level", "message", "service"]
     assert log_dict["service"] == "service_undefined"
 
 
@@ -241,3 +242,36 @@ def test_log_dict_xray_is_updated_when_tracing_id_changes(stdout, monkeypatch, s
     assert log_dict_2["xray_trace_id"] == trace_id_2
 
     monkeypatch.delenv(name="_X_AMZN_TRACE_ID")
+
+
+def test_log_custom_std_log_attribute(stdout, service_name):
+    # GIVEN a logger where we have a standard log attr process
+    # https://docs.python.org/3/library/logging.html#logrecord-attributes
+    logger = Logger(service=service_name, stream=stdout, process="%(process)d")
+
+    # WHEN logging a message
+    logger.info("foo")
+
+    log_dict: dict = json.loads(stdout.getvalue())
+
+    # THEN process key should be evaluated
+    assert "%" not in log_dict["process"]
+
+
+def test_log_in_utc(service_name):
+    # GIVEN a logger where UTC TZ has been set
+    logger = Logger(service=service_name, utc=True)
+
+    # THEN logging formatter time converter should use gmtime fn
+    assert logger._logger.handlers[0].formatter.converter == time.gmtime
+
+
+@pytest.mark.parametrize("message", ["hello", 1.10, {}, [], True, object()])
+def test_logging_various_primitives(stdout, service_name, message):
+    # GIVEN a logger with default settings
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN logging a message of multiple common types
+    # THEN it should raise no serialization/deserialization error
+    logger.info(message)
+    json.loads(stdout.getvalue())
