@@ -104,6 +104,28 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 !!! note "Metrics overflow"
 	CloudWatch EMF supports a max of 100 metrics per batch. Metrics utility will flush all metrics when adding the 100th metric. Subsequent metrics, e.g. 101th, will be aggregated into a new EMF object, for your convenience.
 
+
+### Adding default dimensions
+
+You can add default metric dimensions to ensure they are persisted across Lambda invocations using `set_default_dimenions`.
+
+!!! info "If you'd like to remove them at some point, you can use `clear_default_dimensions` method"
+	Note that they continue to count against the maximum of 9 dimensions.
+
+=== "Default dimensions"
+
+    ```python hl_lines="5"
+	from aws_lambda_powertools import Metrics
+	from aws_lambda_powertools.metrics import MetricUnit
+
+	metrics = Metrics(namespace="ExampleApplication", service="booking")
+	metrics.set_default_dimensions(environment="prod", another="one")
+
+	@metrics.log_metrics
+	def lambda_handler(evt, ctx):
+		metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
+	```
+
 ### Flushing metrics
 
 As you finish adding all your metrics, you need to serialize and flush them to standard output. You can do that automatically with the `log_metrics` decorator.
@@ -353,5 +375,41 @@ If you prefer setting environment variable for specific tests, and are using Pyt
         metrics = Metrics()
         metrics.clear_metrics()
         metrics_global.is_cold_start = True  # ensure each test has cold start
+		metrics.clear_default_dimensions()   # remove persisted default dimensions, if any
         yield
     ```
+
+### Inspecting metrics
+
+As metrics are logged to standard output, you can read stdoutput and assert whether metrics are present. Here's an example using `pytest` with `capsys` built-in fixture:
+
+=== "pytest_metrics_assertion.py"
+
+	```python hl_lines="6 9-10 23-34"
+	from aws_lambda_powertools import Metrics
+	from aws_lambda_powertools.metrics import MetricUnit
+
+	import json
+
+	def test_log_metrics(capsys):
+		# GIVEN Metrics is initialized
+		metrics = Metrics(namespace="ServerlessAirline")
+
+		# WHEN we utilize log_metrics to serialize
+		# and flush all metrics at the end of a function execution
+		@metrics.log_metrics
+		def lambda_handler(evt, ctx):
+			metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
+			metrics.add_dimension(name="environment", value="prod")
+
+		lambda_handler({}, {})
+		log = capsys.readouterr().out.strip()  # remove any extra line
+		metrics_output = json.loads(log)  # deserialize JSON str
+
+		# THEN we should have no exceptions
+		# and a valid EMF object should be flushed correctly
+		assert "SuccessfulBooking" in log  # basic string assertion in JSON str
+		assert "SuccessfulBooking" in metrics_output["_aws"]["CloudWatchMetrics"][0]["Metrics"][0]["Name"]
+	```
+
+!!! tip "For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/functional/test_metrics.py)"
