@@ -34,18 +34,13 @@ class Metrics(MetricManager):
         from aws_lambda_powertools import Metrics
 
         metrics = Metrics(namespace="ServerlessAirline", service="payment")
-        metrics.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
-        metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
-        metrics.add_dimension(name="function_version", value="$LATEST")
-        ...
 
-        @metrics.log_metrics()
+        @metrics.log_metrics(capture_cold_start_metric=True)
         def lambda_handler():
-               do_something()
-               return True
+            metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
+            metrics.add_dimension(name="function_version", value="$LATEST")
 
-        def do_something():
-               metrics.add_metric(name="Something", unit="Count", value=1)
+            return True
 
     Environment variables
     ---------------------
@@ -74,13 +69,15 @@ class Metrics(MetricManager):
     _metrics: Dict[str, Any] = {}
     _dimensions: Dict[str, str] = {}
     _metadata: Dict[str, Any] = {}
+    _default_dimensions: Dict[str, Any] = {}
 
     def __init__(self, service: str = None, namespace: str = None):
         self.metric_set = self._metrics
-        self.dimension_set = self._dimensions
         self.service = service
         self.namespace: Optional[str] = namespace
         self.metadata_set = self._metadata
+        self.default_dimensions = self._default_dimensions
+        self.dimension_set = {**self._default_dimensions, **self._dimensions}
 
         super().__init__(
             metric_set=self.metric_set,
@@ -90,11 +87,41 @@ class Metrics(MetricManager):
             service=self.service,
         )
 
+    def set_default_dimensions(self, **dimensions):
+        """Persist dimensions across Lambda invocations
+
+        Parameters
+        ----------
+        dimensions : Dict[str, Any], optional
+            metric dimensions as key=value
+
+        Example
+        -------
+        **Sets some default dimensions that will always be present across metrics and invocations**
+
+            from aws_lambda_powertools import Metrics
+
+            metrics = Metrics(namespace="ServerlessAirline", service="payment")
+            metrics.set_default_dimensions(environment="demo", another="one")
+
+            @metrics.log_metrics()
+            def lambda_handler():
+                   return True
+        """
+        self.default_dimensions.update(**dimensions)
+        for name, value in dimensions.items():
+            self.add_dimension(name, value)
+
+    def clear_default_dimensions(self):
+        self.default_dimensions.clear()
+
     def clear_metrics(self):
         logger.debug("Clearing out existing metric set from memory")
         self.metric_set.clear()
         self.dimension_set.clear()
         self.metadata_set.clear()
+        # re-add default dimensions
+        self.dimension_set.update(**self._default_dimensions)
 
     def log_metrics(
         self,
