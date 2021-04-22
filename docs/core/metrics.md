@@ -109,8 +109,7 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 
 You can add default metric dimensions to ensure they are persisted across Lambda invocations using `set_default_dimenions`.
 
-!!! info "If you'd like to remove them at some point, you can use `clear_default_dimensions` method"
-	Note that they continue to count against the maximum of 9 dimensions.
+If you'd like to remove them at some point, you can use `clear_default_dimensions` method.
 
 === "Default dimensions"
 
