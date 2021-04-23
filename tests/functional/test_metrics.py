@@ -798,3 +798,27 @@ def test_default_dimensions_across_instances(namespace):
 
     # THEN default dimensions should also be present
     assert "environment" in same_metrics.default_dimensions
+
+
+def test_log_metrics_with_default_dimensions(capsys, metrics, dimensions, namespace):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(namespace=namespace)
+    default_dimensions = {"environment": "test", "log_group": "/lambda/test"}
+
+    # WHEN we utilize log_metrics with default dimensions to serialize
+    # and flush metrics and clear all metrics and dimensions from memory
+    # at the end of a function execution
+    @my_metrics.log_metrics(default_dimensions=default_dimensions)
+    def lambda_handler(evt, ctx):
+        for metric in metrics:
+            my_metrics.add_metric(**metric)
+
+    lambda_handler({}, {})
+    first_invocation = capture_metrics_output(capsys)
+
+    lambda_handler({}, {})
+    second_invocation = capture_metrics_output(capsys)
+
+    # THEN we should have default dimensions in both outputs
+    assert "environment" in first_invocation
+    assert "environment" in second_invocation

@@ -107,11 +107,11 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 
 ### Adding default dimensions
 
-You can add default metric dimensions to ensure they are persisted across Lambda invocations using `set_default_dimenions`.
+You can use either `set_default_dimensions` method or `default_permissions` parameter in `log_metrics` decorator to persist dimensions across Lambda invocations.
 
 If you'd like to remove them at some point, you can use `clear_default_dimensions` method.
 
-=== "Default dimensions"
+=== "set_default_dimensions method"
 
     ```python hl_lines="5"
 	from aws_lambda_powertools import Metrics
@@ -121,6 +121,19 @@ If you'd like to remove them at some point, you can use `clear_default_dimension
 	metrics.set_default_dimensions(environment="prod", another="one")
 
 	@metrics.log_metrics
+	def lambda_handler(evt, ctx):
+		metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
+	```
+=== "with log_metrics decorator"
+
+    ```python hl_lines="5 7"
+	from aws_lambda_powertools import Metrics
+	from aws_lambda_powertools.metrics import MetricUnit
+
+	metrics = Metrics(namespace="ExampleApplication", service="booking")
+	DEFAULT_DIMENSIONS = {"environment": "prod", "another": "one"}
+
+	@metrics.log_metrics(default_dimensions=DEFAULT_DIMENSIONS)
 	def lambda_handler(evt, ctx):
 		metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
 	```

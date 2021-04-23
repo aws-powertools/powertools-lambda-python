@@ -128,6 +128,7 @@ class Metrics(MetricManager):
         lambda_handler: Callable[[Any, Any], Any] = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
+        default_dimensions: Dict[str, str] = None,
     ):
         """Decorator to serialize and publish metrics at the end of a function execution.
 
@@ -150,11 +151,13 @@ class Metrics(MetricManager):
         Parameters
         ----------
         lambda_handler : Callable[[Any, Any], Any], optional
-            Lambda function handler, by default None
+            lambda function handler, by default None
         capture_cold_start_metric : bool, optional
-            Captures cold start metric, by default False
+            captures cold start metric, by default False
         raise_on_empty_metrics : bool, optional
-            Raise exception if no metrics are emitted, by default False
+            raise exception if no metrics are emitted, by default False
+        default_dimensions: Dict[str, str], optional
+            metric dimensions as key=value that will always be present
 
         Raises
         ------
@@ -170,11 +173,14 @@ class Metrics(MetricManager):
                 self.log_metrics,
                 capture_cold_start_metric=capture_cold_start_metric,
                 raise_on_empty_metrics=raise_on_empty_metrics,
+                default_dimensions=default_dimensions,
             )
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
             try:
+                if default_dimensions:
+                    self.set_default_dimensions(**default_dimensions)
                 response = lambda_handler(event, context)
                 if capture_cold_start_metric:
                     self.__add_cold_start_metric(context=context)
