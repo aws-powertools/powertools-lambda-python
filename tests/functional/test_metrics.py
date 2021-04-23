@@ -15,6 +15,7 @@ from aws_lambda_powertools.metrics.base import MetricManager
 def reset_metric_set():
     metrics = Metrics()
     metrics.clear_metrics()
+    metrics.clear_default_dimensions()
     metrics_global.is_cold_start = True  # ensure each test has cold start
     yield
 
@@ -749,3 +750,75 @@ def test_metric_manage_metadata_set():
         assert metric.metadata_set == expected_dict
     except AttributeError:
         pytest.fail("AttributeError should not be raised")
+
+
+def test_log_persist_default_dimensions(capsys, metrics, dimensions, namespace):
+    # GIVEN Metrics is initialized and we persist a set of default dimensions
+    my_metrics = Metrics(namespace=namespace)
+    my_metrics.set_default_dimensions(environment="test", log_group="/lambda/test")
+
+    # WHEN we utilize log_metrics to serialize
+    # and flush metrics and clear all metrics and dimensions from memory
+    # at the end of a function execution
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        for metric in metrics:
+            my_metrics.add_metric(**metric)
+
+    lambda_handler({}, {})
+    first_invocation = capture_metrics_output(capsys)
+
+    lambda_handler({}, {})
+    second_invocation = capture_metrics_output(capsys)
+
+    # THEN we should have default dimensions in both outputs
+    assert "environment" in first_invocation
+    assert "environment" in second_invocation
+
+
+def test_clear_default_dimensions(namespace):
+    # GIVEN Metrics is initialized and we persist a set of default dimensions
+    my_metrics = Metrics(namespace=namespace)
+    my_metrics.set_default_dimensions(environment="test", log_group="/lambda/test")
+
+    # WHEN they are removed via clear_default_dimensions method
+    my_metrics.clear_default_dimensions()
+
+    # THEN there should be no default dimensions
+    assert not my_metrics.default_dimensions
+
+
+def test_default_dimensions_across_instances(namespace):
+    # GIVEN Metrics is initialized and we persist a set of default dimensions
+    my_metrics = Metrics(namespace=namespace)
+    my_metrics.set_default_dimensions(environment="test", log_group="/lambda/test")
+
+    # WHEN a new Metrics instance is created
+    same_metrics = Metrics()
+
+    # THEN default dimensions should also be present
+    assert "environment" in same_metrics.default_dimensions
+
+
+def test_log_metrics_with_default_dimensions(capsys, metrics, dimensions, namespace):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(namespace=namespace)
+    default_dimensions = {"environment": "test", "log_group": "/lambda/test"}
+
+    # WHEN we utilize log_metrics with default dimensions to serialize
+    # and flush metrics and clear all metrics and dimensions from memory
+    # at the end of a function execution
+    @my_metrics.log_metrics(default_dimensions=default_dimensions)
+    def lambda_handler(evt, ctx):
+        for metric in metrics:
+            my_metrics.add_metric(**metric)
+
+    lambda_handler({}, {})
+    first_invocation = capture_metrics_output(capsys)
+
+    lambda_handler({}, {})
+    second_invocation = capture_metrics_output(capsys)
+
+    # THEN we should have default dimensions in both outputs
+    assert "environment" in first_invocation
+    assert "environment" in second_invocation
