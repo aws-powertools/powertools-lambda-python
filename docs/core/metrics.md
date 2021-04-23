@@ -391,11 +391,11 @@ If you prefer setting environment variable for specific tests, and are using Pyt
         yield
     ```
 
-### Inspecting metrics
+### Functional testing
 
-As metrics are logged to standard output, you can read stdoutput and assert whether metrics are present. Here's an example using `pytest` with `capsys` built-in fixture:
+As metrics are logged to standard output, you can read standard output and assert whether metrics are present. Here's an example using `pytest` with `capsys` built-in fixture:
 
-=== "pytest_metrics_assertion.py"
+=== "Assert single EMF blob with pytest.py"
 
 	```python hl_lines="6 9-10 23-34"
 	from aws_lambda_powertools import Metrics
@@ -422,6 +422,43 @@ As metrics are logged to standard output, you can read stdoutput and assert whet
 		# and a valid EMF object should be flushed correctly
 		assert "SuccessfulBooking" in log  # basic string assertion in JSON str
 		assert "SuccessfulBooking" in metrics_output["_aws"]["CloudWatchMetrics"][0]["Metrics"][0]["Name"]
+	```
+
+=== "Assert multiple EMF blobs with pytest"
+
+	```python hl_lines="8-9 11 21-23 25 29-30 32"
+	from aws_lambda_powertools import Metrics
+	from aws_lambda_powertools.metrics import MetricUnit
+
+	from collections import namedtuple
+
+	import json
+
+	def capture_metrics_output_multiple_emf_objects(capsys):
+		return [json.loads(line.strip()) for line in capsys.readouterr().out.split("\n") if line]
+
+	def test_log_metrics(capsys):
+		# GIVEN Metrics is initialized
+		metrics = Metrics(namespace="ServerlessAirline")
+
+		# WHEN log_metrics is used with capture_cold_start_metric
+		@metrics.log_metrics(capture_cold_start_metric=True)
+		def lambda_handler(evt, ctx):
+			metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
+			metrics.add_dimension(name="environment", value="prod")
+
+		# log_metrics uses function_name property from context to add as a dimension for cold start metric
+		LambdaContext = namedtuple("LambdaContext", "function_name")
+		lambda_handler({}, LambdaContext("example_fn")
+
+		cold_start_blob, custom_metrics_blob = capture_metrics_output_multiple_emf_objects(capsys)
+
+		# THEN ColdStart metric and function_name dimension should be logged
+		# in a separate EMF blob than the application metrics
+		assert cold_start_blob["ColdStart"] == [1.0]
+		assert cold_start_blob["function_name"] == "example_fn"
+
+		assert "SuccessfulBooking" in custom_metrics_blob  # as per previous example
 	```
 
 !!! tip "For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/functional/test_metrics.py)"
