@@ -104,6 +104,8 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 !!! note "Metrics overflow"
 	CloudWatch EMF supports a max of 100 metrics per batch. Metrics utility will flush all metrics when adding the 100th metric. Subsequent metrics, e.g. 101th, will be aggregated into a new EMF object, for your convenience.
 
+!!! warning "Do not create metrics or dimensions outside the handler"
+	Metrics or dimensions added in the global scope will only be added during cold start. Disregard if you that's the intended behaviour.
 
 ### Adding default dimensions
 
