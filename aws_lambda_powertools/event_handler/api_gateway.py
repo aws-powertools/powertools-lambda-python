@@ -35,9 +35,8 @@ class Response:
         self.status_code = status_code
         self.body = body
         self.base64_encoded = False
-        self.headers: Dict = headers if headers is not None else {}
-        if "Content-Type" not in self.headers:
-            self.headers["Content-Type"] = content_type
+        self.headers: Dict = headers or {}
+        self.headers.setdefault("Content-Type", content_type)
 
     def add_cors(self, method: str):
         self.headers["Access-Control-Allow-Origin"] = "*"
