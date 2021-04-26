@@ -98,20 +98,8 @@ class ApiGatewayResolver:
     def resolve(self, event, context) -> Dict[str, Any]:
         self.current_event = self._to_data_class(event)
         self.lambda_context = context
-
         route, args = self._find_route(self.current_event.http_method.upper(), self.current_event.path)
-        result = route.func(**args)
-
-        if isinstance(result, Response):
-            response = result
-        elif isinstance(result, dict):
-            response = Response(
-                status_code=200,
-                content_type="application/json",
-                body=json.dumps(result, separators=(",", ":"), cls=Encoder),
-            )
-        else:  # Tuple[int, str, Union[bytes, str]]
-            response = Response(*result)
+        response = self.to_response(route.func(**args))
 
         if route.cors:
             response.add_cors(route.method)
@@ -121,6 +109,19 @@ class ApiGatewayResolver:
             response.compress()
 
         return response.to_dict()
+
+    @staticmethod
+    def to_response(result: Union[Tuple[int, str, Union[bytes, str]], Dict, Response]) -> Response:
+        if isinstance(result, Response):
+            return result
+        elif isinstance(result, dict):
+            return Response(
+                status_code=200,
+                content_type="application/json",
+                body=json.dumps(result, separators=(",", ":"), cls=Encoder),
+            )
+        else:  # Tuple[int, str, Union[bytes, str]]
+            return Response(*result)
 
     @staticmethod
     def _compile_regex(rule: str):
