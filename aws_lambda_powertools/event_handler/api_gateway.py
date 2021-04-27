@@ -3,7 +3,7 @@ import json
 import re
 import zlib
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
@@ -51,24 +51,12 @@ class CORSConfig(object):
 
 class Route:
     def __init__(
-        self,
-        method: str,
-        rule: Any,
-        func: Callable,
-        cors: Union[bool, CORSConfig],
-        compress: bool,
-        cache_control: Optional[str],
+        self, method: str, rule: Any, func: Callable, cors: bool, compress: bool, cache_control: Optional[str]
     ):
         self.method = method.upper()
         self.rule = rule
         self.func = func
-        self.cors: Optional[CORSConfig]
-        if cors is True:
-            self.cors = CORSConfig()
-        elif isinstance(cors, CORSConfig):
-            self.cors = cors
-        else:
-            self.cors = None
+        self.cors = cors
         self.compress = compress
         self.cache_control = cache_control
 
@@ -98,60 +86,44 @@ class Response:
         self.body = gzip.compress(self.body) + gzip.flush()
 
     def to_dict(self) -> Dict[str, Any]:
-        result = {"statusCode": self.status_code, "headers": self.headers}
         if isinstance(self.body, bytes):
             self.base64_encoded = True
             self.body = base64.b64encode(self.body).decode()
-        if self.body:
-            result["isBase64Encoded"] = self.base64_encoded
-            result["body"] = self.body
-        return result
+        return {
+            "statusCode": self.status_code,
+            "headers": self.headers,
+            "body": self.body,
+            "isBase64Encoded": self.base64_encoded,
+        }
 
 
 class ApiGatewayResolver:
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
 
-    def __init__(self, proxy_type: Enum = ProxyEventType.http_api_v1):
+    def __init__(self, proxy_type: Enum = ProxyEventType.http_api_v1, cors: CORSConfig = None):
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
-        self._cors: Optional[CORSConfig] = None
-        self._cors_methods: Set[str] = set()
+        self.cors = cors
 
-    def get(self, rule: str, cors: Union[bool, CORSConfig] = False, compress: bool = False, cache_control: str = None):
+    def get(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
         return self.route(rule, "GET", cors, compress, cache_control)
 
-    def post(self, rule: str, cors: Union[bool, CORSConfig] = False, compress: bool = False, cache_control: str = None):
+    def post(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
         return self.route(rule, "POST", cors, compress, cache_control)
 
-    def put(self, rule: str, cors: Union[bool, CORSConfig] = False, compress: bool = False, cache_control: str = None):
+    def put(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
         return self.route(rule, "PUT", cors, compress, cache_control)
 
-    def delete(
-        self, rule: str, cors: Union[bool, CORSConfig] = False, compress: bool = False, cache_control: str = None
-    ):
+    def delete(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
         return self.route(rule, "DELETE", cors, compress, cache_control)
 
-    def patch(
-        self, rule: str, cors: Union[bool, CORSConfig] = False, compress: bool = False, cache_control: str = None
-    ):
+    def patch(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
         return self.route(rule, "PATCH", cors, compress, cache_control)
 
-    def route(
-        self,
-        rule: str,
-        method: str,
-        cors: Union[bool, CORSConfig] = False,
-        compress: bool = False,
-        cache_control: str = None,
-    ):
+    def route(self, rule: str, method: str, cors: bool = False, compress: bool = False, cache_control: str = None):
         def register_resolver(func: Callable):
-            route = Route(method, self._compile_regex(rule), func, cors, compress, cache_control)
-            self._routes.append(route)
-            if route.cors:
-                if self._cors is None:
-                    self._cors = route.cors
-                self._cors_methods.add(route.method)
+            self._routes.append(Route(method, self._compile_regex(rule), func, cors, compress, cache_control))
             return func
 
         return register_resolver
@@ -159,11 +131,12 @@ class ApiGatewayResolver:
     def resolve(self, event, context) -> Dict[str, Any]:
         self.current_event = self._to_data_class(event)
         self.lambda_context = context
-        route, args = self._find_route(self.current_event.http_method.upper(), self.current_event.path)
-        response = self.to_response(route.func(**args))
+        route, response = self._execute_route(self.current_event.http_method.upper(), self.current_event.path)
+        if route is None:
+            return response.to_dict()
 
         if route.cors:
-            response.add_cors(route.cors)
+            response.add_cors(self.cors or CORSConfig())
         if route.cache_control:
             response.add_cache_control(route.cache_control)
         if route.compress and "gzip" in (self.current_event.get_header_value("accept-encoding") or ""):
@@ -196,28 +169,24 @@ class ApiGatewayResolver:
             return APIGatewayProxyEventV2(event)
         return ALBEvent(event)
 
-    @staticmethod
-    def _preflight(allowed_methods: Set):
-        allowed_methods.add("OPTIONS")
-        headers = {"Access-Control-Allow-Methods": ",".join(sorted(allowed_methods))}
-        return Response(204, None, None, headers)
-
-    def _find_route(self, method: str, path: str) -> Tuple[Route, Dict]:
+    def _execute_route(self, method: str, path: str) -> Tuple[Optional[Route], Response]:
         for route in self._routes:
             if method != route.method:
                 continue
             match: Optional[re.Match] = route.rule.match(path)
             if match:
-                return route, match.groupdict()
+                return route, self.to_response(route.func(**match.groupdict()))
 
-        if method == "OPTIONS" and self._cors is not None:
-            # Most be the preflight options call
-            return (
-                Route("OPTIONS", None, self._preflight, self._cors, False, None),
-                {"allowed_methods": self._cors_methods},
-            )
+        headers = {}
+        if self.cors:
+            headers.update(self.cors.to_dict())
 
-        raise ValueError(f"No route found for '{method}.{path}'")
+        return None, Response(
+            status_code=404,
+            content_type="application/json",
+            body=json.dumps({"message": f"No route found for '{method}.{path}'"}),
+            headers=headers,
+        )
 
     def __call__(self, event, context) -> Any:
         return self.resolve(event, context)

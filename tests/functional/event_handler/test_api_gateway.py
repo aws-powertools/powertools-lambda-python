@@ -5,8 +5,6 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Dict, Tuple
 
-import pytest
-
 from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, CORSConfig, ProxyEventType, Response
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
@@ -144,7 +142,7 @@ def test_no_matches():
         raise RuntimeError()
 
     def handler(event, context):
-        app.resolve(event, context)
+        return app.resolve(event, context)
 
     # Also check check the route configurations
     routes = app._routes
@@ -162,9 +160,11 @@ def test_no_matches():
             assert route.method == "PATCH"
 
     # WHEN calling the handler
-    # THEN raise a ValueError
-    with pytest.raises(ValueError):
-        handler(LOAD_GW_EVENT, None)
+    # THEN return a 404
+    result = handler(LOAD_GW_EVENT, None)
+    assert result["statusCode"] == 404
+    # AND cors headers are not returned
+    assert "Access-Control-Allow-Origin" not in result["headers"]
 
 
 def test_cors():
@@ -188,8 +188,6 @@ def test_cors():
     assert headers["Content-Type"] == TEXT_HTML
     assert headers["Access-Control-Allow-Origin"] == "*"
     assert "Access-Control-Allow-Credentials" not in headers
-    # AND "Access-Control-Allow-Methods" is only included in the preflight cors headers
-    assert "Access-Control-Allow-Methods" not in headers
     assert headers["Access-Control-Allow-Headers"] == ",".join(sorted(CORSConfig._REQUIRED_HEADERS))
 
 
@@ -342,64 +340,24 @@ def test_handling_response_type():
     assert result["body"] == "Not found"
 
 
-def test_preflight_cors():
-    # GIVEN
-    app = ApiGatewayResolver()
-    preflight_event = {"path": "/cors", "httpMethod": "OPTIONS"}
-
-    @app.get("/cors", cors=True)
-    def get_with_cors():
-        ...
-
-    @app.post("/cors", cors=True)
-    def post_with_cors():
-        ...
-
-    @app.delete("/cors")
-    def delete_no_cors():
-        ...
-
-    def handler(event, context):
-        return app.resolve(event, context)
-
-    # WHEN calling the event handler
-    # AND the httpMethod is OPTIONS
-    result = handler(preflight_event, None)
-
-    # THEN return the preflight response
-    # AND No Content it returned
-    assert result["statusCode"] == 204
-    assert "body" not in result
-    assert "isBase64Encoded" not in result
-    # AND no Content-Type is set
-    headers = result["headers"]
-    assert "headers" in result
-    assert "Content-Type" not in headers
-    # AND set the access control headers
-    assert headers["Access-Control-Allow-Origin"] == "*"
-    assert headers["Access-Control-Allow-Methods"] == "GET,OPTIONS,POST"
-    assert "Access-Control-Allow-Credentials" not in headers
-
-
 def test_custom_cors_config():
     # GIVEN a custom cors configuration
-    app = ApiGatewayResolver()
-    event = {"path": "/cors", "httpMethod": "GET"}
     allow_header = ["foo2"]
     cors_config = CORSConfig(
         allow_origin="https://foo1",
         expose_headers=["foo1"],
         allow_headers=allow_header,
         max_age=100,
-        allow_credentials=False,
+        allow_credentials=True,
     )
+    app = ApiGatewayResolver(cors=cors_config)
+    event = {"path": "/cors", "httpMethod": "GET"}
 
-    @app.get("/cors", cors=cors_config)
+    @app.get("/cors", cors=True)
     def get_with_cors():
         return {}
 
-    # NOTE: Currently only the first configuration is used for the OPTIONS preflight
-    @app.get("/another-one", cors=True)
+    @app.get("/another-one")
     def another_one():
         return {}
 
@@ -415,9 +373,41 @@ def test_custom_cors_config():
     assert headers["Access-Control-Allow-Headers"] == expected_allows_headers
     assert headers["Access-Control-Expose-Headers"] == ",".join(cors_config.expose_headers)
     assert headers["Access-Control-Max-Age"] == str(cors_config.max_age)
-    assert "Access-Control-Allow-Credentials" not in headers
+    assert "Access-Control-Allow-Credentials" in headers
+    assert headers["Access-Control-Allow-Credentials"] == "true"
 
     # AND custom cors was set on the app
-    assert isinstance(app._cors, CORSConfig)
-    assert app._cors is cors_config
-    assert app._cors_methods == {"GET"}
+    assert isinstance(app.cors, CORSConfig)
+    assert app.cors is cors_config
+    # AND routes without cors don't include "Access-Control" headers
+    event = {"path": "/another-one", "httpMethod": "GET"}
+    result = app(event, None)
+    headers = result["headers"]
+    assert "Access-Control-Allow-Origin" not in headers
+
+
+def test_no_content_response():
+    # GIVEN a response with no content-type or body
+    response = Response(status_code=204, content_type=None, body=None, headers=None)
+
+    # WHEN calling to_dict
+    result = response.to_dict()
+
+    # THEN return an None body and no Content-Type header
+    assert result["body"] is None
+    assert result["statusCode"] == 204
+    assert "Content-Type" not in result["headers"]
+
+
+def test_no_matches_with_cors():
+    # GIVEN an event that does not match any of the given routes
+    # AND cors enabled
+    app = ApiGatewayResolver(cors=CORSConfig())
+
+    # WHEN calling the handler
+    result = app({"path": "/another-one", "httpMethod": "GET"}, None)
+
+    # THEN return a 404
+    # AND cors headers are returned
+    assert result["statusCode"] == 404
+    assert "Access-Control-Allow-Origin" in result["headers"]
