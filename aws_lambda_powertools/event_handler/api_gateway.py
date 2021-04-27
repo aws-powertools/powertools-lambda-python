@@ -3,7 +3,7 @@ import json
 import re
 import zlib
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
@@ -18,30 +18,74 @@ class ProxyEventType(Enum):
     api_gateway = http_api_v1
 
 
+class CORSConfig(object):
+    _REQUIRED_HEADERS = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token"]
+
+    def __init__(
+        self,
+        allow_origin: str = "*",
+        allow_headers: List[str] = None,
+        expose_headers: List[str] = None,
+        max_age: int = None,
+        allow_credentials: bool = True,
+    ):
+        self.allow_origin = allow_origin
+        self.allow_headers = set((allow_headers or []) + self._REQUIRED_HEADERS)
+        self.expose_headers = expose_headers or []
+        self.max_age = max_age
+        self.allow_credentials = allow_credentials
+
+    def to_dict(self) -> Dict[str, str]:
+        headers = {
+            "Access-Control-Allow-Origin": self.allow_origin,
+            "Access-Control-Allow-Headers": ",".join(sorted(self.allow_headers)),
+        }
+        if self.expose_headers:
+            headers["Access-Control-Expose-Headers"] = ",".join(self.expose_headers)
+        if self.max_age is not None:
+            headers["Access-Control-Max-Age"] = str(self.max_age)
+        if self.allow_credentials is True:
+            headers["Access-Control-Allow-Credentials"] = "true"
+        return headers
+
+
 class Route:
     def __init__(
-        self, method: str, rule: Any, func: Callable, cors: bool, compress: bool, cache_control: Optional[str]
+        self,
+        method: str,
+        rule: Any,
+        func: Callable,
+        cors: Union[bool, CORSConfig],
+        compress: bool,
+        cache_control: Optional[str],
     ):
         self.method = method.upper()
         self.rule = rule
         self.func = func
-        self.cors = cors
+        self.cors: Optional[CORSConfig]
+        if cors is True:
+            self.cors = CORSConfig()
+        elif isinstance(cors, CORSConfig):
+            self.cors = cors
+        else:
+            self.cors = None
         self.compress = compress
         self.cache_control = cache_control
 
 
 class Response:
-    def __init__(self, status_code: int, content_type: str, body: Union[str, bytes], headers: Dict = None):
+    def __init__(
+        self, status_code: int, content_type: Optional[str], body: Union[str, bytes, None], headers: Dict = None
+    ):
         self.status_code = status_code
         self.body = body
         self.base64_encoded = False
         self.headers: Dict = headers or {}
-        self.headers.setdefault("Content-Type", content_type)
+        if content_type:
+            self.headers.setdefault("Content-Type", content_type)
 
-    def add_cors(self, method: str):
-        self.headers["Access-Control-Allow-Origin"] = "*"
-        self.headers["Access-Control-Allow-Methods"] = method
-        self.headers["Access-Control-Allow-Credentials"] = "true"
+    def add_cors(self, cors: CORSConfig):
+        self.headers.update(cors.to_dict())
 
     def add_cache_control(self, cache_control: str):
         self.headers["Cache-Control"] = cache_control if self.status_code == 200 else "no-cache"
@@ -54,15 +98,14 @@ class Response:
         self.body = gzip.compress(self.body) + gzip.flush()
 
     def to_dict(self) -> Dict[str, Any]:
+        result = {"statusCode": self.status_code, "headers": self.headers}
         if isinstance(self.body, bytes):
             self.base64_encoded = True
             self.body = base64.b64encode(self.body).decode()
-        return {
-            "statusCode": self.status_code,
-            "headers": self.headers,
-            "body": self.body,
-            "isBase64Encoded": self.base64_encoded,
-        }
+        if self.body:
+            result["isBase64Encoded"] = self.base64_encoded
+            result["body"] = self.body
+        return result
 
 
 class ApiGatewayResolver:
@@ -72,25 +115,43 @@ class ApiGatewayResolver:
     def __init__(self, proxy_type: Enum = ProxyEventType.http_api_v1):
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
+        self._cors: Optional[CORSConfig] = None
+        self._cors_methods: Set[str] = set()
 
-    def get(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+    def get(self, rule: str, cors: Union[bool, CORSConfig] = False, compress: bool = False, cache_control: str = None):
         return self.route(rule, "GET", cors, compress, cache_control)
 
-    def post(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+    def post(self, rule: str, cors: Union[bool, CORSConfig] = False, compress: bool = False, cache_control: str = None):
         return self.route(rule, "POST", cors, compress, cache_control)
 
-    def put(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+    def put(self, rule: str, cors: Union[bool, CORSConfig] = False, compress: bool = False, cache_control: str = None):
         return self.route(rule, "PUT", cors, compress, cache_control)
 
-    def delete(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+    def delete(
+        self, rule: str, cors: Union[bool, CORSConfig] = False, compress: bool = False, cache_control: str = None
+    ):
         return self.route(rule, "DELETE", cors, compress, cache_control)
 
-    def patch(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+    def patch(
+        self, rule: str, cors: Union[bool, CORSConfig] = False, compress: bool = False, cache_control: str = None
+    ):
         return self.route(rule, "PATCH", cors, compress, cache_control)
 
-    def route(self, rule: str, method: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+    def route(
+        self,
+        rule: str,
+        method: str,
+        cors: Union[bool, CORSConfig] = False,
+        compress: bool = False,
+        cache_control: str = None,
+    ):
         def register_resolver(func: Callable):
-            self._routes.append(Route(method, self._compile_regex(rule), func, cors, compress, cache_control))
+            route = Route(method, self._compile_regex(rule), func, cors, compress, cache_control)
+            self._routes.append(route)
+            if route.cors:
+                if self._cors is None:
+                    self._cors = route.cors
+                self._cors_methods.add(route.method)
             return func
 
         return register_resolver
@@ -102,7 +163,7 @@ class ApiGatewayResolver:
         response = self.to_response(route.func(**args))
 
         if route.cors:
-            response.add_cors(route.method)
+            response.add_cors(route.cors)
         if route.cache_control:
             response.add_cache_control(route.cache_control)
         if route.compress and "gzip" in (self.current_event.get_header_value("accept-encoding") or ""):
@@ -135,6 +196,12 @@ class ApiGatewayResolver:
             return APIGatewayProxyEventV2(event)
         return ALBEvent(event)
 
+    @staticmethod
+    def _preflight(allowed_methods: Set):
+        allowed_methods.add("OPTIONS")
+        headers = {"Access-Control-Allow-Methods": ",".join(sorted(allowed_methods))}
+        return Response(204, None, None, headers)
+
     def _find_route(self, method: str, path: str) -> Tuple[Route, Dict]:
         for route in self._routes:
             if method != route.method:
@@ -142,6 +209,13 @@ class ApiGatewayResolver:
             match: Optional[re.Match] = route.rule.match(path)
             if match:
                 return route, match.groupdict()
+
+        if method == "OPTIONS" and self._cors is not None:
+            # Most be the preflight options call
+            return (
+                Route("OPTIONS", None, self._preflight, self._cors, False, None),
+                {"allowed_methods": self._cors_methods},
+            )
 
         raise ValueError(f"No route found for '{method}.{path}'")
 
