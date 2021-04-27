@@ -27,7 +27,7 @@ class CORSConfig(object):
         allow_headers: List[str] = None,
         expose_headers: List[str] = None,
         max_age: int = None,
-        allow_credentials: bool = True,
+        allow_credentials: bool = False,
     ):
         self.allow_origin = allow_origin
         self.allow_headers = set((allow_headers or []) + self._REQUIRED_HEADERS)

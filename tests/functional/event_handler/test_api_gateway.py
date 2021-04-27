@@ -187,7 +187,7 @@ def test_cors():
     headers = result["headers"]
     assert headers["Content-Type"] == TEXT_HTML
     assert headers["Access-Control-Allow-Origin"] == "*"
-    assert headers["Access-Control-Allow-Credentials"] == "true"
+    assert "Access-Control-Allow-Credentials" not in headers
     # AND "Access-Control-Allow-Methods" is only included in the preflight cors headers
     assert "Access-Control-Allow-Methods" not in headers
     assert headers["Access-Control-Allow-Headers"] == ",".join(sorted(CORSConfig._REQUIRED_HEADERS))
@@ -378,7 +378,7 @@ def test_preflight_cors():
     # AND set the access control headers
     assert headers["Access-Control-Allow-Origin"] == "*"
     assert headers["Access-Control-Allow-Methods"] == "GET,OPTIONS,POST"
-    assert headers["Access-Control-Allow-Credentials"] == "true"
+    assert "Access-Control-Allow-Credentials" not in headers
 
 
 def test_custom_cors_config():
