@@ -377,8 +377,8 @@ def test_custom_cors_config():
     assert headers["Access-Control-Allow-Credentials"] == "true"
 
     # AND custom cors was set on the app
-    assert isinstance(app.cors, CORSConfig)
-    assert app.cors is cors_config
+    assert isinstance(app._cors, CORSConfig)
+    assert app._cors is cors_config
     # AND routes without cors don't include "Access-Control" headers
     event = {"path": "/another-one", "httpMethod": "GET"}
     result = app(event, None)
@@ -411,3 +411,64 @@ def test_no_matches_with_cors():
     # AND cors headers are returned
     assert result["statusCode"] == 404
     assert "Access-Control-Allow-Origin" in result["headers"]
+
+
+def test_preflight():
+    # GIVEN an event for an OPTIONS call that does not match any of the given routes
+    # AND cors is enabled
+    app = ApiGatewayResolver(cors=CORSConfig())
+
+    @app.get("/foo", cors=True)
+    def foo_cors():
+        ...
+
+    @app.route(method="delete", rule="/foo", cors=True)
+    def foo_delete_cors():
+        ...
+
+    @app.post("/foo")
+    def post_no_cors():
+        ...
+
+    # WHEN calling the handler
+    result = app({"path": "/foo", "httpMethod": "OPTIONS"}, None)
+
+    # THEN return no content
+    # AND include Access-Control-Allow-Methods of the cors methods used
+    assert result["statusCode"] == 204
+    assert result["body"] is None
+    headers = result["headers"]
+    assert "Content-Type" not in headers
+    assert "Access-Control-Allow-Origin" in result["headers"]
+    assert headers["Access-Control-Allow-Methods"] == "DELETE,GET,OPTIONS"
+
+
+def test_custom_preflight_response():
+    # GIVEN cors is enabled
+    # AND we have a custom preflight method
+    # AND the request matches this custom preflight route
+    app = ApiGatewayResolver(cors=CORSConfig())
+
+    @app.route(method="OPTIONS", rule="/some-call", cors=True)
+    def custom_preflight():
+        return Response(
+            status_code=200,
+            content_type=TEXT_HTML,
+            body="Foo",
+            headers={"Access-Control-Allow-Methods": "CUSTOM"},
+        )
+
+    @app.route(method="CUSTOM", rule="/some-call", cors=True)
+    def custom_method():
+        ...
+
+    # WHEN calling the handler
+    result = app({"path": "/some-call", "httpMethod": "OPTIONS"}, None)
+
+    # THEN return the custom preflight response
+    assert result["statusCode"] == 200
+    assert result["body"] == "Foo"
+    headers = result["headers"]
+    assert headers["Content-Type"] == TEXT_HTML
+    assert "Access-Control-Allow-Origin" in result["headers"]
+    assert headers["Access-Control-Allow-Methods"] == "CUSTOM"

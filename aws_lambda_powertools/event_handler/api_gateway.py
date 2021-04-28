@@ -3,7 +3,7 @@ import json
 import re
 import zlib
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
@@ -19,7 +19,9 @@ class ProxyEventType(Enum):
 
 
 class CORSConfig(object):
-    _REQUIRED_HEADERS = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token"]
+    """CORS Config"""
+
+    _REQUIRED_HEADERS = ["Authorization", "Content-Type", "X-Amz-Date", "X-Api-Key", "X-Amz-Security-Token"]
 
     def __init__(
         self,
@@ -29,8 +31,25 @@ class CORSConfig(object):
         max_age: int = None,
         allow_credentials: bool = False,
     ):
+        """
+        Parameters
+        ----------
+        allow_origin: str
+            The value of the `Access-Control-Allow-Origin` to send in the response. Defaults to "*", but should
+            only be used during development.
+        allow_headers: str
+            The list of additional allowed headers. This list is added to list of
+            built in allowed headers: `Authorization`, `Content-Type`, `X-Amz-Date`,
+            `X-Api-Key`, `X-Amz-Security-Token`.
+        expose_headers: str
+            A list of values to return for the Access-Control-Expose-Headers
+        max_age: int
+            The value for the `Access-Control-Max-Age`
+        allow_credentials: bool
+            A boolean value that sets the value of `Access-Control-Allow-Credentials`
+        """
         self.allow_origin = allow_origin
-        self.allow_headers = set((allow_headers or []) + self._REQUIRED_HEADERS)
+        self.allow_headers = set(self._REQUIRED_HEADERS + (allow_headers or []))
         self.expose_headers = expose_headers or []
         self.max_age = max_age
         self.allow_credentials = allow_credentials
@@ -104,7 +123,8 @@ class ApiGatewayResolver:
     def __init__(self, proxy_type: Enum = ProxyEventType.http_api_v1, cors: CORSConfig = None):
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
-        self.cors = cors
+        self._cors = cors
+        self._cors_methods: Set[str] = {"OPTIONS"}
 
     def get(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
         return self.route(rule, "GET", cors, compress, cache_control)
@@ -124,6 +144,8 @@ class ApiGatewayResolver:
     def route(self, rule: str, method: str, cors: bool = False, compress: bool = False, cache_control: str = None):
         def register_resolver(func: Callable):
             self._routes.append(Route(method, self._compile_regex(rule), func, cors, compress, cache_control))
+            if cors:
+                self._cors_methods.add(method.upper())
             return func
 
         return register_resolver
@@ -131,12 +153,12 @@ class ApiGatewayResolver:
     def resolve(self, event, context) -> Dict[str, Any]:
         self.current_event = self._to_data_class(event)
         self.lambda_context = context
-        route, response = self._execute_route(self.current_event.http_method.upper(), self.current_event.path)
-        if route is None:
+        route, response = self._find_route(self.current_event.http_method.upper(), self.current_event.path)
+        if route is None:  # No matching route was found
             return response.to_dict()
 
         if route.cors:
-            response.add_cors(self.cors or CORSConfig())
+            response.add_cors(self._cors or CORSConfig())
         if route.cache_control:
             response.add_cache_control(route.cache_control)
         if route.compress and "gzip" in (self.current_event.get_header_value("accept-encoding") or ""):
@@ -169,17 +191,20 @@ class ApiGatewayResolver:
             return APIGatewayProxyEventV2(event)
         return ALBEvent(event)
 
-    def _execute_route(self, method: str, path: str) -> Tuple[Optional[Route], Response]:
+    def _find_route(self, method: str, path: str) -> Tuple[Optional[Route], Response]:
         for route in self._routes:
             if method != route.method:
                 continue
             match: Optional[re.Match] = route.rule.match(path)
             if match:
-                return route, self.to_response(route.func(**match.groupdict()))
+                return self._call_route(match, route)
 
         headers = {}
-        if self.cors:
-            headers.update(self.cors.to_dict())
+        if self._cors:
+            headers.update(self._cors.to_dict())
+            if method == "OPTIONS":  # Preflight
+                headers["Access-Control-Allow-Methods"] = ",".join(sorted(self._cors_methods))
+                return None, Response(status_code=204, content_type=None, body=None, headers=headers)
 
         return None, Response(
             status_code=404,
@@ -187,6 +212,9 @@ class ApiGatewayResolver:
             body=json.dumps({"message": f"No route found for '{method}.{path}'"}),
             headers=headers,
         )
+
+    def _call_route(self, match: re.Match, route: Route) -> Tuple[Route, Response]:
+        return route, self.to_response(route.func(**match.groupdict()))
 
     def __call__(self, event, context) -> Any:
         return self.resolve(event, context)
