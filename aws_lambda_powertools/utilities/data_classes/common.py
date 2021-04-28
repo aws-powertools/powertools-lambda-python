@@ -1,3 +1,4 @@
+import json
 from typing import Any, Dict, Optional
 
 
@@ -57,7 +58,22 @@ class BaseProxyEvent(DictWrapper):
 
     @property
     def body(self) -> Optional[str]:
+        """Submitted body of the request as a string"""
         return self.get("body")
+
+    @property
+    def json_body(self) -> Any:
+        """Parses the submitted body as json"""
+        return json.loads(self["body"])
+
+    @property
+    def path(self) -> str:
+        return self["path"]
+
+    @property
+    def http_method(self) -> str:
+        """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
+        return self["httpMethod"]
 
     def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
         """Get query string value by name
