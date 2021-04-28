@@ -5,7 +5,13 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Dict, Tuple
 
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, CORSConfig, ProxyEventType, Response
+from aws_lambda_powertools.event_handler.api_gateway import (
+    ApiGatewayResolver,
+    CORSConfig,
+    ProxyEventType,
+    Response,
+    ResponseBuilder,
+)
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
 from tests.functional.utils import load_event
@@ -106,14 +112,14 @@ def test_include_rule_matching():
     @app.get("/<name>/<my_id>")
     def get_lambda(my_id: str, name: str) -> Tuple[int, str, str]:
         assert name == "my"
-        return 200, "plain/html", my_id
+        return 200, TEXT_HTML, my_id
 
     # WHEN calling the event handler
     result = app(LOAD_GW_EVENT, {})
 
     # THEN
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == "plain/html"
+    assert result["headers"]["Content-Type"] == TEXT_HTML
     assert result["body"] == "path"
 
 
@@ -389,14 +395,16 @@ def test_custom_cors_config():
 def test_no_content_response():
     # GIVEN a response with no content-type or body
     response = Response(status_code=204, content_type=None, body=None, headers=None)
+    response_builder = ResponseBuilder(response)
 
     # WHEN calling to_dict
-    result = response.to_dict()
+    result = response_builder.build(APIGatewayProxyEvent(LOAD_GW_EVENT))
 
     # THEN return an None body and no Content-Type header
+    assert result["statusCode"] == response.status_code
     assert result["body"] is None
-    assert result["statusCode"] == 204
-    assert "Content-Type" not in result["headers"]
+    headers = result["headers"]
+    assert "Content-Type" not in headers
 
 
 def test_no_matches_with_cors():
@@ -413,7 +421,7 @@ def test_no_matches_with_cors():
     assert "Access-Control-Allow-Origin" in result["headers"]
 
 
-def test_preflight():
+def test_cors_preflight():
     # GIVEN an event for an OPTIONS call that does not match any of the given routes
     # AND cors is enabled
     app = ApiGatewayResolver(cors=CORSConfig())
