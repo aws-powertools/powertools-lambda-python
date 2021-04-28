@@ -167,19 +167,6 @@ class ApiGatewayResolver:
         return response.to_dict()
 
     @staticmethod
-    def to_response(result: Union[Tuple[int, str, Union[bytes, str]], Dict, Response]) -> Response:
-        if isinstance(result, Response):
-            return result
-        elif isinstance(result, dict):
-            return Response(
-                status_code=200,
-                content_type="application/json",
-                body=json.dumps(result, separators=(",", ":"), cls=Encoder),
-            )
-        else:  # Tuple[int, str, Union[bytes, str]]
-            return Response(*result)
-
-    @staticmethod
     def _compile_regex(rule: str):
         rule_regex: str = re.sub(r"(<\w+>)", r"(?P\1.+)", rule)
         return re.compile("^{}$".format(rule_regex))
@@ -214,7 +201,20 @@ class ApiGatewayResolver:
         )
 
     def _call_route(self, route: Route, args: Dict[str, str]) -> Tuple[Route, Response]:
-        return route, self.to_response(route.func(**args))
+        return route, self._to_response(route.func(**args))
+
+    @staticmethod
+    def _to_response(result: Union[Tuple[int, str, Union[bytes, str]], Dict, Response]) -> Response:
+        if isinstance(result, Response):
+            return result
+        elif isinstance(result, dict):
+            return Response(
+                status_code=200,
+                content_type="application/json",
+                body=json.dumps(result, separators=(",", ":"), cls=Encoder),
+            )
+        else:  # Tuple[int, str, Union[bytes, str]]
+            return Response(*result)
 
     def __call__(self, event, context) -> Any:
         return self.resolve(event, context)
