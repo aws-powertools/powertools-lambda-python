@@ -197,7 +197,7 @@ class ApiGatewayResolver:
                 continue
             match: Optional[re.Match] = route.rule.match(path)
             if match:
-                return self._call_route(match, route)
+                return self._call_route(route, match.groupdict())
 
         headers = {}
         if self._cors:
@@ -213,8 +213,8 @@ class ApiGatewayResolver:
             headers=headers,
         )
 
-    def _call_route(self, match: re.Match, route: Route) -> Tuple[Route, Response]:
-        return route, self.to_response(route.func(**match.groupdict()))
+    def _call_route(self, route: Route, args: Dict[str, str]) -> Tuple[Route, Response]:
+        return route, self.to_response(route.func(**args))
 
     def __call__(self, event, context) -> Any:
         return self.resolve(event, context)
