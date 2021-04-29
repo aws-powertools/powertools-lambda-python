@@ -110,7 +110,8 @@ class ResponseBuilder:
         gzip = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS | 16)
         self.response.body = gzip.compress(self.response.body) + gzip.flush()
 
-    def _route(self, event: BaseProxyEvent, cors: CORSConfig = None):
+    def _route(self, event: BaseProxyEvent, cors: Optional[CORSConfig]):
+        """Optionally handle any of the route's configure response handling"""
         if self.route is None:
             return
         if self.route.cors:
@@ -173,12 +174,17 @@ class ApiGatewayResolver:
         self.lambda_context = context
         return self._resolve_response().build(self.current_event, self._cors)
 
+    def __call__(self, event, context) -> Any:
+        return self.resolve(event, context)
+
     @staticmethod
     def _compile_regex(rule: str):
+        """Precompile regex pattern"""
         rule_regex: str = re.sub(r"(<\w+>)", r"(?P\1.+)", rule)
         return re.compile("^{}$".format(rule_regex))
 
     def _to_data_class(self, event: Dict) -> BaseProxyEvent:
+        """Convert the event dict to the corresponding data class"""
         if self._proxy_type == ProxyEventType.http_api_v1:
             return APIGatewayProxyEvent(event)
         if self._proxy_type == ProxyEventType.http_api_v2:
@@ -186,6 +192,7 @@ class ApiGatewayResolver:
         return ALBEvent(event)
 
     def _resolve_response(self) -> ResponseBuilder:
+        """Resolve the response or return the not found response"""
         method = self.current_event.http_method.upper()
         path = self.current_event.path
         for route in self._routes:
@@ -195,9 +202,10 @@ class ApiGatewayResolver:
             if match:
                 return self._call_route(route, match.groupdict())
 
-        return self.not_found(method, path)
+        return self._not_found(method, path)
 
-    def not_found(self, method: str, path: str) -> ResponseBuilder:
+    def _not_found(self, method: str, path: str) -> ResponseBuilder:
+        """No matching route was found, includes support for the cors preflight response"""
         headers = {}
         if self._cors:
             headers.update(self._cors.to_dict())
@@ -214,10 +222,12 @@ class ApiGatewayResolver:
         )
 
     def _call_route(self, route: Route, args: Dict[str, str]) -> ResponseBuilder:
+        """Actually call the matching route with any provided keyword arguments."""
         return ResponseBuilder(self._to_response(route.func(**args)), route)
 
     @staticmethod
     def _to_response(result: Union[Tuple[int, str, Union[bytes, str]], Dict, Response]) -> Response:
+        """Convert the route result to a Response"""
         if isinstance(result, Response):
             return result
         elif isinstance(result, dict):
@@ -228,6 +238,3 @@ class ApiGatewayResolver:
             )
         else:  # Tuple[int, str, Union[bytes, str]]
             return Response(*result)
-
-    def __call__(self, event, context) -> Any:
-        return self.resolve(event, context)
