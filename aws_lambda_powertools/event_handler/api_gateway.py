@@ -12,6 +12,10 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 class ProxyEventType(Enum):
+    """An enumerations of the supported proxy event types.
+
+    **NOTE:** api_gateway is an alias of http_api_v1"""
+
     http_api_v1 = "APIGatewayProxyEvent"
     http_api_v2 = "APIGatewayProxyEventV2"
     alb_event = "ALBEvent"
@@ -19,7 +23,46 @@ class ProxyEventType(Enum):
 
 
 class CORSConfig(object):
-    """CORS Config"""
+    """CORS Config
+
+
+    Examples
+    --------
+
+    Simple cors example using the default permissive cors, not this should only be used during early prototyping
+
+        >>> from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+        >>>
+        >>> app = ApiGatewayResolver()
+        >>>
+        >>> @app.get("/my/path", cors=True)
+        >>> def with_cors():
+        >>>      return {"message": "Foo"}
+
+    Using a custom CORSConfig where `with_cors` used the custom provided CORSConfig and `without_cors`
+    do not include any cors headers.
+
+        >>> from aws_lambda_powertools.event_handler.api_gateway import (
+        >>>    ApiGatewayResolver, CORSConfig
+        >>> )
+        >>>
+        >>> cors_config = CORSConfig(
+        >>>    allow_origin="https://wwww.example.com/",
+        >>>    expose_headers=["x-exposed-response-header"],
+        >>>    allow_headers=["x-custom-request-header"],
+        >>>    max_age=100,
+        >>>    allow_credentials=True,
+        >>> )
+        >>> app = ApiGatewayResolver(cors=cors_config)
+        >>>
+        >>> @app.get("/my/path", cors=True)
+        >>> def with_cors():
+        >>>      return {"message": "Foo"}
+        >>>
+        >>> @app.get("/another-one")
+        >>> def without_cors():
+        >>>     return {"message": "Foo"}
+    """
 
     _REQUIRED_HEADERS = ["Authorization", "Content-Type", "X-Amz-Date", "X-Api-Key", "X-Amz-Security-Token"]
 
@@ -55,6 +98,7 @@ class CORSConfig(object):
         self.allow_credentials = allow_credentials
 
     def to_dict(self) -> Dict[str, str]:
+        """Builds the configured Access-Control http headers"""
         headers = {
             "Access-Control-Allow-Origin": self.allow_origin,
             "Access-Control-Allow-Headers": ",".join(sorted(self.allow_headers)),
@@ -68,7 +112,37 @@ class CORSConfig(object):
         return headers
 
 
+class Response:
+    """Response data class that provides greater control over what is returned from the proxy event"""
+
+    def __init__(
+        self, status_code: int, content_type: Optional[str], body: Union[str, bytes, None], headers: Dict = None
+    ):
+        """
+
+        Parameters
+        ----------
+        status_code: int
+            Http status code, example 200
+        content_type: str
+            Optionally set the Content-Type header, example "application/json". Note this will be merged into any
+            provided http headers
+        body: Union[str, bytes, None]
+            Optionally set the response body. Note: bytes body will be automatically base64 encoded
+        headers: dict
+            Optionally set specific http headers. Setting "Content-Type" hear would override the `content_type` value.
+        """
+        self.status_code = status_code
+        self.body = body
+        self.base64_encoded = False
+        self.headers: Dict = headers or {}
+        if content_type:
+            self.headers.setdefault("Content-Type", content_type)
+
+
 class Route:
+    """Internally used Route Configuration"""
+
     def __init__(
         self, method: str, rule: Any, func: Callable, cors: bool, compress: bool, cache_control: Optional[str]
     ):
@@ -80,30 +154,23 @@ class Route:
         self.cache_control = cache_control
 
 
-class Response:
-    def __init__(
-        self, status_code: int, content_type: Optional[str], body: Union[str, bytes, None], headers: Dict = None
-    ):
-        self.status_code = status_code
-        self.body = body
-        self.base64_encoded = False
-        self.headers: Dict = headers or {}
-        if content_type:
-            self.headers.setdefault("Content-Type", content_type)
-
-
 class ResponseBuilder:
+    """Internally used Response builder"""
+
     def __init__(self, response: Response, route: Route = None):
         self.response = response
         self.route = route
 
     def _add_cors(self, cors: CORSConfig):
+        """Update headers to include the configured Access-Control headers"""
         self.response.headers.update(cors.to_dict())
 
     def _add_cache_control(self, cache_control: str):
+        """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
         self.response.headers["Cache-Control"] = cache_control if self.response.status_code == 200 else "no-cache"
 
     def _compress(self):
+        """Compress the response body, but only if `Accept-Encoding` headers includes gzip."""
         self.response.headers["Content-Encoding"] = "gzip"
         if isinstance(self.response.body, str):
             self.response.body = bytes(self.response.body, "utf-8")
@@ -122,6 +189,7 @@ class ResponseBuilder:
             self._compress()
 
     def build(self, event: BaseProxyEvent, cors: CORSConfig = None) -> Dict[str, Any]:
+        """Build the full response dict to be returned by the lambda"""
         self._route(event, cors)
 
         if isinstance(self.response.body, bytes):
