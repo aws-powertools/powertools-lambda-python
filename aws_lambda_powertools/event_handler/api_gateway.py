@@ -204,31 +204,75 @@ class ResponseBuilder:
 
 
 class ApiGatewayResolver:
+    """API Gateway and ALB proxy resolver
+
+    Examples
+    --------
+    Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
+
+        >>> from aws_lambda_powertools import Tracer
+        >>> from aws_lambda_powertools.event_handler.api_gateway import (
+        >>>    ApiGatewayResolver
+        >>> )
+        >>>
+        >>> tracer = Tracer()
+        >>> app = ApiGatewayResolver()
+        >>>
+        >>> @app.get("/get-call")
+        >>> def simple_get():
+        >>>      return {"message": "Foo"}
+        >>>
+        >>> @app.post("/post-call")
+        >>> def simple_post():
+        >>>     post_data: dict = app.current_event.json_body
+        >>>     return {"message": post_data["value"]}
+        >>>
+        >>> @tracer.capture_lambda_handler
+        >>> def lambda_handler(event, context):
+        >>>    return app.resolve(event, context)
+
+    """
+
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
 
     def __init__(self, proxy_type: Enum = ProxyEventType.http_api_v1, cors: CORSConfig = None):
+        """
+        Parameters
+        ----------
+        proxy_type: ProxyEventType
+            Proxy request type, defaults to API Gateway V1
+        cors: CORSConfig
+            Optionally configure and enabled CORS. Not each route will need to have to cors=True
+        """
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
         self._cors = cors
         self._cors_methods: Set[str] = {"OPTIONS"}
 
     def get(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+        """Get route decorator with GET `method`"""
         return self.route(rule, "GET", cors, compress, cache_control)
 
     def post(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+        """Post route decorator with POST `method`"""
         return self.route(rule, "POST", cors, compress, cache_control)
 
     def put(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+        """Put route decorator with PUT `method`"""
         return self.route(rule, "PUT", cors, compress, cache_control)
 
     def delete(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+        """Delete route decorator with DELETE `method`"""
         return self.route(rule, "DELETE", cors, compress, cache_control)
 
     def patch(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+        """Patch route decorator with PATCH `method`"""
         return self.route(rule, "PATCH", cors, compress, cache_control)
 
     def route(self, rule: str, method: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+        """Route decorator includes parameter `method`"""
+
         def register_resolver(func: Callable):
             self._routes.append(Route(method, self._compile_regex(rule), func, cors, compress, cache_control))
             if cors:
@@ -238,9 +282,22 @@ class ApiGatewayResolver:
         return register_resolver
 
     def resolve(self, event, context) -> Dict[str, Any]:
-        self.current_event = self._to_data_class(event)
+        """Resolves the response based on the provide event and decorator routes
+
+        Parameters
+        ----------
+        event: Dict[str, Any]
+            Event
+        context: LambdaContext
+            Lambda context
+        Returns
+        -------
+        dict
+            Returns the dict response
+        """
+        self.current_event = self._to_proxy_event(event)
         self.lambda_context = context
-        return self._resolve_response().build(self.current_event, self._cors)
+        return self._resolve().build(self.current_event, self._cors)
 
     def __call__(self, event, context) -> Any:
         return self.resolve(event, context)
@@ -251,7 +308,7 @@ class ApiGatewayResolver:
         rule_regex: str = re.sub(r"(<\w+>)", r"(?P\1.+)", rule)
         return re.compile("^{}$".format(rule_regex))
 
-    def _to_data_class(self, event: Dict) -> BaseProxyEvent:
+    def _to_proxy_event(self, event: Dict) -> BaseProxyEvent:
         """Convert the event dict to the corresponding data class"""
         if self._proxy_type == ProxyEventType.http_api_v1:
             return APIGatewayProxyEvent(event)
@@ -259,8 +316,8 @@ class ApiGatewayResolver:
             return APIGatewayProxyEventV2(event)
         return ALBEvent(event)
 
-    def _resolve_response(self) -> ResponseBuilder:
-        """Resolve the response or return the not found response"""
+    def _resolve(self) -> ResponseBuilder:
+        """Resolves the response or return the not found response"""
         method = self.current_event.http_method.upper()
         path = self.current_event.path
         for route in self._routes:
@@ -273,19 +330,21 @@ class ApiGatewayResolver:
         return self._not_found(method, path)
 
     def _not_found(self, method: str, path: str) -> ResponseBuilder:
-        """No matching route was found, includes support for the cors preflight response"""
+        """Called when no matching route was found and includes support for the cors preflight response"""
         headers = {}
         if self._cors:
             headers.update(self._cors.to_dict())
+
             if method == "OPTIONS":  # Preflight
                 headers["Access-Control-Allow-Methods"] = ",".join(sorted(self._cors_methods))
-                return ResponseBuilder(Response(status_code=204, content_type=None, body=None, headers=headers))
+                return ResponseBuilder(Response(status_code=204, content_type=None, headers=headers, body=None))
+
         return ResponseBuilder(
             Response(
                 status_code=404,
                 content_type="application/json",
-                body=json.dumps({"message": f"No route found for '{method}.{path}'"}),
                 headers=headers,
+                body=json.dumps({"message": f"No route found for '{method}.{path}'"}),
             )
         )
 
@@ -295,7 +354,15 @@ class ApiGatewayResolver:
 
     @staticmethod
     def _to_response(result: Union[Tuple[int, str, Union[bytes, str]], Dict, Response]) -> Response:
-        """Convert the route result to a Response"""
+        """Convert the route's result to a Response
+
+         3 main result types are supported:
+
+        - Tuple[int, str, bytes] and Tuple[int, str, str]: status code, content-type and body (str|bytes)
+        - Dict[str, Any]: Rest api response with just the Dict to json stringify and content-type is set to
+          application/json
+        - Response: returned as is, and allows for more flexibility
+        """
         if isinstance(result, Response):
             return result
         elif isinstance(result, dict):
