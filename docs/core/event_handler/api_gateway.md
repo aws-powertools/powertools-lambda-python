@@ -11,16 +11,17 @@ Event handler for AWS API Gateway and Application Loader Balancers.
 * Path expressions - `@app.delete("/delete/<uid>")`
 * Cors - `@app.post("/make_foo", cors=True)` or via `CORSConfig` and builtin CORS preflight route
 * Base64 encode binary - `@app.get("/logo.png")`
-* Gzip Compression - `@app.get("/large-json", compression=True)`
+* Gzip Compression - `@app.get("/large-json", compress=True)`
 * Cache-control - `@app.get("/foo", cache_control="max-age=600")`
 * Rest API simplification with function returns a Dict
 * Support function returns a Response object which give fine-grained control of the headers
 * JSON encoding of Decimals
 
-
-### All in one example
+## Examples
 
 > TODO - Break on into smaller examples
+
+### All in one example
 
 === "app.py"
 
@@ -29,6 +30,7 @@ from decimal import Decimal
 import json
 from typing import Dict, Tuple
 
+from aws_lambda_powertools import Tracer
 from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
 from aws_lambda_powertools.event_handler.api_gateway import (
     ApiGatewayResolver,
@@ -37,6 +39,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     Response,
 )
 
+tracer = Tracer()
 # Other supported proxy_types: "APIGatewayProxyEvent", "APIGatewayProxyEventV2", "ALBEvent"
 app = ApiGatewayResolver(
     proxy_type=ProxyEventType.http_api_v1,
@@ -93,9 +96,29 @@ def foo3() -> Response:
         headers={"custom-header": "value"},
         body=json.dumps({"message": "Foo3"}),
     )
+
+@tracer.capture_lambda_handler
+def lambda_handler(event, context) -> Dict:
+    return app.resolve(event, context)
 ```
 
-Compress examples
+### Compress examples
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.event_handler.api_gateway import (
+        ApiGatewayResolver
+    )
+
+    app = ApiGatewayResolver()
+
+    @app.get("/foo", compress=True)
+    def get_foo() -> Tuple[int, str, str]:
+        # Matches on http GET and proxy path "/foo"
+        # and return status code: 200, content-type: text/html and body: Hello
+        return 200, "text/html", "Hello"
+    ```
 
 === "GET /foo: request"
     ```json
@@ -122,9 +145,35 @@ Compress examples
     }
     ```
 
-CORS examples
+### CORS examples
 
-=== "OPTIONS /make_foo: request"
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.event_handler.api_gateway import (
+        ApiGatewayResolver,
+        CORSConfig,
+    )
+
+    app = ApiGatewayResolver(
+        proxy_type=ProxyEventType.http_api_v1,
+        cors=CORSConfig(
+            allow_origin="https://www.example.com/",
+            expose_headers=["x-exposed-response-header"],
+            allow_headers=["x-custom-request-header"],
+            max_age=100,
+            allow_credentials=True,
+        )
+    )
+
+    @app.post("/make_foo", cors=True)
+    def make_foo() -> Tuple[int, str, str]:
+        # Matches on http POST and proxy path "/make_foo"
+        post_data: dict = app. current_event.json_body
+        return 200, "application/json", json.dumps(post_data["value"])
+    ```
+
+=== "OPTIONS /make_foo"
 
     ```json
     {
@@ -133,7 +182,7 @@ CORS examples
     }
     ```
 
-=== "OPTIONS /make_foo: response"
+=== "<< OPTIONS /make_foo"
 
     ```json
     {
@@ -151,7 +200,7 @@ CORS examples
     }
     ```
 
-=== "POST /make_foo: request"
+=== "POST /make_foo"
 
     ```json
     {
@@ -161,7 +210,7 @@ CORS examples
     }
     ```
 
-=== "POST /make_foo: response"
+=== "<< POST /make_foo"
 
     ```json
     {
@@ -173,6 +222,90 @@ CORS examples
             "Access-Control-Expose-Headers": "x-exposed-response-header",
             "Access-Control-Max-Age": "100",
             "Content-Type": "application/json"
+        },
+        "isBase64Encoded": false,
+        "statusCode": 200
+    }
+    ```
+
+### Simple rest example
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.event_handler.api_gateway import (
+        ApiGatewayResolver
+    )
+
+    app = ApiGatewayResolver()
+
+    @app.get("/rest")
+    def rest_fun() -> Dict:
+        # Returns a statusCode: 200, Content-Type: application/json and json.dumps dict
+        # and handles the serialization of decimals to json string
+        return {"message": "Example", "second": Decimal("100.01")}
+    ```
+
+=== "GET /rest: request"
+
+    ```json
+    {
+        "httpMethod": "GET",
+        "path": "/rest"
+    }
+    ```
+
+=== "GET /rest: response"
+
+    ```json
+    {
+        "body": "{\"message\":\"Example\",\"second\":\"100.01\"}",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "isBase64Encoded": false,
+        "statusCode": 200
+    }
+    ```
+
+### Custom response
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.event_handler.api_gateway import (
+        ApiGatewayResolver
+    )
+
+    app = ApiGatewayResolver()
+
+    @app.get("/foo3")
+    def foo3() -> Response:
+        return Response(
+            status_code=200,
+            content_type="application/json",
+            headers={"custom-header": "value"},
+            body=json.dumps({"message": "Foo3"}),
+        )
+    ```
+
+=== "GET /foo3: request"
+
+    ```json
+    {
+        "httpMethod": "GET",
+        "path": "/foo3"
+    }
+    ```
+
+=== "GET /foo3: response"
+
+    ```json
+    {
+        "body": "{\"message\": \"Foo3\"}",
+        "headers": {
+            "Content-Type": "application/json",
+            "custom-header": "value"
         },
         "isBase64Encoded": false,
         "statusCode": 200
