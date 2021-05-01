@@ -94,3 +94,87 @@ def foo3() -> Response:
         body=json.dumps({"message": "Foo3"}),
     )
 ```
+
+Compress examples
+
+=== "GET /foo: request"
+    ```json
+    {
+        "headers": {
+            "Accept-Encoding": "gzip"
+        },
+        "httpMethod": "GET",
+        "path": "/foo"
+    }
+    ```
+
+=== "GET /foo: response"
+
+    ```json
+    {
+        "body": "H4sIAAAAAAACE/NIzcnJBwCCidH3BQAAAA==",
+        "headers": {
+            "Content-Encoding": "gzip",
+            "Content-Type": "text/html"
+        },
+        "isBase64Encoded": true,
+        "statusCode": 200
+    }
+    ```
+
+CORS examples
+
+=== "OPTIONS /make_foo: request"
+
+    ```json
+    {
+        "httpMethod": "OPTIONS",
+        "path": "/make_foo"
+    }
+    ```
+
+=== "OPTIONS /make_foo: response"
+
+    ```json
+    {
+        "body": null,
+        "headers": {
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Headers": "Authorization,Content-Type,X-Amz-Date,X-Amz-Security-Token,X-Api-Key,x-custom-request-header",
+            "Access-Control-Allow-Methods": "OPTIONS,POST",
+            "Access-Control-Allow-Origin": "https://www.example.com/",
+            "Access-Control-Expose-Headers": "x-exposed-response-header",
+            "Access-Control-Max-Age": "100"
+        },
+        "isBase64Encoded": false,
+        "statusCode": 204
+    }
+    ```
+
+=== "POST /make_foo: request"
+
+    ```json
+    {
+        "body": "{\"value\": \"Hello World\"}",
+        "httpMethod": "POST",
+        "path": "/make_foo"
+    }
+    ```
+
+=== "POST /make_foo: response"
+
+    ```json
+    {
+        "body": "\"Hello World\"",
+        "headers": {
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Headers": "Authorization,Content-Type,X-Amz-Date,X-Amz-Security-Token,X-Api-Key,x-custom-request-header",
+            "Access-Control-Allow-Origin": "https://www.example.com/",
+            "Access-Control-Expose-Headers": "x-exposed-response-header",
+            "Access-Control-Max-Age": "100",
+            "Content-Type": "application/json"
+        },
+        "isBase64Encoded": false,
+        "statusCode": 200
+    }
+    ```
