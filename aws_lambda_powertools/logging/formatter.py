@@ -41,7 +41,6 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
     def append_keys(self, **additional_keys):
         raise NotImplementedError()
 
-    @abstractmethod
     def remove_keys(self, keys: Iterable[str]):
         raise NotImplementedError()
 
@@ -53,13 +52,13 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     dict it will be used directly.
     """
 
-    default_time_format = "%Y-%m-%d %H:%M:%S.%F%z"  # '2021-04-17 18:19:57.656+0200'
+    default_time_format = "%Y-%m-%d %H:%M:%S,%F%z"  # '2021-04-17 18:19:57,656+0200'
     custom_ms_time_directive = "%F"
 
     def __init__(
         self,
-        json_serializer: Optional[Callable[[Any], Any]] = None,
-        json_deserializer: Optional[Callable[[Any], Any]] = None,
+        json_serializer: Optional[Callable[[Dict], str]] = None,
+        json_deserializer: Optional[Callable[[Dict], str]] = None,
         json_default: Optional[Callable[[Any], Any]] = None,
         datefmt: str = None,
         log_record_order: List[str] = None,
