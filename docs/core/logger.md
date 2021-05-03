@@ -843,6 +843,8 @@ Name | Expression | Description
 
 ## Testing your code
 
+### Inject Lambda Context
+
 When unit testing your code that makes use of `inject_lambda_context` decorator, you need to pass a dummy Lambda Context, or else Logger will fail.
 
 This is a Pytest sample that provides the minimum information necessary for Logger to succeed:
@@ -893,6 +895,9 @@ This is a Pytest sample that provides the minimum information necessary for Logg
 		# this will now have a Context object populated
 		your_lambda_handler(test_event, lambda_context)
     ```
+
+!!! tip
+	If you're using pytest and are looking to assert plain log messages, do check out the built-in [caplog fixture](https://docs.pytest.org/en/latest/how-to/logging.html).
 
 ### Pytest live log feature
 
