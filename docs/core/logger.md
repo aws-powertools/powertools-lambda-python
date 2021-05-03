@@ -678,22 +678,18 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 
 #### Setting timestamp to UTC
 
-By default, this Logger and standard logging library emits records using local time timestamp. You can override this behaviour by updating the current converter set in our formatter:
+By default, this Logger and standard logging library emits records using local time timestamp. You can override this behaviour via `utc` parameter:
 
 === "app.py"
 
-    ```python hl_lines="1 3 9"
+    ```python hl_lines="6"
     from aws_lambda_powertools import Logger
 
-    import time
-
-    logger = Logger(service="sample_service")
-
+    logger = Logger(service="payment")
     logger.info("Local time")
 
-    logger._logger.handlers[0].formatter.converter = time.gmtime
-
-    logger.info("GMT time")
+    logger_in_utc = Logger(service="payment", utc=True)
+    logger_in_utc.info("GMT time zone")
     ```
 
 ## Built-in Correlation ID expressions
