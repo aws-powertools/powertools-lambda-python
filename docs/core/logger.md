@@ -71,7 +71,7 @@ You can enrich your structured logs with key Lambda context information via `inj
 
     @logger.inject_lambda_context
     def handler(event, context):
-     logger.info("Collecting payment")
+		logger.info("Collecting payment")
 
      # You can log entire objects too
      logger.info({
@@ -740,6 +740,65 @@ By default, Logger uses StreamHandler and logs to standard output. You can overr
     logger = Logger(service="payment", logger_handler=log_file_handler)
 
 	logger.info("Collecting payment")
+    ```
+
+#### Bring your own formatter
+
+By default, Logger uses a custom Formatter that persists its custom structure between non-cold start invocations. There could be scenarios where the existing feature set isn't sufficient to your formatting needs.
+
+For this, you can subclass `BasePowertoolsFormatter`, implement `append_keys` method, and override `format` standard logging method. This ensures the current feature set of Logger like injecting Lambda context and sampling will continue to work.
+
+!!! info
+	You might need to implement `remove_keys` method if you make use of the feature too.
+
+=== "collect.py"
+
+    ```python hl_lines="2 4 7 12 16 27"
+	from aws_lambda_powertools import Logger
+	from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter
+
+    class CustomFormatter(BasePowertoolsFormatter):
+        custom_format = {}  # will hold our structured keys
+
+        def append_keys(self, **additional_keys):
+			# also used by `inject_lambda_context` decorator
+            self.custom_format.update(additional_keys)
+
+		# Optional unless you make use of this Logger feature
+        def remove_keys(self, keys: Iterable[str]):
+            for key in keys:
+                self.custom_format.pop(key, None)
+
+        def format(self, record: logging.LogRecord) -> str:  # noqa: A003
+			"""Format logging record as structured JSON str"""
+            return json.dumps(
+                {
+                    "event": super().format(record),
+                    "timestamp": self.formatTime(record),
+                    "my_default_key": "test",
+                    **self.custom_format,
+                }
+            )
+
+    logger = Logger(service="payment", logger_formatter=CustomFormatter())
+
+    @logger.inject_lambda_context
+    def handler(event, context):
+		logger.info("Collecting payment")
+    ```
+=== "Example CloudWatch Logs excerpt"
+
+    ```json hl_lines="2-4"
+    {
+	  	"event": "Collecting payment",
+		"timestamp": "2021-05-03 11:47:12,494",
+		"my_default_key": "test",
+	  	"cold_start": true,
+	  	"lambda_function_name": "test",
+	  	"lambda_function_memory_size": 128,
+	  	"lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
+	  	"lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72"
+    }
     ```
 
 ## Built-in Correlation ID expressions

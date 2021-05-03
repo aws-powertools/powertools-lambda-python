@@ -41,7 +41,6 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
     def append_keys(self, **additional_keys):
         raise NotImplementedError()
 
-    @abstractmethod
     def remove_keys(self, keys: Iterable[str]):
         raise NotImplementedError()
 
