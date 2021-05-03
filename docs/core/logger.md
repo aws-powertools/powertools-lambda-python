@@ -801,6 +801,31 @@ For this, you can subclass `BasePowertoolsFormatter`, implement `append_keys` me
     }
     ```
 
+#### Bring your own JSON serializer
+
+By default, Logger uses `json.dumps` and `json.loads` as serializer and deserializer respectively. There could be scenarios where you are making use of alternative JSON libraries like [orjson](https://github.com/ijl/orjson).
+
+As parameters don't always translate well between them, you can pass any callable that receives a `Dict` and return a `str`:
+
+=== "collect.py"
+
+    ```python hl_lines="1 5-6 9-10"
+	import orjson
+
+	from aws_lambda_powertools import Logger
+
+	custom_serializer = orjson.dumps
+	custom_deserializer = orjson.loads
+
+    logger = Logger(service="payment",
+                json_serializer=custom_serializer,
+                json_deserializer=custom_deserializer
+	)
+
+	# when using parameters, you can pass a partial
+	# custom_serializer=functools.partial(orjson.dumps, option=orjson.OPT_SERIALIZE_NUMPY)
+    ```
+
 ## Built-in Correlation ID expressions
 
 You can use any of the following built-in JMESPath expressions as part of [inject_lambda_context decorator](#setting-a-correlation-id).
