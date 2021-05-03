@@ -676,7 +676,7 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 	}
 	```
 
-### Setting timestamp to UTC
+#### Setting timestamp to UTC
 
 By default, this Logger and standard logging library emits records using local time timestamp. You can override this behaviour via `utc` parameter:
 
@@ -692,7 +692,7 @@ By default, this Logger and standard logging library emits records using local t
     logger_in_utc.info("GMT time zone")
     ```
 
-### Custom function for unserializable values
+#### Custom function for unserializable values
 
 By default, Logger uses `str` to handle values non-serializable by JSON. You can override this behaviour via `json_default` parameter by passing a Callable:
 
@@ -722,6 +722,25 @@ By default, Logger uses `str` to handle values non-serializable by JSON. You can
 		"service": "payment"
 	}
 	```
+
+#### Bring your own handler
+
+By default, Logger uses StreamHandler and logs to standard output. You can override this behaviour via `logger_handler` parameter:
+
+=== "collect.py"
+
+    ```python hl_lines="3-4 9 12"
+	import logging
+	from pathlib import Path
+
+	from aws_lambda_powertools import Logger
+
+	log_file = Path("/tmp/log.json")
+	log_file_handler = logging.FileHandler(filename=log_file)
+    logger = Logger(service="payment", logger_handler=log_file_handler)
+
+	logger.info("Collecting payment")
+    ```
 
 ## Built-in Correlation ID expressions
 
