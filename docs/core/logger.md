@@ -676,7 +676,7 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 	}
 	```
 
-#### Setting timestamp to UTC
+### Setting timestamp to UTC
 
 By default, this Logger and standard logging library emits records using local time timestamp. You can override this behaviour via `utc` parameter:
 
@@ -691,6 +691,37 @@ By default, this Logger and standard logging library emits records using local t
     logger_in_utc = Logger(service="payment", utc=True)
     logger_in_utc.info("GMT time zone")
     ```
+
+### Custom function for unserializable values
+
+By default, Logger uses `str` to handle values non-serializable by JSON. You can override this behaviour via `json_default` parameter by passing a Callable:
+
+=== "collect.py"
+
+    ```python hl_lines="3-4 9 12"
+    from aws_lambda_powertools import Logger
+
+	def custom_json_default(value):
+		return f"<non-serializable: {type(value).__name__}>"
+
+	class Unserializable:
+		pass
+
+    logger = Logger(service="payment", json_default=custom_json_default)
+
+	def handler(event, context):
+		logger.info(Unserializable())
+    ```
+=== "Example CloudWatch Logs excerpt"
+	```json hl_lines="4"
+	{
+		"level": "INFO",
+		"location": "collect.handler:8",
+		"message": ""<non-serializable: Unserializable>"",
+		"timestamp": "2021-05-03 15:17:23,632+0200",
+		"service": "payment"
+	}
+	```
 
 ## Built-in Correlation ID expressions
 
