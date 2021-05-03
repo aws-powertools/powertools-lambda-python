@@ -53,7 +53,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     dict it will be used directly.
     """
 
-    default_time_format = "%Y-%m-%d %H:%M:%S.%F%z"  # '2021-04-17 18:19:57.656+0200'
+    default_time_format = "%Y-%m-%d %H:%M:%S,%F%z"  # '2021-04-17 18:19:57,656+0200'
     custom_ms_time_directive = "%F"
 
     def __init__(

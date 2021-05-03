@@ -44,17 +44,17 @@ Setting | Description | Environment variable | Constructor parameter
 
 ### Standard structured keys
 
-Your Logger will include the following keys to your structured logging, by default:
+Your Logger will include the following keys to your structured logging:
 
-Key | Type | Example | Description
-------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
-**timestamp** | str | "2020-05-24 18:17:33,774" | Timestamp of actual log statement
-**level** | str | "INFO" | Logging level
-**location** | str | "collect.handler:1" | Source code location where statement was executed
-**service** | str | "payment" | Service name defined. "service_undefined" will be used if unknown
-**sampling_rate** | int |  0.1 | Debug logging sampling rate in percentage e.g. 10% in this case
-**message** | any |  "Collecting payment" | Log statement value. Unserializable JSON values will be casted to string
-**xray_trace_id** | str | "1-5759e988-bd862e3fe1be46a994272793" | X-Ray Trace ID when Lambda function has enabled Tracing
+Key | Example | Note
+------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
+**level**: `str` | `INFO` | Logging level
+**location**: `str` | `collect.handler:1` | Source code location where statement was executed
+**message**: `Any` | `Collecting payment` | Unserializable JSON values are casted as `str`
+**timestamp**: `str` | `2021-05-03 10:20:19,650+0200` | Timestamp with milliseconds, by default uses local timezone
+**service**: `str` | `payment` | Service name defined, by default `service_undefined`
+**xray_trace_id**: `str` | `1-5759e988-bd862e3fe1be46a994272793` | When [tracing is enabled](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html), it shows X-Ray Trace ID
+**sampling_rate**: `float` |  `0.1` | When enabled, it shows sampling rate in percentage e.g. 10%
 
 ### Capturing Lambda context info
 
