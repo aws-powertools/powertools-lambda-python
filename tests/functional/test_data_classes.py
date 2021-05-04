@@ -31,6 +31,7 @@ from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import 
     AppSyncResolverEventInfo,
     get_identity_object,
 )
+from aws_lambda_powertools.utilities.data_classes.code_pipeline_job_event import CodePipelineData, CodePipelineJobEvent
 from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import (
     CreateAuthChallengeTriggerEvent,
     CustomMessageTriggerEvent,
@@ -1106,3 +1107,56 @@ def test_format_time_negative():
     datetime_str = _formatted_time(now, "%H:%M:%S", -12)
     assert isinstance(datetime_str, str)
     assert datetime_str == "02:22:33-12:00:00"
+
+
+def test_code_pipeline_event():
+    event = CodePipelineJobEvent(load_event("codePipelineEvent.json"))
+
+    job = event["CodePipeline.job"]
+    assert job["id"] == event.get_id
+    assert job["accountId"] == event.account_id
+
+    data = event.data
+    assert isinstance(data, CodePipelineData)
+    assert job["data"]["continuationToken"] == data.continuation_token
+    configuration = data.action_configuration.configuration
+    assert "MyLambdaFunctionForAWSCodePipeline" == configuration.function_name
+    assert event.user_parameters == configuration.user_parameters
+    assert "some-input-such-as-a-URL" == configuration.user_parameters
+
+    input_artifacts = data.input_artifacts
+    assert len(input_artifacts) == 1
+    assert "ArtifactName" == input_artifacts[0].name
+    assert input_artifacts[0].revision is None
+    assert "S3" == input_artifacts[0].location.get_type
+
+    output_artifacts = data.output_artifacts
+    assert len(output_artifacts) == 0
+
+    artifact_credentials = data.artifact_credentials
+    artifact_credentials_dict = event["CodePipeline.job"]["data"]["artifactCredentials"]
+    assert artifact_credentials_dict["accessKeyId"] == artifact_credentials.access_key_id
+    assert artifact_credentials_dict["secretAccessKey"] == artifact_credentials.secret_access_key
+    assert artifact_credentials_dict["sessionToken"] == artifact_credentials.session_token
+
+
+def test_code_pipeline_event_decoded_data():
+    event = CodePipelineJobEvent(load_event("codePipelineEventData.json"))
+
+    assert event.data.continuation_token is None
+    decoded_params = event.data.action_configuration.configuration.decoded_user_parameters
+    assert decoded_params == event.decoded_user_parameters
+    assert "VALUE" == decoded_params["KEY"]
+
+    output_artifacts = event.data.output_artifacts
+    assert len(output_artifacts) == 1
+    assert "S3" == output_artifacts[0].location.get_type
+    assert "my-pipeline/invokeOutp/D0YHsJn" == output_artifacts[0].location.s3_location.key
+
+    artifact_credentials = event.data.artifact_credentials
+    artifact_credentials_dict = event["CodePipeline.job"]["data"]["artifactCredentials"]
+    assert isinstance(artifact_credentials.expiration_time, int)
+    assert artifact_credentials_dict["expirationTime"] == artifact_credentials.expiration_time
+
+    assert "us-west-2-123456789012-my-pipeline" == event.input_bucket_name
+    assert "my-pipeline/test-api-2/TdOSFRV" == event.input_object_key
