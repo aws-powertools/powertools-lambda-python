@@ -3,7 +3,9 @@ title: API Gateway
 description: Core utility
 ---
 
-Event handler for AWS API Gateway and Application Loader Balancers.
+Event handler for AWS API Gateway and Application Loader Balancer (ALB).
+
+!!! todo "Change proxy types enum to match PascalCase"
 
 ### Key Features
 
@@ -16,6 +18,28 @@ Event handler for AWS API Gateway and Application Loader Balancers.
 * Rest API simplification with function returns a Dict
 * Support function returns a Response object which give fine-grained control of the headers
 * JSON encoding of Decimals
+
+## Getting started
+
+!!! todo "Supported event types"
+
+### Required resources
+
+!!! todo "API Gateway proxy template"
+
+### Resolver decorator
+
+### Path expressions
+
+### CORS
+
+## Advanced
+
+### Fine grained responses
+
+### Binary responses
+
+### Testing your code
 
 ## Examples
 
