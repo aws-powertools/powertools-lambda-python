@@ -7,6 +7,8 @@ Event handler for Amazon API Gateway REST/HTTP APIs and Application Loader Balan
 
 !!! todo "Change proxy types enum to match PascalCase"
 
+!!! todo "Update `route` methods to include an example in docstring to improve developer experience"
+
 ### Key Features
 
 * Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API and ALB
@@ -15,19 +17,65 @@ Event handler for Amazon API Gateway REST/HTTP APIs and Application Loader Balan
 * Built-in support for Decimals JSON encoding
 * Support for dynamic path expressions
 
-> Rest API simplification with function returns a Dict
-> Support function returns a Response object which give fine-grained control of the headers
-
-
 ## Getting started
-
-!!! todo "Supported event types"
 
 ### Required resources
 
-!!! todo "API Gateway proxy template"
+You must have an existing [API Gateway Proxy integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html){target="_blank"} or [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html){target="_blank"} configured to invoke your Lambda function. There is no additional permissions or dependencies required to use this utility.
+
+This is the sample infrastructure we are using for the initial examples in this section.
+
+=== "template.yml"
+
+	```yaml
+	AWSTemplateFormatVersion: '2010-09-09'
+	Transform: AWS::Serverless-2016-10-31
+	Description: Hello world event handler API Gateway
+
+	Globals:
+      Function:
+        Timeout: 5
+        Runtime: python3.8
+        Tracing: Active
+          Environment:
+            Variables:
+              LOG_LEVEL: INFO
+              POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
+              POWERTOOLS_LOGGER_LOG_EVENT: true
+              POWERTOOLS_METRICS_NAMESPACE: MyServerlessApplication
+              POWERTOOLS_SERVICE_NAME: hello
+
+	Resources:
+	  HelloWorldFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+          Handler: app.lambda_handler
+          CodeUri: hello_world
+          Description: Hello World function
+			Events:
+				HelloUniverse:
+				  Type: Api
+					Properties:
+					  Path: /hello
+					  Method: GET
+				HelloYou:
+				  Type: Api
+					Properties:
+					  Path: /hello/{name}
+					  Method: GET
+
+	Outputs:
+      HelloWorldApigwURL:
+        Description: "API Gateway endpoint URL for Prod environment for Hello World Function"
+        Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello"
+
+    HelloWorldFunction:
+        Description: "Hello World Lambda Function ARN"
+        Value: !GetAtt HelloWorldFunction.Arn
+	```
 
 ### Resolver decorator
+
 
 ### Path expressions
 
