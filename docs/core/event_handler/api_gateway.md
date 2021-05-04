@@ -42,7 +42,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
 tracer = Tracer()
 # Other supported proxy_types: "APIGatewayProxyEvent", "APIGatewayProxyEventV2", "ALBEvent"
 app = ApiGatewayResolver(
-    proxy_type=ProxyEventType.http_api_v1,
+    proxy_type=ProxyEventType.APIGatewayProxyEvent,
     cors=CORSConfig(
         allow_origin="https://www.example.com/",
         expose_headers=["x-exposed-response-header"],
@@ -52,11 +52,13 @@ app = ApiGatewayResolver(
     )
 )
 
+
 @app.get("/foo", compress=True)
 def get_foo() -> Tuple[int, str, str]:
     # Matches on http GET and proxy path "/foo"
     # and return status code: 200, content-type: text/html and body: Hello
     return 200, "text/html", "Hello"
+
 
 @app.get("/logo.png")
 def get_logo() -> Tuple[int, str, bytes]:
@@ -64,11 +66,13 @@ def get_logo() -> Tuple[int, str, bytes]:
     logo: bytes = load_logo()
     return 200, "image/png", logo
 
+
 @app.post("/make_foo", cors=True)
 def make_foo() -> Tuple[int, str, str]:
     # Matches on http POST and proxy path "/make_foo"
-    post_data: dict = app. current_event.json_body
+    post_data: dict = app.current_event.json_body
     return 200, "application/json", json.dumps(post_data["value"])
+
 
 @app.delete("/delete/<uid>")
 def delete_foo(uid: str) -> Tuple[int, str, str]:
@@ -78,15 +82,18 @@ def delete_foo(uid: str) -> Tuple[int, str, str]:
     assert app.current_event.request_context.authorizer.claims["username"] == "Mike"
     return 200, "application/json", json.dumps({"id": uid})
 
+
 @app.get("/hello/<username>")
 def hello_user(username: str) -> Tuple[int, str, str]:
     return 200, "text/html", f"Hello {username}!"
+
 
 @app.get("/rest")
 def rest_fun() -> Dict:
     # Returns a statusCode: 200, Content-Type: application/json and json.dumps dict
     # and handles the serialization of decimals to json string
     return {"message": "Example", "second": Decimal("100.01")}
+
 
 @app.get("/foo3")
 def foo3() -> Response:
@@ -96,6 +103,7 @@ def foo3() -> Response:
         headers={"custom-header": "value"},
         body=json.dumps({"message": "Foo3"}),
     )
+
 
 @tracer.capture_lambda_handler
 def lambda_handler(event, context) -> Dict:

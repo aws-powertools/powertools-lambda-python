@@ -3,7 +3,7 @@ import json
 import zlib
 from decimal import Decimal
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict
 
 from aws_lambda_powertools.event_handler.api_gateway import (
     ApiGatewayResolver,
@@ -29,10 +29,10 @@ APPLICATION_JSON = "application/json"
 
 def test_alb_event():
     # GIVEN a Application Load Balancer proxy type event
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.alb_event)
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.ALBEvent)
 
     @app.get("/lambda")
-    def foo() -> Tuple[int, str, str]:
+    def foo():
         assert isinstance(app.current_event, ALBEvent)
         assert app.lambda_context == {}
         return 200, TEXT_HTML, "foo"
@@ -49,13 +49,13 @@ def test_alb_event():
 
 def test_api_gateway_v1():
     # GIVEN a Http API V1 proxy type event
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.http_api_v1)
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
 
     @app.get("/my/path")
-    def get_lambda() -> Tuple[int, str, str]:
+    def get_lambda() -> Response:
         assert isinstance(app.current_event, APIGatewayProxyEvent)
         assert app.lambda_context == {}
-        return 200, APPLICATION_JSON, json.dumps({"foo": "value"})
+        return Response(200, APPLICATION_JSON, json.dumps({"foo": "value"}))
 
     # WHEN calling the event handler
     result = app(LOAD_GW_EVENT, {})
@@ -68,12 +68,12 @@ def test_api_gateway_v1():
 
 def test_api_gateway():
     # GIVEN a Rest API Gateway proxy type event
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.api_gateway)
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
 
     @app.get("/my/path")
-    def get_lambda() -> Tuple[int, str, str]:
+    def get_lambda() -> Response:
         assert isinstance(app.current_event, APIGatewayProxyEvent)
-        return 200, TEXT_HTML, "foo"
+        return Response(200, TEXT_HTML, "foo")
 
     # WHEN calling the event handler
     result = app(LOAD_GW_EVENT, {})
@@ -87,13 +87,13 @@ def test_api_gateway():
 
 def test_api_gateway_v2():
     # GIVEN a Http API V2 proxy type event
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.http_api_v2)
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEventV2)
 
     @app.post("/my/path")
-    def my_path() -> Tuple[int, str, str]:
+    def my_path() -> Response:
         assert isinstance(app.current_event, APIGatewayProxyEventV2)
         post_data = app.current_event.json_body
-        return 200, "plain/text", post_data["username"]
+        return Response(200, "plain/text", post_data["username"])
 
     # WHEN calling the event handler
     result = app(load_event("apiGatewayProxyV2Event.json"), {})
@@ -110,9 +110,9 @@ def test_include_rule_matching():
     app = ApiGatewayResolver()
 
     @app.get("/<name>/<my_id>")
-    def get_lambda(my_id: str, name: str) -> Tuple[int, str, str]:
+    def get_lambda(my_id: str, name: str) -> Response:
         assert name == "my"
-        return 200, TEXT_HTML, my_id
+        return Response(200, TEXT_HTML, my_id)
 
     # WHEN calling the event handler
     result = app(LOAD_GW_EVENT, {})
@@ -179,8 +179,8 @@ def test_cors():
     app = ApiGatewayResolver()
 
     @app.get("/my/path", cors=True)
-    def with_cors() -> Tuple[int, str, str]:
-        return 200, TEXT_HTML, "test"
+    def with_cors() -> Response:
+        return Response(200, TEXT_HTML, "test")
 
     def handler(event, context):
         return app.resolve(event, context)
@@ -205,8 +205,8 @@ def test_compress():
     expected_value = '{"test": "value"}'
 
     @app.get("/my/request", compress=True)
-    def with_compression() -> Tuple[int, str, str]:
-        return 200, APPLICATION_JSON, expected_value
+    def with_compression() -> Response:
+        return Response(200, APPLICATION_JSON, expected_value)
 
     def handler(event, context):
         return app.resolve(event, context)
@@ -230,8 +230,8 @@ def test_base64_encode():
     mock_event = {"path": "/my/path", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
 
     @app.get("/my/path", compress=True)
-    def read_image() -> Tuple[int, str, bytes]:
-        return 200, "image/png", read_media("idempotent_sequence_exception.png")
+    def read_image() -> Response:
+        return Response(200, "image/png", read_media("idempotent_sequence_exception.png"))
 
     # WHEN calling the event handler
     result = app(mock_event, None)
@@ -251,8 +251,8 @@ def test_compress_no_accept_encoding():
     expected_value = "Foo"
 
     @app.get("/my/path", compress=True)
-    def return_text() -> Tuple[int, str, str]:
-        return 200, "text/plain", expected_value
+    def return_text() -> Response:
+        return Response(200, "text/plain", expected_value)
 
     # WHEN calling the event handler
     result = app({"path": "/my/path", "httpMethod": "GET", "headers": {}}, None)
@@ -267,8 +267,8 @@ def test_cache_control_200():
     app = ApiGatewayResolver()
 
     @app.get("/success", cache_control="max-age=600")
-    def with_cache_control() -> Tuple[int, str, str]:
-        return 200, TEXT_HTML, "has 200 response"
+    def with_cache_control() -> Response:
+        return Response(200, TEXT_HTML, "has 200 response")
 
     def handler(event, context):
         return app.resolve(event, context)
@@ -288,8 +288,8 @@ def test_cache_control_non_200():
     app = ApiGatewayResolver()
 
     @app.delete("/fails", cache_control="max-age=600")
-    def with_cache_control_has_500() -> Tuple[int, str, str]:
-        return 503, TEXT_HTML, "has 503 response"
+    def with_cache_control_has_500() -> Response:
+        return Response(503, TEXT_HTML, "has 503 response")
 
     def handler(event, context):
         return app.resolve(event, context)
@@ -306,7 +306,7 @@ def test_cache_control_non_200():
 
 def test_rest_api():
     # GIVEN a function that returns a Dict
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.http_api_v1)
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
     expected_dict = {"foo": "value", "second": Decimal("100.01")}
 
     @app.get("/my/path")
@@ -325,7 +325,7 @@ def test_rest_api():
 
 def test_handling_response_type():
     # GIVEN a function that returns Response
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.http_api_v1)
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
 
     @app.get("/my/path")
     def rest_func() -> Response:
