@@ -22,7 +22,7 @@ class AppSyncIdentityIAM(DictWrapper):
 
     @property
     def source_ip(self) -> List[str]:
-        """The source IP address of the caller received by AWS AppSync. """
+        """The source IP address of the caller received by AWS AppSync."""
         return self["sourceIp"]
 
     @property
@@ -67,7 +67,7 @@ class AppSyncIdentityCognito(DictWrapper):
 
     @property
     def source_ip(self) -> List[str]:
-        """The source IP address of the caller received by AWS AppSync. """
+        """The source IP address of the caller received by AWS AppSync."""
         return self["sourceIp"]
 
     @property

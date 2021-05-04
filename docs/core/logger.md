@@ -555,6 +555,32 @@ Sampling decision happens at the Logger initialization. This means sampling may 
     }
     ```
 
+### LambdaPowertoolsFormatter
+
+Logger propagates a few formatting configurations to the built-in `LambdaPowertoolsFormatter` logging formatter.
+
+If you prefer configuring it separately, or you'd want to bring this JSON Formatter to another application, these are the supported settings:
+
+Parameter | Description | Default
+------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------
+**`json_serializer`** | function to serialize `obj` to a JSON formatted `str` | `json.dumps`
+**`json_deserializer`** | function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python obj | `json.loads`
+**`json_default`** | function to coerce unserializable values, when no custom serializer/deserializer is set | `str`
+**`datefmt`** | string directives (strftime) to format log timestamp | `%Y-%m-%d %H:%M:%S,%F%z`, where `%F` is a custom ms directive
+**`utc`** | set logging timestamp to UTC | `False`
+**`log_record_order`** | set order of log keys when logging | `["level", "location", "message", "timestamp"]`
+**`kwargs`** | key-value to be included in log messages | `None`
+
+=== "LambdaPowertoolsFormatter.py"
+
+    ```python hl_lines="2 4-5"
+    from aws_lambda_powertools import Logger
+	from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
+
+	formatter = LambdaPowertoolsFormatter(utc=True, log_record_order=["message"])
+    logger = Logger(service="example", logger_formatter=formatter)
+    ```
+
 ### Migrating from other Loggers
 
 If you're migrating from other Loggers, there are few key points to be aware of: [Service parameter](#the-service-parameter), [Inheriting Loggers](#inheriting-loggers), [Overriding Log records](#overriding-log-records), and [Logging exceptions](#logging-exceptions).
@@ -644,7 +670,6 @@ Logger allows you to either change the format or suppress the following keys alt
 		"service": "payment"
 	}
 	```
-
 
 #### Reordering log keys position
 
@@ -744,9 +769,30 @@ By default, Logger uses StreamHandler and logs to standard output. You can overr
 
 #### Bring your own formatter
 
-By default, Logger uses a custom Formatter that persists its custom structure between non-cold start invocations. There could be scenarios where the existing feature set isn't sufficient to your formatting needs.
+By default, Logger uses [LambdaPowertoolsFormatter](#lambdapowertoolsformatter) that persists its custom structure between non-cold start invocations. There could be scenarios where the existing feature set isn't sufficient to your formatting needs.
 
-For this, you can subclass `BasePowertoolsFormatter`, implement `append_keys` method, and override `format` standard logging method. This ensures the current feature set of Logger like injecting Lambda context and sampling will continue to work.
+For **minor changes like remapping keys** after all log record processing has completed, you can override `serialize` method from [LambdaPowertoolsFormatter](#lambdapowertoolsformatter):
+
+=== "custom_formatter.py"
+
+	```python
+	from aws_lambda_powertools import Logger
+	from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
+
+	from typing import Dict
+
+	class CustomFormatter(LambdaPowertoolsFormatter):
+		def serialize(self, log: Dict) -> str:
+			"""Serialize final structured log dict to JSON str"""
+			log["event"] = log.pop("message")  # rename message key to event
+			return self.json_serializer(log)   # use configured json serializer
+
+	my_formatter = CustomFormatter()
+	logger = Logger(service="example", logger_formatter=my_formatter)
+	logger.info("hello")
+	```
+
+For **replacing the formatter entirely**, you can subclass `BasePowertoolsFormatter`, implement `append_keys` method, and override `format` standard logging method. This ensures the current feature set of Logger like [injecting Lambda context](#capturing-lambda-context-info) and [sampling](#sampling-debug-logs) will continue to work.
 
 !!! info
 	You might need to implement `remove_keys` method if you make use of the feature too.
@@ -758,7 +804,7 @@ For this, you can subclass `BasePowertoolsFormatter`, implement `append_keys` me
 	from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter
 
     class CustomFormatter(BasePowertoolsFormatter):
-        custom_format = {}  # will hold our structured keys
+        custom_format = {}  # arbitrary dict to hold our structured keys
 
         def append_keys(self, **additional_keys):
 			# also used by `inject_lambda_context` decorator
