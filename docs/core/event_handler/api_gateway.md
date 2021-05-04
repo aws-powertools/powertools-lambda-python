@@ -173,10 +173,59 @@ Here's an example where we have two separate functions to resolve two paths: `/h
 	}
 	```
 
-#### API Gateway HTTP API
+#### HTTP API
 
+When using API Gateway HTTP API to front your Lambda functions, you can instruct `ApiGatewayResolver` to conform with their contract via `proxy_type` param:
+
+=== "app.py"
+
+	```python hl_lines="3 7"
+	from aws_lambda_powertools import Logger, Tracer
+	from aws_lambda_powertools.logging import correlation_paths
+	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, ProxyEventType
+
+	tracer = Tracer()
+	logger = Logger()
+	app = ApiGatewayResolver(proxy_type=ProxyEventType.http_api_v2)
+
+	@app.get("/hello")
+	@tracer.capture_method
+	def get_hello_universe():
+		return {"message": "hello universe"}
+
+	# You can continue to use other utilities just as before
+	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_HTTP)
+	@tracer.capture_lambda_handler
+	def lambda_handler(event, context):
+		return app.resolve(event, context)
+	```
 
 #### ALB
+
+When using ALB to front your Lambda functions, you can instruct `ApiGatewayResolver` to conform with their contract via `proxy_type` param:
+
+=== "app.py"
+
+	```python hl_lines="3 7"
+	from aws_lambda_powertools import Logger, Tracer
+	from aws_lambda_powertools.logging import correlation_paths
+	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, ProxyEventType
+
+	tracer = Tracer()
+	logger = Logger()
+	app = ApiGatewayResolver(proxy_type=ProxyEventType.alb_event)
+
+	@app.get("/hello")
+	@tracer.capture_method
+	def get_hello_universe():
+		return {"message": "hello universe"}
+
+	# You can continue to use other utilities just as before
+	@logger.inject_lambda_context(correlation_id_path=correlation_paths.APPLICATION_LOAD_BALANCER)
+	@tracer.capture_lambda_handler
+	def lambda_handler(event, context):
+		return app.resolve(event, context)
+	```
 
 
 ### Path expressions
