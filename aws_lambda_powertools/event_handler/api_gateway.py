@@ -3,7 +3,7 @@ import json
 import re
 import zlib
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
@@ -12,14 +12,11 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 class ProxyEventType(Enum):
-    """An enumerations of the supported proxy event types.
+    """An enumerations of the supported proxy event types."""
 
-    **NOTE:** api_gateway is an alias of http_api_v1"""
-
-    http_api_v1 = "APIGatewayProxyEvent"
-    http_api_v2 = "APIGatewayProxyEventV2"
-    alb_event = "ALBEvent"
-    api_gateway = http_api_v1
+    APIGatewayProxyEvent = "APIGatewayProxyEvent"
+    APIGatewayProxyEventV2 = "APIGatewayProxyEventV2"
+    ALBEvent = "ALBEvent"
 
 
 class CORSConfig(object):
@@ -236,7 +233,7 @@ class ApiGatewayResolver:
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
 
-    def __init__(self, proxy_type: Enum = ProxyEventType.http_api_v1, cors: CORSConfig = None):
+    def __init__(self, proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent, cors: CORSConfig = None):
         """
         Parameters
         ----------
@@ -310,9 +307,9 @@ class ApiGatewayResolver:
 
     def _to_proxy_event(self, event: Dict) -> BaseProxyEvent:
         """Convert the event dict to the corresponding data class"""
-        if self._proxy_type == ProxyEventType.http_api_v1:
+        if self._proxy_type == ProxyEventType.APIGatewayProxyEvent:
             return APIGatewayProxyEvent(event)
-        if self._proxy_type == ProxyEventType.http_api_v2:
+        if self._proxy_type == ProxyEventType.APIGatewayProxyEventV2:
             return APIGatewayProxyEventV2(event)
         return ALBEvent(event)
 
@@ -327,9 +324,9 @@ class ApiGatewayResolver:
             if match:
                 return self._call_route(route, match.groupdict())
 
-        return self._not_found(method, path)
+        return self._not_found(method)
 
-    def _not_found(self, method: str, path: str) -> ResponseBuilder:
+    def _not_found(self, method: str) -> ResponseBuilder:
         """Called when no matching route was found and includes support for the cors preflight response"""
         headers = {}
         if self._cors:
@@ -344,7 +341,7 @@ class ApiGatewayResolver:
                 status_code=404,
                 content_type="application/json",
                 headers=headers,
-                body=json.dumps({"message": f"No route found for '{method}.{path}'"}),
+                body=json.dumps({"message": "Not found"}),
             )
         )
 
@@ -353,12 +350,11 @@ class ApiGatewayResolver:
         return ResponseBuilder(self._to_response(route.func(**args)), route)
 
     @staticmethod
-    def _to_response(result: Union[Tuple[int, str, Union[bytes, str]], Dict, Response]) -> Response:
+    def _to_response(result: Union[Dict, Response]) -> Response:
         """Convert the route's result to a Response
 
-         3 main result types are supported:
+         2 main result types are supported:
 
-        - Tuple[int, str, bytes] and Tuple[int, str, str]: status code, content-type and body (str|bytes)
         - Dict[str, Any]: Rest api response with just the Dict to json stringify and content-type is set to
           application/json
         - Response: returned as is, and allows for more flexibility
