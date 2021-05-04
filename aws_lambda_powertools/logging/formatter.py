@@ -69,7 +69,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         The `log_record_order` kwarg is used to specify the order of the keys used in
         the structured json logs. By default the order is: "level", "location", "message", "timestamp",
-        "service" and "sampling_rate".
+        "service".
 
         Other kwargs are used to specify log field format strings.
 
@@ -113,6 +113,10 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         keys_combined = {**self._build_default_keys(), **kwargs}
         self.log_format.update(**keys_combined)
 
+    def serialize(self, log: Dict) -> str:
+        """Serialize structured log dict to JSON str"""
+        return self.json_serializer(log)
+
     def format(self, record: logging.LogRecord) -> str:  # noqa: A003
         """Format logging record as structured JSON str"""
         formatted_log = self._extract_log_keys(log_record=record)
@@ -121,7 +125,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         formatted_log["xray_trace_id"] = self._get_latest_trace_id()
         formatted_log = self._strip_none_records(records=formatted_log)
 
-        return self.json_serializer(formatted_log)
+        return self.serialize(log=formatted_log)
 
     def formatTime(self, record: logging.LogRecord, datefmt: Optional[str] = None) -> str:
         record_ts = self.converter(record.created)

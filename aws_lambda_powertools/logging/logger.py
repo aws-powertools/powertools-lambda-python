@@ -4,7 +4,7 @@ import logging
 import os
 import random
 import sys
-from typing import Any, Callable, Dict, Iterable, Optional, Union
+from typing import Any, Callable, Dict, Iterable, Optional, TypeVar, Union
 
 import jmespath
 
@@ -18,6 +18,8 @@ from .lambda_context import build_lambda_context_model
 logger = logging.getLogger(__name__)
 
 is_cold_start = True
+
+PowertoolsFormatter = TypeVar("PowertoolsFormatter", bound=BasePowertoolsFormatter)
 
 
 def _is_cold_start() -> bool:
@@ -70,8 +72,8 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         sample rate for debug calls within execution context defaults to 0.0
     stream: sys.stdout, optional
         valid output for a logging stream, by default sys.stdout
-    logger_formatter: BasePowertoolsFormatter, optional
-        custom logging formatter that implements BasePowertoolsFormatter
+    logger_formatter: PowertoolsFormatter, optional
+        custom logging formatter that implements PowertoolsFormatter
     logger_handler: logging.Handler, optional
         custom logging handler e.g. logging.FileHandler("file.log")
 
@@ -87,7 +89,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     json_default : Callable, optional
         function to coerce unserializable values, by default `str()`
 
-        Only used when no custom JSON encoder is set
+        Only used when no custom formatter is set
     utc : bool, optional
         set logging timestamp to UTC, by default False to continue to use local time as per stdlib
     log_record_order : list, optional
@@ -170,7 +172,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         child: bool = False,
         sampling_rate: float = None,
         stream: sys.stdout = None,
-        logger_formatter: Optional[BasePowertoolsFormatter] = None,
+        logger_formatter: Optional[PowertoolsFormatter] = None,
         logger_handler: Optional[logging.Handler] = None,
         **kwargs,
     ):
@@ -198,7 +200,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         return getattr(self._logger, name)
 
     def _get_logger(self):
-        """ Returns a Logger named {self.service}, or {self.service.filename} for child loggers"""
+        """Returns a Logger named {self.service}, or {self.service.filename} for child loggers"""
         logger_name = self.service
         if self.child:
             logger_name = f"{self.service}.{self._get_caller_filename()}"
@@ -346,7 +348,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         return handlers[0]
 
     @property
-    def registered_formatter(self) -> Optional[BasePowertoolsFormatter]:
+    def registered_formatter(self) -> Optional[PowertoolsFormatter]:
         """Convenience property to access logger formatter"""
         return self.registered_handler.formatter
 
@@ -384,7 +386,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
     @staticmethod
     def _get_log_level(level: Union[str, int, None]) -> Union[str, int]:
-        """ Returns preferred log level set by the customer in upper case """
+        """Returns preferred log level set by the customer in upper case"""
         if isinstance(level, int):
             return level
 
@@ -396,7 +398,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
     @staticmethod
     def _get_caller_filename():
-        """ Return caller filename by finding the caller frame """
+        """Return caller filename by finding the caller frame"""
         # Current frame         => _get_logger()
         # Previous frame        => logger.py
         # Before previous frame => Caller
