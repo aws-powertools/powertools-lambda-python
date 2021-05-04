@@ -53,7 +53,7 @@ class S3ObjectConfiguration(DictWrapper):
 
 
 class S3ObjectUserRequest(DictWrapper):
-    """ Information about the original call to S3 Object Lambda."""
+    """Information about the original call to S3 Object Lambda."""
 
     @property
     def url(self) -> str:

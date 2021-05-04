@@ -60,7 +60,7 @@ class EventBridgeEvent(DictWrapper):
 
     @property
     def detail(self) -> Dict[str, Any]:
-        """A JSON object, whose content is at the discretion of the service originating the event. """
+        """A JSON object, whose content is at the discretion of the service originating the event."""
         return self["detail"]
 
     @property

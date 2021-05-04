@@ -70,7 +70,7 @@ class SQSMessageAttribute(DictWrapper):
 
     @property
     def data_type(self) -> str:
-        """ The message attribute data type. Supported types include `String`, `Number`, and `Binary`."""
+        """The message attribute data type. Supported types include `String`, `Number`, and `Binary`."""
         return self["dataType"]
 
 
@@ -120,7 +120,7 @@ class SQSRecord(DictWrapper):
 
     @property
     def event_source(self) -> str:
-        """The AWS service from which the SQS record originated. For SQS, this is `aws:sqs` """
+        """The AWS service from which the SQS record originated. For SQS, this is `aws:sqs`"""
         return self["eventSource"]
 
     @property
