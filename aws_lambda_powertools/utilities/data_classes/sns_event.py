@@ -46,7 +46,7 @@ class SNSMessage(DictWrapper):
 
     @property
     def message(self) -> str:
-        """A string that describes the message. """
+        """A string that describes the message."""
         return self["Sns"]["Message"]
 
     @property

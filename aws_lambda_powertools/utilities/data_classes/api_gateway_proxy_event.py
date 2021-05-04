@@ -164,7 +164,7 @@ class APIGatewayEventRequestContext(DictWrapper):
 
     @property
     def stage(self) -> str:
-        """The deployment stage of the API request """
+        """The deployment stage of the API request"""
         return self["requestContext"]["stage"]
 
     @property
@@ -352,7 +352,7 @@ class RequestContextV2(DictWrapper):
 
     @property
     def domain_name(self) -> str:
-        """A domain name """
+        """A domain name"""
         return self["requestContext"]["domainName"]
 
     @property
@@ -375,7 +375,7 @@ class RequestContextV2(DictWrapper):
 
     @property
     def stage(self) -> str:
-        """The deployment stage of the API request """
+        """The deployment stage of the API request"""
         return self["requestContext"]["stage"]
 
     @property

@@ -720,7 +720,7 @@ class Tracer:
         patch_modules: Union[List, Tuple] = None,
         provider: BaseProvider = None,
     ):
-        """ Populates Tracer config for new and existing initializations """
+        """Populates Tracer config for new and existing initializations"""
         is_disabled = disabled if disabled is not None else self._is_tracer_disabled()
         is_service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
 

@@ -85,7 +85,7 @@ def a_hundred_metrics() -> List[Dict[str, str]]:
 def serialize_metrics(
     metrics: List[Dict], dimensions: List[Dict], namespace: str, metadatas: List[Dict] = None
 ) -> Dict:
-    """ Helper function to build EMF object from a list of metrics, dimensions """
+    """Helper function to build EMF object from a list of metrics, dimensions"""
     my_metrics = MetricManager(namespace=namespace)
     for dimension in dimensions:
         my_metrics.add_dimension(**dimension)
@@ -102,7 +102,7 @@ def serialize_metrics(
 
 
 def serialize_single_metric(metric: Dict, dimension: Dict, namespace: str, metadata: Dict = None) -> Dict:
-    """ Helper function to build EMF object from a given metric, dimension and namespace """
+    """Helper function to build EMF object from a given metric, dimension and namespace"""
     my_metrics = MetricManager(namespace=namespace)
     my_metrics.add_metric(**metric)
     my_metrics.add_dimension(**dimension)
@@ -114,7 +114,7 @@ def serialize_single_metric(metric: Dict, dimension: Dict, namespace: str, metad
 
 
 def remove_timestamp(metrics: List):
-    """ Helper function to remove Timestamp key from EMF objects as they're built at serialization """
+    """Helper function to remove Timestamp key from EMF objects as they're built at serialization"""
     for metric in metrics:
         del metric["_aws"]["Timestamp"]
 
