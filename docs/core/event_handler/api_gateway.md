@@ -3,21 +3,21 @@ title: API Gateway
 description: Core utility
 ---
 
-Event handler for AWS API Gateway and Application Loader Balancer (ALB).
+Event handler for Amazon API Gateway REST/HTTP APIs and Application Loader Balancer (ALB).
 
 !!! todo "Change proxy types enum to match PascalCase"
 
 ### Key Features
 
-* Routes - `@app.get("/foo")`
-* Path expressions - `@app.delete("/delete/<uid>")`
-* Cors - `@app.post("/make_foo", cors=True)` or via `CORSConfig` and builtin CORS preflight route
-* Base64 encode binary - `@app.get("/logo.png")`
-* Gzip Compression - `@app.get("/large-json", compress=True)`
-* Cache-control - `@app.get("/foo", cache_control="max-age=600")`
-* Rest API simplification with function returns a Dict
-* Support function returns a Response object which give fine-grained control of the headers
-* JSON encoding of Decimals
+* Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API and ALB
+* Seamless support for CORS, binary and Gzip compression
+* Integrates with [Data classes utilities](../../utilities/data_classes.md){target="_blank"} to easily access event and identity information
+* Built-in support for Decimals JSON encoding
+* Support for dynamic path expressions
+
+> Rest API simplification with function returns a Dict
+> Support function returns a Response object which give fine-grained control of the headers
+
 
 ## Getting started
 
