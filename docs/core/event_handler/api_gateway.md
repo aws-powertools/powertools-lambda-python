@@ -33,6 +33,8 @@ This is the sample infrastructure we are using for the initial examples in this 
 	Description: Hello world event handler API Gateway
 
 	Globals:
+	  Api:
+	    TracingEnabled: true
       Function:
         Timeout: 5
         Runtime: python3.8
@@ -52,17 +54,17 @@ This is the sample infrastructure we are using for the initial examples in this 
           Handler: app.lambda_handler
           CodeUri: hello_world
           Description: Hello World function
-			Events:
-				HelloUniverse:
-				  Type: Api
-					Properties:
-					  Path: /hello
-					  Method: GET
-				HelloYou:
-				  Type: Api
-					Properties:
-					  Path: /hello/{name}
-					  Method: GET
+		  Events:
+		    HelloUniverse:
+			  Type: Api
+			  Properties:
+				Path: /hello
+				Method: GET
+			HelloYou:
+			  Type: Api
+			  Properties:
+			    Path: /hello/{name}
+			    Method: GET
 
 	Outputs:
       HelloWorldApigwURL:
@@ -74,7 +76,107 @@ This is the sample infrastructure we are using for the initial examples in this 
         Value: !GetAtt HelloWorldFunction.Arn
 	```
 
-### Resolver decorator
+### API Gateway decorator
+
+You can define your functions to match a path and HTTP method, when you use the decorator `ApiGatewayResolver`.
+
+Here's an example where we have two separate functions to resolve two paths: `/hello` and `/hello/{name}`.
+
+=== "app.py"
+
+	```python hl_lines="3 7 9 18"
+	from aws_lambda_powertools import Logger, Tracer
+	from aws_lambda_powertools.logging import correlation_paths
+	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+	tracer = Tracer()
+	logger = Logger()
+	app = ApiGatewayResolver()  # by default API Gateway REST API (v1)
+
+	@app.get("/hello")
+	@tracer.capture_method
+	def get_hello_universe():
+		return {"message": "hello universe"}
+
+	# You can continue to use other utilities just as before
+	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+	@tracer.capture_lambda_handler
+	def lambda_handler(event, context):
+		return app.resolve(event, context)
+	```
+=== "hello_event.json"
+
+	This utility uses `path` and `httpMethod` to route to the right function. This helps make unit tests and local invocation easier too.
+
+	```json hl_lines="4-5"
+	{
+	  "body": "hello",
+	  "resource": "/hello",
+	  "path": "/hello",
+	  "httpMethod": "GET",
+	  "isBase64Encoded": false,
+	  "queryStringParameters": {
+		"foo": "bar"
+	  },
+	  "multiValueQueryStringParameters": {},
+	  "pathParameters": {
+		"hello": "/hello"
+	  },
+	  "stageVariables": {},
+	  "headers": {
+		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+		"Accept-Encoding": "gzip, deflate, sdch",
+		"Accept-Language": "en-US,en;q=0.8",
+		"Cache-Control": "max-age=0",
+		"CloudFront-Forwarded-Proto": "https",
+		"CloudFront-Is-Desktop-Viewer": "true",
+		"CloudFront-Is-Mobile-Viewer": "false",
+		"CloudFront-Is-SmartTV-Viewer": "false",
+		"CloudFront-Is-Tablet-Viewer": "false",
+		"CloudFront-Viewer-Country": "US",
+		"Host": "1234567890.execute-api.us-east-1.amazonaws.com",
+		"Upgrade-Insecure-Requests": "1",
+		"User-Agent": "Custom User Agent String",
+		"Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",
+		"X-Amz-Cf-Id": "cDehVQoZnx43VYQb9j2-nvCh-9z396Uhbp027Y2JvkCPNLmGJHqlaA==",
+		"X-Forwarded-For": "127.0.0.1, 127.0.0.2",
+		"X-Forwarded-Port": "443",
+		"X-Forwarded-Proto": "https"
+	  },
+	  "multiValueHeaders": {},
+	  "requestContext": {
+		"accountId": "123456789012",
+		"resourceId": "123456",
+		"stage": "Prod",
+		"requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
+		"requestTime": "25/Jul/2020:12:34:56 +0000",
+		"requestTimeEpoch": 1428582896000,
+		"identity": {
+		  "cognitoIdentityPoolId": null,
+		  "accountId": null,
+		  "cognitoIdentityId": null,
+		  "caller": null,
+		  "accessKey": null,
+		  "sourceIp": "127.0.0.1",
+		  "cognitoAuthenticationType": null,
+		  "cognitoAuthenticationProvider": null,
+		  "userArn": null,
+		  "userAgent": "Custom User Agent String",
+		  "user": null
+		},
+		"path": "/Prod/hello",
+		"resourcePath": "/hello",
+		"httpMethod": "POST",
+		"apiId": "1234567890",
+		"protocol": "HTTP/1.1"
+	  }
+	}
+	```
+
+#### API Gateway HTTP API
+
+
+#### ALB
 
 
 ### Path expressions
