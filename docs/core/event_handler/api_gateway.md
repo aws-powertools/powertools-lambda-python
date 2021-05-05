@@ -39,7 +39,7 @@ This is the sample infrastructure we are using for the initial examples in this 
           AllowOrigin: "'https://example.com'"
           AllowHeaders: "'Content-Type,Authorization,X-Amz-Date'"
           MaxAge: "'300'"
-		BinaryMediaTypes:                   # see Binary responses
+		BinaryMediaTypes:                   # see Binary responses section
 		  - '*~1*'  # converts to */* for any binary type
       Function:
         Timeout: 5
@@ -186,6 +186,19 @@ Here's an example where we have two separate functions to resolve two paths: `/h
 	}
 	```
 
+=== "response.json"
+
+	```json
+	{
+		"statusCode": 200,
+		"headers": {
+			"Content-Type": "application/json"
+		},
+		"body": "{\"message\":\"hello universe\"}",
+		"isBase64Encoded": false
+	}
+	```
+
 #### HTTP API
 
 When using API Gateway HTTP API to front your Lambda functions, you can instruct `ApiGatewayResolver` to conform with their contract via `proxy_type` param:
@@ -267,6 +280,17 @@ You can use `/path/{dynamic_value}` when configuring dynamic URL paths. This all
 		return app.resolve(event, context)
 	```
 
+=== "sample_request.json"
+
+	```json
+    {
+		"resource": "/hello/{name}",
+		"path": "/hello/lessa",
+		"httpMethod": "GET",
+		...
+    }
+    ```
+
 You can also nest paths as configured earlier in [our sample infrastructure](#required-resources): `/{message}/{name}`.
 
 === "app.py"
@@ -291,6 +315,17 @@ You can also nest paths as configured earlier in [our sample infrastructure](#re
 	def lambda_handler(event, context):
 		return app.resolve(event, context)
 	```
+
+=== "sample_request.json"
+
+	```json
+    {
+		"resource": "/{message}/{name}",
+		"path": "/hi/michael",
+		"httpMethod": "GET",
+		...
+    }
+    ```
 
 ### Accessing request details
 
@@ -383,6 +418,35 @@ This will ensure that CORS headers are always returned as part of the response w
 	def lambda_handler(event, context):
 		return app.resolve(event, context)
 	```
+
+=== "response.json"
+
+	```json
+	{
+		"statusCode": 200,
+		"headers": {
+			"Content-Type": "application/json",
+			"Access-Control-Allow-Origin": "https://www.example.com",
+			"Access-Control-Allow-Headers": "Authorization,Content-Type,X-Amz-Date,X-Amz-Security-Token,X-Api-Key"
+		},
+		"body": "{\"message\":\"hello lessa\"}",
+		"isBase64Encoded": false
+	}
+	```
+
+=== "response_no_cors.json"
+
+	```json
+	{
+		"statusCode": 200,
+		"headers": {
+			"Content-Type": "application/json"
+		},
+		"body": "{\"message\":\"hello lessa\"}",
+		"isBase64Encoded": false
+	}
+	```
+
 
 !!! tip "Optionally disable class on a per path basis with `cors=False` parameter"
 

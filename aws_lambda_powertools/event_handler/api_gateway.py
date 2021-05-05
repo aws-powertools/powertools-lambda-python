@@ -247,27 +247,27 @@ class ApiGatewayResolver:
         self._cors = cors
         self._cors_methods: Set[str] = {"OPTIONS"}
 
-    def get(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+    def get(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
         """Get route decorator with GET `method`"""
         return self.route(rule, "GET", cors, compress, cache_control)
 
-    def post(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+    def post(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
         """Post route decorator with POST `method`"""
         return self.route(rule, "POST", cors, compress, cache_control)
 
-    def put(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+    def put(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
         """Put route decorator with PUT `method`"""
         return self.route(rule, "PUT", cors, compress, cache_control)
 
-    def delete(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+    def delete(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
         """Delete route decorator with DELETE `method`"""
         return self.route(rule, "DELETE", cors, compress, cache_control)
 
-    def patch(self, rule: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+    def patch(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
         """Patch route decorator with PATCH `method`"""
         return self.route(rule, "PATCH", cors, compress, cache_control)
 
-    def route(self, rule: str, method: str, cors: bool = False, compress: bool = False, cache_control: str = None):
+    def route(self, rule: str, method: str, cors: bool = True, compress: bool = False, cache_control: str = None):
         """Route decorator includes parameter `method`"""
 
         def register_resolver(func: Callable):
