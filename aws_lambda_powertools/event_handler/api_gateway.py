@@ -361,11 +361,9 @@ class ApiGatewayResolver:
         """
         if isinstance(result, Response):
             return result
-        elif isinstance(result, dict):
-            return Response(
-                status_code=200,
-                content_type="application/json",
-                body=json.dumps(result, separators=(",", ":"), cls=Encoder),
-            )
-        else:  # Tuple[int, str, Union[bytes, str]]
-            return Response(*result)
+
+        return Response(
+            status_code=200,
+            content_type="application/json",
+            body=json.dumps(result, separators=(",", ":"), cls=Encoder),
+        )

@@ -35,7 +35,7 @@ def test_alb_event():
     def foo():
         assert isinstance(app.current_event, ALBEvent)
         assert app.lambda_context == {}
-        return 200, TEXT_HTML, "foo"
+        return Response(200, TEXT_HTML, "foo")
 
     # WHEN calling the event handler
     result = app(load_event("albEvent.json"), {})
