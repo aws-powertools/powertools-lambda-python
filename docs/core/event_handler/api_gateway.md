@@ -5,9 +5,7 @@ description: Core utility
 
 Event handler for Amazon API Gateway REST/HTTP APIs and Application Loader Balancer (ALB).
 
-!!! todo "Change proxy types enum to match PascalCase"
-
-!!! todo "Update `route` methods to include an example in docstring to improve developer experience"
+!!! info "This is currently in Beta as we want to hear feedback on UX."
 
 ### Key Features
 
