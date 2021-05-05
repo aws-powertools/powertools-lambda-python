@@ -7,8 +7,6 @@ Event handler for AWS AppSync Direct Lambda Resolver and Amplify GraphQL Transfo
 
 ### Key Features
 
-<!-- * Supports an implicit handler where in `app = AppSyncResolver()` can be invoked directly as `app(event, context)` -->
-
 * Automatically parse API arguments to function arguments
 * Choose between strictly match a GraphQL field name or all of them to a function
 * Integrates with [Data classes utilities](../../utilities/data_classes.md){target="_blank"} to access resolver and identity information

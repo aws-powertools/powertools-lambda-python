@@ -272,13 +272,13 @@ Here's an example of parsing a model found in an event coming from EventBridge, 
         }
     }
 
-    ret = parse(model=UserModel, envelope=envelopes.EventBridgeModel, event=payload)
+    ret = parse(model=UserModel, envelope=envelopes.EventBridgeEnvelope, event=payload)
 
     # Parsed model only contains our actual model, not the entire EventBridge + Payload parsed
     assert ret.password1 == ret.password2
 
     # Same behaviour but using our decorator
-    @event_parser(model=UserModel, envelope=envelopes.EventBridgeModel)
+    @event_parser(model=UserModel, envelope=envelopes.EventBridgeEnvelope)
     def handler(event: UserModel, context: LambdaContext):
         assert event.password1 == event.password2
     ```
@@ -286,7 +286,7 @@ Here's an example of parsing a model found in an event coming from EventBridge, 
 **What's going on here, you might ask**:
 
 1. We imported built-in `envelopes` from the parser utility
-2. Used `envelopes.EventBridgeModel` as the envelope for our `UserModel` model
+2. Used `envelopes.EventBridgeEnvelope` as the envelope for our `UserModel` model
 3. Parser parsed the original event against the EventBridge model
 4. Parser then parsed the `detail` key using `UserModel`
 
