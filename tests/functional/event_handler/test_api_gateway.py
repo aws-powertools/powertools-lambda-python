@@ -363,7 +363,7 @@ def test_custom_cors_config():
     def get_with_cors():
         return {}
 
-    @app.get("/another-one")
+    @app.get("/another-one", cors=False)
     def another_one():
         return {}
 
@@ -434,7 +434,7 @@ def test_cors_preflight():
     def foo_delete_cors():
         ...
 
-    @app.post("/foo")
+    @app.post("/foo", cors=False)
     def post_no_cors():
         ...
 
