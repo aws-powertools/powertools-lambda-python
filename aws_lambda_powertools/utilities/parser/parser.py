@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, Union
 
 from ...middleware_factory import lambda_handler_decorator
 from ..typing import LambdaContext
@@ -10,14 +10,17 @@ from .types import Model
 logger = logging.getLogger(__name__)
 
 
+EventParserReturnType = TypeVar("EventParserReturnType")
+
+
 @lambda_handler_decorator
 def event_parser(
-    handler: Callable[[Any, LambdaContext], Any],
+    handler: Callable[[Any, LambdaContext], EventParserReturnType],
     event: Dict[str, Any],
     context: LambdaContext,
-    model: Model,
-    envelope: Optional[Envelope] = None,
-) -> Any:
+    model: Type[Model],
+    envelope: Optional[Union[Envelope, Type[Envelope]]] = None,
+) -> EventParserReturnType:
     """Lambda handler decorator to parse & validate events using Pydantic models
 
     It requires a model that implements Pydantic BaseModel to parse & validate the event.
@@ -83,7 +86,9 @@ def event_parser(
     return handler(parsed_event, context)
 
 
-def parse(event: Dict[str, Any], model: Model, envelope: Optional[Envelope] = None) -> Model:
+def parse(
+    event: Dict[str, Any], model: Type[Model], envelope: Optional[Union[Envelope, Type[Envelope]]] = None
+) -> Model:
     """Standalone function to parse & validate events using Pydantic models
 
     Typically used when you need fine-grained control over error handling compared to event_parser decorator.
