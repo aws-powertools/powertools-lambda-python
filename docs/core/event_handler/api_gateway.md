@@ -290,6 +290,62 @@ You can also nest paths as configured earlier in [our sample infrastructure](#re
 		return app.resolve(event, context)
 	```
 
+### Accessing request details
+
+By integrating with [Data classes utilities](../../utilities/data_classes.md){target="_blank"}, you have access to request details, Lambda context and also some convenient methods.
+
+These are made available in the response returned when instantiating `ApiGatewayResolver`, for example `app.current_event` and `app.lambda_context`.
+
+#### Query strings and payload
+
+Within `app.current_event` property, you can access query strings as dictionary via `query_string_parameters`, or by name via `get_query_string_value` method.
+
+You can access the raw payload via `body` property, or if it's a JSON string you can quickly deserialize it via `json_body` property.
+
+=== "app.py"
+
+	```python hl_lines="7-9 11"
+	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+	app = ApiGatewayResolver()
+
+	@app.get("/hello")
+	def get_hello_you():
+		query_strings_as_dict = app.current_event.query_string_parameters
+		json_payload = app.current_event.json_body
+		payload = app.current_event.body
+
+		name = app.current_event.get_query_string_value(name="name", default_value="")
+		return {"message": f"hello {name}}"}
+
+	def lambda_handler(event, context):
+		return app.resolve(event, context)
+	```
+
+#### Headers
+
+Similarly to [Query strings](#query-strings), you can access headers as dictionary via `app.current_event.headers`, or by name via `get_header_value`.
+
+=== "app.py"
+
+	```python hl_lines="7-8"
+	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+	app = ApiGatewayResolver()
+
+	@app.get("/hello")
+	def get_hello_you():
+		headers_as_dict = app.current_event.headers
+		name = app.current_event.get_header_value(name="X-Name", default_value="")
+
+		return {"message": f"hello {name}}"}
+
+	def lambda_handler(event, context):
+		return app.resolve(event, context)
+	```
+
+## Advanced
+
 ### CORS
 
 You can configure CORS at the `ApiGatewayResolver` constructor via `cors` parameter using the `CORSConfig` class.
@@ -328,6 +384,12 @@ This will ensure that CORS headers are always returned as part of the response w
 
 !!! tip "Optionally disable class on a per path basis with `cors=False` parameter"
 
+#### Pre-flight
+
+Pre-flight (OPTIONS) calls are typically handled at the API Gateway level as per [our sample infrastructure](#required-resources), no Lambda integration necessary. However, ALB expects you to handle pre-flight requests.
+
+For convenience, we automatically handle that for you as long as you [setup CORS in the constructor level](#cors).
+
 #### Defaults
 
 For convenience, these are the default values when using `CORSConfig` to enable CORS:
@@ -341,14 +403,6 @@ Key | Value | Note
 **[expose_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers){target="_blank"}**: `List[str]` | `[]` | Any additional header beyond the [safe listed by CORS specification](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header){target="_blank"}.
 **[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="_blank"}**: `int` | `` | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway
 **[allow_credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials){target="_blank"}**: `bool` | `False` | Only necessary when you need to expose cookies, authorization headers or TLS client certificates.
-
-#### Pre-flight
-
-Pre-flight (OPTIONS) calls are typically handled at the API Gateway level as per [our sample infrastructure](#required-resources), no Lambda integration necessary. However, ALB expects you to handle pre-flight requests.
-
-For convenience, we automatically handle that for you as long as you [setup CORS in the constructor level](#cors).
-
-## Advanced
 
 ### Fine grained responses
 
