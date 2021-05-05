@@ -23,7 +23,7 @@ Event handler for Amazon API Gateway REST/HTTP APIs and Application Loader Balan
 
 You must have an existing [API Gateway Proxy integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html){target="_blank"} or [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html){target="_blank"} configured to invoke your Lambda function. There is no additional permissions or dependencies required to use this utility.
 
-This is the sample infrastructure we are using for the initial examples in this section.
+This is the sample infrastructure for API Gateway we are using for the examples in this documentation.
 
 === "template.yml"
 
