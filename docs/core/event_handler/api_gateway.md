@@ -408,6 +408,43 @@ Key | Value | Note
 
 ### Fine grained responses
 
+You can use the `Response` class to have full control over the response, for example you might want to add additional headers or set a custom Content-type.
+
+=== "app.py"
+
+	```python hl_lines="10-14"
+	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+
+	app = ApiGatewayResolver()
+
+	@app.get("/hello")
+	def get_hello_you():
+		payload = json.dumps({"message": "I'm a teapot"})
+		custom_headers = {"X-Custom": "X-Value"}
+
+		return Response(status_code=418,
+						content_type="application/json",
+						body=payload,
+						headers=custom_headers
+		)
+
+	def lambda_handler(event, context):
+		return app.resolve(event, context)
+	```
+
+=== "response.json"
+
+    ```json
+    {
+        "body": "{\"message\":\"I\'m a teapot\"}",
+        "headers": {
+            "Content-Type": "application/json",
+			"X-Custom": "X-Value"
+        },
+        "isBase64Encoded": false,
+        "statusCode": 418
+    }
+
 ### Compress
 
 You can compress with gzip and base64 encode your responses via `compress` parameter.
@@ -417,7 +454,7 @@ You can compress with gzip and base64 encode your responses via `compress` param
 === "app.py"
 
 	```python hl_lines="5 7"
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
 	app = ApiGatewayResolver()
 
