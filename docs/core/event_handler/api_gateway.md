@@ -706,5 +706,10 @@ You can test your routes by passing a proxy event request where `path` and `http
 		return app.resolve(event, context)
 	```
 
-
 ## FAQ
+
+**What's the difference between this utility and frameworks like Chalice?**
+
+Chalice is a full featured microframework that manages application and infrastructure. This utility, however, is largely focused on routing to reduce boilerplate and expects you to setup and manage infrastructure with your framework of choice.
+
+That said, [Chalice has native integration with Lambda Powertools](https://aws.github.io/chalice/topics/middleware.html){target="_blank"} if you're looking for a more opinionated and web framework feature set.
