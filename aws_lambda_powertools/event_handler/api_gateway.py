@@ -28,37 +28,37 @@ class CORSConfig(object):
 
     Simple cors example using the default permissive cors, not this should only be used during early prototyping
 
-        >>> from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
-        >>>
-        >>> app = ApiGatewayResolver()
-        >>>
-        >>> @app.get("/my/path", cors=True)
-        >>> def with_cors():
-        >>>      return {"message": "Foo"}
+        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+        app = ApiGatewayResolver()
+
+        @app.get("/my/path", cors=True)
+        def with_cors():
+            return {"message": "Foo"}
 
     Using a custom CORSConfig where `with_cors` used the custom provided CORSConfig and `without_cors`
     do not include any cors headers.
 
-        >>> from aws_lambda_powertools.event_handler.api_gateway import (
-        >>>    ApiGatewayResolver, CORSConfig
-        >>> )
-        >>>
-        >>> cors_config = CORSConfig(
-        >>>    allow_origin="https://wwww.example.com/",
-        >>>    expose_headers=["x-exposed-response-header"],
-        >>>    allow_headers=["x-custom-request-header"],
-        >>>    max_age=100,
-        >>>    allow_credentials=True,
-        >>> )
-        >>> app = ApiGatewayResolver(cors=cors_config)
-        >>>
-        >>> @app.get("/my/path", cors=True)
-        >>> def with_cors():
-        >>>      return {"message": "Foo"}
-        >>>
-        >>> @app.get("/another-one")
-        >>> def without_cors():
-        >>>     return {"message": "Foo"}
+        from aws_lambda_powertools.event_handler.api_gateway import (
+            ApiGatewayResolver, CORSConfig
+        )
+
+        cors_config = CORSConfig(
+            allow_origin="https://wwww.example.com/",
+            expose_headers=["x-exposed-response-header"],
+            allow_headers=["x-custom-request-header"],
+            max_age=100,
+            allow_credentials=True,
+        )
+        app = ApiGatewayResolver(cors=cors_config)
+
+        @app.get("/my/path", cors=True)
+        def with_cors():
+            return {"message": "Foo"}
+
+        @app.get("/another-one")
+        def without_cors():
+            return {"message": "Foo"}
     """
 
     _REQUIRED_HEADERS = ["Authorization", "Content-Type", "X-Amz-Date", "X-Api-Key", "X-Amz-Security-Token"]
@@ -207,27 +207,26 @@ class ApiGatewayResolver:
     --------
     Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
 
-        >>> from aws_lambda_powertools import Tracer
-        >>> from aws_lambda_powertools.event_handler.api_gateway import (
-        >>>    ApiGatewayResolver
-        >>> )
-        >>>
-        >>> tracer = Tracer()
-        >>> app = ApiGatewayResolver()
-        >>>
-        >>> @app.get("/get-call")
-        >>> def simple_get():
-        >>>      return {"message": "Foo"}
-        >>>
-        >>> @app.post("/post-call")
-        >>> def simple_post():
-        >>>     post_data: dict = app.current_event.json_body
-        >>>     return {"message": post_data["value"]}
-        >>>
-        >>> @tracer.capture_lambda_handler
-        >>> def lambda_handler(event, context):
-        >>>    return app.resolve(event, context)
+    ```python
+    from aws_lambda_powertools import Tracer
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
+    tracer = Tracer()
+    app = ApiGatewayResolver()
+
+    @app.get("/get-call")
+    def simple_get():
+        return {"message": "Foo"}
+
+    @app.post("/post-call")
+    def simple_post():
+        post_data: dict = app.current_event.json_body
+        return {"message": post_data["value"]}
+
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
     """
 
     current_event: BaseProxyEvent
@@ -248,23 +247,133 @@ class ApiGatewayResolver:
         self._cors_methods: Set[str] = {"OPTIONS"}
 
     def get(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
-        """Get route decorator with GET `method`"""
+        """Get route decorator with GET `method`
+
+        Examples
+        --------
+        Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
+
+        ```python
+        from aws_lambda_powertools import Tracer
+        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+            >>>
+        tracer = Tracer()
+        app = ApiGatewayResolver()
+
+        @app.get("/get-call")
+        def simple_get():
+            return {"message": "Foo"}
+
+        @tracer.capture_lambda_handler
+        def lambda_handler(event, context):
+            return app.resolve(event, context)
+        ```
+        """
         return self.route(rule, "GET", cors, compress, cache_control)
 
     def post(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
-        """Post route decorator with POST `method`"""
+        """Post route decorator with POST `method`
+
+        Examples
+        --------
+        Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
+
+        ```python
+        from aws_lambda_powertools import Tracer
+        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+        tracer = Tracer()
+        app = ApiGatewayResolver()
+
+        @app.post("/post-call")
+        def simple_post():
+            post_data: dict = app.current_event.json_body
+            return {"message": post_data["value"]}
+
+        @tracer.capture_lambda_handler
+        def lambda_handler(event, context):
+            return app.resolve(event, context)
+        ```
+        """
         return self.route(rule, "POST", cors, compress, cache_control)
 
     def put(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
-        """Put route decorator with PUT `method`"""
+        """Put route decorator with PUT `method`
+
+        Examples
+        --------
+        Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
+
+        ```python
+        from aws_lambda_powertools import Tracer
+        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+        tracer = Tracer()
+        app = ApiGatewayResolver()
+
+        @app.put("/put-call")
+        def simple_post():
+            put_data: dict = app.current_event.json_body
+            return {"message": put_data["value"]}
+
+        @tracer.capture_lambda_handler
+        def lambda_handler(event, context):
+            return app.resolve(event, context)
+        ```
+        """
         return self.route(rule, "PUT", cors, compress, cache_control)
 
     def delete(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
-        """Delete route decorator with DELETE `method`"""
+        """Delete route decorator with DELETE `method`
+
+        Examples
+        --------
+        Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
+
+        ```python
+        from aws_lambda_powertools import Tracer
+        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+        tracer = Tracer()
+        app = ApiGatewayResolver()
+
+        @app.delete("/delete-call")
+        def simple_delete():
+            return {"message": "deleted"}
+
+        @tracer.capture_lambda_handler
+        def lambda_handler(event, context):
+            return app.resolve(event, context)
+        ```
+        """
         return self.route(rule, "DELETE", cors, compress, cache_control)
 
     def patch(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
-        """Patch route decorator with PATCH `method`"""
+        """Patch route decorator with PATCH `method`
+
+        Examples
+        --------
+        Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
+
+        ```python
+        from aws_lambda_powertools import Tracer
+        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+        tracer = Tracer()
+        app = ApiGatewayResolver()
+
+        @app.patch("/patch-call")
+        def simple_patch():
+            patch_data: dict = app.current_event.json_body
+            patch_data["value"] = patched
+
+            return {"message": patch_data}
+
+        @tracer.capture_lambda_handler
+        def lambda_handler(event, context):
+            return app.resolve(event, context)
+        ```
+        """
         return self.route(rule, "PATCH", cors, compress, cache_control)
 
     def route(self, rule: str, method: str, cors: bool = True, compress: bool = False, cache_control: str = None):
