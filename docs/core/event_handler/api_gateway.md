@@ -35,6 +35,10 @@ This is the sample infrastructure we are using for the initial examples in this 
 	Globals:
 	  Api:
 	    TracingEnabled: true
+        Cors:								# see CORS section
+          AllowOrigin: "'https://example.com'"
+          AllowHeaders: "'Content-Type,Authorization,X-Amz-Date'"
+          MaxAge: "'300'"
       Function:
         Timeout: 5
         Runtime: python3.8
@@ -287,6 +291,62 @@ You can also nest paths as configured earlier in [our sample infrastructure](#re
 	```
 
 ### CORS
+
+You can configure CORS at the `ApiGatewayResolver` constructor via `cors` parameter using the `CORSConfig` class.
+
+This will ensure that CORS headers are always returned as part of the response when your functions match the path invoked.
+
+=== "app.py"
+
+	```python hl_lines="9 11"
+	from aws_lambda_powertools import Logger, Tracer
+	from aws_lambda_powertools.logging import correlation_paths
+	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, CORSConfig
+
+	tracer = Tracer()
+	logger = Logger()
+
+	cors_config = CORSConfig(allow_origin="https://example.com", max_age=300)
+	app = ApiGatewayResolver(cors=cors_config)
+
+	@app.get("/hello/<name>")
+	@tracer.capture_method
+	def get_hello_you(name):
+		return {"message": f"hello {name}}"}
+
+	@app.get("/hello", cors=False)  # optionally exclude CORS from response, if needed
+	@tracer.capture_method
+	def get_hello_no_cors_needed():
+		return {"message": "hello, no CORS needed for this path ;)"}
+
+	# You can continue to use other utilities just as before
+	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+	@tracer.capture_lambda_handler
+	def lambda_handler(event, context):
+		return app.resolve(event, context)
+	```
+
+!!! tip "Optionally disable class on a per path basis with `cors=False` parameter"
+
+#### Defaults
+
+For convenience, these are the default values when using `CORSConfig` to enable CORS:
+
+!!! warning "Always configure `allow_origin` when using in production"
+
+Key | Value | Note
+------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------
+**[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank"}**: `str` | `*` | Only use the default value for development. **Never use `*` for production** unless your use case requires it
+**[allow_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers){target="_blank"}**: `List[str]` | `[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]` | Additional headers will be appended to the default list for your convenience
+**[expose_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers){target="_blank"}**: `List[str]` | `[]` | Any additional header beyond the [safe listed by CORS specification](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header){target="_blank"}.
+**[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="_blank"}**: `int` | `` | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway
+**[allow_credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials){target="_blank"}**: `bool` | `False` | Only necessary when you need to expose cookies, authorization headers or TLS client certificates.
+
+#### Pre-flight
+
+Pre-flight (OPTIONS) calls are typically handled at the API Gateway level as per [our sample infrastructure](#required-resources), no Lambda integration necessary. However, ALB expects you to handle pre-flight requests.
+
+For convenience, we automatically handle that for you as long as you [setup CORS in the constructor level](#cors).
 
 ## Advanced
 

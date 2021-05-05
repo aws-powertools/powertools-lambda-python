@@ -66,9 +66,9 @@ class CORSConfig(object):
     def __init__(
         self,
         allow_origin: str = "*",
-        allow_headers: List[str] = None,
-        expose_headers: List[str] = None,
-        max_age: int = None,
+        allow_headers: Optional[List[str]] = None,
+        expose_headers: Optional[List[str]] = None,
+        max_age: Optional[int] = None,
         allow_credentials: bool = False,
     ):
         """
@@ -77,13 +77,13 @@ class CORSConfig(object):
         allow_origin: str
             The value of the `Access-Control-Allow-Origin` to send in the response. Defaults to "*", but should
             only be used during development.
-        allow_headers: str
+        allow_headers: Optional[List[str]]
             The list of additional allowed headers. This list is added to list of
             built in allowed headers: `Authorization`, `Content-Type`, `X-Amz-Date`,
             `X-Api-Key`, `X-Amz-Security-Token`.
-        expose_headers: str
+        expose_headers: Optional[List[str]]
             A list of values to return for the Access-Control-Expose-Headers
-        max_age: int
+        max_age: Optional[int]
             The value for the `Access-Control-Max-Age`
         allow_credentials: bool
             A boolean value that sets the value of `Access-Control-Allow-Credentials`
