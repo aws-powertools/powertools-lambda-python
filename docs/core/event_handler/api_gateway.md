@@ -63,7 +63,12 @@ This is the sample infrastructure we are using for the initial examples in this 
 			HelloYou:
 			  Type: Api
 			  Properties:
-			    Path: /hello/{name}
+			    Path: /hello/{name}      # see Dynamic routes section
+			    Method: GET
+			CustomMessage:
+			  Type: Api
+			  Properties:
+			    Path: /{message}/{name}  # see Dynamic routes section
 			    Method: GET
 
 	Outputs:
@@ -80,11 +85,13 @@ This is the sample infrastructure we are using for the initial examples in this 
 
 You can define your functions to match a path and HTTP method, when you use the decorator `ApiGatewayResolver`.
 
-Here's an example where we have two separate functions to resolve two paths: `/hello` and `/hello/{name}`.
+Here's an example where we have two separate functions to resolve two paths: `/hello`.
+
+!!! info "We automatically serialize `Dict` responses as JSON and set content-type to `application/json`"
 
 === "app.py"
 
-	```python hl_lines="3 7 9 18"
+	```python hl_lines="3 7 9 12 18"
 	from aws_lambda_powertools import Logger, Tracer
 	from aws_lambda_powertools.logging import correlation_paths
 	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
@@ -227,8 +234,57 @@ When using ALB to front your Lambda functions, you can instruct `ApiGatewayResol
 		return app.resolve(event, context)
 	```
 
+### Dynamic routes
 
-### Path expressions
+You can use `/path/{dynamic_value}` when configuring dynamic URL paths. This allows you to define such dynamic value as part of your function signature.
+
+=== "app.py"
+
+	```python hl_lines="9 11"
+	from aws_lambda_powertools import Logger, Tracer
+	from aws_lambda_powertools.logging import correlation_paths
+	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+	tracer = Tracer()
+	logger = Logger()
+	app = ApiGatewayResolver()
+
+	@app.get("/hello/<name>")
+	@tracer.capture_method
+	def get_hello_you(name):
+		return {"message": f"hello {name}}"}
+
+	# You can continue to use other utilities just as before
+	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+	@tracer.capture_lambda_handler
+	def lambda_handler(event, context):
+		return app.resolve(event, context)
+	```
+
+You can also nest paths as configured earlier in [our sample infrastructure](#required-resources): `/{message}/{name}`.
+
+=== "app.py"
+
+	```python hl_lines="9 11"
+	from aws_lambda_powertools import Logger, Tracer
+	from aws_lambda_powertools.logging import correlation_paths
+	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+	tracer = Tracer()
+	logger = Logger()
+	app = ApiGatewayResolver()
+
+	@app.get("/<message>/<name>")
+	@tracer.capture_method
+	def get_message(message, name):
+		return {"message": f"{message}, {name}}"}
+
+	# You can continue to use other utilities just as before
+	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+	@tracer.capture_lambda_handler
+	def lambda_handler(event, context):
+		return app.resolve(event, context)
+	```
 
 ### CORS
 
