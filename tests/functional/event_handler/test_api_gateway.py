@@ -35,7 +35,7 @@ def test_alb_event():
     def foo():
         assert isinstance(app.current_event, ALBEvent)
         assert app.lambda_context == {}
-        return 200, TEXT_HTML, "foo"
+        return Response(200, TEXT_HTML, "foo")
 
     # WHEN calling the event handler
     result = app(load_event("albEvent.json"), {})
@@ -363,7 +363,7 @@ def test_custom_cors_config():
     def get_with_cors():
         return {}
 
-    @app.get("/another-one")
+    @app.get("/another-one", cors=False)
     def another_one():
         return {}
 
@@ -434,7 +434,7 @@ def test_cors_preflight():
     def foo_delete_cors():
         ...
 
-    @app.post("/foo")
+    @app.post("/foo", cors=False)
     def post_no_cors():
         ...
 

@@ -53,7 +53,7 @@ Key | Example | Note
 **message**: `Any` | `Collecting payment` | Unserializable JSON values are casted as `str`
 **timestamp**: `str` | `2021-05-03 10:20:19,650+0200` | Timestamp with milliseconds, by default uses local timezone
 **service**: `str` | `payment` | Service name defined, by default `service_undefined`
-**xray_trace_id**: `str` | `1-5759e988-bd862e3fe1be46a994272793` | When [tracing is enabled](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html), it shows X-Ray Trace ID
+**xray_trace_id**: `str` | `1-5759e988-bd862e3fe1be46a994272793` | When [tracing is enabled](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html){target="_blank"}, it shows X-Ray Trace ID
 **sampling_rate**: `float` |  `0.1` | When enabled, it shows sampling rate in percentage e.g. 10%
 **exception_name**: `str` | `ValueError` | When `logger.exception` is used and there is an exception
 **exception**: `str` | `Traceback (most recent call last)..` | When `logger.exception` is used and there is an exception
@@ -644,7 +644,7 @@ You might want to continue to use the same date formatting style, or override `l
 Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, `xray_trace_id`.
 
 === "lambda_handler.py"
-	> We honour standard [logging library string formats](https://docs.python.org/3/howto/logging.html#displaying-the-date-time-in-messages).
+	> We honour standard [logging library string formats](https://docs.python.org/3/howto/logging.html#displaying-the-date-time-in-messages){target="_blank"}.
 
     ```python hl_lines="7 10"
     from aws_lambda_powertools import Logger
@@ -849,7 +849,7 @@ For **replacing the formatter entirely**, you can subclass `BasePowertoolsFormat
 
 #### Bring your own JSON serializer
 
-By default, Logger uses `json.dumps` and `json.loads` as serializer and deserializer respectively. There could be scenarios where you are making use of alternative JSON libraries like [orjson](https://github.com/ijl/orjson).
+By default, Logger uses `json.dumps` and `json.loads` as serializer and deserializer respectively. There could be scenarios where you are making use of alternative JSON libraries like [orjson](https://github.com/ijl/orjson){target="_blank"}.
 
 As parameters don't always translate well between them, you can pass any callable that receives a `Dict` and return a `str`:
 
@@ -943,7 +943,7 @@ This is a Pytest sample that provides the minimum information necessary for Logg
     ```
 
 !!! tip
-	If you're using pytest and are looking to assert plain log messages, do check out the built-in [caplog fixture](https://docs.pytest.org/en/latest/how-to/logging.html).
+	If you're using pytest and are looking to assert plain log messages, do check out the built-in [caplog fixture](https://docs.pytest.org/en/latest/how-to/logging.html){target="_blank"}.
 
 ### Pytest live log feature
 
