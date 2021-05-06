@@ -55,11 +55,11 @@ class CORSConfig(object):
         )
         app = ApiGatewayResolver(cors=cors_config)
 
-        @app.get("/my/path", cors=True)
+        @app.get("/my/path")
         def with_cors():
             return {"message": "Foo"}
 
-        @app.get("/another-one")
+        @app.get("/another-one", cors=False)
         def without_cors():
             return {"message": "Foo"}
     """
@@ -249,9 +249,10 @@ class ApiGatewayResolver:
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
         self._cors = cors
+        self._cors_enabled: bool = cors is not None
         self._cors_methods: Set[str] = {"OPTIONS"}
 
-    def get(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
+    def get(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
         """Get route decorator with GET `method`
 
         Examples
@@ -276,7 +277,7 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "GET", cors, compress, cache_control)
 
-    def post(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
+    def post(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
         """Post route decorator with POST `method`
 
         Examples
@@ -302,7 +303,7 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "POST", cors, compress, cache_control)
 
-    def put(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
+    def put(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
         """Put route decorator with PUT `method`
 
         Examples
@@ -317,7 +318,7 @@ class ApiGatewayResolver:
         app = ApiGatewayResolver()
 
         @app.put("/put-call")
-        def simple_post():
+        def simple_put():
             put_data: dict = app.current_event.json_body
             return {"message": put_data["value"]}
 
@@ -328,7 +329,7 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "PUT", cors, compress, cache_control)
 
-    def delete(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
+    def delete(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
         """Delete route decorator with DELETE `method`
 
         Examples
@@ -353,7 +354,7 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "DELETE", cors, compress, cache_control)
 
-    def patch(self, rule: str, cors: bool = True, compress: bool = False, cache_control: str = None):
+    def patch(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
         """Patch route decorator with PATCH `method`
 
         Examples
@@ -381,13 +382,17 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "PATCH", cors, compress, cache_control)
 
-    def route(self, rule: str, method: str, cors: bool = True, compress: bool = False, cache_control: str = None):
+    def route(self, rule: str, method: str, cors: bool = None, compress: bool = False, cache_control: str = None):
         """Route decorator includes parameter `method`"""
 
         def register_resolver(func: Callable):
             logger.debug(f"Adding route using rule {rule} and method {method.upper()}")
-            self._routes.append(Route(method, self._compile_regex(rule), func, cors, compress, cache_control))
-            if cors:
+            if cors is None:
+                cors_enabled = self._cors_enabled
+            else:
+                cors_enabled = cors
+            self._routes.append(Route(method, self._compile_regex(rule), func, cors_enabled, compress, cache_control))
+            if cors_enabled:
                 logger.debug(f"Registering method {method.upper()} to Allow Methods in CORS")
                 self._cors_methods.add(method.upper())
             return func
@@ -454,7 +459,7 @@ class ApiGatewayResolver:
             logger.debug("CORS is enabled, updating headers.")
             headers.update(self._cors.to_dict())
 
-            if method == "OPTIONS":  # Pre-flight
+            if method == "OPTIONS":
                 logger.debug("Pre-flight request detected. Returning CORS with null response")
                 headers["Access-Control-Allow-Methods"] = ",".join(sorted(self._cors_methods))
                 return ResponseBuilder(Response(status_code=204, content_type=None, headers=headers, body=None))
