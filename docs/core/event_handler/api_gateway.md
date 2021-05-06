@@ -5,8 +5,6 @@ description: Core utility
 
 Event handler for Amazon API Gateway REST/HTTP APIs and Application Loader Balancer (ALB).
 
-!!! info "This is currently in Beta as we want to hear feedback on UX."
-
 ### Key Features
 
 * Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API and ALB
