@@ -267,7 +267,7 @@ You can use `/path/{dynamic_value}` when configuring dynamic URL paths. This all
 	@app.get("/hello/<name>")
 	@tracer.capture_method
 	def get_hello_you(name):
-		return {"message": f"hello {name}}"}
+		return {"message": f"hello {name}"}
 
 	# You can continue to use other utilities just as before
 	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
