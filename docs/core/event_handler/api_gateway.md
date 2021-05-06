@@ -208,7 +208,7 @@ When using API Gateway HTTP API to front your Lambda functions, you can instruct
 
 	tracer = Tracer()
 	logger = Logger()
-	app = ApiGatewayResolver(proxy_type=ProxyEventType.http_api_v2)
+	app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEventV2)
 
 	@app.get("/hello")
 	@tracer.capture_method
@@ -235,7 +235,7 @@ When using ALB to front your Lambda functions, you can instruct `ApiGatewayResol
 
 	tracer = Tracer()
 	logger = Logger()
-	app = ApiGatewayResolver(proxy_type=ProxyEventType.alb_event)
+	app = ApiGatewayResolver(proxy_type=ProxyEventType.ALBEvent)
 
 	@app.get("/hello")
 	@tracer.capture_method
