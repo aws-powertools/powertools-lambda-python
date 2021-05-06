@@ -5,8 +5,6 @@ description: Core utility
 
 Event handler for Amazon API Gateway REST/HTTP APIs and Application Loader Balancer (ALB).
 
-!!! info "This is currently in Beta as we want to hear feedback on UX."
-
 ### Key Features
 
 * Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API and ALB
@@ -269,7 +267,7 @@ You can use `/path/{dynamic_value}` when configuring dynamic URL paths. This all
 	@app.get("/hello/<name>")
 	@tracer.capture_method
 	def get_hello_you(name):
-		return {"message": f"hello {name}}"}
+		return {"message": f"hello {name}"}
 
 	# You can continue to use other utilities just as before
 	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)

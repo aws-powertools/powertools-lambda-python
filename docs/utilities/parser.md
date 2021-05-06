@@ -291,7 +291,7 @@ Here's an example of parsing a model found in an event coming from EventBridge, 
 4. Parser then parsed the `detail` key using `UserModel`
 
 
-### built-in envelopes
+### Built-in envelopes
 
 Parser comes with the following built-in envelopes, where `Model` in the return section is your given model.
 
@@ -304,8 +304,9 @@ Parser comes with the following built-in envelopes, where `Model` in the return 
 | **KinesisDataStreamEnvelope**                                                                                                                | 1. Parses data using `KinesisDataStreamModel` which will base64 decode it. <br/> 2. Parses records in in `Records` key using your model and returns them in a list.                                         | `List[Model]`                      |
 | **SnsEnvelope**                                                                                                                              | 1. Parses data using `SnsModel`. <br/> 2. Parses records in `body` key using your model and return them in a list.                                                                                          | `List[Model]`                      |
 | **SnsSqsEnvelope**                                                                                                                           | 1. Parses data using `SqsModel`. <br/> 2. Parses SNS records in `body` key using `SnsNotificationModel`. <br/> 3. Parses data in `Message` key using your model and return them in a list.                  | `List[Model]`                      |
-| **ApiGatewayEnvelope**         1. Parses data using `APIGatewayProxyEventModel`. <br/> 2. Parses `body` key using your model and returns it. | `Model`                                                                                                                                                                                                     |
-### bringing your own envelope
+| **ApiGatewayEnvelope**         																											   | 1. Parses data using `APIGatewayProxyEventModel`. <br/> 2. Parses `body` key using your model and returns it. | `Model`                                                                                                                                                                                                     |
+
+### Bringing your own envelope
 
 You can create your own Envelope model and logic by inheriting from `BaseEnvelope`, and implementing the `parse` method.
 
