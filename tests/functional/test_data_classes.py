@@ -1,8 +1,11 @@
 import base64
 import datetime
 import json
+import zipfile
 from secrets import compare_digest
 from urllib.parse import quote_plus
+
+from pytest_mock import MockerFixture
 
 from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
@@ -128,11 +131,11 @@ def test_cognito_pre_signup_trigger_event():
 
     # Verify setters
     event.response.auto_confirm_user = True
-    assert event.response.auto_confirm_user is True
+    assert event.response.auto_confirm_user
     event.response.auto_verify_phone = True
-    assert event.response.auto_verify_phone is True
+    assert event.response.auto_verify_phone
     event.response.auto_verify_email = True
-    assert event.response.auto_verify_email is True
+    assert event.response.auto_verify_email
     assert event["response"]["autoVerifyEmail"] is True
 
 
@@ -168,7 +171,7 @@ def test_cognito_user_migration_trigger_event():
     event.response.message_action = "SUPPRESS"
     assert event.response.message_action == "SUPPRESS"
     event.response.force_alias_creation = True
-    assert event.response.force_alias_creation is True
+    assert event.response.force_alias_creation
     event.response.desired_delivery_mediums = ["EMAIL"]
     assert event.response.desired_delivery_mediums == ["EMAIL"]
 
@@ -285,10 +288,10 @@ def test_cognito_define_auth_challenge_trigger_event():
     assert event.response.challenge_name == event["response"]["challengeName"]
     assert event.response.challenge_name == "CUSTOM_CHALLENGE"
     event.response.fail_authentication = True
-    assert event.response.fail_authentication is True
+    assert event.response.fail_authentication
     assert event.response.fail_authentication == event["response"]["failAuthentication"]
     event.response.issue_tokens = True
-    assert event.response.issue_tokens is True
+    assert event.response.issue_tokens
     assert event.response.issue_tokens == event["response"]["issueTokens"]
 
 
@@ -335,7 +338,7 @@ def test_verify_auth_challenge_response_trigger_event():
     # Verify setters
     event.response.answer_correct = True
     assert event.response.answer_correct == event["response"]["answerCorrect"]
-    assert event.response.answer_correct is True
+    assert event.response.answer_correct
 
 
 def test_connect_contact_flow_event_min():
@@ -1148,6 +1151,8 @@ def test_code_pipeline_event_decoded_data():
     assert decoded_params == event.decoded_user_parameters
     assert "VALUE" == decoded_params["KEY"]
 
+    assert "my-pipeline-SourceArtifact" == event.data.input_artifacts[0].name
+
     output_artifacts = event.data.output_artifacts
     assert len(output_artifacts) == 1
     assert "S3" == output_artifacts[0].location.get_type
@@ -1160,3 +1165,40 @@ def test_code_pipeline_event_decoded_data():
 
     assert "us-west-2-123456789012-my-pipeline" == event.input_bucket_name
     assert "my-pipeline/test-api-2/TdOSFRV" == event.input_object_key
+
+
+def test_code_pipeline_get_artifact_not_found():
+    event = CodePipelineJobEvent(load_event("codePipelineEventData.json"))
+
+    assert event.find_input_artifact("not-found") is None
+    assert event.get_artifact("not-found", "foo") is None
+
+
+def test_code_pipeline_get_artifact(mocker: MockerFixture):
+    filename = "foo.json"
+    file_contents = "Foo"
+
+    class MockClient:
+        @staticmethod
+        def download_file(bucket: str, key: str, tmp_name: str):
+            assert bucket == "us-west-2-123456789012-my-pipeline"
+            assert key == "my-pipeline/test-api-2/TdOSFRV"
+            with zipfile.ZipFile(tmp_name, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+                zf.writestr(filename, file_contents)
+
+    s3 = mocker.patch("boto3.client")
+    s3.return_value = MockClient()
+
+    event = CodePipelineJobEvent(load_event("codePipelineEventData.json"))
+
+    artifact_str = event.get_artifact(artifact_name="my-pipeline-SourceArtifact", filename=filename)
+
+    s3.assert_called_once_with(
+        "s3",
+        **{
+            "aws_access_key_id": event.data.artifact_credentials.access_key_id,
+            "aws_secret_access_key": event.data.artifact_credentials.secret_access_key,
+            "aws_session_token": event.data.artifact_credentials.session_token,
+        }
+    )
+    assert artifact_str == file_contents

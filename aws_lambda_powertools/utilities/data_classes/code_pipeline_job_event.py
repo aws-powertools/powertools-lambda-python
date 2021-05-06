@@ -1,6 +1,10 @@
 import json
+import tempfile
+import zipfile
 from typing import Any, Dict, List, Optional
 from urllib.parse import unquote_plus
+
+import boto3
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -129,29 +133,33 @@ class CodePipelineJobEvent(DictWrapper):
     - https://docs.aws.amazon.com/lambda/latest/dg/services-codepipeline.html
     """
 
+    def __init__(self, data: Dict[str, Any]):
+        super().__init__(data)
+        self._job = self["CodePipeline.job"]
+
     @property
     def get_id(self) -> str:
         """Job id"""
-        return self["CodePipeline.job"]["id"]
+        return self._job["id"]
 
     @property
     def account_id(self) -> str:
         """Account id"""
-        return self["CodePipeline.job"]["accountId"]
+        return self._job["accountId"]
 
     @property
     def data(self) -> CodePipelineData:
         """Code pipeline jab data"""
-        return CodePipelineData(self["CodePipeline.job"]["data"])
+        return CodePipelineData(self._job["data"])
 
     @property
     def user_parameters(self) -> str:
-        """User parameters"""
+        """Action configuration user parameters"""
         return self.data.action_configuration.configuration.user_parameters
 
     @property
     def decoded_user_parameters(self) -> Dict[str, Any]:
-        """Json Decoded user parameters"""
+        """Json Decoded action configuration user parameters"""
         return self.data.action_configuration.configuration.decoded_user_parameters
 
     @property
@@ -163,3 +171,66 @@ class CodePipelineJobEvent(DictWrapper):
     def input_object_key(self) -> str:
         """Get the first input artifact order key unquote plus"""
         return self.data.input_artifacts[0].location.s3_location.object_key
+
+    def setup_s3_client(self):
+        """Creates an S3 client
+
+        Uses the credentials passed in the event by CodePipeline. These
+        credentials can be used to access the artifact bucket.
+
+        Returns
+        -------
+        BaseClient
+            An S3 client with the appropriate credentials
+        """
+        return boto3.client(
+            "s3",
+            aws_access_key_id=self.data.artifact_credentials.access_key_id,
+            aws_secret_access_key=self.data.artifact_credentials.secret_access_key,
+            aws_session_token=self.data.artifact_credentials.session_token,
+        )
+
+    def find_input_artifact(self, artifact_name: str) -> Optional[CodePipelineArtifact]:
+        """Find an input artifact by artifact name
+
+        Parameters
+        ----------
+        artifact_name : str
+            The name of the input artifact to look for
+
+        Returns
+        -------
+        CodePipelineArtifact, None
+            Matching CodePipelineArtifact if found
+        """
+        for artifact in self.data.input_artifacts:
+            if artifact.name == artifact_name:
+                return artifact
+        return None
+
+    def get_artifact(self, artifact_name: str, filename: str) -> Optional[str]:
+        """Get a file within an artifact zip on s3
+
+        Parameters
+        ----------
+        artifact_name : str
+            Name of the S3 artifact to download
+        filename : str
+            The file name within the artifact zip to extract as a string
+
+        Returns
+        -------
+        str, None
+            Returns the contents file contents as a string
+        """
+        artifact = self.find_input_artifact(artifact_name)
+        if artifact is None:
+            return None
+
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            s3 = self.setup_s3_client()
+            bucket = artifact.location.s3_location.bucket_name
+            key = artifact.location.s3_location.key
+            s3.download_file(bucket, key, tmp_file.name)
+            with zipfile.ZipFile(tmp_file.name, "r") as zip_file:
+                return zip_file.read(filename).decode("UTF-8")
