@@ -8,6 +8,24 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## [1.15.0] - 2021-05-06
+
+### Added
+
+* **Event handlers**: New API Gateway and ALB utility to reduce routing boilerplate and more
+* **Documentation**: Logger enhancements such as bring your own formatter, handler, UTC support, and testing for Python 3.6
+* **Parser**: Support for API Gateway REST Proxy event and envelope
+* **Logger**: Support for bringing custom formatter, custom handler, custom JSON serializer and deserializer, UTC support, expose `LambdaPowertoolsFormatter`
+* **Metrics**: Support for persisting default dimensions that should always be added
+
+### Fixed
+
+* **Documentation**: Fix highlights, Parser types
+* **Validator**: Fix event type annotations for `validate` standalone function
+* **Parser**: Improve and fix types
+* **Internal**: Remove X-Ray SDK version pinning as serialization regression has been fixed in 2.8.0
+* **Internal**: Latest documentation correctly includes a copy of API docs reference
+
 ## [1.14.0] - 2021-04-09
 
 ### Added
