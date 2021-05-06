@@ -3,9 +3,6 @@ title: Idempotency
 description: Utility
 ---
 
-!!! attention
-    **This utility is currently in beta**. Please open an [issue in GitHub](https://github.com/awslabs/aws-lambda-powertools-python/issues/new/choose) for any bugs or feature requests.
-
 The idempotency utility provides a simple solution to convert your Lambda functions into idempotent operations which
 are safe to retry.
 
