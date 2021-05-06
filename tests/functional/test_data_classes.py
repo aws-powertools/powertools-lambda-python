@@ -13,6 +13,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEventV2,
     AppSyncResolverEvent,
     CloudWatchLogsEvent,
+    CodePipelineJobEvent,
     EventBridgeEvent,
     KinesisStreamEvent,
     S3Event,
@@ -34,7 +35,7 @@ from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import 
     AppSyncResolverEventInfo,
     get_identity_object,
 )
-from aws_lambda_powertools.utilities.data_classes.code_pipeline_job_event import CodePipelineData, CodePipelineJobEvent
+from aws_lambda_powertools.utilities.data_classes.code_pipeline_job_event import CodePipelineData
 from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import (
     CreateAuthChallengeTriggerEvent,
     CustomMessageTriggerEvent,
