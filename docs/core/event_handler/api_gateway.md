@@ -89,7 +89,7 @@ You can define your functions to match a path and HTTP method, when you use the 
 
 Here's an example where we have two separate functions to resolve two paths: `/hello`.
 
-!!! info "We automatically serialize `Dict` responses as JSON and set content-type to `application/json`"
+!!! info "We automatically serialize `Dict` responses as JSON, trim whitespaces for compact responses, and set content-type to `application/json`"
 
 === "app.py"
 
