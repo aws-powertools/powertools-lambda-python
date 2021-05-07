@@ -275,3 +275,16 @@ def test_logging_various_primitives(stdout, service_name, message):
     # THEN it should raise no serialization/deserialization error
     logger.info(message)
     json.loads(stdout.getvalue())
+
+
+def test_log_formatting(stdout, service_name):
+    # GIVEN a logger with default settings
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN logging a message with formatting
+    logger.info('["foo %s %d %s", null]', "bar", 123, [1, None])
+
+    log_dict: dict = json.loads(stdout.getvalue())
+
+    # THEN the formatting should be applied (NB. this is valid json, but hasn't be parsed)
+    assert log_dict["message"] == '["foo bar 123 [1, None]", null]'

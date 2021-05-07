@@ -176,6 +176,9 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         if isinstance(message, dict):
             return message
 
+        if log_record.args:  # logger.info("foo %s", "bar") requires formatting
+            return log_record.getMessage()
+
         if isinstance(message, str):  # could be a JSON string
             try:
                 message = self.json_deserializer(message)
