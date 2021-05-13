@@ -6,7 +6,14 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 
 
+
 ## [Unreleased]
+
+## [1.15.1] - 2021-05-13
+
+### Fixed
+
+* **Logger**: Fix a regression with the `%s` operator
 
 ## [1.15.0] - 2021-05-06
 
