@@ -5,9 +5,12 @@ All notable changes to this project will be documented in this file.
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format for changes and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-
-
 ## [Unreleased]
+
+## [1.16.0] - 2021-05-17
+### Features
+- **data-classes(API Gateway, ALB, AppSync):** New method to decode base64 encoded body ([#425](https://github.com/awslabs/aws-lambda-powertools-python/issues/425))
+- **data-classes(CodePipeline):** Support for CodePipeline job event and methods to handle artifacts more easily ([#416](https://github.com/awslabs/aws-lambda-powertools-python/issues/416))
 
 ## [1.15.1] - 2021-05-13
 
