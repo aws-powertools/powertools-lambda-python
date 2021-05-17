@@ -68,7 +68,7 @@ class BaseProxyEvent(DictWrapper):
         return json.loads(self["body"])
 
     @property
-    def decode_body(self) -> str:
+    def decoded_body(self) -> str:
         """Dynamically base64 decode body as a str"""
         body: str = self["body"]
         if self.is_base64_encoded:
