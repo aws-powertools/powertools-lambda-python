@@ -6,6 +6,7 @@ from .alb_event import ALBEvent
 from .api_gateway_proxy_event import APIGatewayProxyEvent, APIGatewayProxyEventV2
 from .appsync_resolver_event import AppSyncResolverEvent
 from .cloud_watch_logs_event import CloudWatchLogsEvent
+from .code_pipeline_job_event import CodePipelineJobEvent
 from .connect_contact_flow_event import ConnectContactFlowEvent
 from .dynamo_db_stream_event import DynamoDBStreamEvent
 from .event_bridge_event import EventBridgeEvent
@@ -21,6 +22,7 @@ __all__ = [
     "AppSyncResolverEvent",
     "ALBEvent",
     "CloudWatchLogsEvent",
+    "CodePipelineJobEvent",
     "ConnectContactFlowEvent",
     "DynamoDBStreamEvent",
     "EventBridgeEvent",
