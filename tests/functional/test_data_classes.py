@@ -5,6 +5,7 @@ import zipfile
 from secrets import compare_digest
 from urllib.parse import quote_plus
 
+import pytest
 from pytest_mock import MockerFixture
 
 from aws_lambda_powertools.utilities.data_classes import (
@@ -846,6 +847,39 @@ def test_base_proxy_event_get_header_value_case_insensitive():
 
     value = event.get_header_value("unknown", case_sensitive=True)
     assert value is None
+
+
+def test_base_proxy_event_json_body_key_error():
+    event = BaseProxyEvent({})
+    with pytest.raises(KeyError) as ke:
+        assert not event.json_body
+    assert str(ke.value) == "'body'"
+
+
+def test_base_proxy_event_json_body():
+    data = {"message": "Foo"}
+    event = BaseProxyEvent({"body": json.dumps(data)})
+    assert event.json_body == data
+
+
+def test_base_proxy_event_decode_body_key_error():
+    event = BaseProxyEvent({})
+    with pytest.raises(KeyError) as ke:
+        assert not event.decoded_body
+    assert str(ke.value) == "'body'"
+
+
+def test_base_proxy_event_decode_body_encoded_false():
+    data = "Foo"
+    event = BaseProxyEvent({"body": data, "isBase64Encoded": False})
+    assert event.decoded_body == data
+
+
+def test_base_proxy_event_decode_body_encoded_true():
+    data = "Foo"
+    encoded_data = base64.b64encode(data.encode()).decode()
+    event = BaseProxyEvent({"body": encoded_data, "isBase64Encoded": True})
+    assert event.decoded_body == data
 
 
 def test_kinesis_stream_event():
