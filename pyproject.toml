@@ -24,7 +24,7 @@ aws-xray-sdk = "^2.8.0"
 fastjsonschema = "^2.14.5"
 boto3 = "^1.12"
 jmespath = "^0.10.0"
-pydantic = {version = "^1.8.1", optional = true }
+pydantic = {version = "^1.8.2", optional = true }
 email-validator = {version = "*", optional = true }
 
 [tool.poetry.dev-dependencies]
