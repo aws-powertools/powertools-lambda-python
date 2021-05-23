@@ -7,9 +7,15 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## [1.16.1] - 2021-05-23
+
+### Fixed
+
+* **Parser**: Upgrade Pydantic to 1.8.2 due to CVE-2021-29510
+
 ## [1.16.0] - 2021-05-17
 ### Features
-- **data-classes(API Gateway, ALB, AppSync):** New method to decode base64 encoded body ([#425](https://github.com/awslabs/aws-lambda-powertools-python/issues/425))
+- **data-classes(API Gateway, ALB):** New method to decode base64 encoded body ([#425](https://github.com/awslabs/aws-lambda-powertools-python/issues/425))
 - **data-classes(CodePipeline):** Support for CodePipeline job event and methods to handle artifacts more easily ([#416](https://github.com/awslabs/aws-lambda-powertools-python/issues/416))
 
 ## [1.15.1] - 2021-05-13
