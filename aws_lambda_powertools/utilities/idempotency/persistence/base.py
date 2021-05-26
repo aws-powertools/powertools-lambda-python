@@ -16,6 +16,7 @@ import jmespath
 from aws_lambda_powertools.shared.cache_dict import LRUDict
 from aws_lambda_powertools.shared.jmespath_functions import PowertoolsFunctions
 from aws_lambda_powertools.shared.json_encoder import Encoder
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyInvalidStatusError,
@@ -224,6 +225,8 @@ class BasePersistenceLayer(ABC):
             Hashed representation of the provided data
 
         """
+        if isinstance(data, DictWrapper):
+            data = data.raw_event
         hashed_data = self.hash_function(json.dumps(data, cls=Encoder).encode())
         return hashed_data.hexdigest()
 

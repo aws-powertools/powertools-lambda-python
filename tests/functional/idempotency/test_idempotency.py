@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import json
 import sys
 from hashlib import md5
@@ -7,6 +8,8 @@ import jmespath
 import pytest
 from botocore import stub
 
+from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2
+from aws_lambda_powertools.utilities.data_classes.event_source import event_source
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
@@ -223,7 +226,7 @@ def test_idempotent_lambda_first_execution(
 def test_idempotent_lambda_first_execution_cached(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
-    lambda_apigw_event: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
     expected_params_update_item,
     expected_params_put_item,
     lambda_response,
@@ -845,3 +848,34 @@ def test_handler_raise_idempotency_key_error(persistence_store: DynamoDBPersiste
         handler({}, lambda_context)
 
     assert "No data found to create a hashed idempotency_key" == e.value.args[0]
+
+
+def test_idempotent_lambda_event_source(lambda_context):
+    idempotency_config = IdempotencyConfig()
+    expected_result = {"message": "Foo"}
+    expected_idempotency_key = "test-func#" + hashlib.md5(json.dumps({}).encode()).hexdigest()
+
+    class MockPersistenceLayer(BasePersistenceLayer):
+        def __init__(self):
+            super(MockPersistenceLayer, self).__init__()
+
+        def _put_record(self, data_record: DataRecord) -> None:
+            assert data_record.idempotency_key == expected_idempotency_key
+
+        def _update_record(self, data_record: DataRecord) -> None:
+            assert data_record.idempotency_key == expected_idempotency_key
+
+        def _get_record(self, idempotency_key) -> DataRecord:
+            ...
+
+        def _delete_record(self, data_record: DataRecord) -> None:
+            ...
+
+    @event_source(data_class=APIGatewayProxyEventV2)
+    @idempotent(config=idempotency_config, persistence_store=MockPersistenceLayer())
+    def lambda_handler(event, _):
+        assert isinstance(event, APIGatewayProxyEventV2)
+        return expected_result
+
+    result = lambda_handler({}, lambda_context)
+    assert result == expected_result
