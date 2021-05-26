@@ -8,8 +8,7 @@ import jmespath
 import pytest
 from botocore import stub
 
-from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2
-from aws_lambda_powertools.utilities.data_classes.event_source import event_source
+from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2, event_source
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
@@ -851,7 +850,6 @@ def test_handler_raise_idempotency_key_error(persistence_store: DynamoDBPersiste
 
 
 def test_idempotent_lambda_event_source(lambda_context):
-    idempotency_config = IdempotencyConfig()
     expected_result = {"message": "Foo"}
     expected_idempotency_key = "test-func#" + hashlib.md5(json.dumps({}).encode()).hexdigest()
 
@@ -872,7 +870,7 @@ def test_idempotent_lambda_event_source(lambda_context):
             ...
 
     @event_source(data_class=APIGatewayProxyEventV2)
-    @idempotent(config=idempotency_config, persistence_store=MockPersistenceLayer())
+    @idempotent(persistence_store=MockPersistenceLayer())
     def lambda_handler(event, _):
         assert isinstance(event, APIGatewayProxyEventV2)
         return expected_result
