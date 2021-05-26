@@ -850,8 +850,9 @@ def test_handler_raise_idempotency_key_error(persistence_store: DynamoDBPersiste
 
 
 def test_idempotent_lambda_event_source(lambda_context):
-    expected_result = {"message": "Foo"}
+    # Scenario to validate that we can use the event_source before the idempotent decorator
     expected_idempotency_key = "test-func#" + hashlib.md5(json.dumps({}).encode()).hexdigest()
+    expected_result = {"message": "Foo"}
 
     class MockPersistenceLayer(BasePersistenceLayer):
         def __init__(self):
@@ -869,11 +870,15 @@ def test_idempotent_lambda_event_source(lambda_context):
         def _delete_record(self, data_record: DataRecord) -> None:
             ...
 
+    # GIVEN an event_source with a parsed in data class
+    # AND idempotent decorator
     @event_source(data_class=APIGatewayProxyEventV2)
     @idempotent(persistence_store=MockPersistenceLayer())
     def lambda_handler(event, _):
         assert isinstance(event, APIGatewayProxyEventV2)
         return expected_result
 
+    # WHEN calling the lambda handler
     result = lambda_handler({}, lambda_context)
+    # THEN we expect the handler to execute succesfully
     assert result == expected_result

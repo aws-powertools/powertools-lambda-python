@@ -12,7 +12,8 @@ def event_source(
     context: LambdaContext,
     data_class: Type[DictWrapper],
 ):
-    """
+    """Middleware to create an instance of the passed in event source data class
+
     Parameters
     ----------
     handler: Callable
@@ -22,7 +23,7 @@ def event_source(
     context: Dict
         Lambda's Context
     data_class: Type[DictWrapper]
-        Data class
+        Data class type to instantiate
 
     Example
     --------

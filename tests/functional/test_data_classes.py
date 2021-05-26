@@ -1241,8 +1241,12 @@ def test_code_pipeline_get_artifact(mocker: MockerFixture):
 
 
 def test_reflected_types():
+    # GIVEN an event_source decorator
     @event_source(data_class=APIGatewayProxyEventV2)
     def lambda_handler(event: APIGatewayProxyEventV2, _):
+        # THEN we except the event to be of the pass in data class type
+        assert isinstance(event, APIGatewayProxyEventV2)
         assert event.get_header_value("x-foo") == "Foo"
 
+    # WHEN calling the lambda handler
     lambda_handler({"headers": {"X-Foo": "Foo"}}, None)
