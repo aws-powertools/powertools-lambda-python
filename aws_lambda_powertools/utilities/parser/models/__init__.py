@@ -5,6 +5,15 @@ from .apigw import (
     APIGatewayEventRequestContext,
     APIGatewayProxyEventModel,
 )
+from .apigwv2 import (
+    APIGatewayProxyEventV2Model,
+    RequestContextV2,
+    RequestContextV2Authorizer,
+    RequestContextV2AuthorizerIam,
+    RequestContextV2AuthorizerIamCognito,
+    RequestContextV2AuthorizerJwt,
+    RequestContextV2Http,
+)
 from .cloudwatch import CloudWatchLogsData, CloudWatchLogsDecode, CloudWatchLogsLogEvent, CloudWatchLogsModel
 from .dynamodb import DynamoDBStreamChangedRecordModel, DynamoDBStreamModel, DynamoDBStreamRecordModel
 from .event_bridge import EventBridgeModel
@@ -35,6 +44,13 @@ from .sns import SnsModel, SnsNotificationModel, SnsRecordModel
 from .sqs import SqsAttributesModel, SqsModel, SqsMsgAttributeModel, SqsRecordModel
 
 __all__ = [
+    "APIGatewayProxyEventV2Model",
+    "RequestContextV2",
+    "RequestContextV2Http",
+    "RequestContextV2Authorizer",
+    "RequestContextV2AuthorizerJwt",
+    "RequestContextV2AuthorizerIam",
+    "RequestContextV2AuthorizerIamCognito",
     "CloudWatchLogsData",
     "CloudWatchLogsDecode",
     "CloudWatchLogsLogEvent",

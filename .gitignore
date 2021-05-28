@@ -295,6 +295,7 @@ test_report
 wheelhouse
 /.idea/*
 *.html
+TMP_CHANGELOG.md
 
 # Docs files
 docs/.cache/

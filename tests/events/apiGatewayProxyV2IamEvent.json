@@ -29,7 +29,9 @@
                 "accountId": "1234567890",
                 "callerId": "AROA7ZJZYVRE7C3DUXHH6:CognitoIdentityCredentials",
                 "cognitoIdentity": {
-                    "amr" : ["foo"],
+                    "amr": [
+                        "foo"
+                    ],
                     "identityId": "us-east-1:3f291106-8703-466b-8f2b-3ecee1ca56ce",
                     "identityPoolId": "us-east-1:4f291106-8703-466b-8f2b-3ecee1ca56ce"
                 },
@@ -47,7 +49,7 @@
             "method": "GET",
             "path": "/my/path",
             "protocol": "HTTP/1.1",
-            "sourceIp": "IP",
+            "sourceIp": "192.168.0.1/32",
             "userAgent": "agent"
         }
     },

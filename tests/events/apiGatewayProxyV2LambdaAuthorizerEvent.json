@@ -37,7 +37,7 @@
             "method": "GET",
             "path": "/my/path",
             "protocol": "HTTP/1.1",
-            "sourceIp": "IP",
+            "sourceIp": "192.168.0.1/32",
             "userAgent": "agent"
         }
     },

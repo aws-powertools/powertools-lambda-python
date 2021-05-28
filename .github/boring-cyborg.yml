@@ -1,0 +1,117 @@
+##### Labeler ##########################################################################################################
+labelPRBasedOnFilePath:
+  area/utilities:
+    - aws_lambda_powertools/utilities/*
+    - aws_lambda_powertools/utilities/**/*
+    - aws_lambda_powertools_python/middleware_factory/*
+    - aws_lambda_powertools_python/middleware_factory/**/*
+  area/logger:
+    - aws_lambda_powertools_python/logging/*
+    - aws_lambda_powertools_python/logging/**/*
+    - aws_lambda_powertools_python/package_logger.py
+  area/tracer:
+    - aws_lambda_powertools_python/tracing/*
+    - aws_lambda_powertools_python/tracing/**/*
+  area/metrics:
+    - aws_lambda_powertools_python/metrics/*
+    - aws_lambda_powertools_python/metrics/**/*
+  area/event_handlers:
+    - aws_lambda_powertools_python/event_handler/*
+    - aws_lambda_powertools_python/event_handler/**/*
+
+  documentation:
+    - docs/*
+    - docs/**/*
+    - mkdocs.yml
+
+  internal:
+    - .github/*
+    - .github/**/*
+    - .chglog/*
+    - .flake8
+    - .gitignore
+    - .pre-commit-config.yaml
+    - Makefile
+    - CONTRIBUTING.md
+    - CODE_OF_CONDUCT.md
+    - LICENSE
+    - aws_lambda_powertools_python/shared/*
+    - aws_lambda_powertools_python/shared/**
+
+  dependencies:
+    - pyproject.toml
+    - poetry.lock
+
+  tests:
+    - tests/*
+    - tests/**/*
+    - benchmark/*
+    - benchmark/**/*
+
+##### Greetings ########################################################################################################
+firstPRWelcomeComment: >
+  Thanks a lot for your first contribution! Please check out our contributing guidelines and don't hesitate to ask whatever you need.
+
+# Comment to be posted to congratulate user on their first merged PR
+firstPRMergeComment: >
+  Awesome work, congrats on your first merged pull request and thank you for helping improve everyone's experience!
+
+# Comment to be posted to on first time issues
+firstIssueWelcomeComment: >
+  Thanks for opening your first issue here! We'll come back to you as soon as we can.
+
+
+###### IssueLink Adder #################################################################################################
+# Insert Issue (Jira/Github etc) link in PR description based on the Issue ID in PR title.
+#insertIssueLinkInPrDescription:
+#   # specify the placeholder for the issue link that should be present in the description
+#  descriptionIssuePlaceholderRegexp: "^Issue link: (.*)$"
+#  matchers:
+#    # you can have several matches - for different types of issues
+#    # only the first matching entry is replaced
+#    jiraIssueMatch:
+#      # specify the regexp of issue id that you can find in the title of the PR
+#      # the match groups can be used to build the issue id (${1}, ${2}, etc.).
+#      titleIssueIdRegexp: \[(AIRFLOW-[0-9]{4})\]
+#      # the issue link to be added. ${1}, ${2} ... are replaced with the match groups from the
+#      # title match (remember to use quotes)
+#      descriptionIssueLink: "[${1}](https://issues.apache.org/jira/browse/${1}/)"
+#    docOnlyIssueMatch:
+#      titleIssueIdRegexp: \[(AIRFLOW-X{4})\]
+#      descriptionIssueLink: "`Document only change, no JIRA issue`"
+
+###### Title Validator #################################################################################################
+# Verifies if commit/PR titles match the regexp specified
+#verifyTitles:
+#  # Regular expression that should be matched by titles of commits or PR
+#  titleRegexp: ^\[AIRFLOW-[0-9]{4}\].*$|^\[AIRFLOW-XXXX\].*$
+#  # If set to true, it will always check the PR title (as opposed to the individual commits).
+#  alwaysUsePrTitle: true
+#  # If set to true, it will only check the commit in case there is a single commit.
+#  # In case of multiple commits it will check PR title.
+#  # This reflects the standard behaviour of Github that for `Squash & Merge` GitHub
+#  # uses the PR title rather than commit messages for the squashed commit ¯\_(ツ)_/¯
+#  # For single-commit PRs it takes the squashed commit message from the commit as expected.
+#  #
+#  # If set to false it will check all commit messages. This is useful when you do not squash commits at merge.
+#  validateEitherPrOrSingleCommitTitle: true
+#  # The title the GitHub status should appear from.
+#  statusTitle: "Title Validator"
+#  # A custom message to be displayed when the title passes validation.
+#  successMessage: "Validation successful!"
+#  # A custom message to be displayed when the title fails validation.
+#  # Allows insertion of ${type} (commit/PR), ${title} (the title validated) and ${regex} (the titleRegexp above).
+#  failureMessage: "Wrong ${type} title: ${title}"
+
+###### PR/Branch Up-To-Date Checker ####################################################################################
+# Check if the branch is up to date with develop when certain files are modified
+#checkUpToDate:
+#  # The default branch is "develop", change the branch if you want to check against a different target branch
+#  targetBranch: develop
+#  files:
+#  # File paths that you want to check for
+#  # In this example, it checks if the branch is up to date when alembic migrations are modified in the PR.
+#  # It helps avoid multiple heads in alembic migrations in a collaborative development project.
+#    - airflow/migrations/*
+#    - airflow/migrations/**/*
+#    - airflow/alembic.ini

@@ -1,4 +1,5 @@
 from .apigw import ApiGatewayEnvelope
+from .apigwv2 import ApiGatewayV2Envelope
 from .base import BaseEnvelope
 from .cloudwatch import CloudWatchLogsEnvelope
 from .dynamodb import DynamoDBStreamEnvelope
@@ -9,6 +10,7 @@ from .sqs import SqsEnvelope
 
 __all__ = [
     "ApiGatewayEnvelope",
+    "ApiGatewayV2Envelope",
     "CloudWatchLogsEnvelope",
     "DynamoDBStreamEnvelope",
     "EventBridgeEnvelope",
