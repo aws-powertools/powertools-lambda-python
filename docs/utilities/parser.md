@@ -162,6 +162,7 @@ Parser comes with the following built-in models:
 | **SesModel**               | Lambda Event Source payload for Amazon Simple Email Service        |
 | **SnsModel**               | Lambda Event Source payload for Amazon Simple Notification Service |
 | **APIGatewayProxyEvent**   | Lambda Event Source payload for Amazon API Gateway                 |
+| **APIGatewayProxyEventV2Model**  | Lambda Event Source payload for Amazon API Gateway v2 payload |
 
 ### extending built-in models
 
