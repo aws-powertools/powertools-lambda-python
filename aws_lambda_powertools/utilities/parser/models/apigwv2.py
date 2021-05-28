@@ -51,7 +51,6 @@ class RequestContextV2(BaseModel):
     requestId: str
     routeKey: str
     stage: str
-    property
     time: str
     timeEpoch: datetime
     http: RequestContextV2Http
