@@ -1,21 +1,52 @@
 ##### Labeler ##########################################################################################################
 labelPRBasedOnFilePath:
   area/utilities:
+    - aws_lambda_powertools/utilities/*
     - aws_lambda_powertools/utilities/**/*
+    - aws_lambda_powertools_python/middleware_factory/*
+    - aws_lambda_powertools_python/middleware_factory/**/*
+  area/logger:
+    - aws_lambda_powertools_python/logging/*
+    - aws_lambda_powertools_python/logging/**/*
+    - aws_lambda_powertools_python/package_logger.py
+  area/tracer:
+    - aws_lambda_powertools_python/tracing/*
+    - aws_lambda_powertools_python/tracing/**/*
+  area/metrics:
+    - aws_lambda_powertools_python/metrics/*
+    - aws_lambda_powertools_python/metrics/**/*
+  area/event_handlers:
+    - aws_lambda_powertools_python/event_handler/*
+    - aws_lambda_powertools_python/event_handler/**/*
 
-  # Add 'label2' to any file changes within 'example2' folder
   documentation:
     - docs/*
     - docs/**/*
+    - mkdocs.yml
 
-#  # Complex: Add 'area/core' label to any change within the 'core' package
-#  area/core:
-#    - src/core/*
-#    - src/core/**/*
-#
-#  # Add 'test' label to any change to *.spec.js files within the source dir
-#  test:
-#    - src/**/*.spec.js
+  internal:
+    - .github/*
+    - .github/**/*
+    - .chglog/*
+    - .flake8
+    - .gitignore
+    - .pre-commit-config.yaml
+    - Makefile
+    - CONTRIBUTING.md
+    - CODE_OF_CONDUCT.md
+    - LICENSE
+    - aws_lambda_powertools_python/shared/*
+    - aws_lambda_powertools_python/shared/**
+
+  dependencies:
+    - pyproject.toml
+    - poetry.lock
+
+  tests:
+    - tests/*
+    - tests/**/*
+    - benchmark/*
+    - benchmark/**/*
 
 ##### Greetings ########################################################################################################
 firstPRWelcomeComment: >

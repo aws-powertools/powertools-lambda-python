@@ -4,7 +4,7 @@ name: Publish to PyPi
 #
 # === Manual activities ===
 #
-# 1. Document human readable changes in CHANGELOG
+# 1. Document human readable changes in CHANGELOG (pre-generate unreleased changes with `make changelog`)
 # 2. Bump package version using poetry version <major|minor|patch|specific version>
 # 3. Merge version changes to develop branch
 # 4. Edit the current draft release notes

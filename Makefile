@@ -79,3 +79,7 @@ release: pr
 	poetry build
 	$(MAKE) release-test
 	$(MAKE) release-prod
+
+changelog:
+	 @echo "[+] Pre-generating CHANGELOG for tag: $$(git describe --abbrev=0 --tag)"
+	 docker run -v ${PWD}:/workdir quay.io/git-chglog/git-chglog $$(git describe --abbrev=0 --tag).. -o TMP_CHANGELOG.md
