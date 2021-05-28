@@ -743,7 +743,7 @@ def test_api_gateway_proxy_v2_event():
     assert http.method == "POST"
     assert http.path == "/my/path"
     assert http.protocol == "HTTP/1.1"
-    assert http.source_ip == "IP"
+    assert http.source_ip == "192.168.0.1/32"
     assert http.user_agent == "agent"
 
     assert request_context.request_id == event["requestContext"]["requestId"]
