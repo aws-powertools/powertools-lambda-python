@@ -11,3 +11,17 @@ updates:
     schedule:
       interval: "daily"
     target-branch: "develop"
+    update_types:
+      - "semver:minor"
+      - "semver:patch"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "develop"
+    update_types:
+      - "semver:major"
+    labels:
+      - "do-not-merge"
+      - "dependencies"
