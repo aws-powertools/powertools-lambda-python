@@ -5,6 +5,9 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    commit-message:
+      prefix: chore
+      include: scope
 
   - package-ecosystem: "pip"
     directory: "/"
@@ -14,6 +17,9 @@ updates:
     update_types:
       - "semver:minor"
       - "semver:patch"
+    commit-message:
+      prefix: chore
+      include: scope
 
   - package-ecosystem: "pip"
     directory: "/"
@@ -25,3 +31,6 @@ updates:
     labels:
       - "do-not-merge"
       - "dependencies"
+    commit-message:
+      prefix: chore
+      include: scope
