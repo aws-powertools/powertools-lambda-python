@@ -32,13 +32,13 @@ For example, if your Lambda function is being triggered by an API Gateway proxy 
     ```python hl_lines="1 4"
     from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
 
-    def lambda_handler(event, context):
+    def lambda_handler(event: dict, context):
         event = APIGatewayProxyEvent(event)
         if 'helloworld' in event.path and event.http_method == 'GET':
             do_something_with(event.body, user)
     ```
 
-=== "app_using_decorator.py"
+=== "app.py using event_source decorator"
 
     ```python hl_lines="1 3"
     from aws_lambda_powertools.utilities.data_classes import event_source, APIGatewayProxyEvent
@@ -60,7 +60,8 @@ For example, if your Lambda function is being triggered by an API Gateway proxy 
 Event Source | Data_class
 ------------------------------------------------- | ---------------------------------------------------------------------------------
 [API Gateway Proxy](#api-gateway-proxy) | `APIGatewayProxyEvent`
-[API Gateway Proxy event v2](#api-gateway-proxy-v2) | `APIGatewayProxyEventV2`
+[API Gateway Proxy V2](#api-gateway-proxy-v2) | `APIGatewayProxyEventV2`
+[Application Load Balancer](#application-load-balancer) | `ALBEvent`
 [AppSync Resolver](#appsync-resolver) | `AppSyncResolverEvent`
 [CloudWatch Logs](#cloudwatch-logs) | `CloudWatchLogsEvent`
 [CodePipeline Job Event](#codepipeline-job) | `CodePipelineJobEvent`
@@ -100,7 +101,9 @@ def lambda_handler(event: APIGatewayProxyEvent, context):
         do_something_with(event.json_body, user)
 ```
 
-### API Gateway Proxy v2
+### API Gateway Proxy V2
+
+It is used for HTTP API using v2 proxy event.
 
 === "app.py"
 
@@ -109,6 +112,21 @@ from aws_lambda_powertools.utilities.data_classes import event_source, APIGatewa
 
 @event_source(data_class=APIGatewayProxyEventV2)
 def lambda_handler(event: APIGatewayProxyEventV2, context):
+    if "helloworld" in event.path and event.http_method == "POST":
+        do_something_with(event.json_body, event.query_string_parameters)
+```
+
+### Application Load Balancer
+
+Is it used for Application load balancer event.
+
+=== "app.py"
+
+```python
+from aws_lambda_powertools.utilities.data_classes import event_source, ALBEvent
+
+@event_source(data_class=ALBEvent)
+def lambda_handler(event: ALBEvent, context):
     if "helloworld" in event.path and event.http_method == "POST":
         do_something_with(event.json_body, event.query_string_parameters)
 ```
@@ -478,10 +496,11 @@ This example is based on the AWS Cognito docs for [Create Auth Challenge Lambda 
 === "app.py"
 
 ```python
+from aws_lambda_powertools.utilities.data_classes import event_source
 from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import CreateAuthChallengeTriggerEvent
 
-def handler(event: dict, context) -> dict:
-    event: CreateAuthChallengeTriggerEvent = CreateAuthChallengeTriggerEvent(event)
+@event_source(data_class=CreateAuthChallengeTriggerEvent)
+def handler(event: CreateAuthChallengeTriggerEvent, context) -> dict:
     if event.request.challenge_name == "CUSTOM_CHALLENGE":
         event.response.public_challenge_parameters = {"captchaUrl": "url/123.jpg"}
         event.response.private_challenge_parameters = {"answer": "5"}
@@ -496,10 +515,11 @@ This example is based on the AWS Cognito docs for [Verify Auth Challenge Respons
 === "app.py"
 
 ```python
+from aws_lambda_powertools.utilities.data_classes import event_source
 from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import VerifyAuthChallengeResponseTriggerEvent
 
-def handler(event: dict, context) -> dict:
-    event: VerifyAuthChallengeResponseTriggerEvent = VerifyAuthChallengeResponseTriggerEvent(event)
+@event_source(data_class=VerifyAuthChallengeResponseTriggerEvent)
+def handler(event: VerifyAuthChallengeResponseTriggerEvent, context) -> dict:
     event.response.answer_correct = (
         event.request.private_challenge_parameters.get("answer") == event.request.challenge_answer
     )
@@ -594,17 +614,17 @@ def lambda_handler(event: KinesisStreamEvent, context):
 
 ```python
 from urllib.parse import unquote_plus
-from aws_lambda_powertools.utilities.data_classes import S3Event
+from aws_lambda_powertools.utilities.data_classes import event_source, S3Event
 
-def lambda_handler(event, context):
-    event: S3Event = S3Event(event)
+@event_source(data_class=S3Event)
+def lambda_handler(event: S3Event, context):
     bucket_name = event.bucket_name
 
     # Multiple records can be delivered in a single event
     for record in event.records:
         object_key = unquote_plus(record.s3.get_object.key)
 
-        do_something_with(f'{bucket_name}/{object_key}')
+        do_something_with(f"{bucket_name}/{object_key}")
 ```
 
 ### S3 Object Lambda
