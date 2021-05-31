@@ -7,6 +7,7 @@ edit_uri: edit/develop/docs
 nav:
   - Homepage: index.md
   - Changelog: changelog.md
+  - Roadmap: https://github.com/awslabs/aws-lambda-powertools-roadmap/projects/1" target="_blank
   - API reference: api/" target="_blank
   - Core utilities:
       - core/tracer.md

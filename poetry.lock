@@ -81,20 +81,20 @@ d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
 
 [[package]]
 name = "boto3"
-version = "1.17.78"
+version = "1.17.84"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
 [package.dependencies]
-botocore = ">=1.20.78,<1.21.0"
+botocore = ">=1.20.84,<1.21.0"
 jmespath = ">=0.7.1,<1.0.0"
 s3transfer = ">=0.4.0,<0.5.0"
 
 [[package]]
 name = "botocore"
-version = "1.20.78"
+version = "1.20.84"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -591,7 +591,7 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-material"
-version = "7.1.5"
+version = "7.1.6"
 description = "A Material Design theme for MkDocs"
 category = "dev"
 optional = false
@@ -789,17 +789,17 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 
 [[package]]
 name = "pytest-asyncio"
-version = "0.14.0"
+version = "0.15.1"
 description = "Pytest support for asyncio."
 category = "dev"
 optional = false
-python-versions = ">= 3.5"
+python-versions = ">= 3.6"
 
 [package.dependencies]
 pytest = ">=5.4.0"
 
 [package.extras]
-testing = ["async-generator (>=1.3)", "coverage", "hypothesis (>=5.7.1)"]
+testing = ["coverage", "hypothesis (>=5.7.1)"]
 
 [[package]]
 name = "pytest-cov"
@@ -1035,7 +1035,7 @@ python-versions = "*"
 
 [[package]]
 name = "xenon"
-version = "0.7.1"
+version = "0.7.3"
 description = "Monitor code metrics for Python on your CI server"
 category = "dev"
 optional = false
@@ -1043,7 +1043,7 @@ python-versions = "*"
 
 [package.dependencies]
 PyYAML = ">=4.2b1,<6.0"
-radon = {version = ">=4,<5", extras = ["flake8"]}
+radon = ">=4,<5"
 requests = ">=2.0,<3.0"
 
 [[package]]
@@ -1064,7 +1064,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.1"
-content-hash = "86a0de7bd25e0ebdf9a7eb445eca6def21bb7365f4acc12e0512e233794928c9"
+content-hash = "f19bacb5fc43968a9dc90d6725fdb2350aac3a3bde5ea9b3ea6bf63681c43c15"
 
 [metadata.files]
 appdirs = [
@@ -1091,12 +1091,12 @@ black = [
     {file = "black-20.8b1.tar.gz", hash = "sha256:1c02557aa099101b9d21496f8a914e9ed2222ef70336404eeeac8edba836fbea"},
 ]
 boto3 = [
-    {file = "boto3-1.17.78-py2.py3-none-any.whl", hash = "sha256:1a87855123df1f18081a5fb8c1abde28d0096a03f6f3ebb06bcfb77cdffdae5e"},
-    {file = "boto3-1.17.78.tar.gz", hash = "sha256:2a5caee63d45fbdcc85e710c7f4146112f5d10b22fd0176643d2f2914cce54df"},
+    {file = "boto3-1.17.84-py2.py3-none-any.whl", hash = "sha256:1d24c6d1f5db4b52bb29f1dfe13fd3e9d95d9fa4634b0638a096f5a884173cde"},
+    {file = "boto3-1.17.84.tar.gz", hash = "sha256:8ee8766813864796be6c87ad762c6da4bfef603977931854a38f49fe4db06495"},
 ]
 botocore = [
-    {file = "botocore-1.20.78-py2.py3-none-any.whl", hash = "sha256:37105b9434d73f9c4d4960ee54c8eb129120f4c6681eb16edf483f03c5e2326d"},
-    {file = "botocore-1.20.78.tar.gz", hash = "sha256:e74775f9e64e975787d76390fc5ac5aba875d726bb9ece3b7bd900205b430389"},
+    {file = "botocore-1.20.84-py2.py3-none-any.whl", hash = "sha256:75e1397b80aa8757a26636b949eebd20b3cf67e8f1ed80dc01170907e06ea45d"},
+    {file = "botocore-1.20.84.tar.gz", hash = "sha256:bc59eb748fcb07835613ebea6dcc2600ae1a8be0fae30e40b9c1e81b73262296"},
 ]
 certifi = [
     {file = "certifi-2020.12.5-py2.py3-none-any.whl", hash = "sha256:719a74fb9e33b9bd44cc7f3a8d94bc35e4049deebe19ba7d8e108280cfd59830"},
@@ -1341,8 +1341,8 @@ mkdocs-git-revision-date-plugin = [
     {file = "mkdocs_git_revision_date_plugin-0.3.1-py3-none-any.whl", hash = "sha256:8ae50b45eb75d07b150a69726041860801615aae5f4adbd6b1cf4d51abaa03d5"},
 ]
 mkdocs-material = [
-    {file = "mkdocs-material-7.1.5.tar.gz", hash = "sha256:dc4849948695e22b3385518f6237e88164a201a013c6ca8257734a2df3d0c7c6"},
-    {file = "mkdocs_material-7.1.5-py2.py3-none-any.whl", hash = "sha256:d2663b7a0a6ecd435eeb6c2686cd6a1a4e3bb6b6f021464d88a9894d8533e288"},
+    {file = "mkdocs-material-7.1.6.tar.gz", hash = "sha256:b3f1aaea3e79e3c3b30babe0238915cf4ad4c4560d404bb0ac3298ee2ce004a3"},
+    {file = "mkdocs_material-7.1.6-py2.py3-none-any.whl", hash = "sha256:01566c460990dad54d6ec935553b9c5c8e4e753ac3e30ba0945ceeff4ad164ac"},
 ]
 mkdocs-material-extensions = [
     {file = "mkdocs-material-extensions-1.0.1.tar.gz", hash = "sha256:6947fb7f5e4291e3c61405bad3539d81e0b3cd62ae0d66ced018128af509c68f"},
@@ -1428,8 +1428,8 @@ pytest = [
     {file = "pytest-6.2.4.tar.gz", hash = "sha256:50bcad0a0b9c5a72c8e4e7c9855a3ad496ca6a881a3641b4260605450772c54b"},
 ]
 pytest-asyncio = [
-    {file = "pytest-asyncio-0.14.0.tar.gz", hash = "sha256:9882c0c6b24429449f5f969a5158b528f39bde47dc32e85b9f0403965017e700"},
-    {file = "pytest_asyncio-0.14.0-py3-none-any.whl", hash = "sha256:2eae1e34f6c68fc0a9dc12d4bea190483843ff4708d24277c41568d6b6044f1d"},
+    {file = "pytest-asyncio-0.15.1.tar.gz", hash = "sha256:2564ceb9612bbd560d19ca4b41347b54e7835c2f792c504f698e05395ed63f6f"},
+    {file = "pytest_asyncio-0.15.1-py3-none-any.whl", hash = "sha256:3042bcdf1c5d978f6b74d96a151c4cfb9dcece65006198389ccd7e6c60eb1eea"},
 ]
 pytest-cov = [
     {file = "pytest-cov-2.12.0.tar.gz", hash = "sha256:8535764137fecce504a49c2b742288e3d34bc09eed298ad65963616cc98fd45e"},
@@ -1678,8 +1678,8 @@ wrapt = [
     {file = "wrapt-1.12.1.tar.gz", hash = "sha256:b62ffa81fb85f4332a4f609cab4ac40709470da05643a082ec1eb88e6d9b97d7"},
 ]
 xenon = [
-    {file = "xenon-0.7.1-py2.py3-none-any.whl", hash = "sha256:33d807ef805a2ed854adfcc7cc998398d5c0626a5ad443e52684b998a4dd4aa3"},
-    {file = "xenon-0.7.1.tar.gz", hash = "sha256:38bf283135f0636355ecf6054b6f37226af12faab152161bda1a4f9e4dc5b701"},
+    {file = "xenon-0.7.3-py2.py3-none-any.whl", hash = "sha256:a167b4c329fbea7cd84b148007ba92142f46b88ca095488c175dc7a8a8007ee9"},
+    {file = "xenon-0.7.3.tar.gz", hash = "sha256:eda949fbf3cfb4851d49d97e961e2b18a6b66fbecaf285dc89230775d2b2a99f"},
 ]
 zipp = [
     {file = "zipp-3.4.1-py3-none-any.whl", hash = "sha256:51cb66cc54621609dd593d1787f286ee42a5c0adbb4b29abea5a63edc3e03098"},

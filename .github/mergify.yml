@@ -1,0 +1,27 @@
+pull_request_rules:
+  - name: automatic merge for Dependabot pull requests
+    conditions:
+      - author~=^dependabot(|-preview)\[bot\]$
+      - check-success=Build
+      - -label~="do-not-merge"
+    actions:
+      merge:
+        strict: false
+        method: squash
+        commit_message: title+body
+
+  - name: Automatic merge ⬇️ on approval ✔
+    conditions:
+      - base!=master
+      - "#approved-reviews-by>=1"
+      - "#changes-requested-reviews-by=0"
+      - -title~=(WIP|wip)
+      - check-success=Build
+      - check-success=Semantic Pull Request
+      - body~=(?m)^\[X\] Meet tenets criteria
+    actions:
+      merge:
+        strict: smart
+        method: squash
+        strict_method: merge
+        commit_message: title+body
