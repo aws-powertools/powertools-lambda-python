@@ -14,23 +14,20 @@ updates:
     schedule:
       interval: "daily"
     target-branch: "develop"
-    update_types:
-      - "semver:minor"
-      - "semver:patch"
     commit-message:
       prefix: chore
       include: scope
 
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    target-branch: "develop"
-    update_types:
-      - "semver:major"
-    labels:
-      - "do-not-merge"
-      - "dependencies"
-    commit-message:
-      prefix: chore
-      include: scope
+#   - package-ecosystem: "pip"
+#     directory: "/"
+#     schedule:
+#       interval: "daily"
+#     target-branch: "develop"
+#     update_types:
+#       - "semver:major"
+#     labels:
+#       - "do-not-merge"
+#       - "dependencies"
+#     commit-message:
+#       prefix: chore
+#       include: scope
