@@ -29,25 +29,27 @@ For example, if your Lambda function is being triggered by an API Gateway proxy 
 
 === "app.py"
 
-    ```python hl_lines="1 4"
-    from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
+```python hl_lines="1 4"
+from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
 
-    def lambda_handler(event: dict, context):
-        event = APIGatewayProxyEvent(event)
-        if 'helloworld' in event.path and event.http_method == 'GET':
-            do_something_with(event.body, user)
-    ```
+def lambda_handler(event: dict, context):
+    event = APIGatewayProxyEvent(event)
+    if 'helloworld' in event.path and event.http_method == 'GET':
+        do_something_with(event.body, user)
+```
 
-=== "app.py using event_source decorator"
+Same example as above, but using the `event_source` decorator
 
-    ```python hl_lines="1 3"
-    from aws_lambda_powertools.utilities.data_classes import event_source, APIGatewayProxyEvent
+=== "app.py"
 
-    @event_source(data_class=APIGatewayProxyEvent)
-    def lambda_handler(event: APIGatewayProxyEvent, context):
-        if 'helloworld' in event.path and event.http_method == 'GET':
-            do_something_with(event.body, user)
-    ```
+```python hl_lines="1 3"
+from aws_lambda_powertools.utilities.data_classes import event_source, APIGatewayProxyEvent
+
+@event_source(data_class=APIGatewayProxyEvent)
+def lambda_handler(event: APIGatewayProxyEvent, context):
+    if 'helloworld' in event.path and event.http_method == 'GET':
+        do_something_with(event.body, user)
+```
 
 **Autocomplete with self-documented properties and methods**
 
@@ -93,10 +95,9 @@ from aws_lambda_powertools.utilities.data_classes import event_source, APIGatewa
 
 @event_source(data_class=APIGatewayProxyEvent)
 def lambda_handler(event: APIGatewayProxyEvent, context):
-    request_context = event.request_context
-    identity = request_context.identity
-
     if "helloworld" in event.path and event.http_method == "GET":
+        request_context = event.request_context
+        identity = request_context.identity
         user = identity.user
         do_something_with(event.json_body, user)
 ```
@@ -259,7 +260,6 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_classes import event_source, CodePipelineJobEvent
 
 logger = Logger()
-
 
 @event_source(data_class=CodePipelineJobEvent)
 def lambda_handler(event, context):
