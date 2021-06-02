@@ -2,7 +2,7 @@ pull_request_rules:
   - name: automatic merge for Dependabot pull requests
     conditions:
       - author~=^dependabot(|-preview)\[bot\]$
-      - check-success=Build
+      - check-success=build
       - -label~="do-not-merge"
       - "#approved-reviews-by>=1"  # until we exclude major versions in dependabot
     actions:
