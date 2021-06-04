@@ -224,8 +224,7 @@ class BasePersistenceLayer(ABC):
             Hashed representation of the provided data
 
         """
-        if hasattr(data, "raw_event"):
-            data = data.raw_event
+data = getattr(data, "raw_event", data)  # could be a data class depending on decorator order
         hashed_data = self.hash_function(json.dumps(data, cls=Encoder).encode())
         return hashed_data.hexdigest()
 
