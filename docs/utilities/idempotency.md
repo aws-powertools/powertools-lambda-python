@@ -85,8 +85,6 @@ TTL attribute name | `expiration` | This can only be configured after your table
     see 1WCU and 1RCU. Review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/) to
     estimate the cost.
 
-!!! danger "CREATE SECTION FOR PERSISTENCE LAYERS"
-
 ### Idempotent decorator
 
 You can quickly start by initializing the `DynamoDBPersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler.
