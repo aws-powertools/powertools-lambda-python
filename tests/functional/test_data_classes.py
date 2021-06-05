@@ -62,6 +62,7 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
     DynamoDBStreamEvent,
     StreamViewType,
 )
+from aws_lambda_powertools.utilities.data_classes.event_source import event_source
 from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
 from tests.functional.utils import load_event
 
@@ -1237,3 +1238,15 @@ def test_code_pipeline_get_artifact(mocker: MockerFixture):
         }
     )
     assert artifact_str == file_contents
+
+
+def test_reflected_types():
+    # GIVEN an event_source decorator
+    @event_source(data_class=APIGatewayProxyEventV2)
+    def lambda_handler(event: APIGatewayProxyEventV2, _):
+        # THEN we except the event to be of the pass in data class type
+        assert isinstance(event, APIGatewayProxyEventV2)
+        assert event.get_header_value("x-foo") == "Foo"
+
+    # WHEN calling the lambda handler
+    lambda_handler({"headers": {"X-Foo": "Foo"}}, None)

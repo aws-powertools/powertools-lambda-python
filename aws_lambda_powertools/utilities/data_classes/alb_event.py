@@ -6,6 +6,7 @@ from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, 
 class ALBEventRequestContext(DictWrapper):
     @property
     def elb_target_group_arn(self) -> str:
+        """Target group arn for your Lambda function"""
         return self["requestContext"]["elb"]["targetGroupArn"]
 
 
@@ -15,6 +16,7 @@ class ALBEvent(BaseProxyEvent):
     Documentation:
     --------------
     - https://docs.aws.amazon.com/lambda/latest/dg/services-alb.html
+    - https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html
     """
 
     @property
