@@ -4,11 +4,29 @@ from typing import Dict, Iterator, List, Optional
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
+class AttributeValueType(Enum):
+    Binary = "B"
+    BinarySet = "BS"
+    Boolean = "BOOL"
+    List = "L"
+    Map = "M"
+    Number = "N"
+    NumberSet = "NS"
+    Null = "NULL"
+    String = "S"
+    StringSet = "SS"
+
+
 class AttributeValue(DictWrapper):
     """Represents the data for an attribute
 
     Documentation: https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_streams_AttributeValue.html
     """
+
+    @property
+    def get_type(self) -> AttributeValueType:
+        """Get the attribute value type based on the contained data"""
+        return AttributeValueType(list(self.raw_event.keys())[0])
 
     @property
     def b_value(self) -> Optional[str]:

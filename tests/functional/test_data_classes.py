@@ -58,6 +58,7 @@ from aws_lambda_powertools.utilities.data_classes.connect_contact_flow_event imp
 )
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
     AttributeValue,
+    AttributeValueType,
     DynamoDBRecordEventName,
     DynamoDBStreamEvent,
     StreamViewType,
@@ -443,6 +444,30 @@ def test_dynamo_db_stream_trigger_event():
     assert record.user_identity is None
 
 
+def test_dynamo_attribute_value_b_value():
+    example_attribute_value = {"B": "dGhpcyB0ZXh0IGlzIGJhc2U2NC1lbmNvZGVk"}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.Binary
+
+
+def test_dynamo_attribute_value_bs_value():
+    example_attribute_value = {"BS": ["U3Vubnk=", "UmFpbnk=", "U25vd3k="]}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.BinarySet
+
+
+def test_dynamo_attribute_value_bool_value():
+    example_attribute_value = {"BOOL": True}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.Boolean
+
+
 def test_dynamo_attribute_value_list_value():
     example_attribute_value = {"L": [{"S": "Cookies"}, {"S": "Coffee"}, {"N": "3.14159"}]}
     attribute_value = AttributeValue(example_attribute_value)
@@ -450,6 +475,7 @@ def test_dynamo_attribute_value_list_value():
     assert list_value is not None
     item = list_value[0]
     assert item.s_value == "Cookies"
+    assert attribute_value.get_type == AttributeValueType.List
 
 
 def test_dynamo_attribute_value_map_value():
@@ -461,6 +487,47 @@ def test_dynamo_attribute_value_map_value():
     assert map_value is not None
     item = map_value["Name"]
     assert item.s_value == "Joe"
+    assert attribute_value.get_type == AttributeValueType.Map
+
+
+def test_dynamo_attribute_value_n_value():
+    example_attribute_value = {"N": "123.45"}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.Number
+
+
+def test_dynamo_attribute_value_ns_value():
+    example_attribute_value = {"NS": ["42.2", "-19", "7.5", "3.14"]}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.NumberSet
+
+
+def test_dynamo_attribute_value_null_value():
+    example_attribute_value = {"NULL": True}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.Null
+
+
+def test_dynamo_attribute_value_s_value():
+    example_attribute_value = {"S": "Hello"}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.String
+
+
+def test_dynamo_attribute_value_ss_value():
+    example_attribute_value = {"SS": ["Giraffe", "Hippo", "Zebra"]}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.StringSet
 
 
 def test_event_bridge_event():
