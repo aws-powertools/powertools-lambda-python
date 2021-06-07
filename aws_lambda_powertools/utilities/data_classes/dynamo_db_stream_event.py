@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterator, List, Optional, Union
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -23,10 +23,16 @@ class AttributeValue(DictWrapper):
     Documentation: https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_streams_AttributeValue.html
     """
 
-    @property
-    def get_type(self) -> AttributeValueType:
-        """Get the attribute value type based on the contained data"""
-        return AttributeValueType(list(self.raw_event.keys())[0])
+    def __init__(self, data: Dict[str, Any]):
+        """AttributeValue constructor
+
+        Parameters
+        ----------
+        data: Dict[str, Any]
+            Raw lambda event dict
+        """
+        super().__init__(data)
+        self.dynamodb_type = list(data.keys())[0]
 
     @property
     def b_value(self) -> Optional[str]:
@@ -123,6 +129,29 @@ class AttributeValue(DictWrapper):
             >>> {"SS": ["Giraffe", "Hippo" ,"Zebra"]}
         """
         return self.get("SS")
+
+    @property
+    def get_type(self) -> AttributeValueType:
+        """Get the attribute value type based on the contained data"""
+        return AttributeValueType(self.dynamodb_type)
+
+    @property
+    def value(self) -> Union[Optional[bool], Optional[str], Optional[List], Optional[Dict]]:
+        """Get the attribute value"""
+        try:
+            return getattr(self, f"{self.dynamodb_type.lower()}_value")
+        except AttributeError:
+            raise TypeError(f"Dynamodb type {self.dynamodb_type} is not supported")
+
+    @property
+    def l_value(self) -> Optional[List["AttributeValue"]]:
+        """Alias of list_value"""
+        return self.list_value
+
+    @property
+    def m_value(self) -> Optional[Dict[str, "AttributeValue"]]:
+        """Alias of map_value"""
+        return self.map_value
 
 
 def _attribute_value_dict(attr_values: Dict[str, dict], key: str) -> Optional[Dict[str, AttributeValue]]:
