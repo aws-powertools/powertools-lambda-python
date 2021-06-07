@@ -542,6 +542,17 @@ def test_dynamo_attribute_value_ss_value():
     assert attribute_value.ss_value == attribute_value.value
 
 
+def test_dynamo_attribute_value_type_error():
+    example_attribute_value = {"UNSUPPORTED": "'value' should raise a type error"}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    with pytest.raises(TypeError):
+        print(attribute_value.value)
+    with pytest.raises(ValueError):
+        print(attribute_value.get_type)
+
+
 def test_event_bridge_event():
     event = EventBridgeEvent(load_event("eventBridgeEvent.json"))
 
