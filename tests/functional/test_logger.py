@@ -562,3 +562,23 @@ def test_logger_custom_handler(lambda_context, service_name, tmp_path):
     # THEN we should output to a file not stdout
     log = log_file.read_text()
     assert "custom handler" in log
+
+
+def test_clear_keys_on_inject_lambda_context(lambda_context, stdout, service_name):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN clear_custom_key is set and a key was conditionally added in the first invocation
+    @logger.inject_lambda_context(clear_custom_keys=True)
+    def handler(event, context):
+        if event.get("add_key"):
+            logger.append_keys(my_key="value")
+        logger.info("Foo")
+
+    # THEN custom key should only exist in the first log
+    handler({"add_key": True}, lambda_context)
+    handler({}, lambda_context)
+
+    first_log, second_log = capture_multiple_logging_statements_output(stdout)
+    assert "my_key" in first_log
+    assert "my_key" not in second_log
