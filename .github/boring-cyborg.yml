@@ -3,21 +3,21 @@ labelPRBasedOnFilePath:
   area/utilities:
     - aws_lambda_powertools/utilities/*
     - aws_lambda_powertools/utilities/**/*
-    - aws_lambda_powertools_python/middleware_factory/*
-    - aws_lambda_powertools_python/middleware_factory/**/*
+    - aws_lambda_powertools/middleware_factory/*
+    - aws_lambda_powertools/middleware_factory/**/*
   area/logger:
-    - aws_lambda_powertools_python/logging/*
-    - aws_lambda_powertools_python/logging/**/*
-    - aws_lambda_powertools_python/package_logger.py
+    - aws_lambda_powertools/logging/*
+    - aws_lambda_powertools/logging/**/*
+    - aws_lambda_powertools/package_logger.py
   area/tracer:
-    - aws_lambda_powertools_python/tracing/*
-    - aws_lambda_powertools_python/tracing/**/*
+    - aws_lambda_powertools/tracing/*
+    - aws_lambda_powertools/tracing/**/*
   area/metrics:
-    - aws_lambda_powertools_python/metrics/*
-    - aws_lambda_powertools_python/metrics/**/*
+    - aws_lambda_powertools/metrics/*
+    - aws_lambda_powertools/metrics/**/*
   area/event_handlers:
-    - aws_lambda_powertools_python/event_handler/*
-    - aws_lambda_powertools_python/event_handler/**/*
+    - aws_lambda_powertools/event_handler/*
+    - aws_lambda_powertools/event_handler/**/*
 
   documentation:
     - docs/*
