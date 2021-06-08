@@ -297,8 +297,6 @@ class DynamoDBStreamEvent(DictWrapper):
                 elif key == AttributeValueType.Map:
                     assert key.get_value == key.map_value
                     print(key.get_value)
-
-
     """
 
     @property
