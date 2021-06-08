@@ -564,12 +564,12 @@ def test_logger_custom_handler(lambda_context, service_name, tmp_path):
     assert "custom handler" in log
 
 
-def test_clear_keys_on_inject_lambda_context(lambda_context, stdout, service_name):
+def test_clear_state_on_inject_lambda_context(lambda_context, stdout, service_name):
     # GIVEN
     logger = Logger(service=service_name, stream=stdout)
 
-    # WHEN remove_custom_keys is set and a key was conditionally added in the first invocation
-    @logger.inject_lambda_context(remove_custom_keys=True)
+    # WHEN clear_state is set and a key was conditionally added in the first invocation
+    @logger.inject_lambda_context(clear_state=True)
     def handler(event, context):
         if event.get("add_key"):
             logger.append_keys(my_key="value")

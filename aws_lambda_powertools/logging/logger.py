@@ -264,13 +264,13 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         lambda_handler: Callable[[Dict, Any], Any] = None,
         log_event: bool = None,
         correlation_id_path: str = None,
-        remove_custom_keys: bool = False,
+        clear_state: bool = False,
     ):
         """Decorator to capture Lambda contextual info and inject into logger
 
         Parameters
         ----------
-        remove_custom_keys : bool, optional
+        clear_state : bool, optional
             Instructs logger to remove any custom keys previously added
         lambda_handler : Callable
             Method to inject the lambda context
@@ -320,7 +320,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
                 self.inject_lambda_context,
                 log_event=log_event,
                 correlation_id_path=correlation_id_path,
-                remove_custom_keys=remove_custom_keys,
+                clear_state=clear_state,
             )
 
         log_event = resolve_truthy_env_var_choice(
@@ -332,7 +332,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             lambda_context = build_lambda_context_model(context)
             cold_start = _is_cold_start()
 
-            if remove_custom_keys:
+            if clear_state:
                 self.structure_logs(cold_start=cold_start, **lambda_context.__dict__)
             else:
                 self.append_keys(cold_start=cold_start, **lambda_context.__dict__)
