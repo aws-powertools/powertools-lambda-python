@@ -20,7 +20,10 @@ class AttributeValueType(Enum):
 class AttributeValue(DictWrapper):
     """Represents the data for an attribute
 
-    Documentation: https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_streams_AttributeValue.html
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_streams_AttributeValue.html
+    - https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html
     """
 
     def __init__(self, data: Dict[str, Any]):
@@ -136,14 +139,6 @@ class AttributeValue(DictWrapper):
         return AttributeValueType(self.dynamodb_type)
 
     @property
-    def value(self) -> Union[Optional[bool], Optional[str], Optional[List], Optional[Dict]]:
-        """Get the attribute value"""
-        try:
-            return getattr(self, f"{self.dynamodb_type.lower()}_value")
-        except AttributeError:
-            raise TypeError(f"Dynamodb type {self.dynamodb_type} is not supported")
-
-    @property
     def l_value(self) -> Optional[List["AttributeValue"]]:
         """Alias of list_value"""
         return self.list_value
@@ -152,6 +147,14 @@ class AttributeValue(DictWrapper):
     def m_value(self) -> Optional[Dict[str, "AttributeValue"]]:
         """Alias of map_value"""
         return self.map_value
+
+    @property
+    def get_value(self) -> Union[Optional[bool], Optional[str], Optional[List], Optional[Dict]]:
+        """Get the attribute value"""
+        try:
+            return getattr(self, f"{self.dynamodb_type.lower()}_value")
+        except AttributeError:
+            raise TypeError(f"Dynamodb type {self.dynamodb_type} is not supported")
 
 
 def _attribute_value_dict(attr_values: Dict[str, dict], key: str) -> Optional[Dict[str, AttributeValue]]:
@@ -271,6 +274,31 @@ class DynamoDBStreamEvent(DictWrapper):
     Documentation:
     -------------
     - https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html
+
+    Example
+    -------
+    **Process dynamodb stream events and use get_type and get_value for handling conversions**
+
+        from aws_lambda_powertools.utilities.data_classes import event_source, DynamoDBStreamEvent
+        from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
+            AttributeValueType,
+            AttributeValue,
+        )
+        from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+        @event_source(data_class=DynamoDBStreamEvent)
+        def lambda_handler(event: DynamoDBStreamEvent, context: LambdaContext):
+            for record in event.records:
+                key: AttributeValue = record.dynamodb.keys["id"]
+                if key == AttributeValueType.Number:
+                    assert key.get_value == key.n_value
+                    print(key.get_value)
+                elif key == AttributeValueType.Map:
+                    assert key.get_value == key.map_value
+                    print(key.get_value)
+
+
     """
 
     @property

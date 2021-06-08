@@ -450,7 +450,7 @@ def test_dynamo_attribute_value_b_value():
     attribute_value = AttributeValue(example_attribute_value)
 
     assert attribute_value.get_type == AttributeValueType.Binary
-    assert attribute_value.b_value == attribute_value.value
+    assert attribute_value.b_value == attribute_value.get_value
 
 
 def test_dynamo_attribute_value_bs_value():
@@ -459,7 +459,7 @@ def test_dynamo_attribute_value_bs_value():
     attribute_value = AttributeValue(example_attribute_value)
 
     assert attribute_value.get_type == AttributeValueType.BinarySet
-    assert attribute_value.bs_value == attribute_value.value
+    assert attribute_value.bs_value == attribute_value.get_value
 
 
 def test_dynamo_attribute_value_bool_value():
@@ -468,7 +468,7 @@ def test_dynamo_attribute_value_bool_value():
     attribute_value = AttributeValue(example_attribute_value)
 
     assert attribute_value.get_type == AttributeValueType.Boolean
-    assert attribute_value.bool_value == attribute_value.value
+    assert attribute_value.bool_value == attribute_value.get_value
 
 
 def test_dynamo_attribute_value_list_value():
@@ -480,7 +480,7 @@ def test_dynamo_attribute_value_list_value():
     assert item.s_value == "Cookies"
     assert attribute_value.get_type == AttributeValueType.List
     assert attribute_value.l_value == attribute_value.list_value
-    assert attribute_value.list_value == attribute_value.value
+    assert attribute_value.list_value == attribute_value.get_value
 
 
 def test_dynamo_attribute_value_map_value():
@@ -494,7 +494,7 @@ def test_dynamo_attribute_value_map_value():
     assert item.s_value == "Joe"
     assert attribute_value.get_type == AttributeValueType.Map
     assert attribute_value.m_value == attribute_value.map_value
-    assert attribute_value.map_value == attribute_value.value
+    assert attribute_value.map_value == attribute_value.get_value
 
 
 def test_dynamo_attribute_value_n_value():
@@ -503,7 +503,7 @@ def test_dynamo_attribute_value_n_value():
     attribute_value = AttributeValue(example_attribute_value)
 
     assert attribute_value.get_type == AttributeValueType.Number
-    assert attribute_value.n_value == attribute_value.value
+    assert attribute_value.n_value == attribute_value.get_value
 
 
 def test_dynamo_attribute_value_ns_value():
@@ -512,7 +512,7 @@ def test_dynamo_attribute_value_ns_value():
     attribute_value = AttributeValue(example_attribute_value)
 
     assert attribute_value.get_type == AttributeValueType.NumberSet
-    assert attribute_value.ns_value == attribute_value.value
+    assert attribute_value.ns_value == attribute_value.get_value
 
 
 def test_dynamo_attribute_value_null_value():
@@ -521,7 +521,7 @@ def test_dynamo_attribute_value_null_value():
     attribute_value = AttributeValue(example_attribute_value)
 
     assert attribute_value.get_type == AttributeValueType.Null
-    assert attribute_value.null_value == attribute_value.value
+    assert attribute_value.null_value == attribute_value.get_value
 
 
 def test_dynamo_attribute_value_s_value():
@@ -530,7 +530,7 @@ def test_dynamo_attribute_value_s_value():
     attribute_value = AttributeValue(example_attribute_value)
 
     assert attribute_value.get_type == AttributeValueType.String
-    assert attribute_value.s_value == attribute_value.value
+    assert attribute_value.s_value == attribute_value.get_value
 
 
 def test_dynamo_attribute_value_ss_value():
@@ -539,7 +539,7 @@ def test_dynamo_attribute_value_ss_value():
     attribute_value = AttributeValue(example_attribute_value)
 
     assert attribute_value.get_type == AttributeValueType.StringSet
-    assert attribute_value.ss_value == attribute_value.value
+    assert attribute_value.ss_value == attribute_value.get_value
 
 
 def test_dynamo_attribute_value_type_error():
@@ -548,7 +548,7 @@ def test_dynamo_attribute_value_type_error():
     attribute_value = AttributeValue(example_attribute_value)
 
     with pytest.raises(TypeError):
-        print(attribute_value.value)
+        print(attribute_value.get_value)
     with pytest.raises(ValueError):
         print(attribute_value.get_type)
 
