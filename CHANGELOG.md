@@ -7,6 +7,37 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## [1.17.0] - 2021-06-08
+
+### Added
+
+* **Documentation**: Include new public roadmap ([#452](https://github.com/awslabs/aws-lambda-powertools-python/issues/452))
+* **Documentation**: Remove old todo in idempotency docs
+* **Data classes:** New `AttributeValueType` to get type and value from data in `DynamoDBStreamEvent` ([#462](https://github.com/awslabs/aws-lambda-powertools-python/issues/462))
+* **Data classes:** New decorator `event_source` to instantiate data_classes ([#442](https://github.com/awslabs/aws-lambda-powertools-python/issues/442))
+* **Logger:** New `clear_state` parameter to clear previously added custom keys upon invocation ([#467](https://github.com/awslabs/aws-lambda-powertools-python/issues/467))
+* **Parser:** Support for API Gateway HTTP API [#434](https://github.com/awslabs/aws-lambda-powertools-python/issues/434) ([#441](https://github.com/awslabs/aws-lambda-powertools-python/issues/441))
+
+### Maintenance
+
+* **deps**: bump xenon from 0.7.1 to 0.7.3 ([#446](https://github.com/awslabs/aws-lambda-powertools-python/issues/446))
+* assited changelog pre-generation, auto-label PR ([#443](https://github.com/awslabs/aws-lambda-powertools-python/issues/443))
+* enable dependabot for dep upgrades ([#444](https://github.com/awslabs/aws-lambda-powertools-python/issues/444))
+* enable mergify ([#450](https://github.com/awslabs/aws-lambda-powertools-python/issues/450))
+* **deps**: bump mkdocs-material from 7.1.5 to 7.1.6 ([#451](https://github.com/awslabs/aws-lambda-powertools-python/issues/451))
+* **deps**: bump boto3 from 1.17.78 to 1.17.84 ([#449](https://github.com/awslabs/aws-lambda-powertools-python/issues/449))
+* update mergify to require approval on dependabot ([#456](https://github.com/awslabs/aws-lambda-powertools-python/issues/456))
+* **deps**: bump actions/setup-python from 1 to 2.2.2 ([#445](https://github.com/awslabs/aws-lambda-powertools-python/issues/445))
+* **deps:** bump boto3 from 1.17.87 to 1.17.88 ([#463](https://github.com/awslabs/aws-lambda-powertools-python/issues/463))
+* **deps:** bump boto3 from 1.17.88 to 1.17.89 ([#466](https://github.com/awslabs/aws-lambda-powertools-python/issues/466))
+* **deps:** bump boto3 from 1.17.84 to 1.17.85 ([#455](https://github.com/awslabs/aws-lambda-powertools-python/issues/455))
+* **deps:** bump boto3 from 1.17.85 to 1.17.86 ([#458](https://github.com/awslabs/aws-lambda-powertools-python/issues/458))
+* **deps:** bump boto3 from 1.17.86 to 1.17.87 ([#459](https://github.com/awslabs/aws-lambda-powertools-python/issues/459))
+* **deps-dev:** bump mkdocs-material from 7.1.6 to 7.1.7 ([#464](https://github.com/awslabs/aws-lambda-powertools-python/issues/464))
+* **deps-dev:** bump pytest-cov from 2.12.0 to 2.12.1 ([#454](https://github.com/awslabs/aws-lambda-powertools-python/issues/454))
+* **mergify:** disable check for matrix jobs
+* **mergify:** use job name to match GH Actions
+
 ## [1.16.1] - 2021-05-23
 
 ### Fixed
