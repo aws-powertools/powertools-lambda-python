@@ -232,7 +232,7 @@ We provide [built-in JMESPath expressions](#built-in-correlation-id-expressions)
 ### Appending additional keys
 
 !!! info "Custom keys are persisted across warm invocations"
-	Always set additional keys as part of your handler to ensure they have the latest value, or explicitly clear them with `clear_custom_keys=True`as explained above.
+	Always set additional keys as part of your handler to ensure they have the latest value, or explicitly clear them with `remove_custom_keys=True`as explained above.
 
 
 You can append additional keys using either mechanism:
@@ -429,7 +429,7 @@ You can remove any additional key from Logger state using `remove_keys`.
 
 #### Removing all custom keys
 
-Logger is commonly initialized in the global scope. Due to [Lambda Execution Context reuse](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html), this means that custom keys can be persisted across invocations. If you want all custom keys to be deleted, you can use `clear_custom_keys=True` param in `inject_lambda_context` decorator.
+Logger is commonly initialized in the global scope. Due to [Lambda Execution Context reuse](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html), this means that custom keys can be persisted across invocations. If you want all custom keys to be deleted, you can use `remove_custom_keys=True` param in `inject_lambda_context` decorator.
 
 !!! info
 	This is useful when you add multiple custom keys conditionally, instead of setting a default `None` value if not present. Any key with `None` value is automatically removed by Logger.
@@ -437,7 +437,7 @@ Logger is commonly initialized in the global scope. Due to [Lambda Execution Con
 !!! danger "This can have unintended side effects if you use Layers"
 	Lambda Layers code is imported before the Lambda handler.
 
-	This means that `clear_custom_keys=True` will instruct Logger to remove any keys previously added before Lambda handler execution proceeds.
+	This means that `remove_custom_keys=True` will instruct Logger to remove any keys previously added before Lambda handler execution proceeds.
 
 	You can either avoid running any code as part of Lambda Layers global scope, or override keys with their latest value as part of handler's execution.
 
@@ -448,7 +448,7 @@ Logger is commonly initialized in the global scope. Due to [Lambda Execution Con
 
     logger = Logger(service="payment")
 
-    @logger.inject_lambda_context(clear_custom_keys=True)
+    @logger.inject_lambda_context(remove_custom_keys=True)
     def handler(event, context):
 		if event.get("special_key"):
 			# Should only be available in the first request log

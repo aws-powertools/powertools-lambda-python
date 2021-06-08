@@ -568,8 +568,8 @@ def test_clear_keys_on_inject_lambda_context(lambda_context, stdout, service_nam
     # GIVEN
     logger = Logger(service=service_name, stream=stdout)
 
-    # WHEN clear_custom_key is set and a key was conditionally added in the first invocation
-    @logger.inject_lambda_context(clear_custom_keys=True)
+    # WHEN remove_custom_keys is set and a key was conditionally added in the first invocation
+    @logger.inject_lambda_context(remove_custom_keys=True)
     def handler(event, context):
         if event.get("add_key"):
             logger.append_keys(my_key="value")
