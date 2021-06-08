@@ -1,4 +1,4 @@
-name: Build
+name: Code quality
 
 on:
   pull_request:
@@ -44,3 +44,4 @@ jobs:
           env_vars: OS,PYTHON
           name: aws-lambda-powertools-python-codecov
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
