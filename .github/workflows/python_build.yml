@@ -43,5 +43,5 @@ jobs:
           # flags: unittests
           env_vars: OS,PYTHON
           name: aws-lambda-powertools-python-codecov
-          fail_ci_if_error: true
+          # fail_ci_if_error: true  # failing more consistently making CI unreliable despite all tests above passing
           token: ${{ secrets.CODECOV_TOKEN }}
