@@ -232,7 +232,7 @@ We provide [built-in JMESPath expressions](#built-in-correlation-id-expressions)
 ### Appending additional keys
 
 !!! info "Custom keys are persisted across warm invocations"
-	Always set additional keys as part of your handler to ensure they have the latest value, or explicitly clear them with `clear_state=True`as explained above.
+	Always set additional keys as part of your handler to ensure they have the latest value, or explicitly clear them with [`clear_state=True`](#clearing-all-state).
 
 
 You can append additional keys using either mechanism:
