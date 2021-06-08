@@ -231,8 +231,9 @@ We provide [built-in JMESPath expressions](#built-in-correlation-id-expressions)
 
 ### Appending additional keys
 
-!!! info "Keys might be persisted across invocations"
-	Always set additional keys as part of your handler to ensure they have the latest value. Additional keys are kept in memory as part of a Logger instance and might be reused in non-cold start scenarios.
+!!! info "Custom keys are persisted across warm invocations"
+	Always set additional keys as part of your handler to ensure they have the latest value, or explicitly clear them with [`clear_state=True`](#clearing-all-state).
+
 
 You can append additional keys using either mechanism:
 
@@ -425,6 +426,73 @@ You can remove any additional key from Logger state using `remove_keys`.
 	  	"service": "payment"
 	}
     ```
+
+#### Clearing all state
+
+Logger is commonly initialized in the global scope. Due to [Lambda Execution Context reuse](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html), this means that custom keys can be persisted across invocations. If you want all custom keys to be deleted, you can use `clear_state=True` param in `inject_lambda_context` decorator.
+
+!!! info
+	This is useful when you add multiple custom keys conditionally, instead of setting a default `None` value if not present. Any key with `None` value is automatically removed by Logger.
+
+!!! danger "This can have unintended side effects if you use Layers"
+	Lambda Layers code is imported before the Lambda handler.
+
+	This means that `clear_state=True` will instruct Logger to remove any keys previously added before Lambda handler execution proceeds.
+
+	You can either avoid running any code as part of Lambda Layers global scope, or override keys with their latest value as part of handler's execution.
+
+=== "collect.py"
+
+    ```python hl_lines="5 8"
+    from aws_lambda_powertools import Logger
+
+    logger = Logger(service="payment")
+
+    @logger.inject_lambda_context(clear_state=True)
+    def handler(event, context):
+		if event.get("special_key"):
+			# Should only be available in the first request log
+			# as the second request doesn't contain `special_key`
+			logger.append_keys(debugging_key="value")
+
+		logger.info("Collecting payment")
+    ```
+
+=== "#1 request"
+
+    ```json hl_lines="7"
+	{
+		"level": "INFO",
+	  	"location": "collect.handler:10",
+	  	"message": "Collecting payment",
+		"timestamp": "2021-05-03 11:47:12,494+0200",
+	  	"service": "payment",
+		"special_key": "debug_key",
+	  	"cold_start": true,
+	  	"lambda_function_name": "test",
+	  	"lambda_function_memory_size": 128,
+	  	"lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
+	  	"lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72"
+	}
+    ```
+
+=== "#2 request"
+
+	```json hl_lines="7"
+	{
+		"level": "INFO",
+	  	"location": "collect.handler:10",
+	  	"message": "Collecting payment",
+		"timestamp": "2021-05-03 11:47:12,494+0200",
+	  	"service": "payment",
+	  	"cold_start": false,
+	  	"lambda_function_name": "test",
+	  	"lambda_function_memory_size": 128,
+	  	"lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
+	  	"lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72"
+	}
+    ```
+
 
 ### Logging exceptions
 
