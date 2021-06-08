@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import json
 import sys
 from hashlib import md5
@@ -7,6 +8,7 @@ import jmespath
 import pytest
 from botocore import stub
 
+from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2, event_source
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
@@ -19,6 +21,7 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
 from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent
 from aws_lambda_powertools.utilities.idempotency.persistence.base import BasePersistenceLayer, DataRecord
 from aws_lambda_powertools.utilities.validation import envelopes, validator
+from tests.functional.utils import load_event
 
 TABLE_NAME = "TEST_TABLE"
 
@@ -223,7 +226,7 @@ def test_idempotent_lambda_first_execution(
 def test_idempotent_lambda_first_execution_cached(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
-    lambda_apigw_event: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
     expected_params_update_item,
     expected_params_put_item,
     lambda_response,
@@ -845,3 +848,41 @@ def test_handler_raise_idempotency_key_error(persistence_store: DynamoDBPersiste
         handler({}, lambda_context)
 
     assert "No data found to create a hashed idempotency_key" == e.value.args[0]
+
+
+class MockPersistenceLayer(BasePersistenceLayer):
+    def __init__(self, expected_idempotency_key: str):
+        self.expected_idempotency_key = expected_idempotency_key
+        super(MockPersistenceLayer, self).__init__()
+
+    def _put_record(self, data_record: DataRecord) -> None:
+        assert data_record.idempotency_key == self.expected_idempotency_key
+
+    def _update_record(self, data_record: DataRecord) -> None:
+        assert data_record.idempotency_key == self.expected_idempotency_key
+
+    def _get_record(self, idempotency_key) -> DataRecord:
+        ...
+
+    def _delete_record(self, data_record: DataRecord) -> None:
+        ...
+
+
+def test_idempotent_lambda_event_source(lambda_context):
+    # Scenario to validate that we can use the event_source decorator before or after the idempotent decorator
+    mock_event = load_event("apiGatewayProxyV2Event.json")
+    persistence_layer = MockPersistenceLayer("test-func#" + hashlib.md5(json.dumps(mock_event).encode()).hexdigest())
+    expected_result = {"message": "Foo"}
+
+    # GIVEN an event_source decorator
+    # AND then an idempotent decorator
+    @event_source(data_class=APIGatewayProxyEventV2)
+    @idempotent(persistence_store=persistence_layer)
+    def lambda_handler(event, _):
+        assert isinstance(event, APIGatewayProxyEventV2)
+        return expected_result
+
+    # WHEN calling the lambda handler
+    result = lambda_handler(mock_event, lambda_context)
+    # THEN we expect the handler to execute successfully
+    assert result == expected_result

@@ -58,10 +58,12 @@ from aws_lambda_powertools.utilities.data_classes.connect_contact_flow_event imp
 )
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
     AttributeValue,
+    AttributeValueType,
     DynamoDBRecordEventName,
     DynamoDBStreamEvent,
     StreamViewType,
 )
+from aws_lambda_powertools.utilities.data_classes.event_source import event_source
 from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
 from tests.functional.utils import load_event
 
@@ -442,6 +444,33 @@ def test_dynamo_db_stream_trigger_event():
     assert record.user_identity is None
 
 
+def test_dynamo_attribute_value_b_value():
+    example_attribute_value = {"B": "dGhpcyB0ZXh0IGlzIGJhc2U2NC1lbmNvZGVk"}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.Binary
+    assert attribute_value.b_value == attribute_value.get_value
+
+
+def test_dynamo_attribute_value_bs_value():
+    example_attribute_value = {"BS": ["U3Vubnk=", "UmFpbnk=", "U25vd3k="]}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.BinarySet
+    assert attribute_value.bs_value == attribute_value.get_value
+
+
+def test_dynamo_attribute_value_bool_value():
+    example_attribute_value = {"BOOL": True}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.Boolean
+    assert attribute_value.bool_value == attribute_value.get_value
+
+
 def test_dynamo_attribute_value_list_value():
     example_attribute_value = {"L": [{"S": "Cookies"}, {"S": "Coffee"}, {"N": "3.14159"}]}
     attribute_value = AttributeValue(example_attribute_value)
@@ -449,6 +478,9 @@ def test_dynamo_attribute_value_list_value():
     assert list_value is not None
     item = list_value[0]
     assert item.s_value == "Cookies"
+    assert attribute_value.get_type == AttributeValueType.List
+    assert attribute_value.l_value == attribute_value.list_value
+    assert attribute_value.list_value == attribute_value.get_value
 
 
 def test_dynamo_attribute_value_map_value():
@@ -460,6 +492,65 @@ def test_dynamo_attribute_value_map_value():
     assert map_value is not None
     item = map_value["Name"]
     assert item.s_value == "Joe"
+    assert attribute_value.get_type == AttributeValueType.Map
+    assert attribute_value.m_value == attribute_value.map_value
+    assert attribute_value.map_value == attribute_value.get_value
+
+
+def test_dynamo_attribute_value_n_value():
+    example_attribute_value = {"N": "123.45"}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.Number
+    assert attribute_value.n_value == attribute_value.get_value
+
+
+def test_dynamo_attribute_value_ns_value():
+    example_attribute_value = {"NS": ["42.2", "-19", "7.5", "3.14"]}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.NumberSet
+    assert attribute_value.ns_value == attribute_value.get_value
+
+
+def test_dynamo_attribute_value_null_value():
+    example_attribute_value = {"NULL": True}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.Null
+    assert attribute_value.null_value == attribute_value.get_value
+
+
+def test_dynamo_attribute_value_s_value():
+    example_attribute_value = {"S": "Hello"}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.String
+    assert attribute_value.s_value == attribute_value.get_value
+
+
+def test_dynamo_attribute_value_ss_value():
+    example_attribute_value = {"SS": ["Giraffe", "Hippo", "Zebra"]}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    assert attribute_value.get_type == AttributeValueType.StringSet
+    assert attribute_value.ss_value == attribute_value.get_value
+
+
+def test_dynamo_attribute_value_type_error():
+    example_attribute_value = {"UNSUPPORTED": "'value' should raise a type error"}
+
+    attribute_value = AttributeValue(example_attribute_value)
+
+    with pytest.raises(TypeError):
+        print(attribute_value.get_value)
+    with pytest.raises(ValueError):
+        print(attribute_value.get_type)
 
 
 def test_event_bridge_event():
@@ -1237,3 +1328,15 @@ def test_code_pipeline_get_artifact(mocker: MockerFixture):
         }
     )
     assert artifact_str == file_contents
+
+
+def test_reflected_types():
+    # GIVEN an event_source decorator
+    @event_source(data_class=APIGatewayProxyEventV2)
+    def lambda_handler(event: APIGatewayProxyEventV2, _):
+        # THEN we except the event to be of the pass in data class type
+        assert isinstance(event, APIGatewayProxyEventV2)
+        assert event.get_header_value("x-foo") == "Foo"
+
+    # WHEN calling the lambda handler
+    lambda_handler({"headers": {"X-Foo": "Foo"}}, None)
