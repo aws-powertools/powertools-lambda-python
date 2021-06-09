@@ -29,7 +29,17 @@ nav:
 theme:
   name: material
   palette:
-    primary: deep purple
+    - scheme: default
+      primary: deep purple
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
   features:
     - navigation.sections
     - navigation.expand
