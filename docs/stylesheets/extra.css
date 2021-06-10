@@ -4,6 +4,10 @@
 
 .highlight .hll {
     background-color: lavender
+
+    [data-md-color-scheme="slate"] {
+        background-color: rgb(69, 48, 164)
+    }
 }
 
 .md-typeset table:not([class]) {
@@ -24,4 +28,8 @@
 
 .md-typeset .admonition, .md-typeset details {
     font-size: 0.70rem
+}
+
+[data-md-color-scheme="slate"] {
+    --md-typeset-a-color: rgb(28, 152, 152)
 }
