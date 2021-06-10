@@ -77,7 +77,6 @@ plugins:
 extra_css:
   - stylesheets/extra.css
 extra_javascript:
-  - javascript/aws-amplify.min.js
   - javascript/extra.js
 
 extra:
