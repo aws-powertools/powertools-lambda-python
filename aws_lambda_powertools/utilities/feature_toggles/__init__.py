@@ -1,6 +1,7 @@
 """Advanced feature toggles utility
 """
-from .configuration_store import ACTION, ConfigurationException, ConfigurationStore
+from .configuration_store import ACTION, ConfigurationStore
+from .exceptions import ConfigurationException
 
 __all__ = [
     "ConfigurationException",

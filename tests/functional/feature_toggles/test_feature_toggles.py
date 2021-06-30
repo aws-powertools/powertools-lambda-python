@@ -5,23 +5,6 @@ import pytest  # noqa: F401
 from aws_lambda_powertools.utilities.feature_toggles.configuration_store import ACTION, ConfigurationStore
 
 
-class MockLogger:
-    def debug(self, message: str, **kwargs) -> None:
-        pass
-
-    def info(self, message: str, **kwargs) -> None:
-        pass
-
-    def warning(self, message: str, **kwargs) -> None:
-        pass
-
-    def error(self, message: str, **kwargs) -> None:
-        pass
-
-    def exception(self, message: str, **kwargs) -> None:
-        pass
-
-
 def init_configuration_store(mocker, mock_schema: Dict) -> ConfigurationStore:
     mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.parameters.AppConfigProvider.get")
     mocked_get_conf.return_value = mock_schema
@@ -30,14 +13,13 @@ def init_configuration_store(mocker, mock_schema: Dict) -> ConfigurationStore:
         service="test_app",
         conf_name="test_conf_name",
         cache_seconds=600,
-        region_name="us-east-1",
     )
     return conf_store
 
 
 # this test checks that we get correct value of feature that exists in the schema.
 # we also don't send an empty rules_context dict in this case
-def test_toggles_no_restrictions(mocker):
+def test_toggles_rule_does_not_match(mocker):
     expected_value = "True"
     mocked_app_config_schema = {
         "log_level": "DEBUG",
@@ -61,11 +43,8 @@ def test_toggles_no_restrictions(mocker):
         },
     }
 
-    logger = MockLogger()
     conf_store = init_configuration_store(mocker, mocked_app_config_schema)
-    toggle = conf_store.get_feature_toggle(
-        logger=logger, feature_name="my_feature", rules_context={}, default_value=False
-    )
+    toggle = conf_store.get_feature_toggle(feature_name="my_feature", rules_context={}, default_value=False)
     assert str(toggle) == expected_value
 
 
@@ -75,11 +54,8 @@ def test_toggles_no_restrictions_feature_does_not_exist(mocker):
     expected_value = False
     mocked_app_config_schema = {"log_level": "DEBUG", "features": {"my_fake_feature": {"default_value": "True"}}}
 
-    logger = MockLogger()
     conf_store = init_configuration_store(mocker, mocked_app_config_schema)
-    toggle = conf_store.get_feature_toggle(
-        logger=logger, feature_name="my_feature", rules_context={}, default_value=expected_value
-    )
+    toggle = conf_store.get_feature_toggle(feature_name="my_feature", rules_context={}, default_value=expected_value)
     assert toggle == expected_value
 
 
@@ -88,10 +64,9 @@ def test_toggles_no_restrictions_feature_does_not_exist(mocker):
 def test_toggles_no_rules(mocker):
     expected_value = "True"
     mocked_app_config_schema = {"log_level": "DEBUG", "features": {"my_feature": {"default_value": expected_value}}}
-    logger = MockLogger()
     conf_store = init_configuration_store(mocker, mocked_app_config_schema)
     toggle = conf_store.get_feature_toggle(
-        logger=logger, feature_name="my_feature", rules_context={"tenant_id": "6", "username": "a"}, default_value=False
+        feature_name="my_feature", rules_context={"tenant_id": "6", "username": "a"}, default_value=False
     )
     assert str(toggle) == expected_value
 
@@ -120,10 +95,8 @@ def test_toggles_restrictions_no_match(mocker):
             }
         },
     }
-    logger = MockLogger()
     conf_store = init_configuration_store(mocker, mocked_app_config_schema)
     toggle = conf_store.get_feature_toggle(
-        logger=logger,
         feature_name="my_feature",
         rules_context={"tenant_id": "6", "username": "a"},  # rule will not match
         default_value=False,
@@ -162,10 +135,8 @@ def test_toggles_restrictions_rule_match_equal_multiple_restrictions(mocker):
             }
         },
     }
-    logger = MockLogger()
     conf_store = init_configuration_store(mocker, mocked_app_config_schema)
     toggle = conf_store.get_feature_toggle(
-        logger=logger,
         feature_name="my_feature",
         rules_context={
             "tenant_id": tenant_id_val,
@@ -207,10 +178,9 @@ def test_toggles_restrictions_no_rule_match_equal_multiple_restrictions(mocker):
             }
         },
     }
-    logger = MockLogger()
     conf_store = init_configuration_store(mocker, mocked_app_config_schema)
     toggle = conf_store.get_feature_toggle(
-        logger=logger, feature_name="my_feature", rules_context={"tenant_id": "6", "username": "a"}, default_value=False
+        feature_name="my_feature", rules_context={"tenant_id": "6", "username": "a"}, default_value=False
     )
     assert str(toggle) == expected_val
 
@@ -269,11 +239,9 @@ def test_toggles_restrictions_rule_match_multiple_actions_multiple_rules_multipl
         },
     }
 
-    logger = MockLogger()
     conf_store = init_configuration_store(mocker, mocked_app_config_schema)
     # match first rule
     toggle = conf_store.get_feature_toggle(
-        logger=logger,
         feature_name="my_feature",
         rules_context={"tenant_id": "6", "username": "abcd"},
         default_value=False,
@@ -281,7 +249,6 @@ def test_toggles_restrictions_rule_match_multiple_actions_multiple_rules_multipl
     assert str(toggle) == expected_value_first_check
     # match second rule
     toggle = conf_store.get_feature_toggle(
-        logger=logger,
         feature_name="my_feature",
         rules_context={"tenant_id": "4446", "username": "az"},
         default_value=False,
@@ -289,7 +256,6 @@ def test_toggles_restrictions_rule_match_multiple_actions_multiple_rules_multipl
     assert str(toggle) == expected_value_second_check
     # match no rule
     toggle = conf_store.get_feature_toggle(
-        logger=logger,
         feature_name="my_feature",
         rules_context={"tenant_id": "11114446", "username": "ab"},
         default_value=False,
@@ -297,7 +263,6 @@ def test_toggles_restrictions_rule_match_multiple_actions_multiple_rules_multipl
     assert str(toggle) == expected_value_third_check
     # feature doesn't exist
     toggle = conf_store.get_feature_toggle(
-        logger=logger,
         feature_name="my_fake_feature",
         rules_context={"tenant_id": "11114446", "username": "ab"},
         default_value=expected_value_fourth_case,
@@ -329,10 +294,8 @@ def test_toggles_match_rule_with_contains_action(mocker):
             }
         },
     }
-    logger = MockLogger()
     conf_store = init_configuration_store(mocker, mocked_app_config_schema)
     toggle = conf_store.get_feature_toggle(
-        logger=logger,
         feature_name="my_feature",
         rules_context={"tenant_id": "6", "username": "a"},  # rule will match
         default_value=False,
@@ -363,10 +326,8 @@ def test_toggles_no_match_rule_with_contains_action(mocker):
             }
         },
     }
-    logger = MockLogger()
     conf_store = init_configuration_store(mocker, mocked_app_config_schema)
     toggle = conf_store.get_feature_toggle(
-        logger=logger,
         feature_name="my_feature",
         rules_context={"tenant_id": "6", "username": "a"},  # rule will not match
         default_value=False,

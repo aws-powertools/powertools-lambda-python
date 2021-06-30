@@ -1,10 +1,13 @@
 # pylint: disable=no-name-in-module,line-too-long
+import logging
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities.parameters import AppConfigProvider, GetParameterError, TransformParameterError
+
+from .exceptions import ConfigurationException
 
 TRANSFORM_TYPE = "json"
 FEATURES_KEY = "features"
@@ -25,13 +28,12 @@ class ACTION(str, Enum):
     CONTAINS = "CONTAINS"
 
 
-class ConfigurationException(Exception):
-    pass
+logger = logging.getLogger(__name__)
 
 
 class ConfigurationStore:
     def __init__(
-        self, environment: str, service: str, conf_name: str, cache_seconds: int, region_name: Optional[str] = None
+        self, environment: str, service: str, conf_name: str, cache_seconds: int, config: Optional[Config] = None
     ):
         """constructor
 
@@ -40,13 +42,11 @@ class ConfigurationStore:
             service (str): what service name to use from the supplied environment
             conf_name (str): what configuration to take from the environment & service combination
             cache_seconds (int): cache expiration time, how often to call AppConfig to fetch latest configuration
-            region_name (str): aws region where the configuration resides in
         """
         self._cache_seconds = cache_seconds
+        self.logger = logger
         self._conf_name = conf_name
-        config = None
-        if region_name is not None:
-            config = Config(region_name=region_name)
+        config = config or Config()
         self._conf_store = AppConfigProvider(environment=environment, application=service, config=config)
 
     def _validate_json_schema(self, schema: str) -> bool:
@@ -54,6 +54,8 @@ class ConfigurationStore:
         return True
 
     def _match_by_action(self, action: str, restriction_value: Any, context_value: Any) -> bool:
+        if not context_value:
+            return False
         mapping_by_action = {
             ACTION.EQUALS.value: lambda a, b: a == b,
             ACTION.STARTSWITH.value: lambda a, b: a.startswith(b),
@@ -69,7 +71,7 @@ class ConfigurationStore:
 
     def _handle_rules(
         self,
-        logger: object,
+        *,
         feature_name: str,
         rules_context: Dict[str, Any],
         default_value: bool,
@@ -80,53 +82,31 @@ class ConfigurationStore:
             rule_default_value = rule.get(RULE_DEFAULT_VALUE)
             is_match = True
             restrictions: Dict[str, str] = rule.get(RESTRICTIONS_KEY)
-            if restrictions is None:
-                error_str = f"invalid rule schema detected in rule {rule_name}, missing restrictions list"
-                logger.error(error_str)
-                raise ConfigurationException(error_str)
 
             for restriction in restrictions:
-                context_value = rules_context.get(restriction.get(RESTRICTION_KEY, ""))
-                if not context_value:
-                    logger.debug(
-                        "rule did not not match key",
-                        rule_name=rule_name,
-                        default_value=rule_default_value,
-                        feature_name=feature_name,
-                    )
-                    is_match = False  # rule doesn't match, continue to next one
-                    break
-                elif not self._match_by_action(
+                context_value = rules_context.get(restriction.get(RESTRICTION_KEY, ""), "")
+                if not self._match_by_action(
                     restriction.get(RESTRICTION_ACTION), restriction.get(RESTRICTION_VALUE), context_value
                 ):
                     logger.debug(
-                        "rule did not match action",
-                        rule_name=rule_name,
-                        default_value=rule_default_value,
-                        feature_name=feature_name,
+                        f"rule did not match action, rule_name={rule_name}, default_value={rule_default_value}, feature_name={feature_name}, context_value={str(context_value)}"  # noqa: E501
                     )
                     is_match = False  # rules doesn't match restriction
                     break
             # if we got here, all restrictions match
             if is_match:
                 logger.debug(
-                    "rule matched", rule_name=rule_name, default_value=rule_default_value, feature_name=feature_name
+                    f"rule matched, rule_name={rule_name}, default_value={rule_default_value}, feature_name={feature_name}"  # noqa: E501
                 )
                 return rule_default_value
         # no rule matched, return default value of feature
         logger.debug(
-            "no rule matched, returning default value of feature",
-            default_value=default_value,
-            feature_name=feature_name,
+            f"no rule matched, returning default value of feature, default_value={default_value}, feature_name={feature_name}"  # noqa: E501
         )
         return default_value
 
-    def get_configuration(self, logger: object) -> Dict[str, Any]:
+    def get_configuration(self) -> Dict[str, Any]:
         """Get configuration string from AWs AppConfig and returned the parsed JSON dictionary
-
-        Args:
-            logger (object): logger class to use. must have a debug, info, error, warning and exception functions that
-            receive a message and kwargs
 
         Raises:
             ConfigurationException: Any validation error or appconfig error that can occur
@@ -151,15 +131,11 @@ class ConfigurationStore:
             raise ConfigurationException(error_str)
         return schema
 
-    def get_feature_toggle(
-        self, logger: object, feature_name: str, rules_context: Dict[str, Any], default_value: bool
-    ) -> bool:
+    def get_feature_toggle(self, *, feature_name: str, rules_context: Dict[str, Any], default_value: bool) -> bool:
         """get a feature toggle boolean value. Value is calculated according to a set of rules and conditions.
            see below for explanation.
 
         Args:
-            logger (object): logger class to use. must have a debug, info, error, warning and exception functions
-                             that receive a message and kwargs
             feature_name (str): feature name that you wish to fetch
             rules_context (Dict[str, Any]): dict of attributes that you would like to match the rules
                                             against, can be {'tenant_id: 'X', 'username':' 'Y', 'region': 'Z'} etc.
@@ -175,7 +151,7 @@ class ConfigurationStore:
                 3. feature exists and a rule matches -> default_value of rule is returned
         """
         try:
-            toggles_dict: Dict[str, Any] = self.get_configuration(logger=logger)
+            toggles_dict: Dict[str, Any] = self.get_configuration()
         except ConfigurationException:
             logger.warning("unable to get feature toggles JSON, returning provided default value")
             return default_value
@@ -183,25 +159,22 @@ class ConfigurationStore:
         feature: Dict[str, Dict] = toggles_dict.get(FEATURES_KEY, {}).get(feature_name, None)
         if feature is None:
             logger.warning(
-                "feature does not appear in configuration, using provided default value",
-                feature_name=feature_name,
-                default_value=default_value,
+                f"feature does not appear in configuration, using provided default value, feature_name={feature_name}, default_value={default_value}"  # noqa: E501
             )
             return default_value
 
         rules_list = feature.get(RULES_KEY, [])
-        def_val = feature.get(DEFAULT_VAL_KEY)
-        if def_val is None:
-            error_str = f"invalid feature schema, missing default value, feature={feature_name}"
-            logger.error(error_str)
-            raise ConfigurationException(error_str)
-
+        default_value = feature.get(DEFAULT_VAL_KEY)
         if not rules_list:
             # not rules but has a value
             logger.debug(
-                "no rules found, returning feature default value", feature_name=feature_name, default_value=def_val
+                f"no rules found, returning feature default value, feature_name={feature_name}, default_value={default_value}"  # noqa: E501
             )
-            return def_val
+            return default_value
         # look for first rule match
-        logger.debug("looking for rule match", feature_name=feature_name, feature_default_value=def_val)
-        return self._handle_rules(logger, feature_name, rules_context, def_val, rules_list)
+        logger.debug(
+            f"looking for rule match,  feature_name={feature_name}, default_value={default_value}"
+        )  # noqa: E501
+        return self._handle_rules(
+            feature_name=feature_name, rules_context=rules_context, default_value=default_value, rules=rules_list
+        )
