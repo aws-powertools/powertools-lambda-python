@@ -46,7 +46,6 @@ class ConfigurationStore:
         self._cache_seconds = cache_seconds
         self.logger = logger
         self._conf_name = conf_name
-        config = config or Config()
         self._conf_store = AppConfigProvider(environment=environment, application=service, config=config)
 
     def _validate_json_schema(self, schema: str) -> bool:
