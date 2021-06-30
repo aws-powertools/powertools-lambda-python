@@ -149,7 +149,7 @@ def get_app_config(
         >>> print(value)
         My configuration value
 
-    **Retrieves a confiugration value and decodes it using a JSON decoder**
+    **Retrieves a configuration value and decodes it using a JSON decoder**
 
         >>> from aws_lambda_powertools.utilities.parameters import get_parameter
         >>>

@@ -1,11 +1,17 @@
 from typing import Dict
 
 import pytest  # noqa: F401
+from botocore.config import Config
 
 from aws_lambda_powertools.utilities.feature_toggles.configuration_store import ACTION, ConfigurationStore
 
 
-def init_configuration_store(mocker, mock_schema: Dict) -> ConfigurationStore:
+@pytest.fixture(scope="module")
+def config():
+    return Config(region_name="us-east-1")
+
+
+def init_configuration_store(mocker, mock_schema: Dict, config: Config) -> ConfigurationStore:
     mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.parameters.AppConfigProvider.get")
     mocked_get_conf.return_value = mock_schema
     conf_store: ConfigurationStore = ConfigurationStore(
@@ -13,13 +19,14 @@ def init_configuration_store(mocker, mock_schema: Dict) -> ConfigurationStore:
         service="test_app",
         conf_name="test_conf_name",
         cache_seconds=600,
+        config=config,
     )
     return conf_store
 
 
 # this test checks that we get correct value of feature that exists in the schema.
 # we also don't send an empty rules_context dict in this case
-def test_toggles_rule_does_not_match(mocker):
+def test_toggles_rule_does_not_match(mocker, config):
     expected_value = "True"
     mocked_app_config_schema = {
         "log_level": "DEBUG",
@@ -43,28 +50,28 @@ def test_toggles_rule_does_not_match(mocker):
         },
     }
 
-    conf_store = init_configuration_store(mocker, mocked_app_config_schema)
+    conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     toggle = conf_store.get_feature_toggle(feature_name="my_feature", rules_context={}, default_value=False)
     assert str(toggle) == expected_value
 
 
 # this test checks that if you try to get a feature that doesn't exist in the schema,
 # you get the default value of False that was sent to the get_feature_toggle API
-def test_toggles_no_restrictions_feature_does_not_exist(mocker):
+def test_toggles_no_restrictions_feature_does_not_exist(mocker, config):
     expected_value = False
     mocked_app_config_schema = {"log_level": "DEBUG", "features": {"my_fake_feature": {"default_value": "True"}}}
 
-    conf_store = init_configuration_store(mocker, mocked_app_config_schema)
+    conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     toggle = conf_store.get_feature_toggle(feature_name="my_feature", rules_context={}, default_value=expected_value)
     assert toggle == expected_value
 
 
 # check that feature match works when they are no rules and we send rules_context.
 # default value is False but the feature has a True default_value.
-def test_toggles_no_rules(mocker):
+def test_toggles_no_rules(mocker, config):
     expected_value = "True"
     mocked_app_config_schema = {"log_level": "DEBUG", "features": {"my_feature": {"default_value": expected_value}}}
-    conf_store = init_configuration_store(mocker, mocked_app_config_schema)
+    conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     toggle = conf_store.get_feature_toggle(
         feature_name="my_feature", rules_context={"tenant_id": "6", "username": "a"}, default_value=False
     )
@@ -72,7 +79,7 @@ def test_toggles_no_rules(mocker):
 
 
 # check a case where the feature exists but the rule doesn't match so we revert to the default value of the feature
-def test_toggles_restrictions_no_match(mocker):
+def test_toggles_restrictions_no_match(mocker, config):
     expected_value = "True"
     mocked_app_config_schema = {
         "log_level": "DEBUG",
@@ -95,7 +102,7 @@ def test_toggles_restrictions_no_match(mocker):
             }
         },
     }
-    conf_store = init_configuration_store(mocker, mocked_app_config_schema)
+    conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     toggle = conf_store.get_feature_toggle(
         feature_name="my_feature",
         rules_context={"tenant_id": "6", "username": "a"},  # rule will not match
@@ -105,7 +112,7 @@ def test_toggles_restrictions_no_match(mocker):
 
 
 # check that a rule can match when it has multiple restrictions, see rule name for further explanation
-def test_toggles_restrictions_rule_match_equal_multiple_restrictions(mocker):
+def test_toggles_restrictions_rule_match_equal_multiple_restrictions(mocker, config):
     expected_value = "False"
     tenant_id_val = "6"
     username_val = "a"
@@ -135,7 +142,7 @@ def test_toggles_restrictions_rule_match_equal_multiple_restrictions(mocker):
             }
         },
     }
-    conf_store = init_configuration_store(mocker, mocked_app_config_schema)
+    conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     toggle = conf_store.get_feature_toggle(
         feature_name="my_feature",
         rules_context={
@@ -150,7 +157,7 @@ def test_toggles_restrictions_rule_match_equal_multiple_restrictions(mocker):
 # check a case when rule doesn't match and it has multiple restrictions,
 # different tenant id causes the rule to not match.
 # default value of the feature in this case is True
-def test_toggles_restrictions_no_rule_match_equal_multiple_restrictions(mocker):
+def test_toggles_restrictions_no_rule_match_equal_multiple_restrictions(mocker, config):
     expected_val = "True"
     mocked_app_config_schema = {
         "log_level": "DEBUG",
@@ -178,7 +185,7 @@ def test_toggles_restrictions_no_rule_match_equal_multiple_restrictions(mocker):
             }
         },
     }
-    conf_store = init_configuration_store(mocker, mocked_app_config_schema)
+    conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     toggle = conf_store.get_feature_toggle(
         feature_name="my_feature", rules_context={"tenant_id": "6", "username": "a"}, default_value=False
     )
@@ -186,7 +193,7 @@ def test_toggles_restrictions_no_rule_match_equal_multiple_restrictions(mocker):
 
 
 # check rule match for multiple of action types
-def test_toggles_restrictions_rule_match_multiple_actions_multiple_rules_multiple_restrictions(mocker):
+def test_toggles_restrictions_rule_match_multiple_actions_multiple_rules_multiple_restrictions(mocker, config):
     expected_value_first_check = "True"
     expected_value_second_check = "False"
     expected_value_third_check = "False"
@@ -239,7 +246,7 @@ def test_toggles_restrictions_rule_match_multiple_actions_multiple_rules_multipl
         },
     }
 
-    conf_store = init_configuration_store(mocker, mocked_app_config_schema)
+    conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     # match first rule
     toggle = conf_store.get_feature_toggle(
         feature_name="my_feature",
@@ -271,7 +278,7 @@ def test_toggles_restrictions_rule_match_multiple_actions_multiple_rules_multipl
 
 
 # check a case where the feature exists but the rule doesn't match so we revert to the default value of the feature
-def test_toggles_match_rule_with_contains_action(mocker):
+def test_toggles_match_rule_with_contains_action(mocker, config):
     expected_value = True
     mocked_app_config_schema = {
         "log_level": "DEBUG",
@@ -294,7 +301,7 @@ def test_toggles_match_rule_with_contains_action(mocker):
             }
         },
     }
-    conf_store = init_configuration_store(mocker, mocked_app_config_schema)
+    conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     toggle = conf_store.get_feature_toggle(
         feature_name="my_feature",
         rules_context={"tenant_id": "6", "username": "a"},  # rule will match
@@ -303,7 +310,7 @@ def test_toggles_match_rule_with_contains_action(mocker):
     assert toggle == expected_value
 
 
-def test_toggles_no_match_rule_with_contains_action(mocker):
+def test_toggles_no_match_rule_with_contains_action(mocker, config):
     expected_value = False
     mocked_app_config_schema = {
         "log_level": "DEBUG",
@@ -326,7 +333,7 @@ def test_toggles_no_match_rule_with_contains_action(mocker):
             }
         },
     }
-    conf_store = init_configuration_store(mocker, mocked_app_config_schema)
+    conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     toggle = conf_store.get_feature_toggle(
         feature_name="my_feature",
         rules_context={"tenant_id": "6", "username": "a"},  # rule will not match
