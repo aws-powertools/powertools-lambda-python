@@ -1099,3 +1099,9 @@ Here's an example where we persist `payment_id` not `request_id`. Note that `pay
 		"payment_id": "123456789"
 	}
 	```
+
+**How do I aggregate and search Powertools logs across accounts?**
+
+As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task.
+
+Please see this discussion for more information: https://github.com/awslabs/aws-lambda-powertools-python/issues/460
