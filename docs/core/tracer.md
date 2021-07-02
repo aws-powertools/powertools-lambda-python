@@ -201,10 +201,11 @@ tracer = Tracer(patch_modules=modules_to_be_patched)
 
 Use **`capture_response=False`** parameter in both `capture_lambda_handler` and `capture_method` decorators to instruct Tracer **not** to serialize function responses as metadata.
 
-!!! info "This is commonly useful in two scenarios"
+!!! info "This is commonly useful in three scenarios"
 
 	1. You might **return sensitive** information you don't want it to be added to your traces
 	2. You might manipulate **streaming objects that can be read only once**; this prevents subsequent calls from being empty
+	3. You might return **more than 64K** of data _e.g., `message too long` error_
 
 === "sensitive_data_scenario.py"
 	```python hl_lines="3 7"
