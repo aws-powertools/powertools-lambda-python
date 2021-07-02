@@ -20,7 +20,7 @@ options:
       perf: Performance Improvements
       refactor: Code Refactoring
       docs: Documentation
-      chore: Project maintenance
+      chore: Maintenance
   header:
     pattern: "^(\\w*)(?:\\(([\\w\\$\\.\\-\\*\\s]*)\\))?\\:\\s(.*)$"
     pattern_maps:
