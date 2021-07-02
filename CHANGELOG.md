@@ -7,6 +7,28 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## [1.17.1] - 2021-07-02
+
+### Bug Fixes
+
+* **Validator:** Handle built-in custom formats like `date-time` when type is `string` ([#498](https://github.com/awslabs/aws-lambda-powertools-python/issues/498))
+
+### Documentation
+
+* **Layers:** Add Layers example for Serverless framework & CDK ([#500](https://github.com/awslabs/aws-lambda-powertools-python/issues/500))
+* **Misc.:** Enable dark mode switch ([#471](https://github.com/awslabs/aws-lambda-powertools-python/issues/471))
+* **Tracer:** Additional scenario when to disable auto-capture for responses larger than 64K ([#499](https://github.com/awslabs/aws-lambda-powertools-python/issues/499))
+
+### Maintenance
+
+* **deps:** bump boto3 from 1.17.101 to 1.17.102 ([#493](https://github.com/awslabs/aws-lambda-powertools-python/issues/493))
+* **deps:** bump boto3 from 1.17.91 to 1.17.101 ([#490](https://github.com/awslabs/aws-lambda-powertools-python/issues/490))
+* **deps:** bump email-validator from 1.1.2 to 1.1.3 ([#478](https://github.com/awslabs/aws-lambda-powertools-python/issues/478))
+* **deps:** bump boto3 from 1.17.89 to 1.17.91 ([#473](https://github.com/awslabs/aws-lambda-powertools-python/issues/473))
+* **deps-dev:** bump flake8-eradicate from 1.0.0 to 1.1.0 ([#492](https://github.com/awslabs/aws-lambda-powertools-python/issues/492))
+* **deps-dev:** bump isort from 5.8.0 to 5.9.1 ([#487](https://github.com/awslabs/aws-lambda-powertools-python/issues/487))
+* **deps-dev:** bump mkdocs-material from 7.1.7 to 7.1.9 ([#491](https://github.com/awslabs/aws-lambda-powertools-python/issues/491))
+
 ## [1.17.0] - 2021-06-08
 
 ### Added
