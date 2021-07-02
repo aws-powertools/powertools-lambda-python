@@ -47,23 +47,81 @@ Powertools is also available as a Lambda Layer, and it is distributed via the [A
 
 If using SAM, you can include this SAR App as part of your shared Layers stack, and lock to a specific semantic version. Once deployed, it'll be available across the account this is deployed to.
 
-=== "template.yml"
+=== "SAM"
 
-```yaml hl_lines="5-6 12-13"
-AwsLambdaPowertoolsPythonLayer:
-  Type: AWS::Serverless::Application
-  Properties:
-	Location:
-	  ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-	  SemanticVersion: 1.10.2 # change to latest semantic version available in SAR
+	```yaml hl_lines="5-6 12-13"
+	AwsLambdaPowertoolsPythonLayer:
+	  Type: AWS::Serverless::Application
+	  Properties:
+		Location:
+		  ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+		  SemanticVersion: 1.17.0 # change to latest semantic version available in SAR
 
-MyLambdaFunction:
-  Type: AWS::Serverless::Function
-  Properties:
-  	Layers:
-      	  # fetch Layer ARN from SAR App stack output
-	  - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
-```
+	MyLambdaFunction:
+	  Type: AWS::Serverless::Function
+	  Properties:
+		Layers:
+		  # fetch Layer ARN from SAR App stack output
+		  - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
+	```
+
+=== "Serverless framework"
+
+	```yaml hl_lines="5 8 10-11"
+	functions:
+	  main:
+		handler: lambda_function.lambda_handler
+		layers:
+		  - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
+
+	resources:
+	  Transform: AWS::Serverless-2016-10-31
+	  Resources:
+		AwsLambdaPowertoolsPythonLayer:
+		  Type: AWS::Serverless::Application
+		  Properties:
+			Location:
+			  ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+			  # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
+			  SemanticVersion: 1.17.0
+	```
+
+=== "CDK"
+
+	```python hl_lines="14 22-23 31"
+	from aws_cdk import core, aws_sam as sam, aws_lambda
+
+    POWERTOOLS_BASE_NAME = 'AWSLambdaPowertools'
+    # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
+    POWERTOOLS_VER = '1.17.0'
+    POWERTOOLS_ARN = 'arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer'
+
+	class SampleApp(core.Construct):
+
+		def __init__(self, scope: core.Construct, id_: str) -> None:
+			super().__init__(scope, id_)
+
+            # Launches SAR App as CloudFormation nested stack and return Lambda Layer
+            powertools_app = sam.CfnApplication(self,
+                f'{POWERTOOLS_BASE_NAME}Application',
+                location={
+                    'applicationId': POWERTOOLS_ARN,
+                    'semanticVersion': POWERTOOLS_VER
+                },
+            )
+
+            powertools_layer_arn = powertools_app.get_att("Outputs.LayerVersionArn").to_string()
+            powertools_layer_version = aws_lambda.LayerVersion.from_layer_version_arn(self, f'{POWERTOOLS_BASE_NAME}', powertools_layer_arn)
+
+            aws_lambda.Function(self,
+				'sample-app-lambda',
+                runtime=aws_lambda.Runtime.PYTHON_3_8,
+                function_name='sample-lambda',
+                code=aws_lambda.Code.asset('./src'),
+                handler='app.handler',
+                layers: [powertools_layer_version]
+            )
+	```
 
 ??? tip "Example of least-privileged IAM permissions to deploy Layer"
 
