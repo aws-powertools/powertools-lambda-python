@@ -12,10 +12,10 @@ from .exceptions import ConfigurationException
 TRANSFORM_TYPE = "json"
 FEATURES_KEY = "features"
 RULES_KEY = "rules"
-DEFAULT_VAL_KEY = "default_value"
+DEFAULT_VAL_KEY = "feature_default_value"
 RESTRICTIONS_KEY = "restrictions"
 RULE_NAME_KEY = "name"
-RULE_DEFAULT_VALUE = "default_value"
+RULE_DEFAULT_VALUE = "rule_default_value"
 RESTRICTION_KEY = "key"
 RESTRICTION_VALUE = "value"
 RESTRICTION_ACTION = "action"
@@ -73,7 +73,7 @@ class ConfigurationStore:
         *,
         feature_name: str,
         rules_context: Dict[str, Any],
-        default_value: bool,
+        feature_default_value: bool,
         rules: List[Dict[str, Any]],
     ) -> bool:
         for rule in rules:
@@ -88,21 +88,21 @@ class ConfigurationStore:
                     restriction.get(RESTRICTION_ACTION), restriction.get(RESTRICTION_VALUE), context_value
                 ):
                     logger.debug(
-                        f"rule did not match action, rule_name={rule_name}, default_value={rule_default_value}, feature_name={feature_name}, context_value={str(context_value)}"  # noqa: E501
+                        f"rule did not match action, rule_name={rule_name}, rule_default_value={rule_default_value}, feature_name={feature_name}, context_value={str(context_value)}"  # noqa: E501
                     )
                     is_match = False  # rules doesn't match restriction
                     break
             # if we got here, all restrictions match
             if is_match:
                 logger.debug(
-                    f"rule matched, rule_name={rule_name}, default_value={rule_default_value}, feature_name={feature_name}"  # noqa: E501
+                    f"rule matched, rule_name={rule_name}, rule_default_value={rule_default_value}, feature_name={feature_name}"  # noqa: E501
                 )
                 return rule_default_value
         # no rule matched, return default value of feature
         logger.debug(
-            f"no rule matched, returning default value of feature, default_value={default_value}, feature_name={feature_name}"  # noqa: E501
+            f"no rule matched, returning default value of feature, feature_default_value={feature_default_value}, feature_name={feature_name}"  # noqa: E501
         )
-        return default_value
+        return feature_default_value
 
     def get_configuration(self) -> Dict[str, Any]:
         """Get configuration string from AWs AppConfig and returned the parsed JSON dictionary
@@ -130,7 +130,7 @@ class ConfigurationStore:
             raise ConfigurationException(error_str)
         return schema
 
-    def get_feature_toggle(self, *, feature_name: str, rules_context: Dict[str, Any], default_value: bool) -> bool:
+    def get_feature_toggle(self, *, feature_name: str, rules_context: Dict[str, Any], value_if_missing: bool) -> bool:
         """get a feature toggle boolean value. Value is calculated according to a set of rules and conditions.
            see below for explanation.
 
@@ -138,16 +138,16 @@ class ConfigurationStore:
             feature_name (str): feature name that you wish to fetch
             rules_context (Dict[str, Any]): dict of attributes that you would like to match the rules
                                             against, can be {'tenant_id: 'X', 'username':' 'Y', 'region': 'Z'} etc.
-            default_value (bool): this will be the returned value in case the feature toggle doesn't exist in the schema
+            value_if_missing (bool): this will be the returned value in case the feature toggle doesn't exist in the schema
                                   or there has been an error while fetching the configuration from appconfig
 
         Returns:
             bool: calculated feature toggle value. several possibilities:
                 1. if the feature doesn't appear in the schema or there has been an error fetching the
-                   configuration -> error log would appear and default_value is returned
-                2. feature exists and has no rules or no rules have matched -> return default_value of
+                   configuration -> warning log would appear and value_if_missing is returned
+                2. feature exists and has no rules or no rules have matched -> return feature_default_value of
                    the defined feature
-                3. feature exists and a rule matches -> default_value of rule is returned
+                3. feature exists and a rule matches -> rule_default_value of rule is returned
         """
         try:
             toggles_dict: Dict[str, Any] = self.get_configuration()
@@ -158,22 +158,22 @@ class ConfigurationStore:
         feature: Dict[str, Dict] = toggles_dict.get(FEATURES_KEY, {}).get(feature_name, None)
         if feature is None:
             logger.warning(
-                f"feature does not appear in configuration, using provided default value, feature_name={feature_name}, default_value={default_value}"  # noqa: E501
+                f"feature does not appear in configuration, using provided default value, feature_name={feature_name}, value_if_missing={value_if_missing}"  # noqa: E501
             )
-            return default_value
+            return value_if_missing
 
         rules_list = feature.get(RULES_KEY, [])
-        default_value = feature.get(DEFAULT_VAL_KEY)
+        feature_default_value = feature.get(DEFAULT_VAL_KEY)
         if not rules_list:
             # not rules but has a value
             logger.debug(
-                f"no rules found, returning feature default value, feature_name={feature_name}, default_value={default_value}"  # noqa: E501
+                f"no rules found, returning feature default value, feature_name={feature_name}, default_value={feature_default_value}"  # noqa: E501
             )
-            return default_value
+            return feature_default_value
         # look for first rule match
         logger.debug(
-            f"looking for rule match,  feature_name={feature_name}, default_value={default_value}"
+            f"looking for rule match,  feature_name={feature_name}, feature_default_value={feature_default_value}"
         )  # noqa: E501
         return self._handle_rules(
-            feature_name=feature_name, rules_context=rules_context, default_value=default_value, rules=rules_list
+            feature_name=feature_name, rules_context=rules_context, feature_default_value=feature_default_value, rules=rules_list
         )
