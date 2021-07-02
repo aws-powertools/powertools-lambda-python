@@ -29,7 +29,6 @@ def init_configuration_store(mocker, mock_schema: Dict, config: Config) -> Confi
 def test_toggles_rule_does_not_match(mocker, config):
     expected_value = "True"
     mocked_app_config_schema = {
-        "log_level": "DEBUG",
         "features": {
             "my_feature": {
                 "feature_default_value": expected_value,
@@ -59,7 +58,7 @@ def test_toggles_rule_does_not_match(mocker, config):
 # you get the default value of False that was sent to the get_feature_toggle API
 def test_toggles_no_restrictions_feature_does_not_exist(mocker, config):
     expected_value = False
-    mocked_app_config_schema = {"log_level": "DEBUG", "features": {"my_fake_feature": {"feature_default_value": "True"}}}
+    mocked_app_config_schema = {"features": {"my_fake_feature": {"feature_default_value": "True"}}}
 
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     toggle = conf_store.get_feature_toggle(feature_name="my_feature", rules_context={}, value_if_missing=expected_value)
@@ -70,7 +69,7 @@ def test_toggles_no_restrictions_feature_does_not_exist(mocker, config):
 # default value is False but the feature has a True default_value.
 def test_toggles_no_rules(mocker, config):
     expected_value = "True"
-    mocked_app_config_schema = {"log_level": "DEBUG", "features": {"my_feature": {"feature_default_value": expected_value}}}
+    mocked_app_config_schema = {"features": {"my_feature": {"feature_default_value": expected_value}}}
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     toggle = conf_store.get_feature_toggle(
         feature_name="my_feature", rules_context={"tenant_id": "6", "username": "a"}, value_if_missing=False
@@ -82,7 +81,6 @@ def test_toggles_no_rules(mocker, config):
 def test_toggles_restrictions_no_match(mocker, config):
     expected_value = "True"
     mocked_app_config_schema = {
-        "log_level": "DEBUG",
         "features": {
             "my_feature": {
                 "feature_default_value": expected_value,
@@ -117,7 +115,6 @@ def test_toggles_restrictions_rule_match_equal_multiple_restrictions(mocker, con
     tenant_id_val = "6"
     username_val = "a"
     mocked_app_config_schema = {
-        "log_level": "DEBUG",
         "features": {
             "my_feature": {
                 "feature_default_value": "True",
@@ -160,7 +157,6 @@ def test_toggles_restrictions_rule_match_equal_multiple_restrictions(mocker, con
 def test_toggles_restrictions_no_rule_match_equal_multiple_restrictions(mocker, config):
     expected_val = "True"
     mocked_app_config_schema = {
-        "log_level": "DEBUG",
         "features": {
             "my_feature": {
                 "feature_default_value": expected_val,
@@ -199,7 +195,6 @@ def test_toggles_restrictions_rule_match_multiple_actions_multiple_rules_multipl
     expected_value_third_check = "False"
     expected_value_fourth_case = False
     mocked_app_config_schema = {
-        "log_level": "DEBUG",
         "features": {
             "my_feature": {
                 "feature_default_value": expected_value_third_check,
@@ -281,7 +276,6 @@ def test_toggles_restrictions_rule_match_multiple_actions_multiple_rules_multipl
 def test_toggles_match_rule_with_contains_action(mocker, config):
     expected_value = True
     mocked_app_config_schema = {
-        "log_level": "DEBUG",
         "features": {
             "my_feature": {
                 "feature_default_value": expected_value,
@@ -313,7 +307,6 @@ def test_toggles_match_rule_with_contains_action(mocker, config):
 def test_toggles_no_match_rule_with_contains_action(mocker, config):
     expected_value = False
     mocked_app_config_schema = {
-        "log_level": "DEBUG",
         "features": {
             "my_feature": {
                 "feature_default_value": expected_value,

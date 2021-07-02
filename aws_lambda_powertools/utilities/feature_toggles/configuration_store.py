@@ -48,8 +48,8 @@ class ConfigurationStore:
         self._conf_name = conf_name
         self._conf_store = AppConfigProvider(environment=environment, application=service, config=config)
 
-    def _validate_json_schema(self, schema: str) -> bool:
-        ## todo
+    def _validate_json_schema(self, schema: Dict[str, Any]) -> bool:
+        #
         return True
 
     def _match_by_action(self, action: str, restriction_value: Any, context_value: Any) -> bool:
@@ -138,13 +138,14 @@ class ConfigurationStore:
             feature_name (str): feature name that you wish to fetch
             rules_context (Dict[str, Any]): dict of attributes that you would like to match the rules
                                             against, can be {'tenant_id: 'X', 'username':' 'Y', 'region': 'Z'} etc.
-            value_if_missing (bool): this will be the returned value in case the feature toggle doesn't exist in the schema
-                                  or there has been an error while fetching the configuration from appconfig
+            value_if_missing (bool): this will be the returned value in case the feature toggle doesn't exist in
+                                     the schema or there has been an error while fetching the
+                                    configuration from appconfig
 
         Returns:
             bool: calculated feature toggle value. several possibilities:
                 1. if the feature doesn't appear in the schema or there has been an error fetching the
-                   configuration -> warning log would appear and value_if_missing is returned
+                   configuration -> error/warning log would appear and value_if_missing is returned
                 2. feature exists and has no rules or no rules have matched -> return feature_default_value of
                    the defined feature
                 3. feature exists and a rule matches -> rule_default_value of rule is returned
@@ -152,13 +153,13 @@ class ConfigurationStore:
         try:
             toggles_dict: Dict[str, Any] = self.get_configuration()
         except ConfigurationException:
-            logger.warning("unable to get feature toggles JSON, returning provided default value")
-            return default_value
+            logger.error("unable to get feature toggles JSON, returning provided value_if_missing value")  # noqa: E501
+            return value_if_missing
 
         feature: Dict[str, Dict] = toggles_dict.get(FEATURES_KEY, {}).get(feature_name, None)
         if feature is None:
             logger.warning(
-                f"feature does not appear in configuration, using provided default value, feature_name={feature_name}, value_if_missing={value_if_missing}"  # noqa: E501
+                f"feature does not appear in configuration, using provided value_if_missing, feature_name={feature_name}, value_if_missing={value_if_missing}"  # noqa: E501
             )
             return value_if_missing
 
@@ -175,5 +176,8 @@ class ConfigurationStore:
             f"looking for rule match,  feature_name={feature_name}, feature_default_value={feature_default_value}"
         )  # noqa: E501
         return self._handle_rules(
-            feature_name=feature_name, rules_context=rules_context, feature_default_value=feature_default_value, rules=rules_list
+            feature_name=feature_name,
+            rules_context=rules_context,
+            feature_default_value=feature_default_value,
+            rules=rules_list,
         )
