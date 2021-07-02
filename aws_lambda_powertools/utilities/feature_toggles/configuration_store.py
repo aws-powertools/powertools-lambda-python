@@ -1,32 +1,15 @@
 # pylint: disable=no-name-in-module,line-too-long
 import logging
-from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities.parameters import AppConfigProvider, GetParameterError, TransformParameterError
 
+from . import schema
 from .exceptions import ConfigurationException
 
 TRANSFORM_TYPE = "json"
-FEATURES_KEY = "features"
-RULES_KEY = "rules"
-DEFAULT_VAL_KEY = "feature_default_value"
-RESTRICTIONS_KEY = "restrictions"
-RULE_NAME_KEY = "name"
-RULE_DEFAULT_VALUE = "rule_default_value"
-RESTRICTION_KEY = "key"
-RESTRICTION_VALUE = "value"
-RESTRICTION_ACTION = "action"
-
-
-class ACTION(str, Enum):
-    EQUALS = "EQUALS"
-    STARTSWITH = "STARTSWITH"
-    ENDSWITH = "ENDSWITH"
-    CONTAINS = "CONTAINS"
-
 
 logger = logging.getLogger(__name__)
 
@@ -44,28 +27,26 @@ class ConfigurationStore:
             cache_seconds (int): cache expiration time, how often to call AppConfig to fetch latest configuration
         """
         self._cache_seconds = cache_seconds
-        self.logger = logger
+        self._logger = logger
         self._conf_name = conf_name
+        self._schema_validator = schema.SchemaValidator(self._logger)
         self._conf_store = AppConfigProvider(environment=environment, application=service, config=config)
-
-    def _validate_json_schema(self, schema: Dict[str, Any]) -> bool:
-        #
-        return True
 
     def _match_by_action(self, action: str, restriction_value: Any, context_value: Any) -> bool:
         if not context_value:
             return False
         mapping_by_action = {
-            ACTION.EQUALS.value: lambda a, b: a == b,
-            ACTION.STARTSWITH.value: lambda a, b: a.startswith(b),
-            ACTION.ENDSWITH.value: lambda a, b: a.endswith(b),
-            ACTION.CONTAINS.value: lambda a, b: a in b,
+            schema.ACTION.EQUALS.value: lambda a, b: a == b,
+            schema.ACTION.STARTSWITH.value: lambda a, b: a.startswith(b),
+            schema.ACTION.ENDSWITH.value: lambda a, b: a.endswith(b),
+            schema.ACTION.CONTAINS.value: lambda a, b: a in b,
         }
 
         try:
             func = mapping_by_action.get(action, lambda a, b: False)
             return func(context_value, restriction_value)
-        except Exception:
+        except Exception as exc:
+            self._logger.error(f"caught exception while matching action, action={action}, exception={str(exc)}")
             return False
 
     def _handle_rules(
@@ -77,15 +58,17 @@ class ConfigurationStore:
         rules: List[Dict[str, Any]],
     ) -> bool:
         for rule in rules:
-            rule_name = rule.get(RULE_NAME_KEY, "")
-            rule_default_value = rule.get(RULE_DEFAULT_VALUE)
+            rule_name = rule.get(schema.RULE_NAME_KEY, "")
+            rule_default_value = rule.get(schema.RULE_DEFAULT_VALUE)
             is_match = True
-            restrictions: Dict[str, str] = rule.get(RESTRICTIONS_KEY)
+            restrictions: Dict[str, str] = rule.get(schema.RESTRICTIONS_KEY)
 
             for restriction in restrictions:
-                context_value = rules_context.get(restriction.get(RESTRICTION_KEY, ""), "")
+                context_value = rules_context.get(restriction.get(schema.RESTRICTION_KEY))
                 if not self._match_by_action(
-                    restriction.get(RESTRICTION_ACTION), restriction.get(RESTRICTION_VALUE), context_value
+                    restriction.get(schema.RESTRICTION_ACTION),
+                    restriction.get(schema.RESTRICTION_VALUE),
+                    context_value,
                 ):
                     logger.debug(
                         f"rule did not match action, rule_name={rule_name}, rule_default_value={rule_default_value}, feature_name={feature_name}, context_value={str(context_value)}"  # noqa: E501
@@ -121,13 +104,11 @@ class ConfigurationStore:
             )  # parse result conf as JSON, keep in cache for self.max_age seconds
         except (GetParameterError, TransformParameterError) as exc:
             error_str = f"unable to get AWS AppConfig configuration file, exception={str(exc)}"
-            logger.error(error_str)
+            self._logger.error(error_str)
             raise ConfigurationException(error_str)
+
         # validate schema
-        if not self._validate_json_schema(schema):
-            error_str = "AWS AppConfig schema failed validation"
-            logger.error(error_str)
-            raise ConfigurationException(error_str)
+        self._schema_validator.validate_json_schema(schema)
         return schema
 
     def get_feature_toggle(self, *, feature_name: str, rules_context: Dict[str, Any], value_if_missing: bool) -> bool:
@@ -156,15 +137,15 @@ class ConfigurationStore:
             logger.error("unable to get feature toggles JSON, returning provided value_if_missing value")  # noqa: E501
             return value_if_missing
 
-        feature: Dict[str, Dict] = toggles_dict.get(FEATURES_KEY, {}).get(feature_name, None)
+        feature: Dict[str, Dict] = toggles_dict.get(schema.FEATURES_KEY, {}).get(feature_name, None)
         if feature is None:
             logger.warning(
                 f"feature does not appear in configuration, using provided value_if_missing, feature_name={feature_name}, value_if_missing={value_if_missing}"  # noqa: E501
             )
             return value_if_missing
 
-        rules_list = feature.get(RULES_KEY, [])
-        feature_default_value = feature.get(DEFAULT_VAL_KEY)
+        rules_list = feature.get(schema.RULES_KEY)
+        feature_default_value = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
         if not rules_list:
             # not rules but has a value
             logger.debug(
