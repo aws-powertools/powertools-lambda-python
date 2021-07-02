@@ -1210,13 +1210,13 @@ def test_aws_date_utc():
 def test_aws_time_utc():
     time_str = aws_time()
     assert isinstance(time_str, str)
-    assert datetime.datetime.strptime(time_str, "%H:%M:%SZ")
+    assert datetime.datetime.strptime(time_str, "%H:%M:%S.%fZ")
 
 
 def test_aws_datetime_utc():
     datetime_str = aws_datetime()
     assert isinstance(datetime_str, str)
-    assert datetime.datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%SZ")
+    assert datetime.datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 def test_aws_timestamp():
