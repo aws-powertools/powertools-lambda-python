@@ -565,3 +565,24 @@ def eventbridge_schema_registry_cloudtrail_v2_s3():
         "x-amazon-events-detail-type": "AWS API Call via CloudTrail",
         "x-amazon-events-source": "aws.s3",
     }
+
+
+@pytest.fixture
+def schema_datetime_format():
+    return {
+        "$schema": "http://json-schema.org/draft-07/schema",
+        "$id": "http://example.com/example.json",
+        "type": "object",
+        "title": "Sample schema with string date-time format",
+        "description": "The root schema comprises the entire JSON document.",
+        "required": ["message"],
+        "properties": {
+            "message": {
+                "$id": "#/properties/message",
+                "type": "string",
+                "format": "date-time",
+                "title": "The message",
+                "examples": ["hello world"],
+            },
+        },
+    }

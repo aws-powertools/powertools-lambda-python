@@ -32,6 +32,7 @@ def validate_data_against_schema(data: Dict, schema: Dict, formats: Optional[Dic
         When JSON schema provided is invalid
     """
     try:
+        formats = formats or {}
         fastjsonschema.validate(definition=schema, data=data, formats=formats)
     except (TypeError, AttributeError, fastjsonschema.JsonSchemaDefinitionException) as e:
         raise InvalidSchemaFormatError(f"Schema received: {schema}, Formats: {formats}. Error: {e}")

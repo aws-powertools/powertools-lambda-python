@@ -151,3 +151,12 @@ def test_custom_jmespath_function_overrides_builtin_functions(schema, wrapped_ev
             envelope="powertools_json(data).payload",
             jmespath_options=jmespath_opts,
         )
+
+
+def test_validate_date_time_format(schema_datetime_format):
+    raw_event = {"message": "2021-06-29T14:46:06.804Z"}
+    validate(event=raw_event, schema=schema_datetime_format)
+
+    invalid_datetime = {"message": "2021-06-29T14"}
+    with pytest.raises(exceptions.SchemaValidationError, match="data.message must be date-time"):
+        validate(event=invalid_datetime, schema=schema_datetime_format)
