@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 import pytest  # noqa: F401
 from botocore.config import Config
@@ -279,11 +279,11 @@ def test_toggles_match_rule_with_contains_action(mocker, config):
     mocked_app_config_schema = {
         "features": {
             "my_feature": {
-                "feature_default_value": expected_value,
+                "feature_default_value": False,
                 "rules": [
                     {
-                        "rule_name": "tenant id equals 345345435",
-                        "value_when_applies": True,
+                        "rule_name": "tenant id is contained in [6,2] ",
+                        "value_when_applies": expected_value,
                         "restrictions": [
                             {
                                 "action": ACTION.CONTAINS.value,
@@ -313,7 +313,7 @@ def test_toggles_no_match_rule_with_contains_action(mocker, config):
                 "feature_default_value": expected_value,
                 "rules": [
                     {
-                        "rule_name": "tenant id equals 345345435",
+                        "rule_name": "tenant id is contained in [6,2] ",
                         "value_when_applies": True,
                         "restrictions": [
                             {
@@ -334,3 +334,86 @@ def test_toggles_no_match_rule_with_contains_action(mocker, config):
         value_if_missing=False,
     )
     assert toggle == expected_value
+
+
+def test_multiple_features_enabled(mocker, config):
+    expected_value = ["my_feature", "my_feature2"]
+    mocked_app_config_schema = {
+        "features": {
+            "my_feature": {
+                "feature_default_value": False,
+                "rules": [
+                    {
+                        "rule_name": "tenant id is contained in [6,2] ",
+                        "value_when_applies": True,
+                        "restrictions": [
+                            {
+                                "action": ACTION.CONTAINS.value,
+                                "key": "tenant_id",
+                                "value": ["6", "2"],
+                            }
+                        ],
+                    },
+                ],
+            },
+            "my_feature2": {
+                "feature_default_value": True,
+            },
+        },
+    }
+    conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
+    enabled_list: List[str] = conf_store.get_all_enabled_feature_toggles(
+        rules_context={"tenant_id": "6", "username": "a"}
+    )
+    assert enabled_list == expected_value
+
+
+def test_multiple_features_only_some_enabled(mocker, config):
+    expected_value = ["my_feature", "my_feature2", "my_feature4"]
+    mocked_app_config_schema = {
+        "features": {
+            "my_feature": {  # rule will match here, feature is enabled due to rule match
+                "feature_default_value": False,
+                "rules": [
+                    {
+                        "rule_name": "tenant id is contained in [6,2] ",
+                        "value_when_applies": True,
+                        "restrictions": [
+                            {
+                                "action": ACTION.CONTAINS.value,
+                                "key": "tenant_id",
+                                "value": ["6", "2"],
+                            }
+                        ],
+                    },
+                ],
+            },
+            "my_feature2": {
+                "feature_default_value": True,
+            },
+            "my_feature3": {
+                "feature_default_value": False,
+            },
+            "my_feature4": {  # rule will not match here, feature is enabled by default
+                "feature_default_value": True,
+                "rules": [
+                    {
+                        "rule_name": "tenant id equals 7",
+                        "value_when_applies": False,
+                        "restrictions": [
+                            {
+                                "action": ACTION.EQUALS.value,
+                                "key": "tenant_id",
+                                "value": "7",
+                            }
+                        ],
+                    },
+                ],
+            },
+        },
+    }
+    conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
+    enabled_list: List[str] = conf_store.get_all_enabled_feature_toggles(
+        rules_context={"tenant_id": "6", "username": "a"}
+    )
+    assert enabled_list == expected_value

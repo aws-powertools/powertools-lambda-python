@@ -49,6 +49,29 @@ class ConfigurationStore:
             self._logger.error(f"caught exception while matching action, action={action}, exception={str(exc)}")
             return False
 
+    def _is_rule_matched(self, feature_name: str, rule: Dict[str, Any], rules_context: Dict[str, Any]) -> bool:
+        rule_name = rule.get(schema.RULE_NAME_KEY, "")
+        rule_default_value = rule.get(schema.RULE_DEFAULT_VALUE)
+        restrictions: Dict[str, str] = rule.get(schema.RESTRICTIONS_KEY)
+
+        for restriction in restrictions:
+            context_value = rules_context.get(restriction.get(schema.RESTRICTION_KEY))
+            if not self._match_by_action(
+                restriction.get(schema.RESTRICTION_ACTION),
+                restriction.get(schema.RESTRICTION_VALUE),
+                context_value,
+            ):
+                logger.debug(
+                    f"rule did not match action, rule_name={rule_name}, rule_default_value={rule_default_value}, feature_name={feature_name}, context_value={str(context_value)}"  # noqa: E501
+                )
+                # context doesn't match restriction
+                return False
+            # if we got here, all restrictions match
+            logger.debug(
+                f"rule matched, rule_name={rule_name}, rule_default_value={rule_default_value}, feature_name={feature_name}"  # noqa: E501
+            )
+            return True
+
     def _handle_rules(
         self,
         *,
@@ -58,34 +81,14 @@ class ConfigurationStore:
         rules: List[Dict[str, Any]],
     ) -> bool:
         for rule in rules:
-            rule_name = rule.get(schema.RULE_NAME_KEY, "")
             rule_default_value = rule.get(schema.RULE_DEFAULT_VALUE)
-            is_match = True
-            restrictions: Dict[str, str] = rule.get(schema.RESTRICTIONS_KEY)
-
-            for restriction in restrictions:
-                context_value = rules_context.get(restriction.get(schema.RESTRICTION_KEY))
-                if not self._match_by_action(
-                    restriction.get(schema.RESTRICTION_ACTION),
-                    restriction.get(schema.RESTRICTION_VALUE),
-                    context_value,
-                ):
-                    logger.debug(
-                        f"rule did not match action, rule_name={rule_name}, rule_default_value={rule_default_value}, feature_name={feature_name}, context_value={str(context_value)}"  # noqa: E501
-                    )
-                    is_match = False  # rules doesn't match restriction
-                    break
-            # if we got here, all restrictions match
-            if is_match:
-                logger.debug(
-                    f"rule matched, rule_name={rule_name}, rule_default_value={rule_default_value}, feature_name={feature_name}"  # noqa: E501
-                )
+            if self._is_rule_matched(feature_name, rule, rules_context):
                 return rule_default_value
-        # no rule matched, return default value of feature
-        logger.debug(
-            f"no rule matched, returning default value of feature, feature_default_value={feature_default_value}, feature_name={feature_name}"  # noqa: E501
-        )
-        return feature_default_value
+            # no rule matched, return default value of feature
+            logger.debug(
+                f"no rule matched, returning default value of feature, feature_default_value={feature_default_value}, feature_name={feature_name}"  # noqa: E501
+            )
+            return feature_default_value
 
     def get_configuration(self) -> Dict[str, Any]:
         """Get configuration string from AWs AppConfig and returned the parsed JSON dictionary
@@ -162,3 +165,39 @@ class ConfigurationStore:
             feature_default_value=feature_default_value,
             rules=rules_list,
         )
+
+    def get_all_enabled_feature_toggles(self, *, rules_context: Dict[str, Any]) -> List[str]:
+        """Get all enabled feature toggles while also taking into account rule_context (when a feature has defined rules)
+
+        Args:
+            rules_context (Dict[str, Any]): dict of attributes that you would like to match the rules
+                                            against, can be {'tenant_id: 'X', 'username':' 'Y', 'region': 'Z'} etc.
+
+        Returns:
+            List[str]: a list of all features name that are enabled by also taking into account
+                       rule_context (when a feature has defined rules)
+        """
+        try:
+            toggles_dict: Dict[str, Any] = self.get_configuration()
+        except ConfigurationException:
+            logger.error("unable to get feature toggles JSON")  # noqa: E501
+            return []
+        ret_list = []
+        features: Dict[str, Any] = toggles_dict.get(schema.FEATURES_KEY, {})
+        for feature_name, feature_dict_def in features.items():
+            rules_list = feature_dict_def.get(schema.RULES_KEY, [])
+            feature_default_value = feature_dict_def.get(schema.FEATURE_DEFAULT_VAL_KEY)
+            if feature_default_value and not rules_list:
+                self._logger.debug(
+                    f"feature is enabled by default and has no defined rules, feature_name={feature_name}"
+                )
+                ret_list.append(feature_name)
+            elif self._handle_rules(
+                feature_name=feature_name,
+                rules_context=rules_context,
+                feature_default_value=feature_default_value,
+                rules=rules_list,
+            ):
+                self._logger.debug(f"feature's calculated value is True, feature_name={feature_name}")
+                ret_list.append(feature_name)
+        return ret_list
