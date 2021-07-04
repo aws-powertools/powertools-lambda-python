@@ -6,11 +6,15 @@ from pathlib import Path
 from typing import Dict
 
 from aws_lambda_powertools.event_handler.api_gateway import (
+    APPLICATION_JSON,
     ApiGatewayResolver,
+    BadRequestError,
     CORSConfig,
+    NotFoundError,
     ProxyEventType,
     Response,
     ResponseBuilder,
+    ServiceError,
 )
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
@@ -24,7 +28,6 @@ def read_media(file_name: str) -> bytes:
 
 LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
 TEXT_HTML = "text/html"
-APPLICATION_JSON = "application/json"
 
 
 def test_alb_event():
@@ -429,6 +432,7 @@ def test_no_matches_with_cors():
     # AND cors headers are returned
     assert result["statusCode"] == 404
     assert "Access-Control-Allow-Origin" in result["headers"]
+    assert "Not found" in result["body"]
 
 
 def test_cors_preflight():
@@ -490,3 +494,48 @@ def test_custom_preflight_response():
     assert headers["Content-Type"] == TEXT_HTML
     assert "Access-Control-Allow-Origin" in result["headers"]
     assert headers["Access-Control-Allow-Methods"] == "CUSTOM"
+
+
+def test_service_error_response():
+    # GIVEN a service error response
+    app = ApiGatewayResolver(cors=CORSConfig())
+
+    @app.route(method="GET", rule="/service-error", cors=True)
+    def service_error():
+        raise ServiceError(403, "Unauthorized")
+
+    @app.route(method="GET", rule="/not-found-error", cors=False)
+    def not_found_error():
+        raise NotFoundError
+
+    @app.route(method="GET", rule="/bad-request-error", cors=False)
+    def bad_request_error():
+        raise BadRequestError("Missing required parameter")
+
+    # WHEN calling the handler
+    # AND path is /service-error
+    result = app({"path": "/service-error", "httpMethod": "GET"}, None)
+    # THEN return the service error response
+    # AND status code equals 403
+    assert result["statusCode"] == 403
+    assert result["body"] == json.dumps({"message": "Unauthorized"})
+    assert result["headers"]["Content-Type"] == APPLICATION_JSON
+    assert "Access-Control-Allow-Origin" in result["headers"]
+
+    # WHEN calling the handler
+    # AND path is /not-found-error
+    result = app({"path": "/not-found-error", "httpMethod": "GET"}, None)
+    # THEN return the not found error response
+    # AND status code equals 404
+    assert result["statusCode"] == 404
+    assert result["body"] == json.dumps({"message": "Not found"})
+    assert result["headers"]["Content-Type"] == APPLICATION_JSON
+
+    # WHEN calling the handler
+    # AND path is /bad-request-error
+    result = app({"path": "/bad-request-error", "httpMethod": "GET"}, None)
+    # THEN return the bad request error response
+    # AND status code equals 400
+    assert result["statusCode"] == 400
+    assert result["body"] == json.dumps({"message": "Missing required parameter"})
+    assert result["headers"]["Content-Type"] == APPLICATION_JSON

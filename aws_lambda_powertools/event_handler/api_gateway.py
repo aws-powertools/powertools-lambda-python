@@ -12,6 +12,79 @@ from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
+APPLICATION_JSON = "application/json"
+
+
+class ServiceError(Exception):
+    """Service Error"""
+
+    def __init__(self, status_code: int, message: str):
+        """
+        Parameters
+        ----------
+        code: int
+            Http status code
+        message: str
+            Error message
+        """
+        self.status_code = status_code
+        self.message = message
+
+    def __str__(self) -> str:
+        """To string of the message only"""
+        return self.message
+
+
+class BadRequestError(ServiceError):
+    """Bad Request Error"""
+
+    def __init__(self, message: str):
+        """
+        Parameters
+        ----------
+        message: str
+            Error message
+        """
+        super().__init__(400, message)
+
+
+class UnauthorizedError(ServiceError):
+    """Unauthorized Error"""
+
+    def __init__(self, message: str):
+        """
+        Parameters
+        ----------
+        message: str
+            Error message
+        """
+        super().__init__(401, message)
+
+
+class NotFoundError(ServiceError):
+    """Not Found Error"""
+
+    def __init__(self, message: str = "Not found"):
+        """
+        Parameters
+        ----------
+        message: str
+            Error message
+        """
+        super().__init__(404, message)
+
+
+class InternalServerError(ServiceError):
+    """Internal Serve Error"""
+
+    def __init__(self, message: str):
+        """
+        Parameters
+        ----------
+        message: str
+            Error message
+        """
+        super().__init__(500, message)
 
 
 class ProxyEventType(Enum):
@@ -467,7 +540,7 @@ class ApiGatewayResolver:
         return ResponseBuilder(
             Response(
                 status_code=404,
-                content_type="application/json",
+                content_type=APPLICATION_JSON,
                 headers=headers,
                 body=json.dumps({"message": "Not found"}),
             )
@@ -475,7 +548,17 @@ class ApiGatewayResolver:
 
     def _call_route(self, route: Route, args: Dict[str, str]) -> ResponseBuilder:
         """Actually call the matching route with any provided keyword arguments."""
-        return ResponseBuilder(self._to_response(route.func(**args)), route)
+        try:
+            return ResponseBuilder(self._to_response(route.func(**args)), route)
+        except ServiceError as e:
+            return ResponseBuilder(
+                Response(
+                    status_code=e.status_code,
+                    content_type=APPLICATION_JSON,
+                    body=json.dumps({"message": str(e)}),
+                ),
+                route,
+            )
 
     @staticmethod
     def _to_response(result: Union[Dict, Response]) -> Response:
@@ -493,6 +576,6 @@ class ApiGatewayResolver:
         logger.debug("Simple response detected, serializing return before constructing final response")
         return Response(
             status_code=200,
-            content_type="application/json",
+            content_type=APPLICATION_JSON,
             body=json.dumps(result, separators=(",", ":"), cls=Encoder),
         )
