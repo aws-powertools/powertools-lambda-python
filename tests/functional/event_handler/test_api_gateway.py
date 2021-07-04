@@ -10,6 +10,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     ApiGatewayResolver,
     BadRequestError,
     CORSConfig,
+    InternalServerError,
     NotFoundError,
     ProxyEventType,
     Response,
@@ -501,6 +502,14 @@ def test_service_error_response():
     # GIVEN a service error response
     app = ApiGatewayResolver(cors=CORSConfig())
 
+    @app.route(method="GET", rule="/bad-request-error", cors=False)
+    def bad_request_error():
+        raise BadRequestError("Missing required parameter")
+
+    @app.route(method="GET", rule="/unauthorized-error", cors=False)
+    def unauthorized_error():
+        raise UnauthorizedError("Unauthorized")
+
     @app.route(method="GET", rule="/service-error", cors=True)
     def service_error():
         raise ServiceError(403, "Unauthorized")
@@ -509,13 +518,27 @@ def test_service_error_response():
     def not_found_error():
         raise NotFoundError
 
-    @app.route(method="GET", rule="/bad-request-error", cors=False)
-    def bad_request_error():
-        raise BadRequestError("Missing required parameter")
+    @app.route(method="GET", rule="/internal-server-error", cors=False)
+    def internal_server_error():
+        raise InternalServerError("Internal server error")
 
-    @app.route(method="GET", rule="/unauthorized-error", cors=False)
-    def unauthorized_error():
-        raise UnauthorizedError("Unauthorized")
+    # WHEN calling the handler
+    # AND path is /bad-request-error
+    result = app({"path": "/bad-request-error", "httpMethod": "GET"}, None)
+    # THEN return the bad request error response
+    # AND status code equals 400
+    assert result["statusCode"] == 400
+    assert result["body"] == json.dumps({"message": "Missing required parameter"})
+    assert result["headers"]["Content-Type"] == APPLICATION_JSON
+
+    # WHEN calling the handler
+    # AND path is /unauthorized-error
+    result = app({"path": "/unauthorized-error", "httpMethod": "GET"}, None)
+    # THEN return the unauthorized error response
+    # AND status code equals 401
+    assert result["statusCode"] == 401
+    assert result["body"] == json.dumps({"message": "Unauthorized"})
+    assert result["headers"]["Content-Type"] == APPLICATION_JSON
 
     # WHEN calling the handler
     # AND path is /service-error
@@ -537,19 +560,10 @@ def test_service_error_response():
     assert result["headers"]["Content-Type"] == APPLICATION_JSON
 
     # WHEN calling the handler
-    # AND path is /bad-request-error
-    result = app({"path": "/bad-request-error", "httpMethod": "GET"}, None)
-    # THEN return the bad request error response
-    # AND status code equals 400
-    assert result["statusCode"] == 400
-    assert result["body"] == json.dumps({"message": "Missing required parameter"})
-    assert result["headers"]["Content-Type"] == APPLICATION_JSON
-
-    # WHEN calling the handler
-    # AND path is /unauthorized-error
-    result = app({"path": "/unauthorized-error", "httpMethod": "GET"}, None)
-    # THEN return the unauthorized error response
-    # AND status code equals 401
-    assert result["statusCode"] == 401
-    assert result["body"] == json.dumps({"message": "Unauthorized"})
+    # AND path is /internal-server-error
+    result = app({"path": "/internal-server-error", "httpMethod": "GET"}, None)
+    # THEN return the internal server error response
+    # AND status code equals 500
+    assert result["statusCode"] == 500
+    assert result["body"] == json.dumps({"message": "Internal server error"})
     assert result["headers"]["Content-Type"] == APPLICATION_JSON
