@@ -114,13 +114,15 @@ class ConfigurationStore:
         self._schema_validator.validate_json_schema(schema)
         return schema
 
-    def get_feature_toggle(self, *, feature_name: str, rules_context: Dict[str, Any], value_if_missing: bool) -> bool:
+    def get_feature_toggle(
+        self, *, feature_name: str, rules_context: Optional[Dict[str, Any]] = None, value_if_missing: bool
+    ) -> bool:
         """get a feature toggle boolean value. Value is calculated according to a set of rules and conditions.
            see below for explanation.
 
         Args:
             feature_name (str): feature name that you wish to fetch
-            rules_context (Dict[str, Any]): dict of attributes that you would like to match the rules
+            rules_context (Optional[Dict[str, Any]]): dict of attributes that you would like to match the rules
                                             against, can be {'tenant_id: 'X', 'username':' 'Y', 'region': 'Z'} etc.
             value_if_missing (bool): this will be the returned value in case the feature toggle doesn't exist in
                                      the schema or there has been an error while fetching the
@@ -134,6 +136,9 @@ class ConfigurationStore:
                    the defined feature
                 3. feature exists and a rule matches -> rule_default_value of rule is returned
         """
+        if rules_context is None:
+            rules_context = {}
+
         try:
             toggles_dict: Dict[str, Any] = self.get_configuration()
         except ConfigurationException:
@@ -166,17 +171,19 @@ class ConfigurationStore:
             rules=rules_list,
         )
 
-    def get_all_enabled_feature_toggles(self, *, rules_context: Dict[str, Any]) -> List[str]:
+    def get_all_enabled_feature_toggles(self, *, rules_context: Optional[Dict[str, Any]] = None) -> List[str]:
         """Get all enabled feature toggles while also taking into account rule_context (when a feature has defined rules)
 
         Args:
-            rules_context (Dict[str, Any]): dict of attributes that you would like to match the rules
+            rules_context (Optional[Dict[str, Any]]): dict of attributes that you would like to match the rules
                                             against, can be {'tenant_id: 'X', 'username':' 'Y', 'region': 'Z'} etc.
 
         Returns:
             List[str]: a list of all features name that are enabled by also taking into account
                        rule_context (when a feature has defined rules)
         """
+        if rules_context is None:
+            rules_context = {}
         try:
             toggles_dict: Dict[str, Any] = self.get_configuration()
         except ConfigurationException:
