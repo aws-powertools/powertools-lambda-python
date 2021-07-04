@@ -15,6 +15,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     Response,
     ResponseBuilder,
     ServiceError,
+    UnauthorizedError,
 )
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
@@ -512,6 +513,10 @@ def test_service_error_response():
     def bad_request_error():
         raise BadRequestError("Missing required parameter")
 
+    @app.route(method="GET", rule="/unauthorized-error", cors=False)
+    def unauthorized_error():
+        raise UnauthorizedError("Unauthorized")
+
     # WHEN calling the handler
     # AND path is /service-error
     result = app({"path": "/service-error", "httpMethod": "GET"}, None)
@@ -538,4 +543,13 @@ def test_service_error_response():
     # AND status code equals 400
     assert result["statusCode"] == 400
     assert result["body"] == json.dumps({"message": "Missing required parameter"})
+    assert result["headers"]["Content-Type"] == APPLICATION_JSON
+
+    # WHEN calling the handler
+    # AND path is /unauthorized-error
+    result = app({"path": "/unauthorized-error", "httpMethod": "GET"}, None)
+    # THEN return the unauthorized error response
+    # AND status code equals 401
+    assert result["statusCode"] == 401
+    assert result["body"] == json.dumps({"message": "Unauthorized"})
     assert result["headers"]["Content-Type"] == APPLICATION_JSON
