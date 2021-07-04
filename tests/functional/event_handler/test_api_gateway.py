@@ -5,6 +5,8 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Dict
 
+import pytest
+
 from aws_lambda_powertools.event_handler.api_gateway import (
     ApiGatewayResolver,
     CORSConfig,
@@ -490,3 +492,42 @@ def test_custom_preflight_response():
     assert headers["Content-Type"] == TEXT_HTML
     assert "Access-Control-Allow-Origin" in result["headers"]
     assert headers["Access-Control-Allow-Methods"] == "CUSTOM"
+
+
+def test_unhandled_exceptions_debug_on():
+    # GIVEN debug is enabled
+    # AND an unhandlable exception is raised
+    app = ApiGatewayResolver(debug=True)
+
+    @app.get("/raises-error")
+    def raises_error():
+        raise RuntimeError("Foo")
+
+    # WHEN calling the handler
+    result = app({"path": "/raises-error", "httpMethod": "GET"}, None)
+
+    # THEN return a 500
+    # AND Content-Type is set to text/plain
+    # AND include the exception traceback in the response
+    assert result["statusCode"] == 500
+    assert "Traceback (most recent call last)" in result["body"]
+    headers = result["headers"]
+    assert headers["Content-Type"] == "text/plain"
+
+
+def test_unhandled_exceptions_debug_off():
+    # GIVEN debug is disabled
+    # AND an unhandlable exception is raised
+    app = ApiGatewayResolver(debug=False)
+
+    @app.get("/raises-error")
+    def raises_error():
+        raise RuntimeError("Foo")
+
+    # WHEN calling the handler
+    # THEN raise the original exception
+    with pytest.raises(RuntimeError) as e:
+        app({"path": "/raises-error", "httpMethod": "GET"}, None)
+
+    # AND include the original error
+    assert e.value.args == ("Foo",)

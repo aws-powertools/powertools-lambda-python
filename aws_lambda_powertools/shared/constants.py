@@ -18,3 +18,5 @@ XRAY_TRACE_ID_ENV: str = "_X_AMZN_TRACE_ID"
 
 XRAY_SDK_MODULE = "aws_xray_sdk"
 XRAY_SDK_CORE_MODULE = "aws_xray_sdk.core"
+
+API_DEBUG_ENV: str = "POWERTOOLS_API_DEBUG"

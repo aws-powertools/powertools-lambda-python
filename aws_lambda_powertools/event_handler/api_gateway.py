@@ -1,11 +1,15 @@
 import base64
 import json
 import logging
+import os
 import re
+import traceback
 import zlib
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
@@ -237,7 +241,12 @@ class ApiGatewayResolver:
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
 
-    def __init__(self, proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent, cors: CORSConfig = None):
+    def __init__(
+        self,
+        proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent,
+        cors: CORSConfig = None,
+        debug: Optional[bool] = None,
+    ):
         """
         Parameters
         ----------
@@ -245,12 +254,15 @@ class ApiGatewayResolver:
             Proxy request type, defaults to API Gateway V1
         cors: CORSConfig
             Optionally configure and enabled CORS. Not each route will need to have to cors=True
+        debug: Optional[bool]
+            Enables debug mode, by default False, can be enabled by an environement variable
         """
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
         self._cors = cors
         self._cors_enabled: bool = cors is not None
         self._cors_methods: Set[str] = {"OPTIONS"}
+        self.debug = resolve_truthy_env_var_choice(choice=debug, env=os.getenv(constants.API_DEBUG_ENV, "false"))
 
     def get(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
         """Get route decorator with GET `method`
@@ -475,7 +487,21 @@ class ApiGatewayResolver:
 
     def _call_route(self, route: Route, args: Dict[str, str]) -> ResponseBuilder:
         """Actually call the matching route with any provided keyword arguments."""
-        return ResponseBuilder(self._to_response(route.func(**args)), route)
+        try:
+            return ResponseBuilder(self._to_response(route.func(**args)), route)
+        except Exception:
+            if self.debug:
+                # If the user has turned on debug mode,
+                # we'll let the original exception propagate so
+                # they get more information about what went wrong.
+                return ResponseBuilder(
+                    Response(
+                        status_code=500,
+                        content_type="text/plain",
+                        body="".join(traceback.format_exc()),
+                    )
+                )
+            raise
 
     @staticmethod
     def _to_response(result: Union[Dict, Response]) -> Response:
