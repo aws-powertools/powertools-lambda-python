@@ -517,7 +517,7 @@ def test_service_error_responses():
     # AND status code equals 400
     assert result["statusCode"] == 400
     assert result["headers"]["Content-Type"] == APPLICATION_JSON
-    expected = {"code": 400, "message": "Missing required parameter"}
+    expected = {"statusCode": 400, "message": "Missing required parameter"}
     assert result["body"] == json_dump(expected)
 
     # GIVEN an UnauthorizedError
@@ -532,7 +532,7 @@ def test_service_error_responses():
     # AND status code equals 401
     assert result["statusCode"] == 401
     assert result["headers"]["Content-Type"] == APPLICATION_JSON
-    expected = {"code": 401, "message": "Unauthorized"}
+    expected = {"statusCode": 401, "message": "Unauthorized"}
     assert result["body"] == json_dump(expected)
 
     # GIVEN an NotFoundError
@@ -547,7 +547,7 @@ def test_service_error_responses():
     # AND status code equals 404
     assert result["statusCode"] == 404
     assert result["headers"]["Content-Type"] == APPLICATION_JSON
-    expected = {"code": 404, "message": "Not found"}
+    expected = {"statusCode": 404, "message": "Not found"}
     assert result["body"] == json_dump(expected)
 
     # GIVEN an InternalServerError
@@ -562,7 +562,7 @@ def test_service_error_responses():
     # AND status code equals 500
     assert result["statusCode"] == 500
     assert result["headers"]["Content-Type"] == APPLICATION_JSON
-    expected = {"code": 500, "message": "Internal server error"}
+    expected = {"statusCode": 500, "message": "Internal server error"}
     assert result["body"] == json_dump(expected)
 
     # GIVEN an ServiceError with a custom status code
@@ -578,5 +578,5 @@ def test_service_error_responses():
     assert result["statusCode"] == 502
     assert result["headers"]["Content-Type"] == APPLICATION_JSON
     assert "Access-Control-Allow-Origin" in result["headers"]
-    expected = {"code": 502, "message": "Something went wrong!"}
+    expected = {"statusCode": 502, "message": "Something went wrong!"}
     assert result["body"] == json_dump(expected)

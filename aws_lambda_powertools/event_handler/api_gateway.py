@@ -4,6 +4,7 @@ import logging
 import re
 import zlib
 from enum import Enum
+from http import HTTPStatus
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -35,28 +36,28 @@ class BadRequestError(ServiceError):
     """Bad Request Error"""
 
     def __init__(self, msg: str):
-        super().__init__(400, msg)
+        super().__init__(HTTPStatus.BAD_REQUEST.value, msg)
 
 
 class UnauthorizedError(ServiceError):
     """Unauthorized Error"""
 
     def __init__(self, msg: str):
-        super().__init__(401, msg)
+        super().__init__(HTTPStatus.UNAUTHORIZED.value, msg)
 
 
 class NotFoundError(ServiceError):
     """Not Found Error"""
 
     def __init__(self, msg: str = "Not found"):
-        super().__init__(404, msg)
+        super().__init__(HTTPStatus.NOT_FOUND.value, msg)
 
 
 class InternalServerError(ServiceError):
     """Internal Server Error"""
 
     def __init__(self, message: str):
-        super().__init__(500, message)
+        super().__init__(HTTPStatus.INTERNAL_SERVER_ERROR.value, message)
 
 
 class ProxyEventType(Enum):
@@ -511,10 +512,10 @@ class ApiGatewayResolver:
 
         return ResponseBuilder(
             Response(
-                status_code=404,
+                status_code=HTTPStatus.NOT_FOUND.value,
                 content_type=APPLICATION_JSON,
                 headers=headers,
-                body=self._json_dump({"code": 404, "message": "Not found"}),
+                body=self._json_dump({"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"}),
             )
         )
 
@@ -527,7 +528,7 @@ class ApiGatewayResolver:
                 Response(
                     status_code=e.status_code,
                     content_type=APPLICATION_JSON,
-                    body=self._json_dump({"code": e.status_code, "message": e.msg}),
+                    body=self._json_dump({"statusCode": e.status_code, "message": e.msg}),
                 ),
                 route,
             )
