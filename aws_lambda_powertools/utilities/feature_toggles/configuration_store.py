@@ -32,7 +32,7 @@ class ConfigurationStore:
         self._schema_validator = schema.SchemaValidator(self._logger)
         self._conf_store = AppConfigProvider(environment=environment, application=service, config=config)
 
-    def _match_by_action(self, action: str, restriction_value: Any, context_value: Any) -> bool:
+    def _match_by_action(self, action: str, CONDITION_VALUE: Any, context_value: Any) -> bool:
         if not context_value:
             return False
         mapping_by_action = {
@@ -44,7 +44,7 @@ class ConfigurationStore:
 
         try:
             func = mapping_by_action.get(action, lambda a, b: False)
-            return func(context_value, restriction_value)
+            return func(context_value, CONDITION_VALUE)
         except Exception as exc:
             self._logger.error(f"caught exception while matching action, action={action}, exception={str(exc)}")
             return False
@@ -52,21 +52,21 @@ class ConfigurationStore:
     def _is_rule_matched(self, feature_name: str, rule: Dict[str, Any], rules_context: Dict[str, Any]) -> bool:
         rule_name = rule.get(schema.RULE_NAME_KEY, "")
         rule_default_value = rule.get(schema.RULE_DEFAULT_VALUE)
-        restrictions: Dict[str, str] = rule.get(schema.RESTRICTIONS_KEY)
+        conditions: Dict[str, str] = rule.get(schema.CONDITIONS_KEY)
 
-        for restriction in restrictions:
-            context_value = rules_context.get(restriction.get(schema.RESTRICTION_KEY))
+        for condition in conditions:
+            context_value = rules_context.get(condition.get(schema.CONDITION_KEY))
             if not self._match_by_action(
-                restriction.get(schema.RESTRICTION_ACTION),
-                restriction.get(schema.RESTRICTION_VALUE),
+                condition.get(schema.CONDITION_ACTION),
+                condition.get(schema.CONDITION_VALUE),
                 context_value,
             ):
                 logger.debug(
                     f"rule did not match action, rule_name={rule_name}, rule_default_value={rule_default_value}, feature_name={feature_name}, context_value={str(context_value)}"  # noqa: E501
                 )
-                # context doesn't match restriction
+                # context doesn't match condition
                 return False
-            # if we got here, all restrictions match
+            # if we got here, all conditions match
             logger.debug(
                 f"rule matched, rule_name={rule_name}, rule_default_value={rule_default_value}, feature_name={feature_name}"  # noqa: E501
             )

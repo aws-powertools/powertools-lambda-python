@@ -37,7 +37,7 @@ def test_toggles_rule_does_not_match(mocker, config):
                     {
                         "rule_name": "tenant id equals 345345435",
                         "value_when_applies": False,
-                        "restrictions": [
+                        "conditions": [
                             {
                                 "action": ACTION.EQUALS.value,
                                 "key": "tenant_id",
@@ -57,7 +57,7 @@ def test_toggles_rule_does_not_match(mocker, config):
 
 # this test checks that if you try to get a feature that doesn't exist in the schema,
 # you get the default value of False that was sent to the get_feature_toggle API
-def test_toggles_no_restrictions_feature_does_not_exist(mocker, config):
+def test_toggles_no_conditions_feature_does_not_exist(mocker, config):
     expected_value = False
     mocked_app_config_schema = {"features": {"my_fake_feature": {"feature_default_value": True}}}
 
@@ -79,7 +79,7 @@ def test_toggles_no_rules(mocker, config):
 
 
 # check a case where the feature exists but the rule doesn't match so we revert to the default value of the feature
-def test_toggles_restrictions_no_match(mocker, config):
+def test_toggles_conditions_no_match(mocker, config):
     expected_value = True
     mocked_app_config_schema = {
         "features": {
@@ -89,7 +89,7 @@ def test_toggles_restrictions_no_match(mocker, config):
                     {
                         "rule_name": "tenant id equals 345345435",
                         "value_when_applies": False,
-                        "restrictions": [
+                        "conditions": [
                             {
                                 "action": ACTION.EQUALS.value,
                                 "key": "tenant_id",
@@ -110,8 +110,8 @@ def test_toggles_restrictions_no_match(mocker, config):
     assert toggle == expected_value
 
 
-# check that a rule can match when it has multiple restrictions, see rule name for further explanation
-def test_toggles_restrictions_rule_match_equal_multiple_restrictions(mocker, config):
+# check that a rule can match when it has multiple conditions, see rule name for further explanation
+def test_toggles_conditions_rule_match_equal_multiple_conditions(mocker, config):
     expected_value = False
     tenant_id_val = "6"
     username_val = "a"
@@ -123,9 +123,9 @@ def test_toggles_restrictions_rule_match_equal_multiple_restrictions(mocker, con
                     {
                         "rule_name": "tenant id equals 6 and username is a",
                         "value_when_applies": expected_value,
-                        "restrictions": [
+                        "conditions": [
                             {
-                                "action": ACTION.EQUALS.value,  # this rule will match, it has multiple restrictions
+                                "action": ACTION.EQUALS.value,  # this rule will match, it has multiple conditions
                                 "key": "tenant_id",
                                 "value": tenant_id_val,
                             },
@@ -152,10 +152,10 @@ def test_toggles_restrictions_rule_match_equal_multiple_restrictions(mocker, con
     assert toggle == expected_value
 
 
-# check a case when rule doesn't match and it has multiple restrictions,
+# check a case when rule doesn't match and it has multiple conditions,
 # different tenant id causes the rule to not match.
 # default value of the feature in this case is True
-def test_toggles_restrictions_no_rule_match_equal_multiple_restrictions(mocker, config):
+def test_toggles_conditions_no_rule_match_equal_multiple_conditions(mocker, config):
     expected_val = True
     mocked_app_config_schema = {
         "features": {
@@ -165,7 +165,7 @@ def test_toggles_restrictions_no_rule_match_equal_multiple_restrictions(mocker, 
                     {
                         "rule_name": "tenant id equals 645654 and username is a",  # rule will not match
                         "value_when_applies": False,
-                        "restrictions": [
+                        "conditions": [
                             {
                                 "action": ACTION.EQUALS.value,
                                 "key": "tenant_id",
@@ -190,7 +190,7 @@ def test_toggles_restrictions_no_rule_match_equal_multiple_restrictions(mocker, 
 
 
 # check rule match for multiple of action types
-def test_toggles_restrictions_rule_match_multiple_actions_multiple_rules_multiple_restrictions(mocker, config):
+def test_toggles_conditions_rule_match_multiple_actions_multiple_rules_multiple_conditions(mocker, config):
     expected_value_first_check = True
     expected_value_second_check = False
     expected_value_third_check = False
@@ -203,7 +203,7 @@ def test_toggles_restrictions_rule_match_multiple_actions_multiple_rules_multipl
                     {
                         "rule_name": "tenant id equals 6 and username startswith a",
                         "value_when_applies": expected_value_first_check,
-                        "restrictions": [
+                        "conditions": [
                             {
                                 "action": ACTION.EQUALS.value,
                                 "key": "tenant_id",
@@ -219,7 +219,7 @@ def test_toggles_restrictions_rule_match_multiple_actions_multiple_rules_multipl
                     {
                         "rule_name": "tenant id equals 4446 and username startswith a and endswith z",
                         "value_when_applies": expected_value_second_check,
-                        "restrictions": [
+                        "conditions": [
                             {
                                 "action": ACTION.EQUALS.value,
                                 "key": "tenant_id",
@@ -284,7 +284,7 @@ def test_toggles_match_rule_with_contains_action(mocker, config):
                     {
                         "rule_name": "tenant id is contained in [6,2] ",
                         "value_when_applies": expected_value,
-                        "restrictions": [
+                        "conditions": [
                             {
                                 "action": ACTION.CONTAINS.value,
                                 "key": "tenant_id",
@@ -315,7 +315,7 @@ def test_toggles_no_match_rule_with_contains_action(mocker, config):
                     {
                         "rule_name": "tenant id is contained in [6,2] ",
                         "value_when_applies": True,
-                        "restrictions": [
+                        "conditions": [
                             {
                                 "action": ACTION.CONTAINS.value,
                                 "key": "tenant_id",
@@ -346,7 +346,7 @@ def test_multiple_features_enabled(mocker, config):
                     {
                         "rule_name": "tenant id is contained in [6,2] ",
                         "value_when_applies": True,
-                        "restrictions": [
+                        "conditions": [
                             {
                                 "action": ACTION.CONTAINS.value,
                                 "key": "tenant_id",
@@ -378,7 +378,7 @@ def test_multiple_features_only_some_enabled(mocker, config):
                     {
                         "rule_name": "tenant id is contained in [6,2] ",
                         "value_when_applies": True,
-                        "restrictions": [
+                        "conditions": [
                             {
                                 "action": ACTION.CONTAINS.value,
                                 "key": "tenant_id",
@@ -400,7 +400,7 @@ def test_multiple_features_only_some_enabled(mocker, config):
                     {
                         "rule_name": "tenant id equals 7",
                         "value_when_applies": False,
-                        "restrictions": [
+                        "conditions": [
                             {
                                 "action": ACTION.EQUALS.value,
                                 "key": "tenant_id",

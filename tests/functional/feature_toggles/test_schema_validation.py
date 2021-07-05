@@ -7,10 +7,10 @@ from aws_lambda_powertools.utilities.feature_toggles.schema import (
     ACTION,
     FEATURE_DEFAULT_VAL_KEY,
     FEATURES_KEY,
-    RESTRICTION_ACTION,
-    RESTRICTION_KEY,
-    RESTRICTION_VALUE,
-    RESTRICTIONS_KEY,
+    CONDITION_ACTION,
+    CONDITION_KEY,
+    CONDITION_VALUE,
+    CONDITIONS_KEY,
     RULE_DEFAULT_VALUE,
     RULE_NAME_KEY,
     RULES_KEY,
@@ -117,7 +117,7 @@ def test_invalid_rule():
     with pytest.raises(ConfigurationException):
         validator.validate_json_schema(schema)
 
-    # missing restrictions list
+    # missing conditions list
     schema = {
         FEATURES_KEY: {
             "my_feature": {
@@ -134,13 +134,13 @@ def test_invalid_rule():
     with pytest.raises(ConfigurationException):
         validator.validate_json_schema(schema)
 
-    # restriction list is empty
+    # condition list is empty
     schema = {
         FEATURES_KEY: {
             "my_feature": {
                 FEATURE_DEFAULT_VAL_KEY: False,
                 RULES_KEY: [
-                    {RULE_NAME_KEY: "tenant id equals 345345435", RULE_DEFAULT_VALUE: False, RESTRICTIONS_KEY: []},
+                    {RULE_NAME_KEY: "tenant id equals 345345435", RULE_DEFAULT_VALUE: False, CONDITIONS_KEY: []},
                 ],
             }
         }
@@ -148,13 +148,13 @@ def test_invalid_rule():
     with pytest.raises(ConfigurationException):
         validator.validate_json_schema(schema)
 
-    # restriction is invalid type, not list
+    # condition is invalid type, not list
     schema = {
         FEATURES_KEY: {
             "my_feature": {
                 FEATURE_DEFAULT_VAL_KEY: False,
                 RULES_KEY: [
-                    {RULE_NAME_KEY: "tenant id equals 345345435", RULE_DEFAULT_VALUE: False, RESTRICTIONS_KEY: {}},
+                    {RULE_NAME_KEY: "tenant id equals 345345435", RULE_DEFAULT_VALUE: False, CONDITIONS_KEY: {}},
                 ],
             }
         }
@@ -163,8 +163,8 @@ def test_invalid_rule():
         validator.validate_json_schema(schema)
 
 
-def test_invalid_restriction():
-    # invalid restriction action
+def test_invalid_condition():
+    # invalid condition action
     schema = {
         FEATURES_KEY: {
             "my_feature": {
@@ -173,7 +173,7 @@ def test_invalid_restriction():
                     {
                         RULE_NAME_KEY: "tenant id equals 345345435",
                         RULE_DEFAULT_VALUE: False,
-                        RESTRICTIONS_KEY: {RESTRICTION_ACTION: "stuff", RESTRICTION_KEY: "a", RESTRICTION_VALUE: "a"},
+                        CONDITIONS_KEY: {CONDITION_ACTION: "stuff", CONDITION_KEY: "a", CONDITION_VALUE: "a"},
                     },
                 ],
             }
@@ -183,7 +183,7 @@ def test_invalid_restriction():
     with pytest.raises(ConfigurationException):
         validator.validate_json_schema(schema)
 
-    # missing restriction key and value
+    # missing condition key and value
     schema = {
         FEATURES_KEY: {
             "my_feature": {
@@ -192,7 +192,7 @@ def test_invalid_restriction():
                     {
                         RULE_NAME_KEY: "tenant id equals 345345435",
                         RULE_DEFAULT_VALUE: False,
-                        RESTRICTIONS_KEY: {RESTRICTION_ACTION: ACTION.EQUALS.value},
+                        CONDITIONS_KEY: {CONDITION_ACTION: ACTION.EQUALS.value},
                     },
                 ],
             }
@@ -201,7 +201,7 @@ def test_invalid_restriction():
     with pytest.raises(ConfigurationException):
         validator.validate_json_schema(schema)
 
-    # invalid restriction key type, not string
+    # invalid condition key type, not string
     schema = {
         FEATURES_KEY: {
             "my_feature": {
@@ -210,10 +210,10 @@ def test_invalid_restriction():
                     {
                         RULE_NAME_KEY: "tenant id equals 345345435",
                         RULE_DEFAULT_VALUE: False,
-                        RESTRICTIONS_KEY: {
-                            RESTRICTION_ACTION: ACTION.EQUALS.value,
-                            RESTRICTION_KEY: 5,
-                            RESTRICTION_VALUE: "a",
+                        CONDITIONS_KEY: {
+                            CONDITION_ACTION: ACTION.EQUALS.value,
+                            CONDITION_KEY: 5,
+                            CONDITION_VALUE: "a",
                         },
                     },
                 ],
@@ -224,7 +224,7 @@ def test_invalid_restriction():
         validator.validate_json_schema(schema)
 
 
-def test_valid_restriction_all_actions():
+def test_valid_condition_all_actions():
     validator = SchemaValidator(logger)
     schema = {
         FEATURES_KEY: {
@@ -234,26 +234,26 @@ def test_valid_restriction_all_actions():
                     {
                         RULE_NAME_KEY: "tenant id equals 645654 and username is a",
                         RULE_DEFAULT_VALUE: True,
-                        RESTRICTIONS_KEY: [
+                        CONDITIONS_KEY: [
                             {
-                                RESTRICTION_ACTION: ACTION.EQUALS.value,
-                                RESTRICTION_KEY: "tenant_id",
-                                RESTRICTION_VALUE: "645654",
+                                CONDITION_ACTION: ACTION.EQUALS.value,
+                                CONDITION_KEY: "tenant_id",
+                                CONDITION_VALUE: "645654",
                             },
                             {
-                                RESTRICTION_ACTION: ACTION.STARTSWITH.value,
-                                RESTRICTION_KEY: "username",
-                                RESTRICTION_VALUE: "a",
+                                CONDITION_ACTION: ACTION.STARTSWITH.value,
+                                CONDITION_KEY: "username",
+                                CONDITION_VALUE: "a",
                             },
                             {
-                                RESTRICTION_ACTION: ACTION.ENDSWITH.value,
-                                RESTRICTION_KEY: "username",
-                                RESTRICTION_VALUE: "a",
+                                CONDITION_ACTION: ACTION.ENDSWITH.value,
+                                CONDITION_KEY: "username",
+                                CONDITION_VALUE: "a",
                             },
                             {
-                                RESTRICTION_ACTION: ACTION.CONTAINS.value,
-                                RESTRICTION_KEY: "username",
-                                RESTRICTION_VALUE: ["a", "b"],
+                                CONDITION_ACTION: ACTION.CONTAINS.value,
+                                CONDITION_KEY: "username",
+                                CONDITION_VALUE: ["a", "b"],
                             },
                         ],
                     },

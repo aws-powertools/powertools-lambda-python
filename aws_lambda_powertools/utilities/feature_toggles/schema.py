@@ -6,12 +6,12 @@ from .exceptions import ConfigurationException
 FEATURES_KEY = "features"
 RULES_KEY = "rules"
 FEATURE_DEFAULT_VAL_KEY = "feature_default_value"
-RESTRICTIONS_KEY = "restrictions"
+CONDITIONS_KEY = "conditions"
 RULE_NAME_KEY = "rule_name"
 RULE_DEFAULT_VALUE = "value_when_applies"
-RESTRICTION_KEY = "key"
-RESTRICTION_VALUE = "value"
-RESTRICTION_ACTION = "action"
+CONDITION_KEY = "key"
+CONDITION_VALUE = "value"
+CONDITION_ACTION = "action"
 
 
 class ACTION(str, Enum):
@@ -29,18 +29,18 @@ class SchemaValidator:
         self._logger.error(error_str)
         raise ConfigurationException(error_str)
 
-    def _validate_restriction(self, rule_name: str, restriction: Dict[str, str]) -> None:
-        if not restriction or not isinstance(restriction, dict):
-            self._raise_conf_exc(f"invalid restriction type, not a dictionary, rule_name={rule_name}")
-        action = restriction.get(RESTRICTION_ACTION, "")
+    def _validate_condition(self, rule_name: str, condition: Dict[str, str]) -> None:
+        if not condition or not isinstance(condition, dict):
+            self._raise_conf_exc(f"invalid condition type, not a dictionary, rule_name={rule_name}")
+        action = condition.get(CONDITION_ACTION, "")
         if action not in [ACTION.EQUALS.value, ACTION.STARTSWITH.value, ACTION.ENDSWITH.value, ACTION.CONTAINS.value]:
             self._raise_conf_exc(f"invalid action value, rule_name={rule_name}, action={action}")
-        key = restriction.get(RESTRICTION_KEY, "")
+        key = condition.get(CONDITION_KEY, "")
         if not key or not isinstance(key, str):
             self._raise_conf_exc(f"invalid key value, key has to be a non empty string, rule_name={rule_name}")
-        value = restriction.get(RESTRICTION_VALUE, "")
+        value = condition.get(CONDITION_VALUE, "")
         if not value:
-            self._raise_conf_exc(f"missing restriction value, rule_name={rule_name}")
+            self._raise_conf_exc(f"missing condition value, rule_name={rule_name}")
 
     def _validate_rule(self, feature_name: str, rule: Dict[str, Any]) -> None:
         if not rule or not isinstance(rule, dict):
@@ -51,12 +51,12 @@ class SchemaValidator:
         rule_default_value = rule.get(RULE_DEFAULT_VALUE)
         if rule_default_value is None or not isinstance(rule_default_value, bool):
             self._raise_conf_exc(f"invalid rule_default_value, rule_name={rule_name}")
-        restrictions = rule.get(RESTRICTIONS_KEY, {})
-        if not restrictions or not isinstance(restrictions, list):
-            self._raise_conf_exc(f"invalid restrictions, rule_name={rule_name}")
-        # validate restrictions
-        for restriction in restrictions:
-            self._validate_restriction(rule_name, restriction)
+        conditions = rule.get(CONDITIONS_KEY, {})
+        if not conditions or not isinstance(conditions, list):
+            self._raise_conf_exc(f"invalid condition, rule_name={rule_name}")
+        # validate conditions
+        for condition in conditions:
+            self._validate_condition(rule_name, condition)
 
     def _validate_feature(self, feature_name: str, feature_dict_def: Dict[str, Any]) -> None:
         if not feature_dict_def or not isinstance(feature_dict_def, dict):
