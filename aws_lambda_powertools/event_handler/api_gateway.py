@@ -481,7 +481,7 @@ class ApiGatewayResolver:
                 status_code=404,
                 content_type="application/json",
                 headers=headers,
-                body=json.dumps({"message": "Not found"}),
+                body=self._json_dump({"message": "Not found"}),
             )
         )
 
@@ -503,8 +503,7 @@ class ApiGatewayResolver:
                 )
             raise
 
-    @staticmethod
-    def _to_response(result: Union[Dict, Response]) -> Response:
+    def _to_response(self, result: Union[Dict, Response]) -> Response:
         """Convert the route's result to a Response
 
          2 main result types are supported:
@@ -520,5 +519,12 @@ class ApiGatewayResolver:
         return Response(
             status_code=200,
             content_type="application/json",
-            body=json.dumps(result, separators=(",", ":"), cls=Encoder),
+            body=self._json_dump(result),
         )
+
+    def _json_dump(self, obj: Any) -> str:
+        """Does a concise json serialization"""
+        if self._debug:
+            return json.dumps(obj, indent=4, cls=Encoder)
+        else:
+            return json.dumps(obj, separators=(",", ":"), cls=Encoder)

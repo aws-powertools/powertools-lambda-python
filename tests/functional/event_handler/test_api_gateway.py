@@ -544,3 +544,19 @@ def test_debug_mode_environment_variable(monkeypatch):
     # WHEN calling app._debug
     # THEN the debug mode is enabled
     assert app._debug
+
+
+def test_debug_json_formatting():
+    # GIVEN debug is True
+    app = ApiGatewayResolver(debug=True)
+    response = {"message": "Foo"}
+
+    @app.get("/foo")
+    def foo():
+        return response
+
+    # WHEN calling the handler
+    result = app({"path": "/foo", "httpMethod": "GET"}, None)
+
+    # THEN return a pretty print json in the body
+    assert result["body"] == json.dumps(response, indent=4)
