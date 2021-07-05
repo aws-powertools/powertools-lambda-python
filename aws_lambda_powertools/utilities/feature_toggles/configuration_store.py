@@ -32,7 +32,7 @@ class ConfigurationStore:
         self._schema_validator = schema.SchemaValidator(self._logger)
         self._conf_store = AppConfigProvider(environment=environment, application=service, config=config)
 
-    def _match_by_action(self, action: str, CONDITION_VALUE: Any, context_value: Any) -> bool:
+    def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
         if not context_value:
             return False
         mapping_by_action = {
@@ -44,7 +44,7 @@ class ConfigurationStore:
 
         try:
             func = mapping_by_action.get(action, lambda a, b: False)
-            return func(context_value, CONDITION_VALUE)
+            return func(context_value, condition_value)
         except Exception as exc:
             self._logger.error(f"caught exception while matching action, action={action}, exception={str(exc)}")
             return False
