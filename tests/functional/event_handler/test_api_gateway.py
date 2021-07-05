@@ -538,7 +538,7 @@ def test_unhandled_exceptions_debug_off():
 
 def test_debug_mode_environment_variable(monkeypatch):
     # GIVEN a debug mode environment variable is set
-    monkeypatch.setenv(constants.API_DEBUG_ENV, "true")
+    monkeypatch.setenv(constants.EVENT_HANDLER_DEBUG_ENV, "true")
     app = ApiGatewayResolver()
 
     # WHEN calling app._debug
