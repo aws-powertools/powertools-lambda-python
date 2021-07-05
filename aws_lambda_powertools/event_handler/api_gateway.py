@@ -255,14 +255,14 @@ class ApiGatewayResolver:
         cors: CORSConfig
             Optionally configure and enabled CORS. Not each route will need to have to cors=True
         debug: Optional[bool]
-            Enables debug mode, by default False, can be enabled by an environement variable
+            Enables debug mode, by default False. Can be enabled by "POWERTOOLS_API_DEBUG" environment variable
         """
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
         self._cors = cors
         self._cors_enabled: bool = cors is not None
         self._cors_methods: Set[str] = {"OPTIONS"}
-        self.debug = resolve_truthy_env_var_choice(choice=debug, env=os.getenv(constants.API_DEBUG_ENV, "false"))
+        self._debug = resolve_truthy_env_var_choice(choice=debug, env=os.getenv(constants.API_DEBUG_ENV, "false"))
 
     def get(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
         """Get route decorator with GET `method`
@@ -490,7 +490,7 @@ class ApiGatewayResolver:
         try:
             return ResponseBuilder(self._to_response(route.func(**args)), route)
         except Exception:
-            if self.debug:
+            if self._debug:
                 # If the user has turned on debug mode,
                 # we'll let the original exception propagate so
                 # they get more information about what went wrong.

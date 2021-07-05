@@ -497,9 +497,9 @@ def test_custom_preflight_response():
 
 def test_unhandled_exceptions_debug_on():
     # GIVEN debug is enabled
-    # AND an unhandlable exception is raised
+    # AND an unhandled exception is raised
     app = ApiGatewayResolver(debug=True)
-    assert app.debug
+    assert app._debug
 
     @app.get("/raises-error")
     def raises_error():
@@ -519,9 +519,9 @@ def test_unhandled_exceptions_debug_on():
 
 def test_unhandled_exceptions_debug_off():
     # GIVEN debug is disabled
-    # AND an unhandlable exception is raised
+    # AND an unhandled exception is raised
     app = ApiGatewayResolver(debug=False)
-    assert not app.debug
+    assert not app._debug
 
     @app.get("/raises-error")
     def raises_error():
@@ -541,6 +541,6 @@ def test_debug_mode_environment_variable(monkeypatch):
     monkeypatch.setenv(constants.API_DEBUG_ENV, "true")
     app = ApiGatewayResolver()
 
-    # WHEN calling app.debug
+    # WHEN calling app._debug
     # THEN the debug mode is enabled
-    assert app.debug
+    assert app._debug
