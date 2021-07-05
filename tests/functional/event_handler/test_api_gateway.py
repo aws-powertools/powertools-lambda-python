@@ -498,29 +498,17 @@ def test_custom_preflight_response():
     assert headers["Access-Control-Allow-Methods"] == "CUSTOM"
 
 
-def test_service_error_response():
-    # GIVEN a service error response
+def test_service_error_responses():
+    # SCENARIO handling different kind of service errors being raised
     app = ApiGatewayResolver(cors=CORSConfig())
 
-    @app.route(method="GET", rule="/bad-request-error", cors=False)
+    def json_dump(obj):
+        return json.dumps(obj, separators=(",", ":"))
+
+    # GIVEN an BadRequestError
+    @app.get(rule="/bad-request-error", cors=False)
     def bad_request_error():
         raise BadRequestError("Missing required parameter")
-
-    @app.route(method="GET", rule="/unauthorized-error", cors=False)
-    def unauthorized_error():
-        raise UnauthorizedError("Unauthorized")
-
-    @app.route(method="GET", rule="/service-error", cors=True)
-    def service_error():
-        raise ServiceError(403, "Unauthorized")
-
-    @app.route(method="GET", rule="/not-found-error", cors=False)
-    def not_found_error():
-        raise NotFoundError
-
-    @app.route(method="GET", rule="/internal-server-error", cors=False)
-    def internal_server_error():
-        raise InternalServerError("Internal server error")
 
     # WHEN calling the handler
     # AND path is /bad-request-error
@@ -528,8 +516,14 @@ def test_service_error_response():
     # THEN return the bad request error response
     # AND status code equals 400
     assert result["statusCode"] == 400
-    assert result["body"] == json.dumps({"message": "Missing required parameter"})
     assert result["headers"]["Content-Type"] == APPLICATION_JSON
+    expected = {"code": 400, "message": "Missing required parameter"}
+    assert result["body"] == json_dump(expected)
+
+    # GIVEN an UnauthorizedError
+    @app.get(rule="/unauthorized-error", cors=False)
+    def unauthorized_error():
+        raise UnauthorizedError("Unauthorized")
 
     # WHEN calling the handler
     # AND path is /unauthorized-error
@@ -537,18 +531,14 @@ def test_service_error_response():
     # THEN return the unauthorized error response
     # AND status code equals 401
     assert result["statusCode"] == 401
-    assert result["body"] == json.dumps({"message": "Unauthorized"})
     assert result["headers"]["Content-Type"] == APPLICATION_JSON
+    expected = {"code": 401, "message": "Unauthorized"}
+    assert result["body"] == json_dump(expected)
 
-    # WHEN calling the handler
-    # AND path is /service-error
-    result = app({"path": "/service-error", "httpMethod": "GET"}, None)
-    # THEN return the service error response
-    # AND status code equals 403
-    assert result["statusCode"] == 403
-    assert result["body"] == json.dumps({"message": "Unauthorized"})
-    assert result["headers"]["Content-Type"] == APPLICATION_JSON
-    assert "Access-Control-Allow-Origin" in result["headers"]
+    # GIVEN an NotFoundError
+    @app.get(rule="/not-found-error", cors=False)
+    def not_found_error():
+        raise NotFoundError
 
     # WHEN calling the handler
     # AND path is /not-found-error
@@ -556,8 +546,14 @@ def test_service_error_response():
     # THEN return the not found error response
     # AND status code equals 404
     assert result["statusCode"] == 404
-    assert result["body"] == json.dumps({"message": "Not found"})
     assert result["headers"]["Content-Type"] == APPLICATION_JSON
+    expected = {"code": 404, "message": "Not found"}
+    assert result["body"] == json_dump(expected)
+
+    # GIVEN an InternalServerError
+    @app.get(rule="/internal-server-error", cors=False)
+    def internal_server_error():
+        raise InternalServerError("Internal server error")
 
     # WHEN calling the handler
     # AND path is /internal-server-error
@@ -565,5 +561,22 @@ def test_service_error_response():
     # THEN return the internal server error response
     # AND status code equals 500
     assert result["statusCode"] == 500
-    assert result["body"] == json.dumps({"message": "Internal server error"})
     assert result["headers"]["Content-Type"] == APPLICATION_JSON
+    expected = {"code": 500, "message": "Internal server error"}
+    assert result["body"] == json_dump(expected)
+
+    # GIVEN an ServiceError with a custom status code
+    @app.get(rule="/service-error", cors=True)
+    def service_error():
+        raise ServiceError(502, "Something went wrong!")
+
+    # WHEN calling the handler
+    # AND path is /service-error
+    result = app({"path": "/service-error", "httpMethod": "GET"}, None)
+    # THEN return the service error response
+    # AND status code equals 502
+    assert result["statusCode"] == 502
+    assert result["headers"]["Content-Type"] == APPLICATION_JSON
+    assert "Access-Control-Allow-Origin" in result["headers"]
+    expected = {"code": 502, "message": "Something went wrong!"}
+    assert result["body"] == json_dump(expected)

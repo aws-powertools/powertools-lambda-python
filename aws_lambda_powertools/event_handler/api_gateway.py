@@ -18,72 +18,44 @@ APPLICATION_JSON = "application/json"
 class ServiceError(Exception):
     """Service Error"""
 
-    def __init__(self, status_code: int, message: str):
+    def __init__(self, status_code: int, msg: str):
         """
         Parameters
         ----------
-        code: int
+        status_code: int
             Http status code
-        message: str
+        msg: str
             Error message
         """
         self.status_code = status_code
-        self.message = message
-
-    def __str__(self) -> str:
-        """To string of the message only"""
-        return self.message
+        self.msg = msg
 
 
 class BadRequestError(ServiceError):
     """Bad Request Error"""
 
-    def __init__(self, message: str):
-        """
-        Parameters
-        ----------
-        message: str
-            Error message
-        """
-        super().__init__(400, message)
+    def __init__(self, msg: str):
+        super().__init__(400, msg)
 
 
 class UnauthorizedError(ServiceError):
     """Unauthorized Error"""
 
-    def __init__(self, message: str):
-        """
-        Parameters
-        ----------
-        message: str
-            Error message
-        """
-        super().__init__(401, message)
+    def __init__(self, msg: str):
+        super().__init__(401, msg)
 
 
 class NotFoundError(ServiceError):
     """Not Found Error"""
 
-    def __init__(self, message: str = "Not found"):
-        """
-        Parameters
-        ----------
-        message: str
-            Error message
-        """
-        super().__init__(404, message)
+    def __init__(self, msg: str = "Not found"):
+        super().__init__(404, msg)
 
 
 class InternalServerError(ServiceError):
-    """Internal Serve Error"""
+    """Internal Server Error"""
 
     def __init__(self, message: str):
-        """
-        Parameters
-        ----------
-        message: str
-            Error message
-        """
         super().__init__(500, message)
 
 
@@ -542,7 +514,7 @@ class ApiGatewayResolver:
                 status_code=404,
                 content_type=APPLICATION_JSON,
                 headers=headers,
-                body=json.dumps({"message": "Not found"}),
+                body=self._json_dump({"code": 404, "message": "Not found"}),
             )
         )
 
@@ -555,13 +527,12 @@ class ApiGatewayResolver:
                 Response(
                     status_code=e.status_code,
                     content_type=APPLICATION_JSON,
-                    body=json.dumps({"message": str(e)}),
+                    body=self._json_dump({"code": e.status_code, "message": e.msg}),
                 ),
                 route,
             )
 
-    @staticmethod
-    def _to_response(result: Union[Dict, Response]) -> Response:
+    def _to_response(self, result: Union[Dict, Response]) -> Response:
         """Convert the route's result to a Response
 
          2 main result types are supported:
@@ -577,5 +548,10 @@ class ApiGatewayResolver:
         return Response(
             status_code=200,
             content_type=APPLICATION_JSON,
-            body=json.dumps(result, separators=(",", ":"), cls=Encoder),
+            body=self._json_dump(result),
         )
+
+    @staticmethod
+    def _json_dump(obj: Any) -> str:
+        """Does a concise json serialization"""
+        return json.dumps(obj, separators=(",", ":"), cls=Encoder)
