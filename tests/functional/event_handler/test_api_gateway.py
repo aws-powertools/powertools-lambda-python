@@ -14,6 +14,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     Response,
     ResponseBuilder,
 )
+from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
 from tests.functional.utils import load_event
@@ -498,6 +499,7 @@ def test_unhandled_exceptions_debug_on():
     # GIVEN debug is enabled
     # AND an unhandlable exception is raised
     app = ApiGatewayResolver(debug=True)
+    assert app.debug
 
     @app.get("/raises-error")
     def raises_error():
@@ -519,6 +521,7 @@ def test_unhandled_exceptions_debug_off():
     # GIVEN debug is disabled
     # AND an unhandlable exception is raised
     app = ApiGatewayResolver(debug=False)
+    assert not app.debug
 
     @app.get("/raises-error")
     def raises_error():
@@ -531,3 +534,13 @@ def test_unhandled_exceptions_debug_off():
 
     # AND include the original error
     assert e.value.args == ("Foo",)
+
+
+def test_debug_mode_environment_variable(monkeypatch):
+    # GIVEN a debug mode environment variable is set
+    monkeypatch.setenv(constants.API_DEBUG_ENV, "true")
+    app = ApiGatewayResolver()
+
+    # WHEN calling app.debug
+    # THEN the debug mode is enabled
+    assert app.debug
