@@ -19,15 +19,21 @@ def _formatted_time(now: datetime.date, fmt: str, timezone_offset: int) -> str:
     str
         Returns string formatted time with optional timezone offset
     """
+    if timezone_offset != 0:
+        now = now + datetime.timedelta(hours=timezone_offset)
+
+    datetime_str = now.strftime(fmt)
+    if fmt.endswith(".%f"):
+        datetime_str = datetime_str[:-3]
+
     if timezone_offset == 0:
-        return now.strftime(fmt + "Z")
+        postfix = "Z"
+    else:
+        postfix = "+" if timezone_offset > 0 else "-"
+        postfix += str(abs(timezone_offset)).zfill(2)
+        postfix += ":00:00"
 
-    now = now + datetime.timedelta(hours=timezone_offset)
-    fmt += "+" if timezone_offset > 0 else "-"
-    fmt += str(abs(timezone_offset)).zfill(2)
-    fmt += ":00:00"
-
-    return now.strftime(fmt)
+    return datetime_str + postfix
 
 
 def make_id() -> str:
@@ -65,7 +71,7 @@ def aws_time(timezone_offset: int = 0) -> str:
     str
         Returns current time as AWSTime scalar string with optional timezone offset
     """
-    return _formatted_time(datetime.datetime.utcnow(), "%H:%M:%S", timezone_offset)
+    return _formatted_time(datetime.datetime.utcnow(), "%H:%M:%S.%f", timezone_offset)
 
 
 def aws_datetime(timezone_offset: int = 0) -> str:
@@ -81,7 +87,7 @@ def aws_datetime(timezone_offset: int = 0) -> str:
     str
         Returns current time as AWSDateTime scalar string with optional timezone offset
     """
-    return _formatted_time(datetime.datetime.utcnow(), "%Y-%m-%dT%H:%M:%S", timezone_offset)
+    return _formatted_time(datetime.datetime.utcnow(), "%Y-%m-%dT%H:%M:%S.%f", timezone_offset)
 
 
 def aws_timestamp() -> int:
