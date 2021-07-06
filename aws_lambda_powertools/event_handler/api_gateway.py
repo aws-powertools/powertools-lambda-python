@@ -7,57 +7,14 @@ from enum import Enum
 from http import HTTPStatus
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
+from aws_lambda_powertools.event_handler import content_types
+from aws_lambda_powertools.event_handler.exceptions import ServiceError
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
-APPLICATION_JSON = "application/json"
-
-
-class ServiceError(Exception):
-    """Service Error"""
-
-    def __init__(self, status_code: int, msg: str):
-        """
-        Parameters
-        ----------
-        status_code: int
-            Http status code
-        msg: str
-            Error message
-        """
-        self.status_code = status_code
-        self.msg = msg
-
-
-class BadRequestError(ServiceError):
-    """Bad Request Error"""
-
-    def __init__(self, msg: str):
-        super().__init__(HTTPStatus.BAD_REQUEST.value, msg)
-
-
-class UnauthorizedError(ServiceError):
-    """Unauthorized Error"""
-
-    def __init__(self, msg: str):
-        super().__init__(HTTPStatus.UNAUTHORIZED.value, msg)
-
-
-class NotFoundError(ServiceError):
-    """Not Found Error"""
-
-    def __init__(self, msg: str = "Not found"):
-        super().__init__(HTTPStatus.NOT_FOUND.value, msg)
-
-
-class InternalServerError(ServiceError):
-    """Internal Server Error"""
-
-    def __init__(self, message: str):
-        super().__init__(HTTPStatus.INTERNAL_SERVER_ERROR.value, message)
 
 
 class ProxyEventType(Enum):
@@ -513,7 +470,7 @@ class ApiGatewayResolver:
         return ResponseBuilder(
             Response(
                 status_code=HTTPStatus.NOT_FOUND.value,
-                content_type=APPLICATION_JSON,
+                content_type=content_types.APPLICATION_JSON,
                 headers=headers,
                 body=self._json_dump({"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"}),
             )
@@ -527,7 +484,7 @@ class ApiGatewayResolver:
             return ResponseBuilder(
                 Response(
                     status_code=e.status_code,
-                    content_type=APPLICATION_JSON,
+                    content_type=content_types.APPLICATION_JSON,
                     body=self._json_dump({"statusCode": e.status_code, "message": e.msg}),
                 ),
                 route,
@@ -548,7 +505,7 @@ class ApiGatewayResolver:
         logger.debug("Simple response detected, serializing return before constructing final response")
         return Response(
             status_code=200,
-            content_type=APPLICATION_JSON,
+            content_type=content_types.APPLICATION_JSON,
             body=self._json_dump(result),
         )
 
