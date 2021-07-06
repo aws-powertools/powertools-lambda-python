@@ -32,43 +32,46 @@ class ProxyEventType(Enum):
 class CORSConfig(object):
     """CORS Config
 
-
     Examples
     --------
 
     Simple cors example using the default permissive cors, not this should only be used during early prototyping
 
-        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    ```python
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
-        app = ApiGatewayResolver()
+    app = ApiGatewayResolver()
 
-        @app.get("/my/path", cors=True)
-        def with_cors():
-            return {"message": "Foo"}
+    @app.get("/my/path", cors=True)
+    def with_cors():
+        return {"message": "Foo"}
+    ```
 
     Using a custom CORSConfig where `with_cors` used the custom provided CORSConfig and `without_cors`
     do not include any cors headers.
 
-        from aws_lambda_powertools.event_handler.api_gateway import (
-            ApiGatewayResolver, CORSConfig
-        )
+    ```python
+    from aws_lambda_powertools.event_handler.api_gateway import (
+        ApiGatewayResolver, CORSConfig
+    )
 
-        cors_config = CORSConfig(
-            allow_origin="https://wwww.example.com/",
-            expose_headers=["x-exposed-response-header"],
-            allow_headers=["x-custom-request-header"],
-            max_age=100,
-            allow_credentials=True,
-        )
-        app = ApiGatewayResolver(cors=cors_config)
+    cors_config = CORSConfig(
+        allow_origin="https://wwww.example.com/",
+        expose_headers=["x-exposed-response-header"],
+        allow_headers=["x-custom-request-header"],
+        max_age=100,
+        allow_credentials=True,
+    )
+    app = ApiGatewayResolver(cors=cors_config)
 
-        @app.get("/my/path")
-        def with_cors():
-            return {"message": "Foo"}
+    @app.get("/my/path")
+    def with_cors():
+        return {"message": "Foo"}
 
-        @app.get("/another-one", cors=False)
-        def without_cors():
-            return {"message": "Foo"}
+    @app.get("/another-one", cors=False)
+    def without_cors():
+        return {"message": "Foo"}
+    ```
     """
 
     _REQUIRED_HEADERS = ["Authorization", "Content-Type", "X-Amz-Date", "X-Api-Key", "X-Amz-Security-Token"]
@@ -512,7 +515,7 @@ class ApiGatewayResolver:
                 return ResponseBuilder(
                     Response(
                         status_code=500,
-                        content_type="text/plain",
+                        content_type=content_types.TEXT_PLAIN,
                         body="".join(traceback.format_exc()),
                     )
                 )
