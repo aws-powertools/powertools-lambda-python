@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 
 class ServiceError(Exception):
-    """Service Error"""
+    """API Gateway and ALB HTTP Service Error"""
 
     def __init__(self, status_code: int, msg: str):
         """
@@ -18,28 +18,28 @@ class ServiceError(Exception):
 
 
 class BadRequestError(ServiceError):
-    """Bad Request Error"""
+    """API Gateway and ALB Bad Request Error (400)"""
 
     def __init__(self, msg: str):
         super().__init__(HTTPStatus.BAD_REQUEST, msg)
 
 
 class UnauthorizedError(ServiceError):
-    """Unauthorized Error"""
+    """API Gateway and ALB Unauthorized Error (401)"""
 
     def __init__(self, msg: str):
         super().__init__(HTTPStatus.UNAUTHORIZED, msg)
 
 
 class NotFoundError(ServiceError):
-    """Not Found Error"""
+    """API Gateway and ALB Not Found Error (404)"""
 
     def __init__(self, msg: str = "Not found"):
         super().__init__(HTTPStatus.NOT_FOUND, msg)
 
 
 class InternalServerError(ServiceError):
-    """Internal Server Error"""
+    """API Gateway and ALB Not Found Internal Server Error (500)"""
 
     def __init__(self, message: str):
         super().__init__(HTTPStatus.INTERNAL_SERVER_ERROR, message)
