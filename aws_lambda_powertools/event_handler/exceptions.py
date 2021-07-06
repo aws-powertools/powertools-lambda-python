@@ -21,25 +21,25 @@ class BadRequestError(ServiceError):
     """Bad Request Error"""
 
     def __init__(self, msg: str):
-        super().__init__(HTTPStatus.BAD_REQUEST.value, msg)
+        super().__init__(HTTPStatus.BAD_REQUEST, msg)
 
 
 class UnauthorizedError(ServiceError):
     """Unauthorized Error"""
 
     def __init__(self, msg: str):
-        super().__init__(HTTPStatus.UNAUTHORIZED.value, msg)
+        super().__init__(HTTPStatus.UNAUTHORIZED, msg)
 
 
 class NotFoundError(ServiceError):
     """Not Found Error"""
 
     def __init__(self, msg: str = "Not found"):
-        super().__init__(HTTPStatus.NOT_FOUND.value, msg)
+        super().__init__(HTTPStatus.NOT_FOUND, msg)
 
 
 class InternalServerError(ServiceError):
     """Internal Server Error"""
 
     def __init__(self, message: str):
-        super().__init__(HTTPStatus.INTERNAL_SERVER_ERROR.value, message)
+        super().__init__(HTTPStatus.INTERNAL_SERVER_ERROR, message)
