@@ -1,9 +1,11 @@
 import base64
+import builtins
 import json
 import zlib
 from decimal import Decimal
 from pathlib import Path
 from typing import Dict
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -502,73 +504,6 @@ def test_custom_preflight_response():
     assert headers["Access-Control-Allow-Methods"] == "CUSTOM"
 
 
-def test_unhandled_exceptions_debug_on():
-    # GIVEN debug is enabled
-    # AND an unhandled exception is raised
-    app = ApiGatewayResolver(debug=True)
-    assert app._debug
-
-    @app.get("/raises-error")
-    def raises_error():
-        raise RuntimeError("Foo")
-
-    # WHEN calling the handler
-    result = app({"path": "/raises-error", "httpMethod": "GET"}, None)
-
-    # THEN return a 500
-    # AND Content-Type is set to text/plain
-    # AND include the exception traceback in the response
-    assert result["statusCode"] == 500
-    assert "Traceback (most recent call last)" in result["body"]
-    headers = result["headers"]
-    assert headers["Content-Type"] == content_types.TEXT_PLAIN
-
-
-def test_unhandled_exceptions_debug_off():
-    # GIVEN debug is disabled
-    # AND an unhandled exception is raised
-    app = ApiGatewayResolver(debug=False)
-    assert not app._debug
-
-    @app.get("/raises-error")
-    def raises_error():
-        raise RuntimeError("Foo")
-
-    # WHEN calling the handler
-    # THEN raise the original exception
-    with pytest.raises(RuntimeError) as e:
-        app({"path": "/raises-error", "httpMethod": "GET"}, None)
-
-    # AND include the original error
-    assert e.value.args == ("Foo",)
-
-
-def test_debug_mode_environment_variable(monkeypatch):
-    # GIVEN a debug mode environment variable is set
-    monkeypatch.setenv(constants.EVENT_HANDLER_DEBUG_ENV, "true")
-    app = ApiGatewayResolver()
-
-    # WHEN calling app._debug
-    # THEN the debug mode is enabled
-    assert app._debug
-
-
-def test_debug_json_formatting():
-    # GIVEN debug is True
-    app = ApiGatewayResolver(debug=True)
-    response = {"message": "Foo"}
-
-    @app.get("/foo")
-    def foo():
-        return response
-
-    # WHEN calling the handler
-    result = app({"path": "/foo", "httpMethod": "GET"}, None)
-
-    # THEN return a pretty print json in the body
-    assert result["body"] == json.dumps(response, indent=4)
-
-
 def test_service_error_responses():
     # SCENARIO handling different kind of service errors being raised
     app = ApiGatewayResolver(cors=CORSConfig())
@@ -651,3 +586,85 @@ def test_service_error_responses():
     assert "Access-Control-Allow-Origin" in result["headers"]
     expected = {"statusCode": 502, "message": "Something went wrong!"}
     assert result["body"] == json_dump(expected)
+
+
+def test_debug_unhandled_exceptions_debug_on():
+    # GIVEN debug is enabled
+    # AND an unhandled exception is raised
+    app = ApiGatewayResolver(debug=True)
+    assert app._debug
+
+    @app.get("/raises-error")
+    def raises_error():
+        raise RuntimeError("Foo")
+
+    # WHEN calling the handler
+    result = app({"path": "/raises-error", "httpMethod": "GET"}, None)
+
+    # THEN return a 500
+    # AND Content-Type is set to text/plain
+    # AND include the exception traceback in the response
+    assert result["statusCode"] == 500
+    assert "Traceback (most recent call last)" in result["body"]
+    headers = result["headers"]
+    assert headers["Content-Type"] == content_types.TEXT_PLAIN
+
+
+def test_debug_unhandled_exceptions_debug_off():
+    # GIVEN debug is disabled
+    # AND an unhandled exception is raised
+    app = ApiGatewayResolver(debug=False)
+    assert not app._debug
+
+    @app.get("/raises-error")
+    def raises_error():
+        raise RuntimeError("Foo")
+
+    # WHEN calling the handler
+    # THEN raise the original exception
+    with pytest.raises(RuntimeError) as e:
+        app({"path": "/raises-error", "httpMethod": "GET"}, None)
+
+    # AND include the original error
+    assert e.value.args == ("Foo",)
+
+
+def test_debug_mode_environment_variable(monkeypatch):
+    # GIVEN a debug mode environment variable is set
+    monkeypatch.setenv(constants.EVENT_HANDLER_DEBUG_ENV, "true")
+    app = ApiGatewayResolver()
+
+    # WHEN calling app._debug
+    # THEN the debug mode is enabled
+    assert app._debug
+
+
+def test_debug_json_formatting():
+    # GIVEN debug is True
+    app = ApiGatewayResolver(debug=True)
+    response = {"message": "Foo"}
+
+    @app.get("/foo")
+    def foo():
+        return response
+
+    # WHEN calling the handler
+    result = app({"path": "/foo", "httpMethod": "GET"}, None)
+
+    # THEN return a pretty print json in the body
+    assert result["body"] == json.dumps(response, indent=4)
+
+
+def test_debug_print_event(monkeypatch):
+    # GIVE debug is True
+    app = ApiGatewayResolver(debug=True)
+    mocked_print = MagicMock()
+    monkeypatch.setattr(builtins, "print", mocked_print)
+
+    # WHEN calling resolve
+    event = {"path": "/foo", "httpMethod": "GET"}
+    app(event, None)
+
+    # THEN print the event
+    # NOTE: other calls might have happened outside of this mock
+    mocked_print.assert_any_call(json.dumps(event, indent=4))

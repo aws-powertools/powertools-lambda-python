@@ -434,6 +434,8 @@ class ApiGatewayResolver:
         dict
             Returns the dict response
         """
+        if self._debug:
+            print(self._json_dump(event))
         self.current_event = self._to_proxy_event(event)
         self.lambda_context = context
         return self._resolve().build(self.current_event, self._cors)
