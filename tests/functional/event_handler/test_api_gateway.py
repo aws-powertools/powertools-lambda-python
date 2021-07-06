@@ -7,12 +7,20 @@ from typing import Dict
 
 import pytest
 
+from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.api_gateway import (
     ApiGatewayResolver,
     CORSConfig,
     ProxyEventType,
     Response,
     ResponseBuilder,
+)
+from aws_lambda_powertools.event_handler.exceptions import (
+    BadRequestError,
+    InternalServerError,
+    NotFoundError,
+    ServiceError,
+    UnauthorizedError,
 )
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -27,7 +35,6 @@ def read_media(file_name: str) -> bytes:
 
 LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
 TEXT_HTML = "text/html"
-APPLICATION_JSON = "application/json"
 
 
 def test_alb_event():
@@ -58,7 +65,7 @@ def test_api_gateway_v1():
     def get_lambda() -> Response:
         assert isinstance(app.current_event, APIGatewayProxyEvent)
         assert app.lambda_context == {}
-        return Response(200, APPLICATION_JSON, json.dumps({"foo": "value"}))
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"foo": "value"}))
 
     # WHEN calling the event handler
     result = app(LOAD_GW_EVENT, {})
@@ -66,7 +73,7 @@ def test_api_gateway_v1():
     # THEN process event correctly
     # AND set the current_event type as APIGatewayProxyEvent
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == APPLICATION_JSON
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
 
 
 def test_api_gateway():
@@ -96,7 +103,7 @@ def test_api_gateway_v2():
     def my_path() -> Response:
         assert isinstance(app.current_event, APIGatewayProxyEventV2)
         post_data = app.current_event.json_body
-        return Response(200, "plain/text", post_data["username"])
+        return Response(200, content_types.PLAIN_TEXT, post_data["username"])
 
     # WHEN calling the event handler
     result = app(load_event("apiGatewayProxyV2Event.json"), {})
@@ -104,7 +111,7 @@ def test_api_gateway_v2():
     # THEN process event correctly
     # AND set the current_event type as APIGatewayProxyEventV2
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == "plain/text"
+    assert result["headers"]["Content-Type"] == content_types.PLAIN_TEXT
     assert result["body"] == "tom"
 
 
@@ -218,7 +225,7 @@ def test_compress():
 
     @app.get("/my/request", compress=True)
     def with_compression() -> Response:
-        return Response(200, APPLICATION_JSON, expected_value)
+        return Response(200, content_types.APPLICATION_JSON, expected_value)
 
     def handler(event, context):
         return app.resolve(event, context)
@@ -264,7 +271,7 @@ def test_compress_no_accept_encoding():
 
     @app.get("/my/path", compress=True)
     def return_text() -> Response:
-        return Response(200, "text/plain", expected_value)
+        return Response(200, content_types.PLAIN_TEXT, expected_value)
 
     # WHEN calling the event handler
     result = app({"path": "/my/path", "httpMethod": "GET", "headers": {}}, None)
@@ -330,7 +337,7 @@ def test_rest_api():
 
     # THEN automatically process this as a json rest api response
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == APPLICATION_JSON
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
     expected_str = json.dumps(expected_dict, separators=(",", ":"), indent=None, cls=Encoder)
     assert result["body"] == expected_str
 
@@ -385,7 +392,7 @@ def test_custom_cors_config():
     # THEN routes by default return the custom cors headers
     assert "headers" in result
     headers = result["headers"]
-    assert headers["Content-Type"] == APPLICATION_JSON
+    assert headers["Content-Type"] == content_types.APPLICATION_JSON
     assert headers["Access-Control-Allow-Origin"] == cors_config.allow_origin
     expected_allows_headers = ",".join(sorted(set(allow_header + cors_config._REQUIRED_HEADERS)))
     assert headers["Access-Control-Allow-Headers"] == expected_allows_headers
@@ -432,6 +439,7 @@ def test_no_matches_with_cors():
     # AND cors headers are returned
     assert result["statusCode"] == 404
     assert "Access-Control-Allow-Origin" in result["headers"]
+    assert "Not found" in result["body"]
 
 
 def test_cors_preflight():
@@ -560,3 +568,87 @@ def test_debug_json_formatting():
 
     # THEN return a pretty print json in the body
     assert result["body"] == json.dumps(response, indent=4)
+
+
+def test_service_error_responses():
+    # SCENARIO handling different kind of service errors being raised
+    app = ApiGatewayResolver(cors=CORSConfig())
+
+    def json_dump(obj):
+        return json.dumps(obj, separators=(",", ":"))
+
+    # GIVEN an BadRequestError
+    @app.get(rule="/bad-request-error", cors=False)
+    def bad_request_error():
+        raise BadRequestError("Missing required parameter")
+
+    # WHEN calling the handler
+    # AND path is /bad-request-error
+    result = app({"path": "/bad-request-error", "httpMethod": "GET"}, None)
+    # THEN return the bad request error response
+    # AND status code equals 400
+    assert result["statusCode"] == 400
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    expected = {"statusCode": 400, "message": "Missing required parameter"}
+    assert result["body"] == json_dump(expected)
+
+    # GIVEN an UnauthorizedError
+    @app.get(rule="/unauthorized-error", cors=False)
+    def unauthorized_error():
+        raise UnauthorizedError("Unauthorized")
+
+    # WHEN calling the handler
+    # AND path is /unauthorized-error
+    result = app({"path": "/unauthorized-error", "httpMethod": "GET"}, None)
+    # THEN return the unauthorized error response
+    # AND status code equals 401
+    assert result["statusCode"] == 401
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    expected = {"statusCode": 401, "message": "Unauthorized"}
+    assert result["body"] == json_dump(expected)
+
+    # GIVEN an NotFoundError
+    @app.get(rule="/not-found-error", cors=False)
+    def not_found_error():
+        raise NotFoundError
+
+    # WHEN calling the handler
+    # AND path is /not-found-error
+    result = app({"path": "/not-found-error", "httpMethod": "GET"}, None)
+    # THEN return the not found error response
+    # AND status code equals 404
+    assert result["statusCode"] == 404
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    expected = {"statusCode": 404, "message": "Not found"}
+    assert result["body"] == json_dump(expected)
+
+    # GIVEN an InternalServerError
+    @app.get(rule="/internal-server-error", cors=False)
+    def internal_server_error():
+        raise InternalServerError("Internal server error")
+
+    # WHEN calling the handler
+    # AND path is /internal-server-error
+    result = app({"path": "/internal-server-error", "httpMethod": "GET"}, None)
+    # THEN return the internal server error response
+    # AND status code equals 500
+    assert result["statusCode"] == 500
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    expected = {"statusCode": 500, "message": "Internal server error"}
+    assert result["body"] == json_dump(expected)
+
+    # GIVEN an ServiceError with a custom status code
+    @app.get(rule="/service-error", cors=True)
+    def service_error():
+        raise ServiceError(502, "Something went wrong!")
+
+    # WHEN calling the handler
+    # AND path is /service-error
+    result = app({"path": "/service-error", "httpMethod": "GET"}, None)
+    # THEN return the service error response
+    # AND status code equals 502
+    assert result["statusCode"] == 502
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert "Access-Control-Allow-Origin" in result["headers"]
+    expected = {"statusCode": 502, "message": "Something went wrong!"}
+    assert result["body"] == json_dump(expected)

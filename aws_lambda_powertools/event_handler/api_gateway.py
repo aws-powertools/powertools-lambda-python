@@ -6,8 +6,11 @@ import re
 import traceback
 import zlib
 from enum import Enum
+from http import HTTPStatus
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
+from aws_lambda_powertools.event_handler import content_types
+from aws_lambda_powertools.event_handler.exceptions import ServiceError
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -481,10 +484,10 @@ class ApiGatewayResolver:
 
         return ResponseBuilder(
             Response(
-                status_code=404,
-                content_type="application/json",
+                status_code=HTTPStatus.NOT_FOUND.value,
+                content_type=content_types.APPLICATION_JSON,
                 headers=headers,
-                body=self._json_dump({"message": "Not found"}),
+                body=self._json_dump({"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"}),
             )
         )
 
@@ -492,6 +495,15 @@ class ApiGatewayResolver:
         """Actually call the matching route with any provided keyword arguments."""
         try:
             return ResponseBuilder(self._to_response(route.func(**args)), route)
+        except ServiceError as e:
+            return ResponseBuilder(
+                Response(
+                    status_code=e.status_code,
+                    content_type=content_types.APPLICATION_JSON,
+                    body=self._json_dump({"statusCode": e.status_code, "message": e.msg}),
+                ),
+                route,
+            )
         except Exception:
             if self._debug:
                 # If the user has turned on debug mode,
@@ -521,12 +533,12 @@ class ApiGatewayResolver:
         logger.debug("Simple response detected, serializing return before constructing final response")
         return Response(
             status_code=200,
-            content_type="application/json",
+            content_type=content_types.APPLICATION_JSON,
             body=self._json_dump(result),
         )
 
     def _json_dump(self, obj: Any) -> str:
-        """Does a concise json serialization"""
+        """Does a concise json serialization or pretty print when in debug mode"""
         if self._debug:
             return json.dumps(obj, indent=4, cls=Encoder)
         else:
