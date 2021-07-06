@@ -4,8 +4,11 @@ import logging
 import re
 import zlib
 from enum import Enum
+from http import HTTPStatus
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
+from aws_lambda_powertools.event_handler import content_types
+from aws_lambda_powertools.event_handler.exceptions import ServiceError
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
@@ -466,19 +469,28 @@ class ApiGatewayResolver:
 
         return ResponseBuilder(
             Response(
-                status_code=404,
-                content_type="application/json",
+                status_code=HTTPStatus.NOT_FOUND.value,
+                content_type=content_types.APPLICATION_JSON,
                 headers=headers,
-                body=json.dumps({"message": "Not found"}),
+                body=self._json_dump({"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"}),
             )
         )
 
     def _call_route(self, route: Route, args: Dict[str, str]) -> ResponseBuilder:
         """Actually call the matching route with any provided keyword arguments."""
-        return ResponseBuilder(self._to_response(route.func(**args)), route)
+        try:
+            return ResponseBuilder(self._to_response(route.func(**args)), route)
+        except ServiceError as e:
+            return ResponseBuilder(
+                Response(
+                    status_code=e.status_code,
+                    content_type=content_types.APPLICATION_JSON,
+                    body=self._json_dump({"statusCode": e.status_code, "message": e.msg}),
+                ),
+                route,
+            )
 
-    @staticmethod
-    def _to_response(result: Union[Dict, Response]) -> Response:
+    def _to_response(self, result: Union[Dict, Response]) -> Response:
         """Convert the route's result to a Response
 
          2 main result types are supported:
@@ -493,6 +505,11 @@ class ApiGatewayResolver:
         logger.debug("Simple response detected, serializing return before constructing final response")
         return Response(
             status_code=200,
-            content_type="application/json",
-            body=json.dumps(result, separators=(",", ":"), cls=Encoder),
+            content_type=content_types.APPLICATION_JSON,
+            body=self._json_dump(result),
         )
+
+    @staticmethod
+    def _json_dump(obj: Any) -> str:
+        """Does a concise json serialization"""
+        return json.dumps(obj, separators=(",", ":"), cls=Encoder)
