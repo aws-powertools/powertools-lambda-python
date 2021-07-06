@@ -7,8 +7,8 @@ import os
 from typing import Any, Dict, Optional, Union
 from uuid import uuid4
 
-import boto3
-from botocore.config import Config
+import boto3  # type: ignore
+from botocore.config import Config  # type: ignore
 
 from ...shared import constants
 from ...shared.functions import resolve_env_var_choice

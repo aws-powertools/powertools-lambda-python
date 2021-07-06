@@ -5,8 +5,8 @@ AWS Secrets Manager parameter retrieval and caching utility
 
 from typing import Any, Dict, Optional, Union
 
-import boto3
-from botocore.config import Config
+import boto3  # type: ignore
+from botocore.config import Config  # type: ignore
 
 from .base import DEFAULT_PROVIDERS, BaseProvider
 
