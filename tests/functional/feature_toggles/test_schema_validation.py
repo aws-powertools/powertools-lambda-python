@@ -5,12 +5,12 @@ import pytest  # noqa: F401
 from aws_lambda_powertools.utilities.feature_toggles.exceptions import ConfigurationException
 from aws_lambda_powertools.utilities.feature_toggles.schema import (
     ACTION,
-    FEATURE_DEFAULT_VAL_KEY,
-    FEATURES_KEY,
     CONDITION_ACTION,
     CONDITION_KEY,
     CONDITION_VALUE,
     CONDITIONS_KEY,
+    FEATURE_DEFAULT_VAL_KEY,
+    FEATURES_KEY,
     RULE_DEFAULT_VALUE,
     RULE_NAME_KEY,
     RULES_KEY,

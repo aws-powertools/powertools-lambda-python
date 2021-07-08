@@ -1,36 +1,23 @@
-# pylint: disable=no-name-in-module,line-too-long
 import logging
 from typing import Any, Dict, List, Optional
 
-from botocore.config import Config
-
-from aws_lambda_powertools.utilities.parameters import AppConfigProvider, GetParameterError, TransformParameterError
-
 from . import schema
 from .exceptions import ConfigurationException
-
-TRANSFORM_TYPE = "json"
+from .schema_fetcher import SchemaFetcher
 
 logger = logging.getLogger(__name__)
 
 
 class ConfigurationStore:
-    def __init__(
-        self, environment: str, service: str, conf_name: str, cache_seconds: int, config: Optional[Config] = None
-    ):
+    def __init__(self, schema_fetcher: SchemaFetcher):
         """constructor
 
         Args:
-            environment (str): what appconfig environment to use 'dev/test' etc.
-            service (str): what service name to use from the supplied environment
-            conf_name (str): what configuration to take from the environment & service combination
-            cache_seconds (int): cache expiration time, how often to call AppConfig to fetch latest configuration
+            schema_fetcher (SchemaFetcher): A schema JSON fetcher, can be AWS AppConfig, Hashicorp Consul etc.
         """
-        self._cache_seconds = cache_seconds
         self._logger = logger
-        self._conf_name = conf_name
+        self._schema_fetcher = schema_fetcher
         self._schema_validator = schema.SchemaValidator(self._logger)
-        self._conf_store = AppConfigProvider(environment=environment, application=service, config=config)
 
     def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
         if not context_value:
@@ -99,17 +86,11 @@ class ConfigurationStore:
         Returns:
             Dict[str, Any]: parsed JSON dictionary
         """
-        try:
-            schema = self._conf_store.get(
-                name=self._conf_name,
-                transform=TRANSFORM_TYPE,
-                max_age=self._cache_seconds,
-            )  # parse result conf as JSON, keep in cache for self.max_age seconds
-        except (GetParameterError, TransformParameterError) as exc:
-            error_str = f"unable to get AWS AppConfig configuration file, exception={str(exc)}"
-            self._logger.error(error_str)
-            raise ConfigurationException(error_str)
-
+        schema: Dict[
+            str, Any
+        ] = (
+            self._schema_fetcher.get_json_configuration()
+        )  # parse result conf as JSON, keep in cache for self.max_age seconds
         # validate schema
         self._schema_validator.validate_json_schema(schema)
         return schema

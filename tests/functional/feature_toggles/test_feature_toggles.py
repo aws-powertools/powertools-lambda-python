@@ -3,6 +3,7 @@ from typing import Dict, List
 import pytest  # noqa: F401
 from botocore.config import Config
 
+from aws_lambda_powertools.utilities.feature_toggles.appconfig_fetcher import AppConfigFetcher
 from aws_lambda_powertools.utilities.feature_toggles.configuration_store import ConfigurationStore
 from aws_lambda_powertools.utilities.feature_toggles.schema import ACTION
 
@@ -15,13 +16,15 @@ def config():
 def init_configuration_store(mocker, mock_schema: Dict, config: Config) -> ConfigurationStore:
     mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.parameters.AppConfigProvider.get")
     mocked_get_conf.return_value = mock_schema
-    conf_store: ConfigurationStore = ConfigurationStore(
+
+    app_conf_fetcher = AppConfigFetcher(
         environment="test_env",
         service="test_app",
-        conf_name="test_conf_name",
+        configuration_name="test_conf_name",
         cache_seconds=600,
         config=config,
     )
+    conf_store: ConfigurationStore = ConfigurationStore(schema_fetcher=app_conf_fetcher)
     return conf_store
 
 
