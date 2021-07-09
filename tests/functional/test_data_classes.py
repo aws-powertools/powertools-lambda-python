@@ -1210,13 +1210,18 @@ def test_aws_date_utc():
 def test_aws_time_utc():
     time_str = aws_time()
     assert isinstance(time_str, str)
-    assert datetime.datetime.strptime(time_str, "%H:%M:%SZ")
+    assert datetime.datetime.strptime(time_str, "%H:%M:%S.%fZ")
 
 
 def test_aws_datetime_utc():
     datetime_str = aws_datetime()
-    assert isinstance(datetime_str, str)
-    assert datetime.datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%SZ")
+    assert datetime.datetime.strptime(datetime_str[:-1] + "000Z", "%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def test_format_time_to_milli():
+    now = datetime.datetime(2024, 4, 23, 16, 26, 34, 123021)
+    datetime_str = _formatted_time(now, "%H:%M:%S.%f", -12)
+    assert datetime_str == "04:26:34.123-12:00:00"
 
 
 def test_aws_timestamp():
@@ -1227,14 +1232,12 @@ def test_aws_timestamp():
 def test_format_time_positive():
     now = datetime.datetime(2022, 1, 22)
     datetime_str = _formatted_time(now, "%Y-%m-%d", 8)
-    assert isinstance(datetime_str, str)
     assert datetime_str == "2022-01-22+08:00:00"
 
 
 def test_format_time_negative():
     now = datetime.datetime(2022, 1, 22, 14, 22, 33)
     datetime_str = _formatted_time(now, "%H:%M:%S", -12)
-    assert isinstance(datetime_str, str)
     assert datetime_str == "02:22:33-12:00:00"
 
 
