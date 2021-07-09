@@ -1,11 +1,9 @@
 import base64
-import builtins
 import json
 import zlib
 from decimal import Decimal
 from pathlib import Path
 from typing import Dict
-from unittest.mock import MagicMock
 
 import pytest
 
