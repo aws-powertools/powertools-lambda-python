@@ -460,6 +460,20 @@ def test_logger_set_correlation_id(lambda_context, stdout, service_name):
     assert request_id == log["correlation_id"]
 
 
+def test_logger_set_correlation_id_to_none(lambda_context, stdout, service_name):
+    # GIVEN a logger with a correlation_id set
+    logger = Logger(service=service_name, stream=stdout)
+    logger.set_correlation_id("foo")
+
+    # WHEN calling set_correlation_id with None
+    logger.set_correlation_id(None)
+
+    # THEN there should be no correlation_id
+    logger.info("Foo")
+    log = capture_logging_output(stdout)
+    assert "correlation_id" not in log
+
+
 def test_logger_set_correlation_id_path(lambda_context, stdout, service_name):
     # GIVEN
     logger = Logger(service=service_name, stream=stdout)
