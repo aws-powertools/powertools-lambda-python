@@ -8,7 +8,7 @@ nav:
   - Homepage: index.md
   - Changelog: changelog.md
   - Roadmap: https://github.com/awslabs/aws-lambda-powertools-roadmap/projects/1" target="_blank
-  - API reference: api/" target="_blank
+  - API reference: api.md
   - Core utilities:
       - core/tracer.md
       - core/logger.md
@@ -25,6 +25,7 @@ nav:
       - utilities/data_classes.md
       - utilities/parser.md
       - utilities/idempotency.md
+
 
 theme:
   name: material
@@ -73,6 +74,9 @@ copyright: Copyright &copy; 2021 Amazon Web Services
 plugins:
   - git-revision-date
   - search
+  - mkdocstrings:
+      watch:
+        - aws_lambda_powertools
 
 extra_css:
   - stylesheets/extra.css
