@@ -5,7 +5,7 @@ import inspect
 import logging
 import numbers
 import os
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Optional, Sequence, Union
 
 from ..shared import constants
 from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
@@ -19,119 +19,51 @@ aws_xray_sdk = LazyLoader(constants.XRAY_SDK_MODULE, globals(), constants.XRAY_S
 aws_xray_sdk.core = LazyLoader(constants.XRAY_SDK_CORE_MODULE, globals(), constants.XRAY_SDK_CORE_MODULE)
 
 
+LambdaHandlerT = Union[Callable[[Dict, Any], Any], Callable[[Dict, Any, Optional[Dict]], Any]]
+
+
 class Tracer:
-    """Tracer using AWS-XRay to provide decorators with known defaults for Lambda functions
+    """Tracer provides opinionated decorators to trace Lambda functions with AWS X-Ray # noqa E501
 
-    When running locally, it detects whether it's running via SAM CLI,
-    and if it is it returns dummy segments/subsegments instead.
+    By default, it patches all [available libraries supported by X-Ray SDK](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/thirdparty.html).
 
-    By default, it patches all available libraries supported by X-Ray SDK. Patching is
-    automatically disabled when running locally via SAM CLI or by any other means. \n
-    Ref: https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/thirdparty.html
+    When running locally, it disables itself whether it's running via SAM CLI or Chalice.
 
-    Tracer keeps a copy of its configuration as it can be instantiated more than once. This
-    is useful when you are using your own middlewares and want to utilize an existing Tracer.
-    Make sure to set `auto_patch=False` in subsequent Tracer instances to avoid double patching.
+    Note: Reusing Tracer across the codebase.
+        Tracer keeps a copy of its configuration after the first initialization and reuses it across instances.
 
-    Environment variables
-    ---------------------
-    POWERTOOLS_TRACE_DISABLED : str
-        disable tracer (e.g. `"true", "True", "TRUE"`)
-    POWERTOOLS_SERVICE_NAME : str
-        service name
-    POWERTOOLS_TRACER_CAPTURE_RESPONSE : str
-        disable auto-capture response as metadata (e.g. `"true", "True", "TRUE"`)
-    POWERTOOLS_TRACER_CAPTURE_ERROR : str
-        disable auto-capture error as metadata (e.g. `"true", "True", "TRUE"`)
+        Additional instances can override configuration via the constructor.
 
-    Parameters
-    ----------
-    service: str
-        Service name that will be appended in all tracing metadata
-    auto_patch: bool
-        Patch existing imported modules during initialization, by default True
-    disabled: bool
-        Flag to explicitly disable tracing, useful when running/testing locally
-        `Env POWERTOOLS_TRACE_DISABLED="true"`
-    patch_modules: Tuple[str]
-        Tuple of modules supported by tracing provider to patch, by default all modules are patched
-    provider: BaseProvider
-        Tracing provider, by default it is aws_xray_sdk.core.xray_recorder
+    ## Environment variables
 
-    Returns
-    -------
-    Tracer
-        Tracer instance with imported modules patched
+    * `POWERTOOLS_TRACE_DISABLED`: disable tracer (`true`)
+    * `POWERTOOLS_SERVICE_NAME`: service name, (`payment`)
+    * `POWERTOOLS_TRACER_CAPTURE_RESPONSE`: disable auto-capture response as metadata, (`true`)
+    * `POWERTOOLS_TRACER_CAPTURE_ERROR`: disable auto-capture error as metadata, (`true`)
 
-    Example
-    -------
-    **A Lambda function using Tracer**
+    ## Examples
 
-        from aws_lambda_powertools import Tracer
-        tracer = Tracer(service="greeting")
+    ### Reuse an existing instance of Tracer across the codebase
 
-        @tracer.capture_method
-        def greeting(name: str) -> Dict:
-            return {
-                "name": name
-            }
+    ```python
+    # lambda_handler.py
+    from aws_lambda_powertools import Tracer
 
-        @tracer.capture_lambda_handler
-        def handler(event: dict, context: Any) -> Dict:
-            print("Received event from Lambda...")
-            response = greeting(name="Heitor")
-            return response
+    tracer = Tracer(service="booking")
 
-    **Booking Lambda function using Tracer that adds additional annotation/metadata**
-
-        from aws_lambda_powertools import Tracer
-        tracer = Tracer(service="booking")
-
-        @tracer.capture_method
-        def confirm_booking(booking_id: str) -> Dict:
-                resp = add_confirmation(booking_id)
-
-                tracer.put_annotation("BookingConfirmation", resp["requestId"])
-                tracer.put_metadata("Booking confirmation", resp)
-
-                return resp
-
-        @tracer.capture_lambda_handler
-        def handler(event: dict, context: Any) -> Dict:
-            print("Received event from Lambda...")
-            booking_id = event.get("booking_id")
-            response = confirm_booking(booking_id=booking_id)
-            return response
-
-    **A Lambda function using service name via POWERTOOLS_SERVICE_NAME**
-
-        export POWERTOOLS_SERVICE_NAME="booking"
-        from aws_lambda_powertools import Tracer
-        tracer = Tracer()
-
-        @tracer.capture_lambda_handler
-        def handler(event: dict, context: Any) -> Dict:
-            print("Received event from Lambda...")
-            response = greeting(name="Lessa")
-            return response
-
-    **Reuse an existing instance of Tracer anywhere in the code**
-
-        # lambda_handler.py
-        from aws_lambda_powertools import Tracer
-        tracer = Tracer()
-
-        @tracer.capture_lambda_handler
-        def handler(event: dict, context: Any) -> Dict:
-            ...
-
-        # utils.py
-        from aws_lambda_powertools import Tracer
-        tracer = Tracer()
+    @tracer.capture_lambda_handler
+    def handler(event: dict, context: Any) -> Dict:
         ...
 
-    Limitations
-    -----------
+    # utils.py
+    from aws_lambda_powertools import Tracer
+
+    tracer = Tracer(service="booking")
+    ...
+    ```
+
+    ## Limitations
+
     * Async handler not supported
     """
 
@@ -146,19 +78,30 @@ class Tracer:
 
     def __init__(
         self,
-        service: str = None,
-        disabled: bool = None,
-        auto_patch: bool = None,
-        patch_modules: Optional[Tuple[str]] = None,
-        provider: BaseProvider = None,
+        service: Optional[str] = None,
+        disabled: Optional[bool] = None,
+        auto_patch: Optional[bool] = None,
+        patch_modules: Optional[Sequence[str]] = None,
+        provider: Optional[BaseProvider] = None,
     ):
+        """Tracer constructor
+
+        Parameters:
+
+            service (str): Service name that will be appended in all tracing metadata
+            auto_patch (bool): Patch existing imported modules during initialization, by default True
+            disabled (bool): Flag to explicitly disable tracing, useful when running/testing locally
+            patch_modules (Sequence[str]): List of modules supported by tracing provider to patch
+            provider (BaseProvider): Tracing provider, by default it is `aws_xray_sdk.core.xray_recorder`
+
+        """
         self.__build_config(
             service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
         )
         self.provider: BaseProvider = self._config["provider"]
-        self.disabled = self._config["disabled"]
-        self.service = self._config["service"]
-        self.auto_patch = self._config["auto_patch"]
+        self.disabled: bool = self._config["disabled"]
+        self.service: str = self._config["service"]
+        self.auto_patch: Optional[bool] = self._config["auto_patch"]
 
         if self.disabled:
             self._disable_tracer_provider()
@@ -174,19 +117,32 @@ class Tracer:
     def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]):
         """Adds annotation to existing segment or subsegment
 
-        Parameters
-        ----------
-        key : str
-            Annotation key
-        value : Union[str, numbers.Number, bool]
-            Value for annotation
+        Parameters:
+            key (str): Annotation key
+            key (Union[str, numbers.Number, bool): Value for annotation
 
-        Example
-        -------
-        Custom annotation for a pseudo service named payment
+        ## Example
 
-            tracer = Tracer(service="payment")
-            tracer.put_annotation("PaymentStatus", "CONFIRMED")
+        ```python
+        from aws_lambda_powertools import Tracer
+
+        tracer = Tracer(service="booking")
+
+        @tracer.capture_method
+        def confirm_booking(booking_id: str) -> Dict:
+            resp = add_confirmation(booking_id)
+            tracer.put_annotation("BookingConfirmation", resp["requestId"])
+
+            return resp
+
+        @tracer.capture_lambda_handler
+        def handler(event: dict, context: Any) -> Dict:
+            booking_id = event.get("booking_id", "")
+            tracer.put_annotation("BookingId", booking_id)
+            response = confirm_booking(booking_id=booking_id)
+
+            return response
+        ```
         """
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting put_annotation")
@@ -198,22 +154,33 @@ class Tracer:
     def put_metadata(self, key: str, value: Any, namespace: str = None):
         """Adds metadata to existing segment or subsegment
 
-        Parameters
-        ----------
-        key : str
-            Metadata key
-        value : any
-            Value for metadata
-        namespace : str, optional
-            Namespace that metadata will lie under, by default None
+        Parameters:
 
-        Example
-        -------
-        Custom metadata for a pseudo service named payment
+            key (str): Metadata key
+            value (any): Value for metadata
+            namespace (str): Namespace that metadata will lie under, by default None
 
-            tracer = Tracer(service="payment")
-            response = collect_payment()
-            tracer.put_metadata("Payment collection", response)
+        ## Example
+
+        ```python
+        from aws_lambda_powertools import Tracer
+
+        tracer = Tracer(service="booking")
+
+        @tracer.capture_method
+        def confirm_booking(booking_id: str) -> Dict:
+            resp = add_confirmation(booking_id)
+            tracer.put_metadata("Booking request metadata", resp["Metadata"])
+
+            return resp["booking"]
+
+        @tracer.capture_lambda_handler
+        def handler(event: dict, context: Any) -> Dict:
+            booking_id = event.get("booking_id")
+            response = confirm_booking(booking_id=booking_id)
+
+            return response
+        ```
         """
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting put_metadata")
@@ -223,15 +190,14 @@ class Tracer:
         logger.debug(f"Adding metadata on key '{key}' with '{value}' at namespace '{namespace}'")
         self.provider.put_metadata(key=key, value=value, namespace=namespace)
 
-    def patch(self, modules: Tuple[str] = None):
+    def patch(self, modules: Sequence[str] = None):
         """Patch modules for instrumentation.
 
         Patches all supported modules by default if none are given.
 
-        Parameters
-        ----------
-        modules : Tuple[str]
-            List of modules to be patched, optional by default
+        Parameters:
+
+            modules (Sequence[str]): List of modules to be patched, optional by default
         """
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting patch")
@@ -244,44 +210,30 @@ class Tracer:
 
     def capture_lambda_handler(
         self,
-        lambda_handler: Union[Callable[[Dict, Any], Any], Callable[[Dict, Any, Optional[Dict]], Any]] = None,
+        lambda_handler: LambdaHandlerT = None,
         capture_response: Optional[bool] = None,
         capture_error: Optional[bool] = None,
     ):
         """Decorator to create subsegment for lambda handlers
 
-        As Lambda follows (event, context) signature we can remove some of the boilerplate
-        and also capture any exception any Lambda function throws or its response as metadata
+        By default, it automatically captures Lambda Handler's response or exception as metadata.
 
-        Parameters
-        ----------
-        lambda_handler : Callable
-            Method to annotate on
-        capture_response : bool, optional
-            Instructs tracer to not include handler's response as metadata
-        capture_error : bool, optional
-            Instructs tracer to not include handler's error as metadata, by default True
+        Parameters:
+            lambda_handler (LambdaHandlerT): Lambda function's handler
+            capture_response (bool): Instructs tracer to not include handler's response as metadata
+            capture_error (bool): Instructs tracer to not include handler's error as metadata, by default `True`
 
-        Example
-        -------
-        **Lambda function using capture_lambda_handler decorator**
+        ## Example
 
-            tracer = Tracer(service="payment")
-            @tracer.capture_lambda_handler
-            def handler(event, context):
-                ...
+        ```python
+        from aws_lambda_powertools import Tracer
 
-        **Preventing Tracer to log response as metadata**
+        tracer = Tracer(service="booking")
 
-            tracer = Tracer(service="payment")
-            @tracer.capture_lambda_handler(capture_response=False)
-            def handler(event, context):
-                ...
-
-        Raises
-        ------
-        err
-            Exception raised by method
+        @tracer.capture_lambda_handler
+        def handler(event: dict, context: Any) -> Dict:
+            ...
+        ```
         """
         # If handler is None we've been called with parameters
         # Return a partial function with args filled
@@ -334,151 +286,137 @@ class Tracer:
     ):
         """Decorator to create subsegment for arbitrary functions
 
-        It also captures both response and exceptions as metadata
-        and creates a subsegment named `## <method_name>`
+        By default, it automatically captures response or exception as metadata in a subsegment named `## <method_name>`. # noqa E501
 
-        When running [async functions concurrently](https://docs.python.org/3/library/asyncio-task.html#id6),
-        methods may impact each others subsegment, and can trigger
-        and AlreadyEndedException from X-Ray due to async nature.
+        Warning: Running [async functions concurrently](https://docs.python.org/3/library/asyncio-task.html#id6)
+            Methods may impact each others subsegment and can trigger `AlreadyEndedException` from X-Ray due to async nature.
 
-        For this use case, either use `capture_method` only where
-        `async.gather` is called, or use `in_subsegment_async`
-        context manager via our escape hatch mechanism - See examples.
+            For this use case, either use `capture_method` only where`async.gather` is called,
+            or use `in_subsegment_async` context manager via our escape hatch mechanism - See examples.
 
-        Parameters
-        ----------
-        method : Callable
-            Method to annotate on
-        capture_response : bool, optional
-            Instructs tracer to not include method's response as metadata
-        capture_error : bool, optional
-            Instructs tracer to not include handler's error as metadata, by default True
+        Parameters:
+            method (Callable): Method to annotate on
+            capture_response (bool): Instructs tracer to not include method's response as metadata, by default `True`
+            capture_error (bool): Instructs tracer to not include handler's error as metadata, by default `True`
 
-        Example
-        -------
-        **Custom function using capture_method decorator**
+        ## Example
 
-            tracer = Tracer(service="payment")
-            @tracer.capture_method
-            def some_function()
+        ```python
+        from aws_lambda_powertools import Tracer
+        tracer = Tracer(service="greeting")
 
-        **Custom async method using capture_method decorator**
+        @tracer.capture_method
+        def greeting(name: str) -> Dict:
+            return { "name": name }
 
-            from aws_lambda_powertools import Tracer
-            tracer = Tracer(service="booking")
+        @tracer.capture_lambda_handler
+        def handler(event: dict, context: Any) -> Dict:
+            response = greeting(name="Heitor")
 
-            @tracer.capture_method
-            async def confirm_booking(booking_id: str) -> Dict:
-                resp = call_to_booking_service()
+            return response
+        ```
 
-                tracer.put_annotation("BookingConfirmation", resp["requestId"])
-                tracer.put_metadata("Booking confirmation", resp)
+        **Tracing async method**
 
-                return resp
+        ```python
+        from aws_lambda_powertools import Tracer
+        tracer = Tracer(service="booking")
 
-            def lambda_handler(event: dict, context: Any) -> Dict:
-                booking_id = event.get("booking_id")
-                asyncio.run(confirm_booking(booking_id=booking_id))
+        @tracer.capture_method
+        async def confirm_booking(booking_id: str) -> Dict:
+            resp = call_to_booking_service()
 
-        **Custom generator function using capture_method decorator**
+            tracer.put_annotation("BookingConfirmation", resp["requestId"])
+            tracer.put_metadata("Booking confirmation", resp)
 
-            from aws_lambda_powertools import Tracer
-            tracer = Tracer(service="booking")
+            return resp
 
-            @tracer.capture_method
-            def bookings_generator(booking_id):
-                resp = call_to_booking_service()
-                yield resp[0]
-                yield resp[1]
+        def lambda_handler(event: dict, context: Any) -> Dict:
+            booking_id = event.get("booking_id")
+            asyncio.run(confirm_booking(booking_id=booking_id))
+        ```
 
-            def lambda_handler(event: dict, context: Any) -> Dict:
-                gen = bookings_generator(booking_id=booking_id)
-                result = list(gen)
+        **Tracing generator function**
 
-        **Custom generator context manager using capture_method decorator**
+        ```python
+        from aws_lambda_powertools import Tracer
+        tracer = Tracer(service="booking")
 
-            from aws_lambda_powertools import Tracer
-            tracer = Tracer(service="booking")
+        @tracer.capture_method
+        def bookings_generator(booking_id):
+            resp = call_to_booking_service()
+            yield resp[0]
+            yield resp[1]
 
-            @tracer.capture_method
-            @contextlib.contextmanager
-            def booking_actions(booking_id):
-                resp = call_to_booking_service()
-                yield "example result"
-                cleanup_stuff()
+        def lambda_handler(event: dict, context: Any) -> Dict:
+            gen = bookings_generator(booking_id=booking_id)
+            result = list(gen)
+        ```
 
-            def lambda_handler(event: dict, context: Any) -> Dict:
-                booking_id = event.get("booking_id")
+        **Tracing generator context manager**
 
-                with booking_actions(booking_id=booking_id) as booking:
-                    result = booking
+        ```python
+        from aws_lambda_powertools import Tracer
+        tracer = Tracer(service="booking")
+
+        @tracer.capture_method
+        @contextlib.contextmanager
+        def booking_actions(booking_id):
+            resp = call_to_booking_service()
+            yield "example result"
+            cleanup_stuff()
+
+        def lambda_handler(event: dict, context: Any) -> Dict:
+            booking_id = event.get("booking_id")
+
+            with booking_actions(booking_id=booking_id) as booking:
+                result = booking
+        ```
 
         **Tracing nested async calls**
 
-            from aws_lambda_powertools import Tracer
-            tracer = Tracer(service="booking")
+        ```python
+        from aws_lambda_powertools import Tracer
+        tracer = Tracer(service="booking")
 
-            @tracer.capture_method
-            async def get_identity():
-                ...
+        @tracer.capture_method
+        async def get_identity():
+            ...
 
-            @tracer.capture_method
-            async def long_async_call():
-                ...
+        @tracer.capture_method
+        async def long_async_call():
+            ...
 
-            @tracer.capture_method
-            async def async_tasks():
-                await get_identity()
-                ret = await long_async_call()
+        @tracer.capture_method
+        async def async_tasks():
+            await get_identity()
+            ret = await long_async_call()
 
-                return { "task": "done", **ret }
+            return { "task": "done", **ret }
+        ```
 
         **Safely tracing concurrent async calls with decorator**
 
-        This may not needed once [this bug is closed](https://github.com/aws/aws-xray-sdk-python/issues/164)
+        > This may not be needed once [this bug is closed](https://github.com/aws/aws-xray-sdk-python/issues/164)
 
-            from aws_lambda_powertools import Tracer
-            tracer = Tracer(service="booking")
+        ```python
+        from aws_lambda_powertools import Tracer
+        tracer = Tracer(service="booking")
 
-            async def get_identity():
-                async with aioboto3.client("sts") as sts:
-                    account = await sts.get_caller_identity()
-                    return account
+        async def get_identity():
+            async with aioboto3.client("sts") as sts:
+                account = await sts.get_caller_identity()
+                return account
 
-            async def long_async_call():
-                ...
+        async def long_async_call():
+            ...
 
-            @tracer.capture_method
-            async def async_tasks():
-                _, ret = await asyncio.gather(get_identity(), long_async_call(), return_exceptions=True)
+        @tracer.capture_method
+        async def async_tasks():
+            _, ret = await asyncio.gather(get_identity(), long_async_call(), return_exceptions=True)
 
-                return { "task": "done", **ret }
-
-        **Safely tracing each concurrent async calls with escape hatch**
-
-        This may not needed once [this bug is closed](https://github.com/aws/aws-xray-sdk-python/issues/164)
-
-            from aws_lambda_powertools import Tracer
-            tracer = Tracer(service="booking")
-
-            async def get_identity():
-                async tracer.provider.in_subsegment_async("## get_identity"):
-                    ...
-
-            async def long_async_call():
-                async tracer.provider.in_subsegment_async("## long_async_call"):
-                    ...
-
-            @tracer.capture_method
-            async def async_tasks():
-                _, ret = await asyncio.gather(get_identity(), long_async_call(), return_exceptions=True)
-
-                return { "task": "done", **ret }
-
-        Raises
-        ------
-        err
-            Exception raised by method
+            return { "task": "done", **ret }
+        ```
         """
         # If method is None we've been called with parameters
         # Return a partial function with args filled
@@ -717,7 +655,7 @@ class Tracer:
         service: str = None,
         disabled: bool = None,
         auto_patch: bool = None,
-        patch_modules: Union[List, Tuple] = None,
+        patch_modules: Sequence[str] = None,
         provider: BaseProvider = None,
     ):
         """Populates Tracer config for new and existing initializations"""
