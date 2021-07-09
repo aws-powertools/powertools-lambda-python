@@ -655,16 +655,14 @@ def test_debug_json_formatting():
     assert result["body"] == json.dumps(response, indent=4)
 
 
-def test_debug_print_event(monkeypatch):
+def test_debug_print_event(capsys):
     # GIVE debug is True
     app = ApiGatewayResolver(debug=True)
-    mocked_print = MagicMock()
-    monkeypatch.setattr(builtins, "print", mocked_print)
 
     # WHEN calling resolve
     event = {"path": "/foo", "httpMethod": "GET"}
     app(event, None)
 
     # THEN print the event
-    # NOTE: other calls might have happened outside of this mock
-    mocked_print.assert_any_call(json.dumps(event, indent=4))
+    out, err = capsys.readouterr()
+    assert json.loads(out) == event
