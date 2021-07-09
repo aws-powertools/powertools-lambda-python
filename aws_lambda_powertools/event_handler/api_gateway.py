@@ -1,7 +1,9 @@
 import base64
 import json
 import logging
+import os
 import re
+import traceback
 import zlib
 from enum import Enum
 from http import HTTPStatus
@@ -9,6 +11,8 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import ServiceError
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
@@ -28,43 +32,46 @@ class ProxyEventType(Enum):
 class CORSConfig(object):
     """CORS Config
 
-
     Examples
     --------
 
     Simple cors example using the default permissive cors, not this should only be used during early prototyping
 
-        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    ```python
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
-        app = ApiGatewayResolver()
+    app = ApiGatewayResolver()
 
-        @app.get("/my/path", cors=True)
-        def with_cors():
-            return {"message": "Foo"}
+    @app.get("/my/path", cors=True)
+    def with_cors():
+        return {"message": "Foo"}
+    ```
 
     Using a custom CORSConfig where `with_cors` used the custom provided CORSConfig and `without_cors`
     do not include any cors headers.
 
-        from aws_lambda_powertools.event_handler.api_gateway import (
-            ApiGatewayResolver, CORSConfig
-        )
+    ```python
+    from aws_lambda_powertools.event_handler.api_gateway import (
+        ApiGatewayResolver, CORSConfig
+    )
 
-        cors_config = CORSConfig(
-            allow_origin="https://wwww.example.com/",
-            expose_headers=["x-exposed-response-header"],
-            allow_headers=["x-custom-request-header"],
-            max_age=100,
-            allow_credentials=True,
-        )
-        app = ApiGatewayResolver(cors=cors_config)
+    cors_config = CORSConfig(
+        allow_origin="https://wwww.example.com/",
+        expose_headers=["x-exposed-response-header"],
+        allow_headers=["x-custom-request-header"],
+        max_age=100,
+        allow_credentials=True,
+    )
+    app = ApiGatewayResolver(cors=cors_config)
 
-        @app.get("/my/path")
-        def with_cors():
-            return {"message": "Foo"}
+    @app.get("/my/path")
+    def with_cors():
+        return {"message": "Foo"}
 
-        @app.get("/another-one", cors=False)
-        def without_cors():
-            return {"message": "Foo"}
+    @app.get("/another-one", cors=False)
+    def without_cors():
+        return {"message": "Foo"}
+    ```
     """
 
     _REQUIRED_HEADERS = ["Authorization", "Content-Type", "X-Amz-Date", "X-Api-Key", "X-Amz-Security-Token"]
@@ -240,7 +247,12 @@ class ApiGatewayResolver:
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
 
-    def __init__(self, proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent, cors: CORSConfig = None):
+    def __init__(
+        self,
+        proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent,
+        cors: CORSConfig = None,
+        debug: Optional[bool] = None,
+    ):
         """
         Parameters
         ----------
@@ -248,12 +260,18 @@ class ApiGatewayResolver:
             Proxy request type, defaults to API Gateway V1
         cors: CORSConfig
             Optionally configure and enabled CORS. Not each route will need to have to cors=True
+        debug: Optional[bool]
+            Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_EVENT_HANDLER_DEBUG"
+            environment variable
         """
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
         self._cors = cors
         self._cors_enabled: bool = cors is not None
         self._cors_methods: Set[str] = {"OPTIONS"}
+        self._debug = resolve_truthy_env_var_choice(
+            choice=debug, env=os.getenv(constants.EVENT_HANDLER_DEBUG_ENV, "false")
+        )
 
     def get(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
         """Get route decorator with GET `method`
@@ -416,6 +434,8 @@ class ApiGatewayResolver:
         dict
             Returns the dict response
         """
+        if self._debug:
+            print(self._json_dump(event))
         self.current_event = self._to_proxy_event(event)
         self.lambda_context = context
         return self._resolve().build(self.current_event, self._cors)
@@ -489,6 +509,19 @@ class ApiGatewayResolver:
                 ),
                 route,
             )
+        except Exception:
+            if self._debug:
+                # If the user has turned on debug mode,
+                # we'll let the original exception propagate so
+                # they get more information about what went wrong.
+                return ResponseBuilder(
+                    Response(
+                        status_code=500,
+                        content_type=content_types.TEXT_PLAIN,
+                        body="".join(traceback.format_exc()),
+                    )
+                )
+            raise
 
     def _to_response(self, result: Union[Dict, Response]) -> Response:
         """Convert the route's result to a Response
@@ -509,7 +542,9 @@ class ApiGatewayResolver:
             body=self._json_dump(result),
         )
 
-    @staticmethod
-    def _json_dump(obj: Any) -> str:
-        """Does a concise json serialization"""
-        return json.dumps(obj, separators=(",", ":"), cls=Encoder)
+    def _json_dump(self, obj: Any) -> str:
+        """Does a concise json serialization or pretty print when in debug mode"""
+        if self._debug:
+            return json.dumps(obj, indent=4, cls=Encoder)
+        else:
+            return json.dumps(obj, separators=(",", ":"), cls=Encoder)

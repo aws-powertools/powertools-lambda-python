@@ -5,6 +5,8 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Dict
 
+import pytest
+
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.api_gateway import (
     ApiGatewayResolver,
@@ -20,6 +22,7 @@ from aws_lambda_powertools.event_handler.exceptions import (
     ServiceError,
     UnauthorizedError,
 )
+from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
 from tests.functional.utils import load_event
@@ -31,7 +34,6 @@ def read_media(file_name: str) -> bytes:
 
 
 LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
-TEXT_HTML = "text/html"
 
 
 def test_alb_event():
@@ -42,7 +44,7 @@ def test_alb_event():
     def foo():
         assert isinstance(app.current_event, ALBEvent)
         assert app.lambda_context == {}
-        return Response(200, TEXT_HTML, "foo")
+        return Response(200, content_types.TEXT_HTML, "foo")
 
     # WHEN calling the event handler
     result = app(load_event("albEvent.json"), {})
@@ -50,7 +52,7 @@ def test_alb_event():
     # THEN process event correctly
     # AND set the current_event type as ALBEvent
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == TEXT_HTML
+    assert result["headers"]["Content-Type"] == content_types.TEXT_HTML
     assert result["body"] == "foo"
 
 
@@ -80,7 +82,7 @@ def test_api_gateway():
     @app.get("/my/path")
     def get_lambda() -> Response:
         assert isinstance(app.current_event, APIGatewayProxyEvent)
-        return Response(200, TEXT_HTML, "foo")
+        return Response(200, content_types.TEXT_HTML, "foo")
 
     # WHEN calling the event handler
     result = app(LOAD_GW_EVENT, {})
@@ -88,7 +90,7 @@ def test_api_gateway():
     # THEN process event correctly
     # AND set the current_event type as APIGatewayProxyEvent
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == TEXT_HTML
+    assert result["headers"]["Content-Type"] == content_types.TEXT_HTML
     assert result["body"] == "foo"
 
 
@@ -100,7 +102,7 @@ def test_api_gateway_v2():
     def my_path() -> Response:
         assert isinstance(app.current_event, APIGatewayProxyEventV2)
         post_data = app.current_event.json_body
-        return Response(200, content_types.PLAIN_TEXT, post_data["username"])
+        return Response(200, content_types.TEXT_PLAIN, post_data["username"])
 
     # WHEN calling the event handler
     result = app(load_event("apiGatewayProxyV2Event.json"), {})
@@ -108,7 +110,7 @@ def test_api_gateway_v2():
     # THEN process event correctly
     # AND set the current_event type as APIGatewayProxyEventV2
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == content_types.PLAIN_TEXT
+    assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
     assert result["body"] == "tom"
 
 
@@ -119,14 +121,14 @@ def test_include_rule_matching():
     @app.get("/<name>/<my_id>")
     def get_lambda(my_id: str, name: str) -> Response:
         assert name == "my"
-        return Response(200, TEXT_HTML, my_id)
+        return Response(200, content_types.TEXT_HTML, my_id)
 
     # WHEN calling the event handler
     result = app(LOAD_GW_EVENT, {})
 
     # THEN
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == TEXT_HTML
+    assert result["headers"]["Content-Type"] == content_types.TEXT_HTML
     assert result["body"] == "path"
 
 
@@ -187,11 +189,11 @@ def test_cors():
 
     @app.get("/my/path", cors=True)
     def with_cors() -> Response:
-        return Response(200, TEXT_HTML, "test")
+        return Response(200, content_types.TEXT_HTML, "test")
 
     @app.get("/without-cors")
     def without_cors() -> Response:
-        return Response(200, TEXT_HTML, "test")
+        return Response(200, content_types.TEXT_HTML, "test")
 
     def handler(event, context):
         return app.resolve(event, context)
@@ -202,7 +204,7 @@ def test_cors():
     # THEN the headers should include cors headers
     assert "headers" in result
     headers = result["headers"]
-    assert headers["Content-Type"] == TEXT_HTML
+    assert headers["Content-Type"] == content_types.TEXT_HTML
     assert headers["Access-Control-Allow-Origin"] == "*"
     assert "Access-Control-Allow-Credentials" not in headers
     assert headers["Access-Control-Allow-Headers"] == ",".join(sorted(CORSConfig._REQUIRED_HEADERS))
@@ -268,7 +270,7 @@ def test_compress_no_accept_encoding():
 
     @app.get("/my/path", compress=True)
     def return_text() -> Response:
-        return Response(200, content_types.PLAIN_TEXT, expected_value)
+        return Response(200, content_types.TEXT_PLAIN, expected_value)
 
     # WHEN calling the event handler
     result = app({"path": "/my/path", "httpMethod": "GET", "headers": {}}, None)
@@ -284,7 +286,7 @@ def test_cache_control_200():
 
     @app.get("/success", cache_control="max-age=600")
     def with_cache_control() -> Response:
-        return Response(200, TEXT_HTML, "has 200 response")
+        return Response(200, content_types.TEXT_HTML, "has 200 response")
 
     def handler(event, context):
         return app.resolve(event, context)
@@ -295,7 +297,7 @@ def test_cache_control_200():
 
     # THEN return the set Cache-Control
     headers = result["headers"]
-    assert headers["Content-Type"] == TEXT_HTML
+    assert headers["Content-Type"] == content_types.TEXT_HTML
     assert headers["Cache-Control"] == "max-age=600"
 
 
@@ -305,7 +307,7 @@ def test_cache_control_non_200():
 
     @app.delete("/fails", cache_control="max-age=600")
     def with_cache_control_has_500() -> Response:
-        return Response(503, TEXT_HTML, "has 503 response")
+        return Response(503, content_types.TEXT_HTML, "has 503 response")
 
     def handler(event, context):
         return app.resolve(event, context)
@@ -316,7 +318,7 @@ def test_cache_control_non_200():
 
     # THEN return a Cache-Control of "no-cache"
     headers = result["headers"]
-    assert headers["Content-Type"] == TEXT_HTML
+    assert headers["Content-Type"] == content_types.TEXT_HTML
     assert headers["Cache-Control"] == "no-cache"
 
 
@@ -479,7 +481,7 @@ def test_custom_preflight_response():
     def custom_preflight():
         return Response(
             status_code=200,
-            content_type=TEXT_HTML,
+            content_type=content_types.TEXT_HTML,
             body="Foo",
             headers={"Access-Control-Allow-Methods": "CUSTOM"},
         )
@@ -495,7 +497,7 @@ def test_custom_preflight_response():
     assert result["statusCode"] == 200
     assert result["body"] == "Foo"
     headers = result["headers"]
-    assert headers["Content-Type"] == TEXT_HTML
+    assert headers["Content-Type"] == content_types.TEXT_HTML
     assert "Access-Control-Allow-Origin" in result["headers"]
     assert headers["Access-Control-Allow-Methods"] == "CUSTOM"
 
@@ -582,3 +584,83 @@ def test_service_error_responses():
     assert "Access-Control-Allow-Origin" in result["headers"]
     expected = {"statusCode": 502, "message": "Something went wrong!"}
     assert result["body"] == json_dump(expected)
+
+
+def test_debug_unhandled_exceptions_debug_on():
+    # GIVEN debug is enabled
+    # AND an unhandled exception is raised
+    app = ApiGatewayResolver(debug=True)
+    assert app._debug
+
+    @app.get("/raises-error")
+    def raises_error():
+        raise RuntimeError("Foo")
+
+    # WHEN calling the handler
+    result = app({"path": "/raises-error", "httpMethod": "GET"}, None)
+
+    # THEN return a 500
+    # AND Content-Type is set to text/plain
+    # AND include the exception traceback in the response
+    assert result["statusCode"] == 500
+    assert "Traceback (most recent call last)" in result["body"]
+    headers = result["headers"]
+    assert headers["Content-Type"] == content_types.TEXT_PLAIN
+
+
+def test_debug_unhandled_exceptions_debug_off():
+    # GIVEN debug is disabled
+    # AND an unhandled exception is raised
+    app = ApiGatewayResolver(debug=False)
+    assert not app._debug
+
+    @app.get("/raises-error")
+    def raises_error():
+        raise RuntimeError("Foo")
+
+    # WHEN calling the handler
+    # THEN raise the original exception
+    with pytest.raises(RuntimeError) as e:
+        app({"path": "/raises-error", "httpMethod": "GET"}, None)
+
+    # AND include the original error
+    assert e.value.args == ("Foo",)
+
+
+def test_debug_mode_environment_variable(monkeypatch):
+    # GIVEN a debug mode environment variable is set
+    monkeypatch.setenv(constants.EVENT_HANDLER_DEBUG_ENV, "true")
+    app = ApiGatewayResolver()
+
+    # WHEN calling app._debug
+    # THEN the debug mode is enabled
+    assert app._debug
+
+
+def test_debug_json_formatting():
+    # GIVEN debug is True
+    app = ApiGatewayResolver(debug=True)
+    response = {"message": "Foo"}
+
+    @app.get("/foo")
+    def foo():
+        return response
+
+    # WHEN calling the handler
+    result = app({"path": "/foo", "httpMethod": "GET"}, None)
+
+    # THEN return a pretty print json in the body
+    assert result["body"] == json.dumps(response, indent=4)
+
+
+def test_debug_print_event(capsys):
+    # GIVE debug is True
+    app = ApiGatewayResolver(debug=True)
+
+    # WHEN calling resolve
+    event = {"path": "/foo", "httpMethod": "GET"}
+    app(event, None)
+
+    # THEN print the event
+    out, err = capsys.readouterr()
+    assert json.loads(out) == event
