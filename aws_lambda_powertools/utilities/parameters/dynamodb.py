@@ -5,9 +5,9 @@ Amazon DynamoDB parameter retrieval and caching utility
 
 from typing import Any, Dict, Optional
 
-import boto3  # type: ignore
-from boto3.dynamodb.conditions import Key  # type: ignore
-from botocore.config import Config  # type: ignore
+import boto3
+from boto3.dynamodb.conditions import Key
+from botocore.config import Config
 
 from .base import BaseProvider
 

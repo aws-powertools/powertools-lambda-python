@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 from types import MappingProxyType
 from typing import Any, Dict, Optional
 
-import jmespath  # type: ignore
+import jmespath
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
 from aws_lambda_powertools.shared.jmespath_functions import PowertoolsFunctions

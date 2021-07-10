@@ -4,7 +4,7 @@ import zipfile
 from typing import Any, Dict, List, Optional
 from urllib.parse import unquote_plus
 
-import boto3  # type: ignore
+import boto3
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 

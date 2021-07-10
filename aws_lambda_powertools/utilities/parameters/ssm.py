@@ -5,8 +5,8 @@ AWS SSM Parameter retrieval and caching utility
 
 from typing import Any, Dict, Optional, Union
 
-import boto3  # type: ignore
-from botocore.config import Config  # type: ignore
+import boto3
+from botocore.config import Config
 
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 

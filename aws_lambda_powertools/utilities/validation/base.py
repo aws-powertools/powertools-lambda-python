@@ -1,9 +1,9 @@
 import logging
 from typing import Any, Dict, Optional, Union
 
-import fastjsonschema  # type: ignore
-import jmespath  # type: ignore
-from jmespath.exceptions import LexerError  # type: ignore
+import fastjsonschema
+import jmespath
+from jmespath.exceptions import LexerError
 
 from aws_lambda_powertools.shared.jmespath_functions import PowertoolsFunctions
 

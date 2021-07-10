@@ -2,7 +2,7 @@ import base64
 import gzip
 import json
 
-import jmespath  # type: ignore
+import jmespath
 
 
 class PowertoolsFunctions(jmespath.functions.Functions):

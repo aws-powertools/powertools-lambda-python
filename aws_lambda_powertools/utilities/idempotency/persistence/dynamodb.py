@@ -2,8 +2,8 @@ import datetime
 import logging
 from typing import Any, Dict, Optional
 
-import boto3  # type: ignore
-from botocore.config import Config  # type: ignore
+import boto3
+from botocore.config import Config
 
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (

@@ -7,8 +7,8 @@ import logging
 import sys
 from typing import Callable, Dict, List, Optional, Tuple
 
-import boto3  # type: ignore
-from botocore.config import Config  # type: ignore
+import boto3
+from botocore.config import Config
 
 from ...middleware_factory import lambda_handler_decorator
 from .base import BasePartialProcessor
