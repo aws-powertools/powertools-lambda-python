@@ -400,6 +400,16 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         else:
             self.append_keys(correlation_id=value)
 
+    def get_correlation_id(self) -> Optional[str]:
+        """Gets the correlation_id in the logging json
+
+        Returns
+        -------
+        str, optional
+            Value for the correlation id
+        """
+        return self.registered_formatter.log_format.get("correlation_id")
+
     @staticmethod
     def _get_log_level(level: Union[str, int, None]) -> Union[str, int]:
         """Returns preferred log level set by the customer in upper case"""
