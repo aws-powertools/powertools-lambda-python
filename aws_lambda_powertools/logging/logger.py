@@ -167,11 +167,11 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
     def __init__(
         self,
-        service: str = None,
-        level: Union[str, int] = None,
+        service: Optional[str] = None,
+        level: Union[str, int, None] = None,
         child: bool = False,
-        sampling_rate: float = None,
-        stream: IO[str] = None,
+        sampling_rate: Optional[float] = None,
+        stream: Optional[IO[str]] = None,
         logger_formatter: Optional[PowertoolsFormatter] = None,
         logger_handler: Optional[logging.Handler] = None,
         **kwargs,
@@ -261,10 +261,10 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
     def inject_lambda_context(
         self,
-        lambda_handler: Callable[[Dict, Any], Any] = None,
-        log_event: bool = None,
-        correlation_id_path: str = None,
-        clear_state: bool = False,
+        lambda_handler: Optional[Callable[[Dict, Any], Any]] = None,
+        log_event: Optional[bool] = None,
+        correlation_id_path: Optional[str] = None,
+        clear_state: Optional[bool] = False,
     ):
         """Decorator to capture Lambda contextual info and inject into logger
 
@@ -421,7 +421,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
 
 def set_package_logger(
-    level: Union[str, int] = logging.DEBUG, stream: IO[str] = None, formatter: logging.Formatter = None
+    level: Union[str, int] = logging.DEBUG,
+    stream: Optional[IO[str]] = None,
+    formatter: Optional[logging.Formatter] = None,
 ):
     """Set an additional stream handler, formatter, and log level for aws_lambda_powertools package logger.
 

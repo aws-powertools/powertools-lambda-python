@@ -126,7 +126,11 @@ class Response:
     """Response data class that provides greater control over what is returned from the proxy event"""
 
     def __init__(
-        self, status_code: int, content_type: Optional[str], body: Union[str, bytes, None], headers: Dict = None
+        self,
+        status_code: int,
+        content_type: Optional[str],
+        body: Union[str, bytes, None],
+        headers: Optional[Dict] = None,
     ):
         """
 
@@ -167,7 +171,7 @@ class Route:
 class ResponseBuilder:
     """Internally used Response builder"""
 
-    def __init__(self, response: Response, route: Route = None):
+    def __init__(self, response: Response, route: Optional[Route] = None):
         self.response = response
         self.route = route
 
@@ -199,7 +203,7 @@ class ResponseBuilder:
         if self.route.compress and "gzip" in (event.get_header_value("accept-encoding", "") or ""):
             self._compress()
 
-    def build(self, event: BaseProxyEvent, cors: CORSConfig = None) -> Dict[str, Any]:
+    def build(self, event: BaseProxyEvent, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
         """Build the full response dict to be returned by the lambda"""
         self._route(event, cors)
 
@@ -250,7 +254,7 @@ class ApiGatewayResolver:
     def __init__(
         self,
         proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent,
-        cors: CORSConfig = None,
+        cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
     ):
         """
@@ -273,7 +277,7 @@ class ApiGatewayResolver:
             choice=debug, env=os.getenv(constants.EVENT_HANDLER_DEBUG_ENV, "false")
         )
 
-    def get(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
+    def get(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
         """Get route decorator with GET `method`
 
         Examples
@@ -298,7 +302,7 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "GET", cors, compress, cache_control)
 
-    def post(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
+    def post(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
         """Post route decorator with POST `method`
 
         Examples
@@ -324,7 +328,7 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "POST", cors, compress, cache_control)
 
-    def put(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
+    def put(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
         """Put route decorator with PUT `method`
 
         Examples
@@ -350,7 +354,9 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "PUT", cors, compress, cache_control)
 
-    def delete(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
+    def delete(
+        self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
+    ):
         """Delete route decorator with DELETE `method`
 
         Examples
@@ -375,7 +381,9 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "DELETE", cors, compress, cache_control)
 
-    def patch(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
+    def patch(
+        self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
+    ):
         """Patch route decorator with PATCH `method`
 
         Examples
@@ -403,7 +411,14 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "PATCH", cors, compress, cache_control)
 
-    def route(self, rule: str, method: str, cors: bool = None, compress: bool = False, cache_control: str = None):
+    def route(
+        self,
+        rule: str,
+        method: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+    ):
         """Route decorator includes parameter `method`"""
 
         def register_resolver(func: Callable):

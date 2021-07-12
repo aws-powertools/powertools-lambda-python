@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 
 class IdempotencyConfig:
@@ -6,7 +6,7 @@ class IdempotencyConfig:
         self,
         event_key_jmespath: str = "",
         payload_validation_jmespath: str = "",
-        jmespath_options: Dict = None,
+        jmespath_options: Optional[Dict] = None,
         raise_on_no_idempotency_key: bool = False,
         expires_after_seconds: int = 60 * 60,  # 1 hour default
         use_local_cache: bool = False,

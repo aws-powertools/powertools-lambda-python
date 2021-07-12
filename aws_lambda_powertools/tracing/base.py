@@ -2,7 +2,7 @@ import abc
 import numbers
 import traceback
 from contextlib import contextmanager
-from typing import Any, AsyncContextManager, ContextManager, List, NoReturn, Set, Union
+from typing import Any, AsyncContextManager, ContextManager, List, NoReturn, Optional, Set, Union
 
 
 class BaseProvider(abc.ABC):
@@ -81,7 +81,7 @@ class BaseSegment(abc.ABC):
     """Holds common properties and methods on segment and subsegment."""
 
     @abc.abstractmethod
-    def close(self, end_time: int = None):
+    def close(self, end_time: Optional[int] = None):
         """Close the trace entity by setting `end_time`
         and flip the in progress flag to False.
 

@@ -150,7 +150,7 @@ class Tracer:
         disabled: bool = None,
         auto_patch: bool = None,
         patch_modules: Optional[Tuple[str]] = None,
-        provider: BaseProvider = None,
+        provider: Optional[BaseProvider] = None,
     ):
         self.__build_config(
             service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
@@ -223,7 +223,7 @@ class Tracer:
         logger.debug(f"Adding metadata on key '{key}' with '{value}' at namespace '{namespace}'")
         self.provider.put_metadata(key=key, value=value, namespace=namespace)
 
-    def patch(self, modules: Tuple[str] = None):
+    def patch(self, modules: Optional[Tuple[str]] = None):
         """Patch modules for instrumentation.
 
         Patches all supported modules by default if none are given.
@@ -244,7 +244,7 @@ class Tracer:
 
     def capture_lambda_handler(
         self,
-        lambda_handler: Union[Callable[[Dict, Any], Any], Callable[[Dict, Any, Optional[Dict]], Any]] = None,
+        lambda_handler: Union[Callable[[Dict, Any], Any], Optional[Callable[[Dict, Any, Optional[Dict]], Any]]] = None,
         capture_response: Optional[bool] = None,
         capture_error: Optional[bool] = None,
     ):
