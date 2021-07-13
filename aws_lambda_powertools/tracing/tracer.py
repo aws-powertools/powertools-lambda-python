@@ -146,9 +146,9 @@ class Tracer:
 
     def __init__(
         self,
-        service: str = None,
-        disabled: bool = None,
-        auto_patch: bool = None,
+        service: Optional[str] = None,
+        disabled: Optional[bool] = None,
+        auto_patch: Optional[bool] = None,
         patch_modules: Optional[Tuple[str]] = None,
         provider: Optional[BaseProvider] = None,
     ):
@@ -574,7 +574,7 @@ class Tracer:
         method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
-        method_name: str = None,
+        method_name: Optional[str] = None,
     ):
         @functools.wraps(method)
         @contextlib.contextmanager
@@ -602,7 +602,7 @@ class Tracer:
         method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
-        method_name: str = None,
+        method_name: Optional[str] = None,
     ):
         @functools.wraps(method)
         def decorate(*args, **kwargs):
@@ -629,9 +629,9 @@ class Tracer:
 
     def _add_response_as_metadata(
         self,
-        method_name: str = None,
-        data: Any = None,
-        subsegment: BaseSegment = None,
+        method_name: Optional[str] = None,
+        data: Optional[Any] = None,
+        subsegment: Optional[BaseSegment] = None,
         capture_response: Optional[Union[bool, str]] = None,
     ):
         """Add response as metadata for given subsegment
@@ -714,11 +714,11 @@ class Tracer:
 
     def __build_config(
         self,
-        service: str = None,
-        disabled: bool = None,
-        auto_patch: bool = None,
-        patch_modules: Union[List, Tuple] = None,
-        provider: BaseProvider = None,
+        service: Optional[str] = None,
+        disabled: Optional[bool] = None,
+        auto_patch: Optional[bool] = None,
+        patch_modules: Union[List, Tuple, None] = None,
+        provider: Optional[BaseProvider] = None,
     ):
         """Populates Tracer config for new and existing initializations"""
         is_disabled = disabled if disabled is not None else self._is_tracer_disabled()
