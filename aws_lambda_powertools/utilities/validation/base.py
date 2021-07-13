@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import fastjsonschema
 import jmespath
@@ -12,7 +12,7 @@ from .exceptions import InvalidEnvelopeExpressionError, InvalidSchemaFormatError
 logger = logging.getLogger(__name__)
 
 
-def validate_data_against_schema(data: Dict, schema: Dict, formats: Optional[Dict] = None):
+def validate_data_against_schema(data: Union[Dict, str], schema: Dict, formats: Optional[Dict] = None):
     """Validate dict data against given JSON Schema
 
     Parameters
@@ -41,7 +41,7 @@ def validate_data_against_schema(data: Dict, schema: Dict, formats: Optional[Dic
         raise SchemaValidationError(message)
 
 
-def unwrap_event_from_envelope(data: Dict, envelope: str, jmespath_options: Optional[Dict]) -> Any:
+def unwrap_event_from_envelope(data: Union[Dict, str], envelope: str, jmespath_options: Optional[Dict]) -> Any:
     """Searches data using JMESPath expression
 
     Parameters

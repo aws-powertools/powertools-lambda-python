@@ -4,7 +4,7 @@ import logging
 import os
 import random
 import sys
-from typing import Any, Callable, Dict, Iterable, Optional, TypeVar, Union
+from typing import IO, Any, Callable, Dict, Iterable, Optional, TypeVar, Union
 
 import jmespath
 
@@ -171,7 +171,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         level: Union[str, int] = None,
         child: bool = False,
         sampling_rate: float = None,
-        stream: sys.stdout = None,
+        stream: IO[str] = None,
         logger_formatter: Optional[PowertoolsFormatter] = None,
         logger_handler: Optional[logging.Handler] = None,
         **kwargs,
@@ -363,7 +363,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     @property
     def registered_formatter(self) -> Optional[PowertoolsFormatter]:
         """Convenience property to access logger formatter"""
-        return self.registered_handler.formatter
+        return self.registered_handler.formatter  # type: ignore
 
     def structure_logs(self, append: bool = False, **keys):
         """Sets logging formatting to JSON.
@@ -384,7 +384,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             self.append_keys(**keys)
         else:
             log_keys = {**self._default_log_keys, **keys}
-            formatter = self.logger_formatter or LambdaPowertoolsFormatter(**log_keys)
+            formatter = self.logger_formatter or LambdaPowertoolsFormatter(**log_keys)  # type: ignore
             self.registered_handler.setFormatter(formatter)
 
     def set_correlation_id(self, value: Optional[str]):
@@ -434,7 +434,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
 
 def set_package_logger(
-    level: Union[str, int] = logging.DEBUG, stream: sys.stdout = None, formatter: logging.Formatter = None
+    level: Union[str, int] = logging.DEBUG, stream: IO[str] = None, formatter: logging.Formatter = None
 ):
     """Set an additional stream handler, formatter, and log level for aws_lambda_powertools package logger.
 
