@@ -324,7 +324,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             )
 
         log_event = resolve_truthy_env_var_choice(
-            choice=log_event, env=os.getenv(constants.LOGGER_LOG_EVENT_ENV, "false")
+            env=os.getenv(constants.LOGGER_LOG_EVENT_ENV, "false"), choice=log_event
         )
 
         @functools.wraps(lambda_handler)

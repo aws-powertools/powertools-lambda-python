@@ -274,7 +274,7 @@ class ApiGatewayResolver:
         self._cors_enabled: bool = cors is not None
         self._cors_methods: Set[str] = {"OPTIONS"}
         self._debug = resolve_truthy_env_var_choice(
-            choice=debug, env=os.getenv(constants.EVENT_HANDLER_DEBUG_ENV, "false")
+            env=os.getenv(constants.EVENT_HANDLER_DEBUG_ENV, "false"), choice=debug
         )
 
     def get(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):

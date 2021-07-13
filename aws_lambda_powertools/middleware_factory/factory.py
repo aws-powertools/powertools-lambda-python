@@ -106,7 +106,7 @@ def lambda_handler_decorator(decorator: Optional[Callable] = None, trace_executi
         return functools.partial(lambda_handler_decorator, trace_execution=trace_execution)
 
     trace_execution = resolve_truthy_env_var_choice(
-        choice=trace_execution, env=os.getenv(constants.MIDDLEWARE_FACTORY_TRACE_ENV, "false")
+        env=os.getenv(constants.MIDDLEWARE_FACTORY_TRACE_ENV, "false"), choice=trace_execution
     )
 
     @functools.wraps(decorator)

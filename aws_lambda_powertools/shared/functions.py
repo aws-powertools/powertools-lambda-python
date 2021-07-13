@@ -2,14 +2,14 @@ from distutils.util import strtobool
 from typing import Any, Optional, Union
 
 
-def resolve_truthy_env_var_choice(env: Optional[Any] = None, choice: Optional[bool] = None) -> bool:
+def resolve_truthy_env_var_choice(env: str, choice: Optional[bool] = None) -> bool:
     """Pick explicit choice over truthy env value, if available, otherwise return truthy env value
 
     NOTE: Environment variable should be resolved by the caller.
 
     Parameters
     ----------
-    env : Any, Optional
+    env : str
         environment variable actual value
     choice : bool
         explicit choice
