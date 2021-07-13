@@ -520,7 +520,7 @@ class Tracer:
         method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
-        method_name: str = None,
+        method_name: Optional[str] = None,
     ):
         @functools.wraps(method)
         async def decorate(*args, **kwargs):
@@ -547,7 +547,7 @@ class Tracer:
         method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
-        method_name: str = None,
+        method_name: Optional[str] = None,
     ):
         @functools.wraps(method)
         def decorate(*args, **kwargs):
