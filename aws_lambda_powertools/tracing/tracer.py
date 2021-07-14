@@ -195,7 +195,7 @@ class Tracer:
         logger.debug(f"Annotating on key '{key}' with '{value}'")
         self.provider.put_annotation(key=key, value=value)
 
-    def put_metadata(self, key: str, value: Any, namespace: str = None):
+    def put_metadata(self, key: str, value: Any, namespace: Optional[str] = None):
         """Adds metadata to existing segment or subsegment
 
         Parameters
@@ -330,7 +330,10 @@ class Tracer:
         return decorate
 
     def capture_method(
-        self, method: Callable = None, capture_response: Optional[bool] = None, capture_error: Optional[bool] = None
+        self,
+        method: Optional[Callable] = None,
+        capture_response: Optional[bool] = None,
+        capture_error: Optional[bool] = None,
     ):
         """Decorator to create subsegment for arbitrary functions
 
@@ -717,7 +720,7 @@ class Tracer:
         service: Optional[str] = None,
         disabled: Optional[bool] = None,
         auto_patch: Optional[bool] = None,
-        patch_modules: Union[List, Tuple, None] = None,
+        patch_modules: Optional[Union[List, Tuple]] = None,
         provider: Optional[BaseProvider] = None,
     ):
         """Populates Tracer config for new and existing initializations"""
