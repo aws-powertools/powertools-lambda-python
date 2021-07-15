@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable
+from typing import Any, Callable, Type
 
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -37,7 +37,7 @@ class AppSyncResolver:
             # Would match all fieldNames matching 'commonField'
             return str(uuid.uuid4())
     """
-
+    
     current_event: AppSyncResolverEvent
     lambda_context: LambdaContext
 
@@ -62,7 +62,7 @@ class AppSyncResolver:
 
         return register_resolver
 
-    def resolve(self, event: dict, context: LambdaContext) -> Any:
+    def resolve(self, event: dict, context: LambdaContext, current_event_data_class: Type[AppSyncResolverEvent] = AppSyncResolverEvent) -> Any:
         """Resolve field_name
 
         Parameters
@@ -71,6 +71,8 @@ class AppSyncResolver:
             Lambda event
         context : LambdaContext
             Lambda context
+        current_event_data_class:
+            Decode instance of event to class or subclass of AppSyncResolverEvent
 
         Returns
         -------
@@ -82,7 +84,7 @@ class AppSyncResolver:
         ValueError
             If we could not find a field resolver
         """
-        self.current_event = AppSyncResolverEvent(event)
+        self.current_event = current_event_data_class(event)
         self.lambda_context = context
         resolver = self._get_resolver(self.current_event.type_name, self.current_event.field_name)
         return resolver(**self.current_event.arguments)
