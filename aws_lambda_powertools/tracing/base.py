@@ -6,7 +6,7 @@ from typing import Any, AsyncContextManager, ContextManager, List, NoReturn, Opt
 
 
 class BaseProvider(abc.ABC):
-    @abc.abstractmethod
+    @abc.abstractmethod  # type: ignore
     @contextmanager
     def in_subsegment(self, name=None, **kwargs) -> ContextManager:
         """Return a subsegment context manger.
@@ -19,7 +19,7 @@ class BaseProvider(abc.ABC):
             Optional parameters to be propagated to segment
         """
 
-    @abc.abstractmethod
+    @abc.abstractmethod  # type: ignore
     @contextmanager
     def in_subsegment_async(self, name=None, **kwargs) -> AsyncContextManager:
         """Return a subsegment async context manger.

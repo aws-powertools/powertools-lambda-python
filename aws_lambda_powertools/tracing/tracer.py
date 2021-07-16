@@ -5,7 +5,7 @@ import inspect
 import logging
 import numbers
 import os
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Optional, Sequence, Union
 
 from ..shared import constants
 from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
@@ -53,7 +53,7 @@ class Tracer:
     disabled: bool
         Flag to explicitly disable tracing, useful when running/testing locally
         `Env POWERTOOLS_TRACE_DISABLED="true"`
-    patch_modules: Tuple[str]
+    patch_modules: Optional[Sequence[str]]
         Tuple of modules supported by tracing provider to patch, by default all modules are patched
     provider: BaseProvider
         Tracing provider, by default it is aws_xray_sdk.core.xray_recorder
@@ -149,7 +149,7 @@ class Tracer:
         service: Optional[str] = None,
         disabled: Optional[bool] = None,
         auto_patch: Optional[bool] = None,
-        patch_modules: Optional[Tuple[str]] = None,
+        patch_modules: Optional[Sequence[str]] = None,
         provider: Optional[BaseProvider] = None,
     ):
         self.__build_config(
@@ -223,14 +223,14 @@ class Tracer:
         logger.debug(f"Adding metadata on key '{key}' with '{value}' at namespace '{namespace}'")
         self.provider.put_metadata(key=key, value=value, namespace=namespace)
 
-    def patch(self, modules: Optional[Tuple[str]] = None):
+    def patch(self, modules: Optional[Sequence[str]] = None):
         """Patch modules for instrumentation.
 
         Patches all supported modules by default if none are given.
 
         Parameters
         ----------
-        modules : Tuple[str]
+        modules : Optional[Sequence[str]]
             List of modules to be patched, optional by default
         """
         if self.disabled:
@@ -720,7 +720,7 @@ class Tracer:
         service: Optional[str] = None,
         disabled: Optional[bool] = None,
         auto_patch: Optional[bool] = None,
-        patch_modules: Optional[Union[List, Tuple]] = None,
+        patch_modules: Optional[Sequence[str]] = None,
         provider: Optional[BaseProvider] = None,
     ):
         """Populates Tracer config for new and existing initializations"""
