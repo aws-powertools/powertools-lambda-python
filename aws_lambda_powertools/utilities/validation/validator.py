@@ -12,12 +12,12 @@ def validator(
     handler: Callable,
     event: Union[Dict, str],
     context: Any,
-    inbound_schema: Dict = None,
+    inbound_schema: Optional[Dict] = None,
     inbound_formats: Optional[Dict] = None,
-    outbound_schema: Dict = None,
+    outbound_schema: Optional[Dict] = None,
     outbound_formats: Optional[Dict] = None,
-    envelope: str = None,
-    jmespath_options: Dict = None,
+    envelope: Optional[str] = None,
+    jmespath_options: Optional[Dict] = None,
 ) -> Any:
     """Lambda handler decorator to validate incoming/outbound data using a JSON Schema
 
@@ -135,8 +135,8 @@ def validate(
     event: Any,
     schema: Dict,
     formats: Optional[Dict] = None,
-    envelope: str = None,
-    jmespath_options: Dict = None,
+    envelope: Optional[str] = None,
+    jmespath_options: Optional[Dict] = None,
 ):
     """Standalone function to validate event data using a JSON Schema
 
