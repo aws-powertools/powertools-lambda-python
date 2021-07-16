@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -44,7 +44,7 @@ class AppSyncResolver:
     def __init__(self):
         self._resolvers: dict = {}
 
-    def resolver(self, type_name: str = "*", field_name: str = None):
+    def resolver(self, type_name: str = "*", field_name: Optional[str] = None):
         """Registers the resolver for field_name
 
         Parameters

@@ -5,7 +5,7 @@ import inspect
 import logging
 import numbers
 import os
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Optional, Sequence, Union
 
 from ..shared import constants
 from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
@@ -53,7 +53,7 @@ class Tracer:
     disabled: bool
         Flag to explicitly disable tracing, useful when running/testing locally
         `Env POWERTOOLS_TRACE_DISABLED="true"`
-    patch_modules: Tuple[str]
+    patch_modules: Optional[Sequence[str]]
         Tuple of modules supported by tracing provider to patch, by default all modules are patched
     provider: BaseProvider
         Tracing provider, by default it is aws_xray_sdk.core.xray_recorder
@@ -146,11 +146,11 @@ class Tracer:
 
     def __init__(
         self,
-        service: str = None,
-        disabled: bool = None,
-        auto_patch: bool = None,
-        patch_modules: Optional[Tuple[str]] = None,
-        provider: BaseProvider = None,
+        service: Optional[str] = None,
+        disabled: Optional[bool] = None,
+        auto_patch: Optional[bool] = None,
+        patch_modules: Optional[Sequence[str]] = None,
+        provider: Optional[BaseProvider] = None,
     ):
         self.__build_config(
             service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
@@ -195,7 +195,7 @@ class Tracer:
         logger.debug(f"Annotating on key '{key}' with '{value}'")
         self.provider.put_annotation(key=key, value=value)
 
-    def put_metadata(self, key: str, value: Any, namespace: str = None):
+    def put_metadata(self, key: str, value: Any, namespace: Optional[str] = None):
         """Adds metadata to existing segment or subsegment
 
         Parameters
@@ -223,14 +223,14 @@ class Tracer:
         logger.debug(f"Adding metadata on key '{key}' with '{value}' at namespace '{namespace}'")
         self.provider.put_metadata(key=key, value=value, namespace=namespace)
 
-    def patch(self, modules: Tuple[str] = None):
+    def patch(self, modules: Optional[Sequence[str]] = None):
         """Patch modules for instrumentation.
 
         Patches all supported modules by default if none are given.
 
         Parameters
         ----------
-        modules : Tuple[str]
+        modules : Optional[Sequence[str]]
             List of modules to be patched, optional by default
         """
         if self.disabled:
@@ -244,7 +244,7 @@ class Tracer:
 
     def capture_lambda_handler(
         self,
-        lambda_handler: Union[Callable[[Dict, Any], Any], Callable[[Dict, Any, Optional[Dict]], Any]] = None,
+        lambda_handler: Union[Callable[[Dict, Any], Any], Optional[Callable[[Dict, Any, Optional[Dict]], Any]]] = None,
         capture_response: Optional[bool] = None,
         capture_error: Optional[bool] = None,
     ):
@@ -330,7 +330,10 @@ class Tracer:
         return decorate
 
     def capture_method(
-        self, method: Callable = None, capture_response: Optional[bool] = None, capture_error: Optional[bool] = None
+        self,
+        method: Optional[Callable] = None,
+        capture_response: Optional[bool] = None,
+        capture_error: Optional[bool] = None,
     ):
         """Decorator to create subsegment for arbitrary functions
 
@@ -520,7 +523,7 @@ class Tracer:
         method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
-        method_name: str = None,
+        method_name: Optional[str] = None,
     ):
         @functools.wraps(method)
         async def decorate(*args, **kwargs):
@@ -547,7 +550,7 @@ class Tracer:
         method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
-        method_name: str = None,
+        method_name: Optional[str] = None,
     ):
         @functools.wraps(method)
         def decorate(*args, **kwargs):
@@ -574,7 +577,7 @@ class Tracer:
         method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
-        method_name: str = None,
+        method_name: Optional[str] = None,
     ):
         @functools.wraps(method)
         @contextlib.contextmanager
@@ -602,7 +605,7 @@ class Tracer:
         method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
-        method_name: str = None,
+        method_name: Optional[str] = None,
     ):
         @functools.wraps(method)
         def decorate(*args, **kwargs):
@@ -629,9 +632,9 @@ class Tracer:
 
     def _add_response_as_metadata(
         self,
-        method_name: str = None,
-        data: Any = None,
-        subsegment: BaseSegment = None,
+        method_name: Optional[str] = None,
+        data: Optional[Any] = None,
+        subsegment: Optional[BaseSegment] = None,
         capture_response: Optional[Union[bool, str]] = None,
     ):
         """Add response as metadata for given subsegment
@@ -714,11 +717,11 @@ class Tracer:
 
     def __build_config(
         self,
-        service: str = None,
-        disabled: bool = None,
-        auto_patch: bool = None,
-        patch_modules: Union[List, Tuple] = None,
-        provider: BaseProvider = None,
+        service: Optional[str] = None,
+        disabled: Optional[bool] = None,
+        auto_patch: Optional[bool] = None,
+        patch_modules: Optional[Sequence[str]] = None,
+        provider: Optional[BaseProvider] = None,
     ):
         """Populates Tracer config for new and existing initializations"""
         is_disabled = disabled if disabled is not None else self._is_tracer_disabled()
