@@ -424,7 +424,7 @@ def test_multiple_features_only_some_enabled(mocker, config):
     assert enabled_list == expected_value
 
 
-def test_app_config_get_parameter_err(mocker):
+def test_app_config_get_parameter_err(mocker, config):
     # GIVEN an appconfig with a missing config
     mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.parameters.AppConfigProvider.get")
     mocked_get_conf.side_effect = GetParameterError()
@@ -433,6 +433,7 @@ def test_app_config_get_parameter_err(mocker):
         service="service",
         configuration_name="conf",
         cache_seconds=1,
+        config=config,
     )
 
     # WHEN calling get_json_configuration
