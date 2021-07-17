@@ -75,6 +75,10 @@ plugins:
   - git-revision-date
   - search
   - mkdocstrings:
+      handlers:
+        python:
+          selection:
+            docstring_style: numpy
       watch:
         - aws_lambda_powertools
 

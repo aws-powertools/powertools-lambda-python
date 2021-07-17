@@ -201,6 +201,14 @@ curio = ["curio (>=1.2)", "sniffio (>=1.1)"]
 trio = ["trio (>=0.14.0)", "sniffio (>=1.1)"]
 
 [[package]]
+name = "docstring-parser"
+version = "0.7.3"
+description = ""
+category = "dev"
+optional = false
+python-versions = "~=3.5"
+
+[[package]]
 name = "email-validator"
 version = "1.1.3"
 description = "A robust email syntax and deliverability validation library for Python 2.x/3.x."
@@ -903,6 +911,7 @@ python-versions = ">=3.6.1,<4.0.0"
 astunparse = {version = ">=1.6.3,<2.0.0", markers = "python_version < \"3.9\""}
 cached-property = {version = ">=1.5.2,<2.0.0", markers = "python_version < \"3.8\""}
 dataclasses = {version = ">=0.7,<0.9", markers = "python_version == \"3.6\""}
+docstring_parser = {version = ">=0.7.3,<0.8.0", optional = true, markers = "extra == \"numpy-style\""}
 typing-extensions = {version = ">=3.7.4.3,<4.0.0.0", markers = "python_version < \"3.8\""}
 
 [package.extras]
@@ -1131,7 +1140,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.1"
-content-hash = "d2e09af1d7a6481f5063548e4207e0791dbd015d12b1519a5c7e1f43ff96affc"
+content-hash = "1873bfb09f928c38d678ecee00ab3d945fa758169e7d9629e6ac0cd53863eb57"
 
 [metadata.files]
 appdirs = [
@@ -1250,6 +1259,9 @@ dataclasses = [
 dnspython = [
     {file = "dnspython-2.1.0-py3-none-any.whl", hash = "sha256:95d12f6ef0317118d2a1a6fc49aac65ffec7eb8087474158f42f26a639135216"},
     {file = "dnspython-2.1.0.zip", hash = "sha256:e4a87f0b573201a0f3727fa18a516b055fd1107e0e5477cded4a2de497df1dd4"},
+]
+docstring-parser = [
+    {file = "docstring_parser-0.7.3.tar.gz", hash = "sha256:cde5fbf8b846433dfbde1e0f96b7f909336a634d5df34a38cb75050c7346734a"},
 ]
 email-validator = [
     {file = "email_validator-1.1.3-py2.py3-none-any.whl", hash = "sha256:5675c8ceb7106a37e40e2698a57c056756bf3f272cfa8682a4f87ebd95d8440b"},
