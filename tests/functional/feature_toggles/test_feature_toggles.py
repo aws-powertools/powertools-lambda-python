@@ -30,6 +30,18 @@ def init_configuration_store(mocker, mock_schema: Dict, config: Config) -> Confi
     return conf_store
 
 
+def init_fetcher_side_effect(mocker, config: Config, side_effect) -> AppConfigFetcher:
+    mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.parameters.AppConfigProvider.get")
+    mocked_get_conf.side_effect = side_effect
+    return AppConfigFetcher(
+        environment="env",
+        service="service",
+        configuration_name="conf",
+        cache_seconds=1,
+        config=config,
+    )
+
+
 # this test checks that we get correct value of feature that exists in the schema.
 # we also don't send an empty rules_context dict in this case
 def test_toggles_rule_does_not_match(mocker, config):
@@ -424,17 +436,33 @@ def test_multiple_features_only_some_enabled(mocker, config):
     assert enabled_list == expected_value
 
 
+def test_get_feature_toggle_handles_error(mocker, config):
+    # GIVEN a schema fetch that raises a ConfigurationError
+    schema_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
+    conf_store = ConfigurationStore(schema_fetcher)
+
+    # WHEN calling get_feature_toggle
+    toggle = conf_store.get_feature_toggle(feature_name="Foo", value_if_missing=False)
+
+    # THEN handle the error and return the value_if_missing
+    assert toggle is False
+
+
+def test_get_all_enabled_feature_toggles_handles_error(mocker, config):
+    # GIVEN a schema fetch that raises a ConfigurationError
+    schema_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
+    conf_store = ConfigurationStore(schema_fetcher)
+
+    # WHEN calling get_all_enabled_feature_toggles
+    toggles = conf_store.get_all_enabled_feature_toggles(rules_context=None)
+
+    # THEN handle the error and return an empty list
+    assert toggles == []
+
+
 def test_app_config_get_parameter_err(mocker, config):
     # GIVEN an appconfig with a missing config
-    mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.parameters.AppConfigProvider.get")
-    mocked_get_conf.side_effect = GetParameterError()
-    app_conf_fetcher = AppConfigFetcher(
-        environment="env",
-        service="service",
-        configuration_name="conf",
-        cache_seconds=1,
-        config=config,
-    )
+    app_conf_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
 
     # WHEN calling get_json_configuration
     with pytest.raises(ConfigurationError) as err:

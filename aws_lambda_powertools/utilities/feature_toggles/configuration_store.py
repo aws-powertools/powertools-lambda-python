@@ -187,11 +187,13 @@ class ConfigurationStore:
         """
         if rules_context is None:
             rules_context = {}
+
         try:
             toggles_dict: Dict[str, Any] = self.get_configuration()
         except ConfigurationError:
-            logger.error("unable to get feature toggles JSON")  # noqa: E501
+            logger.error("unable to get feature toggles JSON")
             return []
+
         ret_list = []
         features: Dict[str, Any] = toggles_dict.get(schema.FEATURES_KEY, {})
         for feature_name, feature_dict_def in features.items():
@@ -210,4 +212,5 @@ class ConfigurationStore:
             ):
                 self._logger.debug(f"feature's calculated value is True, feature_name={feature_name}")
                 ret_list.append(feature_name)
+
         return ret_list
