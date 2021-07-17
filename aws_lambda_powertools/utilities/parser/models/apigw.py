@@ -46,7 +46,7 @@ class APIGatewayEventAuthorizer(BaseModel):
 class APIGatewayEventRequestContext(BaseModel):
     accountId: str
     apiId: str
-    authorizer: APIGatewayEventAuthorizer
+    authorizer: Optional[APIGatewayEventAuthorizer]
     stage: str
     protocol: str
     identity: APIGatewayEventIdentity
@@ -70,7 +70,7 @@ class APIGatewayEventRequestContext(BaseModel):
 
 
 class APIGatewayProxyEventModel(BaseModel):
-    version: str
+    version: Optional[str]
     resource: str
     path: str
     httpMethod: Literal["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
