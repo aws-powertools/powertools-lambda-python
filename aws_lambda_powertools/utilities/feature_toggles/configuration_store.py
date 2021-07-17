@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from . import schema
 from .exceptions import ConfigurationError
@@ -12,8 +12,10 @@ class ConfigurationStore:
     def __init__(self, schema_fetcher: SchemaFetcher):
         """constructor
 
-        Args:
-            schema_fetcher (SchemaFetcher): A schema JSON fetcher, can be AWS AppConfig, Hashicorp Consul etc.
+        Parameters
+        ----------
+        schema_fetcher: SchemaFetcher
+            A schema JSON fetcher, can be AWS AppConfig, Hashicorp Consul etc.
         """
         self._logger = logger
         self._schema_fetcher = schema_fetcher
@@ -39,12 +41,12 @@ class ConfigurationStore:
     def _is_rule_matched(self, feature_name: str, rule: Dict[str, Any], rules_context: Dict[str, Any]) -> bool:
         rule_name = rule.get(schema.RULE_NAME_KEY, "")
         rule_default_value = rule.get(schema.RULE_DEFAULT_VALUE)
-        conditions: Dict[str, str] = rule.get(schema.CONDITIONS_KEY)
+        conditions = cast(List[Dict], rule.get(schema.CONDITIONS_KEY))
 
         for condition in conditions:
-            context_value = rules_context.get(condition.get(schema.CONDITION_KEY))
+            context_value = rules_context.get(str(condition.get(schema.CONDITION_KEY)))
             if not self._match_by_action(
-                condition.get(schema.CONDITION_ACTION),
+                condition.get(schema.CONDITION_ACTION, ""),
                 condition.get(schema.CONDITION_VALUE),
                 context_value,
             ):
@@ -73,7 +75,7 @@ class ConfigurationStore:
         for rule in rules:
             rule_default_value = rule.get(schema.RULE_DEFAULT_VALUE)
             if self._is_rule_matched(feature_name, rule, rules_context):
-                return rule_default_value
+                return bool(rule_default_value)
             # no rule matched, return default value of feature
             logger.debug(
                 f"no rule matched, returning default value of feature, feature_default_value={feature_default_value}, "
@@ -95,11 +97,8 @@ class ConfigurationStore:
         Dict[str, Any]
             parsed JSON dictionary
         """
-        config: Dict[
-            str, Any
-        ] = (
-            self._schema_fetcher.get_json_configuration()
-        )  # parse result conf as JSON, keep in cache for self.max_age seconds
+        # parse result conf as JSON, keep in cache for self.max_age seconds
+        config = self._schema_fetcher.get_json_configuration()
         # validate schema
         self._schema_validator.validate_json_schema(config)
         return config
@@ -107,8 +106,9 @@ class ConfigurationStore:
     def get_feature_toggle(
         self, *, feature_name: str, rules_context: Optional[Dict[str, Any]] = None, value_if_missing: bool
     ) -> bool:
-        """get a feature toggle boolean value. Value is calculated according to a set of rules and conditions.
-           see below for explanation.
+        """Get a feature toggle boolean value. Value is calculated according to a set of rules and conditions.
+
+        See below for explanation.
 
         Parameters
         ----------
@@ -123,7 +123,7 @@ class ConfigurationStore:
             configuration from appconfig
 
         Returns
-        ----------
+        ------
         bool
             calculated feature toggle value. several possibilities:
             1. if the feature doesn't appear in the schema or there has been an error fetching the
@@ -157,7 +157,7 @@ class ConfigurationStore:
                 f"no rules found, returning feature default value, feature_name={feature_name}, "
                 f"default_value={feature_default_value}"
             )
-            return feature_default_value
+            return bool(feature_default_value)
         # look for first rule match
         logger.debug(
             f"looking for rule match,  feature_name={feature_name}, feature_default_value={feature_default_value}"
@@ -165,8 +165,8 @@ class ConfigurationStore:
         return self._handle_rules(
             feature_name=feature_name,
             rules_context=rules_context,
-            feature_default_value=feature_default_value,
-            rules=rules_list,
+            feature_default_value=bool(feature_default_value),
+            rules=cast(List, rules_list),
         )
 
     def get_all_enabled_feature_toggles(self, *, rules_context: Optional[Dict[str, Any]] = None) -> List[str]:
