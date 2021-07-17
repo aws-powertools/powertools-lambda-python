@@ -1,9 +1,9 @@
 from typing import Dict, List
 
-import pytest  # noqa: F401
+import pytest
 from botocore.config import Config
 
-from aws_lambda_powertools.utilities.feature_toggles import ConfigurationError
+from aws_lambda_powertools.utilities.feature_toggles import ConfigurationError, schema
 from aws_lambda_powertools.utilities.feature_toggles.appconfig_fetcher import AppConfigFetcher
 from aws_lambda_powertools.utilities.feature_toggles.configuration_store import ConfigurationStore
 from aws_lambda_powertools.utilities.feature_toggles.schema import ACTION
@@ -442,3 +442,34 @@ def test_app_config_get_parameter_err(mocker, config):
 
     # THEN raise ConfigurationError error
     assert "AWS AppConfig configuration" in str(err.value)
+
+
+def test_match_by_action_no_matching_action(mocker, config):
+    # GIVEN an unsupported action
+    conf_store = init_configuration_store(mocker, {}, config)
+    # WHEN calling _match_by_action
+    result = conf_store._match_by_action("Foo", None, "foo")
+    # THEN default to False
+    assert result is False
+
+
+def test_match_by_action_attribute_error(mocker, config):
+    # GIVEN a startswith action and 2 integer
+    conf_store = init_configuration_store(mocker, {}, config)
+    # WHEN calling _match_by_action
+    result = conf_store._match_by_action(ACTION.STARTSWITH.value, 1, 100)
+    # THEN swallow the AttributeError and return False
+    assert result is False
+
+
+def test_is_rule_matched_no_matches(mocker, config):
+    # GIVEN an empty list of conditions
+    rule = {schema.CONDITIONS_KEY: []}
+    rules_context = {}
+    conf_store = init_configuration_store(mocker, {}, config)
+
+    # WHEN calling _is_rule_matched
+    result = conf_store._is_rule_matched("feature_name", rule, rules_context)
+
+    # THEN return False
+    assert result is False
