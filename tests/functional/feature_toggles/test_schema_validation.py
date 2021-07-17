@@ -262,3 +262,69 @@ def test_valid_condition_all_actions():
         },
     }
     validator.validate_json_schema(schema)
+
+
+def test_validate_condition_invalid_condition_type():
+    # GIVEN an invalid condition type of empty dict
+    validator = SchemaValidator(logger)
+    condition = {}
+
+    # WHEN calling _validate_condition
+    with pytest.raises(ConfigurationError) as err:
+        validator._validate_condition("foo", condition)
+
+    # THEN raise ConfigurationError
+    assert "invalid condition type" in str(err)
+
+
+def test_validate_condition_invalid_condition_action():
+    # GIVEN an invalid condition action of foo
+    validator = SchemaValidator(logger)
+    condition = {"action": "foo"}
+
+    # WHEN calling _validate_condition
+    with pytest.raises(ConfigurationError) as err:
+        validator._validate_condition("foo", condition)
+
+    # THEN raise ConfigurationError
+    assert "invalid action value" in str(err)
+
+
+def test_validate_condition_invalid_condition_key():
+    # GIVEN a configuration with a missing "key"
+    validator = SchemaValidator(logger)
+    condition = {"action": ACTION.EQUALS.value}
+
+    # WHEN calling _validate_condition
+    with pytest.raises(ConfigurationError) as err:
+        validator._validate_condition("foo", condition)
+
+    # THEN raise ConfigurationError
+    assert "invalid key value" in str(err)
+
+
+def test_validate_condition_missing_condition_value():
+    # GIVEN a configuration with a missing condition value
+    validator = SchemaValidator(logger)
+    condition = {"action": ACTION.EQUALS.value, "key": "Foo"}
+
+    # WHEN calling _validate_condition
+    with pytest.raises(ConfigurationError) as err:
+        validator._validate_condition("foo", condition)
+
+    # THEN raise ConfigurationError
+    assert "missing condition value" in str(err)
+
+
+def test_validate_rule_invalid_rule_name():
+    # GIVEN a rule_name not in the rule dict
+    validator = SchemaValidator(logger)
+    rule_name = "invalid_rule_name"
+    rule = {"missing": ""}
+
+    # WHEN calling _validate_rule
+    with pytest.raises(ConfigurationError) as err:
+        validator._validate_rule(rule_name, rule)
+
+    # THEN raise ConfigurationError
+    assert "invalid rule_name" in str(err)
