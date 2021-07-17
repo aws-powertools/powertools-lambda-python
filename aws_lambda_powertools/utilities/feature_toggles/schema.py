@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any, Dict
 
-from .exceptions import ConfigurationException
+from .exceptions import ConfigurationError
 
 FEATURES_KEY = "features"
 RULES_KEY = "rules"
@@ -27,7 +27,7 @@ class SchemaValidator:
 
     def _raise_conf_exc(self, error_str: str) -> None:
         self._logger.error(error_str)
-        raise ConfigurationException(error_str)
+        raise ConfigurationError(error_str)
 
     def _validate_condition(self, rule_name: str, condition: Dict[str, str]) -> None:
         if not condition or not isinstance(condition, dict):

@@ -3,9 +3,11 @@ from typing import Dict, List
 import pytest  # noqa: F401
 from botocore.config import Config
 
+from aws_lambda_powertools.utilities.feature_toggles import ConfigurationError
 from aws_lambda_powertools.utilities.feature_toggles.appconfig_fetcher import AppConfigFetcher
 from aws_lambda_powertools.utilities.feature_toggles.configuration_store import ConfigurationStore
 from aws_lambda_powertools.utilities.feature_toggles.schema import ACTION
+from aws_lambda_powertools.utilities.parameters import GetParameterError
 
 
 @pytest.fixture(scope="module")
@@ -420,3 +422,22 @@ def test_multiple_features_only_some_enabled(mocker, config):
         rules_context={"tenant_id": "6", "username": "a"}
     )
     assert enabled_list == expected_value
+
+
+def test_app_config_get_parameter_err(mocker):
+    # GIVEN an appconfig with a missing config
+    mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.parameters.AppConfigProvider.get")
+    mocked_get_conf.side_effect = GetParameterError()
+    app_conf_fetcher = AppConfigFetcher(
+        environment="env",
+        service="service",
+        configuration_name="conf",
+        cache_seconds=1,
+    )
+
+    # WHEN calling get_json_configuration
+    with pytest.raises(ConfigurationError) as err:
+        app_conf_fetcher.get_json_configuration()
+
+    # THEN raise ConfigurationException error
+    assert "AWS AppConfig configuration" in str(err.value)

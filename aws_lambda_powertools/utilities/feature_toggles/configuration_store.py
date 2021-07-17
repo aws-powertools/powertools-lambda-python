@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from . import schema
-from .exceptions import ConfigurationException
+from .exceptions import ConfigurationError
 from .schema_fetcher import SchemaFetcher
 
 logger = logging.getLogger(__name__)
@@ -122,7 +122,7 @@ class ConfigurationStore:
 
         try:
             toggles_dict: Dict[str, Any] = self.get_configuration()
-        except ConfigurationException:
+        except ConfigurationError:
             logger.error("unable to get feature toggles JSON, returning provided value_if_missing value")  # noqa: E501
             return value_if_missing
 
@@ -167,7 +167,7 @@ class ConfigurationStore:
             rules_context = {}
         try:
             toggles_dict: Dict[str, Any] = self.get_configuration()
-        except ConfigurationException:
+        except ConfigurationError:
             logger.error("unable to get feature toggles JSON")  # noqa: E501
             return []
         ret_list = []
