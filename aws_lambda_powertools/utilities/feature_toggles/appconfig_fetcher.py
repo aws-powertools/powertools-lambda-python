@@ -47,7 +47,7 @@ class AppConfigFetcher(SchemaFetcher):
 
         Raises
         ------
-        ConfigurationException
+        ConfigurationError
             Any validation error or appconfig error that can occur
 
         Returns

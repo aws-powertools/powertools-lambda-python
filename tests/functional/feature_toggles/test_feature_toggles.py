@@ -439,5 +439,5 @@ def test_app_config_get_parameter_err(mocker):
     with pytest.raises(ConfigurationError) as err:
         app_conf_fetcher.get_json_configuration()
 
-    # THEN raise ConfigurationException error
+    # THEN raise ConfigurationError error
     assert "AWS AppConfig configuration" in str(err.value)
