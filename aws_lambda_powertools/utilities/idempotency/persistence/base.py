@@ -39,9 +39,9 @@ class DataRecord:
         self,
         idempotency_key,
         status: str = "",
-        expiry_timestamp: int = None,
+        expiry_timestamp: Optional[int] = None,
         response_data: Optional[str] = "",
-        payload_hash: str = None,
+        payload_hash: Optional[str] = None,
     ) -> None:
         """
 

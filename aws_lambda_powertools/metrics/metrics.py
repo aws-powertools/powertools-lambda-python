@@ -71,7 +71,7 @@ class Metrics(MetricManager):
     _metadata: Dict[str, Any] = {}
     _default_dimensions: Dict[str, Any] = {}
 
-    def __init__(self, service: str = None, namespace: str = None):
+    def __init__(self, service: Optional[str] = None, namespace: Optional[str] = None):
         self.metric_set = self._metrics
         self.service = service
         self.namespace: Optional[str] = namespace
@@ -125,10 +125,10 @@ class Metrics(MetricManager):
 
     def log_metrics(
         self,
-        lambda_handler: Callable[[Any, Any], Any] = None,
+        lambda_handler: Optional[Callable[[Any, Any], Any]] = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
-        default_dimensions: Dict[str, str] = None,
+        default_dimensions: Optional[Dict[str, str]] = None,
     ):
         """Decorator to serialize and publish metrics at the end of a function execution.
 

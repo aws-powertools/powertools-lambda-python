@@ -2,11 +2,11 @@ import abc
 import numbers
 import traceback
 from contextlib import contextmanager
-from typing import Any, AsyncContextManager, ContextManager, List, NoReturn, Set, Union
+from typing import Any, AsyncContextManager, ContextManager, List, NoReturn, Optional, Set, Union
 
 
 class BaseProvider(abc.ABC):
-    @abc.abstractmethod
+    @abc.abstractmethod  # type: ignore
     @contextmanager
     def in_subsegment(self, name=None, **kwargs) -> ContextManager:
         """Return a subsegment context manger.
@@ -19,7 +19,7 @@ class BaseProvider(abc.ABC):
             Optional parameters to be propagated to segment
         """
 
-    @abc.abstractmethod
+    @abc.abstractmethod  # type: ignore
     @contextmanager
     def in_subsegment_async(self, name=None, **kwargs) -> AsyncContextManager:
         """Return a subsegment async context manger.
@@ -81,7 +81,7 @@ class BaseSegment(abc.ABC):
     """Holds common properties and methods on segment and subsegment."""
 
     @abc.abstractmethod
-    def close(self, end_time: int = None):
+    def close(self, end_time: Optional[int] = None):
         """Close the trace entity by setting `end_time`
         and flip the in progress flag to False.
 
