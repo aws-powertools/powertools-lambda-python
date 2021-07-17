@@ -16,7 +16,7 @@ is_cold_start = True
 logger = logging.getLogger(__name__)
 
 aws_xray_sdk = LazyLoader(constants.XRAY_SDK_MODULE, globals(), constants.XRAY_SDK_MODULE)
-aws_xray_sdk.core = LazyLoader(constants.XRAY_SDK_CORE_MODULE, globals(), constants.XRAY_SDK_CORE_MODULE)
+aws_xray_sdk.core = LazyLoader(constants.XRAY_SDK_CORE_MODULE, globals(), constants.XRAY_SDK_CORE_MODULE)  # type: ignore # noqa: E501
 
 AnyCallableT = TypeVar("AnyCallableT", bound=Callable[..., Any])  # noqa: VNE001
 
@@ -506,9 +506,9 @@ class Tracer:
     def _decorate_async_function(
         self,
         method: Callable,
-        capture_response: Optional[Union[bool, str]] = None,
-        capture_error: Optional[Union[bool, str]] = None,
-        method_name: Optional[str] = None,
+        capture_response: bool,
+        capture_error: bool,
+        method_name: str,
     ):
         @functools.wraps(method)
         async def decorate(*args, **kwargs):
@@ -533,9 +533,9 @@ class Tracer:
     def _decorate_generator_function(
         self,
         method: Callable,
-        capture_response: Optional[Union[bool, str]] = None,
-        capture_error: Optional[Union[bool, str]] = None,
-        method_name: Optional[str] = None,
+        capture_response: bool,
+        capture_error: bool,
+        method_name: str,
     ):
         @functools.wraps(method)
         def decorate(*args, **kwargs):
@@ -560,9 +560,9 @@ class Tracer:
     def _decorate_generator_function_with_context_manager(
         self,
         method: Callable,
-        capture_response: Optional[Union[bool, str]] = None,
-        capture_error: Optional[Union[bool, str]] = None,
-        method_name: Optional[str] = None,
+        capture_response: bool,
+        capture_error: bool,
+        method_name: str,
     ):
         @functools.wraps(method)
         @contextlib.contextmanager
@@ -588,9 +588,9 @@ class Tracer:
     def _decorate_sync_function(
         self,
         method: AnyCallableT,
-        capture_response: Optional[Union[bool, str]] = None,
-        capture_error: Optional[Union[bool, str]] = None,
-        method_name: Optional[str] = None,
+        capture_response: bool,
+        capture_error: bool,
+        method_name: str,
     ) -> AnyCallableT:
         @functools.wraps(method)
         def decorate(*args, **kwargs):
