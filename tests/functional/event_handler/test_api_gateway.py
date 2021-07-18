@@ -672,31 +672,30 @@ def test_similar_dynamic_routes():
     app = ApiGatewayResolver()
     event = deepcopy(LOAD_GW_EVENT)
 
+    # WHEN
     # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: E800
     @app.get("/accounts/<account_id>")
     def get_account(account_id: str):
         assert account_id == "single_account"
-        return {"message": f"{account_id}"}
 
     # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: E800
     @app.get("/accounts/<account_id>/source_networks")
     def get_account_networks(account_id: str):
         assert account_id == "nested_account"
-        return {"message": f"{account_id}"}
 
     # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: E800
     @app.get("/accounts/<account_id>/source_networks/<network_id>")
     def get_network_account(account_id: str, network_id: str):
         assert account_id == "nested_account"
         assert network_id == "network"
-        return {"message": f"{account_id}"}
+
+    # THEN
+    event["resource"] = "/accounts/{account_id}"
+    event["path"] = "/accounts/single_account"
+    app.resolve(event, None)
 
     event["resource"] = "/accounts/{account_id}/source_networks"
     event["path"] = "/accounts/nested_account/source_networks"
-    app.resolve(event, None)
-
-    event["resource"] = "/accounts/{account_id}"
-    event["path"] = "/accounts/single_account"
     app.resolve(event, None)
 
     event["resource"] = "/accounts/{account_id}/source_networks/{network_id}"
