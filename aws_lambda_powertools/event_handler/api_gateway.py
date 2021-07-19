@@ -20,6 +20,9 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
+_DYNAMIC_ROUTE_PATTERN = r"(<\w+>)"
+_NAMED_GROUP_BOUNDARY_PATTERN = r"(?P\1\\w+\\b)"
+
 
 class ProxyEventType(Enum):
     """An enumerations of the supported proxy event types."""
@@ -460,8 +463,35 @@ class ApiGatewayResolver:
 
     @staticmethod
     def _compile_regex(rule: str):
-        """Precompile regex pattern"""
-        rule_regex: str = re.sub(r"(<\w+>)", r"(?P\1.+)", rule)
+        """Precompile regex pattern
+
+        Logic
+        -----
+
+        1. Find any dynamic routes defined as <pattern>
+            e.g. @app.get("/accounts/<account_id>")
+        2. Create a new regex by substituting every dynamic route found as a named group (?P<group>),
+        and match whole words only (word boundary) instead of a greedy match
+
+            non-greedy example with word boundary
+
+                rule: '/accounts/<account_id>'
+                regex: r'/accounts/(?P<account_id>\\w+\\b)'
+
+                value: /accounts/123/some_other_path
+                account_id: 123
+
+            greedy example without word boundary
+
+                regex: r'/accounts/(?P<account_id>.+)'
+
+                value: /accounts/123/some_other_path
+                account_id: 123/some_other_path
+        3. Compiles a regex and include start (^) and end ($) in between for an exact match
+
+        NOTE: See #520 for context
+        """
+        rule_regex: str = re.sub(_DYNAMIC_ROUTE_PATTERN, _NAMED_GROUP_BOUNDARY_PATTERN, rule)
         return re.compile("^{}$".format(rule_regex))
 
     def _to_proxy_event(self, event: Dict) -> BaseProxyEvent:
@@ -485,7 +515,7 @@ class ApiGatewayResolver:
             match: Optional[re.Match] = route.rule.match(path)
             if match:
                 logger.debug("Found a registered route. Calling function")
-                return self._call_route(route, match.groupdict())
+                return self._call_route(route, match.groupdict())  # pass fn args
 
         logger.debug(f"No match found for path {path} and method {method}")
         return self._not_found(method)
