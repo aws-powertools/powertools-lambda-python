@@ -65,7 +65,7 @@ class AppSyncResolver:
         return register_resolver
 
     def resolve(
-        self, event: dict, context: LambdaContext, model: Type[AppSyncResolverEvent] = AppSyncResolverEvent
+        self, event: dict, context: LambdaContext, data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent
     ) -> Any:
         """Resolve field_name
 
@@ -75,8 +75,8 @@ class AppSyncResolver:
             Lambda event
         context : LambdaContext
             Lambda context
-        model:
-            Your data model to decode AppSync event, by default AppSyncResolverEvent
+        data_model:
+            Your data data_model to decode AppSync event, by default AppSyncResolverEvent
 
         Example
         -------
@@ -123,7 +123,7 @@ class AppSyncResolver:
         @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
         @tracer.capture_lambda_handler
         def lambda_handler(event, context):
-            return app.resolve(event, context, model=MyCustomModel)
+            return app.resolve(event, context, data_model=MyCustomModel)
         ```
 
         Returns
@@ -136,7 +136,7 @@ class AppSyncResolver:
         ValueError
             If we could not find a field resolver
         """
-        self.current_event = model(event)
+        self.current_event = data_model(event)
         self.lambda_context = context
         resolver = self._get_resolver(self.current_event.type_name, self.current_event.field_name)
         return resolver(**self.current_event.arguments)
@@ -163,7 +163,7 @@ class AppSyncResolver:
         return resolver["func"]
 
     def __call__(
-        self, event: dict, context: LambdaContext, model: Type[AppSyncResolverEvent] = AppSyncResolverEvent
+        self, event: dict, context: LambdaContext, data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent
     ) -> Any:
         """Implicit lambda handler which internally calls `resolve`"""
-        return self.resolve(event, context, model)
+        return self.resolve(event, context, data_model)

@@ -598,9 +598,9 @@ Use the following code for `merchantInfo` and `searchMerchant` functions respect
     }
     ```
 
-### Custom models
+### Custom data models
 
-You can subclass `AppSyncResolverEvent` to bring your own set of methods to handle incoming events, by using `model` param in the `resolve` method.
+You can subclass `AppSyncResolverEvent` to bring your own set of methods to handle incoming events, by using `data_model` param in the `resolve` method.
 
 
 === "custom_model.py"
@@ -631,7 +631,7 @@ You can subclass `AppSyncResolverEvent` to bring your own set of methods to hand
       @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
       @tracer.capture_lambda_handler
       def lambda_handler(event, context):
-          return app.resolve(event, context, model=MyCustomModel)
+          return app.resolve(event, context, data_model=MyCustomModel)
     ```
 
 === "schema.graphql"
