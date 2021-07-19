@@ -395,10 +395,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         value : str, optional
             Value for the correlation id. None will remove the correlation_id
         """
-        if value is None:
-            self.remove_keys(["correlation_id"])
-        else:
-            self.append_keys(correlation_id=value)
+        self.append_keys(correlation_id=value)
 
     def get_correlation_id(self) -> Optional[str]:
         """Gets the correlation_id in the logging json
