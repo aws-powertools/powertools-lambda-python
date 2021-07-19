@@ -37,7 +37,7 @@ class AppSyncResolver:
             # Would match all fieldNames matching 'commonField'
             return str(uuid.uuid4())
     """
-    
+
     current_event: AppSyncResolverEvent
     lambda_context: LambdaContext
 
@@ -62,7 +62,9 @@ class AppSyncResolver:
 
         return register_resolver
 
-    def resolve(self, event: dict, context: LambdaContext, current_event_data_class: Type[AppSyncResolverEvent] = AppSyncResolverEvent) -> Any:
+    def resolve(
+        self, event: dict, context: LambdaContext, model: Type[AppSyncResolverEvent] = AppSyncResolverEvent
+    ) -> Any:
         """Resolve field_name
 
         Parameters
@@ -71,8 +73,8 @@ class AppSyncResolver:
             Lambda event
         context : LambdaContext
             Lambda context
-        current_event_data_class:
-            Decode instance of event to class or subclass of AppSyncResolverEvent
+        model:
+            Your data model to decode AppSync event, by default AppSyncResolverEvent
 
         Returns
         -------
@@ -84,7 +86,7 @@ class AppSyncResolver:
         ValueError
             If we could not find a field resolver
         """
-        self.current_event = current_event_data_class(event)
+        self.current_event = model(event)
         self.lambda_context = context
         resolver = self._get_resolver(self.current_event.type_name, self.current_event.field_name)
         return resolver(**self.current_event.arguments)
