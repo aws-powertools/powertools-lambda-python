@@ -1,11 +1,13 @@
 from typing import Dict, List
 
-import pytest  # noqa: F401
+import pytest
 from botocore.config import Config
 
+from aws_lambda_powertools.utilities.feature_toggles import ConfigurationError, schema
 from aws_lambda_powertools.utilities.feature_toggles.appconfig_fetcher import AppConfigFetcher
 from aws_lambda_powertools.utilities.feature_toggles.configuration_store import ConfigurationStore
 from aws_lambda_powertools.utilities.feature_toggles.schema import ACTION
+from aws_lambda_powertools.utilities.parameters import GetParameterError
 
 
 @pytest.fixture(scope="module")
@@ -26,6 +28,18 @@ def init_configuration_store(mocker, mock_schema: Dict, config: Config) -> Confi
     )
     conf_store: ConfigurationStore = ConfigurationStore(schema_fetcher=app_conf_fetcher)
     return conf_store
+
+
+def init_fetcher_side_effect(mocker, config: Config, side_effect) -> AppConfigFetcher:
+    mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.parameters.AppConfigProvider.get")
+    mocked_get_conf.side_effect = side_effect
+    return AppConfigFetcher(
+        environment="env",
+        service="service",
+        configuration_name="conf",
+        cache_seconds=1,
+        config=config,
+    )
 
 
 # this test checks that we get correct value of feature that exists in the schema.
@@ -420,3 +434,70 @@ def test_multiple_features_only_some_enabled(mocker, config):
         rules_context={"tenant_id": "6", "username": "a"}
     )
     assert enabled_list == expected_value
+
+
+def test_get_feature_toggle_handles_error(mocker, config):
+    # GIVEN a schema fetch that raises a ConfigurationError
+    schema_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
+    conf_store = ConfigurationStore(schema_fetcher)
+
+    # WHEN calling get_feature_toggle
+    toggle = conf_store.get_feature_toggle(feature_name="Foo", value_if_missing=False)
+
+    # THEN handle the error and return the value_if_missing
+    assert toggle is False
+
+
+def test_get_all_enabled_feature_toggles_handles_error(mocker, config):
+    # GIVEN a schema fetch that raises a ConfigurationError
+    schema_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
+    conf_store = ConfigurationStore(schema_fetcher)
+
+    # WHEN calling get_all_enabled_feature_toggles
+    toggles = conf_store.get_all_enabled_feature_toggles(rules_context=None)
+
+    # THEN handle the error and return an empty list
+    assert toggles == []
+
+
+def test_app_config_get_parameter_err(mocker, config):
+    # GIVEN an appconfig with a missing config
+    app_conf_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
+
+    # WHEN calling get_json_configuration
+    with pytest.raises(ConfigurationError) as err:
+        app_conf_fetcher.get_json_configuration()
+
+    # THEN raise ConfigurationError error
+    assert "AWS AppConfig configuration" in str(err.value)
+
+
+def test_match_by_action_no_matching_action(mocker, config):
+    # GIVEN an unsupported action
+    conf_store = init_configuration_store(mocker, {}, config)
+    # WHEN calling _match_by_action
+    result = conf_store._match_by_action("Foo", None, "foo")
+    # THEN default to False
+    assert result is False
+
+
+def test_match_by_action_attribute_error(mocker, config):
+    # GIVEN a startswith action and 2 integer
+    conf_store = init_configuration_store(mocker, {}, config)
+    # WHEN calling _match_by_action
+    result = conf_store._match_by_action(ACTION.STARTSWITH.value, 1, 100)
+    # THEN swallow the AttributeError and return False
+    assert result is False
+
+
+def test_is_rule_matched_no_matches(mocker, config):
+    # GIVEN an empty list of conditions
+    rule = {schema.CONDITIONS_KEY: []}
+    rules_context = {}
+    conf_store = init_configuration_store(mocker, {}, config)
+
+    # WHEN calling _is_rule_matched
+    result = conf_store._is_rule_matched("feature_name", rule, rules_context)
+
+    # THEN return False
+    assert result is False

@@ -154,7 +154,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             "ExpressionAttributeNames": expression_attr_names,
         }
 
-        self.table.update_item(**kwargs)  # type: ignore
+        self.table.update_item(**kwargs)
 
     def _delete_record(self, data_record: DataRecord) -> None:
         logger.debug(f"Deleting record for idempotency key: {data_record.idempotency_key}")
