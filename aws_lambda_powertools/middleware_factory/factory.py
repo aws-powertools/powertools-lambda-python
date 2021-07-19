@@ -2,7 +2,7 @@ import functools
 import inspect
 import logging
 import os
-from typing import Callable
+from typing import Callable, Optional
 
 from ..shared import constants
 from ..shared.functions import resolve_truthy_env_var_choice
@@ -12,7 +12,7 @@ from .exceptions import MiddlewareInvalidArgumentError
 logger = logging.getLogger(__name__)
 
 
-def lambda_handler_decorator(decorator: Callable = None, trace_execution: bool = None):
+def lambda_handler_decorator(decorator: Optional[Callable] = None, trace_execution: Optional[bool] = None):
     """Decorator factory for decorating Lambda handlers.
 
     You can use lambda_handler_decorator to create your own middlewares,
@@ -106,11 +106,11 @@ def lambda_handler_decorator(decorator: Callable = None, trace_execution: bool =
         return functools.partial(lambda_handler_decorator, trace_execution=trace_execution)
 
     trace_execution = resolve_truthy_env_var_choice(
-        choice=trace_execution, env=os.getenv(constants.MIDDLEWARE_FACTORY_TRACE_ENV, "false")
+        env=os.getenv(constants.MIDDLEWARE_FACTORY_TRACE_ENV, "false"), choice=trace_execution
     )
 
     @functools.wraps(decorator)
-    def final_decorator(func: Callable = None, **kwargs):
+    def final_decorator(func: Optional[Callable] = None, **kwargs):
         # If called with kwargs return new func with kwargs
         if func is None:
             return functools.partial(final_decorator, **kwargs)

@@ -31,7 +31,7 @@ def idempotent(
     event: Dict[str, Any],
     context: LambdaContext,
     persistence_store: BasePersistenceLayer,
-    config: IdempotencyConfig = None,
+    config: Optional[IdempotencyConfig] = None,
 ) -> Any:
     """
     Middleware to handle idempotency
