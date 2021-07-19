@@ -138,3 +138,26 @@ def test_resolver_async():
 
     # THEN
     assert asyncio.run(result) == "value"
+
+
+def test_resolve_custom_data_model():
+    # Check whether we can handle an example appsync direct resolver
+    mock_event = load_event("appSyncDirectResolver.json")
+
+    class MyCustomModel(AppSyncResolverEvent):
+        @property
+        def country_viewer(self):
+            return self.request_headers.get("cloudfront-viewer-country")
+
+    app = AppSyncResolver()
+
+    @app.resolver(field_name="createSomething")
+    def create_something(id: str):  # noqa AA03 VNE003
+        return id
+
+    # Call the implicit handler
+    result = app(event=mock_event, context=LambdaContext(), data_model=MyCustomModel)
+
+    assert result == "my identifier"
+
+    assert app.current_event.country_viewer == "US"
