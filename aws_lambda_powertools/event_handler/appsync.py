@@ -1,10 +1,12 @@
 import logging
-from typing import Any, Callable, Type
+from typing import Any, Callable, Optional, Type, TypeVar
 
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
+
+AppSyncResolverEventT = TypeVar("AppSyncResolverEventT", bound=AppSyncResolverEvent)
 
 
 class AppSyncResolver:
@@ -38,13 +40,13 @@ class AppSyncResolver:
             return str(uuid.uuid4())
     """
 
-    current_event: AppSyncResolverEvent
+    current_event: AppSyncResolverEventT  # type: ignore[valid-type]
     lambda_context: LambdaContext
 
     def __init__(self):
         self._resolvers: dict = {}
 
-    def resolver(self, type_name: str = "*", field_name: str = None):
+    def resolver(self, type_name: str = "*", field_name: Optional[str] = None):
         """Registers the resolver for field_name
 
         Parameters
@@ -112,6 +114,8 @@ class AppSyncResolver:
             raise ValueError(f"No resolver found for '{full_name}'")
         return resolver["func"]
 
-    def __call__(self, event, context) -> Any:
+    def __call__(
+        self, event: dict, context: LambdaContext, model: Type[AppSyncResolverEvent] = AppSyncResolverEvent
+    ) -> Any:
         """Implicit lambda handler which internally calls `resolve`"""
-        return self.resolve(event, context)
+        return self.resolve(event, context, model)
