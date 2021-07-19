@@ -460,6 +460,18 @@ def test_logger_set_correlation_id(lambda_context, stdout, service_name):
     assert request_id == log["correlation_id"]
 
 
+def test_logger_get_correlation_id(lambda_context, stdout, service_name):
+    # GIVEN a logger with a correlation_id set
+    logger = Logger(service=service_name, stream=stdout)
+    logger.set_correlation_id("foo")
+
+    # WHEN calling get_correlation_id
+    correlation_id = logger.get_correlation_id()
+
+    # THEN it should return the correlation_id
+    assert "foo" == correlation_id
+
+
 def test_logger_set_correlation_id_path(lambda_context, stdout, service_name):
     # GIVEN
     logger = Logger(service=service_name, stream=stdout)
