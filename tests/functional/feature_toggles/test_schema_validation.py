@@ -2,7 +2,7 @@ import logging
 
 import pytest  # noqa: F401
 
-from aws_lambda_powertools.utilities.feature_toggles.exceptions import ConfigurationException
+from aws_lambda_powertools.utilities.feature_toggles.exceptions import ConfigurationError
 from aws_lambda_powertools.utilities.feature_toggles.schema import (
     ACTION,
     CONDITION_ACTION,
@@ -24,17 +24,17 @@ def test_invalid_features_dict():
     schema = {}
     # empty dict
     validator = SchemaValidator(logger)
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
     schema = []
     # invalid type
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
     # invalid features key
     schema = {FEATURES_KEY: []}
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
 
@@ -48,27 +48,27 @@ def test_invalid_feature_dict():
     # invalid feature type, not dict
     schema = {FEATURES_KEY: {"my_feature": []}}
     validator = SchemaValidator(logger)
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
     # empty feature dict
     schema = {FEATURES_KEY: {"my_feature": {}}}
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
     # invalid FEATURE_DEFAULT_VAL_KEY type, not boolean
     schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: "False"}}}
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
     # invalid FEATURE_DEFAULT_VAL_KEY type, not boolean #2
     schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: 5}}}
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
     # invalid rules type, not list
     schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False, RULES_KEY: "4"}}}
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
 
@@ -97,7 +97,7 @@ def test_invalid_rule():
         }
     }
     validator = SchemaValidator(logger)
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
     # rules RULE_DEFAULT_VALUE is not bool
@@ -114,7 +114,7 @@ def test_invalid_rule():
             }
         }
     }
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
     # missing conditions list
@@ -131,7 +131,7 @@ def test_invalid_rule():
             }
         }
     }
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
     # condition list is empty
@@ -145,7 +145,7 @@ def test_invalid_rule():
             }
         }
     }
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
     # condition is invalid type, not list
@@ -159,7 +159,7 @@ def test_invalid_rule():
             }
         }
     }
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
 
@@ -180,7 +180,7 @@ def test_invalid_condition():
         }
     }
     validator = SchemaValidator(logger)
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
     # missing condition key and value
@@ -198,7 +198,7 @@ def test_invalid_condition():
             }
         }
     }
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
     # invalid condition key type, not string
@@ -220,7 +220,7 @@ def test_invalid_condition():
             }
         }
     }
-    with pytest.raises(ConfigurationException):
+    with pytest.raises(ConfigurationError):
         validator.validate_json_schema(schema)
 
 
@@ -262,3 +262,69 @@ def test_valid_condition_all_actions():
         },
     }
     validator.validate_json_schema(schema)
+
+
+def test_validate_condition_invalid_condition_type():
+    # GIVEN an invalid condition type of empty dict
+    validator = SchemaValidator(logger)
+    condition = {}
+
+    # WHEN calling _validate_condition
+    with pytest.raises(ConfigurationError) as err:
+        validator._validate_condition("foo", condition)
+
+    # THEN raise ConfigurationError
+    assert "invalid condition type" in str(err)
+
+
+def test_validate_condition_invalid_condition_action():
+    # GIVEN an invalid condition action of foo
+    validator = SchemaValidator(logger)
+    condition = {"action": "foo"}
+
+    # WHEN calling _validate_condition
+    with pytest.raises(ConfigurationError) as err:
+        validator._validate_condition("foo", condition)
+
+    # THEN raise ConfigurationError
+    assert "invalid action value" in str(err)
+
+
+def test_validate_condition_invalid_condition_key():
+    # GIVEN a configuration with a missing "key"
+    validator = SchemaValidator(logger)
+    condition = {"action": ACTION.EQUALS.value}
+
+    # WHEN calling _validate_condition
+    with pytest.raises(ConfigurationError) as err:
+        validator._validate_condition("foo", condition)
+
+    # THEN raise ConfigurationError
+    assert "invalid key value" in str(err)
+
+
+def test_validate_condition_missing_condition_value():
+    # GIVEN a configuration with a missing condition value
+    validator = SchemaValidator(logger)
+    condition = {"action": ACTION.EQUALS.value, "key": "Foo"}
+
+    # WHEN calling _validate_condition
+    with pytest.raises(ConfigurationError) as err:
+        validator._validate_condition("foo", condition)
+
+    # THEN raise ConfigurationError
+    assert "missing condition value" in str(err)
+
+
+def test_validate_rule_invalid_rule_name():
+    # GIVEN a rule_name not in the rule dict
+    validator = SchemaValidator(logger)
+    rule_name = "invalid_rule_name"
+    rule = {"missing": ""}
+
+    # WHEN calling _validate_rule
+    with pytest.raises(ConfigurationError) as err:
+        validator._validate_rule(rule_name, rule)
+
+    # THEN raise ConfigurationError
+    assert "invalid rule_name" in str(err)

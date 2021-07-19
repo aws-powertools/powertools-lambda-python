@@ -85,4 +85,4 @@ changelog:
 	docker run -v "${PWD}":/workdir quay.io/git-chglog/git-chglog $$(git describe --abbrev=0 --tag).. > TMP_CHANGELOG.md
 
 mypy:
-	poetry run mypy aws_lambda_powertools
+	poetry run mypy --pretty aws_lambda_powertools

@@ -5,7 +5,7 @@ from botocore.config import Config
 
 from aws_lambda_powertools.utilities.parameters import AppConfigProvider, GetParameterError, TransformParameterError
 
-from .exceptions import ConfigurationException
+from .exceptions import ConfigurationError
 from .schema_fetcher import SchemaFetcher
 
 logger = logging.getLogger(__name__)
@@ -25,12 +25,18 @@ class AppConfigFetcher(SchemaFetcher):
     ):
         """This class fetches JSON schemas from AWS AppConfig
 
-        Args:
-            environment (str): what appconfig environment to use 'dev/test' etc.
-            service (str): what service name to use from the supplied environment
-            configuration_name (str): what configuration to take from the environment & service combination
-            cache_seconds (int): cache expiration time, how often to call AppConfig to fetch latest configuration
-            config (Optional[Config]): boto3 client configuration
+        Parameters
+        ----------
+        environment: str
+            what appconfig environment to use 'dev/test' etc.
+        service: str
+            what service name to use from the supplied environment
+        configuration_name: str
+            what configuration to take from the environment & service combination
+        cache_seconds: int
+            cache expiration time, how often to call AppConfig to fetch latest configuration
+        config: Optional[Config]
+            boto3 client configuration
         """
         super().__init__(configuration_name, cache_seconds)
         self._logger = logger
@@ -39,11 +45,15 @@ class AppConfigFetcher(SchemaFetcher):
     def get_json_configuration(self) -> Dict[str, Any]:
         """Get configuration string from AWs AppConfig and return the parsed JSON dictionary
 
-        Raises:
-            ConfigurationException: Any validation error or appconfig error that can occur
+        Raises
+        ------
+        ConfigurationError
+            Any validation error or appconfig error that can occur
 
-        Returns:
-            Dict[str, Any]: parsed JSON dictionary
+        Returns
+        -------
+        Dict[str, Any]
+            parsed JSON dictionary
         """
         try:
             return self._conf_store.get(
@@ -54,4 +64,4 @@ class AppConfigFetcher(SchemaFetcher):
         except (GetParameterError, TransformParameterError) as exc:
             error_str = f"unable to get AWS AppConfig configuration file, exception={str(exc)}"
             self._logger.error(error_str)
-            raise ConfigurationException(error_str)
+            raise ConfigurationError(error_str)

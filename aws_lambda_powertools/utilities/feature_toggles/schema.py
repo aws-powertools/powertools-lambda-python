@@ -1,7 +1,8 @@
 from enum import Enum
+from logging import Logger
 from typing import Any, Dict
 
-from .exceptions import ConfigurationException
+from .exceptions import ConfigurationError
 
 FEATURES_KEY = "features"
 RULES_KEY = "rules"
@@ -22,12 +23,12 @@ class ACTION(str, Enum):
 
 
 class SchemaValidator:
-    def __init__(self, logger: object):
+    def __init__(self, logger: Logger):
         self._logger = logger
 
     def _raise_conf_exc(self, error_str: str) -> None:
         self._logger.error(error_str)
-        raise ConfigurationException(error_str)
+        raise ConfigurationError(error_str)
 
     def _validate_condition(self, rule_name: str, condition: Dict[str, str]) -> None:
         if not condition or not isinstance(condition, dict):
@@ -47,7 +48,7 @@ class SchemaValidator:
             self._raise_conf_exc(f"feature rule is not a dictionary, feature_name={feature_name}")
         rule_name = rule.get(RULE_NAME_KEY)
         if not rule_name or rule_name is None or not isinstance(rule_name, str):
-            self._raise_conf_exc(f"invalid rule_name, feature_name={feature_name}")
+            return self._raise_conf_exc(f"invalid rule_name, feature_name={feature_name}")
         rule_default_value = rule.get(RULE_DEFAULT_VALUE)
         if rule_default_value is None or not isinstance(rule_default_value, bool):
             self._raise_conf_exc(f"invalid rule_default_value, rule_name={rule_name}")
@@ -76,8 +77,8 @@ class SchemaValidator:
     def validate_json_schema(self, schema: Dict[str, Any]) -> None:
         if not isinstance(schema, dict):
             self._raise_conf_exc("invalid AWS AppConfig JSON schema detected, root schema is not a dictionary")
-        features_dict: Dict = schema.get(FEATURES_KEY)
+        features_dict = schema.get(FEATURES_KEY)
         if not isinstance(features_dict, dict):
-            self._raise_conf_exc("invalid AWS AppConfig JSON schema detected, missing features dictionary")
+            return self._raise_conf_exc("invalid AWS AppConfig JSON schema detected, missing features dictionary")
         for feature_name, feature_dict_def in features_dict.items():
             self._validate_feature(feature_name, feature_dict_def)
