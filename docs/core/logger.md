@@ -146,6 +146,8 @@ When debugging in non-production environments, you can instruct Logger to log th
 
 You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
 
+!!! tip "You can retrieve correlation IDs via `get_correlation_id` method"
+
 === "collect.py"
 
     ```python hl_lines="5"
@@ -155,6 +157,7 @@ You can set a Correlation ID using `correlation_id_path` param by passing a [JME
 
 	@logger.inject_lambda_context(correlation_id_path="headers.my_request_id_header")
 	def handler(event, context):
+		logger.debug(f"Correlation ID => {logger.get_correlation_id()}")
 		logger.info("Collecting payment")
     ```
 
@@ -198,6 +201,7 @@ We provide [built-in JMESPath expressions](#built-in-correlation-id-expressions)
 
 	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
 	def handler(event, context):
+		logger.debug(f"Correlation ID => {logger.get_correlation_id()}")
 		logger.info("Collecting payment")
     ```
 
