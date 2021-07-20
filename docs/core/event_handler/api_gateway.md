@@ -647,6 +647,30 @@ Like `compress` feature, the client must send the `Accept` header with the corre
     }
     ```
 
+### Debug mode
+
+You can enable debug mode via `debug` param, or via `POWERTOOLS_EVENT_HANDLER_DEBUG` [environment variable](../../index.md#environment-variables).
+
+This will enable full tracebacks errors in the response, print request and responses, and set CORS in development mode.
+
+!!! warning "This might reveal sensitive information in your logs and relax CORS restrictions, use it sparingly."
+
+=== "debug.py"
+
+	```python hl_lines="3"
+	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+	app = ApiGatewayResolver(debug=True)
+
+	@app.get("/hello")
+	def get_hello_universe():
+		return {"message": "hello universe"}
+
+	def lambda_handler(event, context):
+		return app.resolve(event, context)
+	```
+
+
 ## Testing your code
 
 You can test your routes by passing a proxy event request where `path` and `httpMethod`.
