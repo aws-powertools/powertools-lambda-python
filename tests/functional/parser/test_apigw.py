@@ -139,5 +139,8 @@ def test_apigw_event_with_invalid_websocket_request():
         handle_apigw_event(event, LambdaContext())
 
     # THEN raise TypeError for invalid event
-    assert len(err.value.errors()) == 1
-    assert "messageId is available only when the `eventType` is `MESSAGE`" in str(err.value)
+    errors = err.value.errors()
+    assert len(errors) == 1
+    expected_msg = "messageId is available only when the `eventType` is `MESSAGE`"
+    assert errors[0]["msg"] == expected_msg
+    assert expected_msg in str(err.value)
