@@ -3,7 +3,7 @@ Amazon DynamoDB parameter retrieval and caching utility
 """
 
 
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 import boto3
 from boto3.dynamodb.conditions import Key
@@ -141,11 +141,6 @@ class DynamoDBProvider(BaseProvider):
         c   Parameter value c
     """
 
-    table: Any = None
-    key_attr = None
-    sort_attr = None
-    value_attr = None
-
     def __init__(
         self,
         table_name: str,
@@ -183,7 +178,7 @@ class DynamoDBProvider(BaseProvider):
         # Explicit arguments will take precedence over keyword arguments
         sdk_options["Key"] = {self.key_attr: name}
 
-        return self.table.get_item(**sdk_options)["Item"][self.value_attr]
+        return str(self.table.get_item(**sdk_options)["Item"][self.value_attr])
 
     def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
         """
@@ -209,4 +204,4 @@ class DynamoDBProvider(BaseProvider):
             response = self.table.query(**sdk_options)
             items.extend(response.get("Items", []))
 
-        return {item[self.sort_attr]: item[self.value_attr] for item in items}
+        return {str(item[self.sort_attr]): str(item[self.value_attr]) for item in items}
