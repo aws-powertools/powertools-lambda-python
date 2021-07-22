@@ -108,7 +108,27 @@ def test_apigw_event():
 def test_apigw_event_with_invalid_websocket_request():
     # GIVEN an event with an eventType != MESSAGE and has  a messageId
     event = {
+        "resource": "/",
+        "path": "/",
+        "httpMethod": "GET",
+        "headers": {},
+        "multiValueHeaders": {},
+        "isBase64Encoded": False,
+        "body": "Foo!",
         "requestContext": {
+            "accountId": "1234",
+            "apiId": "myApi",
+            "httpMethod": "GET",
+            "identity": {
+                "sourceIp": "127.0.0.1",
+            },
+            "path": "/",
+            "protocol": "Https",
+            "requestId": "1234",
+            "requestTime": "2018-09-07T16:20:46Z",
+            "requestTimeEpoch": 1536992496000,
+            "resourcePath": "/",
+            "stage": "test",
             "eventType": "DISCONNECT",
             "messageId": "messageId",
         },
@@ -119,4 +139,5 @@ def test_apigw_event_with_invalid_websocket_request():
         handle_apigw_event(event, LambdaContext())
 
     # THEN raise TypeError for invalid event
+    assert len(err.value.errors()) == 1
     assert "messageId is available only when the `eventType` is `MESSAGE`" in str(err.value)
