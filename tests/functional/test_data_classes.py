@@ -1037,6 +1037,18 @@ def test_base_proxy_event_decode_body_encoded_true():
     assert event.decoded_body == data
 
 
+def test_base_proxy_event_json_body_with_base64_encoded_data():
+    # GIVEN a base64 encoded json body
+    data = {"message": "Foo"}
+    data_str = json.dumps(data)
+    encoded_data = base64.b64encode(data_str.encode()).decode()
+    event = BaseProxyEvent({"body": encoded_data, "isBase64Encoded": True})
+
+    # WHEN calling json_body
+    # THEN then base64 decode and json load
+    assert event.json_body == data
+
+
 def test_kinesis_stream_event():
     event = KinesisStreamEvent(load_event("kinesisStreamEvent.json"))
 
