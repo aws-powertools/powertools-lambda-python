@@ -703,7 +703,8 @@ def test_similar_dynamic_routes():
     app.resolve(event, {})
 
 
-def test_non_word_chars_route():
+@pytest.mark.parametrize("req", [123456789, "user@example.com", "<foo>", "-._~'!*:@,;"])
+def test_non_word_chars_route(req):
     # GIVEN
     app = ApiGatewayResolver()
     event = deepcopy(LOAD_GW_EVENT)
@@ -711,9 +712,11 @@ def test_non_word_chars_route():
     # WHEN
     @app.get("/accounts/<account_id>")
     def get_account(account_id: str):
-        assert account_id == "12345"
+        assert account_id == f"{req}"
 
     # THEN
     event["resource"] = "/accounts/{account_id}"
-    event["path"] = "/accounts/12345"
-    app.resolve(event, None)
+    event["path"] = f"/accounts/{req}"
+
+    ret = app.resolve(event, None)
+    assert ret["statusCode"] == 200
