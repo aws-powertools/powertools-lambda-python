@@ -701,3 +701,19 @@ def test_similar_dynamic_routes():
     event["resource"] = "/accounts/{account_id}/source_networks/{network_id}"
     event["path"] = "/accounts/nested_account/source_networks/network"
     app.resolve(event, {})
+
+
+def test_non_word_chars_route():
+    # GIVEN
+    app = ApiGatewayResolver()
+    event = deepcopy(LOAD_GW_EVENT)
+
+    # WHEN
+    @app.get("/accounts/<account_id>")
+    def get_account(account_id: str):
+        assert account_id == "12345"
+
+    # THEN
+    event["resource"] = "/accounts/{account_id}"
+    event["path"] = "/accounts/12345"
+    app.resolve(event, None)

@@ -21,7 +21,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger = logging.getLogger(__name__)
 
 _DYNAMIC_ROUTE_PATTERN = r"(<\w+>)"
-_NAMED_GROUP_BOUNDARY_PATTERN = r"(?P\1\\w+\\b)"
+_NAMED_GROUP_BOUNDARY_PATTERN = r"(?P\1[-%@.:\\w]+)"
 
 
 class ProxyEventType(Enum):
