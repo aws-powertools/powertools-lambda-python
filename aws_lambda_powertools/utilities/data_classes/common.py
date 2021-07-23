@@ -65,7 +65,7 @@ class BaseProxyEvent(DictWrapper):
     @property
     def json_body(self) -> Any:
         """Parses the submitted body as json"""
-        return json.loads(self["body"])
+        return json.loads(self.decoded_body)
 
     @property
     def decoded_body(self) -> str:
