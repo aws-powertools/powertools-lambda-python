@@ -701,3 +701,30 @@ def test_similar_dynamic_routes():
     event["resource"] = "/accounts/{account_id}/source_networks/{network_id}"
     event["path"] = "/accounts/nested_account/source_networks/network"
     app.resolve(event, {})
+
+
+@pytest.mark.parametrize(
+    "req",
+    [
+        pytest.param(123456789, id="num"),
+        pytest.param("user@example.com", id="email"),
+        pytest.param("-._~'!*:@,;()", id="safe-rfc3986"),
+        pytest.param("%<>[]{}|^", id="unsafe-rfc3986"),
+    ],
+)
+def test_non_word_chars_route(req):
+    # GIVEN
+    app = ApiGatewayResolver()
+    event = deepcopy(LOAD_GW_EVENT)
+
+    # WHEN
+    @app.get("/accounts/<account_id>")
+    def get_account(account_id: str):
+        assert account_id == f"{req}"
+
+    # THEN
+    event["resource"] = "/accounts/{account_id}"
+    event["path"] = f"/accounts/{req}"
+
+    ret = app.resolve(event, None)
+    assert ret["statusCode"] == 200
