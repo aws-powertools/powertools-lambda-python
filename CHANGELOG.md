@@ -7,6 +7,12 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## [1.18.1] - 2021-07-23
+
+### Bug Fixes
+
+* **api-gateway:** route regression for non-word and unsafe URI chars ([#556](https://github.com/awslabs/aws-lambda-powertools-python/issues/556))
+
 ## [1.18.0] - 2021-07-20
 
 ### Bug Fixes
