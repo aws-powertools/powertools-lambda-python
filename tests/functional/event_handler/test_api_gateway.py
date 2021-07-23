@@ -703,7 +703,15 @@ def test_similar_dynamic_routes():
     app.resolve(event, {})
 
 
-@pytest.mark.parametrize("req", [123456789, "user@example.com", "-._~'!*:@,;%#"])
+@pytest.mark.parametrize(
+    "req",
+    [
+        pytest.param(123456789, id="num"),
+        pytest.param("user@example.com", id="email"),
+        pytest.param("-._~'!*:@,;()", id="safe-rfc3986"),
+        pytest.param("%<>[]{}|^", id="unsafe-rfc3986"),
+    ],
+)
 def test_non_word_chars_route(req):
     # GIVEN
     app = ApiGatewayResolver()
