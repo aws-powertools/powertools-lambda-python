@@ -703,7 +703,7 @@ def test_similar_dynamic_routes():
     app.resolve(event, {})
 
 
-@pytest.mark.parametrize("req", [123456789, "user@example.com", "<foo>", "-._~'!*:@,;"])
+@pytest.mark.parametrize("req", [123456789, "user@example.com", "-._~'!*:@,;%#"])
 def test_non_word_chars_route(req):
     # GIVEN
     app = ApiGatewayResolver()

@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 _DYNAMIC_ROUTE_PATTERN = r"(<\w+>)"
 # Safe URI chars https://www.ietf.org/rfc/rfc3986.txt
-_NAMED_GROUP_BOUNDARY_PATTERN = r"(?P\1[-._~()'!*:@,;\\w]+)"
+_NAMED_GROUP_BOUNDARY_PATTERN = r"(?P\1[-._~()'!*:@%#,;\\w]+)"
 
 
 class ProxyEventType(Enum):
