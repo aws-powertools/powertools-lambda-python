@@ -78,9 +78,7 @@ def idempotent(
         try:
             return idempotency_handler.handle()
         except IdempotencyInconsistentStateError:
-            if i < max_handler_retries:
-                continue
-            else:
+            if i == max_handler_retries:
                 # Allow the exception to bubble up after max retries exceeded
                 raise
 
@@ -117,7 +115,6 @@ class IdempotencyHandler:
         self.context = context
         self.event = event
         self.lambda_handler = lambda_handler
-        self.max_handler_retries = 2
 
     def handle(self) -> Any:
         """
