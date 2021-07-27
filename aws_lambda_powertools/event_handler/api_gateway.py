@@ -6,6 +6,7 @@ import re
 import traceback
 import zlib
 from enum import Enum
+from functools import partial
 from http import HTTPStatus
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
@@ -263,6 +264,7 @@ class ApiGatewayResolver:
         proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent,
         cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
+        serializer: Optional[Callable[[Dict], str]] = None,
     ):
         """
         Parameters
@@ -283,6 +285,14 @@ class ApiGatewayResolver:
         self._debug = resolve_truthy_env_var_choice(
             env=os.getenv(constants.EVENT_HANDLER_DEBUG_ENV, "false"), choice=debug
         )
+
+        if serializer:
+            self._serializer = serializer
+        elif self._debug:
+            """Does a concise json serialization or pretty print when in debug mode"""
+            self._serializer = partial(json.dumps, indent=4, cls=Encoder)
+        else:
+            self._serializer = partial(json.dumps, separators=(",", ":"), cls=Encoder)
 
     def get(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
         """Get route decorator with GET `method`
@@ -592,8 +602,4 @@ class ApiGatewayResolver:
         )
 
     def _json_dump(self, obj: Any) -> str:
-        """Does a concise json serialization or pretty print when in debug mode"""
-        if self._debug:
-            return json.dumps(obj, indent=4, cls=Encoder)
-        else:
-            return json.dumps(obj, separators=(",", ":"), cls=Encoder)
+        return self._serializer(obj)
