@@ -733,10 +733,7 @@ def test_non_word_chars_route(req):
 
 
 def test_custom_serializer():
-    class Color(Enum):
-        RED = 1
-        BLUE = 2
-
+    # GIVEN a custom serializer to handle enums and sets
     class CustomEncoder(JSONEncoder):
         def default(self, data):
             if isinstance(data, Enum):
@@ -746,13 +743,17 @@ def test_custom_serializer():
             except TypeError:
                 pass
             else:
-                return list(iterable)
+                return sorted(iterable)
             return JSONEncoder.default(self, data)
 
     def custom_serializer(data) -> str:
         return json.dumps(data, cls=CustomEncoder)
 
     app = ApiGatewayResolver(serializer=custom_serializer)
+
+    class Color(Enum):
+        RED = 1
+        BLUE = 2
 
     @app.get("/colors")
     def get_color() -> Dict:
@@ -761,8 +762,10 @@ def test_custom_serializer():
             "variations": {"light", "dark"},
         }
 
+    # WHEN calling handler
     response = app({"httpMethod": "GET", "path": "/colors"}, None)
 
+    # THEN then use the custom serializer
     body = response["body"]
-    expected = '{"color": 1, "variations": ["light", "dark"]}'
+    expected = '{"color": 1, "variations": ["dark", "light"]}'
     assert expected == body
