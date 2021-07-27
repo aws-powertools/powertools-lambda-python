@@ -12,7 +12,7 @@ from botocore.config import Config
 
 from ...shared import constants
 from ...shared.functions import resolve_env_var_choice
-from .base import DEFAULT_PROVIDERS, BaseProvider
+from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 
 CLIENT_ID = str(uuid4())
 
@@ -110,6 +110,7 @@ def get_app_config(
     application: Optional[str] = None,
     transform: Optional[str] = None,
     force_fetch: bool = False,
+    max_age: int = DEFAULT_MAX_AGE_SECS,
     **sdk_options
 ) -> Union[str, list, dict, bytes]:
     """
@@ -127,6 +128,8 @@ def get_app_config(
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
     force_fetch: bool, optional
         Force update even before a cached item has expired, defaults to False
+    max_age: int
+        Maximum age of the cached value
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameter API call
 
@@ -165,4 +168,6 @@ def get_app_config(
 
     sdk_options["ClientId"] = CLIENT_ID
 
-    return DEFAULT_PROVIDERS["appconfig"].get(name, transform=transform, force_fetch=force_fetch, **sdk_options)
+    return DEFAULT_PROVIDERS["appconfig"].get(
+        name, max_age=max_age, transform=transform, force_fetch=force_fetch, **sdk_options
+    )
