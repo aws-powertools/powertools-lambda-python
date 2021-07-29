@@ -437,6 +437,39 @@ For example, if you have three parameters, */param/a*, */param/b* and */param/c*
         values = ssm_provider.get_multiple("/param", transform="json", raise_on_transform_error=True)
     ```
 
+#### Infer transform from parameter suffix with `get_multiple()`
+
+If you use `transform` with `get_multiple()`, you might want to retrieve and transform parameters encoded in different formats. You can do this with a single request by using `transform="auto"` and let the infer the transform type to use based on the parameter suffix.
+
+!!! info "The `transform="auto"` feature is available across all providers, including the high level functions"
+
+=== "partial_failures.py"
+
+````python hl_lines="6"
+    from aws_lambda_powertools.utilities import parameters
+
+    ssm_provider = parameters.SSMProvider()
+
+    def handler(event, context):
+        values = ssm_provider.get_multiple("/param", transform="auto")
+
+For example, if you have two parameters with the following suffixes `.json` and `.binary`:
+
+| Parameter name  | Parameter value         |
+| --------------- | ----------------------- |
+| /param/a.json   | [some encoded value]    |
+| /param/a.binary | [some encoded value]    |
+
+The return of `ssm_provider.get_multiple("/param", transform="auto")` call will be a dictionary like:
+
+```json
+{
+    "a.json": [some value],
+    "b.binary": [some value]
+}
+```
+````
+
 ### Passing additional SDK arguments
 
 You can use arbitrary keyword arguments to pass it directly to the underlying SDK method.
