@@ -1,16 +1,16 @@
 """Advanced feature toggles utility
 """
-from .appconfig_fetcher import AppConfigFetcher
-from .configuration_store import ConfigurationStore
+from .appconfig import AppConfigStore
+from .base import StoreProvider
 from .exceptions import ConfigurationError
+from .feature_flags import FeatureFlags
 from .schema import ACTION, SchemaValidator
-from .schema_fetcher import SchemaFetcher
 
 __all__ = [
     "ConfigurationError",
-    "ConfigurationStore",
+    "FeatureFlags",
     "ACTION",
     "SchemaValidator",
-    "AppConfigFetcher",
-    "SchemaFetcher",
+    "AppConfigStore",
+    "StoreProvider",
 ]

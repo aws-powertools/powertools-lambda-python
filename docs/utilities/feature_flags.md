@@ -61,10 +61,10 @@ By default, this utility provides AWS AppConfig as a configuration store. As suc
 Potential changes to be validated when docs are in a better shape
 
 - [x] ~~`rules_context` to `context`~~
-- [ ] `ConfigurationStore` to `FeatureFlags`
-- [ ] `SchemaFetcher` to `StoreProvider`
+- [x] `ConfigurationStore` to `FeatureFlags`
+- [x] `StoreProvider` to `StoreProvider`
 - [ ] Use `base.py` for interfaces for consistency (e.g. Metrics, Tracer, etc.)
-- [ ] Some docstrings and logger refer to AWS AppConfig only (outdated given SchemaFetcher)
+- [ ] Some docstrings and logger refer to AWS AppConfig only (outdated given StoreProvider)
 - [ ] Review why we're testing a private method(`is_rule_matched`)
 - [x] AppConfig construct parameter names for consistency (e.g. `configuration_name` -> `name`, `service` -> `application`)
 - [ ] Review `get_configuration`, `get_json_configuration`

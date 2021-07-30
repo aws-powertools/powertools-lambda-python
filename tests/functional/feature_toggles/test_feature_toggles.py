@@ -4,8 +4,8 @@ import pytest
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities.feature_toggles import ConfigurationError, schema
-from aws_lambda_powertools.utilities.feature_toggles.appconfig_fetcher import AppConfigFetcher
-from aws_lambda_powertools.utilities.feature_toggles.configuration_store import ConfigurationStore
+from aws_lambda_powertools.utilities.feature_toggles.appconfig import AppConfigStore
+from aws_lambda_powertools.utilities.feature_toggles.feature_flags import FeatureFlags
 from aws_lambda_powertools.utilities.feature_toggles.schema import ACTION
 from aws_lambda_powertools.utilities.parameters import GetParameterError
 
@@ -15,25 +15,25 @@ def config():
     return Config(region_name="us-east-1")
 
 
-def init_configuration_store(mocker, mock_schema: Dict, config: Config) -> ConfigurationStore:
+def init_configuration_store(mocker, mock_schema: Dict, config: Config) -> FeatureFlags:
     mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.parameters.AppConfigProvider.get")
     mocked_get_conf.return_value = mock_schema
 
-    app_conf_fetcher = AppConfigFetcher(
+    app_conf_fetcher = AppConfigStore(
         environment="test_env",
         application="test_app",
         name="test_conf_name",
         cache_seconds=600,
         config=config,
     )
-    conf_store: ConfigurationStore = ConfigurationStore(schema_fetcher=app_conf_fetcher)
+    conf_store: FeatureFlags = FeatureFlags(schema_fetcher=app_conf_fetcher)
     return conf_store
 
 
-def init_fetcher_side_effect(mocker, config: Config, side_effect) -> AppConfigFetcher:
+def init_fetcher_side_effect(mocker, config: Config, side_effect) -> AppConfigStore:
     mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.parameters.AppConfigProvider.get")
     mocked_get_conf.side_effect = side_effect
-    return AppConfigFetcher(
+    return AppConfigStore(
         environment="env",
         application="application",
         name="conf",
@@ -423,7 +423,7 @@ def test_multiple_features_only_some_enabled(mocker, config):
 def test_get_feature_toggle_handles_error(mocker, config):
     # GIVEN a schema fetch that raises a ConfigurationError
     schema_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
-    conf_store = ConfigurationStore(schema_fetcher)
+    conf_store = FeatureFlags(schema_fetcher)
 
     # WHEN calling get_feature_toggle
     toggle = conf_store.get_feature_toggle(feature_name="Foo", value_if_missing=False)
@@ -435,7 +435,7 @@ def test_get_feature_toggle_handles_error(mocker, config):
 def test_get_all_enabled_feature_toggles_handles_error(mocker, config):
     # GIVEN a schema fetch that raises a ConfigurationError
     schema_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
-    conf_store = ConfigurationStore(schema_fetcher)
+    conf_store = FeatureFlags(schema_fetcher)
 
     # WHEN calling get_all_enabled_feature_toggles
     toggles = conf_store.get_all_enabled_feature_toggles(context=None)

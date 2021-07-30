@@ -5,8 +5,8 @@ from botocore.config import Config
 
 from aws_lambda_powertools.utilities.parameters import AppConfigProvider, GetParameterError, TransformParameterError
 
+from .base import StoreProvider
 from .exceptions import ConfigurationError
-from .schema_fetcher import SchemaFetcher
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 TRANSFORM_TYPE = "json"
 
 
-class AppConfigFetcher(SchemaFetcher):
+class AppConfigStore(StoreProvider):
     def __init__(
         self,
         environment: str,

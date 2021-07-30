@@ -2,19 +2,19 @@ import logging
 from typing import Any, Dict, List, Optional, cast
 
 from . import schema
+from .base import StoreProvider
 from .exceptions import ConfigurationError
-from .schema_fetcher import SchemaFetcher
 
 logger = logging.getLogger(__name__)
 
 
-class ConfigurationStore:
-    def __init__(self, schema_fetcher: SchemaFetcher):
+class FeatureFlags:
+    def __init__(self, schema_fetcher: StoreProvider):
         """constructor
 
         Parameters
         ----------
-        schema_fetcher: SchemaFetcher
+        schema_fetcher: StoreProvider
             A schema JSON fetcher, can be AWS AppConfig, Hashicorp Consul etc.
         """
         self._logger = logger

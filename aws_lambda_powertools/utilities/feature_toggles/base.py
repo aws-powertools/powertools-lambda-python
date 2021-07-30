@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict
 
 
-class SchemaFetcher(ABC):
+class StoreProvider(ABC):
     def __init__(self, configuration_name: str, cache_seconds: int):
         self.name = configuration_name
         self._cache_seconds = cache_seconds
