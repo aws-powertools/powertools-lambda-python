@@ -360,7 +360,7 @@ def test_multiple_features_enabled(mocker, config):
         },
     }
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
-    enabled_list: List[str] = conf_store.get_all_enabled_feature_toggles(context={"tenant_id": "6", "username": "a"})
+    enabled_list: List[str] = conf_store.get_enabled_features(context={"tenant_id": "6", "username": "a"})
     assert enabled_list == expected_value
 
 
@@ -409,7 +409,7 @@ def test_multiple_features_only_some_enabled(mocker, config):
         },
     }
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
-    enabled_list: List[str] = conf_store.get_all_enabled_feature_toggles(context={"tenant_id": "6", "username": "a"})
+    enabled_list: List[str] = conf_store.get_enabled_features(context={"tenant_id": "6", "username": "a"})
     assert enabled_list == expected_value
 
 
@@ -430,8 +430,8 @@ def test_get_all_enabled_feature_toggles_handles_error(mocker, config):
     schema_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
     conf_store = FeatureFlags(schema_fetcher)
 
-    # WHEN calling get_all_enabled_feature_toggles
-    toggles = conf_store.get_all_enabled_feature_toggles(context=None)
+    # WHEN calling get_enabled_features
+    toggles = conf_store.get_enabled_features(context=None)
 
     # THEN handle the error and return an empty list
     assert toggles == []

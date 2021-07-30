@@ -66,7 +66,8 @@ Potential changes to be validated when docs are in a better shape
 - [x] ~~Use `base.py` for interfaces for consistency (e.g. Metrics, Tracer, etc.)~~
 - [x] ~~AppConfig construct parameter names for consistency (e.g. `configuration_name` -> `name`, `service` -> `application`)~~
 - [x] ~~Rename `value_if_missing` param to `default` to match Python consistency (e.g. `os.getenv("VAR", default=False)`)~~
-- [x] ~~Review `get_feature` in favour of `evaluate`~~
+- [x] ~~Rename `get_feature` to `evaluate`~~
+- [x] ~~Rename `get_all_enabled_feature_toggles` to `get_enabled_features`~~
 - [ ] Some docstrings and logger refer to AWS AppConfig only (outdated given StoreProvider)
 - [ ] Review why we're testing a private method(`is_rule_matched`)
 - [ ] Review `get_configuration`, `get_json_configuration`

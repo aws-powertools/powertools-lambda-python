@@ -166,7 +166,7 @@ class FeatureFlags:
             rules=cast(List, rules_list),
         )
 
-    def get_all_enabled_feature_toggles(self, *, context: Optional[Dict[str, Any]] = None) -> List[str]:
+    def get_enabled_features(self, *, context: Optional[Dict[str, Any]] = None) -> List[str]:
         """Get all enabled feature toggles while also taking into account rule_context
         (when a feature has defined rules)
 
