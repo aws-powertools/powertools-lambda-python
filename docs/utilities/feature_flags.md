@@ -30,11 +30,7 @@ That being said, be mindful that feature flags can increase your application com
 ## Getting started
 ### IAM Permissions
 
-This utility requires additional permissions to work as expected.
-
-Provider | Function/Method | IAM Permission
-------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
-App Config | `AppConfigProvider.get_app_config`, `get_app_config` | `appconfig:GetConfiguration`
+By default, this utility provides AWS AppConfig as a configuration store. As such, you IAM Role needs permission - `appconfig:GetConfiguration` - to fetch feature flags from AppConfig.
 
 ### Creating feature flags
 
