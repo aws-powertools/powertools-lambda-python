@@ -9,7 +9,15 @@ The feature flags utility provides a simple rule engine to define when one or mu
 
 ## Terminology
 
-> Explain the difference between static vs dynamic feature flags
+Feature flags are used to modify a system behaviour without having to change their code. These flags can be static or dynamic.
+
+**Static feature flags** are commonly used for long-lived behaviours that will rarely change, for example `TRACER_ENABLED=True`. These are better suited for [Parameters utility](parameters.md).
+
+**Dynamic feature flags** are typically used for experiments where you'd want to enable a feature for a limited set of customers, for example A/B testing and Canary releases. These are better suited for this utility, as you can create multiple conditions on whether a feature flag should be `True` or `False`.
+
+That being said, be mindful that feature flags can increase your application complexity over time if you're not careful; use them sparingly.
+
+!!! tip "Read [this article](https://martinfowler.com/articles/feature-toggles.html){target="_blank"} for more details on different types of feature flags and trade-offs"
 
 ## Key features
 
