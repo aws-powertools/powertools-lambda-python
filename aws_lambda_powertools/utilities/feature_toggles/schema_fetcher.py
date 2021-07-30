@@ -4,12 +4,12 @@ from typing import Any, Dict
 
 class SchemaFetcher(ABC):
     def __init__(self, configuration_name: str, cache_seconds: int):
-        self.configuration_name = configuration_name
+        self.name = configuration_name
         self._cache_seconds = cache_seconds
 
     @abstractmethod
     def get_json_configuration(self) -> Dict[str, Any]:
-        """Get configuration string from any configuration storing service and return the parsed JSON dictionary
+        """Get configuration string from any configuration storing application and return the parsed JSON dictionary
 
         Raises
         ------

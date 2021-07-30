@@ -18,8 +18,8 @@ class AppConfigFetcher(SchemaFetcher):
     def __init__(
         self,
         environment: str,
-        service: str,
-        configuration_name: str,
+        application: str,
+        name: str,
         cache_seconds: int,
         config: Optional[Config] = None,
     ):
@@ -28,19 +28,19 @@ class AppConfigFetcher(SchemaFetcher):
         Parameters
         ----------
         environment: str
-            what appconfig environment to use 'dev/test' etc.
-        service: str
-            what service name to use from the supplied environment
-        configuration_name: str
-            what configuration to take from the environment & service combination
+            Appconfig environment, e.g. 'dev/test' etc.
+        application: str
+            AppConfig application name, e.g. 'powertools'
+        name: str
+            AppConfig configuration name e.g. `my_conf`
         cache_seconds: int
             cache expiration time, how often to call AppConfig to fetch latest configuration
         config: Optional[Config]
             boto3 client configuration
         """
-        super().__init__(configuration_name, cache_seconds)
+        super().__init__(name, cache_seconds)
         self._logger = logger
-        self._conf_store = AppConfigProvider(environment=environment, application=service, config=config)
+        self._conf_store = AppConfigProvider(environment=environment, application=application, config=config)
 
     def get_json_configuration(self) -> Dict[str, Any]:
         """Get configuration string from AWs AppConfig and return the parsed JSON dictionary
@@ -60,7 +60,7 @@ class AppConfigFetcher(SchemaFetcher):
             return cast(
                 dict,
                 self._conf_store.get(
-                    name=self.configuration_name,
+                    name=self.name,
                     transform=TRANSFORM_TYPE,
                     max_age=self._cache_seconds,
                 ),

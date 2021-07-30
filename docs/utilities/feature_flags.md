@@ -66,5 +66,6 @@ Potential changes to be validated when docs are in a better shape
 - [ ] Use `base.py` for interfaces for consistency (e.g. Metrics, Tracer, etc.)
 - [ ] Some docstrings and logger refer to AWS AppConfig only (outdated given SchemaFetcher)
 - [ ] Review why we're testing a private method(`is_rule_matched`)
-
-**Q: Why is `get_configuration()` public?**
+- [x] AppConfig construct parameter names for consistency (e.g. `configuration_name` -> `name`, `service` -> `application`)
+- [ ] Review `get_configuration`, `get_json_configuration`
+- [ ] Review `get_feature` in favour of `get_feature_toggle`

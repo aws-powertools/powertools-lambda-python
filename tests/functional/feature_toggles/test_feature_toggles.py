@@ -21,8 +21,8 @@ def init_configuration_store(mocker, mock_schema: Dict, config: Config) -> Confi
 
     app_conf_fetcher = AppConfigFetcher(
         environment="test_env",
-        service="test_app",
-        configuration_name="test_conf_name",
+        application="test_app",
+        name="test_conf_name",
         cache_seconds=600,
         config=config,
     )
@@ -35,8 +35,8 @@ def init_fetcher_side_effect(mocker, config: Config, side_effect) -> AppConfigFe
     mocked_get_conf.side_effect = side_effect
     return AppConfigFetcher(
         environment="env",
-        service="service",
-        configuration_name="conf",
+        application="application",
+        name="conf",
         cache_seconds=1,
         config=config,
     )
