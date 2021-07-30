@@ -3,7 +3,7 @@ Amazon DynamoDB parameter retrieval and caching utility
 """
 
 
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 import boto3
 from boto3.dynamodb.conditions import Key
@@ -140,11 +140,6 @@ class DynamoDBProvider(BaseProvider):
         b   Parameter value b
         c   Parameter value c
     """
-
-    table: Any = None
-    key_attr = None
-    sort_attr = None
-    value_attr = None
 
     def __init__(
         self,

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 from botocore.config import Config
 
@@ -56,11 +56,15 @@ class AppConfigFetcher(SchemaFetcher):
             parsed JSON dictionary
         """
         try:
-            return self._conf_store.get(
-                name=self.configuration_name,
-                transform=TRANSFORM_TYPE,
-                max_age=self._cache_seconds,
-            )  # parse result conf as JSON, keep in cache for self.max_age seconds
+            # parse result conf as JSON, keep in cache for self.max_age seconds
+            return cast(
+                dict,
+                self._conf_store.get(
+                    name=self.configuration_name,
+                    transform=TRANSFORM_TYPE,
+                    max_age=self._cache_seconds,
+                ),
+            )
         except (GetParameterError, TransformParameterError) as exc:
             error_str = f"unable to get AWS AppConfig configuration file, exception={str(exc)}"
             self._logger.error(error_str)

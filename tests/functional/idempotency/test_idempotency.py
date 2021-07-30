@@ -395,7 +395,6 @@ def test_idempotent_lambda_expired_during_request(
     lambda_apigw_event,
     timestamp_expired,
     lambda_response,
-    expected_params_update_item,
     hashed_idempotency_key,
     lambda_context,
 ):
