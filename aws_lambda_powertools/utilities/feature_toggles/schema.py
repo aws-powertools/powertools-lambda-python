@@ -26,7 +26,8 @@ class SchemaValidator:
     def __init__(self, logger: Logger):
         self._logger = logger
 
-    def _validate_condition(self, rule_name: str, condition: Dict[str, str]) -> None:
+    @staticmethod
+    def _validate_condition(rule_name: str, condition: Dict[str, str]) -> None:
         if not condition or not isinstance(condition, dict):
             raise ConfigurationError(f"invalid condition type, not a dictionary, rule_name={rule_name}")
 
