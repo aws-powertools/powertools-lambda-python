@@ -286,13 +286,11 @@ class ApiGatewayResolver:
             env=os.getenv(constants.EVENT_HANDLER_DEBUG_ENV, "false"), choice=debug
         )
 
-        if serializer:
-            self._serializer = serializer
-        elif self._debug:
+        self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
+
+        if self._debug:
             """Does a concise json serialization or pretty print when in debug mode"""
             self._serializer = partial(json.dumps, indent=4, cls=Encoder)
-        else:
-            self._serializer = partial(json.dumps, separators=(",", ":"), cls=Encoder)
 
     def get(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
         """Get route decorator with GET `method`
