@@ -186,7 +186,12 @@ class SSMProvider(BaseProvider):
 
 
 def get_parameter(
-    name: str, transform: Optional[str] = None, decrypt: bool = False, force_fetch: bool = False, **sdk_options
+    name: str,
+    transform: Optional[str] = None,
+    decrypt: bool = False,
+    force_fetch: bool = False,
+    max_age: int = DEFAULT_MAX_AGE_SECS,
+    **sdk_options
 ) -> Union[str, list, dict, bytes]:
     """
     Retrieve a parameter value from AWS Systems Manager (SSM) Parameter Store
@@ -201,6 +206,8 @@ def get_parameter(
         If the parameter values should be decrypted
     force_fetch: bool, optional
         Force update even before a cached item has expired, defaults to False
+    max_age: int
+        Maximum age of the cached value
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameter API call
 
@@ -240,7 +247,9 @@ def get_parameter(
     # Add to `decrypt` sdk_options to we can have an explicit option for this
     sdk_options["decrypt"] = decrypt
 
-    return DEFAULT_PROVIDERS["ssm"].get(name, transform=transform, force_fetch=force_fetch, **sdk_options)
+    return DEFAULT_PROVIDERS["ssm"].get(
+        name, max_age=max_age, transform=transform, force_fetch=force_fetch, **sdk_options
+    )
 
 
 def get_parameters(
@@ -249,6 +258,8 @@ def get_parameters(
     recursive: bool = True,
     decrypt: bool = False,
     force_fetch: bool = False,
+    max_age: int = DEFAULT_MAX_AGE_SECS,
+    raise_on_transform_error: bool = False,
     **sdk_options
 ) -> Union[Dict[str, str], Dict[str, dict], Dict[str, bytes]]:
     """
@@ -266,6 +277,11 @@ def get_parameters(
         If the parameter values should be decrypted
     force_fetch: bool, optional
         Force update even before a cached item has expired, defaults to False
+    max_age: int
+        Maximum age of the cached value
+    raise_on_transform_error: bool, optional
+        Raises an exception if any transform fails, otherwise this will
+        return a None value for each transform that failed
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameters_by_path API call
 
@@ -305,4 +321,11 @@ def get_parameters(
     sdk_options["recursive"] = recursive
     sdk_options["decrypt"] = decrypt
 
-    return DEFAULT_PROVIDERS["ssm"].get_multiple(path, transform=transform, force_fetch=force_fetch, **sdk_options)
+    return DEFAULT_PROVIDERS["ssm"].get_multiple(
+        path,
+        max_age=max_age,
+        transform=transform,
+        raise_on_transform_error=raise_on_transform_error,
+        force_fetch=force_fetch,
+        **sdk_options
+    )
