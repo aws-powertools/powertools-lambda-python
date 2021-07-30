@@ -3,6 +3,8 @@ import json
 import zlib
 from copy import deepcopy
 from decimal import Decimal
+from enum import Enum
+from json import JSONEncoder
 from pathlib import Path
 from typing import Dict
 
@@ -728,3 +730,42 @@ def test_non_word_chars_route(req):
 
     ret = app.resolve(event, None)
     assert ret["statusCode"] == 200
+
+
+def test_custom_serializer():
+    # GIVEN a custom serializer to handle enums and sets
+    class CustomEncoder(JSONEncoder):
+        def default(self, data):
+            if isinstance(data, Enum):
+                return data.value
+            try:
+                iterable = iter(data)
+            except TypeError:
+                pass
+            else:
+                return sorted(iterable)
+            return JSONEncoder.default(self, data)
+
+    def custom_serializer(data) -> str:
+        return json.dumps(data, cls=CustomEncoder)
+
+    app = ApiGatewayResolver(serializer=custom_serializer)
+
+    class Color(Enum):
+        RED = 1
+        BLUE = 2
+
+    @app.get("/colors")
+    def get_color() -> Dict:
+        return {
+            "color": Color.RED,
+            "variations": {"light", "dark"},
+        }
+
+    # WHEN calling handler
+    response = app({"httpMethod": "GET", "path": "/colors"}, None)
+
+    # THEN then use the custom serializer
+    body = response["body"]
+    expected = '{"color": 1, "variations": ["dark", "light"]}'
+    assert expected == body
