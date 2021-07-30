@@ -103,9 +103,7 @@ class FeatureFlags:
         self._schema_validator.validate_json_schema(config)
         return config
 
-    def get_feature_toggle(
-        self, *, feature_name: str, context: Optional[Dict[str, Any]] = None, value_if_missing: bool
-    ) -> bool:
+    def evaluate(self, *, feature_name: str, context: Optional[Dict[str, Any]] = None, default: bool) -> bool:
         """Get a feature toggle boolean value. Value is calculated according to a set of rules and conditions.
 
         See below for explanation.
@@ -117,10 +115,9 @@ class FeatureFlags:
         context: Optional[Dict[str, Any]]
             dict of attributes that you would like to match the rules
             against, can be {'tenant_id: 'X', 'username':' 'Y', 'region': 'Z'} etc.
-        value_if_missing: bool
-            this will be the returned value in case the feature toggle doesn't exist in
-            the schema or there has been an error while fetching the
-            configuration from appconfig
+        default: bool
+            default value if feature flag doesn't exist in the schema,
+            or there has been an error while fetching the configuration from appconfig
 
         Returns
         ------
@@ -138,16 +135,16 @@ class FeatureFlags:
         try:
             toggles_dict: Dict[str, Any] = self.get_configuration()
         except ConfigurationError:
-            logger.error("unable to get feature toggles JSON, returning provided value_if_missing value")
-            return value_if_missing
+            logger.error("unable to get feature toggles JSON, returning provided default value")
+            return default
 
         feature: Dict[str, Dict] = toggles_dict.get(schema.FEATURES_KEY, {}).get(feature_name, None)
         if feature is None:
             logger.warning(
-                f"feature does not appear in configuration, using provided value_if_missing, "
-                f"feature_name={feature_name}, value_if_missing={value_if_missing}"
+                f"feature does not appear in configuration, using provided default, "
+                f"feature_name={feature_name}, default={default}"
             )
-            return value_if_missing
+            return default
 
         rules_list = feature.get(schema.RULES_KEY)
         feature_default_value = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)

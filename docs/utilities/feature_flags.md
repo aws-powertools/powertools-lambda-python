@@ -63,9 +63,11 @@ Potential changes to be validated when docs are in a better shape
 - [x] ~~`rules_context` to `context`~~
 - [x] `ConfigurationStore` to `FeatureFlags`
 - [x] `StoreProvider` to `StoreProvider`
-- [ ] Use `base.py` for interfaces for consistency (e.g. Metrics, Tracer, etc.)
+- [x] ~~Use `base.py` for interfaces for consistency (e.g. Metrics, Tracer, etc.)~~
+- [x] ~~AppConfig construct parameter names for consistency (e.g. `configuration_name` -> `name`, `service` -> `application`)~~
+- [x] ~~Rename `value_if_missing` param to `default` to match Python consistency (e.g. `os.getenv("VAR", default=False)`)~~
+- [x] ~~Review `get_feature` in favour of `evaluate`~~
 - [ ] Some docstrings and logger refer to AWS AppConfig only (outdated given StoreProvider)
 - [ ] Review why we're testing a private method(`is_rule_matched`)
-- [x] AppConfig construct parameter names for consistency (e.g. `configuration_name` -> `name`, `service` -> `application`)
 - [ ] Review `get_configuration`, `get_json_configuration`
-- [ ] Review `get_feature` in favour of `get_feature_toggle`
+- [ ] Review potentially redundant logging

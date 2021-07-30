@@ -68,18 +68,18 @@ def test_toggles_rule_does_not_match(mocker, config):
     }
 
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
-    toggle = conf_store.get_feature_toggle(feature_name="my_feature", context={}, value_if_missing=False)
+    toggle = conf_store.evaluate(feature_name="my_feature", context={}, default=False)
     assert toggle == expected_value
 
 
 # this test checks that if you try to get a feature that doesn't exist in the schema,
-# you get the default value of False that was sent to the get_feature_toggle API
+# you get the default value of False that was sent to the evaluate API
 def test_toggles_no_conditions_feature_does_not_exist(mocker, config):
     expected_value = False
     mocked_app_config_schema = {"features": {"my_fake_feature": {"feature_default_value": True}}}
 
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
-    toggle = conf_store.get_feature_toggle(feature_name="my_feature", context={}, value_if_missing=expected_value)
+    toggle = conf_store.evaluate(feature_name="my_feature", context={}, default=expected_value)
     assert toggle == expected_value
 
 
@@ -89,9 +89,7 @@ def test_toggles_no_rules(mocker, config):
     expected_value = True
     mocked_app_config_schema = {"features": {"my_feature": {"feature_default_value": expected_value}}}
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
-    toggle = conf_store.get_feature_toggle(
-        feature_name="my_feature", context={"tenant_id": "6", "username": "a"}, value_if_missing=False
-    )
+    toggle = conf_store.evaluate(feature_name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
     assert toggle == expected_value
 
 
@@ -119,9 +117,7 @@ def test_toggles_conditions_no_match(mocker, config):
         },
     }
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
-    toggle = conf_store.get_feature_toggle(
-        feature_name="my_feature", context={"tenant_id": "6", "username": "a"}, value_if_missing=False
-    )
+    toggle = conf_store.evaluate(feature_name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
     assert toggle == expected_value
 
 
@@ -156,13 +152,13 @@ def test_toggles_conditions_rule_match_equal_multiple_conditions(mocker, config)
         },
     }
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
-    toggle = conf_store.get_feature_toggle(
+    toggle = conf_store.evaluate(
         feature_name="my_feature",
         context={
             "tenant_id": tenant_id_val,
             "username": username_val,
         },
-        value_if_missing=True,
+        default=True,
     )
     assert toggle == expected_value
 
@@ -198,9 +194,7 @@ def test_toggles_conditions_no_rule_match_equal_multiple_conditions(mocker, conf
         },
     }
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
-    toggle = conf_store.get_feature_toggle(
-        feature_name="my_feature", context={"tenant_id": "6", "username": "a"}, value_if_missing=False
-    )
+    toggle = conf_store.evaluate(feature_name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
     assert toggle == expected_val
 
 
@@ -259,25 +253,25 @@ def test_toggles_conditions_rule_match_multiple_actions_multiple_rules_multiple_
 
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     # match first rule
-    toggle = conf_store.get_feature_toggle(
-        feature_name="my_feature", context={"tenant_id": "6", "username": "abcd"}, value_if_missing=False
+    toggle = conf_store.evaluate(
+        feature_name="my_feature", context={"tenant_id": "6", "username": "abcd"}, default=False
     )
     assert toggle == expected_value_first_check
     # match second rule
-    toggle = conf_store.get_feature_toggle(
-        feature_name="my_feature", context={"tenant_id": "4446", "username": "az"}, value_if_missing=False
+    toggle = conf_store.evaluate(
+        feature_name="my_feature", context={"tenant_id": "4446", "username": "az"}, default=False
     )
     assert toggle == expected_value_second_check
     # match no rule
-    toggle = conf_store.get_feature_toggle(
-        feature_name="my_feature", context={"tenant_id": "11114446", "username": "ab"}, value_if_missing=False
+    toggle = conf_store.evaluate(
+        feature_name="my_feature", context={"tenant_id": "11114446", "username": "ab"}, default=False
     )
     assert toggle == expected_value_third_check
     # feature doesn't exist
-    toggle = conf_store.get_feature_toggle(
+    toggle = conf_store.evaluate(
         feature_name="my_fake_feature",
         context={"tenant_id": "11114446", "username": "ab"},
-        value_if_missing=expected_value_fourth_case,
+        default=expected_value_fourth_case,
     )
     assert toggle == expected_value_fourth_case
 
@@ -306,9 +300,7 @@ def test_toggles_match_rule_with_contains_action(mocker, config):
         },
     }
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
-    toggle = conf_store.get_feature_toggle(
-        feature_name="my_feature", context={"tenant_id": "6", "username": "a"}, value_if_missing=False
-    )
+    toggle = conf_store.evaluate(feature_name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
     assert toggle == expected_value
 
 
@@ -335,9 +327,7 @@ def test_toggles_no_match_rule_with_contains_action(mocker, config):
         },
     }
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
-    toggle = conf_store.get_feature_toggle(
-        feature_name="my_feature", context={"tenant_id": "6", "username": "a"}, value_if_missing=False
-    )
+    toggle = conf_store.evaluate(feature_name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
     assert toggle == expected_value
 
 
@@ -425,10 +415,10 @@ def test_get_feature_toggle_handles_error(mocker, config):
     schema_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
     conf_store = FeatureFlags(schema_fetcher)
 
-    # WHEN calling get_feature_toggle
-    toggle = conf_store.get_feature_toggle(feature_name="Foo", value_if_missing=False)
+    # WHEN calling evaluate
+    toggle = conf_store.evaluate(feature_name="Foo", default=False)
 
-    # THEN handle the error and return the value_if_missing
+    # THEN handle the error and return the default
     assert toggle is False
 
 
