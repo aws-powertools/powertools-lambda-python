@@ -443,22 +443,23 @@ If you use `transform` with `get_multiple()`, you might want to retrieve and tra
 
 !!! info "The `transform="auto"` feature is available across all providers, including the high level functions"
 
-=== "partial_failures.py"
+=== "transform_auto.py"
 
-````python hl_lines="6"
+    ```python hl_lines="6"
     from aws_lambda_powertools.utilities import parameters
 
     ssm_provider = parameters.SSMProvider()
 
     def handler(event, context):
         values = ssm_provider.get_multiple("/param", transform="auto")
+    ```
 
 For example, if you have two parameters with the following suffixes `.json` and `.binary`:
 
-| Parameter name  | Parameter value         |
-| --------------- | ----------------------- |
-| /param/a.json   | [some encoded value]    |
-| /param/a.binary | [some encoded value]    |
+| Parameter name  | Parameter value      |
+| --------------- | -------------------- |
+| /param/a.json   | [some encoded value] |
+| /param/a.binary | [some encoded value] |
 
 The return of `ssm_provider.get_multiple("/param", transform="auto")` call will be a dictionary like:
 
@@ -468,7 +469,6 @@ The return of `ssm_provider.get_multiple("/param", transform="auto")` call will 
     "b.binary": [some value]
 }
 ```
-````
 
 ### Passing additional SDK arguments
 
