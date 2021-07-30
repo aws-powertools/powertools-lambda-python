@@ -56,24 +56,15 @@ By default, this utility provides AWS AppConfig as a configuration store. As suc
 
 > NOTE: Share example on how customers can unit test their feature flags
 
-## TODO
-
-* Review param names and UX
-	- Deep dive on naming - ConfigurationStore vs SchemaFetcher vs Schema
-	- How can we make it easier to get started
-* Getting started
-  	- Sample Infrastructure
-  	- Quickest way to start --- defaults, built-ins
-* Advanced section
-  	- Bring your own
-
 ## Changes
 
 Potential changes to be validated when docs are in a better shape
 
-- [ ] `rules_context` to `context`
+- [x] ~~`rules_context` to `context`~~
 - [ ] `ConfigurationStore` to `FeatureFlags`
 - [ ] `SchemaFetcher` to `StoreProvider`
 - [ ] Use `base.py` for interfaces for consistency (e.g. Metrics, Tracer, etc.)
 - [ ] Some docstrings and logger refer to AWS AppConfig only (outdated given SchemaFetcher)
-- [ ]
+- [ ] Review why we're testing a private method(`is_rule_matched`)
+
+**Q: Why is `get_configuration()` public?**

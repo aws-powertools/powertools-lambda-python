@@ -38,13 +38,13 @@ class ConfigurationStore:
             self._logger.error(f"caught exception while matching action, action={action}, exception={str(exc)}")
             return False
 
-    def _is_rule_matched(self, feature_name: str, rule: Dict[str, Any], rules_context: Dict[str, Any]) -> bool:
+    def _is_rule_matched(self, feature_name: str, rule: Dict[str, Any], context: Dict[str, Any]) -> bool:
         rule_name = rule.get(schema.RULE_NAME_KEY, "")
         rule_default_value = rule.get(schema.RULE_DEFAULT_VALUE)
         conditions = cast(List[Dict], rule.get(schema.CONDITIONS_KEY))
 
         for condition in conditions:
-            context_value = rules_context.get(str(condition.get(schema.CONDITION_KEY)))
+            context_value = context.get(str(condition.get(schema.CONDITION_KEY)))
             if not self._match_by_action(
                 condition.get(schema.CONDITION_ACTION, ""),
                 condition.get(schema.CONDITION_VALUE),
@@ -68,13 +68,13 @@ class ConfigurationStore:
         self,
         *,
         feature_name: str,
-        rules_context: Dict[str, Any],
+        context: Dict[str, Any],
         feature_default_value: bool,
         rules: List[Dict[str, Any]],
     ) -> bool:
         for rule in rules:
             rule_default_value = rule.get(schema.RULE_DEFAULT_VALUE)
-            if self._is_rule_matched(feature_name, rule, rules_context):
+            if self._is_rule_matched(feature_name, rule, context):
                 return bool(rule_default_value)
             # no rule matched, return default value of feature
             logger.debug(
@@ -104,7 +104,7 @@ class ConfigurationStore:
         return config
 
     def get_feature_toggle(
-        self, *, feature_name: str, rules_context: Optional[Dict[str, Any]] = None, value_if_missing: bool
+        self, *, feature_name: str, context: Optional[Dict[str, Any]] = None, value_if_missing: bool
     ) -> bool:
         """Get a feature toggle boolean value. Value is calculated according to a set of rules and conditions.
 
@@ -114,7 +114,7 @@ class ConfigurationStore:
         ----------
         feature_name: str
             feature name that you wish to fetch
-        rules_context: Optional[Dict[str, Any]]
+        context: Optional[Dict[str, Any]]
             dict of attributes that you would like to match the rules
             against, can be {'tenant_id: 'X', 'username':' 'Y', 'region': 'Z'} etc.
         value_if_missing: bool
@@ -132,8 +132,8 @@ class ConfigurationStore:
                the defined feature
             3. feature exists and a rule matches -> rule_default_value of rule is returned
         """
-        if rules_context is None:
-            rules_context = {}
+        if context is None:
+            context = {}
 
         try:
             toggles_dict: Dict[str, Any] = self.get_configuration()
@@ -164,18 +164,18 @@ class ConfigurationStore:
         )
         return self._handle_rules(
             feature_name=feature_name,
-            rules_context=rules_context,
+            context=context,
             feature_default_value=bool(feature_default_value),
             rules=cast(List, rules_list),
         )
 
-    def get_all_enabled_feature_toggles(self, *, rules_context: Optional[Dict[str, Any]] = None) -> List[str]:
+    def get_all_enabled_feature_toggles(self, *, context: Optional[Dict[str, Any]] = None) -> List[str]:
         """Get all enabled feature toggles while also taking into account rule_context
         (when a feature has defined rules)
 
         Parameters
         ----------
-        rules_context: Optional[Dict[str, Any]]
+        context: Optional[Dict[str, Any]]
             dict of attributes that you would like to match the rules
             against, can be `{'tenant_id: 'X', 'username':' 'Y', 'region': 'Z'}` etc.
 
@@ -185,8 +185,8 @@ class ConfigurationStore:
             a list of all features name that are enabled by also taking into account
             rule_context (when a feature has defined rules)
         """
-        if rules_context is None:
-            rules_context = {}
+        if context is None:
+            context = {}
 
         try:
             toggles_dict: Dict[str, Any] = self.get_configuration()
@@ -206,7 +206,7 @@ class ConfigurationStore:
                 ret_list.append(feature_name)
             elif self._handle_rules(
                 feature_name=feature_name,
-                rules_context=rules_context,
+                context=context,
                 feature_default_value=feature_default_value,
                 rules=rules_list,
             ):
