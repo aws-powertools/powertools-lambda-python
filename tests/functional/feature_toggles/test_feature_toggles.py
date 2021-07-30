@@ -354,6 +354,9 @@ def test_multiple_features_enabled(mocker, config):
             "my_feature2": {
                 "feature_default_value": True,
             },
+            "my_feature3": {
+                "feature_default_value": False,
+            },
         },
     }
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
