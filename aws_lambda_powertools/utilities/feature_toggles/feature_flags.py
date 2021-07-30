@@ -35,7 +35,7 @@ class FeatureFlags:
             func = mapping_by_action.get(action, lambda a, b: False)
             return func(context_value, condition_value)
         except Exception as exc:
-            self._logger.error(f"caught exception while matching action, action={action}, exception={str(exc)}")
+            self._logger.debug(f"caught exception while matching action: action={action}, exception={str(exc)}")
             return False
 
     def _is_rule_matched(self, feature_name: str, rule: Dict[str, Any], context: Dict[str, Any]) -> bool:
@@ -135,12 +135,12 @@ class FeatureFlags:
         try:
             toggles_dict: Dict[str, Any] = self.get_configuration()
         except ConfigurationError:
-            logger.error("unable to get feature toggles JSON, returning provided default value")
+            logger.debug("Unable to get feature toggles JSON, returning provided default value")
             return default
 
         feature: Dict[str, Dict] = toggles_dict.get(schema.FEATURES_KEY, {}).get(feature_name, None)
         if feature is None:
-            logger.warning(
+            logger.debug(
                 f"feature does not appear in configuration, using provided default, "
                 f"feature_name={feature_name}, default={default}"
             )
@@ -149,7 +149,7 @@ class FeatureFlags:
         rules_list = feature.get(schema.RULES_KEY)
         feature_default_value = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
         if not rules_list:
-            # not rules but has a value
+            # no rules but value
             logger.debug(
                 f"no rules found, returning feature default value, feature_name={feature_name}, "
                 f"default_value={feature_default_value}"
@@ -185,13 +185,14 @@ class FeatureFlags:
         if context is None:
             context = {}
 
+        features_enabled: List[str] = []
+
         try:
             toggles_dict: Dict[str, Any] = self.get_configuration()
         except ConfigurationError:
-            logger.error("unable to get feature toggles JSON")
-            return []
+            logger.debug("unable to get feature toggles JSON")
+            return features_enabled
 
-        ret_list = []
         features: Dict[str, Any] = toggles_dict.get(schema.FEATURES_KEY, {})
         for feature_name, feature_dict_def in features.items():
             rules_list = feature_dict_def.get(schema.RULES_KEY, [])
@@ -200,7 +201,7 @@ class FeatureFlags:
                 self._logger.debug(
                     f"feature is enabled by default and has no defined rules, feature_name={feature_name}"
                 )
-                ret_list.append(feature_name)
+                features_enabled.append(feature_name)
             elif self._handle_rules(
                 feature_name=feature_name,
                 context=context,
@@ -208,6 +209,6 @@ class FeatureFlags:
                 rules=rules_list,
             ):
                 self._logger.debug(f"feature's calculated value is True, feature_name={feature_name}")
-                ret_list.append(feature_name)
+                features_enabled.append(feature_name)
 
-        return ret_list
+        return features_enabled

@@ -10,7 +10,6 @@ from .exceptions import ConfigurationError
 
 logger = logging.getLogger(__name__)
 
-
 TRANSFORM_TYPE = "json"
 
 
@@ -66,6 +65,4 @@ class AppConfigStore(StoreProvider):
                 ),
             )
         except (GetParameterError, TransformParameterError) as exc:
-            error_str = f"unable to get AWS AppConfig configuration file, exception={str(exc)}"
-            self._logger.error(error_str)
-            raise ConfigurationError(error_str)
+            raise ConfigurationError("Unable to get AWS AppConfig configuration file") from exc

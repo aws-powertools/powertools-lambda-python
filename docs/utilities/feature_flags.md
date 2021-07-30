@@ -68,7 +68,8 @@ Potential changes to be validated when docs are in a better shape
 - [x] ~~Rename `value_if_missing` param to `default` to match Python consistency (e.g. `os.getenv("VAR", default=False)`)~~
 - [x] ~~Rename `get_feature` to `evaluate`~~
 - [x] ~~Rename `get_all_enabled_feature_toggles` to `get_enabled_features`~~
+- [x] ~~Review redundant logging~~
 - [ ] Some docstrings and logger refer to AWS AppConfig only (outdated given StoreProvider)
 - [ ] Review why we're testing a private method(`is_rule_matched`)
 - [ ] Review `get_configuration`, `get_json_configuration`
-- [ ] Review potentially redundant logging
+- [ ] Consider fine grained ConfigurationError instead of a single ConfigurationError
