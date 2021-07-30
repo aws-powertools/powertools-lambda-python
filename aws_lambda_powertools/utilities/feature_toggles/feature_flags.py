@@ -9,16 +9,16 @@ logger = logging.getLogger(__name__)
 
 
 class FeatureFlags:
-    def __init__(self, schema_fetcher: StoreProvider):
+    def __init__(self, store: StoreProvider):
         """constructor
 
         Parameters
         ----------
-        schema_fetcher: StoreProvider
+        store: StoreProvider
             A schema JSON fetcher, can be AWS AppConfig, Hashicorp Consul etc.
         """
         self._logger = logger
-        self._schema_fetcher = schema_fetcher
+        self._store = store
         self._schema_validator = schema.SchemaValidator(self._logger)
 
     def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
@@ -98,7 +98,7 @@ class FeatureFlags:
             parsed JSON dictionary
         """
         # parse result conf as JSON, keep in cache for self.max_age seconds
-        config = self._schema_fetcher.get_json_configuration()
+        config = self._store.get_json_configuration()
         # validate schema
         self._schema_validator.validate_json_schema(config)
         return config

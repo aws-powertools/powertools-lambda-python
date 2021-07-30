@@ -26,7 +26,7 @@ def init_configuration_store(mocker, mock_schema: Dict, config: Config) -> Featu
         cache_seconds=600,
         config=config,
     )
-    conf_store: FeatureFlags = FeatureFlags(schema_fetcher=app_conf_fetcher)
+    conf_store: FeatureFlags = FeatureFlags(store=app_conf_fetcher)
     return conf_store
 
 
