@@ -265,6 +265,7 @@ class ApiGatewayResolver:
         cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
+        prefix: Optional[str] = None,
     ):
         """
         Parameters
@@ -276,6 +277,10 @@ class ApiGatewayResolver:
         debug: Optional[bool]
             Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_EVENT_HANDLER_DEBUG"
             environment variable
+        serializer : Callable, optional
+            function to serialize `obj` to a JSON formatted `str`, by default json.dumps
+        prefix: str, optional
+            optional prefix removed from the path before doing the routing
         """
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
@@ -285,6 +290,7 @@ class ApiGatewayResolver:
         self._debug = resolve_truthy_env_var_choice(
             env=os.getenv(constants.EVENT_HANDLER_DEBUG_ENV, "false"), choice=debug
         )
+        self._prefix = prefix
 
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
@@ -521,7 +527,7 @@ class ApiGatewayResolver:
     def _resolve(self) -> ResponseBuilder:
         """Resolves the response or return the not found response"""
         method = self.current_event.http_method.upper()
-        path = self.current_event.path
+        path = self._remove_prefix(self.current_event.path)
         for route in self._routes:
             if method != route.method:
                 continue
@@ -532,6 +538,12 @@ class ApiGatewayResolver:
 
         logger.debug(f"No match found for path {path} and method {method}")
         return self._not_found(method)
+
+    def _remove_prefix(self, path: str) -> str:
+        """Remove the configured prefix from the path"""
+        if self._prefix and path.startswith(self._prefix):
+            return path[len(self._prefix) :]
+        return path
 
     def _not_found(self, method: str) -> ResponseBuilder:
         """Called when no matching route was found and includes support for the cors preflight response"""

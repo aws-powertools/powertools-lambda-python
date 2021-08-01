@@ -769,3 +769,23 @@ def test_custom_serializer():
     body = response["body"]
     expected = '{"color": 1, "variations": ["dark", "light"]}'
     assert expected == body
+
+
+@pytest.mark.parametrize(
+    "path",
+    [pytest.param("/pay/foo", id="prefix matches path"), pytest.param("/foo", id="prefix does not match path")],
+)
+def test_remove_prefix(path: str):
+    # GIVEN a configured prefix of `/pay`
+    # AND events paths `/pay/foo` or `/foo`
+    app = ApiGatewayResolver(prefix="/pay")
+
+    @app.get("/foo")
+    def foo():
+        ...
+
+    # WHEN calling handler
+    response = app({"httpMethod": "GET", "path": path}, None)
+
+    # THEN a route for `/foo` should be found
+    assert response["statusCode"] == 200
