@@ -52,14 +52,13 @@ class FeatureFlags:
             ):
                 logger.debug(
                     f"rule did not match action, rule_name={rule_name}, rule_default_value={rule_default_value}, "
-                    f"feature_name={feature_name}, context_value={str(context_value)} "
+                    f"name={feature_name}, context_value={str(context_value)} "
                 )
                 # context doesn't match condition
                 return False
             # if we got here, all conditions match
             logger.debug(
-                f"rule matched, rule_name={rule_name}, rule_default_value={rule_default_value}, "
-                f"feature_name={feature_name}"
+                f"rule matched, rule_name={rule_name}, rule_default_value={rule_default_value}, " f"name={feature_name}"
             )
             return True
         return False
@@ -79,7 +78,7 @@ class FeatureFlags:
             # no rule matched, return default value of feature
             logger.debug(
                 f"no rule matched, returning default value of feature, feature_default_value={feature_default_value}, "
-                f"feature_name={feature_name}"
+                f"name={feature_name}"
             )
             return feature_default_value
         return False
@@ -103,14 +102,14 @@ class FeatureFlags:
         self._schema_validator.validate_json_schema(config)
         return config
 
-    def evaluate(self, *, feature_name: str, context: Optional[Dict[str, Any]] = None, default: bool) -> bool:
+    def evaluate(self, *, name: str, context: Optional[Dict[str, Any]] = None, default: bool) -> bool:
         """Get a feature toggle boolean value. Value is calculated according to a set of rules and conditions.
 
         See below for explanation.
 
         Parameters
         ----------
-        feature_name: str
+        name: str
             feature name that you wish to fetch
         context: Optional[Dict[str, Any]]
             dict of attributes that you would like to match the rules
@@ -138,11 +137,10 @@ class FeatureFlags:
             logger.debug("Unable to get feature toggles JSON, returning provided default value")
             return default
 
-        feature: Dict[str, Dict] = toggles_dict.get(schema.FEATURES_KEY, {}).get(feature_name, None)
+        feature: Dict[str, Dict] = toggles_dict.get(schema.FEATURES_KEY, {}).get(name, None)
         if feature is None:
             logger.debug(
-                f"feature does not appear in configuration, using provided default, "
-                f"feature_name={feature_name}, default={default}"
+                f"feature does not appear in configuration, using provided default, " f"name={name}, default={default}"
             )
             return default
 
@@ -151,16 +149,14 @@ class FeatureFlags:
         if not rules_list:
             # no rules but value
             logger.debug(
-                f"no rules found, returning feature default value, feature_name={feature_name}, "
+                f"no rules found, returning feature default value, name={name}, "
                 f"default_value={feature_default_value}"
             )
             return bool(feature_default_value)
         # look for first rule match
-        logger.debug(
-            f"looking for rule match,  feature_name={feature_name}, feature_default_value={feature_default_value}"
-        )
+        logger.debug(f"looking for rule match,  name={name}, feature_default_value={feature_default_value}")
         return self._handle_rules(
-            feature_name=feature_name,
+            feature_name=name,
             context=context,
             feature_default_value=bool(feature_default_value),
             rules=cast(List, rules_list),
@@ -198,9 +194,7 @@ class FeatureFlags:
             rules_list = feature_dict_def.get(schema.RULES_KEY, [])
             feature_default_value = feature_dict_def.get(schema.FEATURE_DEFAULT_VAL_KEY)
             if feature_default_value and not rules_list:
-                self._logger.debug(
-                    f"feature is enabled by default and has no defined rules, feature_name={feature_name}"
-                )
+                self._logger.debug(f"feature is enabled by default and has no defined rules, name={feature_name}")
                 features_enabled.append(feature_name)
             elif self._handle_rules(
                 feature_name=feature_name,
@@ -208,7 +202,7 @@ class FeatureFlags:
                 feature_default_value=feature_default_value,
                 rules=rules_list,
             ):
-                self._logger.debug(f"feature's calculated value is True, feature_name={feature_name}")
+                self._logger.debug(f"feature's calculated value is True, name={feature_name}")
                 features_enabled.append(feature_name)
 
         return features_enabled
