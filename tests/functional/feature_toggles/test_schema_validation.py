@@ -296,11 +296,9 @@ def test_validate_condition_invalid_condition_key():
     condition = {"action": ACTION.EQUALS.value}
 
     # WHEN calling _validate_condition
-    with pytest.raises(ConfigurationError) as err:
-        validator._validate_condition("foo", condition)
-
     # THEN raise ConfigurationError
-    assert "invalid key value" in str(err)
+    with pytest.raises(ConfigurationError, match="Invalid key value"):
+        validator._validate_condition("foo", condition)
 
 
 def test_validate_condition_missing_condition_value():
@@ -309,11 +307,8 @@ def test_validate_condition_missing_condition_value():
     condition = {"action": ACTION.EQUALS.value, "key": "Foo"}
 
     # WHEN calling _validate_condition
-    with pytest.raises(ConfigurationError) as err:
+    with pytest.raises(ConfigurationError, match="Missing condition value"):
         validator._validate_condition("foo", condition)
-
-    # THEN raise ConfigurationError
-    assert "missing condition value" in str(err)
 
 
 def test_validate_rule_invalid_rule_name():
@@ -323,8 +318,6 @@ def test_validate_rule_invalid_rule_name():
     rule = {"missing": ""}
 
     # WHEN calling _validate_rule
-    with pytest.raises(ConfigurationError) as err:
-        validator._validate_rule(rule_name, rule)
-
     # THEN raise ConfigurationError
-    assert "invalid rule_name" in str(err)
+    with pytest.raises(ConfigurationError, match="Invalid rule_name"):
+        validator._validate_rule(rule_name, rule)
