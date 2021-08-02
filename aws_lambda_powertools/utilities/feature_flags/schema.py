@@ -18,7 +18,7 @@ CONDITION_VALUE = "value"
 CONDITION_ACTION = "action"
 
 
-class ACTION(str, Enum):
+class RuleAction(str, Enum):
     EQUALS = "EQUALS"
     STARTSWITH = "STARTSWITH"
     ENDSWITH = "ENDSWITH"
@@ -129,7 +129,7 @@ class ConditionsValidator(BaseValidator):
     @staticmethod
     def _validate_condition_action(condition: Dict[str, Any], rule_name: str):
         action = condition.get(CONDITION_ACTION, "")
-        if action not in ACTION.__members__:
+        if action not in RuleAction.__members__:
             raise ConfigurationError(f"invalid action value, rule_name={rule_name}, action={action}")
 
     @staticmethod

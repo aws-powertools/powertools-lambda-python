@@ -24,10 +24,10 @@ class FeatureFlags:
         if not context_value:
             return False
         mapping_by_action = {
-            schema.ACTION.EQUALS.value: lambda a, b: a == b,
-            schema.ACTION.STARTSWITH.value: lambda a, b: a.startswith(b),
-            schema.ACTION.ENDSWITH.value: lambda a, b: a.endswith(b),
-            schema.ACTION.CONTAINS.value: lambda a, b: a in b,
+            schema.RuleAction.EQUALS.value: lambda a, b: a == b,
+            schema.RuleAction.STARTSWITH.value: lambda a, b: a.startswith(b),
+            schema.RuleAction.ENDSWITH.value: lambda a, b: a.endswith(b),
+            schema.RuleAction.CONTAINS.value: lambda a, b: a in b,
         }
 
         try:

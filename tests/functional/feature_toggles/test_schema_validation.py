@@ -4,7 +4,6 @@ import pytest  # noqa: F401
 
 from aws_lambda_powertools.utilities.feature_flags.exceptions import ConfigurationError
 from aws_lambda_powertools.utilities.feature_flags.schema import (
-    ACTION,
     CONDITION_ACTION,
     CONDITION_KEY,
     CONDITION_VALUE,
@@ -14,6 +13,7 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
     RULE_DEFAULT_VALUE,
     RULE_NAME_KEY,
     RULES_KEY,
+    RuleAction,
     RulesValidator,
     SchemaValidator,
 )
@@ -195,7 +195,7 @@ def test_invalid_condition():
                     {
                         RULE_NAME_KEY: "tenant id equals 345345435",
                         RULE_DEFAULT_VALUE: False,
-                        CONDITIONS_KEY: {CONDITION_ACTION: ACTION.EQUALS.value},
+                        CONDITIONS_KEY: {CONDITION_ACTION: RuleAction.EQUALS.value},
                     },
                 ],
             }
@@ -214,7 +214,7 @@ def test_invalid_condition():
                         RULE_NAME_KEY: "tenant id equals 345345435",
                         RULE_DEFAULT_VALUE: False,
                         CONDITIONS_KEY: {
-                            CONDITION_ACTION: ACTION.EQUALS.value,
+                            CONDITION_ACTION: RuleAction.EQUALS.value,
                             CONDITION_KEY: 5,
                             CONDITION_VALUE: "a",
                         },
@@ -238,22 +238,22 @@ def test_valid_condition_all_actions():
                         RULE_DEFAULT_VALUE: True,
                         CONDITIONS_KEY: [
                             {
-                                CONDITION_ACTION: ACTION.EQUALS.value,
+                                CONDITION_ACTION: RuleAction.EQUALS.value,
                                 CONDITION_KEY: "tenant_id",
                                 CONDITION_VALUE: "645654",
                             },
                             {
-                                CONDITION_ACTION: ACTION.STARTSWITH.value,
+                                CONDITION_ACTION: RuleAction.STARTSWITH.value,
                                 CONDITION_KEY: "username",
                                 CONDITION_VALUE: "a",
                             },
                             {
-                                CONDITION_ACTION: ACTION.ENDSWITH.value,
+                                CONDITION_ACTION: RuleAction.ENDSWITH.value,
                                 CONDITION_KEY: "username",
                                 CONDITION_VALUE: "a",
                             },
                             {
-                                CONDITION_ACTION: ACTION.CONTAINS.value,
+                                CONDITION_ACTION: RuleAction.CONTAINS.value,
                                 CONDITION_KEY: "username",
                                 CONDITION_VALUE: ["a", "b"],
                             },
@@ -296,7 +296,7 @@ def test_validate_condition_invalid_condition_action():
 def test_validate_condition_invalid_condition_key():
     # GIVEN a configuration with a missing "key"
     validator = SchemaValidator(EMPTY_SCHEMA)
-    condition = {"action": ACTION.EQUALS.value}
+    condition = {"action": RuleAction.EQUALS.value}
 
     # WHEN calling _validate_condition
     # THEN raise ConfigurationError
@@ -307,7 +307,7 @@ def test_validate_condition_invalid_condition_key():
 def test_validate_condition_missing_condition_value():
     # GIVEN a configuration with a missing condition value
     validator = SchemaValidator(EMPTY_SCHEMA)
-    condition = {"action": ACTION.EQUALS.value, "key": "Foo"}
+    condition = {"action": RuleAction.EQUALS.value, "key": "Foo"}
 
     # WHEN calling _validate_condition
     with pytest.raises(ConfigurationError, match="Missing condition value"):

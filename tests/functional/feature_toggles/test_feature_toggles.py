@@ -6,7 +6,7 @@ from botocore.config import Config
 from aws_lambda_powertools.utilities.feature_flags import ConfigurationError, schema
 from aws_lambda_powertools.utilities.feature_flags.appconfig import AppConfigStore
 from aws_lambda_powertools.utilities.feature_flags.feature_flags import FeatureFlags
-from aws_lambda_powertools.utilities.feature_flags.schema import ACTION
+from aws_lambda_powertools.utilities.feature_flags.schema import RuleAction
 from aws_lambda_powertools.utilities.parameters import GetParameterError
 
 
@@ -56,7 +56,7 @@ def test_toggles_rule_does_not_match(mocker, config):
                         "value_when_applies": False,
                         "conditions": [
                             {
-                                "action": ACTION.EQUALS.value,
+                                "action": RuleAction.EQUALS.value,
                                 "key": "tenant_id",
                                 "value": "345345435",
                             }
@@ -106,7 +106,7 @@ def test_toggles_conditions_no_match(mocker, config):
                         "value_when_applies": False,
                         "conditions": [
                             {
-                                "action": ACTION.EQUALS.value,
+                                "action": RuleAction.EQUALS.value,
                                 "key": "tenant_id",
                                 "value": "345345435",
                             }
@@ -136,12 +136,12 @@ def test_toggles_conditions_rule_match_equal_multiple_conditions(mocker, config)
                         "value_when_applies": expected_value,
                         "conditions": [
                             {
-                                "action": ACTION.EQUALS.value,  # this rule will match, it has multiple conditions
+                                "action": RuleAction.EQUALS.value,  # this rule will match, it has multiple conditions
                                 "key": "tenant_id",
                                 "value": tenant_id_val,
                             },
                             {
-                                "action": ACTION.EQUALS.value,
+                                "action": RuleAction.EQUALS.value,
                                 "key": "username",
                                 "value": username_val,
                             },
@@ -178,12 +178,12 @@ def test_toggles_conditions_no_rule_match_equal_multiple_conditions(mocker, conf
                         "value_when_applies": False,
                         "conditions": [
                             {
-                                "action": ACTION.EQUALS.value,
+                                "action": RuleAction.EQUALS.value,
                                 "key": "tenant_id",
                                 "value": "645654",
                             },
                             {
-                                "action": ACTION.EQUALS.value,
+                                "action": RuleAction.EQUALS.value,
                                 "key": "username",
                                 "value": "a",
                             },
@@ -214,12 +214,12 @@ def test_toggles_conditions_rule_match_multiple_actions_multiple_rules_multiple_
                         "value_when_applies": expected_value_first_check,
                         "conditions": [
                             {
-                                "action": ACTION.EQUALS.value,
+                                "action": RuleAction.EQUALS.value,
                                 "key": "tenant_id",
                                 "value": "6",
                             },
                             {
-                                "action": ACTION.STARTSWITH.value,
+                                "action": RuleAction.STARTSWITH.value,
                                 "key": "username",
                                 "value": "a",
                             },
@@ -230,17 +230,17 @@ def test_toggles_conditions_rule_match_multiple_actions_multiple_rules_multiple_
                         "value_when_applies": expected_value_second_check,
                         "conditions": [
                             {
-                                "action": ACTION.EQUALS.value,
+                                "action": RuleAction.EQUALS.value,
                                 "key": "tenant_id",
                                 "value": "4446",
                             },
                             {
-                                "action": ACTION.STARTSWITH.value,
+                                "action": RuleAction.STARTSWITH.value,
                                 "key": "username",
                                 "value": "a",
                             },
                             {
-                                "action": ACTION.ENDSWITH.value,
+                                "action": RuleAction.ENDSWITH.value,
                                 "key": "username",
                                 "value": "z",
                             },
@@ -283,7 +283,7 @@ def test_toggles_match_rule_with_contains_action(mocker, config):
                         "value_when_applies": expected_value,
                         "conditions": [
                             {
-                                "action": ACTION.CONTAINS.value,
+                                "action": RuleAction.CONTAINS.value,
                                 "key": "tenant_id",
                                 "value": ["6", "2"],
                             }
@@ -310,7 +310,7 @@ def test_toggles_no_match_rule_with_contains_action(mocker, config):
                         "value_when_applies": True,
                         "conditions": [
                             {
-                                "action": ACTION.CONTAINS.value,
+                                "action": RuleAction.CONTAINS.value,
                                 "key": "tenant_id",
                                 "value": ["8", "2"],
                             }
@@ -337,7 +337,7 @@ def test_multiple_features_enabled(mocker, config):
                         "value_when_applies": True,
                         "conditions": [
                             {
-                                "action": ACTION.CONTAINS.value,
+                                "action": RuleAction.CONTAINS.value,
                                 "key": "tenant_id",
                                 "value": ["6", "2"],
                             }
@@ -370,7 +370,7 @@ def test_multiple_features_only_some_enabled(mocker, config):
                         "value_when_applies": True,
                         "conditions": [
                             {
-                                "action": ACTION.CONTAINS.value,
+                                "action": RuleAction.CONTAINS.value,
                                 "key": "tenant_id",
                                 "value": ["6", "2"],
                             }
@@ -392,7 +392,7 @@ def test_multiple_features_only_some_enabled(mocker, config):
                         "value_when_applies": False,
                         "conditions": [
                             {
-                                "action": ACTION.EQUALS.value,
+                                "action": RuleAction.EQUALS.value,
                                 "key": "tenant_id",
                                 "value": "7",
                             }
@@ -456,7 +456,7 @@ def test_match_by_action_attribute_error(mocker, config):
     # GIVEN a startswith action and 2 integer
     conf_store = init_configuration_store(mocker, {}, config)
     # WHEN calling _match_by_action
-    result = conf_store._match_by_action(ACTION.STARTSWITH.value, 1, 100)
+    result = conf_store._match_by_action(RuleAction.STARTSWITH.value, 1, 100)
     # THEN swallow the AttributeError and return False
     assert result is False
 
