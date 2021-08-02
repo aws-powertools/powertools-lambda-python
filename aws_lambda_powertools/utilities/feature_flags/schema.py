@@ -28,8 +28,9 @@ class SchemaValidator:
     def __init__(self, schema: Dict[str, Any]):
         self.schema = schema
 
-        if not isinstance(self.schema, dict):
-            raise ConfigurationError(f"Schema must be a dictionary, schema={str(self.schema)}")
+    @staticmethod
+    def _is_dict_and_non_empty(value: Optional[Dict]):
+        return not value or not isinstance(value, dict)
 
     @staticmethod
     def _validate_condition(rule_name: str, condition: Dict[str, str]) -> None:
@@ -88,6 +89,9 @@ class SchemaValidator:
             self._validate_rule(name, rule)
 
     def validate(self) -> None:
+        if self._is_dict_and_non_empty(self.schema):
+            raise ConfigurationError(f"Schema must be a dictionary, schema={str(self.schema)}")
+
         features: Optional[Dict[str, Dict]] = self.schema.get(FEATURES_KEY)
         if not isinstance(features, dict):
             raise ConfigurationError(f"'features' key must be present, schema={self.schema}")
