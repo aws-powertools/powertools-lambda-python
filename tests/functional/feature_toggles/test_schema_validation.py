@@ -33,11 +33,13 @@ def test_invalid_features_dict():
 
     schema = []
     # invalid type
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
         validator.validate()
 
     # invalid features key
     schema = {FEATURES_KEY: []}
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
         validator.validate()
 
@@ -57,33 +59,38 @@ def test_invalid_feature_dict():
 
     # empty feature dict
     schema = {FEATURES_KEY: {"my_feature": {}}}
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
         validator.validate()
 
     # invalid FEATURE_DEFAULT_VAL_KEY type, not boolean
     schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: "False"}}}
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
         validator.validate()
 
     # invalid FEATURE_DEFAULT_VAL_KEY type, not boolean #2
     schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: 5}}}
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
         validator.validate()
 
     # invalid rules type, not list
     schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False, RULES_KEY: "4"}}}
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
         validator.validate()
 
 
 def test_valid_feature_dict():
-    # no rules list at all
-    schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False}}}
+    # empty rules list
+    schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False, RULES_KEY: []}}}
     validator = SchemaValidator(schema)
     validator.validate()
 
-    # empty rules list
-    schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False, RULES_KEY: []}}}
+    # no rules list at all
+    schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False}}}
+    validator = SchemaValidator(schema)
     validator.validate()
 
 
@@ -118,6 +125,7 @@ def test_invalid_rule():
             }
         }
     }
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
         validator.validate()
 
@@ -135,6 +143,7 @@ def test_invalid_rule():
             }
         }
     }
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
         validator.validate()
 
@@ -149,6 +158,7 @@ def test_invalid_rule():
             }
         }
     }
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
         validator.validate()
 
@@ -163,6 +173,7 @@ def test_invalid_rule():
             }
         }
     }
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
         validator.validate()
 
@@ -202,6 +213,7 @@ def test_invalid_condition():
             }
         }
     }
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
         validator.validate()
 
@@ -224,6 +236,7 @@ def test_invalid_condition():
             }
         }
     }
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
         validator.validate()
 

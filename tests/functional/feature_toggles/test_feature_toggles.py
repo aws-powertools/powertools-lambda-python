@@ -279,7 +279,7 @@ def test_toggles_match_rule_with_contains_action(mocker, config):
                 "feature_default_value": False,
                 "rules": [
                     {
-                        "rule_name": "tenant id is contained in [6,2] ",
+                        "rule_name": "tenant id is contained in [6, 2]",
                         "value_when_applies": expected_value,
                         "conditions": [
                             {
@@ -306,7 +306,7 @@ def test_toggles_no_match_rule_with_contains_action(mocker, config):
                 "feature_default_value": expected_value,
                 "rules": [
                     {
-                        "rule_name": "tenant id is contained in [6,2] ",
+                        "rule_name": "tenant id is contained in [8, 2]",
                         "value_when_applies": True,
                         "conditions": [
                             {
@@ -333,7 +333,7 @@ def test_multiple_features_enabled(mocker, config):
                 "feature_default_value": False,
                 "rules": [
                     {
-                        "rule_name": "tenant id is contained in [6,2] ",
+                        "rule_name": "tenant id is contained in [6, 2]",
                         "value_when_applies": True,
                         "conditions": [
                             {
@@ -366,7 +366,7 @@ def test_multiple_features_only_some_enabled(mocker, config):
                 "feature_default_value": False,
                 "rules": [
                     {
-                        "rule_name": "tenant id is contained in [6,2] ",
+                        "rule_name": "tenant id is contained in [6, 2]",
                         "value_when_applies": True,
                         "conditions": [
                             {
