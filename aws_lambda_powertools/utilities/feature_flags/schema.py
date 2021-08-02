@@ -116,30 +116,30 @@ class ConditionsValidator(BaseValidator):
             raise ConfigurationError(f"Invalid condition, rule_name={self.rule_name}")
 
         for condition in self.conditions:
-            self._validate_condition(rule_name=self.rule_name, condition=condition)
+            self.validate_condition(rule_name=self.rule_name, condition=condition)
 
-    def _validate_condition(self, rule_name: str, condition: Dict[str, str]) -> None:
+    def validate_condition(self, rule_name: str, condition: Dict[str, str]) -> None:
         if not condition or not isinstance(condition, dict):
-            raise ConfigurationError(f"invalid condition type, not a dictionary, rule_name={rule_name}")
+            raise ConfigurationError(f"Invalid condition type, not a dictionary, rule_name={rule_name}")
 
-        self._validate_condition_action(condition=condition, rule_name=rule_name)
-        self._validate_condition_key(condition=condition, rule_name=rule_name)
-        self._validate_condition_value(condition=condition, rule_name=rule_name)
+        self.validate_condition_action(condition=condition, rule_name=rule_name)
+        self.validate_condition_key(condition=condition, rule_name=rule_name)
+        self.validate_condition_value(condition=condition, rule_name=rule_name)
 
     @staticmethod
-    def _validate_condition_action(condition: Dict[str, Any], rule_name: str):
+    def validate_condition_action(condition: Dict[str, Any], rule_name: str):
         action = condition.get(CONDITION_ACTION, "")
         if action not in RuleAction.__members__:
-            raise ConfigurationError(f"invalid action value, rule_name={rule_name}, action={action}")
+            raise ConfigurationError(f"Invalid action value, rule_name={rule_name}, action={action}")
 
     @staticmethod
-    def _validate_condition_key(condition: Dict[str, Any], rule_name: str):
+    def validate_condition_key(condition: Dict[str, Any], rule_name: str):
         key = condition.get(CONDITION_KEY, "")
         if not key or not isinstance(key, str):
             raise ConfigurationError(f"Invalid key value, key has to be a non empty string, rule_name={rule_name}")
 
     @staticmethod
-    def _validate_condition_value(condition: Dict[str, Any], rule_name: str):
+    def validate_condition_value(condition: Dict[str, Any], rule_name: str):
         value = condition.get(CONDITION_VALUE, "")
         if not value:
             raise ConfigurationError(f"Missing condition value, rule_name={rule_name}")

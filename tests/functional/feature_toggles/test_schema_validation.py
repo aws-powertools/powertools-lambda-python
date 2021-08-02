@@ -13,6 +13,7 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
     RULE_DEFAULT_VALUE,
     RULE_NAME_KEY,
     RULES_KEY,
+    ConditionsValidator,
     RuleAction,
     RulesValidator,
     SchemaValidator,
@@ -269,49 +270,64 @@ def test_valid_condition_all_actions():
 
 def test_validate_condition_invalid_condition_type():
     # GIVEN an invalid condition type of empty dict
-    validator = SchemaValidator(EMPTY_SCHEMA)
-    condition = {}
+    rule_conditions = {"conditions": {}}
+    condition = rule_conditions[CONDITIONS_KEY]
+    rule_name = "dummy"
 
-    # WHEN calling _validate_condition
-    with pytest.raises(ConfigurationError) as err:
-        validator._validate_condition("foo", condition)
-
+    # WHEN calling validate_condition
     # THEN raise ConfigurationError
-    assert "invalid condition type" in str(err)
+    with pytest.raises(ConfigurationError, match="Invalid condition type"):
+        validator = ConditionsValidator(rule=rule_conditions, rule_name=rule_name)
+        validator.validate_condition(condition=condition, rule_name=rule_name)
 
 
 def test_validate_condition_invalid_condition_action():
     # GIVEN an invalid condition action of foo
-    validator = SchemaValidator(EMPTY_SCHEMA)
-    condition = {"action": "foo"}
+    rule_conditions = {
+        "conditions": [{"action": "INVALID", "key": "tenant_id", "value": "12345"}],
+    }
+    condition = rule_conditions[CONDITIONS_KEY][0]
+    rule_name = "dummy"
 
-    # WHEN calling _validate_condition
-    with pytest.raises(ConfigurationError) as err:
-        validator._validate_condition("foo", condition)
-
+    # WHEN calling validate_condition
     # THEN raise ConfigurationError
-    assert "invalid action value" in str(err)
+    with pytest.raises(ConfigurationError, match="Invalid action value"):
+        validator = ConditionsValidator(rule=rule_conditions, rule_name=rule_name)
+        validator.validate_condition_action(condition=condition, rule_name=rule_name)
 
 
 def test_validate_condition_invalid_condition_key():
     # GIVEN a configuration with a missing "key"
-    validator = SchemaValidator(EMPTY_SCHEMA)
-    condition = {"action": RuleAction.EQUALS.value}
+    rule_conditions = {
+        "conditions": [{"action": RuleAction.EQUALS.value, "value": "12345"}],
+    }
+    condition = rule_conditions[CONDITIONS_KEY][0]
+    rule_name = "dummy"
 
-    # WHEN calling _validate_condition
+    # WHEN calling validate_condition
     # THEN raise ConfigurationError
     with pytest.raises(ConfigurationError, match="Invalid key value"):
-        validator._validate_condition("foo", condition)
+        validator = ConditionsValidator(rule=rule_conditions, rule_name=rule_name)
+        validator.validate_condition_key(condition=condition, rule_name=rule_name)
 
 
 def test_validate_condition_missing_condition_value():
     # GIVEN a configuration with a missing condition value
-    validator = SchemaValidator(EMPTY_SCHEMA)
-    condition = {"action": RuleAction.EQUALS.value, "key": "Foo"}
+    rule_conditions = {
+        "conditions": [
+            {
+                "action": RuleAction.EQUALS.value,
+                "key": "tenant_id",
+            }
+        ],
+    }
+    condition = rule_conditions[CONDITIONS_KEY][0]
+    rule_name = "dummy"
 
-    # WHEN calling _validate_condition
+    # WHEN calling validate_condition
     with pytest.raises(ConfigurationError, match="Missing condition value"):
-        validator._validate_condition("foo", condition)
+        validator = ConditionsValidator(rule=rule_conditions, rule_name=rule_name)
+        validator.validate_condition_value(condition=condition, rule_name=rule_name)
 
 
 def test_validate_rule_invalid_rule_name():
