@@ -3,10 +3,10 @@ from typing import Dict, List
 import pytest
 from botocore.config import Config
 
-from aws_lambda_powertools.utilities.feature_toggles import ConfigurationError, schema
-from aws_lambda_powertools.utilities.feature_toggles.appconfig import AppConfigStore
-from aws_lambda_powertools.utilities.feature_toggles.feature_flags import FeatureFlags
-from aws_lambda_powertools.utilities.feature_toggles.schema import ACTION
+from aws_lambda_powertools.utilities.feature_flags import ConfigurationError, schema
+from aws_lambda_powertools.utilities.feature_flags.appconfig import AppConfigStore
+from aws_lambda_powertools.utilities.feature_flags.feature_flags import FeatureFlags
+from aws_lambda_powertools.utilities.feature_flags.schema import ACTION
 from aws_lambda_powertools.utilities.parameters import GetParameterError
 
 

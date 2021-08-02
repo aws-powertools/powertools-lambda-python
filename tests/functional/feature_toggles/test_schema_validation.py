@@ -2,8 +2,8 @@ import logging
 
 import pytest  # noqa: F401
 
-from aws_lambda_powertools.utilities.feature_toggles.exceptions import ConfigurationError
-from aws_lambda_powertools.utilities.feature_toggles.schema import (
+from aws_lambda_powertools.utilities.feature_flags.exceptions import ConfigurationError
+from aws_lambda_powertools.utilities.feature_flags.schema import (
     ACTION,
     CONDITION_ACTION,
     CONDITION_KEY,
