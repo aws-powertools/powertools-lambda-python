@@ -14,7 +14,7 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
     RULE_DEFAULT_VALUE,
     RULE_NAME_KEY,
     RULES_KEY,
-    FeatureRules,
+    RulesValidator,
     SchemaValidator,
 )
 
@@ -327,5 +327,5 @@ def test_validate_rule_invalid_rule_name():
     # WHEN calling _validate_rule
     # THEN raise ConfigurationError
     with pytest.raises(ConfigurationError, match="'rule_name' key must be present*"):
-        rules_validator = FeatureRules(feature=feature, feature_name="my_feature")
+        rules_validator = RulesValidator(feature=feature, feature_name="my_feature")
         rules_validator.validate_rule_name(rule=rule, feature_name="my_feature")

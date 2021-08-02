@@ -33,11 +33,11 @@ class SchemaValidator:
         if not isinstance(self.schema, dict):
             raise ConfigurationError(f"Schema must be a dictionary, schema={str(self.schema)}")
 
-        features = Features(schema=self.schema)
+        features = FeaturesValidator(schema=self.schema)
         features.validate()
 
 
-class Features(BaseValidator):
+class FeaturesValidator(BaseValidator):
     def __init__(self, schema):
         self.schema = schema
         self.features: Optional[Dict[str, Dict]] = None
@@ -51,7 +51,7 @@ class Features(BaseValidator):
 
         for name, feature in self.features.items():
             self.validate_feature(name, feature)
-            rules = FeatureRules(feature=feature, feature_name=name)
+            rules = RulesValidator(feature=feature, feature_name=name)
             rules.validate()
 
     @staticmethod
@@ -64,7 +64,7 @@ class Features(BaseValidator):
             raise ConfigurationError(f"'feature_default_value' boolean key must be present, feature_name={name}")
 
 
-class FeatureRules(BaseValidator):
+class RulesValidator(BaseValidator):
     def __init__(self, feature: Dict[str, Any], feature_name: str):
         self.feature = feature
         self.feature_name = feature_name
@@ -80,7 +80,7 @@ class FeatureRules(BaseValidator):
 
         for rule in self.rules:
             self.validate_rule(rule, self.feature)
-            conditions = FeatureRuleConditions(rule=rule, rule_name=rule.get(RULE_NAME_KEY))
+            conditions = ConditionsValidator(rule=rule, rule_name=rule.get(RULE_NAME_KEY))
             conditions.validate()
 
     def validate_rule(self, rule, feature_name):
@@ -106,7 +106,7 @@ class FeatureRules(BaseValidator):
             raise ConfigurationError(f"'rule_default_value' key must have be bool, rule_name={rule_name}")
 
 
-class FeatureRuleConditions(BaseValidator):
+class ConditionsValidator(BaseValidator):
     def __init__(self, rule: Dict[str, Any], rule_name: str):
         self.conditions = rule.get(CONDITIONS_KEY, {})
         self.rule_name = rule_name
