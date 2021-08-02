@@ -14,6 +14,7 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
     RULE_DEFAULT_VALUE,
     RULE_NAME_KEY,
     RULES_KEY,
+    FeatureRules,
     SchemaValidator,
 )
 
@@ -315,11 +316,16 @@ def test_validate_condition_missing_condition_value():
 
 def test_validate_rule_invalid_rule_name():
     # GIVEN a rule_name not in the rule dict
-    validator = SchemaValidator(EMPTY_SCHEMA)
-    rule_name = "invalid_rule_name"
-    rule = {"missing": ""}
+    feature = {
+        "feature_default_value": True,
+        "rules": [
+            {"invalid_rule_name": "tenant id equals 345345435"},
+        ],
+    }
+    rule = feature[RULES_KEY][0]
 
     # WHEN calling _validate_rule
     # THEN raise ConfigurationError
-    with pytest.raises(ConfigurationError, match="Invalid rule_name"):
-        validator._validate_rule(rule_name, rule)
+    with pytest.raises(ConfigurationError, match="'rule_name' key must be present*"):
+        rules_validator = FeatureRules(feature=feature, feature_name="my_feature")
+        rules_validator.validate_rule_name(rule=rule, feature_name="my_feature")

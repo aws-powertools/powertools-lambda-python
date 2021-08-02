@@ -22,3 +22,9 @@ class StoreProvider(ABC):
             parsed JSON dictionary
         """
         return NotImplemented  # pragma: no cover
+
+
+class BaseValidator(ABC):
+    @abstractmethod
+    def validate(self):
+        return NotImplemented  # pragma: no cover

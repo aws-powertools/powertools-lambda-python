@@ -1,7 +1,8 @@
 import logging
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
+from .base import BaseValidator
 from .exceptions import ConfigurationError
 
 logger = logging.getLogger(__name__)
@@ -28,74 +29,117 @@ class SchemaValidator:
     def __init__(self, schema: Dict[str, Any]):
         self.schema = schema
 
-    @staticmethod
-    def _is_dict_and_non_empty(value: Optional[Dict]):
-        return not value or isinstance(value, dict)
+    def validate(self) -> None:
+        if not isinstance(self.schema, dict):
+            raise ConfigurationError(f"Schema must be a dictionary, schema={str(self.schema)}")
+
+        features = Features(schema=self.schema)
+        features.validate()
+
+
+class Features(BaseValidator):
+    def __init__(self, schema):
+        self.schema = schema
+        self.features: Optional[Dict[str, Dict]] = None
+
+        if isinstance(self.schema, dict):
+            self.features = self.schema.get(FEATURES_KEY)
+
+    def validate(self):
+        if not isinstance(self.features, dict):
+            raise ConfigurationError(f"'features' key must be a dictionary, schema={self.schema}")
+
+        for name, feature in self.features.items():
+            self.validate_feature(name, feature)
+            rules = FeatureRules(feature=feature, feature_name=name)
+            rules.validate()
 
     @staticmethod
-    def _validate_condition(rule_name: str, condition: Dict[str, str]) -> None:
+    def validate_feature(name, feature):
+        if not feature or not isinstance(feature, dict):
+            raise ConfigurationError(f"Feature must be a non-empty dictionary, feature={name}")
+
+        default_value = feature.get(FEATURE_DEFAULT_VAL_KEY)
+        if default_value is None or not isinstance(default_value, bool):
+            raise ConfigurationError(f"'feature_default_value' boolean key must be present, feature_name={name}")
+
+
+class FeatureRules(BaseValidator):
+    def __init__(self, feature: Dict[str, Any], feature_name: str):
+        self.feature = feature
+        self.feature_name = feature_name
+        self.rules: Optional[List[Dict]] = self.feature.get(RULES_KEY)
+
+    def validate(self):
+        if not isinstance(self.rules, list):
+            raise ConfigurationError(f"Feature rules is not a list, feature_name={self.feature_name}")
+
+        if not self.rules:
+            logger.debug("Rules are empty, ignoring validation")
+            return
+
+        for rule in self.rules:
+            self.validate_rule(rule, self.feature)
+            conditions = FeatureRuleConditions(rule=rule, rule_name=rule.get(RULE_NAME_KEY))
+            conditions.validate()
+
+    def validate_rule(self, rule, feature_name):
+        if not rule or not isinstance(rule, dict):
+            raise ConfigurationError(f"Feature rule must be a dictionary, feature_name={feature_name}")
+
+        self.validate_rule_name(rule, feature_name)
+        self.validate_rule_default_value(rule)
+
+    @staticmethod
+    def validate_rule_name(rule, feature_name):
+        rule_name = rule.get(RULE_NAME_KEY)
+        if not rule_name or rule_name is None or not isinstance(rule_name, str):
+            raise ConfigurationError(
+                f"'rule_name' key must be present and have a non-empty string, feature_name={feature_name}"
+            )
+
+    @staticmethod
+    def validate_rule_default_value(rule):
+        rule_name = rule.get(RULE_NAME_KEY)
+        rule_default_value = rule.get(RULE_DEFAULT_VALUE)
+        if rule_default_value is None or not isinstance(rule_default_value, bool):
+            raise ConfigurationError(f"'rule_default_value' key must have be bool, rule_name={rule_name}")
+
+
+class FeatureRuleConditions(BaseValidator):
+    def __init__(self, rule: Dict[str, Any], rule_name: str):
+        self.conditions = rule.get(CONDITIONS_KEY, {})
+        self.rule_name = rule_name
+
+    def validate(self):
+        if not self.conditions or not isinstance(self.conditions, list):
+            raise ConfigurationError(f"Invalid condition, rule_name={self.rule_name}")
+
+        for condition in self.conditions:
+            self._validate_condition(rule_name=self.rule_name, condition=condition)
+
+    def _validate_condition(self, rule_name: str, condition: Dict[str, str]) -> None:
         if not condition or not isinstance(condition, dict):
             raise ConfigurationError(f"invalid condition type, not a dictionary, rule_name={rule_name}")
 
+        self._validate_condition_action(condition=condition, rule_name=rule_name)
+        self._validate_condition_key(condition=condition, rule_name=rule_name)
+        self._validate_condition_value(condition=condition, rule_name=rule_name)
+
+    @staticmethod
+    def _validate_condition_action(condition: Dict[str, Any], rule_name: str):
         action = condition.get(CONDITION_ACTION, "")
-        if action not in [ACTION.EQUALS.value, ACTION.STARTSWITH.value, ACTION.ENDSWITH.value, ACTION.CONTAINS.value]:
+        if action not in ACTION.__members__:
             raise ConfigurationError(f"invalid action value, rule_name={rule_name}, action={action}")
 
+    @staticmethod
+    def _validate_condition_key(condition: Dict[str, Any], rule_name: str):
         key = condition.get(CONDITION_KEY, "")
         if not key or not isinstance(key, str):
             raise ConfigurationError(f"Invalid key value, key has to be a non empty string, rule_name={rule_name}")
 
+    @staticmethod
+    def _validate_condition_value(condition: Dict[str, Any], rule_name: str):
         value = condition.get(CONDITION_VALUE, "")
         if not value:
             raise ConfigurationError(f"Missing condition value, rule_name={rule_name}")
-
-    def _validate_rule(self, feature_name: str, rule: Dict[str, Any]) -> None:
-        if not rule or not isinstance(rule, dict):
-            raise ConfigurationError(f"Feature rule is not a dictionary, feature_name={feature_name}")
-
-        rule_name = rule.get(RULE_NAME_KEY)
-        if not rule_name or rule_name is None or not isinstance(rule_name, str):
-            raise ConfigurationError(f"Invalid rule_name, feature_name={feature_name}")
-
-        rule_default_value = rule.get(RULE_DEFAULT_VALUE)
-        if rule_default_value is None or not isinstance(rule_default_value, bool):
-            raise ConfigurationError(f"Invalid rule_default_value, rule_name={rule_name}")
-
-        conditions = rule.get(CONDITIONS_KEY, {})
-        if not conditions or not isinstance(conditions, list):
-            raise ConfigurationError(f"Invalid condition, rule_name={rule_name}")
-
-        # validate conditions
-        for condition in conditions:
-            self._validate_condition(rule_name, condition)
-
-    def _validate_feature(self, name: str, feature: Dict[str, Any]) -> None:
-        if not feature or not isinstance(feature, dict):
-            # if self._is_dict_and_non_empty(feature):
-            raise ConfigurationError(f"Invalid AWS AppConfig JSON schema detected, feature {name} is invalid")
-
-        feature_default_value = feature.get(FEATURE_DEFAULT_VAL_KEY)
-        if feature_default_value is None or not isinstance(feature_default_value, bool):
-            raise ConfigurationError(f"Missing feature_default_value for feature, feature_name={name}")
-
-        # validate rules
-        rules = feature.get(RULES_KEY, [])
-        if not rules:
-            return
-
-        if not isinstance(rules, list):
-            raise ConfigurationError(f"Feature rules is not a list, feature_name={name}")
-
-        for rule in rules:
-            self._validate_rule(name, rule)
-
-    def validate(self) -> None:
-        if not self._is_dict_and_non_empty(self.schema):
-            raise ConfigurationError(f"Schema must be a dictionary, schema={str(self.schema)}")
-
-        features: Optional[Dict[str, Dict]] = self.schema.get(FEATURES_KEY)
-        if not isinstance(features, dict):
-            raise ConfigurationError(f"'features' key must be present, schema={self.schema}")
-
-        for name, feature in features.items():
-            self._validate_feature(name, feature)
