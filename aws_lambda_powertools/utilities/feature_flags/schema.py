@@ -25,6 +25,9 @@ class ACTION(str, Enum):
 
 
 class SchemaValidator:
+    def __init__(self, schema: Dict[str, Any]):
+        self.schema = schema
+
     @staticmethod
     def _validate_condition(rule_name: str, condition: Dict[str, str]) -> None:
         if not condition or not isinstance(condition, dict):
@@ -81,11 +84,11 @@ class SchemaValidator:
         for rule in rules:
             self._validate_rule(feature_name, rule)
 
-    def validate(self, schema: Dict[str, Any]) -> None:
-        if not isinstance(schema, dict):
+    def validate(self) -> None:
+        if not isinstance(self.schema, dict):
             raise ConfigurationError("invalid AWS AppConfig JSON schema detected, root schema is not a dictionary")
 
-        features_dict = schema.get(FEATURES_KEY)
+        features_dict = self.schema.get(FEATURES_KEY)
         if not isinstance(features_dict, dict):
             raise ConfigurationError("invalid AWS AppConfig JSON schema detected, missing features dictionary")
 

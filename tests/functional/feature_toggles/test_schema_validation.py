@@ -19,68 +19,70 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
 
 logger = logging.getLogger(__name__)
 
+EMPTY_SCHEMA = {"": ""}
+
 
 def test_invalid_features_dict():
     schema = {}
     # empty dict
-    validator = SchemaValidator()
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
     schema = []
     # invalid type
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
     # invalid features key
     schema = {FEATURES_KEY: []}
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
 
 def test_empty_features_not_fail():
     schema = {FEATURES_KEY: {}}
-    validator = SchemaValidator()
-    validator.validate(schema)
+    validator = SchemaValidator(schema)
+    validator.validate()
 
 
 def test_invalid_feature_dict():
     # invalid feature type, not dict
     schema = {FEATURES_KEY: {"my_feature": []}}
-    validator = SchemaValidator()
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
     # empty feature dict
     schema = {FEATURES_KEY: {"my_feature": {}}}
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
     # invalid FEATURE_DEFAULT_VAL_KEY type, not boolean
     schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: "False"}}}
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
     # invalid FEATURE_DEFAULT_VAL_KEY type, not boolean #2
     schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: 5}}}
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
     # invalid rules type, not list
     schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False, RULES_KEY: "4"}}}
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
 
 def test_valid_feature_dict():
     # no rules list at all
     schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False}}}
-    validator = SchemaValidator()
-    validator.validate(schema)
+    validator = SchemaValidator(schema)
+    validator.validate()
 
     # empty rules list
     schema = {FEATURES_KEY: {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False, RULES_KEY: []}}}
-    validator.validate(schema)
+    validator.validate()
 
 
 def test_invalid_rule():
@@ -96,9 +98,9 @@ def test_invalid_rule():
             }
         }
     }
-    validator = SchemaValidator()
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
     # rules RULE_DEFAULT_VALUE is not bool
     schema = {
@@ -115,7 +117,7 @@ def test_invalid_rule():
         }
     }
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
     # missing conditions list
     schema = {
@@ -132,7 +134,7 @@ def test_invalid_rule():
         }
     }
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
     # condition list is empty
     schema = {
@@ -146,7 +148,7 @@ def test_invalid_rule():
         }
     }
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
     # condition is invalid type, not list
     schema = {
@@ -160,7 +162,7 @@ def test_invalid_rule():
         }
     }
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
 
 def test_invalid_condition():
@@ -179,9 +181,9 @@ def test_invalid_condition():
             }
         }
     }
-    validator = SchemaValidator()
+    validator = SchemaValidator(schema)
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
     # missing condition key and value
     schema = {
@@ -199,7 +201,7 @@ def test_invalid_condition():
         }
     }
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
     # invalid condition key type, not string
     schema = {
@@ -221,11 +223,10 @@ def test_invalid_condition():
         }
     }
     with pytest.raises(ConfigurationError):
-        validator.validate(schema)
+        validator.validate()
 
 
 def test_valid_condition_all_actions():
-    validator = SchemaValidator()
     schema = {
         FEATURES_KEY: {
             "my_feature": {
@@ -261,12 +262,13 @@ def test_valid_condition_all_actions():
             }
         },
     }
-    validator.validate(schema)
+    validator = SchemaValidator(schema)
+    validator.validate()
 
 
 def test_validate_condition_invalid_condition_type():
     # GIVEN an invalid condition type of empty dict
-    validator = SchemaValidator()
+    validator = SchemaValidator(EMPTY_SCHEMA)
     condition = {}
 
     # WHEN calling _validate_condition
@@ -279,7 +281,7 @@ def test_validate_condition_invalid_condition_type():
 
 def test_validate_condition_invalid_condition_action():
     # GIVEN an invalid condition action of foo
-    validator = SchemaValidator()
+    validator = SchemaValidator(EMPTY_SCHEMA)
     condition = {"action": "foo"}
 
     # WHEN calling _validate_condition
@@ -292,7 +294,7 @@ def test_validate_condition_invalid_condition_action():
 
 def test_validate_condition_invalid_condition_key():
     # GIVEN a configuration with a missing "key"
-    validator = SchemaValidator()
+    validator = SchemaValidator(EMPTY_SCHEMA)
     condition = {"action": ACTION.EQUALS.value}
 
     # WHEN calling _validate_condition
@@ -303,7 +305,7 @@ def test_validate_condition_invalid_condition_key():
 
 def test_validate_condition_missing_condition_value():
     # GIVEN a configuration with a missing condition value
-    validator = SchemaValidator()
+    validator = SchemaValidator(EMPTY_SCHEMA)
     condition = {"action": ACTION.EQUALS.value, "key": "Foo"}
 
     # WHEN calling _validate_condition
@@ -313,7 +315,7 @@ def test_validate_condition_missing_condition_value():
 
 def test_validate_rule_invalid_rule_name():
     # GIVEN a rule_name not in the rule dict
-    validator = SchemaValidator()
+    validator = SchemaValidator(EMPTY_SCHEMA)
     rule_name = "invalid_rule_name"
     rule = {"missing": ""}
 

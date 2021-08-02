@@ -19,7 +19,6 @@ class FeatureFlags:
         """
         self._logger = logger
         self._store = store
-        self._schema_validator = schema.SchemaValidator()
 
     def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
         if not context_value:
@@ -117,8 +116,10 @@ class FeatureFlags:
         """
         # parse result conf as JSON, keep in cache for self.max_age seconds
         config = self._store.get_json_configuration()
-        # validate schema
-        self._schema_validator.validate(config)
+
+        validator = schema.SchemaValidator(schema=config)
+        validator.validate()
+
         return config.get(schema.FEATURES_KEY, {})
 
     def evaluate(self, *, name: str, context: Optional[Dict[str, Any]] = None, default: bool) -> bool:
