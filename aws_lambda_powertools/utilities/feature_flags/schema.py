@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from .exceptions import ConfigurationError
 
@@ -27,6 +27,9 @@ class ACTION(str, Enum):
 class SchemaValidator:
     def __init__(self, schema: Dict[str, Any]):
         self.schema = schema
+
+        if not isinstance(self.schema, dict):
+            raise ConfigurationError(f"Schema must be a dictionary, schema={str(self.schema)}")
 
     @staticmethod
     def _validate_condition(rule_name: str, condition: Dict[str, str]) -> None:
@@ -65,32 +68,29 @@ class SchemaValidator:
         for condition in conditions:
             self._validate_condition(rule_name, condition)
 
-    def _validate_feature(self, feature_name: str, feature_dict_def: Dict[str, Any]) -> None:
-        if not feature_dict_def or not isinstance(feature_dict_def, dict):
-            raise ConfigurationError(f"Invalid AWS AppConfig JSON schema detected, feature {feature_name} is invalid")
+    def _validate_feature(self, name: str, feature: Dict[str, Any]) -> None:
+        if not feature or not isinstance(feature, dict):
+            raise ConfigurationError(f"Invalid AWS AppConfig JSON schema detected, feature {name} is invalid")
 
-        feature_default_value = feature_dict_def.get(FEATURE_DEFAULT_VAL_KEY)
+        feature_default_value = feature.get(FEATURE_DEFAULT_VAL_KEY)
         if feature_default_value is None or not isinstance(feature_default_value, bool):
-            raise ConfigurationError(f"Missing feature_default_value for feature, feature_name={feature_name}")
+            raise ConfigurationError(f"Missing feature_default_value for feature, feature_name={name}")
 
         # validate rules
-        rules = feature_dict_def.get(RULES_KEY, [])
+        rules = feature.get(RULES_KEY, [])
         if not rules:
             return
 
         if not isinstance(rules, list):
-            raise ConfigurationError(f"Feature rules is not a list, feature_name={feature_name}")
+            raise ConfigurationError(f"Feature rules is not a list, feature_name={name}")
 
         for rule in rules:
-            self._validate_rule(feature_name, rule)
+            self._validate_rule(name, rule)
 
     def validate(self) -> None:
-        if not isinstance(self.schema, dict):
-            raise ConfigurationError("invalid AWS AppConfig JSON schema detected, root schema is not a dictionary")
+        features: Optional[Dict[str, Dict]] = self.schema.get(FEATURES_KEY)
+        if not isinstance(features, dict):
+            raise ConfigurationError(f"'features' key must be present, schema={self.schema}")
 
-        features_dict = self.schema.get(FEATURES_KEY)
-        if not isinstance(features_dict, dict):
-            raise ConfigurationError("invalid AWS AppConfig JSON schema detected, missing features dictionary")
-
-        for feature_name, feature_dict_def in features_dict.items():
-            self._validate_feature(feature_name, feature_dict_def)
+        for name, feature in features.items():
+            self._validate_feature(name, feature)
