@@ -1,8 +1,10 @@
+import logging
 from enum import Enum
-from logging import Logger
 from typing import Any, Dict
 
 from .exceptions import ConfigurationError
+
+logger = logging.getLogger(__name__)
 
 FEATURES_KEY = "features"
 RULES_KEY = "rules"
@@ -23,9 +25,6 @@ class ACTION(str, Enum):
 
 
 class SchemaValidator:
-    def __init__(self, logger: Logger):
-        self._logger = logger
-
     @staticmethod
     def _validate_condition(rule_name: str, condition: Dict[str, str]) -> None:
         if not condition or not isinstance(condition, dict):
@@ -82,7 +81,7 @@ class SchemaValidator:
         for rule in rules:
             self._validate_rule(feature_name, rule)
 
-    def validate_json_schema(self, schema: Dict[str, Any]) -> None:
+    def validate(self, schema: Dict[str, Any]) -> None:
         if not isinstance(schema, dict):
             raise ConfigurationError("invalid AWS AppConfig JSON schema detected, root schema is not a dictionary")
 

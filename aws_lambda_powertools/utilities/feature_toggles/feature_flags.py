@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 from . import schema
 from .base import StoreProvider
@@ -19,7 +19,7 @@ class FeatureFlags:
         """
         self._logger = logger
         self._store = store
-        self._schema_validator = schema.SchemaValidator(self._logger)
+        self._schema_validator = schema.SchemaValidator()
 
     def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
         if not context_value:
@@ -83,7 +83,7 @@ class FeatureFlags:
             return feature_default_value
         return False
 
-    def get_configuration(self) -> Dict[str, Any]:
+    def get_configuration(self) -> Union[Dict[str, Dict], Dict]:
         """Get configuration string from AWs AppConfig and returned the parsed JSON dictionary
 
         Raises
@@ -93,14 +93,33 @@ class FeatureFlags:
 
         Returns
         ------
-        Dict[str, Any]
+        Dict[str, Dict]
             parsed JSON dictionary
+
+            {
+                "my_feature": {
+                    "feature_default_value": True,
+                    "rules": [
+                        {
+                            "rule_name": "tenant id equals 345345435",
+                            "value_when_applies": False,
+                            "conditions": [
+                                {
+                                    "action": "EQUALS",
+                                    "key": "tenant_id",
+                                    "value": "345345435",
+                                }
+                            ],
+                        },
+                    ],
+                }
+            }
         """
         # parse result conf as JSON, keep in cache for self.max_age seconds
         config = self._store.get_json_configuration()
         # validate schema
-        self._schema_validator.validate_json_schema(config)
-        return config
+        self._schema_validator.validate(config)
+        return config.get(schema.FEATURES_KEY, {})
 
     def evaluate(self, *, name: str, context: Optional[Dict[str, Any]] = None, default: bool) -> bool:
         """Get a feature toggle boolean value. Value is calculated according to a set of rules and conditions.
@@ -132,12 +151,12 @@ class FeatureFlags:
             context = {}
 
         try:
-            toggles_dict: Dict[str, Any] = self.get_configuration()
+            features = self.get_configuration()
         except ConfigurationError:
             logger.debug("Unable to get feature toggles JSON, returning provided default value")
             return default
 
-        feature: Dict[str, Dict] = toggles_dict.get(schema.FEATURES_KEY, {}).get(name, None)
+        feature = features.get(name)
         if feature is None:
             logger.debug(
                 f"feature does not appear in configuration, using provided default, " f"name={name}, default={default}"
@@ -153,6 +172,7 @@ class FeatureFlags:
                 f"default_value={feature_default_value}"
             )
             return bool(feature_default_value)
+
         # look for first rule match
         logger.debug(f"looking for rule match,  name={name}, feature_default_value={feature_default_value}")
         return self._handle_rules(
@@ -184,12 +204,11 @@ class FeatureFlags:
         features_enabled: List[str] = []
 
         try:
-            toggles_dict: Dict[str, Any] = self.get_configuration()
+            features: Dict[str, Any] = self.get_configuration()
         except ConfigurationError:
             logger.debug("unable to get feature toggles JSON")
             return features_enabled
 
-        features: Dict[str, Any] = toggles_dict.get(schema.FEATURES_KEY, {})
         for feature_name, feature_dict_def in features.items():
             rules_list = feature_dict_def.get(schema.RULES_KEY, [])
             feature_default_value = feature_dict_def.get(schema.FEATURE_DEFAULT_VAL_KEY)
