@@ -30,7 +30,7 @@ class SchemaValidator:
 
     @staticmethod
     def _is_dict_and_non_empty(value: Optional[Dict]):
-        return not value or not isinstance(value, dict)
+        return not value or isinstance(value, dict)
 
     @staticmethod
     def _validate_condition(rule_name: str, condition: Dict[str, str]) -> None:
@@ -71,6 +71,7 @@ class SchemaValidator:
 
     def _validate_feature(self, name: str, feature: Dict[str, Any]) -> None:
         if not feature or not isinstance(feature, dict):
+            # if self._is_dict_and_non_empty(feature):
             raise ConfigurationError(f"Invalid AWS AppConfig JSON schema detected, feature {name} is invalid")
 
         feature_default_value = feature.get(FEATURE_DEFAULT_VAL_KEY)
@@ -89,7 +90,7 @@ class SchemaValidator:
             self._validate_rule(name, rule)
 
     def validate(self) -> None:
-        if self._is_dict_and_non_empty(self.schema):
+        if not self._is_dict_and_non_empty(self.schema):
             raise ConfigurationError(f"Schema must be a dictionary, schema={str(self.schema)}")
 
         features: Optional[Dict[str, Dict]] = self.schema.get(FEATURES_KEY)
