@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import pytest
 from botocore.config import Config
@@ -15,7 +15,9 @@ def config():
     return Config(region_name="us-east-1")
 
 
-def init_feature_flags(mocker, mock_schema: Dict, config: Config) -> FeatureFlags:
+def init_feature_flags(
+    mocker, mock_schema: Dict, config: Config, envelope: str = "", jmespath_options: Optional[Dict] = None
+) -> FeatureFlags:
     mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.parameters.AppConfigProvider.get")
     mocked_get_conf.return_value = mock_schema
 
@@ -25,6 +27,8 @@ def init_feature_flags(mocker, mock_schema: Dict, config: Config) -> FeatureFlag
         name="test_conf_name",
         cache_seconds=600,
         config=config,
+        envelope=envelope,
+        jmespath_options=jmespath_options,
     )
     feature_flags: FeatureFlags = FeatureFlags(store=app_conf_fetcher)
     return feature_flags
@@ -73,7 +77,7 @@ def test_toggles_rule_does_not_match(mocker, config):
 # you get the default value of False that was sent to the evaluate API
 def test_toggles_no_conditions_feature_does_not_exist(mocker, config):
     expected_value = False
-    mocked_app_config_schema = {"features": {"my_fake_feature": {"default": True}}}
+    mocked_app_config_schema = {"my_fake_feature": {"default": True}}
 
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
     toggle = feature_flags.evaluate(name="my_feature", context={}, default=expected_value)
@@ -448,3 +452,11 @@ def test_is_rule_matched_no_matches(mocker, config):
 
     # THEN return False
     assert result is False
+
+
+def test_features_jmespath_envelope(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {"features": {"my_feature": {"default": expected_value}}}
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config, envelope="features")
+    toggle = feature_flags.evaluate(name="my_feature", context={}, default=False)
+    assert toggle == expected_value
