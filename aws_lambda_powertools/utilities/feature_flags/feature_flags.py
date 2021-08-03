@@ -121,7 +121,7 @@ class FeatureFlags:
         validator = schema.SchemaValidator(schema=config)
         validator.validate()
 
-        return config.get(schema.FEATURES_KEY, {})
+        return config
 
     def evaluate(self, *, name: str, context: Optional[Dict[str, Any]] = None, default: bool) -> bool:
         """Get a feature toggle boolean value. Value is calculated according to a set of rules and conditions.
@@ -154,8 +154,8 @@ class FeatureFlags:
 
         try:
             features = self.get_configuration()
-        except ConfigurationError:
-            logger.debug("Unable to get feature toggles JSON, returning provided default value")
+        except ConfigurationError as err:
+            logger.debug(f"Unable to get feature toggles JSON, returning provided default value, reason={err}")
             return default
 
         feature = features.get(name)
@@ -165,9 +165,9 @@ class FeatureFlags:
             )
             return default
 
-        rules_list = feature.get(schema.RULES_KEY)
+        rules = feature.get(schema.RULES_KEY)
         feature_default_value = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
-        if not rules_list:
+        if not rules:
             # no rules but value
             logger.debug(
                 f"no rules found, returning feature default value, name={name}, "
@@ -181,7 +181,7 @@ class FeatureFlags:
             feature_name=name,
             context=context,
             feature_default_value=bool(feature_default_value),
-            rules=cast(List, rules_list),
+            rules=rules,
         )
 
     def get_enabled_features(self, *, context: Optional[Dict[str, Any]] = None) -> List[str]:

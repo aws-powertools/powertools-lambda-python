@@ -7,7 +7,6 @@ from .exceptions import ConfigurationError
 
 logger = logging.getLogger(__name__)
 
-FEATURES_KEY = "features"
 RULES_KEY = "rules"
 FEATURE_DEFAULT_VAL_KEY = "default"
 CONDITIONS_KEY = "conditions"
@@ -30,7 +29,7 @@ class SchemaValidator:
 
     def validate(self) -> None:
         if not isinstance(self.schema, dict):
-            raise ConfigurationError(f"Schema must be a dictionary, schema={str(self.schema)}")
+            raise ConfigurationError(f"Features must be a dictionary, schema={str(self.schema)}")
 
         features = FeaturesValidator(schema=self.schema)
         features.validate()
@@ -39,13 +38,9 @@ class SchemaValidator:
 class FeaturesValidator(BaseValidator):
     def __init__(self, schema: Dict):
         self.schema = schema
-        self.features: Optional[Dict[str, Dict]] = self.schema.get(FEATURES_KEY)
 
     def validate(self):
-        if not isinstance(self.features, dict):
-            raise ConfigurationError(f"'features' key must be a dictionary, schema={self.schema}")
-
-        for name, feature in self.features.items():
+        for name, feature in self.schema.items():
             self.validate_feature(name, feature)
             rules = RulesValidator(feature=feature)
             rules.validate()
