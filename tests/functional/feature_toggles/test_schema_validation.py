@@ -246,9 +246,8 @@ def test_valid_condition_all_actions():
         FEATURES_KEY: {
             "my_feature": {
                 FEATURE_DEFAULT_VAL_KEY: False,
-                RULES_KEY: [
-                    {
-                        RULE_NAME_KEY: "tenant id equals 645654 and username is a",
+                RULES_KEY: {
+                    "tenant id equals 645654 and username is a": {
                         RULE_DEFAULT_VALUE: True,
                         CONDITIONS_KEY: [
                             {
@@ -272,10 +271,10 @@ def test_valid_condition_all_actions():
                                 CONDITION_VALUE: ["a", "b"],
                             },
                         ],
-                    },
-                ],
+                    }
+                },
             }
-        },
+        }
     }
     validator = SchemaValidator(schema)
     validator.validate()
@@ -323,11 +322,24 @@ def test_validate_condition_missing_condition_value():
         ConditionsValidator.validate_condition_value(condition=condition, rule_name="dummy")
 
 
-def test_validate_rule_invalid_rule_name():
-    # GIVEN a rule_name not in the rule dict
-    rule = {"invalid_rule_name": "tenant id equals 345345435"}
+def test_new_rule_format():
+    new_features = {
+        "my_feature": {
+            "default": True,
+            "rules": {
+                "tenant id equals 345345435": {
+                    "when_match": False,
+                    "conditions": [
+                        {
+                            "action": "EQUALS",
+                            "key": "tenant_id",
+                            "value": "345345435",
+                        }
+                    ],
+                },
+            },
+        }
+    }
 
-    # WHEN calling _validate_rule
-    # THEN raise ConfigurationError
-    with pytest.raises(ConfigurationError, match="'rule_name' key must be present*"):
-        RulesValidator.validate_rule_name(rule=rule, feature_name="dummy")
+    rules = RulesValidator(feature=new_features)
+    rules.validate()

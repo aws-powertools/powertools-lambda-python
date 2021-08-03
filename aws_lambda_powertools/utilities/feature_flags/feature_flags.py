@@ -37,8 +37,9 @@ class FeatureFlags:
             self._logger.debug(f"caught exception while matching action: action={action}, exception={str(exc)}")
             return False
 
-    def _is_rule_matched(self, feature_name: str, rule: Dict[str, Any], context: Dict[str, Any]) -> bool:
-        rule_name = rule.get(schema.RULE_NAME_KEY, "")
+    def _is_rule_matched(
+        self, rule_name: str, feature_name: str, rule: Dict[str, Any], context: Dict[str, Any]
+    ) -> bool:
         rule_default_value = rule.get(schema.RULE_DEFAULT_VALUE)
         conditions = cast(List[Dict], rule.get(schema.CONDITIONS_KEY))
 
@@ -68,11 +69,11 @@ class FeatureFlags:
         feature_name: str,
         context: Dict[str, Any],
         feature_default_value: bool,
-        rules: List[Dict[str, Any]],
+        rules: Dict[str, Any],
     ) -> bool:
-        for rule in rules:
+        for rule_name, rule in rules.items():
             rule_default_value = rule.get(schema.RULE_DEFAULT_VALUE)
-            if self._is_rule_matched(feature_name, rule, context):
+            if self._is_rule_matched(rule_name=rule_name, feature_name=feature_name, rule=rule, context=context):
                 return bool(rule_default_value)
             # no rule matched, return default value of feature
             logger.debug(
@@ -211,16 +212,16 @@ class FeatureFlags:
             return features_enabled
 
         for feature_name, feature_dict_def in features.items():
-            rules_list = feature_dict_def.get(schema.RULES_KEY, [])
+            rules = feature_dict_def.get(schema.RULES_KEY, {})
             feature_default_value = feature_dict_def.get(schema.FEATURE_DEFAULT_VAL_KEY)
-            if feature_default_value and not rules_list:
+            if feature_default_value and not rules:
                 self._logger.debug(f"feature is enabled by default and has no defined rules, name={feature_name}")
                 features_enabled.append(feature_name)
             elif self._handle_rules(
                 feature_name=feature_name,
                 context=context,
                 feature_default_value=feature_default_value,
-                rules=rules_list,
+                rules=rules,
             ):
                 self._logger.debug(f"feature's calculated value is True, name={feature_name}")
                 features_enabled.append(feature_name)

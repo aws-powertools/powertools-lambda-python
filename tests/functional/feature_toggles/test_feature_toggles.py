@@ -50,9 +50,8 @@ def test_toggles_rule_does_not_match(mocker, config):
         "features": {
             "my_feature": {
                 "default": expected_value,
-                "rules": [
-                    {
-                        "rule_name": "tenant id equals 345345435",
+                "rules": {
+                    "tenant id equals 345345435": {
                         "when_match": False,
                         "conditions": [
                             {
@@ -61,10 +60,10 @@ def test_toggles_rule_does_not_match(mocker, config):
                                 "value": "345345435",
                             }
                         ],
-                    },
-                ],
+                    }
+                },
             }
-        },
+        }
     }
 
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
@@ -100,9 +99,8 @@ def test_toggles_conditions_no_match(mocker, config):
         "features": {
             "my_feature": {
                 "default": expected_value,
-                "rules": [
-                    {
-                        "rule_name": "tenant id equals 345345435",
+                "rules": {
+                    "tenant id equals 345345435": {
                         "when_match": False,
                         "conditions": [
                             {
@@ -111,10 +109,10 @@ def test_toggles_conditions_no_match(mocker, config):
                                 "value": "345345435",
                             }
                         ],
-                    },
-                ],
+                    }
+                },
             }
-        },
+        }
     }
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     toggle = conf_store.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
@@ -130,9 +128,8 @@ def test_toggles_conditions_rule_match_equal_multiple_conditions(mocker, config)
         "features": {
             "my_feature": {
                 "default": True,
-                "rules": [
-                    {
-                        "rule_name": "tenant id equals 6 and username is a",
+                "rules": {
+                    "tenant id equals 6 and username is a": {
                         "when_match": expected_value,
                         "conditions": [
                             {
@@ -146,8 +143,8 @@ def test_toggles_conditions_rule_match_equal_multiple_conditions(mocker, config)
                                 "value": username_val,
                             },
                         ],
-                    },
-                ],
+                    }
+                },
             }
         },
     }
@@ -172,9 +169,9 @@ def test_toggles_conditions_no_rule_match_equal_multiple_conditions(mocker, conf
         "features": {
             "my_feature": {
                 "default": expected_val,
-                "rules": [
-                    {
-                        "rule_name": "tenant id equals 645654 and username is a",  # rule will not match
+                "rules": {
+                    # rule will not match
+                    "tenant id equals 645654 and username is a": {
                         "when_match": False,
                         "conditions": [
                             {
@@ -188,10 +185,10 @@ def test_toggles_conditions_no_rule_match_equal_multiple_conditions(mocker, conf
                                 "value": "a",
                             },
                         ],
-                    },
-                ],
+                    }
+                },
             }
-        },
+        }
     }
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     toggle = conf_store.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
@@ -208,9 +205,8 @@ def test_toggles_conditions_rule_match_multiple_actions_multiple_rules_multiple_
         "features": {
             "my_feature": {
                 "default": expected_value_third_check,
-                "rules": [
-                    {
-                        "rule_name": "tenant id equals 6 and username startswith a",
+                "rules": {
+                    "tenant id equals 6 and username startswith a": {
                         "when_match": expected_value_first_check,
                         "conditions": [
                             {
@@ -225,8 +221,7 @@ def test_toggles_conditions_rule_match_multiple_actions_multiple_rules_multiple_
                             },
                         ],
                     },
-                    {
-                        "rule_name": "tenant id equals 4446 and username startswith a and endswith z",
+                    "tenant id equals 4446 and username startswith a and endswith z": {
                         "when_match": expected_value_second_check,
                         "conditions": [
                             {
@@ -246,9 +241,9 @@ def test_toggles_conditions_rule_match_multiple_actions_multiple_rules_multiple_
                             },
                         ],
                     },
-                ],
+                },
             }
-        },
+        }
     }
 
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
@@ -277,9 +272,8 @@ def test_toggles_match_rule_with_contains_action(mocker, config):
         "features": {
             "my_feature": {
                 "default": False,
-                "rules": [
-                    {
-                        "rule_name": "tenant id is contained in [6, 2]",
+                "rules": {
+                    "tenant id is contained in [6, 2]": {
                         "when_match": expected_value,
                         "conditions": [
                             {
@@ -288,10 +282,10 @@ def test_toggles_match_rule_with_contains_action(mocker, config):
                                 "value": ["6", "2"],
                             }
                         ],
-                    },
-                ],
+                    }
+                },
             }
-        },
+        }
     }
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     toggle = conf_store.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
@@ -331,9 +325,8 @@ def test_multiple_features_enabled(mocker, config):
         "features": {
             "my_feature": {
                 "default": False,
-                "rules": [
-                    {
-                        "rule_name": "tenant id is contained in [6, 2]",
+                "rules": {
+                    "tenant id is contained in [6, 2]": {
                         "when_match": True,
                         "conditions": [
                             {
@@ -342,8 +335,8 @@ def test_multiple_features_enabled(mocker, config):
                                 "value": ["6", "2"],
                             }
                         ],
-                    },
-                ],
+                    }
+                },
             },
             "my_feature2": {
                 "default": True,
@@ -351,7 +344,7 @@ def test_multiple_features_enabled(mocker, config):
             "my_feature3": {
                 "default": False,
             },
-        },
+        }
     }
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     enabled_list: List[str] = conf_store.get_enabled_features(context={"tenant_id": "6", "username": "a"})
@@ -364,9 +357,8 @@ def test_multiple_features_only_some_enabled(mocker, config):
         "features": {
             "my_feature": {  # rule will match here, feature is enabled due to rule match
                 "default": False,
-                "rules": [
-                    {
-                        "rule_name": "tenant id is contained in [6, 2]",
+                "rules": {
+                    "tenant id is contained in [6, 2]": {
                         "when_match": True,
                         "conditions": [
                             {
@@ -375,8 +367,8 @@ def test_multiple_features_only_some_enabled(mocker, config):
                                 "value": ["6", "2"],
                             }
                         ],
-                    },
-                ],
+                    }
+                },
             },
             "my_feature2": {
                 "default": True,
@@ -384,11 +376,11 @@ def test_multiple_features_only_some_enabled(mocker, config):
             "my_feature3": {
                 "default": False,
             },
-            "my_feature4": {  # rule will not match here, feature is enabled by default
+            # rule will not match here, feature is enabled by default
+            "my_feature4": {
                 "default": True,
-                "rules": [
-                    {
-                        "rule_name": "tenant id equals 7",
+                "rules": {
+                    "tenant id equals 7": {
                         "when_match": False,
                         "conditions": [
                             {
@@ -397,10 +389,10 @@ def test_multiple_features_only_some_enabled(mocker, config):
                                 "value": "7",
                             }
                         ],
-                    },
-                ],
+                    }
+                },
             },
-        },
+        }
     }
     conf_store = init_configuration_store(mocker, mocked_app_config_schema, config)
     enabled_list: List[str] = conf_store.get_enabled_features(context={"tenant_id": "6", "username": "a"})
@@ -468,7 +460,7 @@ def test_is_rule_matched_no_matches(mocker, config):
     conf_store = init_configuration_store(mocker, {}, config)
 
     # WHEN calling _is_rule_matched
-    result = conf_store._is_rule_matched("name", rule, rules_context)
+    result = conf_store._is_rule_matched(rule_name="dummy", feature_name="dummy", rule=rule, context=rules_context)
 
     # THEN return False
     assert result is False
