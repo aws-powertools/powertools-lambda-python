@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 RULES_KEY = "rules"
 FEATURE_DEFAULT_VAL_KEY = "default"
 CONDITIONS_KEY = "conditions"
-RULE_DEFAULT_VALUE = "when_match"
+RULE_MATCH_VALUE = "when_match"
 CONDITION_KEY = "key"
 CONDITION_VALUE = "value"
 CONDITION_ACTION = "action"
@@ -28,6 +28,7 @@ class SchemaValidator:
         self.schema = schema
 
     def validate(self) -> None:
+        logger.debug("Validating schema")
         if not isinstance(self.schema, dict):
             raise ConfigurationError(f"Features must be a dictionary, schema={str(self.schema)}")
 
@@ -41,6 +42,7 @@ class FeaturesValidator(BaseValidator):
 
     def validate(self):
         for name, feature in self.schema.items():
+            logger.debug(f"Attempting to validate feature '{name}'")
             self.validate_feature(name, feature)
             rules = RulesValidator(feature=feature)
             rules.validate()
@@ -52,7 +54,7 @@ class FeaturesValidator(BaseValidator):
 
         default_value = feature.get(FEATURE_DEFAULT_VAL_KEY)
         if default_value is None or not isinstance(default_value, bool):
-            raise ConfigurationError(f"'feature_default_value' boolean key must be present, feature_name={name}")
+            raise ConfigurationError(f"feature 'default' boolean key must be present, feature={name}")
 
 
 class RulesValidator(BaseValidator):
@@ -67,9 +69,10 @@ class RulesValidator(BaseValidator):
             return
 
         if not isinstance(self.rules, dict):
-            raise ConfigurationError(f"Feature rules must be a dictionary, feature_name={self.feature_name}")
+            raise ConfigurationError(f"Feature rules must be a dictionary, feature={self.feature_name}")
 
         for rule_name, rule in self.rules.items():
+            logger.debug(f"Attempting to validate rule '{rule_name}'")
             self.validate_rule(rule=rule, rule_name=rule_name, feature_name=self.feature_name)
             conditions = ConditionsValidator(rule=rule, rule_name=rule_name)
             conditions.validate()
@@ -77,7 +80,7 @@ class RulesValidator(BaseValidator):
     @staticmethod
     def validate_rule(rule, rule_name, feature_name):
         if not rule or not isinstance(rule, dict):
-            raise ConfigurationError(f"Feature rule must be a dictionary, feature_name={feature_name}")
+            raise ConfigurationError(f"Feature rule must be a dictionary, feature={feature_name}")
 
         RulesValidator.validate_rule_name(rule_name=rule_name, feature_name=feature_name)
         RulesValidator.validate_rule_default_value(rule=rule, rule_name=rule_name)
@@ -85,13 +88,13 @@ class RulesValidator(BaseValidator):
     @staticmethod
     def validate_rule_name(rule_name: str, feature_name: str):
         if not rule_name or not isinstance(rule_name, str):
-            raise ConfigurationError(f"Rule name key must have a non-empty string, feature_name={feature_name}")
+            raise ConfigurationError(f"Rule name key must have a non-empty string, feature={feature_name}")
 
     @staticmethod
     def validate_rule_default_value(rule: Dict, rule_name: str):
-        rule_default_value = rule.get(RULE_DEFAULT_VALUE)
+        rule_default_value = rule.get(RULE_MATCH_VALUE)
         if not isinstance(rule_default_value, bool):
-            raise ConfigurationError(f"'rule_default_value' key must have be bool, rule_name={rule_name}")
+            raise ConfigurationError(f"'rule_default_value' key must have be bool, rule={rule_name}")
 
 
 class ConditionsValidator(BaseValidator):
@@ -101,7 +104,7 @@ class ConditionsValidator(BaseValidator):
 
     def validate(self):
         if not self.conditions or not isinstance(self.conditions, list):
-            raise ConfigurationError(f"Invalid condition, rule_name={self.rule_name}")
+            raise ConfigurationError(f"Invalid condition, rule={self.rule_name}")
 
         for condition in self.conditions:
             self.validate_condition(rule_name=self.rule_name, condition=condition)
@@ -109,8 +112,10 @@ class ConditionsValidator(BaseValidator):
     @staticmethod
     def validate_condition(rule_name: str, condition: Dict[str, str]) -> None:
         if not condition or not isinstance(condition, dict):
-            raise ConfigurationError(f"Feature rule condition must be a dictionary, rule_name={rule_name}")
+            raise ConfigurationError(f"Feature rule condition must be a dictionary, rule={rule_name}")
 
+        # Condition can contain PII data; do not log condition value
+        logger.debug(f"Attempting to validate condition for '{rule_name}'")
         ConditionsValidator.validate_condition_action(condition=condition, rule_name=rule_name)
         ConditionsValidator.validate_condition_key(condition=condition, rule_name=rule_name)
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
@@ -128,10 +133,10 @@ class ConditionsValidator(BaseValidator):
     def validate_condition_key(condition: Dict[str, Any], rule_name: str):
         key = condition.get(CONDITION_KEY, "")
         if not key or not isinstance(key, str):
-            raise ConfigurationError(f"'key' value must be a non empty string, rule_name={rule_name}")
+            raise ConfigurationError(f"'key' value must be a non empty string, rule={rule_name}")
 
     @staticmethod
     def validate_condition_value(condition: Dict[str, Any], rule_name: str):
         value = condition.get(CONDITION_VALUE, "")
         if not value:
-            raise ConfigurationError(f"'value' key must not be empty, rule_name={rule_name}")
+            raise ConfigurationError(f"'value' key must not be empty, rule={rule_name}")

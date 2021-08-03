@@ -10,17 +10,36 @@ logger = logging.getLogger(__name__)
 
 class FeatureFlags:
     def __init__(self, store: StoreProvider):
-        """constructor
+        """Evaluates whether feature flags should be enabled based on a given context.
+
+        It uses the provided store to fetch feature flag rules before evaluating them.
+
+        Examples
+        --------
+
+        ```python
+        from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+
+        app_config = AppConfigStore(
+            environment="test",
+            application="powertools",
+            name="test_conf_name",
+            cache_seconds=300,
+            envelope="features"
+        )
+
+        feature_flags: FeatureFlags = FeatureFlags(store=app_config)
+        ```
 
         Parameters
         ----------
         store: StoreProvider
-            A schema JSON fetcher, can be AWS AppConfig, Hashicorp Consul etc.
+            Store to use to fetch feature flag schema configuration.
         """
-        self._logger = logger
         self._store = store
 
-    def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
+    @staticmethod
+    def _match_by_action(action: str, condition_value: Any, context_value: Any) -> bool:
         if not context_value:
             return False
         mapping_by_action = {
@@ -34,88 +53,91 @@ class FeatureFlags:
             func = mapping_by_action.get(action, lambda a, b: False)
             return func(context_value, condition_value)
         except Exception as exc:
-            self._logger.debug(f"caught exception while matching action: action={action}, exception={str(exc)}")
+            logger.debug(f"caught exception while matching action: action={action}, exception={str(exc)}")
             return False
 
-    def _is_rule_matched(
+    def _evaluate_conditions(
         self, rule_name: str, feature_name: str, rule: Dict[str, Any], context: Dict[str, Any]
     ) -> bool:
-        rule_default_value = rule.get(schema.RULE_DEFAULT_VALUE)
+        """Evaluates whether context matches conditions, return False otherwise"""
+        rule_match_value = rule.get(schema.RULE_MATCH_VALUE)
         conditions = cast(List[Dict], rule.get(schema.CONDITIONS_KEY))
 
         for condition in conditions:
             context_value = context.get(str(condition.get(schema.CONDITION_KEY)))
-            if not self._match_by_action(
-                condition.get(schema.CONDITION_ACTION, ""),
-                condition.get(schema.CONDITION_VALUE),
-                context_value,
-            ):
+            cond_action = condition.get(schema.CONDITION_ACTION, "")
+            cond_value = condition.get(schema.CONDITION_VALUE)
+
+            if not self._match_by_action(action=cond_action, condition_value=cond_value, context_value=context_value):
                 logger.debug(
-                    f"rule did not match action, rule_name={rule_name}, rule_default_value={rule_default_value}, "
+                    f"rule did not match action, rule_name={rule_name}, rule_value={rule_match_value}, "
                     f"name={feature_name}, context_value={str(context_value)} "
                 )
-                # context doesn't match condition
-                return False
-            # if we got here, all conditions match
-            logger.debug(
-                f"rule matched, rule_name={rule_name}, rule_default_value={rule_default_value}, name={feature_name}"
-            )
+                return False  # context doesn't match condition
+
+            logger.debug(f"rule matched, rule_name={rule_name}, rule_value={rule_match_value}, name={feature_name}")
             return True
         return False
 
-    def _handle_rules(
-        self,
-        *,
-        feature_name: str,
-        context: Dict[str, Any],
-        feature_default_value: bool,
-        rules: Dict[str, Any],
+    def _evaluate_rules(
+        self, *, feature_name: str, context: Dict[str, Any], feat_default: bool, rules: Dict[str, Any]
     ) -> bool:
+        """Evaluates whether context matches rules and conditions, otherwise return feature default"""
         for rule_name, rule in rules.items():
-            rule_default_value = rule.get(schema.RULE_DEFAULT_VALUE)
-            if self._is_rule_matched(rule_name=rule_name, feature_name=feature_name, rule=rule, context=context):
-                return bool(rule_default_value)
+            rule_match_value = rule.get(schema.RULE_MATCH_VALUE)
+
+            # Context might contain PII data; do not log its value
+            logger.debug(f"Evaluating rule matching, rule={rule_name}, feature={feature_name}, default={feat_default}")
+            if self._evaluate_conditions(rule_name=rule_name, feature_name=feature_name, rule=rule, context=context):
+                return bool(rule_match_value)
+
             # no rule matched, return default value of feature
-            logger.debug(
-                f"no rule matched, returning default value of feature, feature_default_value={feature_default_value}, "
-                f"name={feature_name}"
-            )
-            return feature_default_value
+            logger.debug(f"no rule matched, returning feature default, default={feat_default}, name={feature_name}")
+            return feat_default
         return False
 
     def get_configuration(self) -> Union[Dict[str, Dict], Dict]:
-        """Get configuration string from AWs AppConfig and returned the parsed JSON dictionary
+        """Get validated feature flag schema from configured store.
+
+        Largely used to aid testing, since it's called by `evaluate` and `get_enabled_features` methods.
 
         Raises
         ------
         ConfigurationError
-            Any validation error or appconfig error that can occur
+            Any validation error
 
         Returns
         ------
         Dict[str, Dict]
             parsed JSON dictionary
 
+            **Example**
+
+            ```python
             {
-                "my_feature": {
-                    "feature_default_value": True,
-                    "rules": [
-                        {
-                            "rule_name": "tenant id equals 345345435",
-                            "value_when_applies": False,
+                "premium_features": {
+                    "default": False,
+                    "rules": {
+                        "customer tier equals premium": {
+                            "when_match": True,
                             "conditions": [
                                 {
                                     "action": "EQUALS",
-                                    "key": "tenant_id",
-                                    "value": "345345435",
+                                    "key": "tier",
+                                    "value": "premium",
                                 }
                             ],
-                        },
-                    ],
+                        }
+                    },
+                },
+                "feature_two": {
+                    "default": False
                 }
             }
+            ```
         """
-        # parse result conf as JSON, keep in cache for self.max_age seconds
+        # parse result conf as JSON, keep in cache for max age defined in store
+        logger.debug(f"Fetching schema from registered store, store={self._store}")
         config = self._store.get_configuration()
 
         validator = schema.SchemaValidator(schema=config)
@@ -124,30 +146,30 @@ class FeatureFlags:
         return config
 
     def evaluate(self, *, name: str, context: Optional[Dict[str, Any]] = None, default: bool) -> bool:
-        """Get a feature toggle boolean value. Value is calculated according to a set of rules and conditions.
+        """Evaluate whether a feature flag should be enabled according to stored schema and input context
 
-        See below for explanation.
+        **Logic when evaluating a feature flag**
+
+        1. Feature exists and a rule matches, returns when_match value
+        2. Feature exists but has either no rules or no match, return feature default value
+        3. Feature doesn't exist in stored schema, encountered an error when fetching -> return default value provided
 
         Parameters
         ----------
         name: str
-            feature name that you wish to fetch
+            feature name to evaluate
         context: Optional[Dict[str, Any]]
-            dict of attributes that you would like to match the rules
-            against, can be {'tenant_id: 'X', 'username':' 'Y', 'region': 'Z'} etc.
+            Attributes that should be evaluated against the stored schema.
+
+            for example: `{"tenant_id": "X", "username": "Y", "region": "Z"}`
         default: bool
             default value if feature flag doesn't exist in the schema,
-            or there has been an error while fetching the configuration from appconfig
+            or there has been an error when fetching the configuration from the store
 
         Returns
         ------
         bool
-            calculated feature toggle value. several possibilities:
-            1. if the feature doesn't appear in the schema or there has been an error fetching the
-               configuration -> error/warning log would appear and value_if_missing is returned
-            2. feature exists and has no rules or no rules have matched -> return feature_default_value of
-               the defined feature
-            3. feature exists and a rule matches -> rule_default_value of rule is returned
+            whether feature should be enabled or not
         """
         if context is None:
             context = {}
@@ -155,37 +177,25 @@ class FeatureFlags:
         try:
             features = self.get_configuration()
         except ConfigurationError as err:
-            logger.debug(f"Unable to get feature toggles JSON, returning provided default value, reason={err}")
+            logger.debug(f"Failed to fetch feature flags from store, returning default provided, reason={err}")
             return default
 
         feature = features.get(name)
         if feature is None:
-            logger.debug(
-                f"feature does not appear in configuration, using provided default, name={name}, default={default}"
-            )
+            logger.debug(f"Feature not found; returning default provided, name={name}, default={default}")
             return default
 
         rules = feature.get(schema.RULES_KEY)
-        feature_default_value = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
+        feat_default = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
         if not rules:
-            # no rules but value
-            logger.debug(
-                f"no rules found, returning feature default value, name={name}, "
-                f"default_value={feature_default_value}"
-            )
-            return bool(feature_default_value)
+            logger.debug(f"no rules found, returning feature default, name={name}, default={feat_default}")
+            return bool(feat_default)
 
-        # look for first rule match
-        logger.debug(f"looking for rule match,  name={name}, feature_default_value={feature_default_value}")
-        return self._handle_rules(
-            feature_name=name,
-            context=context,
-            feature_default_value=bool(feature_default_value),
-            rules=rules,
-        )
+        logger.debug(f"looking for rule match, name={name}, default={feat_default}")
+        return self._evaluate_rules(feature_name=name, context=context, feat_default=bool(feat_default), rules=rules)
 
     def get_enabled_features(self, *, context: Optional[Dict[str, Any]] = None) -> List[str]:
-        """Get all enabled feature toggles while also taking into account rule_context
+        """Get all enabled feature flags while also taking into account context
         (when a feature has defined rules)
 
         Parameters
@@ -197,8 +207,13 @@ class FeatureFlags:
         Returns
         ----------
         List[str]
-            a list of all features name that are enabled by also taking into account
-            rule_context (when a feature has defined rules)
+            list of all feature names that either matches context or have True as default
+
+            **Example**
+
+            ```python
+            ["premium_features", "my_feature_two", "always_true_feature"]
+            ```
         """
         if context is None:
             context = {}
@@ -207,23 +222,20 @@ class FeatureFlags:
 
         try:
             features: Dict[str, Any] = self.get_configuration()
-        except ConfigurationError:
-            logger.debug("unable to get feature toggles JSON")
+        except ConfigurationError as err:
+            logger.debug(f"Failed to fetch feature flags from store, returning empty list, reason={err}")
             return features_enabled
 
-        for feature_name, feature_dict_def in features.items():
-            rules = feature_dict_def.get(schema.RULES_KEY, {})
-            feature_default_value = feature_dict_def.get(schema.FEATURE_DEFAULT_VAL_KEY)
+        for name, feature in features.items():
+            rules = feature.get(schema.RULES_KEY, {})
+            feature_default_value = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
             if feature_default_value and not rules:
-                self._logger.debug(f"feature is enabled by default and has no defined rules, name={feature_name}")
-                features_enabled.append(feature_name)
-            elif self._handle_rules(
-                feature_name=feature_name,
-                context=context,
-                feature_default_value=feature_default_value,
-                rules=rules,
+                logger.debug(f"feature is enabled by default and has no defined rules, name={name}")
+                features_enabled.append(name)
+            elif self._evaluate_rules(
+                feature_name=name, context=context, feat_default=feature_default_value, rules=rules
             ):
-                self._logger.debug(f"feature's calculated value is True, name={feature_name}")
-                features_enabled.append(feature_name)
+                logger.debug(f"feature's calculated value is True, name={name}")
+                features_enabled.append(name)
 
         return features_enabled

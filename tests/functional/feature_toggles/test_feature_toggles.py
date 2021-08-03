@@ -26,7 +26,7 @@ def init_feature_flags(
         application="test_app",
         name="test_conf_name",
         cache_seconds=600,
-        config=config,
+        sdk_config=config,
         envelope=envelope,
         jmespath_options=jmespath_options,
     )
@@ -42,7 +42,7 @@ def init_fetcher_side_effect(mocker, config: Config, side_effect) -> AppConfigSt
         application="application",
         name="conf",
         cache_seconds=1,
-        config=config,
+        sdk_config=config,
     )
 
 
@@ -447,8 +447,10 @@ def test_is_rule_matched_no_matches(mocker, config):
     rules_context = {}
     feature_flags = init_feature_flags(mocker, {}, config)
 
-    # WHEN calling _is_rule_matched
-    result = feature_flags._is_rule_matched(rule_name="dummy", feature_name="dummy", rule=rule, context=rules_context)
+    # WHEN calling _evaluate_conditions
+    result = feature_flags._evaluate_conditions(
+        rule_name="dummy", feature_name="dummy", rule=rule, context=rules_context
+    )
 
     # THEN return False
     assert result is False

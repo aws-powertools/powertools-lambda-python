@@ -21,7 +21,7 @@ class AppConfigStore(StoreProvider):
         application: str,
         name: str,
         cache_seconds: int,
-        config: Optional[Config] = None,
+        sdk_config: Optional[Config] = None,
         envelope: str = "",
         jmespath_options: Optional[Dict] = None,
     ):
@@ -37,8 +37,8 @@ class AppConfigStore(StoreProvider):
             AppConfig configuration name e.g. `my_conf`
         cache_seconds: int
             cache expiration time, how often to call AppConfig to fetch latest configuration
-        config: Optional[Config]
-            boto3 client configuration
+        sdk_config: Optional[Config]
+            Botocore Config object to pass during client initialization
         envelope : str
             JMESPath expression to pluck feature flags data from config
         jmespath_options : Dict
@@ -49,13 +49,13 @@ class AppConfigStore(StoreProvider):
         self.application = application
         self.name = name
         self.cache_seconds = cache_seconds
-        self.config = config
+        self.config = sdk_config
         self.envelope = envelope
         self.jmespath_options = jmespath_options
-        self._conf_store = AppConfigProvider(environment=environment, application=application, config=config)
+        self._conf_store = AppConfigProvider(environment=environment, application=application, config=sdk_config)
 
     def get_configuration(self) -> Dict[str, Any]:
-        """Get configuration string from AWS AppConfig and return the parsed JSON dictionary
+        """Fetch feature schema configuration from AWS AppConfig
 
         Raises
         ------

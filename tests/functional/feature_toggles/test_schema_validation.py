@@ -9,7 +9,7 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
     CONDITION_VALUE,
     CONDITIONS_KEY,
     FEATURE_DEFAULT_VAL_KEY,
-    RULE_DEFAULT_VALUE,
+    RULE_MATCH_VALUE,
     RULES_KEY,
     ConditionsValidator,
     RuleAction,
@@ -76,13 +76,13 @@ def test_invalid_rule():
     with pytest.raises(ConfigurationError):
         validator.validate()
 
-    # rules RULE_DEFAULT_VALUE is not bool
+    # rules RULE_MATCH_VALUE is not bool
     schema = {
         "my_feature": {
             FEATURE_DEFAULT_VAL_KEY: False,
             RULES_KEY: {
                 "tenant id equals 345345435": {
-                    RULE_DEFAULT_VALUE: "False",
+                    RULE_MATCH_VALUE: "False",
                 }
             },
         }
@@ -97,7 +97,7 @@ def test_invalid_rule():
             FEATURE_DEFAULT_VAL_KEY: False,
             RULES_KEY: {
                 "tenant id equals 345345435": {
-                    RULE_DEFAULT_VALUE: False,
+                    RULE_MATCH_VALUE: False,
                 }
             },
         }
@@ -111,7 +111,7 @@ def test_invalid_rule():
         "my_feature": {
             FEATURE_DEFAULT_VAL_KEY: False,
             RULES_KEY: {
-                "tenant id equals 345345435": {RULE_DEFAULT_VALUE: False, CONDITIONS_KEY: []},
+                "tenant id equals 345345435": {RULE_MATCH_VALUE: False, CONDITIONS_KEY: []},
             },
         }
     }
@@ -124,7 +124,7 @@ def test_invalid_rule():
         "my_feature": {
             FEATURE_DEFAULT_VAL_KEY: False,
             RULES_KEY: {
-                "tenant id equals 345345435": {RULE_DEFAULT_VALUE: False, CONDITIONS_KEY: {}},
+                "tenant id equals 345345435": {RULE_MATCH_VALUE: False, CONDITIONS_KEY: {}},
             },
         }
     }
@@ -140,7 +140,7 @@ def test_invalid_condition():
             FEATURE_DEFAULT_VAL_KEY: False,
             RULES_KEY: {
                 "tenant id equals 345345435": {
-                    RULE_DEFAULT_VALUE: False,
+                    RULE_MATCH_VALUE: False,
                     CONDITIONS_KEY: {CONDITION_ACTION: "stuff", CONDITION_KEY: "a", CONDITION_VALUE: "a"},
                 }
             },
@@ -156,7 +156,7 @@ def test_invalid_condition():
             FEATURE_DEFAULT_VAL_KEY: False,
             RULES_KEY: {
                 "tenant id equals 345345435": {
-                    RULE_DEFAULT_VALUE: False,
+                    RULE_MATCH_VALUE: False,
                     CONDITIONS_KEY: {CONDITION_ACTION: RuleAction.EQUALS.value},
                 }
             },
@@ -172,7 +172,7 @@ def test_invalid_condition():
             FEATURE_DEFAULT_VAL_KEY: False,
             RULES_KEY: {
                 "tenant id equals 345345435": {
-                    RULE_DEFAULT_VALUE: False,
+                    RULE_MATCH_VALUE: False,
                     CONDITIONS_KEY: {
                         CONDITION_ACTION: RuleAction.EQUALS.value,
                         CONDITION_KEY: 5,
@@ -193,7 +193,7 @@ def test_valid_condition_all_actions():
             FEATURE_DEFAULT_VAL_KEY: False,
             RULES_KEY: {
                 "tenant id equals 645654 and username is a": {
-                    RULE_DEFAULT_VALUE: True,
+                    RULE_MATCH_VALUE: True,
                     CONDITIONS_KEY: [
                         {
                             CONDITION_ACTION: RuleAction.EQUALS.value,
