@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 FEATURES_KEY = "features"
 RULES_KEY = "rules"
-FEATURE_DEFAULT_VAL_KEY = "feature_default_value"
+FEATURE_DEFAULT_VAL_KEY = "default"
 CONDITIONS_KEY = "conditions"
 RULE_NAME_KEY = "rule_name"
 RULE_DEFAULT_VALUE = "value_when_applies"
