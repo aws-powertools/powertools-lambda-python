@@ -54,7 +54,7 @@ class AppConfigStore(StoreProvider):
         self.jmespath_options = jmespath_options
         self._conf_store = AppConfigProvider(environment=environment, application=application, config=config)
 
-    def get_json_configuration(self) -> Dict[str, Any]:
+    def get_configuration(self) -> Dict[str, Any]:
         """Get configuration string from AWS AppConfig and return the parsed JSON dictionary
 
         Raises

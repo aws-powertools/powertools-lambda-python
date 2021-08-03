@@ -116,7 +116,7 @@ class FeatureFlags:
             }
         """
         # parse result conf as JSON, keep in cache for self.max_age seconds
-        config = self._store.get_json_configuration()
+        config = self._store.get_configuration()
 
         validator = schema.SchemaValidator(schema=config)
         validator.validate()

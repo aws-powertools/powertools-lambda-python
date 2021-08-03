@@ -415,9 +415,9 @@ def test_app_config_get_parameter_err(mocker, config):
     # GIVEN an appconfig with a missing config
     app_conf_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
 
-    # WHEN calling get_json_configuration
+    # WHEN calling get_configuration
     with pytest.raises(ConfigurationError) as err:
-        app_conf_fetcher.get_json_configuration()
+        app_conf_fetcher.get_configuration()
 
     # THEN raise ConfigurationError error
     assert "AWS AppConfig configuration" in str(err.value)

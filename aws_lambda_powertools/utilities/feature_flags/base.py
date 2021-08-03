@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 class StoreProvider(ABC):
     @abstractmethod
-    def get_json_configuration(self) -> Dict[str, Any]:
+    def get_configuration(self) -> Dict[str, Any]:
         """Get configuration string from any configuration storing application and return the parsed JSON dictionary
 
         Raises
