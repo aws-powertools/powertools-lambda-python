@@ -11,7 +11,6 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
     FEATURE_DEFAULT_VAL_KEY,
     FEATURES_KEY,
     RULE_DEFAULT_VALUE,
-    RULE_NAME_KEY,
     RULES_KEY,
     ConditionsValidator,
     RuleAction,
@@ -116,12 +115,11 @@ def test_invalid_rule():
         FEATURES_KEY: {
             "my_feature": {
                 FEATURE_DEFAULT_VAL_KEY: False,
-                RULES_KEY: [
-                    {
-                        RULE_NAME_KEY: "tenant id equals 345345435",
+                RULES_KEY: {
+                    "tenant id equals 345345435": {
                         RULE_DEFAULT_VALUE: "False",
-                    },
-                ],
+                    }
+                },
             }
         }
     }
@@ -134,12 +132,11 @@ def test_invalid_rule():
         FEATURES_KEY: {
             "my_feature": {
                 FEATURE_DEFAULT_VAL_KEY: False,
-                RULES_KEY: [
-                    {
-                        RULE_NAME_KEY: "tenant id equals 345345435",
+                RULES_KEY: {
+                    "tenant id equals 345345435": {
                         RULE_DEFAULT_VALUE: False,
-                    },
-                ],
+                    }
+                },
             }
         }
     }
@@ -152,9 +149,9 @@ def test_invalid_rule():
         FEATURES_KEY: {
             "my_feature": {
                 FEATURE_DEFAULT_VAL_KEY: False,
-                RULES_KEY: [
-                    {RULE_NAME_KEY: "tenant id equals 345345435", RULE_DEFAULT_VALUE: False, CONDITIONS_KEY: []},
-                ],
+                RULES_KEY: {
+                    "tenant id equals 345345435": {RULE_DEFAULT_VALUE: False, CONDITIONS_KEY: []},
+                },
             }
         }
     }
@@ -167,9 +164,9 @@ def test_invalid_rule():
         FEATURES_KEY: {
             "my_feature": {
                 FEATURE_DEFAULT_VAL_KEY: False,
-                RULES_KEY: [
-                    {RULE_NAME_KEY: "tenant id equals 345345435", RULE_DEFAULT_VALUE: False, CONDITIONS_KEY: {}},
-                ],
+                RULES_KEY: {
+                    "tenant id equals 345345435": {RULE_DEFAULT_VALUE: False, CONDITIONS_KEY: {}},
+                },
             }
         }
     }
@@ -184,13 +181,12 @@ def test_invalid_condition():
         FEATURES_KEY: {
             "my_feature": {
                 FEATURE_DEFAULT_VAL_KEY: False,
-                RULES_KEY: [
-                    {
-                        RULE_NAME_KEY: "tenant id equals 345345435",
+                RULES_KEY: {
+                    "tenant id equals 345345435": {
                         RULE_DEFAULT_VALUE: False,
                         CONDITIONS_KEY: {CONDITION_ACTION: "stuff", CONDITION_KEY: "a", CONDITION_VALUE: "a"},
-                    },
-                ],
+                    }
+                },
             }
         }
     }
@@ -203,13 +199,12 @@ def test_invalid_condition():
         FEATURES_KEY: {
             "my_feature": {
                 FEATURE_DEFAULT_VAL_KEY: False,
-                RULES_KEY: [
-                    {
-                        RULE_NAME_KEY: "tenant id equals 345345435",
+                RULES_KEY: {
+                    "tenant id equals 345345435": {
                         RULE_DEFAULT_VALUE: False,
                         CONDITIONS_KEY: {CONDITION_ACTION: RuleAction.EQUALS.value},
-                    },
-                ],
+                    }
+                },
             }
         }
     }
@@ -222,17 +217,16 @@ def test_invalid_condition():
         FEATURES_KEY: {
             "my_feature": {
                 FEATURE_DEFAULT_VAL_KEY: False,
-                RULES_KEY: [
-                    {
-                        RULE_NAME_KEY: "tenant id equals 345345435",
+                RULES_KEY: {
+                    "tenant id equals 345345435": {
                         RULE_DEFAULT_VALUE: False,
                         CONDITIONS_KEY: {
                             CONDITION_ACTION: RuleAction.EQUALS.value,
                             CONDITION_KEY: 5,
                             CONDITION_VALUE: "a",
                         },
-                    },
-                ],
+                    }
+                },
             }
         }
     }
@@ -286,7 +280,7 @@ def test_validate_condition_invalid_condition_type():
 
     # WHEN calling validate_condition
     # THEN raise ConfigurationError
-    with pytest.raises(ConfigurationError, match="Invalid condition type"):
+    with pytest.raises(ConfigurationError, match="Feature rule condition must be a dictionary"):
         ConditionsValidator.validate_condition(condition=condition, rule_name="dummy")
 
 
@@ -296,7 +290,7 @@ def test_validate_condition_invalid_condition_action():
 
     # WHEN calling validate_condition
     # THEN raise ConfigurationError
-    with pytest.raises(ConfigurationError, match="Invalid action value"):
+    with pytest.raises(ConfigurationError, match="'action' value must be either"):
         ConditionsValidator.validate_condition_action(condition=condition, rule_name="dummy")
 
 
@@ -306,7 +300,7 @@ def test_validate_condition_invalid_condition_key():
 
     # WHEN calling validate_condition
     # THEN raise ConfigurationError
-    with pytest.raises(ConfigurationError, match="Invalid key value"):
+    with pytest.raises(ConfigurationError, match="'key' value must be a non empty string"):
         ConditionsValidator.validate_condition_key(condition=condition, rule_name="dummy")
 
 
@@ -318,28 +312,21 @@ def test_validate_condition_missing_condition_value():
     }
 
     # WHEN calling validate_condition
-    with pytest.raises(ConfigurationError, match="Missing condition value"):
+    with pytest.raises(ConfigurationError, match="'value' key must not be empty"):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name="dummy")
 
 
-def test_new_rule_format():
-    new_features = {
-        "my_feature": {
-            "default": True,
-            "rules": {
-                "tenant id equals 345345435": {
-                    "when_match": False,
-                    "conditions": [
-                        {
-                            "action": "EQUALS",
-                            "key": "tenant_id",
-                            "value": "345345435",
-                        }
-                    ],
-                },
-            },
-        }
-    }
+def test_validate_rule_invalid_rule_type():
+    # GIVEN an invalid rule type of empty list
+    # WHEN calling validate_rule
+    # THEN raise ConfigurationError
+    with pytest.raises(ConfigurationError, match="Feature rule must be a dictionary"):
+        RulesValidator.validate_rule(rule=[], rule_name="dummy", feature_name="dummy")
 
-    rules = RulesValidator(feature=new_features)
-    rules.validate()
+
+def test_validate_rule_invalid_rule_name():
+    # GIVEN a rule name is empty
+    # WHEN calling validate_rule_name
+    # THEN raise ConfigurationError
+    with pytest.raises(ConfigurationError, match="Rule name key must have a non-empty string"):
+        RulesValidator.validate_rule_name(rule_name="", feature_name="dummy")

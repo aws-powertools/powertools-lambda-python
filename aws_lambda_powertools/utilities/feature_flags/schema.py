@@ -11,7 +11,6 @@ FEATURES_KEY = "features"
 RULES_KEY = "rules"
 FEATURE_DEFAULT_VAL_KEY = "default"
 CONDITIONS_KEY = "conditions"
-RULE_NAME_KEY = "rule_name"
 RULE_DEFAULT_VALUE = "when_match"
 CONDITION_KEY = "key"
 CONDITION_VALUE = "value"
@@ -80,19 +79,18 @@ class RulesValidator(BaseValidator):
             conditions = ConditionsValidator(rule=rule, rule_name=rule_name)
             conditions.validate()
 
-    def validate_rule(self, rule, rule_name, feature_name):
+    @staticmethod
+    def validate_rule(rule, rule_name, feature_name):
         if not rule or not isinstance(rule, dict):
             raise ConfigurationError(f"Feature rule must be a dictionary, feature_name={feature_name}")
 
-        self.validate_rule_name(rule_name=rule_name, feature_name=feature_name)
-        self.validate_rule_default_value(rule=rule, rule_name=rule_name)
+        RulesValidator.validate_rule_name(rule_name=rule_name, feature_name=feature_name)
+        RulesValidator.validate_rule_default_value(rule=rule, rule_name=rule_name)
 
     @staticmethod
     def validate_rule_name(rule_name: str, feature_name: str):
         if not rule_name or not isinstance(rule_name, str):
-            raise ConfigurationError(
-                f"'rule_name' key must be present and have a non-empty string, feature_name={feature_name}"
-            )
+            raise ConfigurationError(f"Rule name key must have a non-empty string, feature_name={feature_name}")
 
     @staticmethod
     def validate_rule_default_value(rule: Dict, rule_name: str):
@@ -116,7 +114,7 @@ class ConditionsValidator(BaseValidator):
     @staticmethod
     def validate_condition(rule_name: str, condition: Dict[str, str]) -> None:
         if not condition or not isinstance(condition, dict):
-            raise ConfigurationError(f"Invalid condition type, not a dictionary, rule_name={rule_name}")
+            raise ConfigurationError(f"Feature rule condition must be a dictionary, rule_name={rule_name}")
 
         ConditionsValidator.validate_condition_action(condition=condition, rule_name=rule_name)
         ConditionsValidator.validate_condition_key(condition=condition, rule_name=rule_name)
@@ -126,16 +124,19 @@ class ConditionsValidator(BaseValidator):
     def validate_condition_action(condition: Dict[str, Any], rule_name: str):
         action = condition.get(CONDITION_ACTION, "")
         if action not in RuleAction.__members__:
-            raise ConfigurationError(f"Invalid action value, rule_name={rule_name}, action={action}")
+            allowed_values = [_action.value for _action in RuleAction]
+            raise ConfigurationError(
+                f"'action' value must be either {allowed_values}, rule_name={rule_name}, action={action}"
+            )
 
     @staticmethod
     def validate_condition_key(condition: Dict[str, Any], rule_name: str):
         key = condition.get(CONDITION_KEY, "")
         if not key or not isinstance(key, str):
-            raise ConfigurationError(f"Invalid key value, key has to be a non empty string, rule_name={rule_name}")
+            raise ConfigurationError(f"'key' value must be a non empty string, rule_name={rule_name}")
 
     @staticmethod
     def validate_condition_value(condition: Dict[str, Any], rule_name: str):
         value = condition.get(CONDITION_VALUE, "")
         if not value:
-            raise ConfigurationError(f"Missing condition value, rule_name={rule_name}")
+            raise ConfigurationError(f"'value' key must not be empty, rule_name={rule_name}")
