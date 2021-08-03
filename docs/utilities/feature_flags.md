@@ -55,21 +55,3 @@ By default, this utility provides AWS AppConfig as a configuration store. As suc
 ## Testing your code
 
 > NOTE: Share example on how customers can unit test their feature flags
-
-## Changes
-
-Potential changes to be validated when docs are in a better shape
-
-- [x] ~~`rules_context` to `context`~~
-- [x] `ConfigurationStore` to `FeatureFlags`
-- [x] `StoreProvider` to `StoreProvider`
-- [x] ~~Use `base.py` for interfaces for consistency (e.g. Metrics, Tracer, etc.)~~
-- [x] ~~AppConfig construct parameter names for consistency (e.g. `configuration_name` -> `name`, `service` -> `application`)~~
-- [x] ~~Rename `value_if_missing` param to `default` to match Python consistency (e.g. `os.getenv("VAR", default=False)`)~~
-- [x] ~~Rename `get_feature` to `evaluate`~~
-- [x] ~~Rename `get_all_enabled_feature_toggles` to `get_enabled_features`~~
-- [x] ~~Review redundant logging~~
-- [ ] Some docstrings and logger refer to AWS AppConfig only (outdated given StoreProvider)
-- [ ] Review why we're testing a private method(`is_rule_matched`)
-- [ ] Review `get_configuration`, `get_json_configuration`
-- [ ] Consider fine grained ConfigurationError instead of a single ConfigurationError
