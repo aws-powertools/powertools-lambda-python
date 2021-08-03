@@ -23,7 +23,82 @@ class RuleAction(str, Enum):
     CONTAINS = "CONTAINS"
 
 
-class SchemaValidator:
+class SchemaValidator(BaseValidator):
+    """Validates feature flag schema configuration
+
+    Schema
+    ------
+
+    **Feature object**
+
+    A dictionary containing default value and rules for matching.
+    The value MUST be an object and MIGHT contain the following members:
+
+    * **default**: `bool`. Defines default feature value. This MUST be present
+    * **rules**: `Dict[str, Dict]`. Rules object. This MIGHT be present
+
+    ```json
+    {
+        "my_feature": {
+            "default": True,
+            "rules": {}
+        }
+    }
+    ```
+
+    **Rules object**
+
+    A dictionary with each rule and their conditions that a feature might have.
+    The value MIGHT be present, and when defined it MUST contain the following members:
+
+    * **when_match**: `bool`. Defines value to return when context matches conditions
+    * **conditions**: `List[Dict]`. Conditions object. This MUST be present
+
+    ```json
+    {
+        "my_feature": {
+            "default": True,
+            "rules": {
+                "tenant id equals 345345435": {
+                    "when_match": False,
+                    "conditions": []
+                }
+            }
+        }
+    }
+    ```
+
+    **Conditions object**
+
+    A list of dictionaries containing conditions for a given rule.
+    The value MUST contain the following members:
+
+    * **action**: `str`. Operation to perform to match a key and value.
+    The value MUST be either EQUALS, STARTSWITH, ENDSWITH, CONTAINS
+    * **key**: `str`. Key in given context to perform operation
+    * **value**: `Any`. Value in given context that should match action operation.
+
+    ```json
+    {
+        "my_feature": {
+            "default": True,
+            "rules": {
+                "tenant id equals 345345435": {
+                    "when_match": False,
+                    "conditions": [
+                        {
+                            "action": "EQUALS",
+                            "key": "tenant_id",
+                            "value": "345345435",
+                        }
+                    ]
+                }
+            }
+        }
+    }
+    ```
+    """
+
     def __init__(self, schema: Dict[str, Any]):
         self.schema = schema
 
@@ -37,6 +112,8 @@ class SchemaValidator:
 
 
 class FeaturesValidator(BaseValidator):
+    """Validates each feature and calls RulesValidator to validate its rules"""
+
     def __init__(self, schema: Dict):
         self.schema = schema
 
@@ -58,6 +135,8 @@ class FeaturesValidator(BaseValidator):
 
 
 class RulesValidator(BaseValidator):
+    """Validates each rule and calls ConditionsValidator to validate each rule's conditions"""
+
     def __init__(self, feature: Dict[str, Any]):
         self.feature = feature
         self.feature_name = next(iter(self.feature))
