@@ -38,12 +38,9 @@ class SchemaValidator:
 
 
 class FeaturesValidator(BaseValidator):
-    def __init__(self, schema):
+    def __init__(self, schema: Dict):
         self.schema = schema
-        self.features: Optional[Dict[str, Dict]] = None
-
-        if isinstance(self.schema, dict):
-            self.features = self.schema.get(FEATURES_KEY)
+        self.features: Optional[Dict[str, Dict]] = self.schema.get(FEATURES_KEY)
 
     def validate(self):
         if not isinstance(self.features, dict):
@@ -71,12 +68,12 @@ class RulesValidator(BaseValidator):
         self.rules: Optional[List[Dict]] = self.feature.get(RULES_KEY)
 
     def validate(self):
-        if not isinstance(self.rules, list):
-            raise ConfigurationError(f"Feature rules is not a list, feature_name={self.feature_name}")
-
         if not self.rules:
             logger.debug("Rules are empty, ignoring validation")
             return
+
+        if not isinstance(self.rules, list):
+            raise ConfigurationError(f"Feature rules is not a list, feature_name={self.feature_name}")
 
         for rule in self.rules:
             self.validate_rule(rule, self.feature)

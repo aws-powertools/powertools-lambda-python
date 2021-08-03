@@ -57,7 +57,7 @@ class FeatureFlags:
                 return False
             # if we got here, all conditions match
             logger.debug(
-                f"rule matched, rule_name={rule_name}, rule_default_value={rule_default_value}, " f"name={feature_name}"
+                f"rule matched, rule_name={rule_name}, rule_default_value={rule_default_value}, name={feature_name}"
             )
             return True
         return False
@@ -160,7 +160,7 @@ class FeatureFlags:
         feature = features.get(name)
         if feature is None:
             logger.debug(
-                f"feature does not appear in configuration, using provided default, " f"name={name}, default={default}"
+                f"feature does not appear in configuration, using provided default, name={name}, default={default}"
             )
             return default
 
