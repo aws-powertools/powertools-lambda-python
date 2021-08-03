@@ -105,6 +105,8 @@ class FeatureFlags:
         ------
         ConfigurationError
             Any validation error
+        SchemaValidationError
+            When schema doesn't conform with feature flag schema
 
         Returns
         ------
@@ -170,6 +172,11 @@ class FeatureFlags:
         ------
         bool
             whether feature should be enabled or not
+
+        Raises
+        ------
+        SchemaValidationError
+            When schema doesn't conform with feature flag schema
         """
         if context is None:
             context = {}
@@ -214,6 +221,11 @@ class FeatureFlags:
             ```python
             ["premium_features", "my_feature_two", "always_true_feature"]
             ```
+
+        Raises
+        ------
+        SchemaValidationError
+            When schema doesn't conform with feature flag schema
         """
         if context is None:
             context = {}

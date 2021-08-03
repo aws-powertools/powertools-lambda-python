@@ -291,9 +291,8 @@ def test_toggles_no_match_rule_with_contains_action(mocker, config):
     mocked_app_config_schema = {
         "my_feature": {
             "default": expected_value,
-            "rules": [
-                {
-                    "rule_name": "tenant id is contained in [8, 2]",
+            "rules": {
+                "tenant id is contained in [8, 2]": {
                     "when_match": True,
                     "conditions": [
                         {
@@ -302,8 +301,8 @@ def test_toggles_no_match_rule_with_contains_action(mocker, config):
                             "value": ["8", "2"],
                         }
                     ],
-                },
-            ],
+                }
+            },
         }
     }
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)

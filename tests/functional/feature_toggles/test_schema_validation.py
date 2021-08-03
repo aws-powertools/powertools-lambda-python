@@ -2,7 +2,7 @@ import logging
 
 import pytest  # noqa: F401
 
-from aws_lambda_powertools.utilities.feature_flags.exceptions import ConfigurationError
+from aws_lambda_powertools.utilities.feature_flags.exceptions import SchemaValidationError
 from aws_lambda_powertools.utilities.feature_flags.schema import (
     CONDITION_ACTION,
     CONDITION_KEY,
@@ -24,7 +24,7 @@ EMPTY_SCHEMA = {"": ""}
 
 def test_invalid_features_dict():
     validator = SchemaValidator(schema=[])
-    with pytest.raises(ConfigurationError):
+    with pytest.raises(SchemaValidationError):
         validator.validate()
 
 
@@ -45,7 +45,7 @@ def test_empty_features_not_fail():
 )
 def test_invalid_feature(schema):
     validator = SchemaValidator(schema)
-    with pytest.raises(ConfigurationError):
+    with pytest.raises(SchemaValidationError):
         validator.validate()
 
 
@@ -73,7 +73,7 @@ def test_invalid_rule():
         }
     }
     validator = SchemaValidator(schema)
-    with pytest.raises(ConfigurationError):
+    with pytest.raises(SchemaValidationError):
         validator.validate()
 
     # rules RULE_MATCH_VALUE is not bool
@@ -88,7 +88,7 @@ def test_invalid_rule():
         }
     }
     validator = SchemaValidator(schema)
-    with pytest.raises(ConfigurationError):
+    with pytest.raises(SchemaValidationError):
         validator.validate()
 
     # missing conditions list
@@ -103,7 +103,7 @@ def test_invalid_rule():
         }
     }
     validator = SchemaValidator(schema)
-    with pytest.raises(ConfigurationError):
+    with pytest.raises(SchemaValidationError):
         validator.validate()
 
     # condition list is empty
@@ -116,7 +116,7 @@ def test_invalid_rule():
         }
     }
     validator = SchemaValidator(schema)
-    with pytest.raises(ConfigurationError):
+    with pytest.raises(SchemaValidationError):
         validator.validate()
 
     # condition is invalid type, not list
@@ -129,7 +129,7 @@ def test_invalid_rule():
         }
     }
     validator = SchemaValidator(schema)
-    with pytest.raises(ConfigurationError):
+    with pytest.raises(SchemaValidationError):
         validator.validate()
 
 
@@ -147,7 +147,7 @@ def test_invalid_condition():
         }
     }
     validator = SchemaValidator(schema)
-    with pytest.raises(ConfigurationError):
+    with pytest.raises(SchemaValidationError):
         validator.validate()
 
     # missing condition key and value
@@ -163,7 +163,7 @@ def test_invalid_condition():
         }
     }
     validator = SchemaValidator(schema)
-    with pytest.raises(ConfigurationError):
+    with pytest.raises(SchemaValidationError):
         validator.validate()
 
     # invalid condition key type, not string
@@ -183,7 +183,7 @@ def test_invalid_condition():
         }
     }
     validator = SchemaValidator(schema)
-    with pytest.raises(ConfigurationError):
+    with pytest.raises(SchemaValidationError):
         validator.validate()
 
 
@@ -229,8 +229,8 @@ def test_validate_condition_invalid_condition_type():
     condition = {}
 
     # WHEN calling validate_condition
-    # THEN raise ConfigurationError
-    with pytest.raises(ConfigurationError, match="Feature rule condition must be a dictionary"):
+    # THEN raise SchemaValidationError
+    with pytest.raises(SchemaValidationError, match="Feature rule condition must be a dictionary"):
         ConditionsValidator.validate_condition(condition=condition, rule_name="dummy")
 
 
@@ -239,8 +239,8 @@ def test_validate_condition_invalid_condition_action():
     condition = {"action": "INVALID", "key": "tenant_id", "value": "12345"}
 
     # WHEN calling validate_condition
-    # THEN raise ConfigurationError
-    with pytest.raises(ConfigurationError, match="'action' value must be either"):
+    # THEN raise SchemaValidationError
+    with pytest.raises(SchemaValidationError, match="'action' value must be either"):
         ConditionsValidator.validate_condition_action(condition=condition, rule_name="dummy")
 
 
@@ -249,8 +249,8 @@ def test_validate_condition_invalid_condition_key():
     condition = {"action": RuleAction.EQUALS.value, "value": "12345"}
 
     # WHEN calling validate_condition
-    # THEN raise ConfigurationError
-    with pytest.raises(ConfigurationError, match="'key' value must be a non empty string"):
+    # THEN raise SchemaValidationError
+    with pytest.raises(SchemaValidationError, match="'key' value must be a non empty string"):
         ConditionsValidator.validate_condition_key(condition=condition, rule_name="dummy")
 
 
@@ -262,21 +262,21 @@ def test_validate_condition_missing_condition_value():
     }
 
     # WHEN calling validate_condition
-    with pytest.raises(ConfigurationError, match="'value' key must not be empty"):
+    with pytest.raises(SchemaValidationError, match="'value' key must not be empty"):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name="dummy")
 
 
 def test_validate_rule_invalid_rule_type():
     # GIVEN an invalid rule type of empty list
     # WHEN calling validate_rule
-    # THEN raise ConfigurationError
-    with pytest.raises(ConfigurationError, match="Feature rule must be a dictionary"):
+    # THEN raise SchemaValidationError
+    with pytest.raises(SchemaValidationError, match="Feature rule must be a dictionary"):
         RulesValidator.validate_rule(rule=[], rule_name="dummy", feature_name="dummy")
 
 
 def test_validate_rule_invalid_rule_name():
     # GIVEN a rule name is empty
     # WHEN calling validate_rule_name
-    # THEN raise ConfigurationError
-    with pytest.raises(ConfigurationError, match="Rule name key must have a non-empty string"):
+    # THEN raise SchemaValidationError
+    with pytest.raises(SchemaValidationError, match="Rule name key must have a non-empty string"):
         RulesValidator.validate_rule_name(rule_name="", feature_name="dummy")
