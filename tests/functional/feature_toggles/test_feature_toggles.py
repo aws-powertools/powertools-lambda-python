@@ -53,7 +53,7 @@ def test_toggles_rule_does_not_match(mocker, config):
                 "rules": [
                     {
                         "rule_name": "tenant id equals 345345435",
-                        "value_when_applies": False,
+                        "when_match": False,
                         "conditions": [
                             {
                                 "action": RuleAction.EQUALS.value,
@@ -103,7 +103,7 @@ def test_toggles_conditions_no_match(mocker, config):
                 "rules": [
                     {
                         "rule_name": "tenant id equals 345345435",
-                        "value_when_applies": False,
+                        "when_match": False,
                         "conditions": [
                             {
                                 "action": RuleAction.EQUALS.value,
@@ -133,7 +133,7 @@ def test_toggles_conditions_rule_match_equal_multiple_conditions(mocker, config)
                 "rules": [
                     {
                         "rule_name": "tenant id equals 6 and username is a",
-                        "value_when_applies": expected_value,
+                        "when_match": expected_value,
                         "conditions": [
                             {
                                 "action": RuleAction.EQUALS.value,  # this rule will match, it has multiple conditions
@@ -175,7 +175,7 @@ def test_toggles_conditions_no_rule_match_equal_multiple_conditions(mocker, conf
                 "rules": [
                     {
                         "rule_name": "tenant id equals 645654 and username is a",  # rule will not match
-                        "value_when_applies": False,
+                        "when_match": False,
                         "conditions": [
                             {
                                 "action": RuleAction.EQUALS.value,
@@ -211,7 +211,7 @@ def test_toggles_conditions_rule_match_multiple_actions_multiple_rules_multiple_
                 "rules": [
                     {
                         "rule_name": "tenant id equals 6 and username startswith a",
-                        "value_when_applies": expected_value_first_check,
+                        "when_match": expected_value_first_check,
                         "conditions": [
                             {
                                 "action": RuleAction.EQUALS.value,
@@ -227,7 +227,7 @@ def test_toggles_conditions_rule_match_multiple_actions_multiple_rules_multiple_
                     },
                     {
                         "rule_name": "tenant id equals 4446 and username startswith a and endswith z",
-                        "value_when_applies": expected_value_second_check,
+                        "when_match": expected_value_second_check,
                         "conditions": [
                             {
                                 "action": RuleAction.EQUALS.value,
@@ -280,7 +280,7 @@ def test_toggles_match_rule_with_contains_action(mocker, config):
                 "rules": [
                     {
                         "rule_name": "tenant id is contained in [6, 2]",
-                        "value_when_applies": expected_value,
+                        "when_match": expected_value,
                         "conditions": [
                             {
                                 "action": RuleAction.CONTAINS.value,
@@ -307,7 +307,7 @@ def test_toggles_no_match_rule_with_contains_action(mocker, config):
                 "rules": [
                     {
                         "rule_name": "tenant id is contained in [8, 2]",
-                        "value_when_applies": True,
+                        "when_match": True,
                         "conditions": [
                             {
                                 "action": RuleAction.CONTAINS.value,
@@ -334,7 +334,7 @@ def test_multiple_features_enabled(mocker, config):
                 "rules": [
                     {
                         "rule_name": "tenant id is contained in [6, 2]",
-                        "value_when_applies": True,
+                        "when_match": True,
                         "conditions": [
                             {
                                 "action": RuleAction.CONTAINS.value,
@@ -367,7 +367,7 @@ def test_multiple_features_only_some_enabled(mocker, config):
                 "rules": [
                     {
                         "rule_name": "tenant id is contained in [6, 2]",
-                        "value_when_applies": True,
+                        "when_match": True,
                         "conditions": [
                             {
                                 "action": RuleAction.CONTAINS.value,
@@ -389,7 +389,7 @@ def test_multiple_features_only_some_enabled(mocker, config):
                 "rules": [
                     {
                         "rule_name": "tenant id equals 7",
-                        "value_when_applies": False,
+                        "when_match": False,
                         "conditions": [
                             {
                                 "action": RuleAction.EQUALS.value,
