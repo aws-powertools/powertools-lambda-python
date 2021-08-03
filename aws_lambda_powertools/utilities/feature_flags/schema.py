@@ -115,13 +115,14 @@ class ConditionsValidator(BaseValidator):
         for condition in self.conditions:
             self.validate_condition(rule_name=self.rule_name, condition=condition)
 
-    def validate_condition(self, rule_name: str, condition: Dict[str, str]) -> None:
+    @staticmethod
+    def validate_condition(rule_name: str, condition: Dict[str, str]) -> None:
         if not condition or not isinstance(condition, dict):
             raise ConfigurationError(f"Invalid condition type, not a dictionary, rule_name={rule_name}")
 
-        self.validate_condition_action(condition=condition, rule_name=rule_name)
-        self.validate_condition_key(condition=condition, rule_name=rule_name)
-        self.validate_condition_value(condition=condition, rule_name=rule_name)
+        ConditionsValidator.validate_condition_action(condition=condition, rule_name=rule_name)
+        ConditionsValidator.validate_condition_key(condition=condition, rule_name=rule_name)
+        ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
 
     @staticmethod
     def validate_condition_action(condition: Dict[str, Any], rule_name: str):

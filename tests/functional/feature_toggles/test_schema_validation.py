@@ -283,78 +283,51 @@ def test_valid_condition_all_actions():
 
 def test_validate_condition_invalid_condition_type():
     # GIVEN an invalid condition type of empty dict
-    rule_conditions = {"conditions": {}}
-    condition = rule_conditions[CONDITIONS_KEY]
-    rule_name = "dummy"
+    condition = {}
 
     # WHEN calling validate_condition
     # THEN raise ConfigurationError
     with pytest.raises(ConfigurationError, match="Invalid condition type"):
-        validator = ConditionsValidator(rule=rule_conditions, rule_name=rule_name)
-        validator.validate_condition(condition=condition, rule_name=rule_name)
+        ConditionsValidator.validate_condition(condition=condition, rule_name="dummy")
 
 
 def test_validate_condition_invalid_condition_action():
     # GIVEN an invalid condition action of foo
-    rule_conditions = {
-        "conditions": [{"action": "INVALID", "key": "tenant_id", "value": "12345"}],
-    }
-    condition = rule_conditions[CONDITIONS_KEY][0]
-    rule_name = "dummy"
+    condition = {"action": "INVALID", "key": "tenant_id", "value": "12345"}
 
     # WHEN calling validate_condition
     # THEN raise ConfigurationError
     with pytest.raises(ConfigurationError, match="Invalid action value"):
-        validator = ConditionsValidator(rule=rule_conditions, rule_name=rule_name)
-        validator.validate_condition_action(condition=condition, rule_name=rule_name)
+        ConditionsValidator.validate_condition_action(condition=condition, rule_name="dummy")
 
 
 def test_validate_condition_invalid_condition_key():
     # GIVEN a configuration with a missing "key"
-    rule_conditions = {
-        "conditions": [{"action": RuleAction.EQUALS.value, "value": "12345"}],
-    }
-    condition = rule_conditions[CONDITIONS_KEY][0]
-    rule_name = "dummy"
+    condition = {"action": RuleAction.EQUALS.value, "value": "12345"}
 
     # WHEN calling validate_condition
     # THEN raise ConfigurationError
     with pytest.raises(ConfigurationError, match="Invalid key value"):
-        validator = ConditionsValidator(rule=rule_conditions, rule_name=rule_name)
-        validator.validate_condition_key(condition=condition, rule_name=rule_name)
+        ConditionsValidator.validate_condition_key(condition=condition, rule_name="dummy")
 
 
 def test_validate_condition_missing_condition_value():
     # GIVEN a configuration with a missing condition value
-    rule_conditions = {
-        "conditions": [
-            {
-                "action": RuleAction.EQUALS.value,
-                "key": "tenant_id",
-            }
-        ],
+    condition = {
+        "action": RuleAction.EQUALS.value,
+        "key": "tenant_id",
     }
-    condition = rule_conditions[CONDITIONS_KEY][0]
-    rule_name = "dummy"
 
     # WHEN calling validate_condition
     with pytest.raises(ConfigurationError, match="Missing condition value"):
-        validator = ConditionsValidator(rule=rule_conditions, rule_name=rule_name)
-        validator.validate_condition_value(condition=condition, rule_name=rule_name)
+        ConditionsValidator.validate_condition_value(condition=condition, rule_name="dummy")
 
 
 def test_validate_rule_invalid_rule_name():
     # GIVEN a rule_name not in the rule dict
-    feature = {
-        "feature_default_value": True,
-        "rules": [
-            {"invalid_rule_name": "tenant id equals 345345435"},
-        ],
-    }
-    rule = feature[RULES_KEY][0]
+    rule = {"invalid_rule_name": "tenant id equals 345345435"}
 
     # WHEN calling _validate_rule
     # THEN raise ConfigurationError
     with pytest.raises(ConfigurationError, match="'rule_name' key must be present*"):
-        rules_validator = RulesValidator(feature=feature, feature_name="my_feature")
-        rules_validator.validate_rule_name(rule=rule, feature_name="my_feature")
+        RulesValidator.validate_rule_name(rule=rule, feature_name="dummy")
