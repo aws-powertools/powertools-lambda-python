@@ -1,4 +1,4 @@
-class ConfigurationError(Exception):
+class ConfigurationStoreError(Exception):
     """When a configuration store raises an exception on config retrieval or parsing"""
 
 

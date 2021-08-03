@@ -7,7 +7,7 @@ from aws_lambda_powertools.utilities.parameters import AppConfigProvider, GetPar
 
 from ...shared import jmespath_utils
 from .base import StoreProvider
-from .exceptions import ConfigurationError
+from .exceptions import ConfigurationStoreError
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class AppConfigStore(StoreProvider):
 
         Raises
         ------
-        ConfigurationError
+        ConfigurationStoreError
             Any validation error or AppConfig error that can occur
 
         Returns
@@ -82,4 +82,4 @@ class AppConfigStore(StoreProvider):
 
             return cast(dict, config)
         except (GetParameterError, TransformParameterError) as exc:
-            raise ConfigurationError("Unable to get AWS AppConfig configuration file") from exc
+            raise ConfigurationStoreError("Unable to get AWS AppConfig configuration file") from exc

@@ -2,12 +2,12 @@
 """
 from .appconfig import AppConfigStore
 from .base import StoreProvider
-from .exceptions import ConfigurationError
+from .exceptions import ConfigurationStoreError
 from .feature_flags import FeatureFlags
 from .schema import RuleAction, SchemaValidator
 
 __all__ = [
-    "ConfigurationError",
+    "ConfigurationStoreError",
     "FeatureFlags",
     "RuleAction",
     "SchemaValidator",

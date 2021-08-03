@@ -9,7 +9,7 @@ class StoreProvider(ABC):
 
         Raises
         ------
-        ConfigurationError
+        ConfigurationStoreError
             Any error that can occur during schema fetch or JSON parse
 
         Returns

@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Union, cast
 
 from . import schema
 from .base import StoreProvider
-from .exceptions import ConfigurationError
+from .exceptions import ConfigurationStoreError
 
 logger = logging.getLogger(__name__)
 
@@ -103,8 +103,8 @@ class FeatureFlags:
 
         Raises
         ------
-        ConfigurationError
-            Any validation error
+        ConfigurationStoreError
+            Any propagated error from store
         SchemaValidationError
             When schema doesn't conform with feature flag schema
 
@@ -140,7 +140,10 @@ class FeatureFlags:
         """
         # parse result conf as JSON, keep in cache for max age defined in store
         logger.debug(f"Fetching schema from registered store, store={self._store}")
-        config = self._store.get_configuration()
+        try:
+            config = self._store.get_configuration()
+        except Exception as err:
+            raise ConfigurationStoreError("Unable to fetch schema from registered store") from err
 
         validator = schema.SchemaValidator(schema=config)
         validator.validate()
@@ -183,7 +186,7 @@ class FeatureFlags:
 
         try:
             features = self.get_configuration()
-        except ConfigurationError as err:
+        except ConfigurationStoreError as err:
             logger.debug(f"Failed to fetch feature flags from store, returning default provided, reason={err}")
             return default
 
@@ -234,7 +237,7 @@ class FeatureFlags:
 
         try:
             features: Dict[str, Any] = self.get_configuration()
-        except ConfigurationError as err:
+        except ConfigurationStoreError as err:
             logger.debug(f"Failed to fetch feature flags from store, returning empty list, reason={err}")
             return features_enabled
 

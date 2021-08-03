@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 import pytest
 from botocore.config import Config
 
-from aws_lambda_powertools.utilities.feature_flags import ConfigurationError, schema
+from aws_lambda_powertools.utilities.feature_flags import ConfigurationStoreError, schema
 from aws_lambda_powertools.utilities.feature_flags.appconfig import AppConfigStore
 from aws_lambda_powertools.utilities.feature_flags.feature_flags import FeatureFlags
 from aws_lambda_powertools.utilities.feature_flags.schema import RuleAction
@@ -387,7 +387,7 @@ def test_multiple_features_only_some_enabled(mocker, config):
 
 
 def test_get_feature_toggle_handles_error(mocker, config):
-    # GIVEN a schema fetch that raises a ConfigurationError
+    # GIVEN a schema fetch that raises a ConfigurationStoreError
     schema_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
     feature_flags = FeatureFlags(schema_fetcher)
 
@@ -399,7 +399,7 @@ def test_get_feature_toggle_handles_error(mocker, config):
 
 
 def test_get_all_enabled_feature_toggles_handles_error(mocker, config):
-    # GIVEN a schema fetch that raises a ConfigurationError
+    # GIVEN a schema fetch that raises a ConfigurationStoreError
     schema_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
     feature_flags = FeatureFlags(schema_fetcher)
 
@@ -415,10 +415,10 @@ def test_app_config_get_parameter_err(mocker, config):
     app_conf_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
 
     # WHEN calling get_configuration
-    with pytest.raises(ConfigurationError) as err:
+    with pytest.raises(ConfigurationStoreError) as err:
         app_conf_fetcher.get_configuration()
 
-    # THEN raise ConfigurationError error
+    # THEN raise ConfigurationStoreError error
     assert "AWS AppConfig configuration" in str(err.value)
 
 
