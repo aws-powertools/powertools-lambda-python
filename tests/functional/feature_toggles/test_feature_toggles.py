@@ -6,7 +6,16 @@ from botocore.config import Config
 from aws_lambda_powertools.utilities.feature_flags import ConfigurationStoreError, schema
 from aws_lambda_powertools.utilities.feature_flags.appconfig import AppConfigStore
 from aws_lambda_powertools.utilities.feature_flags.feature_flags import FeatureFlags
-from aws_lambda_powertools.utilities.feature_flags.schema import RuleAction
+from aws_lambda_powertools.utilities.feature_flags.schema import (
+    CONDITION_ACTION,
+    CONDITION_KEY,
+    CONDITION_VALUE,
+    CONDITIONS_KEY,
+    FEATURE_DEFAULT_VAL_KEY,
+    RULE_MATCH_VALUE,
+    RULES_KEY,
+    RuleAction,
+)
 from aws_lambda_powertools.utilities.parameters import GetParameterError
 
 
@@ -460,4 +469,30 @@ def test_features_jmespath_envelope(mocker, config):
     mocked_app_config_schema = {"features": {"my_feature": {"default": expected_value}}}
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config, envelope="features")
     toggle = feature_flags.evaluate(name="my_feature", context={}, default=False)
+    assert toggle == expected_value
+
+
+# test_match_rule_with_contains_action
+def test_match_condition_with_dict_value(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            FEATURE_DEFAULT_VAL_KEY: False,
+            RULES_KEY: {
+                "tenant id is 6 and username is lessa": {
+                    RULE_MATCH_VALUE: expected_value,
+                    CONDITIONS_KEY: [
+                        {
+                            CONDITION_ACTION: RuleAction.EQUALS.value,
+                            CONDITION_KEY: "tenant",
+                            CONDITION_VALUE: {"tenant_id": "6", "username": "lessa"},
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    ctx = {"tenant": {"tenant_id": "6", "username": "lessa"}}
+    toggle = feature_flags.evaluate(name="my_feature", context=ctx, default=False)
     assert toggle == expected_value
