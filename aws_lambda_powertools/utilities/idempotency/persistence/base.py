@@ -14,7 +14,7 @@ from typing import Any, Dict, Optional
 import jmespath
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
-from aws_lambda_powertools.shared.jmespath_functions import PowertoolsFunctions
+from aws_lambda_powertools.shared.jmespath_utils import PowertoolsFunctions
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
