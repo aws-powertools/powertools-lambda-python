@@ -140,11 +140,7 @@ class FeatureFlags:
         """
         # parse result conf as JSON, keep in cache for max age defined in store
         logger.debug(f"Fetching schema from registered store, store={self._store}")
-        try:
-            config = self._store.get_configuration()
-        except Exception as err:
-            raise ConfigurationStoreError("Unable to fetch schema from registered store") from err
-
+        config = self._store.get_configuration()
         validator = schema.SchemaValidator(schema=config)
         validator.validate()
 

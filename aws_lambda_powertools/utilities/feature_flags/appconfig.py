@@ -1,4 +1,5 @@
 import logging
+import traceback
 from typing import Any, Dict, Optional, cast
 
 from botocore.config import Config
@@ -7,7 +8,7 @@ from aws_lambda_powertools.utilities.parameters import AppConfigProvider, GetPar
 
 from ...shared import jmespath_utils
 from .base import StoreProvider
-from .exceptions import ConfigurationStoreError
+from .exceptions import ConfigurationStoreError, StoreClientError
 
 logger = logging.getLogger(__name__)
 
@@ -85,4 +86,7 @@ class AppConfigStore(StoreProvider):
 
             return config
         except (GetParameterError, TransformParameterError) as exc:
+            err_msg = traceback.format_exc()
+            if "AccessDenied" in err_msg:
+                raise StoreClientError(err_msg) from exc
             raise ConfigurationStoreError("Unable to get AWS AppConfig configuration file") from exc

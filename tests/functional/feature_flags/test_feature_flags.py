@@ -5,6 +5,7 @@ from botocore.config import Config
 
 from aws_lambda_powertools.utilities.feature_flags import ConfigurationStoreError, schema
 from aws_lambda_powertools.utilities.feature_flags.appconfig import AppConfigStore
+from aws_lambda_powertools.utilities.feature_flags.exceptions import StoreClientError
 from aws_lambda_powertools.utilities.feature_flags.feature_flags import FeatureFlags
 from aws_lambda_powertools.utilities.feature_flags.schema import RuleAction
 from aws_lambda_powertools.utilities.parameters import GetParameterError
@@ -487,3 +488,16 @@ def test_match_condition_with_dict_value(mocker, config):
     ctx = {"tenant": {"tenant_id": "6", "username": "lessa"}}
     toggle = feature_flags.evaluate(name="my_feature", context=ctx, default=False)
     assert toggle == expected_value
+
+
+def test_get_feature_toggle_propagates_access_denied_error(mocker, config):
+    # GIVEN a schema fetch that raises a StoreClientError
+    # due to client invalid permissions to fetch from the store
+    err = "An error occurred (AccessDeniedException) when calling the GetConfiguration operation"
+    schema_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError(err))
+    feature_flags = FeatureFlags(schema_fetcher)
+
+    # WHEN calling evaluate
+    # THEN raise StoreClientError error
+    with pytest.raises(StoreClientError, match="AccessDeniedException") as err:
+        feature_flags.evaluate(name="Foo", default=False)
