@@ -69,10 +69,13 @@ class AppConfigStore(StoreProvider):
         """
         try:
             # parse result conf as JSON, keep in cache for self.max_age seconds
-            config = self._conf_store.get(
-                name=self.name,
-                transform=TRANSFORM_TYPE,
-                max_age=self.cache_seconds,
+            config = cast(
+                dict,
+                self._conf_store.get(
+                    name=self.name,
+                    transform=TRANSFORM_TYPE,
+                    max_age=self.cache_seconds,
+                ),
             )
 
             if self.envelope:
@@ -80,6 +83,6 @@ class AppConfigStore(StoreProvider):
                     data=config, envelope=self.envelope, jmespath_options=self.jmespath_options
                 )
 
-            return cast(dict, config)
+            return config
         except (GetParameterError, TransformParameterError) as exc:
             raise ConfigurationStoreError("Unable to get AWS AppConfig configuration file") from exc

@@ -24,7 +24,7 @@ repos:
             types: [python]
           - id: isort
             name: formatting::isort
-            entry: poetry run isort -rc
+            entry: poetry run isort
             language: system
             types: [python]
     - repo: local

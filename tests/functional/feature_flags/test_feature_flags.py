@@ -6,16 +6,7 @@ from botocore.config import Config
 from aws_lambda_powertools.utilities.feature_flags import ConfigurationStoreError, schema
 from aws_lambda_powertools.utilities.feature_flags.appconfig import AppConfigStore
 from aws_lambda_powertools.utilities.feature_flags.feature_flags import FeatureFlags
-from aws_lambda_powertools.utilities.feature_flags.schema import (
-    CONDITION_ACTION,
-    CONDITION_KEY,
-    CONDITION_VALUE,
-    CONDITIONS_KEY,
-    FEATURE_DEFAULT_VAL_KEY,
-    RULE_MATCH_VALUE,
-    RULES_KEY,
-    RuleAction,
-)
+from aws_lambda_powertools.utilities.feature_flags.schema import RuleAction
 from aws_lambda_powertools.utilities.parameters import GetParameterError
 
 
@@ -57,7 +48,7 @@ def init_fetcher_side_effect(mocker, config: Config, side_effect) -> AppConfigSt
 
 # this test checks that we get correct value of feature that exists in the schema.
 # we also don't send an empty context dict in this case
-def test_toggles_rule_does_not_match(mocker, config):
+def test_flags_rule_does_not_match(mocker, config):
     expected_value = True
     mocked_app_config_schema = {
         "my_feature": {
@@ -84,7 +75,7 @@ def test_toggles_rule_does_not_match(mocker, config):
 
 # this test checks that if you try to get a feature that doesn't exist in the schema,
 # you get the default value of False that was sent to the evaluate API
-def test_toggles_no_conditions_feature_does_not_exist(mocker, config):
+def test_flags_no_conditions_feature_does_not_exist(mocker, config):
     expected_value = False
     mocked_app_config_schema = {"my_fake_feature": {"default": True}}
 
@@ -95,7 +86,7 @@ def test_toggles_no_conditions_feature_does_not_exist(mocker, config):
 
 # check that feature match works when they are no rules and we send context.
 # default value is False but the feature has a True default_value.
-def test_toggles_no_rules(mocker, config):
+def test_flags_no_rules(mocker, config):
     expected_value = True
     mocked_app_config_schema = {"my_feature": {"default": expected_value}}
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
@@ -104,7 +95,7 @@ def test_toggles_no_rules(mocker, config):
 
 
 # check a case where the feature exists but the rule doesn't match so we revert to the default value of the feature
-def test_toggles_conditions_no_match(mocker, config):
+def test_flags_conditions_no_match(mocker, config):
     expected_value = True
     mocked_app_config_schema = {
         "my_feature": {
@@ -129,7 +120,7 @@ def test_toggles_conditions_no_match(mocker, config):
 
 
 # check that a rule can match when it has multiple conditions, see rule name for further explanation
-def test_toggles_conditions_rule_match_equal_multiple_conditions(mocker, config):
+def test_flags_conditions_rule_match_equal_multiple_conditions(mocker, config):
     expected_value = False
     tenant_id_val = "6"
     username_val = "a"
@@ -170,7 +161,7 @@ def test_toggles_conditions_rule_match_equal_multiple_conditions(mocker, config)
 # check a case when rule doesn't match and it has multiple conditions,
 # different tenant id causes the rule to not match.
 # default value of the feature in this case is True
-def test_toggles_conditions_no_rule_match_equal_multiple_conditions(mocker, config):
+def test_flags_conditions_no_rule_match_equal_multiple_conditions(mocker, config):
     expected_val = True
     mocked_app_config_schema = {
         "my_feature": {
@@ -201,7 +192,7 @@ def test_toggles_conditions_no_rule_match_equal_multiple_conditions(mocker, conf
 
 
 # check rule match for multiple of action types
-def test_toggles_conditions_rule_match_multiple_actions_multiple_rules_multiple_conditions(mocker, config):
+def test_flags_conditions_rule_match_multiple_actions_multiple_rules_multiple_conditions(mocker, config):
     expected_value_first_check = True
     expected_value_second_check = False
     expected_value_third_check = False
@@ -271,7 +262,7 @@ def test_toggles_conditions_rule_match_multiple_actions_multiple_rules_multiple_
 
 
 # check a case where the feature exists but the rule doesn't match so we revert to the default value of the feature
-def test_toggles_match_rule_with_contains_action(mocker, config):
+def test_flags_match_rule_with_contains_action(mocker, config):
     expected_value = True
     mocked_app_config_schema = {
         "my_feature": {
@@ -295,7 +286,7 @@ def test_toggles_match_rule_with_contains_action(mocker, config):
     assert toggle == expected_value
 
 
-def test_toggles_no_match_rule_with_contains_action(mocker, config):
+def test_flags_no_match_rule_with_contains_action(mocker, config):
     expected_value = False
     mocked_app_config_schema = {
         "my_feature": {
@@ -407,16 +398,16 @@ def test_get_feature_toggle_handles_error(mocker, config):
     assert toggle is False
 
 
-def test_get_all_enabled_feature_toggles_handles_error(mocker, config):
+def test_get_all_enabled_feature_flags_handles_error(mocker, config):
     # GIVEN a schema fetch that raises a ConfigurationStoreError
     schema_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
     feature_flags = FeatureFlags(schema_fetcher)
 
     # WHEN calling get_enabled_features
-    toggles = feature_flags.get_enabled_features(context=None)
+    flags = feature_flags.get_enabled_features(context=None)
 
     # THEN handle the error and return an empty list
-    assert toggles == []
+    assert flags == []
 
 
 def test_app_config_get_parameter_err(mocker, config):
@@ -477,15 +468,15 @@ def test_match_condition_with_dict_value(mocker, config):
     expected_value = True
     mocked_app_config_schema = {
         "my_feature": {
-            FEATURE_DEFAULT_VAL_KEY: False,
-            RULES_KEY: {
+            "default": False,
+            "rules": {
                 "tenant id is 6 and username is lessa": {
-                    RULE_MATCH_VALUE: expected_value,
-                    CONDITIONS_KEY: [
+                    "when_match": expected_value,
+                    "conditions": [
                         {
-                            CONDITION_ACTION: RuleAction.EQUALS.value,
-                            CONDITION_KEY: "tenant",
-                            CONDITION_VALUE: {"tenant_id": "6", "username": "lessa"},
+                            "action": RuleAction.EQUALS.value,
+                            "key": "tenant",
+                            "value": {"tenant_id": "6", "username": "lessa"},
                         }
                     ],
                 }

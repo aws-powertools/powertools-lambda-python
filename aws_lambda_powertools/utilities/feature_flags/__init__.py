@@ -1,5 +1,4 @@
-"""Advanced feature toggles utility
-"""
+"""Advanced feature flags utility"""
 from .appconfig import AppConfigStore
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError
