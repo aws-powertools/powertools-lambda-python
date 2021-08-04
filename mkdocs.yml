@@ -25,6 +25,7 @@ nav:
       - utilities/data_classes.md
       - utilities/parser.md
       - utilities/idempotency.md
+      - utilities/feature_flags.md
 
 theme:
   name: material

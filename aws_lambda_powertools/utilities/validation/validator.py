@@ -2,7 +2,8 @@ import logging
 from typing import Any, Callable, Dict, Optional, Union
 
 from ...middleware_factory import lambda_handler_decorator
-from .base import unwrap_event_from_envelope, validate_data_against_schema
+from ...shared import jmespath_utils
+from .base import validate_data_against_schema
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ def validator(
     inbound_formats: Optional[Dict] = None,
     outbound_schema: Optional[Dict] = None,
     outbound_formats: Optional[Dict] = None,
-    envelope: Optional[str] = None,
+    envelope: str = "",
     jmespath_options: Optional[Dict] = None,
 ) -> Any:
     """Lambda handler decorator to validate incoming/outbound data using a JSON Schema
@@ -116,7 +117,9 @@ def validator(
         When JMESPath expression to unwrap event is invalid
     """
     if envelope:
-        event = unwrap_event_from_envelope(data=event, envelope=envelope, jmespath_options=jmespath_options)
+        event = jmespath_utils.unwrap_event_from_envelope(
+            data=event, envelope=envelope, jmespath_options=jmespath_options
+        )
 
     if inbound_schema:
         logger.debug("Validating inbound event")
@@ -216,6 +219,8 @@ def validate(
         When JMESPath expression to unwrap event is invalid
     """
     if envelope:
-        event = unwrap_event_from_envelope(data=event, envelope=envelope, jmespath_options=jmespath_options)
+        event = jmespath_utils.unwrap_event_from_envelope(
+            data=event, envelope=envelope, jmespath_options=jmespath_options
+        )
 
     validate_data_against_schema(data=event, schema=schema, formats=formats)

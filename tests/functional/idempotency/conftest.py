@@ -11,11 +11,11 @@ from botocore import stub
 from botocore.config import Config
 from jmespath import functions
 
+from aws_lambda_powertools.shared.jmespath_utils import unwrap_event_from_envelope
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.idempotency import IdempotencyConfig
 from aws_lambda_powertools.utilities.validation import envelopes
-from aws_lambda_powertools.utilities.validation.base import unwrap_event_from_envelope
 from tests.functional.utils import load_event
 
 TABLE_NAME = "TEST_TABLE"
