@@ -42,7 +42,7 @@ class SchemaValidator(BaseValidator):
     * **default**: `bool`. Defines default feature value. This MUST be present
     * **rules**: `Dict[str, Dict]`. Rules object. This MIGHT be present
 
-    ```json
+    ```python
     {
         "my_feature": {
             "default": True,
@@ -59,7 +59,7 @@ class SchemaValidator(BaseValidator):
     * **when_match**: `bool`. Defines value to return when context matches conditions
     * **conditions**: `List[Dict]`. Conditions object. This MUST be present
 
-    ```json
+    ```python
     {
         "my_feature": {
             "default": True,
@@ -83,7 +83,7 @@ class SchemaValidator(BaseValidator):
     * **key**: `str`. Key in given context to perform operation
     * **value**: `Any`. Value in given context that should match action operation.
 
-    ```json
+    ```python
     {
         "my_feature": {
             "default": True,
