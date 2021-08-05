@@ -39,3 +39,18 @@ template: |
   ## This release was made possible by the following contributors:
 
   $CONTRIBUTORS
+
+autolabeler:
+  - label: 'documentation'
+    title:
+      - '/docs.+/i'
+  - label: 'bug'
+    title:
+      - '/fix/i'
+  - label: 'feature'
+    title:
+      - '/feat.+/i'
+      - '/refactor.+/i'
+  - label: 'internal'
+    title:
+      - '/chore.+/i'
