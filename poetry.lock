@@ -694,11 +694,11 @@ python-versions = ">=2.6"
 
 [[package]]
 name = "pdoc3"
-version = "0.9.2"
+version = "0.10.0"
 description = "Auto-generate API documentation for Python projects."
 category = "dev"
 optional = false
-python-versions = ">= 3.5"
+python-versions = ">= 3.6"
 
 [package.dependencies]
 mako = "*"
@@ -1085,7 +1085,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.1"
-content-hash = "458932b6d26286e05b821686641db661cbafacff296de24ed896c1f3b1b1a68e"
+content-hash = "dd886febae74a063977428d8ac4e232a7db2c074ebc2a318e1a8e8b59151892e"
 
 [metadata.files]
 appdirs = [
@@ -1415,7 +1415,7 @@ pbr = [
     {file = "pbr-5.6.0.tar.gz", hash = "sha256:42df03e7797b796625b1029c0400279c7c34fd7df24a7d7818a1abb5b38710dd"},
 ]
 pdoc3 = [
-    {file = "pdoc3-0.9.2.tar.gz", hash = "sha256:9df5d931f25f353c69c46819a3bd03ef96dd286f2a70bb1b93a23a781f91faa1"},
+    {file = "pdoc3-0.10.0.tar.gz", hash = "sha256:5f22e7bcb969006738e1aa4219c75a32f34c2d62d46dc9d2fb2d3e0b0287e4b7"},
 ]
 pluggy = [
     {file = "pluggy-0.13.1-py2.py3-none-any.whl", hash = "sha256:966c145cd83c96502c3c3868f50408687b38434af77734af1e9ca461a4081d2d"},
