@@ -46,7 +46,8 @@ class FeatureFlags:
             schema.RuleAction.EQUALS.value: lambda a, b: a == b,
             schema.RuleAction.STARTSWITH.value: lambda a, b: a.startswith(b),
             schema.RuleAction.ENDSWITH.value: lambda a, b: a.endswith(b),
-            schema.RuleAction.CONTAINS.value: lambda a, b: a in b,
+            schema.RuleAction.IN.value: lambda a, b: a in b,
+            schema.RuleAction.NOT_IN.value: lambda a, b: a not in b,
         }
 
         try:
@@ -65,10 +66,12 @@ class FeatureFlags:
 
         for condition in conditions:
             context_value = context.get(str(condition.get(schema.CONDITION_KEY)))
-            cond_action = condition.get(schema.CONDITION_ACTION, "")
-            cond_value = condition.get(schema.CONDITION_VALUE)
+            condition_action = condition.get(schema.CONDITION_ACTION, "")
+            condition_value = condition.get(schema.CONDITION_VALUE)
 
-            if not self._match_by_action(action=cond_action, condition_value=cond_value, context_value=context_value):
+            if not self._match_by_action(
+                action=condition_action, condition_value=condition_value, context_value=context_value
+            ):
                 logger.debug(
                     f"rule did not match action, rule_name={rule_name}, rule_value={rule_match_value}, "
                     f"name={feature_name}, context_value={str(context_value)} "

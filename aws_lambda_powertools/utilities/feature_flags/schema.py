@@ -20,7 +20,8 @@ class RuleAction(str, Enum):
     EQUALS = "EQUALS"
     STARTSWITH = "STARTSWITH"
     ENDSWITH = "ENDSWITH"
-    CONTAINS = "CONTAINS"
+    IN = "IN"
+    NOT_IN = "NOT_IN"
 
 
 class SchemaValidator(BaseValidator):
@@ -79,7 +80,7 @@ class SchemaValidator(BaseValidator):
     The value MUST contain the following members:
 
     * **action**: `str`. Operation to perform to match a key and value.
-    The value MUST be either EQUALS, STARTSWITH, ENDSWITH, CONTAINS
+    The value MUST be either EQUALS, STARTSWITH, ENDSWITH, IN
     * **key**: `str`. Key in given context to perform operation
     * **value**: `Any`. Value in given context that should match action operation.
 
