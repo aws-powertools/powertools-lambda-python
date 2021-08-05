@@ -217,9 +217,9 @@ class FeatureFlags:
 
             **Example**
 
-            ```python
-            ["premium_features", "my_feature_two", "always_true_feature"]
-            ```
+        ```python
+        ["premium_features", "my_feature_two", "always_true_feature"]
+        ```
 
         Raises
         ------
