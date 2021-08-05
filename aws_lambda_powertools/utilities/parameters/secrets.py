@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional, Union
 import boto3
 from botocore.config import Config
 
-from .base import DEFAULT_PROVIDERS, BaseProvider
+from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 
 
 class SecretsProvider(BaseProvider):
@@ -94,7 +94,11 @@ class SecretsProvider(BaseProvider):
 
 
 def get_secret(
-    name: str, transform: Optional[str] = None, force_fetch: bool = False, **sdk_options
+    name: str,
+    transform: Optional[str] = None,
+    force_fetch: bool = False,
+    max_age: int = DEFAULT_MAX_AGE_SECS,
+    **sdk_options
 ) -> Union[str, dict, bytes]:
     """
     Retrieve a parameter value from AWS Secrets Manager
@@ -107,6 +111,8 @@ def get_secret(
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
     force_fetch: bool, optional
         Force update even before a cached item has expired, defaults to False
+    max_age: int
+        Maximum age of the cached value
     sdk_options: dict, optional
         Dictionary of options that will be passed to the get_secret_value call
 
@@ -143,4 +149,6 @@ def get_secret(
     if "secrets" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["secrets"] = SecretsProvider()
 
-    return DEFAULT_PROVIDERS["secrets"].get(name, transform=transform, force_fetch=force_fetch, **sdk_options)
+    return DEFAULT_PROVIDERS["secrets"].get(
+        name, max_age=max_age, transform=transform, force_fetch=force_fetch, **sdk_options
+    )

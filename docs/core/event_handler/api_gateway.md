@@ -357,7 +357,7 @@ You can access the raw payload via `body` property, or if it's a JSON string you
 
 #### Headers
 
-Similarly to [Query strings](#query-strings), you can access headers as dictionary via `app.current_event.headers`, or by name via `get_header_value`.
+Similarly to [Query strings](#query-strings-and-payload), you can access headers as dictionary via `app.current_event.headers`, or by name via `get_header_value`.
 
 === "app.py"
 
@@ -376,6 +376,66 @@ Similarly to [Query strings](#query-strings), you can access headers as dictiona
 	def lambda_handler(event, context):
 		return app.resolve(event, context)
 	```
+
+### Raising HTTP errors
+
+You can easily raise any HTTP Error back to the client using `ServiceError` exception.
+
+!!! info "If you need to send custom headers, use [Response](#fine-grained-responses) class instead."
+
+Additionally, we provide pre-defined errors for the most popular ones such as HTTP 400, 401, 404, 500.
+
+
+=== "app.py"
+
+	```python hl_lines="4-10 20 25 30 35 39"
+	from aws_lambda_powertools import Logger, Tracer
+	from aws_lambda_powertools.logging import correlation_paths
+	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler.exceptions import (
+        BadRequestError,
+        InternalServerError,
+        NotFoundError,
+        ServiceError,
+        UnauthorizedError,
+    )
+
+	tracer = Tracer()
+	logger = Logger()
+
+	app = ApiGatewayResolver()
+
+    @app.get(rule="/bad-request-error")
+    def bad_request_error():
+		# HTTP  400
+        raise BadRequestError("Missing required parameter")
+
+    @app.get(rule="/unauthorized-error")
+    def unauthorized_error():
+		# HTTP 401
+        raise UnauthorizedError("Unauthorized")
+
+    @app.get(rule="/not-found-error")
+    def not_found_error():
+		# HTTP 404
+        raise NotFoundError
+
+    @app.get(rule="/internal-server-error")
+    def internal_server_error():
+		# HTTP 500
+        raise InternalServerError("Internal server error")
+
+    @app.get(rule="/service-error", cors=True)
+    def service_error():
+        raise ServiceError(502, "Something went wrong!")
+		# alternatively
+		# from http import HTTPStatus
+		# raise ServiceError(HTTPStatus.BAD_GATEWAY.value, "Something went wrong)
+
+    def handler(event, context):
+        return app.resolve(event, context)
+	```
+
 
 ## Advanced
 
@@ -401,7 +461,7 @@ This will ensure that CORS headers are always returned as part of the response w
 	@app.get("/hello/<name>")
 	@tracer.capture_method
 	def get_hello_you(name):
-		return {"message": f"hello {name}}"}
+		return {"message": f"hello {name}"}
 
 	@app.get("/hello", cors=False)  # optionally exclude CORS from response, if needed
 	@tracer.capture_method
@@ -646,6 +706,30 @@ Like `compress` feature, the client must send the `Accept` header with the corre
         "statusCode": 200
     }
     ```
+
+### Debug mode
+
+You can enable debug mode via `debug` param, or via `POWERTOOLS_EVENT_HANDLER_DEBUG` [environment variable](../../index.md#environment-variables).
+
+This will enable full tracebacks errors in the response, print request and responses, and set CORS in development mode.
+
+!!! warning "This might reveal sensitive information in your logs and relax CORS restrictions, use it sparingly."
+
+=== "debug.py"
+
+	```python hl_lines="3"
+	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+	app = ApiGatewayResolver(debug=True)
+
+	@app.get("/hello")
+	def get_hello_universe():
+		return {"message": "hello universe"}
+
+	def lambda_handler(event, context):
+		return app.resolve(event, context)
+	```
+
 
 ## Testing your code
 

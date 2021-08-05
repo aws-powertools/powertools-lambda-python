@@ -5,7 +5,7 @@ import numbers
 import os
 from collections import defaultdict
 from enum import Enum
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from ..shared import constants
 from ..shared.functions import resolve_env_var_choice
@@ -76,11 +76,11 @@ class MetricManager:
 
     def __init__(
         self,
-        metric_set: Dict[str, Any] = None,
-        dimension_set: Dict = None,
-        namespace: str = None,
-        metadata_set: Dict[str, Any] = None,
-        service: str = None,
+        metric_set: Optional[Dict[str, Any]] = None,
+        dimension_set: Optional[Dict] = None,
+        namespace: Optional[str] = None,
+        metadata_set: Optional[Dict[str, Any]] = None,
+        service: Optional[str] = None,
     ):
         self.metric_set = metric_set if metric_set is not None else {}
         self.dimension_set = dimension_set if dimension_set is not None else {}
@@ -136,7 +136,9 @@ class MetricManager:
             # since we could have more than 100 metrics
             self.metric_set.clear()
 
-    def serialize_metric_set(self, metrics: Dict = None, dimensions: Dict = None, metadata: Dict = None) -> Dict:
+    def serialize_metric_set(
+        self, metrics: Optional[Dict] = None, dimensions: Optional[Dict] = None, metadata: Optional[Dict] = None
+    ) -> Dict:
         """Serializes metric and dimensions set
 
         Parameters

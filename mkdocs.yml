@@ -25,11 +25,22 @@ nav:
       - utilities/data_classes.md
       - utilities/parser.md
       - utilities/idempotency.md
+      - utilities/feature_flags.md
 
 theme:
   name: material
   palette:
-    primary: deep purple
+    - scheme: default
+      primary: deep purple
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
   features:
     - navigation.sections
     - navigation.expand

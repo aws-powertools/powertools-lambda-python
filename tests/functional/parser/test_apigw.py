@@ -1,3 +1,6 @@
+import pytest
+from pydantic import ValidationError
+
 from aws_lambda_powertools.utilities.parser import envelopes, event_parser
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -100,3 +103,44 @@ def test_apigw_event():
     assert request_context.operationName is None
     assert identity.apiKey is None
     assert identity.apiKeyId is None
+
+
+def test_apigw_event_with_invalid_websocket_request():
+    # GIVEN an event with an eventType != MESSAGE and has  a messageId
+    event = {
+        "resource": "/",
+        "path": "/",
+        "httpMethod": "GET",
+        "headers": {},
+        "multiValueHeaders": {},
+        "isBase64Encoded": False,
+        "body": "Foo!",
+        "requestContext": {
+            "accountId": "1234",
+            "apiId": "myApi",
+            "httpMethod": "GET",
+            "identity": {
+                "sourceIp": "127.0.0.1",
+            },
+            "path": "/",
+            "protocol": "Https",
+            "requestId": "1234",
+            "requestTime": "2018-09-07T16:20:46Z",
+            "requestTimeEpoch": 1536992496000,
+            "resourcePath": "/",
+            "stage": "test",
+            "eventType": "DISCONNECT",
+            "messageId": "messageId",
+        },
+    }
+
+    # WHEN calling event_parser with APIGatewayProxyEventModel
+    with pytest.raises(ValidationError) as err:
+        handle_apigw_event(event, LambdaContext())
+
+    # THEN raise TypeError for invalid event
+    errors = err.value.errors()
+    assert len(errors) == 1
+    expected_msg = "messageId is available only when the `eventType` is `MESSAGE`"
+    assert errors[0]["msg"] == expected_msg
+    assert expected_msg in str(err.value)

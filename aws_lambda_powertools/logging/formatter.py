@@ -60,8 +60,8 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         json_serializer: Optional[Callable[[Dict], str]] = None,
         json_deserializer: Optional[Callable[[Dict], str]] = None,
         json_default: Optional[Callable[[Any], Any]] = None,
-        datefmt: str = None,
-        log_record_order: List[str] = None,
+        datefmt: Optional[str] = None,
+        log_record_order: Optional[List[str]] = None,
         utc: bool = False,
         **kwargs
     ):

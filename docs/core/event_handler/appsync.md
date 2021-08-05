@@ -598,6 +598,118 @@ Use the following code for `merchantInfo` and `searchMerchant` functions respect
     }
     ```
 
+### Custom data models
+
+You can subclass `AppSyncResolverEvent` to bring your own set of methods to handle incoming events, by using `data_model` param in the `resolve` method.
+
+
+=== "custom_model.py"
+
+    ```python hl_lines="11-14 19 26"
+      from aws_lambda_powertools import Logger, Tracer
+
+      from aws_lambda_powertools.logging import correlation_paths
+      from aws_lambda_powertools.event_handler import AppSyncResolver
+
+      tracer = Tracer(service="sample_resolver")
+      logger = Logger(service="sample_resolver")
+      app = AppSyncResolver()
+
+
+      class MyCustomModel(AppSyncResolverEvent):
+          @property
+          def country_viewer(self) -> str:
+              return self.request_headers.get("cloudfront-viewer-country")
+
+      @app.resolver(field_name="listLocations")
+      @app.resolver(field_name="locations")
+      def get_locations(name: str, description: str = ""):
+          if app.current_event.country_viewer == "US":
+            ...
+          return name + description
+
+      @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
+      @tracer.capture_lambda_handler
+      def lambda_handler(event, context):
+          return app.resolve(event, context, data_model=MyCustomModel)
+    ```
+
+=== "schema.graphql"
+
+    ```typescript hl_lines="6 20"
+    schema {
+        query: Query
+    }
+
+    type Query {
+        listLocations: [Location]
+    }
+
+    type Location {
+        id: ID!
+        name: String!
+        description: String
+        address: String
+    }
+
+    type Merchant {
+        id: String!
+        name: String!
+        description: String
+        locations: [Location]
+    }
+    ```
+
+=== "listLocations_event.json"
+
+  ```json
+  {
+      "arguments": {},
+      "identity": null,
+      "source": null,
+      "request": {
+        "headers": {
+          "x-forwarded-for": "1.2.3.4, 5.6.7.8",
+          "accept-encoding": "gzip, deflate, br",
+          "cloudfront-viewer-country": "NL",
+          "cloudfront-is-tablet-viewer": "false",
+          "referer": "https://eu-west-1.console.aws.amazon.com/appsync/home?region=eu-west-1",
+          "via": "2.0 9fce949f3749407c8e6a75087e168b47.cloudfront.net (CloudFront)",
+          "cloudfront-forwarded-proto": "https",
+          "origin": "https://eu-west-1.console.aws.amazon.com",
+          "x-api-key": "da1-c33ullkbkze3jg5hf5ddgcs4fq",
+          "content-type": "application/json",
+          "x-amzn-trace-id": "Root=1-606eb2f2-1babc433453a332c43fb4494",
+          "x-amz-cf-id": "SJw16ZOPuMZMINx5Xcxa9pB84oMPSGCzNOfrbJLvd80sPa0waCXzYQ==",
+          "content-length": "114",
+          "x-amz-user-agent": "AWS-Console-AppSync/",
+          "x-forwarded-proto": "https",
+          "host": "ldcvmkdnd5az3lm3gnf5ixvcyy.appsync-api.eu-west-1.amazonaws.com",
+          "accept-language": "en-US,en;q=0.5",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0",
+          "cloudfront-is-desktop-viewer": "true",
+          "cloudfront-is-mobile-viewer": "false",
+          "accept": "*/*",
+          "x-forwarded-port": "443",
+          "cloudfront-is-smarttv-viewer": "false"
+        }
+      },
+      "prev": null,
+      "info": {
+        "parentTypeName": "Query",
+        "selectionSetList": [
+          "id",
+          "name",
+          "description"
+        ],
+        "selectionSetGraphQL": "{\n  id\n  name\n  description\n}",
+        "fieldName": "listLocations",
+        "variables": {}
+      },
+      "stash": {}
+  }
+  ```
+
 ## Testing your code
 
 You can test your resolvers by passing a mocked or actual AppSync Lambda event that you're expecting.

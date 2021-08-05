@@ -2,7 +2,8 @@ import logging
 from typing import Any, Callable, Dict, Optional, Union
 
 from ...middleware_factory import lambda_handler_decorator
-from .base import unwrap_event_from_envelope, validate_data_against_schema
+from ...shared import jmespath_utils
+from .base import validate_data_against_schema
 
 logger = logging.getLogger(__name__)
 
@@ -12,12 +13,12 @@ def validator(
     handler: Callable,
     event: Union[Dict, str],
     context: Any,
-    inbound_schema: Dict = None,
+    inbound_schema: Optional[Dict] = None,
     inbound_formats: Optional[Dict] = None,
-    outbound_schema: Dict = None,
+    outbound_schema: Optional[Dict] = None,
     outbound_formats: Optional[Dict] = None,
-    envelope: str = None,
-    jmespath_options: Dict = None,
+    envelope: str = "",
+    jmespath_options: Optional[Dict] = None,
 ) -> Any:
     """Lambda handler decorator to validate incoming/outbound data using a JSON Schema
 
@@ -116,7 +117,9 @@ def validator(
         When JMESPath expression to unwrap event is invalid
     """
     if envelope:
-        event = unwrap_event_from_envelope(data=event, envelope=envelope, jmespath_options=jmespath_options)
+        event = jmespath_utils.unwrap_event_from_envelope(
+            data=event, envelope=envelope, jmespath_options=jmespath_options
+        )
 
     if inbound_schema:
         logger.debug("Validating inbound event")
@@ -135,8 +138,8 @@ def validate(
     event: Any,
     schema: Dict,
     formats: Optional[Dict] = None,
-    envelope: str = None,
-    jmespath_options: Dict = None,
+    envelope: Optional[str] = None,
+    jmespath_options: Optional[Dict] = None,
 ):
     """Standalone function to validate event data using a JSON Schema
 
@@ -216,6 +219,8 @@ def validate(
         When JMESPath expression to unwrap event is invalid
     """
     if envelope:
-        event = unwrap_event_from_envelope(data=event, envelope=envelope, jmespath_options=jmespath_options)
+        event = jmespath_utils.unwrap_event_from_envelope(
+            data=event, envelope=envelope, jmespath_options=jmespath_options
+        )
 
     validate_data_against_schema(data=event, schema=schema, formats=formats)

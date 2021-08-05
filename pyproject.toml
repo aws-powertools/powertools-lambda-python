@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "1.16.1"
+version = "1.18.1"
 description = "Python utilities for AWS Lambda functions including but not limited to tracing, logging and custom metric"
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed"]
@@ -32,14 +32,14 @@ coverage = {extras = ["toml"], version = "^5.5"}
 pytest = "^6.2.2"
 black = "^20.8b1"
 flake8 = "^3.9.0"
-flake8-black = "^0.2.1"
+flake8-black = "^0.2.3"
 flake8-builtins = "^1.5.3"
 flake8-comprehensions = "^3.4.0"
 flake8-debugger = "^4.0.0"
 flake8-fixme = "^1.1.1"
 flake8-isort = "^4.0.0"
 flake8-variables-names = "^0.0.4"
-isort = "^5.8.0"
+isort = "^5.9.3"
 pytest-cov = "^2.12.1"
 pytest-mock = "^3.5.1"
 pdoc3 = "^0.9.2"
@@ -47,11 +47,12 @@ pytest-asyncio = "^0.15.1"
 bandit = "^1.7.0"
 radon = "^4.5.0"
 xenon = "^0.7.3"
-flake8-eradicate = "^1.0.0"
+flake8-eradicate = "^1.1.0"
 flake8-bugbear = "^21.3.2"
-mkdocs-material = "^7.1.7"
+mkdocs-material = "^7.2.1"
 mkdocs-git-revision-date-plugin = "^0.3.1"
 mike = "^0.6.0"
+mypy = "^0.910"
 
 
 [tool.poetry.extras]

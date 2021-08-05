@@ -5,7 +5,7 @@ import inspect
 import logging
 import numbers
 import os
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Awaitable, Callable, Dict, Optional, Sequence, TypeVar, Union, cast, overload
 
 from ..shared import constants
 from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
@@ -17,6 +17,9 @@ logger = logging.getLogger(__name__)
 
 aws_xray_sdk = LazyLoader(constants.XRAY_SDK_MODULE, globals(), constants.XRAY_SDK_MODULE)
 aws_xray_sdk.core = LazyLoader(constants.XRAY_SDK_CORE_MODULE, globals(), constants.XRAY_SDK_CORE_MODULE)
+
+AnyCallableT = TypeVar("AnyCallableT", bound=Callable[..., Any])  # noqa: VNE001
+AnyAwaitableT = TypeVar("AnyAwaitableT", bound=Awaitable)
 
 
 class Tracer:
@@ -53,7 +56,7 @@ class Tracer:
     disabled: bool
         Flag to explicitly disable tracing, useful when running/testing locally
         `Env POWERTOOLS_TRACE_DISABLED="true"`
-    patch_modules: Tuple[str]
+    patch_modules: Optional[Sequence[str]]
         Tuple of modules supported by tracing provider to patch, by default all modules are patched
     provider: BaseProvider
         Tracing provider, by default it is aws_xray_sdk.core.xray_recorder
@@ -146,11 +149,11 @@ class Tracer:
 
     def __init__(
         self,
-        service: str = None,
-        disabled: bool = None,
-        auto_patch: bool = None,
-        patch_modules: Optional[Tuple[str]] = None,
-        provider: BaseProvider = None,
+        service: Optional[str] = None,
+        disabled: Optional[bool] = None,
+        auto_patch: Optional[bool] = None,
+        patch_modules: Optional[Sequence[str]] = None,
+        provider: Optional[BaseProvider] = None,
     ):
         self.__build_config(
             service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
@@ -195,7 +198,7 @@ class Tracer:
         logger.debug(f"Annotating on key '{key}' with '{value}'")
         self.provider.put_annotation(key=key, value=value)
 
-    def put_metadata(self, key: str, value: Any, namespace: str = None):
+    def put_metadata(self, key: str, value: Any, namespace: Optional[str] = None):
         """Adds metadata to existing segment or subsegment
 
         Parameters
@@ -223,14 +226,14 @@ class Tracer:
         logger.debug(f"Adding metadata on key '{key}' with '{value}' at namespace '{namespace}'")
         self.provider.put_metadata(key=key, value=value, namespace=namespace)
 
-    def patch(self, modules: Tuple[str] = None):
+    def patch(self, modules: Optional[Sequence[str]] = None):
         """Patch modules for instrumentation.
 
         Patches all supported modules by default if none are given.
 
         Parameters
         ----------
-        modules : Tuple[str]
+        modules : Optional[Sequence[str]]
             List of modules to be patched, optional by default
         """
         if self.disabled:
@@ -244,7 +247,7 @@ class Tracer:
 
     def capture_lambda_handler(
         self,
-        lambda_handler: Union[Callable[[Dict, Any], Any], Callable[[Dict, Any, Optional[Dict]], Any]] = None,
+        lambda_handler: Union[Callable[[Dict, Any], Any], Optional[Callable[[Dict, Any, Optional[Dict]], Any]]] = None,
         capture_response: Optional[bool] = None,
         capture_error: Optional[bool] = None,
     ):
@@ -329,9 +332,26 @@ class Tracer:
 
         return decorate
 
+    # see #465
+    @overload
+    def capture_method(self, method: "AnyCallableT") -> "AnyCallableT":
+        ...  # pragma: no cover
+
+    @overload
     def capture_method(
-        self, method: Callable = None, capture_response: Optional[bool] = None, capture_error: Optional[bool] = None
-    ):
+        self,
+        method: None = None,
+        capture_response: Optional[bool] = None,
+        capture_error: Optional[bool] = None,
+    ) -> Callable[["AnyCallableT"], "AnyCallableT"]:
+        ...  # pragma: no cover
+
+    def capture_method(
+        self,
+        method: Optional[AnyCallableT] = None,
+        capture_response: Optional[bool] = None,
+        capture_error: Optional[bool] = None,
+    ) -> AnyCallableT:
         """Decorator to create subsegment for arbitrary functions
 
         It also captures both response and exceptions as metadata
@@ -484,8 +504,9 @@ class Tracer:
         # Return a partial function with args filled
         if method is None:
             logger.debug("Decorator called with parameters")
-            return functools.partial(
-                self.capture_method, capture_response=capture_response, capture_error=capture_error
+            return cast(
+                AnyCallableT,
+                functools.partial(self.capture_method, capture_response=capture_response, capture_error=capture_error),
             )
 
         method_name = f"{method.__name__}"
@@ -506,7 +527,7 @@ class Tracer:
             return self._decorate_generator_function(
                 method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
             )
-        elif hasattr(method, "__wrapped__") and inspect.isgeneratorfunction(method.__wrapped__):
+        elif hasattr(method, "__wrapped__") and inspect.isgeneratorfunction(method.__wrapped__):  # type: ignore
             return self._decorate_generator_function_with_context_manager(
                 method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
             )
@@ -520,7 +541,7 @@ class Tracer:
         method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
-        method_name: str = None,
+        method_name: Optional[str] = None,
     ):
         @functools.wraps(method)
         async def decorate(*args, **kwargs):
@@ -547,7 +568,7 @@ class Tracer:
         method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
-        method_name: str = None,
+        method_name: Optional[str] = None,
     ):
         @functools.wraps(method)
         def decorate(*args, **kwargs):
@@ -574,7 +595,7 @@ class Tracer:
         method: Callable,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
-        method_name: str = None,
+        method_name: Optional[str] = None,
     ):
         @functools.wraps(method)
         @contextlib.contextmanager
@@ -599,11 +620,11 @@ class Tracer:
 
     def _decorate_sync_function(
         self,
-        method: Callable,
+        method: AnyCallableT,
         capture_response: Optional[Union[bool, str]] = None,
         capture_error: Optional[Union[bool, str]] = None,
-        method_name: str = None,
-    ):
+        method_name: Optional[str] = None,
+    ) -> AnyCallableT:
         @functools.wraps(method)
         def decorate(*args, **kwargs):
             with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
@@ -625,13 +646,13 @@ class Tracer:
 
                 return response
 
-        return decorate
+        return cast(AnyCallableT, decorate)
 
     def _add_response_as_metadata(
         self,
-        method_name: str = None,
-        data: Any = None,
-        subsegment: BaseSegment = None,
+        method_name: Optional[str] = None,
+        data: Optional[Any] = None,
+        subsegment: Optional[BaseSegment] = None,
         capture_response: Optional[Union[bool, str]] = None,
     ):
         """Add response as metadata for given subsegment
@@ -714,11 +735,11 @@ class Tracer:
 
     def __build_config(
         self,
-        service: str = None,
-        disabled: bool = None,
-        auto_patch: bool = None,
-        patch_modules: Union[List, Tuple] = None,
-        provider: BaseProvider = None,
+        service: Optional[str] = None,
+        disabled: Optional[bool] = None,
+        auto_patch: Optional[bool] = None,
+        patch_modules: Optional[Sequence[str]] = None,
+        provider: Optional[BaseProvider] = None,
     ):
         """Populates Tracer config for new and existing initializations"""
         is_disabled = disabled if disabled is not None else self._is_tracer_disabled()

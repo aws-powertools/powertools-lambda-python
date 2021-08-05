@@ -1,17 +1,32 @@
 import base64
 import json
 import logging
+import os
 import re
+import traceback
 import zlib
 from enum import Enum
+from functools import partial
+from http import HTTPStatus
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
+from aws_lambda_powertools.event_handler import content_types
+from aws_lambda_powertools.event_handler.exceptions import ServiceError
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
+
+_DYNAMIC_ROUTE_PATTERN = r"(<\w+>)"
+_SAFE_URI = "-._~()'!*:@,;"  # https://www.ietf.org/rfc/rfc3986.txt
+# API GW/ALB decode non-safe URI chars; we must support them too
+_UNSAFE_URI = "%<>\[\]{}|^"  # noqa: W605
+
+_NAMED_GROUP_BOUNDARY_PATTERN = fr"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 
 
 class ProxyEventType(Enum):
@@ -25,43 +40,46 @@ class ProxyEventType(Enum):
 class CORSConfig(object):
     """CORS Config
 
-
     Examples
     --------
 
     Simple cors example using the default permissive cors, not this should only be used during early prototyping
 
-        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    ```python
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
-        app = ApiGatewayResolver()
+    app = ApiGatewayResolver()
 
-        @app.get("/my/path", cors=True)
-        def with_cors():
-            return {"message": "Foo"}
+    @app.get("/my/path", cors=True)
+    def with_cors():
+        return {"message": "Foo"}
+    ```
 
     Using a custom CORSConfig where `with_cors` used the custom provided CORSConfig and `without_cors`
     do not include any cors headers.
 
-        from aws_lambda_powertools.event_handler.api_gateway import (
-            ApiGatewayResolver, CORSConfig
-        )
+    ```python
+    from aws_lambda_powertools.event_handler.api_gateway import (
+        ApiGatewayResolver, CORSConfig
+    )
 
-        cors_config = CORSConfig(
-            allow_origin="https://wwww.example.com/",
-            expose_headers=["x-exposed-response-header"],
-            allow_headers=["x-custom-request-header"],
-            max_age=100,
-            allow_credentials=True,
-        )
-        app = ApiGatewayResolver(cors=cors_config)
+    cors_config = CORSConfig(
+        allow_origin="https://wwww.example.com/",
+        expose_headers=["x-exposed-response-header"],
+        allow_headers=["x-custom-request-header"],
+        max_age=100,
+        allow_credentials=True,
+    )
+    app = ApiGatewayResolver(cors=cors_config)
 
-        @app.get("/my/path")
-        def with_cors():
-            return {"message": "Foo"}
+    @app.get("/my/path")
+    def with_cors():
+        return {"message": "Foo"}
 
-        @app.get("/another-one", cors=False)
-        def without_cors():
-            return {"message": "Foo"}
+    @app.get("/another-one", cors=False)
+    def without_cors():
+        return {"message": "Foo"}
+    ```
     """
 
     _REQUIRED_HEADERS = ["Authorization", "Content-Type", "X-Amz-Date", "X-Api-Key", "X-Amz-Security-Token"]
@@ -116,7 +134,11 @@ class Response:
     """Response data class that provides greater control over what is returned from the proxy event"""
 
     def __init__(
-        self, status_code: int, content_type: Optional[str], body: Union[str, bytes, None], headers: Dict = None
+        self,
+        status_code: int,
+        content_type: Optional[str],
+        body: Union[str, bytes, None],
+        headers: Optional[Dict] = None,
     ):
         """
 
@@ -157,7 +179,7 @@ class Route:
 class ResponseBuilder:
     """Internally used Response builder"""
 
-    def __init__(self, response: Response, route: Route = None):
+    def __init__(self, response: Response, route: Optional[Route] = None):
         self.response = response
         self.route = route
 
@@ -189,7 +211,7 @@ class ResponseBuilder:
         if self.route.compress and "gzip" in (event.get_header_value("accept-encoding", "") or ""):
             self._compress()
 
-    def build(self, event: BaseProxyEvent, cors: CORSConfig = None) -> Dict[str, Any]:
+    def build(self, event: BaseProxyEvent, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
         """Build the full response dict to be returned by the lambda"""
         self._route(event, cors)
 
@@ -237,7 +259,13 @@ class ApiGatewayResolver:
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
 
-    def __init__(self, proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent, cors: CORSConfig = None):
+    def __init__(
+        self,
+        proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent,
+        cors: Optional[CORSConfig] = None,
+        debug: Optional[bool] = None,
+        serializer: Optional[Callable[[Dict], str]] = None,
+    ):
         """
         Parameters
         ----------
@@ -245,14 +273,27 @@ class ApiGatewayResolver:
             Proxy request type, defaults to API Gateway V1
         cors: CORSConfig
             Optionally configure and enabled CORS. Not each route will need to have to cors=True
+        debug: Optional[bool]
+            Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_EVENT_HANDLER_DEBUG"
+            environment variable
         """
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
         self._cors = cors
         self._cors_enabled: bool = cors is not None
         self._cors_methods: Set[str] = {"OPTIONS"}
+        self._debug = resolve_truthy_env_var_choice(
+            env=os.getenv(constants.EVENT_HANDLER_DEBUG_ENV, "false"), choice=debug
+        )
 
-    def get(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
+        # Allow for a custom serializer or a concise json serialization
+        self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
+
+        if self._debug:
+            # Always does a pretty print when in debug mode
+            self._serializer = partial(json.dumps, indent=4, cls=Encoder)
+
+    def get(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
         """Get route decorator with GET `method`
 
         Examples
@@ -277,7 +318,7 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "GET", cors, compress, cache_control)
 
-    def post(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
+    def post(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
         """Post route decorator with POST `method`
 
         Examples
@@ -303,7 +344,7 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "POST", cors, compress, cache_control)
 
-    def put(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
+    def put(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
         """Put route decorator with PUT `method`
 
         Examples
@@ -329,7 +370,9 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "PUT", cors, compress, cache_control)
 
-    def delete(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
+    def delete(
+        self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
+    ):
         """Delete route decorator with DELETE `method`
 
         Examples
@@ -354,7 +397,9 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "DELETE", cors, compress, cache_control)
 
-    def patch(self, rule: str, cors: bool = None, compress: bool = False, cache_control: str = None):
+    def patch(
+        self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
+    ):
         """Patch route decorator with PATCH `method`
 
         Examples
@@ -382,7 +427,14 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "PATCH", cors, compress, cache_control)
 
-    def route(self, rule: str, method: str, cors: bool = None, compress: bool = False, cache_control: str = None):
+    def route(
+        self,
+        rule: str,
+        method: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+    ):
         """Route decorator includes parameter `method`"""
 
         def register_resolver(func: Callable):
@@ -413,6 +465,8 @@ class ApiGatewayResolver:
         dict
             Returns the dict response
         """
+        if self._debug:
+            print(self._json_dump(event))
         self.current_event = self._to_proxy_event(event)
         self.lambda_context = context
         return self._resolve().build(self.current_event, self._cors)
@@ -422,8 +476,35 @@ class ApiGatewayResolver:
 
     @staticmethod
     def _compile_regex(rule: str):
-        """Precompile regex pattern"""
-        rule_regex: str = re.sub(r"(<\w+>)", r"(?P\1.+)", rule)
+        """Precompile regex pattern
+
+        Logic
+        -----
+
+        1. Find any dynamic routes defined as <pattern>
+            e.g. @app.get("/accounts/<account_id>")
+        2. Create a new regex by substituting every dynamic route found as a named group (?P<group>),
+        and match whole words only (word boundary) instead of a greedy match
+
+            non-greedy example with word boundary
+
+                rule: '/accounts/<account_id>'
+                regex: r'/accounts/(?P<account_id>\\w+\\b)'
+
+                value: /accounts/123/some_other_path
+                account_id: 123
+
+            greedy example without word boundary
+
+                regex: r'/accounts/(?P<account_id>.+)'
+
+                value: /accounts/123/some_other_path
+                account_id: 123/some_other_path
+        3. Compiles a regex and include start (^) and end ($) in between for an exact match
+
+        NOTE: See #520 for context
+        """
+        rule_regex: str = re.sub(_DYNAMIC_ROUTE_PATTERN, _NAMED_GROUP_BOUNDARY_PATTERN, rule)
         return re.compile("^{}$".format(rule_regex))
 
     def _to_proxy_event(self, event: Dict) -> BaseProxyEvent:
@@ -447,7 +528,7 @@ class ApiGatewayResolver:
             match: Optional[re.Match] = route.rule.match(path)
             if match:
                 logger.debug("Found a registered route. Calling function")
-                return self._call_route(route, match.groupdict())
+                return self._call_route(route, match.groupdict())  # pass fn args
 
         logger.debug(f"No match found for path {path} and method {method}")
         return self._not_found(method)
@@ -466,19 +547,41 @@ class ApiGatewayResolver:
 
         return ResponseBuilder(
             Response(
-                status_code=404,
-                content_type="application/json",
+                status_code=HTTPStatus.NOT_FOUND.value,
+                content_type=content_types.APPLICATION_JSON,
                 headers=headers,
-                body=json.dumps({"message": "Not found"}),
+                body=self._json_dump({"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"}),
             )
         )
 
     def _call_route(self, route: Route, args: Dict[str, str]) -> ResponseBuilder:
         """Actually call the matching route with any provided keyword arguments."""
-        return ResponseBuilder(self._to_response(route.func(**args)), route)
+        try:
+            return ResponseBuilder(self._to_response(route.func(**args)), route)
+        except ServiceError as e:
+            return ResponseBuilder(
+                Response(
+                    status_code=e.status_code,
+                    content_type=content_types.APPLICATION_JSON,
+                    body=self._json_dump({"statusCode": e.status_code, "message": e.msg}),
+                ),
+                route,
+            )
+        except Exception:
+            if self._debug:
+                # If the user has turned on debug mode,
+                # we'll let the original exception propagate so
+                # they get more information about what went wrong.
+                return ResponseBuilder(
+                    Response(
+                        status_code=500,
+                        content_type=content_types.TEXT_PLAIN,
+                        body="".join(traceback.format_exc()),
+                    )
+                )
+            raise
 
-    @staticmethod
-    def _to_response(result: Union[Dict, Response]) -> Response:
+    def _to_response(self, result: Union[Dict, Response]) -> Response:
         """Convert the route's result to a Response
 
          2 main result types are supported:
@@ -493,6 +596,9 @@ class ApiGatewayResolver:
         logger.debug("Simple response detected, serializing return before constructing final response")
         return Response(
             status_code=200,
-            content_type="application/json",
-            body=json.dumps(result, separators=(",", ":"), cls=Encoder),
+            content_type=content_types.APPLICATION_JSON,
+            body=self._json_dump(result),
         )
+
+    def _json_dump(self, obj: Any) -> str:
+        return self._serializer(obj)

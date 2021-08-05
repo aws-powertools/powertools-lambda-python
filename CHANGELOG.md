@@ -7,6 +7,105 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## [1.18.1] - 2021-07-23
+
+### Bug Fixes
+
+* **api-gateway:** route regression for non-word and unsafe URI chars ([#556](https://github.com/awslabs/aws-lambda-powertools-python/issues/556))
+
+## [1.18.0] - 2021-07-20
+
+### Bug Fixes
+
+* **api-gateway:** non-greedy route pattern regex which incorrectly mapped certain route params to function params ([#533](https://github.com/awslabs/aws-lambda-powertools-python/issues/533))
+* **api-gateway:** incorrect plain text mimetype constant [#506](https://github.com/awslabs/aws-lambda-powertools-python/issues/506)
+* **data-classes:** include milliseconds in scalar types to correctly align with AppSync scalars ([#504](https://github.com/awslabs/aws-lambda-powertools-python/issues/504))
+* **mypy:** addresses lack of optional types ([#521](https://github.com/awslabs/aws-lambda-powertools-python/issues/521))
+* **parser:** make ApiGateway version, authorizer fields optional ([#532](https://github.com/awslabs/aws-lambda-powertools-python/issues/532))
+* **tracer:** mypy generic to preserve decorated method signature ([#529](https://github.com/awslabs/aws-lambda-powertools-python/issues/529))
+
+### Code Refactoring
+
+* **feature-toggles:** code coverage and housekeeping ([#530](https://github.com/awslabs/aws-lambda-powertools-python/issues/530))
+
+### Documentation
+
+* **api-gateway:** new HTTP service error exceptions ([#546](https://github.com/awslabs/aws-lambda-powertools-python/issues/546))
+* **logger:** new get_correlation_id method ([#545](https://github.com/awslabs/aws-lambda-powertools-python/issues/545))
+
+### Features
+
+* **api-gateway:** add debug mode ([#507](https://github.com/awslabs/aws-lambda-powertools-python/issues/507))
+* **api-gateway:** add common HTTP service errors ([#506](https://github.com/awslabs/aws-lambda-powertools-python/issues/506))
+* **event-handler:** Support AppSyncResolverEvent subclassing ([#526](https://github.com/awslabs/aws-lambda-powertools-python/issues/526))
+* **feat-toggle:** New simple feature toggles rule engine (WIP) ([#494](https://github.com/awslabs/aws-lambda-powertools-python/issues/494))
+* **logger:** add get_correlation_id method ([#516](https://github.com/awslabs/aws-lambda-powertools-python/issues/516))
+
+### Maintenance
+
+* **mypy:** add mypy support to makefile ([#508](https://github.com/awslabs/aws-lambda-powertools-python/issues/508))
+* **deps:** bump codecov/codecov-action from 1 to 2.0.1 ([#539](https://github.com/awslabs/aws-lambda-powertools-python/issues/539))
+* **deps:** bump boto3 from 1.18.0 to 1.18.1 ([#528](https://github.com/awslabs/aws-lambda-powertools-python/issues/528))
+* **deps:** bump boto3 from 1.17.110 to 1.18.0 ([#527](https://github.com/awslabs/aws-lambda-powertools-python/issues/527))
+* **deps:** bump boto3 from 1.17.102 to 1.17.110 ([#523](https://github.com/awslabs/aws-lambda-powertools-python/issues/523))
+* **deps-dev:** bump mkdocs-material from 7.1.10 to 7.1.11 ([#542](https://github.com/awslabs/aws-lambda-powertools-python/issues/542))
+* **deps-dev:** bump mkdocs-material from 7.1.9 to 7.1.10 ([#522](https://github.com/awslabs/aws-lambda-powertools-python/issues/522))
+* **deps-dev:** bump isort from 5.9.1 to 5.9.2 ([#514](https://github.com/awslabs/aws-lambda-powertools-python/issues/514))
+* **event-handler:** adjusts API Gateway/ALB service errors exception docstrings to not confuse AppSync customers
+
+## [1.17.1] - 2021-07-02
+
+### Bug Fixes
+
+* **Validator:** Handle built-in custom formats like `date-time` when type is `string` ([#498](https://github.com/awslabs/aws-lambda-powertools-python/issues/498))
+
+### Documentation
+
+* **Layers:** Add Layers example for Serverless framework & CDK ([#500](https://github.com/awslabs/aws-lambda-powertools-python/issues/500))
+* **Misc.:** Enable dark mode switch ([#471](https://github.com/awslabs/aws-lambda-powertools-python/issues/471))
+* **Tracer:** Additional scenario when to disable auto-capture for responses larger than 64K ([#499](https://github.com/awslabs/aws-lambda-powertools-python/issues/499))
+
+### Maintenance
+
+* **deps:** bump boto3 from 1.17.101 to 1.17.102 ([#493](https://github.com/awslabs/aws-lambda-powertools-python/issues/493))
+* **deps:** bump boto3 from 1.17.91 to 1.17.101 ([#490](https://github.com/awslabs/aws-lambda-powertools-python/issues/490))
+* **deps:** bump email-validator from 1.1.2 to 1.1.3 ([#478](https://github.com/awslabs/aws-lambda-powertools-python/issues/478))
+* **deps:** bump boto3 from 1.17.89 to 1.17.91 ([#473](https://github.com/awslabs/aws-lambda-powertools-python/issues/473))
+* **deps-dev:** bump flake8-eradicate from 1.0.0 to 1.1.0 ([#492](https://github.com/awslabs/aws-lambda-powertools-python/issues/492))
+* **deps-dev:** bump isort from 5.8.0 to 5.9.1 ([#487](https://github.com/awslabs/aws-lambda-powertools-python/issues/487))
+* **deps-dev:** bump mkdocs-material from 7.1.7 to 7.1.9 ([#491](https://github.com/awslabs/aws-lambda-powertools-python/issues/491))
+
+## [1.17.0] - 2021-06-08
+
+### Added
+
+* **Documentation**: Include new public roadmap ([#452](https://github.com/awslabs/aws-lambda-powertools-python/issues/452))
+* **Documentation**: Remove old todo in idempotency docs
+* **Data classes:** New `AttributeValueType` to get type and value from data in `DynamoDBStreamEvent` ([#462](https://github.com/awslabs/aws-lambda-powertools-python/issues/462))
+* **Data classes:** New decorator `event_source` to instantiate data_classes ([#442](https://github.com/awslabs/aws-lambda-powertools-python/issues/442))
+* **Logger:** New `clear_state` parameter to clear previously added custom keys upon invocation ([#467](https://github.com/awslabs/aws-lambda-powertools-python/issues/467))
+* **Parser:** Support for API Gateway HTTP API [#434](https://github.com/awslabs/aws-lambda-powertools-python/issues/434) ([#441](https://github.com/awslabs/aws-lambda-powertools-python/issues/441))
+
+### Maintenance
+
+* **deps**: bump xenon from 0.7.1 to 0.7.3 ([#446](https://github.com/awslabs/aws-lambda-powertools-python/issues/446))
+* assited changelog pre-generation, auto-label PR ([#443](https://github.com/awslabs/aws-lambda-powertools-python/issues/443))
+* enable dependabot for dep upgrades ([#444](https://github.com/awslabs/aws-lambda-powertools-python/issues/444))
+* enable mergify ([#450](https://github.com/awslabs/aws-lambda-powertools-python/issues/450))
+* **deps**: bump mkdocs-material from 7.1.5 to 7.1.6 ([#451](https://github.com/awslabs/aws-lambda-powertools-python/issues/451))
+* **deps**: bump boto3 from 1.17.78 to 1.17.84 ([#449](https://github.com/awslabs/aws-lambda-powertools-python/issues/449))
+* update mergify to require approval on dependabot ([#456](https://github.com/awslabs/aws-lambda-powertools-python/issues/456))
+* **deps**: bump actions/setup-python from 1 to 2.2.2 ([#445](https://github.com/awslabs/aws-lambda-powertools-python/issues/445))
+* **deps:** bump boto3 from 1.17.87 to 1.17.88 ([#463](https://github.com/awslabs/aws-lambda-powertools-python/issues/463))
+* **deps:** bump boto3 from 1.17.88 to 1.17.89 ([#466](https://github.com/awslabs/aws-lambda-powertools-python/issues/466))
+* **deps:** bump boto3 from 1.17.84 to 1.17.85 ([#455](https://github.com/awslabs/aws-lambda-powertools-python/issues/455))
+* **deps:** bump boto3 from 1.17.85 to 1.17.86 ([#458](https://github.com/awslabs/aws-lambda-powertools-python/issues/458))
+* **deps:** bump boto3 from 1.17.86 to 1.17.87 ([#459](https://github.com/awslabs/aws-lambda-powertools-python/issues/459))
+* **deps-dev:** bump mkdocs-material from 7.1.6 to 7.1.7 ([#464](https://github.com/awslabs/aws-lambda-powertools-python/issues/464))
+* **deps-dev:** bump pytest-cov from 2.12.0 to 2.12.1 ([#454](https://github.com/awslabs/aws-lambda-powertools-python/issues/454))
+* **mergify:** disable check for matrix jobs
+* **mergify:** use job name to match GH Actions
+
 ## [1.16.1] - 2021-05-23
 
 ### Fixed

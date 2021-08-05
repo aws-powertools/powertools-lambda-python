@@ -1,18 +1,14 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Dict, Optional, Union
 
-import fastjsonschema
-import jmespath
-from jmespath.exceptions import LexerError
+import fastjsonschema  # type: ignore
 
-from aws_lambda_powertools.shared.jmespath_functions import PowertoolsFunctions
-
-from .exceptions import InvalidEnvelopeExpressionError, InvalidSchemaFormatError, SchemaValidationError
+from .exceptions import InvalidSchemaFormatError, SchemaValidationError
 
 logger = logging.getLogger(__name__)
 
 
-def validate_data_against_schema(data: Dict, schema: Dict, formats: Optional[Dict] = None):
+def validate_data_against_schema(data: Union[Dict, str], schema: Dict, formats: Optional[Dict] = None):
     """Validate dict data against given JSON Schema
 
     Parameters
@@ -32,37 +28,10 @@ def validate_data_against_schema(data: Dict, schema: Dict, formats: Optional[Dic
         When JSON schema provided is invalid
     """
     try:
+        formats = formats or {}
         fastjsonschema.validate(definition=schema, data=data, formats=formats)
     except (TypeError, AttributeError, fastjsonschema.JsonSchemaDefinitionException) as e:
         raise InvalidSchemaFormatError(f"Schema received: {schema}, Formats: {formats}. Error: {e}")
     except fastjsonschema.JsonSchemaException as e:
         message = f"Failed schema validation. Error: {e.message}, Path: {e.path}, Data: {e.value}"  # noqa: B306, E501
         raise SchemaValidationError(message)
-
-
-def unwrap_event_from_envelope(data: Dict, envelope: str, jmespath_options: Optional[Dict]) -> Any:
-    """Searches data using JMESPath expression
-
-    Parameters
-    ----------
-    data : Dict
-        Data set to be filtered
-    envelope : str
-        JMESPath expression to filter data against
-    jmespath_options : Dict
-        Alternative JMESPath options to be included when filtering expr
-
-    Returns
-    -------
-    Any
-        Data found using JMESPath expression given in envelope
-    """
-    if not jmespath_options:
-        jmespath_options = {"custom_functions": PowertoolsFunctions()}
-
-    try:
-        logger.debug(f"Envelope detected: {envelope}. JMESPath options: {jmespath_options}")
-        return jmespath.search(envelope, data, options=jmespath.Options(**jmespath_options))
-    except (LexerError, TypeError, UnicodeError) as e:
-        message = f"Failed to unwrap event from envelope using expression. Error: {e} Exp: {envelope}, Data: {data}"  # noqa: B306, E501
-        raise InvalidEnvelopeExpressionError(message)

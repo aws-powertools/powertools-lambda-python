@@ -743,6 +743,70 @@ def test_seq_trigger_event():
     assert record.aws_region == "us-east-2"
 
 
+def test_default_api_gateway_proxy_event():
+    event = APIGatewayProxyEvent(load_event("apiGatewayProxyEvent_noVersionAuth.json"))
+
+    assert event.get("version") is None
+    assert event.resource == event["resource"]
+    assert event.path == event["path"]
+    assert event.http_method == event["httpMethod"]
+    assert event.headers == event["headers"]
+    assert event.multi_value_headers == event["multiValueHeaders"]
+    assert event.query_string_parameters == event["queryStringParameters"]
+    assert event.multi_value_query_string_parameters == event["multiValueQueryStringParameters"]
+
+    request_context = event.request_context
+    assert request_context.account_id == event["requestContext"]["accountId"]
+    assert request_context.api_id == event["requestContext"]["apiId"]
+
+    assert request_context.get("authorizer") is None
+
+    assert request_context.domain_name == event["requestContext"]["domainName"]
+    assert request_context.domain_prefix == event["requestContext"]["domainPrefix"]
+    assert request_context.extended_request_id == event["requestContext"]["extendedRequestId"]
+    assert request_context.http_method == event["requestContext"]["httpMethod"]
+
+    identity = request_context.identity
+    assert identity.access_key == event["requestContext"]["identity"]["accessKey"]
+    assert identity.account_id == event["requestContext"]["identity"]["accountId"]
+    assert identity.caller == event["requestContext"]["identity"]["caller"]
+    assert (
+        identity.cognito_authentication_provider == event["requestContext"]["identity"]["cognitoAuthenticationProvider"]
+    )
+    assert identity.cognito_authentication_type == event["requestContext"]["identity"]["cognitoAuthenticationType"]
+    assert identity.cognito_identity_id == event["requestContext"]["identity"]["cognitoIdentityId"]
+    assert identity.cognito_identity_pool_id == event["requestContext"]["identity"]["cognitoIdentityPoolId"]
+    assert identity.principal_org_id == event["requestContext"]["identity"]["principalOrgId"]
+    assert identity.source_ip == event["requestContext"]["identity"]["sourceIp"]
+    assert identity.user == event["requestContext"]["identity"]["user"]
+    assert identity.user_agent == event["requestContext"]["identity"]["userAgent"]
+    assert identity.user_arn == event["requestContext"]["identity"]["userArn"]
+
+    assert request_context.path == event["requestContext"]["path"]
+    assert request_context.protocol == event["requestContext"]["protocol"]
+    assert request_context.request_id == event["requestContext"]["requestId"]
+    assert request_context.request_time == event["requestContext"]["requestTime"]
+    assert request_context.request_time_epoch == event["requestContext"]["requestTimeEpoch"]
+    assert request_context.resource_id == event["requestContext"]["resourceId"]
+    assert request_context.resource_path == event["requestContext"]["resourcePath"]
+    assert request_context.stage == event["requestContext"]["stage"]
+
+    assert event.path_parameters == event["pathParameters"]
+    assert event.stage_variables == event["stageVariables"]
+    assert event.body == event["body"]
+    assert event.is_base64_encoded == event["isBase64Encoded"]
+
+    assert request_context.connected_at is None
+    assert request_context.connection_id is None
+    assert request_context.event_type is None
+    assert request_context.message_direction is None
+    assert request_context.message_id is None
+    assert request_context.route_key is None
+    assert request_context.operation_name is None
+    assert identity.api_key is None
+    assert identity.api_key_id is None
+
+
 def test_api_gateway_proxy_event():
     event = APIGatewayProxyEvent(load_event("apiGatewayProxyEvent.json"))
 
@@ -971,6 +1035,18 @@ def test_base_proxy_event_decode_body_encoded_true():
     encoded_data = base64.b64encode(data.encode()).decode()
     event = BaseProxyEvent({"body": encoded_data, "isBase64Encoded": True})
     assert event.decoded_body == data
+
+
+def test_base_proxy_event_json_body_with_base64_encoded_data():
+    # GIVEN a base64 encoded json body
+    data = {"message": "Foo"}
+    data_str = json.dumps(data)
+    encoded_data = base64.b64encode(data_str.encode()).decode()
+    event = BaseProxyEvent({"body": encoded_data, "isBase64Encoded": True})
+
+    # WHEN calling json_body
+    # THEN then base64 decode and json load
+    assert event.json_body == data
 
 
 def test_kinesis_stream_event():
@@ -1210,13 +1286,18 @@ def test_aws_date_utc():
 def test_aws_time_utc():
     time_str = aws_time()
     assert isinstance(time_str, str)
-    assert datetime.datetime.strptime(time_str, "%H:%M:%SZ")
+    assert datetime.datetime.strptime(time_str, "%H:%M:%S.%fZ")
 
 
 def test_aws_datetime_utc():
     datetime_str = aws_datetime()
-    assert isinstance(datetime_str, str)
-    assert datetime.datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%SZ")
+    assert datetime.datetime.strptime(datetime_str[:-1] + "000Z", "%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def test_format_time_to_milli():
+    now = datetime.datetime(2024, 4, 23, 16, 26, 34, 123021)
+    datetime_str = _formatted_time(now, "%H:%M:%S.%f", -12)
+    assert datetime_str == "04:26:34.123-12:00:00"
 
 
 def test_aws_timestamp():
@@ -1227,14 +1308,12 @@ def test_aws_timestamp():
 def test_format_time_positive():
     now = datetime.datetime(2022, 1, 22)
     datetime_str = _formatted_time(now, "%Y-%m-%d", 8)
-    assert isinstance(datetime_str, str)
     assert datetime_str == "2022-01-22+08:00:00"
 
 
 def test_format_time_negative():
     now = datetime.datetime(2022, 1, 22, 14, 22, 33)
     datetime_str = _formatted_time(now, "%H:%M:%S", -12)
-    assert isinstance(datetime_str, str)
     assert datetime_str == "02:22:33-12:00:00"
 
 

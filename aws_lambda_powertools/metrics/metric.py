@@ -61,7 +61,7 @@ class SingleMetric(MetricManager):
 
 
 @contextmanager
-def single_metric(name: str, unit: MetricUnit, value: float, namespace: str = None):
+def single_metric(name: str, unit: MetricUnit, value: float, namespace: Optional[str] = None):
     """Context manager to simplify creation of a single metric
 
     Example

@@ -46,7 +46,7 @@ class APIGatewayEventAuthorizer(BaseModel):
 class APIGatewayEventRequestContext(BaseModel):
     accountId: str
     apiId: str
-    authorizer: APIGatewayEventAuthorizer
+    authorizer: Optional[APIGatewayEventAuthorizer]
     stage: str
     protocol: str
     identity: APIGatewayEventIdentity
@@ -68,9 +68,16 @@ class APIGatewayEventRequestContext(BaseModel):
     routeKey: Optional[str]
     operationName: Optional[str]
 
+    @root_validator
+    def check_message_id(cls, values):
+        message_id, event_type = values.get("messageId"), values.get("eventType")
+        if message_id is not None and event_type != "MESSAGE":
+            raise TypeError("messageId is available only when the `eventType` is `MESSAGE`")
+        return values
+
 
 class APIGatewayProxyEventModel(BaseModel):
-    version: str
+    version: Optional[str]
     resource: str
     path: str
     httpMethod: Literal["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
@@ -83,10 +90,3 @@ class APIGatewayProxyEventModel(BaseModel):
     stageVariables: Optional[Dict[str, str]]
     isBase64Encoded: bool
     body: str
-
-    @root_validator()
-    def check_message_id(cls, values):
-        message_id, event_type = values.get("messageId"), values.get("eventType")
-        if message_id is not None and event_type != "MESSAGE":
-            raise TypeError("messageId is available only when the `eventType` is `MESSAGE`")
-        return values

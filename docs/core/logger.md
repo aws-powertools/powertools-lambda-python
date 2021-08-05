@@ -146,6 +146,8 @@ When debugging in non-production environments, you can instruct Logger to log th
 
 You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
 
+!!! tip "You can retrieve correlation IDs via `get_correlation_id` method"
+
 === "collect.py"
 
     ```python hl_lines="5"
@@ -155,6 +157,7 @@ You can set a Correlation ID using `correlation_id_path` param by passing a [JME
 
 	@logger.inject_lambda_context(correlation_id_path="headers.my_request_id_header")
 	def handler(event, context):
+		logger.debug(f"Correlation ID => {logger.get_correlation_id()}")
 		logger.info("Collecting payment")
     ```
 
@@ -198,6 +201,7 @@ We provide [built-in JMESPath expressions](#built-in-correlation-id-expressions)
 
 	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
 	def handler(event, context):
+		logger.debug(f"Correlation ID => {logger.get_correlation_id()}")
 		logger.info("Collecting payment")
     ```
 
@@ -1099,3 +1103,9 @@ Here's an example where we persist `payment_id` not `request_id`. Note that `pay
 		"payment_id": "123456789"
 	}
 	```
+
+**How do I aggregate and search Powertools logs across accounts?**
+
+As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task.
+
+Please see this discussion for more information: https://github.com/awslabs/aws-lambda-powertools-python/issues/460
