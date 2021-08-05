@@ -237,6 +237,7 @@ class FeatureFlags:
             logger.debug(f"Failed to fetch feature flags from store, returning empty list, reason={err}")
             return features_enabled
 
+        logger.debug("Evaluating all features")
         for name, feature in features.items():
             rules = feature.get(schema.RULES_KEY, {})
             feature_default_value = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
