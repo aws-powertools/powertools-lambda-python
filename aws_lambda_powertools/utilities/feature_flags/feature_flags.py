@@ -115,28 +115,28 @@ class FeatureFlags:
 
             **Example**
 
-            ```python
-            {
-                "premium_features": {
-                    "default": False,
-                    "rules": {
-                        "customer tier equals premium": {
-                            "when_match": True,
-                            "conditions": [
-                                {
-                                    "action": "EQUALS",
-                                    "key": "tier",
-                                    "value": "premium",
-                                }
-                            ],
-                        }
-                    },
+        ```python
+        {
+            "premium_features": {
+                "default": False,
+                "rules": {
+                    "customer tier equals premium": {
+                        "when_match": True,
+                        "conditions": [
+                            {
+                                "action": "EQUALS",
+                                "key": "tier",
+                                "value": "premium",
+                            }
+                        ],
+                    }
                 },
-                "feature_two": {
-                    "default": False
-                }
+            },
+            "feature_two": {
+                "default": False
             }
-            ```
+        }
+        ```
         """
         # parse result conf as JSON, keep in cache for max age defined in store
         logger.debug(f"Fetching schema from registered store, store={self._store}")
@@ -217,9 +217,9 @@ class FeatureFlags:
 
             **Example**
 
-            ```python
-            ["premium_features", "my_feature_two", "always_true_feature"]
-            ```
+        ```python
+        ["premium_features", "my_feature_two", "always_true_feature"]
+        ```
 
         Raises
         ------

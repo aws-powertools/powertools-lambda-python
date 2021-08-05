@@ -23,7 +23,7 @@ class AppConfigStore(StoreProvider):
         name: str,
         cache_seconds: int,
         sdk_config: Optional[Config] = None,
-        envelope: str = "",
+        envelope: Optional[str] = "",
         jmespath_options: Optional[Dict] = None,
     ):
         """This class fetches JSON schemas from AWS AppConfig
@@ -40,9 +40,9 @@ class AppConfigStore(StoreProvider):
             cache expiration time, how often to call AppConfig to fetch latest configuration
         sdk_config: Optional[Config]
             Botocore Config object to pass during client initialization
-        envelope : str
+        envelope : Optional[str]
             JMESPath expression to pluck feature flags data from config
-        jmespath_options : Dict
+        jmespath_options : Optional[Dict]
             Alternative JMESPath options to be included when filtering expr
         """
         super().__init__()
