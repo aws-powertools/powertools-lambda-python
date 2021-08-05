@@ -80,7 +80,7 @@ class SchemaValidator(BaseValidator):
     The value MUST contain the following members:
 
     * **action**: `str`. Operation to perform to match a key and value.
-    The value MUST be either EQUALS, STARTSWITH, ENDSWITH, IN
+    The value MUST be either EQUALS, STARTSWITH, ENDSWITH, IN, NOT_IN
     * **key**: `str`. Key in given context to perform operation
     * **value**: `Any`. Value in given context that should match action operation.
 
