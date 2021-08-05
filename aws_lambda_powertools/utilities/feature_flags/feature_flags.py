@@ -66,8 +66,8 @@ class FeatureFlags:
 
         for condition in conditions:
             context_value = context.get(str(condition.get(schema.CONDITION_KEY)))
-            condition_action = condition.get(schema.CONDITION_ACTION, "")
-            condition_value = condition.get(schema.CONDITION_VALUE)
+            cond_action = condition.get(schema.CONDITION_ACTION, "")
+            cond_value = condition.get(schema.CONDITION_VALUE)
 
             if not self._match_by_action(
                 action=condition_action, condition_value=condition_value, context_value=context_value
