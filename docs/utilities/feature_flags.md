@@ -5,7 +5,8 @@ title: Feature flags description: Utility
 The feature flags utility provides a simple rule engine to define when one or multiple features should be enabled
 depending on the input.
 
-!!! tip "For simpler use cases where a feature is simply on or off for all users, use [Parameters](parameters.md) utility instead."
+!!! tip "For simpler use cases where a feature is simply on or off for all users, use [Parameters](parameters.md)
+utility instead."
 
 ## Terminology
 
@@ -21,8 +22,6 @@ multiple conditions on whether a feature flag should be `True` or `False`.
 
 That being said, be mindful that feature flags can increase your application complexity over time if you're not careful;
 use them sparingly.
-
-TODO: fix tip
 
 !!! tip "Read [this article](https://martinfowler.com/articles/feature-toggles.html){target="_blank"} for more details
 on different types of feature flags and trade-offs"
@@ -42,9 +41,9 @@ action to your function.
 
 ### Required resources
 
-TODO: link to appconfig
-By default, this utility provides AWS AppConfig as a configuration store. To create a dedicate you can use this
-cloudformation template:
+By default, this utility
+provides [AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html) as a
+configuration store. To create a dedicate you can use this cloudformation template:
 
 === "template.yaml"
 
@@ -115,67 +114,179 @@ The `Content` parameter is a json structure of the feature flags and rules.
 
 TODO: add steps to create new version and new deployment for the config
 
+TODO: add CDK example
 
 ### Use feature flag store
 
+After you have created and configured `AppConfigStore` and added your feature configuraiton you can use the feature
+flags in your code:
 
-First setup is to setup the `AppConfigStore` based on the AppConfig parameters you have created with the previous
-CloudFormation template.
+=== "app.py"
 
-TOOD: provide full example
+    ```python
+    app_config = AppConfigStore(
+        environment="dev",
+        application="product-catalogue",
+        name="features"
+    )
+    feature_flags = FeatureFlags(store=app_config)
+    ctx = {"username": "lessa", "tier": "premium", "location": "NL"}
 
-=== app.py
-```python
+    has_premium_features: bool = feature_flags.evaluate(name="premium_features",
+                                                        context=ctx,
+                                                        default=False)
+    ```
 
-app_config = AppConfigStore(
-    environment="FeatureStore",
-    application="product-dev",
-    name="features",
-    cache_seconds=300
-)
-feature_flags = FeatureFlags(store=app_config)
-ctx = {"username": "lessa", "tier": "premium", "location": "NL"}
+=== "features.json"
 
-has_premium_features: bool = feature_flags.evaluate(name="premium_features",
-                                                    context=ctx,
-                                                    default=False)
-```
-
-=== schema.json
-```json
-
-```
+    ```json
+    {
+      "premium_features": {
+        "default": false,
+        "rules": {
+          "customer tier equals premium": {
+            "when_match": true,
+            "conditions": [
+              {
+                "action": "EQUALS",
+                "key": "tier",
+                "value": "premium"
+              }
+            ]
+          }
+        }
+      }
+    }
+    ```
 
 ### Evaluating a single feature flag
 
-
 To fetch a single feature, setup the `FeatureFlags` instance and call the `evaluate` method.
 
-```python
-feature_flags = FeatureFlags(store=app_config)
-ctx = {"username": "lessa", "tier": "premium", "location": "NL"}
+=== "app.py"
 
-has_premium_features: bool = feature_flags.evaluate(name="premium_features",
-                                                    context=ctx,
-                                                    default=False)
-```
+    ```python
+      feature_flags = FeatureFlags(store=app_config)
 
-The `context` parameter is optional and will be used for rule evaluation. In this case we have the `key` set
-as `username` and `value` set to `lessa`. Feature flag schema to match this could look like this:
+      new_feature_active: bool = feature_flags.evaluate(name="new_feature",
+                                                          default=False)
+    ```
+
+=== "features.json"
+
+    ```json
+      {
+        "new_feature": {
+          "default": true
+        }
+      }
+    ```
+
+In this example the feature flag is **static**, which mean it will be evaluated without any additional context such as
+user or location. If you want to have **dynamic** feature flags that only works for specific user group or other contex
+aware information you need to pass a context object and add rules to your feature configuration.
+
+=== "app.py"
+
+    ```pyhthon
+    feature_flags = FeatureFlags(store=app_config)
+    ctx = {"username": "lessa", "tier": "premium", "location": "NL"}
+
+    has_premium_features: bool = feature_flags.evaluate(name="premium_features",
+                                                        context=ctx,
+                                                        default=False
+    ```
+
+=== "features.json"
+
+    ```json
+    {
+      "premium_features": {
+        "default": false,
+        "rules": {
+          "customer tier equals premium": {
+            "when_match": true,
+            "conditions": [
+              {
+                "action": "EQUALS",
+                "key": "tier",
+                "value": "premium"
+              }
+            ]
+          }
+        }
+      }
+    }
+    ```
+
+### Get all enabled features
+
+In cases where you need to get a list of all the features that are enabled you can use `get_enabled_features` method:
+
+=== "app.py"
+
+    ```python
+    feature_flags = FeatureFlags(store=app_config)
+    ctx = {"username": "lessa", "tier": "premium", "location": "NL"}
+
+    all_features: list[str] = feature_flags.get_enabled_features(context=ctx)
+    # all_features is evaluated to ["feautre1", "feature2"]
+    ```
+
+=== "features.json"
+
+    ```json hl_lines="2 6"
+    {
+      "feature1": {
+        "default": false,
+        "rules": {...}
+        },
+      "feature2": {
+        "default": false,
+        "rules": {...}
+        },
+      ...
+      }
+    }
+    ```
+
+As a result you will get a list of all the names of the features from your feature flags configuration.
+
+### Feature flags schema
+
+When using the feature flags utility powertools expects specific schema stored in your AppConfig configuration. The
+minimal requirement is the name of the feature and the default value, for example:
 
 ```json
 {
-  "premium_features": {
+  "global_feature": {
+    "default": true
+  }
+}
+```
+
+This is a static flag that will be applied to every evaluation within your code. If you need more control and want to
+provide context such as user group, permisisons, location or other information you need to add rules to your feature
+flag configuration.
+
+#### Rules
+
+To use feature flags dynamically you can configure rules in your feature flags configuration and pass context
+to `evaluate`. The rules block must have:
+
+* rule name as a key
+* value when the condition is met
+* list conditions for evaluation
+
+```json hl_lines="4-11"
+
+{
+  "premium_feature": {
     "default": false,
     "rules": {
-      "username is lessa and tier is premium": {
+      "customer tier equals premium": {
         "when_match": true,
         "conditions": [
-          {
-            "action": "EQUALS",
-            "key": "username",
-            "value": "lessa"
-          },
           {
             "action": "EQUALS",
             "key": "tier",
@@ -188,89 +299,59 @@ as `username` and `value` set to `lessa`. Feature flag schema to match this coul
 }
 ```
 
-### Get all enabled features
-
-In cases where you need to get a list of all the features that are enabled you can use `get_enabled_features` method:
-
-```python
-feature_flags = Feature****Flags(store=app_config)
-ctx = {"username": "lessa", "tier": "premium", "location": "NL"}
-
-all_features: list[str] = feature_flags.get_enabled_features(context=ctx)
-```
-
-As a result you will get a list of all the names of the features from your feaute flag configuration. For example if you
-have two features with the following configuration and both are evaluated to `true`:
-
-```json hl_lines="2 6"
-{
-  "feature1": {
-    "default": false,
-    "rules": {...}
-    },
-  "feature2": {
-    "default": false,
-    "rules": {...}
-    },
-  ...
-  }
-}
-```
-
-The response of `get_enabled_features` will be `["feautre1", "feature2"]`.
-
-
-### Feature flags schema
-
-When using the feature flags utility powertools expects specific schema stored in your AppConfig configuration which
-incldues:
-
-* list of named features
-* default value
-* set of rules that powertools will evaluate
-
-Each rule should contain:
-
-* value if condition is met
-* list of conditions with `action`, `key` and `value` attributes.
-
-Here is small example of a premium feature with a default value `false` and one rule with a condition: if the passed
-context equals `{"tier": "premium"}` return true.
-
-```json
-{
-  "premium_feature": {
-    "default": false
-  }
-}
-```
-
-#### Rules
-
-TODO: explain rules here in detail. The rules are evaluated based on conditions which have the structure:
-
-```json
-{
-  "rules": {
-    "customer tier equals premium": {
-      "when_match": true,
-      "conditions": [
-        {
-          "action": "EQUALS",
-          "key": "tier",
-          "value": "premium"
-        }
-      ]
-    }
-  }
-}
-```
+You can have multiple rules with different names. The powertools will return the first result `when_match` of the
+matching rule configuration or `default` value when none of the rules apply.
 
 #### Conditions
 
-The `action` configuration can have 4 different values: `EQUALS`, `STARTSWITH`, `ENDSWITH`, `IN`, `NOT_IN`. If you have
-multiple rules powertools will evaluate every rule with a logical AND.
+The conditions block is a list of `action`, `key` `value`:
 
+```json
+{
+  "action": "EQUALS",
+  "key": "tier",
+  "value": "premium"
+}
+```
+
+The `action` configuration can have 5 different values: `EQUALS`, `STARTSWITH`, `ENDSWITH`, `IN`, `NOT_IN`.
+The `key` and `value` will be compared to the input from the context parameter.
+
+If you have multiple conditions powertools will evaluate the list of conditions as a logical AND, so all conditions needs to be
+matched to return `when_match` value.
+
+=== "features.json"
+
+    ```json  hl_lines="10-11"
+    {
+      "premium_feature": {
+        "default": false,
+        "rules": {
+          "customer tier equals premium": {
+            "when_match": true,
+            "conditions": [
+              {
+                "action": "EQUALS",
+                "key": "tier",
+                "value": "premium"
+              }
+            ]
+          }
+        }
+      }
+    }
+    ```
+
+=== "app.py"
+
+    ```python  hl_lines="2"
+        feature_flags = FeatureFlags(store=app_config)
+        ctx = {"username": "lessa", "tier": "premium", "location": "NL"}
+
+        has_premium_features: bool = feature_flags.evaluate(name="premium_features",
+                                                            context=ctx,
+                                                            default=False
+    ```
 
 ## Advanced
 
