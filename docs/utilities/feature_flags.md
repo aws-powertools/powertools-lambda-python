@@ -23,6 +23,8 @@ multiple conditions on whether a feature flag should be `True` or `False`.
 That being said, be mindful that feature flags can increase your application complexity over time if you're not careful;
 use them sparingly.
 
+TODO: fix tip
+
 !!! tip "Read [this article](https://martinfowler.com/articles/feature-toggles.html){target="_blank"} for more details
 on different types of feature flags and trade-offs"
 
@@ -34,8 +36,14 @@ on different types of feature flags and trade-offs"
 
 ## Getting started
 
-### Create a feature flag store
+### IAM Permissions
 
+Because powertools needs to fetch the configuration from the AppConfig, you need to add `appconfig:GetConfiguration`
+action to your function.
+
+### Required resources
+
+TODO: link to appconfig
 By default, this utility provides AWS AppConfig as a configuration store. To create a dedicate you can use this
 cloudformation template:
 
@@ -106,68 +114,18 @@ Resources:
 
 The `Content` parameter is a json structure of the feature flags and rules.
 
-### IAM Permissions
+TODO: add steps to create new version and new deployment for the config
 
-Because powertools needs to fetch the configuration from the AppConfig, you need to add `appconfig:GetConfiguration`
-action to your function.
 
-### Creating feature flags
+### Use feature flag store
 
-When using the feature flags utility powertools expects specific schema stored in your AppConfig configuration which
-incldues:
-
-* list of named features
-* default value
-* set of rules that powertools will evaluate
-
-Each rule should contain:
-
-* value if condition is met
-* list of conditions with `action`, `key` and `value` attributes.
-
-Here is small example of a premium feature with a default value `false` and one rule with a condition: if the passed
-context equals `{"tier": "premium"}` return true.
-
-```json
-{
-  "premium_feature": {
-    "default": false,
-    "rules": {
-      "customer tier equals premium": {
-        "when_match": true,
-        "conditions": [
-          {
-            "action": "EQUALS",
-            "key": "tier",
-            "value": "premium"
-          }
-        ]
-      }
-    }
-  }
-}
-```
-
-#### Rules
-
-The rules are evaluated based on conditions which have the structure:
-
-```json
-{
-  "action": "EQUALS",
-  "key": "tier",
-  "value": "premium"
-}
-```
-
-The `action` configuration can have 4 different values: `EQUALS`, `STARTSWITH`, `ENDSWITH` and `CONTAINS`. If you have
-multiple rules powertools will evaluate every rule with a logical AND.
-
-### Setup a feature flag store
 
 First setup is to setup the `AppConfigStore` based on the AppConfig parameters you have created with the previous
 CloudFormation template.
 
+TOOD: provide full example
+
+=== app.py
 ```python
 
 app_config = AppConfigStore(
@@ -176,10 +134,21 @@ app_config = AppConfigStore(
     name="features",
     cache_seconds=300
 )
+feature_flags = FeatureFlags(store=app_config)
+ctx = {"username": "lessa", "tier": "premium", "location": "NL"}
+
+has_premium_features: bool = feature_flags.evaluate(name="premium_features",
+                                                    context=ctx,
+                                                    default=False)
+```
+
+=== schema.json
+```json
 
 ```
 
-### Fetching a single feature flag
+### Evaluating a single feature flag
+
 
 To fetch a single feature, setup the `FeatureFlags` instance and call the `evaluate` method.
 
@@ -220,18 +189,19 @@ as `username` and `value` set to `lessa`. Feature flag schema to match this coul
 }
 ```
 
+### Get all enabled features
 
-### Fetching all feature flags
 In cases where you need to get a list of all the features that are enabled you can use `get_enabled_features` method:
 
 ```python
-feature_flags = FeatureFlags(store=app_config)
+feature_flags = Feature****Flags(store=app_config)
 ctx = {"username": "lessa", "tier": "premium", "location": "NL"}
 
 all_features: list[str] = feature_flags.get_enabled_features(context=ctx)
 ```
-As a result you will get a list of all the names of the features from your feaute flag configuration.
-For example if you have two features with the following configuration and both are evaluated to `true`:
+
+As a result you will get a list of all the names of the features from your feaute flag configuration. For example if you
+have two features with the following configuration and both are evaluated to `true`:
 
 ```json hl_lines="2 6"
 {
@@ -247,17 +217,70 @@ For example if you have two features with the following configuration and both a
   }
 }
 ```
+
 The response of `get_enabled_features` will be `["feautre1", "feature2"]`.
 
 
-### Advanced
+### Feature flags schema
 
-#### Adjusting cache TTL
+When using the feature flags utility powertools expects specific schema stored in your AppConfig configuration which
+incldues:
+
+* list of named features
+* default value
+* set of rules that powertools will evaluate
+
+Each rule should contain:
+
+* value if condition is met
+* list of conditions with `action`, `key` and `value` attributes.
+
+Here is small example of a premium feature with a default value `false` and one rule with a condition: if the passed
+context equals `{"tier": "premium"}` return true.
+
+```json
+{
+  "premium_feature": {
+    "default": false
+  }
+}
+```
+
+#### Rules
+
+TODO: explain rules here in detail. The rules are evaluated based on conditions which have the structure:
+
+```json
+{
+  "rules": {
+    "customer tier equals premium": {
+      "when_match": true,
+      "conditions": [
+        {
+          "action": "EQUALS",
+          "key": "tier",
+          "value": "premium"
+        }
+      ]
+    }
+  }
+}
+```
+
+#### Conditions
+
+The `action` configuration can have 4 different values: `EQUALS`, `STARTSWITH`, `ENDSWITH`, `IN`, `NOT_IN`. If you have
+multiple rules powertools will evaluate every rule with a logical AND.
 
 
+## Advanced
 
-### Partially enabling features
+### Adjusting in-memory cache
 
-### Bring your own store provider
+### Envelope (any better name)
+
+### Built-in store provider
+
+#### AppConfig
 
 ## Testing your code
