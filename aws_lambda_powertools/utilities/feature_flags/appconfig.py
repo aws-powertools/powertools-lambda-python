@@ -21,7 +21,7 @@ class AppConfigStore(StoreProvider):
         environment: str,
         application: str,
         name: str,
-        cache_seconds: int,
+        max_age: int = 5,
         sdk_config: Optional[Config] = None,
         envelope: Optional[str] = "",
         jmespath_options: Optional[Dict] = None,
@@ -36,8 +36,8 @@ class AppConfigStore(StoreProvider):
             AppConfig application name, e.g. 'powertools'
         name: str
             AppConfig configuration name e.g. `my_conf`
-        cache_seconds: int
-            cache expiration time, how often to call AppConfig to fetch latest configuration
+        max_age: int
+            cache expiration time in seconds, or how often to call AppConfig to fetch latest configuration
         sdk_config: Optional[Config]
             Botocore Config object to pass during client initialization
         envelope : Optional[str]
@@ -49,7 +49,7 @@ class AppConfigStore(StoreProvider):
         self.environment = environment
         self.application = application
         self.name = name
-        self.cache_seconds = cache_seconds
+        self.cache_seconds = max_age
         self.config = sdk_config
         self.envelope = envelope
         self.jmespath_options = jmespath_options
