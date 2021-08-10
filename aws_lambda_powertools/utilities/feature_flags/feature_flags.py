@@ -46,7 +46,8 @@ class FeatureFlags:
             schema.RuleAction.EQUALS.value: lambda a, b: a == b,
             schema.RuleAction.STARTSWITH.value: lambda a, b: a.startswith(b),
             schema.RuleAction.ENDSWITH.value: lambda a, b: a.endswith(b),
-            schema.RuleAction.CONTAINS.value: lambda a, b: a in b,
+            schema.RuleAction.IN.value: lambda a, b: a in b,
+            schema.RuleAction.NOT_IN.value: lambda a, b: a not in b,
         }
 
         try:
