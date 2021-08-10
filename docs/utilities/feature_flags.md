@@ -39,15 +39,15 @@ Your Lambda function must have `appconfig:GetConfiguration` IAM permission in or
 
 ### Required resources
 
-By default, this utility
-provides [AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html) as a
-configuration store. To create a dedicate you can use this cloudformation template:
+By default, this utility provides [AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html) as a configuration store.
+
+The following sample infrastructure will be used throughout this documentation:
 
 === "template.yaml"
 
-    ```yaml
+    ```yaml hl_lines="5 11 18 25 31-50 54"
     AWSTemplateFormatVersion: "2010-09-09"
-    Description: A sample template
+    Description: Lambda Powertools Feature flags sample template
     Resources:
       FeatureStoreApp:
         Type: AWS::AppConfig::Application
@@ -110,7 +110,7 @@ configuration store. To create a dedicate you can use this cloudformation templa
 
 === "CDK"
 
-    ```typescript
+    ```typescript hl_lines="2-7 13-32 34-35 40 47 54"
     import * as cdk from '@aws-cdk/core';
     import {
         CfnApplication,
