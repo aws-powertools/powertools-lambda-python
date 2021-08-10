@@ -211,9 +211,14 @@ def test_valid_condition_all_actions():
                             CONDITION_VALUE: "a",
                         },
                         {
-                            CONDITION_ACTION: RuleAction.CONTAINS.value,
+                            CONDITION_ACTION: RuleAction.IN.value,
                             CONDITION_KEY: "username",
                             CONDITION_VALUE: ["a", "b"],
+                        },
+                        {
+                            CONDITION_ACTION: RuleAction.NOT_IN.value,
+                            CONDITION_KEY: "username",
+                            CONDITION_VALUE: ["c"],
                         },
                     ],
                 }

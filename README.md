@@ -25,6 +25,7 @@ A suite of Python utilities for AWS Lambda functions to ease adopting best pract
 * **[Event source data classes](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/data_classes/)** - Data classes describing the schema of common Lambda event triggers
 * **[Parser](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/parser/)** - Data parsing and deep validation using Pydantic
 * **[Idempotency](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/idempotency/)** - Convert your Lambda functions into idempotent operations which are safe to retry
+* **[Feature Flags](./utilities/feature_flags.md)** - A simple rule engine to evaluate when one or multiple features should be enabled depending on the input
 
 ### Installation
 
