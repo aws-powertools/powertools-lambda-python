@@ -427,14 +427,18 @@ needs to be matched to return `when_match` value.
 ## Advanced
 
 ### Adjusting in-memory cache
-Similar to other utilities you can set the number of seconds the `AppConfigProvider` should cache the configuration.
-This will ensure that powertools will keep a configuration for up to `case_seconds` seconds between Lambda invocation and will not make an API call each time.
 
-```python hl_lines="5"
+By default, we cache configuration retrieved from the store for 5 seconds for performance and reliability reasons.
+
+You can override `cache_seconds` parameter when instantiating the store.
+
+```python hl_lines="7"
+from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+
 app_config = AppConfigStore(
-    environment="test",
-    application="powertools",
-    name="test_conf_name",
+    environment="dev",
+    application="product-catalogue",
+    name="features",
     cache_seconds=300
 )
 ```
@@ -496,7 +500,9 @@ app_config.get_configuration()
 
 
 ## Testing your code
+
 You can unit test your feature flags locally without any setup in AWS AppConfig.
+
 Because `AppConfigStore` only fetches a JSON document with a specific schema you can mock the response and use it to verify the rule evaluation.
 Here is an example how to test a single feature with one rule:
 
