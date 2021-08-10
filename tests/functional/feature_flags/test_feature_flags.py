@@ -165,7 +165,7 @@ def test_flags_conditions_rule_match_equal_multiple_conditions(mocker, config):
     username_val = "a"
     mocked_app_config_schema = {
         "my_feature": {
-            "default": True,
+            "default": False,
             "rules": {
                 "tenant id equals 6 and username is a": {
                     "when_match": expected_value,
