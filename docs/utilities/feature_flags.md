@@ -5,8 +5,7 @@ title: Feature flags description: Utility
 The feature flags utility provides a simple rule engine to define when one or multiple features should be enabled
 depending on the input.
 
-!!! tip "For simpler use cases where a feature is simply on or off for all users, use [Parameters](parameters.md)
-utility instead."
+!!! tip "For simpler use cases where a feature is simply on or off for all users, use [Parameters](parameters.md) utility instead."
 
 ## Terminology
 
@@ -23,8 +22,12 @@ multiple conditions on whether a feature flag should be `True` or `False`.
 That being said, be mindful that feature flags can increase your application complexity over time if you're not careful;
 use them sparingly.
 
-!!! tip "Read [this article](https://martinfowler.com/articles/feature-toggles.html){target="_blank"} for more details
-on different types of feature flags and trade-offs"
+If you want to learn more about feature flags, differen types and trade-offs, check this articles:
+
+* [Feature Toggles (aka Feature Flags) - Pete Hodgson](https://martinfowler.com/articles/feature-toggles.html)
+* [AWS Lambda Feature Toggles Made Simple - Ran Isenberg](https://isenberg-ran.medium.com/aws-lambda-feature-toggles-made-simple-580b0c444233)
+* [Feature Flags Getting Started - CloudBees](https://www.cloudbees.com/blog/ultimate-feature-flag-guide)
+
 
 ## Key features
 
@@ -221,7 +224,7 @@ aware information you need to pass a context object and add rules to your featur
 
 ### Get all enabled features
 
-In cases where you need to get a list of all the features that are enabled you can use `get_enabled_features` method:
+In cases where you need to get a list of all the features that are enabled according to the input context you can use `get_enabled_features` method:
 
 === "app.py"
 
