@@ -180,12 +180,6 @@ configuration store. To create a dedicate you can use this cloudformation templa
     }
     ```
 
-The `Content` parameter is a json structure of the feature flags and rules.
-
-TODO: add steps to create new version and new deployment for the config
-
-TODO: add CDK example
-
 ### Use feature flag store
 
 After you have created and configured `AppConfigStore` and added your feature configuraiton you can use the feature
