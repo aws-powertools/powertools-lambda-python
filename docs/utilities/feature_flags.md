@@ -92,8 +92,8 @@ The following sample infrastructure will be used throughout this documentation:
                       }
                     }
                   },
-                  "feature2": {
-                    "default": true
+                  "ten_percent_off_campaign": {
+                    "default": false
                   }
               }
           ContentType: 'application/json'
@@ -139,7 +139,7 @@ The following sample infrastructure will be used throughout this documentation:
                         }
                     }
                 },
-                "feature2": {
+                "ten_percent_off_campaign": {
                     "default": true
                 }
             }
@@ -175,138 +175,210 @@ The following sample infrastructure will be used throughout this documentation:
     }
     ```
 
-### Use feature flag store
+### Evaluating a single feature flag
 
-After you have created and configured `AppConfigStore` and added your feature configuraiton you can use the feature
-flags in your code:
+To get started, you'd need to initialize `AppConfigStore` and `FeatureFlags`. Then call `FeatureFlags` `evaluate` method to fetch, validate, and evaluate your feature.
+
+The `evaluate` method supports two optional parameters:
+
+* **context**: Value to be evaluated against each rule defined for the given feature
+* **default**: Sentinel value to use in case we experience any issues with our store, or feature doesn't exist
 
 === "app.py"
 
-    ```python
+    ```python hl_lines="3 9 13 17-19"
+	from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+
     app_config = AppConfigStore(
         environment="dev",
         application="product-catalogue",
         name="features"
     )
-    feature_flags = FeatureFlags(store=app_config)
-    ctx = {"username": "lessa", "tier": "premium", "location": "NL"}
 
-    has_premium_features: bool = feature_flags.evaluate(name="premium_features",
-                                                        context=ctx,
-                                                        default=False)
+    feature_flags = FeatureFlags(store=app_config)
+
+	def lambda_handler(event, context):
+		# Get customer's tier from incoming request
+		ctx = { "tier": event.get("tier", "standard") }
+
+		# Evaluate whether customer's tier has access to premium features
+		# based on `has_premium_features` rules
+		has_premium_features: bool = feature_flags.evaluate(name="has_premium_features",
+                                                            context=ctx, default=False)
+		if has_premium_features:
+			# enable premium features
+			...
     ```
 
+=== "event.json"
+
+	```json hl_lines="3"
+	{
+		"username": "lessa",
+		"tier": "premium",
+		"basked_id": "random_id"
+	}
+	```
 === "features.json"
 
-    ```json
-    {
-      "premium_features": {
-        "default": false,
-        "rules": {
-          "customer tier equals premium": {
-            "when_match": true,
-            "conditions": [
-              {
-                "action": "EQUALS",
-                "key": "tier",
-                "value": "premium"
-              }
-            ]
-          }
-        }
-      }
+    ```json hl_lines="2 6 9-11"
+	{
+	  "premium_features": {
+		"default": false,
+		"rules": {
+		  "customer tier equals premium": {
+			"when_match": true,
+			"conditions": [
+			  {
+				"action": "EQUALS",
+				"key": "tier",
+				"value": "premium"
+			  }
+			]
+		  }
+		}
+	  },
+	  "ten_percent_off_campaign": {
+		"default": false
+	  }
     }
     ```
 
-### Evaluating a single feature flag
+#### Static flags
 
-To fetch a single feature, setup the `FeatureFlags` instance and call the `evaluate` method.
+We have a static flag named `ten_percent_off_campaign`. Meaning, there are no conditional rules, it's either ON or OFF for all customers.
 
-=== "app.py"
-
-    ```python
-      feature_flags = FeatureFlags(store=app_config)
-
-      new_feature_active: bool = feature_flags.evaluate(name="new_feature",
-                                                          default=False)
-    ```
-
-=== "features.json"
-
-    ```json
-      {
-        "new_feature": {
-          "default": true
-        }
-      }
-    ```
-
-In this example the feature flag is **static**, which mean it will be evaluated without any additional context such as
-user or location. If you want to have **dynamic** feature flags that only works for specific user group or other contex
-aware information you need to pass a context object and add rules to your feature configuration.
+In this case, we could omit the `context` parameter and simply evaluate whether we should apply the 10% discount.
 
 === "app.py"
 
-    ```pyhthon
+    ```python hl_lines="12-13"
+	from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+
+    app_config = AppConfigStore(
+        environment="dev",
+        application="product-catalogue",
+        name="features"
+    )
+
     feature_flags = FeatureFlags(store=app_config)
-    ctx = {"username": "lessa", "tier": "premium", "location": "NL"}
 
-    has_premium_features: bool = feature_flags.evaluate(name="premium_features",
-                                                        context=ctx,
-                                                        default=False
+	def lambda_handler(event, context):
+		apply_discount: bool = feature_flags.evaluate(name="ten_percent_off_campaign",
+															 default=False)
+
+		if apply_discount:
+			# apply 10% discount to product
+			...
     ```
 
 === "features.json"
 
-    ```json
-    {
-      "premium_features": {
-        "default": false,
-        "rules": {
-          "customer tier equals premium": {
-            "when_match": true,
-            "conditions": [
-              {
-                "action": "EQUALS",
-                "key": "tier",
-                "value": "premium"
-              }
-            ]
-          }
-        }
-      }
+    ```json hl_lines="2-3"
+	{
+	  "ten_percent_off_campaign": {
+		"default": false
+	  }
     }
     ```
 
-### Get all enabled features
+### Getting all enabled features
 
-In cases where you need to get a list of all the features that are enabled according to the input context you can
-use `get_enabled_features` method:
+As you might have noticed, each `evaluate` call means an API call to the Store and the more features you have the more costly this becomes.
+
+You can use `get_enabled_features` method for scenarios where you need a list of all enabled features according to the input context.
 
 === "app.py"
 
-    ```python
-    feature_flags = FeatureFlags(store=app_config)
-    ctx = {"username": "lessa", "tier": "premium", "location": "NL"}
+    ```python hl_lines="17-20 23"
+	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+	from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
 
-    all_features: list[str] = feature_flags.get_enabled_features(context=ctx)
-    # all_features is evaluated to ["feautre1", "feature2"]
+	app = ApiGatewayResolver()
+
+    app_config = AppConfigStore(
+        environment="dev",
+        application="product-catalogue",
+        name="features"
+    )
+
+    feature_flags = FeatureFlags(store=app_config)
+
+
+	@app.get("/products")
+	def list_products():
+		ctx = {
+			**app.current_event.headers,
+			**app.current_event.json_body
+		}
+
+		# all_features is evaluated to ["geo_customer_campaign", "ten_percent_off_campaign"]
+		all_features: list[str] = feature_flags.get_enabled_features(context=ctx)
+
+		if "geo_customer_campaign" in all_features:
+			# apply discounts based on geo
+			...
+
+		if "ten_percent_off_campaign" in all_features:
+			# apply additional 10% for all customers
+			...
+
+	def lambda_handler(event, context):
+		return app.resolve(event, context)
     ```
+
+=== "event.json"
+
+	```json hl_lines="2 8"
+	{
+	  "body": '{"username": "lessa", "tier": "premium", "basked_id": "random_id"}',
+	  "resource": "/products",
+	  "path": "/products",
+	  "httpMethod": "GET",
+	  "isBase64Encoded": false,
+	  "headers": {
+		"CloudFront-Viewer-Country": "NL",
+	  }
+	}
+	```
 
 === "features.json"
 
-    ```json hl_lines="2 6"
-    {
-      "feature1": {
-        "default": false,
-        "rules": {...}
-        },
-      "feature2": {
-        "default": false,
-        "rules": {...}
-        },
-      ...
-      }
+    ```json hl_lines="17-18 20 27-29"
+	{
+	  "premium_features": {
+		"default": false,
+		"rules": {
+		  "customer tier equals premium": {
+			"when_match": true,
+			"conditions": [
+			  {
+				"action": "EQUALS",
+				"key": "tier",
+				"value": "premium"
+			  }
+			]
+		  }
+		}
+	  },
+	  "ten_percent_off_campaign": {
+		"default": true
+	  },
+	  "geo_customer_campaign": {
+		"default": false,
+		"rules": {
+		  "customer in temporary discount geo": {
+			"when_match": true,
+			"conditions": [
+			  {
+				"action": "IN",
+				"key": "CloudFront-Viewer-Country",
+				"value": ["NL", "IE", "UK", "PL", "PT"},
+			  }
+			]
+		  }
+		}
+	  }
     }
     ```
 
