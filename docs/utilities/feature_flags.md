@@ -545,20 +545,21 @@ You can unit test your feature flags locally and independently without setting u
 
 `AppConfigStore` only fetches a JSON document with a specific schema. This allows you to mock the response and use it to verify the rule evaluation.
 
-!!! info "This example tests feature flags independently. If you're importing your code and testing, make sure to change the `patch` namespace accordingly"
+!!! warning "This excerpt relies on `pytest` and `pytest-mock` dependencies"
 
-=== "test_feature_flags.py"
+=== "test_feature_flags_independently.py"
 
-	!!! warning "This excerpt relies on `pytest` and `pytest-mock` dependencies"
-
-    ```python
+    ```python hl_lines="9-11"
 	from typing import Dict, List, Optional
 
-	from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+	from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore, RuleAction
 
 
 	def init_feature_flags(mocker, mock_schema, envelope="") -> FeatureFlags:
-		mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.feature_flags.AppConfigStore.get_configuration")
+		"""Mock AppConfig Store get_configuration method to use mock schema instead"""
+
+		method_to_mock = "aws_lambda_powertools.utilities.feature_flags.AppConfigStore.get_configuration"
+		mocked_get_conf = mocker.patch(method_to_mock)
 		mocked_get_conf.return_value = mock_schema
 
 		app_conf_store = AppConfigStore(
@@ -572,6 +573,7 @@ You can unit test your feature flags locally and independently without setting u
 
 
 	def test_flags_condition_match(mocker):
+		# GIVEN
 		expected_value = True
 		mocked_app_config_schema = {
 			"my_feature": {
@@ -591,7 +593,11 @@ You can unit test your feature flags locally and independently without setting u
 				}
 		}
 
+		# WHEN
+		ctx = {"tenant_id": "12345", "username": "a"}
 		feature_flags = init_feature_flags(mocker=mocker, mock_schema=mocked_app_config_schema)
-		flag = feature_flags.evaluate(name="my_feature", context={"tenant_id": "12345", "username": "a"}, default=False)
+		flag = feature_flags.evaluate(name="my_feature", context=ctx, default=False)
+
+		# THEN
 		assert flag == expected_value
     ```
