@@ -7,6 +7,48 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## [1.19.0] - 2021-08-11
+
+### Bug Fixes
+
+* **deps:** bump poetry to latest ([#592](https://github.com/awslabs/aws-lambda-powertools-python/issues/592))
+* **feature-flags:** bug handling multiple conditions ([#599](https://github.com/awslabs/aws-lambda-powertools-python/issues/599))
+* **parser:** API Gateway WebSocket validation under check_message_id; plus some housekeeping ([#553](https://github.com/awslabs/aws-lambda-powertools-python/issues/553))
+
+### Code Refactoring
+
+* **feature-flags:** add debug statements for all feature evaluations ([#590](https://github.com/awslabs/aws-lambda-powertools-python/issues/590))
+* **feature-flags:** optimize UX and maintenance ([#563](https://github.com/awslabs/aws-lambda-powertools-python/issues/563))
+
+### Documentation
+
+* **event-handler:** new custom serializer option
+* **feature-flags:** create concrete documentation ([#594](https://github.com/awslabs/aws-lambda-powertools-python/issues/594))
+* **feature-flags:** correct docs and typing ([#588](https://github.com/awslabs/aws-lambda-powertools-python/issues/588))
+* **parameters:** auto-transforming values based on suffix ([#573](https://github.com/awslabs/aws-lambda-powertools-python/issues/573))
+* **readme:** add code coverage badge ([#577](https://github.com/awslabs/aws-lambda-powertools-python/issues/577))
+* **tracer:** update wording that it auto-disables on non-Lambda env
+
+### Features
+
+* **api-gateway:** add support for custom serializer ([#568](https://github.com/awslabs/aws-lambda-powertools-python/issues/568))
+* **data-classes:** decode json_body if based64 encoded ([#560](https://github.com/awslabs/aws-lambda-powertools-python/issues/560))
+* **feature-flags:** Add not_in action and rename contains to in ([#589](https://github.com/awslabs/aws-lambda-powertools-python/issues/589))
+* **params:** expose params `max_age`, `raise_on_transform_error` to high level functions ([#567](https://github.com/awslabs/aws-lambda-powertools-python/issues/567))
+* **tracer:** auto-disable tracer for non-Lambda environments to ease testing ([#598](https://github.com/awslabs/aws-lambda-powertools-python/issues/598))
+
+### Maintenance
+
+* **deps:** bump boto3 from 1.18.1 to 1.18.15 ([#591](https://github.com/awslabs/aws-lambda-powertools-python/issues/591))
+* **deps:** bump codecov/codecov-action from 2.0.1 to 2.0.2 ([#558](https://github.com/awslabs/aws-lambda-powertools-python/issues/558))
+* **deps:** bump boto3 from 1.18.15 to 1.18.17 ([#597](https://github.com/awslabs/aws-lambda-powertools-python/issues/597))
+* **deps-dev:** bump mkdocs-material from 7.2.2 to 7.2.3 ([#596](https://github.com/awslabs/aws-lambda-powertools-python/issues/596))
+* **deps-dev:** bump mkdocs-material from 7.2.1 to 7.2.2 ([#582](https://github.com/awslabs/aws-lambda-powertools-python/issues/582))
+* **deps-dev:** bump pdoc3 from 0.9.2 to 0.10.0 ([#584](https://github.com/awslabs/aws-lambda-powertools-python/issues/584))
+* **deps-dev:** bump isort from 5.9.2 to 5.9.3 ([#574](https://github.com/awslabs/aws-lambda-powertools-python/issues/574))
+* **deps-dev:** bump mkdocs-material from 7.2.0 to 7.2.1 ([#566](https://github.com/awslabs/aws-lambda-powertools-python/issues/566))
+* **deps-dev:** bump mkdocs-material from 7.1.11 to 7.2.0 ([#551](https://github.com/awslabs/aws-lambda-powertools-python/issues/551))
+* **deps-dev:** bump flake8-black from 0.2.1 to 0.2.3 ([#541](https://github.com/awslabs/aws-lambda-powertools-python/issues/541))
 ## [1.18.1] - 2021-07-23
 
 ### Bug Fixes
