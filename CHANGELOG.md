@@ -29,7 +29,7 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 * **readme:** add code coverage badge ([#577](https://github.com/awslabs/aws-lambda-powertools-python/issues/577))
 * **tracer:** update wording that it auto-disables on non-Lambda env
 * **feature-flags:** fix SAM infra, convert CDK to Python
-
+* **feature-flags:** fix sample feature name in evaluate method
 ### Features
 
 * **api-gateway:** add support for custom serializer ([#568](https://github.com/awslabs/aws-lambda-powertools-python/issues/568))

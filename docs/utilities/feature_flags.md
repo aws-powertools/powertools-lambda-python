@@ -192,7 +192,7 @@ The `evaluate` method supports two optional parameters:
 
 		# Evaluate whether customer's tier has access to premium features
 		# based on `has_premium_features` rules
-		has_premium_features: bool = feature_flags.evaluate(name="has_premium_features",
+		has_premium_features: bool = feature_flags.evaluate(name="premium_features",
                                                             context=ctx, default=False)
 		if has_premium_features:
 			# enable premium features
