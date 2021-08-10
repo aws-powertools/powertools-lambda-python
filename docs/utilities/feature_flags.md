@@ -476,7 +476,23 @@ app_config = AppConfigStore(
 ```
 
 ### Built-in store provider
+Powertools currently support only `AppConfig` store provider out of the box.
+If you have your own store and want to use it with `FeatureFlags`, you need to extend from `StoreProvider` class and implement your `get_configuration` method.
 
 #### AppConfig
+AppConfig store provider fetches any JSON document from your AppConfig definition with the `get_configuration` method.
+You can use it to get more
+
+```python hl_lines="8"
+app_config = AppConfigStore(
+    environment="test",
+    application="powertools",
+    name="test_conf_name",
+    envelope = "features.feature_flags"
+)
+
+app_config.get_configuration()
+```
+
 
 ## Testing your code
