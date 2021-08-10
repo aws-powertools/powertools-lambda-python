@@ -84,7 +84,7 @@ class FeatureFlags:
                 return False  # context doesn't match condition
 
         logger.debug(f"rule matched, rule_name={rule_name}, rule_value={rule_match_value}, name={feature_name}")
-        return rule_match_value
+        return True
 
     def _evaluate_rules(
         self, *, feature_name: str, context: Dict[str, Any], feat_default: bool, rules: Dict[str, Any]

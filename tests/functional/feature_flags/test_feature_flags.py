@@ -122,15 +122,15 @@ def test_flags_conditions_no_match(mocker, config):
 
 # check that a rule can match when it has multiple conditions, see rule name for further explanation
 def test_flags_conditions_rule_not_match_multiple_conditions_match_only_one_condition(mocker, config):
-    expected_value = True
+    expected_value = False
     tenant_id_val = "6"
     username_val = "a"
     mocked_app_config_schema = {
         "my_feature": {
-            "default": True,
+            "default": expected_value,
             "rules": {
                 "tenant id equals 6 and username is a": {
-                    "when_match": False,
+                    "when_match": True,
                     "conditions": [
                         {
                             "action": RuleAction.EQUALS.value,  # this condition matches
@@ -165,7 +165,7 @@ def test_flags_conditions_rule_match_equal_multiple_conditions(mocker, config):
     username_val = "a"
     mocked_app_config_schema = {
         "my_feature": {
-            "default": False,
+            "default": True,
             "rules": {
                 "tenant id equals 6 and username is a": {
                     "when_match": expected_value,
