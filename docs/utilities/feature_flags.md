@@ -23,7 +23,7 @@ multiple conditions on whether a feature flag should be `True` or `False`.
 That being said, be mindful that feature flags can increase your application complexity over time if you're not careful;
 use them sparingly.
 
-If you want to learn more about feature flags, differen types and trade-offs, check this articles:
+If you want to learn more about feature flags, their variations and trade-offs, check these articles:
 
 * [Feature Toggles (aka Feature Flags) - Pete Hodgson](https://martinfowler.com/articles/feature-toggles.html)
 * [AWS Lambda Feature Toggles Made Simple - Ran Isenberg](https://isenberg-ran.medium.com/aws-lambda-feature-toggles-made-simple-580b0c444233)
