@@ -29,6 +29,7 @@ If you want to learn more about feature flags, their variations and trade-offs, 
 
 * Define simple feature flags to dynamically decide when to enable a feature
 * Fetch one or all feature flags enabled for a given application context
+* Support for static feature flags to simply turn on/off a feature without rules
 
 ## Getting started
 
