@@ -458,7 +458,7 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
 		environment="dev",
 		application="product-catalogue",
 		name="configuration",
-		envelope = "features"
+		envelope = "feature_flags"
 	)
 	```
 
