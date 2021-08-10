@@ -24,7 +24,7 @@ class FeatureFlags:
             environment="test",
             application="powertools",
             name="test_conf_name",
-            cache_seconds=300,
+            max_age=300,
             envelope="features"
         )
 

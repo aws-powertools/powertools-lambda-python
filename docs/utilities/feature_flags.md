@@ -419,7 +419,7 @@ needs to be matched to return `when_match` value.
 
 By default, we cache configuration retrieved from the Store for 5 seconds for performance and reliability reasons.
 
-You can override `cache_seconds` parameter when instantiating the store.
+You can override `max_age` parameter when instantiating the store.
 
 ```python hl_lines="7"
 from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
@@ -428,7 +428,7 @@ app_config = AppConfigStore(
     environment="dev",
     application="product-catalogue",
     name="features",
-    cache_seconds=300
+    max_age=300
 )
 ```
 
@@ -498,7 +498,7 @@ Parameter | Default | Description
 **application** | `""` | AWS AppConfig Application
 **name** | `""` | AWS AppConfig Configuration name
 **envelope** | `None` | JMESPath expression to use to extract feature flags configuration from AWS AppConfig configuration
-**cache_seconds** | `5` | Number of seconds to cache feature flags configuration fetched from AWS AppConfig
+**max_age** | `5` | Number of seconds to cache feature flags configuration fetched from AWS AppConfig
 **sdk_config** | `None` | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}
 **jmespath_options** | `None` | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"}
 
@@ -526,7 +526,7 @@ app_config = AppConfigStore(
     environment="dev",
     application="product-catalogue",
     name="configuration",
-    cache_seconds=120,
+    max_age=120,
     envelope = "features",
     sdk_config=boto_config,
     jmespath_options=custom_jmespath_options
