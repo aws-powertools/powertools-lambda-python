@@ -560,7 +560,7 @@ You can unit test your feature flags locally and independently without setting u
     ```python
 	from typing import Dict, List, Optional
 
-	from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+	from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore, RuleAction
 
 
 	def init_feature_flags(mocker, mock_schema, envelope="") -> FeatureFlags:
