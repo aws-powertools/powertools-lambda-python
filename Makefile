@@ -5,7 +5,7 @@ target:
 	@$(MAKE) pr
 
 dev:
-	pip install --upgrade pip pre-commit poetry==1.1.4
+	pip install --upgrade pip pre-commit poetry
 	poetry install --extras "pydantic"
 	pre-commit install
 

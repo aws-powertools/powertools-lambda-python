@@ -64,6 +64,13 @@ class FeatureFlags:
         rule_match_value = rule.get(schema.RULE_MATCH_VALUE)
         conditions = cast(List[Dict], rule.get(schema.CONDITIONS_KEY))
 
+        if not conditions:
+            logger.debug(
+                f"rule did not match, no conditions to match, rule_name={rule_name}, rule_value={rule_match_value}, "
+                f"name={feature_name} "
+            )
+            return False
+
         for condition in conditions:
             context_value = context.get(str(condition.get(schema.CONDITION_KEY)))
             cond_action = condition.get(schema.CONDITION_ACTION, "")
@@ -76,9 +83,8 @@ class FeatureFlags:
                 )
                 return False  # context doesn't match condition
 
-            logger.debug(f"rule matched, rule_name={rule_name}, rule_value={rule_match_value}, name={feature_name}")
-            return True
-        return False
+        logger.debug(f"rule matched, rule_name={rule_name}, rule_value={rule_match_value}, name={feature_name}")
+        return True
 
     def _evaluate_rules(
         self, *, feature_name: str, context: Dict[str, Any], feat_default: bool, rules: Dict[str, Any]
@@ -238,6 +244,7 @@ class FeatureFlags:
             logger.debug(f"Failed to fetch feature flags from store, returning empty list, reason={err}")
             return features_enabled
 
+        logger.debug("Evaluating all features")
         for name, feature in features.items():
             rules = feature.get(schema.RULES_KEY, {})
             feature_default_value = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
