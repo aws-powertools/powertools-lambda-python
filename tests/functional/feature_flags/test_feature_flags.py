@@ -121,6 +121,44 @@ def test_flags_conditions_no_match(mocker, config):
 
 
 # check that a rule can match when it has multiple conditions, see rule name for further explanation
+def test_flags_conditions_rule_not_match_multiple_conditions_match_only_one_condition(mocker, config):
+    expected_value = False
+    tenant_id_val = "6"
+    username_val = "a"
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "tenant id equals 6 and username is a": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.EQUALS.value,  # this condition matches
+                            "key": "tenant_id",
+                            "value": tenant_id_val,
+                        },
+                        {
+                            "action": RuleAction.EQUALS.value,  # this condition does not
+                            "key": "username",
+                            "value": "bbb",
+                        },
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(
+        name="my_feature",
+        context={
+            "tenant_id": tenant_id_val,
+            "username": username_val,
+        },
+        default=True,
+    )
+    assert toggle == expected_value
+
+
 def test_flags_conditions_rule_match_equal_multiple_conditions(mocker, config):
     expected_value = False
     tenant_id_val = "6"
