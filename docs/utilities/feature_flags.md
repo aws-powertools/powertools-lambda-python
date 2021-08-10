@@ -496,3 +496,55 @@ app_config.get_configuration()
 
 
 ## Testing your code
+You can unit test your feature flags locally without any setup in AWS AppConfig.
+Because `AppConfigStore` only fetches a JSON document with a specific schema you can mock the response and use it to verify the rule evaluation.
+Here is an example how to test a single feature with one rule:
+
+=== "test_feature_flags"
+    ```python
+    def test_flags_condition_match(mocker):
+        expected_value = True
+        mocked_app_config_schema = {
+            "my_feature": {
+                "default": expected_value,
+                "rules": {
+                    "tenant id equals 345345435": {
+                        "when_match": True,
+                        "conditions": [
+                            {
+                                "action": RuleAction.EQUALS.value,
+                                "key": "tenant_id",
+                                "value": "345345435",
+                            }
+                        ],
+                    }
+                },
+                }
+        }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, Config(region_name="us-east-1"))
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a"}, default=False)
+    assert toggle == expected_value
+    ```
+
+=== "init_feature_flags"
+
+    ```python
+    def init_feature_flags(
+        mocker, mock_schema: Dict, config: Config, envelope: str = "", jmespath_options: Optional[Dict] = None
+    ) -> FeatureFlags:
+        mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.feature_flags.AppConfigStore.get_configuration")
+        mocked_get_conf.return_value = mock_schema
+
+        app_conf_store = AppConfigStore(
+            environment="test_env",
+            application="test_app",
+            name="test_conf_name",
+            cache_seconds=600,
+            sdk_config=config,
+            envelope=envelope,
+            jmespath_options=jmespath_options,
+        )
+        feature_flags: FeatureFlags = FeatureFlags(store=app_conf_fetcher)
+        return feature_flags
+    ```
