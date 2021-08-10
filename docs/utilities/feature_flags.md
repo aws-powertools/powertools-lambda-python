@@ -2,11 +2,9 @@
 title: Feature flags description: Utility
 ---
 
-The feature flags utility provides a simple rule engine to define when one or multiple features should be enabled
-depending on the input.
+The feature flags utility provides a simple rule engine to define when one or multiple features should be enabled depending on the input.
 
-!!! tip "For simpler use cases where a feature is simply on or off for all users, use [Parameters](parameters.md)
-utility instead."
+!!! tip "For simpler use cases where a feature is simply on or off for all users, use [Parameters](parameters.md) utility instead."
 
 ## Terminology
 
