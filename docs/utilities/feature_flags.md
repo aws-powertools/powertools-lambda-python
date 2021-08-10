@@ -428,7 +428,7 @@ needs to be matched to return `when_match` value.
 
 ### Adjusting in-memory cache
 
-By default, we cache configuration retrieved from the store for 5 seconds for performance and reliability reasons.
+By default, we cache configuration retrieved from the Store for 5 seconds for performance and reliability reasons.
 
 You can override `cache_seconds` parameter when instantiating the store.
 
@@ -444,40 +444,54 @@ app_config = AppConfigStore(
 ```
 
 ### Envelope
-In previous examples the schema for feature flags was a top level element in the json document.
-In some cases it can be embedded as a part of bigger configuration on a deeper nested level, for example:
 
-```json
-{
-  "logging" {...},
-  "features": {
-    "feature_flags": {
-        "feature1": {
-          "default": false,
-          "rules": {...}
-          },
-        "feature2": {
-          "default": false,
-          "rules": {...}
-          },
-        ...
-        }
-      }
-  }
-}
-```
+There are scenarios where you might want to include feature flags as part of an existing application configuration.
 
-This schema would not work with the default `AppConfigProvider` because the feature configuration is not a top level element.
-Therefore, you need to pass a correct JMESPath by using the `envelope` parameter.
+For this to work, you need to use a JMESPath expression via the `envelope` parameter to extract that key as the feature flags configuration.
 
-```python hl_lines="5"
-app_config = AppConfigStore(
-    environment="test",
-    application="powertools",
-    name="test_conf_name",
-    envelope = "features.feature_flags"
-)
-```
+=== "app.py"
+
+	```python hl_lines="7"
+	from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+
+	app_config = AppConfigStore(
+		environment="dev",
+		application="product-catalogue",
+		name="configuration",
+		envelope = "features"
+	)
+	```
+
+=== "configuration.json"
+
+	```json hl_lines="6"
+	{
+		"logging": {
+			"level": "INFO",
+			"sampling_rate": 0.1
+		},
+		"feature_flags": {
+			"premium_feature": {
+				"default": false,
+				"rules": {
+					"customer tier equals premium": {
+						"when_match": true,
+						"conditions": [
+							{
+								"action": "EQUALS",
+								"key": "tier",
+								"value": "premium"
+							}
+						]
+					}
+				}
+			},
+			"feature2": {
+				"default": false
+			}
+		}
+	}
+	```
 
 ### Built-in store provider
 Powertools currently support only `AppConfig` store provider out of the box.
