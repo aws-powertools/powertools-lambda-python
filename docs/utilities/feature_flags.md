@@ -427,8 +427,53 @@ needs to be matched to return `when_match` value.
 ## Advanced
 
 ### Adjusting in-memory cache
+Similar to other utilities you can set the number of seconds the `AppConfigProvider` should cache the configuration.
+This will ensure that powertools will keep a configuration for up to `case_seconds` seconds between Lambda invocation and will not make an API call each time.
 
-### Envelope (any better name)
+```python hl_lines="5"
+app_config = AppConfigStore(
+    environment="test",
+    application="powertools",
+    name="test_conf_name",
+    cache_seconds=300
+)
+```
+
+### Envelope
+In previous examples the schema for feature flags was a top level element in the json document.
+In some cases it can be embedded as a part of bigger configuration on a deeper nested level, for example:
+
+```json
+{
+  "logging" {...},
+  "features": {
+    "feature_flags": {
+        "feature1": {
+          "default": false,
+          "rules": {...}
+          },
+        "feature2": {
+          "default": false,
+          "rules": {...}
+          },
+        ...
+        }
+      }
+  }
+}
+```
+
+This schema would not work with the default `AppConfigProvider` because the feature configuration is not a top level element.
+Therefore, you need to pass a correct JMESPath by using the `envelope` parameter.
+
+```python hl_lines="5"
+app_config = AppConfigStore(
+    environment="test",
+    application="powertools",
+    name="test_conf_name",
+    envelope = "features.feature_flags"
+)
+```
 
 ### Built-in store provider
 
