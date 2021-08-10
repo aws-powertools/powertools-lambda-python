@@ -597,7 +597,7 @@ You can unit test your feature flags locally and independently without setting u
 				}
 		}
 
-	feature_flags = init_feature_flags(mocker=mocker, mock_schema=mocked_app_config_schema)
-	flag = feature_flags.evaluate(name="my_feature", context={"tenant_id": "12345", "username": "a"}, default=False)
-	assert flag == expected_value
+		feature_flags = init_feature_flags(mocker=mocker, mock_schema=mocked_app_config_schema)
+		flag = feature_flags.evaluate(name="my_feature", context={"tenant_id": "12345", "username": "a"}, default=False)
+		assert flag == expected_value
     ```
