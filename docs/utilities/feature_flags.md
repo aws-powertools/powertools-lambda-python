@@ -1,5 +1,6 @@
 ---
-title: Feature flags description: Utility
+title: Feature flags
+description: Utility
 ---
 
 The feature flags utility provides a simple rule engine to define when one or multiple features should be enabled depending on the input.
