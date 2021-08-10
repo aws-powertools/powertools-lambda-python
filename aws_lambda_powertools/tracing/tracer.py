@@ -719,16 +719,15 @@ class Tracer:
         Union[bool, str]
         """
         logger.debug("Verifying whether Tracing has been disabled")
-        is_lambda_sam_cli = os.getenv(constants.SAM_LOCAL_ENV)
-        is_chalice_cli = os.getenv(constants.CHALICE_LOCAL_ENV)
+        is_lambda_env = os.getenv(constants.LAMBDA_TASK_ROOT_ENV)
         is_disabled = resolve_truthy_env_var_choice(env=os.getenv(constants.TRACER_DISABLED_ENV, "false"))
 
         if is_disabled:
             logger.debug("Tracing has been disabled via env var POWERTOOLS_TRACE_DISABLED")
             return is_disabled
 
-        if is_lambda_sam_cli or is_chalice_cli:
-            logger.debug("Running under SAM CLI env or not in Lambda env; disabling Tracing")
+        if not is_lambda_env:
+            logger.debug("Running outside Lambda env; disabling Tracing")
             return True
 
         return False
