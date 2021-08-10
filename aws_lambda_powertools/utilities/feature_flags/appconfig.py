@@ -21,7 +21,7 @@ class AppConfigStore(StoreProvider):
         environment: str,
         application: str,
         name: str,
-        cache_seconds: int,
+        cache_seconds: int = 5,
         sdk_config: Optional[Config] = None,
         envelope: Optional[str] = "",
         jmespath_options: Optional[Dict] = None,
