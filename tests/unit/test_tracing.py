@@ -125,9 +125,11 @@ def test_tracer_method(mocker, dummy_response, provider_stub, in_subsegment_mock
     )
 
 
-def test_tracer_custom_metadata(mocker, dummy_response, provider_stub):
+def test_tracer_custom_metadata(monkeypatch, mocker, dummy_response, provider_stub):
     # GIVEN Tracer is initialized with booking as the service name
+    monkeypatch.setenv("LAMBDA_TASK_ROOT", "/opt/")
     put_metadata_mock = mocker.MagicMock()
+
     provider = provider_stub(put_metadata_mock=put_metadata_mock)
     tracer = Tracer(provider=provider, service="booking")
 
@@ -143,8 +145,9 @@ def test_tracer_custom_metadata(mocker, dummy_response, provider_stub):
     )
 
 
-def test_tracer_custom_annotation(mocker, dummy_response, provider_stub):
+def test_tracer_custom_annotation(monkeypatch, mocker, dummy_response, provider_stub):
     # GIVEN Tracer is initialized
+    monkeypatch.setenv("LAMBDA_TASK_ROOT", "/opt/")
     put_annotation_mock = mocker.MagicMock()
     provider = provider_stub(put_annotation_mock=put_annotation_mock)
     tracer = Tracer(provider=provider)
@@ -214,8 +217,9 @@ def test_tracer_method_does_not_add_empty_response_as_metadata(mocker, provider_
 
 
 @mock.patch("aws_lambda_powertools.tracing.tracer.aws_xray_sdk.core.patch")
-def test_tracer_patch_modules(xray_patch_mock, mocker):
+def test_tracer_patch_modules(xray_patch_mock, monkeypatch, mocker):
     # GIVEN tracer is initialized with a list of modules to patch
+    monkeypatch.setenv("LAMBDA_TASK_ROOT", "/opt/")
     modules = ["boto3"]
 
     # WHEN modules are supported by X-Ray

@@ -60,26 +60,11 @@ def test_capture_method(dummy_response):
     greeting(name="Foo", message="Bar")
 
 
-def test_tracer_lambda_emulator(monkeypatch, dummy_response):
-    # GIVEN tracer runs locally
-    monkeypatch.setenv("AWS_SAM_LOCAL", "true")
+def test_tracer_lambda_outside_lambda_env(monkeypatch, dummy_response):
+    # GIVEN tracer runs locally (ie: `LAMBDA_TASK_ROOT` is not set)
     tracer = Tracer()
 
-    # WHEN a lambda function is run through SAM CLI
-    @tracer.capture_lambda_handler
-    def handler(event, context):
-        return dummy_response
-
-    # THEN tracer should run in disabled mode, and not raise an Exception
-    handler({}, {})
-
-
-def test_tracer_chalice_cli_mode(monkeypatch, dummy_response):
-    # GIVEN tracer runs locally
-    monkeypatch.setenv("AWS_CHALICE_CLI_MODE", "true")
-    tracer = Tracer()
-
-    # WHEN a lambda function is run through the Chalice CLI.
+    # WHEN a lambda function is run through outside of a lambda
     @tracer.capture_lambda_handler
     def handler(event, context):
         return dummy_response
