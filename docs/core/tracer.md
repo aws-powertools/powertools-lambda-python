@@ -10,8 +10,7 @@ Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.
 ## Key features
 
 * Auto capture cold start as annotation, and responses or full exceptions as metadata
-* Run functions locally with SAM CLI without code change to disable tracing
-* Explicitly disable tracing via env var `POWERTOOLS_TRACE_DISABLED="true"`
+* Auto-disable when not running in AWS Lambda environment
 * Support tracing async methods, generators, and context managers
 * Auto patch supported modules by AWS X-Ray
 
@@ -357,11 +356,7 @@ Tracer keeps a copy of its configuration after the first initialization. This is
 
 ## Testing your code
 
-You can safely disable Tracer when unit testing your code using `POWERTOOLS_TRACE_DISABLED` environment variable.
-
-```bash
-POWERTOOLS_TRACE_DISABLED=1 python -m pytest
-```
+Tracer is disabled by default when not running in the AWS Lambda environment - This means no code changes or environment variables to be set.
 
 ## Tips
 
