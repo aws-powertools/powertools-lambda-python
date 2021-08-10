@@ -5,7 +5,8 @@ title: Feature flags description: Utility
 The feature flags utility provides a simple rule engine to define when one or multiple features should be enabled
 depending on the input.
 
-!!! tip "For simpler use cases where a feature is simply on or off for all users, use [Parameters](parameters.md) utility instead."
+!!! tip "For simpler use cases where a feature is simply on or off for all users, use [Parameters](parameters.md)
+utility instead."
 
 ## Terminology
 
@@ -28,7 +29,6 @@ If you want to learn more about feature flags, differen types and trade-offs, ch
 * [AWS Lambda Feature Toggles Made Simple - Ran Isenberg](https://isenberg-ran.medium.com/aws-lambda-feature-toggles-made-simple-580b0c444233)
 * [Feature Flags Getting Started - CloudBees](https://www.cloudbees.com/blog/ultimate-feature-flag-guide)
 
-
 ## Key features
 
 * Define simple feature flags to dynamically decide when to enable a feature
@@ -50,68 +50,135 @@ configuration store. To create a dedicate you can use this cloudformation templa
 
 === "template.yaml"
 
-```yaml
-AWSTemplateFormatVersion: "2010-09-09"
-Description: A sample template
-Resources:
-  FeatureStoreApp:
-    Type: AWS::AppConfig::Application
-    Properties:
-      Description: "AppConfig Appliction for feature toggles"
-      Name: my-app
+    ```yaml
+    AWSTemplateFormatVersion: "2010-09-09"
+    Description: A sample template
+    Resources:
+      FeatureStoreApp:
+        Type: AWS::AppConfig::Application
+        Properties:
+          Description: "AppConfig Appliction for feature toggles"
+          Name: my-app
 
-  FeatureStoreDevEnv:
-    Type: AWS::AppConfig::Environment
-    Properties:
-      ApplicationId: !Ref FeatureStoreApp
-      Description: "Development Environment for the App Config Store"
-      Name: "development"
+      FeatureStoreDevEnv:
+        Type: AWS::AppConfig::Environment
+        Properties:
+          ApplicationId: !Ref FeatureStoreApp
+          Description: "Development Environment for the App Config Store"
+          Name: "development"
 
-  FeatureStoreConfigProfile:
-    Type: AWS::AppConfig::ConfigurationProfile
-    Properties:
-      ApplicationId: !Ref FeatureStoreApp
-      Name: "MyTestProfile"
-      LocationUri: "hosted"
+      FeatureStoreConfigProfile:
+        Type: AWS::AppConfig::ConfigurationProfile
+        Properties:
+          ApplicationId: !Ref FeatureStoreApp
+          Name: "MyTestProfile"
+          LocationUri: "hosted"
 
-  HostedConfigVersion:
-    Type: AWS::AppConfig::HostedConfigurationVersion
-    Properties:
-      ApplicationId: !Ref FeatureStoreApp
-      ConfigurationProfileId: !Ref FeatureStoreConfigProfile
-      Description: 'A sample hosted configuration version'
-      Content: |
-        {
-              "premium_features": {
-                "default": false,
-                "rules": {
-                  "customer tier equals premium": {
-                    "when_match": true,
-                    "conditions": [
-                      {
-                        "action": "EQUALS",
-                        "key": "tier",
-                        "value": "premium"
+      HostedConfigVersion:
+        Type: AWS::AppConfig::HostedConfigurationVersion
+        Properties:
+          ApplicationId: !Ref FeatureStoreApp
+          ConfigurationProfileId: !Ref FeatureStoreConfigProfile
+          Description: 'A sample hosted configuration version'
+          Content: |
+            {
+                  "premium_features": {
+                    "default": false,
+                    "rules": {
+                      "customer tier equals premium": {
+                        "when_match": true,
+                        "conditions": [
+                          {
+                            "action": "EQUALS",
+                            "key": "tier",
+                            "value": "premium"
+                          }
+                        ]
                       }
-                    ]
+                    }
+                  },
+                  "feature2": {
+                    "default": true
                   }
-                }
-              },
-              "feature2": {
-                "default": true
               }
-          }
-      ContentType: 'application/json'
+          ContentType: 'application/json'
 
-  ConfigDeployment:
-    Type: AWS::AppConfig::Deployment
-    Properties:
-      ApplicationId: !Ref FeatureStoreApp
-      ConfigurationProfileId: !Ref FeatureStoreConfigProfile
-      ConfigurationVersion: !Ref HostedConfigVersion
-      DeploymentStrategyId: "AppConfig.AllAtOnce"
-      EnvironmentId: !Ref FeatureStoreDevEnv
-```
+      ConfigDeployment:
+        Type: AWS::AppConfig::Deployment
+        Properties:
+          ApplicationId: !Ref FeatureStoreApp
+          ConfigurationProfileId: !Ref FeatureStoreConfigProfile
+          ConfigurationVersion: !Ref HostedConfigVersion
+          DeploymentStrategyId: "AppConfig.AllAtOnce"
+          EnvironmentId: !Ref FeatureStoreDevEnv
+    ```
+
+=== "CDK"
+
+    ```typescript
+    import * as cdk from '@aws-cdk/core';
+    import {
+        CfnApplication,
+        CfnConfigurationProfile, CfnDeployment,
+        CfnEnvironment,
+        CfnHostedConfigurationVersion
+    } from "@aws-cdk/aws-appconfig";
+
+    export class CdkStack extends cdk.Stack {
+        constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+            super(scope, id, props);
+
+            const featureConfig = {
+                "premium_features": {
+                    "default": false,
+                    "rules": {
+                        "customer tier equals premium": {
+                            "when_match": true,
+                            "conditions": [
+                                {
+                                    "action": "EQUALS",
+                                    "key": "tier",
+                                    "value": "premium"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "feature2": {
+                    "default": true
+                }
+            }
+
+            const app = new CfnApplication(this, "app", {name: "productapp"});
+            const env = new CfnEnvironment(this, "env", {
+                applicationId: app.ref,
+                name: "dev-env"
+            });
+
+            const configProfile = new CfnConfigurationProfile(this, "profile", {
+                applicationId: app.ref,
+                locationUri: "hosted",
+                name: "configProfile"
+            });
+
+
+            const hostedConfigVersion = new CfnHostedConfigurationVersion(this, "version", {
+                applicationId: app.ref,
+                configurationProfileId: configProfile.ref,
+                content: JSON.stringify(featureConfig),
+                contentType: "application/json"
+            });
+
+            new CfnDeployment(this, "deploy", {
+                applicationId: app.ref,
+                configurationProfileId: configProfile.ref,
+                configurationVersion: hostedConfigVersion.ref,
+                deploymentStrategyId: "AppConfig.AllAtOnce",
+                environmentId: env.ref
+            });
+        }
+    }
+    ```
 
 The `Content` parameter is a json structure of the feature flags and rules.
 
@@ -224,7 +291,8 @@ aware information you need to pass a context object and add rules to your featur
 
 ### Get all enabled features
 
-In cases where you need to get a list of all the features that are enabled according to the input context you can use `get_enabled_features` method:
+In cases where you need to get a list of all the features that are enabled according to the input context you can
+use `get_enabled_features` method:
 
 === "app.py"
 
@@ -317,11 +385,11 @@ The conditions block is a list of `action`, `key` `value`:
 }
 ```
 
-The `action` configuration can have 5 different values: `EQUALS`, `STARTSWITH`, `ENDSWITH`, `IN`, `NOT_IN`.
-The `key` and `value` will be compared to the input from the context parameter.
+The `action` configuration can have 5 different values: `EQUALS`, `STARTSWITH`, `ENDSWITH`, `IN`, `NOT_IN`. The `key`
+and `value` will be compared to the input from the context parameter.
 
-If you have multiple conditions powertools will evaluate the list of conditions as a logical AND, so all conditions needs to be
-matched to return `when_match` value.
+If you have multiple conditions powertools will evaluate the list of conditions as a logical AND, so all conditions
+needs to be matched to return `when_match` value.
 
 === "features.json"
 
