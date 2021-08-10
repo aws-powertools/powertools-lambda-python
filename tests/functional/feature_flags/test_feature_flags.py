@@ -26,7 +26,7 @@ def init_feature_flags(
         environment="test_env",
         application="test_app",
         name="test_conf_name",
-        cache_seconds=600,
+        max_age=600,
         sdk_config=config,
         envelope=envelope,
         jmespath_options=jmespath_options,
@@ -42,7 +42,7 @@ def init_fetcher_side_effect(mocker, config: Config, side_effect) -> AppConfigSt
         environment="env",
         application="application",
         name="conf",
-        cache_seconds=1,
+        max_age=1,
         sdk_config=config,
     )
 

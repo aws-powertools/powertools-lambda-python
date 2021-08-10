@@ -212,6 +212,7 @@ aws serverlessrepo list-application-versions \
 [Event source data classes](./utilities/data_classes.md) | Data classes describing the schema of common Lambda event triggers
 [Parser](./utilities/parser.md) | Data parsing and deep validation using Pydantic
 [Idempotency](./utilities/idempotency.md) | Idempotent Lambda handler
+[Feature Flags](./utilities/feature_flags.md) | A simple rule engine to evaluate when one or multiple features should be enabled depending on the input
 
 ## Environment variables
 
