@@ -28,6 +28,7 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 * **parameters:** auto-transforming values based on suffix ([#573](https://github.com/awslabs/aws-lambda-powertools-python/issues/573))
 * **readme:** add code coverage badge ([#577](https://github.com/awslabs/aws-lambda-powertools-python/issues/577))
 * **tracer:** update wording that it auto-disables on non-Lambda env
+* **feature-flags:** fix SAM infra, convert CDK to Python
 
 ### Features
 
