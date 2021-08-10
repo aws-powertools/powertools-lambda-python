@@ -35,8 +35,7 @@ If you want to learn more about feature flags, their variations and trade-offs, 
 
 ### IAM Permissions
 
-Because powertools needs to fetch the configuration from the AppConfig, you need to add `appconfig:GetConfiguration`
-action to your function.
+Your Lambda function must have `appconfig:GetConfiguration` IAM permission in order to fetch configuration from AWS AppConfig.
 
 ### Required resources
 
