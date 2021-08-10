@@ -494,22 +494,54 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
 	```
 
 ### Built-in store provider
-Powertools currently support only `AppConfig` store provider out of the box.
-If you have your own store and want to use it with `FeatureFlags`, you need to extend from `StoreProvider` class and implement your `get_configuration` method.
+
+!!! info "For GA, you'll be able to bring your own store."
 
 #### AppConfig
-AppConfig store provider fetches any JSON document from your AppConfig definition with the `get_configuration` method.
-You can use it to get more
 
-```python hl_lines="8"
+AppConfig store provider fetches any JSON document from AWS AppConfig.
+
+These are the available options for further customization.
+
+Parameter | Default | Description
+------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
+**environment** | `""` | AWS AppConfig Environment, e.g. `test`
+**application** | `""` | AWS AppConfig Application
+**name** | `""` | AWS AppConfig Configuration name
+**envelope** | `None` | JMESPath expression to use to extract feature flags configuration from AWS AppConfig configuration
+**cache_seconds** | `5` | Number of seconds to cache feature flags configuration fetched from AWS AppConfig
+**sdk_config** | `None` | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}
+**jmespath_options** | `None` | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"}
+
+=== "appconfig_store_example.py"
+
+```python hl_lines="19-25"
+from botocore.config import Config
+
+import jmespath
+
+boto_config = Config(read_timeout=10, retries={"total_max_attempts": 2})
+
+# Custom JMESPath functions
+class CustomFunctions(jmespath.functions.Functions):
+
+    @jmespath.functions.signature({'types': ['string']})
+    def _func_special_decoder(self, s):
+        return my_custom_decoder_logic(s)
+
+
+custom_jmespath_options = {"custom_functions": CustomFunctions()}
+
+
 app_config = AppConfigStore(
-    environment="test",
-    application="powertools",
-    name="test_conf_name",
-    envelope = "features.feature_flags"
+    environment="dev",
+    application="product-catalogue",
+    name="configuration",
+    cache_seconds=120,
+    envelope = "features",
+    sdk_config=boto_config,
+    jmespath_options=custom_jmespath_options
 )
-
-app_config.get_configuration()
 ```
 
 
