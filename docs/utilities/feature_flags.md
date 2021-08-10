@@ -382,7 +382,16 @@ You can use `get_enabled_features` method for scenarios where you need a list of
     }
     ```
 
-As a result you will get a list of all the names of the features from your feature flags configuration.
+### Rule engine flowchart
+
+When evaluating whether features should be enabled, there are a number of decisions this utility makes before returning with `True` or `False`.
+
+This is best described in the following flowchart.
+
+![Rule engine ](../media/feat_flags_evaluation_workflow.png)
+
+
+## Advanced
 
 ### Feature flags schema
 
@@ -485,7 +494,6 @@ needs to be matched to return `when_match` value.
                                                             default=False
     ```
 
-## Advanced
 
 ### Adjusting in-memory cache
 
