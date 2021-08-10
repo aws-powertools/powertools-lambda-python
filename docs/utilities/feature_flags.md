@@ -382,118 +382,89 @@ You can use `get_enabled_features` method for scenarios where you need a list of
     }
     ```
 
-### Rule engine flowchart
-
-When evaluating whether features should be enabled, there are a number of decisions this utility makes before returning with `True` or `False`.
-
-This is best described in the following flowchart.
-
-![Rule engine ](../media/feat_flags_evaluation_workflow.png)
-
 
 ## Advanced
 
-### Feature flags schema
+### Schema
 
-When using the feature flags utility powertools expects specific schema stored in your AppConfig configuration. The
-minimal requirement is the name of the feature and the default value, for example:
+This utility expects a certain schema to be stored as JSON within AWS AppConfig.
 
-```json
-{
-  "global_feature": {
-    "default": true
-  }
-}
-```
+#### Features
 
-This is a static flag that will be applied to every evaluation within your code. If you need more control and want to
-provide context such as user group, permisisons, location or other information you need to add rules to your feature
-flag configuration.
+A feature can simply have its name and a `default` value. This is either on or off, also known as a [static flag](#static-flags).
+
+=== "minimal_schema.json"
+	```json hl_lines="2-3"
+	{
+	  "global_feature": {
+		"default": true
+	  }
+	}
+	```
+
+If you need more control and want to provide context such as user group, permissions, location, etc., you need to add rules to your feature flag configuration.
 
 #### Rules
 
-To use feature flags dynamically you can configure rules in your feature flags configuration and pass context
-to `evaluate`. The rules block must have:
+When adding `rules` to a feature, they must contain:
 
-* rule name as a key
-* value when the condition is met
-* list conditions for evaluation
+1. A rule name as a key
+2. `when_match` boolean value that should be used when conditions match
+3. A list of `conditions` for evaluation
 
-```json hl_lines="4-11"
+=== "feature_with_rules.json"
 
-{
-  "premium_feature": {
-    "default": false,
-    "rules": {
-      "customer tier equals premium": {
-        "when_match": true,
-        "conditions": [
-          {
-            "action": "EQUALS",
-            "key": "tier",
-            "value": "premium"
-          }
-        ]
-      }
-    }
-  }
-}
-```
+	```json hl_lines="4-11"
+	{
+	  "premium_feature": {
+		"default": false,
+		"rules": {
+		  "customer tier equals premium": {
+			"when_match": true,
+			"conditions": [
+			  {
+				"action": "EQUALS",
+				"key": "tier",
+				"value": "premium"
+			  }
+			]
+		  }
+		}
+	  }
+	}
+	```
 
-You can have multiple rules with different names. The powertools will return the first result `when_match` of the
-matching rule configuration or `default` value when none of the rules apply.
+You can have multiple rules with different names. The rule engine will return the first result `when_match` of the matching rule configuration, or `default` value when none of the rules apply.
 
 #### Conditions
 
-The conditions block is a list of `action`, `key` `value`:
+The `conditions` block is a list of conditions that contain `action`, `key`, and `value` keys:
 
-```json
-{
-  "action": "EQUALS",
-  "key": "tier",
-  "value": "premium"
-}
-```
-
-The `action` configuration can have 5 different values: `EQUALS`, `STARTSWITH`, `ENDSWITH`, `IN`, `NOT_IN`. The `key`
-and `value` will be compared to the input from the context parameter.
-
-If you have multiple conditions powertools will evaluate the list of conditions as a logical AND, so all conditions
-needs to be matched to return `when_match` value.
-
-=== "features.json"
-
-    ```json  hl_lines="10-11"
+=== "conditions.json"
+    ```json  hl_lines="8-11"
     {
-      "premium_feature": {
-        "default": false,
-        "rules": {
-          "customer tier equals premium": {
-            "when_match": true,
-            "conditions": [
-              {
-                "action": "EQUALS",
-                "key": "tier",
-                "value": "premium"
-              }
-            ]
-          }
-        }
-      }
+		...
+		"conditions": [
+		  {
+			"action": "EQUALS",
+			"key": "tier",
+			"value": "premium"
+		  }
+		]
     }
     ```
 
-=== "app.py"
+The `action` configuration can have 5 different values: `EQUALS`, `STARTSWITH`, `ENDSWITH`, `IN`, `NOT_IN`.
 
-    ```python  hl_lines="2"
-        feature_flags = FeatureFlags(store=app_config)
-        ctx = {"username": "lessa", "tier": "premium", "location": "NL"}
+The `key` and `value` will be compared to the input from the context parameter.
 
-        has_premium_features: bool = feature_flags.evaluate(name="premium_features",
-                                                            context=ctx,
-                                                            default=False
-    ```
+**For multiple conditions**, we will evaluate the list of conditions as a logical `AND`, so all conditions needs to match to return `when_match` value.
 
+#### Rule engine flowchart
+
+Now that you've seen all properties of a feature flag schema, this flowchart describes how the rule engines makes a decision on when to return `True` or `False`.
+
+![Rule engine ](../media/feat_flags_evaluation_workflow.png)
 
 ### Adjusting in-memory cache
 
