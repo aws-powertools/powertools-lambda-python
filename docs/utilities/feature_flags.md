@@ -110,67 +110,67 @@ The following sample infrastructure will be used throughout this documentation:
 
 === "CDK"
 
-	```python hl_lines="11-22 24 29 35 42 50"
-	import json
+    ```python hl_lines="11-22 24 29 35 42 50"
+    import json
 
-	import aws_cdk.aws_appconfig as appconfig
-	from aws_cdk import core
+    import aws_cdk.aws_appconfig as appconfig
+    from aws_cdk import core
 
 
-	class SampleFeatureFlagStore(core.Construct):
-		def __init__(self, scope: core.Construct, id_: str) -> None:
-			super().__init__(scope, id_)
+    class SampleFeatureFlagStore(core.Construct):
+        def __init__(self, scope: core.Construct, id_: str) -> None:
+            super().__init__(scope, id_)
 
-			features_config = {
-				"premium_features": {
-					"default": False,
-					"rules": {
-						"customer tier equals premium": {
-							"when_match": True,
-							"conditions": [{"action": "EQUALS", "key": "tier", "value": "premium"}],
-						}
-					},
-				},
-				"ten_percent_off_campaign": {"default": True},
-			}
+            features_config = {
+                "premium_features": {
+                    "default": False,
+                    "rules": {
+                        "customer tier equals premium": {
+                            "when_match": True,
+                            "conditions": [{"action": "EQUALS", "key": "tier", "value": "premium"}],
+                        }
+                    },
+                },
+                "ten_percent_off_campaign": {"default": True},
+            }
 
-			self.config_app = appconfig.CfnApplication(
-				self,
-				id="app",
-				name="product-catalogue",
-			)
-			self.config_env = appconfig.CfnEnvironment(
-				self,
-				id="env",
-				application_id=self.config_app.ref,
-				name="dev-env",
-			)
-			self.config_profile = appconfig.CfnConfigurationProfile(
-				self,
-				id="profile",
-				application_id=self.config_app.ref,
-				location_uri="hosted",
-				name="features",
-			)
-			self.hosted_cfg_version = appconfig.CfnHostedConfigurationVersion(
-				self,
-				"version",
-				application_id=self.config_app.ref,
-				configuration_profile_id=self.config_profile.ref,
-				content=json.dumps(features_config),
-				content_type="application/json",
-			)
-			self.app_config_deployment = appconfig.CfnDeployment(
-				self,
-				id="deploy",
-				application_id=self.config_app.ref,
-				configuration_profile_id=self.config_profile.ref,
-				configuration_version=self.hosted_cfg_version.ref,
-				deployment_strategy_id="AppConfig.AllAtOnce",
-				environment_id=self.config_env.ref,
-			)
+            self.config_app = appconfig.CfnApplication(
+                self,
+                id="app",
+                name="product-catalogue",
+            )
+            self.config_env = appconfig.CfnEnvironment(
+                self,
+                id="env",
+                application_id=self.config_app.ref,
+                name="dev-env",
+            )
+            self.config_profile = appconfig.CfnConfigurationProfile(
+                self,
+                id="profile",
+                application_id=self.config_app.ref,
+                location_uri="hosted",
+                name="features",
+            )
+            self.hosted_cfg_version = appconfig.CfnHostedConfigurationVersion(
+                self,
+                "version",
+                application_id=self.config_app.ref,
+                configuration_profile_id=self.config_profile.ref,
+                content=json.dumps(features_config),
+                content_type="application/json",
+            )
+            self.app_config_deployment = appconfig.CfnDeployment(
+                self,
+                id="deploy",
+                application_id=self.config_app.ref,
+                configuration_profile_id=self.config_profile.ref,
+                configuration_version=self.hosted_cfg_version.ref,
+                deployment_strategy_id="AppConfig.AllAtOnce",
+                environment_id=self.config_env.ref,
+            )
 
-	```
+    ```
 
 ### Evaluating a single feature flag
 
@@ -184,7 +184,7 @@ The `evaluate` method supports two optional parameters:
 === "app.py"
 
     ```python hl_lines="3 9 13 17-19"
-	from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
 
     app_config = AppConfigStore(
         environment="dev",
@@ -194,51 +194,51 @@ The `evaluate` method supports two optional parameters:
 
     feature_flags = FeatureFlags(store=app_config)
 
-	def lambda_handler(event, context):
-		# Get customer's tier from incoming request
-		ctx = { "tier": event.get("tier", "standard") }
+    def lambda_handler(event, context):
+        # Get customer's tier from incoming request
+        ctx = { "tier": event.get("tier", "standard") }
 
-		# Evaluate whether customer's tier has access to premium features
-		# based on `has_premium_features` rules
-		has_premium_features: bool = feature_flags.evaluate(name="premium_features",
+        # Evaluate whether customer's tier has access to premium features
+        # based on `has_premium_features` rules
+        has_premium_features: bool = feature_flags.evaluate(name="premium_features",
                                                             context=ctx, default=False)
-		if has_premium_features:
-			# enable premium features
-			...
+        if has_premium_features:
+            # enable premium features
+            ...
     ```
 
 === "event.json"
 
-	```json hl_lines="3"
-	{
-		"username": "lessa",
-		"tier": "premium",
-		"basked_id": "random_id"
-	}
-	```
+    ```json hl_lines="3"
+    {
+        "username": "lessa",
+        "tier": "premium",
+        "basked_id": "random_id"
+    }
+    ```
 === "features.json"
 
     ```json hl_lines="2 6 9-11"
-	{
-		"premium_features": {
-			"default": false,
-			"rules": {
-				"customer tier equals premium": {
-					"when_match": true,
-					"conditions": [
-						{
-							"action": "EQUALS",
-							"key": "tier",
-							"value": "premium"
-						}
-					]
-				}
-			}
-		},
-		"ten_percent_off_campaign": {
-			"default": false
-		}
-	}
+    {
+        "premium_features": {
+            "default": false,
+            "rules": {
+                "customer tier equals premium": {
+                    "when_match": true,
+                    "conditions": [
+                        {
+                            "action": "EQUALS",
+                            "key": "tier",
+                            "value": "premium"
+                        }
+                    ]
+                }
+            }
+        },
+        "ten_percent_off_campaign": {
+            "default": false
+        }
+    }
     ```
 
 #### Static flags
@@ -250,7 +250,7 @@ In this case, we could omit the `context` parameter and simply evaluate whether 
 === "app.py"
 
     ```python hl_lines="12-13"
-	from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
 
     app_config = AppConfigStore(
         environment="dev",
@@ -260,23 +260,23 @@ In this case, we could omit the `context` parameter and simply evaluate whether 
 
     feature_flags = FeatureFlags(store=app_config)
 
-	def lambda_handler(event, context):
-		apply_discount: bool = feature_flags.evaluate(name="ten_percent_off_campaign",
-															 default=False)
+    def lambda_handler(event, context):
+        apply_discount: bool = feature_flags.evaluate(name="ten_percent_off_campaign",
+                                                                default=False)
 
-		if apply_discount:
-			# apply 10% discount to product
-			...
+        if apply_discount:
+            # apply 10% discount to product
+            ...
     ```
 
 === "features.json"
 
     ```json hl_lines="2-3"
-	{
-		"ten_percent_off_campaign": {
-			"default": false
-		}
-	}
+    {
+        "ten_percent_off_campaign": {
+            "default": false
+        }
+    }
     ```
 
 ### Getting all enabled features
@@ -288,10 +288,10 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 === "app.py"
 
     ```python hl_lines="17-20 23"
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
-	from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
 
-	app = ApiGatewayResolver()
+    app = ApiGatewayResolver()
 
     app_config = AppConfigStore(
         environment="dev",
@@ -301,82 +301,81 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 
     feature_flags = FeatureFlags(store=app_config)
 
+    @app.get("/products")
+    def list_products():
+        ctx = {
+            **app.current_event.headers,
+            **app.current_event.json_body
+        }
 
-	@app.get("/products")
-	def list_products():
-		ctx = {
-			**app.current_event.headers,
-			**app.current_event.json_body
-		}
+        # all_features is evaluated to ["geo_customer_campaign", "ten_percent_off_campaign"]
+        all_features: list[str] = feature_flags.get_enabled_features(context=ctx)
 
-		# all_features is evaluated to ["geo_customer_campaign", "ten_percent_off_campaign"]
-		all_features: list[str] = feature_flags.get_enabled_features(context=ctx)
+        if "geo_customer_campaign" in all_features:
+            # apply discounts based on geo
+            ...
 
-		if "geo_customer_campaign" in all_features:
-			# apply discounts based on geo
-			...
+        if "ten_percent_off_campaign" in all_features:
+            # apply additional 10% for all customers
+            ...
 
-		if "ten_percent_off_campaign" in all_features:
-			# apply additional 10% for all customers
-			...
-
-	def lambda_handler(event, context):
-		return app.resolve(event, context)
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
     ```
 
 === "event.json"
 
-	```json hl_lines="2 8"
-	{
-		"body": "{\"username\": \"lessa\", \"tier\": \"premium\", \"basked_id\": \"random_id\"}",
-		"resource": "/products",
-		"path": "/products",
-		"httpMethod": "GET",
-		"isBase64Encoded": false,
-		"headers": {
-			"CloudFront-Viewer-Country": "NL"
-		}
-	}
-	```
+    ```json hl_lines="2 8"
+    {
+        "body": "{\"username\": \"lessa\", \"tier\": \"premium\", \"basked_id\": \"random_id\"}",
+        "resource": "/products",
+        "path": "/products",
+        "httpMethod": "GET",
+        "isBase64Encoded": false,
+        "headers": {
+            "CloudFront-Viewer-Country": "NL"
+        }
+    }
+    ```
 
 === "features.json"
 
     ```json hl_lines="17-18 20 27-29"
-	{
-		"premium_features": {
-			"default": false,
-			"rules": {
-				"customer tier equals premium": {
-					"when_match": true,
-					"conditions": [
-						{
-							"action": "EQUALS",
-							"key": "tier",
-							"value": "premium"
-						}
-					]
-				}
-			}
-		},
-		"ten_percent_off_campaign": {
-			"default": true
-		},
-		"geo_customer_campaign": {
-			"default": false,
-			"rules": {
-				"customer in temporary discount geo": {
-					"when_match": true,
-					"conditions": [
-						{
-							"action": "IN",
-							"key": "CloudFront-Viewer-Country",
-							"value": ["NL", "IE", "UK", "PL", "PT"]
-						}
-					]
-				}
-			}
-		}
-	}
+    {
+        "premium_features": {
+            "default": false,
+            "rules": {
+                "customer tier equals premium": {
+                    "when_match": true,
+                    "conditions": [
+                        {
+                            "action": "EQUALS",
+                            "key": "tier",
+                            "value": "premium"
+                        }
+                    ]
+                }
+            }
+        },
+        "ten_percent_off_campaign": {
+            "default": true
+        },
+        "geo_customer_campaign": {
+            "default": false,
+            "rules": {
+                "customer in temporary discount geo": {
+                    "when_match": true,
+                    "conditions": [
+                        {
+                            "action": "IN",
+                            "key": "CloudFront-Viewer-Country",
+                            "value": ["NL", "IE", "UK", "PL", "PT"]
+                        }
+                    ]
+                }
+            }
+        }
+    }
     ```
 
 ## Advanced
@@ -390,13 +389,14 @@ This utility expects a certain schema to be stored as JSON within AWS AppConfig.
 A feature can simply have its name and a `default` value. This is either on or off, also known as a [static flag](#static-flags).
 
 === "minimal_schema.json"
-	```json hl_lines="2-3"
-	{
-		"global_feature": {
-			"default": true
-		}
-	}
-	```
+
+    ```json hl_lines="2-3"
+    {
+        "global_feature": {
+            "default": true
+        }
+    }
+    ```
 
 If you need more control and want to provide context such as user group, permissions, location, etc., you need to add rules to your feature flag configuration.
 
@@ -410,25 +410,25 @@ When adding `rules` to a feature, they must contain:
 
 === "feature_with_rules.json"
 
-	```json hl_lines="4-11"
-	{
-		"premium_feature": {
-			"default": false,
-			"rules": {
-				"customer tier equals premium": {
-					"when_match": true,
-					"conditions": [
-						{
-							"action": "EQUALS",
-							"key": "tier",
-							"value": "premium"
-						}
-					]
-				}
-			}
-		}
-	}
-	```
+    ```json hl_lines="4-11"
+    {
+        "premium_feature": {
+            "default": false,
+            "rules": {
+                "customer tier equals premium": {
+                    "when_match": true,
+                    "conditions": [
+                        {
+                            "action": "EQUALS",
+                            "key": "tier",
+                            "value": "premium"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+    ```
 
 You can have multiple rules with different names. The rule engine will return the first result `when_match` of the matching rule configuration, or `default` value when none of the rules apply.
 
@@ -437,16 +437,17 @@ You can have multiple rules with different names. The rule engine will return th
 The `conditions` block is a list of conditions that contain `action`, `key`, and `value` keys:
 
 === "conditions.json"
+
     ```json  hl_lines="5-7"
     {
-		...
-		"conditions": [
-			{
-				"action": "EQUALS",
-				"key": "tier",
-				"value": "premium"
-			}
-		]
+        ...
+        "conditions": [
+            {
+                "action": "EQUALS",
+                "key": "tier",
+                "value": "premium"
+            }
+        ]
     }
     ```
 
@@ -468,16 +469,16 @@ By default, we cache configuration retrieved from the Store for 5 seconds for pe
 
 You can override `max_age` parameter when instantiating the store.
 
-```python hl_lines="7"
-from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+    ```python hl_lines="7"
+    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
 
-app_config = AppConfigStore(
-    environment="dev",
-    application="product-catalogue",
-    name="features",
-    max_age=300
-)
-```
+    app_config = AppConfigStore(
+        environment="dev",
+        application="product-catalogue",
+        name="features",
+        max_age=300
+    )
+    ```
 
 ### Envelope
 
@@ -487,47 +488,47 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
 
 === "app.py"
 
-	```python hl_lines="7"
-	from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+    ```python hl_lines="7"
+    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
 
-	app_config = AppConfigStore(
-		environment="dev",
-		application="product-catalogue",
-		name="configuration",
-		envelope = "feature_flags"
-	)
-	```
+    app_config = AppConfigStore(
+        environment="dev",
+        application="product-catalogue",
+        name="configuration",
+        envelope = "feature_flags"
+    )
+    ```
 
 === "configuration.json"
 
-	```json hl_lines="6"
-	{
-		"logging": {
-			"level": "INFO",
-			"sampling_rate": 0.1
-		},
-		"feature_flags": {
-			"premium_feature": {
-				"default": false,
-				"rules": {
-					"customer tier equals premium": {
-						"when_match": true,
-						"conditions": [
-							{
-								"action": "EQUALS",
-								"key": "tier",
-								"value": "premium"
-							}
-						]
-					}
-				}
-			},
-			"feature2": {
-				"default": false
-			}
-		}
-	}
-	```
+    ```json hl_lines="6"
+    {
+        "logging": {
+            "level": "INFO",
+            "sampling_rate": 0.1
+        },
+        "feature_flags": {
+            "premium_feature": {
+                "default": false,
+                "rules": {
+                    "customer tier equals premium": {
+                        "when_match": true,
+                        "conditions": [
+                            {
+                                "action": "EQUALS",
+                                "key": "tier",
+                                "value": "premium"
+                            }
+                        ]
+                    }
+                }
+            },
+            "feature2": {
+                "default": false
+            }
+        }
+    }
+    ```
 
 ### Built-in store provider
 
@@ -551,35 +552,34 @@ Parameter | Default | Description
 
 === "appconfig_store_example.py"
 
-```python hl_lines="19-25"
-from botocore.config import Config
+    ```python hl_lines="19-25"
+    from botocore.config import Config
 
-import jmespath
+    import jmespath
 
-boto_config = Config(read_timeout=10, retries={"total_max_attempts": 2})
+    boto_config = Config(read_timeout=10, retries={"total_max_attempts": 2})
 
-# Custom JMESPath functions
-class CustomFunctions(jmespath.functions.Functions):
+    # Custom JMESPath functions
+    class CustomFunctions(jmespath.functions.Functions):
 
-    @jmespath.functions.signature({'types': ['string']})
-    def _func_special_decoder(self, s):
-        return my_custom_decoder_logic(s)
-
-
-custom_jmespath_options = {"custom_functions": CustomFunctions()}
+        @jmespath.functions.signature({'types': ['string']})
+        def _func_special_decoder(self, s):
+            return my_custom_decoder_logic(s)
 
 
-app_config = AppConfigStore(
-    environment="dev",
-    application="product-catalogue",
-    name="configuration",
-    max_age=120,
-    envelope = "features",
-    sdk_config=boto_config,
-    jmespath_options=custom_jmespath_options
-)
-```
+    custom_jmespath_options = {"custom_functions": CustomFunctions()}
 
+
+    app_config = AppConfigStore(
+        environment="dev",
+        application="product-catalogue",
+        name="configuration",
+        max_age=120,
+        envelope = "features",
+        sdk_config=boto_config,
+        jmespath_options=custom_jmespath_options
+    )
+    ```
 
 ## Testing your code
 
@@ -592,56 +592,56 @@ You can unit test your feature flags locally and independently without setting u
 === "test_feature_flags_independently.py"
 
     ```python hl_lines="9-11"
-	from typing import Dict, List, Optional
+    from typing import Dict, List, Optional
 
-	from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore, RuleAction
-
-
-	def init_feature_flags(mocker, mock_schema, envelope="") -> FeatureFlags:
-		"""Mock AppConfig Store get_configuration method to use mock schema instead"""
-
-		method_to_mock = "aws_lambda_powertools.utilities.feature_flags.AppConfigStore.get_configuration"
-		mocked_get_conf = mocker.patch(method_to_mock)
-		mocked_get_conf.return_value = mock_schema
-
-		app_conf_store = AppConfigStore(
-			environment="test_env",
-			application="test_app",
-			name="test_conf_name",
-			envelope=envelope,
-		)
-
-		return FeatureFlags(store=app_conf_store)
+    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore, RuleAction
 
 
-	def test_flags_condition_match(mocker):
-		# GIVEN
-		expected_value = True
-		mocked_app_config_schema = {
-			"my_feature": {
-				"default": expected_value,
-				"rules": {
-					"tenant id equals 12345": {
-						"when_match": True,
-						"conditions": [
-							{
-								"action": RuleAction.EQUALS.value,
-								"key": "tenant_id",
-								"value": "12345",
-							}
-						],
-					}
-				},
-				}
-		}
+    def init_feature_flags(mocker, mock_schema, envelope="") -> FeatureFlags:
+        """Mock AppConfig Store get_configuration method to use mock schema instead"""
 
-		# WHEN
-		ctx = {"tenant_id": "12345", "username": "a"}
-		feature_flags = init_feature_flags(mocker=mocker, mock_schema=mocked_app_config_schema)
-		flag = feature_flags.evaluate(name="my_feature", context=ctx, default=False)
+        method_to_mock = "aws_lambda_powertools.utilities.feature_flags.AppConfigStore.get_configuration"
+        mocked_get_conf = mocker.patch(method_to_mock)
+        mocked_get_conf.return_value = mock_schema
 
-		# THEN
-		assert flag == expected_value
+        app_conf_store = AppConfigStore(
+            environment="test_env",
+            application="test_app",
+            name="test_conf_name",
+            envelope=envelope,
+        )
+
+        return FeatureFlags(store=app_conf_store)
+
+
+    def test_flags_condition_match(mocker):
+        # GIVEN
+        expected_value = True
+        mocked_app_config_schema = {
+            "my_feature": {
+                "default": expected_value,
+                "rules": {
+                    "tenant id equals 12345": {
+                        "when_match": True,
+                        "conditions": [
+                            {
+                                "action": RuleAction.EQUALS.value,
+                                "key": "tenant_id",
+                                "value": "12345",
+                            }
+                        ],
+                    }
+                },
+                }
+        }
+
+        # WHEN
+        ctx = {"tenant_id": "12345", "username": "a"}
+        feature_flags = init_feature_flags(mocker=mocker, mock_schema=mocked_app_config_schema)
+        flag = feature_flags.evaluate(name="my_feature", context=ctx, default=False)
+
+        # THEN
+        assert flag == expected_value
     ```
 
 ## Feature flags vs Parameters vs env vars
