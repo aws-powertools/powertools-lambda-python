@@ -212,6 +212,7 @@ aws serverlessrepo list-application-versions \
 [Event source data classes](./utilities/data_classes.md) | Data classes describing the schema of common Lambda event triggers
 [Parser](./utilities/parser.md) | Data parsing and deep validation using Pydantic
 [Idempotency](./utilities/idempotency.md) | Idempotent Lambda handler
+[Feature Flags](./utilities/feature_flags.md) | A simple rule engine to evaluate when one or multiple features should be enabled depending on the input
 
 ## Environment variables
 
@@ -222,7 +223,7 @@ aws serverlessrepo list-application-versions \
 | ------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------- |
 | **POWERTOOLS_SERVICE_NAME** | Sets service name used for tracing namespace, metrics dimension and structured logging | All | `"service_undefined"` |
 | **POWERTOOLS_METRICS_NAMESPACE** | Sets namespace used for metrics | [Metrics](./core/metrics) | `None` |
-| **POWERTOOLS_TRACE_DISABLED** | Disables tracing | [Tracing](./core/tracer) | `false` |
+| **POWERTOOLS_TRACE_DISABLED** | Explicitly disables tracing | [Tracing](./core/tracer) | `false` |
 | **POWERTOOLS_TRACER_CAPTURE_RESPONSE** | Captures Lambda or method return as metadata. | [Tracing](./core/tracer) | `true` |
 | **POWERTOOLS_TRACER_CAPTURE_ERROR** | Captures Lambda or method exception as metadata. | [Tracing](./core/tracer) | `true` |
 | **POWERTOOLS_TRACE_MIDDLEWARES** | Creates sub-segment for each custom middleware | [Middleware factory](./utilities/middleware_factory) | `false` |

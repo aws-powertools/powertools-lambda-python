@@ -26,7 +26,7 @@ def init_feature_flags(
         environment="test_env",
         application="test_app",
         name="test_conf_name",
-        cache_seconds=600,
+        max_age=600,
         sdk_config=config,
         envelope=envelope,
         jmespath_options=jmespath_options,
@@ -42,7 +42,7 @@ def init_fetcher_side_effect(mocker, config: Config, side_effect) -> AppConfigSt
         environment="env",
         application="application",
         name="conf",
-        cache_seconds=1,
+        max_age=1,
         sdk_config=config,
     )
 
@@ -121,6 +121,44 @@ def test_flags_conditions_no_match(mocker, config):
 
 
 # check that a rule can match when it has multiple conditions, see rule name for further explanation
+def test_flags_conditions_rule_not_match_multiple_conditions_match_only_one_condition(mocker, config):
+    expected_value = False
+    tenant_id_val = "6"
+    username_val = "a"
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "tenant id equals 6 and username is a": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.EQUALS.value,  # this condition matches
+                            "key": "tenant_id",
+                            "value": tenant_id_val,
+                        },
+                        {
+                            "action": RuleAction.EQUALS.value,  # this condition does not
+                            "key": "username",
+                            "value": "bbb",
+                        },
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(
+        name="my_feature",
+        context={
+            "tenant_id": tenant_id_val,
+            "username": username_val,
+        },
+        default=True,
+    )
+    assert toggle == expected_value
+
+
 def test_flags_conditions_rule_match_equal_multiple_conditions(mocker, config):
     expected_value = False
     tenant_id_val = "6"
@@ -263,7 +301,7 @@ def test_flags_conditions_rule_match_multiple_actions_multiple_rules_multiple_co
 
 
 # check a case where the feature exists but the rule doesn't match so we revert to the default value of the feature
-def test_flags_match_rule_with_contains_action(mocker, config):
+def test_flags_match_rule_with_in_action(mocker, config):
     expected_value = True
     mocked_app_config_schema = {
         "my_feature": {
@@ -273,7 +311,7 @@ def test_flags_match_rule_with_contains_action(mocker, config):
                     "when_match": expected_value,
                     "conditions": [
                         {
-                            "action": RuleAction.CONTAINS.value,
+                            "action": RuleAction.IN.value,
                             "key": "tenant_id",
                             "value": ["6", "2"],
                         }
@@ -287,7 +325,7 @@ def test_flags_match_rule_with_contains_action(mocker, config):
     assert toggle == expected_value
 
 
-def test_flags_no_match_rule_with_contains_action(mocker, config):
+def test_flags_no_match_rule_with_in_action(mocker, config):
     expected_value = False
     mocked_app_config_schema = {
         "my_feature": {
@@ -297,9 +335,57 @@ def test_flags_no_match_rule_with_contains_action(mocker, config):
                     "when_match": True,
                     "conditions": [
                         {
-                            "action": RuleAction.CONTAINS.value,
+                            "action": RuleAction.IN.value,
                             "key": "tenant_id",
                             "value": ["8", "2"],
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
+    assert toggle == expected_value
+
+
+def test_flags_match_rule_with_not_in_action(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant id is contained in [8, 2]": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.NOT_IN.value,
+                            "key": "tenant_id",
+                            "value": ["10", "4"],
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
+    assert toggle == expected_value
+
+
+def test_flags_no_match_rule_with_not_in_action(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "tenant id is contained in [8, 2]": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.NOT_IN.value,
+                            "key": "tenant_id",
+                            "value": ["6", "4"],
                         }
                     ],
                 }
@@ -321,7 +407,7 @@ def test_multiple_features_enabled(mocker, config):
                     "when_match": True,
                     "conditions": [
                         {
-                            "action": RuleAction.CONTAINS.value,
+                            "action": RuleAction.IN.value,
                             "key": "tenant_id",
                             "value": ["6", "2"],
                         }
@@ -351,7 +437,7 @@ def test_multiple_features_only_some_enabled(mocker, config):
                     "when_match": True,
                     "conditions": [
                         {
-                            "action": RuleAction.CONTAINS.value,
+                            "action": RuleAction.IN.value,
                             "key": "tenant_id",
                             "value": ["6", "2"],
                         }
@@ -464,7 +550,7 @@ def test_features_jmespath_envelope(mocker, config):
     assert toggle == expected_value
 
 
-# test_match_rule_with_contains_action
+# test_match_rule_with_equals_action
 def test_match_condition_with_dict_value(mocker, config):
     expected_value = True
     mocked_app_config_schema = {

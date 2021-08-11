@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - develop
+    paths:
+      - 'docs/**'
+      - 'CHANGELOG.md'
+      - 'mkdocs.yml'
 
 jobs:
   docs:
