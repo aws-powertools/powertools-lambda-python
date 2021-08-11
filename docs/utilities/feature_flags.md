@@ -220,25 +220,25 @@ The `evaluate` method supports two optional parameters:
 
     ```json hl_lines="2 6 9-11"
 	{
-	  "premium_features": {
-		"default": false,
-		"rules": {
-		  "customer tier equals premium": {
-			"when_match": true,
-			"conditions": [
-			  {
-				"action": "EQUALS",
-				"key": "tier",
-				"value": "premium"
-			  }
-			]
-		  }
+		"premium_features": {
+			"default": false,
+			"rules": {
+				"customer tier equals premium": {
+					"when_match": true,
+					"conditions": [
+						{
+							"action": "EQUALS",
+							"key": "tier",
+							"value": "premium"
+						}
+					]
+				}
+			}
+		},
+		"ten_percent_off_campaign": {
+			"default": false
 		}
-	  },
-	  "ten_percent_off_campaign": {
-		"default": false
-	  }
-    }
+	}
     ```
 
 #### Static flags
@@ -273,10 +273,10 @@ In this case, we could omit the `context` parameter and simply evaluate whether 
 
     ```json hl_lines="2-3"
 	{
-	  "ten_percent_off_campaign": {
-		"default": false
-	  }
-    }
+		"ten_percent_off_campaign": {
+			"default": false
+		}
+	}
     ```
 
 ### Getting all enabled features
@@ -328,14 +328,14 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 
 	```json hl_lines="2 8"
 	{
-	  "body": '{"username": "lessa", "tier": "premium", "basked_id": "random_id"}',
-	  "resource": "/products",
-	  "path": "/products",
-	  "httpMethod": "GET",
-	  "isBase64Encoded": false,
-	  "headers": {
-		"CloudFront-Viewer-Country": "NL",
-	  }
+		"body": "{\"username\": \"lessa\", \"tier\": \"premium\", \"basked_id\": \"random_id\"}",
+		"resource": "/products",
+		"path": "/products",
+		"httpMethod": "GET",
+		"isBase64Encoded": false,
+		"headers": {
+			"CloudFront-Viewer-Country": "NL"
+		}
 	}
 	```
 
@@ -343,42 +343,41 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 
     ```json hl_lines="17-18 20 27-29"
 	{
-	  "premium_features": {
-		"default": false,
-		"rules": {
-		  "customer tier equals premium": {
-			"when_match": true,
-			"conditions": [
-			  {
-				"action": "EQUALS",
-				"key": "tier",
-				"value": "premium"
-			  }
-			]
-		  }
+		"premium_features": {
+			"default": false,
+			"rules": {
+				"customer tier equals premium": {
+					"when_match": true,
+					"conditions": [
+						{
+							"action": "EQUALS",
+							"key": "tier",
+							"value": "premium"
+						}
+					]
+				}
+			}
+		},
+		"ten_percent_off_campaign": {
+			"default": true
+		},
+		"geo_customer_campaign": {
+			"default": false,
+			"rules": {
+				"customer in temporary discount geo": {
+					"when_match": true,
+					"conditions": [
+						{
+							"action": "IN",
+							"key": "CloudFront-Viewer-Country",
+							"value": ["NL", "IE", "UK", "PL", "PT"]
+						}
+					]
+				}
+			}
 		}
-	  },
-	  "ten_percent_off_campaign": {
-		"default": true
-	  },
-	  "geo_customer_campaign": {
-		"default": false,
-		"rules": {
-		  "customer in temporary discount geo": {
-			"when_match": true,
-			"conditions": [
-			  {
-				"action": "IN",
-				"key": "CloudFront-Viewer-Country",
-				"value": ["NL", "IE", "UK", "PL", "PT"},
-			  }
-			]
-		  }
-		}
-	  }
-    }
+	}
     ```
-
 
 ## Advanced
 
@@ -393,9 +392,9 @@ A feature can simply have its name and a `default` value. This is either on or o
 === "minimal_schema.json"
 	```json hl_lines="2-3"
 	{
-	  "global_feature": {
-		"default": true
-	  }
+		"global_feature": {
+			"default": true
+		}
 	}
 	```
 
@@ -413,21 +412,21 @@ When adding `rules` to a feature, they must contain:
 
 	```json hl_lines="4-11"
 	{
-	  "premium_feature": {
-		"default": false,
-		"rules": {
-		  "customer tier equals premium": {
-			"when_match": true,
-			"conditions": [
-			  {
-				"action": "EQUALS",
-				"key": "tier",
-				"value": "premium"
-			  }
-			]
-		  }
+		"premium_feature": {
+			"default": false,
+			"rules": {
+				"customer tier equals premium": {
+					"when_match": true,
+					"conditions": [
+						{
+							"action": "EQUALS",
+							"key": "tier",
+							"value": "premium"
+						}
+					]
+				}
+			}
 		}
-	  }
 	}
 	```
 
@@ -442,11 +441,11 @@ The `conditions` block is a list of conditions that contain `action`, `key`, and
     {
 		...
 		"conditions": [
-		  {
-			"action": "EQUALS",
-			"key": "tier",
-			"value": "premium"
-		  }
+			{
+				"action": "EQUALS",
+				"key": "tier",
+				"value": "premium"
+			}
 		]
     }
     ```
