@@ -437,7 +437,7 @@ You can have multiple rules with different names. The rule engine will return th
 The `conditions` block is a list of conditions that contain `action`, `key`, and `value` keys:
 
 === "conditions.json"
-    ```json  hl_lines="8-11"
+    ```json  hl_lines="5-7"
     {
 		...
 		"conditions": [
