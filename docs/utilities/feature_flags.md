@@ -328,7 +328,7 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 
 	```json hl_lines="2 8"
 	{
-	  "body": '{"username": "lessa", "tier": "premium", "basked_id": "random_id"}',
+	  "body": "{\"username\": \"lessa\", \"tier\": \"premium\", \"basked_id\": \"random_id\"}",
 	  "resource": "/products",
 	  "path": "/products",
 	  "httpMethod": "GET",
@@ -370,7 +370,7 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 			  {
 				"action": "IN",
 				"key": "CloudFront-Viewer-Country",
-				"value": ["NL", "IE", "UK", "PL", "PT"},
+				"value": ["NL", "IE", "UK", "PL", "PT"],
 			  }
 			]
 		  }
