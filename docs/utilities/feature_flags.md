@@ -110,59 +110,67 @@ The following sample infrastructure will be used throughout this documentation:
 
 === "CDK"
 
-    ```python hl_lines="13-29 31 33 37 41 47"
-    import json
+	```python hl_lines="11-22 24 29 35 42 50"
+	import json
 
-    import aws_cdk.aws_appconfig as appconfig
-    from aws_cdk import core
+	import aws_cdk.aws_appconfig as appconfig
+	from aws_cdk import core
 
 
-    class SampleFeatureFlagStore(core.Construct):
-    ​
-        def __init__(self, scope: core.Construct, id_: str) -> None:
-            super().__init__(scope, id_)
-    ​
-            features_config = {
-                "premium_features": {
-                    "default": False,
-                    "rules": {
-                        "customer tier equals premium": {
-                            "when_match": True,
-                            "conditions": [{
-                                "action": "EQUALS",
-                                "key": "tier",
-                                "value": "premium"
-                            }]
-                        }
-                    }
-                },
-                "ten_percent_off_campaign": {
-                    "default": True
-                }
-            }
-    ​
-            self.config_app = appconfig.CfnApplication(self, id='app', name="product-catalogue")
+	class SampleFeatureFlagStore(core.Construct):
+		def __init__(self, scope: core.Construct, id_: str) -> None:
+			super().__init__(scope, id_)
 
-            self.config_env = appconfig.CfnEnvironment(self, id='env',
-                                                            application_id=self.config_app.ref,
-                                                            name="dev-env")
+			features_config = {
+				"premium_features": {
+					"default": False,
+					"rules": {
+						"customer tier equals premium": {
+							"when_match": True,
+							"conditions": [{"action": "EQUALS", "key": "tier", "value": "premium"}],
+						}
+					},
+				},
+				"ten_percent_off_campaign": {"default": True},
+			}
 
-            self.config_profile = appconfig.CfnConfigurationProfile(self, id='profile',
-                                                                        application_id=self.config_app.ref,
-                                                                        location_uri='hosted', name="features")
-    ​
-            self.hosted_cfg_version = appconfig.CfnHostedConfigurationVersion(self, 'version',
-                                                                                application_id=self.config_app.ref,
-                                                                                configuration_profile_id=self.config_profile.ref,
-                                                                                content=json_dumps(features_config),
-                                                                                content_type='application/json')
-    ​
-            self.app_config_deployment = appconfig.CfnDeployment(self, id='deploy', application_id=self.config_app.ref,
-                                                                    configuration_profile_id=self.config_profile.ref,
-                                                                    configuration_version=self.hosted_cfg_version.ref,
-                                                                    deployment_strategy_id="AppConfig.AllAtOnce",
-                                                                    environment_id=self.config_env.ref)
-    ```
+			self.config_app = appconfig.CfnApplication(
+				self,
+				id="app",
+				name="product-catalogue",
+			)
+			self.config_env = appconfig.CfnEnvironment(
+				self,
+				id="env",
+				application_id=self.config_app.ref,
+				name="dev-env",
+			)
+			self.config_profile = appconfig.CfnConfigurationProfile(
+				self,
+				id="profile",
+				application_id=self.config_app.ref,
+				location_uri="hosted",
+				name="features",
+			)
+			self.hosted_cfg_version = appconfig.CfnHostedConfigurationVersion(
+				self,
+				"version",
+				application_id=self.config_app.ref,
+				configuration_profile_id=self.config_profile.ref,
+				content=json.dumps(features_config),
+				content_type="application/json",
+			)
+			self.app_config_deployment = appconfig.CfnDeployment(
+				self,
+				id="deploy",
+				application_id=self.config_app.ref,
+				configuration_profile_id=self.config_profile.ref,
+				configuration_version=self.hosted_cfg_version.ref,
+				deployment_strategy_id="AppConfig.AllAtOnce",
+				environment_id=self.config_env.ref,
+			)
+
+	```
 
 ### Evaluating a single feature flag
 
@@ -636,3 +644,11 @@ You can unit test your feature flags locally and independently without setting u
 		# THEN
 		assert flag == expected_value
     ```
+
+## Feature flags vs Parameters vs env vars
+
+Method | When to use | Requires new deployment on changes | Supported services
+------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------
+**[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment. | Yes | Lambda
+**[Parameters utility](parameters.md)** | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No | Parameter Store, DynamoDB, Secrets Manager, AppConfig
+**Feature flags utility** | Rule engine to define when one or multiple features should be enabled depending on the input. | No | AppConfig

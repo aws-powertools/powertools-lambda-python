@@ -14,6 +14,7 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 * **deps:** bump poetry to latest ([#592](https://github.com/awslabs/aws-lambda-powertools-python/issues/592))
 * **feature-flags:** bug handling multiple conditions ([#599](https://github.com/awslabs/aws-lambda-powertools-python/issues/599))
 * **parser:** API Gateway WebSocket validation under check_message_id; plus some housekeeping ([#553](https://github.com/awslabs/aws-lambda-powertools-python/issues/553))
+* **feature-toggles:** correct cdk example ([#601](https://github.com/awslabs/aws-lambda-powertools-python/issues/601))
 
 ### Code Refactoring
 
@@ -30,6 +31,7 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 * **tracer:** update wording that it auto-disables on non-Lambda env
 * **feature-flags:** fix SAM infra, convert CDK to Python
 * **feature-flags:** fix sample feature name in evaluate method
+* **feature-flags:** add guidance when to use vs env vars vs parameters
 ### Features
 
 * **api-gateway:** add support for custom serializer ([#568](https://github.com/awslabs/aws-lambda-powertools-python/issues/568))
