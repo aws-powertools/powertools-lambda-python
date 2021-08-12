@@ -230,7 +230,6 @@ You can extend them to include your own models, and yet have all other known fie
 3. Defined how part of our EventBridge event should look like by overriding `detail` key within our `OrderEventModel`
 4. Parser parsed the original event against `OrderEventModel`
 
-
 ## Envelopes
 
 When trying to parse your payloads wrapped in a known structure, you might encounter the following situations:
@@ -291,7 +290,6 @@ Here's an example of parsing a model found in an event coming from EventBridge, 
 3. Parser parsed the original event against the EventBridge model
 4. Parser then parsed the `detail` key using `UserModel`
 
-
 ### Built-in envelopes
 
 Parser comes with the following built-in envelopes, where `Model` in the return section is your given model.
@@ -307,6 +305,7 @@ Parser comes with the following built-in envelopes, where `Model` in the return 
 | **SnsSqsEnvelope**            | 1. Parses data using `SqsModel`. <br/> 2. Parses SNS records in `body` key using `SnsNotificationModel`. <br/> 3. Parses data in `Message` key using your model and return them in a list.                  | `List[Model]`                      |
 | **ApiGatewayEnvelope**        | 1. Parses data using `APIGatewayProxyEventModel`. <br/> 2. Parses `body` key using your model and returns it.                                                                                               | `Model`                            |
 | **ApiGatewayV2Envelope**      | 1. Parses data using `APIGatewayProxyEventV2Model`. <br/> 2. Parses `body` key using your model and returns it.                                                                                             | `Model`                            |
+
 ### Bringing your own envelope
 
 You can create your own Envelope model and logic by inheriting from `BaseEnvelope`, and implementing the `parse` method.
@@ -475,7 +474,6 @@ Alternatively, you can pass `'*'` as an argument for the decorator so that you c
 !!! info
     You can read more about validating list items, reusing validators, validating raw inputs, and a lot more in <a href="https://pydantic-docs.helpmanual.io/usage/validators/">Pydantic's documentation</a>.
 
-
 ## Advanced use cases
 
 !!! info
@@ -557,19 +555,19 @@ Artillery load test sample against a [hello world sample](https://github.com/aws
 
 ```
 Summary report @ 14:36:07(+0200) 2020-10-23
-  Scenarios launched:  10
-  Scenarios completed: 10
-  Requests completed:  2000
-  Mean response/sec: 114.81
-  Response time (msec):
+Scenarios launched:  10
+Scenarios completed: 10
+Requests completed:  2000
+Mean response/sec: 114.81
+Response time (msec):
     min: 54.9
     max: 1684.9
     median: 68
     p95: 109.1
     p99: 180.3
-  Scenario counts:
+Scenario counts:
     0: 10 (100%)
-  Codes:
+Codes:
     200: 2000
 ```
 
@@ -579,18 +577,18 @@ Summary report @ 14:36:07(+0200) 2020-10-23
 
 ```
 Summary report @ 14:29:23(+0200) 2020-10-23
-  Scenarios launched:  10
-  Scenarios completed: 10
-  Requests completed:  2000
-  Mean response/sec: 111.67
-  Response time (msec):
+Scenarios launched:  10
+Scenarios completed: 10
+Requests completed:  2000
+Mean response/sec: 111.67
+Response time (msec):
     min: 54.3
     max: 1887.2
     median: 66.1
     p95: 113.3
     p99: 193.1
-  Scenario counts:
+Scenario counts:
     0: 10 (100%)
-  Codes:
+Codes:
     200: 2000
 ```

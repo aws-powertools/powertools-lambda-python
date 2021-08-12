@@ -170,7 +170,6 @@ This is the sample infrastructure we are using for the initial examples with a A
         Value: !GetAtt HelloWorldApi.Arn
     ```
 
-
 ### Resolver decorator
 
 You can define your functions to match GraphQL types and fields with the `app.resolver()` decorator.
@@ -238,6 +237,7 @@ Here's an example where we have two separate functions to resolve `getTodo` and 
     ```
 
 === "getTodo_event.json"
+
     ```json
     {
         "arguments": {
@@ -288,6 +288,7 @@ Here's an example where we have two separate functions to resolve `getTodo` and 
     ```
 
 === "listTodos_event.json"
+
     ```json
     {
         "arguments": {},
@@ -395,6 +396,7 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 For Lambda Python3.8+ runtime, this utility supports async functions when you use in conjunction with `asyncio.run`.
 
 === "async_resolver.py"
+
     ```python hl_lines="4 8 10-12 20"
     from aws_lambda_powertools import Logger, Tracer
 
@@ -602,7 +604,6 @@ Use the following code for `merchantInfo` and `searchMerchant` functions respect
 
 You can subclass `AppSyncResolverEvent` to bring your own set of methods to handle incoming events, by using `data_model` param in the `resolve` method.
 
-
 === "custom_model.py"
 
     ```python hl_lines="11-14 19 26"
@@ -662,8 +663,8 @@ You can subclass `AppSyncResolverEvent` to bring your own set of methods to hand
 
 === "listLocations_event.json"
 
-  ```json
-  {
+    ```json
+    {
       "arguments": {},
       "identity": null,
       "source": null,
@@ -707,8 +708,8 @@ You can subclass `AppSyncResolverEvent` to bring your own set of methods to hand
         "variables": {}
       },
       "stash": {}
-  }
-  ```
+    }
+    ```
 
 ## Testing your code
 
@@ -719,6 +720,7 @@ You can use either `app.resolve(event, context)` or simply `app(event, context)`
 Here's an example from our internal functional test.
 
 === "test_direct_resolver.py"
+
     ```python
     def test_direct_resolver():
       # Check whether we can handle an example appsync direct resolver
@@ -739,6 +741,7 @@ Here's an example from our internal functional test.
     ```
 
 === "appSyncDirectResolver.json"
+
     ```json
     --8<-- "tests/events/appSyncDirectResolver.json"
     ```

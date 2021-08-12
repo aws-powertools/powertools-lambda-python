@@ -201,11 +201,12 @@ The DynamoDB Provider does not have any high-level functions, as it needs to kno
 You can initialize the DynamoDB provider pointing to [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html) using **`endpoint_url`** parameter:
 
 === "dynamodb_local.py"
-	```python hl_lines="3"
-	from aws_lambda_powertools.utilities import parameters
 
-	dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table", endpoint_url="http://localhost:8000")
-	```
+    ```python hl_lines="3"
+    from aws_lambda_powertools.utilities import parameters
+
+    dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table", endpoint_url="http://localhost:8000")
+    ```
 
 **DynamoDB table structure for single parameters**
 
@@ -218,7 +219,7 @@ For single parameters, you must use `id` as the [partition key](https://docs.aws
 > **Example**
 
 === "app.py"
-	With this table, the return value of `dynamodb_provider.get("my-param")` call will be `my-value`.
+    With this table, the return value of `dynamodb_provider.get("my-param")` call will be `my-value`.
 
     ```python hl_lines="3 7"
     from aws_lambda_powertools.utilities import parameters
@@ -241,7 +242,6 @@ For example, if you want to retrieve multiple parameters having `my-hash-key` as
 | my-hash-key | param-a | my-value-a |
 | my-hash-key | param-b | my-value-b |
 | my-hash-key | param-c | my-value-c |
-
 
 With this table, the return of `dynamodb_provider.get_multiple("my-hash-key")` call will be a dictionary like:
 
