@@ -30,6 +30,7 @@ from aws_lambda_powertools.utilities.data_classes.appsync.scalar_types_utils imp
     aws_timestamp,
     make_id,
 )
+from aws_lambda_powertools.utilities.data_classes.appsync_authorizer_event import AppSyncAuthorizerEvent
 from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import (
     AppSyncIdentityCognito,
     AppSyncIdentityIAM,
@@ -1419,3 +1420,16 @@ def test_reflected_types():
 
     # WHEN calling the lambda handler
     lambda_handler({"headers": {"X-Foo": "Foo"}}, None)
+
+
+def test_appsync_authorizer_event():
+    event = AppSyncAuthorizerEvent(load_event("appSyncAuthorizerEvent.json"))
+
+    assert event.authorization_token == "BE9DC5E3-D410-4733-AF76-70178092E681"
+    assert event.authorization_token == event["authorizationToken"]
+    assert event.request_context.api_id == event["requestContext"]["apiId"]
+    assert event.request_context.account_id == event["requestContext"]["accountId"]
+    assert event.request_context.request_id == event["requestContext"]["requestId"]
+    assert event.request_context.query_string == event["requestContext"]["queryString"]
+    assert event.request_context.operation_name == event["requestContext"]["operationName"]
+    assert event.request_context.variables == event["requestContext"]["variables"]
