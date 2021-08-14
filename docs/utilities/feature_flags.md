@@ -337,7 +337,6 @@ You can use `get_enabled_features` method for scenarios where you need a list of
         }
     }
     ```
-
 === "features.json"
 
     ```json hl_lines="17-18 20 27-29"
