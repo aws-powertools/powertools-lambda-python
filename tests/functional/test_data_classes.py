@@ -1441,17 +1441,16 @@ def test_appsync_authorizer_event():
 def test_appsync_authorizer_response():
     """Check various helper functions for AppSync authorizer response"""
     expected = load_event("appSyncAuthorizerResponse.json")
-
-    response = (
-        AppSyncAuthorizerResponse()
-        .authorize()
-        .denied_fields(["Mutation.createEvent"])
-        .resolver_context({"balance": 100, "name": "Foo Man"})
-        .ttl(15)
+    response = AppSyncAuthorizerResponse(
+        authorize=True,
+        ttl=15,
+        resolver_context={"balance": 100, "name": "Foo Man"},
+        denied_fields=["Mutation.createEvent"],
     )
-
     assert expected == response.to_dict()
 
     assert {"isAuthorized": False} == AppSyncAuthorizerResponse().to_dict()
-    assert {"isAuthorized": True} == AppSyncAuthorizerResponse().authorize().ttl(None).to_dict()
-    assert {"isAuthorized": True, "ttlOverride": 0} == AppSyncAuthorizerResponse().authorize().ttl().to_dict()
+    assert {"isAuthorized": False} == AppSyncAuthorizerResponse(denied_fields=[]).to_dict()
+    assert {"isAuthorized": False} == AppSyncAuthorizerResponse(resolver_context={}).to_dict()
+    assert {"isAuthorized": True} == AppSyncAuthorizerResponse(authorize=True).to_dict()
+    assert {"isAuthorized": True, "ttlOverride": 0} == AppSyncAuthorizerResponse(authorize=True, ttl=0).to_dict()
