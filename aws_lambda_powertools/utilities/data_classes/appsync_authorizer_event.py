@@ -76,12 +76,12 @@ class AppSyncAuthorizerResponse:
         A JSON object visible as `$ctx.identity.resolverContext` in resolver templates
         Warning: The total size of this JSON object must not exceed 5MB.
     deny_fields: Optional[List[str]]
-        A list of which are forcibly changed to null, even if a value was returned from a resolver.
-        Each item is either a fully qualified field ARN in the form of
+        A list of fields that will be set to `null` regardless of the resolver's return.
+
+        A field is either `TypeName.FieldName`, or an ARN such as
         `arn:aws:appsync:us-east-1:111122223333:apis/GraphQLApiId/types/TypeName/fields/FieldName`
-        or a short form of TypeName.FieldName. The full ARN form should be used when two APIs
-        share a lambda function authorizer and there might be ambiguity between common types
-        and fields between the two APIs.
+
+        Use the full ARN for correctness when sharing a Lambda function authorizer between APIs.
     """
 
     def __init__(
