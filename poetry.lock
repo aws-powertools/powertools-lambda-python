@@ -273,7 +273,7 @@ test = ["coverage", "coveralls", "mock", "pytest", "pytest-cov"]
 
 [[package]]
 name = "flake8-comprehensions"
-version = "3.5.0"
+version = "3.6.0"
 description = "A flake8 plugin to help you write better list/set/dict comprehensions."
 category = "dev"
 optional = false
@@ -1059,7 +1059,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.1"
-content-hash = "17fe51bd22f00b3f8da0266adf6fab9d03448492a789700f4fa0096eedfeda63"
+content-hash = "ef80bd8445c78d1ad83e8b8b6809f41b753643085cc12735775cb4dbb015c539"
 
 [metadata.files]
 appdirs = [
@@ -1199,8 +1199,8 @@ flake8-builtins = [
     {file = "flake8_builtins-1.5.3-py2.py3-none-any.whl", hash = "sha256:7706babee43879320376861897e5d1468e396a40b8918ed7bccf70e5f90b8687"},
 ]
 flake8-comprehensions = [
-    {file = "flake8-comprehensions-3.5.0.tar.gz", hash = "sha256:f24be9032587127f7a5bc6d066bf755b6e66834f694383adb8a673e229c1f559"},
-    {file = "flake8_comprehensions-3.5.0-py3-none-any.whl", hash = "sha256:b07aef3277623db32310aa241a1cec67212b53c1d18e767d7e26d4d83aa05bf7"},
+    {file = "flake8-comprehensions-3.6.0.tar.gz", hash = "sha256:4dbaf4be0b25376d568e072dd39798e0c9a40c7adb1b3f95ea680f94e1f9b9dd"},
+    {file = "flake8_comprehensions-3.6.0-py3-none-any.whl", hash = "sha256:7a86d1f4dfb53ad0806eb352e9c5754fbd48f34093737d4e7a14e83f13c4df47"},
 ]
 flake8-debugger = [
     {file = "flake8-debugger-4.0.0.tar.gz", hash = "sha256:e43dc777f7db1481db473210101ec2df2bd39a45b149d7218a618e954177eda6"},
