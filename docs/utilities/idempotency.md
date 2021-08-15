@@ -77,7 +77,7 @@ TTL attribute name | `expiration` | This can only be configured after your table
 !!! warning "Large responses with DynamoDB persistence layer"
     When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items).
 
-	Larger items cannot be written to DynamoDB and will cause exceptions.
+    Larger items cannot be written to DynamoDB and will cause exceptions.
 
 !!! info "DynamoDB "
     Each function invocation will generally make 2 requests to DynamoDB. If the
@@ -306,6 +306,7 @@ You can enable in-memory caching with the **`use_local_cache`** parameter:
     ```
 
 When enabled, the default is to cache a maximum of 256 records in each Lambda execution environment - You can change it with the **`local_cache_max_items`** parameter.
+
 ### Expiring idempotency records
 
 !!! note

@@ -107,6 +107,8 @@ For advanced use cases, you can instantiate [Tracer](../core/tracer.md) inside y
 
 When unit testing middlewares with `trace_execution` option enabled, use `POWERTOOLS_TRACE_DISABLED` env var to safely disable Tracer.
 
-```bash
-POWERTOOLS_TRACE_DISABLED=1 python -m pytest
-```
+=== "shell"
+
+    ```bash
+    POWERTOOLS_TRACE_DISABLED=1 python -m pytest
+    ```
