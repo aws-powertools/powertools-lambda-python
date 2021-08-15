@@ -30,7 +30,10 @@ from aws_lambda_powertools.utilities.data_classes.appsync.scalar_types_utils imp
     aws_timestamp,
     make_id,
 )
-from aws_lambda_powertools.utilities.data_classes.appsync_authorizer_event import AppSyncAuthorizerEvent
+from aws_lambda_powertools.utilities.data_classes.appsync_authorizer_event import (
+    AppSyncAuthorizerEvent,
+    AppSyncAuthorizerResponse,
+)
 from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import (
     AppSyncIdentityCognito,
     AppSyncIdentityIAM,
@@ -1433,3 +1436,22 @@ def test_appsync_authorizer_event():
     assert event.request_context.query_string == event["requestContext"]["queryString"]
     assert event.request_context.operation_name == event["requestContext"]["operationName"]
     assert event.request_context.variables == event["requestContext"]["variables"]
+
+
+def test_appsync_authorizer_response():
+    """Check various helper functions for AppSync authorizer response"""
+    expected = load_event("appSyncAuthorizerResponse.json")
+
+    response = (
+        AppSyncAuthorizerResponse()
+        .authorize()
+        .denied_fields(["Mutation.createEvent"])
+        .resolver_context({"balance": 100, "name": "Foo Man"})
+        .ttl(15)
+    )
+
+    assert expected == response.asdict()
+
+    assert {"isAuthorized": False} == AppSyncAuthorizerResponse().asdict()
+    assert {"isAuthorized": True} == AppSyncAuthorizerResponse().authorize().ttl(None).asdict()
+    assert {"isAuthorized": True, "ttlOverride": 0} == AppSyncAuthorizerResponse().authorize().ttl().asdict()
