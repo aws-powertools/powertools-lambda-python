@@ -1443,16 +1443,14 @@ def test_appsync_authorizer_response():
     expected = load_event("appSyncAuthorizerResponse.json")
     response = AppSyncAuthorizerResponse(
         authorize=True,
-        ttl_override=15,
+        max_age=15,
         resolver_context={"balance": 100, "name": "Foo Man"},
-        denied_fields=["Mutation.createEvent"],
+        deny_fields=["Mutation.createEvent"],
     )
     assert expected == response.asdict()
 
     assert {"isAuthorized": False} == AppSyncAuthorizerResponse().asdict()
-    assert {"isAuthorized": False} == AppSyncAuthorizerResponse(denied_fields=[]).asdict()
+    assert {"isAuthorized": False} == AppSyncAuthorizerResponse(deny_fields=[]).asdict()
     assert {"isAuthorized": False} == AppSyncAuthorizerResponse(resolver_context={}).asdict()
     assert {"isAuthorized": True} == AppSyncAuthorizerResponse(authorize=True).asdict()
-    assert {"isAuthorized": True, "ttlOverride": 0} == AppSyncAuthorizerResponse(
-        authorize=True, ttl_override=0
-    ).asdict()
+    assert {"isAuthorized": False, "ttlOverride": 0} == AppSyncAuthorizerResponse(max_age=0).asdict()

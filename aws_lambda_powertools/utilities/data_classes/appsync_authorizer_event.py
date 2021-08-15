@@ -8,7 +8,7 @@ class AppSyncAuthorizerEventRequestContext(DictWrapper):
 
     @property
     def api_id(self) -> str:
-        """AppSync api id"""
+        """AppSync API ID"""
         return self["requestContext"]["apiId"]
 
     @property
@@ -67,7 +67,7 @@ class AppSyncAuthorizerResponse:
         is authorized to make calls to the GraphQL API. If this value is
         true, execution of the GraphQL API continues. If this value is false,
         an UnauthorizedException is raised
-    ttl_override: Optional[int]
+    max_age: Optional[int]
         Set the ttlOverride. The number of seconds that the response should be
         cached for. If no value is returned, the value from the API (if configured)
         or the default of 300 seconds (five minutes) is used. If this is 0, the response
@@ -75,7 +75,7 @@ class AppSyncAuthorizerResponse:
     resolver_context: Optional[Dict[str, Any]]
         A JSON object visible as `$ctx.identity.resolverContext` in resolver templates
         Warning: The total size of this JSON object must not exceed 5MB.
-    denied_fields: Optional[List[str]]
+    deny_fields: Optional[List[str]]
         A list of which are forcibly changed to null, even if a value was returned from a resolver.
         Each item is either a fully qualified field ARN in the form of
         `arn:aws:appsync:us-east-1:111122223333:apis/GraphQLApiId/types/TypeName/fields/FieldName`
@@ -87,24 +87,24 @@ class AppSyncAuthorizerResponse:
     def __init__(
         self,
         authorize: bool = False,
-        ttl_override: Optional[int] = None,
+        max_age: Optional[int] = None,
         resolver_context: Optional[Dict[str, Any]] = None,
-        denied_fields: Optional[List[str]] = None,
+        deny_fields: Optional[List[str]] = None,
     ):
         self.authorize = authorize
-        self.ttl_override = ttl_override
-        self.denied_fields = denied_fields
+        self.max_age = max_age
+        self.deny_fields = deny_fields
         self.resolver_context = resolver_context
 
     def asdict(self) -> dict:
         """Return the response as a dict"""
         response: Dict = {"isAuthorized": self.authorize}
 
-        if self.ttl_override is not None:
-            response["ttlOverride"] = self.ttl_override
+        if self.max_age is not None:
+            response["ttlOverride"] = self.max_age
 
-        if self.denied_fields:
-            response["deniedFields"] = self.denied_fields
+        if self.deny_fields:
+            response["deniedFields"] = self.deny_fields
 
         if self.resolver_context:
             response["resolverContext"] = self.resolver_context
