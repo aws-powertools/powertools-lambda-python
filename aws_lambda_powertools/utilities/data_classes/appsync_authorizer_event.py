@@ -23,17 +23,17 @@ class AppSyncAuthorizerEventRequestContext(DictWrapper):
 
     @property
     def query_string(self) -> str:
-        """Graphql query string"""
+        """GraphQL query string"""
         return self["requestContext"]["queryString"]
 
     @property
     def operation_name(self) -> Optional[str]:
-        """Graphql operation name, optional"""
+        """GraphQL operation name, optional"""
         return self["requestContext"].get("operationName")
 
     @property
     def variables(self) -> Dict:
-        """Graphql variables"""
+        """GraphQL variables"""
         return self["requestContext"]["variables"]
 
 
