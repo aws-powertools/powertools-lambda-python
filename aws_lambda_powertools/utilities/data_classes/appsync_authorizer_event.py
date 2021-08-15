@@ -67,7 +67,7 @@ class AppSyncAuthorizerResponse:
         is authorized to make calls to the GraphQL API. If this value is
         true, execution of the GraphQL API continues. If this value is false,
         an UnauthorizedException is raised
-    ttl: Optional[int]
+    ttl_override: Optional[int]
         Set the ttlOverride. The number of seconds that the response should be
         cached for. If no value is returned, the value from the API (if configured)
         or the default of 300 seconds (five minutes) is used. If this is 0, the response
@@ -87,21 +87,26 @@ class AppSyncAuthorizerResponse:
     def __init__(
         self,
         authorize: bool = False,
-        ttl: Optional[int] = None,
+        ttl_override: Optional[int] = None,
         resolver_context: Optional[Dict[str, Any]] = None,
         denied_fields: Optional[List[str]] = None,
     ):
-        self._data: Dict = {"isAuthorized": authorize}
+        self.authorize = authorize
+        self.ttl_override = ttl_override
+        self.denied_fields = denied_fields
+        self.resolver_context = resolver_context
 
-        if ttl is not None:
-            self._data["ttlOverride"] = ttl
-
-        if denied_fields:
-            self._data["deniedFields"] = denied_fields
-
-        if resolver_context:
-            self._data["resolverContext"] = resolver_context
-
-    def to_dict(self) -> dict:
+    def asdict(self) -> dict:
         """Return the response as a dict"""
-        return self._data
+        response: Dict = {"isAuthorized": self.authorize}
+
+        if self.ttl_override is not None:
+            response["ttlOverride"] = self.ttl_override
+
+        if self.denied_fields:
+            response["deniedFields"] = self.denied_fields
+
+        if self.resolver_context:
+            response["resolverContext"] = self.resolver_context
+
+        return response
