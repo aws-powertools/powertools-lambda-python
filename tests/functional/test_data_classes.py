@@ -1450,8 +1450,8 @@ def test_appsync_authorizer_response():
         .ttl(15)
     )
 
-    assert expected == response.asdict()
+    assert expected == response.to_dict()
 
-    assert {"isAuthorized": False} == AppSyncAuthorizerResponse().asdict()
-    assert {"isAuthorized": True} == AppSyncAuthorizerResponse().authorize().ttl(None).asdict()
-    assert {"isAuthorized": True, "ttlOverride": 0} == AppSyncAuthorizerResponse().authorize().ttl().asdict()
+    assert {"isAuthorized": False} == AppSyncAuthorizerResponse().to_dict()
+    assert {"isAuthorized": True} == AppSyncAuthorizerResponse().authorize().ttl(None).to_dict()
+    assert {"isAuthorized": True, "ttlOverride": 0} == AppSyncAuthorizerResponse().authorize().ttl().to_dict()

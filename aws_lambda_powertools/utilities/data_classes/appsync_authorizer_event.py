@@ -106,6 +106,6 @@ class AppSyncAuthorizerResponse:
         self._data["deniedFields"] = denied_fields
         return self
 
-    def asdict(self) -> dict:
+    def to_dict(self) -> dict:
         """Return the response as a dict"""
         return self._data
