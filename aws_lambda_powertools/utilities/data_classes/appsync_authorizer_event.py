@@ -44,6 +44,7 @@ class AppSyncAuthorizerEvent(DictWrapper):
     -------------
     - https://aws.amazon.com/blogs/mobile/appsync-lambda-auth/
     - https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#aws-lambda-authorization
+    - https://docs.amplify.aws/lib/graphqlapi/authz/q/platform/js#aws-lambda
     """
 
     @property
