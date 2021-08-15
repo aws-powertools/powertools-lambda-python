@@ -134,7 +134,6 @@ Here is a sample custom EventBridge event, where we only validate what's inside 
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
-
 This is quite powerful because you can use JMESPath Query language to extract records from [arrays, slice and dice](https://jmespath.org/tutorial.html#list-and-slice-projections), to [pipe expressions](https://jmespath.org/tutorial.html#pipe-expressions) and [function expressions](https://jmespath.org/tutorial.html#functions), where you'd extract what you need before validating the actual payload.
 
 ### Built-in envelopes
@@ -165,7 +164,6 @@ This utility comes with built-in envelopes to easily extract the payload from po
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
-
 Here is a handy table with built-in envelopes along with their JMESPath expressions in case you want to build your own.
 
 Envelope name | JMESPath expression
@@ -189,12 +187,13 @@ Envelope name | JMESPath expression
 JSON Schemas with custom formats like `int64` will fail validation. If you have these, you can pass them using `formats` parameter:
 
 === "custom_json_schema_type_format.json"
+
     ```json
     {
-    	"lastModifiedTime": {
-    	  "format": "int64",
-    	  "type": "integer"
-    	}
+        "lastModifiedTime": {
+            "format": "int64",
+            "type": "integer"
+        }
     }
     ```
 
@@ -209,7 +208,7 @@ For each format defined in a dictionary key, you must use a regex, or a function
 
     custom_format = {
         "int64": True, # simply ignore it,
-    	"positive": lambda x: False if x < 0 else True
+        "positive": lambda x: False if x < 0 else True
     }
 
     validate(event=event, schema=schemas.INPUT, formats=custom_format)
@@ -352,6 +351,7 @@ For each format defined in a dictionary key, you must use a regex, or a function
     ```
 
 === "event.json"
+
     ```json
     {
         "account": "123456789012",
@@ -459,7 +459,6 @@ This sample will decode the value within the `data` key into a valid JSON before
     ```python hl_lines="7 14 16 23 39 45 47 52"
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
-
 
 #### powertools_base64 function
 
