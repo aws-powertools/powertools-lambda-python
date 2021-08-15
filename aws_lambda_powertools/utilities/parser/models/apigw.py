@@ -68,7 +68,7 @@ class APIGatewayEventRequestContext(BaseModel):
     routeKey: Optional[str]
     operationName: Optional[str]
 
-    @root_validator
+    @root_validator(allow_reuse=True)
     def check_message_id(cls, values):
         message_id, event_type = values.get("messageId"), values.get("eventType")
         if message_id is not None and event_type != "MESSAGE":

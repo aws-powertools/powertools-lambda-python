@@ -18,7 +18,7 @@ class KinesisDataStreamRecordPayload(BaseModel):
     data: bytes  # base64 encoded str is parsed into bytes
     approximateArrivalTimestamp: float
 
-    @validator("data", pre=True)
+    @validator("data", pre=True, allow_reuse=True)
     def data_base64_decode(cls, value):
         try:
             logger.debug("Decoding base64 Kinesis data record before parsing")
