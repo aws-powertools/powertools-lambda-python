@@ -75,6 +75,9 @@ class AppSyncAuthorizerResponse:
         is not cached.
     resolver_context: Optional[Dict[str, Any]]
         A JSON object visible as `$ctx.identity.resolverContext` in resolver templates
+
+        The resolverContext object only supports key-value pairs. Nested keys are not supported.
+
         Warning: The total size of this JSON object must not exceed 5MB.
     deny_fields: Optional[List[str]]
         A list of fields that will be set to `null` regardless of the resolver's return.
