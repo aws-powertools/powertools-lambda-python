@@ -137,8 +137,7 @@ Used when building an [AWS_LAMBDA Authorization](https://docs.aws.amazon.com/app
 See blog post [Introducing Lambda authorization for AWS AppSync GraphQL APIs](https://aws.amazon.com/blogs/mobile/appsync-lambda-auth/){target="_blank"}
 or read the Amplify documentation on using [AWS Lambda for authorization](https://docs.amplify.aws/lib/graphqlapi/authz/q/platform/js#aws-lambda){target="_blank"} with AppSync.
 
-In this example extract the `requestId` as the `correlation_id` for logging and builds the AppSync authorizer
-using the `AppSyncAuthorizerResponse` helper.
+In this example extract the `requestId` as the `correlation_id` for logging, used `@event_source` decorator and builds the AppSync authorizer using the `AppSyncAuthorizerResponse` helper.
 
 === "app.py"
 
