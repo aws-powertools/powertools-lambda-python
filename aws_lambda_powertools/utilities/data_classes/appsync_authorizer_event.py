@@ -68,18 +68,18 @@ class AppSyncAuthorizerResponse:
         is authorized to make calls to the GraphQL API. If this value is
         true, execution of the GraphQL API continues. If this value is false,
         an UnauthorizedException is raised
-    max_age: Optional[int]
+    max_age: int, optional
         Set the ttlOverride. The number of seconds that the response should be
         cached for. If no value is returned, the value from the API (if configured)
         or the default of 300 seconds (five minutes) is used. If this is 0, the response
         is not cached.
-    resolver_context: Optional[Dict[str, Any]]
+    resolver_context: Dict[str, Any], optional
         A JSON object visible as `$ctx.identity.resolverContext` in resolver templates
 
         The resolverContext object only supports key-value pairs. Nested keys are not supported.
 
         Warning: The total size of this JSON object must not exceed 5MB.
-    deny_fields: Optional[List[str]]
+    deny_fields: List[str], optional
         A list of fields that will be set to `null` regardless of the resolver's return.
 
         A field is either `TypeName.FieldName`, or an ARN such as
