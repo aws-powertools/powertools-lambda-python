@@ -1,13 +1,15 @@
 import base64
 import gzip
 import json
+import logging
 from typing import Any, Dict, Optional, Union
 
 import jmespath
 from jmespath.exceptions import LexerError
 
-from aws_lambda_powertools.utilities.validation import InvalidEnvelopeExpressionError
-from aws_lambda_powertools.utilities.validation.base import logger
+from aws_lambda_powertools.exceptions import InvalidEnvelopeExpressionError
+
+logger = logging.getLogger(__name__)
 
 
 class PowertoolsFunctions(jmespath.functions.Functions):

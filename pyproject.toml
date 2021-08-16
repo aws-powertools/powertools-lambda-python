@@ -60,7 +60,7 @@ pydantic = ["pydantic", "email-validator"]
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]
-omit = ["tests/*"]
+omit = ["tests/*", "aws_lambda_powertools/exceptions/*"]
 branch = true
 
 [tool.coverage.html]
