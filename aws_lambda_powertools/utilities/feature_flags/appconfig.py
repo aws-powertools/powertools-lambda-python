@@ -80,7 +80,7 @@ class AppConfigStore(StoreProvider):
             )
 
             if self.envelope:
-                config = jmespath_utils.unwrap_event_from_envelope(
+                config = jmespath_utils.extract_data_from_envelope(
                     data=config, envelope=self.envelope, jmespath_options=self.jmespath_options
                 )
 
