@@ -29,7 +29,7 @@ class PowertoolsFunctions(jmespath.functions.Functions):
         return uncompressed.decode()
 
 
-def unwrap_event_from_envelope(data: Union[Dict, str], envelope: str, jmespath_options: Optional[Dict]) -> Any:
+def extract_data_from_envelope(data: Union[Dict, str], envelope: str, jmespath_options: Optional[Dict]) -> Any:
     """Searches data using JMESPath expression
 
     Parameters
