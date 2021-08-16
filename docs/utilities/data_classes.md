@@ -63,6 +63,7 @@ Event Source | Data_class
 [API Gateway Proxy V2](#api-gateway-proxy-v2) | `APIGatewayProxyEventV2`
 [Application Load Balancer](#application-load-balancer) | `ALBEvent`
 [AppSync Resolver](#appsync-resolver) | `AppSyncResolverEvent`
+[AppSync Authorizer](#appsync-authorizer) | `AppSyncAuthorizerEvent`
 [CloudWatch Logs](#cloudwatch-logs) | `CloudWatchLogsEvent`
 [CodePipeline Job Event](#codepipeline-job) | `CodePipelineJobEvent`
 [Cognito User Pool](#cognito-user-pool) | Multiple available under `cognito_user_pool_event`
@@ -126,6 +127,54 @@ Is it used for Application load balancer event.
     def lambda_handler(event: ALBEvent, context):
         if "helloworld" in event.path and event.http_method == "POST":
             do_something_with(event.json_body, event.query_string_parameters)
+    ```
+
+## AppSync Authorizer
+
+> New in 1.20.0
+
+Used when building an [AWS_LAMBDA Authorization](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#aws-lambda-authorization){target="_blank"} with AppSync.
+See blog post [Introducing Lambda authorization for AWS AppSync GraphQL APIs](https://aws.amazon.com/blogs/mobile/appsync-lambda-auth/){target="_blank"}
+or read the Amplify documentation on using [AWS Lambda for authorization](https://docs.amplify.aws/lib/graphqlapi/authz/q/platform/js#aws-lambda){target="_blank"} with AppSync.
+
+In this example extract the `requestId` as the `correlation_id` for logging and builds the AppSync authorizer
+using the `AppSyncAuthorizerResponse` helper.
+
+=== "app.py"
+
+    ```python
+    from typing import Dict
+
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.logging.logger import Logger
+    from aws_lambda_powertools.utilities.data_classes.appsync_authorizer_event import (
+        AppSyncAuthorizerEvent,
+        AppSyncAuthorizerResponse,
+    )
+    from aws_lambda_powertools.utilities.data_classes.event_source import event_source
+
+    logger = Logger()
+
+
+    def get_user_by_token(token: str):
+        """Look a user by token"""
+
+
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_AUTHORIZER)
+    @event_source(data_class=AppSyncAuthorizerEvent)
+    def lambda_handler(event: AppSyncAuthorizerEvent, context) -> Dict:
+        user = get_user_by_token(event.authorization_token)
+
+        if not user:
+            # No user found, return not authorized
+            return AppSyncAuthorizerResponse().to_dict()
+
+        return AppSyncAuthorizerResponse(
+            authorize=True,
+            resolver_context={"id": user.id},
+            # Only allow admins to delete events
+            deny_fields=None if user.is_admin else ["Mutation.deleteEvent"],
+        ).asdict()
     ```
 
 ### AppSync Resolver
