@@ -1,0 +1,13 @@
+{
+    "authorizationToken": "BE9DC5E3-D410-4733-AF76-70178092E681",
+    "requestContext": {
+        "apiId": "giy7kumfmvcqvbedntjwjvagii",
+        "accountId": "254688921111",
+        "requestId": "b80ed838-14c6-4500-b4c3-b694c7bef086",
+        "queryString": "mutation MyNewTask($desc: String!) {\n  createTask(description: $desc, owner: \"ccc\", taskStatus: \"cc\", title: \"ccc\") {\n    id\n  }\n}\n",
+        "operationName": "MyNewTask",
+        "variables": {
+            "desc": "Foo"
+        }
+    }
+}
