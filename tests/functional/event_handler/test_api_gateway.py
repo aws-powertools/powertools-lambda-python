@@ -773,12 +773,16 @@ def test_custom_serializer():
 
 @pytest.mark.parametrize(
     "path",
-    [pytest.param("/pay/foo", id="prefix matches path"), pytest.param("/foo", id="prefix does not match path")],
+    [
+        pytest.param("/pay/foo", id="prefix matches path"),
+        pytest.param("/payment/foo", id="prefix matches path"),
+        pytest.param("/foo", id="prefix does not match path"),
+    ],
 )
 def test_remove_prefix(path: str):
     # GIVEN a configured prefix of `/pay`
     # AND events paths `/pay/foo` or `/foo`
-    app = ApiGatewayResolver(prefix="/pay")
+    app = ApiGatewayResolver(strip_prefixes=["/pay", "/payment"])
 
     @app.get("/foo")
     def foo():

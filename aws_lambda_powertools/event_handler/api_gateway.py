@@ -265,7 +265,7 @@ class ApiGatewayResolver:
         cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
-        prefix: Optional[str] = None,
+        strip_prefixes: Optional[List[str]] = None,
     ):
         """
         Parameters
@@ -279,8 +279,8 @@ class ApiGatewayResolver:
             environment variable
         serializer : Callable, optional
             function to serialize `obj` to a JSON formatted `str`, by default json.dumps
-        prefix: str, optional
-            optional prefix removed from the path before doing the routing
+        strip_prefixes: List[str], optional
+            optional list of prefixes to be removed from the path before doing the routing
         """
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
@@ -290,7 +290,7 @@ class ApiGatewayResolver:
         self._debug = resolve_truthy_env_var_choice(
             env=os.getenv(constants.EVENT_HANDLER_DEBUG_ENV, "false"), choice=debug
         )
-        self._prefix = prefix
+        self._strip_prefixes = strip_prefixes
 
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
@@ -541,8 +541,11 @@ class ApiGatewayResolver:
 
     def _remove_prefix(self, path: str) -> str:
         """Remove the configured prefix from the path"""
-        if self._prefix and path.startswith(self._prefix):
-            return path[len(self._prefix) :]
+        if self._strip_prefixes:
+            for prefix in self._strip_prefixes:
+                if path.startswith(prefix + "/"):
+                    return path[len(prefix) :]
+
         return path
 
     def _not_found(self, method: str) -> ResponseBuilder:
