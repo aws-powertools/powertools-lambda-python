@@ -11,7 +11,7 @@ from botocore import stub
 from botocore.config import Config
 from jmespath import functions
 
-from aws_lambda_powertools.shared.jmespath_utils import unwrap_event_from_envelope
+from aws_lambda_powertools.shared.jmespath_utils import extract_data_from_envelope
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.idempotency import IdempotencyConfig
@@ -149,7 +149,7 @@ def hashed_idempotency_key(lambda_apigw_event, default_jmespath, lambda_context)
 
 @pytest.fixture
 def hashed_idempotency_key_with_envelope(lambda_apigw_event):
-    event = unwrap_event_from_envelope(
+    event = extract_data_from_envelope(
         data=lambda_apigw_event, envelope=envelopes.API_GATEWAY_HTTP, jmespath_options={}
     )
     return "test-func#" + hashlib.md5(json.dumps(event).encode()).hexdigest()

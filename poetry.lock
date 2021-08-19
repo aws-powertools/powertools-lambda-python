@@ -81,14 +81,14 @@ d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
 
 [[package]]
 name = "boto3"
-version = "1.18.21"
+version = "1.18.22"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.6"
 
 [package.dependencies]
-botocore = ">=1.21.21,<1.22.0"
+botocore = ">=1.21.22,<1.22.0"
 jmespath = ">=0.7.1,<1.0.0"
 s3transfer = ">=0.5.0,<0.6.0"
 
@@ -97,7 +97,7 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.21.21"
+version = "1.21.22"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -273,7 +273,7 @@ test = ["coverage", "coveralls", "mock", "pytest", "pytest-cov"]
 
 [[package]]
 name = "flake8-comprehensions"
-version = "3.6.0"
+version = "3.6.1"
 description = "A flake8 plugin to help you write better list/set/dict comprehensions."
 category = "dev"
 optional = false
@@ -1059,7 +1059,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.1"
-content-hash = "ef80bd8445c78d1ad83e8b8b6809f41b753643085cc12735775cb4dbb015c539"
+content-hash = "5b8f1cde398c9218d69c14c7c8abe2ba2369e554f1c680b5005f2cb7deb10d00"
 
 [metadata.files]
 appdirs = [
@@ -1086,12 +1086,12 @@ black = [
     {file = "black-20.8b1.tar.gz", hash = "sha256:1c02557aa099101b9d21496f8a914e9ed2222ef70336404eeeac8edba836fbea"},
 ]
 boto3 = [
-    {file = "boto3-1.18.21-py3-none-any.whl", hash = "sha256:59b6e8e79b2114e21388288a06a004f2a9378b1e0fc58466a35da8fb74fe2dd8"},
-    {file = "boto3-1.18.21.tar.gz", hash = "sha256:00748c760dc30be61c6db4b092718f6a9f8d27c767da0e232695a65adb75cde8"},
+    {file = "boto3-1.18.22-py3-none-any.whl", hash = "sha256:6cc7011cb857fecee54884ff344d6b793cd22af51142f715706c757d26d02bb1"},
+    {file = "boto3-1.18.22.tar.gz", hash = "sha256:7405ae77ce4f2151fae1b542183f9c0f7ffb57c288b1f152819cfcb88e9cf297"},
 ]
 botocore = [
-    {file = "botocore-1.21.21-py3-none-any.whl", hash = "sha256:fa5ac13829d24fcdd385e82c3b6d78e22d93f427cca8dac38158cae84a8cc2f5"},
-    {file = "botocore-1.21.21.tar.gz", hash = "sha256:12cfe74b0a5c44afb34bdd86c1f8ad74bc2ad9ec168eaed9040ef70cb3db944f"},
+    {file = "botocore-1.21.22-py3-none-any.whl", hash = "sha256:9df7a84840bcea10eb68f816d562c77656ec253a3a0dc3724e7e9ac086656e28"},
+    {file = "botocore-1.21.22.tar.gz", hash = "sha256:9c133caab58b04b4a9ab3f6523cc61cf815c1a5fde7b5ee279eefa48dc3a01d1"},
 ]
 certifi = [
     {file = "certifi-2020.12.5-py2.py3-none-any.whl", hash = "sha256:719a74fb9e33b9bd44cc7f3a8d94bc35e4049deebe19ba7d8e108280cfd59830"},
@@ -1199,8 +1199,8 @@ flake8-builtins = [
     {file = "flake8_builtins-1.5.3-py2.py3-none-any.whl", hash = "sha256:7706babee43879320376861897e5d1468e396a40b8918ed7bccf70e5f90b8687"},
 ]
 flake8-comprehensions = [
-    {file = "flake8-comprehensions-3.6.0.tar.gz", hash = "sha256:4dbaf4be0b25376d568e072dd39798e0c9a40c7adb1b3f95ea680f94e1f9b9dd"},
-    {file = "flake8_comprehensions-3.6.0-py3-none-any.whl", hash = "sha256:7a86d1f4dfb53ad0806eb352e9c5754fbd48f34093737d4e7a14e83f13c4df47"},
+    {file = "flake8-comprehensions-3.6.1.tar.gz", hash = "sha256:4888de89248b7f7535159189ff693c77f8354f6d37a02619fa28c9921a913aa0"},
+    {file = "flake8_comprehensions-3.6.1-py3-none-any.whl", hash = "sha256:e9a010b99aa90c05790d45281ad9953df44a4a08a1a8f6cd41f98b4fc6a268a0"},
 ]
 flake8-debugger = [
     {file = "flake8-debugger-4.0.0.tar.gz", hash = "sha256:e43dc777f7db1481db473210101ec2df2bd39a45b149d7218a618e954177eda6"},

@@ -525,10 +525,10 @@ class ApiGatewayResolver:
         for route in self._routes:
             if method != route.method:
                 continue
-            match: Optional[re.Match] = route.rule.match(path)
-            if match:
+            match_results: Optional[re.Match] = route.rule.match(path)
+            if match_results:
                 logger.debug("Found a registered route. Calling function")
-                return self._call_route(route, match.groupdict())  # pass fn args
+                return self._call_route(route, match_results.groupdict())  # pass fn args
 
         logger.debug(f"No match found for path {path} and method {method}")
         return self._not_found(method)
