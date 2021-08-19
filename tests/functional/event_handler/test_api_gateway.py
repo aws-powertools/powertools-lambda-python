@@ -797,3 +797,29 @@ def test_remove_prefix(path: str):
 
     # THEN a route for `/foo` should be found
     assert response["statusCode"] == 200
+
+
+@pytest.mark.parametrize(
+    "prefix",
+    [
+        pytest.param("/foo", id="String are not supported"),
+        pytest.param({"/foo"}, id="Sets are not supported"),
+        pytest.param({"foo": "/foo"}, id="Dicts are not supported"),
+        pytest.param(tuple("/foo"), id="Tuples are not supported"),
+        pytest.param([None, 1, "", False], id="List of invalid values"),
+    ],
+)
+def test_ignore_invalid(prefix):
+    # GIVEN an invalid prefix
+    app = ApiGatewayResolver(strip_prefixes=prefix)
+
+    @app.get("/foo/status")
+    def foo():
+        ...
+
+    # WHEN calling handler
+    response = app({"httpMethod": "GET", "path": "/foo/status"}, None)
+
+    # THEN a route for `/foo/status` should be found
+    # so no prefix was stripped from the request path
+    assert response["statusCode"] == 200

@@ -542,12 +542,22 @@ class ApiGatewayResolver:
 
     def _remove_prefix(self, path: str) -> str:
         """Remove the configured prefix from the path"""
-        if self._strip_prefixes:
-            for prefix in self._strip_prefixes:
-                if path.startswith(prefix + "/"):
-                    return path[len(prefix) :]
+        if not isinstance(self._strip_prefixes, list):
+            return path
+
+        for prefix in self._strip_prefixes:
+            if self._path_starts_with(path, prefix):
+                return path[len(prefix) :]
 
         return path
+
+    @staticmethod
+    def _path_starts_with(path: str, prefix: str):
+        """Returns true if the `path` starts with a prefix plus a `/`"""
+        if not isinstance(prefix, str) or len(prefix) == 0:
+            return False
+
+        return path.startswith(prefix + "/")
 
     def _not_found(self, method: str) -> ResponseBuilder:
         """Called when no matching route was found and includes support for the cors preflight response"""
