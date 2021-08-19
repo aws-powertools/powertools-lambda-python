@@ -28,7 +28,7 @@ class CloudWatchLogsDecode(BaseModel):
 class CloudWatchLogsData(BaseModel):
     decoded_data: CloudWatchLogsDecode = Field(None, alias="data")
 
-    @validator("decoded_data", pre=True)
+    @validator("decoded_data", pre=True, allow_reuse=True)
     def prepare_data(cls, value):
         try:
             logger.debug("Decoding base64 cloudwatch log data before parsing")
