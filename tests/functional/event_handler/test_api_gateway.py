@@ -769,3 +769,57 @@ def test_custom_serializer():
     body = response["body"]
     expected = '{"color": 1, "variations": ["dark", "light"]}'
     assert expected == body
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param("/pay/foo", id="path matched pay prefix"),
+        pytest.param("/payment/foo", id="path matched payment prefix"),
+        pytest.param("/foo", id="path does not start with any of the prefixes"),
+    ],
+)
+def test_remove_prefix(path: str):
+    # GIVEN events paths `/pay/foo`, `/payment/foo` or `/foo`
+    # AND a configured strip_prefixes of `/pay` and `/payment`
+    app = ApiGatewayResolver(strip_prefixes=["/pay", "/payment"])
+
+    @app.get("/pay/foo")
+    def pay_foo():
+        raise ValueError("should not be matching")
+
+    @app.get("/foo")
+    def foo():
+        ...
+
+    # WHEN calling handler
+    response = app({"httpMethod": "GET", "path": path}, None)
+
+    # THEN a route for `/foo` should be found
+    assert response["statusCode"] == 200
+
+
+@pytest.mark.parametrize(
+    "prefix",
+    [
+        pytest.param("/foo", id="String are not supported"),
+        pytest.param({"/foo"}, id="Sets are not supported"),
+        pytest.param({"foo": "/foo"}, id="Dicts are not supported"),
+        pytest.param(tuple("/foo"), id="Tuples are not supported"),
+        pytest.param([None, 1, "", False], id="List of invalid values"),
+    ],
+)
+def test_ignore_invalid(prefix):
+    # GIVEN an invalid prefix
+    app = ApiGatewayResolver(strip_prefixes=prefix)
+
+    @app.get("/foo/status")
+    def foo():
+        ...
+
+    # WHEN calling handler
+    response = app({"httpMethod": "GET", "path": "/foo/status"}, None)
+
+    # THEN a route for `/foo/status` should be found
+    # so no prefix was stripped from the request path
+    assert response["statusCode"] == 200
