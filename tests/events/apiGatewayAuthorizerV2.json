@@ -10,7 +10,8 @@
   "headers": {
     "x-amzn-trace-id": "Root=1-611cc4a7-0746ebee281cfd967db97b64",
     "Header1": "value1",
-    "Header2": "value2"
+    "Header2": "value2",
+    "Authorization": "value"
   },
   "queryStringParameters": {
     "parameter1": "value1,value2",

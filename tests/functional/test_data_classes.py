@@ -22,6 +22,10 @@ from aws_lambda_powertools.utilities.data_classes import (
     SNSEvent,
     SQSEvent,
 )
+from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
+    ApiGatewayAuthorizerSimpleResponse,
+    ApiGatewayAuthorizerV2Event,
+)
 from aws_lambda_powertools.utilities.data_classes.appsync.scalar_types_utils import (
     _formatted_time,
     aws_date,
@@ -1454,3 +1458,62 @@ def test_appsync_authorizer_response():
     assert {"isAuthorized": False} == AppSyncAuthorizerResponse(resolver_context={}).asdict()
     assert {"isAuthorized": True} == AppSyncAuthorizerResponse(authorize=True).asdict()
     assert {"isAuthorized": False, "ttlOverride": 0} == AppSyncAuthorizerResponse(max_age=0).asdict()
+
+
+def test_api_gateway_authorizer_v2():
+    event = ApiGatewayAuthorizerV2Event(load_event("apiGatewayAuthorizerV2.json"))
+
+    assert event["version"] == event.version
+    assert event["type"] == event.get_type
+    assert event["routeArn"] == event.route_arn
+    assert event["identitySource"] == event.identity_source
+    assert event["routeKey"] == event.route_key
+    assert event["rawPath"] == event.raw_path
+    assert event["rawQueryString"] == event.raw_query_string
+    assert event["cookies"] == event.cookies
+    assert event["headers"] == event.headers
+    assert event["queryStringParameters"] == event.query_string_parameters
+    assert event["requestContext"]["accountId"] == event.request_context.account_id
+    assert event["requestContext"]["apiId"] == event.request_context.api_id
+    expected_client_cert = event["requestContext"]["authentication"]["clientCert"]
+    assert expected_client_cert["clientCertPem"] == event.request_context.authentication.client_cert_pem
+    assert expected_client_cert["subjectDN"] == event.request_context.authentication.subject_dn
+    assert expected_client_cert["issuerDN"] == event.request_context.authentication.issuer_dn
+    assert expected_client_cert["serialNumber"] == event.request_context.authentication.serial_number
+    assert expected_client_cert["validity"]["notAfter"] == event.request_context.authentication.validity_not_after
+    assert expected_client_cert["validity"]["notBefore"] == event.request_context.authentication.validity_not_before
+    assert event["requestContext"]["domainName"] == event.request_context.domain_name
+    assert event["requestContext"]["domainPrefix"] == event.request_context.domain_prefix
+    expected_http = event["requestContext"]["http"]
+    assert expected_http["method"] == event.request_context.http.method
+    assert expected_http["path"] == event.request_context.http.path
+    assert expected_http["protocol"] == event.request_context.http.protocol
+    assert expected_http["sourceIp"] == event.request_context.http.source_ip
+    assert expected_http["userAgent"] == event.request_context.http.user_agent
+    assert event["requestContext"]["requestId"] == event.request_context.request_id
+    assert event["requestContext"]["routeKey"] == event.request_context.route_key
+    assert event["requestContext"]["stage"] == event.request_context.stage
+    assert event["requestContext"]["time"] == event.request_context.time
+    assert event["requestContext"]["timeEpoch"] == event.request_context.time_epoch
+    assert event["pathParameters"] == event.path_parameters
+    assert event["stageVariables"] == event.stage_variables
+
+    assert event.get_header_value("Authorization") == "value"
+    assert event.get_header_value("authorization") == "value"
+    assert event.get_header_value("missing") is None
+
+    # Check for optionals
+    event_optionals = ApiGatewayAuthorizerV2Event({"requestContext": {}})
+    assert event_optionals.identity_source is None
+    assert event_optionals.request_context.authentication is None
+    assert event_optionals.path_parameters is None
+    assert event_optionals.stage_variables is None
+
+
+def test_api_gateway_authorizer_simple_response():
+    assert {"isAuthorized": False} == ApiGatewayAuthorizerSimpleResponse().asdict()
+    expected_context = {"foo": "value"}
+    assert {"isAuthorized": True, "context": expected_context} == ApiGatewayAuthorizerSimpleResponse(
+        authorize=True,
+        context=expected_context,
+    ).asdict()

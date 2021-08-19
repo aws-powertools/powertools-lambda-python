@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, BaseRequestContextV2, DictWrapper
 
 
 class APIGatewayEventIdentity(DictWrapper):
@@ -238,31 +238,6 @@ class APIGatewayProxyEvent(BaseProxyEvent):
         return self.get("stageVariables")
 
 
-class RequestContextV2Http(DictWrapper):
-    @property
-    def method(self) -> str:
-        return self["requestContext"]["http"]["method"]
-
-    @property
-    def path(self) -> str:
-        return self["requestContext"]["http"]["path"]
-
-    @property
-    def protocol(self) -> str:
-        """The request protocol, for example, HTTP/1.1."""
-        return self["requestContext"]["http"]["protocol"]
-
-    @property
-    def source_ip(self) -> str:
-        """The source IP address of the TCP connection making the request to API Gateway."""
-        return self["requestContext"]["http"]["sourceIp"]
-
-    @property
-    def user_agent(self) -> str:
-        """The User Agent of the API caller."""
-        return self["requestContext"]["http"]["userAgent"]
-
-
 class RequestContextV2AuthorizerIam(DictWrapper):
     @property
     def access_key(self) -> Optional[str]:
@@ -334,59 +309,11 @@ class RequestContextV2Authorizer(DictWrapper):
         return None if iam is None else RequestContextV2AuthorizerIam(iam)
 
 
-class RequestContextV2(DictWrapper):
-    @property
-    def account_id(self) -> str:
-        """The AWS account ID associated with the request."""
-        return self["requestContext"]["accountId"]
-
-    @property
-    def api_id(self) -> str:
-        """The identifier API Gateway assigns to your API."""
-        return self["requestContext"]["apiId"]
-
+class RequestContextV2(BaseRequestContextV2):
     @property
     def authorizer(self) -> Optional[RequestContextV2Authorizer]:
         authorizer = self["requestContext"].get("authorizer")
         return None if authorizer is None else RequestContextV2Authorizer(authorizer)
-
-    @property
-    def domain_name(self) -> str:
-        """A domain name"""
-        return self["requestContext"]["domainName"]
-
-    @property
-    def domain_prefix(self) -> str:
-        return self["requestContext"]["domainPrefix"]
-
-    @property
-    def http(self) -> RequestContextV2Http:
-        return RequestContextV2Http(self._data)
-
-    @property
-    def request_id(self) -> str:
-        """The ID that API Gateway assigns to the API request."""
-        return self["requestContext"]["requestId"]
-
-    @property
-    def route_key(self) -> str:
-        """The selected route key."""
-        return self["requestContext"]["routeKey"]
-
-    @property
-    def stage(self) -> str:
-        """The deployment stage of the API request"""
-        return self["requestContext"]["stage"]
-
-    @property
-    def time(self) -> str:
-        """The CLF-formatted request time (dd/MMM/yyyy:HH:mm:ss +-hhmm)."""
-        return self["requestContext"]["time"]
-
-    @property
-    def time_epoch(self) -> int:
-        """The Epoch-formatted request time."""
-        return self["requestContext"]["timeEpoch"]
 
 
 class APIGatewayProxyEventV2(BaseProxyEvent):

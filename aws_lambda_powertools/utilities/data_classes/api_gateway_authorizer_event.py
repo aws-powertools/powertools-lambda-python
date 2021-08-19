@@ -1,10 +1,50 @@
 from typing import Any, Dict, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import BaseRequestContextV2, DictWrapper, get_header_value
 
 
-class RequestContextV2(DictWrapper):
-    ...
+class RequestContextV2AuthenticationClientCert(DictWrapper):
+    @property
+    def client_cert_pem(self) -> str:
+        """Client certificate pem"""
+        return self["clientCertPem"]
+
+    @property
+    def issuer_dn(self) -> str:
+        """Issuer Distinguished Name"""
+        return self["issuerDN"]
+
+    @property
+    def serial_number(self) -> str:
+        """Unique serial number for client cert"""
+        return self["serialNumber"]
+
+    @property
+    def subject_dn(self) -> str:
+        """Subject Distinguished Name"""
+        return self["subjectDN"]
+
+    @property
+    def validity_not_after(self) -> str:
+        """Date when the cert is no longer valid
+
+        eg: Aug  5 00:28:21 2120 GMT"""
+        return self["validity"]["notAfter"]
+
+    @property
+    def validity_not_before(self) -> str:
+        """Cert is not valid before this date
+
+        eg: Aug 29 00:28:21 2020 GMT"""
+        return self["validity"]["notBefore"]
+
+
+class RequestContextV2(BaseRequestContextV2):
+    @property
+    def authentication(self) -> Optional[RequestContextV2AuthenticationClientCert]:
+        """Optional when using mutual TLS authentication"""
+        authentication = self["requestContext"].get("authentication", {}).get("clientCert")
+        return None if authentication is None else RequestContextV2AuthenticationClientCert(authentication)
 
 
 class ApiGatewayAuthorizerV2Event(DictWrapper):
@@ -17,22 +57,35 @@ class ApiGatewayAuthorizerV2Event(DictWrapper):
 
     @property
     def version(self) -> str:
+        """Event payload version should always be 2.0"""
         return self["version"]
 
     @property
     def get_type(self) -> str:
+        """Event type should always be request"""
         return self["type"]
 
     @property
     def route_arn(self) -> str:
+        """ARN of the route being called
+
+        eg: arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/request"""
         return self["routeArn"]
 
     @property
-    def identity_source(self) -> List[str]:
-        return self["identitySource"]
+    def identity_source(self) -> Optional[List[str]]:
+        """The identity source for which authorization is requested.
+
+        For a REQUEST authorizer, this is optional. The value is a set of one or more mapping expressions of the
+        specified request parameters. The identity source can be headers, query string parameters, stage variables,
+        and context parameters.
+        """
+        return self.get("identitySource")
 
     @property
     def route_key(self) -> str:
+        """The route key for the route. For HTTP APIs, the route key can be either $default,
+        or a combination of an HTTP method and resource path, for example, GET /pets."""
         return self["routeKey"]
 
     @property
@@ -56,16 +109,36 @@ class ApiGatewayAuthorizerV2Event(DictWrapper):
         return self["queryStringParameters"]
 
     @property
-    def request_pontext(self) -> RequestContextV2:
+    def request_context(self) -> RequestContextV2:
         return RequestContextV2(self._data)
 
     @property
-    def path_parameters(self) -> Dict[str, str]:
-        return self["pathParameters"]
+    def path_parameters(self) -> Optional[Dict[str, str]]:
+        return self.get("pathParameters")
 
     @property
-    def stage_variables(self) -> Dict[str, str]:
-        return self["stageVariables"]
+    def stage_variables(self) -> Optional[Dict[str, str]]:
+        return self.get("stageVariables")
+
+    def get_header_value(
+        self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
+    ) -> Optional[str]:
+        """Get header value by name
+
+        Parameters
+        ----------
+        name: str
+            Header name
+        default_value: str, optional
+            Default value if no value was found by name
+        case_sensitive: bool
+            Whether to use a case sensitive look up
+        Returns
+        -------
+        str, optional
+            Header value
+        """
+        return get_header_value(self.headers, name, default_value, case_sensitive)
 
 
 class ApiGatewayAuthorizerSimpleResponse:
@@ -84,7 +157,6 @@ class ApiGatewayAuthorizerSimpleResponse:
         The context object only supports key-value pairs. Nested keys are not supported.
 
         Warning: The total size of this JSON object must not exceed 5MB.
-
     """
 
     def __init__(
