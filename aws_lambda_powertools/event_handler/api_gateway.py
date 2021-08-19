@@ -37,7 +37,7 @@ class ProxyEventType(Enum):
     ALBEvent = "ALBEvent"
 
 
-class CORSConfig(object):
+class CORSConfig:
     """CORS Config
 
     Examples
@@ -280,7 +280,8 @@ class ApiGatewayResolver:
         serializer : Callable, optional
             function to serialize `obj` to a JSON formatted `str`, by default json.dumps
         strip_prefixes: List[str], optional
-            optional list of prefixes to be removed from the path before doing the routing
+            optional list of prefixes to be removed from the request path before doing the routing. This is often used
+            with api gateways with multiple custom mappings.
         """
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
