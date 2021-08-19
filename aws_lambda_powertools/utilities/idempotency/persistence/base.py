@@ -6,6 +6,7 @@ import datetime
 import hashlib
 import json
 import logging
+import os
 import warnings
 from abc import ABC, abstractmethod
 from types import MappingProxyType
@@ -13,6 +14,7 @@ from typing import Any, Dict, Optional
 
 import jmespath
 
+from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.cache_dict import LRUDict
 from aws_lambda_powertools.shared.jmespath_utils import PowertoolsFunctions
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -23,7 +25,6 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyKeyError,
     IdempotencyValidationError,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
@@ -153,7 +154,7 @@ class BasePersistenceLayer(ABC):
             self._cache = LRUDict(max_items=config.local_cache_max_items)
         self.hash_function = getattr(hashlib, config.hash_function)
 
-    def _get_hashed_idempotency_key(self, event: Dict[str, Any], context: LambdaContext) -> str:
+    def _get_hashed_idempotency_key(self, event: Dict[str, Any]) -> str:
         """
         Extract data from lambda event using event key jmespath, and return a hashed representation
 
@@ -161,8 +162,6 @@ class BasePersistenceLayer(ABC):
         ----------
         event: Dict[str, Any]
             Lambda event
-        context: LambdaContext
-            Lambda context
 
         Returns
         -------
@@ -181,7 +180,8 @@ class BasePersistenceLayer(ABC):
             warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}")
 
         generated_hash = self._generate_hash(data)
-        return f"{context.function_name}#{generated_hash}"
+        function_name = os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, "test-func")
+        return f"{function_name}#{generated_hash}"
 
     @staticmethod
     def is_missing_idempotency_key(data) -> bool:
@@ -301,7 +301,7 @@ class BasePersistenceLayer(ABC):
         if idempotency_key in self._cache:
             del self._cache[idempotency_key]
 
-    def save_success(self, event: Dict[str, Any], context: LambdaContext, result: dict) -> None:
+    def save_success(self, event: Dict[str, Any], result: dict) -> None:
         """
         Save record of function's execution completing successfully
 
@@ -309,15 +309,13 @@ class BasePersistenceLayer(ABC):
         ----------
         event: Dict[str, Any]
             Lambda event
-        context: LambdaContext
-            Lambda context
         result: dict
             The response from lambda handler
         """
         response_data = json.dumps(result, cls=Encoder)
 
         data_record = DataRecord(
-            idempotency_key=self._get_hashed_idempotency_key(event, context),
+            idempotency_key=self._get_hashed_idempotency_key(event),
             status=STATUS_CONSTANTS["COMPLETED"],
             expiry_timestamp=self._get_expiry_timestamp(),
             response_data=response_data,
@@ -331,7 +329,7 @@ class BasePersistenceLayer(ABC):
 
         self._save_to_cache(data_record)
 
-    def save_inprogress(self, event: Dict[str, Any], context: LambdaContext) -> None:
+    def save_inprogress(self, event: Dict[str, Any]) -> None:
         """
         Save record of function's execution being in progress
 
@@ -339,11 +337,9 @@ class BasePersistenceLayer(ABC):
         ----------
         event: Dict[str, Any]
             Lambda event
-        context: LambdaContext
-            Lambda context
         """
         data_record = DataRecord(
-            idempotency_key=self._get_hashed_idempotency_key(event, context),
+            idempotency_key=self._get_hashed_idempotency_key(event),
             status=STATUS_CONSTANTS["INPROGRESS"],
             expiry_timestamp=self._get_expiry_timestamp(),
             payload_hash=self._get_hashed_payload(event),
@@ -356,7 +352,7 @@ class BasePersistenceLayer(ABC):
 
         self._put_record(data_record)
 
-    def delete_record(self, event: Dict[str, Any], context: LambdaContext, exception: Exception):
+    def delete_record(self, event: Dict[str, Any], exception: Exception):
         """
         Delete record from the persistence store
 
@@ -364,12 +360,10 @@ class BasePersistenceLayer(ABC):
         ----------
         event: Dict[str, Any]
             Lambda event
-        context: LambdaContext
-            Lambda context
         exception
             The exception raised by the lambda handler
         """
-        data_record = DataRecord(idempotency_key=self._get_hashed_idempotency_key(event, context))
+        data_record = DataRecord(idempotency_key=self._get_hashed_idempotency_key(event))
 
         logger.debug(
             f"Lambda raised an exception ({type(exception).__name__}). Clearing in progress record in persistence "
@@ -379,7 +373,7 @@ class BasePersistenceLayer(ABC):
 
         self._delete_from_cache(data_record.idempotency_key)
 
-    def get_record(self, event: Dict[str, Any], context: LambdaContext) -> DataRecord:
+    def get_record(self, event: Dict[str, Any]) -> DataRecord:
         """
         Calculate idempotency key for lambda_event, then retrieve item from persistence store using idempotency key
         and return it as a DataRecord instance.and return it as a DataRecord instance.
@@ -388,8 +382,6 @@ class BasePersistenceLayer(ABC):
         ----------
         event: Dict[str, Any]
             Lambda event
-        context: LambdaContext
-            Lambda context
 
         Returns
         -------
@@ -404,7 +396,7 @@ class BasePersistenceLayer(ABC):
             Event payload doesn't match the stored record for the given idempotency key
         """
 
-        idempotency_key = self._get_hashed_idempotency_key(event, context)
+        idempotency_key = self._get_hashed_idempotency_key(event)
 
         cached_record = self._retrieve_from_cache(idempotency_key=idempotency_key)
         if cached_record:

@@ -67,7 +67,7 @@ def idempotent(
 
     config = config or IdempotencyConfig()
     idempotency_handler = IdempotencyHandler(
-        lambda_handler=handler, event=event, context=context, persistence_store=persistence_store, config=config
+        lambda_handler=handler, event=event, context=context, config=config, persistence_store=persistence_store
     )
 
     # IdempotencyInconsistentStateError can happen under rare but expected cases when persistent state changes in the
@@ -112,9 +112,9 @@ class IdempotencyHandler:
         """
         persistence_store.configure(config)
         self.persistence_store = persistence_store
-        self.context = context
         self.event = event
         self.lambda_handler = lambda_handler
+        self.context = context
 
     def handle(self) -> Any:
         """
@@ -129,7 +129,7 @@ class IdempotencyHandler:
         try:
             # We call save_inprogress first as an optimization for the most common case where no idempotent record
             # already exists. If it succeeds, there's no need to call get_record.
-            self.persistence_store.save_inprogress(event=self.event, context=self.context)
+            self.persistence_store.save_inprogress(event=self.event)
         except IdempotencyKeyError:
             raise
         except IdempotencyItemAlreadyExistsError:
@@ -151,7 +151,7 @@ class IdempotencyHandler:
 
         """
         try:
-            event_record = self.persistence_store.get_record(event=self.event, context=self.context)
+            event_record = self.persistence_store.get_record(event=self.event)
         except IdempotencyItemNotFoundError:
             # This code path will only be triggered if the record is removed between save_inprogress and get_record.
             logger.debug(
@@ -219,9 +219,7 @@ class IdempotencyHandler:
             # We need these nested blocks to preserve lambda handler exception in case the persistence store operation
             # also raises an exception
             try:
-                self.persistence_store.delete_record(
-                    event=self.event, context=self.context, exception=handler_exception
-                )
+                self.persistence_store.delete_record(event=self.event, exception=handler_exception)
             except Exception as delete_exception:
                 raise IdempotencyPersistenceLayerError(
                     "Failed to delete record from idempotency store"
@@ -230,7 +228,7 @@ class IdempotencyHandler:
 
         else:
             try:
-                self.persistence_store.save_success(event=self.event, context=self.context, result=handler_response)
+                self.persistence_store.save_success(event=self.event, result=handler_response)
             except Exception as save_exception:
                 raise IdempotencyPersistenceLayerError(
                     "Failed to update record state to success in idempotency store"
