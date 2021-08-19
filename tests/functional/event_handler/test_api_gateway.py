@@ -823,3 +823,22 @@ def test_ignore_invalid(prefix):
     # THEN a route for `/foo/status` should be found
     # so no prefix was stripped from the request path
     assert response["statusCode"] == 200
+
+
+def test_api_gateway_v2_raw_path():
+    # GIVEN a Http API V2 proxy type event
+    # AND a custom stage name "dev" and raw path "/dev/foo"
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEventV2)
+    event = {"rawPath": "/dev/foo", "requestContext": {"http": {"method": "GET"}, "stage": "dev"}}
+
+    @app.get("/foo")
+    def foo():
+        return {}
+
+    # WHEN calling the event handler
+    # WITH a route "/foo"
+    result = app(event, {})
+
+    # THEN process event correctly
+    assert result["statusCode"] == 200
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON

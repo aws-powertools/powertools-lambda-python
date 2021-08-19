@@ -440,6 +440,9 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
 
     @property
     def path(self) -> str:
+        stage = self.request_context.stage
+        if stage != "$default":
+            return self.raw_path[len("/" + stage) :]
         return self.raw_path
 
     @property
