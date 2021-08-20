@@ -221,7 +221,6 @@ def test_idempotent_lambda_first_execution(
     stubber.deactivate()
 
 
-@pytest.mark.skipif(sys.version_info < (3, 8), reason="issue with pytest mock lib for < 3.8")
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_first_execution_cached(
     idempotency_config: IdempotencyConfig,
@@ -255,7 +254,7 @@ def test_idempotent_lambda_first_execution_cached(
 
     retrieve_from_cache_spy.assert_called_once()
     save_to_cache_spy.assert_called_once()
-    assert save_to_cache_spy.call_args[0][0].status == "COMPLETED"
+    assert save_to_cache_spy.call_args[1]["data_record"].status == "COMPLETED"
     assert persistence_store._cache.get(hashed_idempotency_key).status == "COMPLETED"
 
     # This lambda call should not call AWS API
