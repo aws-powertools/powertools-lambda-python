@@ -25,14 +25,27 @@
     "StageVar1": "stageValue1"
   },
   "requestContext": {
-    "path": "/request",
     "accountId": "123456789012",
-    "resourceId": "05c7jb",
-    "stage": "test",
-    "requestId": "...",
+    "apiId": "abcdef123",
+    "domainName": "3npb9j1tlk.execute-api.us-west-1.amazonaws.com",
+    "domainPrefix": "3npb9j1tlk",
+    "extendedRequestId": "EXqgWgXxSK4EJug=",
+    "httpMethod": "GET",
     "identity": {
+      "accessKey": null,
+      "accountId": null,
+      "caller": null,
+      "cognitoAmr": null,
+      "cognitoAuthenticationProvider": null,
+      "cognitoAuthenticationType": null,
+      "cognitoIdentityId": null,
+      "cognitoIdentityPoolId": null,
+      "principalOrgId": null,
       "apiKey": "...",
       "sourceIp": "...",
+      "user": null,
+      "userAgent": "PostmanRuntime/7.28.3",
+      "userArn": null,
       "clientCert": {
         "clientCertPem": "CERT_CONTENT",
         "subjectDN": "www.example.com",
@@ -44,8 +57,13 @@
         }
       }
     },
+    "path": "/request",
+    "protocol": "HTTP/1.1",
+    "requestId": "EXqgWgXxSK4EJug=",
+    "requestTime": "20/Aug/2021:14:36:50 +0000",
+    "requestTimeEpoch": 1629470210043,
+    "resourceId": "ANY /request",
     "resourcePath": "/request",
-    "httpMethod": "GET",
-    "apiId": "abcdef123"
+    "stage": "test"
   }
 }

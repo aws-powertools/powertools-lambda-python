@@ -1,6 +1,11 @@
 from typing import Any, Dict, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import BaseRequestContextV2, DictWrapper, get_header_value
+from aws_lambda_powertools.utilities.data_classes.common import (
+    BaseRequestContext,
+    BaseRequestContextV2,
+    DictWrapper,
+    get_header_value,
+)
 
 
 class APIGatewayRouteArn:
@@ -44,10 +49,6 @@ def parse_api_gateway_arn(arn: str) -> APIGatewayRouteArn:
         http_method=api_gateway_arn_parts[2],
         resource=api_gateway_arn_parts[3] if len(api_gateway_arn_parts) == 4 else "",
     )
-
-
-class RequestContextV2(BaseRequestContextV2):
-    ...
 
 
 class APIGatewayAuthorizerV2Event(DictWrapper):
@@ -117,8 +118,8 @@ class APIGatewayAuthorizerV2Event(DictWrapper):
         return self["queryStringParameters"]
 
     @property
-    def request_context(self) -> RequestContextV2:
-        return RequestContextV2(self._data)
+    def request_context(self) -> BaseRequestContextV2:
+        return BaseRequestContextV2(self._data)
 
     @property
     def path_parameters(self) -> Optional[Dict[str, str]]:
@@ -239,8 +240,8 @@ class APIGatewayAuthorizerRequestEvent(DictWrapper):
         return self["stageVariables"]
 
     @property
-    def request_context(self) -> Dict[str, str]:
-        return self["requestContext"]
+    def request_context(self) -> BaseRequestContext:
+        return BaseRequestContext(self._data)
 
     def get_header_value(
         self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
