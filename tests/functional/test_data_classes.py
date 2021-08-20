@@ -23,6 +23,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     SQSEvent,
 )
 from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
+    APIGatewayAuthorizerRequestEvent,
     APIGatewayAuthorizerSimpleResponse,
     APIGatewayAuthorizerTokenEvent,
     APIGatewayAuthorizerV2Event,
@@ -1525,6 +1526,26 @@ def test_api_gateway_authorizer_token_event():
     assert event.method_arn == event["methodArn"]
     assert event.parsed_arn.arn == event.method_arn
     assert event.get_type == event["type"]
+
+
+def test_api_gateway_authorizer_request_event():
+    """Check API Gateway authorizer token event"""
+    event = APIGatewayAuthorizerRequestEvent(load_event("apiGatewayAuthorizerRequestEvent.json"))
+
+    assert event.version == event["version"]
+    assert event.get_type == event["type"]
+    assert event.method_arn == event["methodArn"]
+    assert event.parsed_arn.arn == event.method_arn
+    assert event.identity_source == event["identitySource"]
+    assert event.authorization_token == event["authorizationToken"]
+    assert event.resource == event["resource"]
+    assert event.path == event["path"]
+    assert event.http_method == event["httpMethod"]
+    assert event.headers == event["headers"]
+    assert event.get_header_value("accept") == "*/*"
+    assert event.query_string_parameters == event["queryStringParameters"]
+    assert event.path_parameters == event["pathParameters"]
+    assert event.stage_variables == event["stageVariables"]
 
 
 def test_api_gateway_authorizer_simple_response():
