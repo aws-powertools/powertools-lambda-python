@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Tuple
 
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
@@ -29,21 +29,27 @@ class IdempotencyHandler:
     def __init__(
         self,
         function: Callable,
-        function_payload: Dict[str, Any],
+        function_payload: Any,
         idempotency_config: IdempotencyConfig,
         persistence_store: BasePersistenceLayer,
-        function_args=None,
-        function_kwargs=None,
+        function_args: Optional[Tuple] = None,
+        function_kwargs: Optional[Dict] = None,
     ):
         """
         Initialize the IdempotencyHandler
 
         Parameters
         ----------
-        config: IdempotencyConfig
+        function_payload: Any
+            JSON Serializable payload to be hashed
+        idempotency_config: IdempotencyConfig
             Idempotency Configuration
         persistence_store : BasePersistenceLayer
             Instance of persistence layer to store idempotency records
+        function_args: Optional[Tuple]
+            Function arguments
+        function_kwargs: Optional[Dict]
+            Function keyword arguments
         """
         self.function = function
         self.data = function_payload

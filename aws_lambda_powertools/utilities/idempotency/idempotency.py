@@ -71,7 +71,7 @@ def idempotent(
 
 
 def idempotent_function(
-    function: AnyCallableT = None,
+    function: Optional[AnyCallableT] = None,
     *,
     data_keyword_argument: str,
     persistence_store: BasePersistenceLayer,
@@ -84,8 +84,6 @@ def idempotent_function(
     ----------
     function: Callable
         Function to be decorated
-    handler: Callable
-        Lambda's handler
     data_keyword_argument: Dict
         Lambda's Event
     persistence_store: BasePersistenceLayer
