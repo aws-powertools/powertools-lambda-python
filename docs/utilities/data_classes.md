@@ -129,7 +129,7 @@ Is it used for Application load balancer event.
             do_something_with(event.json_body, event.query_string_parameters)
     ```
 
-## AppSync Authorizer
+### AppSync Authorizer
 
 > New in 1.20.0
 
