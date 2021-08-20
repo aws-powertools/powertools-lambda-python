@@ -17,6 +17,7 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     DataRecord,
 )
 
+MAX_RETRIES = 2
 logger = logging.getLogger(__name__)
 
 
@@ -62,6 +63,17 @@ class IdempotencyHandler:
             Function response
 
         """
+        # IdempotencyInconsistentStateError can happen under rare but expected cases
+        # when persistent state changes in the small time between put & get requests.
+        # In most cases we can retry successfully on this exception.
+        for i in range(MAX_RETRIES + 1):
+            try:
+                return self._process_idempotency()
+            except IdempotencyInconsistentStateError:
+                if i == MAX_RETRIES:
+                    raise  # Bubble up when exceeded max tries
+
+    def _process_idempotency(self):
         try:
             # We call save_inprogress first as an optimization for the most common case where no idempotent record
             # already exists. If it succeeds, there's no need to call get_record.
@@ -75,7 +87,7 @@ class IdempotencyHandler:
         except Exception as exc:
             raise IdempotencyPersistenceLayerError("Failed to save in progress record to idempotency store") from exc
 
-        return self.get_function_response()
+        return self._get_function_response()
 
     def _get_idempotency_record(self) -> DataRecord:
         """
@@ -138,7 +150,7 @@ class IdempotencyHandler:
 
         return data_record.response_json_as_dict()
 
-    def get_function_response(self):
+    def _get_function_response(self):
         try:
             response = self.function(*self.fn_args, **self.fn_kwargs)
         except Exception as handler_exception:
