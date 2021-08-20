@@ -3,6 +3,49 @@ from typing import Any, Dict, List, Optional
 from aws_lambda_powertools.utilities.data_classes.common import BaseRequestContextV2, DictWrapper, get_header_value
 
 
+class APIGatewayRouteArn:
+    """A parsed route arn"""
+
+    def __init__(
+        self,
+        region: str,
+        aws_account_id: str,
+        api_id: str,
+        stage: str,
+        http_method: str,
+        resource: str,
+    ):
+        self.partition = "aws"
+        self.region = region
+        self.aws_account_id = aws_account_id
+        self.api_id = api_id
+        self.stage = stage
+        self.http_method = http_method
+        self.resource = resource
+
+    @property
+    def arn(self) -> str:
+        """Build an arn from it's parts
+        eg: arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/request"""
+        return (
+            f"arn:{self.partition}:execute-api:{self.region}:{self.aws_account_id}:{self.api_id}/{self.stage}/"
+            f"{self.http_method}/{self.resource}"
+        )
+
+
+def parse_api_gateway_arn(arn: str) -> APIGatewayRouteArn:
+    arn_parts = arn.split(":")
+    api_gateway_arn_parts = arn_parts[5].split("/")
+    return APIGatewayRouteArn(
+        region=arn_parts[3],
+        aws_account_id=arn_parts[4],
+        api_id=api_gateway_arn_parts[0],
+        stage=api_gateway_arn_parts[1],
+        http_method=api_gateway_arn_parts[2],
+        resource=api_gateway_arn_parts[3] if len(api_gateway_arn_parts) == 4 else "",
+    )
+
+
 class RequestContextV2AuthenticationClientCert(DictWrapper):
     @property
     def client_cert_pem(self) -> str:
@@ -43,12 +86,12 @@ class RequestContextV2(BaseRequestContextV2):
     @property
     def authentication(self) -> Optional[RequestContextV2AuthenticationClientCert]:
         """Optional when using mutual TLS authentication"""
-        authentication = self["requestContext"].get("authentication", {}).get("clientCert")
-        return None if authentication is None else RequestContextV2AuthenticationClientCert(authentication)
+        client_cert = self["requestContext"].get("authentication", {}).get("clientCert")
+        return None if client_cert is None else RequestContextV2AuthenticationClientCert(client_cert)
 
 
-class ApiGatewayAuthorizerV2Event(DictWrapper):
-    """API Gateway Authorizer Format 2.0
+class APIGatewayAuthorizerV2Event(DictWrapper):
+    """API Gateway Authorizer Event Format 2.0
 
     Documentation:
     -------------
@@ -71,6 +114,11 @@ class ApiGatewayAuthorizerV2Event(DictWrapper):
 
         eg: arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/request"""
         return self["routeArn"]
+
+    @property
+    def parsed_arn(self) -> APIGatewayRouteArn:
+        """Convenient property to return a parsed api gateway route arn"""
+        return parse_api_gateway_arn(self.route_arn)
 
     @property
     def identity_source(self) -> Optional[List[str]]:
@@ -141,7 +189,35 @@ class ApiGatewayAuthorizerV2Event(DictWrapper):
         return get_header_value(self.headers, name, default_value, case_sensitive)
 
 
-class ApiGatewayAuthorizerSimpleResponse:
+class APIGatewayAuthorizerTokenEvent(DictWrapper):
+    """API Gateway Authorizer Token Event Format 1.0
+
+    Documentation:
+    -------------
+    - https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html
+    """
+
+    @property
+    def get_type(self) -> str:
+        return self["type"]
+
+    @property
+    def authorization_token(self) -> str:
+        return self["authorizationToken"]
+
+    @property
+    def method_arn(self) -> str:
+        """ARN of the incoming method request and is populated by API Gateway in accordance with the Lambda authorizer
+        configuration"""
+        return self["methodArn"]
+
+    @property
+    def parsed_arn(self) -> APIGatewayRouteArn:
+        """Convenient property to return a parsed api gateway method arn"""
+        return parse_api_gateway_arn(self.method_arn)
+
+
+class APIGatewayAuthorizerSimpleResponse:
     """Api Gateway HTTP API V2 payload authorizer simple response helper
 
     Parameters

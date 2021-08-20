@@ -23,8 +23,10 @@ from aws_lambda_powertools.utilities.data_classes import (
     SQSEvent,
 )
 from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
-    ApiGatewayAuthorizerSimpleResponse,
-    ApiGatewayAuthorizerV2Event,
+    APIGatewayAuthorizerSimpleResponse,
+    APIGatewayAuthorizerTokenEvent,
+    APIGatewayAuthorizerV2Event,
+    parse_api_gateway_arn,
 )
 from aws_lambda_powertools.utilities.data_classes.appsync.scalar_types_utils import (
     _formatted_time,
@@ -1461,11 +1463,14 @@ def test_appsync_authorizer_response():
 
 
 def test_api_gateway_authorizer_v2():
-    event = ApiGatewayAuthorizerV2Event(load_event("apiGatewayAuthorizerV2.json"))
+    """Check api gateway authorize event format v2.0"""
+    event = APIGatewayAuthorizerV2Event(load_event("apiGatewayAuthorizerV2Event.json"))
 
     assert event["version"] == event.version
+    assert event["version"] == "2.0"
     assert event["type"] == event.get_type
     assert event["routeArn"] == event.route_arn
+    assert event.parsed_arn.arn == event.route_arn
     assert event["identitySource"] == event.identity_source
     assert event["routeKey"] == event.route_key
     assert event["rawPath"] == event.raw_path
@@ -1503,17 +1508,47 @@ def test_api_gateway_authorizer_v2():
     assert event.get_header_value("missing") is None
 
     # Check for optionals
-    event_optionals = ApiGatewayAuthorizerV2Event({"requestContext": {}})
+    event_optionals = APIGatewayAuthorizerV2Event({"requestContext": {}})
     assert event_optionals.identity_source is None
     assert event_optionals.request_context.authentication is None
     assert event_optionals.path_parameters is None
     assert event_optionals.stage_variables is None
 
 
+def test_api_gateway_authorizer_token_event():
+    """Check API Gateway authorizer token event"""
+    event = APIGatewayAuthorizerTokenEvent(load_event("apiGatewayAuthorizerTokenEvent.json"))
+
+    assert event.authorization_token == event["authorizationToken"]
+    assert event.method_arn == event["methodArn"]
+    assert event.parsed_arn.arn == event.method_arn
+    assert event.get_type == event["type"]
+
+
 def test_api_gateway_authorizer_simple_response():
-    assert {"isAuthorized": False} == ApiGatewayAuthorizerSimpleResponse().asdict()
+    """Check building API Gateway authorizer simple resource"""
+    assert {"isAuthorized": False} == APIGatewayAuthorizerSimpleResponse().asdict()
     expected_context = {"foo": "value"}
-    assert {"isAuthorized": True, "context": expected_context} == ApiGatewayAuthorizerSimpleResponse(
+    assert {"isAuthorized": True, "context": expected_context} == APIGatewayAuthorizerSimpleResponse(
         authorize=True,
         context=expected_context,
     ).asdict()
+
+
+def test_api_gateway_route_arn_parser():
+    """Check api gateway route or method arn parsing"""
+    arn = "arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/request"
+    details = parse_api_gateway_arn(arn)
+
+    assert details.arn == arn
+    assert details.region == "us-east-1"
+    assert details.aws_account_id == "123456789012"
+    assert details.api_id == "abcdef123"
+    assert details.stage == "test"
+    assert details.http_method == "GET"
+    assert details.resource == "request"
+
+    arn = "arn:aws:execute-api:us-west-2:123456789012:ymy8tbxw7b/*/GET"
+    details = parse_api_gateway_arn(arn)
+    assert details.resource == ""
+    assert details.arn == arn + "/"
