@@ -881,6 +881,7 @@ def test_api_gateway_proxy_event():
     assert request_context.operation_name is None
     assert identity.api_key is None
     assert identity.api_key_id is None
+    assert request_context.identity.client_cert.subject_dn == "www.example.com"
 
 
 def test_api_gateway_proxy_v2_event():
@@ -916,6 +917,7 @@ def test_api_gateway_proxy_v2_event():
     assert request_context.stage == event["requestContext"]["stage"]
     assert request_context.time == event["requestContext"]["time"]
     assert request_context.time_epoch == event["requestContext"]["timeEpoch"]
+    assert request_context.authentication.subject_dn == "www.example.com"
 
     assert event.body == event["body"]
     assert event.path_parameters == event["pathParameters"]
