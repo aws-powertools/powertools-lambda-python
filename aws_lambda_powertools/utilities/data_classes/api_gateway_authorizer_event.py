@@ -39,6 +39,16 @@ class APIGatewayRouteArn:
 
 
 def parse_api_gateway_arn(arn: str) -> APIGatewayRouteArn:
+    """Parses a gateway route arn as a APIGatewayRouteArn class
+
+    Parameters
+    ----------
+    arn : str
+        ARN string for a methodArn or a routeArn
+    Returns
+    -------
+    APIGatewayRouteArn
+    """
     arn_parts = arn.split(":")
     api_gateway_arn_parts = arn_parts[5].split("/")
     return APIGatewayRouteArn(
@@ -264,7 +274,7 @@ class APIGatewayAuthorizerRequestEvent(DictWrapper):
         return get_header_value(self.headers, name, default_value, case_sensitive)
 
 
-class APIGatewayAuthorizerSimpleResponse:
+class APIGatewayAuthorizerV2Response:
     """Api Gateway HTTP API V2 payload authorizer simple response helper
 
     Parameters

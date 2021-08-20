@@ -24,9 +24,9 @@ from aws_lambda_powertools.utilities.data_classes import (
 )
 from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
     APIGatewayAuthorizerRequestEvent,
-    APIGatewayAuthorizerSimpleResponse,
     APIGatewayAuthorizerTokenEvent,
     APIGatewayAuthorizerV2Event,
+    APIGatewayAuthorizerV2Response,
     parse_api_gateway_arn,
 )
 from aws_lambda_powertools.utilities.data_classes.appsync.scalar_types_utils import (
@@ -1588,9 +1588,9 @@ def test_api_gateway_authorizer_request_event():
 
 def test_api_gateway_authorizer_simple_response():
     """Check building API Gateway authorizer simple resource"""
-    assert {"isAuthorized": False} == APIGatewayAuthorizerSimpleResponse().asdict()
+    assert {"isAuthorized": False} == APIGatewayAuthorizerV2Response().asdict()
     expected_context = {"foo": "value"}
-    assert {"isAuthorized": True, "context": expected_context} == APIGatewayAuthorizerSimpleResponse(
+    assert {"isAuthorized": True, "context": expected_context} == APIGatewayAuthorizerV2Response(
         authorize=True,
         context=expected_context,
     ).asdict()
