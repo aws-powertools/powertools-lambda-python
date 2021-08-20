@@ -122,6 +122,42 @@ class BaseProxyEvent(DictWrapper):
         return get_header_value(self.headers, name, default_value, case_sensitive)
 
 
+class RequestContextClientCert(DictWrapper):
+    @property
+    def client_cert_pem(self) -> str:
+        """Client certificate pem"""
+        return self["clientCertPem"]
+
+    @property
+    def issuer_dn(self) -> str:
+        """Issuer Distinguished Name"""
+        return self["issuerDN"]
+
+    @property
+    def serial_number(self) -> str:
+        """Unique serial number for client cert"""
+        return self["serialNumber"]
+
+    @property
+    def subject_dn(self) -> str:
+        """Subject Distinguished Name"""
+        return self["subjectDN"]
+
+    @property
+    def validity_not_after(self) -> str:
+        """Date when the cert is no longer valid
+
+        eg: Aug  5 00:28:21 2120 GMT"""
+        return self["validity"]["notAfter"]
+
+    @property
+    def validity_not_before(self) -> str:
+        """Cert is not valid before this date
+
+        eg: Aug 29 00:28:21 2020 GMT"""
+        return self["validity"]["notBefore"]
+
+
 class RequestContextV2Http(DictWrapper):
     @property
     def method(self) -> str:
@@ -195,3 +231,9 @@ class BaseRequestContextV2(DictWrapper):
     def time_epoch(self) -> int:
         """The Epoch-formatted request time."""
         return self["requestContext"]["timeEpoch"]
+
+    @property
+    def authentication(self) -> Optional[RequestContextClientCert]:
+        """Optional when using mutual TLS authentication"""
+        client_cert = self["requestContext"].get("authentication", {}).get("clientCert")
+        return None if client_cert is None else RequestContextClientCert(client_cert)

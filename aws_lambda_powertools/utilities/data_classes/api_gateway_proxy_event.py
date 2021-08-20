@@ -1,6 +1,11 @@
 from typing import Any, Dict, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, BaseRequestContextV2, DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import (
+    BaseProxyEvent,
+    BaseRequestContextV2,
+    DictWrapper,
+    RequestContextClientCert,
+)
 
 
 class APIGatewayEventIdentity(DictWrapper):
@@ -77,6 +82,11 @@ class APIGatewayEventIdentity(DictWrapper):
     def user_arn(self) -> Optional[str]:
         """The Amazon Resource Name (ARN) of the effective user identified after authentication."""
         return self["requestContext"]["identity"].get("userArn")
+
+    @property
+    def client_cert(self) -> Optional[RequestContextClientCert]:
+        client_cert = self["requestContext"]["identity"].get("clientCert")
+        return None if client_cert is None else RequestContextClientCert(client_cert)
 
 
 class APIGatewayEventAuthorizer(DictWrapper):

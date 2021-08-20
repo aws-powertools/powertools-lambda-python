@@ -46,48 +46,8 @@ def parse_api_gateway_arn(arn: str) -> APIGatewayRouteArn:
     )
 
 
-class RequestContextV2AuthenticationClientCert(DictWrapper):
-    @property
-    def client_cert_pem(self) -> str:
-        """Client certificate pem"""
-        return self["clientCertPem"]
-
-    @property
-    def issuer_dn(self) -> str:
-        """Issuer Distinguished Name"""
-        return self["issuerDN"]
-
-    @property
-    def serial_number(self) -> str:
-        """Unique serial number for client cert"""
-        return self["serialNumber"]
-
-    @property
-    def subject_dn(self) -> str:
-        """Subject Distinguished Name"""
-        return self["subjectDN"]
-
-    @property
-    def validity_not_after(self) -> str:
-        """Date when the cert is no longer valid
-
-        eg: Aug  5 00:28:21 2120 GMT"""
-        return self["validity"]["notAfter"]
-
-    @property
-    def validity_not_before(self) -> str:
-        """Cert is not valid before this date
-
-        eg: Aug 29 00:28:21 2020 GMT"""
-        return self["validity"]["notBefore"]
-
-
 class RequestContextV2(BaseRequestContextV2):
-    @property
-    def authentication(self) -> Optional[RequestContextV2AuthenticationClientCert]:
-        """Optional when using mutual TLS authentication"""
-        client_cert = self["requestContext"].get("authentication", {}).get("clientCert")
-        return None if client_cert is None else RequestContextV2AuthenticationClientCert(client_cert)
+    ...
 
 
 class APIGatewayAuthorizerV2Event(DictWrapper):
@@ -215,6 +175,92 @@ class APIGatewayAuthorizerTokenEvent(DictWrapper):
     def parsed_arn(self) -> APIGatewayRouteArn:
         """Convenient property to return a parsed api gateway method arn"""
         return parse_api_gateway_arn(self.method_arn)
+
+
+class APIGatewayAuthorizerRequestEvent(DictWrapper):
+    """API Gateway Authorizer Request Event Format 1.0
+
+    Documentation:
+    -------------
+    - https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html
+    - https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html
+    """
+
+    @property
+    def version(self) -> str:
+        return self["version"]
+
+    @property
+    def get_type(self) -> str:
+        return self["type"]
+
+    @property
+    def method_arn(self) -> str:
+        return self["methodArn"]
+
+    @property
+    def parsed_arn(self) -> APIGatewayRouteArn:
+        return parse_api_gateway_arn(self.method_arn)
+
+    @property
+    def identity_source(self) -> str:
+        return self["identitySource"]
+
+    @property
+    def authorization_token(self) -> str:
+        return self["authorizationToken"]
+
+    @property
+    def resource(self) -> str:
+        return self["resource"]
+
+    @property
+    def path(self) -> str:
+        return self["path"]
+
+    @property
+    def http_method(self) -> str:
+        return self["httpMethod"]
+
+    @property
+    def headers(self) -> Dict[str, str]:
+        return self["headers"]
+
+    @property
+    def query_string_parameters(self) -> Dict[str, str]:
+        return self["queryStringParameters"]
+
+    @property
+    def path_parameters(self) -> Dict[str, str]:
+        return self["pathParameters"]
+
+    @property
+    def stage_variables(self) -> Dict[str, str]:
+        return self["stageVariables"]
+
+    @property
+    def request_context(self) -> Dict[str, str]:
+        return self["requestContext"]
+
+    def get_header_value(
+        self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
+    ) -> Optional[str]:
+        """Get header value by name
+
+        Parameters
+        ----------
+        name: str
+            Header name
+        default_value: str, optional
+            Default value if no value was found by name
+        case_sensitive: bool
+            Whether to use a case sensitive look up
+        Returns
+        -------
+        str, optional
+            Header value
+        """
+        return get_header_value(self.headers, name, default_value, case_sensitive)
 
 
 class APIGatewayAuthorizerSimpleResponse:
