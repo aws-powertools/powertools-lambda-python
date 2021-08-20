@@ -61,105 +61,6 @@ def parse_api_gateway_arn(arn: str) -> APIGatewayRouteArn:
     )
 
 
-class APIGatewayAuthorizerV2Event(DictWrapper):
-    """API Gateway Authorizer Event Format 2.0
-
-    Documentation:
-    -------------
-    - https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html
-    """
-
-    @property
-    def version(self) -> str:
-        """Event payload version should always be 2.0"""
-        return self["version"]
-
-    @property
-    def get_type(self) -> str:
-        """Event type should always be request"""
-        return self["type"]
-
-    @property
-    def route_arn(self) -> str:
-        """ARN of the route being called
-
-        eg: arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/request"""
-        return self["routeArn"]
-
-    @property
-    def parsed_arn(self) -> APIGatewayRouteArn:
-        """Convenient property to return a parsed api gateway route arn"""
-        return parse_api_gateway_arn(self.route_arn)
-
-    @property
-    def identity_source(self) -> Optional[List[str]]:
-        """The identity source for which authorization is requested.
-
-        For a REQUEST authorizer, this is optional. The value is a set of one or more mapping expressions of the
-        specified request parameters. The identity source can be headers, query string parameters, stage variables,
-        and context parameters.
-        """
-        return self.get("identitySource")
-
-    @property
-    def route_key(self) -> str:
-        """The route key for the route. For HTTP APIs, the route key can be either $default,
-        or a combination of an HTTP method and resource path, for example, GET /pets."""
-        return self["routeKey"]
-
-    @property
-    def raw_path(self) -> str:
-        return self["rawPath"]
-
-    @property
-    def raw_query_string(self) -> str:
-        return self["rawQueryString"]
-
-    @property
-    def cookies(self) -> List[str]:
-        return self["cookies"]
-
-    @property
-    def headers(self) -> Dict[str, str]:
-        return self["headers"]
-
-    @property
-    def query_string_parameters(self) -> Dict[str, str]:
-        return self["queryStringParameters"]
-
-    @property
-    def request_context(self) -> BaseRequestContextV2:
-        return BaseRequestContextV2(self._data)
-
-    @property
-    def path_parameters(self) -> Optional[Dict[str, str]]:
-        return self.get("pathParameters")
-
-    @property
-    def stage_variables(self) -> Optional[Dict[str, str]]:
-        return self.get("stageVariables")
-
-    def get_header_value(
-        self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
-    ) -> Optional[str]:
-        """Get header value by name
-
-        Parameters
-        ----------
-        name: str
-            Header name
-        default_value: str, optional
-            Default value if no value was found by name
-        case_sensitive: bool
-            Whether to use a case sensitive look up
-        Returns
-        -------
-        str, optional
-            Header value
-        """
-        return get_header_value(self.headers, name, default_value, case_sensitive)
-
-
 class APIGatewayAuthorizerTokenEvent(DictWrapper):
     """API Gateway Authorizer Token Event Format 1.0
 
@@ -274,7 +175,107 @@ class APIGatewayAuthorizerRequestEvent(DictWrapper):
         return get_header_value(self.headers, name, default_value, case_sensitive)
 
 
-class APIGatewayAuthorizerV2Response:
+class APIGatewayAuthorizerEventV2(DictWrapper):
+    """API Gateway Authorizer Event Format 2.0
+
+    Documentation:
+    -------------
+    - https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html
+    - https://aws.amazon.com/blogs/compute/introducing-iam-and-lambda-authorizers-for-amazon-api-gateway-http-apis/
+    """
+
+    @property
+    def version(self) -> str:
+        """Event payload version should always be 2.0"""
+        return self["version"]
+
+    @property
+    def get_type(self) -> str:
+        """Event type should always be request"""
+        return self["type"]
+
+    @property
+    def route_arn(self) -> str:
+        """ARN of the route being called
+
+        eg: arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/request"""
+        return self["routeArn"]
+
+    @property
+    def parsed_arn(self) -> APIGatewayRouteArn:
+        """Convenient property to return a parsed api gateway route arn"""
+        return parse_api_gateway_arn(self.route_arn)
+
+    @property
+    def identity_source(self) -> Optional[List[str]]:
+        """The identity source for which authorization is requested.
+
+        For a REQUEST authorizer, this is optional. The value is a set of one or more mapping expressions of the
+        specified request parameters. The identity source can be headers, query string parameters, stage variables,
+        and context parameters.
+        """
+        return self.get("identitySource")
+
+    @property
+    def route_key(self) -> str:
+        """The route key for the route. For HTTP APIs, the route key can be either $default,
+        or a combination of an HTTP method and resource path, for example, GET /pets."""
+        return self["routeKey"]
+
+    @property
+    def raw_path(self) -> str:
+        return self["rawPath"]
+
+    @property
+    def raw_query_string(self) -> str:
+        return self["rawQueryString"]
+
+    @property
+    def cookies(self) -> List[str]:
+        return self["cookies"]
+
+    @property
+    def headers(self) -> Dict[str, str]:
+        return self["headers"]
+
+    @property
+    def query_string_parameters(self) -> Dict[str, str]:
+        return self["queryStringParameters"]
+
+    @property
+    def request_context(self) -> BaseRequestContextV2:
+        return BaseRequestContextV2(self._data)
+
+    @property
+    def path_parameters(self) -> Optional[Dict[str, str]]:
+        return self.get("pathParameters")
+
+    @property
+    def stage_variables(self) -> Optional[Dict[str, str]]:
+        return self.get("stageVariables")
+
+    def get_header_value(
+        self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
+    ) -> Optional[str]:
+        """Get header value by name
+
+        Parameters
+        ----------
+        name: str
+            Header name
+        default_value: str, optional
+            Default value if no value was found by name
+        case_sensitive: bool
+            Whether to use a case sensitive look up
+        Returns
+        -------
+        str, optional
+            Header value
+        """
+        return get_header_value(self.headers, name, default_value, case_sensitive)
+
+
+class APIGatewayAuthorizerResponseV2:
     """Api Gateway HTTP API V2 payload authorizer simple response helper
 
     Parameters

@@ -59,11 +59,12 @@ Same example as above, but using the `event_source` decorator
 
 Event Source | Data_class
 ------------------------------------------------- | ---------------------------------------------------------------------------------
+[API Gateway Authorizer V2](#api-gateway-authorizer-v2) | `APIGatewayAuthorizerEventV2`
 [API Gateway Proxy](#api-gateway-proxy) | `APIGatewayProxyEvent`
 [API Gateway Proxy V2](#api-gateway-proxy-v2) | `APIGatewayProxyEventV2`
 [Application Load Balancer](#application-load-balancer) | `ALBEvent`
-[AppSync Resolver](#appsync-resolver) | `AppSyncResolverEvent`
 [AppSync Authorizer](#appsync-authorizer) | `AppSyncAuthorizerEvent`
+[AppSync Resolver](#appsync-resolver) | `AppSyncResolverEvent`
 [CloudWatch Logs](#cloudwatch-logs) | `CloudWatchLogsEvent`
 [CodePipeline Job Event](#codepipeline-job) | `CodePipelineJobEvent`
 [Cognito User Pool](#cognito-user-pool) | Multiple available under `cognito_user_pool_event`
@@ -80,6 +81,45 @@ Event Source | Data_class
 !!! info
     The examples provided below are far from exhaustive - the data classes themselves are designed to provide a form of
     documentation inherently (via autocompletion, types and docstrings).
+
+### API Gateway Authorizer V2
+
+> New in 1.20.0
+
+It is used for API Gateway HTTP API lambda authorizer payload version 2. See blog post
+[Introducing IAM and Lambda authorizers for Amazon API Gateway HTTP APIs](https://aws.amazon.com/blogs/compute/introducing-iam-and-lambda-authorizers-for-amazon-api-gateway-http-apis/){target="_blank"}
+or [Working with AWS Lambda authorizers for HTTP APIs](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html){target="_blank"}
+for more details
+
+Below is a simple example of an HTTP API lambda authorizer looking up user details by `x-token` header and using
+`APIGatewayAuthorizerResponseV2` to return the declined response when user is not found or authorized and include
+the user details in the request context.
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import event_source
+    from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
+        APIGatewayAuthorizerEventV2,
+        APIGatewayAuthorizerResponseV2,
+    )
+
+
+    def get_user_by_token(token):
+        ...
+
+
+    @event_source(data_class=APIGatewayAuthorizerEventV2)
+    def handler(event: APIGatewayAuthorizerEventV2, context):
+        user = get_user_by_token(event.get_header_value("x-token"))
+
+        if user is None:
+            # No user was found, so we return not authorized
+            return APIGatewayAuthorizerResponseV2().asdict()
+
+        # Found the user and setting the details in the context
+        return APIGatewayAuthorizerResponseV2(authorize=True, context=user).asdict()
+    ```
 
 ### API Gateway Proxy
 

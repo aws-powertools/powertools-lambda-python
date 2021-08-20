@@ -23,10 +23,10 @@ from aws_lambda_powertools.utilities.data_classes import (
     SQSEvent,
 )
 from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
+    APIGatewayAuthorizerEventV2,
     APIGatewayAuthorizerRequestEvent,
+    APIGatewayAuthorizerResponseV2,
     APIGatewayAuthorizerTokenEvent,
-    APIGatewayAuthorizerV2Event,
-    APIGatewayAuthorizerV2Response,
     parse_api_gateway_arn,
 )
 from aws_lambda_powertools.utilities.data_classes.appsync.scalar_types_utils import (
@@ -1469,7 +1469,7 @@ def test_appsync_authorizer_response():
 
 def test_api_gateway_authorizer_v2():
     """Check api gateway authorize event format v2.0"""
-    event = APIGatewayAuthorizerV2Event(load_event("apiGatewayAuthorizerV2Event.json"))
+    event = APIGatewayAuthorizerEventV2(load_event("apiGatewayAuthorizerV2Event.json"))
 
     assert event["version"] == event.version
     assert event["version"] == "2.0"
@@ -1513,7 +1513,7 @@ def test_api_gateway_authorizer_v2():
     assert event.get_header_value("missing") is None
 
     # Check for optionals
-    event_optionals = APIGatewayAuthorizerV2Event({"requestContext": {}})
+    event_optionals = APIGatewayAuthorizerEventV2({"requestContext": {}})
     assert event_optionals.identity_source is None
     assert event_optionals.request_context.authentication is None
     assert event_optionals.path_parameters is None
@@ -1588,9 +1588,9 @@ def test_api_gateway_authorizer_request_event():
 
 def test_api_gateway_authorizer_simple_response():
     """Check building API Gateway authorizer simple resource"""
-    assert {"isAuthorized": False} == APIGatewayAuthorizerV2Response().asdict()
+    assert {"isAuthorized": False} == APIGatewayAuthorizerResponseV2().asdict()
     expected_context = {"foo": "value"}
-    assert {"isAuthorized": True, "context": expected_context} == APIGatewayAuthorizerV2Response(
+    assert {"isAuthorized": True, "context": expected_context} == APIGatewayAuthorizerResponseV2(
         authorize=True,
         context=expected_context,
     ).asdict()
