@@ -326,8 +326,8 @@ class HttpVerb:
 class APIGatewayAuthorizerResponse:
     """Api Gateway HTTP API V1 payload or Rest api authorizer response helper
 
-    Based on: - https://github.com/awslabs/aws-apigateway-lambda-authorizer-blueprints/blob/master/blueprints/python
-    /api-gateway-authorizer-python.py
+    Based on: - https://github.com/awslabs/aws-apigateway-lambda-authorizer-blueprints/blob/\
+    master/blueprints/python/api-gateway-authorizer-python.py
     """
 
     version = "2012-10-17"
@@ -364,8 +364,8 @@ class APIGatewayAuthorizerResponse:
             See https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_resource.html for more
             details.
         stage : str
-            The default stage to be used in the policy. Replace the placeholder value with a default stage to be
-            used in the policy. Beware of using '*' since it will not simply mean any stage, because stars will
+            The default stage to be used in the policy.
+            Beware of using '*' since it will not simply mean any stage, because stars will
             greedily expand over '/' or other separators.
             See https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_resource.html for more
             details.
@@ -379,12 +379,6 @@ class APIGatewayAuthorizerResponse:
         self.api_id = api_id
         self.stage = stage
         self.context = context
-
-        """these are the internal lists of allowed and denied methods. These are lists
-        of objects and each object has 2 properties: A resource ARN and a nullable
-        conditions statement.
-        the build method processes these lists and generates the appropriate
-        statements for the final policy"""
         self._allow_methods: List[Dict] = []
         self._deny_methods: List[Dict] = []
 
