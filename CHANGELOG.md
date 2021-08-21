@@ -21,6 +21,8 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 * **data-classes:** make authorizer concise; use enum ([#630](https://github.com/awslabs/aws-lambda-powertools-python/issues/630))
 * **feature-flags:** correct link and json examples ([#605](https://github.com/awslabs/aws-lambda-powertools-python/issues/605))
+* **data-class:** fix invalid syntax in new AppSync Authorizer
+* **api-gateway:** add new API mapping support
 
 ### Features
 
