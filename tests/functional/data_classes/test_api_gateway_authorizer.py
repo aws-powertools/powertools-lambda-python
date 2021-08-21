@@ -13,7 +13,7 @@ def builder():
 
 def test_authorizer_response_no_statement(builder: APIGatewayAuthorizerResponse):
     # GIVEN a builder with no statements
-    with pytest.raises(NameError) as ex:
+    with pytest.raises(ValueError) as ex:
         # WHEN calling build
         builder.asdict()
 
@@ -22,7 +22,7 @@ def test_authorizer_response_no_statement(builder: APIGatewayAuthorizerResponse)
 
 
 def test_authorizer_response_invalid_verb(builder: APIGatewayAuthorizerResponse):
-    with pytest.raises(NameError) as ex:
+    with pytest.raises(ValueError) as ex:
         # GIVEN a invalid http_method
         # WHEN calling deny_method
         builder.deny_method("INVALID", "foo")
@@ -32,7 +32,7 @@ def test_authorizer_response_invalid_verb(builder: APIGatewayAuthorizerResponse)
 
 
 def test_authorizer_response_invalid_resource(builder: APIGatewayAuthorizerResponse):
-    with pytest.raises(NameError) as ex:
+    with pytest.raises(ValueError) as ex:
         # GIVEN a invalid resource path "$"
         # WHEN calling deny_method
         builder.deny_method(HttpVerb.GET, "$")
@@ -112,7 +112,7 @@ def test_authorizer_response_deny_method(builder: APIGatewayAuthorizerResponse):
 
 
 def test_authorizer_response_allow_method_with_conditions(builder: APIGatewayAuthorizerResponse):
-    builder.allow_method_with_conditions(
+    builder.allow_method(
         HttpVerb.POST,
         "/foo",
         [
@@ -136,7 +136,7 @@ def test_authorizer_response_allow_method_with_conditions(builder: APIGatewayAut
 
 
 def test_authorizer_response_deny_method_with_conditions(builder: APIGatewayAuthorizerResponse):
-    builder.deny_method_with_conditions(
+    builder.deny_method(
         HttpVerb.POST,
         "/foo",
         [
