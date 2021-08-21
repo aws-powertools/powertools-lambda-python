@@ -59,11 +59,13 @@ Same example as above, but using the `event_source` decorator
 
 Event Source | Data_class
 ------------------------------------------------- | ---------------------------------------------------------------------------------
+[API Gateway Authorizer](#api-gateway-authorizer) | `APIGatewayAuthorizerRequestEvent`
+[API Gateway Authorizer V2](#api-gateway-authorizer-v2) | `APIGatewayAuthorizerEventV2`
 [API Gateway Proxy](#api-gateway-proxy) | `APIGatewayProxyEvent`
 [API Gateway Proxy V2](#api-gateway-proxy-v2) | `APIGatewayProxyEventV2`
 [Application Load Balancer](#application-load-balancer) | `ALBEvent`
-[AppSync Resolver](#appsync-resolver) | `AppSyncResolverEvent`
 [AppSync Authorizer](#appsync-authorizer) | `AppSyncAuthorizerEvent`
+[AppSync Resolver](#appsync-resolver) | `AppSyncResolverEvent`
 [CloudWatch Logs](#cloudwatch-logs) | `CloudWatchLogsEvent`
 [CodePipeline Job Event](#codepipeline-job) | `CodePipelineJobEvent`
 [Cognito User Pool](#cognito-user-pool) | Multiple available under `cognito_user_pool_event`
@@ -80,6 +82,129 @@ Event Source | Data_class
 !!! info
     The examples provided below are far from exhaustive - the data classes themselves are designed to provide a form of
     documentation inherently (via autocompletion, types and docstrings).
+
+### API Gateway Authorizer
+
+> New in 1.20.0
+
+It is used for API Gateway Rest API lambda authorizer payload. See docs on
+[Use API Gateway Lambda authorizers](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html){target="_blank"}
+for more details. Use `APIGatewayAuthorizerRequestEvent` for type "REQUEST" and `APIGatewayAuthorizerTokenEvent` for
+type "TOKEN".
+
+Below is 2 examples of a Rest API lambda authorizer. One looking up user details by `Authorization` header and using
+`APIGatewayAuthorizerResponse` to return the declined response when user is not found or authorized and include
+the user details in the request context and full access for admin users. And another using
+`APIGatewayAuthorizerTokenEvent` to get the `authorization_token`.
+
+=== "app_type_request.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import event_source
+    from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
+        APIGatewayAuthorizerRequestEvent,
+        APIGatewayAuthorizerResponse,
+        HttpVerb,
+    )
+    from secrets import compare_digest
+
+
+    def get_user_by_token(token):
+        if compare_digest(token, "admin-foo"):
+            return {"isAdmin": True, "name": "Admin"}
+        elif compare_digest(token, "regular-foo"):
+            return {"name": "Joe"}
+        else:
+            return None
+
+
+    @event_source(data_class=APIGatewayAuthorizerRequestEvent)
+    def handler(event: APIGatewayAuthorizerRequestEvent, context):
+        user = get_user_by_token(event.get_header_value("Authorization"))
+
+        # parse the `methodArn` as an `APIGatewayRouteArn`
+        arn = event.parsed_arn
+        # Create the response builder from parts of the `methodArn`
+        builder = APIGatewayAuthorizerResponse("user", arn.region, arn.aws_account_id, arn.api_id, arn.stage)
+
+        if user is None:
+            # No user was found, so we return not authorized
+            builder.deny_all_routes()
+            return builder.asdict()
+
+        # Found the user and setting the details in the context
+        builder.context = user
+
+        # Conditional IAM Policy
+        if user.get("isAdmin", False):
+            builder.allow_all_routes()
+        else:
+            builder.allow_route(HttpVerb.GET, "/user-profile")
+
+        return builder.asdict()
+    ```
+=== "app_type_token.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import event_source
+    from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
+        APIGatewayAuthorizerTokenEvent,
+        APIGatewayAuthorizerResponse,
+    )
+
+
+    @event_source(data_class=APIGatewayAuthorizerTokenEvent)
+    def handler(event: APIGatewayAuthorizerTokenEvent, context):
+        arn = event.parsed_arn
+        builder = APIGatewayAuthorizerResponse("user", arn.region, arn.aws_account_id, arn.api_id, arn.stage)
+        if event.authorization_token == "42":
+            builder.allow_all_methods()
+        else:
+            builder.deny_all_methods()
+        return builder.asdict()
+    ```
+
+### API Gateway Authorizer V2
+
+> New in 1.20.0
+
+It is used for API Gateway HTTP API lambda authorizer payload version 2. See blog post
+[Introducing IAM and Lambda authorizers for Amazon API Gateway HTTP APIs](https://aws.amazon.com/blogs/compute/introducing-iam-and-lambda-authorizers-for-amazon-api-gateway-http-apis/){target="_blank"}
+or [Working with AWS Lambda authorizers for HTTP APIs](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html){target="_blank"}
+for more details
+
+Below is a simple example of an HTTP API lambda authorizer looking up user details by `x-token` header and using
+`APIGatewayAuthorizerResponseV2` to return the declined response when user is not found or authorized and include
+the user details in the request context.
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import event_source
+    from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
+        APIGatewayAuthorizerEventV2,
+        APIGatewayAuthorizerResponseV2,
+    )
+    from secrets import compare_digest
+
+
+    def get_user_by_token(token):
+        if compare_digest(token, "Foo"):
+            return {"name": "Foo"}
+        return None
+
+
+    @event_source(data_class=APIGatewayAuthorizerEventV2)
+    def handler(event: APIGatewayAuthorizerEventV2, context):
+        user = get_user_by_token(event.get_header_value("x-token"))
+
+        if user is None:
+            # No user was found, so we return not authorized
+            return APIGatewayAuthorizerResponseV2().asdict()
+
+        # Found the user and setting the details in the context
+        return APIGatewayAuthorizerResponseV2(authorize=True, context=user).asdict()
+    ```
 
 ### API Gateway Proxy
 
@@ -129,7 +254,7 @@ Is it used for Application load balancer event.
             do_something_with(event.json_body, event.query_string_parameters)
     ```
 
-## AppSync Authorizer
+### AppSync Authorizer
 
 > New in 1.20.0
 

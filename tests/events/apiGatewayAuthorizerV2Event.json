@@ -1,15 +1,17 @@
 {
   "version": "2.0",
-  "routeKey": "$default",
-  "rawPath": "/my/path",
+  "type": "REQUEST",
+  "routeArn": "arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/request",
+  "identitySource": ["user1", "123"],
+  "routeKey": "GET /merchants",
+  "rawPath": "/merchants",
   "rawQueryString": "parameter1=value1&parameter1=value2&parameter2=value",
-  "cookies": [
-    "cookie1",
-    "cookie2"
-  ],
+  "cookies": ["cookie1", "cookie2"],
   "headers": {
+    "x-amzn-trace-id": "Root=1-611cc4a7-0746ebee281cfd967db97b64",
     "Header1": "value1",
-    "Header2": "value1,value2"
+    "Header2": "value2",
+    "Authorization": "value"
   },
   "queryStringParameters": {
     "parameter1": "value1,value2",
@@ -30,40 +32,21 @@
         }
       }
     },
-    "authorizer": {
-      "jwt": {
-        "claims": {
-          "claim1": "value1",
-          "claim2": "value2"
-        },
-        "scopes": [
-          "scope1",
-          "scope2"
-        ]
-      }
-    },
     "domainName": "id.execute-api.us-east-1.amazonaws.com",
     "domainPrefix": "id",
     "http": {
       "method": "POST",
-      "path": "/my/path",
+      "path": "/merchants",
       "protocol": "HTTP/1.1",
-      "sourceIp": "192.168.0.1/32",
+      "sourceIp": "IP",
       "userAgent": "agent"
     },
     "requestId": "id",
-    "routeKey": "$default",
+    "routeKey": "GET /merchants",
     "stage": "$default",
     "time": "12/Mar/2020:19:03:58 +0000",
     "timeEpoch": 1583348638390
   },
-  "body": "{\"message\": \"hello world\", \"username\": \"tom\"}",
-  "pathParameters": {
-    "parameter1": "value1"
-  },
-  "isBase64Encoded": false,
-  "stageVariables": {
-    "stageVariable1": "value1",
-    "stageVariable2": "value2"
-  }
+  "pathParameters": { "parameter1": "value1" },
+  "stageVariables": { "stageVariable1": "value1", "stageVariable2": "value2" }
 }
