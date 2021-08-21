@@ -1088,6 +1088,7 @@ def test_kinesis_stream_event():
     assert kinesis.partition_key == "1"
     assert kinesis.sequence_number == "49590338271490256608559692538361571095921575989136588898"
 
+    assert kinesis.data_as_bytes() == b"Hello, this is a test."
     assert kinesis.data_as_text() == "Hello, this is a test."
 
 
