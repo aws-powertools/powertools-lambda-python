@@ -15,7 +15,7 @@ def test_authorizer_response_no_statement(builder: APIGatewayAuthorizerResponse)
     # GIVEN a builder with no statements
     with pytest.raises(NameError) as ex:
         # WHEN calling build
-        builder.build()
+        builder.asdict()
 
     # THEN raise a name error for not statements
     assert str(ex.value) == "No statements defined for the policy"
@@ -44,7 +44,7 @@ def test_authorizer_response_invalid_resource(builder: APIGatewayAuthorizerRespo
 def test_authorizer_response_allow_all_methods_with_context():
     builder = APIGatewayAuthorizerResponse("foo", "us-west-1", "123456789", "fantom", "dev", {"name": "Foo"})
     builder.allow_all_methods()
-    assert builder.build() == {
+    assert builder.asdict() == {
         "principalId": "foo",
         "policyDocument": {
             "Version": "2012-10-17",
@@ -62,7 +62,7 @@ def test_authorizer_response_allow_all_methods_with_context():
 
 def test_authorizer_response_deny_all_methods(builder: APIGatewayAuthorizerResponse):
     builder.deny_all_methods()
-    assert builder.build() == {
+    assert builder.asdict() == {
         "principalId": "foo",
         "policyDocument": {
             "Version": "2012-10-17",
@@ -79,7 +79,7 @@ def test_authorizer_response_deny_all_methods(builder: APIGatewayAuthorizerRespo
 
 def test_authorizer_response_allow_method(builder: APIGatewayAuthorizerResponse):
     builder.allow_method(HttpVerb.GET, "/foo")
-    assert builder.build() == {
+    assert builder.asdict() == {
         "policyDocument": {
             "Version": "2012-10-17",
             "Statement": [
@@ -96,7 +96,7 @@ def test_authorizer_response_allow_method(builder: APIGatewayAuthorizerResponse)
 
 def test_authorizer_response_deny_method(builder: APIGatewayAuthorizerResponse):
     builder.deny_method(HttpVerb.PUT, "foo")
-    assert builder.build() == {
+    assert builder.asdict() == {
         "principalId": "foo",
         "policyDocument": {
             "Version": "2012-10-17",
@@ -119,7 +119,7 @@ def test_authorizer_response_allow_method_with_conditions(builder: APIGatewayAut
             {"StringEquals": {"method.request.header.Content-Type": "text/html"}},
         ],
     )
-    assert builder.build() == {
+    assert builder.asdict() == {
         "principalId": "foo",
         "policyDocument": {
             "Version": "2012-10-17",
@@ -143,7 +143,7 @@ def test_authorizer_response_deny_method_with_conditions(builder: APIGatewayAuth
             {"StringEquals": {"method.request.header.Content-Type": "application/json"}},
         ],
     )
-    assert builder.build() == {
+    assert builder.asdict() == {
         "principalId": "foo",
         "policyDocument": {
             "Version": "2012-10-17",

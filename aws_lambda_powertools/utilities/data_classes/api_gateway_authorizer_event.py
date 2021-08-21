@@ -467,7 +467,7 @@ class APIGatewayAuthorizerResponse:
         conditions here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html#Condition"""
         self._add_method("Deny", verb, resource, conditions)
 
-    def build(self) -> Dict[str, Any]:
+    def asdict(self) -> Dict[str, Any]:
         """Generates the policy document based on the internal lists of allowed and denied
         conditions. This will generate a policy with two main statements for the effect:
         one statement for Allow and one statement for Deny.
