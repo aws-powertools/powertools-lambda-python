@@ -1,3 +1,4 @@
+import re
 from typing import Any, Dict, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import (
@@ -304,6 +305,183 @@ class APIGatewayAuthorizerResponseV2:
     def asdict(self) -> dict:
         """Return the response as a dict"""
         response: Dict = {"isAuthorized": self.authorize}
+
+        if self.context:
+            response["context"] = self.context
+
+        return response
+
+
+class HttpVerb:
+    GET = "GET"
+    POST = "POST"
+    PUT = "PUT"
+    PATCH = "PATCH"
+    HEAD = "HEAD"
+    DELETE = "DELETE"
+    OPTIONS = "OPTIONS"
+    ALL = "*"
+
+
+class APIGatewayAuthorizerResponse:
+    """Api Gateway HTTP API V1 payload or Rest api authorizer response helper
+
+    Based on: - https://github.com/awslabs/aws-apigateway-lambda-authorizer-blueprints/blob/master/blueprints/python
+    /api-gateway-authorizer-python.py
+    """
+
+    version = "2012-10-17"
+    """The policy version used for the evaluation. This should always be '2012-10-17'"""
+
+    path_regex = r"^[/.a-zA-Z0-9-\*]+$"
+    """The regular expression used to validate resource paths for the policy"""
+
+    def __init__(
+        self,
+        principal_id: str,
+        region: str,
+        aws_account_id: str,
+        api_id: str,
+        stage: str,
+        context: Optional[Dict] = None,
+    ):
+        """
+        Parameters
+        ----------
+        principal_id : str
+            The principal used for the policy, this should be a unique identifier for the end user
+        region : str
+            AWS Regions. Beware of using '*' since it will not simply mean any region, because stars will greedily
+            expand over '/' or other separators.
+            See https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_resource.html for more
+            details.
+        aws_account_id : str
+            The AWS account id the policy will be generated for. This is used to create the method ARNs.
+        api_id : str
+            The API Gateway API id to be used in the policy.
+            Beware of using '*' since it will not simply mean any API Gateway API id, because stars will greedily
+            expand over '/' or other separators.
+            See https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_resource.html for more
+            details.
+        stage : str
+            The default stage to be used in the policy. Replace the placeholder value with a default stage to be
+            used in the policy. Beware of using '*' since it will not simply mean any stage, because stars will
+            greedily expand over '/' or other separators.
+            See https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_resource.html for more
+            details.
+        context : Dict, optional
+            Optional, context.
+            Note: only names of type string and values of type int, string or boolean are supported
+        """
+        self.principal_id = principal_id
+        self.region = region
+        self.aws_account_id = aws_account_id
+        self.api_id = api_id
+        self.stage = stage
+        self.context = context
+
+        """these are the internal lists of allowed and denied methods. These are lists
+        of objects and each object has 2 properties: A resource ARN and a nullable
+        conditions statement.
+        the build method processes these lists and generates the appropriate
+        statements for the final policy"""
+        self._allow_methods: List[Dict] = []
+        self._deny_methods: List[Dict] = []
+
+    def _add_method(self, effect: str, verb: str, resource: str, conditions: List[Dict]):
+        """Adds a method to the internal lists of allowed or denied methods. Each object in
+        the internal list contains a resource ARN and a condition statement. The condition
+        statement can be null."""
+        if verb != "*" and not hasattr(HttpVerb, verb):
+            raise NameError(f"Invalid HTTP verb {verb}. Allowed verbs in HttpVerb class")
+
+        resource_pattern = re.compile(self.path_regex)
+        if not resource_pattern.match(resource):
+            raise NameError(f"Invalid resource path: {resource}. Path should match {self.path_regex}")
+        if resource[:1] == "/":
+            resource = resource[1:]
+
+        resource_arn = APIGatewayRouteArn(self.region, self.aws_account_id, self.api_id, self.stage, verb, resource).arn
+
+        method = {"resourceArn": resource_arn, "conditions": conditions}
+        if effect.lower() == "allow":
+            self._allow_methods.append(method)
+        else:  # deny
+            self._deny_methods.append(method)
+
+    @staticmethod
+    def _get_empty_statement(effect: str) -> Dict[str, Any]:
+        """Returns an empty statement object prepopulated with the correct action and the desired effect."""
+        return {"Action": "execute-api:Invoke", "Effect": effect.capitalize(), "Resource": []}
+
+    def _get_statement_for_effect(self, effect: str, methods: List) -> List:
+        """This function loops over an array of objects containing a resourceArn and
+        conditions statement and generates the array of statements for the policy."""
+        if len(methods) == 0:
+            return []
+
+        statements = []
+
+        statement = self._get_empty_statement(effect)
+        for method in methods:
+            if method["conditions"] is None or len(method["conditions"]) == 0:
+                statement["Resource"].append(method["resourceArn"])
+            else:
+                conditional_statement = self._get_empty_statement(effect)
+                conditional_statement["Resource"].append(method["resourceArn"])
+                conditional_statement["Condition"] = method["conditions"]
+                statements.append(conditional_statement)
+
+        if len(statement["Resource"]) > 0:
+            statements.append(statement)
+
+        return statements
+
+    def allow_all_methods(self):
+        """Adds a '*' allow to the policy to authorize access to all methods of an API"""
+        self._add_method("Allow", HttpVerb.ALL, "*", [])
+
+    def deny_all_methods(self):
+        """Adds a '*' allow to the policy to deny access to all methods of an API"""
+        self._add_method("Deny", HttpVerb.ALL, "*", [])
+
+    def allow_method(self, verb, resource: str):
+        """Adds an API Gateway method (Http verb + Resource path) to the list of allowed
+        methods for the policy"""
+        self._add_method("Allow", verb, resource, [])
+
+    def deny_method(self, verb: str, resource: str):
+        """Adds an API Gateway method (Http verb + Resource path) to the list of denied
+        methods for the policy"""
+        self._add_method("Deny", verb, resource, [])
+
+    def allow_method_with_conditions(self, verb: str, resource: str, conditions: List[Dict]):
+        """Adds an API Gateway method (Http verb + Resource path) to the list of allowed
+        methods and includes a condition for the policy statement. More on AWS policy
+        conditions here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html#Condition"""
+        self._add_method("Allow", verb, resource, conditions)
+
+    def deny_method_with_conditions(self, verb: str, resource: str, conditions: List[Dict]):
+        """Adds an API Gateway method (Http verb + Resource path) to the list of denied
+        methods and includes a condition for the policy statement. More on AWS policy
+        conditions here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html#Condition"""
+        self._add_method("Deny", verb, resource, conditions)
+
+    def build(self) -> Dict[str, Any]:
+        """Generates the policy document based on the internal lists of allowed and denied
+        conditions. This will generate a policy with two main statements for the effect:
+        one statement for Allow and one statement for Deny.
+        Methods that includes conditions will have their own statement in the policy."""
+        if len(self._allow_methods) == 0 and len(self._deny_methods) == 0:
+            raise NameError("No statements defined for the policy")
+
+        response: Dict[str, Any] = {
+            "principalId": self.principal_id,
+            "policyDocument": {"Version": self.version, "Statement": []},
+        }
+
+        response["policyDocument"]["Statement"].extend(self._get_statement_for_effect("Allow", self._allow_methods))
+        response["policyDocument"]["Statement"].extend(self._get_statement_for_effect("Deny", self._deny_methods))
 
         if self.context:
             response["context"] = self.context
