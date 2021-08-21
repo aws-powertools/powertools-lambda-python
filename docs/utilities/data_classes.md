@@ -87,19 +87,17 @@ Event Source | Data_class
 
 > New in 1.20.0
 
-It is used for API Gateway Rest API lambda authorizer payload. See docs on
-[Use API Gateway Lambda authorizers](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html){target="_blank"}
-for more details. Use `APIGatewayAuthorizerRequestEvent` for type "REQUEST" and `APIGatewayAuthorizerTokenEvent` for
-type "TOKEN".
+It is used for [API Gateway Rest API Lambda Authorizer payload](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html){target="_blank"}.
 
-Below is 2 examples of a Rest API lambda authorizer. One looking up user details by `Authorization` header and using
-`APIGatewayAuthorizerResponse` to return the declined response when user is not found or authorized and include
-the user details in the request context and full access for admin users. And another using
-`APIGatewayAuthorizerTokenEvent` to get the `authorization_token`.
+Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayAuthorizerTokenEvent`** for type `TOKEN`.
 
 === "app_type_request.py"
 
-    ```python
+	This example uses the `APIGatewayAuthorizerResponse` to decline a given request if the user is not found.
+
+	When the user is found, it includes the user details in the request context that will be available to the back-end, and returns a full access policy for admin users.
+
+    ```python hl_lines="2-5 26-31 36-37 40 44 46"
     from aws_lambda_powertools.utilities.data_classes import event_source
     from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
         APIGatewayAuthorizerRequestEvent,
@@ -125,27 +123,33 @@ the user details in the request context and full access for admin users. And ano
         # parse the `methodArn` as an `APIGatewayRouteArn`
         arn = event.parsed_arn
         # Create the response builder from parts of the `methodArn`
-        builder = APIGatewayAuthorizerResponse("user", arn.region, arn.aws_account_id, arn.api_id, arn.stage)
+        policy = APIGatewayAuthorizerResponse(
+            principal_id="user",
+            region=arn.region,
+            aws_account_id=arn.aws_account_id,
+            api_id=arn.api_id,
+            stage=arn.stage
+        )
 
         if user is None:
             # No user was found, so we return not authorized
-            builder.deny_all_routes()
-            return builder.asdict()
+            policy.deny_all_routes()
+            return policy.asdict()
 
         # Found the user and setting the details in the context
-        builder.context = user
+        policy.context = user
 
         # Conditional IAM Policy
         if user.get("isAdmin", False):
-            builder.allow_all_routes()
+            policy.allow_all_routes()
         else:
-            builder.allow_route(HttpVerb.GET, "/user-profile")
+            policy.allow_route(HttpVerb.GET, "/user-profile")
 
-        return builder.asdict()
+        return policy.asdict()
     ```
 === "app_type_token.py"
 
-    ```python
+    ```python hl_lines="2-5 12-18 21 23-24"
     from aws_lambda_powertools.utilities.data_classes import event_source
     from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
         APIGatewayAuthorizerTokenEvent,
@@ -156,30 +160,34 @@ the user details in the request context and full access for admin users. And ano
     @event_source(data_class=APIGatewayAuthorizerTokenEvent)
     def handler(event: APIGatewayAuthorizerTokenEvent, context):
         arn = event.parsed_arn
-        builder = APIGatewayAuthorizerResponse("user", arn.region, arn.aws_account_id, arn.api_id, arn.stage)
+
+        policy = APIGatewayAuthorizerResponse(
+            principal_id="user",
+            region=arn.region,
+            aws_account_id=arn.aws_account_id,
+            api_id=arn.api_id,
+            stage=arn.stage
+        )
+
         if event.authorization_token == "42":
-            builder.allow_all_methods()
+            policy.allow_all_routes()
         else:
-            builder.deny_all_methods()
-        return builder.asdict()
+            policy.deny_all_routes()
+        return policy.asdict()
     ```
 
 ### API Gateway Authorizer V2
 
 > New in 1.20.0
 
-It is used for API Gateway HTTP API lambda authorizer payload version 2. See blog post
-[Introducing IAM and Lambda authorizers for Amazon API Gateway HTTP APIs](https://aws.amazon.com/blogs/compute/introducing-iam-and-lambda-authorizers-for-amazon-api-gateway-http-apis/){target="_blank"}
-or [Working with AWS Lambda authorizers for HTTP APIs](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html){target="_blank"}
-for more details
-
-Below is a simple example of an HTTP API lambda authorizer looking up user details by `x-token` header and using
-`APIGatewayAuthorizerResponseV2` to return the declined response when user is not found or authorized and include
-the user details in the request context.
+It is used for [API Gateway HTTP API Lambda Authorizer payload version 2](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html){target="_blank"}.
+See also [this blog post](https://aws.amazon.com/blogs/compute/introducing-iam-and-lambda-authorizers-for-amazon-api-gateway-http-apis/){target="_blank"} for more details.
 
 === "app.py"
 
-    ```python
+	This example looks up user details via `x-token` header. It uses `APIGatewayAuthorizerResponseV2` to return a deny policy when user is not found or authorized.
+
+    ```python hl_lines="2-5 21 24"
     from aws_lambda_powertools.utilities.data_classes import event_source
     from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
         APIGatewayAuthorizerEventV2,
