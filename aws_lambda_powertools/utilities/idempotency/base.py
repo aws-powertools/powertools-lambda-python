@@ -30,7 +30,7 @@ class IdempotencyHandler:
         self,
         function: Callable,
         function_payload: Any,
-        idempotency_config: IdempotencyConfig,
+        config: IdempotencyConfig,
         persistence_store: BasePersistenceLayer,
         function_args: Optional[Tuple] = None,
         function_kwargs: Optional[Dict] = None,
@@ -42,7 +42,7 @@ class IdempotencyHandler:
         ----------
         function_payload: Any
             JSON Serializable payload to be hashed
-        idempotency_config: IdempotencyConfig
+        config: IdempotencyConfig
             Idempotency Configuration
         persistence_store : BasePersistenceLayer
             Instance of persistence layer to store idempotency records
@@ -56,7 +56,7 @@ class IdempotencyHandler:
         self.fn_args = function_args
         self.fn_kwargs = function_kwargs
 
-        persistence_store.configure(idempotency_config)
+        persistence_store.configure(config)
         self.persistence_store = persistence_store
 
     def handle(self) -> Any:

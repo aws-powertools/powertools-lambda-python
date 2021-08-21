@@ -61,7 +61,7 @@ def idempotent(
     idempotency_handler = IdempotencyHandler(
         function=handler,
         function_payload=event,
-        idempotency_config=config,
+        config=config,
         persistence_store=persistence_store,
         function_args=args,
         function_kwargs=kwargs,
@@ -133,7 +133,7 @@ def idempotent_function(
         idempotency_handler = IdempotencyHandler(
             function=function,
             function_payload=payload,
-            idempotency_config=config,
+            config=config,
             persistence_store=persistence_store,
             function_args=args,
             function_kwargs=kwargs,
