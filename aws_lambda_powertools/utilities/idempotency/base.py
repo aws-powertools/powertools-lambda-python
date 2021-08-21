@@ -72,7 +72,7 @@ class IdempotencyHandler:
         # IdempotencyInconsistentStateError can happen under rare but expected cases
         # when persistent state changes in the small time between put & get requests.
         # In most cases we can retry successfully on this exception.
-        for i in range(MAX_RETRIES + 1):
+        for i in range(MAX_RETRIES + 1):  # pragma: no cover
             try:
                 return self._process_idempotency()
             except IdempotencyInconsistentStateError:
