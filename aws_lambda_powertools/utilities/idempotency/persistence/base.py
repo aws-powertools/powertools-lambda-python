@@ -6,6 +6,7 @@ import datetime
 import hashlib
 import json
 import logging
+import os
 import warnings
 from abc import ABC, abstractmethod
 from types import MappingProxyType
@@ -13,6 +14,7 @@ from typing import Any, Dict, Optional
 
 import jmespath
 
+from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.cache_dict import LRUDict
 from aws_lambda_powertools.shared.jmespath_utils import PowertoolsFunctions
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -23,7 +25,6 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyKeyError,
     IdempotencyValidationError,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
@@ -153,16 +154,14 @@ class BasePersistenceLayer(ABC):
             self._cache = LRUDict(max_items=config.local_cache_max_items)
         self.hash_function = getattr(hashlib, config.hash_function)
 
-    def _get_hashed_idempotency_key(self, event: Dict[str, Any], context: LambdaContext) -> str:
+    def _get_hashed_idempotency_key(self, data: Dict[str, Any]) -> str:
         """
-        Extract data from lambda event using event key jmespath, and return a hashed representation
+        Extract idempotency key and return a hashed representation
 
         Parameters
         ----------
-        event: Dict[str, Any]
-            Lambda event
-        context: LambdaContext
-            Lambda context
+        data: Dict[str, Any]
+            Incoming data
 
         Returns
         -------
@@ -170,18 +169,17 @@ class BasePersistenceLayer(ABC):
             Hashed representation of the data extracted by the jmespath expression
 
         """
-        data = event
-
         if self.event_key_jmespath:
-            data = self.event_key_compiled_jmespath.search(event, options=jmespath.Options(**self.jmespath_options))
+            data = self.event_key_compiled_jmespath.search(data, options=jmespath.Options(**self.jmespath_options))
 
-        if self.is_missing_idempotency_key(data):
+        if self.is_missing_idempotency_key(data=data):
             if self.raise_on_no_idempotency_key:
                 raise IdempotencyKeyError("No data found to create a hashed idempotency_key")
             warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}")
 
-        generated_hash = self._generate_hash(data)
-        return f"{context.function_name}#{generated_hash}"
+        generated_hash = self._generate_hash(data=data)
+        function_name = os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, "test-func")
+        return f"{function_name}#{generated_hash}"
 
     @staticmethod
     def is_missing_idempotency_key(data) -> bool:
@@ -189,14 +187,14 @@ class BasePersistenceLayer(ABC):
             return all(x is None for x in data)
         return not data
 
-    def _get_hashed_payload(self, lambda_event: Dict[str, Any]) -> str:
+    def _get_hashed_payload(self, data: Dict[str, Any]) -> str:
         """
-        Extract data from lambda event using validation key jmespath, and return a hashed representation
+        Extract payload using validation key jmespath and return a hashed representation
 
         Parameters
         ----------
-        lambda_event: Dict[str, Any]
-            Lambda event
+        data: Dict[str, Any]
+            Payload
 
         Returns
         -------
@@ -206,8 +204,8 @@ class BasePersistenceLayer(ABC):
         """
         if not self.payload_validation_enabled:
             return ""
-        data = self.validation_key_jmespath.search(lambda_event)
-        return self._generate_hash(data)
+        data = self.validation_key_jmespath.search(data)
+        return self._generate_hash(data=data)
 
     def _generate_hash(self, data: Any) -> str:
         """
@@ -228,26 +226,26 @@ class BasePersistenceLayer(ABC):
         hashed_data = self.hash_function(json.dumps(data, cls=Encoder).encode())
         return hashed_data.hexdigest()
 
-    def _validate_payload(self, lambda_event: Dict[str, Any], data_record: DataRecord) -> None:
+    def _validate_payload(self, data: Dict[str, Any], data_record: DataRecord) -> None:
         """
-        Validate that the hashed payload matches in the lambda event and stored data record
+        Validate that the hashed payload matches data provided and stored data record
 
         Parameters
         ----------
-        lambda_event: Dict[str, Any]
-            Lambda event
+        data: Dict[str, Any]
+            Payload
         data_record: DataRecord
             DataRecord instance
 
         Raises
         ----------
         IdempotencyValidationError
-            Event payload doesn't match the stored record for the given idempotency key
+            Payload doesn't match the stored record for the given idempotency key
 
         """
         if self.payload_validation_enabled:
-            lambda_payload_hash = self._get_hashed_payload(lambda_event)
-            if data_record.payload_hash != lambda_payload_hash:
+            data_hash = self._get_hashed_payload(data=data)
+            if data_record.payload_hash != data_hash:
                 raise IdempotencyValidationError("Payload does not match stored record for this event key")
 
     def _get_expiry_timestamp(self) -> int:
@@ -288,12 +286,12 @@ class BasePersistenceLayer(ABC):
     def _retrieve_from_cache(self, idempotency_key: str):
         if not self.use_local_cache:
             return
-        cached_record = self._cache.get(idempotency_key)
+        cached_record = self._cache.get(key=idempotency_key)
         if cached_record:
             if not cached_record.is_expired:
                 return cached_record
             logger.debug(f"Removing expired local cache record for idempotency key: {idempotency_key}")
-            self._delete_from_cache(idempotency_key)
+            self._delete_from_cache(idempotency_key=idempotency_key)
 
     def _delete_from_cache(self, idempotency_key: str):
         if not self.use_local_cache:
@@ -301,52 +299,48 @@ class BasePersistenceLayer(ABC):
         if idempotency_key in self._cache:
             del self._cache[idempotency_key]
 
-    def save_success(self, event: Dict[str, Any], context: LambdaContext, result: dict) -> None:
+    def save_success(self, data: Dict[str, Any], result: dict) -> None:
         """
         Save record of function's execution completing successfully
 
         Parameters
         ----------
-        event: Dict[str, Any]
-            Lambda event
-        context: LambdaContext
-            Lambda context
+        data: Dict[str, Any]
+            Payload
         result: dict
-            The response from lambda handler
+            The response from function
         """
         response_data = json.dumps(result, cls=Encoder)
 
         data_record = DataRecord(
-            idempotency_key=self._get_hashed_idempotency_key(event, context),
+            idempotency_key=self._get_hashed_idempotency_key(data=data),
             status=STATUS_CONSTANTS["COMPLETED"],
             expiry_timestamp=self._get_expiry_timestamp(),
             response_data=response_data,
-            payload_hash=self._get_hashed_payload(event),
+            payload_hash=self._get_hashed_payload(data=data),
         )
         logger.debug(
-            f"Lambda successfully executed. Saving record to persistence store with "
+            f"Function successfully executed. Saving record to persistence store with "
             f"idempotency key: {data_record.idempotency_key}"
         )
         self._update_record(data_record=data_record)
 
-        self._save_to_cache(data_record)
+        self._save_to_cache(data_record=data_record)
 
-    def save_inprogress(self, event: Dict[str, Any], context: LambdaContext) -> None:
+    def save_inprogress(self, data: Dict[str, Any]) -> None:
         """
         Save record of function's execution being in progress
 
         Parameters
         ----------
-        event: Dict[str, Any]
-            Lambda event
-        context: LambdaContext
-            Lambda context
+        data: Dict[str, Any]
+            Payload
         """
         data_record = DataRecord(
-            idempotency_key=self._get_hashed_idempotency_key(event, context),
+            idempotency_key=self._get_hashed_idempotency_key(data=data),
             status=STATUS_CONSTANTS["INPROGRESS"],
             expiry_timestamp=self._get_expiry_timestamp(),
-            payload_hash=self._get_hashed_payload(event),
+            payload_hash=self._get_hashed_payload(data=data),
         )
 
         logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")
@@ -354,42 +348,37 @@ class BasePersistenceLayer(ABC):
         if self._retrieve_from_cache(idempotency_key=data_record.idempotency_key):
             raise IdempotencyItemAlreadyExistsError
 
-        self._put_record(data_record)
+        self._put_record(data_record=data_record)
 
-    def delete_record(self, event: Dict[str, Any], context: LambdaContext, exception: Exception):
+    def delete_record(self, data: Dict[str, Any], exception: Exception):
         """
         Delete record from the persistence store
 
         Parameters
         ----------
-        event: Dict[str, Any]
-            Lambda event
-        context: LambdaContext
-            Lambda context
+        data: Dict[str, Any]
+            Payload
         exception
-            The exception raised by the lambda handler
+            The exception raised by the function
         """
-        data_record = DataRecord(idempotency_key=self._get_hashed_idempotency_key(event, context))
+        data_record = DataRecord(idempotency_key=self._get_hashed_idempotency_key(data=data))
 
         logger.debug(
-            f"Lambda raised an exception ({type(exception).__name__}). Clearing in progress record in persistence "
+            f"Function raised an exception ({type(exception).__name__}). Clearing in progress record in persistence "
             f"store for idempotency key: {data_record.idempotency_key}"
         )
-        self._delete_record(data_record)
+        self._delete_record(data_record=data_record)
 
-        self._delete_from_cache(data_record.idempotency_key)
+        self._delete_from_cache(idempotency_key=data_record.idempotency_key)
 
-    def get_record(self, event: Dict[str, Any], context: LambdaContext) -> DataRecord:
+    def get_record(self, data: Dict[str, Any]) -> DataRecord:
         """
-        Calculate idempotency key for lambda_event, then retrieve item from persistence store using idempotency key
-        and return it as a DataRecord instance.and return it as a DataRecord instance.
+        Retrieve idempotency key for data provided, fetch from persistence store, and convert to DataRecord.
 
         Parameters
         ----------
-        event: Dict[str, Any]
-            Lambda event
-        context: LambdaContext
-            Lambda context
+        data: Dict[str, Any]
+            Payload
 
         Returns
         -------
@@ -401,22 +390,22 @@ class BasePersistenceLayer(ABC):
         IdempotencyItemNotFoundError
             Exception raised if no record exists in persistence store with the idempotency key
         IdempotencyValidationError
-            Event payload doesn't match the stored record for the given idempotency key
+            Payload doesn't match the stored record for the given idempotency key
         """
 
-        idempotency_key = self._get_hashed_idempotency_key(event, context)
+        idempotency_key = self._get_hashed_idempotency_key(data=data)
 
         cached_record = self._retrieve_from_cache(idempotency_key=idempotency_key)
         if cached_record:
             logger.debug(f"Idempotency record found in cache with idempotency key: {idempotency_key}")
-            self._validate_payload(event, cached_record)
+            self._validate_payload(data=data, data_record=cached_record)
             return cached_record
 
-        record = self._get_record(idempotency_key)
+        record = self._get_record(idempotency_key=idempotency_key)
 
         self._save_to_cache(data_record=record)
 
-        self._validate_payload(event, record)
+        self._validate_payload(data=data, data_record=record)
         return record
 
     @abstractmethod

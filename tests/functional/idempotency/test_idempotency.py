@@ -18,7 +18,7 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyPersistenceLayerError,
     IdempotencyValidationError,
 )
-from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent
+from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent, idempotent_function
 from aws_lambda_powertools.utilities.idempotency.persistence.base import BasePersistenceLayer, DataRecord
 from aws_lambda_powertools.utilities.validation import envelopes, validator
 from tests.functional.utils import load_event
@@ -221,7 +221,6 @@ def test_idempotent_lambda_first_execution(
     stubber.deactivate()
 
 
-@pytest.mark.skipif(sys.version_info < (3, 8), reason="issue with pytest mock lib for < 3.8")
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_first_execution_cached(
     idempotency_config: IdempotencyConfig,
@@ -255,7 +254,7 @@ def test_idempotent_lambda_first_execution_cached(
 
     retrieve_from_cache_spy.assert_called_once()
     save_to_cache_spy.assert_called_once()
-    assert save_to_cache_spy.call_args[0][0].status == "COMPLETED"
+    assert save_to_cache_spy.call_args[1]["data_record"].status == "COMPLETED"
     assert persistence_store._cache.get(hashed_idempotency_key).status == "COMPLETED"
 
     # This lambda call should not call AWS API
@@ -739,7 +738,7 @@ def test_default_no_raise_on_missing_idempotency_key(
     assert "body" in persistence_store.event_key_jmespath
 
     # WHEN getting the hashed idempotency key for an event with no `body` key
-    hashed_key = persistence_store._get_hashed_idempotency_key({}, lambda_context)
+    hashed_key = persistence_store._get_hashed_idempotency_key({})
 
     # THEN return the hash of None
     expected_value = "test-func#" + md5(json.dumps(None).encode()).hexdigest()
@@ -760,7 +759,7 @@ def test_raise_on_no_idempotency_key(
 
     # WHEN getting the hashed idempotency key for an event with no `body` key
     with pytest.raises(IdempotencyKeyError) as excinfo:
-        persistence_store._get_hashed_idempotency_key({}, lambda_context)
+        persistence_store._get_hashed_idempotency_key({})
 
     # THEN raise IdempotencyKeyError error
     assert "No data found to create a hashed idempotency_key" in str(excinfo.value)
@@ -790,7 +789,7 @@ def test_jmespath_with_powertools_json(
     }
 
     # WHEN calling _get_hashed_idempotency_key
-    result = persistence_store._get_hashed_idempotency_key(api_gateway_proxy_event, lambda_context)
+    result = persistence_store._get_hashed_idempotency_key(api_gateway_proxy_event)
 
     # THEN the hashed idempotency key should match the extracted values generated hash
     assert result == "test-func#" + persistence_store._generate_hash(expected_value)
@@ -807,7 +806,7 @@ def test_custom_jmespath_function_overrides_builtin_functions(
     with pytest.raises(jmespath.exceptions.UnknownFunctionError, match="Unknown function: powertools_json()"):
         # WHEN calling _get_hashed_idempotency_key
         # THEN raise unknown function
-        persistence_store._get_hashed_idempotency_key({}, lambda_context)
+        persistence_store._get_hashed_idempotency_key({})
 
 
 def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPersistenceLayer, lambda_context):
@@ -885,3 +884,95 @@ def test_idempotent_lambda_event_source(lambda_context):
     result = lambda_handler(mock_event, lambda_context)
     # THEN we expect the handler to execute successfully
     assert result == expected_result
+
+
+def test_idempotent_function():
+    # Scenario to validate we can use idempotent_function with any function
+    mock_event = {"data": "value"}
+    persistence_layer = MockPersistenceLayer("test-func#" + hashlib.md5(json.dumps(mock_event).encode()).hexdigest())
+    expected_result = {"message": "Foo"}
+
+    @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
+    def record_handler(record):
+        return expected_result
+
+    # WHEN calling the function
+    result = record_handler(record=mock_event)
+    # THEN we expect the function to execute successfully
+    assert result == expected_result
+
+
+def test_idempotent_function_arbitrary_args_kwargs():
+    # Scenario to validate we can use idempotent_function with a function
+    # with an arbitrary number of args and kwargs
+    mock_event = {"data": "value"}
+    persistence_layer = MockPersistenceLayer("test-func#" + hashlib.md5(json.dumps(mock_event).encode()).hexdigest())
+    expected_result = {"message": "Foo"}
+
+    @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
+    def record_handler(arg_one, arg_two, record, is_record):
+        return expected_result
+
+    # WHEN calling the function
+    result = record_handler("foo", "bar", record=mock_event, is_record=True)
+    # THEN we expect the function to execute successfully
+    assert result == expected_result
+
+
+def test_idempotent_function_invalid_data_kwarg():
+    mock_event = {"data": "value"}
+    persistence_layer = MockPersistenceLayer("test-func#" + hashlib.md5(json.dumps(mock_event).encode()).hexdigest())
+    expected_result = {"message": "Foo"}
+    keyword_argument = "payload"
+
+    # GIVEN data_keyword_argument does not match fn signature
+    @idempotent_function(persistence_store=persistence_layer, data_keyword_argument=keyword_argument)
+    def record_handler(record):
+        return expected_result
+
+    # WHEN calling the function
+    # THEN we expect to receive a Runtime error
+    with pytest.raises(RuntimeError, match=f"Unable to extract '{keyword_argument}'"):
+        record_handler(record=mock_event)
+
+
+def test_idempotent_function_arg_instead_of_kwarg():
+    mock_event = {"data": "value"}
+    persistence_layer = MockPersistenceLayer("test-func#" + hashlib.md5(json.dumps(mock_event).encode()).hexdigest())
+    expected_result = {"message": "Foo"}
+    keyword_argument = "record"
+
+    # GIVEN data_keyword_argument matches fn signature
+    @idempotent_function(persistence_store=persistence_layer, data_keyword_argument=keyword_argument)
+    def record_handler(record):
+        return expected_result
+
+    # WHEN calling the function without named argument
+    # THEN we expect to receive a Runtime error
+    with pytest.raises(RuntimeError, match=f"Unable to extract '{keyword_argument}'"):
+        record_handler(mock_event)
+
+
+def test_idempotent_function_and_lambda_handler(lambda_context):
+    # Scenario to validate we can use both idempotent_function and idempotent decorators
+    mock_event = {"data": "value"}
+    persistence_layer = MockPersistenceLayer("test-func#" + hashlib.md5(json.dumps(mock_event).encode()).hexdigest())
+    expected_result = {"message": "Foo"}
+
+    @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
+    def record_handler(record):
+        return expected_result
+
+    @idempotent(persistence_store=persistence_layer)
+    def lambda_handler(event, _):
+        return expected_result
+
+    # WHEN calling the function
+    fn_result = record_handler(record=mock_event)
+
+    # WHEN calling lambda handler
+    handler_result = lambda_handler(mock_event, lambda_context)
+
+    # THEN we expect the function and lambda handler to execute successfully
+    assert fn_result == expected_result
+    assert handler_result == expected_result
