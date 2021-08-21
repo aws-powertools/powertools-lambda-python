@@ -44,7 +44,7 @@ jobs:
         echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> $GITHUB_ENV
     - name: Ensure new version is also set in pyproject and CHANGELOG
       run: |
-        grep --regexp "\[${RELEASE_TAG_VERSION}\]" CHANGELOG.md
+        grep --regexp "${RELEASE_TAG_VERSION}" CHANGELOG.md
         grep --regexp "version \= \"${RELEASE_TAG_VERSION}\"" pyproject.toml
     - name: Install dependencies
       run: make dev
