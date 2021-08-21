@@ -31,9 +31,13 @@ class KinesisStreamRecordPayload(DictWrapper):
         """The unique identifier of the record within its shard"""
         return self["kinesis"]["sequenceNumber"]
 
+    def data_as_bytes(self) -> bytes:
+        """Decode binary encoded data as bytes"""
+        return base64.b64decode(self.data)
+
     def data_as_text(self) -> str:
         """Decode binary encoded data as text"""
-        return base64.b64decode(self.data).decode("utf-8")
+        return self.data_as_bytes().decode("utf-8")
 
     def data_as_json(self) -> dict:
         """Decode binary encoded data as json"""
