@@ -290,6 +290,7 @@ In this example extract the `requestId` as the `correlation_id` for logging, use
 
     def get_user_by_token(token: str):
         """Look a user by token"""
+		...
 
 
     @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_AUTHORIZER)
