@@ -379,11 +379,11 @@ class APIGatewayAuthorizerResponse:
         self.api_id = api_id
         self.stage = stage
         self.context = context
-        self._allow_methods: List[Dict] = []
-        self._deny_methods: List[Dict] = []
+        self._allow_routes: List[Dict] = []
+        self._deny_routes: List[Dict] = []
 
-    def _add_method(self, effect: str, verb: str, resource: str, conditions: List[Dict]):
-        """Adds a method to the internal lists of allowed or denied methods. Each object in
+    def _add_route(self, effect: str, verb: str, resource: str, conditions: List[Dict]):
+        """Adds a route to the internal lists of allowed or denied routes. Each object in
         the internal list contains a resource ARN and a condition statement. The condition
         statement can be null."""
         if verb != "*" and not hasattr(HttpVerb, verb):
@@ -392,16 +392,18 @@ class APIGatewayAuthorizerResponse:
         resource_pattern = re.compile(self.path_regex)
         if not resource_pattern.match(resource):
             raise ValueError(f"Invalid resource path: {resource}. Path should match {self.path_regex}")
+
         if resource[:1] == "/":
             resource = resource[1:]
 
         resource_arn = APIGatewayRouteArn(self.region, self.aws_account_id, self.api_id, self.stage, verb, resource).arn
 
-        method = {"resourceArn": resource_arn, "conditions": conditions}
+        route = {"resourceArn": resource_arn, "conditions": conditions}
+
         if effect.lower() == "allow":
-            self._allow_methods.append(method)
+            self._allow_routes.append(route)
         else:  # deny
-            self._deny_methods.append(method)
+            self._deny_routes.append(route)
 
     @staticmethod
     def _get_empty_statement(effect: str) -> Dict[str, Any]:
@@ -431,36 +433,36 @@ class APIGatewayAuthorizerResponse:
 
         return statements
 
-    def allow_all_methods(self):
+    def allow_all_routes(self):
         """Adds a '*' allow to the policy to authorize access to all methods of an API"""
-        self._add_method("Allow", HttpVerb.ALL, "*", [])
+        self._add_route("Allow", HttpVerb.ALL, "*", [])
 
-    def deny_all_methods(self):
+    def deny_all_route(self):
         """Adds a '*' allow to the policy to deny access to all methods of an API"""
-        self._add_method("Deny", HttpVerb.ALL, "*", [])
+        self._add_route("Deny", HttpVerb.ALL, "*", [])
 
-    def allow_method(self, http_method: str, resource: str, conditions: Optional[List[Dict]] = None):
+    def allow_route(self, http_method: str, resource: str, conditions: Optional[List[Dict]] = None):
         """Adds an API Gateway method (Http verb + Resource path) to the list of allowed
         methods for the policy.
 
         Optionally includes a condition for the policy statement. More on AWS policy
         conditions here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html#Condition"""
-        self._add_method("Allow", http_method, resource, conditions or [])
+        self._add_route("Allow", http_method, resource, conditions or [])
 
-    def deny_method(self, http_method: str, resource: str, conditions: Optional[List[Dict]] = None):
+    def deny_route(self, http_method: str, resource: str, conditions: Optional[List[Dict]] = None):
         """Adds an API Gateway method (Http verb + Resource path) to the list of denied
         methods for the policy.
 
         Optionally includes a condition for the policy statement. More on AWS policy
         conditions here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html#Condition"""
-        self._add_method("Deny", http_method, resource, conditions or [])
+        self._add_route("Deny", http_method, resource, conditions or [])
 
     def asdict(self) -> Dict[str, Any]:
         """Generates the policy document based on the internal lists of allowed and denied
         conditions. This will generate a policy with two main statements for the effect:
         one statement for Allow and one statement for Deny.
         Methods that includes conditions will have their own statement in the policy."""
-        if len(self._allow_methods) == 0 and len(self._deny_methods) == 0:
+        if len(self._allow_routes) == 0 and len(self._deny_routes) == 0:
             raise ValueError("No statements defined for the policy")
 
         response: Dict[str, Any] = {
@@ -468,8 +470,8 @@ class APIGatewayAuthorizerResponse:
             "policyDocument": {"Version": self.version, "Statement": []},
         }
 
-        response["policyDocument"]["Statement"].extend(self._get_statement_for_effect("Allow", self._allow_methods))
-        response["policyDocument"]["Statement"].extend(self._get_statement_for_effect("Deny", self._deny_methods))
+        response["policyDocument"]["Statement"].extend(self._get_statement_for_effect("Allow", self._allow_routes))
+        response["policyDocument"]["Statement"].extend(self._get_statement_for_effect("Deny", self._deny_routes))
 
         if self.context:
             response["context"] = self.context
