@@ -25,7 +25,7 @@ def idempotent(
     **kwargs,
 ) -> Any:
     """
-    Middleware to handle idempotency
+    Decorator to handle idempotency
 
     Parameters
     ----------
@@ -78,14 +78,14 @@ def idempotent_function(
     config: Optional[IdempotencyConfig] = None,
 ) -> Any:
     """
-    Middleware to handle idempotency of any function
+    Decorator to handle idempotency of any function
 
     Parameters
     ----------
     function: Callable
         Function to be decorated
-    data_keyword_argument: Dict
-        Lambda's Event
+    data_keyword_argument: str
+        Keyword parameter name in function's signature that we should hash as idempotency key, e.g. "order"
     persistence_store: BasePersistenceLayer
         Instance of BasePersistenceLayer to store data
     config: IdempotencyConfig
@@ -93,18 +93,18 @@ def idempotent_function(
 
     Examples
     --------
-    **Processes Lambda's event in an idempotent manner**
+    **Processes an order in an idempotent manner**
 
-        >>> from aws_lambda_powertools.utilities.idempotency import (
-        >>>    idempotent, DynamoDBPersistenceLayer, IdempotencyConfig
-        >>> )
-        >>>
-        >>> idem_config=IdempotencyConfig(event_key_jmespath="body")
-        >>> persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency_store")
-        >>>
-        >>> @idempotent(config=idem_config, persistence_store=persistence_layer)
-        >>> def handler(event, context):
-        >>>     return {"StatusCode": 200}
+        from aws_lambda_powertools.utilities.idempotency import (
+           idempotent_function, DynamoDBPersistenceLayer, IdempotencyConfig
+        )
+
+        idem_config=IdempotencyConfig(event_key_jmespath="order_id")
+        persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency_store")
+
+        @idempotent_function(data_keyword_argument="order", config=idem_config, persistence_store=persistence_layer)
+        def process_order(customer_id: str, order: dict, **kwargs):
+            return {"StatusCode": 200}
     """
 
     if function is None:
