@@ -170,9 +170,9 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
         )
 
         if event.authorization_token == "42":
-            policy.allow_all_methods()
+            policy.allow_all_routes()
         else:
-            policy.deny_all_methods()
+            policy.deny_all_routes()
         return policy.asdict()
     ```
 
