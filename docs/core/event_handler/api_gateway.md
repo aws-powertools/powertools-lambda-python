@@ -435,6 +435,49 @@ Additionally, we provide pre-defined errors for the most popular ones such as HT
         return app.resolve(event, context)
     ```
 
+
+### Custom Domain API Mappings
+
+When using Custom Domain API Mappings feature, you must use **`strip_prefixes`** param in the `ApiGatewayResolver` constructor.
+
+Scenario: You have a custom domain `api.mydomain.dev` and set an API Mapping `payment` to forward requests to your Payments API, the path argument will be `/payment/<your_actual_path>`.
+
+This will lead to a HTTP 404 despite having your Lambda configured correctly. See the example below on how to account for this change.
+
+
+=== "app.py"
+
+    ```python hl_lines="7"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver(strip_prefixes=["/payment"])
+
+    @app.get("/subscriptions/<subscription>")
+    @tracer.capture_method
+    def get_subscription(subscription):
+		return {"subscription_id": subscription}
+
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
+
+=== "sample_request.json"
+
+    ```json
+    {
+        "resource": "/subscriptions/{subscription}",
+        "path": "/payment/subscriptions/123",
+        "httpMethod": "GET",
+        ...
+    }
+    ```
+
 ## Advanced
 
 ### CORS
