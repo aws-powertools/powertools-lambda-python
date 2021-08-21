@@ -437,7 +437,7 @@ class APIGatewayAuthorizerResponse:
         """Adds a '*' allow to the policy to authorize access to all methods of an API"""
         self._add_route("Allow", HttpVerb.ALL, "*", [])
 
-    def deny_all_route(self):
+    def deny_all_routes(self):
         """Adds a '*' allow to the policy to deny access to all methods of an API"""
         self._add_route("Deny", HttpVerb.ALL, "*", [])
 

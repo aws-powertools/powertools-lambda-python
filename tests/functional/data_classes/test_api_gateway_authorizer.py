@@ -61,7 +61,7 @@ def test_authorizer_response_allow_all_routes_with_context():
 
 
 def test_authorizer_response_deny_all_routes(builder: APIGatewayAuthorizerResponse):
-    builder.deny_all_route()
+    builder.deny_all_routes()
     assert builder.asdict() == {
         "principalId": "foo",
         "policyDocument": {
