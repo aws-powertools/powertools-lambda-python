@@ -121,7 +121,83 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
     }
     ```
 
-#### Choosing a payload subset for idempotency
+### Idempotent_function decorator
+
+Similar to [idempotent decorator](#idempotent-decorator), you can use `idempotent_function` decorator for any synchronous Python function.
+
+When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`** - Such data must be JSON serializable.
+
+
+
+!!! warning "Make sure to call your decorated function using keyword arguments"
+
+=== "app.py"
+
+	This example also demonstrates how you can integrate with [Batch utility](batch.md), so you can process each record in an idempotent manner.
+
+    ```python hl_lines="4 13 18 25"
+    import uuid
+
+    from aws_lambda_powertools.utilities.batch import sqs_batch_processor
+    from aws_lambda_powertools.utilities.idempotency import idempotent_function, DynamoDBPersistenceLayer, IdempotencyConfig
+
+
+    dynamodb = DynamoDBPersistenceLayer(table_name="idem")
+    config =  IdempotencyConfig(
+        event_key_jmespath="messageId",  # see "Choosing a payload subset for idempotency" section
+        use_local_cache=True,
+    )
+
+    @idempotent_function(data_keyword_argument="data", config=config, persistence_store=dynamodb)
+    def dummy(arg_one, arg_two, data: dict, **kwargs):
+        return {"data": data}
+
+
+    @idempotent_function(data_keyword_argument="record", config=config, persistence_store=dynamodb)
+    def record_handler(record):
+        return {"message": record["body"]}
+
+
+    @sqs_batch_processor(record_handler=record_handler)
+    def lambda_handler(event, context):
+		# `data` parameter must be called as a keyword argument to work
+        dummy("hello", "universe", data="test")
+		return {"statusCode": 200}
+    ```
+
+=== "Example event"
+
+    ```json hl_lines="4"
+    {
+        "Records": [
+            {
+                "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
+                "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a...",
+                "body": "Test message.",
+                "attributes": {
+                    "ApproximateReceiveCount": "1",
+                    "SentTimestamp": "1545082649183",
+                    "SenderId": "AIDAIENQZJOLO23YVJ4VO",
+                    "ApproximateFirstReceiveTimestamp": "1545082649185"
+                },
+                "messageAttributes": {
+                    "testAttr": {
+                    "stringValue": "100",
+                    "binaryValue": "base64Str",
+                    "dataType": "Number"
+                    }
+                },
+                "md5OfBody": "e4e68fb7bd0e697a0ae8f1bb342846b3",
+                "eventSource": "aws:sqs",
+                "eventSourceARN": "arn:aws:sqs:us-east-2:123456789012:my-queue",
+                "awsRegion": "us-east-2"
+            }
+        ]
+    }
+    ```
+
+
+### Choosing a payload subset for idempotency
 
 !!! tip "Dealing with always changing payloads"
     When dealing with a more elaborate payload, where parts of the payload always change, you should use **`event_key_jmespath`** parameter.
@@ -198,7 +274,7 @@ Imagine the function executes successfully, but the client never receives the re
     }
     ```
 
-#### Idempotency request flow
+### Idempotency request flow
 
 This sequence diagram shows an example flow of what happens in the payment scenario:
 
