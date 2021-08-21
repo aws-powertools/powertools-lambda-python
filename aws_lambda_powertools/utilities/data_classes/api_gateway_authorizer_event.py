@@ -1,3 +1,4 @@
+import enum
 import re
 from typing import Any, Dict, List, Optional
 
@@ -312,7 +313,7 @@ class APIGatewayAuthorizerResponseV2:
         return response
 
 
-class HttpVerb:
+class HttpVerb(enum.Enum):
     GET = "GET"
     POST = "POST"
     PUT = "PUT"
@@ -386,8 +387,9 @@ class APIGatewayAuthorizerResponse:
         """Adds a route to the internal lists of allowed or denied routes. Each object in
         the internal list contains a resource ARN and a condition statement. The condition
         statement can be null."""
-        if verb != "*" and not hasattr(HttpVerb, verb):
-            raise ValueError(f"Invalid HTTP verb {verb}. Allowed verbs in HttpVerb class")
+        if verb != "*" and verb not in HttpVerb.__members__:
+            allowed_values = [verb.value for verb in HttpVerb]
+            raise ValueError(f"Invalid HTTP verb: '{verb}'. Use either '{allowed_values}'")
 
         resource_pattern = re.compile(self.path_regex)
         if not resource_pattern.match(resource):
@@ -433,13 +435,24 @@ class APIGatewayAuthorizerResponse:
 
         return statements
 
-    def allow_all_routes(self):
-        """Adds a '*' allow to the policy to authorize access to all methods of an API"""
-        self._add_route("Allow", HttpVerb.ALL, "*", [])
+    def allow_all_routes(self, http_method: str = HttpVerb.ALL.value):
+        """Adds a '*' allow to the policy to authorize access to all methods of an API
 
-    def deny_all_routes(self):
-        """Adds a '*' allow to the policy to deny access to all methods of an API"""
-        self._add_route("Deny", HttpVerb.ALL, "*", [])
+        Parameters
+        ----------
+        http_method: str
+        """
+        self._add_route(effect="Allow", verb=http_method, resource="*", conditions=[])
+
+    def deny_all_routes(self, http_method: str = HttpVerb.ALL.value):
+        """Adds a '*' allow to the policy to deny access to all methods of an API
+
+        Parameters
+        ----------
+        http_method: str
+        """
+
+        self._add_route(effect="Deny", verb=http_method, resource="*", conditions=[])
 
     def allow_route(self, http_method: str, resource: str, conditions: Optional[List[Dict]] = None):
         """Adds an API Gateway method (Http verb + Resource path) to the list of allowed
@@ -447,7 +460,8 @@ class APIGatewayAuthorizerResponse:
 
         Optionally includes a condition for the policy statement. More on AWS policy
         conditions here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html#Condition"""
-        self._add_route("Allow", http_method, resource, conditions or [])
+        conditions = conditions or []
+        self._add_route(effect="Allow", verb=http_method, resource=resource, conditions=conditions)
 
     def deny_route(self, http_method: str, resource: str, conditions: Optional[List[Dict]] = None):
         """Adds an API Gateway method (Http verb + Resource path) to the list of denied
@@ -455,7 +469,8 @@ class APIGatewayAuthorizerResponse:
 
         Optionally includes a condition for the policy statement. More on AWS policy
         conditions here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html#Condition"""
-        self._add_route("Deny", http_method, resource, conditions or [])
+        conditions = conditions or []
+        self._add_route(effect="Deny", verb=http_method, resource=resource, conditions=conditions)
 
     def asdict(self) -> Dict[str, Any]:
         """Generates the policy document based on the internal lists of allowed and denied
