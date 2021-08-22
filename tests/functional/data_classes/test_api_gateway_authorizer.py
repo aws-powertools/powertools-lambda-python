@@ -37,7 +37,7 @@ def test_authorizer_response_invalid_resource(builder: APIGatewayAuthorizerRespo
 
 
 def test_authorizer_response_allow_all_routes_with_context():
-    builder = APIGatewayAuthorizerResponse("foo", "us-west-1", "123456789", "fantom", "dev", {"name": "Foo"})
+    builder = APIGatewayAuthorizerResponse("foo", "us-west-1", "123456789", "fantom", "dev", context={"name": "Foo"})
     builder.allow_all_routes()
     assert builder.asdict() == {
         "principalId": "foo",
@@ -52,6 +52,25 @@ def test_authorizer_response_allow_all_routes_with_context():
             ],
         },
         "context": {"name": "Foo"},
+    }
+
+
+def test_authorizer_response_allow_all_routes_with_usage_identifier_key():
+    builder = APIGatewayAuthorizerResponse("cow", "us-east-1", "1111111111", "api", "dev", usage_identifier_key="key")
+    builder.allow_all_routes()
+    assert builder.asdict() == {
+        "principalId": "cow",
+        "policyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": "execute-api:Invoke",
+                    "Effect": "Allow",
+                    "Resource": ["arn:aws:execute-api:us-east-1:1111111111:api/dev/*/*"],
+                }
+            ],
+        },
+        "usageIdentifierKey": "key",
     }
 
 

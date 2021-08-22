@@ -340,10 +340,15 @@ DENY_ALL_RESPONSE = {
 
 
 class APIGatewayAuthorizerResponse:
-    """Api Gateway HTTP API V1 payload or Rest api authorizer response helper
+    """The IAM Policy Response required for API Gateway REST APIs and HTTP APIs.
 
     Based on: - https://github.com/awslabs/aws-apigateway-lambda-authorizer-blueprints/blob/\
     master/blueprints/python/api-gateway-authorizer-python.py
+
+    Documentation:
+    -------------
+    - https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html
+    - https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html
     """
 
     version = "2012-10-17"
@@ -360,6 +365,7 @@ class APIGatewayAuthorizerResponse:
         api_id: str,
         stage: str,
         context: Optional[Dict] = None,
+        usage_identifier_key: Optional[str] = None,
     ):
         """
         Parameters
@@ -388,13 +394,18 @@ class APIGatewayAuthorizerResponse:
         context : Dict, optional
             Optional, context.
             Note: only names of type string and values of type int, string or boolean are supported
+        usage_identifier_key: str, optional
+            If the API uses a usage plan (the apiKeySource is set to `AUTHORIZER`), the Lambda authorizer function
+            must return one of the usage plan's API keys as the usageIdentifierKey property value.
+            > **Note:** This only applies for REST APIs.
         """
+        self.principal_id = principal_id
         self.region = region
         self.aws_account_id = aws_account_id
         self.api_id = api_id
         self.stage = stage
-        self.principal_id = principal_id
         self.context = context
+        self.usage_identifier_key = usage_identifier_key
         self._allow_routes: List[Dict] = []
         self._deny_routes: List[Dict] = []
 
@@ -505,6 +516,9 @@ class APIGatewayAuthorizerResponse:
 
         response["policyDocument"]["Statement"].extend(self._get_statement_for_effect("Allow", self._allow_routes))
         response["policyDocument"]["Statement"].extend(self._get_statement_for_effect("Deny", self._deny_routes))
+
+        if self.usage_identifier_key:
+            response["usageIdentifierKey"] = self.usage_identifier_key
 
         if self.context:
             response["context"] = self.context
