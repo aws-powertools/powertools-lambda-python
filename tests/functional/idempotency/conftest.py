@@ -21,6 +21,10 @@ from tests.functional.utils import load_event
 TABLE_NAME = "TEST_TABLE"
 
 
+def serialize(data):
+    return json.dumps(data, sort_keys=True, cls=Encoder)
+
+
 @pytest.fixture(scope="module")
 def config() -> Config:
     return Config(region_name="us-east-1")
@@ -62,12 +66,12 @@ def lambda_response():
 
 @pytest.fixture(scope="module")
 def serialized_lambda_response(lambda_response):
-    return json.dumps(lambda_response, cls=Encoder)
+    return serialize(lambda_response)
 
 
 @pytest.fixture(scope="module")
 def deserialized_lambda_response(lambda_response):
-    return json.loads(json.dumps(lambda_response, cls=Encoder))
+    return json.loads(serialize(lambda_response))
 
 
 @pytest.fixture
@@ -144,7 +148,7 @@ def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_vali
 def hashed_idempotency_key(lambda_apigw_event, default_jmespath, lambda_context):
     compiled_jmespath = jmespath.compile(default_jmespath)
     data = compiled_jmespath.search(lambda_apigw_event)
-    return "test-func#" + hashlib.md5(json.dumps(data).encode()).hexdigest()
+    return "test-func#" + hashlib.md5(serialize(data).encode()).hexdigest()
 
 
 @pytest.fixture
@@ -152,12 +156,12 @@ def hashed_idempotency_key_with_envelope(lambda_apigw_event):
     event = extract_data_from_envelope(
         data=lambda_apigw_event, envelope=envelopes.API_GATEWAY_HTTP, jmespath_options={}
     )
-    return "test-func#" + hashlib.md5(json.dumps(event).encode()).hexdigest()
+    return "test-func#" + hashlib.md5(serialize(event).encode()).hexdigest()
 
 
 @pytest.fixture
 def hashed_validation_key(lambda_apigw_event):
-    return hashlib.md5(json.dumps(lambda_apigw_event["requestContext"]).encode()).hexdigest()
+    return hashlib.md5(serialize(lambda_apigw_event["requestContext"]).encode()).hexdigest()
 
 
 @pytest.fixture

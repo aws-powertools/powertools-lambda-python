@@ -223,7 +223,7 @@ class BasePersistenceLayer(ABC):
 
         """
         data = getattr(data, "raw_event", data)  # could be a data class depending on decorator order
-        hashed_data = self.hash_function(json.dumps(data, cls=Encoder).encode())
+        hashed_data = self.hash_function(json.dumps(data, cls=Encoder, sort_keys=True).encode())
         return hashed_data.hexdigest()
 
     def _validate_payload(self, data: Dict[str, Any], data_record: DataRecord) -> None:
@@ -310,7 +310,7 @@ class BasePersistenceLayer(ABC):
         result: dict
             The response from function
         """
-        response_data = json.dumps(result, cls=Encoder)
+        response_data = json.dumps(result, cls=Encoder, sort_keys=True)
 
         data_record = DataRecord(
             idempotency_key=self._get_hashed_idempotency_key(data=data),
