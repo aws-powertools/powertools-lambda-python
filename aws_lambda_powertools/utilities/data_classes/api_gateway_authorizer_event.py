@@ -324,6 +324,21 @@ class HttpVerb(enum.Enum):
     ALL = "*"
 
 
+DENY_ALL_RESPONSE = {
+    "principalId": "deny-all-user",
+    "policyDocument": {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Action": "execute-api:Invoke",
+                "Effect": "Deny",
+                "Resource": ["*"],
+            }
+        ],
+    },
+}
+
+
 class APIGatewayAuthorizerResponse:
     """Api Gateway HTTP API V1 payload or Rest api authorizer response helper
 

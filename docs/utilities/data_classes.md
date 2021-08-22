@@ -96,18 +96,15 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
 
     When the user is found, it includes the user details in the request context that will be available to the back-end, and returns a full access policy for admin users.
 
-    ```python hl_lines="2-5 29 36-42 47 49"
+    ```python hl_lines="2-6 29 36-42 47 49"
     from aws_lambda_powertools.utilities.data_classes import event_source
     from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
+        DENY_ALL_RESPONSE,
         APIGatewayAuthorizerRequestEvent,
         APIGatewayAuthorizerResponse,
         HttpVerb,
     )
     from secrets import compare_digest
-
-
-    class UnAuthorizedError(Exception):
-        ...
 
 
     def get_user_by_token(token):
@@ -124,8 +121,11 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
         user = get_user_by_token(event.get_header_value("Authorization"))
 
         if user is None:
-            # No user was found, so we raised a not authorized error
-            raise UnAuthorizedError("Not authorized to perform this action")
+            # No user was found
+            # to return 401 - `{"message":"Unauthorized"}`, but polutes lambda metrics
+            # raise Exception("Unauthorized")
+            # to return 403 - `{"message":"Forbidden"}`
+            return DENY_ALL_RESPONSE
 
         # parse the `methodArn` as an `APIGatewayRouteArn`
         arn = event.parsed_arn

@@ -1,6 +1,7 @@
 import pytest
 
 from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
+    DENY_ALL_RESPONSE,
     APIGatewayAuthorizerResponse,
     HttpVerb,
 )
@@ -144,4 +145,15 @@ def test_authorizer_response_deny_route_with_conditions(builder: APIGatewayAutho
                 }
             ],
         },
+    }
+
+
+def test_deny_all():
+    # CHECK we always explicitly deny all
+    statements = DENY_ALL_RESPONSE["policyDocument"]["Statement"]
+    assert len(statements) == 1
+    assert statements[0] == {
+        "Action": "execute-api:Invoke",
+        "Effect": "Deny",
+        "Resource": ["*"],
     }
