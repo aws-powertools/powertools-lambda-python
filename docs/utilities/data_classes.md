@@ -50,7 +50,6 @@ Same example as above, but using the `event_source` decorator
         if 'helloworld' in event.path and event.http_method == 'GET':
             do_something_with(event.body, user)
     ```
-
 **Autocomplete with self-documented properties and methods**
 
 ![Utilities Data Classes](../media/utilities_data_classes.png)
@@ -93,9 +92,9 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
 
 === "app_type_request.py"
 
-	This example uses the `APIGatewayAuthorizerResponse` to decline a given request if the user is not found.
+    This example uses the `APIGatewayAuthorizerResponse` to decline a given request if the user is not found.
 
-	When the user is found, it includes the user details in the request context that will be available to the back-end, and returns a full access policy for admin users.
+    When the user is found, it includes the user details in the request context that will be available to the back-end, and returns a full access policy for admin users.
 
     ```python hl_lines="2-5 26-31 36-37 40 44 46"
     from aws_lambda_powertools.utilities.data_classes import event_source
@@ -185,7 +184,7 @@ See also [this blog post](https://aws.amazon.com/blogs/compute/introducing-iam-a
 
 === "app.py"
 
-	This example looks up user details via `x-token` header. It uses `APIGatewayAuthorizerResponseV2` to return a deny policy when user is not found or authorized.
+    This example looks up user details via `x-token` header. It uses `APIGatewayAuthorizerResponseV2` to return a deny policy when user is not found or authorized.
 
     ```python hl_lines="2-5 21 24"
     from aws_lambda_powertools.utilities.data_classes import event_source
@@ -290,7 +289,7 @@ In this example extract the `requestId` as the `correlation_id` for logging, use
 
     def get_user_by_token(token: str):
         """Look a user by token"""
-		...
+        ...
 
 
     @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_AUTHORIZER)

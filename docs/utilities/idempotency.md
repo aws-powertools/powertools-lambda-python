@@ -40,7 +40,6 @@ Configuration | Value | Notes
 Partition key | `id` |
 TTL attribute name | `expiration` | This can only be configured after your table is created if you're using AWS Console
 
-
 !!! tip "You can share a single state table for all functions"
     You can reuse the same DynamoDB table to store idempotency state. We add your `function_name` in addition to the idempotency key as a hash key.
 
@@ -127,13 +126,11 @@ Similar to [idempotent decorator](#idempotent-decorator), you can use `idempoten
 
 When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`** - Such data must be JSON serializable.
 
-
-
 !!! warning "Make sure to call your decorated function using keyword arguments"
 
 === "app.py"
 
-	This example also demonstrates how you can integrate with [Batch utility](batch.md), so you can process each record in an idempotent manner.
+    This example also demonstrates how you can integrate with [Batch utility](batch.md), so you can process each record in an idempotent manner.
 
     ```python hl_lines="4 13 18 25"
     import uuid
@@ -160,9 +157,9 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
     @sqs_batch_processor(record_handler=record_handler)
     def lambda_handler(event, context):
-		# `data` parameter must be called as a keyword argument to work
+        # `data` parameter must be called as a keyword argument to work
         dummy("hello", "universe", data="test")
-		return {"statusCode": 200}
+        return {"statusCode": 200}
     ```
 
 === "Example event"
@@ -195,7 +192,6 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
         ]
     }
     ```
-
 
 ### Choosing a payload subset for idempotency
 
