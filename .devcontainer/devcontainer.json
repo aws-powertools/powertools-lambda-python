@@ -38,7 +38,9 @@
 		"ms-python.python",
 		"ms-python.vscode-pylance",
 		"littlefoxteam.vscode-python-test-adapter",
-		"ms-azuretools.vscode-docker"
+		"ms-azuretools.vscode-docker",
+		"davidanson.vscode-markdownlint",
+		"bungcip.better-toml"
 	],
 	"postCreateCommand": "make dev",
 	"remoteUser": "vscode"
