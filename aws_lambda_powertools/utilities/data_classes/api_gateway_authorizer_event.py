@@ -374,22 +374,22 @@ class APIGatewayAuthorizerResponse:
             Optional, context.
             Note: only names of type string and values of type int, string or boolean are supported
         """
-        self.principal_id = principal_id
         self.region = region
         self.aws_account_id = aws_account_id
         self.api_id = api_id
         self.stage = stage
+        self.principal_id = principal_id
         self.context = context
         self._allow_routes: List[Dict] = []
         self._deny_routes: List[Dict] = []
 
-    def _add_route(self, effect: str, verb: str, resource: str, conditions: List[Dict]):
+    def _add_route(self, effect: str, http_method: str, resource: str, conditions: Optional[List[Dict]] = None):
         """Adds a route to the internal lists of allowed or denied routes. Each object in
         the internal list contains a resource ARN and a condition statement. The condition
         statement can be null."""
-        if verb != "*" and verb not in HttpVerb.__members__:
+        if http_method != "*" and http_method not in HttpVerb.__members__:
             allowed_values = [verb.value for verb in HttpVerb]
-            raise ValueError(f"Invalid HTTP verb: '{verb}'. Use either '{allowed_values}'")
+            raise ValueError(f"Invalid HTTP verb: '{http_method}'. Use either '{allowed_values}'")
 
         resource_pattern = re.compile(self.path_regex)
         if not resource_pattern.match(resource):
@@ -398,7 +398,9 @@ class APIGatewayAuthorizerResponse:
         if resource[:1] == "/":
             resource = resource[1:]
 
-        resource_arn = APIGatewayRouteArn(self.region, self.aws_account_id, self.api_id, self.stage, verb, resource).arn
+        resource_arn = APIGatewayRouteArn(
+            self.region, self.aws_account_id, self.api_id, self.stage, http_method, resource
+        ).arn
 
         route = {"resourceArn": resource_arn, "conditions": conditions}
 
@@ -412,23 +414,26 @@ class APIGatewayAuthorizerResponse:
         """Returns an empty statement object prepopulated with the correct action and the desired effect."""
         return {"Action": "execute-api:Invoke", "Effect": effect.capitalize(), "Resource": []}
 
-    def _get_statement_for_effect(self, effect: str, methods: List) -> List:
-        """This function loops over an array of objects containing a resourceArn and
-        conditions statement and generates the array of statements for the policy."""
-        if len(methods) == 0:
+    def _get_statement_for_effect(self, effect: str, routes: List[Dict]) -> List[Dict]:
+        """This function loops over an array of objects containing a `resourceArn` and
+        `conditions` statement and generates the array of statements for the policy."""
+        if len(routes) == 0:
             return []
 
-        statements = []
-
+        statements: List[Dict] = []
         statement = self._get_empty_statement(effect)
-        for method in methods:
-            if method["conditions"] is None or len(method["conditions"]) == 0:
-                statement["Resource"].append(method["resourceArn"])
-            else:
+
+        for route in routes:
+            resource_arn = route["resourceArn"]
+            conditions = route.get("conditions")
+            if conditions is not None and len(conditions) > 0:
                 conditional_statement = self._get_empty_statement(effect)
-                conditional_statement["Resource"].append(method["resourceArn"])
-                conditional_statement["Condition"] = method["conditions"]
+                conditional_statement["Resource"].append(resource_arn)
+                conditional_statement["Condition"] = conditions
                 statements.append(conditional_statement)
+
+            else:
+                statement["Resource"].append(resource_arn)
 
         if len(statement["Resource"]) > 0:
             statements.append(statement)
@@ -442,7 +447,7 @@ class APIGatewayAuthorizerResponse:
         ----------
         http_method: str
         """
-        self._add_route(effect="Allow", verb=http_method, resource="*", conditions=[])
+        self._add_route(effect="Allow", http_method=http_method, resource="*")
 
     def deny_all_routes(self, http_method: str = HttpVerb.ALL.value):
         """Adds a '*' allow to the policy to deny access to all methods of an API
@@ -452,7 +457,7 @@ class APIGatewayAuthorizerResponse:
         http_method: str
         """
 
-        self._add_route(effect="Deny", verb=http_method, resource="*", conditions=[])
+        self._add_route(effect="Deny", http_method=http_method, resource="*")
 
     def allow_route(self, http_method: str, resource: str, conditions: Optional[List[Dict]] = None):
         """Adds an API Gateway method (Http verb + Resource path) to the list of allowed
@@ -460,8 +465,7 @@ class APIGatewayAuthorizerResponse:
 
         Optionally includes a condition for the policy statement. More on AWS policy
         conditions here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html#Condition"""
-        conditions = conditions or []
-        self._add_route(effect="Allow", verb=http_method, resource=resource, conditions=conditions)
+        self._add_route(effect="Allow", http_method=http_method, resource=resource, conditions=conditions)
 
     def deny_route(self, http_method: str, resource: str, conditions: Optional[List[Dict]] = None):
         """Adds an API Gateway method (Http verb + Resource path) to the list of denied
@@ -469,8 +473,7 @@ class APIGatewayAuthorizerResponse:
 
         Optionally includes a condition for the policy statement. More on AWS policy
         conditions here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html#Condition"""
-        conditions = conditions or []
-        self._add_route(effect="Deny", verb=http_method, resource=resource, conditions=conditions)
+        self._add_route(effect="Deny", http_method=http_method, resource=resource, conditions=conditions)
 
     def asdict(self) -> Dict[str, Any]:
         """Generates the policy document based on the internal lists of allowed and denied
