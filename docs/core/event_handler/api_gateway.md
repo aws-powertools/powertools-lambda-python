@@ -435,7 +435,6 @@ Additionally, we provide pre-defined errors for the most popular ones such as HT
         return app.resolve(event, context)
     ```
 
-
 ### Custom Domain API Mappings
 
 When using Custom Domain API Mappings feature, you must use **`strip_prefixes`** param in the `ApiGatewayResolver` constructor.
@@ -443,7 +442,6 @@ When using Custom Domain API Mappings feature, you must use **`strip_prefixes`**
 Scenario: You have a custom domain `api.mydomain.dev` and set an API Mapping `payment` to forward requests to your Payments API, the path argument will be `/payment/<your_actual_path>`.
 
 This will lead to a HTTP 404 despite having your Lambda configured correctly. See the example below on how to account for this change.
-
 
 === "app.py"
 
@@ -459,7 +457,7 @@ This will lead to a HTTP 404 despite having your Lambda configured correctly. Se
     @app.get("/subscriptions/<subscription>")
     @tracer.capture_method
     def get_subscription(subscription):
-		return {"subscription_id": subscription}
+        return {"subscription_id": subscription}
 
     @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
     @tracer.capture_lambda_handler
