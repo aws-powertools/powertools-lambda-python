@@ -7,6 +7,18 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## 1.20.1 - 2021-08-22
+
+### Bug Fixes
+
+* **idempotency:** sorting keys before hashing ([#639](https://github.com/awslabs/aws-lambda-powertools-python/issues/639))
+
+### Maintenance
+
+* markdown linter fixes ([#636](https://github.com/awslabs/aws-lambda-powertools-python/issues/636))
+* setup codespaces ([#637](https://github.com/awslabs/aws-lambda-powertools-python/issues/637))
+* **license:** add third party license ([#635](https://github.com/awslabs/aws-lambda-powertools-python/issues/635))
+
 ## 1.20.0 - 2021-08-21
 
 ## Bug Fixes
