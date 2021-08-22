@@ -351,9 +351,6 @@ class APIGatewayAuthorizerResponse:
     - https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html
     """
 
-    version = "2012-10-17"
-    """The policy version used for the evaluation. This should always be '2012-10-17'"""
-
     path_regex = r"^[/.a-zA-Z0-9-\*]+$"
     """The regular expression used to validate resource paths for the policy"""
 
@@ -408,6 +405,7 @@ class APIGatewayAuthorizerResponse:
         self.usage_identifier_key = usage_identifier_key
         self._allow_routes: List[Dict] = []
         self._deny_routes: List[Dict] = []
+        self.resource_pattern = re.compile(self.path_regex)
 
     def _add_route(self, effect: str, http_method: str, resource: str, conditions: Optional[List[Dict]] = None):
         """Adds a route to the internal lists of allowed or denied routes. Each object in
@@ -417,8 +415,7 @@ class APIGatewayAuthorizerResponse:
             allowed_values = [verb.value for verb in HttpVerb]
             raise ValueError(f"Invalid HTTP verb: '{http_method}'. Use either '{allowed_values}'")
 
-        resource_pattern = re.compile(self.path_regex)
-        if not resource_pattern.match(resource):
+        if not self.resource_pattern.match(resource):
             raise ValueError(f"Invalid resource path: {resource}. Path should match {self.path_regex}")
 
         if resource[:1] == "/":
@@ -443,7 +440,7 @@ class APIGatewayAuthorizerResponse:
     def _get_statement_for_effect(self, effect: str, routes: List[Dict]) -> List[Dict]:
         """This function loops over an array of objects containing a `resourceArn` and
         `conditions` statement and generates the array of statements for the policy."""
-        if len(routes) == 0:
+        if not routes:
             return []
 
         statements: List[Dict] = []
@@ -511,7 +508,7 @@ class APIGatewayAuthorizerResponse:
 
         response: Dict[str, Any] = {
             "principalId": self.principal_id,
-            "policyDocument": {"Version": self.version, "Statement": []},
+            "policyDocument": {"Version": "2012-10-17", "Statement": []},
         }
 
         response["policyDocument"]["Statement"].extend(self._get_statement_for_effect("Allow", self._allow_routes))
