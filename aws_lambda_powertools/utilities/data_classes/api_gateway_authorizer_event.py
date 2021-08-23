@@ -234,10 +234,12 @@ class APIGatewayAuthorizerEventV2(DictWrapper):
 
     @property
     def cookies(self) -> List[str]:
+        """Cookies"""
         return self["cookies"]
 
     @property
     def headers(self) -> Dict[str, str]:
+        """Http headers"""
         return self["headers"]
 
     @property
@@ -314,6 +316,8 @@ class APIGatewayAuthorizerResponseV2:
 
 
 class HttpVerb(enum.Enum):
+    """Enum of http methods / verbs"""
+
     GET = "GET"
     POST = "POST"
     PUT = "PUT"
@@ -405,7 +409,25 @@ class APIGatewayAuthorizerResponse:
         self.usage_identifier_key = usage_identifier_key
         self._allow_routes: List[Dict] = []
         self._deny_routes: List[Dict] = []
-        self.resource_pattern = re.compile(self.path_regex)
+        self._resource_pattern = re.compile(self.path_regex)
+
+    @staticmethod
+    def from_route_arn(
+        arn: str,
+        principal_id: str,
+        context: Optional[Dict] = None,
+        usage_identifier_key: Optional[str] = None,
+    ) -> "APIGatewayAuthorizerResponse":
+        parsed_arn = parse_api_gateway_arn(arn)
+        return APIGatewayAuthorizerResponse(
+            principal_id,
+            parsed_arn.region,
+            parsed_arn.aws_account_id,
+            parsed_arn.api_id,
+            parsed_arn.stage,
+            context,
+            usage_identifier_key,
+        )
 
     def _add_route(self, effect: str, http_method: str, resource: str, conditions: Optional[List[Dict]] = None):
         """Adds a route to the internal lists of allowed or denied routes. Each object in
@@ -415,7 +437,7 @@ class APIGatewayAuthorizerResponse:
             allowed_values = [verb.value for verb in HttpVerb]
             raise ValueError(f"Invalid HTTP verb: '{http_method}'. Use either '{allowed_values}'")
 
-        if not self.resource_pattern.match(resource):
+        if not self._resource_pattern.match(resource):
             raise ValueError(f"Invalid resource path: {resource}. Path should match {self.path_regex}")
 
         if resource[:1] == "/":
