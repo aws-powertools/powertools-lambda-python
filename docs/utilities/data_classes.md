@@ -122,7 +122,7 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
 
         if user is None:
             # No user was found
-            # to return 401 - `{"message":"Unauthorized"}`, but polutes lambda metrics
+            # to return 401 - `{"message":"Unauthorized"}`, but pollutes lambda error count metrics
             # raise Exception("Unauthorized")
             # to return 403 - `{"message":"Forbidden"}`
             return DENY_ALL_RESPONSE
