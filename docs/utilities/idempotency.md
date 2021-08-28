@@ -340,7 +340,7 @@ Idempotent decorator can be further configured with **`IdempotencyConfig`** as s
 
 Parameter | Default | Description
 ------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
-**event_key_jmespath** | `""` | JMESPath expression to extract the idempotency key from the event record
+**event_key_jmespath** | `""` | JMESPath expression to extract the idempotency key from the event record using [built-in functions](/utilities/jmespath_functions)
 **payload_validation_jmespath** | `""` | JMESPath expression to validate whether certain parameters have changed in the event while the event payload
 **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request
 **expires_after_seconds** | 3600 | The number of seconds to wait before a record is expired
