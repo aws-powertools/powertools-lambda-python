@@ -206,6 +206,11 @@ In this example, we have a Lambda handler that creates a payment for a user subs
 
 Imagine the function executes successfully, but the client never receives the response due to a connection issue. It is safe to retry in this instance, as the idempotent decorator will return a previously saved response.
 
+!!! warning "Making JSON APIs Idempotent"
+    To ensure JSON structured APIs are fully idempotent we must ensure the idempotent key is a valid JSON object.
+
+    To do this we can [customize the default behaviour](#customizing-the-default-behavior) with *event_key_jmespath* and the [JMESPath built-in function](/utilities/jmespath_functions) *powertools_json()*.
+
 === "payment.py"
 
     ```python hl_lines="2-4 10 12 15 20"
@@ -218,7 +223,7 @@ Imagine the function executes successfully, but the client never receives the re
 
     # Treat everything under the "body" key
     # in the event json object as our payload
-    config = IdempotencyConfig(event_key_jmespath="body")
+    config = IdempotencyConfig(event_key_jmespath="powertools_json(body)")
 
     @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event, context):
@@ -269,6 +274,7 @@ Imagine the function executes successfully, but the client never receives the re
       "isBase64Encoded":false
     }
     ```
+
 
 ### Idempotency request flow
 
