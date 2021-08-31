@@ -842,3 +842,21 @@ def test_api_gateway_v2_raw_path():
     # THEN process event correctly
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+
+
+def test_api_gateway_request_path_equals_strip_prefix():
+    # GIVEN a strip_prefix matches the request path
+    app = ApiGatewayResolver(strip_prefixes=["/foo"])
+    event = {"httpMethod": "GET", "path": "/foo"}
+
+    @app.get("/")
+    def base():
+        return {}
+
+    # WHEN calling the event handler
+    # WITH a route "/"
+    result = app(event, {})
+
+    # THEN process event correctly
+    assert result["statusCode"] == 200
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
