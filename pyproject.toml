@@ -30,7 +30,7 @@ email-validator = {version = "*", optional = true }
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^5.5"}
-pytest = "^6.2.2"
+pytest = "^6.2.5"
 black = "^20.8b1"
 flake8 = "^3.9.0"
 flake8-black = "^0.2.3"
