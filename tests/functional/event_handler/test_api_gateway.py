@@ -872,7 +872,7 @@ def test_api_gateway_app_proxy():
     def foo(app):
         return {}
 
-    blueprint.register_to_app(app)
+    app.register_blueprint(blueprint)
     # WHEN calling the event handler after applying routes from blueprint object
     result = app(LOAD_GW_EVENT, {})
 

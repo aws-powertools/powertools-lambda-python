@@ -631,12 +631,17 @@ class ApiGatewayResolver:
     def _json_dump(self, obj: Any) -> str:
         return self._serializer(obj)
 
+    def register_blueprint(self, blueprint: "Blueprint") -> None:
+        """Adds all routes defined in a blueprint"""
+        for route, func in blueprint.api.items():
+            self.route(*route)(func(app=self))
+
 
 class Blueprint:
     """Blueprint helper class to allow splitting ApiGatewayResolver into multiple files"""
 
     def __init__(self):
-        self._api: Dict[tuple, Callable] = {}
+        self.api: Dict[tuple, Callable] = {}
 
     def route(
         self,
@@ -656,9 +661,9 @@ class Blueprint:
 
             if isinstance(method, (list, tuple)):
                 for item in method:
-                    self._api[(rule, item, cors, compress, cache_control)] = wrapper
+                    self.api[(rule, item, cors, compress, cache_control)] = wrapper
             else:
-                self._api[(rule, method, cors, compress, cache_control)] = wrapper
+                self.api[(rule, method, cors, compress, cache_control)] = wrapper
 
         return actual_decorator
 
@@ -680,8 +685,3 @@ class Blueprint:
         self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
     ):
         return self.route(rule, "PATCH", cors, compress, cache_control)
-
-    def register_to_app(self, app: ApiGatewayResolver):
-        """Bind a blueprint object to an existing ApiGatewayResolver instance"""
-        for route, func in self._api.items():
-            app.route(*route)(func(app=app))
