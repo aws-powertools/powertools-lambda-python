@@ -476,6 +476,8 @@ This will lead to a HTTP 404 despite having your Lambda configured correctly. Se
     }
     ```
 
+Note: After removing a path prefix with `strip_prefixes`, the new root path will automatically be mapped to the path argument of `/`. For example, when using `strip_prefixes` value of `/pay`, there is no difference between a request path of `/pay` and `/pay/`; and the path argument would be defined as `/`.
+
 ## Advanced
 
 ### CORS
