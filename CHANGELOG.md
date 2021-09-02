@@ -7,6 +7,20 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 ## [Unreleased]
 
+## 1.20.2 - 2021-09-02
+
+### Bug Fixes
+
+* **event-handler:** fix issue with strip_prefixes and root level resolvers ([#646](https://github.com/awslabs/aws-lambda-powertools-python/issues/646))
+
+### Maintenance
+
+* **deps:** bump boto3 from 1.18.26 to 1.18.32 ([#663](https://github.com/awslabs/aws-lambda-powertools-python/issues/663))
+* **deps-dev:** bump mkdocs-material from 7.2.4 to 7.2.6 ([#665](https://github.com/awslabs/aws-lambda-powertools-python/issues/665))
+* **deps-dev:** bump pytest from 6.2.4 to 6.2.5 ([#662](https://github.com/awslabs/aws-lambda-powertools-python/issues/662))
+* **deps-dev:** bump mike from 0.6.0 to 1.0.1 ([#453](https://github.com/awslabs/aws-lambda-powertools-python/issues/453))
+* **license:** add third party license to pyproject.toml ([#641](https://github.com/awslabs/aws-lambda-powertools-python/issues/641))
+
 ## 1.20.1 - 2021-08-22
 
 ### Bug Fixes
