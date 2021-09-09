@@ -96,9 +96,10 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
 
     When the user is found, it includes the user details in the request context that will be available to the back-end, and returns a full access policy for admin users.
 
-    ```python hl_lines="2-5 26-31 36-37 40 44 46"
+    ```python hl_lines="2-6 29 36-42 47 49"
     from aws_lambda_powertools.utilities.data_classes import event_source
     from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
+        DENY_ALL_RESPONSE,
         APIGatewayAuthorizerRequestEvent,
         APIGatewayAuthorizerResponse,
         HttpVerb,
@@ -108,9 +109,9 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
 
     def get_user_by_token(token):
         if compare_digest(token, "admin-foo"):
-            return {"isAdmin": True, "name": "Admin"}
+            return {"id": 0, "name": "Admin", "isAdmin": True}
         elif compare_digest(token, "regular-foo"):
-            return {"name": "Joe"}
+            return {"id": 1, "name": "Joe"}
         else:
             return None
 
@@ -119,24 +120,26 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
     def handler(event: APIGatewayAuthorizerRequestEvent, context):
         user = get_user_by_token(event.get_header_value("Authorization"))
 
+        if user is None:
+            # No user was found
+            # to return 401 - `{"message":"Unauthorized"}`, but pollutes lambda error count metrics
+            # raise Exception("Unauthorized")
+            # to return 403 - `{"message":"Forbidden"}`
+            return DENY_ALL_RESPONSE
+
         # parse the `methodArn` as an `APIGatewayRouteArn`
         arn = event.parsed_arn
+
         # Create the response builder from parts of the `methodArn`
+        # and set the logged in user id and context
         policy = APIGatewayAuthorizerResponse(
-            principal_id="user",
+            principal_id=user["id"],
+            context=user,
             region=arn.region,
             aws_account_id=arn.aws_account_id,
             api_id=arn.api_id,
-            stage=arn.stage
+            stage=arn.stage,
         )
-
-        if user is None:
-            # No user was found, so we return not authorized
-            policy.deny_all_routes()
-            return policy.asdict()
-
-        # Found the user and setting the details in the context
-        policy.context = user
 
         # Conditional IAM Policy
         if user.get("isAdmin", False):
