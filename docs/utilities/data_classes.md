@@ -299,7 +299,7 @@ In this example extract the `requestId` as the `correlation_id` for logging, use
 
         if not user:
             # No user found, return not authorized
-            return AppSyncAuthorizerResponse().to_dict()
+            return AppSyncAuthorizerResponse().asdict()
 
         return AppSyncAuthorizerResponse(
             authorize=True,
