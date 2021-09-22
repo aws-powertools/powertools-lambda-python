@@ -24,24 +24,28 @@ class SchemaValidationError(Exception):
         message : str
             Powertools formatted error message
         validation_message : str, optional
-            Containing human-readable information what is wrong (e.g. ``data.property[index] must be smaller than or
-            equal to 42``)
+            Containing human-readable information what is wrong
+            (e.g. `data.property[index] must be smaller than or equal to 42`)
         name : str, optional
-            name of a path in the data structure (e.g. ``data.property[index]``)
+            name of a path in the data structure
+            (e.g. `data.property[index]`)
         path: List, optional
-            ``path`` as an array in the data structure (e.g. ``['data', 'property', 'index']``),
+            `path` as an array in the data structure
+            (e.g. `['data', 'property', 'index']`),
         value : Any, optional
-            the invalid value
+            The invalid value
         definition : Any, optional
-            The full rule ``definition`` (e.g. ``42``)
+            The full rule `definition`
+            (e.g. `42`)
         rule : str, optional
-            `rule`` which the ``data`` is breaking (e.g. ``maximum``)
+            `rule` which the `data` is breaking
+            (e.g. `maximum`)
         rule_definition : Any, optional
-            The full rule ``definition`` (e.g. ``42``)
+            The specific rule `definition`
+            (e.g. `42`)
         """
         super().__init__(message)
         self.message = message
-
         self.validation_message = validation_message
         self.name = name
         self.path = path

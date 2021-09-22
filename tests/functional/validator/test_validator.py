@@ -1,3 +1,5 @@
+import re
+
 import jmespath
 import pytest
 from jmespath import functions
@@ -22,8 +24,15 @@ def test_validate_base64_string_envelope(schema, wrapped_event_base64_json_strin
 
 
 def test_validate_event_does_not_conform_with_schema(schema):
-    with pytest.raises(exceptions.SchemaValidationError):
-        validate(event={"message": "hello_world"}, schema=schema)
+    data = {"message": "hello_world"}
+    with pytest.raises(
+        exceptions.SchemaValidationError,
+        match=re.escape(
+            "Failed schema validation. Error: data must contain ['message', 'username'] properties, "
+            f"Path: ['data'], Data: {data}"
+        ),
+    ):
+        validate(event=data, schema=schema)
 
 
 def test_validate_json_string_no_envelope(schema, wrapped_event_json_string):
