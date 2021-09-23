@@ -587,3 +587,102 @@ def test_get_feature_toggle_propagates_access_denied_error(mocker, config):
     # THEN raise StoreClientError error
     with pytest.raises(StoreClientError, match="AccessDeniedException") as err:
         feature_flags.evaluate(name="Foo", default=False)
+
+
+def test_re_match_rule_does_match(mocker, config):
+    default_value = False
+    expected_value = True
+    email_address_val = "somebody+admin@COMPANY.COM"
+    email_address_re_val = ".*admin.*@company.com$"
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": default_value,
+            "rules": {
+                "email address ends with @company.com and has 'admin' in the mailbox (case insensitive)": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.RE_MATCH_IGNORECASE.value,
+                            "key": "email_address",
+                            "value": email_address_re_val,
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(
+        name="my_feature",
+        context={
+            "email_address": email_address_val,
+        },
+        default=True,
+    )
+    assert toggle == expected_value
+
+
+def test_re_search_rule_does_match(mocker, config):
+    default_value = False
+    expected_value = True
+    email_address_val = "somebody+admin@COMPANY.COM"
+    email_address_re_val = "@company.com$"
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": default_value,
+            "rules": {
+                "email address ends with @company.com (case insensitive)": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.RE_SEARCH_IGNORECASE.value,
+                            "key": "email_address",
+                            "value": email_address_re_val,
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(
+        name="my_feature",
+        context={
+            "email_address": email_address_val,
+        },
+        default=True,
+    )
+    assert toggle == expected_value
+
+
+def test_re_fullmatch_rule_does_not_match(mocker, config):
+    default_value = False
+    expected_value = True
+    email_address_val = "somebody+admin@COMPANY.COM"
+    email_address_re_val = ".*admin.*@competitor.com$"
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": default_value,
+            "rules": {
+                "email address ends with @company.com and has 'admin' in the mailbox (case insensitive)": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.RE_FULLMATCH_IGNORECASE.value,
+                            "key": "email_address",
+                            "value": email_address_re_val,
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(
+        name="my_feature",
+        context={
+            "email_address": email_address_val,
+        },
+        default=True,
+    )
+    assert toggle == default_value

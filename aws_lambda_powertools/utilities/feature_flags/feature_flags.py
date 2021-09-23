@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Any, Dict, List, Optional, Union, cast
 
 from . import schema
@@ -48,6 +49,12 @@ class FeatureFlags:
             schema.RuleAction.ENDSWITH.value: lambda a, b: a.endswith(b),
             schema.RuleAction.IN.value: lambda a, b: a in b,
             schema.RuleAction.NOT_IN.value: lambda a, b: a not in b,
+            schema.RuleAction.RE_MATCH.value: lambda a, b: bool(re.match(b, a)),
+            schema.RuleAction.RE_MATCH_IGNORECASE.value: lambda a, b: bool(re.match(b, a, flags=re.IGNORECASE)),
+            schema.RuleAction.RE_FULLMATCH.value: lambda a, b: bool(re.fullmatch(b, a)),
+            schema.RuleAction.RE_FULLMATCH_IGNORECASE.value: lambda a, b: bool(re.fullmatch(b, a, flags=re.IGNORECASE)),
+            schema.RuleAction.RE_SEARCH.value: lambda a, b: bool(re.search(b, a)),
+            schema.RuleAction.RE_SEARCH_IGNORECASE.value: lambda a, b: bool(re.search(b, a, flags=re.IGNORECASE)),
         }
 
         try:

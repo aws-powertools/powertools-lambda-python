@@ -450,9 +450,9 @@ The `conditions` block is a list of conditions that contain `action`, `key`, and
     }
     ```
 
-The `action` configuration can have 5 different values: `EQUALS`, `STARTSWITH`, `ENDSWITH`, `IN`, `NOT_IN`.
+The `action` configuration can have 5 different values: `EQUALS`, `STARTSWITH`, `ENDSWITH`, `IN`, `NOT_IN`, `RE_MATCH`, `RE_MATCH_IGNORECASE`, `RE_FULLMATCH`, `RE_FULLMATCH_IGNORECASE`, `RE_SEARCH`, `RE_SEARCH_IGNORECASE`.
 
-The `key` and `value` will be compared to the input from the context parameter.
+The `key` and `value` will be compared to the input from the context parameter.  The `value` should be the regular expression pattern to use when the `action` is any of the `RE_*` actions listed above.
 
 **For multiple conditions**, we will evaluate the list of conditions as a logical `AND`, so all conditions needs to match to return `when_match` value.
 
