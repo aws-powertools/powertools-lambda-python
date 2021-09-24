@@ -122,7 +122,8 @@ def expected_params_update_item_with_validation(
 @pytest.fixture
 def expected_params_put_item(hashed_idempotency_key):
     return {
-        "ConditionExpression": "attribute_not_exists(id) OR expiration < :now",
+        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now",
+        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration"},
         "ExpressionAttributeValues": {":now": stub.ANY},
         "Item": {"expiration": stub.ANY, "id": hashed_idempotency_key, "status": "INPROGRESS"},
         "TableName": "TEST_TABLE",
@@ -132,7 +133,8 @@ def expected_params_put_item(hashed_idempotency_key):
 @pytest.fixture
 def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_validation_key):
     return {
-        "ConditionExpression": "attribute_not_exists(id) OR expiration < :now",
+        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now",
+        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration"},
         "ExpressionAttributeValues": {":now": stub.ANY},
         "Item": {
             "expiration": stub.ANY,
