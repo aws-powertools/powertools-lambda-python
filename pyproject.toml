@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "1.20.1"
+version = "1.20.2"
 description = "A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, batching, idempotency, feature flags, and more."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -30,7 +30,7 @@ email-validator = {version = "*", optional = true }
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^5.5"}
-pytest = "^6.2.2"
+pytest = "^6.2.5"
 black = "^20.8b1"
 flake8 = "^3.9.0"
 flake8-black = "^0.2.3"
@@ -46,11 +46,11 @@ pytest-mock = "^3.5.1"
 pdoc3 = "^0.10.0"
 pytest-asyncio = "^0.15.1"
 bandit = "^1.7.0"
-radon = "^4.5.0"
-xenon = "^0.7.3"
+radon = "^5.1.0"
+xenon = "^0.8.0"
 flake8-eradicate = "^1.1.0"
-flake8-bugbear = "^21.3.2"
-mkdocs-material = "^7.2.4"
+flake8-bugbear = "^21.9.1"
+mkdocs-material = "^7.3.0"
 mkdocs-git-revision-date-plugin = "^0.3.1"
 mike = "^0.6.0"
 mypy = "^0.910"
