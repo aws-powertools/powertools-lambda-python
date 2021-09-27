@@ -206,10 +206,10 @@ In this example, we have a Lambda handler that creates a payment for a user subs
 
 Imagine the function executes successfully, but the client never receives the response due to a connection issue. It is safe to retry in this instance, as the idempotent decorator will return a previously saved response.
 
-!!! warning "Making JSON APIs Idempotent"
-    To ensure JSON structured APIs are fully idempotent we must ensure the idempotent key is a valid JSON object.
+!!! warning "Idempotency for JSON payloads"
+    The payload extracted by the `event_key_jmespath` is treated as a string by default, so will be sensitive to differences in whitespace even when the JSON payload itself is identical.
 
-    To do this we can [customize the default behaviour](#customizing-the-default-behavior) with *event_key_jmespath* and the [JMESPath built-in function](/utilities/jmespath_functions) *powertools_json()*.
+    To alter this behaviour, we can use the [JMESPath built-in function](/utilities/jmespath_functions) *powertools_json()* to treat the payload as a JSON object rather than a string.
 
 === "payment.py"
 

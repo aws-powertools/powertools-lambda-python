@@ -3,7 +3,7 @@ title: JMESPath Functions
 description: Utility
 ---
 
-You might have events or responses that contain non-encoded JSON, where you need to decode so that you can access portions of the object or ensure the Powertools utility recieves a JSON object
+You might have events or responses that contain non-encoded JSON, where you need to decode so that you can access portions of the object or ensure the Powertools utility receives a JSON object. This is a common use case when using the [validation](/utilities/validation) or [idempotency](/utilities/idempotency) utilities.  
 
 ## Built-in JMESPath functions
 You can use our built-in JMESPath functions within your expressions to do exactly that to decode JSON Strings, base64, and uncompress gzip data.
