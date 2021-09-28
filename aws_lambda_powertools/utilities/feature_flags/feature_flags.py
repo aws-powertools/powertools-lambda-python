@@ -33,6 +33,8 @@ class FeatureFlags:
         ----------
         store: StoreProvider
             Store to use to fetch feature flag schema configuration.
+        logger: A logging object
+            Used to log messages.  If None is supplied, one will be created.
         """
         self._store = store
         if logger == None:

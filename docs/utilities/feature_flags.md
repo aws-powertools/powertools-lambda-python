@@ -548,6 +548,7 @@ Parameter | Default | Description
 **max_age** | `5` | Number of seconds to cache feature flags configuration fetched from AWS AppConfig
 **sdk_config** | `None` | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}
 **jmespath_options** | `None` | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"}
+**logger** | `None` | Logger to use.  If None is supplied, then a logger will be created.
 
 === "appconfig_store_example.py"
 
