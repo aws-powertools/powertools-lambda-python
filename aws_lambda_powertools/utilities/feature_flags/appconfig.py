@@ -10,8 +10,6 @@ from ...shared import jmespath_utils
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError, StoreClientError
 
-logger = logging.getLogger(__name__)
-
 TRANSFORM_TYPE = "json"
 
 
@@ -25,6 +23,7 @@ class AppConfigStore(StoreProvider):
         sdk_config: Optional[Config] = None,
         envelope: Optional[str] = "",
         jmespath_options: Optional[Dict] = None,
+        logger=None,
     ):
         """This class fetches JSON schemas from AWS AppConfig
 
@@ -46,6 +45,10 @@ class AppConfigStore(StoreProvider):
             Alternative JMESPath options to be included when filtering expr
         """
         super().__init__()
+        if logger == None:
+            self.logger = logging.getLogger(__name__)
+        else:
+            self.logger = logger
         self.environment = environment
         self.application = application
         self.name = name
