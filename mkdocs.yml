@@ -26,6 +26,7 @@ nav:
       - utilities/parser.md
       - utilities/idempotency.md
       - utilities/feature_flags.md
+      - utilities/jmespath_functions.md
 
 theme:
   name: material
