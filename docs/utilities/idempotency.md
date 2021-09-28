@@ -206,6 +206,11 @@ In this example, we have a Lambda handler that creates a payment for a user subs
 
 Imagine the function executes successfully, but the client never receives the response due to a connection issue. It is safe to retry in this instance, as the idempotent decorator will return a previously saved response.
 
+!!! warning "Idempotency for JSON payloads"
+    The payload extracted by the `event_key_jmespath` is treated as a string by default, so will be sensitive to differences in whitespace even when the JSON payload itself is identical.
+
+    To alter this behaviour, we can use the [JMESPath built-in function](/utilities/jmespath_functions) *powertools_json()* to treat the payload as a JSON object rather than a string.
+
 === "payment.py"
 
     ```python hl_lines="2-4 10 12 15 20"
@@ -218,7 +223,7 @@ Imagine the function executes successfully, but the client never receives the re
 
     # Treat everything under the "body" key
     # in the event json object as our payload
-    config = IdempotencyConfig(event_key_jmespath="body")
+    config = IdempotencyConfig(event_key_jmespath="powertools_json(body)")
 
     @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event, context):
@@ -269,6 +274,7 @@ Imagine the function executes successfully, but the client never receives the re
       "isBase64Encoded":false
     }
     ```
+
 
 ### Idempotency request flow
 
@@ -334,7 +340,7 @@ Idempotent decorator can be further configured with **`IdempotencyConfig`** as s
 
 Parameter | Default | Description
 ------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
-**event_key_jmespath** | `""` | JMESPath expression to extract the idempotency key from the event record
+**event_key_jmespath** | `""` | JMESPath expression to extract the idempotency key from the event record using [built-in functions](/utilities/jmespath_functions)
 **payload_validation_jmespath** | `""` | JMESPath expression to validate whether certain parameters have changed in the event while the event payload
 **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request
 **expires_after_seconds** | 3600 | The number of seconds to wait before a record is expired
