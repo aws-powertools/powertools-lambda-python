@@ -287,6 +287,8 @@ You can use `/path/{dynamic_value}` when configuring dynamic URL paths. This all
     }
     ```
 
+#### Nested routes
+
 You can also nest paths as configured earlier in [our sample infrastructure](#required-resources): `/{message}/{name}`.
 
 === "app.py"
@@ -318,6 +320,42 @@ You can also nest paths as configured earlier in [our sample infrastructure](#re
     {
         "resource": "/{message}/{name}",
         "path": "/hi/michael",
+        "httpMethod": "GET",
+        ...
+    }
+    ```
+
+#### Catch-all routes
+
+!!! note "We recommend having explicit routes whenever possible; use catch-all routes sparingly"
+
+You can use a regex string to handle an arbitrary number of paths within a request, for example `.+`.
+
+You can also combine nested paths with greedy regex to catch in between routes.
+
+!!! warning "We will choose the more explicit registered route that match incoming event"
+
+=== "app.py"
+
+    ```python hl_lines="5"
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+    app = ApiGatewayResolver()
+
+    @app.get(".+")
+    def catch_any_route_after_any():
+        return {"path_received": app.current_event.path}
+
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
+
+=== "sample_request.json"
+
+    ```json
+    {
+        "resource": "/any/route/should/work",
+        "path": "/any/route/should/work",
         "httpMethod": "GET",
         ...
     }
@@ -475,6 +513,8 @@ This will lead to a HTTP 404 despite having your Lambda configured correctly. Se
         ...
     }
     ```
+
+Note: After removing a path prefix with `strip_prefixes`, the new root path will automatically be mapped to the path argument of `/`. For example, when using `strip_prefixes` value of `/pay`, there is no difference between a request path of `/pay` and `/pay/`; and the path argument would be defined as `/`.
 
 ## Advanced
 

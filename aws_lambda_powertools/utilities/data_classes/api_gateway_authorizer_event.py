@@ -234,10 +234,12 @@ class APIGatewayAuthorizerEventV2(DictWrapper):
 
     @property
     def cookies(self) -> List[str]:
+        """Cookies"""
         return self["cookies"]
 
     @property
     def headers(self) -> Dict[str, str]:
+        """Http headers"""
         return self["headers"]
 
     @property
@@ -314,6 +316,8 @@ class APIGatewayAuthorizerResponseV2:
 
 
 class HttpVerb(enum.Enum):
+    """Enum of http methods / verbs"""
+
     GET = "GET"
     POST = "POST"
     PUT = "PUT"
@@ -324,15 +328,32 @@ class HttpVerb(enum.Enum):
     ALL = "*"
 
 
+DENY_ALL_RESPONSE = {
+    "principalId": "deny-all-user",
+    "policyDocument": {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Action": "execute-api:Invoke",
+                "Effect": "Deny",
+                "Resource": ["*"],
+            }
+        ],
+    },
+}
+
+
 class APIGatewayAuthorizerResponse:
-    """Api Gateway HTTP API V1 payload or Rest api authorizer response helper
+    """The IAM Policy Response required for API Gateway REST APIs and HTTP APIs.
 
     Based on: - https://github.com/awslabs/aws-apigateway-lambda-authorizer-blueprints/blob/\
     master/blueprints/python/api-gateway-authorizer-python.py
-    """
 
-    version = "2012-10-17"
-    """The policy version used for the evaluation. This should always be '2012-10-17'"""
+    Documentation:
+    -------------
+    - https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html
+    - https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html
+    """
 
     path_regex = r"^[/.a-zA-Z0-9-\*]+$"
     """The regular expression used to validate resource paths for the policy"""
@@ -345,6 +366,7 @@ class APIGatewayAuthorizerResponse:
         api_id: str,
         stage: str,
         context: Optional[Dict] = None,
+        usage_identifier_key: Optional[str] = None,
     ):
         """
         Parameters
@@ -373,6 +395,10 @@ class APIGatewayAuthorizerResponse:
         context : Dict, optional
             Optional, context.
             Note: only names of type string and values of type int, string or boolean are supported
+        usage_identifier_key: str, optional
+            If the API uses a usage plan (the apiKeySource is set to `AUTHORIZER`), the Lambda authorizer function
+            must return one of the usage plan's API keys as the usageIdentifierKey property value.
+            > **Note:** This only applies for REST APIs.
         """
         self.principal_id = principal_id
         self.region = region
@@ -380,25 +406,46 @@ class APIGatewayAuthorizerResponse:
         self.api_id = api_id
         self.stage = stage
         self.context = context
+        self.usage_identifier_key = usage_identifier_key
         self._allow_routes: List[Dict] = []
         self._deny_routes: List[Dict] = []
+        self._resource_pattern = re.compile(self.path_regex)
 
-    def _add_route(self, effect: str, verb: str, resource: str, conditions: List[Dict]):
+    @staticmethod
+    def from_route_arn(
+        arn: str,
+        principal_id: str,
+        context: Optional[Dict] = None,
+        usage_identifier_key: Optional[str] = None,
+    ) -> "APIGatewayAuthorizerResponse":
+        parsed_arn = parse_api_gateway_arn(arn)
+        return APIGatewayAuthorizerResponse(
+            principal_id,
+            parsed_arn.region,
+            parsed_arn.aws_account_id,
+            parsed_arn.api_id,
+            parsed_arn.stage,
+            context,
+            usage_identifier_key,
+        )
+
+    def _add_route(self, effect: str, http_method: str, resource: str, conditions: Optional[List[Dict]] = None):
         """Adds a route to the internal lists of allowed or denied routes. Each object in
         the internal list contains a resource ARN and a condition statement. The condition
         statement can be null."""
-        if verb != "*" and verb not in HttpVerb.__members__:
+        if http_method != "*" and http_method not in HttpVerb.__members__:
             allowed_values = [verb.value for verb in HttpVerb]
-            raise ValueError(f"Invalid HTTP verb: '{verb}'. Use either '{allowed_values}'")
+            raise ValueError(f"Invalid HTTP verb: '{http_method}'. Use either '{allowed_values}'")
 
-        resource_pattern = re.compile(self.path_regex)
-        if not resource_pattern.match(resource):
+        if not self._resource_pattern.match(resource):
             raise ValueError(f"Invalid resource path: {resource}. Path should match {self.path_regex}")
 
         if resource[:1] == "/":
             resource = resource[1:]
 
-        resource_arn = APIGatewayRouteArn(self.region, self.aws_account_id, self.api_id, self.stage, verb, resource).arn
+        resource_arn = APIGatewayRouteArn(
+            self.region, self.aws_account_id, self.api_id, self.stage, http_method, resource
+        ).arn
 
         route = {"resourceArn": resource_arn, "conditions": conditions}
 
@@ -412,23 +459,26 @@ class APIGatewayAuthorizerResponse:
         """Returns an empty statement object prepopulated with the correct action and the desired effect."""
         return {"Action": "execute-api:Invoke", "Effect": effect.capitalize(), "Resource": []}
 
-    def _get_statement_for_effect(self, effect: str, methods: List) -> List:
-        """This function loops over an array of objects containing a resourceArn and
-        conditions statement and generates the array of statements for the policy."""
-        if len(methods) == 0:
+    def _get_statement_for_effect(self, effect: str, routes: List[Dict]) -> List[Dict]:
+        """This function loops over an array of objects containing a `resourceArn` and
+        `conditions` statement and generates the array of statements for the policy."""
+        if not routes:
             return []
 
-        statements = []
-
+        statements: List[Dict] = []
         statement = self._get_empty_statement(effect)
-        for method in methods:
-            if method["conditions"] is None or len(method["conditions"]) == 0:
-                statement["Resource"].append(method["resourceArn"])
-            else:
+
+        for route in routes:
+            resource_arn = route["resourceArn"]
+            conditions = route.get("conditions")
+            if conditions is not None and len(conditions) > 0:
                 conditional_statement = self._get_empty_statement(effect)
-                conditional_statement["Resource"].append(method["resourceArn"])
-                conditional_statement["Condition"] = method["conditions"]
+                conditional_statement["Resource"].append(resource_arn)
+                conditional_statement["Condition"] = conditions
                 statements.append(conditional_statement)
+
+            else:
+                statement["Resource"].append(resource_arn)
 
         if len(statement["Resource"]) > 0:
             statements.append(statement)
@@ -442,7 +492,7 @@ class APIGatewayAuthorizerResponse:
         ----------
         http_method: str
         """
-        self._add_route(effect="Allow", verb=http_method, resource="*", conditions=[])
+        self._add_route(effect="Allow", http_method=http_method, resource="*")
 
     def deny_all_routes(self, http_method: str = HttpVerb.ALL.value):
         """Adds a '*' allow to the policy to deny access to all methods of an API
@@ -452,7 +502,7 @@ class APIGatewayAuthorizerResponse:
         http_method: str
         """
 
-        self._add_route(effect="Deny", verb=http_method, resource="*", conditions=[])
+        self._add_route(effect="Deny", http_method=http_method, resource="*")
 
     def allow_route(self, http_method: str, resource: str, conditions: Optional[List[Dict]] = None):
         """Adds an API Gateway method (Http verb + Resource path) to the list of allowed
@@ -460,8 +510,7 @@ class APIGatewayAuthorizerResponse:
 
         Optionally includes a condition for the policy statement. More on AWS policy
         conditions here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html#Condition"""
-        conditions = conditions or []
-        self._add_route(effect="Allow", verb=http_method, resource=resource, conditions=conditions)
+        self._add_route(effect="Allow", http_method=http_method, resource=resource, conditions=conditions)
 
     def deny_route(self, http_method: str, resource: str, conditions: Optional[List[Dict]] = None):
         """Adds an API Gateway method (Http verb + Resource path) to the list of denied
@@ -469,8 +518,7 @@ class APIGatewayAuthorizerResponse:
 
         Optionally includes a condition for the policy statement. More on AWS policy
         conditions here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html#Condition"""
-        conditions = conditions or []
-        self._add_route(effect="Deny", verb=http_method, resource=resource, conditions=conditions)
+        self._add_route(effect="Deny", http_method=http_method, resource=resource, conditions=conditions)
 
     def asdict(self) -> Dict[str, Any]:
         """Generates the policy document based on the internal lists of allowed and denied
@@ -482,11 +530,14 @@ class APIGatewayAuthorizerResponse:
 
         response: Dict[str, Any] = {
             "principalId": self.principal_id,
-            "policyDocument": {"Version": self.version, "Statement": []},
+            "policyDocument": {"Version": "2012-10-17", "Statement": []},
         }
 
         response["policyDocument"]["Statement"].extend(self._get_statement_for_effect("Allow", self._allow_routes))
         response["policyDocument"]["Statement"].extend(self._get_statement_for_effect("Deny", self._deny_routes))
+
+        if self.usage_identifier_key:
+            response["usageIdentifierKey"] = self.usage_identifier_key
 
         if self.context:
             response["context"] = self.context

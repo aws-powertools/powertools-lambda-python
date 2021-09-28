@@ -1,6 +1,7 @@
 import pytest
 
 from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
+    DENY_ALL_RESPONSE,
     APIGatewayAuthorizerResponse,
     HttpVerb,
 )
@@ -36,7 +37,8 @@ def test_authorizer_response_invalid_resource(builder: APIGatewayAuthorizerRespo
 
 
 def test_authorizer_response_allow_all_routes_with_context():
-    builder = APIGatewayAuthorizerResponse("foo", "us-west-1", "123456789", "fantom", "dev", {"name": "Foo"})
+    arn = "arn:aws:execute-api:us-west-1:123456789:fantom/dev/GET/foo"
+    builder = APIGatewayAuthorizerResponse.from_route_arn(arn, principal_id="foo", context={"name": "Foo"})
     builder.allow_all_routes()
     assert builder.asdict() == {
         "principalId": "foo",
@@ -51,6 +53,26 @@ def test_authorizer_response_allow_all_routes_with_context():
             ],
         },
         "context": {"name": "Foo"},
+    }
+
+
+def test_authorizer_response_allow_all_routes_with_usage_identifier_key():
+    arn = "arn:aws:execute-api:us-east-1:1111111111:api/dev/ANY/y"
+    builder = APIGatewayAuthorizerResponse.from_route_arn(arn, principal_id="cow", usage_identifier_key="key")
+    builder.allow_all_routes()
+    assert builder.asdict() == {
+        "principalId": "cow",
+        "policyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": "execute-api:Invoke",
+                    "Effect": "Allow",
+                    "Resource": ["arn:aws:execute-api:us-east-1:1111111111:api/dev/*/*"],
+                }
+            ],
+        },
+        "usageIdentifierKey": "key",
     }
 
 
@@ -144,4 +166,15 @@ def test_authorizer_response_deny_route_with_conditions(builder: APIGatewayAutho
                 }
             ],
         },
+    }
+
+
+def test_deny_all():
+    # CHECK we always explicitly deny all
+    statements = DENY_ALL_RESPONSE["policyDocument"]["Statement"]
+    assert len(statements) == 1
+    assert statements[0] == {
+        "Action": "execute-api:Invoke",
+        "Effect": "Deny",
+        "Resource": ["*"],
     }
