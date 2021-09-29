@@ -301,6 +301,8 @@ def test_flags_conditions_rule_match_multiple_actions_multiple_rules_multiple_co
 
 
 # check a case where the feature exists but the rule doesn't match so we revert to the default value of the feature
+
+# Check IN/NOT_IN/KEY_IN_VALUE/KEY_NOT_IN_VALUE/VALUE_IN_KEY/VALUE_NOT_IN_KEY conditions
 def test_flags_match_rule_with_in_action(mocker, config):
     expected_value = True
     mocked_app_config_schema = {
@@ -395,8 +397,201 @@ def test_flags_no_match_rule_with_not_in_action(mocker, config):
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
     toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
     assert toggle == expected_value
+    
+def test_flags_match_rule_with_key_in_value_action(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant id is contained in [6, 2]": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["6", "2"],
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
+    assert toggle == expected_value
 
 
+def test_flags_no_match_rule_with_key_in_value_action(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "tenant id is contained in [8, 2]": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["8", "2"],
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
+    assert toggle == expected_value
+
+
+def test_flags_match_rule_with_key_not_in_value_action(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant id is contained in [8, 2]": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_NOT_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["10", "4"],
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
+    assert toggle == expected_value
+
+
+def test_flags_no_match_rule_with_key_not_in_value_action(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "tenant id is contained in [8, 2]": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_NOT_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["6", "4"],
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
+    assert toggle == expected_value
+    
+def test_flags_match_rule_with_value_in_key_action(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant id is contained in [6, 2]": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.VALUE_IN_KEY.value,
+                            "key": "groups",
+                            "value": "SYSADMIN",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a", "groups": ["SYSADMIN", "IT"]}, default=False)
+    assert toggle == expected_value
+
+
+def test_flags_no_match_rule_with_value_in_key_action(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "tenant id is contained in [8, 2]": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.VALUE_IN_KEY.value,
+                            "key": "groups",
+                            "value": "GUEST",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a", "groups": ["SYSADMIN", "IT"]}, default=False)
+    assert toggle == expected_value
+
+
+def test_flags_match_rule_with_value_not_in_key_action(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant id is contained in [8, 2]": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.VALUE_NOT_IN_KEY.value,
+                            "key": "groups",
+                            "value": "GUEST",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a", "groups": ["SYSADMIN", "IT"]}, default=False)
+    assert toggle == expected_value
+
+
+def test_flags_no_match_rule_with_value_not_in_key_action(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "tenant id is contained in [8, 2]": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.VALUE_NOT_IN_KEY.value,
+                            "key": "groups",
+                            "value": "SYSADMIN",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a", "groups": ["SYSADMIN", "IT"]}, default=False)
+    assert toggle == expected_value
+
+
+
+
+# Check multiple features
 def test_multiple_features_enabled(mocker, config):
     expected_value = ["my_feature", "my_feature2"]
     mocked_app_config_schema = {

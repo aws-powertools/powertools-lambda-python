@@ -220,6 +220,26 @@ def test_valid_condition_all_actions():
                             CONDITION_KEY: "username",
                             CONDITION_VALUE: ["c"],
                         },
+                        {
+                            CONDITION_ACTION: RuleAction.KEY_IN_VALUE.value,
+                            CONDITION_KEY: "username",
+                            CONDITION_VALUE: ["a", "b"],
+                        },
+                        {
+                            CONDITION_ACTION: RuleAction.KEY_NOT_IN_VALUE.value,
+                            CONDITION_KEY: "username",
+                            CONDITION_VALUE: ["c"],
+                        },
+                        {
+                            CONDITION_ACTION: RuleAction.VALUE_IN_KEY.value,
+                            CONDITION_KEY: "groups",
+                            CONDITION_VALUE: "SYSADMIN",
+                        },
+                        {
+                            CONDITION_ACTION: RuleAction.VALUE_NOT_IN_KEY.value,
+                            CONDITION_KEY: "groups",
+                            CONDITION_VALUE: "GUEST",
+                        },
                     ],
                 }
             },

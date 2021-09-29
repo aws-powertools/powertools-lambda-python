@@ -48,6 +48,10 @@ class FeatureFlags:
             schema.RuleAction.ENDSWITH.value: lambda a, b: a.endswith(b),
             schema.RuleAction.IN.value: lambda a, b: a in b,
             schema.RuleAction.NOT_IN.value: lambda a, b: a not in b,
+            schema.RuleAction.KEY_IN_VALUE.value: lambda a, b: a in b,
+            schema.RuleAction.KEY_NOT_IN_VALUE.value: lambda a, b: a not in b,
+            schema.RuleAction.VALUE_IN_KEY.value: lambda a, b: b in a,
+            schema.RuleAction.VALUE_NOT_IN_KEY.value: lambda a, b: b not in a,
         }
 
         try:

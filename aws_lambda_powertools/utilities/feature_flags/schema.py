@@ -22,6 +22,10 @@ class RuleAction(str, Enum):
     ENDSWITH = "ENDSWITH"
     IN = "IN"
     NOT_IN = "NOT_IN"
+    KEY_IN_VALUE = "KEY_IN_VALUE"
+    KEY_NOT_IN_VALUE = "KEY_NOT_IN_VALUE"
+    VALUE_IN_KEY = "VALUE_IN_KEY"
+    VALUE_NOT_IN_KEY = "VALUE_NOT_IN_KEY"
 
 
 class SchemaValidator(BaseValidator):
