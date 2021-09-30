@@ -44,7 +44,7 @@ class AppConfigStore(StoreProvider):
         jmespath_options : Optional[Dict]
             Alternative JMESPath options to be included when filtering expr
         logger: A logging object
-            Used to log messages.  If None is supplied, one will be created.
+            Used to log messages. If None is supplied, one will be created.
         """
         super().__init__()
         if logger == None:
