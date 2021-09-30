@@ -98,10 +98,9 @@ class FeatureFlags:
             if self._evaluate_conditions(rule_name=rule_name, feature_name=feature_name, rule=rule, context=context):
                 return bool(rule_match_value)
 
-            # no rule matched, return default value of feature
-            logger.debug(f"no rule matched, returning feature default, default={feat_default}, name={feature_name}")
-            return feat_default
-        return False
+        # no rule matched, return default value of feature
+        logger.debug(f"no rule matched, returning feature default, default={feat_default}, name={feature_name}")
+        return feat_default
 
     def get_configuration(self) -> Union[Dict[str, Dict], Dict]:
         """Get validated feature flag schema from configured store.
