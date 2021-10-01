@@ -869,7 +869,7 @@ def test_api_gateway_app_proxy():
     blueprint = Blueprint()
 
     @blueprint.get("/my/path")
-    def foo(app):
+    def foo(app: ApiGatewayResolver):
         return {}
 
     app.register_blueprint(blueprint)
