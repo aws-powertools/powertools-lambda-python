@@ -2,8 +2,9 @@ import functools
 import json
 import logging
 import warnings
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Union, cast
 
+from ..shared.types import AnyCallableT
 from .base import MetricManager, MetricUnit
 from .metric import single_metric
 
@@ -87,7 +88,7 @@ class Metrics(MetricManager):
             service=self.service,
         )
 
-    def set_default_dimensions(self, **dimensions):
+    def set_default_dimensions(self, **dimensions) -> None:
         """Persist dimensions across Lambda invocations
 
         Parameters
@@ -113,10 +114,10 @@ class Metrics(MetricManager):
 
         self.default_dimensions.update(**dimensions)
 
-    def clear_default_dimensions(self):
+    def clear_default_dimensions(self) -> None:
         self.default_dimensions.clear()
 
-    def clear_metrics(self):
+    def clear_metrics(self) -> None:
         logger.debug("Clearing out existing metric set from memory")
         self.metric_set.clear()
         self.dimension_set.clear()
@@ -125,11 +126,11 @@ class Metrics(MetricManager):
 
     def log_metrics(
         self,
-        lambda_handler: Optional[Callable[[Any, Any], Any]] = None,
+        lambda_handler: Union[Callable[[Dict, Any], Any], Optional[Callable[[Dict, Any, Optional[Dict]], Any]]] = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
         default_dimensions: Optional[Dict[str, str]] = None,
-    ):
+    ) -> AnyCallableT:
         """Decorator to serialize and publish metrics at the end of a function execution.
 
         Be aware that the log_metrics **does call* the decorated function (e.g. lambda_handler).
@@ -169,11 +170,14 @@ class Metrics(MetricManager):
         # Return a partial function with args filled
         if lambda_handler is None:
             logger.debug("Decorator called with parameters")
-            return functools.partial(
-                self.log_metrics,
-                capture_cold_start_metric=capture_cold_start_metric,
-                raise_on_empty_metrics=raise_on_empty_metrics,
-                default_dimensions=default_dimensions,
+            return cast(
+                AnyCallableT,
+                functools.partial(
+                    self.log_metrics,
+                    capture_cold_start_metric=capture_cold_start_metric,
+                    raise_on_empty_metrics=raise_on_empty_metrics,
+                    default_dimensions=default_dimensions,
+                ),
             )
 
         @functools.wraps(lambda_handler)
@@ -194,9 +198,9 @@ class Metrics(MetricManager):
 
             return response
 
-        return decorate
+        return cast(AnyCallableT, decorate)
 
-    def __add_cold_start_metric(self, context: Any):
+    def __add_cold_start_metric(self, context: Any) -> None:
         """Add cold start metric and function_name dimension
 
         Parameters
