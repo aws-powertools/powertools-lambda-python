@@ -62,17 +62,36 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             >>>     return {"StatusCode": 200}
         """
 
-        boto_config = boto_config or Config()
-        session = boto3_session or boto3.session.Session()
-        self._ddb_resource = session.resource("dynamodb", config=boto_config)
+        self._boto_config = boto_config or Config()
+        self._boto3_session = boto3_session or boto3.session.Session()
+
+        self._table = None
         self.table_name = table_name
-        self.table = self._ddb_resource.Table(self.table_name)
         self.key_attr = key_attr
         self.expiry_attr = expiry_attr
         self.status_attr = status_attr
         self.data_attr = data_attr
         self.validation_key_attr = validation_key_attr
         super(DynamoDBPersistenceLayer, self).__init__()
+
+    @property
+    def table(self):
+        """
+        Caching property to store boto3 dynamodb Table resource
+
+        """
+        if self._table:
+            return self._table
+        ddb_resource = self._boto3_session.resource("dynamodb", config=self._boto_config)
+        self._table = ddb_resource.Table(self.table_name)
+        return self._table
+
+    @table.setter
+    def table(self, table):
+        """
+        Allow table instance variable to be set directly, primarily for use in tests
+        """
+        self._table = table
 
     def _item_to_data_record(self, item: Dict[str, Any]) -> DataRecord:
         """
@@ -125,7 +144,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
                 ExpressionAttributeNames={"#id": self.key_attr, "#now": self.expiry_attr},
                 ExpressionAttributeValues={":now": int(now.timestamp())},
             )
-        except self._ddb_resource.meta.client.exceptions.ConditionalCheckFailedException:
+        except self.table.meta.client.exceptions.ConditionalCheckFailedException:
             logger.debug(f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}")
             raise IdempotencyItemAlreadyExistsError
 
