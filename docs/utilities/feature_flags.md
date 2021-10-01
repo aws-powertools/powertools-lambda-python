@@ -529,6 +529,27 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
     }
     ```
 
+### Getting fetched configuration
+
+You can access the configuration fetched from the store via `get_raw_configuration` property within the store instance.
+
+=== "app.py"
+
+    ```python hl_lines="12"
+    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+
+    app_config = AppConfigStore(
+        environment="dev",
+        application="product-catalogue",
+        name="configuration",
+        envelope = "feature_flags"
+    )
+
+	feature_flags = FeatureFlags(store=app_config)
+
+	config = app_config.get_raw_configuration
+    ```
+
 ### Built-in store provider
 
 !!! info "For GA, you'll be able to bring your own store."
