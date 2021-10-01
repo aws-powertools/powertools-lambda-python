@@ -587,3 +587,15 @@ def test_get_feature_toggle_propagates_access_denied_error(mocker, config):
     # THEN raise StoreClientError error
     with pytest.raises(StoreClientError, match="AccessDeniedException") as err:
         feature_flags.evaluate(name="Foo", default=False)
+
+
+def test_get_configuration_with_envelope_and_raw(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {"log_level": "INFO", "features": {"my_feature": {"default": expected_value}}}
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config, envelope="features")
+
+    features_config = feature_flags.get_configuration()
+    config = feature_flags.store.get_raw_configuration
+
+    assert "log_level" in config
+    assert "log_level" not in features_config

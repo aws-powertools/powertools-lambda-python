@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, cast
 
 from . import schema
 from .base import StoreProvider
@@ -36,7 +36,7 @@ class FeatureFlags:
         store: StoreProvider
             Store to use to fetch feature flag schema configuration.
         """
-        self._store = store
+        self.store = store
 
     @staticmethod
     def _match_by_action(action: str, condition_value: Any, context_value: Any) -> bool:
@@ -103,7 +103,7 @@ class FeatureFlags:
             return feat_default
         return False
 
-    def get_configuration(self) -> Union[Dict[str, Dict], Dict]:
+    def get_configuration(self) -> Dict:
         """Get validated feature flag schema from configured store.
 
         Largely used to aid testing, since it's called by `evaluate` and `get_enabled_features` methods.
@@ -146,8 +146,8 @@ class FeatureFlags:
         ```
         """
         # parse result conf as JSON, keep in cache for max age defined in store
-        logger.debug(f"Fetching schema from registered store, store={self._store}")
-        config = self._store.get_configuration()
+        logger.debug(f"Fetching schema from registered store, store={self.store}")
+        config: Dict = self.store.get_configuration()
         validator = schema.SchemaValidator(schema=config)
         validator.validate()
 

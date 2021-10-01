@@ -55,8 +55,30 @@ class AppConfigStore(StoreProvider):
         self.jmespath_options = jmespath_options
         self._conf_store = AppConfigProvider(environment=environment, application=application, config=sdk_config)
 
+    @property
+    def get_raw_configuration(self) -> Dict[str, Any]:
+        """Fetch feature schema configuration from AWS AppConfig"""
+        try:
+            # parse result conf as JSON, keep in cache for self.max_age seconds
+            return cast(
+                dict,
+                self._conf_store.get(
+                    name=self.name,
+                    transform=TRANSFORM_TYPE,
+                    max_age=self.cache_seconds,
+                ),
+            )
+        except (GetParameterError, TransformParameterError) as exc:
+            err_msg = traceback.format_exc()
+            if "AccessDenied" in err_msg:
+                raise StoreClientError(err_msg) from exc
+            raise ConfigurationStoreError("Unable to get AWS AppConfig configuration file") from exc
+
     def get_configuration(self) -> Dict[str, Any]:
         """Fetch feature schema configuration from AWS AppConfig
+
+        If envelope is set, it'll extract and return feature flags from configuration,
+        otherwise it'll return the entire configuration fetched from AWS AppConfig.
 
         Raises
         ------
@@ -68,25 +90,11 @@ class AppConfigStore(StoreProvider):
         Dict[str, Any]
             parsed JSON dictionary
         """
-        try:
-            # parse result conf as JSON, keep in cache for self.max_age seconds
-            config = cast(
-                dict,
-                self._conf_store.get(
-                    name=self.name,
-                    transform=TRANSFORM_TYPE,
-                    max_age=self.cache_seconds,
-                ),
+        config = self.get_raw_configuration
+
+        if self.envelope:
+            config = jmespath_utils.extract_data_from_envelope(
+                data=config, envelope=self.envelope, jmespath_options=self.jmespath_options
             )
 
-            if self.envelope:
-                config = jmespath_utils.extract_data_from_envelope(
-                    data=config, envelope=self.envelope, jmespath_options=self.jmespath_options
-                )
-
-            return config
-        except (GetParameterError, TransformParameterError) as exc:
-            err_msg = traceback.format_exc()
-            if "AccessDenied" in err_msg:
-                raise StoreClientError(err_msg) from exc
-            raise ConfigurationStoreError("Unable to get AWS AppConfig configuration file") from exc
+        return config
