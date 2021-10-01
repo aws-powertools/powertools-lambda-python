@@ -501,3 +501,40 @@ Here is the mapping between this utility's functions and methods and the underly
 | DynamoDB            | `DynamoDBProvider.get`          | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table)) | [get_item](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.get_item)
 | DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table)) | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)
 | App Config          | `get_app_config`                | `appconfig`      | [get_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfig.html#AppConfig.Client.get_configuration) |
+
+
+### Customizing boto configuration
+
+You can provide a custom boto configuration via **`config`**, or use a custom boto session via **`boto3_session`** parameters, when constructing any of the built-in provider classes.
+
+> **Example**
+
+
+=== "Custom session"
+
+    ```python hl_lines="2 4 5"
+    from aws_lambda_powertools.utilities import parameters
+    import boto3
+
+    boto3_session = boto3.session.Session()
+    ssm_provider = parameters.SSMProvider(boto3_session=boto3_session)
+
+    def handler(event, context):
+        # Retrieve a single parameter
+        value = ssm_provider.get("/my/parameter")
+        ...
+    ```
+=== "Custom config"
+
+    ```python hl_lines="2 4 5"
+    from aws_lambda_powertools.utilities import parameters
+    from botocore.config import Config
+
+    boto_config = Config()
+    ssm_provider = parameters.SSMProvider(config=boto_config)
+
+    def handler(event, context):
+        # Retrieve a single parameter
+        value = ssm_provider.get("/my/parameter")
+        ...
+    ```
