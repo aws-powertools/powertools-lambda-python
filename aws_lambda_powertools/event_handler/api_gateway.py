@@ -266,6 +266,7 @@ class ApiGatewayResolver:
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[str]] = None,
+        custom_not_found: Union[Callable[[str, str], str], str, None] = None,
     ):
         """
         Parameters
@@ -282,6 +283,9 @@ class ApiGatewayResolver:
         strip_prefixes: List[str], optional
             optional list of prefixes to be removed from the request path before doing the routing. This is often used
             with api gateways with multiple custom mappings.
+        custom_not_found: Callable, str, optional
+            optional string body for 404 Not Found error messages. This can also be a function which accepts the method
+            and path of the request and returns a string.
         """
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
@@ -295,6 +299,9 @@ class ApiGatewayResolver:
 
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
+
+        # Allow for a custom 404 response body content
+        self._custom_not_found = custom_not_found
 
         if self._debug:
             # Always does a pretty print when in debug mode
@@ -538,7 +545,7 @@ class ApiGatewayResolver:
                 return self._call_route(route, match_results.groupdict())  # pass fn args
 
         logger.debug(f"No match found for path {path} and method {method}")
-        return self._not_found(method)
+        return self._not_found(method, path)
 
     def _remove_prefix(self, path: str) -> str:
         """Remove the configured prefix from the path"""
@@ -561,7 +568,7 @@ class ApiGatewayResolver:
 
         return path.startswith(prefix + "/")
 
-    def _not_found(self, method: str) -> ResponseBuilder:
+    def _not_found(self, method: str, path: str) -> ResponseBuilder:
         """Called when no matching route was found and includes support for the cors preflight response"""
         headers = {}
         if self._cors:
@@ -573,12 +580,19 @@ class ApiGatewayResolver:
                 headers["Access-Control-Allow-Methods"] = ",".join(sorted(self._cors_methods))
                 return ResponseBuilder(Response(status_code=204, content_type=None, headers=headers, body=None))
 
+        if callable(self._custom_not_found):
+            body_content = self._custom_not_found(method, path)
+        elif self._custom_not_found:
+            body_content = self._custom_not_found
+        else:
+            body_content = self._json_dump({"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"})
+
         return ResponseBuilder(
             Response(
                 status_code=HTTPStatus.NOT_FOUND.value,
                 content_type=content_types.APPLICATION_JSON,
                 headers=headers,
-                body=self._json_dump({"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"}),
+                body=body_content,
             )
         )
 
