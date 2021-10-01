@@ -1,11 +1,10 @@
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
+from ... import Logger
 from .base import BaseValidator
 from .exceptions import SchemaValidationError
-
-logger = logging.getLogger(__name__)
 
 RULES_KEY = "rules"
 FEATURE_DEFAULT_VAL_KEY = "default"
@@ -111,11 +110,12 @@ class SchemaValidator(BaseValidator):
     ```
     """
 
-    def __init__(self, schema: Dict[str, Any]):
+    def __init__(self, schema: Dict[str, Any], logger: Optional[Union[logging.Logger, Logger]] = None):
         self.schema = schema
+        self.logger = logger or logging.getLogger(__name__)
 
     def validate(self) -> None:
-        logger.debug("Validating schema")
+        self.logger.debug("Validating schema")
         if not isinstance(self.schema, dict):
             raise SchemaValidationError(f"Features must be a dictionary, schema={str(self.schema)}")
 
@@ -126,12 +126,13 @@ class SchemaValidator(BaseValidator):
 class FeaturesValidator(BaseValidator):
     """Validates each feature and calls RulesValidator to validate its rules"""
 
-    def __init__(self, schema: Dict):
+    def __init__(self, schema: Dict, logger: Optional[Union[logging.Logger, Logger]] = None):
         self.schema = schema
+        self.logger = logger or logging.getLogger(__name__)
 
     def validate(self):
         for name, feature in self.schema.items():
-            logger.debug(f"Attempting to validate feature '{name}'")
+            self.logger.debug(f"Attempting to validate feature '{name}'")
             self.validate_feature(name, feature)
             rules = RulesValidator(feature=feature)
             rules.validate()
@@ -149,21 +150,22 @@ class FeaturesValidator(BaseValidator):
 class RulesValidator(BaseValidator):
     """Validates each rule and calls ConditionsValidator to validate each rule's conditions"""
 
-    def __init__(self, feature: Dict[str, Any]):
+    def __init__(self, feature: Dict[str, Any], logger: Optional[Union[logging.Logger, Logger]] = None):
         self.feature = feature
         self.feature_name = next(iter(self.feature))
         self.rules: Optional[Dict] = self.feature.get(RULES_KEY)
+        self.logger = logger or logging.getLogger(__name__)
 
     def validate(self):
         if not self.rules:
-            logger.debug("Rules are empty, ignoring validation")
+            self.logger.debug("Rules are empty, ignoring validation")
             return
 
         if not isinstance(self.rules, dict):
             raise SchemaValidationError(f"Feature rules must be a dictionary, feature={self.feature_name}")
 
         for rule_name, rule in self.rules.items():
-            logger.debug(f"Attempting to validate rule '{rule_name}'")
+            self.logger.debug(f"Attempting to validate rule '{rule_name}'")
             self.validate_rule(rule=rule, rule_name=rule_name, feature_name=self.feature_name)
             conditions = ConditionsValidator(rule=rule, rule_name=rule_name)
             conditions.validate()
@@ -189,15 +191,18 @@ class RulesValidator(BaseValidator):
 
 
 class ConditionsValidator(BaseValidator):
-    def __init__(self, rule: Dict[str, Any], rule_name: str):
+    def __init__(self, rule: Dict[str, Any], rule_name: str, logger: Optional[Union[logging.Logger, Logger]] = None):
         self.conditions: List[Dict[str, Any]] = rule.get(CONDITIONS_KEY, {})
         self.rule_name = rule_name
+        self.logger = logger or logging.getLogger(__name__)
 
     def validate(self):
         if not self.conditions or not isinstance(self.conditions, list):
             raise SchemaValidationError(f"Invalid condition, rule={self.rule_name}")
 
         for condition in self.conditions:
+            # Condition can contain PII data; do not log condition value
+            self.logger.debug(f"Attempting to validate condition for '{self.rule_name}'")
             self.validate_condition(rule_name=self.rule_name, condition=condition)
 
     @staticmethod
@@ -205,8 +210,6 @@ class ConditionsValidator(BaseValidator):
         if not condition or not isinstance(condition, dict):
             raise SchemaValidationError(f"Feature rule condition must be a dictionary, rule={rule_name}")
 
-        # Condition can contain PII data; do not log condition value
-        logger.debug(f"Attempting to validate condition for '{rule_name}'")
         ConditionsValidator.validate_condition_action(condition=condition, rule_name=rule_name)
         ConditionsValidator.validate_condition_key(condition=condition, rule_name=rule_name)
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
