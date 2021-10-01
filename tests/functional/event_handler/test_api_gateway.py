@@ -13,6 +13,7 @@ import pytest
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.api_gateway import (
     ApiGatewayResolver,
+    Blueprint,
     CORSConfig,
     ProxyEventType,
     Response,
@@ -856,6 +857,24 @@ def test_api_gateway_request_path_equals_strip_prefix():
     # WHEN calling the event handler
     # WITH a route "/"
     result = app(event, {})
+
+    # THEN process event correctly
+    assert result["statusCode"] == 200
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+
+
+def test_api_gateway_app_proxy():
+    # GIVEN a Blueprint with registered routes
+    app = ApiGatewayResolver()
+    blueprint = Blueprint()
+
+    @blueprint.get("/my/path")
+    def foo(app):
+        return {}
+
+    blueprint.register_to_app(app)
+    # WHEN calling the event handler after applying routes from blueprint object
+    result = app(LOAD_GW_EVENT, {})
 
     # THEN process event correctly
     assert result["statusCode"] == 200

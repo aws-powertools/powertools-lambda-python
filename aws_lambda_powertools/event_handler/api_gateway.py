@@ -631,41 +631,57 @@ class ApiGatewayResolver:
     def _json_dump(self, obj: Any) -> str:
         return self._serializer(obj)
 
-class Blueprint():
+
+class Blueprint:
     """Blueprint helper class to allow splitting ApiGatewayResolver into multiple files"""
+
     def __init__(self):
         self._api: Dict[tuple, Callable] = {}
 
-    def __call__(self, rule: str, method: Union[str, Tuple[str], List[str]], cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None,):
+    def route(
+        self,
+        rule: str,
+        method: Union[str, Tuple[str], List[str]],
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+    ):
         def actual_decorator(func: Callable):
             @wraps(func)
             def wrapper(app: ApiGatewayResolver):
                 def inner_wrapper():
                     return func(app)
+
                 return inner_wrapper
+
             if isinstance(method, (list, tuple)):
                 for item in method:
                     self._api[(rule, item, cors, compress, cache_control)] = wrapper
             else:
                 self._api[(rule, method, cors, compress, cache_control)] = wrapper
+
         return actual_decorator
 
     def get(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
-        return self.__call__(rule, "GET", cors, compress, cache_control)
+        return self.route(rule, "GET", cors, compress, cache_control)
 
     def post(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
-        return self.__call__(rule, "POST", cors, compress, cache_control)
+        return self.route(rule, "POST", cors, compress, cache_control)
 
     def put(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
-        return self.__call__(rule, "PUT", cors, compress, cache_control)
+        return self.route(rule, "PUT", cors, compress, cache_control)
 
-    def delete(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
-        return self.__call__(rule, "DELETE", cors, compress, cache_control)
+    def delete(
+        self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
+    ):
+        return self.route(rule, "DELETE", cors, compress, cache_control)
 
-    def patch(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
-        return self.__call__(rule, "PATCH", cors, compress, cache_control)
+    def patch(
+        self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
+    ):
+        return self.route(rule, "PATCH", cors, compress, cache_control)
 
-    def register_to_app(self, app:ApiGatewayResolver):
+    def register_to_app(self, app: ApiGatewayResolver):
         """Bind a blueprint object to an existing ApiGatewayResolver instance"""
         for route, func in self._api.items():
             app.route(*route)(func(app=app))
