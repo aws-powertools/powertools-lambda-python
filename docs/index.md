@@ -126,7 +126,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 
 === "Terraform"
 
-    ```terraform hl_lines="24-25"
+    ```terraform hl_lines="12-13 15-20 23-25"
     terraform {
       required_version = "~> 0.13"
       required_providers {
@@ -161,7 +161,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
     }
 
     output "deployed_powertools_sar_version" {
-      value = data.aws_serverlessapplicationrepository_application.app.semantic_version
+      value = data.aws_serverlessapplicationrepository_application.sar_app.semantic_version
     }
     ```
 
