@@ -58,14 +58,14 @@ class SecretsProvider(BaseProvider):
 
     client: Any = None
 
-    def __init__(self, config: Optional[Config] = None):
+    def __init__(self, config: Optional[Config] = None, boto3_session: Optional[boto3.session.Session] = None):
         """
         Initialize the Secrets Manager client
         """
 
         config = config or Config()
-
-        self.client = boto3.client("secretsmanager", config=config)
+        session = boto3_session or boto3.session.Session()
+        self.client = session.client("secretsmanager", config=config)
 
         super().__init__()
 

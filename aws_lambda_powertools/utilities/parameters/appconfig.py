@@ -60,13 +60,20 @@ class AppConfigProvider(BaseProvider):
 
     client: Any = None
 
-    def __init__(self, environment: str, application: Optional[str] = None, config: Optional[Config] = None):
+    def __init__(
+        self,
+        environment: str,
+        application: Optional[str] = None,
+        config: Optional[Config] = None,
+        boto3_session: Optional[boto3.session.Session] = None,
+    ):
         """
         Initialize the App Config client
         """
 
         config = config or Config()
-        self.client = boto3.client("appconfig", config=config)
+        session = boto3_session or boto3.session.Session()
+        self.client = session.client("appconfig", config=config)
         self.application = resolve_env_var_choice(
             choice=application, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
         )

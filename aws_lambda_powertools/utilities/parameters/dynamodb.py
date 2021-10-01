@@ -149,13 +149,16 @@ class DynamoDBProvider(BaseProvider):
         value_attr: str = "value",
         endpoint_url: Optional[str] = None,
         config: Optional[Config] = None,
+        boto3_session: Optional[boto3.session.Session] = None,
     ):
         """
         Initialize the DynamoDB client
         """
 
         config = config or Config()
-        self.table = boto3.resource("dynamodb", endpoint_url=endpoint_url, config=config).Table(table_name)
+        session = boto3_session or boto3.session.Session()
+
+        self.table = session.resource("dynamodb", endpoint_url=endpoint_url, config=config).Table(table_name)
 
         self.key_attr = key_attr
         self.sort_attr = sort_attr
