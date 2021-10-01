@@ -126,6 +126,8 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 
 === "Terraform"
 
+	> Credits to [Dani Comnea](https://github.com/DanyC97) for providing the Terraform equivalent.
+
     ```terraform hl_lines="12-13 15-20 23-25 40"
     terraform {
       required_version = "~> 0.13"
