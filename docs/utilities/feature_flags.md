@@ -650,3 +650,11 @@ Method | When to use | Requires new deployment on changes | Supported services
 **[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment. | Yes | Lambda
 **[Parameters utility](parameters.md)** | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No | Parameter Store, DynamoDB, Secrets Manager, AppConfig
 **Feature flags utility** | Rule engine to define when one or multiple features should be enabled depending on the input. | No | AppConfig
+
+
+## Deprecation list when GA
+
+Breaking change | Recommendation
+------------------------------------------------- | ---------------------------------------------------------------------------------
+`IN` RuleAction | Use `KEY_IN_VALUE` instead
+`NOT_IN` RuleAction | Use `KEY_NOT_IN_VALUE` instead
