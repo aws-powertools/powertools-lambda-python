@@ -450,7 +450,7 @@ The `conditions` block is a list of conditions that contain `action`, `key`, and
     }
     ```
 
-The `action` configuration can have 5 different values: `EQUALS`, `STARTSWITH`, `ENDSWITH`, `IN`, `NOT_IN`.
+The `action` configuration can have ten different values: `EQUALS`, `NOT_EQUAL`, `KEY_GREATER_THAN_VALUE`, `KEY_GREATER_THAN_OR_EQUAL_VALUE`, `KEY_LESS_THAN_VALUE`, `KEY_LESS_THAN_OR_EQUAL_VALUE`, `STARTSWITH`, `ENDSWITH`, `IN`, or `NOT_IN`.
 
 The `key` and `value` will be compared to the input from the context parameter.
 
