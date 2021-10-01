@@ -1,15 +1,14 @@
 import logging
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
+from ... import Logger
 from . import schema
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError
 
-logger = logging.getLogger(__name__)
-
 
 class FeatureFlags:
-    def __init__(self, store: StoreProvider):
+    def __init__(self, store: StoreProvider, logger: Optional[Union[logging.Logger, Logger]] = None):
         """Evaluates whether feature flags should be enabled based on a given context.
 
         It uses the provided store to fetch feature flag rules before evaluating them.
@@ -35,11 +34,13 @@ class FeatureFlags:
         ----------
         store: StoreProvider
             Store to use to fetch feature flag schema configuration.
+        logger: A logging object
+            Used to log messages. If None is supplied, one will be created.
         """
         self.store = store
+        self.logger = logger or logging.getLogger(__name__)
 
-    @staticmethod
-    def _match_by_action(action: str, condition_value: Any, context_value: Any) -> bool:
+    def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
         if not context_value:
             return False
         mapping_by_action = {
@@ -58,7 +59,7 @@ class FeatureFlags:
             func = mapping_by_action.get(action, lambda a, b: False)
             return func(context_value, condition_value)
         except Exception as exc:
-            logger.debug(f"caught exception while matching action: action={action}, exception={str(exc)}")
+            self.logger.debug(f"caught exception while matching action: action={action}, exception={str(exc)}")
             return False
 
     def _evaluate_conditions(
@@ -69,7 +70,7 @@ class FeatureFlags:
         conditions = cast(List[Dict], rule.get(schema.CONDITIONS_KEY))
 
         if not conditions:
-            logger.debug(
+            self.logger.debug(
                 f"rule did not match, no conditions to match, rule_name={rule_name}, rule_value={rule_match_value}, "
                 f"name={feature_name} "
             )
@@ -81,13 +82,13 @@ class FeatureFlags:
             cond_value = condition.get(schema.CONDITION_VALUE)
 
             if not self._match_by_action(action=cond_action, condition_value=cond_value, context_value=context_value):
-                logger.debug(
+                self.logger.debug(
                     f"rule did not match action, rule_name={rule_name}, rule_value={rule_match_value}, "
                     f"name={feature_name}, context_value={str(context_value)} "
                 )
                 return False  # context doesn't match condition
 
-        logger.debug(f"rule matched, rule_name={rule_name}, rule_value={rule_match_value}, name={feature_name}")
+        self.logger.debug(f"rule matched, rule_name={rule_name}, rule_value={rule_match_value}, name={feature_name}")
         return True
 
     def _evaluate_rules(
@@ -98,12 +99,14 @@ class FeatureFlags:
             rule_match_value = rule.get(schema.RULE_MATCH_VALUE)
 
             # Context might contain PII data; do not log its value
-            logger.debug(f"Evaluating rule matching, rule={rule_name}, feature={feature_name}, default={feat_default}")
+            self.logger.debug(
+                f"Evaluating rule matching, rule={rule_name}, feature={feature_name}, default={feat_default}"
+            )
             if self._evaluate_conditions(rule_name=rule_name, feature_name=feature_name, rule=rule, context=context):
                 return bool(rule_match_value)
 
         # no rule matched, return default value of feature
-        logger.debug(f"no rule matched, returning feature default, default={feat_default}, name={feature_name}")
+        self.logger.debug(f"no rule matched, returning feature default, default={feat_default}, name={feature_name}")
         return feat_default
 
     def get_configuration(self) -> Dict:
@@ -149,7 +152,7 @@ class FeatureFlags:
         ```
         """
         # parse result conf as JSON, keep in cache for max age defined in store
-        logger.debug(f"Fetching schema from registered store, store={self.store}")
+        self.logger.debug(f"Fetching schema from registered store, store={self.store}")
         config: Dict = self.store.get_configuration()
         validator = schema.SchemaValidator(schema=config)
         validator.validate()
@@ -193,21 +196,21 @@ class FeatureFlags:
         try:
             features = self.get_configuration()
         except ConfigurationStoreError as err:
-            logger.debug(f"Failed to fetch feature flags from store, returning default provided, reason={err}")
+            self.logger.debug(f"Failed to fetch feature flags from store, returning default provided, reason={err}")
             return default
 
         feature = features.get(name)
         if feature is None:
-            logger.debug(f"Feature not found; returning default provided, name={name}, default={default}")
+            self.logger.debug(f"Feature not found; returning default provided, name={name}, default={default}")
             return default
 
         rules = feature.get(schema.RULES_KEY)
         feat_default = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
         if not rules:
-            logger.debug(f"no rules found, returning feature default, name={name}, default={feat_default}")
+            self.logger.debug(f"no rules found, returning feature default, name={name}, default={feat_default}")
             return bool(feat_default)
 
-        logger.debug(f"looking for rule match, name={name}, default={feat_default}")
+        self.logger.debug(f"looking for rule match, name={name}, default={feat_default}")
         return self._evaluate_rules(feature_name=name, context=context, feat_default=bool(feat_default), rules=rules)
 
     def get_enabled_features(self, *, context: Optional[Dict[str, Any]] = None) -> List[str]:
@@ -244,20 +247,20 @@ class FeatureFlags:
         try:
             features: Dict[str, Any] = self.get_configuration()
         except ConfigurationStoreError as err:
-            logger.debug(f"Failed to fetch feature flags from store, returning empty list, reason={err}")
+            self.logger.debug(f"Failed to fetch feature flags from store, returning empty list, reason={err}")
             return features_enabled
 
-        logger.debug("Evaluating all features")
+        self.logger.debug("Evaluating all features")
         for name, feature in features.items():
             rules = feature.get(schema.RULES_KEY, {})
             feature_default_value = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
             if feature_default_value and not rules:
-                logger.debug(f"feature is enabled by default and has no defined rules, name={name}")
+                self.logger.debug(f"feature is enabled by default and has no defined rules, name={name}")
                 features_enabled.append(name)
             elif self._evaluate_rules(
                 feature_name=name, context=context, feat_default=feature_default_value, rules=rules
             ):
-                logger.debug(f"feature's calculated value is True, name={name}")
+                self.logger.debug(f"feature's calculated value is True, name={name}")
                 features_enabled.append(name)
 
         return features_enabled

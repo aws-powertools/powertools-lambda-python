@@ -1,16 +1,15 @@
 import logging
 import traceback
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Optional, Union, cast
 
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities.parameters import AppConfigProvider, GetParameterError, TransformParameterError
 
+from ... import Logger
 from ...shared import jmespath_utils
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError, StoreClientError
-
-logger = logging.getLogger(__name__)
 
 TRANSFORM_TYPE = "json"
 
@@ -25,6 +24,7 @@ class AppConfigStore(StoreProvider):
         sdk_config: Optional[Config] = None,
         envelope: Optional[str] = "",
         jmespath_options: Optional[Dict] = None,
+        logger: Optional[Union[logging.Logger, Logger]] = None,
     ):
         """This class fetches JSON schemas from AWS AppConfig
 
@@ -44,8 +44,11 @@ class AppConfigStore(StoreProvider):
             JMESPath expression to pluck feature flags data from config
         jmespath_options : Optional[Dict]
             Alternative JMESPath options to be included when filtering expr
+        logger: A logging object
+            Used to log messages. If None is supplied, one will be created.
         """
         super().__init__()
+        self.logger = logger or logging.getLogger(__name__)
         self.environment = environment
         self.application = application
         self.name = name
@@ -60,6 +63,9 @@ class AppConfigStore(StoreProvider):
         """Fetch feature schema configuration from AWS AppConfig"""
         try:
             # parse result conf as JSON, keep in cache for self.max_age seconds
+            self.logger.debug(
+                "Fetching configuration from the store", extra={"param_name": self.name, "max_age": self.cache_seconds}
+            )
             return cast(
                 dict,
                 self._conf_store.get(
@@ -93,6 +99,7 @@ class AppConfigStore(StoreProvider):
         config = self.get_raw_configuration
 
         if self.envelope:
+            self.logger.debug("Envelope enabled; extracting data from config", extra={"envelope": self.envelope})
             config = jmespath_utils.extract_data_from_envelope(
                 data=config, envelope=self.envelope, jmespath_options=self.jmespath_options
             )
