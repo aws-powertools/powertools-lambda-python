@@ -903,3 +903,42 @@ def test_api_gateway_app_proxy_with_params():
     # THEN process event correctly
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+
+
+def test_api_gateway_app_proxy_with_prefix():
+    # GIVEN a Blueprint with registered routes
+    # AND a prefix is defined during the registration
+    app = ApiGatewayResolver()
+    blueprint = Blueprint()
+
+    @blueprint.get(rule="/path")
+    def foo(app: ApiGatewayResolver):
+        return {}
+
+    app.register_blueprint(blueprint, prefix="/my")
+    # WHEN calling the event handler after applying routes from blueprint object
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN process event correctly
+    assert result["statusCode"] == 200
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+
+
+def test_api_gateway_app_proxy_with_prefix_equals_path():
+    # GIVEN a Blueprint with registered routes
+    # AND a prefix is defined during the registration
+    app = ApiGatewayResolver()
+    blueprint = Blueprint()
+
+    @blueprint.get(rule="/")
+    def foo(app: ApiGatewayResolver):
+        return {}
+
+    app.register_blueprint(blueprint, prefix="/my/path")
+    # WHEN calling the event handler after applying routes from blueprint object
+    # WITH the request path matching the registration prefix
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN process event correctly
+    assert result["statusCode"] == 200
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON

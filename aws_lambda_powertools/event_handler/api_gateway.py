@@ -631,9 +631,13 @@ class ApiGatewayResolver:
     def _json_dump(self, obj: Any) -> str:
         return self._serializer(obj)
 
-    def register_blueprint(self, blueprint: "Blueprint") -> None:
+    def register_blueprint(self, blueprint: "Blueprint", prefix: Optional[str] = None) -> None:
         """Adds all routes defined in a blueprint"""
         for route, func in blueprint.api.items():
+            if prefix and route[0] == "/":
+                route = (prefix, *route[1:])
+            elif prefix:
+                route = (f"{prefix}{route[0]}" if prefix else route[0], *route[1:])
             self.route(*route)(func(app=self))
 
 
