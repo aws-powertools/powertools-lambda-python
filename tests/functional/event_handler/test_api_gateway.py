@@ -879,3 +879,27 @@ def test_api_gateway_app_proxy():
     # THEN process event correctly
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+
+
+def test_api_gateway_app_proxy_with_params():
+    # GIVEN a Blueprint with registered routes
+    app = ApiGatewayResolver()
+    blueprint = Blueprint()
+    req = "foo"
+    event = deepcopy(LOAD_GW_EVENT)
+    event["resource"] = "/accounts/{account_id}"
+    event["path"] = f"/accounts/{req}"
+
+    @blueprint.route(rule="/accounts/<account_id>", method=["GET", "POST"])
+    def foo(app: ApiGatewayResolver, account_id):
+        assert app.current_event.raw_event == event
+        assert account_id == f"{req}"
+        return {}
+
+    app.register_blueprint(blueprint)
+    # WHEN calling the event handler after applying routes from blueprint object
+    result = app(event, {})
+
+    # THEN process event correctly
+    assert result["statusCode"] == 200
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
