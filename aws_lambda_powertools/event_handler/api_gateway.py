@@ -654,8 +654,8 @@ class Blueprint:
         def actual_decorator(func: Callable):
             @wraps(func)
             def wrapper(app: ApiGatewayResolver):
-                def inner_wrapper():
-                    return func(app)
+                def inner_wrapper(**kwargs):
+                    return func(app, **kwargs)
 
                 return inner_wrapper
 
