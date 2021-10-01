@@ -795,7 +795,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 
     @idempotent(persistence_store=persistence_layer)
     def handler(event, context):
-    print('expensive operation')
+        print('expensive operation')
         return {
             "payment_id": 12345,
             "message": "success",
@@ -819,7 +819,7 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
         resource = boto3.resource("dynamodb", endpoint_url='http://localhost:8000')
         table = resource.Table(app.persistence_layer.table_name)
         app.persistence_layer.table = table
-    
+
         result = app.handler({'testkey': 'testvalue'}, {})
         assert result['payment_id'] == 12345
     ```
@@ -835,7 +835,7 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
 
     @idempotent(persistence_store=persistence_layer)
     def handler(event, context):
-    print('expensive operation')
+        print('expensive operation')
         return {
             "payment_id": 12345,
             "message": "success",
@@ -874,7 +874,7 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 
     @idempotent(persistence_store=persistence_layer)
     def handler(event, context):
-    print('expensive operation')
+        print('expensive operation')
         return {
             "payment_id": 12345,
             "message": "success",
