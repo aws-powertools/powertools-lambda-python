@@ -126,7 +126,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 
 === "Terraform"
 
-    ```terraform hl_lines="12-13 15-20 23-25"
+    ```terraform hl_lines="12-13 15-20 23-25 40"
     terraform {
       required_version = "~> 0.13"
       required_providers {
@@ -163,6 +163,11 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
     output "deployed_powertools_sar_version" {
       value = data.aws_serverlessapplicationrepository_application.sar_app.semantic_version
     }
+
+	# Fetch Lambda Powertools Layer ARN from deployed SAR App
+	output "aws_lambda_powertools_layer_arn" {
+	  value = aws_serverlessapplicationrepository_cloudformation_stack.deploy_sar_stack.outputs.LayerVersionArn
+	}
     ```
 
 ??? tip "Example of least-privileged IAM permissions to deploy Layer"
