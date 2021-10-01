@@ -1087,7 +1087,7 @@ def test_flags_greater_than_or_equal_no_match(mocker, config):
         }
     }
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
-    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.12.25"}, default=False)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.04.01"}, default=False)
     assert toggle == expected_value
 
 def test_flags_greater_than_or_equal_match_1(mocker, config):
@@ -1110,7 +1110,7 @@ def test_flags_greater_than_or_equal_match_1(mocker, config):
         }
     }
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
-    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.04.01"}, default=False)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.12.25"}, default=False)
     assert toggle == expected_value
 
 
