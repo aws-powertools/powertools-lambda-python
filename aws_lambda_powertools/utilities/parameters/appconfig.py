@@ -29,6 +29,8 @@ class AppConfigProvider(BaseProvider):
         Application of the configuration to pass during client initialization
     config: botocore.config.Config, optional
         Botocore configuration to pass during client initialization
+    boto3_session : boto3.session.Session, optional
+            Boto3 session to use for AWS API communication
 
     Example
     -------
@@ -60,13 +62,20 @@ class AppConfigProvider(BaseProvider):
 
     client: Any = None
 
-    def __init__(self, environment: str, application: Optional[str] = None, config: Optional[Config] = None):
+    def __init__(
+        self,
+        environment: str,
+        application: Optional[str] = None,
+        config: Optional[Config] = None,
+        boto3_session: Optional[boto3.session.Session] = None,
+    ):
         """
         Initialize the App Config client
         """
 
         config = config or Config()
-        self.client = boto3.client("appconfig", config=config)
+        session = boto3_session or boto3.session.Session()
+        self.client = session.client("appconfig", config=config)
         self.application = resolve_env_var_choice(
             choice=application, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
         )

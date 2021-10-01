@@ -366,7 +366,7 @@ You can use `get_enabled_features` method for scenarios where you need a list of
                     "when_match": true,
                     "conditions": [
                         {
-                            "action": "IN",
+                            "action": "KEY_IN_VALUE",
                             "key": "CloudFront-Viewer-Country",
                             "value": ["NL", "IE", "UK", "PL", "PT"]
                         }
@@ -450,9 +450,20 @@ The `conditions` block is a list of conditions that contain `action`, `key`, and
     }
     ```
 
-The `action` configuration can have ten different values: `EQUALS`, `NOT_EQUAL`, `KEY_GREATER_THAN_VALUE`, `KEY_GREATER_THAN_OR_EQUAL_VALUE`, `KEY_LESS_THAN_VALUE`, `KEY_LESS_THAN_OR_EQUAL_VALUE`, `STARTSWITH`, `ENDSWITH`, `IN`, or `NOT_IN`.
+The `action` configuration can have the following values, where the expressions **`a`** is the `key` and **`b`** is the `value` above:
 
-The `key` and `value` will be compared to the input from the context parameter.
+Action | Equivalent expression
+------------------------------------------------- | ---------------------------------------------------------------------------------
+**EQUALS** | `lambda a, b: a == b`
+**STARTSWITH** | `lambda a, b: a.startswith(b)`
+**ENDSWITH** | `lambda a, b: a.endswith(b)`
+**KEY_IN_VALUE** | `lambda a, b: a in b`
+**KEY_NOT_IN_VALUE** | `lambda a, b: a not in b`
+**VALUE_IN_KEY** | `lambda a, b: b in a`
+**VALUE_NOT_IN_KEY** | `lambda a, b: b not in a`
+
+
+!!! info "The `**key**` and `**value**` will be compared to the input from the `**context**` parameter."
 
 **For multiple conditions**, we will evaluate the list of conditions as a logical `AND`, so all conditions needs to match to return `when_match` value.
 
@@ -529,6 +540,27 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
     }
     ```
 
+### Getting fetched configuration
+
+You can access the configuration fetched from the store via `get_raw_configuration` property within the store instance.
+
+=== "app.py"
+
+    ```python hl_lines="12"
+    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+
+    app_config = AppConfigStore(
+        environment="dev",
+        application="product-catalogue",
+        name="configuration",
+        envelope = "feature_flags"
+    )
+
+	feature_flags = FeatureFlags(store=app_config)
+
+	config = app_config.get_raw_configuration
+    ```
+
 ### Built-in store provider
 
 !!! info "For GA, you'll be able to bring your own store."
@@ -548,6 +580,7 @@ Parameter | Default | Description
 **max_age** | `5` | Number of seconds to cache feature flags configuration fetched from AWS AppConfig
 **sdk_config** | `None` | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}
 **jmespath_options** | `None` | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"}
+**logger** | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools Logger.
 
 === "appconfig_store_example.py"
 
@@ -650,3 +683,11 @@ Method | When to use | Requires new deployment on changes | Supported services
 **[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment. | Yes | Lambda
 **[Parameters utility](parameters.md)** | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No | Parameter Store, DynamoDB, Secrets Manager, AppConfig
 **Feature flags utility** | Rule engine to define when one or multiple features should be enabled depending on the input. | No | AppConfig
+
+
+## Deprecation list when GA
+
+Breaking change | Recommendation
+------------------------------------------------- | ---------------------------------------------------------------------------------
+`IN` RuleAction | Use `KEY_IN_VALUE` instead
+`NOT_IN` RuleAction | Use `KEY_NOT_IN_VALUE` instead
