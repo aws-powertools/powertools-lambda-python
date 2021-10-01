@@ -30,6 +30,8 @@ class DynamoDBProvider(BaseProvider):
         Complete url to reference local DynamoDB instance, e.g. http://localhost:8080
     config: botocore.config.Config, optional
         Botocore configuration to pass during client initialization
+    boto3_session : boto3.session.Session, optional
+            Boto3 session to use for AWS API communication
 
     Example
     -------
