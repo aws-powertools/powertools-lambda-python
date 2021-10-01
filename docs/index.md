@@ -126,7 +126,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 
 === "Terraform"
 
-    ```ruby hl_lines="24-25"
+    ```terraform hl_lines="24-25"
     terraform {
       required_version = "~> 0.13"
       required_providers {
