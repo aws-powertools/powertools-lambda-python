@@ -548,7 +548,7 @@ This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`
 
 ### Customizing boto configuration
 
-You can provide a custom boto configuration via **`boto_config`**, or an existing boto session via **`boto3_session`** parameters, when constructing the persistence store.
+The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html) when constructing the persistence store.
 
 === "Custom session"
 
@@ -764,6 +764,123 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
 
 !!! tip "JMESPath Powertools functions are also available"
     Built-in functions known in the validation utility like `powertools_json`, `powertools_base64`, `powertools_base64_gzip` are also available to use in this utility.
+
+
+## Testing your code
+
+The idempotency utility provides several routes to test your code.
+
+### Disabling the idempotency utility
+When testing your code, you may wish to disable the idempotency logic altogether and focus on testing your business logic. To do this, you can set the environment variable `POWERTOOLS_IDEMPOTENCY_DISABLED`
+with a truthy value. If you prefer setting this for specific tests, and are using Pytest, you can use [monkeypatch](https://docs.pytest.org/en/latest/monkeypatch.html) fixture:
+
+=== "tests.py"
+
+    ```python hl_lines="2 3"
+    def test_idempotent_lambda_handler(monkeypatch):
+        # Set POWERTOOLS_IDEMPOTENCY_DISABLED before calling decorated functions
+        monkeypatch.setenv("POWERTOOLS_IDEMPOTENCY_DISABLED", 1)
+
+        result = handler()
+        ...
+    ```
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.idempotency import (
+    DynamoDBPersistenceLayer, idempotent
+    )
+
+    persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency")
+
+    @idempotent(persistence_store=persistence_layer)
+    def handler(event, context):
+        print('expensive operation')
+        return {
+            "payment_id": 12345,
+            "message": "success",
+            "statusCode": 200,
+        }
+    ```
+
+### Testing with DynamoDB Local
+
+To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html), you can replace the `Table` resource used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
+
+=== "tests.py"
+
+    ```python hl_lines="6 7 8"
+    import boto3
+
+    import app
+
+    def test_idempotent_lambda():
+        # Create our own Table resource using the endpoint for our DynamoDB Local instance
+        resource = boto3.resource("dynamodb", endpoint_url='http://localhost:8000')
+        table = resource.Table(app.persistence_layer.table_name)
+        app.persistence_layer.table = table
+
+        result = app.handler({'testkey': 'testvalue'}, {})
+        assert result['payment_id'] == 12345
+    ```
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.idempotency import (
+    DynamoDBPersistenceLayer, idempotent
+    )
+
+    persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency")
+
+    @idempotent(persistence_store=persistence_layer)
+    def handler(event, context):
+        print('expensive operation')
+        return {
+            "payment_id": 12345,
+            "message": "success",
+            "statusCode": 200,
+        }
+    ```
+
+### How do I mock all DynamoDB I/O operations
+
+The idempotency utility lazily creates the dynamodb [Table](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table) which it uses to access DynamoDB.
+This means it is possible to pass a mocked Table resource, or stub various methods.
+
+=== "tests.py"
+
+    ```python hl_lines="6 7 8 9"
+    from unittest.mock import MagicMock
+
+    import app
+
+    def test_idempotent_lambda():
+        table = MagicMock()
+        app.persistence_layer.table = table
+        result = app.handler({'testkey': 'testvalue'}, {})
+        table.put_item.assert_called()
+        ...
+    ```
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.idempotency import (
+    DynamoDBPersistenceLayer, idempotent
+    )
+
+    persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency")
+
+    @idempotent(persistence_store=persistence_layer)
+    def handler(event, context):
+        print('expensive operation')
+        return {
+            "payment_id": 12345,
+            "message": "success",
+            "statusCode": 200,
+        }
+    ```
 
 ## Extra resources
 

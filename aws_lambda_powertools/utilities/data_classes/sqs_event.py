@@ -75,9 +75,9 @@ class SQSMessageAttribute(DictWrapper):
 
 
 class SQSMessageAttributes(Dict[str, SQSMessageAttribute]):
-    def __getitem__(self, key: str) -> Optional[SQSMessageAttribute]:
+    def __getitem__(self, key: str) -> Optional[SQSMessageAttribute]:  # type: ignore
         item = super(SQSMessageAttributes, self).get(key)
-        return None if item is None else SQSMessageAttribute(item)
+        return None if item is None else SQSMessageAttribute(item)  # type: ignore
 
 
 class SQSRecord(DictWrapper):

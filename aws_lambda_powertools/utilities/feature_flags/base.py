@@ -3,9 +3,18 @@ from typing import Any, Dict
 
 
 class StoreProvider(ABC):
+    @property
+    @abstractmethod
+    def get_raw_configuration(self) -> Dict[str, Any]:
+        """Get configuration from any store and return the parsed JSON dictionary"""
+        raise NotImplementedError()  # pragma: no cover
+
     @abstractmethod
     def get_configuration(self) -> Dict[str, Any]:
         """Get configuration from any store and return the parsed JSON dictionary
+
+        If envelope is set, it'll extract and return feature flags from configuration,
+        otherwise it'll return the entire configuration fetched from the store.
 
         Raises
         ------
@@ -42,10 +51,10 @@ class StoreProvider(ABC):
         }
         ```
         """
-        return NotImplemented  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
 
 class BaseValidator(ABC):
     @abstractmethod
     def validate(self):
-        return NotImplemented  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover

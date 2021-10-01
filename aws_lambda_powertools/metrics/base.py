@@ -90,7 +90,7 @@ class MetricManager:
         self._metric_unit_options = list(MetricUnit.__members__)
         self.metadata_set = metadata_set if metadata_set is not None else {}
 
-    def add_metric(self, name: str, unit: Union[MetricUnit, str], value: float):
+    def add_metric(self, name: str, unit: Union[MetricUnit, str], value: float) -> None:
         """Adds given metric
 
         Example
@@ -215,7 +215,7 @@ class MetricManager:
             **metric_names_and_values,  # "single_metric": 1.0
         }
 
-    def add_dimension(self, name: str, value: str):
+    def add_dimension(self, name: str, value: str) -> None:
         """Adds given dimension to all metrics
 
         Example
@@ -241,7 +241,7 @@ class MetricManager:
         # checking before casting improves performance in most cases
         self.dimension_set[name] = value if isinstance(value, str) else str(value)
 
-    def add_metadata(self, key: str, value: Any):
+    def add_metadata(self, key: str, value: Any) -> None:
         """Adds high cardinal metadata for metrics object
 
         This will not be available during metrics visualization.

@@ -118,7 +118,7 @@ def lambda_handler_decorator(decorator: Optional[Callable] = None, trace_executi
         if not inspect.isfunction(func):
             # @custom_middleware(True) vs @custom_middleware(log_event=True)
             raise MiddlewareInvalidArgumentError(
-                f"Only keyword arguments is supported for middlewares: {decorator.__qualname__} received {func}"
+                f"Only keyword arguments is supported for middlewares: {decorator.__qualname__} received {func}"  # type: ignore # noqa: E501
             )
 
         @functools.wraps(func)

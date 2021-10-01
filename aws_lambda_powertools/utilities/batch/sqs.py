@@ -31,6 +31,8 @@ class PartialSQSProcessor(BasePartialProcessor):
         botocore config object
     suppress_exception: bool, optional
         Supress exception raised if any messages fail processing, by default False
+    boto3_session : boto3.session.Session, optional
+            Boto3 session to use for AWS API communication
 
 
     Example
@@ -56,12 +58,18 @@ class PartialSQSProcessor(BasePartialProcessor):
 
     """
 
-    def __init__(self, config: Optional[Config] = None, suppress_exception: bool = False):
+    def __init__(
+        self,
+        config: Optional[Config] = None,
+        suppress_exception: bool = False,
+        boto3_session: Optional[boto3.session.Session] = None,
+    ):
         """
         Initializes sqs client.
         """
         config = config or Config()
-        self.client = boto3.client("sqs", config=config)
+        session = boto3_session or boto3.session.Session()
+        self.client = session.client("sqs", config=config)
         self.suppress_exception = suppress_exception
 
         super().__init__()
@@ -142,6 +150,7 @@ def sqs_batch_processor(
     record_handler: Callable,
     config: Optional[Config] = None,
     suppress_exception: bool = False,
+    boto3_session: Optional[boto3.session.Session] = None,
 ):
     """
     Middleware to handle SQS batch event processing
@@ -160,6 +169,8 @@ def sqs_batch_processor(
             botocore config object
     suppress_exception: bool, optional
         Supress exception raised if any messages fail processing, by default False
+    boto3_session : boto3.session.Session, optional
+            Boto3 session to use for AWS API communication
 
     Examples
     --------
@@ -180,7 +191,9 @@ def sqs_batch_processor(
 
     """
     config = config or Config()
-    processor = PartialSQSProcessor(config=config, suppress_exception=suppress_exception)
+    session = boto3_session or boto3.session.Session()
+
+    processor = PartialSQSProcessor(config=config, suppress_exception=suppress_exception, boto3_session=session)
 
     records = event["Records"]
 
