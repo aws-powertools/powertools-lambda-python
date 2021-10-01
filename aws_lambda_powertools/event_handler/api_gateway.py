@@ -637,7 +637,7 @@ class ApiGatewayResolver:
             if prefix and route[0] == "/":
                 route = (prefix, *route[1:])
             elif prefix:
-                route = (f"{prefix}{route[0]}" if prefix else route[0], *route[1:])
+                route = (f"{prefix}{route[0]}", *route[1:])
             self.route(*route)(func(app=self))
 
 
