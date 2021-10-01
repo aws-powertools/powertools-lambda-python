@@ -111,7 +111,7 @@ class SchemaValidator(BaseValidator):
             self.logger = logger
 
     def validate(self) -> None:
-        self.loggerdebug("Validating schema")
+        self.logger.debug("Validating schema")
         if not isinstance(self.schema, dict):
             raise SchemaValidationError(f"Features must be a dictionary, schema={str(self.schema)}")
 
@@ -127,7 +127,7 @@ class FeaturesValidator(BaseValidator):
 
     def validate(self):
         for name, feature in self.schema.items():
-            self.loggerdebug(f"Attempting to validate feature '{name}'")
+            self.logger.debug(f"Attempting to validate feature '{name}'")
             self.validate_feature(name, feature)
             rules = RulesValidator(feature=feature)
             rules.validate()
@@ -152,14 +152,14 @@ class RulesValidator(BaseValidator):
 
     def validate(self):
         if not self.rules:
-            self.loggerdebug("Rules are empty, ignoring validation")
+            self.logger.debug("Rules are empty, ignoring validation")
             return
 
         if not isinstance(self.rules, dict):
             raise SchemaValidationError(f"Feature rules must be a dictionary, feature={self.feature_name}")
 
         for rule_name, rule in self.rules.items():
-            self.loggerdebug(f"Attempting to validate rule '{rule_name}'")
+            self.logger.debug(f"Attempting to validate rule '{rule_name}'")
             self.validate_rule(rule=rule, rule_name=rule_name, feature_name=self.feature_name)
             conditions = ConditionsValidator(rule=rule, rule_name=rule_name)
             conditions.validate()
@@ -201,7 +201,7 @@ class ConditionsValidator(BaseValidator):
             raise SchemaValidationError(f"Feature rule condition must be a dictionary, rule={rule_name}")
 
         # Condition can contain PII data; do not log condition value
-        self.loggerdebug(f"Attempting to validate condition for '{rule_name}'")
+        self.logger.debug(f"Attempting to validate condition for '{rule_name}'")
         ConditionsValidator.validate_condition_action(condition=condition, rule_name=rule_name)
         ConditionsValidator.validate_condition_key(condition=condition, rule_name=rule_name)
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
