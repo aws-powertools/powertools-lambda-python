@@ -505,7 +505,7 @@ Here is the mapping between this utility's functions and methods and the underly
 
 ### Customizing boto configuration
 
-You can provide a custom boto configuration via **`config`**, or use a custom boto session via **`boto3_session`** parameters, when constructing any of the built-in provider classes.
+The **`config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html) when constructing any of the built-in provider classes.
 
 > **Example**
 

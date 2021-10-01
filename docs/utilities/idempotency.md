@@ -548,7 +548,7 @@ This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`
 
 ### Customizing boto configuration
 
-You can provide a custom boto configuration via **`boto_config`**, or an existing boto session via **`boto3_session`** parameters, when constructing the persistence store.
+The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html) when constructing the persistence store.
 
 === "Custom session"
 
