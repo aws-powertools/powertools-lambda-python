@@ -266,7 +266,7 @@ class ApiGatewayResolver:
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[str]] = None,
-        custom_not_found: Union[Callable[[str, str], str], str, None] = None,
+        custom_not_found: Union[Callable[[str, str], Response], Response, None] = None,
     ):
         """
         Parameters
@@ -283,9 +283,9 @@ class ApiGatewayResolver:
         strip_prefixes: List[str], optional
             optional list of prefixes to be removed from the request path before doing the routing. This is often used
             with api gateways with multiple custom mappings.
-        custom_not_found: Callable, str, optional
-            optional string body for 404 Not Found error messages. This can also be a function which accepts the method
-            and path of the request and returns a string.
+        custom_not_found: Callable, Response, optional
+            optional Response to replace 404 Not Found error messages. This can also be a function which accepts the
+            method and path of the request and returns a Response.
         """
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
@@ -581,20 +581,18 @@ class ApiGatewayResolver:
                 return ResponseBuilder(Response(status_code=204, content_type=None, headers=headers, body=None))
 
         if callable(self._custom_not_found):
-            body_content = self._custom_not_found(method, path)
+            response = self._custom_not_found(method, path)
         elif self._custom_not_found:
-            body_content = self._custom_not_found
+            response = self._custom_not_found
         else:
-            body_content = self._json_dump({"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"})
-
-        return ResponseBuilder(
-            Response(
+            response = Response(
                 status_code=HTTPStatus.NOT_FOUND.value,
                 content_type=content_types.APPLICATION_JSON,
                 headers=headers,
-                body=body_content,
+                body=self._json_dump({"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"}),
             )
-        )
+
+        return ResponseBuilder(response)
 
     def _call_route(self, route: Route, args: Dict[str, str]) -> ResponseBuilder:
         """Actually call the matching route with any provided keyword arguments."""

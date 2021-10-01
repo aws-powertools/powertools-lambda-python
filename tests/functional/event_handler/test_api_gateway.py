@@ -864,17 +864,18 @@ def test_api_gateway_request_path_equals_strip_prefix():
 
 def test_custom_not_found_string():
     # GIVEN a resolver with a custom not found string
-    response_body = "foo"
+    response_body = "Forbidden"
+    response = Response(status_code=403, content_type=content_types.TEXT_PLAIN, body=response_body)
 
-    app = ApiGatewayResolver(custom_not_found=response_body)
+    app = ApiGatewayResolver(custom_not_found=response)
 
     # WHEN calling the event handler
     result = app(LOAD_GW_EVENT, {})
 
     # THEN attempt to process th event
     # AND on error return the custom body string
-    assert result["statusCode"] == 404
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["statusCode"] == 403
+    assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
     assert result["body"] == response_body
 
 
@@ -885,7 +886,7 @@ def test_custom_not_found_function():
     def response_body_function(method: str, path: str):
         assert method == "GET"
         assert path == "/my/path"
-        return response_body
+        return Response(status_code=404, content_type=content_types.TEXT_PLAIN, body=response_body)
 
     app = ApiGatewayResolver(custom_not_found=response_body_function)
 
@@ -895,5 +896,5 @@ def test_custom_not_found_function():
     # THEN attempt to process th event
     # AND on error return the custom body string
     assert result["statusCode"] == 404
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
     assert result["body"] == response_body
