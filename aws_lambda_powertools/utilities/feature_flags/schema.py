@@ -201,14 +201,15 @@ class ConditionsValidator(BaseValidator):
             raise SchemaValidationError(f"Invalid condition, rule={self.rule_name}")
 
         for condition in self.conditions:
+            # Condition can contain PII data; do not log condition value
+            self.logger.debug(f"Attempting to validate condition for '{self.rule_name}'")
             self.validate_condition(rule_name=self.rule_name, condition=condition)
 
-    def validate_condition(self, rule_name: str, condition: Dict[str, str]) -> None:
+    @staticmethod
+    def validate_condition(rule_name: str, condition: Dict[str, str]) -> None:
         if not condition or not isinstance(condition, dict):
             raise SchemaValidationError(f"Feature rule condition must be a dictionary, rule={rule_name}")
 
-        # Condition can contain PII data; do not log condition value
-        self.logger.debug(f"Attempting to validate condition for '{rule_name}'")
         ConditionsValidator.validate_condition_action(condition=condition, rule_name=rule_name)
         ConditionsValidator.validate_condition_key(condition=condition, rule_name=rule_name)
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
