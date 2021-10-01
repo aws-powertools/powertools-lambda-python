@@ -1,13 +1,14 @@
 import logging
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
+from ... import Logger
 from . import schema
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError
 
 
 class FeatureFlags:
-    def __init__(self, store: StoreProvider, logger=None):
+    def __init__(self, store: StoreProvider, logger: Optional[Union[logging.Logger, Logger]] = None):
         """Evaluates whether feature flags should be enabled based on a given context.
 
         It uses the provided store to fetch feature flag rules before evaluating them.

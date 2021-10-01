@@ -1,7 +1,8 @@
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
+from ... import Logger
 from .base import BaseValidator
 from .exceptions import SchemaValidationError
 
@@ -109,7 +110,7 @@ class SchemaValidator(BaseValidator):
     ```
     """
 
-    def __init__(self, schema: Dict[str, Any], logger=None):
+    def __init__(self, schema: Dict[str, Any], logger: Optional[Union[logging.Logger, Logger]] = None):
         self.schema = schema
         self.logger = logger or logging.getLogger(__name__)
 
@@ -125,8 +126,9 @@ class SchemaValidator(BaseValidator):
 class FeaturesValidator(BaseValidator):
     """Validates each feature and calls RulesValidator to validate its rules"""
 
-    def __init__(self, schema: Dict):
+    def __init__(self, schema: Dict, logger: Optional[Union[logging.Logger, Logger]] = None):
         self.schema = schema
+        self.logger = logger or logging.getLogger(__name__)
 
     def validate(self):
         for name, feature in self.schema.items():
@@ -148,10 +150,11 @@ class FeaturesValidator(BaseValidator):
 class RulesValidator(BaseValidator):
     """Validates each rule and calls ConditionsValidator to validate each rule's conditions"""
 
-    def __init__(self, feature: Dict[str, Any]):
+    def __init__(self, feature: Dict[str, Any], logger: Optional[Union[logging.Logger, Logger]] = None):
         self.feature = feature
         self.feature_name = next(iter(self.feature))
         self.rules: Optional[Dict] = self.feature.get(RULES_KEY)
+        self.logger = logger or logging.getLogger(__name__)
 
     def validate(self):
         if not self.rules:
@@ -188,9 +191,10 @@ class RulesValidator(BaseValidator):
 
 
 class ConditionsValidator(BaseValidator):
-    def __init__(self, rule: Dict[str, Any], rule_name: str):
+    def __init__(self, rule: Dict[str, Any], rule_name: str, logger: Optional[Union[logging.Logger, Logger]] = None):
         self.conditions: List[Dict[str, Any]] = rule.get(CONDITIONS_KEY, {})
         self.rule_name = rule_name
+        self.logger = logger or logging.getLogger(__name__)
 
     def validate(self):
         if not self.conditions or not isinstance(self.conditions, list):
