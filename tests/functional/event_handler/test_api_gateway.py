@@ -860,3 +860,40 @@ def test_api_gateway_request_path_equals_strip_prefix():
     # THEN process event correctly
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+
+
+def test_custom_not_found_string():
+    # GIVEN a resolver with a custom not found string
+    response_body = "foo"
+
+    app = ApiGatewayResolver(custom_not_found=response_body)
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN attempt to process th event
+    # AND on error return the custom body string
+    assert result["statusCode"] == 404
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["body"] == response_body
+
+
+def test_custom_not_found_function():
+    # GIVEN a resolver with a custom not found as a callable function
+    response_body = "foo"
+
+    def response_body_function(method: str, path: str):
+        assert method == "GET"
+        assert path == "/my/path"
+        return response_body
+
+    app = ApiGatewayResolver(custom_not_found=response_body_function)
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN attempt to process th event
+    # AND on error return the custom body string
+    assert result["statusCode"] == 404
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["body"] == response_body
