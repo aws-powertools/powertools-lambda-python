@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, cast
 
 from . import schema
 from .base import StoreProvider
@@ -36,11 +36,8 @@ class FeatureFlags:
         logger: A logging object
             Used to log messages. If None is supplied, one will be created.
         """
-        self._store = store
-        if logger == None:
-            self.logger = logging.getLogger(__name__)
-        else:
-            self.logger = logger
+        self.store = store
+        self.logger = logger or logging.getLogger(__name__)
 
     def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
         if not context_value:
@@ -51,6 +48,10 @@ class FeatureFlags:
             schema.RuleAction.ENDSWITH.value: lambda a, b: a.endswith(b),
             schema.RuleAction.IN.value: lambda a, b: a in b,
             schema.RuleAction.NOT_IN.value: lambda a, b: a not in b,
+            schema.RuleAction.KEY_IN_VALUE.value: lambda a, b: a in b,
+            schema.RuleAction.KEY_NOT_IN_VALUE.value: lambda a, b: a not in b,
+            schema.RuleAction.VALUE_IN_KEY.value: lambda a, b: b in a,
+            schema.RuleAction.VALUE_NOT_IN_KEY.value: lambda a, b: b not in a,
         }
 
         try:
@@ -97,16 +98,20 @@ class FeatureFlags:
             rule_match_value = rule.get(schema.RULE_MATCH_VALUE)
 
             # Context might contain PII data; do not log its value
-            self.logger.debug(f"Evaluating rule matching, rule={rule_name}, feature={feature_name}, default={feat_default}")
+            self.logger.debug(
+                f"Evaluating rule matching, rule={rule_name}, feature={feature_name}, default={feat_default}"
+            )
             if self._evaluate_conditions(rule_name=rule_name, feature_name=feature_name, rule=rule, context=context):
                 return bool(rule_match_value)
 
             # no rule matched, return default value of feature
-            self.logger.debug(f"no rule matched, returning feature default, default={feat_default}, name={feature_name}")
+            self.logger.debug(
+                f"no rule matched, returning feature default, default={feat_default}, name={feature_name}"
+            )
             return feat_default
         return False
 
-    def get_configuration(self) -> Union[Dict[str, Dict], Dict]:
+    def get_configuration(self) -> Dict:
         """Get validated feature flag schema from configured store.
 
         Largely used to aid testing, since it's called by `evaluate` and `get_enabled_features` methods.
@@ -149,8 +154,8 @@ class FeatureFlags:
         ```
         """
         # parse result conf as JSON, keep in cache for max age defined in store
-        self.logger.debug(f"Fetching schema from registered store, store={self._store}")
-        config = self._store.get_configuration()
+        self.logger.debug(f"Fetching schema from registered store, store={self.store}")
+        config: Dict = self.store.get_configuration()
         validator = schema.SchemaValidator(schema=config)
         validator.validate()
 

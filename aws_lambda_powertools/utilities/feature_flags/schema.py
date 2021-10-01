@@ -20,6 +20,10 @@ class RuleAction(str, Enum):
     ENDSWITH = "ENDSWITH"
     IN = "IN"
     NOT_IN = "NOT_IN"
+    KEY_IN_VALUE = "KEY_IN_VALUE"
+    KEY_NOT_IN_VALUE = "KEY_NOT_IN_VALUE"
+    VALUE_IN_KEY = "VALUE_IN_KEY"
+    VALUE_NOT_IN_KEY = "VALUE_NOT_IN_KEY"
 
 
 class SchemaValidator(BaseValidator):
@@ -78,7 +82,9 @@ class SchemaValidator(BaseValidator):
     The value MUST contain the following members:
 
     * **action**: `str`. Operation to perform to match a key and value.
-    The value MUST be either EQUALS, STARTSWITH, ENDSWITH, IN, NOT_IN
+    The value MUST be either EQUALS, STARTSWITH, ENDSWITH,
+    KEY_IN_VALUE KEY_NOT_IN_VALUE VALUE_IN_KEY VALUE_NOT_IN_KEY
+
     * **key**: `str`. Key in given context to perform operation
     * **value**: `Any`. Value in given context that should match action operation.
 
@@ -105,10 +111,7 @@ class SchemaValidator(BaseValidator):
 
     def __init__(self, schema: Dict[str, Any], logger=None):
         self.schema = schema
-        if logger == None:
-            self.logger = logging.getLogger(__name__)
-        else:
-            self.logger = logger
+        self.logger = logger or logging.getLogger(__name__)
 
     def validate(self) -> None:
         self.logger.debug("Validating schema")
@@ -196,7 +199,7 @@ class ConditionsValidator(BaseValidator):
         for condition in self.conditions:
             self.validate_condition(rule_name=self.rule_name, condition=condition)
 
-    def validate_condition(self,rule_name: str, condition: Dict[str, str]) -> None:
+    def validate_condition(self, rule_name: str, condition: Dict[str, str]) -> None:
         if not condition or not isinstance(condition, dict):
             raise SchemaValidationError(f"Feature rule condition must be a dictionary, rule={rule_name}")
 

@@ -6,22 +6,23 @@ from typing import Any, Dict, Optional, Union
 
 import jmespath
 from jmespath.exceptions import LexerError
+from jmespath.functions import Functions, signature
 
 from aws_lambda_powertools.exceptions import InvalidEnvelopeExpressionError
 
 logger = logging.getLogger(__name__)
 
 
-class PowertoolsFunctions(jmespath.functions.Functions):
-    @jmespath.functions.signature({"types": ["string"]})
+class PowertoolsFunctions(Functions):
+    @signature({"types": ["string"]})
     def _func_powertools_json(self, value):
         return json.loads(value)
 
-    @jmespath.functions.signature({"types": ["string"]})
+    @signature({"types": ["string"]})
     def _func_powertools_base64(self, value):
         return base64.b64decode(value).decode()
 
-    @jmespath.functions.signature({"types": ["string"]})
+    @signature({"types": ["string"]})
     def _func_powertools_base64_gzip(self, value):
         encoded = base64.b64decode(value)
         uncompressed = gzip.decompress(encoded)
