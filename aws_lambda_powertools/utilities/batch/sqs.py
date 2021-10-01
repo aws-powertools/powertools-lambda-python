@@ -31,6 +31,8 @@ class PartialSQSProcessor(BasePartialProcessor):
         botocore config object
     suppress_exception: bool, optional
         Supress exception raised if any messages fail processing, by default False
+    boto3_session : boto3.session.Session, optional
+            Boto3 session to use for AWS API communication
 
 
     Example
@@ -56,12 +58,18 @@ class PartialSQSProcessor(BasePartialProcessor):
 
     """
 
-    def __init__(self, config: Optional[Config] = None, suppress_exception: bool = False):
+    def __init__(
+        self,
+        config: Optional[Config] = None,
+        suppress_exception: bool = False,
+        boto3_session: Optional[boto3.session.Session] = None,
+    ):
         """
         Initializes sqs client.
         """
         config = config or Config()
-        self.client = boto3.client("sqs", config=config)
+        session = boto3_session or boto3.session.Session()
+        self.client = session.client("sqs", config=config)
         self.suppress_exception = suppress_exception
 
         super().__init__()
