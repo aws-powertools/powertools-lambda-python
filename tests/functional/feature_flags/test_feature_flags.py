@@ -397,7 +397,8 @@ def test_flags_no_match_rule_with_not_in_action(mocker, config):
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
     toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
     assert toggle == expected_value
-    
+
+
 def test_flags_match_rule_with_key_in_value_action(mocker, config):
     expected_value = True
     mocked_app_config_schema = {
@@ -492,14 +493,15 @@ def test_flags_no_match_rule_with_key_not_in_value_action(mocker, config):
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
     toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a"}, default=False)
     assert toggle == expected_value
-    
+
+
 def test_flags_match_rule_with_value_in_key_action(mocker, config):
     expected_value = True
     mocked_app_config_schema = {
         "my_feature": {
             "default": False,
             "rules": {
-                "tenant id is contained in [6, 2]": {
+                "user is in the SYSADMIN group": {
                     "when_match": expected_value,
                     "conditions": [
                         {
@@ -513,7 +515,9 @@ def test_flags_match_rule_with_value_in_key_action(mocker, config):
         }
     }
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
-    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a", "groups": ["SYSADMIN", "IT"]}, default=False)
+    toggle = feature_flags.evaluate(
+        name="my_feature", context={"tenant_id": "6", "username": "a", "groups": ["SYSADMIN", "IT"]}, default=False
+    )
     assert toggle == expected_value
 
 
@@ -537,7 +541,9 @@ def test_flags_no_match_rule_with_value_in_key_action(mocker, config):
         }
     }
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
-    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a", "groups": ["SYSADMIN", "IT"]}, default=False)
+    toggle = feature_flags.evaluate(
+        name="my_feature", context={"tenant_id": "6", "username": "a", "groups": ["SYSADMIN", "IT"]}, default=False
+    )
     assert toggle == expected_value
 
 
@@ -547,7 +553,7 @@ def test_flags_match_rule_with_value_not_in_key_action(mocker, config):
         "my_feature": {
             "default": False,
             "rules": {
-                "tenant id is contained in [8, 2]": {
+                "user is in the GUEST group": {
                     "when_match": expected_value,
                     "conditions": [
                         {
@@ -561,7 +567,9 @@ def test_flags_match_rule_with_value_not_in_key_action(mocker, config):
         }
     }
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
-    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a", "groups": ["SYSADMIN", "IT"]}, default=False)
+    toggle = feature_flags.evaluate(
+        name="my_feature", context={"tenant_id": "6", "username": "a", "groups": ["SYSADMIN", "IT"]}, default=False
+    )
     assert toggle == expected_value
 
 
@@ -571,7 +579,7 @@ def test_flags_no_match_rule_with_value_not_in_key_action(mocker, config):
         "my_feature": {
             "default": expected_value,
             "rules": {
-                "tenant id is contained in [8, 2]": {
+                "user is in the SYSADMIN group": {
                     "when_match": True,
                     "conditions": [
                         {
@@ -585,10 +593,10 @@ def test_flags_no_match_rule_with_value_not_in_key_action(mocker, config):
         }
     }
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
-    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "6", "username": "a", "groups": ["SYSADMIN", "IT"]}, default=False)
+    toggle = feature_flags.evaluate(
+        name="my_feature", context={"tenant_id": "6", "username": "a", "groups": ["SYSADMIN", "IT"]}, default=False
+    )
     assert toggle == expected_value
-
-
 
 
 # Check multiple features
