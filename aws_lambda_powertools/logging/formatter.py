@@ -222,7 +222,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         record_dict["asctime"] = self.formatTime(record=log_record, datefmt=self.datefmt)
         extras = {k: v for k, v in record_dict.items() if k not in RESERVED_LOG_ATTRS}
 
-        formatted_log = {**extras}
+        formatted_log = {}
 
         # Iterate over a default or existing log structure
         # then replace any std log attribute e.g. '%(level)s' to 'INFO', '%(process)d to '4773'
@@ -233,6 +233,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             else:
                 formatted_log[key] = value
 
+        formatted_log.update(**extras)
         return formatted_log
 
     @staticmethod
