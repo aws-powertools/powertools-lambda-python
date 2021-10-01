@@ -366,7 +366,7 @@ You can use `get_enabled_features` method for scenarios where you need a list of
                     "when_match": true,
                     "conditions": [
                         {
-                            "action": "IN",
+                            "action": "KEY_IN_VALUE",
                             "key": "CloudFront-Viewer-Country",
                             "value": ["NL", "IE", "UK", "PL", "PT"]
                         }
@@ -450,9 +450,20 @@ The `conditions` block is a list of conditions that contain `action`, `key`, and
     }
     ```
 
-The `action` configuration can have 5 different values: `EQUALS`, `STARTSWITH`, `ENDSWITH`, `KEY_IN_VALUE`, `KEY_NOT_IN_VALUE`, `VALUE_IN_KEY`, and `VALUE_NOT_IN_KEY`.  Note that `IN` and `NOT_IN` are also defined and are synonymous with  `KEY_IN_VALUE` and `KEY_NOT_IN_VALUE` respectively.
+The `action` configuration can have the following values, where the expressions **`a`** is the `key` and **`b`** is the `value` above:
 
-The `key` and `value` will be compared to the input from the context parameter.
+Action | Equivalent expression
+------------------------------------------------- | ---------------------------------------------------------------------------------
+**EQUALS** | `lambda a, b: a == b`
+**STARTSWITH** | `lambda a, b: a.startswith(b)`
+**ENDSWITH** | `lambda a, b: a.endswith(b)`
+**KEY_IN_VALUE** | `lambda a, b: a in b`
+**KEY_NOT_IN_VALUE** | `lambda a, b: a not in b`
+**VALUE_IN_KEY** | `lambda a, b: b in a`
+**VALUE_NOT_IN_KEY** | `lambda a, b: b not in a`
+
+
+!!! info "The `**key**` and `**value**` will be compared to the input from the `**context**` parameter."
 
 **For multiple conditions**, we will evaluate the list of conditions as a logical `AND`, so all conditions needs to match to return `when_match` value.
 
