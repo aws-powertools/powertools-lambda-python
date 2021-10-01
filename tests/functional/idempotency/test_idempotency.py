@@ -3,6 +3,7 @@ import hashlib
 import json
 import sys
 from hashlib import md5
+from unittest.mock import MagicMock
 
 import jmespath
 import pytest
@@ -994,3 +995,25 @@ def test_idempotent_data_sorting():
 
     # WHEN
     dummy(payload=data_two)
+
+
+def test_idempotency_disabled_envvar(monkeypatch, lambda_context, persistence_store: DynamoDBPersistenceLayer):
+    # Scenario to validate no requests sent to dynamodb table when 'POWERTOOLS_IDEMPOTENCY_DISABLED' is set
+    mock_event = {"data": "value"}
+
+    persistence_store.table = MagicMock()
+
+    monkeypatch.setenv("POWERTOOLS_IDEMPOTENCY_DISABLED", "1")
+
+    @idempotent_function(data_keyword_argument="data", persistence_store=persistence_store)
+    def dummy(data):
+        return {"message": "hello"}
+
+    @idempotent(persistence_store=persistence_store)
+    def dummy_handler(event, context):
+        return {"message": "hi"}
+
+    dummy(data=mock_event)
+    dummy_handler(mock_event, lambda_context)
+
+    assert len(persistence_store.table.method_calls) == 0
