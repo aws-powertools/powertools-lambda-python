@@ -802,3 +802,338 @@ def test_get_configuration_with_envelope_and_raw(mocker, config):
 
     assert "log_level" in config
     assert "log_level" not in features_config
+    
+##
+## Inequality test cases
+##
+
+# Test not equals
+def test_flags_not_equal_no_match(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "tenant id not equals 345345435": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.NOT_EQUALS.value,
+                            "key": "tenant_id",
+                            "value": "345345435",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a"}, default=False)
+    assert toggle == expected_value
+
+def test_flags_not_equal_match(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "tenant id not equals 345345435": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.NOT_EQUALS.value,
+                            "key": "tenant_id",
+                            "value": "345345435",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "", "username": "a"}, default=False)
+    assert toggle == expected_value
+
+
+# Test less than
+def test_flags_less_than_no_match_1(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "Date less than 2021.10.31": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_LESS_THAN_VALUE.value,
+                            "key": "current_date",
+                            "value": "2021.10.31",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.12.25"}, default=False)
+    assert toggle == expected_value
+
+def test_flags_less_than_no_match_2(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "Date less than 2021.10.31": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_LESS_THAN_VALUE.value,
+                            "key": "current_date",
+                            "value": "2021.10.31",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.10.31"}, default=False)
+    assert toggle == expected_value
+
+def test_flags_less_than_match(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "Date less than 2021.10.31": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_LESS_THAN_VALUE.value,
+                            "key": "current_date",
+                            "value": "2021.10.31",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.04.01"}, default=False)
+    assert toggle == expected_value
+
+# Test less than or equal to 
+def test_flags_less_than_or_equal_no_match(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "Date less than or equal 2021.10.31": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_LESS_THAN_OR_EQUAL_VALUE.value,
+                            "key": "current_date",
+                            "value": "2021.10.31",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.12.25"}, default=False)
+    assert toggle == expected_value
+
+def test_flags_less_than_or_equal_match_1(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "Date less than or equal 2021.10.31": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_LESS_THAN_OR_EQUAL_VALUE.value,
+                            "key": "current_date",
+                            "value": "2021.10.31",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.04.01"}, default=False)
+    assert toggle == expected_value
+
+
+def test_flags_less_than_or_equal_match_2(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "Date less than or equal 2021.10.31": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_LESS_THAN_OR_EQUAL_VALUE.value,
+                            "key": "current_date",
+                            "value": "2021.10.31",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.10.31"}, default=False)
+    assert toggle == expected_value
+
+# Test greater than
+def test_flags_greater_than_no_match_1(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "Date greater than 2021.10.31": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_GREATER_THAN_VALUE.value,
+                            "key": "current_date",
+                            "value": "2021.10.31",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.04.01"}, default=False)
+    assert toggle == expected_value
+
+def test_flags_greater_than_no_match_2(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "Date greater than 2021.10.31": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_GREATER_THAN_VALUE.value,
+                            "key": "current_date",
+                            "value": "2021.10.31",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.10.31"}, default=False)
+    assert toggle == expected_value
+
+def test_flags_greater_than_match(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "Date greater than 2021.10.31": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_GREATER_THAN_VALUE.value,
+                            "key": "current_date",
+                            "value": "2021.10.31",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.12.25"}, default=False)
+    assert toggle == expected_value
+
+# Test greater than or equal to 
+def test_flags_greater_than_or_equal_no_match(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "Date greater than or equal 2021.10.31": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_GREATER_THAN_OR_EQUAL_VALUE.value,
+                            "key": "current_date",
+                            "value": "2021.10.31",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.04.01"}, default=False)
+    assert toggle == expected_value
+
+def test_flags_greater_than_or_equal_match_1(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "Date greater than or equal 2021.10.31": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_GREATER_THAN_OR_EQUAL_VALUE.value,
+                            "key": "current_date",
+                            "value": "2021.10.31",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.12.25"}, default=False)
+    assert toggle == expected_value
+
+
+def test_flags_greater_than_or_equal_match_2(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": expected_value,
+            "rules": {
+                "Date greater than or equal 2021.10.31": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.KEY_GREATER_THAN_OR_EQUAL_VALUE.value,
+                            "key": "current_date",
+                            "value": "2021.10.31",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a", "current_date": "2021.10.31"}, default=False)
+    assert toggle == expected_value
+

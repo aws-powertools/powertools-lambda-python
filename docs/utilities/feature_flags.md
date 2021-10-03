@@ -455,6 +455,11 @@ The `action` configuration can have the following values, where the expressions 
 Action | Equivalent expression
 ------------------------------------------------- | ---------------------------------------------------------------------------------
 **EQUALS** | `lambda a, b: a == b`
+**NOT_EQUALS** | `lambda a, b: a != b`
+**KEY_GREATER_THAN_VALUE** | `lambda a, b: a > b`
+**KEY_GREATER_THAN_OR_EQUAL_VALUE** | `lambda a, b: a >= b`
+**KEY_LESS_THAN_VALUE** | `lambda a, b: a < b`
+**KEY_LESS_THAN_OR_EQUAL_VALUE** | `lambda a, b: a <= b`
 **STARTSWITH** | `lambda a, b: a.startswith(b)`
 **ENDSWITH** | `lambda a, b: a.endswith(b)`
 **KEY_IN_VALUE** | `lambda a, b: a in b`
