@@ -233,9 +233,9 @@ def test_flags_conditions_no_rule_match_equal_multiple_conditions(mocker, config
 # check rule match for multiple of action types
 def test_flags_conditions_rule_match_multiple_actions_multiple_rules_multiple_conditions(mocker, config):
     expected_value_first_check = True
-    expected_value_second_check = False
+    expected_value_second_check = True
     expected_value_third_check = False
-    expected_value_fourth_case = False
+    expected_value_fourth_check = False
     mocked_app_config_schema = {
         "my_feature": {
             "default": expected_value_third_check,
@@ -295,9 +295,9 @@ def test_flags_conditions_rule_match_multiple_actions_multiple_rules_multiple_co
     toggle = feature_flags.evaluate(
         name="my_fake_feature",
         context={"tenant_id": "11114446", "username": "ab"},
-        default=expected_value_fourth_case,
+        default=expected_value_fourth_check,
     )
-    assert toggle == expected_value_fourth_case
+    assert toggle == expected_value_fourth_check
 
 
 # check a case where the feature exists but the rule doesn't match so we revert to the default value of the feature
