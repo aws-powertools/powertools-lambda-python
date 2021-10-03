@@ -831,7 +831,7 @@ def test_flags_not_eqaul_no_match(mocker, config):
     toggle = feature_flags.evaluate(name="my_feature", context={"tenant_id": "345345435", "username": "a"}, default=False)
     assert toggle == expected_value
 
-def test_flags_not_eqaul_match(mocker, config):
+def test_flags_not_equal_match(mocker, config):
     expected_value = True
     mocked_app_config_schema = {
         "my_feature": {
