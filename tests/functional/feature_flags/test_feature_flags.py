@@ -808,7 +808,7 @@ def test_get_configuration_with_envelope_and_raw(mocker, config):
 ##
 
 # Test not equals
-def test_flags_not_eqaul_no_match(mocker, config):
+def test_flags_not_equal_no_match(mocker, config):
     expected_value = False
     mocked_app_config_schema = {
         "my_feature": {
