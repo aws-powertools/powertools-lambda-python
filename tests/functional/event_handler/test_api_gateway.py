@@ -13,11 +13,11 @@ import pytest
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.api_gateway import (
     ApiGatewayResolver,
-    Blueprint,
     CORSConfig,
     ProxyEventType,
     Response,
     ResponseBuilder,
+    Router,
 )
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
@@ -863,17 +863,17 @@ def test_api_gateway_request_path_equals_strip_prefix():
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
 
 
-def test_api_gateway_app_proxy():
-    # GIVEN a Blueprint with registered routes
+def test_api_gateway_app_router():
+    # GIVEN a Router with registered routes
     app = ApiGatewayResolver()
-    blueprint = Blueprint()
+    router = Router()
 
-    @blueprint.get("/my/path")
-    def foo(app: ApiGatewayResolver):
+    @router.get("/my/path")
+    def foo():
         return {}
 
-    app.register_blueprint(blueprint)
-    # WHEN calling the event handler after applying routes from blueprint object
+    app.include_router(router)
+    # WHEN calling the event handler after applying routes from router object
     result = app(LOAD_GW_EVENT, {})
 
     # THEN process event correctly
@@ -881,42 +881,44 @@ def test_api_gateway_app_proxy():
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
 
 
-def test_api_gateway_app_proxy_with_params():
-    # GIVEN a Blueprint with registered routes
+def test_api_gateway_app_router_with_params():
+    # GIVEN a Router with registered routes
     app = ApiGatewayResolver()
-    blueprint = Blueprint()
+    router = Router()
     req = "foo"
     event = deepcopy(LOAD_GW_EVENT)
     event["resource"] = "/accounts/{account_id}"
     event["path"] = f"/accounts/{req}"
+    lambda_context = {}
 
-    @blueprint.route(rule="/accounts/<account_id>", method=["GET", "POST"])
-    def foo(app: ApiGatewayResolver, account_id):
-        assert app.current_event.raw_event == event
+    @router.route(rule="/accounts/<account_id>", method=["GET", "POST"])
+    def foo(account_id):
+        assert router.current_event.raw_event == event
+        assert router.lambda_context == lambda_context
         assert account_id == f"{req}"
         return {}
 
-    app.register_blueprint(blueprint)
-    # WHEN calling the event handler after applying routes from blueprint object
-    result = app(event, {})
+    app.include_router(router)
+    # WHEN calling the event handler after applying routes from router object
+    result = app(event, lambda_context)
 
     # THEN process event correctly
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
 
 
-def test_api_gateway_app_proxy_with_prefix():
-    # GIVEN a Blueprint with registered routes
+def test_api_gateway_app_router_with_prefix():
+    # GIVEN a Router with registered routes
     # AND a prefix is defined during the registration
     app = ApiGatewayResolver()
-    blueprint = Blueprint()
+    router = Router()
 
-    @blueprint.get(rule="/path")
-    def foo(app: ApiGatewayResolver):
+    @router.get(rule="/path")
+    def foo():
         return {}
 
-    app.register_blueprint(blueprint, prefix="/my")
-    # WHEN calling the event handler after applying routes from blueprint object
+    app.include_router(router, prefix="/my")
+    # WHEN calling the event handler after applying routes from router object
     result = app(LOAD_GW_EVENT, {})
 
     # THEN process event correctly
@@ -924,21 +926,71 @@ def test_api_gateway_app_proxy_with_prefix():
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
 
 
-def test_api_gateway_app_proxy_with_prefix_equals_path():
-    # GIVEN a Blueprint with registered routes
+def test_api_gateway_app_router_with_prefix_equals_path():
+    # GIVEN a Router with registered routes
     # AND a prefix is defined during the registration
     app = ApiGatewayResolver()
-    blueprint = Blueprint()
+    router = Router()
 
-    @blueprint.get(rule="/")
-    def foo(app: ApiGatewayResolver):
+    @router.get(rule="/")
+    def foo():
         return {}
 
-    app.register_blueprint(blueprint, prefix="/my/path")
-    # WHEN calling the event handler after applying routes from blueprint object
+    app.include_router(router, prefix="/my/path")
+    # WHEN calling the event handler after applying routes from router object
     # WITH the request path matching the registration prefix
     result = app(LOAD_GW_EVENT, {})
 
     # THEN process event correctly
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+
+
+def test_api_gateway_app_router_with_different_methods():
+    # GIVEN a Router with all the possible HTTP methods
+    app = ApiGatewayResolver()
+    router = Router()
+
+    @router.get("/not_matching_get")
+    def get_func():
+        raise RuntimeError()
+
+    @router.post("/no_matching_post")
+    def post_func():
+        raise RuntimeError()
+
+    @router.put("/no_matching_put")
+    def put_func():
+        raise RuntimeError()
+
+    @router.delete("/no_matching_delete")
+    def delete_func():
+        raise RuntimeError()
+
+    @router.patch("/no_matching_patch")
+    def patch_func():
+        raise RuntimeError()
+
+    app.include_router(router)
+
+    # Also check check the route configurations
+    routes = app._routes
+    assert len(routes) == 5
+    for route in routes:
+        if route.func == get_func:
+            assert route.method == "GET"
+        elif route.func == post_func:
+            assert route.method == "POST"
+        elif route.func == put_func:
+            assert route.method == "PUT"
+        elif route.func == delete_func:
+            assert route.method == "DELETE"
+        elif route.func == patch_func:
+            assert route.method == "PATCH"
+
+    # WHEN calling the handler
+    # THEN return a 404
+    result = app(LOAD_GW_EVENT, None)
+    assert result["statusCode"] == 404
+    # AND cors headers are not returned
+    assert "Access-Control-Allow-Origin" not in result["headers"]

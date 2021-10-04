@@ -631,21 +631,32 @@ class ApiGatewayResolver:
     def _json_dump(self, obj: Any) -> str:
         return self._serializer(obj)
 
-    def register_blueprint(self, blueprint: "Blueprint", prefix: Optional[str] = None) -> None:
-        """Adds all routes defined in a blueprint"""
-        for route, func in blueprint.api.items():
+    def include_router(self, router: "Router", prefix: Optional[str] = None) -> None:
+        """Adds all routes defined in a router"""
+        router._app = self
+        for route, func in router.api.items():
             if prefix and route[0] == "/":
                 route = (prefix, *route[1:])
             elif prefix:
                 route = (f"{prefix}{route[0]}", *route[1:])
-            self.route(*route)(func(app=self))
+            self.route(*route)(func())
 
 
-class Blueprint:
-    """Blueprint helper class to allow splitting ApiGatewayResolver into multiple files"""
+class Router:
+    """Router helper class to allow splitting ApiGatewayResolver into multiple files"""
+
+    _app: ApiGatewayResolver
 
     def __init__(self):
         self.api: Dict[tuple, Callable] = {}
+
+    @property
+    def current_event(self) -> BaseProxyEvent:
+        return self._app.current_event
+
+    @property
+    def lambda_context(self) -> LambdaContext:
+        return self._app.lambda_context
 
     def route(
         self,
@@ -657,9 +668,9 @@ class Blueprint:
     ):
         def actual_decorator(func: Callable):
             @wraps(func)
-            def wrapper(app: ApiGatewayResolver):
+            def wrapper():
                 def inner_wrapper(**kwargs):
-                    return func(app, **kwargs)
+                    return func(**kwargs)
 
                 return inner_wrapper
 
