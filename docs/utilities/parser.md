@@ -448,7 +448,7 @@ Alternatively, you can pass `'*'` as an argument for the decorator so that you c
 === "validate_all_field_values.py"
 
     ```python
-    from aws_lambda_powertools.utilities.parser import parse, BaseModel, validator
+    from aws_lambda_powertools.utilities.parser import parse, BaseModel, root_validator
 
     class UserModel(BaseModel):
         username: str
