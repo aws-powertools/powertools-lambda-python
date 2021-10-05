@@ -1,8 +1,9 @@
 import logging
 from typing import Any, Callable, Dict, Optional, Union
 
+from aws_lambda_powertools.utilities import jmespath_utils
+
 from ...middleware_factory import lambda_handler_decorator
-from ...shared import jmespath_utils
 from .base import validate_data_against_schema
 
 logger = logging.getLogger(__name__)

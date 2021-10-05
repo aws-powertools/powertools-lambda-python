@@ -30,8 +30,27 @@ class PowertoolsFunctions(Functions):
         return uncompressed.decode()
 
 
-def extract_data_from_envelope(data: Union[Dict, str], envelope: str, jmespath_options: Optional[Dict]) -> Any:
-    """Searches data using JMESPath expression
+def extract_data_from_envelope(data: Union[Dict, str], envelope: str, jmespath_options: Optional[Dict] = None) -> Any:
+    """Searches and extracts data using JMESPath
+
+    Envelope being the JMESPath expression to extract the data you're after
+
+    Built-in JMESPath functions include: powertools_json, powertools_base64, powertools_base64_gzip
+
+    Examples
+    --------
+
+    **Deserialize JSON string and extracts data from body key**
+
+        from aws_lambda_powertools.utilities.jmespath_utils import extract_data_from_envelope
+        from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+        def handler(event: dict, context: LambdaContext):
+            # event = {"body": "{\"customerId\":\"dd4649e6-2484-4993-acb8-0f9123103394\"}"}  # noqa: E800
+            payload = extract_data_from_envelope(data=event, envelope="powertools_json(body)")
+            customer = payload.get("customerId")  # now deserialized
+            ...
 
     Parameters
     ----------
@@ -41,6 +60,7 @@ def extract_data_from_envelope(data: Union[Dict, str], envelope: str, jmespath_o
         JMESPath expression to filter data against
     jmespath_options : Dict
         Alternative JMESPath options to be included when filtering expr
+
 
     Returns
     -------

@@ -446,7 +446,7 @@ def set_package_logger(
     -------
     **Enables debug logging for AWS Lambda Powertools package**
 
-        >>> from aws_lambda_powertools.logging.logger import set_package_logger
+        >>> aws_lambda_powertools.logging.logger import set_package_logger
         >>> set_package_logger()
 
     Parameters
