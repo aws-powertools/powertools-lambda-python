@@ -4,10 +4,10 @@ from typing import Any, Dict, Optional, Union, cast
 
 from botocore.config import Config
 
+from aws_lambda_powertools.utilities import jmespath_utils
 from aws_lambda_powertools.utilities.parameters import AppConfigProvider, GetParameterError, TransformParameterError
 
 from ... import Logger
-from ...shared import jmespath_utils
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError, StoreClientError
 

@@ -209,7 +209,7 @@ Imagine the function executes successfully, but the client never receives the re
 !!! warning "Idempotency for JSON payloads"
     The payload extracted by the `event_key_jmespath` is treated as a string by default, so will be sensitive to differences in whitespace even when the JSON payload itself is identical.
 
-    To alter this behaviour, we can use the [JMESPath built-in function](/utilities/jmespath_functions) *powertools_json()* to treat the payload as a JSON object rather than a string.
+    To alter this behaviour, we can use the [JMESPath built-in function](jmespath_functions.md#powertools_json-function) `powertools_json()` to treat the payload as a JSON object rather than a string.
 
 === "payment.py"
 
