@@ -45,6 +45,11 @@ class FeatureFlags:
             return False
         mapping_by_action = {
             schema.RuleAction.EQUALS.value: lambda a, b: a == b,
+            schema.RuleAction.NOT_EQUALS.value: lambda a, b: a != b,
+            schema.RuleAction.KEY_GREATER_THAN_VALUE.value: lambda a, b: a > b,
+            schema.RuleAction.KEY_GREATER_THAN_OR_EQUAL_VALUE.value: lambda a, b: a >= b,
+            schema.RuleAction.KEY_LESS_THAN_VALUE.value: lambda a, b: a < b,
+            schema.RuleAction.KEY_LESS_THAN_OR_EQUAL_VALUE.value: lambda a, b: a <= b,
             schema.RuleAction.STARTSWITH.value: lambda a, b: a.startswith(b),
             schema.RuleAction.ENDSWITH.value: lambda a, b: a.endswith(b),
             schema.RuleAction.IN.value: lambda a, b: a in b,
@@ -105,12 +110,9 @@ class FeatureFlags:
             if self._evaluate_conditions(rule_name=rule_name, feature_name=feature_name, rule=rule, context=context):
                 return bool(rule_match_value)
 
-            # no rule matched, return default value of feature
-            self.logger.debug(
-                f"no rule matched, returning feature default, default={feat_default}, name={feature_name}"
-            )
-            return feat_default
-        return False
+        # no rule matched, return default value of feature
+        self.logger.debug(f"no rule matched, returning feature default, default={feat_default}, name={feature_name}")
+        return feat_default
 
     def get_configuration(self) -> Dict:
         """Get validated feature flag schema from configured store.
