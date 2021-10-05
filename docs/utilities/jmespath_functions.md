@@ -18,6 +18,8 @@ You might have events that contains encoded JSON payloads as string, base64, or 
 
 Lambda Powertools also have utilities like [validation](validation.md), [idempotency](idempotency.md), or [feature flags](feature_flags.md) where you might need to extract a portion of your data before using them.
 
+!!! info "**Envelope** is the terminology we use for the JMESPath expression to extract your JSON object from your data input"
+
 ### Extracting data
 
 You can use the `extract_data_from_envelope` function along with any [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
