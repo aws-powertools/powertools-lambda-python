@@ -13,6 +13,7 @@ options:
         - refactor
         - docs
         - chore
+        - revert
   commit_groups:
     title_maps:
       feat: Features
@@ -21,6 +22,7 @@ options:
       refactor: Code Refactoring
       docs: Documentation
       chore: Maintenance
+      revert: Regression
   header:
     pattern: "^(\\w*)(?:\\(([\\w\\$\\.\\-\\*\\s]*)\\))?\\:\\s(.*)$"
     pattern_maps:
