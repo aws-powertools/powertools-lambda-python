@@ -36,7 +36,35 @@ Powertools is available in PyPi. You can use your favourite dependency managemen
 
 ### Lambda Layer
 
-Powertools is also available as a Lambda Layer, and it is distributed via the [AWS Serverless Application Repository (SAR)](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/what-is-serverlessrepo.html) to support semantic versioning.
+Powertools is also available as a Lambda Layer with public ARNs in each region or distributed via the [AWS Serverless Application Repository (SAR)](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/what-is-serverlessrepo.html) to support semantic versioning.
+
+#### Public ARNs
+
+We build, release and distribute packaged Lambda Powertools layers for each region. This means you can copy a specific ARN and use it in your Lambda deployment. The layer region must be in the same region as your lambda function. The public layers do not contain the `pydantic` library that is required for the `parser` utility.
+
+??? info "List of all regions and version with public AWS Lambda Powertools Layers"
+
+    | Region | Version | Layer ARN
+    |---------------------------| ---------------------------| ---------------------------
+    | `us-east-1` | `1.21.0` | `arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `us-east-2` | `1.21.0` | `arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `us-west-1` | `1.21.0` | `arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `us-west-2` | `1.21.0` | `arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `ap-south-1` | `1.21.0` | `arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `ap-northeast-1` | `1.21.0` | `arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `ap-northeast-2` | `1.21.0` | `arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `ap-northeast-3` | `1.21.0` | `arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `ap-southeast-1` | `1.21.0` | `arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `ap-southeast-2` | `1.21.0` | `arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `eu-central-1` | `1.21.0` | `arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `eu-west-1` | `1.21.0` | `arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `eu-west-2` | `1.21.0` | `arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `eu-west-3` | `1.21.0` | `arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `eu-north-1` | `1.21.0` | `arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `ca-central-1` | `1.21.0` | `arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:2`
+    | `sa-east-1` | `1.21.0` | `arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:2`
+
+#### SAR
 
 | App | ARN | Description
 |----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------
