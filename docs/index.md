@@ -50,7 +50,7 @@ We build, release and distribute packaged Lambda Powertools layers for each regi
         Type: AWS::Serverless::Function
         Properties:
         Layers:
-            - arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:2
+            - arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3
     ```
 
 === "Serverless framework"
@@ -60,7 +60,7 @@ We build, release and distribute packaged Lambda Powertools layers for each regi
         main:
         handler: lambda_function.lambda_handler
         layers:
-            - arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:2
+            - arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3
     ```
 
 === "CDK"
@@ -79,7 +79,7 @@ We build, release and distribute packaged Lambda Powertools layers for each regi
                 function_name='sample-lambda',
                 code=aws_lambda.Code.asset('./src'),
                 handler='app.handler',
-                layers: ["arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:2"]
+                layers: ["arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3"]
             )
     ```
 
@@ -123,7 +123,7 @@ We build, release and distribute packaged Lambda Powertools layers for each regi
       role          = aws_iam_role.iam_for_lambda.arn
       handler       = "index.test"
       runtime = "python3.8"
-      layers = ["arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:2"]
+      layers = ["arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3"]
 
       source_code_hash = filebase64sha256("lambda_function_payload.zip")
     }
@@ -137,23 +137,23 @@ We build, release and distribute packaged Lambda Powertools layers for each regi
 
     | Region | Version | Layer ARN
     |---------------------------| ---------------------------| ---------------------------
-    | `us-east-1` | `1.21.0` |[arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `us-east-2` | `1.21.0` |[arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `us-west-1` | `1.21.0` |[arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `us-west-2` | `1.21.0` |[arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `ap-south-1` | `1.21.0` |[arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `ap-northeast-1` | `1.21.0` |[arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `ap-northeast-2` | `1.21.0` |[arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `ap-northeast-3` | `1.21.0` |[arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `ap-southeast-1` | `1.21.0` |[arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `ap-southeast-2` | `1.21.0` |[arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `eu-central-1` | `1.21.0` |[arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `eu-west-1` | `1.21.0` |[arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `eu-west-2` | `1.21.0` |[arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `eu-west-3` | `1.21.0` |[arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `eu-north-1` | `1.21.0` |[arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `ca-central-1` | `1.21.0` |[arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
-    | `sa-east-1` | `1.21.0` |[arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:2](#) {: .copyMe}
+    | `us-east-1` | `1.21.0` |[arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `us-east-2` | `1.21.0` |[arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `us-west-1` | `1.21.0` |[arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `us-west-2` | `1.21.0` |[arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-south-1` | `1.21.0` |[arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-northeast-1` | `1.21.0` |[arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-northeast-2` | `1.21.0` |[arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-northeast-3` | `1.21.0` |[arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-southeast-1` | `1.21.0` |[arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-southeast-2` | `1.21.0` |[arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-central-1` | `1.21.0` |[arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-west-1` | `1.21.0` |[arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-west-2` | `1.21.0` |[arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-west-3` | `1.21.0` |[arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-north-1` | `1.21.0` |[arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ca-central-1` | `1.21.0` |[arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `sa-east-1` | `1.21.0` |[arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
 
 #### SAR
 
