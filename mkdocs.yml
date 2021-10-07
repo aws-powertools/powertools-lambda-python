@@ -69,6 +69,7 @@ markdown_extensions:
   - attr_list
   - pymdownx.emoji
   - pymdownx.inlinehilite
+  - attr_list
 
 copyright: Copyright &copy; 2021 Amazon Web Services
 
