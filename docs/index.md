@@ -131,29 +131,29 @@ We build, release and distribute packaged Lambda Powertools layers for each regi
 
     ```
 
-??? note "Layer ARN per region"
+??? note "Latest Lambda Layers ARN per region"
 
     !!! tip "Click to copy to clipboard"
 
-    | Region | Version | Layer ARN
-    |---------------------------| ---------------------------| ---------------------------
-    | `us-east-1` | `1.21.0` |[arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `us-east-2` | `1.21.0` |[arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `us-west-1` | `1.21.0` |[arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `us-west-2` | `1.21.0` |[arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `ap-south-1` | `1.21.0` |[arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `ap-northeast-1` | `1.21.0` |[arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `ap-northeast-2` | `1.21.0` |[arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `ap-northeast-3` | `1.21.0` |[arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `ap-southeast-1` | `1.21.0` |[arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `ap-southeast-2` | `1.21.0` |[arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `eu-central-1` | `1.21.0` |[arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `eu-west-1` | `1.21.0` |[arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `eu-west-2` | `1.21.0` |[arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `eu-west-3` | `1.21.0` |[arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `eu-north-1` | `1.21.0` |[arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `ca-central-1` | `1.21.0` |[arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `sa-east-1` | `1.21.0` |[arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | Region | Layer ARN
+    |--------------------------- | ---------------------------
+    | `us-east-1` | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `us-east-2` | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `us-west-1` | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `us-west-2` | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-south-1` | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-central-1` | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-west-1` | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-west-2` | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-west-3` | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-north-1` | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ca-central-1` | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `sa-east-1` | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
 
 #### SAR
 
