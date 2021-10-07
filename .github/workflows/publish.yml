@@ -23,9 +23,21 @@ name: Publish to PyPi
 # 9. Push latest release source code to master using release title as the commit message
 # 10. Builds latest documentation for new release, and update latest alias pointing to the new release tag
 
+#
+# === Fallback mechanism due to external failures ===
+#
+# 1. Trigger "Publish to PyPi" workflow manually: https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow
+# 2. Use the version released under Releases e.g. v1.13.0
+#
+
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      publish_version:
+        description: 'Version to publish, e.g. v1.13.0'
+        required: true
 
 jobs:
   release:
@@ -40,7 +52,9 @@ jobs:
         python-version: "3.8"
     - name: Set release notes tag
       run: |
-        export RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}
+        RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}
+        # Replace publishing version if the workflow was triggered manually
+        test -n $RELEASE_TAG_VERSION && RELEASE_TAG_VERSION=${{ github.event.inputs.publish_version }}
         echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> $GITHUB_ENV
     - name: Ensure new version is also set in pyproject and CHANGELOG
       run: |
