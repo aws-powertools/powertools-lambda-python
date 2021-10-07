@@ -361,7 +361,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         return handlers[0]
 
     @property
-    def registered_formatter(self) -> Optional[PowertoolsFormatter]:
+    def registered_formatter(self) -> PowertoolsFormatter:
         """Convenience property to access logger formatter"""
         return self.registered_handler.formatter  # type: ignore
 
@@ -405,7 +405,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         str, optional
             Value for the correlation id
         """
-        return self.registered_formatter.log_format.get("correlation_id")
+        if isinstance(self.registered_formatter, LambdaPowertoolsFormatter):
+            return self.registered_formatter.log_format.get("correlation_id")
+        return None
 
     @staticmethod
     def _get_log_level(level: Union[str, int, None]) -> Union[str, int]:
@@ -444,7 +446,7 @@ def set_package_logger(
     -------
     **Enables debug logging for AWS Lambda Powertools package**
 
-        >>> from aws_lambda_powertools.logging.logger import set_package_logger
+        >>> aws_lambda_powertools.logging.logger import set_package_logger
         >>> set_package_logger()
 
     Parameters

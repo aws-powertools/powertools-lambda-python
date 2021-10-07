@@ -18,6 +18,30 @@ labelPRBasedOnFilePath:
   area/event_handlers:
     - aws_lambda_powertools/event_handler/*
     - aws_lambda_powertools/event_handler/**/*
+  area/middleware_factory:
+    - aws_lambda_powertools/middleware_factory/*
+    - aws_lambda_powertools/middleware_factory/**/*
+  area/parameters:
+    - aws_lambda_powertools/parameters/*
+    - aws_lambda_powertools/parameters/**/*
+  area/batch:
+    - aws_lambda_powertools/batch/*
+    - aws_lambda_powertools/batch/**/*
+  area/validator:
+    - aws_lambda_powertools/validation/*
+    - aws_lambda_powertools/validation/**/*
+  area/event_sources:
+    - aws_lambda_powertools/data_classes/*
+    - aws_lambda_powertools/data_classes/**/*
+  area/parser:
+    - aws_lambda_powertools/parser/*
+    - aws_lambda_powertools/parser/**/*
+  area/idempotency:
+    - aws_lambda_powertools/idempotency/*
+    - aws_lambda_powertools/idempotency/**/*
+  area/feature_flags:
+    - aws_lambda_powertools/feature_flags/*
+    - aws_lambda_powertools/feature_flags/**/*
 
   documentation:
     - docs/*

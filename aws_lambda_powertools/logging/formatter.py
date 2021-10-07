@@ -58,7 +58,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     def __init__(
         self,
         json_serializer: Optional[Callable[[Dict], str]] = None,
-        json_deserializer: Optional[Callable[[Dict], str]] = None,
+        json_deserializer: Optional[Callable[[Union[Dict, str, bool, int, float]], str]] = None,
         json_default: Optional[Callable[[Any], Any]] = None,
         datefmt: Optional[str] = None,
         log_record_order: Optional[List[str]] = None,
@@ -106,7 +106,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         self.update_formatter = self.append_keys  # alias to old method
 
         if self.utc:
-            self.converter = time.gmtime
+            self.converter = time.gmtime  # type: ignore
 
         super(LambdaPowertoolsFormatter, self).__init__(datefmt=self.datefmt)
 
@@ -128,7 +128,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         return self.serialize(log=formatted_log)
 
     def formatTime(self, record: logging.LogRecord, datefmt: Optional[str] = None) -> str:
-        record_ts = self.converter(record.created)
+        record_ts = self.converter(record.created)  # type: ignore
         if datefmt:
             return time.strftime(datefmt, record_ts)
 
@@ -201,7 +201,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             Log record with constant traceback info and exception name
         """
         if log_record.exc_info:
-            return self.formatException(log_record.exc_info), log_record.exc_info[0].__name__
+            return self.formatException(log_record.exc_info), log_record.exc_info[0].__name__  # type: ignore
 
         return None, None
 
@@ -222,7 +222,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         record_dict["asctime"] = self.formatTime(record=log_record, datefmt=self.datefmt)
         extras = {k: v for k, v in record_dict.items() if k not in RESERVED_LOG_ATTRS}
 
-        formatted_log = {**extras}
+        formatted_log = {}
 
         # Iterate over a default or existing log structure
         # then replace any std log attribute e.g. '%(level)s' to 'INFO', '%(process)d to '4773'
@@ -233,6 +233,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             else:
                 formatted_log[key] = value
 
+        formatted_log.update(**extras)
         return formatted_log
 
     @staticmethod

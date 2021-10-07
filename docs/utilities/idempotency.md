@@ -40,7 +40,6 @@ Configuration | Value | Notes
 Partition key | `id` |
 TTL attribute name | `expiration` | This can only be configured after your table is created if you're using AWS Console
 
-
 !!! tip "You can share a single state table for all functions"
     You can reuse the same DynamoDB table to store idempotency state. We add your `function_name` in addition to the idempotency key as a hash key.
 
@@ -77,7 +76,7 @@ TTL attribute name | `expiration` | This can only be configured after your table
 !!! warning "Large responses with DynamoDB persistence layer"
     When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items).
 
-	Larger items cannot be written to DynamoDB and will cause exceptions.
+    Larger items cannot be written to DynamoDB and will cause exceptions.
 
 !!! info "DynamoDB "
     Each function invocation will generally make 2 requests to DynamoDB. If the
@@ -121,7 +120,80 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
     }
     ```
 
-#### Choosing a payload subset for idempotency
+### Idempotent_function decorator
+
+Similar to [idempotent decorator](#idempotent-decorator), you can use `idempotent_function` decorator for any synchronous Python function.
+
+When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`** - Such data must be JSON serializable.
+
+!!! warning "Make sure to call your decorated function using keyword arguments"
+
+=== "app.py"
+
+    This example also demonstrates how you can integrate with [Batch utility](batch.md), so you can process each record in an idempotent manner.
+
+    ```python hl_lines="4 13 18 25"
+    import uuid
+
+    from aws_lambda_powertools.utilities.batch import sqs_batch_processor
+    from aws_lambda_powertools.utilities.idempotency import idempotent_function, DynamoDBPersistenceLayer, IdempotencyConfig
+
+
+    dynamodb = DynamoDBPersistenceLayer(table_name="idem")
+    config =  IdempotencyConfig(
+        event_key_jmespath="messageId",  # see "Choosing a payload subset for idempotency" section
+        use_local_cache=True,
+    )
+
+    @idempotent_function(data_keyword_argument="data", config=config, persistence_store=dynamodb)
+    def dummy(arg_one, arg_two, data: dict, **kwargs):
+        return {"data": data}
+
+
+    @idempotent_function(data_keyword_argument="record", config=config, persistence_store=dynamodb)
+    def record_handler(record):
+        return {"message": record["body"]}
+
+
+    @sqs_batch_processor(record_handler=record_handler)
+    def lambda_handler(event, context):
+        # `data` parameter must be called as a keyword argument to work
+        dummy("hello", "universe", data="test")
+        return {"statusCode": 200}
+    ```
+
+=== "Example event"
+
+    ```json hl_lines="4"
+    {
+        "Records": [
+            {
+                "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
+                "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a...",
+                "body": "Test message.",
+                "attributes": {
+                    "ApproximateReceiveCount": "1",
+                    "SentTimestamp": "1545082649183",
+                    "SenderId": "AIDAIENQZJOLO23YVJ4VO",
+                    "ApproximateFirstReceiveTimestamp": "1545082649185"
+                },
+                "messageAttributes": {
+                    "testAttr": {
+                    "stringValue": "100",
+                    "binaryValue": "base64Str",
+                    "dataType": "Number"
+                    }
+                },
+                "md5OfBody": "e4e68fb7bd0e697a0ae8f1bb342846b3",
+                "eventSource": "aws:sqs",
+                "eventSourceARN": "arn:aws:sqs:us-east-2:123456789012:my-queue",
+                "awsRegion": "us-east-2"
+            }
+        ]
+    }
+    ```
+
+### Choosing a payload subset for idempotency
 
 !!! tip "Dealing with always changing payloads"
     When dealing with a more elaborate payload, where parts of the payload always change, you should use **`event_key_jmespath`** parameter.
@@ -133,6 +205,11 @@ Use [`IdempotencyConfig`](#customizing-the-default-behavior) to instruct the ide
 In this example, we have a Lambda handler that creates a payment for a user subscribing to a product. We want to ensure that we don't accidentally charge our customer by subscribing them more than once.
 
 Imagine the function executes successfully, but the client never receives the response due to a connection issue. It is safe to retry in this instance, as the idempotent decorator will return a previously saved response.
+
+!!! warning "Idempotency for JSON payloads"
+    The payload extracted by the `event_key_jmespath` is treated as a string by default, so will be sensitive to differences in whitespace even when the JSON payload itself is identical.
+
+    To alter this behaviour, we can use the [JMESPath built-in function](jmespath_functions.md#powertools_json-function) `powertools_json()` to treat the payload as a JSON object rather than a string.
 
 === "payment.py"
 
@@ -146,7 +223,7 @@ Imagine the function executes successfully, but the client never receives the re
 
     # Treat everything under the "body" key
     # in the event json object as our payload
-    config = IdempotencyConfig(event_key_jmespath="body")
+    config = IdempotencyConfig(event_key_jmespath="powertools_json(body)")
 
     @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event, context):
@@ -198,7 +275,8 @@ Imagine the function executes successfully, but the client never receives the re
     }
     ```
 
-#### Idempotency request flow
+
+### Idempotency request flow
 
 This sequence diagram shows an example flow of what happens in the payment scenario:
 
@@ -262,7 +340,7 @@ Idempotent decorator can be further configured with **`IdempotencyConfig`** as s
 
 Parameter | Default | Description
 ------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
-**event_key_jmespath** | `""` | JMESPath expression to extract the idempotency key from the event record
+**event_key_jmespath** | `""` | JMESPath expression to extract the idempotency key from the event record using [built-in functions](/utilities/jmespath_functions)
 **payload_validation_jmespath** | `""` | JMESPath expression to validate whether certain parameters have changed in the event while the event payload
 **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request
 **expires_after_seconds** | 3600 | The number of seconds to wait before a record is expired
@@ -306,6 +384,7 @@ You can enable in-memory caching with the **`use_local_cache`** parameter:
     ```
 
 When enabled, the default is to cache a maximum of 256 records in each Lambda execution environment - You can change it with the **`local_cache_max_items`** parameter.
+
 ### Expiring idempotency records
 
 !!! note
@@ -469,7 +548,7 @@ This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`
 
 ### Customizing boto configuration
 
-You can provide a custom boto configuration via **`boto_config`**, or an existing boto session via **`boto3_session`** parameters, when constructing the persistence store.
+The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html) when constructing the persistence store.
 
 === "Custom session"
 
@@ -685,6 +764,123 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
 
 !!! tip "JMESPath Powertools functions are also available"
     Built-in functions known in the validation utility like `powertools_json`, `powertools_base64`, `powertools_base64_gzip` are also available to use in this utility.
+
+
+## Testing your code
+
+The idempotency utility provides several routes to test your code.
+
+### Disabling the idempotency utility
+When testing your code, you may wish to disable the idempotency logic altogether and focus on testing your business logic. To do this, you can set the environment variable `POWERTOOLS_IDEMPOTENCY_DISABLED`
+with a truthy value. If you prefer setting this for specific tests, and are using Pytest, you can use [monkeypatch](https://docs.pytest.org/en/latest/monkeypatch.html) fixture:
+
+=== "tests.py"
+
+    ```python hl_lines="2 3"
+    def test_idempotent_lambda_handler(monkeypatch):
+        # Set POWERTOOLS_IDEMPOTENCY_DISABLED before calling decorated functions
+        monkeypatch.setenv("POWERTOOLS_IDEMPOTENCY_DISABLED", 1)
+
+        result = handler()
+        ...
+    ```
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.idempotency import (
+    DynamoDBPersistenceLayer, idempotent
+    )
+
+    persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency")
+
+    @idempotent(persistence_store=persistence_layer)
+    def handler(event, context):
+        print('expensive operation')
+        return {
+            "payment_id": 12345,
+            "message": "success",
+            "statusCode": 200,
+        }
+    ```
+
+### Testing with DynamoDB Local
+
+To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html), you can replace the `Table` resource used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
+
+=== "tests.py"
+
+    ```python hl_lines="6 7 8"
+    import boto3
+
+    import app
+
+    def test_idempotent_lambda():
+        # Create our own Table resource using the endpoint for our DynamoDB Local instance
+        resource = boto3.resource("dynamodb", endpoint_url='http://localhost:8000')
+        table = resource.Table(app.persistence_layer.table_name)
+        app.persistence_layer.table = table
+
+        result = app.handler({'testkey': 'testvalue'}, {})
+        assert result['payment_id'] == 12345
+    ```
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.idempotency import (
+    DynamoDBPersistenceLayer, idempotent
+    )
+
+    persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency")
+
+    @idempotent(persistence_store=persistence_layer)
+    def handler(event, context):
+        print('expensive operation')
+        return {
+            "payment_id": 12345,
+            "message": "success",
+            "statusCode": 200,
+        }
+    ```
+
+### How do I mock all DynamoDB I/O operations
+
+The idempotency utility lazily creates the dynamodb [Table](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table) which it uses to access DynamoDB.
+This means it is possible to pass a mocked Table resource, or stub various methods.
+
+=== "tests.py"
+
+    ```python hl_lines="6 7 8 9"
+    from unittest.mock import MagicMock
+
+    import app
+
+    def test_idempotent_lambda():
+        table = MagicMock()
+        app.persistence_layer.table = table
+        result = app.handler({'testkey': 'testvalue'}, {})
+        table.put_item.assert_called()
+        ...
+    ```
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.idempotency import (
+    DynamoDBPersistenceLayer, idempotent
+    )
+
+    persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency")
+
+    @idempotent(persistence_store=persistence_layer)
+    def handler(event, context):
+        print('expensive operation')
+        return {
+            "payment_id": 12345,
+            "message": "success",
+            "statusCode": 200,
+        }
+    ```
 
 ## Extra resources
 

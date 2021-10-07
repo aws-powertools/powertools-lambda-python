@@ -23,65 +23,65 @@ This is the sample infrastructure for API Gateway we are using for the examples 
 
 === "template.yml"
 
-	```yaml
-	AWSTemplateFormatVersion: '2010-09-09'
-	Transform: AWS::Serverless-2016-10-31
-	Description: Hello world event handler API Gateway
+    ```yaml
+    AWSTemplateFormatVersion: '2010-09-09'
+    Transform: AWS::Serverless-2016-10-31
+    Description: Hello world event handler API Gateway
 
-	Globals:
-	  Api:
-	    TracingEnabled: true
-        Cors:								# see CORS section
-          AllowOrigin: "'https://example.com'"
-          AllowHeaders: "'Content-Type,Authorization,X-Amz-Date'"
-          MaxAge: "'300'"
-		BinaryMediaTypes:                   # see Binary responses section
-		  - '*~1*'  # converts to */* for any binary type
-      Function:
+    Globals:
+        Api:
+        TracingEnabled: true
+        Cors:                           # see CORS section
+            AllowOrigin: "'https://example.com'"
+            AllowHeaders: "'Content-Type,Authorization,X-Amz-Date'"
+            MaxAge: "'300'"
+        BinaryMediaTypes:               # see Binary responses section
+            - '*~1*'  # converts to */* for any binary type
+        Function:
         Timeout: 5
         Runtime: python3.8
         Tracing: Active
-          Environment:
+            Environment:
             Variables:
-              LOG_LEVEL: INFO
-              POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
-              POWERTOOLS_LOGGER_LOG_EVENT: true
-              POWERTOOLS_METRICS_NAMESPACE: MyServerlessApplication
-              POWERTOOLS_SERVICE_NAME: hello
+                LOG_LEVEL: INFO
+                POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
+                POWERTOOLS_LOGGER_LOG_EVENT: true
+                POWERTOOLS_METRICS_NAMESPACE: MyServerlessApplication
+                POWERTOOLS_SERVICE_NAME: hello
 
-	Resources:
-	  HelloWorldFunction:
+    Resources:
+        HelloWorldFunction:
         Type: AWS::Serverless::Function
         Properties:
-          Handler: app.lambda_handler
-          CodeUri: hello_world
-          Description: Hello World function
-		  Events:
-		    HelloUniverse:
-			  Type: Api
-			  Properties:
-				Path: /hello
-				Method: GET
-			HelloYou:
-			  Type: Api
-			  Properties:
-			    Path: /hello/{name}      # see Dynamic routes section
-			    Method: GET
-			CustomMessage:
-			  Type: Api
-			  Properties:
-			    Path: /{message}/{name}  # see Dynamic routes section
-			    Method: GET
+            Handler: app.lambda_handler
+            CodeUri: hello_world
+            Description: Hello World function
+            Events:
+            HelloUniverse:
+                Type: Api
+                Properties:
+                Path: /hello
+                Method: GET
+            HelloYou:
+                Type: Api
+                Properties:
+                Path: /hello/{name}      # see Dynamic routes section
+                Method: GET
+            CustomMessage:
+                Type: Api
+                Properties:
+                Path: /{message}/{name}  # see Dynamic routes section
+                Method: GET
 
-	Outputs:
-      HelloWorldApigwURL:
+    Outputs:
+        HelloWorldApigwURL:
         Description: "API Gateway endpoint URL for Prod environment for Hello World Function"
         Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello"
 
     HelloWorldFunction:
         Description: "Hello World Lambda Function ARN"
         Value: !GetAtt HelloWorldFunction.Arn
-	```
+    ```
 
 ### API Gateway decorator
 
@@ -93,107 +93,107 @@ Here's an example where we have two separate functions to resolve two paths: `/h
 
 === "app.py"
 
-	```python hl_lines="3 7 9 12 18"
-	from aws_lambda_powertools import Logger, Tracer
-	from aws_lambda_powertools.logging import correlation_paths
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    ```python hl_lines="3 7 9 12 18"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
-	tracer = Tracer()
-	logger = Logger()
-	app = ApiGatewayResolver()  # by default API Gateway REST API (v1)
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver()  # by default API Gateway REST API (v1)
 
-	@app.get("/hello")
-	@tracer.capture_method
-	def get_hello_universe():
-		return {"message": "hello universe"}
+    @app.get("/hello")
+    @tracer.capture_method
+    def get_hello_universe():
+        return {"message": "hello universe"}
 
-	# You can continue to use other utilities just as before
-	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-	@tracer.capture_lambda_handler
-	def lambda_handler(event, context):
-		return app.resolve(event, context)
-	```
+    # You can continue to use other utilities just as before
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
 === "hello_event.json"
 
-	This utility uses `path` and `httpMethod` to route to the right function. This helps make unit tests and local invocation easier too.
+    This utility uses `path` and `httpMethod` to route to the right function. This helps make unit tests and local invocation easier too.
 
-	```json hl_lines="4-5"
-	{
-	  "body": "hello",
-	  "resource": "/hello",
-	  "path": "/hello",
-	  "httpMethod": "GET",
-	  "isBase64Encoded": false,
-	  "queryStringParameters": {
-		"foo": "bar"
-	  },
-	  "multiValueQueryStringParameters": {},
-	  "pathParameters": {
-		"hello": "/hello"
-	  },
-	  "stageVariables": {},
-	  "headers": {
-		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-		"Accept-Encoding": "gzip, deflate, sdch",
-		"Accept-Language": "en-US,en;q=0.8",
-		"Cache-Control": "max-age=0",
-		"CloudFront-Forwarded-Proto": "https",
-		"CloudFront-Is-Desktop-Viewer": "true",
-		"CloudFront-Is-Mobile-Viewer": "false",
-		"CloudFront-Is-SmartTV-Viewer": "false",
-		"CloudFront-Is-Tablet-Viewer": "false",
-		"CloudFront-Viewer-Country": "US",
-		"Host": "1234567890.execute-api.us-east-1.amazonaws.com",
-		"Upgrade-Insecure-Requests": "1",
-		"User-Agent": "Custom User Agent String",
-		"Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",
-		"X-Amz-Cf-Id": "cDehVQoZnx43VYQb9j2-nvCh-9z396Uhbp027Y2JvkCPNLmGJHqlaA==",
-		"X-Forwarded-For": "127.0.0.1, 127.0.0.2",
-		"X-Forwarded-Port": "443",
-		"X-Forwarded-Proto": "https"
-	  },
-	  "multiValueHeaders": {},
-	  "requestContext": {
-		"accountId": "123456789012",
-		"resourceId": "123456",
-		"stage": "Prod",
-		"requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
-		"requestTime": "25/Jul/2020:12:34:56 +0000",
-		"requestTimeEpoch": 1428582896000,
-		"identity": {
-		  "cognitoIdentityPoolId": null,
-		  "accountId": null,
-		  "cognitoIdentityId": null,
-		  "caller": null,
-		  "accessKey": null,
-		  "sourceIp": "127.0.0.1",
-		  "cognitoAuthenticationType": null,
-		  "cognitoAuthenticationProvider": null,
-		  "userArn": null,
-		  "userAgent": "Custom User Agent String",
-		  "user": null
-		},
-		"path": "/Prod/hello",
-		"resourcePath": "/hello",
-		"httpMethod": "POST",
-		"apiId": "1234567890",
-		"protocol": "HTTP/1.1"
-	  }
-	}
-	```
+    ```json hl_lines="4-5"
+    {
+        "body": "hello",
+        "resource": "/hello",
+        "path": "/hello",
+        "httpMethod": "GET",
+        "isBase64Encoded": false,
+        "queryStringParameters": {
+        "foo": "bar"
+        },
+        "multiValueQueryStringParameters": {},
+        "pathParameters": {
+        "hello": "/hello"
+        },
+        "stageVariables": {},
+        "headers": {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, sdch",
+        "Accept-Language": "en-US,en;q=0.8",
+        "Cache-Control": "max-age=0",
+        "CloudFront-Forwarded-Proto": "https",
+        "CloudFront-Is-Desktop-Viewer": "true",
+        "CloudFront-Is-Mobile-Viewer": "false",
+        "CloudFront-Is-SmartTV-Viewer": "false",
+        "CloudFront-Is-Tablet-Viewer": "false",
+        "CloudFront-Viewer-Country": "US",
+        "Host": "1234567890.execute-api.us-east-1.amazonaws.com",
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Custom User Agent String",
+        "Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",
+        "X-Amz-Cf-Id": "cDehVQoZnx43VYQb9j2-nvCh-9z396Uhbp027Y2JvkCPNLmGJHqlaA==",
+        "X-Forwarded-For": "127.0.0.1, 127.0.0.2",
+        "X-Forwarded-Port": "443",
+        "X-Forwarded-Proto": "https"
+        },
+        "multiValueHeaders": {},
+        "requestContext": {
+        "accountId": "123456789012",
+        "resourceId": "123456",
+        "stage": "Prod",
+        "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
+        "requestTime": "25/Jul/2020:12:34:56 +0000",
+        "requestTimeEpoch": 1428582896000,
+        "identity": {
+            "cognitoIdentityPoolId": null,
+            "accountId": null,
+            "cognitoIdentityId": null,
+            "caller": null,
+            "accessKey": null,
+            "sourceIp": "127.0.0.1",
+            "cognitoAuthenticationType": null,
+            "cognitoAuthenticationProvider": null,
+            "userArn": null,
+            "userAgent": "Custom User Agent String",
+            "user": null
+        },
+        "path": "/Prod/hello",
+        "resourcePath": "/hello",
+        "httpMethod": "POST",
+        "apiId": "1234567890",
+        "protocol": "HTTP/1.1"
+        }
+    }
+    ```
 
 === "response.json"
 
-	```json
-	{
-		"statusCode": 200,
-		"headers": {
-			"Content-Type": "application/json"
-		},
-		"body": "{\"message\":\"hello universe\"}",
-		"isBase64Encoded": false
-	}
-	```
+    ```json
+    {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "body": "{\"message\":\"hello universe\"}",
+        "isBase64Encoded": false
+    }
+    ```
 
 #### HTTP API
 
@@ -201,26 +201,26 @@ When using API Gateway HTTP API to front your Lambda functions, you can instruct
 
 === "app.py"
 
-	```python hl_lines="3 7"
-	from aws_lambda_powertools import Logger, Tracer
-	from aws_lambda_powertools.logging import correlation_paths
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, ProxyEventType
+    ```python hl_lines="3 7"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, ProxyEventType
 
-	tracer = Tracer()
-	logger = Logger()
-	app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEventV2)
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEventV2)
 
-	@app.get("/hello")
-	@tracer.capture_method
-	def get_hello_universe():
-		return {"message": "hello universe"}
+    @app.get("/hello")
+    @tracer.capture_method
+    def get_hello_universe():
+        return {"message": "hello universe"}
 
-	# You can continue to use other utilities just as before
-	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_HTTP)
-	@tracer.capture_lambda_handler
-	def lambda_handler(event, context):
-		return app.resolve(event, context)
-	```
+    # You can continue to use other utilities just as before
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_HTTP)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
 
 #### ALB
 
@@ -228,26 +228,26 @@ When using ALB to front your Lambda functions, you can instruct `ApiGatewayResol
 
 === "app.py"
 
-	```python hl_lines="3 7"
-	from aws_lambda_powertools import Logger, Tracer
-	from aws_lambda_powertools.logging import correlation_paths
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, ProxyEventType
+    ```python hl_lines="3 7"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, ProxyEventType
 
-	tracer = Tracer()
-	logger = Logger()
-	app = ApiGatewayResolver(proxy_type=ProxyEventType.ALBEvent)
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.ALBEvent)
 
-	@app.get("/hello")
-	@tracer.capture_method
-	def get_hello_universe():
-		return {"message": "hello universe"}
+    @app.get("/hello")
+    @tracer.capture_method
+    def get_hello_universe():
+        return {"message": "hello universe"}
 
-	# You can continue to use other utilities just as before
-	@logger.inject_lambda_context(correlation_id_path=correlation_paths.APPLICATION_LOAD_BALANCER)
-	@tracer.capture_lambda_handler
-	def lambda_handler(event, context):
-		return app.resolve(event, context)
-	```
+    # You can continue to use other utilities just as before
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPLICATION_LOAD_BALANCER)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
 
 ### Dynamic routes
 
@@ -255,71 +255,109 @@ You can use `/path/{dynamic_value}` when configuring dynamic URL paths. This all
 
 === "app.py"
 
-	```python hl_lines="9 11"
-	from aws_lambda_powertools import Logger, Tracer
-	from aws_lambda_powertools.logging import correlation_paths
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    ```python hl_lines="9 11"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
-	tracer = Tracer()
-	logger = Logger()
-	app = ApiGatewayResolver()
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver()
 
-	@app.get("/hello/<name>")
-	@tracer.capture_method
-	def get_hello_you(name):
-		return {"message": f"hello {name}"}
+    @app.get("/hello/<name>")
+    @tracer.capture_method
+    def get_hello_you(name):
+        return {"message": f"hello {name}"}
 
-	# You can continue to use other utilities just as before
-	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-	@tracer.capture_lambda_handler
-	def lambda_handler(event, context):
-		return app.resolve(event, context)
-	```
+    # You can continue to use other utilities just as before
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
 
 === "sample_request.json"
 
-	```json
+    ```json
     {
-		"resource": "/hello/{name}",
-		"path": "/hello/lessa",
-		"httpMethod": "GET",
-		...
+        "resource": "/hello/{name}",
+        "path": "/hello/lessa",
+        "httpMethod": "GET",
+        ...
     }
     ```
+
+#### Nested routes
 
 You can also nest paths as configured earlier in [our sample infrastructure](#required-resources): `/{message}/{name}`.
 
 === "app.py"
 
-	```python hl_lines="9 11"
-	from aws_lambda_powertools import Logger, Tracer
-	from aws_lambda_powertools.logging import correlation_paths
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    ```python hl_lines="9 11"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
-	tracer = Tracer()
-	logger = Logger()
-	app = ApiGatewayResolver()
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver()
 
-	@app.get("/<message>/<name>")
-	@tracer.capture_method
-	def get_message(message, name):
-		return {"message": f"{message}, {name}}"}
+    @app.get("/<message>/<name>")
+    @tracer.capture_method
+    def get_message(message, name):
+        return {"message": f"{message}, {name}}"}
 
-	# You can continue to use other utilities just as before
-	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-	@tracer.capture_lambda_handler
-	def lambda_handler(event, context):
-		return app.resolve(event, context)
-	```
+    # You can continue to use other utilities just as before
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
 
 === "sample_request.json"
 
-	```json
+    ```json
     {
-		"resource": "/{message}/{name}",
-		"path": "/hi/michael",
-		"httpMethod": "GET",
-		...
+        "resource": "/{message}/{name}",
+        "path": "/hi/michael",
+        "httpMethod": "GET",
+        ...
+    }
+    ```
+
+#### Catch-all routes
+
+!!! note "We recommend having explicit routes whenever possible; use catch-all routes sparingly"
+
+You can use a regex string to handle an arbitrary number of paths within a request, for example `.+`.
+
+You can also combine nested paths with greedy regex to catch in between routes.
+
+!!! warning "We will choose the more explicit registered route that match incoming event"
+
+=== "app.py"
+
+    ```python hl_lines="5"
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+    app = ApiGatewayResolver()
+
+    @app.get(".+")
+    def catch_any_route_after_any():
+        return {"path_received": app.current_event.path}
+
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
+
+=== "sample_request.json"
+
+    ```json
+    {
+        "resource": "/any/route/should/work",
+        "path": "/any/route/should/work",
+        "httpMethod": "GET",
+        ...
     }
     ```
 
@@ -337,23 +375,23 @@ You can access the raw payload via `body` property, or if it's a JSON string you
 
 === "app.py"
 
-	```python hl_lines="7-9 11"
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    ```python hl_lines="7-9 11"
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
-	app = ApiGatewayResolver()
+    app = ApiGatewayResolver()
 
-	@app.get("/hello")
-	def get_hello_you():
-		query_strings_as_dict = app.current_event.query_string_parameters
-		json_payload = app.current_event.json_body
-		payload = app.current_event.body
+    @app.get("/hello")
+    def get_hello_you():
+        query_strings_as_dict = app.current_event.query_string_parameters
+        json_payload = app.current_event.json_body
+        payload = app.current_event.body
 
-		name = app.current_event.get_query_string_value(name="name", default_value="")
-		return {"message": f"hello {name}}"}
+        name = app.current_event.get_query_string_value(name="name", default_value="")
+        return {"message": f"hello {name}}"}
 
-	def lambda_handler(event, context):
-		return app.resolve(event, context)
-	```
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
 
 #### Headers
 
@@ -361,21 +399,21 @@ Similarly to [Query strings](#query-strings-and-payload), you can access headers
 
 === "app.py"
 
-	```python hl_lines="7-8"
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    ```python hl_lines="7-8"
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
-	app = ApiGatewayResolver()
+    app = ApiGatewayResolver()
 
-	@app.get("/hello")
-	def get_hello_you():
-		headers_as_dict = app.current_event.headers
-		name = app.current_event.get_header_value(name="X-Name", default_value="")
+    @app.get("/hello")
+    def get_hello_you():
+        headers_as_dict = app.current_event.headers
+        name = app.current_event.get_header_value(name="X-Name", default_value="")
 
-		return {"message": f"hello {name}}"}
+        return {"message": f"hello {name}}"}
 
-	def lambda_handler(event, context):
-		return app.resolve(event, context)
-	```
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
 
 ### Raising HTTP errors
 
@@ -385,13 +423,12 @@ You can easily raise any HTTP Error back to the client using `ServiceError` exce
 
 Additionally, we provide pre-defined errors for the most popular ones such as HTTP 400, 401, 404, 500.
 
-
 === "app.py"
 
-	```python hl_lines="4-10 20 25 30 35 39"
-	from aws_lambda_powertools import Logger, Tracer
-	from aws_lambda_powertools.logging import correlation_paths
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    ```python hl_lines="4-10 20 25 30 35 39"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
     from aws_lambda_powertools.event_handler.exceptions import (
         BadRequestError,
         InternalServerError,
@@ -400,42 +437,84 @@ Additionally, we provide pre-defined errors for the most popular ones such as HT
         UnauthorizedError,
     )
 
-	tracer = Tracer()
-	logger = Logger()
+    tracer = Tracer()
+    logger = Logger()
 
-	app = ApiGatewayResolver()
+    app = ApiGatewayResolver()
 
     @app.get(rule="/bad-request-error")
     def bad_request_error():
-		# HTTP  400
+        # HTTP  400
         raise BadRequestError("Missing required parameter")
 
     @app.get(rule="/unauthorized-error")
     def unauthorized_error():
-		# HTTP 401
+        # HTTP 401
         raise UnauthorizedError("Unauthorized")
 
     @app.get(rule="/not-found-error")
     def not_found_error():
-		# HTTP 404
+        # HTTP 404
         raise NotFoundError
 
     @app.get(rule="/internal-server-error")
     def internal_server_error():
-		# HTTP 500
+        # HTTP 500
         raise InternalServerError("Internal server error")
 
     @app.get(rule="/service-error", cors=True)
     def service_error():
         raise ServiceError(502, "Something went wrong!")
-		# alternatively
-		# from http import HTTPStatus
-		# raise ServiceError(HTTPStatus.BAD_GATEWAY.value, "Something went wrong)
+        # alternatively
+        # from http import HTTPStatus
+        # raise ServiceError(HTTPStatus.BAD_GATEWAY.value, "Something went wrong)
 
     def handler(event, context):
         return app.resolve(event, context)
-	```
+    ```
 
+### Custom Domain API Mappings
+
+When using Custom Domain API Mappings feature, you must use **`strip_prefixes`** param in the `ApiGatewayResolver` constructor.
+
+Scenario: You have a custom domain `api.mydomain.dev` and set an API Mapping `payment` to forward requests to your Payments API, the path argument will be `/payment/<your_actual_path>`.
+
+This will lead to a HTTP 404 despite having your Lambda configured correctly. See the example below on how to account for this change.
+
+=== "app.py"
+
+    ```python hl_lines="7"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver(strip_prefixes=["/payment"])
+
+    @app.get("/subscriptions/<subscription>")
+    @tracer.capture_method
+    def get_subscription(subscription):
+        return {"subscription_id": subscription}
+
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
+
+=== "sample_request.json"
+
+    ```json
+    {
+        "resource": "/subscriptions/{subscription}",
+        "path": "/payment/subscriptions/123",
+        "httpMethod": "GET",
+        ...
+    }
+    ```
+
+Note: After removing a path prefix with `strip_prefixes`, the new root path will automatically be mapped to the path argument of `/`. For example, when using `strip_prefixes` value of `/pay`, there is no difference between a request path of `/pay` and `/pay/`; and the path argument would be defined as `/`.
 
 ## Advanced
 
@@ -447,62 +526,61 @@ This will ensure that CORS headers are always returned as part of the response w
 
 === "app.py"
 
-	```python hl_lines="9 11"
-	from aws_lambda_powertools import Logger, Tracer
-	from aws_lambda_powertools.logging import correlation_paths
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, CORSConfig
+    ```python hl_lines="9 11"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, CORSConfig
 
-	tracer = Tracer()
-	logger = Logger()
+    tracer = Tracer()
+    logger = Logger()
 
-	cors_config = CORSConfig(allow_origin="https://example.com", max_age=300)
-	app = ApiGatewayResolver(cors=cors_config)
+    cors_config = CORSConfig(allow_origin="https://example.com", max_age=300)
+    app = ApiGatewayResolver(cors=cors_config)
 
-	@app.get("/hello/<name>")
-	@tracer.capture_method
-	def get_hello_you(name):
-		return {"message": f"hello {name}"}
+    @app.get("/hello/<name>")
+    @tracer.capture_method
+    def get_hello_you(name):
+        return {"message": f"hello {name}"}
 
-	@app.get("/hello", cors=False)  # optionally exclude CORS from response, if needed
-	@tracer.capture_method
-	def get_hello_no_cors_needed():
-		return {"message": "hello, no CORS needed for this path ;)"}
+    @app.get("/hello", cors=False)  # optionally exclude CORS from response, if needed
+    @tracer.capture_method
+    def get_hello_no_cors_needed():
+        return {"message": "hello, no CORS needed for this path ;)"}
 
-	# You can continue to use other utilities just as before
-	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-	@tracer.capture_lambda_handler
-	def lambda_handler(event, context):
-		return app.resolve(event, context)
-	```
+    # You can continue to use other utilities just as before
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
 
 === "response.json"
 
-	```json
-	{
-		"statusCode": 200,
-		"headers": {
-			"Content-Type": "application/json",
-			"Access-Control-Allow-Origin": "https://www.example.com",
-			"Access-Control-Allow-Headers": "Authorization,Content-Type,X-Amz-Date,X-Amz-Security-Token,X-Api-Key"
-		},
-		"body": "{\"message\":\"hello lessa\"}",
-		"isBase64Encoded": false
-	}
-	```
+    ```json
+    {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "https://www.example.com",
+            "Access-Control-Allow-Headers": "Authorization,Content-Type,X-Amz-Date,X-Amz-Security-Token,X-Api-Key"
+        },
+        "body": "{\"message\":\"hello lessa\"}",
+        "isBase64Encoded": false
+    }
+    ```
 
 === "response_no_cors.json"
 
-	```json
-	{
-		"statusCode": 200,
-		"headers": {
-			"Content-Type": "application/json"
-		},
-		"body": "{\"message\":\"hello lessa\"}",
-		"isBase64Encoded": false
-	}
-	```
-
+    ```json
+    {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "body": "{\"message\":\"hello lessa\"}",
+        "isBase64Encoded": false
+    }
+    ```
 
 !!! tip "Optionally disable class on a per path basis with `cors=False` parameter"
 
@@ -532,25 +610,25 @@ You can use the `Response` class to have full control over the response, for exa
 
 === "app.py"
 
-	```python hl_lines="10-14"
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+    ```python hl_lines="10-14"
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
 
-	app = ApiGatewayResolver()
+    app = ApiGatewayResolver()
 
-	@app.get("/hello")
-	def get_hello_you():
-		payload = json.dumps({"message": "I'm a teapot"})
-		custom_headers = {"X-Custom": "X-Value"}
+    @app.get("/hello")
+    def get_hello_you():
+        payload = json.dumps({"message": "I'm a teapot"})
+        custom_headers = {"X-Custom": "X-Value"}
 
-		return Response(status_code=418,
-						content_type="application/json",
-						body=payload,
-						headers=custom_headers
-		)
+        return Response(status_code=418,
+                        content_type="application/json",
+                        body=payload,
+                        headers=custom_headers
+        )
 
-	def lambda_handler(event, context):
-		return app.resolve(event, context)
-	```
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
 
 === "response.json"
 
@@ -559,7 +637,7 @@ You can use the `Response` class to have full control over the response, for exa
         "body": "{\"message\":\"I\'m a teapot\"}",
         "headers": {
             "Content-Type": "application/json",
-			"X-Custom": "X-Value"
+            "X-Custom": "X-Value"
         },
         "isBase64Encoded": false,
         "statusCode": 418
@@ -573,29 +651,29 @@ You can compress with gzip and base64 encode your responses via `compress` param
 
 === "app.py"
 
-	```python hl_lines="5 7"
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    ```python hl_lines="5 7"
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
-	app = ApiGatewayResolver()
+    app = ApiGatewayResolver()
 
-	@app.get("/hello", compress=True)
-	def get_hello_you():
-		return {"message": "hello universe"}
+    @app.get("/hello", compress=True)
+    def get_hello_you():
+        return {"message": "hello universe"}
 
-	def lambda_handler(event, context):
-		return app.resolve(event, context)
-	```
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
 
 === "sample_request.json"
 
-	```json
+    ```json
     {
         "headers": {
             "Accept-Encoding": "gzip"
         },
         "httpMethod": "GET",
         "path": "/hello",
-		...
+        ...
     }
     ```
 
@@ -623,74 +701,75 @@ Like `compress` feature, the client must send the `Accept` header with the corre
 
 === "app.py"
 
-	```python hl_lines="4 7 11"
-	import os
-	from pathlib import Path
+    ```python hl_lines="4 7 11"
+    import os
+    from pathlib import Path
 
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
 
-	app = ApiGatewayResolver()
-	logo_file: bytes = Path(os.getenv("LAMBDA_TASK_ROOT") + "/logo.svg").read_bytes()
+    app = ApiGatewayResolver()
+    logo_file: bytes = Path(os.getenv("LAMBDA_TASK_ROOT") + "/logo.svg").read_bytes()
 
-	@app.get("/logo")
-	def get_logo():
-		return Response(status_code=200, content_type="image/svg+xml", body=logo_file)
+    @app.get("/logo")
+    def get_logo():
+        return Response(status_code=200, content_type="image/svg+xml", body=logo_file)
 
-	def lambda_handler(event, context):
-		return app.resolve(event, context)
-	```
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
 
 === "logo.svg"
-	```xml
-	<?xml version="1.0" encoding="utf-8"?>
-	<!-- Generator: Adobe Illustrator 19.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-	<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-		 viewBox="0 0 304 182" style="enable-background:new 0 0 304 182;" xml:space="preserve">
-	<style type="text/css">
-		.st0{fill:#FFFFFF;}
-		.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
-	</style>
-	<g>
-		<path class="st0" d="M86.4,66.4c0,3.7,0.4,6.7,1.1,8.9c0.8,2.2,1.8,4.6,3.2,7.2c0.5,0.8,0.7,1.6,0.7,2.3c0,1-0.6,2-1.9,3l-6.3,4.2
-			c-0.9,0.6-1.8,0.9-2.6,0.9c-1,0-2-0.5-3-1.4C76.2,90,75,88.4,74,86.8c-1-1.7-2-3.6-3.1-5.9c-7.8,9.2-17.6,13.8-29.4,13.8
-			c-8.4,0-15.1-2.4-20-7.2c-4.9-4.8-7.4-11.2-7.4-19.2c0-8.5,3-15.4,9.1-20.6c6.1-5.2,14.2-7.8,24.5-7.8c3.4,0,6.9,0.3,10.6,0.8
-			c3.7,0.5,7.5,1.3,11.5,2.2v-7.3c0-7.6-1.6-12.9-4.7-16c-3.2-3.1-8.6-4.6-16.3-4.6c-3.5,0-7.1,0.4-10.8,1.3c-3.7,0.9-7.3,2-10.8,3.4
-			c-1.6,0.7-2.8,1.1-3.5,1.3c-0.7,0.2-1.2,0.3-1.6,0.3c-1.4,0-2.1-1-2.1-3.1v-4.9c0-1.6,0.2-2.8,0.7-3.5c0.5-0.7,1.4-1.4,2.8-2.1
-			c3.5-1.8,7.7-3.3,12.6-4.5c4.9-1.3,10.1-1.9,15.6-1.9c11.9,0,20.6,2.7,26.2,8.1c5.5,5.4,8.3,13.6,8.3,24.6V66.4z M45.8,81.6
-			c3.3,0,6.7-0.6,10.3-1.8c3.6-1.2,6.8-3.4,9.5-6.4c1.6-1.9,2.8-4,3.4-6.4c0.6-2.4,1-5.3,1-8.7v-4.2c-2.9-0.7-6-1.3-9.2-1.7
-			c-3.2-0.4-6.3-0.6-9.4-0.6c-6.7,0-11.6,1.3-14.9,4c-3.3,2.7-4.9,6.5-4.9,11.5c0,4.7,1.2,8.2,3.7,10.6
-			C37.7,80.4,41.2,81.6,45.8,81.6z M126.1,92.4c-1.8,0-3-0.3-3.8-1c-0.8-0.6-1.5-2-2.1-3.9L96.7,10.2c-0.6-2-0.9-3.3-0.9-4
-			c0-1.6,0.8-2.5,2.4-2.5h9.8c1.9,0,3.2,0.3,3.9,1c0.8,0.6,1.4,2,2,3.9l16.8,66.2l15.6-66.2c0.5-2,1.1-3.3,1.9-3.9c0.8-0.6,2.2-1,4-1
-			h8c1.9,0,3.2,0.3,4,1c0.8,0.6,1.5,2,1.9,3.9l15.8,67l17.3-67c0.6-2,1.3-3.3,2-3.9c0.8-0.6,2.1-1,3.9-1h9.3c1.6,0,2.5,0.8,2.5,2.5
-			c0,0.5-0.1,1-0.2,1.6c-0.1,0.6-0.3,1.4-0.7,2.5l-24.1,77.3c-0.6,2-1.3,3.3-2.1,3.9c-0.8,0.6-2.1,1-3.8,1h-8.6c-1.9,0-3.2-0.3-4-1
-			c-0.8-0.7-1.5-2-1.9-4L156,23l-15.4,64.4c-0.5,2-1.1,3.3-1.9,4c-0.8,0.7-2.2,1-4,1H126.1z M254.6,95.1c-5.2,0-10.4-0.6-15.4-1.8
-			c-5-1.2-8.9-2.5-11.5-4c-1.6-0.9-2.7-1.9-3.1-2.8c-0.4-0.9-0.6-1.9-0.6-2.8v-5.1c0-2.1,0.8-3.1,2.3-3.1c0.6,0,1.2,0.1,1.8,0.3
-			c0.6,0.2,1.5,0.6,2.5,1c3.4,1.5,7.1,2.7,11,3.5c4,0.8,7.9,1.2,11.9,1.2c6.3,0,11.2-1.1,14.6-3.3c3.4-2.2,5.2-5.4,5.2-9.5
-			c0-2.8-0.9-5.1-2.7-7c-1.8-1.9-5.2-3.6-10.1-5.2L246,52c-7.3-2.3-12.7-5.7-16-10.2c-3.3-4.4-5-9.3-5-14.5c0-4.2,0.9-7.9,2.7-11.1
-			c1.8-3.2,4.2-6,7.2-8.2c3-2.3,6.4-4,10.4-5.2c4-1.2,8.2-1.7,12.6-1.7c2.2,0,4.5,0.1,6.7,0.4c2.3,0.3,4.4,0.7,6.5,1.1
-			c2,0.5,3.9,1,5.7,1.6c1.8,0.6,3.2,1.2,4.2,1.8c1.4,0.8,2.4,1.6,3,2.5c0.6,0.8,0.9,1.9,0.9,3.3v4.7c0,2.1-0.8,3.2-2.3,3.2
-			c-0.8,0-2.1-0.4-3.8-1.2c-5.7-2.6-12.1-3.9-19.2-3.9c-5.7,0-10.2,0.9-13.3,2.8c-3.1,1.9-4.7,4.8-4.7,8.9c0,2.8,1,5.2,3,7.1
-			c2,1.9,5.7,3.8,11,5.5l14.2,4.5c7.2,2.3,12.4,5.5,15.5,9.6c3.1,4.1,4.6,8.8,4.6,14c0,4.3-0.9,8.2-2.6,11.6
-			c-1.8,3.4-4.2,6.4-7.3,8.8c-3.1,2.5-6.8,4.3-11.1,5.6C264.4,94.4,259.7,95.1,254.6,95.1z"/>
-		<g>
-			<path class="st1" d="M273.5,143.7c-32.9,24.3-80.7,37.2-121.8,37.2c-57.6,0-109.5-21.3-148.7-56.7c-3.1-2.8-0.3-6.6,3.4-4.4
-				c42.4,24.6,94.7,39.5,148.8,39.5c36.5,0,76.6-7.6,113.5-23.2C274.2,133.6,278.9,139.7,273.5,143.7z"/>
-			<path class="st1" d="M287.2,128.1c-4.2-5.4-27.8-2.6-38.5-1.3c-3.2,0.4-3.7-2.4-0.8-4.5c18.8-13.2,49.7-9.4,53.3-5
-				c3.6,4.5-1,35.4-18.6,50.2c-2.7,2.3-5.3,1.1-4.1-1.9C282.5,155.7,291.4,133.4,287.2,128.1z"/>
-		</g>
-	</g>
-	</svg>
-	```
+
+    ```xml
+    <?xml version="1.0" encoding="utf-8"?>
+    <!-- Generator: Adobe Illustrator 19.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+            viewBox="0 0 304 182" style="enable-background:new 0 0 304 182;" xml:space="preserve">
+    <style type="text/css">
+        .st0{fill:#FFFFFF;}
+        .st1{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
+    </style>
+    <g>
+        <path class="st0" d="M86.4,66.4c0,3.7,0.4,6.7,1.1,8.9c0.8,2.2,1.8,4.6,3.2,7.2c0.5,0.8,0.7,1.6,0.7,2.3c0,1-0.6,2-1.9,3l-6.3,4.2
+            c-0.9,0.6-1.8,0.9-2.6,0.9c-1,0-2-0.5-3-1.4C76.2,90,75,88.4,74,86.8c-1-1.7-2-3.6-3.1-5.9c-7.8,9.2-17.6,13.8-29.4,13.8
+            c-8.4,0-15.1-2.4-20-7.2c-4.9-4.8-7.4-11.2-7.4-19.2c0-8.5,3-15.4,9.1-20.6c6.1-5.2,14.2-7.8,24.5-7.8c3.4,0,6.9,0.3,10.6,0.8
+            c3.7,0.5,7.5,1.3,11.5,2.2v-7.3c0-7.6-1.6-12.9-4.7-16c-3.2-3.1-8.6-4.6-16.3-4.6c-3.5,0-7.1,0.4-10.8,1.3c-3.7,0.9-7.3,2-10.8,3.4
+            c-1.6,0.7-2.8,1.1-3.5,1.3c-0.7,0.2-1.2,0.3-1.6,0.3c-1.4,0-2.1-1-2.1-3.1v-4.9c0-1.6,0.2-2.8,0.7-3.5c0.5-0.7,1.4-1.4,2.8-2.1
+            c3.5-1.8,7.7-3.3,12.6-4.5c4.9-1.3,10.1-1.9,15.6-1.9c11.9,0,20.6,2.7,26.2,8.1c5.5,5.4,8.3,13.6,8.3,24.6V66.4z M45.8,81.6
+            c3.3,0,6.7-0.6,10.3-1.8c3.6-1.2,6.8-3.4,9.5-6.4c1.6-1.9,2.8-4,3.4-6.4c0.6-2.4,1-5.3,1-8.7v-4.2c-2.9-0.7-6-1.3-9.2-1.7
+            c-3.2-0.4-6.3-0.6-9.4-0.6c-6.7,0-11.6,1.3-14.9,4c-3.3,2.7-4.9,6.5-4.9,11.5c0,4.7,1.2,8.2,3.7,10.6
+            C37.7,80.4,41.2,81.6,45.8,81.6z M126.1,92.4c-1.8,0-3-0.3-3.8-1c-0.8-0.6-1.5-2-2.1-3.9L96.7,10.2c-0.6-2-0.9-3.3-0.9-4
+            c0-1.6,0.8-2.5,2.4-2.5h9.8c1.9,0,3.2,0.3,3.9,1c0.8,0.6,1.4,2,2,3.9l16.8,66.2l15.6-66.2c0.5-2,1.1-3.3,1.9-3.9c0.8-0.6,2.2-1,4-1
+            h8c1.9,0,3.2,0.3,4,1c0.8,0.6,1.5,2,1.9,3.9l15.8,67l17.3-67c0.6-2,1.3-3.3,2-3.9c0.8-0.6,2.1-1,3.9-1h9.3c1.6,0,2.5,0.8,2.5,2.5
+            c0,0.5-0.1,1-0.2,1.6c-0.1,0.6-0.3,1.4-0.7,2.5l-24.1,77.3c-0.6,2-1.3,3.3-2.1,3.9c-0.8,0.6-2.1,1-3.8,1h-8.6c-1.9,0-3.2-0.3-4-1
+            c-0.8-0.7-1.5-2-1.9-4L156,23l-15.4,64.4c-0.5,2-1.1,3.3-1.9,4c-0.8,0.7-2.2,1-4,1H126.1z M254.6,95.1c-5.2,0-10.4-0.6-15.4-1.8
+            c-5-1.2-8.9-2.5-11.5-4c-1.6-0.9-2.7-1.9-3.1-2.8c-0.4-0.9-0.6-1.9-0.6-2.8v-5.1c0-2.1,0.8-3.1,2.3-3.1c0.6,0,1.2,0.1,1.8,0.3
+            c0.6,0.2,1.5,0.6,2.5,1c3.4,1.5,7.1,2.7,11,3.5c4,0.8,7.9,1.2,11.9,1.2c6.3,0,11.2-1.1,14.6-3.3c3.4-2.2,5.2-5.4,5.2-9.5
+            c0-2.8-0.9-5.1-2.7-7c-1.8-1.9-5.2-3.6-10.1-5.2L246,52c-7.3-2.3-12.7-5.7-16-10.2c-3.3-4.4-5-9.3-5-14.5c0-4.2,0.9-7.9,2.7-11.1
+            c1.8-3.2,4.2-6,7.2-8.2c3-2.3,6.4-4,10.4-5.2c4-1.2,8.2-1.7,12.6-1.7c2.2,0,4.5,0.1,6.7,0.4c2.3,0.3,4.4,0.7,6.5,1.1
+            c2,0.5,3.9,1,5.7,1.6c1.8,0.6,3.2,1.2,4.2,1.8c1.4,0.8,2.4,1.6,3,2.5c0.6,0.8,0.9,1.9,0.9,3.3v4.7c0,2.1-0.8,3.2-2.3,3.2
+            c-0.8,0-2.1-0.4-3.8-1.2c-5.7-2.6-12.1-3.9-19.2-3.9c-5.7,0-10.2,0.9-13.3,2.8c-3.1,1.9-4.7,4.8-4.7,8.9c0,2.8,1,5.2,3,7.1
+            c2,1.9,5.7,3.8,11,5.5l14.2,4.5c7.2,2.3,12.4,5.5,15.5,9.6c3.1,4.1,4.6,8.8,4.6,14c0,4.3-0.9,8.2-2.6,11.6
+            c-1.8,3.4-4.2,6.4-7.3,8.8c-3.1,2.5-6.8,4.3-11.1,5.6C264.4,94.4,259.7,95.1,254.6,95.1z"/>
+        <g>
+            <path class="st1" d="M273.5,143.7c-32.9,24.3-80.7,37.2-121.8,37.2c-57.6,0-109.5-21.3-148.7-56.7c-3.1-2.8-0.3-6.6,3.4-4.4
+                c42.4,24.6,94.7,39.5,148.8,39.5c36.5,0,76.6-7.6,113.5-23.2C274.2,133.6,278.9,139.7,273.5,143.7z"/>
+            <path class="st1" d="M287.2,128.1c-4.2-5.4-27.8-2.6-38.5-1.3c-3.2,0.4-3.7-2.4-0.8-4.5c18.8-13.2,49.7-9.4,53.3-5
+                c3.6,4.5-1,35.4-18.6,50.2c-2.7,2.3-5.3,1.1-4.1-1.9C282.5,155.7,291.4,133.4,287.2,128.1z"/>
+        </g>
+    </g>
+    </svg>
+    ```
 === "sample_request.json"
 
-	```json
+    ```json
     {
         "headers": {
             "Accept": "image/svg+xml"
         },
         "httpMethod": "GET",
         "path": "/logo",
-		...
+        ...
     }
     ```
 
@@ -717,62 +796,62 @@ This will enable full tracebacks errors in the response, print request and respo
 
 === "debug.py"
 
-	```python hl_lines="3"
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    ```python hl_lines="3"
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
-	app = ApiGatewayResolver(debug=True)
+    app = ApiGatewayResolver(debug=True)
 
-	@app.get("/hello")
-	def get_hello_universe():
-		return {"message": "hello universe"}
+    @app.get("/hello")
+    def get_hello_universe():
+        return {"message": "hello universe"}
 
-	def lambda_handler(event, context):
-		return app.resolve(event, context)
-	```
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
 
 ### Custom serializer
 
 You can instruct API Gateway handler to use a custom serializer to best suit your needs, for example take into account Enums when serializing.
 
 === "custom_serializer.py"
-	```python hl_lines="19-20 24"
-	import json
-	from enum import Enum
-	from json import JSONEncoder
-	from typing import Dict
+    ```python hl_lines="19-20 24"
+    import json
+    from enum import Enum
+    from json import JSONEncoder
+    from typing import Dict
 
-	class CustomEncoder(JSONEncoder):
-		"""Your customer json encoder"""
-		def default(self, obj):
-			if isinstance(obj, Enum):
-				return obj.value
-			try:
-				iterable = iter(obj)
-			except TypeError:
-				pass
-			else:
-				return sorted(iterable)
-			return JSONEncoder.default(self, obj)
+    class CustomEncoder(JSONEncoder):
+        """Your customer json encoder"""
+        def default(self, obj):
+            if isinstance(obj, Enum):
+                return obj.value
+            try:
+                iterable = iter(obj)
+            except TypeError:
+                pass
+            else:
+                return sorted(iterable)
+            return JSONEncoder.default(self, obj)
 
-	def custom_serializer(obj) -> str:
-		"""Your custom serializer function ApiGatewayResolver will use"""
-		return json.dumps(obj, cls=CustomEncoder)
+    def custom_serializer(obj) -> str:
+        """Your custom serializer function ApiGatewayResolver will use"""
+        return json.dumps(obj, cls=CustomEncoder)
 
-	# Assigning your custom serializer
-	app = ApiGatewayResolver(serializer=custom_serializer)
+    # Assigning your custom serializer
+    app = ApiGatewayResolver(serializer=custom_serializer)
 
-	class Color(Enum):
-		RED = 1
-		BLUE = 2
+    class Color(Enum):
+        RED = 1
+        BLUE = 2
 
-	@app.get("/colors")
-	def get_color() -> Dict:
-		return {
-			# Color.RED will be serialized to 1 as expected now
-			"color": Color.RED,
-			"variations": {"light", "dark"},
-		}
-	```
+    @app.get("/colors")
+    def get_color() -> Dict:
+        return {
+            # Color.RED will be serialized to 1 as expected now
+            "color": Color.RED,
+            "variations": {"light", "dark"},
+        }
+    ```
 
 ## Testing your code
 
@@ -780,54 +859,54 @@ You can test your routes by passing a proxy event request where `path` and `http
 
 === "test_app.py"
 
-	```python hl_lines="18-24"
-	from dataclasses import dataclass
+    ```python hl_lines="18-24"
+    from dataclasses import dataclass
 
-	import pytest
-	import app
+    import pytest
+    import app
 
     @pytest.fixture
     def lambda_context():
-		@dataclass
-		class LambdaContext:
-			function_name: str = "test"
-			memory_limit_in_mb: int = 128
-			invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
-			aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
+        @dataclass
+        class LambdaContext:
+            function_name: str = "test"
+            memory_limit_in_mb: int = 128
+            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
+            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
 
         return LambdaContext()
 
     def test_lambda_handler(lambda_context):
-		minimal_event = {
-			"path": "/hello",
-			"httpMethod": "GET"
-	  		"requestContext": {  # correlation ID
-				"requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef"
-			}
-		}
+        minimal_event = {
+            "path": "/hello",
+            "httpMethod": "GET"
+            "requestContext": {  # correlation ID
+                "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef"
+            }
+        }
 
         app.lambda_handler(minimal_event, lambda_context)
-	```
+    ```
 
 === "app.py"
 
-	```python
-	from aws_lambda_powertools import Logger
-	from aws_lambda_powertools.logging import correlation_paths
-	from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    ```python
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
-	logger = Logger()
-	app = ApiGatewayResolver()  # by default API Gateway REST API (v1)
+    logger = Logger()
+    app = ApiGatewayResolver()  # by default API Gateway REST API (v1)
 
-	@app.get("/hello")
-	def get_hello_universe():
-		return {"message": "hello universe"}
+    @app.get("/hello")
+    def get_hello_universe():
+        return {"message": "hello universe"}
 
-	# You can continue to use other utilities just as before
-	@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-	def lambda_handler(event, context):
-		return app.resolve(event, context)
-	```
+    # You can continue to use other utilities just as before
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
 
 ## FAQ
 

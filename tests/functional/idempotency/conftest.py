@@ -11,14 +11,18 @@ from botocore import stub
 from botocore.config import Config
 from jmespath import functions
 
-from aws_lambda_powertools.shared.jmespath_utils import unwrap_event_from_envelope
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.idempotency import IdempotencyConfig
+from aws_lambda_powertools.utilities.jmespath_utils import extract_data_from_envelope
 from aws_lambda_powertools.utilities.validation import envelopes
 from tests.functional.utils import load_event
 
 TABLE_NAME = "TEST_TABLE"
+
+
+def serialize(data):
+    return json.dumps(data, sort_keys=True, cls=Encoder)
 
 
 @pytest.fixture(scope="module")
@@ -62,12 +66,12 @@ def lambda_response():
 
 @pytest.fixture(scope="module")
 def serialized_lambda_response(lambda_response):
-    return json.dumps(lambda_response, cls=Encoder)
+    return serialize(lambda_response)
 
 
 @pytest.fixture(scope="module")
 def deserialized_lambda_response(lambda_response):
-    return json.loads(json.dumps(lambda_response, cls=Encoder))
+    return json.loads(serialize(lambda_response))
 
 
 @pytest.fixture
@@ -118,7 +122,8 @@ def expected_params_update_item_with_validation(
 @pytest.fixture
 def expected_params_put_item(hashed_idempotency_key):
     return {
-        "ConditionExpression": "attribute_not_exists(id) OR expiration < :now",
+        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now",
+        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration"},
         "ExpressionAttributeValues": {":now": stub.ANY},
         "Item": {"expiration": stub.ANY, "id": hashed_idempotency_key, "status": "INPROGRESS"},
         "TableName": "TEST_TABLE",
@@ -128,7 +133,8 @@ def expected_params_put_item(hashed_idempotency_key):
 @pytest.fixture
 def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_validation_key):
     return {
-        "ConditionExpression": "attribute_not_exists(id) OR expiration < :now",
+        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now",
+        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration"},
         "ExpressionAttributeValues": {":now": stub.ANY},
         "Item": {
             "expiration": stub.ANY,
@@ -144,20 +150,20 @@ def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_vali
 def hashed_idempotency_key(lambda_apigw_event, default_jmespath, lambda_context):
     compiled_jmespath = jmespath.compile(default_jmespath)
     data = compiled_jmespath.search(lambda_apigw_event)
-    return "test-func#" + hashlib.md5(json.dumps(data).encode()).hexdigest()
+    return "test-func#" + hashlib.md5(serialize(data).encode()).hexdigest()
 
 
 @pytest.fixture
 def hashed_idempotency_key_with_envelope(lambda_apigw_event):
-    event = unwrap_event_from_envelope(
+    event = extract_data_from_envelope(
         data=lambda_apigw_event, envelope=envelopes.API_GATEWAY_HTTP, jmespath_options={}
     )
-    return "test-func#" + hashlib.md5(json.dumps(event).encode()).hexdigest()
+    return "test-func#" + hashlib.md5(serialize(event).encode()).hexdigest()
 
 
 @pytest.fixture
 def hashed_validation_key(lambda_apigw_event):
-    return hashlib.md5(json.dumps(lambda_apigw_event["requestContext"]).encode()).hexdigest()
+    return hashlib.md5(serialize(lambda_apigw_event["requestContext"]).encode()).hexdigest()
 
 
 @pytest.fixture

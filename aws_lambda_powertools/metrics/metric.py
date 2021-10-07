@@ -42,7 +42,7 @@ class SingleMetric(MetricManager):
         Inherits from `aws_lambda_powertools.metrics.base.MetricManager`
     """
 
-    def add_metric(self, name: str, unit: Union[MetricUnit, str], value: float):
+    def add_metric(self, name: str, unit: Union[MetricUnit, str], value: float) -> None:
         """Method to prevent more than one metric being created
 
         Parameters

@@ -201,11 +201,12 @@ The DynamoDB Provider does not have any high-level functions, as it needs to kno
 You can initialize the DynamoDB provider pointing to [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html) using **`endpoint_url`** parameter:
 
 === "dynamodb_local.py"
-	```python hl_lines="3"
-	from aws_lambda_powertools.utilities import parameters
 
-	dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table", endpoint_url="http://localhost:8000")
-	```
+    ```python hl_lines="3"
+    from aws_lambda_powertools.utilities import parameters
+
+    dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table", endpoint_url="http://localhost:8000")
+    ```
 
 **DynamoDB table structure for single parameters**
 
@@ -218,7 +219,7 @@ For single parameters, you must use `id` as the [partition key](https://docs.aws
 > **Example**
 
 === "app.py"
-	With this table, the return value of `dynamodb_provider.get("my-param")` call will be `my-value`.
+    With this table, the return value of `dynamodb_provider.get("my-param")` call will be `my-value`.
 
     ```python hl_lines="3 7"
     from aws_lambda_powertools.utilities import parameters
@@ -241,7 +242,6 @@ For example, if you want to retrieve multiple parameters having `my-hash-key` as
 | my-hash-key | param-a | my-value-a |
 | my-hash-key | param-b | my-value-b |
 | my-hash-key | param-c | my-value-c |
-
 
 With this table, the return of `dynamodb_provider.get_multiple("my-hash-key")` call will be a dictionary like:
 
@@ -501,3 +501,40 @@ Here is the mapping between this utility's functions and methods and the underly
 | DynamoDB            | `DynamoDBProvider.get`          | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table)) | [get_item](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.get_item)
 | DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table)) | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)
 | App Config          | `get_app_config`                | `appconfig`      | [get_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfig.html#AppConfig.Client.get_configuration) |
+
+
+### Customizing boto configuration
+
+The **`config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html) when constructing any of the built-in provider classes.
+
+> **Example**
+
+
+=== "Custom session"
+
+    ```python hl_lines="2 4 5"
+    from aws_lambda_powertools.utilities import parameters
+    import boto3
+
+    boto3_session = boto3.session.Session()
+    ssm_provider = parameters.SSMProvider(boto3_session=boto3_session)
+
+    def handler(event, context):
+        # Retrieve a single parameter
+        value = ssm_provider.get("/my/parameter")
+        ...
+    ```
+=== "Custom config"
+
+    ```python hl_lines="2 4 5"
+    from aws_lambda_powertools.utilities import parameters
+    from botocore.config import Config
+
+    boto_config = Config()
+    ssm_provider = parameters.SSMProvider(config=boto_config)
+
+    def handler(event, context):
+        # Retrieve a single parameter
+        value = ssm_provider.get("/my/parameter")
+        ...
+    ```

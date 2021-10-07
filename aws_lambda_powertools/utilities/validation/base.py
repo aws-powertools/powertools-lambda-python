@@ -32,6 +32,15 @@ def validate_data_against_schema(data: Union[Dict, str], schema: Dict, formats: 
         fastjsonschema.validate(definition=schema, data=data, formats=formats)
     except (TypeError, AttributeError, fastjsonschema.JsonSchemaDefinitionException) as e:
         raise InvalidSchemaFormatError(f"Schema received: {schema}, Formats: {formats}. Error: {e}")
-    except fastjsonschema.JsonSchemaException as e:
-        message = f"Failed schema validation. Error: {e.message}, Path: {e.path}, Data: {e.value}"  # noqa: B306, E501
-        raise SchemaValidationError(message)
+    except fastjsonschema.JsonSchemaValueException as e:
+        message = f"Failed schema validation. Error: {e.message}, Path: {e.path}, Data: {e.value}"  # noqa: B306
+        raise SchemaValidationError(
+            message,
+            validation_message=e.message,  # noqa: B306
+            name=e.name,
+            path=e.path,
+            value=e.value,
+            definition=e.definition,
+            rule=e.rule,
+            rule_definition=e.rule_definition,
+        )

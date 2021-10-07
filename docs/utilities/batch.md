@@ -34,22 +34,23 @@ Before your use this utility, your AWS Lambda function must have `sqs:DeleteMess
 > Example using AWS Serverless Application Model (SAM)
 
 === "template.yml"
+
     ```yaml hl_lines="2-3 12-15"
     Resources:
-	  MyQueue:
-		Type: AWS::SQS::Queue
+        MyQueue:
+        Type: AWS::SQS::Queue
 
-      HelloWorldFunction:
+        HelloWorldFunction:
         Type: AWS::Serverless::Function
         Properties:
-          Runtime: python3.8
-          Environment:
+            Runtime: python3.8
+            Environment:
             Variables:
-              POWERTOOLS_SERVICE_NAME: example
-		  Policies:
-		    - SQSPollerPolicy:
-			    QueueName:
-				  !GetAtt MyQueue.QueueName
+                POWERTOOLS_SERVICE_NAME: example
+            Policies:
+            - SQSPollerPolicy:
+                QueueName:
+                    !GetAtt MyQueue.QueueName
     ```
 
 ### Processing messages from SQS
@@ -90,9 +91,9 @@ You need to create a function to handle each record from the batch - We call it 
     ```
 
 !!! tip
-	**Any non-exception/successful return from your record handler function** will instruct both decorator and context manager to queue up each individual message for deletion.
+    **Any non-exception/successful return from your record handler function** will instruct both decorator and context manager to queue up each individual message for deletion.
 
-	If the entire batch succeeds, we let Lambda to proceed in deleting the records from the queue for cost reasons.
+    If the entire batch succeeds, we let Lambda to proceed in deleting the records from the queue for cost reasons.
 
 ### Partial failure mechanics
 
@@ -104,7 +105,7 @@ All records in the batch will be passed to this handler for processing, even if 
 !!! warning
     You will not have accessed to the **processed messages** within the Lambda Handler.
 
-	All processing logic will and should be performed by the `record_handler` function.
+    All processing logic will and should be performed by the `record_handler` function.
 
 ## Advanced
 
@@ -114,8 +115,8 @@ They have nearly the same behaviour when it comes to processing messages from th
 
 * **Entire batch has been successfully processed**, where your Lambda handler returned successfully, we will let SQS delete the batch to optimize your cost
 * **Entire Batch has been partially processed successfully**, where exceptions were raised within your `record handler`, we will:
-    - **1)** Delete successfully processed messages from the queue by directly calling `sqs:DeleteMessageBatch`
-    - **2)** Raise `SQSBatchProcessingError` to ensure failed messages return to your SQS queue
+  * **1)** Delete successfully processed messages from the queue by directly calling `sqs:DeleteMessageBatch`
+  * **2)** Raise `SQSBatchProcessingError` to ensure failed messages return to your SQS queue
 
 The only difference is that **PartialSQSProcessor** will give you access to processed messages if you need.
 
@@ -142,10 +143,13 @@ Use `PartialSQSProcessor` context manager to access a list of all return values 
         return result
     ```
 
-### Passing custom boto3 config
+### Customizing boto configuration
 
-If you need to pass custom configuration such as region to the SDK, you can pass your own [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) to
-the `sqs_batch_processor` decorator:
+The **`config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html)
+or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html) when using the `sqs_batch_processor`
+decorator or `PartialSQSProcessor` class.
+
+> Custom config example
 
 === "Decorator"
 
@@ -192,6 +196,52 @@ the `sqs_batch_processor` decorator:
         return result
     ```
 
+> Custom boto3 session example
+
+=== "Decorator"
+
+    ```python  hl_lines="4 12"
+    from aws_lambda_powertools.utilities.batch import sqs_batch_processor
+    from botocore.config import Config
+
+    session = boto3.session.Session()
+
+    def record_handler(record):
+        # This will be called for each individual message from a batch
+        # It should raise an exception if the message was not processed successfully
+        return_value = do_something_with(record["body"])
+        return return_value
+
+    @sqs_batch_processor(record_handler=record_handler, boto3_session=session)
+    def lambda_handler(event, context):
+        return {"statusCode": 200}
+    ```
+
+=== "Context manager"
+
+    ```python  hl_lines="4 16"
+    from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
+    import boto3
+
+    session = boto3.session.Session()
+
+    def record_handler(record):
+        # This will be called for each individual message from a batch
+        # It should raise an exception if the message was not processed successfully
+        return_value = do_something_with(record["body"])
+        return return_value
+
+
+    def lambda_handler(event, context):
+        records = event["Records"]
+
+        processor = PartialSQSProcessor(boto3_session=session)
+
+        with processor(records, record_handler):
+            result = processor.process()
+
+        return result
+    ```
 
 ### Suppressing exceptions
 
@@ -300,15 +350,15 @@ When using Sentry.io for error monitoring, you can override `failure_handler` to
 
 === "sentry_integration.py"
 
-	```python hl_lines="4 7-8"
-	from typing import Tuple
+    ```python hl_lines="4 7-8"
+    from typing import Tuple
 
-	from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
-	from sentry_sdk import capture_exception
+    from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
+    from sentry_sdk import capture_exception
 
-	class SQSProcessor(PartialSQSProcessor):
-		def failure_handler(self, record: Event, exception: Tuple) -> Tuple:  # type: ignore
-			capture_exception()  # send exception to Sentry
-			logger.exception("got exception while processing SQS message")
-			return super().failure_handler(record, exception)  # type: ignore
-	```
+    class SQSProcessor(PartialSQSProcessor):
+        def failure_handler(self, record: Event, exception: Tuple) -> Tuple:  # type: ignore
+            capture_exception()  # send exception to Sentry
+            logger.exception("got exception while processing SQS message")
+            return super().failure_handler(record, exception)  # type: ignore
+    ```

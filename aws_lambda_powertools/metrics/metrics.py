@@ -2,7 +2,7 @@ import functools
 import json
 import logging
 import warnings
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Union
 
 from .base import MetricManager, MetricUnit
 from .metric import single_metric
@@ -87,7 +87,7 @@ class Metrics(MetricManager):
             service=self.service,
         )
 
-    def set_default_dimensions(self, **dimensions):
+    def set_default_dimensions(self, **dimensions) -> None:
         """Persist dimensions across Lambda invocations
 
         Parameters
@@ -113,10 +113,10 @@ class Metrics(MetricManager):
 
         self.default_dimensions.update(**dimensions)
 
-    def clear_default_dimensions(self):
+    def clear_default_dimensions(self) -> None:
         self.default_dimensions.clear()
 
-    def clear_metrics(self):
+    def clear_metrics(self) -> None:
         logger.debug("Clearing out existing metric set from memory")
         self.metric_set.clear()
         self.dimension_set.clear()
@@ -125,7 +125,7 @@ class Metrics(MetricManager):
 
     def log_metrics(
         self,
-        lambda_handler: Optional[Callable[[Any, Any], Any]] = None,
+        lambda_handler: Union[Callable[[Dict, Any], Any], Optional[Callable[[Dict, Any, Optional[Dict]], Any]]] = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
         default_dimensions: Optional[Dict[str, str]] = None,
@@ -196,7 +196,7 @@ class Metrics(MetricManager):
 
         return decorate
 
-    def __add_cold_start_metric(self, context: Any):
+    def __add_cold_start_metric(self, context: Any) -> None:
         """Add cold start metric and function_name dimension
 
         Parameters

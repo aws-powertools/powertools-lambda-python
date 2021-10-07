@@ -25,7 +25,7 @@ class SnsNotificationModel(BaseModel):
     Timestamp: datetime
     SignatureVersion: str
 
-    @root_validator(pre=True)
+    @root_validator(pre=True, allow_reuse=True)
     def check_sqs_protocol(cls, values):
         sqs_rewritten_keys = ("UnsubscribeURL", "SigningCertURL")
         if any(key in sqs_rewritten_keys for key in values):

@@ -6,7 +6,7 @@ description: AWS Lambda Powertools Python
 A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, and more.
 
 !!! tip "Looking for a quick read through how the core features are used?"
-  	Check out [this detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/) with a practical example.
+    Check out [this detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/) with a practical example.
 
 ## Tenets
 
@@ -28,9 +28,11 @@ Powertools is available in PyPi. You can use your favourite dependency managemen
 
 **Quick hello world example using SAM CLI**
 
-```bash
-sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
-```
+=== "shell"
+
+    ```bash
+    sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
+    ```
 
 ### Lambda Layer
 
@@ -44,62 +46,61 @@ Powertools is also available as a Lambda Layer, and it is distributed via the [A
 !!! warning
     **Layer-extras** does not support Python 3.6 runtime. This layer also includes all extra dependencies: `22.4MB zipped`, `~155MB unzipped`.
 
-
 If using SAM, you can include this SAR App as part of your shared Layers stack, and lock to a specific semantic version. Once deployed, it'll be available across the account this is deployed to.
 
 === "SAM"
 
-	```yaml hl_lines="5-6 12-13"
-	AwsLambdaPowertoolsPythonLayer:
-	  Type: AWS::Serverless::Application
-	  Properties:
-		Location:
-		  ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-		  SemanticVersion: 1.17.0 # change to latest semantic version available in SAR
+    ```yaml hl_lines="5-6 12-13"
+    AwsLambdaPowertoolsPythonLayer:
+        Type: AWS::Serverless::Application
+        Properties:
+        Location:
+            ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+            SemanticVersion: 1.17.0 # change to latest semantic version available in SAR
 
-	MyLambdaFunction:
-	  Type: AWS::Serverless::Function
-	  Properties:
-		Layers:
-		  # fetch Layer ARN from SAR App stack output
-		  - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
-	```
+    MyLambdaFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+        Layers:
+            # fetch Layer ARN from SAR App stack output
+            - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
+    ```
 
 === "Serverless framework"
 
-	```yaml hl_lines="5 8 10-11"
-	functions:
-	  main:
-		handler: lambda_function.lambda_handler
-		layers:
-		  - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
+    ```yaml hl_lines="5 8 10-11"
+    functions:
+        main:
+        handler: lambda_function.lambda_handler
+        layers:
+            - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
 
-	resources:
-	  Transform: AWS::Serverless-2016-10-31
-	  Resources:
-		AwsLambdaPowertoolsPythonLayer:
-		  Type: AWS::Serverless::Application
-		  Properties:
-			Location:
-			  ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-			  # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
-			  SemanticVersion: 1.17.0
-	```
+    resources:
+        Transform: AWS::Serverless-2016-10-31
+        Resources:
+        AwsLambdaPowertoolsPythonLayer:
+            Type: AWS::Serverless::Application
+            Properties:
+            Location:
+                ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+                # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
+                SemanticVersion: 1.17.0
+    ```
 
 === "CDK"
 
-	```python hl_lines="14 22-23 31"
-	from aws_cdk import core, aws_sam as sam, aws_lambda
+    ```python hl_lines="14 22-23 31"
+    from aws_cdk import core, aws_sam as sam, aws_lambda
 
     POWERTOOLS_BASE_NAME = 'AWSLambdaPowertools'
     # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
     POWERTOOLS_VER = '1.17.0'
     POWERTOOLS_ARN = 'arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer'
 
-	class SampleApp(core.Construct):
+    class SampleApp(core.Construct):
 
-		def __init__(self, scope: core.Construct, id_: str) -> None:
-			super().__init__(scope, id_)
+        def __init__(self, scope: core.Construct, id_: str) -> None:
+            super().__init__(scope, id_)
 
             # Launches SAR App as CloudFormation nested stack and return Lambda Layer
             powertools_app = sam.CfnApplication(self,
@@ -114,86 +115,136 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
             powertools_layer_version = aws_lambda.LayerVersion.from_layer_version_arn(self, f'{POWERTOOLS_BASE_NAME}', powertools_layer_arn)
 
             aws_lambda.Function(self,
-				'sample-app-lambda',
+                'sample-app-lambda',
                 runtime=aws_lambda.Runtime.PYTHON_3_8,
                 function_name='sample-lambda',
                 code=aws_lambda.Code.asset('./src'),
                 handler='app.handler',
                 layers: [powertools_layer_version]
             )
-	```
+    ```
+
+=== "Terraform"
+
+	> Credits to [Dani Comnea](https://github.com/DanyC97) for providing the Terraform equivalent.
+
+    ```terraform hl_lines="12-13 15-20 23-25 40"
+    terraform {
+      required_version = "~> 0.13"
+      required_providers {
+        aws = "~> 3.50.0"
+      }
+    }
+
+    provider "aws" {
+      region  = "us-east-1"
+    }
+
+    resource "aws_serverlessapplicationrepository_cloudformation_stack" "deploy_sar_stack" {
+      name = "aws-lambda-powertools-python-layer"
+
+      application_id   = data.aws_serverlessapplicationrepository_application.sar_app.application_id
+      semantic_version = data.aws_serverlessapplicationrepository_application.sar_app.semantic_version
+      capabilities = [
+        "CAPABILITY_IAM",
+        "CAPABILITY_NAMED_IAM"
+      ]
+    }
+
+    data "aws_serverlessapplicationrepository_application" "sar_app" {
+      application_id   = "arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer"
+      semantic_version = var.aws_powertools_version
+    }
+
+    variable "aws_powertools_version" {
+      type        = string
+      default     = "1.20.2"
+      description = "The AWS Powertools release version"
+    }
+
+    output "deployed_powertools_sar_version" {
+      value = data.aws_serverlessapplicationrepository_application.sar_app.semantic_version
+    }
+
+	# Fetch Lambda Powertools Layer ARN from deployed SAR App
+	output "aws_lambda_powertools_layer_arn" {
+	  value = aws_serverlessapplicationrepository_cloudformation_stack.deploy_sar_stack.outputs.LayerVersionArn
+	}
+    ```
 
 ??? tip "Example of least-privileged IAM permissions to deploy Layer"
 
-	> Credits to [mwarkentin](https://github.com/mwarkentin) for providing the scoped down IAM permissions.
+    > Credits to [mwarkentin](https://github.com/mwarkentin) for providing the scoped down IAM permissions.
 
-	The region and the account id for `CloudFormationTransform` and `GetCfnTemplate` are fixed.
+    The region and the account id for `CloudFormationTransform` and `GetCfnTemplate` are fixed.
 
-	=== "template.yml"
+    === "template.yml"
 
-		```yaml hl_lines="21-52"
-		AWSTemplateFormatVersion: "2010-09-09"
-		Resources:
-		  PowertoolsLayerIamRole:
-			Type: "AWS::IAM::Role"
-			Properties:
-			  AssumeRolePolicyDocument:
-				Version: "2012-10-17"
-				Statement:
-				  - Effect: "Allow"
-					Principal:
-					  Service:
-						- "cloudformation.amazonaws.com"
-					Action:
-					  - "sts:AssumeRole"
-			  Path: "/"
-		  PowertoolsLayerIamPolicy:
-			Type: "AWS::IAM::Policy"
-			Properties:
-			  PolicyName: PowertoolsLambdaLayerPolicy
-			  PolicyDocument:
-				Version: "2012-10-17"
-				Statement:
-				  - Sid: CloudFormationTransform
-					Effect: Allow
-					Action: cloudformation:CreateChangeSet
-					Resource:
-					  - arn:aws:cloudformation:us-east-1:aws:transform/Serverless-2016-10-31
-				  - Sid: GetCfnTemplate
-					Effect: Allow
-					Action:
-					  - serverlessrepo:CreateCloudFormationTemplate
-					  - serverlessrepo:GetCloudFormationTemplate
-					Resource:
-					  # this is arn of the powertools SAR app
-					  - arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-				  - Sid: S3AccessLayer
-					Effect: Allow
-					Action:
-					  - s3:GetObject
-					Resource:
-					  # AWS publishes to an external S3 bucket locked down to your account ID
-					  # The below example is us publishing lambda powertools
-					  # Bucket: awsserverlessrepo-changesets-plntc6bfnfj
-					  # Key: *****/arn:aws:serverlessrepo:eu-west-1:057560766410:applications-aws-lambda-powertools-python-layer-versions-1.10.2/aeeccf50-****-****-****-*********
-					  - arn:aws:s3:::awsserverlessrepo-changesets-*/*
-				  - Sid: GetLayerVersion
-					Effect: Allow
-					Action:
-					  - lambda:PublishLayerVersion
-					  - lambda:GetLayerVersion
-					Resource:
-					  - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:aws-lambda-powertools-python-layer*
-			  Roles:
-				- Ref: "PowertoolsLayerIamRole"
-		```
+        ```yaml hl_lines="21-52"
+        AWSTemplateFormatVersion: "2010-09-09"
+        Resources:
+            PowertoolsLayerIamRole:
+            Type: "AWS::IAM::Role"
+            Properties:
+                AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Effect: "Allow"
+                    Principal:
+                        Service:
+                        - "cloudformation.amazonaws.com"
+                    Action:
+                        - "sts:AssumeRole"
+                Path: "/"
+            PowertoolsLayerIamPolicy:
+            Type: "AWS::IAM::Policy"
+            Properties:
+                PolicyName: PowertoolsLambdaLayerPolicy
+                PolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Sid: CloudFormationTransform
+                    Effect: Allow
+                    Action: cloudformation:CreateChangeSet
+                    Resource:
+                        - arn:aws:cloudformation:us-east-1:aws:transform/Serverless-2016-10-31
+                    - Sid: GetCfnTemplate
+                    Effect: Allow
+                    Action:
+                        - serverlessrepo:CreateCloudFormationTemplate
+                        - serverlessrepo:GetCloudFormationTemplate
+                    Resource:
+                        # this is arn of the powertools SAR app
+                        - arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+                    - Sid: S3AccessLayer
+                    Effect: Allow
+                    Action:
+                        - s3:GetObject
+                    Resource:
+                        # AWS publishes to an external S3 bucket locked down to your account ID
+                        # The below example is us publishing lambda powertools
+                        # Bucket: awsserverlessrepo-changesets-plntc6bfnfj
+                        # Key: *****/arn:aws:serverlessrepo:eu-west-1:057560766410:applications-aws-lambda-powertools-python-layer-versions-1.10.2/aeeccf50-****-****-****-*********
+                        - arn:aws:s3:::awsserverlessrepo-changesets-*/*
+                    - Sid: GetLayerVersion
+                    Effect: Allow
+                    Action:
+                        - lambda:PublishLayerVersion
+                        - lambda:GetLayerVersion
+                    Resource:
+                        - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:aws-lambda-powertools-python-layer*
+                Roles:
+                - Ref: "PowertoolsLayerIamRole"
+        ```
 
 You can fetch available versions via SAR API with:
 
-```bash
-aws serverlessrepo list-application-versions \
-	--application-id arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-```
+=== "shell"
+
+    ```bash
+    aws serverlessrepo list-application-versions \
+        --application-id arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+    ```
 
 ## Features
 
@@ -238,6 +289,7 @@ aws serverlessrepo list-application-versions \
 As a best practice, AWS Lambda Powertools logging statements are suppressed. If necessary, you can enable debugging using `set_package_logger`:
 
 === "app.py"
+
     ```python
     from aws_lambda_powertools.logging.logger import set_package_logger
 

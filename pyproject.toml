@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "1.19.0"
-description = "A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, and more."
+version = "1.21.1"
+description = "A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, batching, idempotency, feature flags, and more."
 authors = ["Amazon Web Services"]
-include = ["aws_lambda_powertools/py.typed"]
+include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
 classifiers=[
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -12,6 +12,7 @@ classifiers=[
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
 ]
 repository="https://github.com/awslabs/aws-lambda-powertools-python"
 readme = "README.md"
@@ -22,34 +23,34 @@ license = "MIT-0"
 python = "^3.6.1"
 aws-xray-sdk = "^2.8.0"
 fastjsonschema = "^2.14.5"
-boto3 = "^1.12"
+boto3 = "^1.18"
 jmespath = "^0.10.0"
 pydantic = {version = "^1.8.2", optional = true }
 email-validator = {version = "*", optional = true }
 
 [tool.poetry.dev-dependencies]
-coverage = {extras = ["toml"], version = "^5.5"}
-pytest = "^6.2.2"
+coverage = {extras = ["toml"], version = "^6.0"}
+pytest = "^6.2.5"
 black = "^20.8b1"
 flake8 = "^3.9.0"
 flake8-black = "^0.2.3"
 flake8-builtins = "^1.5.3"
-flake8-comprehensions = "^3.4.0"
+flake8-comprehensions = "^3.6.1"
 flake8-debugger = "^4.0.0"
 flake8-fixme = "^1.1.1"
 flake8-isort = "^4.0.0"
 flake8-variables-names = "^0.0.4"
 isort = "^5.9.3"
-pytest-cov = "^2.12.1"
+pytest-cov = "^3.0.0"
 pytest-mock = "^3.5.1"
 pdoc3 = "^0.10.0"
 pytest-asyncio = "^0.15.1"
 bandit = "^1.7.0"
-radon = "^4.5.0"
-xenon = "^0.7.3"
+radon = "^5.1.0"
+xenon = "^0.8.0"
 flake8-eradicate = "^1.1.0"
-flake8-bugbear = "^21.3.2"
-mkdocs-material = "^7.2.3"
+flake8-bugbear = "^21.9.2"
+mkdocs-material = "^7.3.2"
 mkdocs-git-revision-date-plugin = "^0.3.1"
 mike = "^0.6.0"
 mypy = "^0.910"
@@ -60,7 +61,7 @@ pydantic = ["pydantic", "email-validator"]
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]
-omit = ["tests/*"]
+omit = ["tests/*", "aws_lambda_powertools/exceptions/*", "aws_lambda_powertools/utilities/parser/types.py", "aws_lambda_powertools/utilities/jmespath_utils/envelopes.py"]
 branch = true
 
 [tool.coverage.html]

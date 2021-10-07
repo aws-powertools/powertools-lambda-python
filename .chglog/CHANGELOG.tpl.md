@@ -1,6 +1,6 @@
 {{ if .Versions -}}
 <a name="unreleased"></a>
-## [Unreleased]
+## Unreleased
 
 {{ if .Unreleased.CommitGroups -}}
 {{ range .Unreleased.CommitGroups -}}

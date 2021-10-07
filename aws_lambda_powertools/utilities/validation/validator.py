@@ -1,8 +1,9 @@
 import logging
 from typing import Any, Callable, Dict, Optional, Union
 
+from aws_lambda_powertools.utilities import jmespath_utils
+
 from ...middleware_factory import lambda_handler_decorator
-from ...shared import jmespath_utils
 from .base import validate_data_against_schema
 
 logger = logging.getLogger(__name__)
@@ -117,7 +118,7 @@ def validator(
         When JMESPath expression to unwrap event is invalid
     """
     if envelope:
-        event = jmespath_utils.unwrap_event_from_envelope(
+        event = jmespath_utils.extract_data_from_envelope(
             data=event, envelope=envelope, jmespath_options=jmespath_options
         )
 
@@ -219,7 +220,7 @@ def validate(
         When JMESPath expression to unwrap event is invalid
     """
     if envelope:
-        event = jmespath_utils.unwrap_event_from_envelope(
+        event = jmespath_utils.extract_data_from_envelope(
             data=event, envelope=envelope, jmespath_options=jmespath_options
         )
 
