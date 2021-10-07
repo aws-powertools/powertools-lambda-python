@@ -54,7 +54,7 @@ jobs:
       run: |
         RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}
         # Replace publishing version if the workflow was triggered manually
-        test -n $RELEASE_TAG_VERSION && RELEASE_TAG_VERSION=${{ github.event.inputs.publish_version }}
+        test -n ${RELEASE_TAG_VERSION} && RELEASE_TAG_VERSION=${{ github.event.inputs.publish_version }}
         echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> $GITHUB_ENV
     - name: Ensure new version is also set in pyproject and CHANGELOG
       run: |
