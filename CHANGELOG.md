@@ -13,6 +13,9 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 * **metrics:** typing regression on log_metrics callable ([#744](https://github.com/awslabs/aws-lambda-powertools-python/issues/744))
 
+### Documentation
+
+* add new public layer ARNs ([#746](https://github.com/awslabs/aws-lambda-powertools-python/issues/746))
 ### Maintenance
 
 * ignore constants in test cov ([#745](https://github.com/awslabs/aws-lambda-powertools-python/issues/745))
