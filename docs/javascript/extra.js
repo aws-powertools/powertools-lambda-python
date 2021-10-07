@@ -11,7 +11,13 @@ const awsconfig = {
 
 const RUNTIME = "python"
 
-const attachListeners = () => {
+function copyToClipboard(e) {
+	e.preventDefault()
+	navigator.clipboard.writeText(e.target.textContent)
+  	alert$.next("Copied to clipboard")
+}
+
+function enableSearchOnBlurElement() {
 	/* Register handler to log search on blur */
 	document.addEventListener("DOMContentLoaded", function () {
 		recordPageView({
@@ -39,6 +45,18 @@ const attachListeners = () => {
 			prevLocation: document.referrer
 		})
 	};
+}
+
+function enableClipboardElements() {
+	let copyElements = document.querySelectorAll('.copyMe');
+	copyElements.forEach(element => {
+		element.addEventListener('click', copyToClipboard);
+	})
+}
+
+const attachListeners = () => {
+	enableSearchOnBlurElement()
+	enableClipboardElements()
 }
 
 const init = () => {

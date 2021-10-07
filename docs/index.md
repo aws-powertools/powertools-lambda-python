@@ -36,7 +36,126 @@ Powertools is available in PyPi. You can use your favourite dependency managemen
 
 ### Lambda Layer
 
-Powertools is also available as a Lambda Layer, and it is distributed via the [AWS Serverless Application Repository (SAR)](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/what-is-serverlessrepo.html) to support semantic versioning.
+Powertools is also available as a Lambda Layer with public ARNs in each region or distributed via the [AWS Serverless Application Repository (SAR)](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/what-is-serverlessrepo.html) to support semantic versioning.
+
+#### Public ARNs
+
+We build, release and distribute packaged Lambda Powertools layers for each region. This means you can copy a specific ARN and use it in your Lambda deployment. The layer region must be equal to the region of your lambda function. The public layers do not contain the `pydantic` library that is required for the `parser` utility.
+
+
+=== "SAM"
+
+    ```yaml hl_lines="5"
+    MyLambdaFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+        Layers:
+            - arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3
+    ```
+
+=== "Serverless framework"
+
+    ```yaml hl_lines="5"
+    functions:
+        main:
+        handler: lambda_function.lambda_handler
+        layers:
+            - arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3
+    ```
+
+=== "CDK"
+
+    ```python hl_lines="14"
+    from aws_cdk import core, aws_lambda
+
+    class SampleApp(core.Construct):
+
+        def __init__(self, scope: core.Construct, id_: str) -> None:
+            super().__init__(scope, id_)
+
+            aws_lambda.Function(self,
+                'sample-app-lambda',
+                runtime=aws_lambda.Runtime.PYTHON_3_8,
+                function_name='sample-lambda',
+                code=aws_lambda.Code.asset('./src'),
+                handler='app.handler',
+                layers: ["arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3"]
+            )
+    ```
+
+=== "Terraform"
+
+    ```terraform hl_lines="9 38"
+    terraform {
+      required_version = "~> 1.0.5"
+      required_providers {
+        aws = "~> 3.50.0"
+      }
+    }
+
+    provider "aws" {
+      region  = "us-east-1"
+    }
+
+    resource "aws_iam_role" "iam_for_lambda" {
+      name = "iam_for_lambda"
+
+      assume_role_policy = <<EOF
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Effect": "Allow",
+              "Sid": ""
+            }
+          ]
+        }
+        EOF
+        }
+
+    resource "aws_lambda_function" "test_lambda" {
+      filename      = "lambda_function_payload.zip"
+      function_name = "lambda_function_name"
+      role          = aws_iam_role.iam_for_lambda.arn
+      handler       = "index.test"
+      runtime = "python3.8"
+      layers = ["arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3"]
+
+      source_code_hash = filebase64sha256("lambda_function_payload.zip")
+    }
+
+
+    ```
+
+??? note "Layer ARN per region"
+
+    !!! tip "Click to copy to clipboard"
+
+    | Region | Version | Layer ARN
+    |---------------------------| ---------------------------| ---------------------------
+    | `us-east-1` | `1.21.0` |[arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `us-east-2` | `1.21.0` |[arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `us-west-1` | `1.21.0` |[arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `us-west-2` | `1.21.0` |[arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-south-1` | `1.21.0` |[arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-northeast-1` | `1.21.0` |[arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-northeast-2` | `1.21.0` |[arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-northeast-3` | `1.21.0` |[arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-southeast-1` | `1.21.0` |[arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ap-southeast-2` | `1.21.0` |[arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-central-1` | `1.21.0` |[arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-west-1` | `1.21.0` |[arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-west-2` | `1.21.0` |[arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-west-3` | `1.21.0` |[arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `eu-north-1` | `1.21.0` |[arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `ca-central-1` | `1.21.0` |[arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | `sa-east-1` | `1.21.0` |[arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+
+#### SAR
 
 | App | ARN | Description
 |----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------
