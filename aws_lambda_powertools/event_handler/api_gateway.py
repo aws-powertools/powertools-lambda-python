@@ -6,9 +6,9 @@ import re
 import traceback
 import zlib
 from enum import Enum
-from functools import partial
+from functools import partial, wraps
 from http import HTTPStatus
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import ServiceError
@@ -630,3 +630,73 @@ class ApiGatewayResolver:
 
     def _json_dump(self, obj: Any) -> str:
         return self._serializer(obj)
+
+    def include_router(self, router: "Router", prefix: Optional[str] = None) -> None:
+        """Adds all routes defined in a router"""
+        router._app = self
+        for route, func in router.api.items():
+            if prefix and route[0] == "/":
+                route = (prefix, *route[1:])
+            elif prefix:
+                route = (f"{prefix}{route[0]}", *route[1:])
+            self.route(*route)(func())
+
+
+class Router:
+    """Router helper class to allow splitting ApiGatewayResolver into multiple files"""
+
+    _app: ApiGatewayResolver
+
+    def __init__(self):
+        self.api: Dict[tuple, Callable] = {}
+
+    @property
+    def current_event(self) -> BaseProxyEvent:
+        return self._app.current_event
+
+    @property
+    def lambda_context(self) -> LambdaContext:
+        return self._app.lambda_context
+
+    def route(
+        self,
+        rule: str,
+        method: Union[str, Tuple[str], List[str]],
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+    ):
+        def actual_decorator(func: Callable):
+            @wraps(func)
+            def wrapper():
+                def inner_wrapper(**kwargs):
+                    return func(**kwargs)
+
+                return inner_wrapper
+
+            if isinstance(method, (list, tuple)):
+                for item in method:
+                    self.api[(rule, item, cors, compress, cache_control)] = wrapper
+            else:
+                self.api[(rule, method, cors, compress, cache_control)] = wrapper
+
+        return actual_decorator
+
+    def get(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
+        return self.route(rule, "GET", cors, compress, cache_control)
+
+    def post(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
+        return self.route(rule, "POST", cors, compress, cache_control)
+
+    def put(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
+        return self.route(rule, "PUT", cors, compress, cache_control)
+
+    def delete(
+        self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
+    ):
+        return self.route(rule, "DELETE", cors, compress, cache_control)
+
+    def patch(
+        self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
+    ):
+        return self.route(rule, "PATCH", cors, compress, cache_control)
