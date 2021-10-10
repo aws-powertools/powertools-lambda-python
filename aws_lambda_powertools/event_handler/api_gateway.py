@@ -4,7 +4,9 @@ import logging
 import os
 import re
 import traceback
+import warnings
 import zlib
+from abc import ABC, abstractmethod
 from enum import Enum
 from functools import partial, wraps
 from http import HTTPStatus
@@ -227,78 +229,17 @@ class ResponseBuilder:
         }
 
 
-class ApiGatewayResolver:
-    """API Gateway and ALB proxy resolver
-
-    Examples
-    --------
-    Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
-
-    ```python
-    from aws_lambda_powertools import Tracer
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
-
-    tracer = Tracer()
-    app = ApiGatewayResolver()
-
-    @app.get("/get-call")
-    def simple_get():
-        return {"message": "Foo"}
-
-    @app.post("/post-call")
-    def simple_post():
-        post_data: dict = app.current_event.json_body
-        return {"message": post_data["value"]}
-
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
-    ```
-    """
-
-    current_event: BaseProxyEvent
-    lambda_context: LambdaContext
-
-    def __init__(
+class BaseRouter(ABC):
+    @abstractmethod
+    def route(
         self,
-        proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent,
-        cors: Optional[CORSConfig] = None,
-        debug: Optional[bool] = None,
-        serializer: Optional[Callable[[Dict], str]] = None,
-        strip_prefixes: Optional[List[str]] = None,
+        rule: str,
+        method: Any,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
     ):
-        """
-        Parameters
-        ----------
-        proxy_type: ProxyEventType
-            Proxy request type, defaults to API Gateway V1
-        cors: CORSConfig
-            Optionally configure and enabled CORS. Not each route will need to have to cors=True
-        debug: Optional[bool]
-            Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_EVENT_HANDLER_DEBUG"
-            environment variable
-        serializer : Callable, optional
-            function to serialize `obj` to a JSON formatted `str`, by default json.dumps
-        strip_prefixes: List[str], optional
-            optional list of prefixes to be removed from the request path before doing the routing. This is often used
-            with api gateways with multiple custom mappings.
-        """
-        self._proxy_type = proxy_type
-        self._routes: List[Route] = []
-        self._cors = cors
-        self._cors_enabled: bool = cors is not None
-        self._cors_methods: Set[str] = {"OPTIONS"}
-        self._debug = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.EVENT_HANDLER_DEBUG_ENV, "false"), choice=debug
-        )
-        self._strip_prefixes = strip_prefixes
-
-        # Allow for a custom serializer or a concise json serialization
-        self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
-
-        if self._debug:
-            # Always does a pretty print when in debug mode
-            self._serializer = partial(json.dumps, indent=4, cls=Encoder)
+        raise NotImplementedError()
 
     def get(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
         """Get route decorator with GET `method`
@@ -434,6 +375,81 @@ class ApiGatewayResolver:
         """
         return self.route(rule, "PATCH", cors, compress, cache_control)
 
+
+class ApiGatewayResolver(BaseRouter):
+    """API Gateway and ALB proxy resolver
+
+    Examples
+    --------
+    Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
+
+    ```python
+    from aws_lambda_powertools import Tracer
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+    tracer = Tracer()
+    app = ApiGatewayResolver()
+
+    @app.get("/get-call")
+    def simple_get():
+        return {"message": "Foo"}
+
+    @app.post("/post-call")
+    def simple_post():
+        post_data: dict = app.current_event.json_body
+        return {"message": post_data["value"]}
+
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
+    """
+
+    current_event: BaseProxyEvent
+    lambda_context: LambdaContext
+
+    def __init__(
+        self,
+        proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent,
+        cors: Optional[CORSConfig] = None,
+        debug: Optional[bool] = None,
+        serializer: Optional[Callable[[Dict], str]] = None,
+        strip_prefixes: Optional[List[str]] = None,
+    ):
+        """
+        Parameters
+        ----------
+        proxy_type: ProxyEventType
+            Proxy request type, defaults to API Gateway V1
+        cors: CORSConfig
+            Optionally configure and enabled CORS. Not each route will need to have to cors=True
+        debug: Optional[bool]
+            Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_EVENT_HANDLER_DEBUG"
+            environment variable
+        serializer : Callable, optional
+            function to serialize `obj` to a JSON formatted `str`, by default json.dumps
+        strip_prefixes: List[str], optional
+            optional list of prefixes to be removed from the request path before doing the routing. This is often used
+            with api gateways with multiple custom mappings.
+        """
+        self._proxy_type = proxy_type
+        self._routes: List[Route] = []
+        self._route_keys: List[str] = []
+        self._cors = cors
+        self._cors_enabled: bool = cors is not None
+        self._cors_methods: Set[str] = {"OPTIONS"}
+        self._debug = resolve_truthy_env_var_choice(
+            env=os.getenv(constants.EVENT_HANDLER_DEBUG_ENV, "false"), choice=debug
+        )
+        self._strip_prefixes = strip_prefixes
+
+        # Allow for a custom serializer or a concise json serialization
+        self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
+
+        if self._debug:
+            # Always does a pretty print when in debug mode
+            self._serializer = partial(json.dumps, indent=4, cls=Encoder)
+
     def route(
         self,
         rule: str,
@@ -451,6 +467,10 @@ class ApiGatewayResolver:
             else:
                 cors_enabled = cors
             self._routes.append(Route(method, self._compile_regex(rule), func, cors_enabled, compress, cache_control))
+            route_key = method + rule
+            if route_key in self._route_keys:
+                warnings.warn(f"A route like this was already registered. method: '{method}' rule: '{rule}'")
+            self._route_keys.append(route_key)
             if cors_enabled:
                 logger.debug(f"Registering method {method.upper()} to Allow Methods in CORS")
                 self._cors_methods.add(method.upper())
@@ -642,7 +662,7 @@ class ApiGatewayResolver:
             self.route(*route)(func())
 
 
-class Router:
+class Router(BaseRouter):
     """Router helper class to allow splitting ApiGatewayResolver into multiple files"""
 
     _app: ApiGatewayResolver
@@ -681,22 +701,3 @@ class Router:
                 self.api[(rule, method, cors, compress, cache_control)] = wrapper
 
         return actual_decorator
-
-    def get(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
-        return self.route(rule, "GET", cors, compress, cache_control)
-
-    def post(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
-        return self.route(rule, "POST", cors, compress, cache_control)
-
-    def put(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
-        return self.route(rule, "PUT", cors, compress, cache_control)
-
-    def delete(
-        self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
-    ):
-        return self.route(rule, "DELETE", cors, compress, cache_control)
-
-    def patch(
-        self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
-    ):
-        return self.route(rule, "PATCH", cors, compress, cache_control)

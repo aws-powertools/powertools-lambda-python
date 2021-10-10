@@ -994,3 +994,30 @@ def test_api_gateway_app_router_with_different_methods():
     assert result["statusCode"] == 404
     # AND cors headers are not returned
     assert "Access-Control-Allow-Origin" not in result["headers"]
+
+
+def test_duplicate_routes():
+    # GIVEN a duplicate routes
+    app = ApiGatewayResolver()
+    router = Router()
+
+    @router.get("/my/path")
+    def get_func_duplicate():
+        raise RuntimeError()
+
+    @app.get("/my/path")
+    def get_func():
+        return {}
+
+    @router.get("/my/path")
+    def get_func_another_duplicate():
+        raise RuntimeError()
+
+    app.include_router(router)
+
+    # WHEN calling the handler
+    result = app(LOAD_GW_EVENT, None)
+
+    # THEN only execute the first registered route
+    # AND print warnings
+    assert result["statusCode"] == 200
