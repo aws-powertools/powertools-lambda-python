@@ -8,7 +8,7 @@ class SchemaValidationError(Exception):
 
     def __init__(
         self,
-        message: str,
+        message: Optional[str] = None,
         validation_message: Optional[str] = None,
         name: Optional[str] = None,
         path: Optional[List] = None,
@@ -21,7 +21,7 @@ class SchemaValidationError(Exception):
 
         Parameters
         ----------
-        message : str
+        message : str, optional
             Powertools formatted error message
         validation_message : str, optional
             Containing human-readable information what is wrong
