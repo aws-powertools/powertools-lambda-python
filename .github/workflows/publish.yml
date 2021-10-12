@@ -55,7 +55,6 @@ jobs:
       with:
         python-version: "3.8"
     - name: Set release notes tag
-      if: ${{ github.event.inputs.publish_docs_only == false }}
       run: |
         RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}
         # Replace publishing version if the workflow was triggered manually
