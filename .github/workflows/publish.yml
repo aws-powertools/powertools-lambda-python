@@ -38,6 +38,10 @@ on:
       publish_version:
         description: 'Version to publish, e.g. v1.13.0'
         required: true
+      publish_docs_only:
+        description: 'Build and publish docs only'
+        required: false
+        default: 'false'
 
 jobs:
   release:
@@ -51,32 +55,39 @@ jobs:
       with:
         python-version: "3.8"
     - name: Set release notes tag
+      if: ${{ github.event.inputs.publish_docs_only == "false" }}
       run: |
         RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}
         # Replace publishing version if the workflow was triggered manually
         test -n ${RELEASE_TAG_VERSION} && RELEASE_TAG_VERSION=${{ github.event.inputs.publish_version }}
         echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> $GITHUB_ENV
     - name: Ensure new version is also set in pyproject and CHANGELOG
+      if: ${{ github.event.inputs.publish_docs_only == "false" }}
       run: |
         grep --regexp "${RELEASE_TAG_VERSION}" CHANGELOG.md
         grep --regexp "version \= \"${RELEASE_TAG_VERSION}\"" pyproject.toml
     - name: Install dependencies
       run: make dev
     - name: Run all tests, linting and baselines
+      if: ${{ github.event.inputs.publish_docs_only == "false" }}
       run: make pr
     - name: Build python package and wheel
+      if: ${{ github.event.inputs.publish_docs_only == "false" }}
       run: poetry build
     - name: Upload to PyPi test
+      if: ${{ github.event.inputs.publish_docs_only == "false" }}
       run: make release-test
       env:
         PYPI_USERNAME: __token__
         PYPI_TEST_TOKEN: ${{ secrets.PYPI_TEST_TOKEN }}
     - name: Upload to PyPi prod
+      if: ${{ github.event.inputs.publish_docs_only == "false" }}
       run: make release-prod
       env:
         PYPI_USERNAME: __token__
         PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
     - name: publish lambda layer in SAR by triggering the internal codepipeline
+      if: ${{ github.event.inputs.publish_docs_only == "false" }}
       run: |
         aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_TAG_VERSION --overwrite
         aws codepipeline start-pipeline-execution --name ${{ secrets.CODEPIPELINE_NAME }}
@@ -88,7 +99,7 @@ jobs:
     - name: Setup doc deploy
       run: |
         git config --global user.name Docs deploy
-        git config --global user.email docs@dummy.bot.com
+        git config --global user.email aws-devax-open-source@amazon.com
     - name: Build docs website and API reference
       run: |
         make release-docs VERSION=${RELEASE_TAG_VERSION} ALIAS="latest"
@@ -113,6 +124,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      if: ${{ github.event.inputs.publish_docs_only == "false" }}
     - name: Sync master from detached head
       # If version matches CHANGELOG and pyproject.toml
       # If it passes all checks, successfully releases to test and prod
