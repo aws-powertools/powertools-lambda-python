@@ -131,7 +131,33 @@ We build, release and distribute packaged Lambda Powertools layers for each regi
 
     ```
 
-??? note "Latest Lambda Layers ARN per region"
+=== "Amplify"
+
+    ```zsh
+    # Create a new one with the layer
+    ❯ amplify add function
+    ? Select which capability you want to add: Lambda function (serverless function)
+    ? Provide an AWS Lambda function name: <NAME-OF-FUNCTION>
+    ? Choose the runtime that you want to use: Python
+    ? Do you want to configure advanced settings? Yes
+    ...
+    ? Do you want to enable Lambda layers for this function? Yes
+    ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3
+    ❯ amplify push -y
+
+
+    # Updating an existing function and add the layer
+    ❯ amplify update function
+    ? Select the Lambda function you want to update test2
+    General information
+    - Name: <NAME-OF-FUNCTION>
+    ? Which setting do you want to update? Lambda layers configuration
+    ? Do you want to enable Lambda layers for this function? Yes
+    ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3
+    ? Do you want to edit the local lambda function now? No
+    ```
+
+??? note "Layer ARN per region"
 
     !!! tip "Click to copy to clipboard"
 
@@ -196,7 +222,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 
     resources:
         Transform: AWS::Serverless-2016-10-31
-        Resources:
+        Resources:****
         AwsLambdaPowertoolsPythonLayer:
             Type: AWS::Serverless::Application
             Properties:
