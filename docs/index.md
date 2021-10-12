@@ -21,27 +21,21 @@ This project separates core utilities that will be available in other runtimes v
 
 ## Install
 
-Powertools is available in PyPi. You can use your favourite dependency management tool to install it
+Powertools is available in the following formats:
 
-* [poetry](https://python-poetry.org/): `poetry add aws-lambda-powertools`
-* [pip](https://pip.pypa.io/en/latest/index.html): `pip install aws-lambda-powertools`
+??? info "Lambda Layer is a .zip file archive with Lambda Powertools pre-packaged in every AWS region. See what's inside!"
+	Change {region} to your AWS region, e.g. `eu-west-1`
 
-**Quick hello world example using SAM CLI**
+	**`aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:3 --region {region}`**
 
-=== "shell"
-
-    ```bash
-    sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
-    ```
+* **Lambda Layer**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:3**](#){: .copyMe} :clipboard:
+* **PyPi**: **`pip install aws-lambda-powertools`**
 
 ### Lambda Layer
 
-Powertools is also available as a Lambda Layer with public ARNs in each region or distributed via the [AWS Serverless Application Repository (SAR)](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/what-is-serverlessrepo.html) to support semantic versioning.
+Include Lambda Powertools in your function using the [AWS Lambda Console](https://console.aws.amazon.com/lambda){target="_blank"} or your preferred deployment framework.
 
-#### Public ARNs
-
-We build, release and distribute packaged Lambda Powertools layers for each region. This means you can copy a specific ARN and use it in your Lambda deployment. The layer region must be equal to the region of your lambda function. The public layers do not contain the `pydantic` library that is required for the `parser` utility.
-
+!!! note "The public layers do not contain the `pydantic` library that is required for the `parser` utility; See [SAR](#sar) option instead."
 
 === "SAM"
 
@@ -50,7 +44,7 @@ We build, release and distribute packaged Lambda Powertools layers for each regi
         Type: AWS::Serverless::Function
         Properties:
         Layers:
-            - arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3
+            - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:3
     ```
 
 === "Serverless framework"
@@ -60,7 +54,7 @@ We build, release and distribute packaged Lambda Powertools layers for each regi
         main:
         handler: lambda_function.lambda_handler
         layers:
-            - arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3
+            - arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPython:3
     ```
 
 === "CDK"
@@ -70,16 +64,16 @@ We build, release and distribute packaged Lambda Powertools layers for each regi
 
     class SampleApp(core.Construct):
 
-        def __init__(self, scope: core.Construct, id_: str) -> None:
+        def __init__(self, scope: core.Construct, id_: str, env: core.Environment) -> None:
             super().__init__(scope, id_)
 
             aws_lambda.Function(self,
                 'sample-app-lambda',
-                runtime=aws_lambda.Runtime.PYTHON_3_8,
+                runtime=aws_lambda.Runtime.PYTHON_3_9,
                 function_name='sample-lambda',
                 code=aws_lambda.Code.asset('./src'),
                 handler='app.handler',
-                layers: ["arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3"]
+                layers: [f"arn:aws:lambda:{env.region}:017000801446:layer:AWSLambdaPowertoolsPython:3"]
             )
     ```
 
@@ -94,7 +88,7 @@ We build, release and distribute packaged Lambda Powertools layers for each regi
     }
 
     provider "aws" {
-      region  = "us-east-1"
+      region  = "{region}"
     }
 
     resource "aws_iam_role" "iam_for_lambda" {
@@ -109,21 +103,20 @@ We build, release and distribute packaged Lambda Powertools layers for each regi
               "Principal": {
                 "Service": "lambda.amazonaws.com"
               },
-              "Effect": "Allow",
-              "Sid": ""
+              "Effect": "Allow"
             }
           ]
         }
         EOF
-        }
+	}
 
     resource "aws_lambda_function" "test_lambda" {
       filename      = "lambda_function_payload.zip"
       function_name = "lambda_function_name"
       role          = aws_iam_role.iam_for_lambda.arn
       handler       = "index.test"
-      runtime = "python3.8"
-      layers = ["arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3"]
+      runtime 		= "python3.9"
+      layers 		= ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:3"]
 
       source_code_hash = filebase64sha256("lambda_function_payload.zip")
     }
@@ -145,7 +138,7 @@ We build, release and distribute packaged Lambda Powertools layers for each regi
     ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3
     ❯ amplify push -y
 
-    
+
     # Updating an existing function and add the layer
     ❯ amplify update function
     ? Select the Lambda function you want to update test2
@@ -157,39 +150,43 @@ We build, release and distribute packaged Lambda Powertools layers for each regi
     ? Do you want to edit the local lambda function now? No
     ```
 
-??? note "Layer ARN per region"
+??? note "Expand to copy any regional Lambda Layer ARN"
 
-    !!! tip "Click to copy to clipboard"
-
-    | Region | Version | Layer ARN
-    |---------------------------| ---------------------------| ---------------------------
-    | `us-east-1` | `1.21.0` |[arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `us-east-2` | `1.21.0` |[arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `us-west-1` | `1.21.0` |[arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `us-west-2` | `1.21.0` |[arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `ap-south-1` | `1.21.0` |[arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `ap-northeast-1` | `1.21.0` |[arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `ap-northeast-2` | `1.21.0` |[arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `ap-northeast-3` | `1.21.0` |[arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `ap-southeast-1` | `1.21.0` |[arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `ap-southeast-2` | `1.21.0` |[arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `eu-central-1` | `1.21.0` |[arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `eu-west-1` | `1.21.0` |[arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `eu-west-2` | `1.21.0` |[arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `eu-west-3` | `1.21.0` |[arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `eu-north-1` | `1.21.0` |[arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `ca-central-1` | `1.21.0` |[arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
-    | `sa-east-1` | `1.21.0` |[arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#) {: .copyMe}
+    | Region | Layer ARN
+    |--------------------------- | ---------------------------
+    | `us-east-1` | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `us-east-2` | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `us-west-1` | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `us-west-2` | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `ap-south-1` | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `eu-central-1` | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `eu-west-1` | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `eu-west-2` | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `eu-west-3` | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `eu-north-1` | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `ca-central-1` | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `sa-east-1` | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
 
 #### SAR
 
+Serverless Application Repository (SAR) App deploys a CloudFormation stack with a copy of our Lambda Layer in your AWS account and region.
+
+Despite having more steps compared to the [public Layer ARN](#lambda-layer) option, the benefit is that you can specify a semantic version you want to use.
+
 | App | ARN | Description
 |----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------
-| [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer) | arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer | Core dependencies only; sufficient for nearly all utilities.
-| [aws-lambda-powertools-python-layer-extras](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-extras) | arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-extras | Core plus extra dependencies such as `pydantic` that is required by `parser` utility.
+| [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer) | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer](#){: .copyMe} :clipboard: | Core dependencies only; sufficient for nearly all utilities.
+| [aws-lambda-powertools-python-layer-extras](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-extras) | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-extras](#){: .copyMe} :clipboard: | Core plus extra dependencies such as `pydantic` that is required by `parser` utility.
 
 !!! warning
     **Layer-extras** does not support Python 3.6 runtime. This layer also includes all extra dependencies: `22.4MB zipped`, `~155MB unzipped`.
+
+!!! tip "You can create a shared Lambda Layers stack and make this along with other account level layers stack."
 
 If using SAM, you can include this SAR App as part of your shared Layers stack, and lock to a specific semantic version. Once deployed, it'll be available across the account this is deployed to.
 
@@ -201,7 +198,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
         Properties:
         Location:
             ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-            SemanticVersion: 1.17.0 # change to latest semantic version available in SAR
+            SemanticVersion: 1.21.1 # change to latest semantic version available in SAR
 
     MyLambdaFunction:
         Type: AWS::Serverless::Function
@@ -222,14 +219,14 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 
     resources:
         Transform: AWS::Serverless-2016-10-31
-        Resources:
+        Resources:****
         AwsLambdaPowertoolsPythonLayer:
             Type: AWS::Serverless::Application
             Properties:
             Location:
                 ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
                 # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
-                SemanticVersion: 1.17.0
+                SemanticVersion: 1.21.1
     ```
 
 === "CDK"
@@ -239,7 +236,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 
     POWERTOOLS_BASE_NAME = 'AWSLambdaPowertools'
     # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
-    POWERTOOLS_VER = '1.17.0'
+    POWERTOOLS_VER = '1.21.1'
     POWERTOOLS_ARN = 'arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer'
 
     class SampleApp(core.Construct):
@@ -389,6 +386,16 @@ You can fetch available versions via SAR API with:
     ```bash
     aws serverlessrepo list-application-versions \
         --application-id arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+    ```
+
+## Quick getting started
+
+**Quick hello world example using SAM CLI**
+
+=== "shell"
+
+    ```bash
+    sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
     ```
 
 ## Features
