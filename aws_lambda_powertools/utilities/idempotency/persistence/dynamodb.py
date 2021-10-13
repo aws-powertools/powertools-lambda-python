@@ -1,10 +1,12 @@
 import datetime
 import logging
+import os
 from typing import Any, Dict, Optional
 
 import boto3
 from botocore.config import Config
 
+from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyItemAlreadyExistsError,
@@ -20,7 +22,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         self,
         table_name: str,
         key_attr: str = "id",
-        key_attr_value: str = "powertools#idempotency",
+        key_attr_value: str = f"idempotency#{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, 'test-func')}",
         sort_key_attr: Optional[str] = None,
         expiry_attr: str = "expiration",
         status_attr: str = "status",
@@ -39,7 +41,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         key_attr: str, optional
             DynamoDB attribute name for partition key, by default "id"
         key_attr_value: str, optional
-            DynamoDB attribute value for partition key, by default "powertools#idempotency".
+            DynamoDB attribute value for partition key, by default "idempotency#<function-name>".
             This will be used if the sort_key_attr is set.
         sort_key_attr: str, optional
             DynamoDB attribute name for the sort key
@@ -71,6 +73,8 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
         self._boto_config = boto_config or Config()
         self._boto3_session = boto3_session or boto3.session.Session()
+        if sort_key_attr == key_attr:
+            raise ValueError(f"key_attr [{key_attr}] and sort_key_attr [{sort_key_attr}] cannot be the same!")
 
         self._table = None
         self.table_name = table_name

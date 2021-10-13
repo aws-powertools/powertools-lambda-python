@@ -2,9 +2,7 @@ import datetime
 import hashlib
 import json
 from collections import namedtuple
-from dataclasses import dataclass
 from decimal import Decimal
-from typing import Callable
 from unittest import mock
 
 import jmespath
@@ -82,23 +80,25 @@ def default_jmespath():
 
 
 @pytest.fixture
-def expected_params_update_item(serialized_lambda_response):
-    return lambda key: {
+def expected_params_update_item(serialized_lambda_response, hashed_idempotency_key):
+    return {
         "ExpressionAttributeNames": {"#expiry": "expiration", "#response_data": "data", "#status": "status"},
         "ExpressionAttributeValues": {
             ":expiry": stub.ANY,
             ":response_data": serialized_lambda_response,
             ":status": "COMPLETED",
         },
-        "Key": key,
+        "Key": {"id": hashed_idempotency_key},
         "TableName": "TEST_TABLE",
         "UpdateExpression": "SET #response_data = :response_data, " "#expiry = :expiry, #status = :status",
     }
 
 
 @pytest.fixture
-def expected_params_update_item_with_validation(serialized_lambda_response, hashed_validation_key):
-    return lambda key: {
+def expected_params_update_item_with_validation(
+    serialized_lambda_response, hashed_idempotency_key, hashed_validation_key
+):
+    return {
         "ExpressionAttributeNames": {
             "#expiry": "expiration",
             "#response_data": "data",
@@ -111,7 +111,7 @@ def expected_params_update_item_with_validation(serialized_lambda_response, hash
             ":status": "COMPLETED",
             ":validation_key": hashed_validation_key,
         },
-        "Key": key,
+        "Key": {"id": hashed_idempotency_key},
         "TableName": "TEST_TABLE",
         "UpdateExpression": "SET #response_data = :response_data, "
         "#expiry = :expiry, #status = :status, "
@@ -120,23 +120,28 @@ def expected_params_update_item_with_validation(serialized_lambda_response, hash
 
 
 @pytest.fixture
-def expected_params_put_item():
-    return lambda key_attr, key: {
+def expected_params_put_item(hashed_idempotency_key):
+    return {
         "ConditionExpression": "attribute_not_exists(#id) OR #now < :now",
-        "ExpressionAttributeNames": {"#id": key_attr, "#now": "expiration"},
+        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration"},
         "ExpressionAttributeValues": {":now": stub.ANY},
-        "Item": {"expiration": stub.ANY, "status": "INPROGRESS", **key},
+        "Item": {"expiration": stub.ANY, "id": hashed_idempotency_key, "status": "INPROGRESS"},
         "TableName": "TEST_TABLE",
     }
 
 
 @pytest.fixture
-def expected_params_put_item_with_validation(hashed_validation_key):
-    return lambda key_attr, key: {
+def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_validation_key):
+    return {
         "ConditionExpression": "attribute_not_exists(#id) OR #now < :now",
-        "ExpressionAttributeNames": {"#id": key_attr, "#now": "expiration"},
+        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration"},
         "ExpressionAttributeValues": {":now": stub.ANY},
-        "Item": {"expiration": stub.ANY, "status": "INPROGRESS", "validation": hashed_validation_key, **key},
+        "Item": {
+            "expiration": stub.ANY,
+            "id": hashed_idempotency_key,
+            "status": "INPROGRESS",
+            "validation": hashed_validation_key,
+        },
         "TableName": "TEST_TABLE",
     }
 
@@ -161,40 +166,9 @@ def hashed_validation_key(lambda_apigw_event):
     return hashlib.md5(serialize(lambda_apigw_event["requestContext"]).encode()).hexdigest()
 
 
-@dataclass(eq=True, frozen=True)
-class TestPersistenceStore:
-    persistence_layer: DynamoDBPersistenceLayer
-    key_attr: str
-    expected_key: Callable[[str], dict]
-    expected_key_values: Callable[[str], dict]
-
-
-@pytest.fixture(params=[{}, {"key_attr": "PK", "key_attr_value": "powertools#idempotency", "sort_key_attr": "SK"}])
-def test_persistence_store(config, request) -> TestPersistenceStore:
-    expected_key = (
-        lambda idempotency_key: {"PK": "powertools#idempotency", "SK": idempotency_key}
-        if request.param
-        else {"id": idempotency_key}
-    )
-    expected_key_values = (
-        lambda idempotency_key: {"PK": {"S": "powertools#idempotency"}, "SK": {"S": idempotency_key}}
-        if request.param
-        else {"id": {"S": idempotency_key}}
-    )
-    return TestPersistenceStore(
-        persistence_layer=DynamoDBPersistenceLayer(table_name=TABLE_NAME, boto_config=config, **request.param),
-        key_attr="PK" if request.param else "id",
-        expected_key=expected_key,
-        expected_key_values=expected_key_values,
-    )
-
-
 @pytest.fixture
-def persistence_store_with_composite_key(config):
-    return DynamoDBPersistenceLayer(
-        table_name=TABLE_NAME,
-        boto_config=config,
-    )
+def persistence_store(config):
+    return DynamoDBPersistenceLayer(table_name=TABLE_NAME, boto_config=config)
 
 
 @pytest.fixture
