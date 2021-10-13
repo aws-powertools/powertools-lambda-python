@@ -8,7 +8,7 @@ import warnings
 import zlib
 from abc import ABC, abstractmethod
 from enum import Enum
-from functools import partial, wraps
+from functools import partial
 from http import HTTPStatus
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
@@ -669,7 +669,7 @@ class ApiGatewayResolver(BaseRouter):
                 rule = prefix if rule == "/" else f"{prefix}{rule}"
                 route = (rule, *route[1:])
 
-            self.route(*route)(func())
+            self.route(*route)(func)
 
 
 class Router(BaseRouter):
@@ -696,18 +696,11 @@ class Router(BaseRouter):
         compress: bool = False,
         cache_control: Optional[str] = None,
     ):
-        def actual_decorator(func: Callable):
-            @wraps(func)
-            def wrapper():
-                def inner_wrapper(**kwargs):
-                    return func(**kwargs)
-
-                return inner_wrapper
-
+        def register_route(func: Callable):
             if isinstance(method, (list, tuple)):
                 for item in method:
-                    self.routes[(rule, item, cors, compress, cache_control)] = wrapper
+                    self.routes[(rule, item, cors, compress, cache_control)] = func
             else:
-                self.routes[(rule, method, cors, compress, cache_control)] = wrapper
+                self.routes[(rule, method, cors, compress, cache_control)] = func
 
-        return actual_decorator
+        return register_route
