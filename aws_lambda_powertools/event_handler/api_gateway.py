@@ -654,7 +654,7 @@ class ApiGatewayResolver(BaseRouter):
     def include_router(self, router: "Router", prefix: Optional[str] = None) -> None:
         """Adds all routes defined in a router"""
         router._app = self
-        for route, func in router.api.items():
+        for route, func in router.routes.items():
             if prefix and route[0] == "/":
                 route = (prefix, *route[1:])
             elif prefix:
@@ -668,7 +668,7 @@ class Router(BaseRouter):
     _app: ApiGatewayResolver
 
     def __init__(self):
-        self.api: Dict[tuple, Callable] = {}
+        self.routes: Dict[tuple, Callable] = {}
 
     @property
     def current_event(self) -> BaseProxyEvent:
@@ -696,8 +696,8 @@ class Router(BaseRouter):
 
             if isinstance(method, (list, tuple)):
                 for item in method:
-                    self.api[(rule, item, cors, compress, cache_control)] = wrapper
+                    self.routes[(rule, item, cors, compress, cache_control)] = wrapper
             else:
-                self.api[(rule, method, cors, compress, cache_control)] = wrapper
+                self.routes[(rule, method, cors, compress, cache_control)] = wrapper
 
         return actual_decorator
