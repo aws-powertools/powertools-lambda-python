@@ -652,13 +652,23 @@ class ApiGatewayResolver(BaseRouter):
         return self._serializer(obj)
 
     def include_router(self, router: "Router", prefix: Optional[str] = None) -> None:
-        """Adds all routes defined in a router"""
+        """Adds all routes defined in a router
+
+        Parameters
+        ----------
+        router : Router
+            The Router containing a list of routes to be registered after the existing routes
+        prefix : str, optional
+            An optional prefix to be added to the originally defined rule
+        """
         router._app = self
+
         for route, func in router.routes.items():
-            if prefix and route[0] == "/":
-                route = (prefix, *route[1:])
-            elif prefix:
-                route = (f"{prefix}{route[0]}", *route[1:])
+            if prefix:
+                rule = route[0]
+                rule = prefix if rule == "/" else f"{prefix}{rule}"
+                route = (rule, *route[1:])
+
             self.route(*route)(func())
 
 
