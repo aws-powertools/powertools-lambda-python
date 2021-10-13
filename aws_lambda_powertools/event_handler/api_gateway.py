@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from functools import partial, wraps
 from http import HTTPStatus
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import ServiceError
@@ -681,7 +681,7 @@ class Router(BaseRouter):
     def route(
         self,
         rule: str,
-        method: Union[str, Tuple[str], List[str]],
+        method: Union[str, List[str]],
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
