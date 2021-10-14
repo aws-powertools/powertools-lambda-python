@@ -230,6 +230,9 @@ class ResponseBuilder:
 
 
 class BaseRouter(ABC):
+    current_event: BaseProxyEvent
+    lambda_context: LambdaContext
+
     @abstractmethod
     def route(
         self,
@@ -405,9 +408,6 @@ class ApiGatewayResolver(BaseRouter):
     ```
     """
 
-    current_event: BaseProxyEvent
-    lambda_context: LambdaContext
-
     def __init__(
         self,
         proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent,
@@ -494,8 +494,8 @@ class ApiGatewayResolver(BaseRouter):
         """
         if self._debug:
             print(self._json_dump(event))
-        self.current_event = self._to_proxy_event(event)
-        self.lambda_context = context
+        BaseRouter.current_event = self._to_proxy_event(event)
+        BaseRouter.lambda_context = context
         return self._resolve().build(self.current_event, self._cors)
 
     def __call__(self, event, context) -> Any:
@@ -661,8 +661,6 @@ class ApiGatewayResolver(BaseRouter):
         prefix : str, optional
             An optional prefix to be added to the originally defined rule
         """
-        router._app = self
-
         for route, func in router._routes.items():
             if prefix:
                 rule = route[0]
@@ -675,18 +673,8 @@ class ApiGatewayResolver(BaseRouter):
 class Router(BaseRouter):
     """Router helper class to allow splitting ApiGatewayResolver into multiple files"""
 
-    _app: ApiGatewayResolver
-
     def __init__(self):
         self._routes: Dict[tuple, Callable] = {}
-
-    @property
-    def current_event(self) -> BaseProxyEvent:
-        return self._app.current_event
-
-    @property
-    def lambda_context(self) -> LambdaContext:
-        return self._app.lambda_context
 
     def route(
         self,
@@ -697,10 +685,8 @@ class Router(BaseRouter):
         cache_control: Optional[str] = None,
     ):
         def register_route(func: Callable):
-            if isinstance(method, list):
-                for item in method:
-                    self._routes[(rule, item, cors, compress, cache_control)] = func
-            else:
-                self._routes[(rule, method, cors, compress, cache_control)] = func
+            methods = method if isinstance(method, list) else [method]
+            for item in methods:
+                self._routes[(rule, item, cors, compress, cache_control)] = func
 
         return register_route
