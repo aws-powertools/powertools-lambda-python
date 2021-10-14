@@ -662,13 +662,11 @@ class ApiGatewayResolver(BaseRouter):
             An optional prefix to be added to the originally defined rule
         """
         router._app = self
-
         for route, func in router.routes.items():
             if prefix:
                 rule = route[0]
                 rule = prefix if rule == "/" else f"{prefix}{rule}"
                 route = (rule, *route[1:])
-
             self.route(*route)(func)
 
 
@@ -697,7 +695,7 @@ class Router(BaseRouter):
         cache_control: Optional[str] = None,
     ):
         def register_route(func: Callable):
-            if isinstance(method, (list, tuple)):
+            if isinstance(method, list):
                 for item in method:
                     self.routes[(rule, item, cors, compress, cache_control)] = func
             else:
