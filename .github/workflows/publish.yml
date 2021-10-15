@@ -30,6 +30,14 @@ name: Publish to PyPi
 # 2. Use the version released under Releases e.g. v1.13.0
 #
 
+#
+# === Documentation hotfix ===
+#
+# 1. Trigger "Publish to PyPi" workflow manually: https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow
+# 2. Use the latest version released under Releases e.g. v1.21.1
+# 3. Set `Build and publish docs only` field to `true`
+
+
 on:
   release:
     types: [published]
@@ -121,9 +129,9 @@ jobs:
   sync_master:
     needs: release
     runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.publish_docs_only == false }}
     steps:
     - uses: actions/checkout@v2
-      if: ${{ github.event.inputs.publish_docs_only == false }}
     - name: Sync master from detached head
       # If version matches CHANGELOG and pyproject.toml
       # If it passes all checks, successfully releases to test and prod
