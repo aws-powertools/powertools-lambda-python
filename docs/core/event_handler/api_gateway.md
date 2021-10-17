@@ -12,6 +12,7 @@ Event handler for Amazon API Gateway REST/HTTP APIs and Application Loader Balan
 * Integrates with [Data classes utilities](../../utilities/data_classes.md){target="_blank"} to easily access event and identity information
 * Built-in support for Decimals JSON encoding
 * Support for dynamic path expressions
+* Router to allow for splitting up the handler accross multiple files
 
 ## Getting started
 
