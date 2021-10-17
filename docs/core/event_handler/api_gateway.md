@@ -852,38 +852,71 @@ You can instruct API Gateway handler to use a custom serializer to best suit you
             "variations": {"light", "dark"},
         }
     ```
+
 ### Splitting routes across multiple files
 
-```text
-.
-├── Makefile
-├── Pipfile
-├── Pipfile.lock
-├── events
-│   └── health_status_event.json
-├── src
-│   ├── __init__.py
-│   ├── requirements.txt      #
-│   └── app
-│       ├── __init__.py       # this file makes "app" a "Python package"
-│       ├── main.py           # Main lambda handler
-│       └── routers
-│           ├── __init__.py
-│           ├── items.py      # "items" submodule, e.g. from .routers import items
-│           ├── health.py     # "health" submodule, e.g. from .routers import health
-│           └── users.py      # "users" submodule, e.g. from .routers import users
-├── template.yaml
-└── tests
-    ├── __init__.py
-    ├── conftest.py
-    ├── unit
-    │   ├── __init__.py
-    │   └── test_health.py   # unit tests for the health router
-    └── functional
-        ├── __init__.py
-        └── test_app_main.py # functional tests for the main lambda handler
-```
+When building a larger application, sometimes to helps to split out your routes into multiple file. Also
+there might be cases where you have some shared routes for multiple lambdas like a `health` status lambda
+to be used with Application Load Balancer.
 
+Below is an example project layout for AWS Lambda Functions using AWS SAM CLI that allows for relative path
+imports.
+
+    ```text
+    .
+    ├── Pipfile
+    ├── Pipfile.lock
+    ├── events
+    │   └── health_status_event.json
+    ├── src
+    │   ├── __init__.py
+    │   ├── requirements.txt      # pipenv lock -r > src/requirements.txt
+    │   └── app
+    │       ├── __init__.py       # this file makes "app" a "Python package"
+    │       ├── main.py           # Main lambda handler (app.py, index.py, handler.py)
+    │       └── routers           # routers module
+    │           ├── __init__.py
+    │           ├── items.py      # "items" submodule, e.g. from .routers import items
+    │           ├── health.py     # "health" submodule, e.g. from .routers import health
+    │           └── users.py      # "users" submodule, e.g. from .routers import users
+    ├── template.yaml             # SAM template.yml
+    └── tests
+        ├── __init__.py
+        ├── conftest.py
+        ├── unit
+        │   ├── __init__.py
+        │   └── test_health.py   # unit tests for the health router
+        └── functional
+            ├── __init__.py
+            └── test_app_main.py # functional tests for the main lambda handler
+    ```
+
+=== "src/app/main.py"
+
+    ```python
+    from typing import Dict
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.event_handler import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler.api_gateway import ProxyEventType
+    from aws_lambda_powertools.logging.correlation_paths import API_GATEWAY_HTTP
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+    from .routers import health, items, users
+
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.ALBEvent)
+    app.include_router(health.router, prefix="/health")
+    app.include_router(items.router)
+    app.include_router(users.router)
+
+
+    @logger.inject_lambda_context(correlation_id_path=API_GATEWAY_HTTP)
+    @tracer.capture_lambda_handler
+    def handler(event: Dict, context: LambdaContext):
+        app.resolve(event, context)
+    ```
 
 ## Testing your code
 
