@@ -852,6 +852,38 @@ You can instruct API Gateway handler to use a custom serializer to best suit you
             "variations": {"light", "dark"},
         }
     ```
+### Splitting routes across multiple files
+
+```text
+.
+├── Makefile
+├── Pipfile
+├── Pipfile.lock
+├── events
+│   └── health_status_event.json
+├── src
+│   ├── __init__.py
+│   ├── requirements.txt      #
+│   └── app
+│       ├── __init__.py       # this file makes "app" a "Python package"
+│       ├── main.py           # Main lambda handler
+│       └── routers
+│           ├── __init__.py
+│           ├── items.py      # "items" submodule, e.g. from .routers import items
+│           ├── health.py     # "health" submodule, e.g. from .routers import health
+│           └── users.py      # "users" submodule, e.g. from .routers import users
+├── template.yaml
+└── tests
+    ├── __init__.py
+    ├── conftest.py
+    ├── unit
+    │   ├── __init__.py
+    │   └── test_health.py   # unit tests for the health router
+    └── functional
+        ├── __init__.py
+        └── test_app_main.py # functional tests for the main lambda handler
+```
+
 
 ## Testing your code
 
