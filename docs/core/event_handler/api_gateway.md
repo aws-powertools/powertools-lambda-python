@@ -862,6 +862,8 @@ to be used with Application Load Balancer.
 Below is an example project layout for AWS Lambda Functions using AWS SAM CLI that allows for relative path
 imports.
 
+=== "Project layout"
+
     ```text
     .
     ├── Pipfile
@@ -891,6 +893,77 @@ imports.
             └── test_app_main.py # functional tests for the main lambda handler
     ```
 
+=== "template.yml"
+
+    ```yml
+    AWSTemplateFormatVersion: '2010-09-09'
+    Transform: AWS::Serverless-2016-10-31
+    Description: >
+        app
+
+    Globals:
+        Api:
+            EndpointConfiguration: REGIONAL
+            TracingEnabled: true
+            Cors:
+                # AllowOrigin: "'https://example.com'"
+                AllowOrigin: "'*'"  # Dev only
+                AllowHeaders: "'Content-Type,Authorization,X-Amz-Date'"
+                MaxAge: "'300'"
+            BinaryMediaTypes:
+            - '*~1*'
+        Function:
+            Timeout: 20
+            MemorySize: 512
+            Runtime: python3.9
+            Tracing: Active
+            AutoPublishAlias: live
+            Environment:
+                Variables:
+                    LOG_LEVEL: INFO
+                    POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
+                    POWERTOOLS_LOGGER_LOG_EVENT: true
+                    POWERTOOLS_METRICS_NAMESPACE: MyServerlessApplication
+                    POWERTOOLS_SERVICE_NAME: app
+
+    Resources:
+        AppFunction:
+            Type: AWS::Serverless::Function
+            Properties:
+                Handler: app.main.lambda_handler
+                CodeUri: src
+                Description: App function
+                Events:
+                    HealthPath:
+                        Type: Api
+                        Properties:
+                            Path: /health/status
+                            Method: GET
+                    ItemsPath:
+                        Type: Api
+                        Properties:
+                            Path: /items
+                            Method: GET
+                    UserPath:
+                        Type: Api
+                        Properties:
+                            Path: /users/{name}
+                            Method: GET
+                Environment:
+                    Variables:
+                        PARAM1: VALUE
+                Tags:
+                    LambdaPowertools: python
+    Outputs:
+        AppApigwURL:
+        Description: "API Gateway endpoint URL for Prod environment for App Function"
+        Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/app"
+
+        AppFunction:
+        Description: "App Lambda Function ARN"
+        Value: !GetAtt AppFunction.Arn
+    ```
+
 === "src/app/main.py"
 
     ```python
@@ -914,8 +987,39 @@ imports.
 
     @logger.inject_lambda_context(correlation_id_path=API_GATEWAY_HTTP)
     @tracer.capture_lambda_handler
-    def handler(event: Dict, context: LambdaContext):
+    def lambda_handler(event: Dict, context: LambdaContext):
         app.resolve(event, context)
+    ```
+
+=== "src/app/routers/health.py"
+
+    ```python
+    from typing import Dict
+
+    from aws_lambda_powertools.event_handler.api_gateway import Router
+
+    router = Router()
+
+
+    @router.get("/status")
+    def health() -> Dict:
+        return {"status": "OK"}
+    ```
+
+=== "tests/functional/test_app_main.py"
+
+    ```python
+    import json
+
+    from src.app import main
+
+
+    def test_lambda_handler(apigw_event, lambda_context):
+        ret = main.lambda_handler(apigw_event, lambda_context)
+        expected = json.dumps({"message": "hello universe"}, separators=(",", ":"))
+
+        assert ret["statusCode"] == 200
+        assert ret["body"] == expected
     ```
 
 ## Testing your code
