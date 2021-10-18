@@ -879,7 +879,6 @@ imports (ie: `from .routers import health`).
     │       ├── main.py           # Main lambda handler (app.py, index.py, handler.py)
     │       └── routers           # routers module
     │           ├── __init__.py   # this file makes "routers" a "Python package"
-    │           ├── items.py      # "items" submodule, e.g. from .routers import items
     │           ├── health.py     # "health" submodule, e.g. from .routers import health
     │           └── users.py      # "users" submodule, e.g. from .routers import users
     ├── template.yaml             # SAM template.yml
@@ -927,11 +926,6 @@ imports (ie: `from .routers import health`).
                         Properties:
                             Path: /health/status
                             Method: GET
-                    ItemsPath:
-                        Type: Api
-                        Properties:
-                            Path: /items
-                            Method: GET
                     UserPath:
                         Type: Api
                         Properties:
@@ -962,13 +956,12 @@ imports (ie: `from .routers import health`).
     from aws_lambda_powertools.logging.correlation_paths import API_GATEWAY_HTTP
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
-    from .routers import health, items, users
+    from .routers import health, users
 
     tracer = Tracer()
     logger = Logger()
     app = ApiGatewayResolver(proxy_type=ProxyEventType.ALBEvent)
     app.include_router(health.router, prefix="/health")
-    app.include_router(items.router)
     app.include_router(users.router)
 
 
