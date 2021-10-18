@@ -76,12 +76,11 @@ This is the sample infrastructure for API Gateway we are using for the examples 
 
     Outputs:
         HelloWorldApigwURL:
-        Description: "API Gateway endpoint URL for Prod environment for Hello World Function"
-        Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello"
-
-    HelloWorldFunction:
-        Description: "Hello World Lambda Function ARN"
-        Value: !GetAtt HelloWorldFunction.Arn
+            Description: "API Gateway endpoint URL for Prod environment for Hello World Function"
+            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello"
+        HelloWorldFunction:
+            Description: "Hello World Lambda Function ARN"
+            Value: !GetAtt HelloWorldFunction.Arn
     ```
 
 ### API Gateway decorator
@@ -861,7 +860,7 @@ there might be cases where you have some shared routes for multiple lambdas like
 to be used with Application Load Balancer.
 
 Below is an example project layout for AWS Lambda Functions using AWS SAM CLI that allows for relative path
-imports.
+imports (ie: `from .routers import health` ).
 
 === "Project layout"
 
@@ -869,8 +868,6 @@ imports.
     .
     ├── Pipfile
     ├── Pipfile.lock
-    ├── events
-    │   └── health_status_event.json
     ├── src
     │   ├── __init__.py
     │   ├── requirements.txt      # pipenv lock -r > src/requirements.txt
@@ -878,54 +875,41 @@ imports.
     │       ├── __init__.py       # this file makes "app" a "Python package"
     │       ├── main.py           # Main lambda handler (app.py, index.py, handler.py)
     │       └── routers           # routers module
-    │           ├── __init__.py
+    │           ├── __init__.py   # this file makes "routers" a "Python package"
     │           ├── items.py      # "items" submodule, e.g. from .routers import items
     │           ├── health.py     # "health" submodule, e.g. from .routers import health
     │           └── users.py      # "users" submodule, e.g. from .routers import users
     ├── template.yaml             # SAM template.yml
     └── tests
         ├── __init__.py
-        ├── conftest.py
         ├── unit
         │   ├── __init__.py
         │   └── test_health.py   # unit tests for the health router
         └── functional
             ├── __init__.py
+            ├── conftest.py      # pytest fixtures for the functional tests
             └── test_app_main.py # functional tests for the main lambda handler
     ```
 
 === "template.yml"
 
-    ```yml
+    ```yaml  hl_lines="22 23"
     AWSTemplateFormatVersion: '2010-09-09'
     Transform: AWS::Serverless-2016-10-31
-    Description: >
-        app
+    Description: Example service with multiple routes
 
     Globals:
-        Api:
-            EndpointConfiguration: REGIONAL
-            TracingEnabled: true
-            Cors:
-                # AllowOrigin: "'https://example.com'"
-                AllowOrigin: "'*'"  # Dev only
-                AllowHeaders: "'Content-Type,Authorization,X-Amz-Date'"
-                MaxAge: "'300'"
-            BinaryMediaTypes:
-            - '*~1*'
         Function:
             Timeout: 20
             MemorySize: 512
             Runtime: python3.9
             Tracing: Active
-            AutoPublishAlias: live
             Environment:
                 Variables:
                     LOG_LEVEL: INFO
-                    POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
                     POWERTOOLS_LOGGER_LOG_EVENT: true
                     POWERTOOLS_METRICS_NAMESPACE: MyServerlessApplication
-                    POWERTOOLS_SERVICE_NAME: app
+                    POWERTOOLS_SERVICE_NAME: ServiceName
 
     Resources:
         AppFunction:
@@ -933,7 +917,7 @@ imports.
             Properties:
                 Handler: app.main.lambda_handler
                 CodeUri: src
-                Description: App function
+                Description: App function description
                 Events:
                     HealthPath:
                         Type: Api
@@ -957,17 +941,16 @@ imports.
                     LambdaPowertools: python
     Outputs:
         AppApigwURL:
-        Description: "API Gateway endpoint URL for Prod environment for App Function"
-        Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/app"
-
+            Description: "API Gateway endpoint URL for Prod environment for App Function"
+            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/app"
         AppFunction:
-        Description: "App Lambda Function ARN"
-        Value: !GetAtt AppFunction.Arn
+            Description: "App Lambda Function ARN"
+            Value: !GetAtt AppFunction.Arn
     ```
 
 === "src/app/main.py"
 
-    ```python
+    ```python hl_lines="9 14-16"
     from typing import Dict
 
     from aws_lambda_powertools import Logger, Tracer
@@ -994,7 +977,7 @@ imports.
 
 === "src/app/routers/health.py"
 
-    ```python
+    ```python hl_lines="3 5 8"
     from typing import Dict
 
     from aws_lambda_powertools.event_handler.api_gateway import Router
@@ -1009,7 +992,7 @@ imports.
 
 === "tests/functional/test_app_main.py"
 
-    ```python
+    ```python  hl_lines="3"
     import json
 
     from src.app import main
