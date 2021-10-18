@@ -860,7 +860,10 @@ there might be cases where you have some shared routes for multiple lambdas like
 to be used with Application Load Balancer.
 
 Below is an example project layout for AWS Lambda Functions using AWS SAM CLI that allows for relative path
-imports (ie: `from .routers import health` ).
+imports (ie: `from .routers import health`).
+
+!!! tip "See in `src/app/main.py`, when including a route we can add a prefix to those routes ie: `prefix="/health"`."
+!!! tip "See in `src/app/routers/health.py`, when adding a child logger we use `Logger(child=True)`."
 
 === "Project layout"
 
@@ -977,16 +980,19 @@ imports (ie: `from .routers import health` ).
 
 === "src/app/routers/health.py"
 
-    ```python hl_lines="3 5 8"
+    ```python hl_lines="4 6-7 10 12"
     from typing import Dict
 
+    from aws_lambda_powertools import Logger
     from aws_lambda_powertools.event_handler.api_gateway import Router
 
+    logger = Logger(child=True)
     router = Router()
 
 
     @router.get("/status")
     def health() -> Dict:
+        logger.debug("Health check called")
         return {"status": "OK"}
     ```
 
