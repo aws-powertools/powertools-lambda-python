@@ -43,6 +43,11 @@ def test_rabbit_mq_event():
     assert event.event_source_arn is not None
 
     message = event.rmq_messages_by_queue["pizzaQueue::/"][0]
+    assert message.redelivered is False
+    assert message.data is not None
+    assert message.decoded_data is not None
+    assert message.json_data["timeout"] == 0
+
     assert isinstance(message, RabbitMessage)
     properties = message.basic_properties
     assert isinstance(properties, BasicProperties)
@@ -53,8 +58,12 @@ def test_rabbit_mq_event():
     assert properties.delivery_mode == 1
     assert properties.priority == 34
     assert properties.correlation_id is None
-
-    assert message.redelivered is False
-    assert message.data is not None
-    assert message.decoded_data is not None
-    assert message.json_data["timeout"] == 0
+    assert properties.reply_to is None
+    assert properties.expiration == "60000"
+    assert properties.message_id is None
+    assert properties.timestamp is not None
+    assert properties.get_type is None
+    assert properties.user_id is not None
+    assert properties.app_id is None
+    assert properties.cluster_id is None
+    assert properties.body_size == 80

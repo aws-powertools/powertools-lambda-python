@@ -35,7 +35,7 @@ class BasicProperties(DictWrapper):
         return self["replyTo"]
 
     @property
-    def expiration(self) -> int:
+    def expiration(self) -> str:
         return self["expiration"]
 
     @property
@@ -43,7 +43,7 @@ class BasicProperties(DictWrapper):
         return self["messageId"]
 
     @property
-    def timestamp(self) -> int:
+    def timestamp(self) -> str:
         return self["timestamp"]
 
     @property
