@@ -19,6 +19,14 @@ def test_cloud_watch_trigger_event():
     assert message.redelivered is False
     assert message.timestamp is not None
     assert message.broker_in_time is not None
+    assert message.broker_out_time is not None
+    assert message.destination_physicalname is not None
+    assert message.delivery_mode is None
+    assert message.correlation_id is None
+    assert message.reply_to is None
+    assert message.get_type is None
+    assert message.expiration is None
+    assert message.priority is None
 
     messages = list(event.messages)
     message = messages[1]
