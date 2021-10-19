@@ -1,8 +1,8 @@
-from aws_lambda_powertools.utilities.data_classes.active_mq import ActiveMQEvent, ActiveMQMessage
+from aws_lambda_powertools.utilities.data_classes.active_mq_event import ActiveMQEvent, ActiveMQMessage
 from tests.functional.utils import load_event
 
 
-def test_cloud_watch_trigger_event():
+def test_activate_mq_event():
     event = ActiveMQEvent(load_event("activeMQEvent.json"))
 
     assert event.event_source == "aws:amq"
