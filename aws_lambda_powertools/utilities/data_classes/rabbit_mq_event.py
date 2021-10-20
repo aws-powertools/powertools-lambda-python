@@ -113,6 +113,7 @@ class RabbitMQEvent(DictWrapper):
 
     @property
     def event_source_arn(self) -> str:
+        """The Amazon Resource Name (ARN) of the event source"""
         return self["eventSourceArn"]
 
     @property

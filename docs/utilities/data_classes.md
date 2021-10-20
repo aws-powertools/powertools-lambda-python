@@ -58,6 +58,7 @@ Same example as above, but using the `event_source` decorator
 
 Event Source | Data_class
 ------------------------------------------------- | ---------------------------------------------------------------------------------
+[Active MQ](#active-mq) | `ActiveMQEvent`
 [API Gateway Authorizer](#api-gateway-authorizer) | `APIGatewayAuthorizerRequestEvent`
 [API Gateway Authorizer V2](#api-gateway-authorizer-v2) | `APIGatewayAuthorizerEventV2`
 [API Gateway Proxy](#api-gateway-proxy) | `APIGatewayProxyEvent`
@@ -72,6 +73,7 @@ Event Source | Data_class
 [DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName`
 [EventBridge](#eventbridge) | `EventBridgeEvent`
 [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent`
+[Rabbit MQ](#rabbit-mq) | `RabbitMQEvent`
 [S3](#s3) | `S3Event`
 [S3 Object Lambda](#s3-object-lambda) | `S3ObjectLambdaEvent`
 [SES](#ses) | `SESEvent`
@@ -81,6 +83,31 @@ Event Source | Data_class
 !!! info
     The examples provided below are far from exhaustive - the data classes themselves are designed to provide a form of
     documentation inherently (via autocompletion, types and docstrings).
+
+### Active MQ
+
+It is used for [Active MQ payloads](https://docs.aws.amazon.com/lambda/latest/dg/with-mq.html){target="_blank"}, also see
+the [AWS blog post](https://aws.amazon.com/blogs/compute/using-amazon-mq-as-an-event-source-for-aws-lambda/){target="_blank"}
+for more details.
+
+=== "app.py"
+
+    ```python
+    from typing import Dict
+
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.utilities.data_classes import event_source
+    from aws_lambda_powertools.utilities.data_classes.active_mq_event import ActiveMQEvent
+
+    logger = Logger()
+
+    @event_source(data_class=ActiveMQEvent)
+    def lambda_handle(event: ActiveMQEvent, context):
+        for message in event.messages:
+            logger.debug(f"MessageID: {message.message_id}")
+            data: Dict = message.json_data
+            logger.debug("Process json in base64 encoded data str", data)
+    ```
 
 ### API Gateway Authorizer
 
@@ -808,6 +835,33 @@ or plain text, depending on the original payload.
         data = kinesis_record.data_as_json()
 
         do_something_with(data)
+    ```
+
+### Rabbit MQ
+
+It is used for [Rabbit MQ payloads](https://docs.aws.amazon.com/lambda/latest/dg/with-mq.html){target="_blank"}, also see
+the [blog post](https://aws.amazon.com/blogs/compute/using-amazon-mq-for-rabbitmq-as-an-event-source-for-lambda/){target="_blank"}
+for more details.
+
+=== "app.py"
+
+    ```python
+    from typing import Dict
+
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.utilities.data_classes import event_source
+    from aws_lambda_powertools.utilities.data_classes.rabbit_mq_event import RabbitMQEvent
+
+    logger = Logger()
+
+    @event_source(data_class=RabbitMQEvent)
+    def lambda_handle(event: RabbitMQEvent, context):
+        for queue_name, messages in event.rmq_messages_by_queue.items():
+            logger.debug(f"Messages for queue: {queue_name}")
+            for message in messages:
+                logger.debug(f"MessageID: {message.basic_properties.message_id}")
+                data: Dict = message.json_data
+                logger.debug("Process json in base64 encoded data str", data)
     ```
 
 ### S3
