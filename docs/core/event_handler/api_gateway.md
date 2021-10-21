@@ -855,7 +855,7 @@ You can instruct API Gateway handler to use a custom serializer to best suit you
 
 ### Splitting routes across multiple files
 
-When building a larger application, sometimes to helps to split out your routes into multiple file. Also
+When building a larger application, sometimes it helps to split out your routes into multiple file. Also
 there might be cases where you have some shared routes for multiple lambdas like a `health` status lambda
 to be used with Application Load Balancer.
 
