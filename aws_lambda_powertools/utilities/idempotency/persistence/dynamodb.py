@@ -22,7 +22,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         self,
         table_name: str,
         key_attr: str = "id",
-        key_attr_value: str = f"idempotency#{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, 'test-func')}",
+        key_attr_value: str = f"idempotency#{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, '')}",
         sort_key_attr: Optional[str] = None,
         expiry_attr: str = "expiration",
         status_attr: str = "status",
