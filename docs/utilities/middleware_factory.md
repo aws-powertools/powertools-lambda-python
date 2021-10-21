@@ -48,7 +48,7 @@ You can also have your own keyword arguments after the mandatory arguments.
         if fields:
             for field in fields:
                 if field in event:
-                    event[field] = obfuscate(event.get(field, ""))
+                    event[field] = obfuscate(event[field])
 
         return handler(event, context)
 
