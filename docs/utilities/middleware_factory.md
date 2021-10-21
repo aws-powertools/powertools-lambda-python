@@ -47,9 +47,8 @@ You can also have your own keyword arguments after the mandatory arguments.
         # Obfuscate email before calling Lambda handler
         if fields:
             for field in fields:
-                field = event.get(field, "")
                 if field in event:
-                    event[field] = obfuscate(field)
+                    event[field] = obfuscate(event.get(field, ""))
 
         return handler(event, context)
 
