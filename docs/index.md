@@ -33,7 +33,9 @@ Powertools is available in the following formats:
 
 ### Lambda Layer
 
-Include Lambda Powertools in your function using the [AWS Lambda Console](https://console.aws.amazon.com/lambda){target="_blank"} or your preferred deployment framework.
+A Lambda Layer is a zip file containing pre-packaged dependencies that is added to your Lambda function's configuration. Avoiding the need to bundle those dependences and share them between many functions. Note that Lambda Layers may only be used with functions deployed as a zip archive.
+
+Include the Lambda Powertools layer in your function following the [AWS Lambda Console](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html#invocation-layers-using){target="_blank"} instructions or your preferred deployment framework.
 
 !!! note "The public layers do not contain the `pydantic` library that is required for the `parser` utility; See [SAR](#sar) option instead."
 
