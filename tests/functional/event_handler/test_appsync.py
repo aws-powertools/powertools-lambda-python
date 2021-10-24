@@ -4,6 +4,7 @@ import sys
 import pytest
 
 from aws_lambda_powertools.event_handler import AppSyncResolver
+from aws_lambda_powertools.event_handler.appsync import Resolver
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
@@ -161,3 +162,29 @@ def test_resolve_custom_data_model():
     assert result == "my identifier"
 
     assert app.current_event.country_viewer == "US"
+
+
+def test_resolver_include_resolver():
+    # GIVEN
+    app = AppSyncResolver()
+    resolver = Resolver()
+
+    @resolver.resolver(type_name="Query", field_name="listLocations")
+    def get_locations(name: str):
+        return "get_locations#" + name
+
+    @app.resolver(field_name="listLocations2")
+    def get_locations2(name: str):
+        return "get_locations2#" + name
+
+    app.include_resolver(resolver)
+
+    # WHEN
+    mock_event1 = {"typeName": "Query", "fieldName": "listLocations", "arguments": {"name": "value"}}
+    mock_event2 = {"typeName": "Query", "fieldName": "listLocations2", "arguments": {"name": "value"}}
+    result1 = app.resolve(mock_event1, LambdaContext())
+    result2 = app.resolve(mock_event2, LambdaContext())
+
+    # THEN
+    assert result1 == "get_locations#value"
+    assert result2 == "get_locations2#value"
