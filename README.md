@@ -8,7 +8,7 @@ A suite of Python utilities for AWS Lambda functions to ease adopting best pract
 
 
 
-**[📜Documentation](https://awslabs.github.io/aws-lambda-powertools-python/)** | **[🐍PyPi](https://pypi.org/project/aws-lambda-powertools/)** | **[Roadmap](https://github.com/awslabs/aws-lambda-powertools-roadmap/projects/1)** | **[Quick hello world example](https://github.com/aws-samples/cookiecutter-aws-sam-python)** | **[Detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/)**
+**[📜Documentation](https://awslabs.github.io/aws-lambda-powertools-python/)** | **[🐍PyPi](https://pypi.org/project/aws-lambda-powertools/)** | **[Roadmap](https://github.com/awslabs/aws-lambda-powertools-roadmap/projects/1)** | **[Detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/)**
 
 > **An AWS Developer Acceleration (DevAx) initiative by Specialist Solution Architects | aws-devax-open-source@amazon.com**
 
@@ -34,134 +34,10 @@ A suite of Python utilities for AWS Lambda functions to ease adopting best pract
 
 With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip install aws-lambda-powertools``
 
-## Quick Start
-With [SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)  installed create, hello-world application and instruct it to include powertools library in the runtime.
-```sh
-sam init --runtime python3.9 --dependency-manager pip --app-template hello-world --name sam-app
-echo "aws-lambda-powertools" > sam-app/hello-world/requirements.txt
-```
-### Structured Logging
-Copy following code into `sam-app/hello-world/app.py`. Build the package and invoke our Lambda code locally `sam build && sam local invoke HelloWorldFunction -e events/event.json`
-```python
-from aws_lambda_powertools import Logger
 
-logger = Logger()
+## Quickstart and Examples
 
-
-def send_message(message: str):
-    logger.info(f"Message returned: {message}")
-    return {"message": message}
-
-
-@logger.inject_lambda_context(log_event=True)
-def lambda_handler(event, context):
-    return send_message(message="hello")
-
-```
-
-As a result we should see two records in our logs following the same structured pattern. First one includes the whole event and context thanks to `inject_lambda_context` decorator. Second is the result of invoking `logger.info method`
-
-### X-Ray Tracing
-
-```python
-from aws_lambda_powertools import Tracer
-
-tracer = Tracer()
-
-
-@tracer.capture_method
-def send_message(message: str):
-    tracer.put_annotation(key="message", value=message)
-    return {"message": message}
-
-
-@tracer.capture_lambda_handler
-def lambda_handler(event, context):
-    return send_message(message="hello")
-```
-As tracing doesn't work locally we need to deploy our lambda to the account of your choice.
-Modify `template.yaml` to add enable tracing for our lambda
-```yaml
-Resources:
-  HelloWorldFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      ...
-      Tracing: Active
-      ...
-```
-Configure aws credentials to ensure you deploy it to the specific account
-then build and deploy your code: `sam build && sam deploy --guided`.
-Invoke your remote function ``aws lambda invoke --function-name <function-name> response.json``
-As a result you should see traces for your lambda in X-RAY console
-<include zdjecie z segmentem>
-<include zdjecie z annotations>
-
-### Custom Metrics
-Let's extend our code with application metrics.
-
-```python
-from aws_lambda_powertools import Metrics
-from aws_lambda_powertools.metrics import MetricUnit
-
-metrics = Metrics(namespace="ApplicationMetrics", service="exampleAPP")
-
-
-def send_message(message: str):
-    metrics.add_metric(name="SuccessfulMessageGeneration", unit=MetricUnit.Count, value=1)
-    return {"message": message}
-
-
-@metrics.log_metrics
-def lambda_handler(event, context):
-    return send_message(message="hello")
-```
-
-In order to see CloudWatch Embedded Metric Format logs you can invoke lambda locally: `sam local invoke HelloWorldFunction -e events/event.json`
-```
-{"_aws":{"Timestamp":1634299249318,"CloudWatchMetrics":[{"Namespace":"ApplicationMetrics","Dimensions":[["service"]],"Metrics":[{"Name":"SuccessfulMessageGeneration","Unit":"Count"}]}]},"service":"exampleAPP","SuccessfulMessageGeneration":[1.0]}
-```
-if you deploy this changes into your account those logs will be picked up by cloudwatch and corresponding metrics will be generated
-``sam build && sam deploy``
-Metrics:
-<screenshot>
-
-
-## Event Handler for Amazon API Gateway:
-You might also add event handler router capabilities into your lambda. This way you might configure different methods in your lambda code to be triggered by different API paths.
-
-```python
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
-
-app = ApiGatewayResolver()
-
-
-@app.get("/hi")
-def get_message():
-    return {"message": "Hi!"}
-
-
-@app.get("/hello")
-def get_hello_message():
-    return {"message": "Hello!"}
-
-
-def lambda_handler(event, context):
-    return app.resolve(event, context)
-```
-
-Let's test it locally:
-```sh
-sam build && sam local start-api &
-curl http://127.0.0.1:3000/hi
-{"message":"Hi!"}%
-(venv) ➜  aws-lambda-powertools-python git:(develop) ✗ curl http://127.0.0.1:3000/hello
-{"message":"Hello!"}%
-```
-
-
-## Examples
-
+* [Quickstart](https://awslabs.github.io/aws-lambda-powertools-python/quickstart)
 * [Serverless Shopping cart](https://github.com/aws-samples/aws-serverless-shopping-cart)
 * [Serverless Airline](https://github.com/aws-samples/aws-serverless-airline-booking)
 * [Serverless E-commerce platform](https://github.com/aws-samples/aws-serverless-ecommerce-platform)
@@ -174,7 +50,7 @@ curl http://127.0.0.1:3000/hi
 
 ## Connect
 
-* **AWS Developers Slack**: `#lambda-powertools`** - **[Invite, if you don't have an account](https://join.slack.com/t/awsdevelopers/shared_invite/zt-gu30gquv-EhwIYq3kHhhysaZ2aIX7ew)**
+* **AWS Developers Slack**: `#lambda-powertools`**
 * **Email**: aws-lambda-powertools-feedback@amazon.com
 
 ## License
