@@ -174,17 +174,17 @@ class AppSyncResolver(BaseRouter):
         """Implicit lambda handler which internally calls `resolve`"""
         return self.resolve(event, context, data_model)
 
-    def include_resolver(self, resolver: "Resolver") -> None:
-        """Adds all resolvers defined in a resolver
+    def include_router(self, router: "Router") -> None:
+        """Adds all resolvers defined in a router
 
         Parameters
         ----------
-        resolver : Resolver
-            A resolver containing a dict of field resolvers
+        router : Router
+            A router containing a dict of field resolvers
         """
-        self._resolvers.update(resolver._resolvers)
+        self._resolvers.update(router._resolvers)
 
 
-class Resolver(BaseRouter):
+class Router(BaseRouter):
     def __init__(self):
         super().__init__()

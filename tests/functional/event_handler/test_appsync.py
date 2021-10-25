@@ -4,7 +4,7 @@ import sys
 import pytest
 
 from aws_lambda_powertools.event_handler import AppSyncResolver
-from aws_lambda_powertools.event_handler.appsync import Resolver
+from aws_lambda_powertools.event_handler.appsync import Router
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
@@ -167,9 +167,9 @@ def test_resolve_custom_data_model():
 def test_resolver_include_resolver():
     # GIVEN
     app = AppSyncResolver()
-    resolver = Resolver()
+    router = Router()
 
-    @resolver.resolver(type_name="Query", field_name="listLocations")
+    @router.resolver(type_name="Query", field_name="listLocations")
     def get_locations(name: str):
         return "get_locations#" + name
 
@@ -177,7 +177,7 @@ def test_resolver_include_resolver():
     def get_locations2(name: str):
         return "get_locations2#" + name
 
-    app.include_resolver(resolver)
+    app.include_router(router)
 
     # WHEN
     mock_event1 = {"typeName": "Query", "fieldName": "listLocations", "arguments": {"name": "value"}}
