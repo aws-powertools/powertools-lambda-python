@@ -43,8 +43,8 @@ Include Lambda Powertools in your function using the [AWS Lambda Console](https:
     MyLambdaFunction:
         Type: AWS::Serverless::Function
         Properties:
-        Layers:
-            - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:3
+            Layers:
+                - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:3
     ```
 
 === "Serverless framework"
@@ -196,16 +196,16 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
     AwsLambdaPowertoolsPythonLayer:
         Type: AWS::Serverless::Application
         Properties:
-        Location:
-            ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-            SemanticVersion: 1.21.1 # change to latest semantic version available in SAR
+            Location:
+                ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+                SemanticVersion: 1.21.1 # change to latest semantic version available in SAR
 
     MyLambdaFunction:
         Type: AWS::Serverless::Function
         Properties:
-        Layers:
-            # fetch Layer ARN from SAR App stack output
-            - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
+            Layers:
+                # fetch Layer ARN from SAR App stack output
+                - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
     ```
 
 === "Serverless framework"
@@ -223,10 +223,10 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
         AwsLambdaPowertoolsPythonLayer:
             Type: AWS::Serverless::Application
             Properties:
-            Location:
-                ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-                # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
-                SemanticVersion: 1.21.1
+                Location:
+                    ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+                    # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
+                    SemanticVersion: 1.21.1
     ```
 
 === "CDK"
