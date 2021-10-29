@@ -1,4 +1,5 @@
 import logging
+from abc import ABC
 from typing import Any, Callable, Optional, Type, TypeVar
 
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
@@ -9,7 +10,33 @@ logger = logging.getLogger(__name__)
 AppSyncResolverEventT = TypeVar("AppSyncResolverEventT", bound=AppSyncResolverEvent)
 
 
-class AppSyncResolver:
+class BaseRouter(ABC):
+    current_event: AppSyncResolverEventT  # type: ignore[valid-type]
+    lambda_context: LambdaContext
+
+    def __init__(self):
+        self._resolvers: dict = {}
+
+    def resolver(self, type_name: str = "*", field_name: Optional[str] = None):
+        """Registers the resolver for field_name
+
+        Parameters
+        ----------
+        type_name : str
+            Type name
+        field_name : str
+            Field name
+        """
+
+        def register_resolver(func):
+            logger.debug(f"Adding resolver `{func.__name__}` for field `{type_name}.{field_name}`")
+            self._resolvers[f"{type_name}.{field_name}"] = {"func": func}
+            return func
+
+        return register_resolver
+
+
+class AppSyncResolver(BaseRouter):
     """
     AppSync resolver decorator
 
@@ -40,29 +67,8 @@ class AppSyncResolver:
             return str(uuid.uuid4())
     """
 
-    current_event: AppSyncResolverEventT  # type: ignore[valid-type]
-    lambda_context: LambdaContext
-
     def __init__(self):
-        self._resolvers: dict = {}
-
-    def resolver(self, type_name: str = "*", field_name: Optional[str] = None):
-        """Registers the resolver for field_name
-
-        Parameters
-        ----------
-        type_name : str
-            Type name
-        field_name : str
-            Field name
-        """
-
-        def register_resolver(func):
-            logger.debug(f"Adding resolver `{func.__name__}` for field `{type_name}.{field_name}`")
-            self._resolvers[f"{type_name}.{field_name}"] = {"func": func}
-            return func
-
-        return register_resolver
+        super().__init__()
 
     def resolve(
         self, event: dict, context: LambdaContext, data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent
@@ -136,10 +142,10 @@ class AppSyncResolver:
         ValueError
             If we could not find a field resolver
         """
-        self.current_event = data_model(event)
-        self.lambda_context = context
-        resolver = self._get_resolver(self.current_event.type_name, self.current_event.field_name)
-        return resolver(**self.current_event.arguments)
+        BaseRouter.current_event = data_model(event)
+        BaseRouter.lambda_context = context
+        resolver = self._get_resolver(BaseRouter.current_event.type_name, BaseRouter.current_event.field_name)
+        return resolver(**BaseRouter.current_event.arguments)
 
     def _get_resolver(self, type_name: str, field_name: str) -> Callable:
         """Get resolver for field_name
@@ -167,3 +173,18 @@ class AppSyncResolver:
     ) -> Any:
         """Implicit lambda handler which internally calls `resolve`"""
         return self.resolve(event, context, data_model)
+
+    def include_router(self, router: "Router") -> None:
+        """Adds all resolvers defined in a router
+
+        Parameters
+        ----------
+        router : Router
+            A router containing a dict of field resolvers
+        """
+        self._resolvers.update(router._resolvers)
+
+
+class Router(BaseRouter):
+    def __init__(self):
+        super().__init__()
