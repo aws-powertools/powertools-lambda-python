@@ -57,8 +57,9 @@ Use the decorator for fail fast scenarios where you want your Lambda function to
 === "event_parser_decorator.py"
 
     ```python hl_lines="18"
-    from aws_lambda_powertools.utilities.parser import event_parser, BaseModel, ValidationError
+    from aws_lambda_powertools.utilities.parser import event_parser, BaseModel
     from aws_lambda_powertools.utilities.typing import LambdaContext
+    from typing import List, Optional
 
     import json
 
@@ -80,7 +81,7 @@ Use the decorator for fail fast scenarios where you want your Lambda function to
         print(event.description)
         print(event.items)
 
-        order_items = [items for item in event.items]
+        order_items = [item for item in event.items]
         ...
 
     payload = {
@@ -107,6 +108,7 @@ Use this standalone function when you want more control over the data validation
 
     ```python hl_lines="21 30"
     from aws_lambda_powertools.utilities.parser import parse, BaseModel, ValidationError
+    from typing import List, Optional
 
     class OrderItem(BaseModel):
         id: int
