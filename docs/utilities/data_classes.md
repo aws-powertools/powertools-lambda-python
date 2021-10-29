@@ -92,7 +92,7 @@ for more details.
 
 === "app.py"
 
-    ```python
+    ```python hl_lines="4-5 9-10"
     from typing import Dict
 
     from aws_lambda_powertools import Logger
@@ -102,7 +102,7 @@ for more details.
     logger = Logger()
 
     @event_source(data_class=ActiveMQEvent)
-    def lambda_handle(event: ActiveMQEvent, context):
+    def lambda_handler(event: ActiveMQEvent, context):
         for message in event.messages:
             logger.debug(f"MessageID: {message.message_id}")
             data: Dict = message.json_data
@@ -845,7 +845,7 @@ for more details.
 
 === "app.py"
 
-    ```python
+    ```python hl_lines="4-5 9-10"
     from typing import Dict
 
     from aws_lambda_powertools import Logger
@@ -855,7 +855,7 @@ for more details.
     logger = Logger()
 
     @event_source(data_class=RabbitMQEvent)
-    def lambda_handle(event: RabbitMQEvent, context):
+    def lambda_handler(event: RabbitMQEvent, context):
         for queue_name, messages in event.rmq_messages_by_queue.items():
             logger.debug(f"Messages for queue: {queue_name}")
             for message in messages:
