@@ -853,27 +853,129 @@ You can instruct API Gateway handler to use a custom serializer to best suit you
         }
     ```
 
-### Splitting routes across multiple files
+### Split routes with Router
 
-When building a larger application, sometimes to helps to split out your routes into multiple file. Also
-there might be cases where you have some shared routes for multiple lambdas like a `health` status lambda
-to be used with Application Load Balancer.
+As you grow the number of routes a given Lambda function should handle, it is natural to split routes into separate files to ease maintenance - That's where the `Router` feature is useful.
 
-Below is an example project layout for AWS Lambda Functions using AWS SAM CLI that allows for relative path
-imports (ie: `from .routers import health`).
+Let's assume you have `app.py` as your Lambda function entrypoint and routes in `users.py`, this is how you'd use the `Router` feature.
 
-!!! tip "See in `src/app/main.py`, when including a route we can add a prefix to those routes ie: `prefix="/health"`."
-!!! tip "See in `src/app/routers/health.py`, when adding a child logger we use `Logger(child=True)`."
+=== "users.py"
+
+	We import **Router** instead of **ApiGatewayResolver**; syntax wise is exactly the same.
+
+    ```python hl_lines="4 8 12 15 21"
+    import itertools
+	from typing import Dict
+
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.event_handler.api_gateway import Router
+
+    logger = Logger(child=True)
+    router = Router()
+
+    USERS = {"user1": "details_here", "user2": "details_here", "user3": "details_here"}
+
+    @router.get("/users")
+    def get_users() -> Dict:
+		# get query string ?limit=10
+		pagination_limit = router.current_event.get_query_string_value(name="limit", default_value=10)
+
+		logger.info(f"Fetching the first {pagination_limit} users...")
+		ret = dict(itertools.islice(USERS.items(), pagination_limit))
+		return {"items": [ret]}
+
+    @router.get("/users/<username>")
+    def get_user(username: str) -> Dict:
+        logger.info(f"Fetching username {username}")
+        return {"details": USERS.get(username, {})}
+
+	# many other related /users routing
+    ```
+
+=== "app.py"
+
+	We use `include_router` method and include all user routers registered in the `router` global object.
+
+	```python hl_lines="6 8-9"
+	from typing import Dict
+
+	from aws_lambda_powertools.event_handler import ApiGatewayResolver
+	from aws_lambda_powertools.utilities.typing import LambdaContext
+
+	import users
+
+	app = ApiGatewayResolver()
+	app.include_router(users.router)
+
+
+	def lambda_handler(event: Dict, context: LambdaContext):
+		app.resolve(event, context)
+	```
+
+#### Route prefix
+
+As routes are now split in their own files, you can optionally instruct `Router` to inject a prefix for all routes during registration.
+
+In the previous example, `users.py` routes had a `/users` prefix. We could remove `/users` from all route definitions, and then set `include_router(users.router, prefix="/users")` in the `app.py`.
+
+=== "app.py"
+
+	```python hl_lines="9"
+	from typing import Dict
+
+	from aws_lambda_powertools.event_handler import ApiGatewayResolver
+	from aws_lambda_powertools.utilities.typing import LambdaContext
+
+	import users
+
+	app = ApiGatewayResolver()
+	app.include_router(users.router, prefix="/users") # prefix '/users' to any route in `users.router`
+
+	def lambda_handler(event: Dict, context: LambdaContext):
+		app.resolve(event, context)
+	```
+
+=== "users.py"
+
+    ```python hl_lines="11 15"
+	from typing import Dict
+
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.event_handler.api_gateway import Router
+
+    logger = Logger(child=True)
+    router = Router()
+
+    USERS = {"user1": "details_here", "user2": "details_here", "user3": "details_here"}
+
+    @router.get("/")  # /users, when we set the prefix in app.py
+    def get_users() -> Dict:
+		...
+
+    @router.get("/<username>")
+    def get_user(username: str) -> Dict:
+		...
+
+	# many other related /users routing
+    ```
+
+#### Sample larger layout
+
+Below is an example project layout where we have Users routes similar to the previous example, and health check route - We use ALB to demonstrate the UX remains the same.
+
+Note that this layout optimizes for code sharing and for those familiar with Python modules. This means multiple functions will share the same `CodeUri` and package, though they are only built once.
+
+!!! tip "External dependencies can be [built as a Lambda Layer](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/building-layers.html){target="_blank"} and set as `dev` dependencies for the project, though outside of scope for this documentation."
 
 === "Project layout"
 
-    ```text
+    ```python hl_lines="10-13"
     .
-    ├── Pipfile
+    ├── Pipfile					  # project dev dependencies
     ├── Pipfile.lock
     ├── src
     │   ├── __init__.py
-    │   ├── requirements.txt      # pipenv lock -r > src/requirements.txt
+    │   ├── requirements.txt      # dummy for `sam build`, as external deps are Lambda Layers
     │   └── app
     │       ├── __init__.py       # this file makes "app" a "Python package"
     │       ├── main.py           # Main lambda handler (app.py, index.py, handler.py)
@@ -1004,6 +1106,10 @@ imports (ie: `from .routers import health`).
         assert ret["statusCode"] == 200
         assert ret["body"] == expected
     ```
+
+#### Trade-offs
+
+!!! todo "TODO"
 
 ## Testing your code
 
