@@ -23,40 +23,55 @@ This project separates core utilities that will be available in other runtimes v
 
 Powertools is available in the following formats:
 
-??? info "Lambda Layer is a .zip file archive with Lambda Powertools pre-packaged in every AWS region. See what's inside!"
-	Change {region} to your AWS region, e.g. `eu-west-1`
-
-	**`aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:3 --region {region}`**
-
 * **Lambda Layer**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:3**](#){: .copyMe} :clipboard:
 * **PyPi**: **`pip install aws-lambda-powertools`**
 
 ### Lambda Layer
 
-A Lambda Layer is a zip file containing pre-packaged dependencies that is added to your Lambda function's configuration. Avoiding the need to bundle those dependences and share them between many functions. Note that Lambda Layers may only be used with functions deployed as a zip archive.
+[Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. Layers promote code sharing and separation of responsibilities so that you can iterate faster on writing business logic.
 
-Include the Lambda Powertools layer in your function following the [AWS Lambda Console](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html#invocation-layers-using){target="_blank"} instructions or your preferred deployment framework.
+You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html#invocation-layers-using){target="_blank"}, or your preferred deployment framework.
 
-!!! note "The public layers do not contain the `pydantic` library that is required for the `parser` utility; See [SAR](#sar) option instead."
+??? note "Expand to copy any regional Lambda Layer ARN"
+
+    | Region | Layer ARN
+    |--------------------------- | ---------------------------
+    | `us-east-1` | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `us-east-2` | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `us-west-1` | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `us-west-2` | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `ap-south-1` | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `eu-central-1` | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `eu-west-1` | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `eu-west-2` | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `eu-west-3` | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `eu-north-1` | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `ca-central-1` | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+    | `sa-east-1` | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
 
 === "SAM"
 
     ```yaml hl_lines="5"
-    MyLambdaFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-        Layers:
-            - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:3
+	MyLambdaFunction:
+	  Type: AWS::Serverless::Function
+	  Properties:
+		Layers:
+		  - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:3
     ```
 
 === "Serverless framework"
 
     ```yaml hl_lines="5"
-    functions:
-        main:
-        handler: lambda_function.lambda_handler
-        layers:
-            - arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPython:3
+	functions:
+		hello:
+		  handler: lambda_function.lambda_handler
+		  layers:
+			- arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPython:3
     ```
 
 === "CDK"
@@ -152,27 +167,17 @@ Include the Lambda Powertools layer in your function following the [AWS Lambda C
     ? Do you want to edit the local lambda function now? No
     ```
 
-??? note "Expand to copy any regional Lambda Layer ARN"
+=== "Get the Layer .zip contents"
+	Change {region} to your AWS region, e.g. `eu-west-1`
 
-    | Region | Layer ARN
-    |--------------------------- | ---------------------------
-    | `us-east-1` | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `us-east-2` | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `us-west-1` | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `us-west-2` | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `ap-south-1` | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `eu-central-1` | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `eu-west-1` | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `eu-west-2` | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `eu-west-3` | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `eu-north-1` | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `ca-central-1` | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
-    | `sa-east-1` | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:3](#){: .copyMe} :clipboard:
+	**`aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:3 --region {region}`**
+
+!!! warning "Limitations"
+
+	Container Image deployment (OCI) or inline Lambda functions do not support Lambda Layers.
+
+	Lambda Powertools Lambda Layer do not include `pydantic` library - required dependency for the `parser` utility. See [SAR](#sar) option instead.
+
 
 #### SAR
 
