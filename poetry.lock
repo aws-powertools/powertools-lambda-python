@@ -541,7 +541,7 @@ test = ["coverage", "flake8 (>=3.0)"]
 
 [[package]]
 name = "mkdocs"
-version = "1.2.2"
+version = "1.2.3"
 description = "Project documentation with Markdown."
 category = "dev"
 optional = false
@@ -1333,8 +1333,8 @@ mike = [
     {file = "mike-0.6.0.tar.gz", hash = "sha256:6d6239de2a60d733da2f34617e9b9a14c4b5437423b47e524f14dc96d6ce5f2f"},
 ]
 mkdocs = [
-    {file = "mkdocs-1.2.2-py3-none-any.whl", hash = "sha256:d019ff8e17ec746afeb54eb9eb4112b5e959597aebc971da46a5c9486137f0ff"},
-    {file = "mkdocs-1.2.2.tar.gz", hash = "sha256:a334f5bd98ec960638511366eb8c5abc9c99b9083a0ed2401d8791b112d6b078"},
+    {file = "mkdocs-1.2.3-py3-none-any.whl", hash = "sha256:a1fa8c2d0c1305d7fc2b9d9f607c71778572a8b110fb26642aa00296c9e6d072"},
+    {file = "mkdocs-1.2.3.tar.gz", hash = "sha256:89f5a094764381cda656af4298727c9f53dc3e602983087e1fe96ea1df24f4c1"},
 ]
 mkdocs-git-revision-date-plugin = [
     {file = "mkdocs-git-revision-date-plugin-0.3.1.tar.gz", hash = "sha256:4abaef720763a64c952bed6829dcc180f67c97c60dd73914e90715e05d1cfb23"},
