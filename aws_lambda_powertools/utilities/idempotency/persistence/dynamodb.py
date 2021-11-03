@@ -22,7 +22,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         self,
         table_name: str,
         key_attr: str = "id",
-        key_attr_value: str = f"idempotency#{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, '')}",
+        static_pk_value: str = f"idempotency#{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, '')}",
         sort_key_attr: Optional[str] = None,
         expiry_attr: str = "expiration",
         status_attr: str = "status",
@@ -40,7 +40,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             Name of the table to use for storing execution records
         key_attr: str, optional
             DynamoDB attribute name for partition key, by default "id"
-        key_attr_value: str, optional
+        static_pk_value: str, optional
             DynamoDB attribute value for partition key, by default "idempotency#<function-name>".
             This will be used if the sort_key_attr is set.
         sort_key_attr: str, optional
@@ -79,7 +79,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         self._table = None
         self.table_name = table_name
         self.key_attr = key_attr
-        self.key_attr_value = key_attr_value
+        self.static_pk_value = static_pk_value
         self.sort_key_attr = sort_key_attr
         self.expiry_attr = expiry_attr
         self.status_attr = status_attr
@@ -108,7 +108,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
     def _get_key(self, idempotency_key: str) -> dict:
         if self.sort_key_attr:
-            return {self.key_attr: self.key_attr_value, self.sort_key_attr: idempotency_key}
+            return {self.key_attr: self.static_pk_value, self.sort_key_attr: idempotency_key}
         return {self.key_attr: idempotency_key}
 
     def _item_to_data_record(self, item: Dict[str, Any]) -> DataRecord:

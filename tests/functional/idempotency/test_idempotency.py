@@ -783,11 +783,11 @@ def test_jmespath_with_powertools_json(
     # GIVEN an event_key_jmespath with powertools_json custom function
     persistence_store.configure(idempotency_config)
     sub_attr_value = "cognito_user"
-    key_attr_value = "some_key"
-    expected_value = [sub_attr_value, key_attr_value]
+    static_pk_value = "some_key"
+    expected_value = [sub_attr_value, static_pk_value]
     api_gateway_proxy_event = {
         "requestContext": {"authorizer": {"claims": {"sub": sub_attr_value}}},
-        "body": serialize({"id": key_attr_value}),
+        "body": serialize({"id": static_pk_value}),
     }
 
     # WHEN calling _get_hashed_idempotency_key
