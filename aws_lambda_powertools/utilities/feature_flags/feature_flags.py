@@ -97,7 +97,13 @@ class FeatureFlags:
         return True
 
     def _evaluate_rules(
-        self, *, feature_name: str, context: Dict[str, Any], feat_default: bool, rules: Dict[str, Any]
+        self,
+        *,
+        feature_name: str,
+        context: Dict[str, Any],
+        feat_default: Any,
+        rules: Dict[str, Any],
+        boolean_feature: bool,
     ) -> bool:
         """Evaluates whether context matches rules and conditions, otherwise return feature default"""
         for rule_name, rule in rules.items():
@@ -105,13 +111,15 @@ class FeatureFlags:
 
             # Context might contain PII data; do not log its value
             self.logger.debug(
-                f"Evaluating rule matching, rule={rule_name}, feature={feature_name}, default={feat_default}"
+                f"Evaluating rule matching, rule={rule_name}, feature={feature_name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # type: ignore # noqa: E501
             )
             if self._evaluate_conditions(rule_name=rule_name, feature_name=feature_name, rule=rule, context=context):
-                return bool(rule_match_value)
+                return bool(rule_match_value) if boolean_feature else rule_match_value
 
         # no rule matched, return default value of feature
-        self.logger.debug(f"no rule matched, returning feature default, default={feat_default}, name={feature_name}")
+        self.logger.debug(
+            f"no rule matched, returning feature default, default={str(feat_default)}, name={feature_name}, boolean_feature={boolean_feature}"  # type: ignore # noqa: E501
+        )
         return feat_default
 
     def get_configuration(self) -> Dict:
@@ -164,7 +172,7 @@ class FeatureFlags:
 
         return config
 
-    def evaluate(self, *, name: str, context: Optional[Dict[str, Any]] = None, default: bool) -> bool:
+    def evaluate(self, *, name: str, context: Optional[Dict[str, Any]] = None, default: bool) -> Any:
         """Evaluate whether a feature flag should be enabled according to stored schema and input context
 
         **Logic when evaluating a feature flag**
@@ -181,14 +189,15 @@ class FeatureFlags:
             Attributes that should be evaluated against the stored schema.
 
             for example: `{"tenant_id": "X", "username": "Y", "region": "Z"}`
-        default: bool
+        default: Any
             default value if feature flag doesn't exist in the schema,
             or there has been an error when fetching the configuration from the store
+            Can be boolean (the default for feature flags) or any JSON values for advanced features
 
         Returns
         ------
         bool
-            whether feature should be enabled or not
+            whether feature should be enabled or not for boolean feature flag or any other JSON type
 
         Raises
         ------
@@ -211,12 +220,21 @@ class FeatureFlags:
 
         rules = feature.get(schema.RULES_KEY)
         feat_default = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
+        boolean_feature = feature.get(
+            schema.FEATURE_DEFAULT_VAL_TYPE_KEY, True
+        )  # backwards compatability ,assume feature flag
         if not rules:
-            self.logger.debug(f"no rules found, returning feature default, name={name}, default={feat_default}")
-            return bool(feat_default)
+            self.logger.debug(
+                f"no rules found, returning feature default, name={name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # type: ignore # noqa: E501
+            )
+            return bool(feat_default) if boolean_feature else feat_default
 
-        self.logger.debug(f"looking for rule match, name={name}, default={feat_default}")
-        return self._evaluate_rules(feature_name=name, context=context, feat_default=bool(feat_default), rules=rules)
+        self.logger.debug(
+            f"looking for rule match, name={name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # type: ignore # noqa: E501
+        )
+        return self._evaluate_rules(
+            feature_name=name, context=context, feat_default=feat_default, rules=rules, boolean_feature=boolean_feature
+        )
 
     def get_enabled_features(self, *, context: Optional[Dict[str, Any]] = None) -> List[str]:
         """Get all enabled feature flags while also taking into account context
@@ -259,11 +277,22 @@ class FeatureFlags:
         for name, feature in features.items():
             rules = feature.get(schema.RULES_KEY, {})
             feature_default_value = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
+            boolean_feature = feature.get(
+                schema.FEATURE_DEFAULT_VAL_TYPE_KEY, True
+            )  # backwards compatability ,assume feature flag
+            if not boolean_feature:
+                self.logger.debug(f"skipping feature because it is not a boolean feature flag, name={name}")
+                continue
+
             if feature_default_value and not rules:
                 self.logger.debug(f"feature is enabled by default and has no defined rules, name={name}")
                 features_enabled.append(name)
             elif self._evaluate_rules(
-                feature_name=name, context=context, feat_default=feature_default_value, rules=rules
+                feature_name=name,
+                context=context,
+                feat_default=feature_default_value,
+                rules=rules,
+                boolean_feature=boolean_feature,
             ):
                 self.logger.debug(f"feature's calculated value is True, name={name}")
                 features_enabled.append(name)

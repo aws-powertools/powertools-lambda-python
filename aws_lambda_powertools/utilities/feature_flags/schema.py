@@ -13,6 +13,7 @@ RULE_MATCH_VALUE = "when_match"
 CONDITION_KEY = "key"
 CONDITION_VALUE = "value"
 CONDITION_ACTION = "action"
+FEATURE_DEFAULT_VAL_TYPE_KEY = "boolean_type"
 
 
 class RuleAction(str, Enum):
@@ -138,28 +139,36 @@ class FeaturesValidator(BaseValidator):
     def validate(self):
         for name, feature in self.schema.items():
             self.logger.debug(f"Attempting to validate feature '{name}'")
-            self.validate_feature(name, feature)
-            rules = RulesValidator(feature=feature)
+            boolean_feature: bool = self.validate_feature(name, feature)
+            rules = RulesValidator(feature=feature, boolean_feature=boolean_feature)
             rules.validate()
 
+    # returns True in case the feature is a regular feature flag with a  boolean default value
     @staticmethod
-    def validate_feature(name, feature):
+    def validate_feature(name, feature) -> bool:
         if not feature or not isinstance(feature, dict):
             raise SchemaValidationError(f"Feature must be a non-empty dictionary, feature={name}")
 
-        default_value = feature.get(FEATURE_DEFAULT_VAL_KEY)
-        if default_value is None or not isinstance(default_value, bool):
+        default_value: Any = feature.get(FEATURE_DEFAULT_VAL_KEY)
+        boolean_feature: bool = feature.get(FEATURE_DEFAULT_VAL_TYPE_KEY, True)
+        # if feature is boolean_feature, default_value must be a boolean type.
+        # default_value must exist
+        if default_value is None or (not isinstance(default_value, bool) and boolean_feature):
             raise SchemaValidationError(f"feature 'default' boolean key must be present, feature={name}")
+        return boolean_feature
 
 
 class RulesValidator(BaseValidator):
     """Validates each rule and calls ConditionsValidator to validate each rule's conditions"""
 
-    def __init__(self, feature: Dict[str, Any], logger: Optional[Union[logging.Logger, Logger]] = None):
+    def __init__(
+        self, feature: Dict[str, Any], boolean_feature: bool, logger: Optional[Union[logging.Logger, Logger]] = None
+    ):
         self.feature = feature
         self.feature_name = next(iter(self.feature))
         self.rules: Optional[Dict] = self.feature.get(RULES_KEY)
         self.logger = logger or logging.getLogger(__name__)
+        self.boolean_feature = boolean_feature
 
     def validate(self):
         if not self.rules:
@@ -171,17 +180,19 @@ class RulesValidator(BaseValidator):
 
         for rule_name, rule in self.rules.items():
             self.logger.debug(f"Attempting to validate rule '{rule_name}'")
-            self.validate_rule(rule=rule, rule_name=rule_name, feature_name=self.feature_name)
+            self.validate_rule(
+                rule=rule, rule_name=rule_name, feature_name=self.feature_name, boolean_feature=self.boolean_feature
+            )
             conditions = ConditionsValidator(rule=rule, rule_name=rule_name)
             conditions.validate()
 
     @staticmethod
-    def validate_rule(rule, rule_name, feature_name):
+    def validate_rule(rule: Dict, rule_name: str, feature_name: str, boolean_feature: Optional[bool] = True):
         if not rule or not isinstance(rule, dict):
             raise SchemaValidationError(f"Feature rule must be a dictionary, feature={feature_name}")
 
         RulesValidator.validate_rule_name(rule_name=rule_name, feature_name=feature_name)
-        RulesValidator.validate_rule_default_value(rule=rule, rule_name=rule_name)
+        RulesValidator.validate_rule_default_value(rule=rule, rule_name=rule_name, boolean_feature=boolean_feature)
 
     @staticmethod
     def validate_rule_name(rule_name: str, feature_name: str):
@@ -189,9 +200,9 @@ class RulesValidator(BaseValidator):
             raise SchemaValidationError(f"Rule name key must have a non-empty string, feature={feature_name}")
 
     @staticmethod
-    def validate_rule_default_value(rule: Dict, rule_name: str):
+    def validate_rule_default_value(rule: Dict, rule_name: str, boolean_feature: bool):
         rule_default_value = rule.get(RULE_MATCH_VALUE)
-        if not isinstance(rule_default_value, bool):
+        if boolean_feature and not isinstance(rule_default_value, bool):
             raise SchemaValidationError(f"'rule_default_value' key must have be bool, rule={rule_name}")
 
 
