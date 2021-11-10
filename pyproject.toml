@@ -20,7 +20,7 @@ keywords = ["aws_lambda_powertools", "aws", "tracing", "logging", "lambda", "pow
 license = "MIT-0"
 
 [tool.poetry.dependencies]
-python = "^3.6.1"
+python = "^3.6.2"
 aws-xray-sdk = "^2.8.0"
 fastjsonschema = "^2.14.5"
 boto3 = "^1.18"
@@ -31,7 +31,7 @@ email-validator = {version = "*", optional = true }
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^6.0"}
 pytest = "^6.2.5"
-black = "^20.8b1"
+black = "^21.10.b0"
 flake8 = "^3.9.0"
 flake8-black = "^0.2.3"
 flake8-builtins = "^1.5.3"
