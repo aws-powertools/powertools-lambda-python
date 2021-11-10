@@ -289,16 +289,40 @@ The client was successful in receiving the result after the retry. Since the Lam
 
 ### Handling exceptions
 
-**The record in the persistence layer will be deleted** if your Lambda handler returns an exception. This means that new invocations will execute again despite having the same payload.
+If you are using the `idempotent` decorator on your Lambda handler, any unhandled exceptions that are raised during the code execution will cause **the record in the persistence layer to be deleted**.
+This means that new invocations will execute your code again despite having the same payload. If you don't want the record to be deleted, you need to catch exceptions within the idempotent function and return a successful response.
 
-If you don't want the record to be deleted, you need to catch exceptions within the handler and return a successful response.
 
 ![Idempotent sequence exception](../media/idempotent_sequence_exception.png)
 
-!!! warning
-    **We will raise `IdempotencyPersistenceLayerError`** if any of the calls to the persistence layer  fail unexpectedly.
+If you are using `idempotent_function`, any unhandled exceptions that are raised _inside_ the decorated function will cause the record in the persistence layer to be deleted, and allow the function to be executed again if retried.
+If an Exception is raised _outside_ the scope of the decorated function and after your function has been called, the persistent record will not be affected. In this case, idempotency will be maintained for your decorated function. Example:
 
-    As this happens outside the scope of your Lambda handler, you are not going to be able to catch it.
+=== "app.py"
+
+```python hl_lines="2-4 8-10"
+def lambda_handler(event, context):
+    # If an exception is raised here, no idempotent record will ever get created as the
+    # idempotent function does not get called
+    do_some_stuff()
+
+    result = call_external_service(data={"user": "user1", "id": 5})
+
+    # This exception will not cause the idempotent record to be deleted, since it
+    # happens after the decorated function has been successfully called
+    raise Exception
+
+
+@idempotent_function(data_keyword_argument="data", config=config, persistence_store=dynamodb)
+def call_external_service(data: dict, **kwargs):
+    result = requests.post('http://example.com', json={"user": data['user'], "transaction_id": data['id']}
+    return result.json()
+```
+
+!!! warning
+    **We will raise `IdempotencyPersistenceLayerError`** if any of the calls to the persistence layer fail unexpectedly.
+
+    As this happens outside the scope of your decorated function, you are not able to catch it if you're using the `idempotent` decorator on your Lambda handler.
 
 ### Persistence layers
 
