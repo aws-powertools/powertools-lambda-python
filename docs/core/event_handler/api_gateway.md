@@ -12,6 +12,7 @@ Event handler for Amazon API Gateway REST/HTTP APIs and Application Loader Balan
 * Integrates with [Data classes utilities](../../utilities/data_classes.md){target="_blank"} to easily access event and identity information
 * Built-in support for Decimals JSON encoding
 * Support for dynamic path expressions
+* Router to allow for splitting up the handler accross multiple files
 
 ## Getting started
 
@@ -75,12 +76,11 @@ This is the sample infrastructure for API Gateway we are using for the examples 
 
     Outputs:
         HelloWorldApigwURL:
-        Description: "API Gateway endpoint URL for Prod environment for Hello World Function"
-        Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello"
-
-    HelloWorldFunction:
-        Description: "Hello World Lambda Function ARN"
-        Value: !GetAtt HelloWorldFunction.Arn
+            Description: "API Gateway endpoint URL for Prod environment for Hello World Function"
+            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello"
+        HelloWorldFunction:
+            Description: "Hello World Lambda Function ARN"
+            Value: !GetAtt HelloWorldFunction.Arn
     ```
 
 ### API Gateway decorator
@@ -852,6 +852,130 @@ You can instruct API Gateway handler to use a custom serializer to best suit you
             "variations": {"light", "dark"},
         }
     ```
+
+### Split routes with Router
+
+As you grow the number of routes a given Lambda function should handle, it is natural to split routes into separate files to ease maintenance - That's where the `Router` feature is useful.
+
+Let's assume you have `app.py` as your Lambda function entrypoint and routes in `users.py`, this is how you'd use the `Router` feature.
+
+=== "users.py"
+
+	We import **Router** instead of **ApiGatewayResolver**; syntax wise is exactly the same.
+
+    ```python hl_lines="4 8 12 15 21"
+    import itertools
+	from typing import Dict
+
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.event_handler.api_gateway import Router
+
+    logger = Logger(child=True)
+    router = Router()
+    USERS = {"user1": "details_here", "user2": "details_here", "user3": "details_here"}
+
+
+    @router.get("/users")
+    def get_users() -> Dict:
+		# /users?limit=1
+		pagination_limit = router.current_event.get_query_string_value(name="limit", default_value=10)
+
+		logger.info(f"Fetching the first {pagination_limit} users...")
+		ret = dict(itertools.islice(USERS.items(), int(pagination_limit)))
+		return {"items": [ret]}
+
+    @router.get("/users/<username>")
+    def get_user(username: str) -> Dict:
+        logger.info(f"Fetching username {username}")
+        return {"details": USERS.get(username, {})}
+
+	# many other related /users routing
+    ```
+
+=== "app.py"
+
+	We use `include_router` method and include all user routers registered in the `router` global object.
+
+	```python hl_lines="6 8-9"
+	from typing import Dict
+
+	from aws_lambda_powertools.event_handler import ApiGatewayResolver
+	from aws_lambda_powertools.utilities.typing import LambdaContext
+
+	import users
+
+	app = ApiGatewayResolver()
+	app.include_router(users.router)
+
+
+	def lambda_handler(event: Dict, context: LambdaContext):
+		return app.resolve(event, context)
+	```
+
+#### Route prefix
+
+In the previous example, `users.py` routes had a `/users` prefix. This might grow over time and become repetitive.
+
+When necessary, you can set a prefix when including a router object. This means you could remove `/users` prefix in `users.py` altogether.
+
+=== "app.py"
+
+	```python hl_lines="9"
+	from typing import Dict
+
+	from aws_lambda_powertools.event_handler import ApiGatewayResolver
+	from aws_lambda_powertools.utilities.typing import LambdaContext
+
+	import users
+
+	app = ApiGatewayResolver()
+	app.include_router(users.router, prefix="/users") # prefix '/users' to any route in `users.router`
+
+
+	def lambda_handler(event: Dict, context: LambdaContext):
+		return app.resolve(event, context)
+	```
+
+=== "users.py"
+
+    ```python hl_lines="11 15"
+	from typing import Dict
+
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.event_handler.api_gateway import Router
+
+    logger = Logger(child=True)
+    router = Router()
+    USERS = {"user1": "details", "user2": "details", "user3": "details"}
+
+
+    @router.get("/")  # /users, when we set the prefix in app.py
+    def get_users() -> Dict:
+		...
+
+    @router.get("/<username>")
+    def get_user(username: str) -> Dict:
+		...
+
+	# many other related /users routing
+    ```
+
+
+#### Trade-offs
+
+!!! tip "TL;DR. Balance your latency requirements, cognitive overload, least privilege, and operational overhead to decide between one, few, or many single purpose functions."
+
+Route splitting feature helps accommodate customers familiar with popular frameworks and practices found in the Python community.
+
+It can help better organize your code and reason
+
+This can also quickly lead to discussions whether it facilitates a monolithic vs single-purpose function. To this end, these are common trade-offs you'll encounter as you grow your Serverless service, specifically synchronous functions.
+
+**Least privilege**. Start with a monolithic function, then split them as their data access & boundaries become clearer. Treat Lambda functions as separate logical resources to more easily scope permissions.
+
+**Package size**. Consider Lambda Layers for third-party dependencies and service-level shared code. Treat third-party dependencies as dev dependencies, and Lambda Layers as a mechanism to speed up build and deployments.
+
+**Cold start**. High load can diminish the benefit of monolithic functions depending on your latency requirements. Always load test to pragmatically balance between your customer experience and development cognitive load.
 
 ## Testing your code
 
