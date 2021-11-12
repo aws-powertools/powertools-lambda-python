@@ -289,16 +289,40 @@ The client was successful in receiving the result after the retry. Since the Lam
 
 ### Handling exceptions
 
-**The record in the persistence layer will be deleted** if your Lambda handler returns an exception. This means that new invocations will execute again despite having the same payload.
+If you are using the `idempotent` decorator on your Lambda handler, any unhandled exceptions that are raised during the code execution will cause **the record in the persistence layer to be deleted**.
+This means that new invocations will execute your code again despite having the same payload. If you don't want the record to be deleted, you need to catch exceptions within the idempotent function and return a successful response.
 
-If you don't want the record to be deleted, you need to catch exceptions within the handler and return a successful response.
 
 ![Idempotent sequence exception](../media/idempotent_sequence_exception.png)
 
-!!! warning
-    **We will raise `IdempotencyPersistenceLayerError`** if any of the calls to the persistence layer  fail unexpectedly.
+If you are using `idempotent_function`, any unhandled exceptions that are raised _inside_ the decorated function will cause the record in the persistence layer to be deleted, and allow the function to be executed again if retried.
+If an Exception is raised _outside_ the scope of the decorated function and after your function has been called, the persistent record will not be affected. In this case, idempotency will be maintained for your decorated function. Example:
 
-    As this happens outside the scope of your Lambda handler, you are not going to be able to catch it.
+=== "app.py"
+
+```python hl_lines="2-4 8-10"
+def lambda_handler(event, context):
+    # If an exception is raised here, no idempotent record will ever get created as the
+    # idempotent function does not get called
+    do_some_stuff()
+
+    result = call_external_service(data={"user": "user1", "id": 5})
+
+    # This exception will not cause the idempotent record to be deleted, since it
+    # happens after the decorated function has been successfully called
+    raise Exception
+
+
+@idempotent_function(data_keyword_argument="data", config=config, persistence_store=dynamodb)
+def call_external_service(data: dict, **kwargs):
+    result = requests.post('http://example.com', json={"user": data['user'], "transaction_id": data['id']}
+    return result.json()
+```
+
+!!! warning
+    **We will raise `IdempotencyPersistenceLayerError`** if any of the calls to the persistence layer fail unexpectedly.
+
+    As this happens outside the scope of your decorated function, you are not able to catch it if you're using the `idempotent` decorator on your Lambda handler.
 
 ### Persistence layers
 
@@ -321,16 +345,18 @@ This persistence layer is built-in, and you can either use an existing DynamoDB 
     )
     ```
 
-These are knobs you can use when using DynamoDB as a persistence layer:
+When using DynamoDB as a persistence layer, you can alter the attribute names by passing these parameters when initializing the persistence layer:
 
 Parameter | Required | Default | Description
 ------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
 **table_name** | :heavy_check_mark: | | Table name to store state
-**key_attr** |  | `id` | Primary key of the table. Hashed representation of the payload
+**key_attr** |  | `id` | Partition key of the table. Hashed representation of the payload (unless **sort_key_attr** is specified)
 **expiry_attr** |  | `expiration` | Unix timestamp of when record expires
 **status_attr** |  | `status` | Stores status of the lambda execution during and after invocation
 **data_attr** |  | `data`  | Stores results of successfully executed Lambda handlers
 **validation_key_attr** |  | `validation` | Hashed representation of the parts of the event used for validation
+**sort_key_attr** | | | Sort key of the table (if table is configured with a sort key).
+**static_pk_value** | | `idempotency#{LAMBDA_FUNCTION_NAME}` | Static value to use as the partition key. Only used when **sort_key_attr** is set.
 
 ## Advanced
 
@@ -589,6 +615,36 @@ The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a
     def handler(event, context):
        ...
     ```
+
+### Using a DynamoDB table with a composite primary key
+
+If you wish to use this utility with a DynamoDB table that is configured with a composite primary key (uses both partition key and sort key), you
+should set the `sort_key_attr` parameter when initializing your persistence layer. When this parameter is set, the partition key value for all idempotency entries
+will be the same, with the idempotency key being saved as the sort key instead of the partition key. You can optionally set a static value for the partition
+key using the `static_pk_value` parameter. If not specified, it will default to `idempotency#{LAMBDA_FUNCTION_NAME}`.
+
+=== "MyLambdaFunction"
+
+    ```python hl_lines="5"
+    from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent
+
+    persistence_layer = DynamoDBPersistenceLayer(
+        table_name="IdempotencyTable",
+        sort_key_attr='sort_key')
+
+
+    @idempotent(persistence_store=persistence_layer)
+    def handler(event, context):
+        return {"message": "success": "id": event['body']['id]}
+    ```
+
+The example function above would cause data to be stored in DynamoDB like this:
+
+| id                           | sort_key                         | expiration | status      | data                                |
+|------------------------------|----------------------------------|------------|-------------|-------------------------------------|
+| idempotency#MyLambdaFunction | 1e956ef7da78d0cb890be999aecc0c9e | 1636549553 | COMPLETED   | {"id": 12391, "message": "success"} |
+| idempotency#MyLambdaFunction | 2b2cdb5f86361e97b4383087c1ffdf27 | 1636549571 | COMPLETED   | {"id": 527212, "message": "success"}|
+| idempotency#MyLambdaFunction | f091d2527ad1c78f05d54cc3f363be80 | 1636549585 | IN_PROGRESS |                                     |
 
 ### Bring your own persistent store
 
