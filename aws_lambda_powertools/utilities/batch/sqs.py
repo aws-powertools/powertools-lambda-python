@@ -126,8 +126,13 @@ class PartialSQSProcessor(BasePartialProcessor):
         entries_to_remove = self._get_entries_to_clean()
 
         delete_message_response = None
-        if entries_to_remove:
-            delete_message_response = self.client.delete_message_batch(QueueUrl=queue_url, Entries=entries_to_remove)
+        while entries_to_remove:
+            # Batch delete up to 10 messages at a time (SQS limit)
+            delete_message_response = self.client.delete_message_batch(
+                QueueUrl=queue_url,
+                Entries=entries_to_remove[:10],
+            )
+            entries_to_remove = entries_to_remove[10:]
 
         if self.suppress_exception:
             logger.debug(f"{len(self.fail_messages)} records failed processing, but exceptions are suppressed")
