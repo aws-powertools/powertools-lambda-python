@@ -872,16 +872,16 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
 
     logger = Logger(child=True)
     router = Router()
-
     USERS = {"user1": "details_here", "user2": "details_here", "user3": "details_here"}
+
 
     @router.get("/users")
     def get_users() -> Dict:
-		# get query string ?limit=10
+		# /users?limit=1
 		pagination_limit = router.current_event.get_query_string_value(name="limit", default_value=10)
 
 		logger.info(f"Fetching the first {pagination_limit} users...")
-		ret = dict(itertools.islice(USERS.items(), pagination_limit))
+		ret = dict(itertools.islice(USERS.items(), int(pagination_limit)))
 		return {"items": [ret]}
 
     @router.get("/users/<username>")
@@ -909,14 +909,14 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
 
 
 	def lambda_handler(event: Dict, context: LambdaContext):
-		app.resolve(event, context)
+		return app.resolve(event, context)
 	```
 
 #### Route prefix
 
-As routes are now split in their own files, you can optionally instruct `Router` to inject a prefix for all routes during registration.
+In the previous example, `users.py` routes had a `/users` prefix. This might grow over time and become repetitive.
 
-In the previous example, `users.py` routes had a `/users` prefix. We could remove `/users` from all route definitions, and then set `include_router(users.router, prefix="/users")` in the `app.py`.
+When necessary, you can set a prefix when including a router object. This means you could remove `/users` prefix in `users.py` altogether.
 
 === "app.py"
 
@@ -931,8 +931,9 @@ In the previous example, `users.py` routes had a `/users` prefix. We could remov
 	app = ApiGatewayResolver()
 	app.include_router(users.router, prefix="/users") # prefix '/users' to any route in `users.router`
 
+
 	def lambda_handler(event: Dict, context: LambdaContext):
-		app.resolve(event, context)
+		return app.resolve(event, context)
 	```
 
 === "users.py"
@@ -945,8 +946,8 @@ In the previous example, `users.py` routes had a `/users` prefix. We could remov
 
     logger = Logger(child=True)
     router = Router()
+    USERS = {"user1": "details", "user2": "details", "user3": "details"}
 
-    USERS = {"user1": "details_here", "user2": "details_here", "user3": "details_here"}
 
     @router.get("/")  # /users, when we set the prefix in app.py
     def get_users() -> Dict:
@@ -961,7 +962,9 @@ In the previous example, `users.py` routes had a `/users` prefix. We could remov
 
 #### Sample larger layout
 
-Below is an example project layout where we have Users routes similar to the previous example, and health check route - We use ALB to demonstrate the UX remains the same.
+!!! info "We use ALB to demonstrate that the UX remains the same"
+
+Below is an example project layout where we have Users routes similar to the previous example, and health check route.
 
 Note that this layout optimizes for code sharing and for those familiar with Python modules. This means multiple functions will share the same `CodeUri` and package, though they are only built once.
 
@@ -1026,7 +1029,7 @@ Note that this layout optimizes for code sharing and for those familiar with Pyt
                     HealthPath:
                         Type: Api
                         Properties:
-                            Path: /health/status
+                            Path: /status
                             Method: GET
                     UserPath:
                         Type: Api
@@ -1055,22 +1058,22 @@ Note that this layout optimizes for code sharing and for those familiar with Pyt
     from aws_lambda_powertools import Logger, Tracer
     from aws_lambda_powertools.event_handler import ApiGatewayResolver
     from aws_lambda_powertools.event_handler.api_gateway import ProxyEventType
-    from aws_lambda_powertools.logging.correlation_paths import API_GATEWAY_HTTP
+    from aws_lambda_powertools.logging.correlation_paths import ALB
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
-    from .routers import health, users
+    from routers import health, users
 
     tracer = Tracer()
     logger = Logger()
     app = ApiGatewayResolver(proxy_type=ProxyEventType.ALBEvent)
-    app.include_router(health.router, prefix="/health")
+    app.include_router(health.router)
     app.include_router(users.router)
 
 
-    @logger.inject_lambda_context(correlation_id_path=API_GATEWAY_HTTP)
+    @logger.inject_lambda_context(correlation_id_path=ALB)
     @tracer.capture_lambda_handler
     def lambda_handler(event: Dict, context: LambdaContext):
-        app.resolve(event, context)
+        return app.resolve(event, context)
     ```
 
 === "src/app/routers/health.py"
