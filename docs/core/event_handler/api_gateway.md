@@ -963,7 +963,19 @@ When necessary, you can set a prefix when including a router object. This means 
 
 #### Trade-offs
 
-!!! todo "TODO"
+!!! tip "TL;DR. Balance your latency requirements, cognitive overload, least privilege, and operational overhead to decide between one, few, or many single purpose functions."
+
+Route splitting feature helps accommodate customers familiar with popular frameworks and practices found in the Python community.
+
+It can help better organize your code and reason
+
+This can also quickly lead to discussions whether it facilitates a monolithic vs single-purpose function. To this end, these are common trade-offs you'll encounter as you grow your Serverless service, specifically synchronous functions.
+
+**Least privilege**. Start with a monolithic function, then split them as their data access & boundaries become clearer. Treat Lambda functions as separate logical resources to more easily scope permissions.
+
+**Package size**. Consider Lambda Layers for third-party dependencies and service-level shared code. Treat third-party dependencies as dev dependencies, and Lambda Layers as a mechanism to speed up build and deployments.
+
+**Cold start**. High load can diminish the benefit of monolithic functions depending on your latency requirements. Always load test to pragmatically balance between your customer experience and development cognitive load.
 
 ## Testing your code
 
