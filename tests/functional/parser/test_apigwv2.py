@@ -1,4 +1,4 @@
-from aws_lambda_powertools.utilities.parser import envelopes, event_parser
+from aws_lambda_powertools.utilities.parser import envelopes, event_parser, parse
 from aws_lambda_powertools.utilities.parser.models import (
     APIGatewayProxyEventV2Model,
     RequestContextV2,
@@ -90,3 +90,16 @@ def test_api_gateway_proxy_v2_event_iam_authorizer():
     assert iam.principalOrgId == "AwsOrgId"
     assert iam.userArn == "arn:aws:iam::1234567890:user/Admin"
     assert iam.userId == "AROA2ZJZYVRE7Y3TUXHH6"
+
+
+def test_apigw_event_empty_body():
+    event = load_event("apiGatewayProxyV2Event.json")
+    event.pop("body")  # API GW v2 removes certain keys when no data is passed
+    parse(event=event, model=APIGatewayProxyEventV2Model)
+
+
+def test_apigw_event_empty_query_strings():
+    event = load_event("apiGatewayProxyV2Event.json")
+    event["rawQueryString"] = ""
+    event.pop("queryStringParameters")  # API GW v2 removes certain keys when no data is passed
+    parse(event=event, model=APIGatewayProxyEventV2Model)
