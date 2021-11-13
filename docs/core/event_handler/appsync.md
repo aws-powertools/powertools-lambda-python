@@ -711,6 +711,64 @@ You can subclass `AppSyncResolverEvent` to bring your own set of methods to hand
     }
     ```
 
+### Split operations with Router
+
+As you grow the number of related GraphQL operations a given Lambda function should handle, it is natural to split them into separate files to ease maintenance - That's where the `Router` feature is useful.
+
+Let's assume you have `app.py` as your Lambda function entrypoint and routes in `users.py`, this is how you'd use the `Router` feature.
+
+=== "resolvers/location.py"
+
+    We import **Router** instead of **AppSyncResolver**; syntax wise is exactly the same.
+
+	```python hl_lines="4 7 10 15"
+    from typing import Any, Dict, List
+
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.event_handler.appsync import Router
+
+    logger = Logger(child=True)
+    router = Router()
+
+
+    @router.resolver(type_name="Query", field_name="listLocations")
+    def list_locations(merchant_id: str) -> List[Dict[str, Any]]:
+        return [{"name": "Location name", "merchant_id": merchant_id}]
+
+
+    @router.resolver(type_name="Location", field_name="status")
+    def resolve_status(merchant_id: str) -> str:
+        logger.debug(f"Resolve status for merchant_id: {merchant_id}")
+        return "FOO"
+	```
+
+=== "app.py"
+
+	We use `include_router` method and include all location operations registered in the `router` global object.
+
+    ```python hl_lines="8 13"
+    from typing import Dict
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.event_handler import AppSyncResolver
+    from aws_lambda_powertools.logging.correlation_paths import APPSYNC_RESOLVER
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+    from resolvers import location
+
+    tracer = Tracer()
+    logger = Logger()
+    app = AppSyncResolver()
+    app.include_router(location.router)
+
+
+    @tracer.capture_lambda_handler
+    @logger.inject_lambda_context(correlation_id_path=APPSYNC_RESOLVER)
+    def lambda_handler(event: Dict, context: LambdaContext):
+        app.resolve(event, context)
+    ```
+
+
 ## Testing your code
 
 You can test your resolvers by passing a mocked or actual AppSync Lambda event that you're expecting.
