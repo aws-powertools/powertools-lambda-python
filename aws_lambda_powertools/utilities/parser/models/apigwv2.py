@@ -63,9 +63,9 @@ class APIGatewayProxyEventV2Model(BaseModel):
     rawQueryString: str
     cookies: Optional[List[str]]
     headers: Dict[str, str]
-    queryStringParameters: Dict[str, str]
+    queryStringParameters: Optional[Dict[str, str]]
     pathParameters: Optional[Dict[str, str]]
     stageVariables: Optional[Dict[str, str]]
     requestContext: RequestContextV2
-    body: str
+    body: Optional[str]
     isBase64Encoded: bool
