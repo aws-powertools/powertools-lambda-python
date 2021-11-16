@@ -1125,7 +1125,41 @@ This sample project contains an Users function with two distinct set of routes, 
     PYTHONPATH="users:${PYTHONPATH}"
     ```
 
-#### Trade-offs
+### Considerations
+
+This utility is optimized for fast startup, minimal feature set, and to quickly on-board customers familiar with frameworks like Flask — it's not meant to be a fully fledged framework.
+
+Event Handler naturally leads to a single Lambda function handling multiple routes for a given service, which can be eventually broken into multiple functions.
+
+Both single (monolithic) and multiple functions (micro) offer different set of trade-offs worth knowing.
+
+!!! tip "Start with a monolithic function and eventually break into multiple functions, if necessary."
+
+#### Monolithic function
+
+![Monolithic function sample](./../../media/monolithic-function.png)
+
+A monolithic function means that your final code artifact will be deployed to a single function. This is generally the best approach to start.
+
+**Benefits**
+
+* **Code reuse**. It's easier to reason about your project, modularize it and reuse code as it grows. Eventually, it can be turned into a standalone library.
+* **No custom tooling**. Monolithic functions are treated just like normal Python packages; no upfront investment in tooling.
+* **Faster deployment and debugging**. Whether you use all-at-once, linear, or canary deployments, a monolithic function is a single deployable unit. IDEs like PyCharm and VSCode have tooling to quickly profile, visualize, and step through debug any Python package.
+
+**Downsides**
+
+* **Cold starts**. Frequent deployments and/or high load can diminish the benefit of monolithic functions depending on your latency requirements, due to [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html). Always load test to pragmatically balance between your customer experience and development cognitive load.
+* **Granular security permissions**. The micro function approach enables you to use fine-grained permissions, separate external dependencies & code signing at the function level. Regardless, least privilege can be applied to either approaches.
+* **Higher risk per deployment**. A bad deployment can cause the entire service to stop working while a micro function will limit its blast radius. You can minimize risks by ensuring modules are tested in isolation, use multiple environments in your CI/CD pipeline, and optionally use linear/canary deployments to trade lead time for safety.
+
+#### Micro function
+
+![Micro function sample](./../../media/micro-function.png)
+
+
+!!! TODO "rewrite this section"
+
 
 !!! tip "TL;DR. Balance your latency requirements, cognitive overload, least privilege, and operational overhead to decide between one, few, or many single purpose functions."
 
@@ -1139,7 +1173,6 @@ This can also quickly lead to discussions whether it facilitates a monolithic vs
 
 **Package size**. Consider Lambda Layers for third-party dependencies and service-level shared code. Treat third-party dependencies as dev dependencies, and Lambda Layers as a mechanism to speed up build and deployments.
 
-**Cold start**. High load can diminish the benefit of monolithic functions depending on your latency requirements. Always load test to pragmatically balance between your customer experience and development cognitive load.
 
 ## Testing your code
 
