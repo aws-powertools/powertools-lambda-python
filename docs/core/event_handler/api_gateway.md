@@ -964,9 +964,7 @@ When necessary, you can set a prefix when including a router object. This means 
 
 !!! info "We use ALB to demonstrate that the UX remains the same"
 
-This sample project contains an Users function with two distinct set of routes, `/users` and `/health`, and a single function to represent a fictitious `users` service.
-
-The layout optimizes for code sharing, no custom build tooling, and it uses [Lambda Layers](../../index.md#lambda-layer) to install Lambda Powertools.
+This sample project contains an Users function with two distinct set of routes, `/users` and `/health`. The layout optimizes for code sharing, no custom build tooling, and it uses [Lambda Layers](../../index.md#lambda-layer) to install Lambda Powertools.
 
 === "Project layout"
 
