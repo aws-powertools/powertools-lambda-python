@@ -960,6 +960,172 @@ When necessary, you can set a prefix when including a router object. This means 
 	# many other related /users routing
     ```
 
+#### Sample layout
+
+!!! info "We use ALB to demonstrate that the UX remains the same"
+
+This sample project contains an Users function with two distinct set of routes, `/users` and `/health`, and a single function to represent a fictitious `users` service.
+
+The layout optimizes for code sharing, no custom build tooling, and it uses [Lambda Layers](../../index.md#lambda-layer) to install Lambda Powertools.
+
+=== "Project layout"
+
+
+    ```python hl_lines="6 8 10-13"
+    .
+    ├── Pipfile                   # project app & dev dependencies; poetry, pipenv, etc.
+    ├── Pipfile.lock
+    ├── mypy.ini                  # namespace_packages = True
+    ├── .env                      # VSCode only. PYTHONPATH="users:${PYTHONPATH}"
+    ├── users
+    │   ├── requirements.txt      # sam build detect it automatically due to CodeUri: users, e.g. pipenv lock -r > users/requirements.txt
+    │   ├── lambda_function.py    # this will be our users Lambda fn; it could be split in folders if we want separate fns same code base
+    │   ├── constants.py
+    │   └── routers               # routers module
+    │       ├── __init__.py
+    │       ├── users.py          # /users routes, e.g. from routers import users; users.router
+    │       ├── health.py         # /health routes, e.g. from routers import health; health.router
+    ├── template.yaml             # SAM template.yml, CodeUri: users, Handler: users.main.lambda_handler
+    └── tests
+        ├── __init__.py
+        ├── unit
+        │   ├── __init__.py
+        │   └── test_users.py    # unit tests for the users router
+        │   └── test_health.py   # unit tests for the health router
+        └── functional
+            ├── __init__.py
+            ├── conftest.py      # pytest fixtures for the functional tests
+            └── test_lambda_function.py    # functional tests for the main lambda handler
+    ```
+
+=== "template.yml"
+
+    ```yaml  hl_lines="20-21"
+    AWSTemplateFormatVersion: '2010-09-09'
+    Transform: AWS::Serverless-2016-10-31
+    Description: Example service with multiple routes
+    Globals:
+        Function:
+            Timeout: 10
+            MemorySize: 512
+            Runtime: python3.9
+            Tracing: Active
+            Environment:
+                Variables:
+                    LOG_LEVEL: INFO
+                    POWERTOOLS_LOGGER_LOG_EVENT: true
+                    POWERTOOLS_METRICS_NAMESPACE: MyServerlessApplication
+                    POWERTOOLS_SERVICE_NAME: users
+    Resources:
+        UsersService:
+            Type: AWS::Serverless::Function
+            Properties:
+                Handler: lambda_function.lambda_handler
+                CodeUri: users
+                Layers:
+                    # Latest version: https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer
+                    - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:3
+                Events:
+                    ByUser:
+                        Type: Api
+                        Properties:
+                            Path: /users/{name}
+                            Method: GET
+                    AllUsers:
+                        Type: Api
+                        Properties:
+                            Path: /users
+                            Method: GET
+                    HealthCheck:
+                        Type: Api
+                        Properties:
+                            Path: /status
+                            Method: GET
+    Outputs:
+        UsersApiEndpoint:
+            Description: "API Gateway endpoint URL for Prod environment for Users Function"
+            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+        AllUsersURL:
+            Description: "URL to fetch all registered users"
+            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users"
+        ByUserURL:
+            Description: "URL to retrieve details by user"
+            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users/test"
+        UsersServiceFunctionArn:
+            Description: "Users Lambda Function ARN"
+            Value: !GetAtt UsersService.Arn
+    ```
+
+=== "users/lambda_function.py"
+
+    ```python hl_lines="9 15-16"
+    from typing import Dict
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.event_handler import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler.api_gateway import ProxyEventType
+    from aws_lambda_powertools.logging.correlation_paths import APPLICATION_LOAD_BALANCER
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+    from routers import health, users
+
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.ALBEvent)
+
+    app.include_router(health.router)
+    app.include_router(users.router)
+
+
+    @logger.inject_lambda_context(correlation_id_path=APPLICATION_LOAD_BALANCER)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event: Dict, context: LambdaContext):
+        return app.resolve(event, context)
+    ```
+
+=== "users/routers/health.py"
+
+    ```python hl_lines="4 6-7 10"
+    from typing import Dict
+
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.event_handler.api_gateway import Router
+
+    router = Router()
+    logger = Logger(child=True)
+
+
+    @router.get("/status")
+    def health() -> Dict:
+        logger.debug("Health check called")
+        return {"status": "OK"}
+    ```
+
+=== "tests/functional/test_users.py"
+
+    ```python  hl_lines="3"
+    import json
+
+    from users import main  # follows namespace package from root
+
+
+    def test_lambda_handler(apigw_event, lambda_context):
+        ret = main.lambda_handler(apigw_event, lambda_context)
+        expected = json.dumps({"message": "hello universe"}, separators=(",", ":"))
+
+        assert ret["statusCode"] == 200
+        assert ret["body"] == expected
+    ```
+
+=== ".env"
+
+    > Note: It is not needed for PyCharm (select folder as source).
+
+    This is necessary for Visual Studio Code, so integrated tooling works without failing import.
+
+    ```bash
+    PYTHONPATH="users:${PYTHONPATH}"
+    ```
 
 #### Trade-offs
 
