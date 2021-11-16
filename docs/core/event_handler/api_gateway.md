@@ -1133,7 +1133,7 @@ Event Handler naturally leads to a single Lambda function handling multiple rout
 
 Both single (monolithic) and multiple functions (micro) offer different set of trade-offs worth knowing.
 
-!!! tip "TL;DR. Start with a monolithic function, break into multiple functions, and eventually micro independent functions if necessary."
+!!! tip "TL;DR. Start with a monolithic function, add additional functions with new handlers, and possibly break into micro functions if necessary."
 
 #### Monolithic function
 
@@ -1143,15 +1143,16 @@ A monolithic function means that your final code artifact will be deployed to a 
 
 **Benefits**
 
-* **Code reuse**. It's easier to reason about your project, modularize it and reuse code as it grows. Eventually, it can be turned into a standalone library.
+* **Code reuse**. It's easier to reason about your service, modularize it and reuse code as it grows. Eventually, it can be turned into a standalone library.
 * **No custom tooling**. Monolithic functions are treated just like normal Python packages; no upfront investment in tooling.
 * **Faster deployment and debugging**. Whether you use all-at-once, linear, or canary deployments, a monolithic function is a single deployable unit. IDEs like PyCharm and VSCode have tooling to quickly profile, visualize, and step through debug any Python package.
 
 **Downsides**
 
 * **Cold starts**. Frequent deployments and/or high load can diminish the benefit of monolithic functions depending on your latency requirements, due to [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"}. Always load test to pragmatically balance between your customer experience and development cognitive load.
-* **Granular security permissions**. The micro function approach enables you to use fine-grained permissions, separate external dependencies & code signing at the function level. Conversely, you could have multiple functions while duplicating the final code artifact in a monolithic approach. Regardless, least privilege can be applied to either approaches.
-* **Higher risk per deployment**. A bad deployment can cause the entire service to stop working while a micro function will limit its blast radius. You can minimize risks by ensuring modules are tested in isolation, use multiple environments in your CI/CD pipeline, and optionally use linear/canary deployments to trade lead time for safety.
+* **Granular security permissions**. The micro function approach enables you to use fine-grained permissions, separate external dependencies & code signing at the function level. Conversely, you could have multiple functions while duplicating the final code artifact in a monolithic approach.
+    - Regardless, least privilege can be applied to either approaches.
+* **Higher risk per deployment**. A misconfiguration or invalid import can cause disruption if not caught earlier in automated testing. Multiple functions can mitigate misconfigurations but they would still share the same code artifact. You can further minimize risks with multiple environments in your CI/CD pipeline.
 
 #### Micro function
 
@@ -1162,14 +1163,16 @@ A micro function means that your final code artifact will be different to each f
 **Benefits**
 
 * **Granular scaling**. A micro function can benefit from the [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"} to scale differently depending on each part of your application. Concurrency controls and provisioned concurrency can also be used at a granular level for capacity management.
-* **Discoverability**. Micro functions are easier do visualize when using distributed tracing. Their automated architectures can be self-explanatory if each function is named to the purpose it serves from a business context.
+* **Discoverability**. Micro functions are easier do visualize when using distributed tracing. Their high-level architectures can be self-explanatory, and complexity is highly visible — assuming each function is named to the business purpose it serves.
 * **Package size**. An independent function can be significant smaller (KB vs MB) depending on external dependencies it require to perform its purpose. Conversely, a monolithic approach can benefit from [Lambda Layers](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html){target="_blank"} to optimize builds for external dependencies.
 
 **Downsides**
 
 * **Upfront investment**. Python ecosystem doesn't use a bundler. This means you need a custom build tooling to ensure each function only has what it needs. External dependencies using C extensions must be built using [Amazon Linux runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html){target="_blank"} for Lambda runtime compatibility reasons.
-* **Harder to share code**. Shared code must be carefully evaluated to avoid unnecessary deployments when that changes. Equally, if shared code isn't a library, you need your building tool to coordinate copying them over to each code artifact prior to deployment. This leads to additional IDE, your preferred terminal and Python settings to ensure code is discoverable, testable, and that linters understand them.
-* **Slower safe deployments**. Safe deployments of multiple functions require coordination, by default AWS CodeDeploy deploys and verifies each function sequentially. This can increase lead time substantially (minutes to hours) depending on the number of functions and the deployment strategy you choose. You can mitigate it by enabling safe deployments in selected environments - pre-prod, prod - and carefully analyzing the risk profile of a deployment. In either approaches, automated testing and operational reviews are essential to stability.
+* **Harder to share code**. Shared code must be carefully evaluated to avoid unnecessary deployments when that changes. Equally, if shared code isn't a library,
+your development, building, deployment tooling need to accommodate the distinct layout.
+* **Slower safe deployments**. Safely deploying multiple functions require coordination — AWS CodeDeploy deploys and verifies each function sequentially. This increases lead time substantially (minutes to hours) depending on the deployment strategy you choose. You can mitigate it by selectively enabling it in prod-like environments only, and where the risk profile is applicable.
+    - Automated testing, operational and security reviews are essential to stability in either approaches.
 
 ## Testing your code
 
