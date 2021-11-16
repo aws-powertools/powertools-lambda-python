@@ -1133,7 +1133,7 @@ Event Handler naturally leads to a single Lambda function handling multiple rout
 
 Both single (monolithic) and multiple functions (micro) offer different set of trade-offs worth knowing.
 
-!!! tip "Start with a monolithic function and eventually break into multiple functions, if necessary."
+!!! tip "TL;DR. Start with a monolithic function, break into multiple functions, and eventually micro independent functions if necessary."
 
 #### Monolithic function
 
@@ -1149,30 +1149,27 @@ A monolithic function means that your final code artifact will be deployed to a 
 
 **Downsides**
 
-* **Cold starts**. Frequent deployments and/or high load can diminish the benefit of monolithic functions depending on your latency requirements, due to [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html). Always load test to pragmatically balance between your customer experience and development cognitive load.
-* **Granular security permissions**. The micro function approach enables you to use fine-grained permissions, separate external dependencies & code signing at the function level. Regardless, least privilege can be applied to either approaches.
+* **Cold starts**. Frequent deployments and/or high load can diminish the benefit of monolithic functions depending on your latency requirements, due to [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"}. Always load test to pragmatically balance between your customer experience and development cognitive load.
+* **Granular security permissions**. The micro function approach enables you to use fine-grained permissions, separate external dependencies & code signing at the function level. Conversely, you could have multiple functions while duplicating the final code artifact in a monolithic approach. Regardless, least privilege can be applied to either approaches.
 * **Higher risk per deployment**. A bad deployment can cause the entire service to stop working while a micro function will limit its blast radius. You can minimize risks by ensuring modules are tested in isolation, use multiple environments in your CI/CD pipeline, and optionally use linear/canary deployments to trade lead time for safety.
 
 #### Micro function
 
 ![Micro function sample](./../../media/micro-function.png)
 
+A micro function means that your final code artifact will be different to each function deployed. This is generally the approach to start if you're looking for fine-grain control and/or high load on certain parts of your service.
 
-!!! TODO "rewrite this section"
+**Benefits**
 
+* **Granular scaling**. A micro function can benefit from the [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"} to scale differently depending on each part of your application. Concurrency controls and provisioned concurrency can also be used at a granular level for capacity management.
+* **Discoverability**. Micro functions are easier do visualize when using distributed tracing. Their automated architectures can be self-explanatory if each function is named to the purpose it serves from a business context.
+* **Package size**. An independent function can be significant smaller (KB vs MB) depending on external dependencies it require to perform its purpose. Conversely, a monolithic approach can benefit from [Lambda Layers](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html){target="_blank"} to optimize builds for external dependencies.
 
-!!! tip "TL;DR. Balance your latency requirements, cognitive overload, least privilege, and operational overhead to decide between one, few, or many single purpose functions."
+**Downsides**
 
-Route splitting feature helps accommodate customers familiar with popular frameworks and practices found in the Python community.
-
-It can help better organize your code and reason
-
-This can also quickly lead to discussions whether it facilitates a monolithic vs single-purpose function. To this end, these are common trade-offs you'll encounter as you grow your Serverless service, specifically synchronous functions.
-
-**Least privilege**. Start with a monolithic function, then split them as their data access & boundaries become clearer. Treat Lambda functions as separate logical resources to more easily scope permissions.
-
-**Package size**. Consider Lambda Layers for third-party dependencies and service-level shared code. Treat third-party dependencies as dev dependencies, and Lambda Layers as a mechanism to speed up build and deployments.
-
+* **Upfront investment**. Python ecosystem doesn't use a bundler. This means you need a custom build tooling to ensure each function only has what it needs. External dependencies using C extensions must be built using [Amazon Linux runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html){target="_blank"} for Lambda runtime compatibility reasons.
+* **Harder to share code**. Shared code must be carefully evaluated to avoid unnecessary deployments when that changes. Equally, if shared code isn't a library, you need your building tool to coordinate copying them over to each code artifact prior to deployment. This leads to additional IDE, your preferred terminal and Python settings to ensure code is discoverable, testable, and that linters understand them.
+* **Slower safe deployments**. Safe deployments of multiple functions require coordination, by default AWS CodeDeploy deploys and verifies each function sequentially. This can increase lead time substantially (minutes to hours) depending on the number of functions and the deployment strategy you choose. You can mitigate it by enabling safe deployments in selected environments - pre-prod, prod - and carefully analyzing the risk profile of a deployment. In either approaches, automated testing and operational reviews are essential to stability.
 
 ## Testing your code
 
