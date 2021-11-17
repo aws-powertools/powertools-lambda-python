@@ -896,14 +896,16 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
 
 	We use `include_router` method and include all user routers registered in the `router` global object.
 
-	```python hl_lines="6 8-9"
+	```python hl_lines="7 10-11"
 	from typing import Dict
 
+    from aws_lambda_powertools import Logger
 	from aws_lambda_powertools.event_handler import ApiGatewayResolver
 	from aws_lambda_powertools.utilities.typing import LambdaContext
 
 	import users
 
+    logger = Logger()
 	app = ApiGatewayResolver()
 	app.include_router(users.router)
 
@@ -960,22 +962,220 @@ When necessary, you can set a prefix when including a router object. This means 
 	# many other related /users routing
     ```
 
+#### Sample layout
 
-#### Trade-offs
+!!! info "We use ALB to demonstrate that the UX remains the same"
 
-!!! tip "TL;DR. Balance your latency requirements, cognitive overload, least privilege, and operational overhead to decide between one, few, or many single purpose functions."
+This sample project contains an Users function with two distinct set of routes, `/users` and `/health`. The layout optimizes for code sharing, no custom build tooling, and it uses [Lambda Layers](../../index.md#lambda-layer) to install Lambda Powertools.
 
-Route splitting feature helps accommodate customers familiar with popular frameworks and practices found in the Python community.
+=== "Project layout"
 
-It can help better organize your code and reason
 
-This can also quickly lead to discussions whether it facilitates a monolithic vs single-purpose function. To this end, these are common trade-offs you'll encounter as you grow your Serverless service, specifically synchronous functions.
+    ```python hl_lines="6 8 10-13"
+    .
+    ├── Pipfile                   # project app & dev dependencies; poetry, pipenv, etc.
+    ├── Pipfile.lock
+    ├── mypy.ini                  # namespace_packages = True
+    ├── .env                      # VSCode only. PYTHONPATH="users:${PYTHONPATH}"
+    ├── users
+    │   ├── requirements.txt      # sam build detect it automatically due to CodeUri: users, e.g. pipenv lock -r > users/requirements.txt
+    │   ├── lambda_function.py    # this will be our users Lambda fn; it could be split in folders if we want separate fns same code base
+    │   ├── constants.py
+    │   └── routers               # routers module
+    │       ├── __init__.py
+    │       ├── users.py          # /users routes, e.g. from routers import users; users.router
+    │       ├── health.py         # /health routes, e.g. from routers import health; health.router
+    ├── template.yaml             # SAM template.yml, CodeUri: users, Handler: users.main.lambda_handler
+    └── tests
+        ├── __init__.py
+        ├── unit
+        │   ├── __init__.py
+        │   └── test_users.py    # unit tests for the users router
+        │   └── test_health.py   # unit tests for the health router
+        └── functional
+            ├── __init__.py
+            ├── conftest.py      # pytest fixtures for the functional tests
+            └── test_lambda_function.py    # functional tests for the main lambda handler
+    ```
 
-**Least privilege**. Start with a monolithic function, then split them as their data access & boundaries become clearer. Treat Lambda functions as separate logical resources to more easily scope permissions.
+=== "template.yml"
 
-**Package size**. Consider Lambda Layers for third-party dependencies and service-level shared code. Treat third-party dependencies as dev dependencies, and Lambda Layers as a mechanism to speed up build and deployments.
+    ```yaml  hl_lines="20-21"
+    AWSTemplateFormatVersion: '2010-09-09'
+    Transform: AWS::Serverless-2016-10-31
+    Description: Example service with multiple routes
+    Globals:
+        Function:
+            Timeout: 10
+            MemorySize: 512
+            Runtime: python3.9
+            Tracing: Active
+            Environment:
+                Variables:
+                    LOG_LEVEL: INFO
+                    POWERTOOLS_LOGGER_LOG_EVENT: true
+                    POWERTOOLS_METRICS_NAMESPACE: MyServerlessApplication
+                    POWERTOOLS_SERVICE_NAME: users
+    Resources:
+        UsersService:
+            Type: AWS::Serverless::Function
+            Properties:
+                Handler: lambda_function.lambda_handler
+                CodeUri: users
+                Layers:
+                    # Latest version: https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer
+                    - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:3
+                Events:
+                    ByUser:
+                        Type: Api
+                        Properties:
+                            Path: /users/{name}
+                            Method: GET
+                    AllUsers:
+                        Type: Api
+                        Properties:
+                            Path: /users
+                            Method: GET
+                    HealthCheck:
+                        Type: Api
+                        Properties:
+                            Path: /status
+                            Method: GET
+    Outputs:
+        UsersApiEndpoint:
+            Description: "API Gateway endpoint URL for Prod environment for Users Function"
+            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+        AllUsersURL:
+            Description: "URL to fetch all registered users"
+            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users"
+        ByUserURL:
+            Description: "URL to retrieve details by user"
+            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users/test"
+        UsersServiceFunctionArn:
+            Description: "Users Lambda Function ARN"
+            Value: !GetAtt UsersService.Arn
+    ```
 
-**Cold start**. High load can diminish the benefit of monolithic functions depending on your latency requirements. Always load test to pragmatically balance between your customer experience and development cognitive load.
+=== "users/lambda_function.py"
+
+    ```python hl_lines="9 15-16"
+    from typing import Dict
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.event_handler import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler.api_gateway import ProxyEventType
+    from aws_lambda_powertools.logging.correlation_paths import APPLICATION_LOAD_BALANCER
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+    from routers import health, users
+
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.ALBEvent)
+
+    app.include_router(health.router)
+    app.include_router(users.router)
+
+
+    @logger.inject_lambda_context(correlation_id_path=APPLICATION_LOAD_BALANCER)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event: Dict, context: LambdaContext):
+        return app.resolve(event, context)
+    ```
+
+=== "users/routers/health.py"
+
+    ```python hl_lines="4 6-7 10"
+    from typing import Dict
+
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.event_handler.api_gateway import Router
+
+    router = Router()
+    logger = Logger(child=True)
+
+
+    @router.get("/status")
+    def health() -> Dict:
+        logger.debug("Health check called")
+        return {"status": "OK"}
+    ```
+
+=== "tests/functional/test_users.py"
+
+    ```python  hl_lines="3"
+    import json
+
+    from users import main  # follows namespace package from root
+
+
+    def test_lambda_handler(apigw_event, lambda_context):
+        ret = main.lambda_handler(apigw_event, lambda_context)
+        expected = json.dumps({"message": "hello universe"}, separators=(",", ":"))
+
+        assert ret["statusCode"] == 200
+        assert ret["body"] == expected
+    ```
+
+=== ".env"
+
+    > Note: It is not needed for PyCharm (select folder as source).
+
+    This is necessary for Visual Studio Code, so integrated tooling works without failing import.
+
+    ```bash
+    PYTHONPATH="users:${PYTHONPATH}"
+    ```
+
+### Considerations
+
+This utility is optimized for fast startup, minimal feature set, and to quickly on-board customers familiar with frameworks like Flask — it's not meant to be a fully fledged framework.
+
+Event Handler naturally leads to a single Lambda function handling multiple routes for a given service, which can be eventually broken into multiple functions.
+
+Both single (monolithic) and multiple functions (micro) offer different set of trade-offs worth knowing.
+
+!!! tip "TL;DR. Start with a monolithic function, add additional functions with new handlers, and possibly break into micro functions if necessary."
+
+#### Monolithic function
+
+![Monolithic function sample](./../../media/monolithic-function.png)
+
+A monolithic function means that your final code artifact will be deployed to a single function. This is generally the best approach to start.
+
+**Benefits**
+
+* **Code reuse**. It's easier to reason about your service, modularize it and reuse code as it grows. Eventually, it can be turned into a standalone library.
+* **No custom tooling**. Monolithic functions are treated just like normal Python packages; no upfront investment in tooling.
+* **Faster deployment and debugging**. Whether you use all-at-once, linear, or canary deployments, a monolithic function is a single deployable unit. IDEs like PyCharm and VSCode have tooling to quickly profile, visualize, and step through debug any Python package.
+
+**Downsides**
+
+* **Cold starts**. Frequent deployments and/or high load can diminish the benefit of monolithic functions depending on your latency requirements, due to [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"}. Always load test to pragmatically balance between your customer experience and development cognitive load.
+* **Granular security permissions**. The micro function approach enables you to use fine-grained permissions & access controls, separate external dependencies & code signing at the function level. Conversely, you could have multiple functions while duplicating the final code artifact in a monolithic approach.
+    - Regardless, least privilege can be applied to either approaches.
+* **Higher risk per deployment**. A misconfiguration or invalid import can cause disruption if not caught earlier in automated testing. Multiple functions can mitigate misconfigurations but they would still share the same code artifact. You can further minimize risks with multiple environments in your CI/CD pipeline.
+
+#### Micro function
+
+![Micro function sample](./../../media/micro-function.png)
+
+A micro function means that your final code artifact will be different to each function deployed. This is generally the approach to start if you're looking for fine-grain control and/or high load on certain parts of your service.
+
+**Benefits**
+
+* **Granular scaling**. A micro function can benefit from the [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"} to scale differently depending on each part of your application. Concurrency controls and provisioned concurrency can also be used at a granular level for capacity management.
+* **Discoverability**. Micro functions are easier do visualize when using distributed tracing. Their high-level architectures can be self-explanatory, and complexity is highly visible — assuming each function is named to the business purpose it serves.
+* **Package size**. An independent function can be significant smaller (KB vs MB) depending on external dependencies it require to perform its purpose. Conversely, a monolithic approach can benefit from [Lambda Layers](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html){target="_blank"} to optimize builds for external dependencies.
+
+**Downsides**
+
+* **Upfront investment**. Python ecosystem doesn't use a bundler — you need a custom build tooling to ensure each function only has what it needs and account for [C bindings for runtime compatibility](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html){target="_blank"}. Operations become more elaborate — you need to standardize tracing labels/annotations, structured logging, and metrics to pinpoint root causes.
+    - Engineering discipline is necessary for both approaches. Micro-function approach however requires further attention in consistency as the number of functions grow, just like any distributed system.
+* **Harder to share code**. Shared code must be carefully evaluated to avoid unnecessary deployments when that changes. Equally, if shared code isn't a library,
+your development, building, deployment tooling need to accommodate the distinct layout.
+* **Slower safe deployments**. Safely deploying multiple functions require coordination — AWS CodeDeploy deploys and verifies each function sequentially. This increases lead time substantially (minutes to hours) depending on the deployment strategy you choose. You can mitigate it by selectively enabling it in prod-like environments only, and where the risk profile is applicable.
+    - Automated testing, operational and security reviews are essential to stability in either approaches.
 
 ## Testing your code
 

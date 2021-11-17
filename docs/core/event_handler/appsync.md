@@ -713,6 +713,8 @@ You can subclass `AppSyncResolverEvent` to bring your own set of methods to hand
 
 ### Split operations with Router
 
+!!! tip "Read the **[considerations section for trade-offs between monolithic and micro functions](./api_gateway.md#considerations){target="_blank"}**, as it's also applicable here."
+
 As you grow the number of related GraphQL operations a given Lambda function should handle, it is natural to split them into separate files to ease maintenance - That's where the `Router` feature is useful.
 
 Let's assume you have `app.py` as your Lambda function entrypoint and routes in `users.py`, this is how you'd use the `Router` feature.
