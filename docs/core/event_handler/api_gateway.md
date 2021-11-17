@@ -896,14 +896,16 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
 
 	We use `include_router` method and include all user routers registered in the `router` global object.
 
-	```python hl_lines="6 8-9"
+	```python hl_lines="7 10-11"
 	from typing import Dict
 
+    from aws_lambda_powertools import Logger
 	from aws_lambda_powertools.event_handler import ApiGatewayResolver
 	from aws_lambda_powertools.utilities.typing import LambdaContext
 
 	import users
 
+    logger = Logger()
 	app = ApiGatewayResolver()
 	app.include_router(users.router)
 
