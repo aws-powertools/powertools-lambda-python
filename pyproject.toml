@@ -29,7 +29,7 @@ pydantic = {version = "^1.8.2", optional = true }
 email-validator = {version = "*", optional = true }
 
 [tool.poetry.dev-dependencies]
-coverage = {extras = ["toml"], version = "^6.0"}
+coverage = {extras = ["toml"], version = "^6.1"}
 pytest = "^6.2.5"
 black = "^21.10.b0"
 flake8 = "^3.9.0"
@@ -40,7 +40,7 @@ flake8-debugger = "^4.0.0"
 flake8-fixme = "^1.1.1"
 flake8-isort = "^4.1.1"
 flake8-variables-names = "^0.0.4"
-isort = "^5.9.3"
+isort = "^5.10.1"
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.5.1"
 pdoc3 = "^0.10.0"
