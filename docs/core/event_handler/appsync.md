@@ -717,7 +717,7 @@ You can subclass `AppSyncResolverEvent` to bring your own set of methods to hand
 
 As you grow the number of related GraphQL operations a given Lambda function should handle, it is natural to split them into separate files to ease maintenance - That's where the `Router` feature is useful.
 
-Let's assume you have `app.py` as your Lambda function entrypoint and routes in `users.py`, this is how you'd use the `Router` feature.
+Let's assume you have `app.py` as your Lambda function entrypoint and routes in `location.py`, this is how you'd use the `Router` feature.
 
 === "resolvers/location.py"
 
@@ -746,7 +746,7 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
 
 === "app.py"
 
-	We use `include_router` method and include all location operations registered in the `router` global object.
+	We use `include_router` method and include all `location` operations registered in the `router` global object.
 
     ```python hl_lines="8 13"
     from typing import Dict
