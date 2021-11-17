@@ -1152,7 +1152,7 @@ A monolithic function means that your final code artifact will be deployed to a 
 **Downsides**
 
 * **Cold starts**. Frequent deployments and/or high load can diminish the benefit of monolithic functions depending on your latency requirements, due to [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"}. Always load test to pragmatically balance between your customer experience and development cognitive load.
-* **Granular security permissions**. The micro function approach enables you to use fine-grained permissions, separate external dependencies & code signing at the function level. Conversely, you could have multiple functions while duplicating the final code artifact in a monolithic approach.
+* **Granular security permissions**. The micro function approach enables you to use fine-grained permissions & access controls, separate external dependencies & code signing at the function level. Conversely, you could have multiple functions while duplicating the final code artifact in a monolithic approach.
     - Regardless, least privilege can be applied to either approaches.
 * **Higher risk per deployment**. A misconfiguration or invalid import can cause disruption if not caught earlier in automated testing. Multiple functions can mitigate misconfigurations but they would still share the same code artifact. You can further minimize risks with multiple environments in your CI/CD pipeline.
 
@@ -1170,7 +1170,8 @@ A micro function means that your final code artifact will be different to each f
 
 **Downsides**
 
-* **Upfront investment**. Python ecosystem doesn't use a bundler. This means you need a custom build tooling to ensure each function only has what it needs. External dependencies using C extensions must be built using [Amazon Linux runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html){target="_blank"} for Lambda runtime compatibility reasons.
+* **Upfront investment**. Python ecosystem doesn't use a bundler — you need a custom build tooling to ensure each function only has what it needs and account for [C bindings](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html){target="_blank"} for runtime compatibility. Operations become more elaborate — you need to standardize tracing labels/annotations, structured logging, and metrics to pinpoint root causes.
+    - Engineering discipline is necessary for both approaches. Micro-function approach however requires further attention in consistency as the number of functions grow, just like any distributed system.
 * **Harder to share code**. Shared code must be carefully evaluated to avoid unnecessary deployments when that changes. Equally, if shared code isn't a library,
 your development, building, deployment tooling need to accommodate the distinct layout.
 * **Slower safe deployments**. Safely deploying multiple functions require coordination — AWS CodeDeploy deploys and verifies each function sequentially. This increases lead time substantially (minutes to hours) depending on the deployment strategy you choose. You can mitigate it by selectively enabling it in prod-like environments only, and where the risk profile is applicable.
