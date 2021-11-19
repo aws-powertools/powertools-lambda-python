@@ -1021,3 +1021,39 @@ def test_duplicate_routes():
     # THEN only execute the first registered route
     # AND print warnings
     assert result["statusCode"] == 200
+
+
+def test_route_multiple_methods():
+    # GIVEN a function with http methods passed as a list
+    app = ApiGatewayResolver()
+    req = "foo"
+    get_event = deepcopy(LOAD_GW_EVENT)
+    get_event["resource"] = "/accounts/{account_id}"
+    get_event["path"] = f"/accounts/{req}"
+
+    post_event = deepcopy(get_event)
+    post_event["httpMethod"] = "POST"
+
+    put_event = deepcopy(get_event)
+    put_event["httpMethod"] = "PUT"
+
+    lambda_context = {}
+
+    @app.route(rule="/accounts/<account_id>", method=["GET", "POST"])
+    def foo(account_id):
+        assert app.lambda_context == lambda_context
+        assert account_id == f"{req}"
+        return {}
+
+    # WHEN calling the event handler with the supplied methods
+    get_result = app(get_event, lambda_context)
+    post_result = app(post_event, lambda_context)
+    put_result = app(put_event, lambda_context)
+
+    # THEN events are processed correctly
+    assert get_result["statusCode"] == 200
+    assert get_result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert post_result["statusCode"] == 200
+    assert post_result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert put_result["statusCode"] == 404
+    assert put_result["headers"]["Content-Type"] == content_types.APPLICATION_JSON

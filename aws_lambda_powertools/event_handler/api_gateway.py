@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from functools import partial
 from http import HTTPStatus
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import ServiceError
@@ -453,7 +453,7 @@ class ApiGatewayResolver(BaseRouter):
     def route(
         self,
         rule: str,
-        method: str,
+        method: Union[str, Union[List[str], Tuple[str]]],
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
@@ -461,19 +461,22 @@ class ApiGatewayResolver(BaseRouter):
         """Route decorator includes parameter `method`"""
 
         def register_resolver(func: Callable):
-            logger.debug(f"Adding route using rule {rule} and method {method.upper()}")
+            methods = (method,) if isinstance(method, str) else method
+            logger.debug(f"Adding route using rule {rule} and methods: {','.join((m.upper() for m in methods))}")
             if cors is None:
                 cors_enabled = self._cors_enabled
             else:
                 cors_enabled = cors
-            self._routes.append(Route(method, self._compile_regex(rule), func, cors_enabled, compress, cache_control))
-            route_key = method + rule
-            if route_key in self._route_keys:
-                warnings.warn(f"A route like this was already registered. method: '{method}' rule: '{rule}'")
-            self._route_keys.append(route_key)
-            if cors_enabled:
-                logger.debug(f"Registering method {method.upper()} to Allow Methods in CORS")
-                self._cors_methods.add(method.upper())
+
+            for item in methods:
+                self._routes.append(Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control))
+                route_key = item + rule
+                if route_key in self._route_keys:
+                    warnings.warn(f"A route like this was already registered. method: '{item}' rule: '{rule}'")
+                self._route_keys.append(route_key)
+                if cors_enabled:
+                    logger.debug(f"Registering method {item.upper()} to Allow Methods in CORS")
+                    self._cors_methods.add(item.upper())
             return func
 
         return register_resolver
@@ -679,14 +682,14 @@ class Router(BaseRouter):
     def route(
         self,
         rule: str,
-        method: Union[str, List[str]],
+        method: Union[str, Union[List[str], Tuple[str]]],
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
     ):
         def register_route(func: Callable):
-            methods = method if isinstance(method, list) else [method]
-            for item in methods:
-                self._routes[(rule, item, cors, compress, cache_control)] = func
+            # Convert methods to tuple. It needs to be hashable as its part of the self._routes dict key
+            methods = (method,) if isinstance(method, str) else tuple(method)
+            self._routes[(rule, methods, cors, compress, cache_control)] = func
 
         return register_route
