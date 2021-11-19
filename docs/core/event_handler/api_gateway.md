@@ -42,45 +42,27 @@ This is the sample infrastructure for API Gateway we are using for the examples 
         Timeout: 5
         Runtime: python3.8
         Tracing: Active
-            Environment:
+        Environment:
             Variables:
                 LOG_LEVEL: INFO
                 POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
                 POWERTOOLS_LOGGER_LOG_EVENT: true
                 POWERTOOLS_METRICS_NAMESPACE: MyServerlessApplication
-                POWERTOOLS_SERVICE_NAME: hello
+                POWERTOOLS_SERVICE_NAME: my_api-service
 
     Resources:
-        HelloWorldFunction:
+        ApiFunction:
         Type: AWS::Serverless::Function
         Properties:
             Handler: app.lambda_handler
-            CodeUri: hello_world
-            Description: Hello World function
+            CodeUri: api_handler/
+            Description: API handler function
             Events:
-            HelloUniverse:
-                Type: Api
-                Properties:
-                Path: /hello
-                Method: GET
-            HelloYou:
-                Type: Api
-                Properties:
-                Path: /hello/{name}      # see Dynamic routes section
-                Method: GET
-            CustomMessage:
-                Type: Api
-                Properties:
-                Path: /{message}/{name}  # see Dynamic routes section
-                Method: GET
-
-    Outputs:
-        HelloWorldApigwURL:
-            Description: "API Gateway endpoint URL for Prod environment for Hello World Function"
-            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello"
-        HelloWorldFunction:
-            Description: "Hello World Lambda Function ARN"
-            Value: !GetAtt HelloWorldFunction.Arn
+                ApiEvent:
+                    Type: Api
+                    Properties:
+                    Path: /{proxy+}  # Send requests on any path to the lambda function
+                    Method: ANY  # Send requests using any http method to the lambda function
     ```
 
 ### API Gateway decorator
@@ -360,6 +342,87 @@ You can also combine nested paths with greedy regex to catch in between routes.
         ...
     }
     ```
+### HTTP Methods
+You can use named decorators to specify the HTTP method that should be handled in your functions. As well as the
+`get` method already shown above, you can use `post`, `put`, `patch`, `delete`, and `patch`.
+
+=== "app.py"
+
+    ```python hl_lines="9-10"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver()
+
+    # Only POST HTTP requests to the path /hello will route to this function
+    @app.post("/hello")
+    @tracer.capture_method
+    def get_hello_you():
+        name = app.current_event.json_body.get("name")
+        return {"message": f"hello {name}"}
+
+    # You can continue to use other utilities just as before
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
+
+=== "sample_request.json"
+
+    ```json
+    {
+        "resource": "/hello/{name}",
+        "path": "/hello/lessa",
+        "httpMethod": "GET",
+        ...
+    }
+    ```
+
+If you need to accept multiple HTTP methods in a single function, you can use the `route` method and pass a list of
+HTTP methods.
+
+=== "app.py"
+
+    ```python hl_lines="9-10"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver()
+
+    # PUT and POST HTTP requests to the path /hello will route to this function
+    @app.route("/hello", method=["PUT", "POST"])
+    @tracer.capture_method
+    def get_hello_you():
+        name = app.current_event.json_body.get("name")
+        return {"message": f"hello {name}"}
+
+    # You can continue to use other utilities just as before
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
+
+=== "sample_request.json"
+
+    ```json
+    {
+        "resource": "/hello/{name}",
+        "path": "/hello/lessa",
+        "httpMethod": "GET",
+        ...
+    }
+    ```
+
+!!! note "It is usually better to have separate functions for each HTTP method, as the functionality tends to differ
+depending on which method is used."
 
 ### Accessing request details
 
