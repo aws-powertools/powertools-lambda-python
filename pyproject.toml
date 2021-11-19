@@ -31,7 +31,7 @@ email-validator = {version = "*", optional = true }
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^6.1"}
 pytest = "^6.2.5"
-black = "^21.10.b0"
+black = "^21.11b1"
 flake8 = "^3.9.0"
 flake8-black = "^0.2.3"
 flake8-builtins = "^1.5.3"
