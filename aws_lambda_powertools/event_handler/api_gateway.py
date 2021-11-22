@@ -380,7 +380,7 @@ class BaseRouter(ABC):
 
 
 class ApiGatewayResolver(BaseRouter):
-    """API Gateway and ALB proxy api_resolver
+    """API Gateway and ALB proxy resolver
 
     Examples
     --------
