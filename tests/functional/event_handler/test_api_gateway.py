@@ -1057,3 +1057,22 @@ def test_route_multiple_methods():
     assert post_result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
     assert put_result["statusCode"] == 404
     assert put_result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+
+
+def test_api_gateway_app_router_access_to_resolver():
+    # GIVEN a Router with registered routes
+    app = ApiGatewayResolver()
+    router = Router()
+
+    @router.get("/my/path")
+    def foo():
+        # WHEN accessing the api resolver instance via the router
+        # THEN it is accessible and equal to the instantiated api resolver
+        assert app == router.api_resolver
+        return {}
+
+    app.include_router(router)
+    result = app(LOAD_GW_EVENT, {})
+
+    assert result["statusCode"] == 200
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
