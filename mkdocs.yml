@@ -30,6 +30,8 @@ nav:
 
 theme:
   name: material
+  font:
+    text: Ubuntu
   palette:
     - scheme: default
       primary: deep purple
@@ -69,6 +71,7 @@ markdown_extensions:
   - attr_list
   - pymdownx.emoji
   - pymdownx.inlinehilite
+  - attr_list
 
 copyright: Copyright &copy; 2021 Amazon Web Services
 

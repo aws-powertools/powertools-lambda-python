@@ -537,11 +537,11 @@ def test_logger_custom_formatter(stdout, service_name, lambda_context):
     logger = Logger(service=service_name, stream=stdout, logger_formatter=custom_formatter)
 
     # WHEN a lambda function is decorated with logger
-    @logger.inject_lambda_context
+    @logger.inject_lambda_context(correlation_id_path="foo")
     def handler(event, context):
         logger.info("Hello")
 
-    handler({}, lambda_context)
+    handler({"foo": "value"}, lambda_context)
 
     lambda_context_keys = (
         "function_name",
@@ -554,8 +554,11 @@ def test_logger_custom_formatter(stdout, service_name, lambda_context):
 
     # THEN custom key should always be present
     # and lambda contextual info should also be in the logs
+    # and get_correlation_id should return None
     assert "my_default_key" in log
     assert all(k in log for k in lambda_context_keys)
+    assert log["correlation_id"] == "value"
+    assert logger.get_correlation_id() is None
 
 
 def test_logger_custom_handler(lambda_context, service_name, tmp_path):

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "1.21.1"
+version = "1.22.0"
 description = "A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, batching, idempotency, feature flags, and more."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -20,7 +20,7 @@ keywords = ["aws_lambda_powertools", "aws", "tracing", "logging", "lambda", "pow
 license = "MIT-0"
 
 [tool.poetry.dependencies]
-python = "^3.6.1"
+python = "^3.6.2"
 aws-xray-sdk = "^2.8.0"
 fastjsonschema = "^2.14.5"
 boto3 = "^1.18"
@@ -29,28 +29,28 @@ pydantic = {version = "^1.8.2", optional = true }
 email-validator = {version = "*", optional = true }
 
 [tool.poetry.dev-dependencies]
-coverage = {extras = ["toml"], version = "^6.0"}
+coverage = {extras = ["toml"], version = "^6.1"}
 pytest = "^6.2.5"
-black = "^20.8b1"
+black = "^21.10.b0"
 flake8 = "^3.9.0"
 flake8-black = "^0.2.3"
 flake8-builtins = "^1.5.3"
-flake8-comprehensions = "^3.6.1"
+flake8-comprehensions = "^3.7.0"
 flake8-debugger = "^4.0.0"
 flake8-fixme = "^1.1.1"
-flake8-isort = "^4.0.0"
+flake8-isort = "^4.1.1"
 flake8-variables-names = "^0.0.4"
-isort = "^5.9.3"
+isort = "^5.10.1"
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.5.1"
 pdoc3 = "^0.10.0"
-pytest-asyncio = "^0.15.1"
+pytest-asyncio = "^0.16.0"
 bandit = "^1.7.0"
 radon = "^5.1.0"
 xenon = "^0.8.0"
-flake8-eradicate = "^1.1.0"
+flake8-eradicate = "^1.2.0"
 flake8-bugbear = "^21.9.2"
-mkdocs-material = "^7.3.2"
+mkdocs-material = "^7.3.6"
 mkdocs-git-revision-date-plugin = "^0.3.1"
 mike = "^0.6.0"
 mypy = "^0.910"
