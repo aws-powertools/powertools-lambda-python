@@ -51,7 +51,9 @@ def provider_stub(mocker):
 def reset_tracing_config(mocker):
     Tracer._reset_config()
     # reset global cold start module
-    mocker.patch("aws_lambda_powertools.tracing.tracer.is_cold_start", return_value=True)
+    mocker.patch(
+        "aws_lambda_powertools.tracing.tracer.is_cold_start", new_callable=mocker.PropertyMock(return_value=True)
+    )
     yield
 
 
@@ -79,7 +81,7 @@ def in_subsegment_mock():
     yield in_subsegment
 
 
-def test_tracer_lambda_handler(mocker, dummy_response, provider_stub, in_subsegment_mock):
+def test_tracer_lambda_handler_subsegment(mocker, dummy_response, provider_stub, in_subsegment_mock):
     # GIVEN Tracer is initialized with booking as the service name
     provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
     tracer = Tracer(provider=provider, service="booking")
@@ -92,15 +94,13 @@ def test_tracer_lambda_handler(mocker, dummy_response, provider_stub, in_subsegm
     handler({}, mocker.MagicMock())
 
     # THEN we should have a subsegment named handler
-    # annotate cold start, and add its response as trace metadata
+    # add its response as trace metadata
     # and use service name as a metadata namespace
     assert in_subsegment_mock.in_subsegment.call_count == 1
     assert in_subsegment_mock.in_subsegment.call_args == mocker.call(name="## handler")
     assert in_subsegment_mock.put_metadata.call_args == mocker.call(
         key="handler response", value=dummy_response, namespace="booking"
     )
-    assert in_subsegment_mock.put_annotation.call_count == 1
-    assert in_subsegment_mock.put_annotation.call_args == mocker.call(key="ColdStart", value=True)
 
 
 def test_tracer_method(mocker, dummy_response, provider_stub, in_subsegment_mock):
@@ -571,3 +571,22 @@ def test_tracer_method_override_error_as_metadata(provider_stub, in_subsegment_m
 
     # THEN we should not add any metadata
     assert in_subsegment_mock.put_metadata.call_count == 0
+
+
+def test_tracer_lambda_handler_cold_start(mocker, dummy_response, provider_stub, in_subsegment_mock):
+    # GIVEN
+    provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
+    tracer = Tracer(provider=provider, service="booking")
+
+    # WHEN
+    @tracer.capture_lambda_handler
+    def handler(event, context):
+        return dummy_response
+
+    handler({}, mocker.MagicMock())
+
+    # THEN
+    assert in_subsegment_mock.put_annotation.call_args == mocker.call(key="ColdStart", value=True)
+
+    handler({}, mocker.MagicMock())
+    assert in_subsegment_mock.put_annotation.call_args == mocker.call(key="ColdStart", value=False)

@@ -304,9 +304,10 @@ class Tracer:
         def decorate(event, context, **kwargs):
             with self.provider.in_subsegment(name=f"## {lambda_handler_name}") as subsegment:
                 global is_cold_start
+                logger.debug("Annotating cold start")
+                subsegment.put_annotation(key="ColdStart", value=is_cold_start)
+
                 if is_cold_start:
-                    logger.debug("Annotating cold start")
-                    subsegment.put_annotation(key="ColdStart", value=True)
                     is_cold_start = False
 
                 try:
