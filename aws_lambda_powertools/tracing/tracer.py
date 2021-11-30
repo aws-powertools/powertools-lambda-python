@@ -166,18 +166,8 @@ class Tracer:
         if self.auto_patch:
             self.patch(modules=patch_modules)
 
-        if "aws_xray_sdk" in self.provider.__module__:
+        if self._is_xray_provider():
             self._disable_xray_trace_batching()
-
-    def _disable_xray_trace_batching(self):
-        """Configure X-Ray SDK to send subsegment individually over batching
-        Known issue: https://github.com/awslabs/aws-lambda-powertools-python/issues/283
-        """
-        if self.disabled:
-            logger.debug("Tracing has been disabled, aborting streaming override")
-            return
-
-        aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0)
 
     def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]):
         """Adds annotation to existing segment or subsegment
@@ -775,6 +765,16 @@ class Tracer:
         provider.patch_all = aws_xray_sdk.core.patch_all
 
         return provider
+
+    def _disable_xray_trace_batching(self):
+        """Configure X-Ray SDK to send subsegment individually over batching
+        Known issue: https://github.com/awslabs/aws-lambda-powertools-python/issues/283
+        """
+        if self.disabled:
+            logger.debug("Tracing has been disabled, aborting streaming override")
+            return
+
+        aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0)
 
     def _is_xray_provider(self):
         return "aws_xray_sdk" in self.provider.__module__
