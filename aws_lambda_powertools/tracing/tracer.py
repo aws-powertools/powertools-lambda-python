@@ -136,7 +136,7 @@ class Tracer:
     """
 
     _default_config: Dict[str, Any] = {
-        "service": "service_undefined",
+        "service": "",
         "disabled": False,
         "auto_patch": True,
         "patch_modules": None,
@@ -316,6 +316,9 @@ class Tracer:
 
                 if is_cold_start:
                     is_cold_start = False
+
+                if self.service:
+                    subsegment.put_annotation(key="Service", value=self.service)
 
                 try:
                     logger.debug("Calling lambda handler")
