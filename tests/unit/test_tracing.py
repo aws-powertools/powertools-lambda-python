@@ -44,6 +44,9 @@ def provider_stub(mocker):
         def patch(self, *args, **kwargs):
             return self.patch_mock(*args, **kwargs)
 
+        def patch_all(self):
+            ...
+
     return CustomProvider
 
 
@@ -590,3 +593,19 @@ def test_tracer_lambda_handler_cold_start(mocker, dummy_response, provider_stub,
 
     handler({}, mocker.MagicMock())
     assert in_subsegment_mock.put_annotation.call_args == mocker.call(key="ColdStart", value=False)
+
+
+def test_tracer_lambda_handler_add_service_annotation(mocker, dummy_response, provider_stub, in_subsegment_mock):
+    # GIVEN
+    provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
+    tracer = Tracer(provider=provider, service="booking")
+
+    # WHEN
+    @tracer.capture_lambda_handler
+    def handler(event, context):
+        return dummy_response
+
+    handler({}, mocker.MagicMock())
+
+    # THEN
+    assert in_subsegment_mock.put_annotation.call_args == mocker.call(key="Service", value="booking")
