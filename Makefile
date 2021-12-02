@@ -20,6 +20,9 @@ test:
 	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=xml
 	poetry run pytest --cache-clear tests/performance
 
+unit-test:
+	poetry run pytest tests/unit
+
 coverage-html:
 	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=html
 

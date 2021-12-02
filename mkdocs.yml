@@ -31,6 +31,8 @@ nav:
 
 theme:
   name: material
+  font:
+    text: Ubuntu
   palette:
     - scheme: default
       primary: deep purple
