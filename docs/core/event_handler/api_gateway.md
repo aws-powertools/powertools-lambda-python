@@ -1073,7 +1073,7 @@ This sample project contains a Users function with two distinct set of routes, `
             Runtime: python3.9
             Tracing: Active
             Architectures:
-                - arm64
+                - x86_64
             Environment:
                 Variables:
                     LOG_LEVEL: INFO
