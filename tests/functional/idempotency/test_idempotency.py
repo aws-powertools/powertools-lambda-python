@@ -1036,3 +1036,24 @@ def test_idempotency_disabled_envvar(monkeypatch, lambda_context, persistence_st
     dummy_handler(mock_event, lambda_context)
 
     assert len(persistence_store.table.method_calls) == 0
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
+def test_idempotent_function_duplicates(
+    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+):
+    # Scenario to validate the both methods are called
+    mock_event = {"data": "value"}
+    persistence_store.table = MagicMock()
+
+    @idempotent_function(data_keyword_argument="data", persistence_store=persistence_store, config=idempotency_config)
+    def one(data):
+        return "one"
+
+    @idempotent_function(data_keyword_argument="data", persistence_store=persistence_store, config=idempotency_config)
+    def two(data):
+        return "two"
+
+    assert one(data=mock_event) == "one"
+    assert two(data=mock_event) == "two"
+    assert len(persistence_store.table.method_calls) == 4

@@ -112,6 +112,7 @@ class BasePersistenceLayer(ABC):
 
     def __init__(self):
         """Initialize the defaults"""
+        self.function_name = None
         self.configured = False
         self.event_key_jmespath: Optional[str] = None
         self.event_key_compiled_jmespath = None
