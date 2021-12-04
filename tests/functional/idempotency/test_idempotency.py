@@ -648,7 +648,7 @@ def test_in_progress_never_saved_to_cache(
 ):
     # GIVEN a data record with status "INPROGRESS"
     # and persistence_store has use_local_cache = True
-    persistence_store.configure(idempotency_config)
+    persistence_store.configure(idempotency_config, "handler")
     data_record = DataRecord("key", status="INPROGRESS")
 
     # WHEN saving to local cache
@@ -661,7 +661,7 @@ def test_in_progress_never_saved_to_cache(
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}], indirect=True)
 def test_user_local_disabled(idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer):
     # GIVEN a persistence_store with use_local_cache = False
-    persistence_store.configure(idempotency_config)
+    persistence_store.configure(idempotency_config, "")
 
     # WHEN calling any local cache options
     data_record = DataRecord("key", status="COMPLETED")
@@ -683,7 +683,7 @@ def test_delete_from_cache_when_empty(
     idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
 ):
     # GIVEN use_local_cache is True AND the local cache is empty
-    persistence_store.configure(idempotency_config)
+    persistence_store.configure(idempotency_config, "handler")
 
     try:
         # WHEN we _delete_from_cache
@@ -735,7 +735,8 @@ def test_default_no_raise_on_missing_idempotency_key(
     idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
 ):
     # GIVEN a persistence_store with use_local_cache = False and event_key_jmespath = "body"
-    persistence_store.configure(idempotency_config)
+    function_name = "foo"
+    persistence_store.configure(idempotency_config, function_name)
     assert persistence_store.use_local_cache is False
     assert "body" in persistence_store.event_key_jmespath
 
@@ -743,7 +744,7 @@ def test_default_no_raise_on_missing_idempotency_key(
     hashed_key = persistence_store._get_hashed_idempotency_key({})
 
     # THEN return the hash of None
-    expected_value = "test-func#" + md5(serialize(None).encode()).hexdigest()
+    expected_value = f"test-func.{function_name}#" + md5(serialize(None).encode()).hexdigest()
     assert expected_value == hashed_key
 
 
@@ -754,7 +755,7 @@ def test_raise_on_no_idempotency_key(
     idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
 ):
     # GIVEN a persistence_store with raise_on_no_idempotency_key and no idempotency key in the request
-    persistence_store.configure(idempotency_config)
+    persistence_store.configure(idempotency_config, "handler")
     persistence_store.raise_on_no_idempotency_key = True
     assert persistence_store.use_local_cache is False
     assert "body" in persistence_store.event_key_jmespath
@@ -781,7 +782,7 @@ def test_jmespath_with_powertools_json(
     idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
 ):
     # GIVEN an event_key_jmespath with powertools_json custom function
-    persistence_store.configure(idempotency_config)
+    persistence_store.configure(idempotency_config, "handler")
     sub_attr_value = "cognito_user"
     static_pk_value = "some_key"
     expected_value = [sub_attr_value, static_pk_value]
@@ -794,7 +795,7 @@ def test_jmespath_with_powertools_json(
     result = persistence_store._get_hashed_idempotency_key(api_gateway_proxy_event)
 
     # THEN the hashed idempotency key should match the extracted values generated hash
-    assert result == "test-func#" + persistence_store._generate_hash(expected_value)
+    assert result == "test-func.handler#" + persistence_store._generate_hash(expected_value)
 
 
 @pytest.mark.parametrize("config_with_jmespath_options", ["powertools_json(data).payload"], indirect=True)
@@ -803,7 +804,7 @@ def test_custom_jmespath_function_overrides_builtin_functions(
 ):
     # GIVEN an persistence store with a custom jmespath_options
     # AND use a builtin powertools custom function
-    persistence_store.configure(config_with_jmespath_options)
+    persistence_store.configure(config_with_jmespath_options, "handler")
 
     with pytest.raises(jmespath.exceptions.UnknownFunctionError, match="Unknown function: powertools_json()"):
         # WHEN calling _get_hashed_idempotency_key
@@ -871,7 +872,9 @@ class MockPersistenceLayer(BasePersistenceLayer):
 def test_idempotent_lambda_event_source(lambda_context):
     # Scenario to validate that we can use the event_source decorator before or after the idempotent decorator
     mock_event = load_event("apiGatewayProxyV2Event.json")
-    persistence_layer = MockPersistenceLayer("test-func#" + hashlib.md5(serialize(mock_event).encode()).hexdigest())
+    persistence_layer = MockPersistenceLayer(
+        "test-func.lambda_handler#" + hashlib.md5(serialize(mock_event).encode()).hexdigest()
+    )
     expected_result = {"message": "Foo"}
 
     # GIVEN an event_source decorator
@@ -891,7 +894,9 @@ def test_idempotent_lambda_event_source(lambda_context):
 def test_idempotent_function():
     # Scenario to validate we can use idempotent_function with any function
     mock_event = {"data": "value"}
-    persistence_layer = MockPersistenceLayer("test-func#" + hashlib.md5(serialize(mock_event).encode()).hexdigest())
+    persistence_layer = MockPersistenceLayer(
+        "test-func.record_handler#" + hashlib.md5(serialize(mock_event).encode()).hexdigest()
+    )
     expected_result = {"message": "Foo"}
 
     @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
@@ -908,7 +913,9 @@ def test_idempotent_function_arbitrary_args_kwargs():
     # Scenario to validate we can use idempotent_function with a function
     # with an arbitrary number of args and kwargs
     mock_event = {"data": "value"}
-    persistence_layer = MockPersistenceLayer("test-func#" + hashlib.md5(serialize(mock_event).encode()).hexdigest())
+    persistence_layer = MockPersistenceLayer(
+        "test-func.record_handler#" + hashlib.md5(serialize(mock_event).encode()).hexdigest()
+    )
     expected_result = {"message": "Foo"}
 
     @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
@@ -923,7 +930,9 @@ def test_idempotent_function_arbitrary_args_kwargs():
 
 def test_idempotent_function_invalid_data_kwarg():
     mock_event = {"data": "value"}
-    persistence_layer = MockPersistenceLayer("test-func#" + hashlib.md5(serialize(mock_event).encode()).hexdigest())
+    persistence_layer = MockPersistenceLayer(
+        "test-func.record_handler#" + hashlib.md5(serialize(mock_event).encode()).hexdigest()
+    )
     expected_result = {"message": "Foo"}
     keyword_argument = "payload"
 
@@ -940,7 +949,9 @@ def test_idempotent_function_invalid_data_kwarg():
 
 def test_idempotent_function_arg_instead_of_kwarg():
     mock_event = {"data": "value"}
-    persistence_layer = MockPersistenceLayer("test-func#" + hashlib.md5(serialize(mock_event).encode()).hexdigest())
+    persistence_layer = MockPersistenceLayer(
+        "test-func.record_handler#" + hashlib.md5(serialize(mock_event).encode()).hexdigest()
+    )
     expected_result = {"message": "Foo"}
     keyword_argument = "record"
 
@@ -958,12 +969,18 @@ def test_idempotent_function_arg_instead_of_kwarg():
 def test_idempotent_function_and_lambda_handler(lambda_context):
     # Scenario to validate we can use both idempotent_function and idempotent decorators
     mock_event = {"data": "value"}
-    persistence_layer = MockPersistenceLayer("test-func#" + hashlib.md5(serialize(mock_event).encode()).hexdigest())
+    persistence_layer = MockPersistenceLayer(
+        "test-func.record_handler#" + hashlib.md5(serialize(mock_event).encode()).hexdigest()
+    )
     expected_result = {"message": "Foo"}
 
     @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
     def record_handler(record):
         return expected_result
+
+    persistence_layer = MockPersistenceLayer(
+        "test-func.lambda_handler#" + hashlib.md5(serialize(mock_event).encode()).hexdigest()
+    )
 
     @idempotent(persistence_store=persistence_layer)
     def lambda_handler(event, _):
@@ -986,7 +1003,9 @@ def test_idempotent_data_sorting():
     data_two = {"more_data": "more data 1", "data": "test message 1"}
 
     # Assertion will happen in MockPersistenceLayer
-    persistence_layer = MockPersistenceLayer("test-func#" + hashlib.md5(json.dumps(data_one).encode()).hexdigest())
+    persistence_layer = MockPersistenceLayer(
+        "test-func.dummy#" + hashlib.md5(json.dumps(data_one).encode()).hexdigest()
+    )
 
     # GIVEN
     @idempotent_function(data_keyword_argument="payload", persistence_store=persistence_layer)

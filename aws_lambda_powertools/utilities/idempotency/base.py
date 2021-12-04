@@ -56,7 +56,7 @@ class IdempotencyHandler:
         self.fn_args = function_args
         self.fn_kwargs = function_kwargs
 
-        persistence_store.configure(config)
+        persistence_store.configure(config, self.function.__name__)
         self.persistence_store = persistence_store
 
     def handle(self) -> Any:
