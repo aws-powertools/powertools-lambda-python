@@ -574,11 +574,11 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-material"
-version = "7.3.6"
+version = "8.0.4"
 description = "A Material Design theme for MkDocs"
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 
 [package.dependencies]
 jinja2 = ">=2.11.1"
@@ -1065,7 +1065,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "17510d9a98137b8f430df0fbca1bcb3037aab183a4ba2e8d5fdad8e7e81574fc"
+content-hash = "fcf2bb0b970ed6ac67079c4edb00aa4cdda7aeeddafb7fc17c8da5fe31a22b97"
 
 [metadata.files]
 atomicwrites = [
@@ -1362,8 +1362,8 @@ mkdocs-git-revision-date-plugin = [
     {file = "mkdocs_git_revision_date_plugin-0.3.1-py3-none-any.whl", hash = "sha256:8ae50b45eb75d07b150a69726041860801615aae5f4adbd6b1cf4d51abaa03d5"},
 ]
 mkdocs-material = [
-    {file = "mkdocs-material-7.3.6.tar.gz", hash = "sha256:1b1dbd8ef2508b358d93af55a5c5db3f141c95667fad802301ec621c40c7c217"},
-    {file = "mkdocs_material-7.3.6-py2.py3-none-any.whl", hash = "sha256:1b6b3e9e09f922c2d7f1160fe15c8f43d4adc0d6fb81aa6ff0cbc7ef5b78ec75"},
+    {file = "mkdocs-material-8.0.4.tar.gz", hash = "sha256:9a2a638c05e48c58786e5be558c0ea8995d8fa20138f1ed22bee48eb08528a36"},
+    {file = "mkdocs_material-8.0.4-py2.py3-none-any.whl", hash = "sha256:88e863ff3614c1acc25ec5d2c1a6f9787326f2025d7d28170a68d0bf85d1c2da"},
 ]
 mkdocs-material-extensions = [
     {file = "mkdocs-material-extensions-1.0.3.tar.gz", hash = "sha256:bfd24dfdef7b41c312ede42648f9eb83476ea168ec163b613f9abd12bbfddba2"},
@@ -1411,6 +1411,7 @@ pbr = [
     {file = "pbr-5.8.0.tar.gz", hash = "sha256:672d8ebee84921862110f23fcec2acea191ef58543d34dfe9ef3d9f13c31cddf"},
 ]
 pdoc3 = [
+    {file = "pdoc3-0.10.0-py3-none-any.whl", hash = "sha256:ba45d1ada1bd987427d2bf5cdec30b2631a3ff5fb01f6d0e77648a572ce6028b"},
     {file = "pdoc3-0.10.0.tar.gz", hash = "sha256:5f22e7bcb969006738e1aa4219c75a32f34c2d62d46dc9d2fb2d3e0b0287e4b7"},
 ]
 platformdirs = [
