@@ -648,7 +648,7 @@ def test_in_progress_never_saved_to_cache(
 ):
     # GIVEN a data record with status "INPROGRESS"
     # and persistence_store has use_local_cache = True
-    persistence_store.configure(idempotency_config, "handler")
+    persistence_store.configure(idempotency_config)
     data_record = DataRecord("key", status="INPROGRESS")
 
     # WHEN saving to local cache
@@ -661,7 +661,7 @@ def test_in_progress_never_saved_to_cache(
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}], indirect=True)
 def test_user_local_disabled(idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer):
     # GIVEN a persistence_store with use_local_cache = False
-    persistence_store.configure(idempotency_config, "")
+    persistence_store.configure(idempotency_config)
 
     # WHEN calling any local cache options
     data_record = DataRecord("key", status="COMPLETED")
@@ -683,7 +683,7 @@ def test_delete_from_cache_when_empty(
     idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
 ):
     # GIVEN use_local_cache is True AND the local cache is empty
-    persistence_store.configure(idempotency_config, "handler")
+    persistence_store.configure(idempotency_config)
 
     try:
         # WHEN we _delete_from_cache
@@ -755,7 +755,7 @@ def test_raise_on_no_idempotency_key(
     idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
 ):
     # GIVEN a persistence_store with raise_on_no_idempotency_key and no idempotency key in the request
-    persistence_store.configure(idempotency_config, "handler")
+    persistence_store.configure(idempotency_config)
     persistence_store.raise_on_no_idempotency_key = True
     assert persistence_store.use_local_cache is False
     assert "body" in persistence_store.event_key_jmespath
@@ -802,9 +802,9 @@ def test_jmespath_with_powertools_json(
 def test_custom_jmespath_function_overrides_builtin_functions(
     config_with_jmespath_options: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
 ):
-    # GIVEN an persistence store with a custom jmespath_options
+    # GIVEN a persistence store with a custom jmespath_options
     # AND use a builtin powertools custom function
-    persistence_store.configure(config_with_jmespath_options, "handler")
+    persistence_store.configure(config_with_jmespath_options)
 
     with pytest.raises(jmespath.exceptions.UnknownFunctionError, match="Unknown function: powertools_json()"):
         # WHEN calling _get_hashed_idempotency_key
