@@ -1,5 +1,6 @@
 import base64
 import gzip
+import hashlib
 import json
 import logging
 from typing import Any, Dict, Optional, Union
@@ -28,6 +29,11 @@ class PowertoolsFunctions(Functions):
         uncompressed = gzip.decompress(encoded)
 
         return uncompressed.decode()
+
+    @signature({"types": ["string"]})
+    def _func_powertools_md5(self, value: str):
+        hashed_content = hashlib.md5(value.encode())
+        return hashed_content.hexdigest()
 
 
 def extract_data_from_envelope(data: Union[Dict, str], envelope: str, jmespath_options: Optional[Dict] = None) -> Any:
