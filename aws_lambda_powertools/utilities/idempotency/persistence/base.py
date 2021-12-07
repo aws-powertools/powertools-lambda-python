@@ -112,6 +112,7 @@ class BasePersistenceLayer(ABC):
 
     def __init__(self):
         """Initialize the defaults"""
+        self.function_name = ""
         self.configured = False
         self.event_key_jmespath: Optional[str] = None
         self.event_key_compiled_jmespath = None
@@ -124,7 +125,7 @@ class BasePersistenceLayer(ABC):
         self._cache: Optional[LRUDict] = None
         self.hash_function = None
 
-    def configure(self, config: IdempotencyConfig) -> None:
+    def configure(self, config: IdempotencyConfig, function_name: Optional[str] = None) -> None:
         """
         Initialize the base persistence layer from the configuration settings
 
@@ -132,7 +133,11 @@ class BasePersistenceLayer(ABC):
         ----------
         config: IdempotencyConfig
             Idempotency configuration settings
+        function_name: str, Optional
+            The name of the function being decorated
         """
+        self.function_name = f"{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, 'test-func')}.{function_name or ''}"
+
         if self.configured:
             # Prevent being reconfigured multiple times
             return
@@ -178,8 +183,7 @@ class BasePersistenceLayer(ABC):
             warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}")
 
         generated_hash = self._generate_hash(data=data)
-        function_name = os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, "test-func")
-        return f"{function_name}#{generated_hash}"
+        return f"{self.function_name}#{generated_hash}"
 
     @staticmethod
     def is_missing_idempotency_key(data) -> bool:
