@@ -146,13 +146,14 @@ This sample will decode the value within the `body` key of an API Gateway event 
 
     ```python hl_lines="8"
     import json
+    from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
     from aws_lambda_powertools.utilities.idempotency import (
         IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
     )
 
     persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-
     config = IdempotencyConfig(event_key_jmespath="powertools_json(body)")
+
     @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event:APIGatewayProxyEvent, context):
         body = json.loads(event['body'])
@@ -226,6 +227,35 @@ This sample will decompress and decode base64 data, then use JMESPath pipeline e
 
     ```python hl_lines="7 14 16 23 39 45 47 52"
     --8<-- "docs/shared/validation_basic_jsonschema.py"
+    ```
+
+
+#### powertools_md5 function
+
+Use `powertools_md5` function to create a hash digest of any string data.
+
+> Idempotency scenario
+
+This sample will hash the base64 encoded binary data within the `body` key of an API Gateway event. Idempotency utility then use the hash digest as an idempotency token - e.g. using the entire base64 encoded data could surpass DynamoDB item limit.
+
+=== "powertools_json_jmespath_function.py"
+
+    ```python hl_lines="7"
+    from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
+    from aws_lambda_powertools.utilities.idempotency import (
+        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
+    )
+
+    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+    config = IdempotencyConfig(event_key_jmespath="powertools_md5(body)")
+
+    @idempotent(config=config, persistence_store=persistence_layer)
+    def handler(event:APIGatewayProxyEvent, context):
+        ...
+        return {
+            "message": "binary processed successfully",
+            "statusCode": 200
+        }
     ```
 
 ### Bring your own JMESPath function
