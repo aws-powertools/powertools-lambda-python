@@ -230,13 +230,13 @@ This sample will decompress and decode base64 data, then use JMESPath pipeline e
     ```
 
 
-#### powertools_md5 function
+#### powertools_sha256 function
 
-Use `powertools_md5` function to create a hash digest of any string data.
+Use `powertools_sha256` function to create a hash digest of any string data.
 
 > Idempotency scenario
 
-This sample will hash the base64 encoded binary data within the `body` key of an API Gateway event. Idempotency utility then use the hash digest as an idempotency token - e.g. using the entire base64 encoded data could surpass DynamoDB item limit.
+This sample will hash the base64 encoded binary data within the `body` key of an API Gateway event. Idempotency utility then use the hash digest as an idempotency token - e.g.using the entire base64 encoded data could exceed [DynamoDB's item limit (400K)](hhttps://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}.
 
 === "powertools_json_jmespath_function.py"
 
@@ -247,7 +247,7 @@ This sample will hash the base64 encoded binary data within the `body` key of an
     )
 
     persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-    config = IdempotencyConfig(event_key_jmespath="powertools_md5(body)")
+    config = IdempotencyConfig(event_key_jmespath="powertools_sha256(body)")
 
     @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event:APIGatewayProxyEvent, context):

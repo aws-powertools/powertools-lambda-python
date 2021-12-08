@@ -31,8 +31,8 @@ class PowertoolsFunctions(Functions):
         return uncompressed.decode()
 
     @signature({"types": ["string"]})
-    def _func_powertools_md5(self, value: str):
-        hashed_content = hashlib.md5(value.encode())
+    def _func_powertools_sha256(self, value: str):
+        hashed_content = hashlib.sha256(value.encode())
         return hashed_content.hexdigest()
 
 
