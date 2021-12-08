@@ -84,7 +84,7 @@ class AppConfigProvider(BaseProvider):
 
         super().__init__()
 
-    def _get(self, name: str, **sdk_options) -> str:
+    def _get(self, name: str, **sdk_options) -> bytes:
         """
         Retrieve a parameter value from AWS App config.
 
