@@ -1503,9 +1503,8 @@ def test_appconf_provider_get_configuration_no_transform(mock_name, config):
     stubber.activate()
 
     try:
-        value = provider.get(mock_name)
-        str_value = value.decode("utf-8")
-        assert str_value == json.dumps(mock_body_json)
+        value: str = provider.get(mock_name)
+        assert value == json.dumps(mock_body_json)
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
