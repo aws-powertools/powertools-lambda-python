@@ -76,7 +76,7 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 
 === "CDK"
 
-    ```python hl_lines="14"
+    ```python hl_lines="11 16"
     from aws_cdk import core, aws_lambda
 
     class SampleApp(core.Construct):
@@ -84,13 +84,16 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
         def __init__(self, scope: core.Construct, id_: str, env: core.Environment) -> None:
             super().__init__(scope, id_)
 
+            powertools_layer = aws_lambda.LayerVersion.from_layer_version_arn(
+                self,
+                id="lambda-powertools",
+                layer_version_arn=f"arn:aws:lambda:{env.region}:017000801446:layer:AWSLambdaPowertoolsPython:4"
+            )
             aws_lambda.Function(self,
                 'sample-app-lambda',
                 runtime=aws_lambda.Runtime.PYTHON_3_9,
-                function_name='sample-lambda',
-                code=aws_lambda.Code.asset('./src'),
-                handler='app.handler',
-                layers: [f"arn:aws:lambda:{env.region}:017000801446:layer:AWSLambdaPowertoolsPython:4"]
+                layers=[powertools_layer]
+                # other props...
             )
     ```
 

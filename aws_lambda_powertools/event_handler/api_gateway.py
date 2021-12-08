@@ -664,6 +664,10 @@ class ApiGatewayResolver(BaseRouter):
         prefix : str, optional
             An optional prefix to be added to the originally defined rule
         """
+
+        # Add reference to parent ApiGatewayResolver to support use cases where people subclass it to add custom logic
+        router.api_resolver = self
+
         for route, func in router._routes.items():
             if prefix:
                 rule = route[0]
@@ -678,6 +682,7 @@ class Router(BaseRouter):
 
     def __init__(self):
         self._routes: Dict[tuple, Callable] = {}
+        self.api_resolver: Optional[BaseRouter] = None
 
     def route(
         self,
