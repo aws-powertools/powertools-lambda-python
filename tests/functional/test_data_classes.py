@@ -281,6 +281,16 @@ def test_cognito_pre_token_generation_trigger_event():
     assert claims_override_details.group_configuration.preferred_role == "role_name"
     assert event["response"]["claimsOverrideDetails"]["groupOverrideDetails"]["preferredRole"] == "role_name"
 
+    # Ensure that even if "claimsOverrideDetails" was explicitly set to None
+    # accessing `event.response.claims_override_details` would set it to `{}`
+    event["response"]["claimsOverrideDetails"] = None
+    claims_override_details = event.response.claims_override_details
+    assert claims_override_details._data == {}
+    assert event["response"]["claimsOverrideDetails"] == {}
+    claims_override_details.claims_to_suppress = ["email"]
+    assert claims_override_details.claims_to_suppress[0] == "email"
+    assert event["response"]["claimsOverrideDetails"]["claimsToSuppress"] == ["email"]
+
 
 def test_cognito_define_auth_challenge_trigger_event():
     event = DefineAuthChallengeTriggerEvent(load_event("cognitoDefineAuthChallengeEvent.json"))
