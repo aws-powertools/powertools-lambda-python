@@ -247,7 +247,7 @@ This sample will hash base64 encoded binary data received via API Gateway within
     )
 
     persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-    config = IdempotencyConfig(event_key_jmespath="powertools_sha256(body, 'md5')")
+    config = IdempotencyConfig(event_key_jmespath="powertools_hash(body, 'md5')")
 
     @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event:APIGatewayProxyEvent, context):
