@@ -104,7 +104,7 @@ class AppConfigProvider(BaseProvider):
         sdk_options["ClientId"] = CLIENT_ID
 
         response = self.client.get_configuration(**sdk_options)
-        return response["Content"].read().decode("utf-8")  # read() of botocore.response.StreamingBody
+        return response["Content"].read()  # read() of botocore.response.StreamingBody
 
     def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
         """
@@ -121,7 +121,7 @@ def get_app_config(
     force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
     **sdk_options
-) -> Union[str, list, dict]:
+) -> Union[str, list, dict, bytes]:
     """
     Retrieve a configuration value from AWS App Config.
 
