@@ -10,6 +10,7 @@ const awsconfig = {
 };
 
 const RUNTIME = "python"
+const BASE_ORIGIN = "awslabs.github.io"
 
 function copyToClipboard(e) {
 	e.preventDefault()
@@ -18,6 +19,7 @@ function copyToClipboard(e) {
 }
 
 function enableSearchOnBlurElement() {
+	if (document.location.hostname != BASE_ORIGIN) return // prevent unnecessary data
 	/* Register handler to log search on blur */
 	document.addEventListener("DOMContentLoaded", function () {
 		recordPageView({

@@ -12,6 +12,7 @@ Event handler for Amazon API Gateway REST/HTTP APIs and Application Loader Balan
 * Integrates with [Data classes utilities](../../utilities/data_classes.md){target="_blank"} to easily access event and identity information
 * Built-in support for Decimals JSON encoding
 * Support for dynamic path expressions
+* Router to allow for splitting up the handler accross multiple files
 
 ## Getting started
 
@@ -41,46 +42,27 @@ This is the sample infrastructure for API Gateway we are using for the examples 
         Timeout: 5
         Runtime: python3.8
         Tracing: Active
-            Environment:
+        Environment:
             Variables:
                 LOG_LEVEL: INFO
                 POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
                 POWERTOOLS_LOGGER_LOG_EVENT: true
                 POWERTOOLS_METRICS_NAMESPACE: MyServerlessApplication
-                POWERTOOLS_SERVICE_NAME: hello
+                POWERTOOLS_SERVICE_NAME: my_api-service
 
     Resources:
-        HelloWorldFunction:
+        ApiFunction:
         Type: AWS::Serverless::Function
         Properties:
             Handler: app.lambda_handler
-            CodeUri: hello_world
-            Description: Hello World function
+            CodeUri: api_handler/
+            Description: API handler function
             Events:
-            HelloUniverse:
-                Type: Api
-                Properties:
-                Path: /hello
-                Method: GET
-            HelloYou:
-                Type: Api
-                Properties:
-                Path: /hello/{name}      # see Dynamic routes section
-                Method: GET
-            CustomMessage:
-                Type: Api
-                Properties:
-                Path: /{message}/{name}  # see Dynamic routes section
-                Method: GET
-
-    Outputs:
-        HelloWorldApigwURL:
-        Description: "API Gateway endpoint URL for Prod environment for Hello World Function"
-        Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello"
-
-    HelloWorldFunction:
-        Description: "Hello World Lambda Function ARN"
-        Value: !GetAtt HelloWorldFunction.Arn
+                ApiEvent:
+                    Type: Api
+                    Properties:
+                    Path: /{proxy+}  # Send requests on any path to the lambda function
+                    Method: ANY  # Send requests using any http method to the lambda function
     ```
 
 ### API Gateway decorator
@@ -360,6 +342,87 @@ You can also combine nested paths with greedy regex to catch in between routes.
         ...
     }
     ```
+### HTTP Methods
+You can use named decorators to specify the HTTP method that should be handled in your functions. As well as the
+`get` method already shown above, you can use `post`, `put`, `patch`, `delete`, and `patch`.
+
+=== "app.py"
+
+    ```python hl_lines="9-10"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver()
+
+    # Only POST HTTP requests to the path /hello will route to this function
+    @app.post("/hello")
+    @tracer.capture_method
+    def get_hello_you():
+        name = app.current_event.json_body.get("name")
+        return {"message": f"hello {name}"}
+
+    # You can continue to use other utilities just as before
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
+
+=== "sample_request.json"
+
+    ```json
+    {
+        "resource": "/hello/{name}",
+        "path": "/hello/lessa",
+        "httpMethod": "GET",
+        ...
+    }
+    ```
+
+If you need to accept multiple HTTP methods in a single function, you can use the `route` method and pass a list of
+HTTP methods.
+
+=== "app.py"
+
+    ```python hl_lines="9-10"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver()
+
+    # PUT and POST HTTP requests to the path /hello will route to this function
+    @app.route("/hello", method=["PUT", "POST"])
+    @tracer.capture_method
+    def get_hello_you():
+        name = app.current_event.json_body.get("name")
+        return {"message": f"hello {name}"}
+
+    # You can continue to use other utilities just as before
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
+
+=== "sample_request.json"
+
+    ```json
+    {
+        "resource": "/hello/{name}",
+        "path": "/hello/lessa",
+        "httpMethod": "GET",
+        ...
+    }
+    ```
+
+!!! note "It is usually better to have separate functions for each HTTP method, as the functionality tends to differ
+depending on which method is used."
 
 ### Accessing request details
 
@@ -852,6 +915,321 @@ You can instruct API Gateway handler to use a custom serializer to best suit you
             "variations": {"light", "dark"},
         }
     ```
+
+### Split routes with Router
+
+As you grow the number of routes a given Lambda function should handle, it is natural to split routes into separate files to ease maintenance - That's where the `Router` feature is useful.
+
+Let's assume you have `app.py` as your Lambda function entrypoint and routes in `users.py`, this is how you'd use the `Router` feature.
+
+=== "users.py"
+
+	We import **Router** instead of **ApiGatewayResolver**; syntax wise is exactly the same.
+
+    ```python hl_lines="4 8 12 15 21"
+    import itertools
+	from typing import Dict
+
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.event_handler.api_gateway import Router
+
+    logger = Logger(child=True)
+    router = Router()
+    USERS = {"user1": "details_here", "user2": "details_here", "user3": "details_here"}
+
+
+    @router.get("/users")
+    def get_users() -> Dict:
+		# /users?limit=1
+		pagination_limit = router.current_event.get_query_string_value(name="limit", default_value=10)
+
+		logger.info(f"Fetching the first {pagination_limit} users...")
+		ret = dict(itertools.islice(USERS.items(), int(pagination_limit)))
+		return {"items": [ret]}
+
+    @router.get("/users/<username>")
+    def get_user(username: str) -> Dict:
+        logger.info(f"Fetching username {username}")
+        return {"details": USERS.get(username, {})}
+
+	# many other related /users routing
+    ```
+
+=== "app.py"
+
+	We use `include_router` method and include all user routers registered in the `router` global object.
+
+	```python hl_lines="7 10-11"
+	from typing import Dict
+
+    from aws_lambda_powertools import Logger
+	from aws_lambda_powertools.event_handler import ApiGatewayResolver
+	from aws_lambda_powertools.utilities.typing import LambdaContext
+
+	import users
+
+    logger = Logger()
+	app = ApiGatewayResolver()
+	app.include_router(users.router)
+
+
+	def lambda_handler(event: Dict, context: LambdaContext):
+		return app.resolve(event, context)
+	```
+
+#### Route prefix
+
+In the previous example, `users.py` routes had a `/users` prefix. This might grow over time and become repetitive.
+
+When necessary, you can set a prefix when including a router object. This means you could remove `/users` prefix in `users.py` altogether.
+
+=== "app.py"
+
+	```python hl_lines="9"
+	from typing import Dict
+
+	from aws_lambda_powertools.event_handler import ApiGatewayResolver
+	from aws_lambda_powertools.utilities.typing import LambdaContext
+
+	import users
+
+	app = ApiGatewayResolver()
+	app.include_router(users.router, prefix="/users") # prefix '/users' to any route in `users.router`
+
+
+	def lambda_handler(event: Dict, context: LambdaContext):
+		return app.resolve(event, context)
+	```
+
+=== "users.py"
+
+    ```python hl_lines="11 15"
+	from typing import Dict
+
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.event_handler.api_gateway import Router
+
+    logger = Logger(child=True)
+    router = Router()
+    USERS = {"user1": "details", "user2": "details", "user3": "details"}
+
+
+    @router.get("/")  # /users, when we set the prefix in app.py
+    def get_users() -> Dict:
+		...
+
+    @router.get("/<username>")
+    def get_user(username: str) -> Dict:
+		...
+
+	# many other related /users routing
+    ```
+
+#### Sample layout
+
+This sample project contains a Users function with two distinct set of routes, `/users` and `/health`. The layout optimizes for code sharing, no custom build tooling, and it uses [Lambda Layers](../../index.md#lambda-layer) to install Lambda Powertools.
+
+=== "Project layout"
+
+
+    ```python hl_lines="1 8 10 12-15"
+    .
+    ├── Pipfile                    # project app & dev dependencies; poetry, pipenv, etc.
+    ├── Pipfile.lock
+    ├── README.md
+    ├── src
+    │       ├── __init__.py
+    │       ├── requirements.txt   # sam build detect it automatically due to CodeUri: src, e.g. pipenv lock -r > src/requirements.txt
+    │       └── users
+    │           ├── __init__.py
+    │           ├── main.py       # this will be our users Lambda fn; it could be split in folders if we want separate fns same code base
+    │           └── routers       # routers module
+    │               ├── __init__.py
+    │               ├── health.py # /users routes, e.g. from routers import users; users.router
+    │               └── users.py  # /users routes, e.g. from .routers import users; users.router
+    ├── template.yml              # SAM template.yml, CodeUri: src, Handler: users.main.lambda_handler
+    └── tests
+        ├── __init__.py
+        ├── unit
+        │   ├── __init__.py
+        │   └── test_users.py     # unit tests for the users router
+        │   └── test_health.py    # unit tests for the health router
+        └── functional
+            ├── __init__.py
+            ├── conftest.py       # pytest fixtures for the functional tests
+            └── test_main.py      # functional tests for the main lambda handler
+    ```
+
+=== "template.yml"
+
+    ```yaml  hl_lines="22-23"
+    AWSTemplateFormatVersion: '2010-09-09'
+    Transform: AWS::Serverless-2016-10-31
+    Description: Example service with multiple routes
+    Globals:
+        Function:
+            Timeout: 10
+            MemorySize: 512
+            Runtime: python3.9
+            Tracing: Active
+            Architectures:
+                - x86_64
+            Environment:
+                Variables:
+                    LOG_LEVEL: INFO
+                    POWERTOOLS_LOGGER_LOG_EVENT: true
+                    POWERTOOLS_METRICS_NAMESPACE: MyServerlessApplication
+                    POWERTOOLS_SERVICE_NAME: users
+    Resources:
+        UsersService:
+            Type: AWS::Serverless::Function
+            Properties:
+                Handler: users.main.lambda_handler
+                CodeUri: src
+                Layers:
+                    # Latest version: https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer
+                    - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:4
+                Events:
+                    ByUser:
+                        Type: Api
+                        Properties:
+                            Path: /users/{name}
+                            Method: GET
+                    AllUsers:
+                        Type: Api
+                        Properties:
+                            Path: /users
+                            Method: GET
+                    HealthCheck:
+                        Type: Api
+                        Properties:
+                            Path: /status
+                            Method: GET
+    Outputs:
+        UsersApiEndpoint:
+            Description: "API Gateway endpoint URL for Prod environment for Users Function"
+            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+        AllUsersURL:
+            Description: "URL to fetch all registered users"
+            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users"
+        ByUserURL:
+            Description: "URL to retrieve details by user"
+            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users/test"
+        UsersServiceFunctionArn:
+            Description: "Users Lambda Function ARN"
+            Value: !GetAtt UsersService.Arn
+    ```
+
+=== "src/users/main.py"
+
+    ```python hl_lines="9 15-16"
+    from typing import Dict
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.event_handler import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler.api_gateway import ProxyEventType
+    from aws_lambda_powertools.logging.correlation_paths import APPLICATION_LOAD_BALANCER
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+    from .routers import health, users
+
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
+
+    app.include_router(health.router)
+    app.include_router(users.router)
+
+
+    @logger.inject_lambda_context(correlation_id_path=API_GATEWAY_REST)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event: Dict, context: LambdaContext):
+        return app.resolve(event, context)
+    ```
+
+=== "src/users/routers/health.py"
+
+    ```python hl_lines="4 6-7 10"
+    from typing import Dict
+
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.event_handler.api_gateway import Router
+
+    router = Router()
+    logger = Logger(child=True)
+
+
+    @router.get("/status")
+    def health() -> Dict:
+        logger.debug("Health check called")
+        return {"status": "OK"}
+    ```
+
+=== "tests/functional/test_users.py"
+
+    ```python  hl_lines="3"
+    import json
+
+    from src.users import main  # follows namespace package from root
+
+
+    def test_lambda_handler(apigw_event, lambda_context):
+        ret = main.lambda_handler(apigw_event, lambda_context)
+        expected = json.dumps({"message": "hello universe"}, separators=(",", ":"))
+
+        assert ret["statusCode"] == 200
+        assert ret["body"] == expected
+    ```
+
+### Considerations
+
+This utility is optimized for fast startup, minimal feature set, and to quickly on-board customers familiar with frameworks like Flask — it's not meant to be a fully fledged framework.
+
+Event Handler naturally leads to a single Lambda function handling multiple routes for a given service, which can be eventually broken into multiple functions.
+
+Both single (monolithic) and multiple functions (micro) offer different set of trade-offs worth knowing.
+
+!!! tip "TL;DR. Start with a monolithic function, add additional functions with new handlers, and possibly break into micro functions if necessary."
+
+#### Monolithic function
+
+![Monolithic function sample](./../../media/monolithic-function.png)
+
+A monolithic function means that your final code artifact will be deployed to a single function. This is generally the best approach to start.
+
+**Benefits**
+
+* **Code reuse**. It's easier to reason about your service, modularize it and reuse code as it grows. Eventually, it can be turned into a standalone library.
+* **No custom tooling**. Monolithic functions are treated just like normal Python packages; no upfront investment in tooling.
+* **Faster deployment and debugging**. Whether you use all-at-once, linear, or canary deployments, a monolithic function is a single deployable unit. IDEs like PyCharm and VSCode have tooling to quickly profile, visualize, and step through debug any Python package.
+
+**Downsides**
+
+* **Cold starts**. Frequent deployments and/or high load can diminish the benefit of monolithic functions depending on your latency requirements, due to [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"}. Always load test to pragmatically balance between your customer experience and development cognitive load.
+* **Granular security permissions**. The micro function approach enables you to use fine-grained permissions & access controls, separate external dependencies & code signing at the function level. Conversely, you could have multiple functions while duplicating the final code artifact in a monolithic approach.
+    - Regardless, least privilege can be applied to either approaches.
+* **Higher risk per deployment**. A misconfiguration or invalid import can cause disruption if not caught earlier in automated testing. Multiple functions can mitigate misconfigurations but they would still share the same code artifact. You can further minimize risks with multiple environments in your CI/CD pipeline.
+
+#### Micro function
+
+![Micro function sample](./../../media/micro-function.png)
+
+A micro function means that your final code artifact will be different to each function deployed. This is generally the approach to start if you're looking for fine-grain control and/or high load on certain parts of your service.
+
+**Benefits**
+
+* **Granular scaling**. A micro function can benefit from the [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"} to scale differently depending on each part of your application. Concurrency controls and provisioned concurrency can also be used at a granular level for capacity management.
+* **Discoverability**. Micro functions are easier do visualize when using distributed tracing. Their high-level architectures can be self-explanatory, and complexity is highly visible — assuming each function is named to the business purpose it serves.
+* **Package size**. An independent function can be significant smaller (KB vs MB) depending on external dependencies it require to perform its purpose. Conversely, a monolithic approach can benefit from [Lambda Layers](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html){target="_blank"} to optimize builds for external dependencies.
+
+**Downsides**
+
+* **Upfront investment**. Python ecosystem doesn't use a bundler — you need a custom build tooling to ensure each function only has what it needs and account for [C bindings for runtime compatibility](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html){target="_blank"}. Operations become more elaborate — you need to standardize tracing labels/annotations, structured logging, and metrics to pinpoint root causes.
+    - Engineering discipline is necessary for both approaches. Micro-function approach however requires further attention in consistency as the number of functions grow, just like any distributed system.
+* **Harder to share code**. Shared code must be carefully evaluated to avoid unnecessary deployments when that changes. Equally, if shared code isn't a library,
+your development, building, deployment tooling need to accommodate the distinct layout.
+* **Slower safe deployments**. Safely deploying multiple functions require coordination — AWS CodeDeploy deploys and verifies each function sequentially. This increases lead time substantially (minutes to hours) depending on the deployment strategy you choose. You can mitigate it by selectively enabling it in prod-like environments only, and where the risk profile is applicable.
+    - Automated testing, operational and security reviews are essential to stability in either approaches.
 
 ## Testing your code
 

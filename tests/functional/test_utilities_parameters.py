@@ -1503,7 +1503,7 @@ def test_appconf_provider_get_configuration_no_transform(mock_name, config):
     stubber.activate()
 
     try:
-        value = provider.get(mock_name)
+        value: str = provider.get(mock_name)
         str_value = value.decode("utf-8")
         assert str_value == json.dumps(mock_body_json)
         stubber.assert_no_pending_responses()
@@ -1516,11 +1516,12 @@ def test_appconf_get_app_config_no_transform(monkeypatch, mock_name):
     Test get_app_config()
     """
     mock_body_json = {"myenvvar1": "Black Panther", "myenvvar2": 3}
+    mock_body_bytes = str.encode(json.dumps(mock_body_json))
 
     class TestProvider(BaseProvider):
-        def _get(self, name: str, **kwargs) -> str:
+        def _get(self, name: str, **kwargs) -> bytes:
             assert name == mock_name
-            return json.dumps(mock_body_json).encode("utf-8")
+            return mock_body_bytes
 
         def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
             raise NotImplementedError()
@@ -1532,6 +1533,30 @@ def test_appconf_get_app_config_no_transform(monkeypatch, mock_name):
     value = parameters.get_app_config(mock_name, environment=environment, application=application)
     str_value = value.decode("utf-8")
     assert str_value == json.dumps(mock_body_json)
+    assert value == mock_body_bytes
+
+
+def test_appconf_get_app_config_transform_json(monkeypatch, mock_name):
+    """
+    Test get_app_config()
+    """
+    mock_body_json = {"myenvvar1": "Black Panther", "myenvvar2": 3}
+    mock_body_bytes = str.encode(json.dumps(mock_body_json))
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            assert name == mock_name
+            return mock_body_bytes
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig", TestProvider())
+
+    environment = "dev"
+    application = "myapp"
+    value = parameters.get_app_config(mock_name, environment=environment, application=application, transform="json")
+    assert value == mock_body_json
 
 
 def test_appconf_get_app_config_new(monkeypatch, mock_name, mock_value):

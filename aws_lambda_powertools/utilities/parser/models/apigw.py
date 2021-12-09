@@ -89,4 +89,4 @@ class APIGatewayProxyEventModel(BaseModel):
     pathParameters: Optional[Dict[str, str]]
     stageVariables: Optional[Dict[str, str]]
     isBase64Encoded: bool
-    body: str
+    body: Optional[str]
