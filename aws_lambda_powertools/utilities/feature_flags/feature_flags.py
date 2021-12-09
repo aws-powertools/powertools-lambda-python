@@ -172,7 +172,7 @@ class FeatureFlags:
 
         return config
 
-    def evaluate(self, *, name: str, context: Optional[Dict[str, Any]] = None, default: bool) -> Any:
+    def evaluate(self, *, name: str, context: Optional[Dict[str, Any]] = None, default: Any) -> Any:
         """Evaluate whether a feature flag should be enabled according to stored schema and input context
 
         **Logic when evaluating a feature flag**
