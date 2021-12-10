@@ -1,14 +1,14 @@
 import logging
-from typing import Any, Callable, Dict, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, overload
+
+from aws_lambda_powertools.utilities.parser.types import Model
 
 from ...middleware_factory import lambda_handler_decorator
 from ..typing import LambdaContext
 from .envelopes.base import Envelope
 from .exceptions import InvalidEnvelopeError, InvalidModelTypeError
-from .types import Model
 
 logger = logging.getLogger(__name__)
-
 
 EventParserReturnType = TypeVar("EventParserReturnType")
 
@@ -19,7 +19,7 @@ def event_parser(
     event: Dict[str, Any],
     context: LambdaContext,
     model: Type[Model],
-    envelope: Optional[Union[Envelope, Type[Envelope]]] = None,
+    envelope: Optional[Type[Envelope]] = None,
 ) -> EventParserReturnType:
     """Lambda handler decorator to parse & validate events using Pydantic models
 
@@ -81,14 +81,22 @@ def event_parser(
     InvalidEnvelopeError
         When envelope given does not implement BaseEnvelope
     """
-    parsed_event = parse(event=event, model=model, envelope=envelope)
+    parsed_event = parse(event=event, model=model, envelope=envelope) if envelope else parse(event=event, model=model)
     logger.debug(f"Calling handler {handler.__name__}")
     return handler(parsed_event, context)
 
 
-def parse(
-    event: Dict[str, Any], model: Type[Model], envelope: Optional[Union[Envelope, Type[Envelope]]] = None
-) -> Model:
+@overload
+def parse(event: Dict[str, Any], model: Type[Model]) -> Model:
+    ...
+
+
+@overload
+def parse(event: Dict[str, Any], model: Type[Model], envelope: Type[Envelope]):
+    ...
+
+
+def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Envelope]] = None):
     """Standalone function to parse & validate events using Pydantic models
 
     Typically used when you need fine-grained control over error handling compared to event_parser decorator.
