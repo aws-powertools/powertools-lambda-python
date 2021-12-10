@@ -1,12 +1,12 @@
 import base64
 import logging
 from binascii import Error as BinAsciiError
-from typing import List
+from typing import List, Union
 
 from pydantic import BaseModel, validator
 from pydantic.types import PositiveInt
 
-from ..types import Literal
+from aws_lambda_powertools.utilities.parser.types import Literal, Model
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class KinesisDataStreamRecordPayload(BaseModel):
     kinesisSchemaVersion: str
     partitionKey: str
     sequenceNumber: PositiveInt
-    data: bytes  # base64 encoded str is parsed into bytes
+    data: Union[bytes, Model]  # base64 encoded str is parsed into bytes
     approximateArrivalTimestamp: float
 
     @validator("data", pre=True, allow_reuse=True)

@@ -170,6 +170,8 @@ Parser comes with the following built-in models:
 
 You can extend them to include your own models, and yet have all other known fields parsed along the way.
 
+!!! tip "For Mypy users, we only allow type override for fields where payload is injected e.g. `detail`, `body`, etc."
+
 **EventBridge example**
 
 === "extending_builtin_models.py"
