@@ -6,6 +6,7 @@ from botocore.config import Config
 from botocore.stub import Stubber
 
 from aws_lambda_powertools.utilities.batch import PartialSQSProcessor, batch_processor, sqs_batch_processor
+from aws_lambda_powertools.utilities.batch.base import BatchProcessor, EventType
 from aws_lambda_powertools.utilities.batch.exceptions import SQSBatchProcessingError
 
 
@@ -290,3 +291,78 @@ def test_partial_sqs_processor_context_only_failure(sqs_event_factory, record_ha
             ctx.process()
 
     assert len(error.value.child_exceptions) == 2
+
+
+def test_batch_processor_middleware_success_only(sqs_event_factory, record_handler):
+    # GIVEN
+    first_record = sqs_event_factory("success")
+    second_record = sqs_event_factory("success")
+    event = {"Records": [first_record, second_record]}
+
+    processor = BatchProcessor(event_type=EventType.SQS)
+
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.report()
+
+    # WHEN
+    result = lambda_handler(event, {})
+
+    # THEN
+    assert result["batchItemFailures"] == []
+
+
+def test_batch_processor_middleware_with_failure(sqs_event_factory, record_handler):
+    # GIVEN
+    first_record = sqs_event_factory("fail")
+    second_record = sqs_event_factory("success")
+    event = {"Records": [first_record, second_record]}
+
+    processor = BatchProcessor(event_type=EventType.SQS)
+
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.report()
+
+    # WHEN
+    result = lambda_handler(event, {})
+
+    # THEN
+    assert len(result["batchItemFailures"]) == 1
+
+
+def test_batch_processor_context_success_only(sqs_event_factory, record_handler):
+    # GIVEN
+    first_record = sqs_event_factory("success")
+    second_record = sqs_event_factory("success")
+    records = [first_record, second_record]
+    processor = BatchProcessor(event_type=EventType.SQS)
+
+    # WHEN
+    with processor(records, record_handler) as batch:
+        processed_messages = batch.process()
+
+    # THEN
+    assert processed_messages == [
+        ("success", first_record["body"], first_record),
+        ("success", second_record["body"], second_record),
+    ]
+
+    assert batch.report() == {"batchItemFailures": []}
+
+
+def test_batch_processor_context_with_failure(sqs_event_factory, record_handler):
+    # GIVEN
+    first_record = sqs_event_factory("failure")
+    second_record = sqs_event_factory("success")
+    records = [first_record, second_record]
+    processor = BatchProcessor(event_type=EventType.SQS)
+
+    # WHEN
+    with processor(records, record_handler) as batch:
+        processed_messages = batch.process()
+
+    # THEN
+    assert processed_messages[1] == ("success", second_record["body"], second_record)
+    assert len(batch.fail_messages) == 1
+    assert batch.report() == {"batchItemFailures": [{first_record["receiptHandle"]: first_record["messageId"]}]}

@@ -3,14 +3,21 @@
 """
 Batch processing utilities
 """
-
 import logging
+import sys
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Tuple
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
 logger = logging.getLogger(__name__)
+
+
+class EventType(Enum):
+    SQS = "SQS"
+    KinesisDataStream = "KinesisDataStream"
+    DynamoDB = "DynamoDB"
 
 
 class BasePartialProcessor(ABC):
@@ -146,3 +153,76 @@ def batch_processor(
         processor.process()
 
     return handler(event, context)
+
+
+class BatchProcessor(BasePartialProcessor):
+    DEFAULT_REPORT = {"batchItemFailures": []}
+
+    def __init__(self, event_type: EventType):
+        """Process batch and partially report failed items
+
+        Parameters
+        ----------
+        event_type: EventType
+            Whether this is a SQS, DynamoDB Streams, or Kinesis Data Stream event
+        """
+        # refactor: Bring boto3 etc. for deleting permanent exceptions
+        self.event_type = event_type
+        self.items_to_report: Dict[str, List[Optional[dict]]] = self.DEFAULT_REPORT
+
+        super().__init__()
+
+    # refactor: think of a better name
+    def report(self):
+        """Report batch items that failed processing, if any"""
+        return self.items_to_report
+
+    def _prepare(self):
+        """
+        Remove results from previous execution.
+        """
+        self.success_messages.clear()
+        self.fail_messages.clear()
+        self.items_to_report = self.DEFAULT_REPORT
+
+    def _process_record(self, record) -> Tuple:
+        """
+        Process a record with instance's handler
+
+        Parameters
+        ----------
+        record: Any
+            An object to be processed.
+        """
+        try:
+            result = self.handler(record=record)
+            return self.success_handler(record=record, result=result)
+        except Exception:
+            return self.failure_handler(record=record, exception=sys.exc_info())
+
+    def _clean(self):
+        """
+        Report messages to be deleted in case of partial failure.
+        """
+
+        if not self._has_messages_to_report():
+            return
+
+        messages = self._get_messages_to_report()
+        self.items_to_report["batchItemFailures"].append(messages)
+
+        return self.items_to_report
+
+    def _has_messages_to_report(self) -> bool:
+        if self.fail_messages:
+            return True
+
+        logger.debug(f"All {len(self.success_messages)} records successfully processed")
+        return False
+
+    def _get_messages_to_report(self) -> Dict[str, str]:
+        """
+        Format messages to use in batch deletion
+        """
+        # Refactor: get message per event type
+        return {msg["receiptHandle"]: msg["messageId"] for msg in self.fail_messages}
