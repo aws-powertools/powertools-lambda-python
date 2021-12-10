@@ -12,3 +12,5 @@ else:
     from typing_extensions import Literal  # noqa: F401
 
 Model = TypeVar("Model", bound=BaseModel)
+EnvelopeModel = TypeVar("EnvelopeModel")
+EventParserReturnType = TypeVar("EventParserReturnType")

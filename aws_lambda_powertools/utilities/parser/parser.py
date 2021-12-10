@@ -1,7 +1,7 @@
 import logging
-from typing import Any, Callable, Dict, Optional, Type, TypeVar, overload
+from typing import Any, Callable, Dict, Optional, Type, overload
 
-from aws_lambda_powertools.utilities.parser.types import Model
+from aws_lambda_powertools.utilities.parser.types import EnvelopeModel, EventParserReturnType, Model
 
 from ...middleware_factory import lambda_handler_decorator
 from ..typing import LambdaContext
@@ -9,8 +9,6 @@ from .envelopes.base import Envelope
 from .exceptions import InvalidEnvelopeError, InvalidModelTypeError
 
 logger = logging.getLogger(__name__)
-
-EventParserReturnType = TypeVar("EventParserReturnType")
 
 
 @lambda_handler_decorator
@@ -92,7 +90,7 @@ def parse(event: Dict[str, Any], model: Type[Model]) -> Model:
 
 
 @overload
-def parse(event: Dict[str, Any], model: Type[Model], envelope: Type[Envelope]):
+def parse(event: Dict[str, Any], model: Type[Model], envelope: Type[Envelope]) -> EnvelopeModel:
     ...
 
 
