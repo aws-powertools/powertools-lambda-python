@@ -1,6 +1,8 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 from pydantic import BaseModel, HttpUrl
+
+from aws_lambda_powertools.utilities.parser.types import Model
 
 
 class S3ObjectContext(BaseModel):
@@ -12,7 +14,7 @@ class S3ObjectContext(BaseModel):
 class S3ObjectConfiguration(BaseModel):
     accessPointArn: str
     supportingAccessPointArn: str
-    payload: str
+    payload: Union[str, Model]
 
 
 class S3ObjectUserRequest(BaseModel):

@@ -1,10 +1,10 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, root_validator
 from pydantic.networks import HttpUrl
 
-from ..types import Literal
+from aws_lambda_powertools.utilities.parser.types import Literal, Model
 
 
 class SnsMsgAttributeModel(BaseModel):
@@ -18,7 +18,7 @@ class SnsNotificationModel(BaseModel):
     UnsubscribeUrl: HttpUrl
     Type: Literal["Notification"]
     MessageAttributes: Optional[Dict[str, SnsMsgAttributeModel]]
-    Message: str
+    Message: Union[str, Model]
     MessageId: str
     SigningCertUrl: HttpUrl
     Signature: str
