@@ -156,7 +156,7 @@ def batch_processor(
 
 
 class BatchProcessor(BasePartialProcessor):
-    DEFAULT_REPORT = {"batchItemFailures": []}
+    DEFAULT_RESPONSE: Dict[str, List[Optional[dict]]] = {"batchItemFailures": []}
 
     def __init__(self, event_type: EventType):
         """Process batch and partially report failed items
@@ -168,13 +168,13 @@ class BatchProcessor(BasePartialProcessor):
         """
         # refactor: Bring boto3 etc. for deleting permanent exceptions
         self.event_type = event_type
-        self.items_to_report: Dict[str, List[Optional[dict]]] = self.DEFAULT_REPORT
+        self.batch_response = self.DEFAULT_RESPONSE
 
         super().__init__()
 
     def response(self):
-        """Response containing batch items that failed processing, if any"""
-        return self.items_to_report
+        """Batch items that failed processing, if any"""
+        return self.batch_response
 
     def _prepare(self):
         """
@@ -182,7 +182,7 @@ class BatchProcessor(BasePartialProcessor):
         """
         self.success_messages.clear()
         self.fail_messages.clear()
-        self.items_to_report = self.DEFAULT_REPORT
+        self.batch_response = self.DEFAULT_RESPONSE
 
     def _process_record(self, record) -> Tuple:
         """
@@ -208,9 +208,7 @@ class BatchProcessor(BasePartialProcessor):
             return
 
         messages = self._get_messages_to_report()
-        self.items_to_report["batchItemFailures"].append(messages)
-
-        return self.items_to_report
+        self.batch_response = {"batchItemFailures": [messages]}
 
     def _has_messages_to_report(self) -> bool:
         if self.fail_messages:
