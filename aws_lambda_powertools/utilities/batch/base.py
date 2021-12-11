@@ -172,9 +172,8 @@ class BatchProcessor(BasePartialProcessor):
 
         super().__init__()
 
-    # refactor: think of a better name
-    def report(self):
-        """Report batch items that failed processing, if any"""
+    def response(self):
+        """Response containing batch items that failed processing, if any"""
         return self.items_to_report
 
     def _prepare(self):

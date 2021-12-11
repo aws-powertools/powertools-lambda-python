@@ -303,7 +303,7 @@ def test_batch_processor_middleware_success_only(sqs_event_factory, record_handl
 
     @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context):
-        return processor.report()
+        return processor.response()
 
     # WHEN
     result = lambda_handler(event, {})
@@ -322,7 +322,7 @@ def test_batch_processor_middleware_with_failure(sqs_event_factory, record_handl
 
     @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context):
-        return processor.report()
+        return processor.response()
 
     # WHEN
     result = lambda_handler(event, {})
@@ -348,7 +348,7 @@ def test_batch_processor_context_success_only(sqs_event_factory, record_handler)
         ("success", second_record["body"], second_record),
     ]
 
-    assert batch.report() == {"batchItemFailures": []}
+    assert batch.response() == {"batchItemFailures": []}
 
 
 def test_batch_processor_context_with_failure(sqs_event_factory, record_handler):
@@ -365,4 +365,4 @@ def test_batch_processor_context_with_failure(sqs_event_factory, record_handler)
     # THEN
     assert processed_messages[1] == ("success", second_record["body"], second_record)
     assert len(batch.fail_messages) == 1
-    assert batch.report() == {"batchItemFailures": [{first_record["receiptHandle"]: first_record["messageId"]}]}
+    assert batch.response() == {"batchItemFailures": [{first_record["receiptHandle"]: first_record["messageId"]}]}
