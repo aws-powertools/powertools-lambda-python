@@ -1,3 +1,4 @@
+from random import randint
 from typing import Callable
 from unittest.mock import patch
 
@@ -8,6 +9,7 @@ from botocore.stub import Stubber
 from aws_lambda_powertools.utilities.batch import PartialSQSProcessor, batch_processor, sqs_batch_processor
 from aws_lambda_powertools.utilities.batch.base import BatchProcessor, EventType
 from aws_lambda_powertools.utilities.batch.exceptions import SQSBatchProcessingError
+from tests.functional.utils import decode_kinesis_data, str_to_b64
 
 
 @pytest.fixture(scope="module")
@@ -29,9 +31,45 @@ def sqs_event_factory() -> Callable:
 
 
 @pytest.fixture(scope="module")
+def kinesis_event_factory() -> Callable:
+    def factory(body: str):
+        seq = "".join(str(randint(0, 9)) for _ in range(52))
+        partition_key = str(randint(1, 9))
+        return {
+            "kinesis": {
+                "kinesisSchemaVersion": "1.0",
+                "partitionKey": partition_key,
+                "sequenceNumber": seq,
+                "data": str_to_b64(body),
+                "approximateArrivalTimestamp": 1545084650.987,
+            },
+            "eventSource": "aws:kinesis",
+            "eventVersion": "1.0",
+            "eventID": f"shardId-000000000006:{seq}",
+            "eventName": "aws:kinesis:record",
+            "invokeIdentityArn": "arn:aws:iam::123456789012:role/lambda-role",
+            "awsRegion": "us-east-2",
+            "eventSourceARN": "arn:aws:kinesis:us-east-2:123456789012:stream/lambda-stream",
+        }
+
+    return factory
+
+
+@pytest.fixture(scope="module")
 def record_handler() -> Callable:
     def handler(record):
         body = record["body"]
+        if "fail" in body:
+            raise Exception("Failed to process record.")
+        return body
+
+    return handler
+
+
+@pytest.fixture(scope="module")
+def kinesis_record_handler() -> Callable:
+    def handler(record):
+        body = decode_kinesis_data(record)
         if "fail" in body:
             raise Exception("Failed to process record.")
         return body
@@ -366,3 +404,61 @@ def test_batch_processor_context_with_failure(sqs_event_factory, record_handler)
     assert processed_messages[1] == ("success", second_record["body"], second_record)
     assert len(batch.fail_messages) == 1
     assert batch.response() == {"batchItemFailures": [{first_record["receiptHandle"]: first_record["messageId"]}]}
+
+
+def test_batch_processor_kinesis_context_success_only(kinesis_event_factory, kinesis_record_handler):
+    # GIVEN
+    first_record = kinesis_event_factory("success")
+    second_record = kinesis_event_factory("success")
+    records = [first_record, second_record]
+    processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
+
+    # WHEN
+    with processor(records, kinesis_record_handler) as batch:
+        processed_messages = batch.process()
+
+    # THEN
+    assert processed_messages == [
+        ("success", decode_kinesis_data(first_record), first_record),
+        ("success", decode_kinesis_data(second_record), second_record),
+    ]
+
+    assert batch.response() == {"batchItemFailures": []}
+
+
+def test_batch_processor_kinesis_context_with_failure(kinesis_event_factory, kinesis_record_handler):
+    # GIVEN
+    first_record = kinesis_event_factory("failure")
+    second_record = kinesis_event_factory("success")
+    records = [first_record, second_record]
+    processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
+
+    # WHEN
+    with processor(records, kinesis_record_handler) as batch:
+        processed_messages = batch.process()
+
+    # THEN
+    assert processed_messages[1] == ("success", decode_kinesis_data(second_record), second_record)
+    assert len(batch.fail_messages) == 1
+    assert batch.response() == {
+        "batchItemFailures": [{first_record["eventID"]: first_record["kinesis"]["sequenceNumber"]}]
+    }
+
+
+def test_batch_processor_kinesis_middleware_with_failure(kinesis_event_factory, kinesis_record_handler):
+    # GIVEN
+    first_record = kinesis_event_factory("failure")
+    second_record = kinesis_event_factory("success")
+    event = {"Records": [first_record, second_record]}
+
+    processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
+
+    @batch_processor(record_handler=kinesis_record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
+
+    # WHEN
+    result = lambda_handler(event, {})
+
+    # THEN
+    assert len(result["batchItemFailures"]) == 1

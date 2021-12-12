@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class EventType(Enum):
     SQS = "SQS"
-    KinesisDataStream = "KinesisDataStream"
+    KinesisDataStreams = "KinesisDataStreams"
     DynamoDB = "DynamoDB"
 
 
@@ -169,7 +169,11 @@ class BatchProcessor(BasePartialProcessor):
         # refactor: Bring boto3 etc. for deleting permanent exceptions
         self.event_type = event_type
         self.batch_response = self.DEFAULT_RESPONSE
-
+        self._COLLECTOR_MAPPING = {
+            EventType.SQS: self._collect_sqs_failures,
+            EventType.KinesisDataStreams: self._collect_kinesis_failures,
+            EventType.DynamoDB: self._collect_dynamodb_failures,
+        }
         super().__init__()
 
     def response(self):
@@ -222,4 +226,13 @@ class BatchProcessor(BasePartialProcessor):
         Format messages to use in batch deletion
         """
         # Refactor: get message per event type
+        return self._COLLECTOR_MAPPING[self.event_type]()
+
+    def _collect_sqs_failures(self):
         return {msg["receiptHandle"]: msg["messageId"] for msg in self.fail_messages}
+
+    def _collect_kinesis_failures(self):
+        return {msg["eventID"]: msg["kinesis"]["sequenceNumber"] for msg in self.fail_messages}
+
+    def _collect_dynamodb_failures(self):
+        ...
