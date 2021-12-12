@@ -169,7 +169,6 @@ class BatchProcessor(BasePartialProcessor):
         event_type: EventType
             Whether this is a SQS, DynamoDB Streams, or Kinesis Data Stream event
         """
-        # refactor: Bring boto3 etc. for deleting permanent exceptions
         self.event_type = event_type
         self.batch_response = self.DEFAULT_RESPONSE
         self._COLLECTOR_MAPPING = {
