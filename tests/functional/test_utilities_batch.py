@@ -34,11 +34,10 @@ def sqs_event_factory() -> Callable:
 def kinesis_event_factory() -> Callable:
     def factory(body: str):
         seq = "".join(str(randint(0, 9)) for _ in range(52))
-        partition_key = str(randint(1, 9))
         return {
             "kinesis": {
                 "kinesisSchemaVersion": "1.0",
-                "partitionKey": partition_key,
+                "partitionKey": "1",
                 "sequenceNumber": seq,
                 "data": str_to_b64(body),
                 "approximateArrivalTimestamp": 1545084650.987,
@@ -403,7 +402,7 @@ def test_batch_processor_context_with_failure(sqs_event_factory, record_handler)
     # THEN
     assert processed_messages[1] == ("success", second_record["body"], second_record)
     assert len(batch.fail_messages) == 1
-    assert batch.response() == {"batchItemFailures": [{first_record["receiptHandle"]: first_record["messageId"]}]}
+    assert batch.response() == {"batchItemFailures": [{"itemIdentifier": first_record["messageId"]}]}
 
 
 def test_batch_processor_kinesis_context_success_only(kinesis_event_factory, kinesis_record_handler):
@@ -440,9 +439,7 @@ def test_batch_processor_kinesis_context_with_failure(kinesis_event_factory, kin
     # THEN
     assert processed_messages[1] == ("success", decode_kinesis_data(second_record), second_record)
     assert len(batch.fail_messages) == 1
-    assert batch.response() == {
-        "batchItemFailures": [{first_record["eventID"]: first_record["kinesis"]["sequenceNumber"]}]
-    }
+    assert batch.response() == {"batchItemFailures": [{"itemIdentifier": first_record["kinesis"]["sequenceNumber"]}]}
 
 
 def test_batch_processor_kinesis_middleware_with_failure(kinesis_event_factory, kinesis_record_handler):

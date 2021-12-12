@@ -229,10 +229,10 @@ class BatchProcessor(BasePartialProcessor):
         return self._COLLECTOR_MAPPING[self.event_type]()
 
     def _collect_sqs_failures(self):
-        return {msg["receiptHandle"]: msg["messageId"] for msg in self.fail_messages}
+        return {"itemIdentifier": msg["messageId"] for msg in self.fail_messages}
 
     def _collect_kinesis_failures(self):
-        return {msg["eventID"]: msg["kinesis"]["sequenceNumber"] for msg in self.fail_messages}
+        return {"itemIdentifier": msg["kinesis"]["sequenceNumber"] for msg in self.fail_messages}
 
     def _collect_dynamodb_failures(self):
         ...
