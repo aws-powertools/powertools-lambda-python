@@ -7,7 +7,8 @@ import logging
 import sys
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from types import TracebackType
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
@@ -15,6 +16,11 @@ from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import Ki
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 
 logger = logging.getLogger(__name__)
+SuccessCallback = Tuple[str, Any, dict]
+FailureCallback = Tuple[str, str, dict]
+
+_ExcInfo = Tuple[Type[BaseException], BaseException, TracebackType]
+_OptExcInfo = Union[_ExcInfo, Tuple[None, None, None]]
 
 
 class EventType(Enum):
@@ -48,7 +54,7 @@ class BasePartialProcessor(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def _process_record(self, record: Any):
+    def _process_record(self, record: dict):
         """
         Process record with handler.
         """
@@ -67,13 +73,13 @@ class BasePartialProcessor(ABC):
     def __exit__(self, exception_type, exception_value, traceback):
         self._clean()
 
-    def __call__(self, records: List[Any], handler: Callable):
+    def __call__(self, records: List[dict], handler: Callable):
         """
         Set instance attributes before execution
 
         Parameters
         ----------
-        records: List[Any]
+        records: List[dict]
             List with objects to be processed.
         handler: Callable
             Callable to process "records" entries.
@@ -82,7 +88,7 @@ class BasePartialProcessor(ABC):
         self.handler = handler
         return self
 
-    def success_handler(self, record: Any, result: Any):
+    def success_handler(self, record: dict, result: Any) -> SuccessCallback:
         """
         Success callback
 
@@ -95,7 +101,7 @@ class BasePartialProcessor(ABC):
         self.success_messages.append(record)
         return entry
 
-    def failure_handler(self, record: Any, exception: Tuple):
+    def failure_handler(self, record: dict, exception: _OptExcInfo) -> FailureCallback:
         """
         Failure callback
 
@@ -196,17 +202,17 @@ class BatchProcessor(BasePartialProcessor):
         self.fail_messages.clear()
         self.batch_response = self.DEFAULT_RESPONSE
 
-    def _process_record(self, record) -> Tuple:
+    def _process_record(self, record: dict) -> Union[SuccessCallback, FailureCallback]:
         """
         Process a record with instance's handler
 
         Parameters
         ----------
-        record: Any
-            An object to be processed.
+        record: dict
+            A batch record to be processed.
         """
         try:
-            data = self._DATA_CLASS_MAPPING[self.event_type](record)
+            data = self._to_batch_type(record, event_type=self.event_type)
             result = self.handler(record=data)
             return self.success_handler(record=record, result=result)
         except Exception:
@@ -244,3 +250,8 @@ class BatchProcessor(BasePartialProcessor):
 
     def _collect_dynamodb_failures(self):
         return {"itemIdentifier": msg["dynamodb"]["SequenceNumber"] for msg in self.fail_messages}
+
+    def _to_batch_type(
+        self, record: dict, event_type: EventType
+    ) -> Union[SQSRecord, KinesisStreamRecord, DynamoDBRecord]:
+        return self._DATA_CLASS_MAPPING[event_type](record)  # type: ignore # since DictWrapper inference is incorrect
