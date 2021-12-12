@@ -8,7 +8,7 @@ import sys
 from abc import ABC, abstractmethod
 from enum import Enum
 from types import TracebackType
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, overload
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
@@ -16,11 +16,19 @@ from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import Ki
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 
 logger = logging.getLogger(__name__)
+has_pydantic = "pydantic" in sys.modules
+
 SuccessCallback = Tuple[str, Any, dict]
 FailureCallback = Tuple[str, str, dict]
-
 _ExcInfo = Tuple[Type[BaseException], BaseException, TracebackType]
 _OptExcInfo = Union[_ExcInfo, Tuple[None, None, None]]
+
+if has_pydantic:
+    from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamRecordModel
+    from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecord as KinesisDataStreamRecordModel
+    from aws_lambda_powertools.utilities.parser.models import SqsRecordModel
+
+    BatchTypeModels = Union[SqsRecordModel, DynamoDBStreamRecordModel, KinesisDataStreamRecordModel]
 
 
 class EventType(Enum):
@@ -167,15 +175,18 @@ def batch_processor(
 class BatchProcessor(BasePartialProcessor):
     DEFAULT_RESPONSE: Dict[str, List[Optional[dict]]] = {"batchItemFailures": []}
 
-    def __init__(self, event_type: EventType):
+    def __init__(self, event_type: EventType, model: Optional["BatchTypeModels"] = None):
         """Process batch and partially report failed items
 
         Parameters
         ----------
         event_type: EventType
             Whether this is a SQS, DynamoDB Streams, or Kinesis Data Stream event
+        model: Optional["BatchTypeModels"]
+            Parser's data model using either SqsRecordModel, DynamoDBStreamRecordModel, KinesisDataStreamRecord
         """
         self.event_type = event_type
+        self.model = model
         self.batch_response = self.DEFAULT_RESPONSE
         self._COLLECTOR_MAPPING = {
             EventType.SQS: self._collect_sqs_failures,
@@ -212,7 +223,7 @@ class BatchProcessor(BasePartialProcessor):
             A batch record to be processed.
         """
         try:
-            data = self._to_batch_type(record, event_type=self.event_type)
+            data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
             result = self.handler(record=data)
             return self.success_handler(record=record, result=result)
         except Exception:
@@ -251,7 +262,18 @@ class BatchProcessor(BasePartialProcessor):
     def _collect_dynamodb_failures(self):
         return {"itemIdentifier": msg["dynamodb"]["SequenceNumber"] for msg in self.fail_messages}
 
+    @overload
+    def _to_batch_type(self, record: dict, event_type: EventType, model: "BatchTypeModels") -> "BatchTypeModels":
+        ...
+
+    @overload
     def _to_batch_type(
         self, record: dict, event_type: EventType
     ) -> Union[SQSRecord, KinesisStreamRecord, DynamoDBRecord]:
-        return self._DATA_CLASS_MAPPING[event_type](record)  # type: ignore # since DictWrapper inference is incorrect
+        ...
+
+    def _to_batch_type(self, record: dict, event_type: EventType, model: Optional["BatchTypeModels"] = None):
+        if model:
+            return model.parse_obj(record)
+        else:
+            return self._DATA_CLASS_MAPPING[event_type](record)
