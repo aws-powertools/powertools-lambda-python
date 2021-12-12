@@ -9,7 +9,10 @@ from botocore.stub import Stubber
 from aws_lambda_powertools.utilities.batch import PartialSQSProcessor, batch_processor, sqs_batch_processor
 from aws_lambda_powertools.utilities.batch.base import BatchProcessor, EventType
 from aws_lambda_powertools.utilities.batch.exceptions import SQSBatchProcessingError
-from tests.functional.utils import decode_kinesis_data, str_to_b64
+from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
+from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
+from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+from tests.functional.utils import b64_to_str, str_to_b64
 
 
 @pytest.fixture(scope="module")
@@ -90,8 +93,8 @@ def record_handler() -> Callable:
 
 @pytest.fixture(scope="module")
 def kinesis_record_handler() -> Callable:
-    def handler(record):
-        body = decode_kinesis_data(record)
+    def handler(record: KinesisStreamRecord):
+        body = b64_to_str(record.kinesis.data)
         if "fail" in body:
             raise Exception("Failed to process record.")
         return body
@@ -101,8 +104,8 @@ def kinesis_record_handler() -> Callable:
 
 @pytest.fixture(scope="module")
 def dynamodb_record_handler() -> Callable:
-    def handler(record):
-        body = record["dynamodb"]["NewImage"]["message"]["S"]
+    def handler(record: DynamoDBRecord):
+        body = record.dynamodb.new_image.get("message").get_value
         if "fail" in body:
             raise Exception("Failed to process record.")
         return body
@@ -366,9 +369,9 @@ def test_partial_sqs_processor_context_only_failure(sqs_event_factory, record_ha
 
 def test_batch_processor_middleware_success_only(sqs_event_factory, record_handler):
     # GIVEN
-    first_record = sqs_event_factory("success")
-    second_record = sqs_event_factory("success")
-    event = {"Records": [first_record, second_record]}
+    first_record = SQSRecord(sqs_event_factory("success"))
+    second_record = SQSRecord(sqs_event_factory("success"))
+    event = {"Records": [first_record.raw_event, second_record.raw_event]}
 
     processor = BatchProcessor(event_type=EventType.SQS)
 
@@ -385,9 +388,9 @@ def test_batch_processor_middleware_success_only(sqs_event_factory, record_handl
 
 def test_batch_processor_middleware_with_failure(sqs_event_factory, record_handler):
     # GIVEN
-    first_record = sqs_event_factory("fail")
-    second_record = sqs_event_factory("success")
-    event = {"Records": [first_record, second_record]}
+    first_record = SQSRecord(sqs_event_factory("fail"))
+    second_record = SQSRecord(sqs_event_factory("success"))
+    event = {"Records": [first_record.raw_event, second_record.raw_event]}
 
     processor = BatchProcessor(event_type=EventType.SQS)
 
@@ -404,9 +407,9 @@ def test_batch_processor_middleware_with_failure(sqs_event_factory, record_handl
 
 def test_batch_processor_context_success_only(sqs_event_factory, record_handler):
     # GIVEN
-    first_record = sqs_event_factory("success")
-    second_record = sqs_event_factory("success")
-    records = [first_record, second_record]
+    first_record = SQSRecord(sqs_event_factory("success"))
+    second_record = SQSRecord(sqs_event_factory("success"))
+    records = [first_record.raw_event, second_record.raw_event]
     processor = BatchProcessor(event_type=EventType.SQS)
 
     # WHEN
@@ -415,8 +418,8 @@ def test_batch_processor_context_success_only(sqs_event_factory, record_handler)
 
     # THEN
     assert processed_messages == [
-        ("success", first_record["body"], first_record),
-        ("success", second_record["body"], second_record),
+        ("success", first_record.body, first_record.raw_event),
+        ("success", second_record.body, second_record.raw_event),
     ]
 
     assert batch.response() == {"batchItemFailures": []}
@@ -424,9 +427,9 @@ def test_batch_processor_context_success_only(sqs_event_factory, record_handler)
 
 def test_batch_processor_context_with_failure(sqs_event_factory, record_handler):
     # GIVEN
-    first_record = sqs_event_factory("failure")
-    second_record = sqs_event_factory("success")
-    records = [first_record, second_record]
+    first_record = SQSRecord(sqs_event_factory("failure"))
+    second_record = SQSRecord(sqs_event_factory("success"))
+    records = [first_record.raw_event, second_record.raw_event]
     processor = BatchProcessor(event_type=EventType.SQS)
 
     # WHEN
@@ -434,16 +437,17 @@ def test_batch_processor_context_with_failure(sqs_event_factory, record_handler)
         processed_messages = batch.process()
 
     # THEN
-    assert processed_messages[1] == ("success", second_record["body"], second_record)
+    assert processed_messages[1] == ("success", second_record.body, second_record.raw_event)
     assert len(batch.fail_messages) == 1
-    assert batch.response() == {"batchItemFailures": [{"itemIdentifier": first_record["messageId"]}]}
+    assert batch.response() == {"batchItemFailures": [{"itemIdentifier": first_record.message_id}]}
 
 
 def test_batch_processor_kinesis_context_success_only(kinesis_event_factory, kinesis_record_handler):
     # GIVEN
-    first_record = kinesis_event_factory("success")
-    second_record = kinesis_event_factory("success")
-    records = [first_record, second_record]
+    first_record = KinesisStreamRecord(kinesis_event_factory("success"))
+    second_record = KinesisStreamRecord(kinesis_event_factory("success"))
+
+    records = [first_record.raw_event, second_record.raw_event]
     processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
 
     # WHEN
@@ -452,8 +456,8 @@ def test_batch_processor_kinesis_context_success_only(kinesis_event_factory, kin
 
     # THEN
     assert processed_messages == [
-        ("success", decode_kinesis_data(first_record), first_record),
-        ("success", decode_kinesis_data(second_record), second_record),
+        ("success", b64_to_str(first_record.kinesis.data), first_record.raw_event),
+        ("success", b64_to_str(second_record.kinesis.data), second_record.raw_event),
     ]
 
     assert batch.response() == {"batchItemFailures": []}
@@ -461,9 +465,10 @@ def test_batch_processor_kinesis_context_success_only(kinesis_event_factory, kin
 
 def test_batch_processor_kinesis_context_with_failure(kinesis_event_factory, kinesis_record_handler):
     # GIVEN
-    first_record = kinesis_event_factory("failure")
-    second_record = kinesis_event_factory("success")
-    records = [first_record, second_record]
+    first_record = KinesisStreamRecord(kinesis_event_factory("failure"))
+    second_record = KinesisStreamRecord(kinesis_event_factory("success"))
+
+    records = [first_record.raw_event, second_record.raw_event]
     processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
 
     # WHEN
@@ -471,16 +476,16 @@ def test_batch_processor_kinesis_context_with_failure(kinesis_event_factory, kin
         processed_messages = batch.process()
 
     # THEN
-    assert processed_messages[1] == ("success", decode_kinesis_data(second_record), second_record)
+    assert processed_messages[1] == ("success", b64_to_str(second_record.kinesis.data), second_record.raw_event)
     assert len(batch.fail_messages) == 1
-    assert batch.response() == {"batchItemFailures": [{"itemIdentifier": first_record["kinesis"]["sequenceNumber"]}]}
+    assert batch.response() == {"batchItemFailures": [{"itemIdentifier": first_record.kinesis.sequence_number}]}
 
 
 def test_batch_processor_kinesis_middleware_with_failure(kinesis_event_factory, kinesis_record_handler):
     # GIVEN
-    first_record = kinesis_event_factory("failure")
-    second_record = kinesis_event_factory("success")
-    event = {"Records": [first_record, second_record]}
+    first_record = KinesisStreamRecord(kinesis_event_factory("failure"))
+    second_record = KinesisStreamRecord(kinesis_event_factory("success"))
+    event = {"Records": [first_record.raw_event, second_record.raw_event]}
 
     processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
 

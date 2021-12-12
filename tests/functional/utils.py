@@ -13,5 +13,5 @@ def str_to_b64(data: str) -> str:
     return base64.b64encode(data.encode()).decode("utf-8")
 
 
-def decode_kinesis_data(data: dict) -> str:
-    return base64.b64decode(data["kinesis"]["data"].encode()).decode("utf-8")
+def b64_to_str(data: str) -> str:
+    return base64.b64decode(data.encode()).decode("utf-8")

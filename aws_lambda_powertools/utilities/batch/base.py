@@ -10,6 +10,9 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
+from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
+from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 
 logger = logging.getLogger(__name__)
 
@@ -174,6 +177,12 @@ class BatchProcessor(BasePartialProcessor):
             EventType.KinesisDataStreams: self._collect_kinesis_failures,
             EventType.DynamoDBStreams: self._collect_dynamodb_failures,
         }
+        self._DATA_CLASS_MAPPING = {
+            EventType.SQS: SQSRecord,
+            EventType.KinesisDataStreams: KinesisStreamRecord,
+            EventType.DynamoDBStreams: DynamoDBRecord,
+        }
+
         super().__init__()
 
     def response(self):
@@ -198,7 +207,8 @@ class BatchProcessor(BasePartialProcessor):
             An object to be processed.
         """
         try:
-            result = self.handler(record=record)
+            data = self._DATA_CLASS_MAPPING[self.event_type](record)
+            result = self.handler(record=data)
             return self.success_handler(record=record, result=result)
         except Exception:
             return self.failure_handler(record=record, exception=sys.exc_info())
@@ -225,7 +235,6 @@ class BatchProcessor(BasePartialProcessor):
         """
         Format messages to use in batch deletion
         """
-        # Refactor: get message per event type
         return self._COLLECTOR_MAPPING[self.event_type]()
 
     def _collect_sqs_failures(self):
