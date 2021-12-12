@@ -55,6 +55,29 @@ def kinesis_event_factory() -> Callable:
 
 
 @pytest.fixture(scope="module")
+def dynamodb_event_factory() -> Callable:
+    def factory(body: str):
+        seq = "".join(str(randint(0, 9)) for _ in range(10))
+        return {
+            "eventID": "1",
+            "eventVersion": "1.0",
+            "dynamodb": {
+                "Keys": {"Id": {"N": "101"}},
+                "NewImage": {"message": {"S": body}},
+                "StreamViewType": "NEW_AND_OLD_IMAGES",
+                "SequenceNumber": seq,
+                "SizeBytes": 26,
+            },
+            "awsRegion": "us-west-2",
+            "eventName": "INSERT",
+            "eventSourceARN": "eventsource_arn",
+            "eventSource": "aws:dynamodb",
+        }
+
+    return factory
+
+
+@pytest.fixture(scope="module")
 def record_handler() -> Callable:
     def handler(record):
         body = record["body"]
@@ -69,6 +92,17 @@ def record_handler() -> Callable:
 def kinesis_record_handler() -> Callable:
     def handler(record):
         body = decode_kinesis_data(record)
+        if "fail" in body:
+            raise Exception("Failed to process record.")
+        return body
+
+    return handler
+
+
+@pytest.fixture(scope="module")
+def dynamodb_record_handler() -> Callable:
+    def handler(record):
+        body = record["dynamodb"]["NewImage"]["message"]["S"]
         if "fail" in body:
             raise Exception("Failed to process record.")
         return body
@@ -451,6 +485,62 @@ def test_batch_processor_kinesis_middleware_with_failure(kinesis_event_factory, 
     processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
 
     @batch_processor(record_handler=kinesis_record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
+
+    # WHEN
+    result = lambda_handler(event, {})
+
+    # THEN
+    assert len(result["batchItemFailures"]) == 1
+
+
+def test_batch_processor_dynamodb_context_success_only(dynamodb_event_factory, dynamodb_record_handler):
+    # GIVEN
+    first_record = dynamodb_event_factory("success")
+    second_record = dynamodb_event_factory("success")
+    records = [first_record, second_record]
+    processor = BatchProcessor(event_type=EventType.DynamoDBStreams)
+
+    # WHEN
+    with processor(records, dynamodb_record_handler) as batch:
+        processed_messages = batch.process()
+
+    # THEN
+    assert processed_messages == [
+        ("success", first_record["dynamodb"]["NewImage"]["message"]["S"], first_record),
+        ("success", second_record["dynamodb"]["NewImage"]["message"]["S"], second_record),
+    ]
+
+    assert batch.response() == {"batchItemFailures": []}
+
+
+def test_batch_processor_dynamodb_context_with_failure(dynamodb_event_factory, dynamodb_record_handler):
+    # GIVEN
+    first_record = dynamodb_event_factory("failure")
+    second_record = dynamodb_event_factory("success")
+    records = [first_record, second_record]
+    processor = BatchProcessor(event_type=EventType.DynamoDBStreams)
+
+    # WHEN
+    with processor(records, dynamodb_record_handler) as batch:
+        processed_messages = batch.process()
+
+    # THEN
+    assert processed_messages[1] == ("success", second_record["dynamodb"]["NewImage"]["message"]["S"], second_record)
+    assert len(batch.fail_messages) == 1
+    assert batch.response() == {"batchItemFailures": [{"itemIdentifier": first_record["dynamodb"]["SequenceNumber"]}]}
+
+
+def test_batch_processor_dynamodb_middleware_with_failure(dynamodb_event_factory, dynamodb_record_handler):
+    # GIVEN
+    first_record = dynamodb_event_factory("failure")
+    second_record = dynamodb_event_factory("success")
+    event = {"Records": [first_record, second_record]}
+
+    processor = BatchProcessor(event_type=EventType.DynamoDBStreams)
+
+    @batch_processor(record_handler=dynamodb_record_handler, processor=processor)
     def lambda_handler(event, context):
         return processor.response()
 

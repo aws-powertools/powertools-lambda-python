@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class EventType(Enum):
     SQS = "SQS"
     KinesisDataStreams = "KinesisDataStreams"
-    DynamoDB = "DynamoDB"
+    DynamoDBStreams = "DynamoDBStreams"
 
 
 class BasePartialProcessor(ABC):
@@ -172,7 +172,7 @@ class BatchProcessor(BasePartialProcessor):
         self._COLLECTOR_MAPPING = {
             EventType.SQS: self._collect_sqs_failures,
             EventType.KinesisDataStreams: self._collect_kinesis_failures,
-            EventType.DynamoDB: self._collect_dynamodb_failures,
+            EventType.DynamoDBStreams: self._collect_dynamodb_failures,
         }
         super().__init__()
 
@@ -235,4 +235,4 @@ class BatchProcessor(BasePartialProcessor):
         return {"itemIdentifier": msg["kinesis"]["sequenceNumber"] for msg in self.fail_messages}
 
     def _collect_dynamodb_failures(self):
-        ...
+        return {"itemIdentifier": msg["dynamodb"]["SequenceNumber"] for msg in self.fail_messages}
