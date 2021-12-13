@@ -23,7 +23,7 @@ class AppConfigStore(StoreProvider):
         name: str,
         max_age: int = 5,
         sdk_config: Optional[Config] = None,
-        transform: Union[AnyCallableT, str] = TRANSFORM_TYPE,
+        transform: Optional[Union[AnyCallableT, str]] = TRANSFORM_TYPE,
         envelope: Optional[str] = "",
         jmespath_options: Optional[Dict] = None,
         logger: Optional[Union[logging.Logger, Logger]] = None,
