@@ -28,7 +28,9 @@ if has_pydantic:
     from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecord as KinesisDataStreamRecordModel
     from aws_lambda_powertools.utilities.parser.models import SqsRecordModel
 
-    BatchTypeModels = Union[SqsRecordModel, DynamoDBStreamRecordModel, KinesisDataStreamRecordModel]
+    BatchTypeModels = Optional[
+        Union[Type[SqsRecordModel], Type[DynamoDBStreamRecordModel], Type[KinesisDataStreamRecordModel]]
+    ]
 
 
 class EventType(Enum):
