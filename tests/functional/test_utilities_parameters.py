@@ -1138,6 +1138,52 @@ def test_base_provider_get_transform_binary_exception(mock_name):
     assert "Incorrect padding" in str(excinfo)
 
 
+def test_base_provider_get_transform_callable(mock_name, mock_value):
+    """
+    Test BaseProvider.get() with a callable transform
+    """
+
+    mock_data = str(mock_value)
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            assert name == mock_name
+            return mock_data
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    provider = TestProvider()
+
+    value = provider.get(mock_name, transform=str)
+
+    assert isinstance(value, str)
+    assert value == mock_data
+
+
+def test_base_provider_get_transform_callable_exception(mock_name):
+    """
+    Test BaseProvider.get() with a callable transform that raises an exception
+    """
+
+    mock_data = str(mock_value) + "a"
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            assert name == mock_name
+            return mock_data
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    provider = TestProvider()
+
+    with pytest.raises(parameters.TransformParameterError) as excinfo:
+        provider.get(mock_name, transform=int)
+
+    assert "invalid literal for int() with base 10" in str(excinfo)
+
+
 def test_base_provider_get_multiple_transform_json(mock_name, mock_value):
     """
     Test BaseProvider.get_multiple() with a json transform
@@ -1279,6 +1325,78 @@ def test_base_provider_get_multiple_transform_binary_exception(mock_name):
         provider.get_multiple(mock_name, transform="binary", raise_on_transform_error=True)
 
     assert "Incorrect padding" in str(excinfo)
+
+
+def test_base_provider_get_multiple_transform_callable(mock_name, mock_value):
+    """
+    Test BaseProvider.get_multiple() with a callable transform
+    """
+
+    mock_data = str(mock_value)
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            assert path == mock_name
+            return {"A": mock_data}
+
+    provider = TestProvider()
+
+    value = provider.get_multiple(mock_name, transform=str)
+
+    assert isinstance(value, dict)
+    assert value["A"] == mock_data
+
+
+def test_base_provider_get_multiple_transform_callable_partial_failure(mock_name, mock_value):
+    """
+    Test BaseProvider.get_multiple() with a callable transform that contains a partial failure
+    """
+
+    mock_integer = 1234
+    mock_data_a = str(mock_integer)
+    mock_data_b = str(mock_value) + "a"
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            assert path == mock_name
+            return {"A": mock_data_a, "B": mock_data_b}
+
+    provider = TestProvider()
+
+    value = provider.get_multiple(mock_name, transform=int)
+
+    assert isinstance(value, dict)
+    assert value["A"] == mock_integer
+    assert value["B"] is None
+
+
+def test_base_provider_get_multiple_transform_callable_exception(mock_name, mock_value):
+    """
+    Test BaseProvider.get_multiple() with a callable transform that raises an exception
+    """
+
+    mock_data = str(mock_value) + "a"
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            assert path == mock_name
+            return {"A": mock_data}
+
+    provider = TestProvider()
+
+    with pytest.raises(parameters.TransformParameterError) as excinfo:
+        provider.get_multiple(mock_name, transform=int, raise_on_transform_error=True)
+
+    assert "invalid literal for int() with base 10" in str(excinfo)
 
 
 def test_base_provider_get_multiple_cached(mock_name, mock_value):
