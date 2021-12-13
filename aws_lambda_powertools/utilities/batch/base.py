@@ -236,12 +236,12 @@ class BatchProcessor(BasePartialProcessor):
         record: dict
             A batch record to be processed.
         """
+        data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
         try:
-            data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
             result = self.handler(record=data)
             return self.success_handler(record=record, result=result)
         except Exception:
-            return self.failure_handler(record=record, exception=sys.exc_info())
+            return self.failure_handler(record=data, exception=sys.exc_info())
 
     def _clean(self):
         """
@@ -268,7 +268,7 @@ class BatchProcessor(BasePartialProcessor):
         return self._COLLECTOR_MAPPING[self.event_type]()
 
     def _collect_sqs_failures(self):
-        return {"itemIdentifier": msg.messageId for msg in self.fail_messages}
+        return {"itemIdentifier": msg.message_id for msg in self.fail_messages}
 
     def _collect_kinesis_failures(self):
         return {"itemIdentifier": msg.kinesis.sequence_number for msg in self.fail_messages}
@@ -285,7 +285,7 @@ class BatchProcessor(BasePartialProcessor):
         ...
 
     def _to_batch_type(self, record: dict, event_type: EventType, model: Optional["BatchTypeModels"] = None):
-        if model:
+        if model is not None:
             return model.parse_obj(record)
         else:
             return self._DATA_CLASS_MAPPING[event_type](record)
