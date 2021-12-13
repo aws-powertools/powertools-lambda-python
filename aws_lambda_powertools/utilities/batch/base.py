@@ -16,13 +16,23 @@ from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import Ki
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 
 logger = logging.getLogger(__name__)
-has_pydantic = "pydantic" in sys.modules
 
-SuccessCallback = Tuple[str, Any, dict]
-FailureCallback = Tuple[str, str, dict]
+
+class EventType(Enum):
+    SQS = "SQS"
+    KinesisDataStreams = "KinesisDataStreams"
+    DynamoDBStreams = "DynamoDBStreams"
+
+
+#
+# type specifics
+#
+has_pydantic = "pydantic" in sys.modules
 _ExcInfo = Tuple[Type[BaseException], BaseException, TracebackType]
 _OptExcInfo = Union[_ExcInfo, Tuple[None, None, None]]
 
+# For IntelliSense and Mypy to work, we need to account for possible SQS, Kinesis and DynamoDB subclasses
+# We need them as subclasses as we must access their message ID or sequence number metadata via dot notation
 if has_pydantic:
     from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamRecordModel
     from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecord as KinesisDataStreamRecordModel
@@ -32,11 +42,13 @@ if has_pydantic:
         Union[Type[SqsRecordModel], Type[DynamoDBStreamRecordModel], Type[KinesisDataStreamRecordModel]]
     ]
 
-
-class EventType(Enum):
-    SQS = "SQS"
-    KinesisDataStreams = "KinesisDataStreams"
-    DynamoDBStreams = "DynamoDBStreams"
+# When using processor with default arguments, records will carry EventSourceDataClassTypes
+# and depending on what EventType it's passed it'll correctly map to the right record
+# When using Pydantic Models, it'll accept any
+EventSourceDataClassTypes = Union[SQSRecord, KinesisStreamRecord, DynamoDBRecord]
+BatchEventTypes = Union[EventSourceDataClassTypes, "BatchTypeModels"]
+SuccessCallback = Tuple[str, Any, BatchEventTypes]
+FailureCallback = Tuple[str, str, BatchEventTypes]
 
 
 class BasePartialProcessor(ABC):
@@ -45,8 +57,8 @@ class BasePartialProcessor(ABC):
     """
 
     def __init__(self):
-        self.success_messages: List = []
-        self.fail_messages: List = []
+        self.success_messages: List[BatchEventTypes] = []
+        self.fail_messages: List[BatchEventTypes] = []
         self.exceptions: List = []
 
     @abstractmethod
@@ -98,7 +110,7 @@ class BasePartialProcessor(ABC):
         self.handler = handler
         return self
 
-    def success_handler(self, record: dict, result: Any) -> SuccessCallback:
+    def success_handler(self, record, result: Any) -> SuccessCallback:
         """
         Success callback
 
@@ -111,7 +123,7 @@ class BasePartialProcessor(ABC):
         self.success_messages.append(record)
         return entry
 
-    def failure_handler(self, record: dict, exception: _OptExcInfo) -> FailureCallback:
+    def failure_handler(self, record, exception: _OptExcInfo) -> FailureCallback:
         """
         Failure callback
 
@@ -256,22 +268,20 @@ class BatchProcessor(BasePartialProcessor):
         return self._COLLECTOR_MAPPING[self.event_type]()
 
     def _collect_sqs_failures(self):
-        return {"itemIdentifier": msg["messageId"] for msg in self.fail_messages}
+        return {"itemIdentifier": msg.messageId for msg in self.fail_messages}
 
     def _collect_kinesis_failures(self):
-        return {"itemIdentifier": msg["kinesis"]["sequenceNumber"] for msg in self.fail_messages}
+        return {"itemIdentifier": msg.kinesis.sequence_number for msg in self.fail_messages}
 
     def _collect_dynamodb_failures(self):
-        return {"itemIdentifier": msg["dynamodb"]["SequenceNumber"] for msg in self.fail_messages}
+        return {"itemIdentifier": msg.dynamodb.sequence_number for msg in self.fail_messages}
 
     @overload
     def _to_batch_type(self, record: dict, event_type: EventType, model: "BatchTypeModels") -> "BatchTypeModels":
         ...
 
     @overload
-    def _to_batch_type(
-        self, record: dict, event_type: EventType
-    ) -> Union[SQSRecord, KinesisStreamRecord, DynamoDBRecord]:
+    def _to_batch_type(self, record: dict, event_type: EventType) -> EventSourceDataClassTypes:
         ...
 
     def _to_batch_type(self, record: dict, event_type: EventType, model: Optional["BatchTypeModels"] = None):
