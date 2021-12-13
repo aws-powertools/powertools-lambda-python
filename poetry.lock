@@ -573,11 +573,11 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-material"
-version = "7.3.6"
+version = "8.1.1"
 description = "A Material Design theme for MkDocs"
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 
 [package.dependencies]
 jinja2 = ">=2.11.1"
@@ -1056,7 +1056,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "d003a9b82e3692f6e55a5dde89dae18796d9c5747c9d097a0ec113ecb4e02f02"
+content-hash = "4d13db75ac2e72afd58be336de87cb121197a83cb984942f7e48babbce0233cc"
 
 [metadata.files]
 atomicwrites = [
@@ -1353,8 +1353,8 @@ mkdocs-git-revision-date-plugin = [
     {file = "mkdocs_git_revision_date_plugin-0.3.1-py3-none-any.whl", hash = "sha256:8ae50b45eb75d07b150a69726041860801615aae5f4adbd6b1cf4d51abaa03d5"},
 ]
 mkdocs-material = [
-    {file = "mkdocs-material-7.3.6.tar.gz", hash = "sha256:1b1dbd8ef2508b358d93af55a5c5db3f141c95667fad802301ec621c40c7c217"},
-    {file = "mkdocs_material-7.3.6-py2.py3-none-any.whl", hash = "sha256:1b6b3e9e09f922c2d7f1160fe15c8f43d4adc0d6fb81aa6ff0cbc7ef5b78ec75"},
+    {file = "mkdocs-material-8.1.1.tar.gz", hash = "sha256:bbc74a1864c67b5736760b1ec996cbd0453a68524a85cf53cf834027bdb60cd7"},
+    {file = "mkdocs_material-8.1.1-py2.py3-none-any.whl", hash = "sha256:da06a34ba042ba5a23e1b04a4ad1353900cf0f30a9da80c9030432483f2ebb68"},
 ]
 mkdocs-material-extensions = [
     {file = "mkdocs-material-extensions-1.0.3.tar.gz", hash = "sha256:bfd24dfdef7b41c312ede42648f9eb83476ea168ec163b613f9abd12bbfddba2"},
@@ -1529,6 +1529,10 @@ requests = [
     {file = "ruamel.yaml-0.17.17.tar.gz", hash = "sha256:9751de4cbb57d4bfbf8fc394e125ed4a2f170fbff3dc3d78abf50be85924f8be"},
 ]
 "ruamel.yaml.clib" = [
+    {file = "ruamel.yaml.clib-0.2.6-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:6e7be2c5bcb297f5b82fee9c665eb2eb7001d1050deaba8471842979293a80b0"},
+    {file = "ruamel.yaml.clib-0.2.6-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:221eca6f35076c6ae472a531afa1c223b9c29377e62936f61bc8e6e8bdc5f9e7"},
+    {file = "ruamel.yaml.clib-0.2.6-cp310-cp310-win32.whl", hash = "sha256:1070ba9dd7f9370d0513d649420c3b362ac2d687fe78c6e888f5b12bf8bc7bee"},
+    {file = "ruamel.yaml.clib-0.2.6-cp310-cp310-win_amd64.whl", hash = "sha256:77df077d32921ad46f34816a9a16e6356d8100374579bc35e15bab5d4e9377de"},
     {file = "ruamel.yaml.clib-0.2.6-cp35-cp35m-macosx_10_6_intel.whl", hash = "sha256:cfdb9389d888c5b74af297e51ce357b800dd844898af9d4a547ffc143fa56751"},
     {file = "ruamel.yaml.clib-0.2.6-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:7b2927e92feb51d830f531de4ccb11b320255ee95e791022555971c466af4527"},
     {file = "ruamel.yaml.clib-0.2.6-cp35-cp35m-win32.whl", hash = "sha256:ada3f400d9923a190ea8b59c8f60680c4ef8a4b0dfae134d2f2ff68429adfab5"},
