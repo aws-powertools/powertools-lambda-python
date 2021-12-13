@@ -3,6 +3,7 @@ import traceback
 from typing import Any, Dict, Optional, Union, cast
 
 from botocore.config import Config
+from aws_lambda_powertools.shared.types import AnyCallableT
 
 from aws_lambda_powertools.utilities import jmespath_utils
 from aws_lambda_powertools.utilities.parameters import AppConfigProvider, GetParameterError, TransformParameterError
@@ -22,6 +23,7 @@ class AppConfigStore(StoreProvider):
         name: str,
         max_age: int = 5,
         sdk_config: Optional[Config] = None,
+        transform: Union[AnyCallableT, str] = TRANSFORM_TYPE,
         envelope: Optional[str] = "",
         jmespath_options: Optional[Dict] = None,
         logger: Optional[Union[logging.Logger, Logger]] = None,
@@ -54,6 +56,7 @@ class AppConfigStore(StoreProvider):
         self.name = name
         self.cache_seconds = max_age
         self.config = sdk_config
+        self.transform = transform
         self.envelope = envelope
         self.jmespath_options = jmespath_options
         self._conf_store = AppConfigProvider(environment=environment, application=application, config=sdk_config)
@@ -70,7 +73,7 @@ class AppConfigStore(StoreProvider):
                 dict,
                 self._conf_store.get(
                     name=self.name,
-                    transform=TRANSFORM_TYPE,
+                    transform=self.transform,
                     max_age=self.cache_seconds,
                 ),
             )
