@@ -9,6 +9,7 @@ from collections import namedtuple
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Tuple, Union
 
+from ...shared.types import AnyCallableT
 from .exceptions import GetParameterError, TransformParameterError
 
 DEFAULT_MAX_AGE_SECS = 5
@@ -34,14 +35,14 @@ class BaseProvider(ABC):
 
         self.store = {}
 
-    def _has_not_expired(self, key: Tuple[str, Optional[str]]) -> bool:
+    def _has_not_expired(self, key: Tuple[str, Optional[Union[AnyCallableT, str]]]) -> bool:
         return key in self.store and self.store[key].ttl >= datetime.now()
 
     def get(
         self,
         name: str,
         max_age: int = DEFAULT_MAX_AGE_SECS,
-        transform: Optional[str] = None,
+        transform: Optional[Union[AnyCallableT, str]] = None,
         force_fetch: bool = False,
         **sdk_options,
     ) -> Union[str, list, dict, bytes]:
@@ -112,7 +113,7 @@ class BaseProvider(ABC):
         self,
         path: str,
         max_age: int = DEFAULT_MAX_AGE_SECS,
-        transform: Optional[str] = None,
+        transform: Optional[Union[AnyCallableT, str]] = None,
         raise_on_transform_error: bool = False,
         force_fetch: bool = False,
         **sdk_options,
@@ -217,7 +218,11 @@ def get_transform_method(key: str, transform: Optional[str] = None) -> Optional[
     return None
 
 
-def transform_value(value: str, transform: str, raise_on_transform_error: bool = True) -> Union[dict, bytes, None]:
+def transform_value(
+    value: str,
+    transform: Union[AnyCallableT, str],
+    raise_on_transform_error: bool = True,
+) -> Union[dict, bytes, None]:
     """
     Apply a transform to a value
 
@@ -238,7 +243,9 @@ def transform_value(value: str, transform: str, raise_on_transform_error: bool =
     """
 
     try:
-        if transform == TRANSFORM_METHOD_JSON:
+        if callable(transform):
+            return transform(value)
+        elif transform == TRANSFORM_METHOD_JSON:
             return json.loads(value)
         elif transform == TRANSFORM_METHOD_BINARY:
             return base64.b64decode(value)
