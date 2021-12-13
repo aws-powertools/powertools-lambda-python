@@ -1,9 +1,11 @@
 import base64
 import json
+import pickle
 import random
 import string
 from datetime import datetime, timedelta
 from io import BytesIO
+from tkinter import E
 from typing import Dict
 
 import pytest
@@ -1143,7 +1145,8 @@ def test_base_provider_get_transform_callable(mock_name, mock_value):
     Test BaseProvider.get() with a callable transform
     """
 
-    mock_data = str(mock_value)
+    mock_binary = mock_value.encode()
+    mock_data = base64.b16encode(mock_binary).decode()
 
     class TestProvider(BaseProvider):
         def _get(self, name: str, **kwargs) -> str:
@@ -1155,10 +1158,10 @@ def test_base_provider_get_transform_callable(mock_name, mock_value):
 
     provider = TestProvider()
 
-    value = provider.get(mock_name, transform=str)
+    value = provider.get(mock_name, transform=base64.b16decode)
 
-    assert isinstance(value, str)
-    assert value == mock_data
+    assert isinstance(value, bytes)
+    assert value == mock_binary
 
 
 def test_base_provider_get_transform_callable_exception(mock_name):
@@ -1166,7 +1169,8 @@ def test_base_provider_get_transform_callable_exception(mock_name):
     Test BaseProvider.get() with a callable transform that raises an exception
     """
 
-    mock_data = str(mock_value) + "a"
+    mock_data = "qw"
+    print(mock_data)
 
     class TestProvider(BaseProvider):
         def _get(self, name: str, **kwargs) -> str:
@@ -1179,9 +1183,9 @@ def test_base_provider_get_transform_callable_exception(mock_name):
     provider = TestProvider()
 
     with pytest.raises(parameters.TransformParameterError) as excinfo:
-        provider.get(mock_name, transform=int)
+        provider.get(mock_name, transform=base64.b16decode)
 
-    assert "invalid literal for int() with base 10" in str(excinfo)
+    assert "Non-base16 digit found" in str(excinfo)
 
 
 def test_base_provider_get_multiple_transform_json(mock_name, mock_value):
@@ -1332,7 +1336,8 @@ def test_base_provider_get_multiple_transform_callable(mock_name, mock_value):
     Test BaseProvider.get_multiple() with a callable transform
     """
 
-    mock_data = str(mock_value)
+    mock_binary = mock_value.encode()
+    mock_data = base64.b16encode(mock_binary).decode()
 
     class TestProvider(BaseProvider):
         def _get(self, name: str, **kwargs) -> str:
@@ -1344,10 +1349,10 @@ def test_base_provider_get_multiple_transform_callable(mock_name, mock_value):
 
     provider = TestProvider()
 
-    value = provider.get_multiple(mock_name, transform=str)
+    value = provider.get_multiple(mock_name, transform=base64.b16decode)
 
     assert isinstance(value, dict)
-    assert value["A"] == mock_data
+    assert value["A"] == mock_binary
 
 
 def test_base_provider_get_multiple_transform_callable_partial_failure(mock_name, mock_value):
@@ -1355,9 +1360,9 @@ def test_base_provider_get_multiple_transform_callable_partial_failure(mock_name
     Test BaseProvider.get_multiple() with a callable transform that contains a partial failure
     """
 
-    mock_integer = 1234
-    mock_data_a = str(mock_integer)
-    mock_data_b = str(mock_value) + "a"
+    mock_binary = mock_value.encode()
+    mock_data_a = base64.b16encode(mock_binary).decode()
+    mock_data_b = "qw"
 
     class TestProvider(BaseProvider):
         def _get(self, name: str, **kwargs) -> str:
@@ -1369,19 +1374,19 @@ def test_base_provider_get_multiple_transform_callable_partial_failure(mock_name
 
     provider = TestProvider()
 
-    value = provider.get_multiple(mock_name, transform=int)
+    value = provider.get_multiple(mock_name, transform=base64.b16decode)
 
     assert isinstance(value, dict)
-    assert value["A"] == mock_integer
+    assert value["A"] == mock_binary
     assert value["B"] is None
 
 
-def test_base_provider_get_multiple_transform_callable_exception(mock_name, mock_value):
+def test_base_provider_get_multiple_transform_callable_exception(mock_name):
     """
     Test BaseProvider.get_multiple() with a callable transform that raises an exception
     """
 
-    mock_data = str(mock_value) + "a"
+    mock_data = "qw"
 
     class TestProvider(BaseProvider):
         def _get(self, name: str, **kwargs) -> str:
@@ -1394,9 +1399,9 @@ def test_base_provider_get_multiple_transform_callable_exception(mock_name, mock
     provider = TestProvider()
 
     with pytest.raises(parameters.TransformParameterError) as excinfo:
-        provider.get_multiple(mock_name, transform=int, raise_on_transform_error=True)
+        provider.get_multiple(mock_name, transform=base64.b16decode, raise_on_transform_error=True)
 
-    assert "invalid literal for int() with base 10" in str(excinfo)
+    assert "Non-base16 digit found" in str(excinfo)
 
 
 def test_base_provider_get_multiple_cached(mock_name, mock_value):
