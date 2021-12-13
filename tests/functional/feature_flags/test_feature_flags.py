@@ -1,3 +1,4 @@
+import json
 from typing import Dict, List, Optional
 
 import pytest
@@ -1197,3 +1198,30 @@ def test_flags_greater_than_or_equal_match_2(mocker, config):
         default=False,
     )
     assert toggle == expected_value
+
+
+def test_get_feature_toggle_appconfig_store_callable_transform(mocker, config):
+
+    mock_schema = {
+        "ten_percent_off_campaign": {
+            "default": False,
+        },
+    }
+
+    mock_value = json.dumps(mock_schema)
+
+    mocked__get_conf = mocker.patch("aws_lambda_powertools.utilities.parameters.AppConfigProvider._get")
+    mocked__get_conf.return_value = mock_value
+
+    app_conf_fetcher = AppConfigStore(
+        environment="test_env",
+        application="test_app",
+        name="test_conf_name",
+        max_age=600,
+        sdk_config=config,
+        transform=json.loads,
+    )
+
+    feature_flags: FeatureFlags = FeatureFlags(store=app_conf_fetcher)
+
+    assert feature_flags.get_configuration() == mock_schema
