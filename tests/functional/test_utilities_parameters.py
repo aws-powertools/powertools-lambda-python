@@ -4,7 +4,6 @@ import random
 import string
 from datetime import datetime, timedelta
 from io import BytesIO
-from tkinter import E
 from typing import Dict
 
 import pytest
