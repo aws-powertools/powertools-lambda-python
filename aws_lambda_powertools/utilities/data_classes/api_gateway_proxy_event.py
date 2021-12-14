@@ -11,11 +11,11 @@ from aws_lambda_powertools.utilities.data_classes.common import (
 class APIGatewayEventAuthorizer(DictWrapper):
     @property
     def claims(self) -> Optional[Dict[str, Any]]:
-        return self["requestContext"]["authorizer"].get("claims")
+        return self.get("claims")
 
     @property
     def scopes(self) -> Optional[List[str]]:
-        return self["requestContext"]["authorizer"].get("scopes")
+        return self.get("scopes")
 
 
 class APIGatewayEventRequestContext(BaseRequestContext):
@@ -56,7 +56,7 @@ class APIGatewayEventRequestContext(BaseRequestContext):
 
     @property
     def authorizer(self) -> APIGatewayEventAuthorizer:
-        return APIGatewayEventAuthorizer(self._data)
+        return APIGatewayEventAuthorizer(self._data["requestContext"]["authorizer"])
 
 
 class APIGatewayProxyEvent(BaseProxyEvent):
