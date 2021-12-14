@@ -17,6 +17,17 @@ class APIGatewayEventAuthorizer(DictWrapper):
     def scopes(self) -> Optional[List[str]]:
         return self.get("scopes")
 
+    @property
+    def principal_id(self) -> Optional[str]:
+        """The principal user identification associated with the token sent by the client and returned from an
+        API Gateway Lambda authorizer (formerly known as a custom authorizer)"""
+        return self.get("principalId")
+
+    @property
+    def integration_latency(self) -> Optional[int]:
+        """The authorizer latency in ms."""
+        return self.get("integrationLatency")
+
 
 class APIGatewayEventRequestContext(BaseRequestContext):
     @property

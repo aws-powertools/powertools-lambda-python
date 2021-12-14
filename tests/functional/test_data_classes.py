@@ -906,7 +906,9 @@ def test_api_gateway_proxy_event_with_principal_id():
     assert authorizer.scopes is None
     assert authorizer["principalId"] == "fake"
     assert authorizer.get("principalId") == "fake"
-    assert authorizer.get("foo", "default") == "default"
+    assert authorizer.principal_id == "fake"
+    assert authorizer.integration_latency == 451
+    assert authorizer.get("integrationStatus", "failed") == "failed"
 
 
 def test_api_gateway_proxy_v2_event():
