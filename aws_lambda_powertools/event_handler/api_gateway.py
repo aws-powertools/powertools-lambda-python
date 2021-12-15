@@ -610,19 +610,10 @@ class ApiGatewayResolver(BaseRouter):
         """Actually call the matching route with any provided keyword arguments."""
         try:
             return ResponseBuilder(self._to_response(route.func(**args)), route)
-        except ServiceError as e:
-            return ResponseBuilder(
-                Response(
-                    status_code=e.status_code,
-                    content_type=content_types.APPLICATION_JSON,
-                    body=self._json_dump({"statusCode": e.status_code, "message": e.msg}),
-                ),
-                route,
-            )
         except Exception as exc:
-            handler = self._lookup_exception_handler(exc)
-            if handler:
-                return ResponseBuilder(handler(exc))
+            response = self._call_exception_handler(exc, route)
+            if response:
+                return response
 
             if self._debug:
                 # If the user has turned on debug mode,
@@ -687,10 +678,22 @@ class ApiGatewayResolver(BaseRouter):
 
         return register_exception_handler
 
-    def _lookup_exception_handler(self, exc: Exception) -> Optional[Callable]:
-        for cls in type(exc).__mro__:
+    def _call_exception_handler(self, exp: Exception, route: Route) -> Optional[ResponseBuilder]:
+        for cls in type(exp).__mro__:
             if cls in self._exception_handlers:
-                return self._exception_handlers[cls]
+                handler = self._exception_handlers[cls]
+                return ResponseBuilder(handler(exp), route)
+
+        if isinstance(exp, ServiceError):
+            return ResponseBuilder(
+                Response(
+                    status_code=exp.status_code,
+                    content_type=content_types.APPLICATION_JSON,
+                    body=self._json_dump({"statusCode": exp.status_code, "message": exp.msg}),
+                ),
+                route,
+            )
+
         return None
 
 
