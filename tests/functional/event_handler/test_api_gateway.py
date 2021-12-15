@@ -163,7 +163,7 @@ def test_no_matches():
     def handler(event, context):
         return app.resolve(event, context)
 
-    # Also check check the route configurations
+    # Also check the route configurations
     routes = app._routes
     assert len(routes) == 5
     for route in routes:
@@ -1076,3 +1076,30 @@ def test_api_gateway_app_router_access_to_resolver():
 
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+
+
+def test_exception_handler():
+    # GIVEN a resolver with an exception handler defined for ValueError
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
+
+    @app.exception_handler(ValueError)
+    def handle_value_error(ex: ValueError):
+        print(f"request path is '{app.current_event.path}'")
+        return Response(
+            status_code=418,
+            content_type=content_types.TEXT_HTML,
+            body=str(ex),
+        )
+
+    @app.get("/my/path")
+    def get_lambda() -> Response:
+        raise ValueError("Foo!")
+
+    # WHEN calling the event handler
+    # AND a ValueError is raised
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN call the exception_handler
+    assert result["statusCode"] == 418
+    assert result["headers"]["Content-Type"] == content_types.TEXT_HTML
+    assert result["body"] == "Foo!"

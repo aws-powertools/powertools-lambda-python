@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from functools import partial
 from http import HTTPStatus
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import ServiceError
@@ -435,6 +435,7 @@ class ApiGatewayResolver(BaseRouter):
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
         self._route_keys: List[str] = []
+        self._exception_handlers: Dict[Type, Callable] = {}
         self._cors = cors
         self._cors_enabled: bool = cors is not None
         self._cors_methods: Set[str] = {"OPTIONS"}
@@ -618,7 +619,11 @@ class ApiGatewayResolver(BaseRouter):
                 ),
                 route,
             )
-        except Exception:
+        except Exception as exc:
+            handler = self._lookup_exception_handler(exc)
+            if handler:
+                return ResponseBuilder(handler(exc))
+
             if self._debug:
                 # If the user has turned on debug mode,
                 # we'll let the original exception propagate so
@@ -675,6 +680,18 @@ class ApiGatewayResolver(BaseRouter):
                 route = (rule, *route[1:])
 
             self.route(*route)(func)
+
+    def exception_handler(self, exception):
+        def register_exception_handler(func: Callable):
+            self._exception_handlers[exception] = func
+
+        return register_exception_handler
+
+    def _lookup_exception_handler(self, exc: Exception) -> Optional[Callable]:
+        for cls in type(exc).__mro__:
+            if cls in self._exception_handlers:
+                return self._exception_handlers[cls]
+        return None
 
 
 class Router(BaseRouter):
