@@ -1103,3 +1103,22 @@ def test_exception_handler():
     assert result["statusCode"] == 418
     assert result["headers"]["Content-Type"] == content_types.TEXT_HTML
     assert result["body"] == "Foo!"
+
+
+def test_exception_handler_not_found():
+    # GIVEN a resolver with an exception handler defined for ValueError
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
+
+    @app.not_found()
+    def handle_not_found(exc: NotFoundError):
+        assert isinstance(exc, NotFoundError)
+        return Response(status_code=404, content_type=content_types.TEXT_PLAIN, body="I am a teapot!")
+
+    # WHEN calling the event handler
+    # AND a ValueError is raised
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN call the exception_handler
+    assert result["statusCode"] == 404
+    assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
+    assert result["body"] == "I am a teapot!"

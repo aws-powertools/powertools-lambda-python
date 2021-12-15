@@ -13,7 +13,7 @@ from http import HTTPStatus
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
 
 from aws_lambda_powertools.event_handler import content_types
-from aws_lambda_powertools.event_handler.exceptions import ServiceError
+from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -435,7 +435,7 @@ class ApiGatewayResolver(BaseRouter):
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
         self._route_keys: List[str] = []
-        self._exception_handlers: Dict[Type, Callable] = {}
+        self._exception_handlers: Dict[Union[int, Type], Callable] = {}
         self._cors = cors
         self._cors_enabled: bool = cors is not None
         self._cors_methods: Set[str] = {"OPTIONS"}
@@ -597,6 +597,11 @@ class ApiGatewayResolver(BaseRouter):
                 headers["Access-Control-Allow-Methods"] = ",".join(sorted(self._cors_methods))
                 return ResponseBuilder(Response(status_code=204, content_type=None, headers=headers, body=None))
 
+        # Allow for custom exception handlers
+        handler = self._exception_handlers.get(404)
+        if handler:
+            return ResponseBuilder(handler(NotFoundError()))
+
         return ResponseBuilder(
             Response(
                 status_code=HTTPStatus.NOT_FOUND.value,
@@ -611,9 +616,9 @@ class ApiGatewayResolver(BaseRouter):
         try:
             return ResponseBuilder(self._to_response(route.func(**args)), route)
         except Exception as exc:
-            response = self._call_exception_handler(exc, route)
-            if response:
-                return response
+            response_builder = self._call_exception_handler(exc, route)
+            if response_builder:
+                return response_builder
 
             if self._debug:
                 # If the user has turned on debug mode,
@@ -624,8 +629,10 @@ class ApiGatewayResolver(BaseRouter):
                         status_code=500,
                         content_type=content_types.TEXT_PLAIN,
                         body="".join(traceback.format_exc()),
-                    )
+                    ),
+                    route,
                 )
+
             raise
 
     def _to_response(self, result: Union[Dict, Response]) -> Response:
@@ -672,17 +679,25 @@ class ApiGatewayResolver(BaseRouter):
 
             self.route(*route)(func)
 
-    def exception_handler(self, exception):
+    def not_found(self):
+        return self.exception_handler(404)
+
+    def exception_handler(self, exc_class_or_status_code: Union[int, Type[Exception]]):
         def register_exception_handler(func: Callable):
-            self._exception_handlers[exception] = func
+            self._exception_handlers[exc_class_or_status_code] = func
 
         return register_exception_handler
 
-    def _call_exception_handler(self, exp: Exception, route: Route) -> Optional[ResponseBuilder]:
+    def _lookup_exception_handler(self, exp: Exception) -> Optional[Callable]:
         for cls in type(exp).__mro__:
             if cls in self._exception_handlers:
-                handler = self._exception_handlers[cls]
-                return ResponseBuilder(handler(exp), route)
+                return self._exception_handlers[cls]
+        return None
+
+    def _call_exception_handler(self, exp: Exception, route: Route) -> Optional[ResponseBuilder]:
+        handler = self._lookup_exception_handler(exp)
+        if handler:
+            return ResponseBuilder(handler(exp), route)
 
         if isinstance(exp, ServiceError):
             return ResponseBuilder(
