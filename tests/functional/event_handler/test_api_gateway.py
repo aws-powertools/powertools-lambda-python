@@ -1080,7 +1080,7 @@ def test_api_gateway_app_router_access_to_resolver():
 
 def test_exception_handler():
     # GIVEN a resolver with an exception handler defined for ValueError
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
+    app = ApiGatewayResolver()
 
     @app.exception_handler(ValueError)
     def handle_value_error(ex: ValueError):
@@ -1105,17 +1105,44 @@ def test_exception_handler():
     assert result["body"] == "Foo!"
 
 
-def test_exception_handler_not_found():
-    # GIVEN a resolver with an exception handler defined for ValueError
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
+def test_exception_handler_service_error():
+    # GIVEN
+    app = ApiGatewayResolver()
 
-    @app.not_found()
-    def handle_not_found(exc: NotFoundError):
+    @app.exception_handler(ServiceError)
+    def service_error(ex: ServiceError):
+        print(ex.msg)
+        return Response(
+            status_code=ex.status_code,
+            content_type=content_types.APPLICATION_JSON,
+            body="CUSTOM ERROR FORMAT",
+        )
+
+    @app.get("/my/path")
+    def get_lambda() -> Response:
+        raise InternalServerError("Something sensitive")
+
+    # WHEN calling the event handler
+    # AND a ServiceError is raised
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN call the exception_handler
+    assert result["statusCode"] == 500
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["body"] == "CUSTOM ERROR FORMAT"
+
+
+def test_exception_handler_not_found():
+    # GIVEN a resolver with an exception handler defined for a 404 not found
+    app = ApiGatewayResolver()
+
+    @app.not_found
+    def handle_not_found(exc: NotFoundError) -> Response:
         assert isinstance(exc, NotFoundError)
         return Response(status_code=404, content_type=content_types.TEXT_PLAIN, body="I am a teapot!")
 
     # WHEN calling the event handler
-    # AND a ValueError is raised
+    # AND not route is found
     result = app(LOAD_GW_EVENT, {})
 
     # THEN call the exception_handler

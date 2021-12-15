@@ -679,8 +679,8 @@ class ApiGatewayResolver(BaseRouter):
 
             self.route(*route)(func)
 
-    def not_found(self):
-        return self.exception_handler(404)
+    def not_found(self, func: Callable):
+        return self.exception_handler(404)(func)
 
     def exception_handler(self, exc_class_or_status_code: Union[int, Type[Exception]]):
         def register_exception_handler(func: Callable):
