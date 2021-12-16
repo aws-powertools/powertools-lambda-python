@@ -1,0 +1,13 @@
+{
+  "resource": "/trip",
+  "path": "/trip",
+  "httpMethod": "POST",
+  "requestContext": {
+    "requestId": "34972478-2843-4ced-a657-253108738274",
+    "authorizer": {
+      "user_id": "fake_username",
+      "principalId": "fake",
+      "integrationLatency": 451
+    }
+  }
+}
