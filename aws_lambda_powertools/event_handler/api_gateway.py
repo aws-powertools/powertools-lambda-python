@@ -27,7 +27,6 @@ _DYNAMIC_ROUTE_PATTERN = r"(<\w+>)"
 _SAFE_URI = "-._~()'!*:@,;"  # https://www.ietf.org/rfc/rfc3986.txt
 # API GW/ALB decode non-safe URI chars; we must support them too
 _UNSAFE_URI = "%<>\[\]{}|^"  # noqa: W605
-
 _NAMED_GROUP_BOUNDARY_PATTERN = fr"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 
 
@@ -435,7 +434,7 @@ class ApiGatewayResolver(BaseRouter):
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
         self._route_keys: List[str] = []
-        self._exception_handlers: Dict[Union[int, Type], Callable] = {}
+        self._exception_handlers: Dict[Type, Callable] = {}
         self._cors = cors
         self._cors_enabled: bool = cors is not None
         self._cors_methods: Set[str] = {"OPTIONS"}
@@ -597,8 +596,7 @@ class ApiGatewayResolver(BaseRouter):
                 headers["Access-Control-Allow-Methods"] = ",".join(sorted(self._cors_methods))
                 return ResponseBuilder(Response(status_code=204, content_type=None, headers=headers, body=None))
 
-        # Allow for custom exception handlers
-        handler = self._exception_handlers.get(404)
+        handler = self._lookup_exception_handler(NotFoundError)
         if handler:
             return ResponseBuilder(handler(NotFoundError()))
 
@@ -634,6 +632,40 @@ class ApiGatewayResolver(BaseRouter):
                 )
 
             raise
+
+    def not_found(self, func: Callable):
+        return self.exception_handler(NotFoundError)(func)
+
+    def exception_handler(self, exc_class: Type[Exception]):
+        def register_exception_handler(func: Callable):
+            self._exception_handlers[exc_class] = func
+
+        return register_exception_handler
+
+    def _lookup_exception_handler(self, exp_type: Type) -> Optional[Callable]:
+        # Use "Method Resolution Order" to allow for matching against a base class
+        # of an exception
+        for cls in exp_type.__mro__:
+            if cls in self._exception_handlers:
+                return self._exception_handlers[cls]
+        return None
+
+    def _call_exception_handler(self, exp: Exception, route: Route) -> Optional[ResponseBuilder]:
+        handler = self._lookup_exception_handler(type(exp))
+        if handler:
+            return ResponseBuilder(handler(exp), route)
+
+        if isinstance(exp, ServiceError):
+            return ResponseBuilder(
+                Response(
+                    status_code=exp.status_code,
+                    content_type=content_types.APPLICATION_JSON,
+                    body=self._json_dump({"statusCode": exp.status_code, "message": exp.msg}),
+                ),
+                route,
+            )
+
+        return None
 
     def _to_response(self, result: Union[Dict, Response]) -> Response:
         """Convert the route's result to a Response
@@ -678,38 +710,6 @@ class ApiGatewayResolver(BaseRouter):
                 route = (rule, *route[1:])
 
             self.route(*route)(func)
-
-    def not_found(self, func: Callable):
-        return self.exception_handler(404)(func)
-
-    def exception_handler(self, exc_class_or_status_code: Union[int, Type[Exception]]):
-        def register_exception_handler(func: Callable):
-            self._exception_handlers[exc_class_or_status_code] = func
-
-        return register_exception_handler
-
-    def _lookup_exception_handler(self, exp: Exception) -> Optional[Callable]:
-        for cls in type(exp).__mro__:
-            if cls in self._exception_handlers:
-                return self._exception_handlers[cls]
-        return None
-
-    def _call_exception_handler(self, exp: Exception, route: Route) -> Optional[ResponseBuilder]:
-        handler = self._lookup_exception_handler(exp)
-        if handler:
-            return ResponseBuilder(handler(exp), route)
-
-        if isinstance(exp, ServiceError):
-            return ResponseBuilder(
-                Response(
-                    status_code=exp.status_code,
-                    content_type=content_types.APPLICATION_JSON,
-                    body=self._json_dump({"statusCode": exp.status_code, "message": exp.msg}),
-                ),
-                route,
-            )
-
-        return None
 
 
 class Router(BaseRouter):
