@@ -897,6 +897,20 @@ def test_api_gateway_proxy_event():
     assert request_context.identity.client_cert.subject_dn == "www.example.com"
 
 
+def test_api_gateway_proxy_event_with_principal_id():
+    event = APIGatewayProxyEvent(load_event("apiGatewayProxyEventPrincipalId.json"))
+
+    request_context = event.request_context
+    authorizer = request_context.authorizer
+    assert authorizer.claims is None
+    assert authorizer.scopes is None
+    assert authorizer["principalId"] == "fake"
+    assert authorizer.get("principalId") == "fake"
+    assert authorizer.principal_id == "fake"
+    assert authorizer.integration_latency == 451
+    assert authorizer.get("integrationStatus", "failed") == "failed"
+
+
 def test_api_gateway_proxy_v2_event():
     event = APIGatewayProxyEventV2(load_event("apiGatewayProxyV2Event.json"))
 

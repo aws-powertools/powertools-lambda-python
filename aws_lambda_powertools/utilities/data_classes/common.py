@@ -18,8 +18,8 @@ class DictWrapper:
 
         return self._data == other._data
 
-    def get(self, key: str) -> Optional[Any]:
-        return self._data.get(key)
+    def get(self, key: str, default: Optional[Any] = None) -> Optional[Any]:
+        return self._data.get(key, default)
 
     @property
     def raw_event(self) -> Dict[str, Any]:
