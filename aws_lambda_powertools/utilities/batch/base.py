@@ -201,7 +201,7 @@ class BatchProcessor(BasePartialProcessor):
         """
         self.event_type = event_type
         self.model = model
-        self.batch_response = self.DEFAULT_RESPONSE
+        self.batch_response = deepcopy(self.DEFAULT_RESPONSE)
         self._COLLECTOR_MAPPING = {
             EventType.SQS: self._collect_sqs_failures,
             EventType.KinesisDataStreams: self._collect_kinesis_failures,
