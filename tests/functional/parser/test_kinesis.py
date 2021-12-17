@@ -35,7 +35,7 @@ def handle_kinesis_no_envelope(event: KinesisDataStreamModel, _: LambdaContext):
     assert kinesis.approximateArrivalTimestamp == 1545084650.987
     assert kinesis.kinesisSchemaVersion == "1.0"
     assert kinesis.partitionKey == "1"
-    assert kinesis.sequenceNumber == 49590338271490256608559692538361571095921575989136588898
+    assert kinesis.sequenceNumber == "49590338271490256608559692538361571095921575989136588898"
     assert kinesis.data == b"Hello, this is a test."
 
 
