@@ -213,7 +213,6 @@ class BatchProcessor(BasePartialProcessor):
             EventType.KinesisDataStreams: KinesisStreamRecord,
             EventType.DynamoDBStreams: DynamoDBRecord,
         }
-        self._EVENT_ID_MAPPING = {}
 
         super().__init__()
 
