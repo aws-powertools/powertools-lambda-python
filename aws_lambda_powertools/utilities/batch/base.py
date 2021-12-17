@@ -213,6 +213,7 @@ class BatchProcessor(BasePartialProcessor):
             EventType.KinesisDataStreams: KinesisStreamRecord,
             EventType.DynamoDBStreams: DynamoDBRecord,
         }
+        self._EVENT_ID_MAPPING = {}
 
         super().__init__()
 
@@ -268,14 +269,26 @@ class BatchProcessor(BasePartialProcessor):
         """
         return self._COLLECTOR_MAPPING[self.event_type]()
 
+    # Event Source Data Classes follow python idioms for fields
+    # while Parser/Pydantic follows the event field names to the latter
     def _collect_sqs_failures(self):
-        return {"itemIdentifier": msg.message_id for msg in self.fail_messages}
+        if self.model:
+            return {"itemIdentifier": msg.messageId for msg in self.fail_messages}
+        else:
+            return {"itemIdentifier": msg.message_id for msg in self.fail_messages}
 
     def _collect_kinesis_failures(self):
-        return {"itemIdentifier": msg.kinesis.sequence_number for msg in self.fail_messages}
+        if self.model:
+            # Pydantic model uses int but Lambda poller expects str
+            return {"itemIdentifier": msg.kinesis.sequenceNumber for msg in self.fail_messages}
+        else:
+            return {"itemIdentifier": msg.kinesis.sequence_number for msg in self.fail_messages}
 
     def _collect_dynamodb_failures(self):
-        return {"itemIdentifier": msg.dynamodb.sequence_number for msg in self.fail_messages}
+        if self.model:
+            return {"itemIdentifier": msg.dynamodb.SequenceNumber for msg in self.fail_messages}
+        else:
+            return {"itemIdentifier": msg.dynamodb.sequence_number for msg in self.fail_messages}
 
     @overload
     def _to_batch_type(self, record: dict, event_type: EventType, model: "BatchTypeModels") -> "BatchTypeModels":

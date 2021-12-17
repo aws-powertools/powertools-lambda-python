@@ -1,5 +1,6 @@
+import json
 from random import randint
-from typing import Callable
+from typing import Callable, Dict, Optional
 from unittest.mock import patch
 
 import pytest
@@ -12,6 +13,11 @@ from aws_lambda_powertools.utilities.batch.exceptions import SQSBatchProcessingE
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
 from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+from aws_lambda_powertools.utilities.parser import BaseModel, validator
+from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamChangedRecordModel, DynamoDBStreamRecordModel
+from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecord as KinesisDataStreamRecordModel
+from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecordPayload, SqsRecordModel
+from aws_lambda_powertools.utilities.parser.types import Literal
 from tests.functional.utils import b64_to_str, str_to_b64
 
 
@@ -22,7 +28,12 @@ def sqs_event_factory() -> Callable:
             "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
             "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a",
             "body": body,
-            "attributes": {},
+            "attributes": {
+                "ApproximateReceiveCount": "1",
+                "SentTimestamp": "1545082649183",
+                "SenderId": "AIDAIENQZJOLO23YVJ4VO",
+                "ApproximateFirstReceiveTimestamp": "1545082649185",
+            },
             "messageAttributes": {},
             "md5OfBody": "e4e68fb7bd0e697a0ae8f1bb342846b3",
             "eventSource": "aws:sqs",
@@ -66,7 +77,7 @@ def dynamodb_event_factory() -> Callable:
             "eventVersion": "1.0",
             "dynamodb": {
                 "Keys": {"Id": {"N": "101"}},
-                "NewImage": {"message": {"S": body}},
+                "NewImage": {"Message": {"S": body}},
                 "StreamViewType": "NEW_AND_OLD_IMAGES",
                 "SequenceNumber": seq,
                 "SizeBytes": 26,
@@ -105,7 +116,7 @@ def kinesis_record_handler() -> Callable:
 @pytest.fixture(scope="module")
 def dynamodb_record_handler() -> Callable:
     def handler(record: DynamoDBRecord):
-        body = record.dynamodb.new_image.get("message").get_value
+        body = record.dynamodb.new_image.get("Message").get_value
         if "fail" in body:
             raise Exception("Failed to process record.")
         return body
@@ -140,6 +151,14 @@ def stubbed_partial_processor_suppressed(config) -> PartialSQSProcessor:
     processor = PartialSQSProcessor(config=config, suppress_exception=True)
     with Stubber(processor.client) as stubber:
         yield stubber, processor
+
+
+@pytest.fixture(scope="module")
+def order_event_factory() -> Callable:
+    def factory(item: Dict) -> str:
+        return json.dumps({"item": item})
+
+    return factory
 
 
 def test_partial_sqs_processor_context_with_failure(sqs_event_factory, record_handler, partial_processor):
@@ -513,8 +532,8 @@ def test_batch_processor_dynamodb_context_success_only(dynamodb_event_factory, d
 
     # THEN
     assert processed_messages == [
-        ("success", first_record["dynamodb"]["NewImage"]["message"]["S"], first_record),
-        ("success", second_record["dynamodb"]["NewImage"]["message"]["S"], second_record),
+        ("success", first_record["dynamodb"]["NewImage"]["Message"]["S"], first_record),
+        ("success", second_record["dynamodb"]["NewImage"]["Message"]["S"], second_record),
     ]
 
     assert batch.response() == {"batchItemFailures": []}
@@ -532,7 +551,7 @@ def test_batch_processor_dynamodb_context_with_failure(dynamodb_event_factory, d
         processed_messages = batch.process()
 
     # THEN
-    assert processed_messages[1] == ("success", second_record["dynamodb"]["NewImage"]["message"]["S"], second_record)
+    assert processed_messages[1] == ("success", second_record["dynamodb"]["NewImage"]["Message"]["S"], second_record)
     assert len(batch.fail_messages) == 1
     assert batch.response() == {"batchItemFailures": [{"itemIdentifier": first_record["dynamodb"]["SequenceNumber"]}]}
 
@@ -554,3 +573,242 @@ def test_batch_processor_dynamodb_middleware_with_failure(dynamodb_event_factory
 
     # THEN
     assert len(result["batchItemFailures"]) == 1
+
+
+def test_batch_processor_context_model(sqs_event_factory, order_event_factory):
+    # GIVEN
+    class Order(BaseModel):
+        item: dict
+
+    class OrderSqs(SqsRecordModel):
+        body: Order
+
+        # auto transform json string
+        # so Pydantic can auto-initialize nested Order model
+        @validator("body", pre=True)
+        def transform_body_to_dict(cls, value: str):
+            return json.loads(value)
+
+    def record_handler(record: OrderSqs):
+        return record.body.item
+
+    order_event = order_event_factory({"type": "success"})
+    first_record = sqs_event_factory(order_event)
+    second_record = sqs_event_factory(order_event)
+    records = [first_record, second_record]
+
+    # WHEN
+    processor = BatchProcessor(event_type=EventType.SQS, model=OrderSqs)
+    with processor(records, record_handler) as batch:
+        processed_messages = batch.process()
+
+    # THEN
+    order_item = json.loads(order_event)["item"]
+    assert processed_messages == [
+        ("success", order_item, first_record),
+        ("success", order_item, second_record),
+    ]
+
+    assert batch.response() == {"batchItemFailures": []}
+
+
+def test_batch_processor_context_model_with_failure(sqs_event_factory, order_event_factory):
+    # GIVEN
+    class Order(BaseModel):
+        item: dict
+
+    class OrderSqs(SqsRecordModel):
+        body: Order
+
+        # auto transform json string
+        # so Pydantic can auto-initialize nested Order model
+        @validator("body", pre=True)
+        def transform_body_to_dict(cls, value: str):
+            return json.loads(value)
+
+    def record_handler(record: OrderSqs):
+        if "fail" in record.body.item["type"]:
+            raise Exception("Failed to process record.")
+        return record.body.item
+
+    order_event = order_event_factory({"type": "success"})
+    order_event_fail = order_event_factory({"type": "fail"})
+    first_record = sqs_event_factory(order_event_fail)
+    second_record = sqs_event_factory(order_event)
+    records = [first_record, second_record]
+
+    # WHEN
+    processor = BatchProcessor(event_type=EventType.SQS, model=OrderSqs)
+    with processor(records, record_handler) as batch:
+        batch.process()
+
+    # THEN
+    assert len(batch.fail_messages) == 1
+    assert batch.response() == {"batchItemFailures": [{"itemIdentifier": first_record["messageId"]}]}
+
+
+def test_batch_processor_dynamodb_context_model(dynamodb_event_factory, order_event_factory):
+    # GIVEN
+    class Order(BaseModel):
+        item: dict
+
+    class OrderDynamoDB(BaseModel):
+        Message: Order
+
+        # auto transform json string
+        # so Pydantic can auto-initialize nested Order model
+        @validator("Message", pre=True)
+        def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
+            return json.loads(value["S"])
+
+    class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
+        NewImage: Optional[OrderDynamoDB]
+        OldImage: Optional[OrderDynamoDB]
+
+    class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
+        dynamodb: OrderDynamoDBChangeRecord
+
+    def record_handler(record: OrderDynamoDBRecord):
+        return record.dynamodb.NewImage.Message.item
+
+    order_event = order_event_factory({"type": "success"})
+    first_record = dynamodb_event_factory(order_event)
+    second_record = dynamodb_event_factory(order_event)
+    records = [first_record, second_record]
+
+    # WHEN
+    processor = BatchProcessor(event_type=EventType.DynamoDBStreams, model=OrderDynamoDBRecord)
+    with processor(records, record_handler) as batch:
+        processed_messages = batch.process()
+
+    # THEN
+    order_item = json.loads(order_event)["item"]
+    assert processed_messages == [
+        ("success", order_item, first_record),
+        ("success", order_item, second_record),
+    ]
+
+    assert batch.response() == {"batchItemFailures": []}
+
+
+def test_batch_processor_dynamodb_context_model_with_failure(dynamodb_event_factory, order_event_factory):
+    # GIVEN
+    class Order(BaseModel):
+        item: dict
+
+    class OrderDynamoDB(BaseModel):
+        Message: Order
+
+        # auto transform json string
+        # so Pydantic can auto-initialize nested Order model
+        @validator("Message", pre=True)
+        def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
+            return json.loads(value["S"])
+
+    class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
+        NewImage: Optional[OrderDynamoDB]
+        OldImage: Optional[OrderDynamoDB]
+
+    class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
+        dynamodb: OrderDynamoDBChangeRecord
+
+    def record_handler(record: OrderDynamoDBRecord):
+        if "fail" in record.dynamodb.NewImage.Message.item["type"]:
+            raise Exception("Failed to process record.")
+        return record.dynamodb.NewImage.Message.item
+
+    order_event = order_event_factory({"type": "success"})
+    order_event_fail = order_event_factory({"type": "fail"})
+    first_record = dynamodb_event_factory(order_event_fail)
+    second_record = dynamodb_event_factory(order_event)
+    records = [first_record, second_record]
+
+    # WHEN
+    processor = BatchProcessor(event_type=EventType.DynamoDBStreams, model=OrderDynamoDBRecord)
+    with processor(records, record_handler) as batch:
+        batch.process()
+
+    # THEN
+    assert len(batch.fail_messages) == 1
+    assert batch.response() == {"batchItemFailures": [{"itemIdentifier": first_record["dynamodb"]["SequenceNumber"]}]}
+
+
+def test_batch_processor_kinesis_context_parser_model(kinesis_event_factory, order_event_factory):
+    # GIVEN
+    class Order(BaseModel):
+        item: dict
+
+    class OrderKinesisPayloadRecord(KinesisDataStreamRecordPayload):
+        data: Order
+
+        # auto transform json string
+        # so Pydantic can auto-initialize nested Order model
+        @validator("data", pre=True)
+        def transform_message_to_dict(cls, value: str):
+            # Powertools KinesisDataStreamRecordModel
+            return json.loads(value)
+
+    class OrderKinesisRecord(KinesisDataStreamRecordModel):
+        kinesis: OrderKinesisPayloadRecord
+
+    def record_handler(record: OrderKinesisRecord):
+        return record.kinesis.data.item
+
+    order_event = order_event_factory({"type": "success"})
+    first_record = kinesis_event_factory(order_event)
+    second_record = kinesis_event_factory(order_event)
+    records = [first_record, second_record]
+
+    # WHEN
+    processor = BatchProcessor(event_type=EventType.KinesisDataStreams, model=OrderKinesisRecord)
+    with processor(records, record_handler) as batch:
+        processed_messages = batch.process()
+
+    # THEN
+    order_item = json.loads(order_event)["item"]
+    assert processed_messages == [
+        ("success", order_item, first_record),
+        ("success", order_item, second_record),
+    ]
+
+    assert batch.response() == {"batchItemFailures": []}
+
+
+def test_batch_processor_kinesis_context_parser_model_with_failure(kinesis_event_factory, order_event_factory):
+    # GIVEN
+    class Order(BaseModel):
+        item: dict
+
+    class OrderKinesisPayloadRecord(KinesisDataStreamRecordPayload):
+        data: Order
+
+        # auto transform json string
+        # so Pydantic can auto-initialize nested Order model
+        @validator("data", pre=True)
+        def transform_message_to_dict(cls, value: str):
+            # Powertools KinesisDataStreamRecordModel
+            return json.loads(value)
+
+    class OrderKinesisRecord(KinesisDataStreamRecordModel):
+        kinesis: OrderKinesisPayloadRecord
+
+    def record_handler(record: OrderKinesisRecord):
+        if "fail" in record.kinesis.data.item["type"]:
+            raise Exception("Failed to process record.")
+        return record.kinesis.data.item
+
+    order_event = order_event_factory({"type": "success"})
+    order_event_fail = order_event_factory({"type": "fail"})
+
+    first_record = kinesis_event_factory(order_event_fail)
+    second_record = kinesis_event_factory(order_event)
+    records = [first_record, second_record]
+
+    # WHEN
+    processor = BatchProcessor(event_type=EventType.KinesisDataStreams, model=OrderKinesisRecord)
+    with processor(records, record_handler) as batch:
+        batch.process()
+
+    # THEN
+    assert len(batch.fail_messages) == 1
+    assert batch.response() == {"batchItemFailures": [{"itemIdentifier": first_record["kinesis"]["sequenceNumber"]}]}
