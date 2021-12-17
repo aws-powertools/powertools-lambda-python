@@ -48,8 +48,8 @@ if has_pydantic:
 # When using Pydantic Models, it'll accept any
 EventSourceDataClassTypes = Union[SQSRecord, KinesisStreamRecord, DynamoDBRecord]
 BatchEventTypes = Union[EventSourceDataClassTypes, "BatchTypeModels"]
-SuccessCallback = Tuple[str, Any, BatchEventTypes]
-FailureCallback = Tuple[str, str, BatchEventTypes]
+SuccessResponse = Tuple[str, Any, BatchEventTypes]
+FailureResponse = Tuple[str, str, BatchEventTypes]
 
 
 class BasePartialProcessor(ABC):
@@ -111,7 +111,7 @@ class BasePartialProcessor(ABC):
         self.handler = handler
         return self
 
-    def success_handler(self, record, result: Any) -> SuccessCallback:
+    def success_handler(self, record, result: Any) -> SuccessResponse:
         """
         Success callback
 
@@ -124,7 +124,7 @@ class BasePartialProcessor(ABC):
         self.success_messages.append(record)
         return entry
 
-    def failure_handler(self, record, exception: _OptExcInfo) -> FailureCallback:
+    def failure_handler(self, record, exception: _OptExcInfo) -> FailureResponse:
         """
         Failure callback
 
@@ -228,7 +228,7 @@ class BatchProcessor(BasePartialProcessor):
         self.fail_messages.clear()
         self.batch_response = self.DEFAULT_RESPONSE
 
-    def _process_record(self, record: dict) -> Union[SuccessCallback, FailureCallback]:
+    def _process_record(self, record: dict) -> Union[SuccessResponse, FailureResponse]:
         """
         Process a record with instance's handler
 
