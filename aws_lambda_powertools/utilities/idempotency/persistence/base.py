@@ -1,7 +1,6 @@
 """
 Persistence layers supporting idempotency
 """
-
 import datetime
 import hashlib
 import json
@@ -226,7 +225,13 @@ class BasePersistenceLayer(ABC):
             Hashed representation of the provided data
 
         """
-        data = getattr(data, "raw_event", data)  # could be a data class depending on decorator order
+        if hasattr(data, "__dataclass_fields__"):
+            import dataclasses
+
+            data = dataclasses.asdict(data)
+        else:
+            data = getattr(data, "raw_event", data)
+
         hashed_data = self.hash_function(json.dumps(data, cls=Encoder, sort_keys=True).encode())
         return hashed_data.hexdigest()
 

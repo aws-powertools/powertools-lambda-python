@@ -1057,3 +1057,33 @@ def test_idempotent_function_duplicates(
     assert one(data=mock_event) == "one"
     assert two(data=mock_event) == "two"
     assert len(persistence_store.table.method_calls) == 4
+
+
+def test_idempotent_function_dataclasses():
+    try:
+        # Scenario idempotent_function should allow for python dataclasses
+        from dataclasses import asdict, dataclass
+
+        @dataclass
+        class Foo:
+            name: str
+
+        mock_event = Foo(name="Bar")
+        persistence_layer = MockPersistenceLayer(
+            "test-func.record_handler#" + hashlib.md5(serialize(asdict(mock_event)).encode()).hexdigest()
+        )
+        expected_result = {"message": "Foo"}
+
+        @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
+        def record_handler(record):
+            assert isinstance(record, Foo)
+            return expected_result
+
+        # WHEN calling the function
+        result = record_handler(record=mock_event)
+        # THEN we expect the function to execute successfully
+        assert result == expected_result
+
+    except ModuleNotFoundError:
+        # Python 3.6
+        pass
