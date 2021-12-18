@@ -20,7 +20,7 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent, idempotent_function
-from aws_lambda_powertools.utilities.idempotency.persistence.base import BasePersistenceLayer, DataRecord
+from aws_lambda_powertools.utilities.idempotency.persistence.base import BasePersistenceLayer, DataRecord, _prepare_data
 from aws_lambda_powertools.utilities.validation import envelopes, validator
 from tests.functional.idempotency.conftest import serialize
 from tests.functional.utils import load_event
@@ -1061,29 +1061,31 @@ def test_idempotent_function_duplicates(
 
 def test_idempotent_function_dataclasses():
     try:
-        # Scenario idempotent_function should allow for python dataclasses
+        # Scenario _prepare_data should allow for python dataclasses
         from dataclasses import asdict, dataclass
 
         @dataclass
         class Foo:
             name: str
 
-        mock_event = Foo(name="Bar")
-        persistence_layer = MockPersistenceLayer(
-            "test-func.record_handler#" + hashlib.md5(serialize(asdict(mock_event)).encode()).hexdigest()
-        )
-        expected_result = {"message": "Foo"}
-
-        @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
-        def record_handler(record):
-            assert isinstance(record, Foo)
-            return expected_result
-
-        # WHEN calling the function
-        result = record_handler(record=mock_event)
-        # THEN we expect the function to execute successfully
-        assert result == expected_result
+        data = Foo(name="Bar")
+        as_dict = _prepare_data(data)
+        assert asdict(data) == as_dict
+        assert as_dict == {"name": "Bar"}
 
     except ModuleNotFoundError:
         # Python 3.6
         pass
+
+
+def test_idempotent_function_pydantic():
+    # Scenario _prepare_data should allow for pydantic
+    from pydantic import BaseModel
+
+    class Foo(BaseModel):
+        name: str
+
+    data = Foo(name="Bar")
+    as_dict = _prepare_data(data)
+    assert as_dict == data.dict()
+    assert as_dict == {"name": "Bar"}

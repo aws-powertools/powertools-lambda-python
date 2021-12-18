@@ -104,6 +104,21 @@ class DataRecord:
         return json.loads(self.response_data)
 
 
+def _prepare_data(data: Any) -> Any:
+    # Convert pydantic as a dict
+    _dict = getattr(data, "dict", None)
+    if callable(_dict):
+        return _dict()
+
+    # Convert dataclasses as a dict
+    if hasattr(data, "__dataclass_fields__"):
+        import dataclasses
+
+        return dataclasses.asdict(data)
+
+    return getattr(data, "raw_event", data)
+
+
 class BasePersistenceLayer(ABC):
     """
     Abstract Base Class for Idempotency persistence layer.
@@ -225,14 +240,7 @@ class BasePersistenceLayer(ABC):
             Hashed representation of the provided data
 
         """
-        if hasattr(data, "__dataclass_fields__"):
-            import dataclasses
-
-            data = dataclasses.asdict(data)
-        else:
-            data = getattr(data, "raw_event", data)
-
-        hashed_data = self.hash_function(json.dumps(data, cls=Encoder, sort_keys=True).encode())
+        hashed_data = self.hash_function(json.dumps(_prepare_data(data), cls=Encoder, sort_keys=True).encode())
         return hashed_data.hexdigest()
 
     def _validate_payload(self, data: Dict[str, Any], data_record: DataRecord) -> None:
