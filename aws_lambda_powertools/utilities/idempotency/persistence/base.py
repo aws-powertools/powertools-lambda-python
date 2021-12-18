@@ -105,12 +105,9 @@ class DataRecord:
 
 
 def _prepare_data(data: Any) -> Any:
-    # Convert pydantic as a dict
-    _dict = getattr(data, "dict", None)
-    if callable(_dict):
-        return _dict()
+    if callable(getattr(data, "dict", None)):
+        return data.dict()
 
-    # Convert dataclasses as a dict
     if hasattr(data, "__dataclass_fields__"):
         import dataclasses
 

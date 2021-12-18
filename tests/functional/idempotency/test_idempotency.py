@@ -1061,31 +1061,38 @@ def test_idempotent_function_duplicates(
 
 def test_idempotent_function_dataclasses():
     try:
-        # Scenario _prepare_data should allow for python dataclasses
+        # Scenario _prepare_data should convert a python dataclasses to a dict
         from dataclasses import asdict, dataclass
 
         @dataclass
         class Foo:
             name: str
 
+        expected_result = {"name": "Bar"}
         data = Foo(name="Bar")
         as_dict = _prepare_data(data)
-        assert asdict(data) == as_dict
-        assert as_dict == {"name": "Bar"}
+        assert as_dict == asdict(data)
+        assert as_dict == expected_result
 
     except ModuleNotFoundError:
-        # Python 3.6
-        pass
+        pass  # Python 3.6
 
 
 def test_idempotent_function_pydantic():
-    # Scenario _prepare_data should allow for pydantic
+    # Scenario _prepare_data should convert a pydantic to a dict
     from pydantic import BaseModel
 
     class Foo(BaseModel):
         name: str
 
+    expected_result = {"name": "Bar"}
     data = Foo(name="Bar")
     as_dict = _prepare_data(data)
     assert as_dict == data.dict()
-    assert as_dict == {"name": "Bar"}
+    assert as_dict == expected_result
+
+
+@pytest.mark.parametrize("data", [None, "foo", ["foo"], 1, True, {}])
+def test_idempotent_function_other(data):
+    # All other data types should be left as is
+    assert _prepare_data(data) == data
