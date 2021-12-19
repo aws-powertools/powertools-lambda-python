@@ -769,8 +769,33 @@ Use the context manager to access a list of all returned values from your `recor
 
 Use context manager when you want access to the processed messages or handle `BatchProcessingError` exception when all records within the batch fail to be processed.
 
+### Integrating exception handling with Sentry.io
 
-<!-- ### Customizing boto configuration
+When using Sentry.io for error monitoring, you can override `failure_handler` to capture each processing exception with Sentry SDK:
+
+> Credits to [Charles-Axel Dein](https://github.com/awslabs/aws-lambda-powertools-python/issues/293#issuecomment-781961732)
+
+=== "sentry_integration.py"
+
+    ```python hl_lines="4 7-8"
+    from typing import Tuple
+
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, FailureResponse
+    from sentry_sdk import capture_exception
+
+
+    class MyProcessor(BatchProcessor):
+        def failure_handler(self, record, exception) -> FailureResponse:
+            capture_exception()  # send exception to Sentry
+            return super().failure_handler(record, exception)
+    ```
+
+
+## Legacy
+
+!!! tip "This is kept for historical purposes. Use the new [BatchProcessor](#processing-messages-from-sqs) instead. "
+
+### Customizing boto configuration
 
 The **`config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html)
 or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html) when using the `sqs_batch_processor`
@@ -868,9 +893,9 @@ decorator or `PartialSQSProcessor` class.
             result = processor.process()
 
         return result
-    ``` -->
+    ```
 
-<!-- ### Suppressing exceptions
+### Suppressing exceptions
 
 If you want to disable the default behavior where `SQSBatchProcessingError` is raised if there are any errors, you can pass the `suppress_exception` boolean argument.
 
@@ -893,9 +918,9 @@ If you want to disable the default behavior where `SQSBatchProcessingError` is r
 
     with processor(records, record_handler):
         result = processor.process()
-    ``` -->
+    ```
 
-<!-- ### Create your own partial processor
+### Create your own partial processor
 
 You can create your own partial batch processor by inheriting the `BasePartialProcessor` class, and implementing `_prepare()`, `_clean()` and `_process_record()`.
 
@@ -968,24 +993,3 @@ You can then use this class as a context manager, or pass it to `batch_processor
     def lambda_handler(event, context):
         return {"statusCode": 200}
     ```
-
-### Integrating exception handling with Sentry.io
-
-When using Sentry.io for error monitoring, you can override `failure_handler` to include to capture each processing exception:
-
-> Credits to [Charles-Axel Dein](https://github.com/awslabs/aws-lambda-powertools-python/issues/293#issuecomment-781961732)
-
-=== "sentry_integration.py"
-
-    ```python hl_lines="4 7-8"
-    from typing import Tuple
-
-    from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
-    from sentry_sdk import capture_exception
-
-    class SQSProcessor(PartialSQSProcessor):
-        def failure_handler(self, record: Event, exception: Tuple) -> Tuple:  # type: ignore
-            capture_exception()  # send exception to Sentry
-            logger.exception("got exception while processing SQS message")
-            return super().failure_handler(record, exception)  # type: ignore
-    ``` -->
