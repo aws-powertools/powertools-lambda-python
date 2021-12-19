@@ -564,7 +564,7 @@ def test_batch_processor_dynamodb_context_with_failure(dynamodb_event_factory, d
 def test_batch_processor_dynamodb_middleware_with_failure(dynamodb_event_factory, dynamodb_record_handler):
     # GIVEN
     first_record = dynamodb_event_factory("failure")
-    second_record = dynamodb_event_factory("failure")
+    second_record = dynamodb_event_factory("success")
     event = {"Records": [first_record, second_record]}
 
     processor = BatchProcessor(event_type=EventType.DynamoDBStreams)
