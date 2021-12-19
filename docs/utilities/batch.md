@@ -707,6 +707,147 @@ You need to create a function to handle each record from the batch - We call it 
 
 ## Advanced
 
+### Pydantic integration
+
+You can bring your own Pydantic models via **`model`** parameter when inheriting from **`SqsRecordModel`**, **`KinesisDataStreamRecord`**, or **`DynamoDBStreamRecordModel`**
+
+Inheritance is importance because we need to access message IDs and sequence numbers from these records in the event of failure. Mypy is fully integrated with this utility, so it should identify whether you're passing the incorrect Model.
+
+
+=== "SQS"
+
+    ```python hl_lines="5 9-10 12-19 21 27"
+    import json
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.parser.models import SqsRecordModel
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    class Order(BaseModel):
+        item: dict
+
+    class OrderSqsRecord(SqsRecordModel):
+        body: Order
+
+        # auto transform json string
+        # so Pydantic can auto-initialize nested Order model
+        @validator("body", pre=True)
+        def transform_body_to_dict(cls, value: str):
+            return json.loads(value)
+
+    processor = BatchProcessor(event_type=EventType.SQS, model=OrderSqsRecord)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    def record_handler(record: OrderSqsRecord):
+        return record.body.item
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context: LambdaContext):
+        return processor.response()
+    ```
+
+=== "Kinesis Data Streams"
+
+    ```python hl_lines="5 9-10 12-20 22-23 26 32"
+    import json
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    class Order(BaseModel):
+        item: dict
+
+    class OrderKinesisPayloadRecord(KinesisDataStreamRecordPayload):
+        data: Order
+
+        # auto transform json string
+        # so Pydantic can auto-initialize nested Order model
+        @validator("data", pre=True)
+        def transform_message_to_dict(cls, value: str):
+            # Powertools KinesisDataStreamRecordModel already decodes b64 to str here
+            return json.loads(value)
+
+    class OrderKinesisRecord(KinesisDataStreamRecordModel):
+        kinesis: OrderKinesisPayloadRecord
+
+
+    processor = BatchProcessor(event_type=EventType.KinesisDataStreams, model=OrderKinesisRecord)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    def record_handler(record: OrderKinesisRecord):
+        return record.kinesis.data.item
+
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context: LambdaContext):
+        return processor.response()
+    ```
+
+=== "DynamoDB Streams"
+
+    ```python hl_lines="7 11-12 14-21 23-25 27-28 31 37"
+    import json
+
+    from typing import Dict, Literal
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamRecordModel
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    class Order(BaseModel):
+        item: dict
+
+    class OrderDynamoDB(BaseModel):
+        Message: Order
+
+        # auto transform json string
+        # so Pydantic can auto-initialize nested Order model
+        @validator("Message", pre=True)
+        def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
+            return json.loads(value["S"])
+
+    class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
+        NewImage: Optional[OrderDynamoDB]
+        OldImage: Optional[OrderDynamoDB]
+
+    class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
+        dynamodb: OrderDynamoDBChangeRecord
+
+
+    processor = BatchProcessor(event_type=EventType.DynamoDBStreams, model=OrderKinesisRecord)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    def record_handler(record: OrderDynamoDBRecord):
+        return record.dynamodb.NewImage.Message.item
+
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context: LambdaContext):
+        return processor.response()
+    ```
+
 ### Accessing processed messages
 
 Use the context manager to access a list of all returned values from your `record_handler` function.
