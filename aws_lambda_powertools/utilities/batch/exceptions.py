@@ -2,45 +2,44 @@
 Batch processing exceptions
 """
 import traceback
+from typing import Optional, Tuple
 
 
-class SQSBatchProcessingError(Exception):
-    """When at least one message within a batch could not be processed"""
-
+class BaseBatchProcessingError(Exception):
     def __init__(self, msg="", child_exceptions=()):
         super().__init__(msg)
         self.msg = msg
         self.child_exceptions = child_exceptions
+
+    def format_exceptions(self, parent_exception_str):
+        exception_list = [f"{parent_exception_str}\n"]
+        for exception in self.child_exceptions:
+            extype, ex, tb = exception
+            formatted = "".join(traceback.format_exception(extype, ex, tb))
+            exception_list.append(formatted)
+
+        return "\n".join(exception_list)
+
+
+class SQSBatchProcessingError(BaseBatchProcessingError):
+    """When at least one message within a batch could not be processed"""
+
+    def __init__(self, msg="", child_exceptions: Optional[Tuple[Exception]] = None):
+        super().__init__(msg, child_exceptions)
 
     # Overriding this method so we can output all child exception tracebacks when we raise this exception to prevent
     # errors being lost. See https://github.com/awslabs/aws-lambda-powertools-python/issues/275
     def __str__(self):
         parent_exception_str = super(SQSBatchProcessingError, self).__str__()
-        exception_list = [f"{parent_exception_str}\n"]
-        for exception in self.child_exceptions:
-            extype, ex, tb = exception
-            formatted = "".join(traceback.format_exception(extype, ex, tb))
-            exception_list.append(formatted)
-
-        return "\n".join(exception_list)
+        return self.format_exceptions(parent_exception_str)
 
 
-class BatchProcessingError(Exception):
-    """When batch messages could not be processed"""
+class BatchProcessingError(BaseBatchProcessingError):
+    """When all batch records failed to be processed"""
 
-    def __init__(self, msg="", child_exceptions=()):
-        super().__init__(msg)
-        self.msg = msg
-        self.child_exceptions = child_exceptions
+    def __init__(self, msg="", child_exceptions: Optional[Tuple[Exception]] = None):
+        super().__init__(msg, child_exceptions)
 
-    # Overriding this method so we can output all child exception tracebacks when we raise this exception to prevent
-    # errors being lost. See https://github.com/awslabs/aws-lambda-powertools-python/issues/275
     def __str__(self):
         parent_exception_str = super(BatchProcessingError, self).__str__()
-        exception_list = [f"{parent_exception_str}\n"]
-        for exception in self.child_exceptions:
-            extype, ex, tb = exception
-            formatted = "".join(traceback.format_exception(extype, ex, tb))
-            exception_list.append(formatted)
-
-        return "\n".join(exception_list)
+        return self.format_exceptions(parent_exception_str)
