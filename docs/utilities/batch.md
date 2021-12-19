@@ -1057,7 +1057,102 @@ When using Sentry.io for error monitoring, you can override `failure_handler` to
 
 ## Legacy
 
-!!! tip "This is kept for historical purposes. Use the new [BatchProcessor](#processing-messages-from-sqs) instead. "
+!!! tip "This is kept for historical purposes. Use the new [BatchProcessor](#processing-messages-from-sqs) instead."
+
+
+### Migration guide
+
+!!! info "keep reading if you are using `sqs_batch_processor` or `PartialSQSProcessor`"
+
+[As of Nov 2021](https://aws.amazon.com/about-aws/whats-new/2021/11/aws-lambda-partial-batch-response-sqs-event-source/){target="_blank"}, this is no longer needed as both SQS, Kinesis, and DynamoDB Streams offer this capability natively with one caveat - it's an [opt-in feature](#required-resources).
+
+Being a native feature, we no longer need to instantiate boto3 nor other customizations like exception suppressing – this lowers the cost of your Lambda function as you can delegate deleting partial failures to Lambda.
+
+!!! tip "It's also easier to test since it's mostly a [contract based response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-batchfailurereporting-syntax){target="_blank"}."
+
+You can migrate in three steps:
+
+1. If you are using **`sqs_batch_decorator`** you can now use **`batch_processor`** decorator
+2. If you were using **`PartialSQSProcessor`** you can now use **`BatchProcessor`**
+3. Change your Lambda Handler to return the new response format
+
+
+=== "Decorator: Before"
+
+    ```python hl_lines="1 6"
+    from aws_lambda_powertools.utilities.batch import sqs_batch_processor
+
+    def record_handler(record):
+        return do_something_with(record["body"])
+
+    @sqs_batch_processor(record_handler=record_handler)
+    def lambda_handler(event, context):
+        return {"statusCode": 200}
+    ```
+
+=== "Decorator: After"
+
+    ```python hl_lines="3 5 11"
+    import json
+
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+
+    processor = BatchProcessor(event_type=EventType.SQS)
+
+
+    def record_handler(record):
+        return do_something_with(record["body"])
+
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
+    ```
+
+
+=== "Context manager: Before"
+
+    ```python hl_lines="1-2 4 14 19"
+    from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
+    from botocore.config import Config
+
+    config = Config(region_name="us-east-1")
+
+    def record_handler(record):
+        return_value = do_something_with(record["body"])
+        return return_value
+
+
+    def lambda_handler(event, context):
+        records = event["Records"]
+
+        processor = PartialSQSProcessor(config=config)
+
+        with processor(records, record_handler):
+            result = processor.process()
+
+        return result
+    ```
+
+=== "Context manager: After"
+
+    ```python hl_lines="1 11"
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+
+
+    def record_handler(record):
+        return_value = do_something_with(record["body"])
+        return return_value
+
+    def lambda_handler(event, context):
+        records = event["Records"]
+
+        processor = BatchProcessor(event_type=EventType.SQS)
+
+        with processor(records, record_handler):
+            result = processor.process()
+
+        return processor.response()
+    ```
 
 ### Customizing boto configuration
 
