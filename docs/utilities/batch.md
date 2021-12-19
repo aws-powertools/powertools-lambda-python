@@ -707,39 +707,68 @@ You need to create a function to handle each record from the batch - We call it 
 
 ## Advanced
 
-<!-- ### Choosing between decorator and context manager
+### Accessing processed messages
 
-They have nearly the same behaviour when it comes to processing messages from the batch:
+Use the context manager to access a list of all returned values from your `record_handler` function.
 
-* **Entire batch has been successfully processed**, where your Lambda handler returned successfully, we will let SQS delete the batch to optimize your cost
-* **Entire Batch has been partially processed successfully**, where exceptions were raised within your `record handler`, we will:
-  * **1)** Delete successfully processed messages from the queue by directly calling `sqs:DeleteMessageBatch`
-  * **2)** Raise `SQSBatchProcessingError` to ensure failed messages return to your SQS queue
+> Signature: List[Tuple[Union[SuccessResponse, FailureResponse]]]
 
-The only difference is that **PartialSQSProcessor** will give you access to processed messages if you need. -->
+* **When successful**. We will include a tuple with `success`, the result of `record_handler`, and the batch record
+* **When failed**. We will include a tuple with `fail`, exception as a string, and the batch record
 
-<!-- ### Accessing processed messages
-
-Use `PartialSQSProcessor` context manager to access a list of all return values from your `record_handler` function.
 
 === "app.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
+    ```python hl_lines="31-38"
+    import json
 
-    def record_handler(record):
-        return do_something_with(record["body"])
+    from typing import Any, List, Literal, Union
 
-    def lambda_handler(event, context):
-        records = event["Records"]
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import (BatchProcessor,
+                                                       EventType,
+                                                       FailureResponse,
+                                                       SuccessResponse,
+                                                       batch_processor)
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
-        processor = PartialSQSProcessor()
 
-        with processor(records, record_handler) as proc:
-            result = proc.process()  # Returns a list of all results from record_handler
+    processor = BatchProcessor(event_type=EventType.SQS)
+    tracer = Tracer()
+    logger = Logger()
 
-        return result
-    ``` -->
+
+    @tracer.capture_method
+    def record_handler(record: SQSRecord):
+        payload: str = record.body
+        if payload:
+            item: dict = json.loads(payload)
+        ...
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context: LambdaContext):
+        batch = event["Records"]
+        with processor(records=batch, processor=processor):
+            processed_messages: List[Union[SuccessResponse, FailureResponse]] = processor.process()
+
+        for messages in processed_messages:
+            for message in messages:
+                status: Union[Literal["success"], Literal["fail"]] = message[0]
+                result: Any = message[1]
+                record: SQSRecord = message[2]
+
+
+        return processor.response()
+    ```
+
+## FAQ
+
+### Choosing between decorator and context manager
+
+Use context manager when you want access to the processed messages or handle `BatchProcessingError` exception when all records within the batch fail to be processed.
+
 
 <!-- ### Customizing boto configuration
 

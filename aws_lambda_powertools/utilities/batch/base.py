@@ -46,7 +46,7 @@ if has_pydantic:
 
 # When using processor with default arguments, records will carry EventSourceDataClassTypes
 # and depending on what EventType it's passed it'll correctly map to the right record
-# When using Pydantic Models, it'll accept any
+# When using Pydantic Models, it'll accept any subclass from SQS, DynamoDB and Kinesis
 EventSourceDataClassTypes = Union[SQSRecord, KinesisStreamRecord, DynamoDBRecord]
 BatchEventTypes = Union[EventSourceDataClassTypes, "BatchTypeModels"]
 SuccessResponse = Tuple[str, Any, BatchEventTypes]
