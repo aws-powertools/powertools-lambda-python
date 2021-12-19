@@ -30,8 +30,8 @@ class EventType(Enum):
 # type specifics
 #
 has_pydantic = "pydantic" in sys.modules
-_ExcInfo = Tuple[Type[BaseException], BaseException, TracebackType]
-_OptExcInfo = Union[_ExcInfo, Tuple[None, None, None]]
+ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
+OptExcInfo = Union[ExceptionInfo, Tuple[None, None, None]]
 
 # For IntelliSense and Mypy to work, we need to account for possible SQS, Kinesis and DynamoDB subclasses
 # We need them as subclasses as we must access their message ID or sequence number metadata via dot notation
@@ -114,24 +114,38 @@ class BasePartialProcessor(ABC):
 
     def success_handler(self, record, result: Any) -> SuccessResponse:
         """
-        Success callback
+        Keeps track of batch records that were processed successfully
+
+        Parameters
+        ----------
+        record: Any
+            record that failed processing
+        result: Any
+            result from record handler
 
         Returns
         -------
-        tuple
+        SuccessResponse
             "success", result, original record
         """
         entry = ("success", result, record)
         self.success_messages.append(record)
         return entry
 
-    def failure_handler(self, record, exception: _OptExcInfo) -> FailureResponse:
+    def failure_handler(self, record, exception: OptExcInfo) -> FailureResponse:
         """
-        Failure callback
+        Keeps track of batch records that failed processing
+
+        Parameters
+        ----------
+        record: Any
+            record that failed processing
+        exception: OptExcInfo
+            Exception information containing type, value, and traceback (sys.exc_info())
 
         Returns
         -------
-        tuple
+        FailureResponse
             "fail", exceptions args, original record
         """
         exception_string = f"{exception[0]}:{exception[1]}"
@@ -189,6 +203,114 @@ def batch_processor(
 
 
 class BatchProcessor(BasePartialProcessor):
+    """Process native partial responses from SQS, Kinesis Data Streams, and DynamoDB.
+
+
+    Example
+    -------
+
+    ## Process batch triggered by SQS
+
+    ```python
+    import json
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    processor = BatchProcessor(event_type=EventType.SQS)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    def record_handler(record: SQSRecord):
+        payload: str = record.body
+        if payload:
+            item: dict = json.loads(payload)
+        ...
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context: LambdaContext):
+        return processor.response()
+    ```
+
+    ## Process batch triggered by Kinesis Data Streams
+
+    ```python
+    import json
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    def record_handler(record: KinesisStreamRecord):
+        logger.info(record.kinesis.data_as_text)
+        payload: dict = record.kinesis.data_as_json()
+        ...
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context: LambdaContext):
+        return processor.response()
+    ```
+
+
+    ## Process batch triggered by DynamoDB Data Streams
+
+    ```python
+    import json
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    processor = BatchProcessor(event_type=EventType.DynamoDBStreams)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    def record_handler(record: DynamoDBRecord):
+        logger.info(record.dynamodb.new_image)
+        payload: dict = json.loads(record.dynamodb.new_image.get("item").s_value)
+        # alternatively:
+        # changes: Dict[str, dynamo_db_stream_event.AttributeValue] = record.dynamodb.new_image  # noqa: E800
+        # payload = change.get("Message").raw_event -> {"S": "<payload>"}
+        ...
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context: LambdaContext):
+        batch = event["Records"]
+        with processor(records=batch, processor=processor):
+            processed_messages = processor.process() # kick off processing, return list[tuple]
+
+        return processor.response()
+    ```
+
+
+    Raises
+    ------
+    BatchProcessingError
+        When all batch records fail processing
+    """
+
     DEFAULT_RESPONSE: Dict[str, List[Optional[dict]]] = {"batchItemFailures": []}
 
     def __init__(self, event_type: EventType, model: Optional["BatchTypeModels"] = None):
@@ -232,7 +354,7 @@ class BatchProcessor(BasePartialProcessor):
         """
         self.success_messages.clear()
         self.fail_messages.clear()
-        self.batch_response = self.DEFAULT_RESPONSE
+        self.batch_response = copy.deepcopy(self.DEFAULT_RESPONSE)
 
     def _process_record(self, record: dict) -> Union[SuccessResponse, FailureResponse]:
         """
