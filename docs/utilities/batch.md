@@ -32,6 +32,8 @@ With this utility, batch records are processed individually – only messages th
 
 Regardless whether you're using SQS, Kinesis Data Streams or DynamoDB Streams, you must configure your Lambda function event source to use ``ReportBatchItemFailures`.
 
+You do not need any additional IAM permissions to use this utility, except for what each event source requires.
+
 ### Required resources
 
 The remaining sections of the documentation will rely on these samples. For completeness, this demonstrates IAM permissions and Dead Letter Queue where batch records will be sent after 2 retries were attempted.
