@@ -216,7 +216,7 @@ The remaining sections of the documentation will rely on these samples. For comp
 
     ```
 
-### Processing SQS batch
+### Processing messages from SQS
 
 Processing batches from SQS works in four stages:
 
@@ -345,7 +345,7 @@ Processing batches from SQS works in four stages:
     }
     ```
 
-### Processing Kinesis batch
+### Processing messages from Kinesis
 
 Processing batches from Kinesis works in four stages:
 
@@ -474,7 +474,7 @@ Processing batches from Kinesis works in four stages:
     ```
 
 
-### Processing DynamoDB batch
+### Processing messages from DynamoDB
 
 Processing batches from Kinesis works in four stages:
 
