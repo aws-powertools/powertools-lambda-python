@@ -1064,6 +1064,141 @@ def lambda_handler(event, context: LambdaContext):
 
 ```
 
+## Testing your code
+
+As there is no external calls, you can unit test your code with `BatchProcessor` quite easily.
+
+**Example**: Given a SQS batch where the first batch record succeeds and the second fails processing, we should have a single item reported in the function response.
+
+=== "test_app.py"
+
+    ```python
+    import json
+
+    from pathlib import Path
+    from dataclasses import dataclass
+
+    import pytest
+    from src.app import lambda_handler, processor
+
+
+    def load_event(path: Path):
+        with path.open() as f:
+            return json.load(f)
+
+
+    @pytest.fixture
+    def lambda_context():
+        @dataclass
+        class LambdaContext:
+            function_name: str = "test"
+            memory_limit_in_mb: int = 128
+            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
+            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
+
+        return LambdaContext()
+
+    @pytest.fixture()
+    def sqs_event():
+        """Generates API GW Event"""
+        return load_event(path=Path("events/sqs_event.json"))
+
+
+    def test_app_batch_partial_response(sqs_event, lambda_context):
+        # GIVEN
+        processor = app.processor  # access processor for additional assertions
+        successful_record = sqs_event["Records"][0]
+        failed_record = sqs_event["Records"][1]
+        expected_response = {
+            "batchItemFailures: [
+                {
+                    "itemIdentifier": failed_record["messageId"]
+                }
+            ]
+        }
+
+        # WHEN
+        ret = app.lambda_handler(sqs_event, lambda_context)
+
+        # THEN
+        assert ret == expected_response
+        assert len(processor.fail_messages) == 1
+        assert processor.success_messages[0] == successful_record
+    ```
+
+=== "src/app.py"
+
+    ```python
+    import json
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    processor = BatchProcessor(event_type=EventType.SQS)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    def record_handler(record: SQSRecord):
+        payload: str = record.body
+        if payload:
+            item: dict = json.loads(payload)
+        ...
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context: LambdaContext):
+        return processor.response()
+    ```
+
+=== "Sample SQS event"
+
+    ```json title="events/sqs_sample.json"
+    {
+        "Records": [
+            {
+                "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
+                "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a",
+                "body": "{\"Message\": \"success\"}",
+                "attributes": {
+                    "ApproximateReceiveCount": "1",
+                    "SentTimestamp": "1545082649183",
+                    "SenderId": "AIDAIENQZJOLO23YVJ4VO",
+                    "ApproximateFirstReceiveTimestamp": "1545082649185"
+                },
+                "messageAttributes": {},
+                "md5OfBody": "e4e68fb7bd0e697a0ae8f1bb342846b3",
+                "eventSource": "aws:sqs",
+                "eventSourceARN": "arn:aws:sqs:us-east-2: 123456789012:my-queue",
+                "awsRegion": "us-east-1"
+            },
+            {
+                "messageId": "244fc6b4-87a3-44ab-83d2-361172410c3a",
+                "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a",
+                "body": "SGVsbG8sIHRoaXMgaXMgYSB0ZXN0Lg==",
+                "attributes": {
+                    "ApproximateReceiveCount": "1",
+                    "SentTimestamp": "1545082649183",
+                    "SenderId": "AIDAIENQZJOLO23YVJ4VO",
+                    "ApproximateFirstReceiveTimestamp": "1545082649185"
+                },
+                "messageAttributes": {},
+                "md5OfBody": "e4e68fb7bd0e697a0ae8f1bb342846b3",
+                "eventSource": "aws:sqs",
+                "eventSourceARN": "arn:aws:sqs:us-east-2: 123456789012:my-queue",
+                "awsRegion": "us-east-1"
+            }
+        ]
+    }
+    ```
+
+
+
 ## FAQ
 
 ### Choosing between decorator and context manager
