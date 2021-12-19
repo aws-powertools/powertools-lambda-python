@@ -620,6 +620,20 @@ Processing batches from Kinesis works in four stages:
     }
     ```
 
+### Partial failure mechanics
+
+All records in the batch will be passed to this handler for processing, even if exceptions are thrown - Here's the behaviour after completing the batch:
+
+* **All records successfully processed**. We will return an empty list of item failures `{'batchItemFailures': []}`
+* **Partial success with some exceptions**. We will return a list of all item IDs/sequence numbers ``{'batchItemFailures': [{"itemIdentifier": "<id>}]}`
+* **All records failed to be processed**. We will raise `BatchProcessingError` exception with a list of all exceptions captured
+
+!!! warning
+    You will not have access to the **processed messages** within the Lambda Handler; use context manager for that.
+
+    All processing logic will and should be performed by the `record_handler` function.
+
+
 <!-- ### IAM Permissions
 
 Before your use this utility, your AWS Lambda function must have `sqs:DeleteMessageBatch` permission to delete successful messages directly from the queue.
@@ -688,17 +702,6 @@ You need to create a function to handle each record from the batch - We call it 
 
     If the entire batch succeeds, we let Lambda to proceed in deleting the records from the queue for cost reasons. -->
 
-<!-- ### Partial failure mechanics
-
-All records in the batch will be passed to this handler for processing, even if exceptions are thrown - Here's the behaviour after completing the batch:
-
-* **Any successfully processed messages**, we will delete them from the queue via `sqs:DeleteMessageBatch`
-* **Any unprocessed messages detected**, we will raise `SQSBatchProcessingError` to ensure failed messages return to your SQS queue
-
-!!! warning
-    You will not have accessed to the **processed messages** within the Lambda Handler.
-
-    All processing logic will and should be performed by the `record_handler` function. -->
 
 ## Advanced
 
