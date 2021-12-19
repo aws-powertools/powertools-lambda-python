@@ -1026,6 +1026,43 @@ You can then use this class as a context manager, or pass it to `batch_processor
         return {"statusCode": 200}
     ```
 
+### Caveats
+
+#### Tracer response auto-capture for large batch sizes
+
+When using Tracer to capture responses for each batch record processing, you might exceed 64K of tracing data depending on what you return from your `record_handler` function, or how big is your batch size.
+
+If that's the case, you can configure [Tracer to disable response auto-capturing](../core/tracer.md#disabling-response-auto-capture){target="_blank"}.
+
+
+```python hl_lines="14" title="Disabling Tracer response auto-capturing"
+import json
+
+from aws_lambda_powertools import Logger, Tracer
+from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+processor = BatchProcessor(event_type=EventType.SQS)
+tracer = Tracer()
+logger = Logger()
+
+
+@tracer.capture_method(capture_response=False)
+def record_handler(record: SQSRecord):
+    payload: str = record.body
+    if payload:
+        item: dict = json.loads(payload)
+    ...
+
+@logger.inject_lambda_context
+@tracer.capture_lambda_handler
+@batch_processor(record_handler=record_handler, processor=processor)
+def lambda_handler(event, context: LambdaContext):
+    return processor.response()
+
+```
 
 ## FAQ
 
