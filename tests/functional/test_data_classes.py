@@ -1053,7 +1053,9 @@ def test_base_proxy_event_json_body_key_error():
 def test_base_proxy_event_json_body():
     data = {"message": "Foo"}
     event = BaseProxyEvent({"body": json.dumps(data)})
+    assert event._parsed_json_body is None
     assert event.json_body == data
+    assert event.json_body == event._parsed_json_body == data
 
 
 def test_base_proxy_event_decode_body_key_error():
@@ -1084,7 +1086,7 @@ def test_base_proxy_event_json_body_with_base64_encoded_data():
     event = BaseProxyEvent({"body": encoded_data, "isBase64Encoded": True})
 
     # WHEN calling json_body
-    # THEN then base64 decode and json load
+    # THEN base64 decode and json load
     assert event.json_body == data
 
 
