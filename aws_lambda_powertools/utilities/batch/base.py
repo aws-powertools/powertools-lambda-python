@@ -12,6 +12,7 @@ from types import TracebackType
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, overload
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
 from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
@@ -199,6 +200,11 @@ class BatchProcessor(BasePartialProcessor):
             Whether this is a SQS, DynamoDB Streams, or Kinesis Data Stream event
         model: Optional["BatchTypeModels"]
             Parser's data model using either SqsRecordModel, DynamoDBStreamRecordModel, KinesisDataStreamRecord
+
+        Exceptions
+        ----------
+        BatchProcessingError
+            Raised when the entire batch has failed processing
         """
         self.event_type = event_type
         self.model = model
@@ -252,6 +258,13 @@ class BatchProcessor(BasePartialProcessor):
         if not self._has_messages_to_report():
             return
 
+        if self._entire_batch_failed():
+            raise BatchProcessingError(
+                msg=f"All records failed processing. {len(self.exceptions)} individual errors logged"
+                f"separately below.",
+                child_exceptions=self.exceptions,
+            )
+
         messages = self._get_messages_to_report()
         self.batch_response = {"batchItemFailures": [messages]}
 
@@ -261,6 +274,9 @@ class BatchProcessor(BasePartialProcessor):
 
         logger.debug(f"All {len(self.success_messages)} records successfully processed")
         return False
+
+    def _entire_batch_failed(self) -> bool:
+        return len(self.exceptions) == len(self.records)
 
     def _get_messages_to_report(self) -> Dict[str, str]:
         """

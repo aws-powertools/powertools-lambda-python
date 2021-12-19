@@ -7,9 +7,14 @@ import pytest
 from botocore.config import Config
 from botocore.stub import Stubber
 
-from aws_lambda_powertools.utilities.batch import PartialSQSProcessor, batch_processor, sqs_batch_processor
-from aws_lambda_powertools.utilities.batch.base import BatchProcessor, EventType
-from aws_lambda_powertools.utilities.batch.exceptions import SQSBatchProcessingError
+from aws_lambda_powertools.utilities.batch import (
+    BatchProcessor,
+    EventType,
+    PartialSQSProcessor,
+    batch_processor,
+    sqs_batch_processor,
+)
+from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError, SQSBatchProcessingError
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
 from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
@@ -559,7 +564,7 @@ def test_batch_processor_dynamodb_context_with_failure(dynamodb_event_factory, d
 def test_batch_processor_dynamodb_middleware_with_failure(dynamodb_event_factory, dynamodb_record_handler):
     # GIVEN
     first_record = dynamodb_event_factory("failure")
-    second_record = dynamodb_event_factory("success")
+    second_record = dynamodb_event_factory("failure")
     event = {"Records": [first_record, second_record]}
 
     processor = BatchProcessor(event_type=EventType.DynamoDBStreams)
@@ -745,7 +750,7 @@ def test_batch_processor_kinesis_context_parser_model(kinesis_event_factory, ord
         # so Pydantic can auto-initialize nested Order model
         @validator("data", pre=True)
         def transform_message_to_dict(cls, value: str):
-            # Powertools KinesisDataStreamRecordModel
+            # Powertools KinesisDataStreamRecordModel already decodes b64 to str here
             return json.loads(value)
 
     class OrderKinesisRecord(KinesisDataStreamRecordModel):
@@ -812,3 +817,20 @@ def test_batch_processor_kinesis_context_parser_model_with_failure(kinesis_event
     # THEN
     assert len(batch.fail_messages) == 1
     assert batch.response() == {"batchItemFailures": [{"itemIdentifier": first_record["kinesis"]["sequenceNumber"]}]}
+
+
+def test_batch_processor_error_when_entire_batch_fails(sqs_event_factory, record_handler):
+    # GIVEN
+    first_record = SQSRecord(sqs_event_factory("fail"))
+    second_record = SQSRecord(sqs_event_factory("fail"))
+    event = {"Records": [first_record.raw_event, second_record.raw_event]}
+
+    processor = BatchProcessor(event_type=EventType.SQS)
+
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
+
+    # WHEN/THEN
+    with pytest.raises(BatchProcessingError):
+        lambda_handler(event, {})
