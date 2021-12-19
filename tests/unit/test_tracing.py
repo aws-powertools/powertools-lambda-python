@@ -628,3 +628,9 @@ def test_tracer_lambda_handler_do_not_add_service_annotation_when_missing(
     # THEN
     assert in_subsegment_mock.put_annotation.call_count == 1
     assert in_subsegment_mock.put_annotation.call_args == mocker.call(key="ColdStart", value=True)
+
+
+def test_ignore_endpoints(provider_stub, in_subsegment_mock):
+    provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
+    tracer = Tracer(provider=provider)
+    tracer.ignore_endpoint(hostname="https://foo.com/", urls=["/bar", "/ignored"])

@@ -5,7 +5,7 @@ import inspect
 import logging
 import numbers
 import os
-from typing import Any, Callable, Dict, Optional, Sequence, Union, cast, overload
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union, cast, overload
 
 from ..shared import constants
 from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
@@ -758,7 +758,7 @@ class Tracer:
         # Due to Lazy Import, we need to activate `core` attrib via import
         # we also need to include `patch`, `patch_all` methods
         # to ensure patch calls are done via the provider
-        from aws_xray_sdk.core import xray_recorder
+        from aws_xray_sdk.core import xray_recorder  # type: ignore
 
         provider = xray_recorder
         provider.patch = aws_xray_sdk.core.patch
@@ -778,3 +778,23 @@ class Tracer:
 
     def _is_xray_provider(self):
         return "aws_xray_sdk" in self.provider.__module__
+
+    @staticmethod
+    def ignore_endpoint(hostname: Optional[str] = None, urls: Optional[List[str]] = None):
+        """If you want to ignore certain httplib requests you can do so based on the hostname or URL that is being
+        requested.
+
+        Documentation
+        --------------
+        - https://github.com/aws/aws-xray-sdk-python#ignoring-httplib-requests
+
+        Parameters
+        ----------
+        hostname : Optional, str
+            The hostname is matched using the Python fnmatch library which does Unix glob style matching.
+        urls: Optional, List[str]
+            List of urls to ignore. Example `tracer.ignore_endpoint(urls=["/ignored-url"])`
+        """
+        from aws_xray_sdk.ext.httplib import add_ignored  # type: ignore
+
+        add_ignored(hostname=hostname, urls=urls)
