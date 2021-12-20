@@ -41,9 +41,7 @@ class KinesisStreamRecordPayload(DictWrapper):
 
     def data_as_json(self) -> dict:
         """Decode binary encoded data as json"""
-        if self._json_data is None:
-            self._json_data = json.loads(self.data_as_text())
-        return self._json_data
+        return json.loads(self.data_as_text())
 
 
 class KinesisStreamRecord(DictWrapper):

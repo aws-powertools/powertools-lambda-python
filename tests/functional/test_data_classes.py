@@ -1125,7 +1125,6 @@ def test_kinesis_stream_event_json_data():
     event = KinesisStreamEvent({"Records": [{"kinesis": {"data": data}}]})
     record = next(event.records)
     assert record.kinesis.data_as_json() == json_value
-    assert record.kinesis.data_as_json() == json_value  # cached lookup
 
 
 def test_alb_event():
