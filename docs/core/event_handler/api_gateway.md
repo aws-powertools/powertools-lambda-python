@@ -478,6 +478,93 @@ Similarly to [Query strings](#query-strings-and-payload), you can access headers
         return app.resolve(event, context)
     ```
 
+
+### Handling not found routes
+
+By default, we return `404` for any unmatched route.
+
+You can use **`not_found`** decorator to override this behaviour, and return a custom **`Response`**.
+
+=== "app.py"
+
+    ```python hl_lines="11 13 16" title="Handling not found"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler import content_types
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+    from aws_lambda_powertools.event_handler.exceptions import NotFoundError
+
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver()
+
+    @app.not_found
+    @tracer.capture_method
+    def handle_not_found_errors(exc: NotFoundError) -> Response:
+        # Return 418 upon 404 errors
+        logger.info(f"Not found route: {app.current_event.path}")
+        return Response(
+            status_code=418,
+            content_type=content_types.TEXT_PLAIN,
+            body="I'm a teapot!"
+        )
+
+
+    @app.get("/catch/me/if/you/can")
+    @tracer.capture_method
+    def catch_me_if_you_can():
+        return {"message": "oh hey"}
+
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
+
+
+### Exception handling
+
+You can use **`exception_handler`** decorator with any Python exception. This allows you to handle a common exception outside your route, for example validation errors.
+
+=== "app.py"
+
+    ```python hl_lines="10 15" title="Exception handling"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler import content_types
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+
+    tracer = Tracer()
+    logger = Logger()
+    app = ApiGatewayResolver()
+
+    @app.exception_handler(ValueError)
+    def handle_value_error(ex: ValueError):
+        metadata = {"path": app.current_event.path}
+        logger.error(f"Malformed request: {ex}", extra=metadata)
+
+        return Response(
+            status_code=400,
+            content_type=content_types.TEXT_PLAIN,
+            body="Invalid request",
+        )
+
+
+    @app.get("/hello")
+    @tracer.capture_method
+    def hello_name():
+        name = app.current_event.get_query_string_value(name="name")
+        if name is not None:
+            raise ValueError("name query string must be present")
+        return {"message": f"hello {name}"}
+
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
+
+
 ### Raising HTTP errors
 
 You can easily raise any HTTP Error back to the client using `ServiceError` exception.
