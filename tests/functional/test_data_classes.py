@@ -1054,6 +1054,7 @@ def test_base_proxy_event_json_body():
     data = {"message": "Foo"}
     event = BaseProxyEvent({"body": json.dumps(data)})
     assert event.json_body == data
+    assert event.json_body == data  # cached lookup
 
 
 def test_base_proxy_event_decode_body_key_error():
@@ -1394,9 +1395,13 @@ def test_code_pipeline_event_decoded_data():
     event = CodePipelineJobEvent(load_event("codePipelineEventData.json"))
 
     assert event.data.continuation_token is None
-    decoded_params = event.data.action_configuration.configuration.decoded_user_parameters
+    configuration = event.data.action_configuration.configuration
+    decoded_params = configuration.decoded_user_parameters
     assert decoded_params == event.decoded_user_parameters
     assert "VALUE" == decoded_params["KEY"]
+
+    decoded_params = configuration.decoded_user_parameters  # cached lookup
+    assert decoded_params is not None
 
     assert "my-pipeline-SourceArtifact" == event.data.input_artifacts[0].name
 
