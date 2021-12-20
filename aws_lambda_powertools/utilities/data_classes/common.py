@@ -8,6 +8,7 @@ class DictWrapper:
 
     def __init__(self, data: Dict[str, Any]):
         self._data = data
+        self._json_data: Optional[Any] = None
 
     def __getitem__(self, key: str) -> Any:
         return self._data[key]
@@ -45,10 +46,6 @@ def get_header_value(
 
 
 class BaseProxyEvent(DictWrapper):
-    def __init__(self, data: Dict[str, Any]):
-        super().__init__(data)
-        self._parsed_json_body: Optional[Any] = None
-
     @property
     def headers(self) -> Dict[str, str]:
         return self["headers"]
@@ -69,11 +66,9 @@ class BaseProxyEvent(DictWrapper):
     @property
     def json_body(self) -> Any:
         """Parses the submitted body as json"""
-        if self._parsed_json_body:
-            return self._parsed_json_body
-
-        self._parsed_json_body = json.loads(self.decoded_body)
-        return self._parsed_json_body
+        if self._json_data is None:
+            self._json_data = json.loads(self.decoded_body)
+        return self._json_data
 
     @property
     def decoded_body(self) -> str:
