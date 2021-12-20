@@ -1095,3 +1095,15 @@ def test_idempotent_function_pydantic():
 def test_idempotent_function_other(data):
     # All other data types should be left as is
     assert _prepare_data(data) == data
+
+
+def test_invalid_dynamodb_persistence_layer():
+    # Scenario constructing a DynamoDBPersistenceLayer with a key_attr matching sort_key_attr should fail
+    with pytest.raises(ValueError) as ve:
+        DynamoDBPersistenceLayer(
+            table_name="Foo",
+            key_attr="id",
+            sort_key_attr="id",
+        )
+    # and raise a ValueError
+    assert str(ve.value) == "key_attr [id] and sort_key_attr [id] cannot be the same!"
