@@ -88,6 +88,9 @@ exclude_lines = [
 
 	# Ignore type function overload
 	"@overload",
+
+	# Ignore interfaces, future protocols, and @overload impl
+	"...",
 ]
 
 [tool.isort]
