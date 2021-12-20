@@ -3,8 +3,10 @@ import io
 import json
 import logging
 import random
+import re
 import string
 from collections import namedtuple
+from datetime import datetime, timezone
 from typing import Iterable
 
 import pytest
@@ -610,3 +612,25 @@ def test_inject_lambda_context_allows_handler_with_kwargs(lambda_context, stdout
 
     # THEN
     handler({}, lambda_context, my_custom_option="blah")
+
+
+@pytest.mark.parametrize("utc", [False, True])
+def test_datetime_fmt(stdout, service_name, utc):
+    # GIVEN
+    logger = Logger(
+        service=service_name,
+        stream=stdout,
+        datetime_fmt="custom timestamp: milliseconds=%F microseconds=%f timezone=%z",
+        utc=utc,
+    )
+
+    # WHEN a log statement happens
+    logger.info({})
+
+    # THEN the timestamp has the appropriate formatting
+    log = capture_logging_output(stdout)
+
+    expected_tz = datetime.now().astimezone(timezone.utc if utc else None).strftime("%z")
+    assert re.fullmatch(
+        f"custom timestamp: milliseconds=[0-9]+ microseconds=[0-9]+ timezone={re.escape(expected_tz)}", log["timestamp"]
+    )

@@ -80,7 +80,11 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     Parameters propagated to LambdaPowertoolsFormatter
     ---------------------------------------------
     datefmt: str, optional
-        String directives (strftime) to format log timestamp, by default it uses RFC 3339.
+        String directives (strftime) to format log timestamp using `time`, by default it uses RFC
+        3339. Only one of `datefmt` and `datetime_fmt` should be specified.
+    datetime_fmt : str, optional
+        String directives (strftime) to format log timestamp using `datetime`. Only one of `datefmt`
+        and `datetime_fmt` should be specified.
     json_serializer : Callable, optional
         function to serialize `obj` to a JSON formatted `str`, by default json.dumps
     json_deserializer : Callable, optional
