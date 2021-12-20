@@ -832,5 +832,7 @@ def test_batch_processor_error_when_entire_batch_fails(sqs_event_factory, record
         return processor.response()
 
     # WHEN/THEN
-    with pytest.raises(BatchProcessingError):
+    with pytest.raises(BatchProcessingError) as e:
         lambda_handler(event, {})
+        ret = str(e)
+        assert ret is not None

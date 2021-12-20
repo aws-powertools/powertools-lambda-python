@@ -2,11 +2,13 @@
 Batch processing exceptions
 """
 import traceback
-from typing import Optional, Tuple
+from typing import List, Optional
+
+from aws_lambda_powertools.utilities.batch import ExceptionInfo
 
 
 class BaseBatchProcessingError(Exception):
-    def __init__(self, msg="", child_exceptions=()):
+    def __init__(self, msg="", child_exceptions: Optional[List[ExceptionInfo]] = None):
         super().__init__(msg)
         self.msg = msg
         self.child_exceptions = child_exceptions
@@ -24,7 +26,7 @@ class BaseBatchProcessingError(Exception):
 class SQSBatchProcessingError(BaseBatchProcessingError):
     """When at least one message within a batch could not be processed"""
 
-    def __init__(self, msg="", child_exceptions: Optional[Tuple[Exception]] = None):
+    def __init__(self, msg="", child_exceptions: Optional[List[ExceptionInfo]] = None):
         super().__init__(msg, child_exceptions)
 
     # Overriding this method so we can output all child exception tracebacks when we raise this exception to prevent
@@ -37,7 +39,7 @@ class SQSBatchProcessingError(BaseBatchProcessingError):
 class BatchProcessingError(BaseBatchProcessingError):
     """When all batch records failed to be processed"""
 
-    def __init__(self, msg="", child_exceptions: Optional[Tuple[Exception]] = None):
+    def __init__(self, msg="", child_exceptions: Optional[List[ExceptionInfo]] = None):
         super().__init__(msg, child_exceptions)
 
     def __str__(self):

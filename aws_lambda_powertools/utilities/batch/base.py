@@ -31,7 +31,6 @@ class EventType(Enum):
 #
 has_pydantic = "pydantic" in sys.modules
 ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
-OptExcInfo = Union[ExceptionInfo, Tuple[None, None, None]]
 
 # For IntelliSense and Mypy to work, we need to account for possible SQS, Kinesis and DynamoDB subclasses
 # We need them as subclasses as we must access their message ID or sequence number metadata via dot notation
@@ -61,7 +60,7 @@ class BasePartialProcessor(ABC):
     def __init__(self):
         self.success_messages: List[BatchEventTypes] = []
         self.fail_messages: List[BatchEventTypes] = []
-        self.exceptions: List = []
+        self.exceptions: List[ExceptionInfo] = []
 
     @abstractmethod
     def _prepare(self):
@@ -132,7 +131,7 @@ class BasePartialProcessor(ABC):
         self.success_messages.append(record)
         return entry
 
-    def failure_handler(self, record, exception: OptExcInfo) -> FailureResponse:
+    def failure_handler(self, record, exception: ExceptionInfo) -> FailureResponse:
         """
         Keeps track of batch records that failed processing
 
@@ -140,7 +139,7 @@ class BasePartialProcessor(ABC):
         ----------
         record: Any
             record that failed processing
-        exception: OptExcInfo
+        exception: ExceptionInfo
             Exception information containing type, value, and traceback (sys.exc_info())
 
         Returns
@@ -384,7 +383,7 @@ class BatchProcessor(BasePartialProcessor):
             raise BatchProcessingError(
                 msg=f"All records failed processing. {len(self.exceptions)} individual errors logged"
                 f"separately below.",
-                child_exceptions=tuple(self.exceptions),
+                child_exceptions=self.exceptions,
             )
 
         messages = self._get_messages_to_report()
