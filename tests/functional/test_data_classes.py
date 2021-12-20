@@ -272,6 +272,8 @@ def test_cognito_pre_token_generation_trigger_event():
     claims_override_details.set_group_configuration_groups_to_override(expected_groups)
     assert claims_override_details.group_configuration.groups_to_override == expected_groups
     assert event["response"]["claimsOverrideDetails"]["groupOverrideDetails"]["groupsToOverride"] == expected_groups
+    claims_override_details = event.response.claims_override_details  # cached lookups
+    assert claims_override_details["groupOverrideDetails"]["groupsToOverride"] == expected_groups
 
     claims_override_details.set_group_configuration_iam_roles_to_override(["role"])
     assert claims_override_details.group_configuration.iam_roles_to_override == ["role"]
