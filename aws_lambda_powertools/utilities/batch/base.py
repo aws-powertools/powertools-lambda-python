@@ -384,7 +384,7 @@ class BatchProcessor(BasePartialProcessor):
             raise BatchProcessingError(
                 msg=f"All records failed processing. {len(self.exceptions)} individual errors logged"
                 f"separately below.",
-                child_exceptions=self.exceptions,
+                child_exceptions=tuple(self.exceptions),
             )
 
         messages = self._get_messages_to_report()
@@ -411,32 +411,28 @@ class BatchProcessor(BasePartialProcessor):
     def _collect_sqs_failures(self):
         if self.model:
             return {"itemIdentifier": msg.messageId for msg in self.fail_messages}
-        else:
-            return {"itemIdentifier": msg.message_id for msg in self.fail_messages}
+        return {"itemIdentifier": msg.message_id for msg in self.fail_messages}
 
     def _collect_kinesis_failures(self):
         if self.model:
             # Pydantic model uses int but Lambda poller expects str
             return {"itemIdentifier": msg.kinesis.sequenceNumber for msg in self.fail_messages}
-        else:
-            return {"itemIdentifier": msg.kinesis.sequence_number for msg in self.fail_messages}
+        return {"itemIdentifier": msg.kinesis.sequence_number for msg in self.fail_messages}
 
     def _collect_dynamodb_failures(self):
         if self.model:
             return {"itemIdentifier": msg.dynamodb.SequenceNumber for msg in self.fail_messages}
-        else:
-            return {"itemIdentifier": msg.dynamodb.sequence_number for msg in self.fail_messages}
+        return {"itemIdentifier": msg.dynamodb.sequence_number for msg in self.fail_messages}
 
     @overload
     def _to_batch_type(self, record: dict, event_type: EventType, model: "BatchTypeModels") -> "BatchTypeModels":
-        ...
+        ...  # pragma: no cover
 
     @overload
     def _to_batch_type(self, record: dict, event_type: EventType) -> EventSourceDataClassTypes:
-        ...
+        ...  # pragma: no cover
 
     def _to_batch_type(self, record: dict, event_type: EventType, model: Optional["BatchTypeModels"] = None):
         if model is not None:
             return model.parse_obj(record)
-        else:
-            return self._DATA_CLASS_MAPPING[event_type](record)
+        return self._DATA_CLASS_MAPPING[event_type](record)
