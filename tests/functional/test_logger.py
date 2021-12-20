@@ -597,3 +597,16 @@ def test_clear_state_on_inject_lambda_context(lambda_context, stdout, service_na
     first_log, second_log = capture_multiple_logging_statements_output(stdout)
     assert "my_key" in first_log
     assert "my_key" not in second_log
+
+
+def test_inject_lambda_context_allows_handler_with_kwargs(lambda_context, stdout, service_name):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN
+    @logger.inject_lambda_context(clear_state=True)
+    def handler(event, context, my_custom_option=None):
+        pass
+
+    # THEN
+    handler({}, lambda_context, my_custom_option="blah")
