@@ -50,7 +50,7 @@ The remaining sections of the documentation will rely on these samples. For comp
         Function:
             Timeout: 5
             MemorySize: 256
-            Runtime: python3.8
+            Runtime: python3.9
             Tracing: Active
             Environment:
                 Variables:
@@ -97,7 +97,7 @@ The remaining sections of the documentation will rely on these samples. For comp
         Function:
             Timeout: 5
             MemorySize: 256
-            Runtime: python3.8
+            Runtime: python3.9
             Tracing: Active
             Environment:
                 Variables:
@@ -155,7 +155,7 @@ The remaining sections of the documentation will rely on these samples. For comp
         Function:
             Timeout: 5
             MemorySize: 256
-            Runtime: python3.8
+            Runtime: python3.9
             Tracing: Active
             Environment:
                 Variables:
@@ -634,75 +634,6 @@ All records in the batch will be passed to this handler for processing, even if 
     You will not have access to the **processed messages** within the Lambda Handler; use context manager for that.
 
     All processing logic will and should be performed by the `record_handler` function.
-
-
-<!-- ### IAM Permissions
-
-Before your use this utility, your AWS Lambda function must have `sqs:DeleteMessageBatch` permission to delete successful messages directly from the queue.
-
-> Example using AWS Serverless Application Model (SAM)
-
-=== "template.yml"
-
-    ```yaml hl_lines="2-3 12-15"
-    Resources:
-        MyQueue:
-        Type: AWS::SQS::Queue
-
-        HelloWorldFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            Runtime: python3.8
-            Environment:
-            Variables:
-                POWERTOOLS_SERVICE_NAME: example
-            Policies:
-            - SQSPollerPolicy:
-                QueueName:
-                    !GetAtt MyQueue.QueueName
-    ```
-
-### Processing messages from SQS
-
-You can use either `sqs_batch_processor` decorator, or `PartialSQSProcessor` as a context manager if you'd like access to the processed results.
-
-You need to create a function to handle each record from the batch - We call it `record_handler` from here on.
-
-=== "Decorator"
-
-    ```python hl_lines="3 6"
-    from aws_lambda_powertools.utilities.batch import sqs_batch_processor
-
-    def record_handler(record):
-        return do_something_with(record["body"])
-
-    @sqs_batch_processor(record_handler=record_handler)
-    def lambda_handler(event, context):
-        return {"statusCode": 200}
-    ```
-=== "Context manager"
-
-    ```python hl_lines="3 9 11-12"
-    from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
-
-    def record_handler(record):
-        return_value = do_something_with(record["body"])
-        return return_value
-
-    def lambda_handler(event, context):
-        records = event["Records"]
-        processor = PartialSQSProcessor()
-
-        with processor(records, record_handler) as proc:
-            result = proc.process()  # Returns a list of all results from record_handler
-
-        return result
-    ```
-
-!!! tip
-    **Any non-exception/successful return from your record handler function** will instruct both decorator and context manager to queue up each individual message for deletion.
-
-    If the entire batch succeeds, we let Lambda to proceed in deleting the records from the queue for cost reasons. -->
 
 
 ## Advanced
