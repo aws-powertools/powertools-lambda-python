@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 import jmespath
 import pytest
 from botocore import stub
+from pydantic import BaseModel
 
 from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2, event_source
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, IdempotencyConfig
@@ -1080,8 +1081,6 @@ def test_idempotent_function_dataclasses():
 
 def test_idempotent_function_pydantic():
     # Scenario _prepare_data should convert a pydantic to a dict
-    from pydantic import BaseModel
-
     class Foo(BaseModel):
         name: str
 
