@@ -49,6 +49,7 @@ theme:
     - navigation.sections
     - navigation.expand
     - navigation.top
+    - navigation.instant
   icon:
     repo: fontawesome/brands/github
   logo: media/aws-logo-light.svg
