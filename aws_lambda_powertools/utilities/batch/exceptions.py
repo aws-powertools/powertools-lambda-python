@@ -2,9 +2,10 @@
 Batch processing exceptions
 """
 import traceback
-from typing import List, Optional
+from types import TracebackType
+from typing import List, Optional, Tuple, Type
 
-from aws_lambda_powertools.utilities.batch import ExceptionInfo
+ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
 
 
 class BaseBatchProcessingError(Exception):

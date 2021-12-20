@@ -8,11 +8,10 @@ import logging
 import sys
 from abc import ABC, abstractmethod
 from enum import Enum
-from types import TracebackType
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, overload
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError
+from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError, ExceptionInfo
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
 from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
@@ -30,7 +29,6 @@ class EventType(Enum):
 # type specifics
 #
 has_pydantic = "pydantic" in sys.modules
-ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
 
 # For IntelliSense and Mypy to work, we need to account for possible SQS, Kinesis and DynamoDB subclasses
 # We need them as subclasses as we must access their message ID or sequence number metadata via dot notation
