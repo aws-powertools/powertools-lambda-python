@@ -524,9 +524,7 @@ You can use **`not_found`** decorator to override this behaviour, and return a c
 
 ### Exception handling
 
-You might want to handle an exception outside your route like custom validation errors or anything that warrants a different response (status code, headers, body).
-
-You can use `exception_handler` decorator with any Python exception.
+You can use `exception_handler` decorator with any Python exception. This allows you to handle a common exception outside your route, for example validation errors.
 
 === "app.py"
 
