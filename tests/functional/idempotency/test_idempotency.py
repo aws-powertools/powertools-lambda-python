@@ -1057,3 +1057,15 @@ def test_idempotent_function_duplicates(
     assert one(data=mock_event) == "one"
     assert two(data=mock_event) == "two"
     assert len(persistence_store.table.method_calls) == 4
+
+
+def test_invalid_dynamodb_persistence_layer():
+    # Scenario constructing a DynamoDBPersistenceLayer with a key_attr matching sort_key_attr should fail
+    with pytest.raises(ValueError) as ve:
+        DynamoDBPersistenceLayer(
+            table_name="Foo",
+            key_attr="id",
+            sort_key_attr="id",
+        )
+    # and raise a ValueError
+    assert str(ve.value) == "key_attr [id] and sort_key_attr [id] cannot be the same!"
