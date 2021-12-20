@@ -8,11 +8,10 @@ import logging
 import sys
 from abc import ABC, abstractmethod
 from enum import Enum
-from types import TracebackType
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, overload
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError
+from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError, ExceptionInfo
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
 from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
@@ -30,8 +29,6 @@ class EventType(Enum):
 # type specifics
 #
 has_pydantic = "pydantic" in sys.modules
-ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
-OptExcInfo = Union[ExceptionInfo, Tuple[None, None, None]]
 
 # For IntelliSense and Mypy to work, we need to account for possible SQS, Kinesis and DynamoDB subclasses
 # We need them as subclasses as we must access their message ID or sequence number metadata via dot notation
@@ -61,7 +58,7 @@ class BasePartialProcessor(ABC):
     def __init__(self):
         self.success_messages: List[BatchEventTypes] = []
         self.fail_messages: List[BatchEventTypes] = []
-        self.exceptions: List = []
+        self.exceptions: List[ExceptionInfo] = []
 
     @abstractmethod
     def _prepare(self):
@@ -132,7 +129,7 @@ class BasePartialProcessor(ABC):
         self.success_messages.append(record)
         return entry
 
-    def failure_handler(self, record, exception: OptExcInfo) -> FailureResponse:
+    def failure_handler(self, record, exception: ExceptionInfo) -> FailureResponse:
         """
         Keeps track of batch records that failed processing
 
@@ -140,7 +137,7 @@ class BasePartialProcessor(ABC):
         ----------
         record: Any
             record that failed processing
-        exception: OptExcInfo
+        exception: ExceptionInfo
             Exception information containing type, value, and traceback (sys.exc_info())
 
         Returns
@@ -411,32 +408,28 @@ class BatchProcessor(BasePartialProcessor):
     def _collect_sqs_failures(self):
         if self.model:
             return {"itemIdentifier": msg.messageId for msg in self.fail_messages}
-        else:
-            return {"itemIdentifier": msg.message_id for msg in self.fail_messages}
+        return {"itemIdentifier": msg.message_id for msg in self.fail_messages}
 
     def _collect_kinesis_failures(self):
         if self.model:
             # Pydantic model uses int but Lambda poller expects str
             return {"itemIdentifier": msg.kinesis.sequenceNumber for msg in self.fail_messages}
-        else:
-            return {"itemIdentifier": msg.kinesis.sequence_number for msg in self.fail_messages}
+        return {"itemIdentifier": msg.kinesis.sequence_number for msg in self.fail_messages}
 
     def _collect_dynamodb_failures(self):
         if self.model:
             return {"itemIdentifier": msg.dynamodb.SequenceNumber for msg in self.fail_messages}
-        else:
-            return {"itemIdentifier": msg.dynamodb.sequence_number for msg in self.fail_messages}
+        return {"itemIdentifier": msg.dynamodb.sequence_number for msg in self.fail_messages}
 
     @overload
     def _to_batch_type(self, record: dict, event_type: EventType, model: "BatchTypeModels") -> "BatchTypeModels":
-        ...
+        ...  # pragma: no cover
 
     @overload
     def _to_batch_type(self, record: dict, event_type: EventType) -> EventSourceDataClassTypes:
-        ...
+        ...  # pragma: no cover
 
     def _to_batch_type(self, record: dict, event_type: EventType, model: Optional["BatchTypeModels"] = None):
         if model is not None:
             return model.parse_obj(record)
-        else:
-            return self._DATA_CLASS_MAPPING[event_type](record)
+        return self._DATA_CLASS_MAPPING[event_type](record)
