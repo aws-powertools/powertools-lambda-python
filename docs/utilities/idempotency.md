@@ -40,45 +40,45 @@ Configuration | Value | Notes
 Partition key | `id` |
 TTL attribute name | `expiration` | This can only be configured after your table is created if you're using AWS Console
 
-!!! tip "You can share a single state table for all functions"
+???+ tip "Tip: You can share a single state table for all functions"
     You can reuse the same DynamoDB table to store idempotency state. We add your `function_name` in addition to the idempotency key as a hash key.
 
-> Example using AWS Serverless Application Model (SAM)
+???+ example "Example: Using AWS Serverless Application Model (SAM)"
 
-=== "template.yml"
+    === "template.yml"
 
-    ```yaml hl_lines="5-13 21-23"
-    Resources:
-      IdempotencyTable:
-        Type: AWS::DynamoDB::Table
-        Properties:
-          AttributeDefinitions:
-            -   AttributeName: id
-                AttributeType: S
-          KeySchema:
-            -   AttributeName: id
-                KeyType: HASH
-          TimeToLiveSpecification:
-            AttributeName: expiration
-            Enabled: true
-          BillingMode: PAY_PER_REQUEST
+        ```yaml hl_lines="5-13 21-23"
+        Resources:
+          IdempotencyTable:
+            Type: AWS::DynamoDB::Table
+            Properties:
+              AttributeDefinitions:
+                -   AttributeName: id
+                    AttributeType: S
+              KeySchema:
+                -   AttributeName: id
+                    KeyType: HASH
+              TimeToLiveSpecification:
+                AttributeName: expiration
+                Enabled: true
+              BillingMode: PAY_PER_REQUEST
 
-      HelloWorldFunction:
-      Type: AWS::Serverless::Function
-      Properties:
-        Runtime: python3.8
-        ...
-        Policies:
-          - DynamoDBCrudPolicy:
-              TableName: !Ref IdempotencyTable
-    ```
+          HelloWorldFunction:
+          Type: AWS::Serverless::Function
+          Properties:
+            Runtime: python3.8
+            ...
+            Policies:
+              - DynamoDBCrudPolicy:
+                  TableName: !Ref IdempotencyTable
+        ```
 
-!!! warning "Large responses with DynamoDB persistence layer"
+???+ warning "Warning: Large responses with DynamoDB persistence layer"
     When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items).
 
     Larger items cannot be written to DynamoDB and will cause exceptions.
 
-!!! info "DynamoDB "
+???+ info "Info: DynamoDB"
     Each function invocation will generally make 2 requests to DynamoDB. If the
     result returned by your Lambda is less than 1kb, you can expect 2 WCUs per invocation. For retried invocations, you will
     see 1WCU and 1RCU. Review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/) to
@@ -126,7 +126,8 @@ Similar to [idempotent decorator](#idempotent-decorator), you can use `idempoten
 
 When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`** - Such data must be JSON serializable.
 
-!!! warning "Make sure to call your decorated function using keyword arguments"
+???+ warning
+    Make sure to call your decorated function using keyword arguments
 
 === "app.py"
 
@@ -195,7 +196,7 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
 ### Choosing a payload subset for idempotency
 
-!!! tip "Dealing with always changing payloads"
+???+ tip "Tip: Dealing with always changing payloads"
     When dealing with a more elaborate payload, where parts of the payload always change, you should use **`event_key_jmespath`** parameter.
 
 Use [`IdempotencyConfig`](#customizing-the-default-behavior) to instruct the idempotent decorator to only use a portion of your payload to verify whether a request is idempotent, and therefore it should not be retried.
@@ -206,7 +207,7 @@ In this example, we have a Lambda handler that creates a payment for a user subs
 
 Imagine the function executes successfully, but the client never receives the response due to a connection issue. It is safe to retry in this instance, as the idempotent decorator will return a previously saved response.
 
-!!! warning "Idempotency for JSON payloads"
+???+ warning "Warning: Idempotency for JSON payloads"
     The payload extracted by the `event_key_jmespath` is treated as a string by default, so will be sensitive to differences in whitespace even when the JSON payload itself is identical.
 
     To alter this behaviour, we can use the [JMESPath built-in function](jmespath_functions.md#powertools_json-function) `powertools_json()` to treat the payload as a JSON object rather than a string.
@@ -284,7 +285,7 @@ This sequence diagram shows an example flow of what happens in the payment scena
 
 The client was successful in receiving the result after the retry. Since the Lambda handler was only executed once, our customer hasn't been charged twice.
 
-!!! note
+???+ note
     Bear in mind that the entire Lambda handler is treated as a single idempotent operation. If your Lambda handler can cause multiple side effects, consider splitting it into separate functions.
 
 ### Handling exceptions
@@ -319,7 +320,7 @@ def call_external_service(data: dict, **kwargs):
     return result.json()
 ```
 
-!!! warning
+???+ warning
     **We will raise `IdempotencyPersistenceLayerError`** if any of the calls to the persistence layer fail unexpectedly.
 
     As this happens outside the scope of your decorated function, you are not able to catch it if you're using the `idempotent` decorator on your Lambda handler.
@@ -378,7 +379,8 @@ Parameter | Default | Description
 
 This utility will raise an **`IdempotencyAlreadyInProgressError`** exception if you receive **multiple invocations with the same payload while the first invocation hasn't completed yet**.
 
-!!! info "If you receive `IdempotencyAlreadyInProgressError`, you can safely retry the operation."
+???+ info
+    If you receive `IdempotencyAlreadyInProgressError`, you can safely retry the operation.
 
 This is a locking mechanism for correctness. Since we don't know the result from the first invocation yet, we can't safely allow another concurrent execution.
 
@@ -386,7 +388,7 @@ This is a locking mechanism for correctness. Since we don't know the result from
 
 **By default, in-memory local caching is disabled**, since we don't know how much memory you consume per invocation compared to the maximum configured in your Lambda function.
 
-!!! note "This in-memory cache is local to each Lambda execution environment"
+???+ note "Note: This in-memory cache is local to each Lambda execution environment"
     This means it will be effective in cases where your function's concurrency is low in comparison to the number of "retry" invocations with the same payload, because cache might be empty.
 
 You can enable in-memory caching with the **`use_local_cache`** parameter:
@@ -413,7 +415,7 @@ When enabled, the default is to cache a maximum of 256 records in each Lambda ex
 
 ### Expiring idempotency records
 
-!!! note
+???+ note
     By default, we expire idempotency records after **an hour** (3600 seconds).
 
 In most cases, it is not desirable to store the idempotency records forever. Rather, you want to guarantee that the same payload won't be executed within a period of time.
@@ -440,15 +442,15 @@ You can change this window with the **`expires_after_seconds`** parameter:
 
 This will mark any records older than 5 minutes as expired, and the lambda handler will be executed as normal if it is invoked with a matching payload.
 
-!!! note "DynamoDB time-to-live field"
+???+ note "Note: DynamoDB time-to-live field"
     This utility uses **`expiration`** as the TTL field in DynamoDB, as [demonstrated in the SAM example earlier](#required-resources).
 
 ### Payload validation
 
-!!! question "What if your function is invoked with the same payload except some outer parameters have changed?"
+???+ question "Question: What if your function is invoked with the same payload except some outer parameters have changed?"
     Example: A payment transaction for a given productID was requested twice for the same customer, **however the amount to be paid has changed in the second transaction**.
 
-By default, we will return the same result as it returned before, however in this instance it may be misleading - We provide a fail fast payload validation to address this edge case.
+By default, we will return the same result as it returned before, however in this instance it may be misleading; we provide a fail fast payload validation to address this edge case.
 
 With **`payload_validation_jmespath`**, you can provide an additional JMESPath expression to specify which part of the event body should be validated against previous idempotent invocations
 
@@ -513,7 +515,7 @@ With **`payload_validation_jmespath`**, you can provide an additional JMESPath e
 
 In this example, the **`userDetail`** and **`productId`** keys are used as the payload to generate the idempotency key, as per **`event_key_jmespath`** parameter.
 
-!!! note
+???+ note
     If we try to send the same request but with a different amount, we will raise **`IdempotencyValidationError`**.
 
 Without payload validation, we would have returned the same result as we did for the initial request. Since we're also returning an amount in the response, this could be quite confusing for the client.
@@ -784,7 +786,7 @@ You can inherit from the `BasePersistenceLayer` class and implement the abstract
             self.table.delete_item(Key={self.key_attr: data_record.idempotency_key},)
     ```
 
-!!! danger
+???+ danger
     Pay attention to the documentation for each - you may need to perform additional checks inside these methods to ensure the idempotency guarantees remain intact.
 
     For example, the `_put_record` method needs to raise an exception if a non-expired record already exists in the data store with a matching key.
@@ -795,7 +797,7 @@ You can inherit from the `BasePersistenceLayer` class and implement the abstract
 
 The idempotency utility can be used with the `validator` decorator. Ensure that idempotency is the innermost decorator.
 
-!!! warning
+???+ warning
     If you use an envelope with the validator, the event received by the idempotency utility will be the unwrapped
     event - not the "raw" event Lambda was invoked with. You will need to account for this if you set the
     `event_key_jmespath`.
@@ -818,7 +820,7 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
         return {"message": event['message'], "statusCode": 200}
     ```
 
-!!! tip "JMESPath Powertools functions are also available"
+???+ tip "Tip: JMESPath Powertools functions are also available"
     Built-in functions known in the validation utility like `powertools_json`, `powertools_base64`, `powertools_base64_gzip` are also available to use in this utility.
 
 

@@ -23,7 +23,7 @@ With this utility, batch records are processed individually – only messages th
 1.  `ReportBatchItemFailures` is set in your SQS, Kinesis, or DynamoDB event source properties
 2.  [A specific response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-batchfailurereporting-syntax){target="_blank"} is returned so Lambda knows which records should not be deleted during partial responses
 
-!!! warning "This utility lowers the chance of processing records more than once; it does not guarantee it"
+???+ warning "Warning: This utility lowers the chance of processing records more than once; it does not guarantee it"
     We recommend implementing processing logic in an [idempotent manner](idempotency.md){target="_blank"} wherever possible.
 
     You can find more details on how Lambda works with either [SQS](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html){target="_blank"}, [Kinesis](https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html){target="_blank"}, or [DynamoDB](https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html){target="_blank"} in the AWS Documentation.
@@ -225,7 +225,8 @@ Processing batches from SQS works in four stages:
 3.  Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
 4.  Return the appropriate response contract to Lambda via **`.response()`** processor method
 
-!!! info "This code example optionally uses Tracer and Logger for completion"
+???+ info
+    This code example optionally uses Tracer and Logger for completion.
 
 === "As a decorator"
 
@@ -354,7 +355,8 @@ Processing batches from Kinesis works in four stages:
 3.  Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
 4.  Return the appropriate response contract to Lambda via **`.response()`** processor method
 
-!!! info "This code example optionally uses Tracer and Logger for completion"
+???+ info
+    This code example optionally uses Tracer and Logger for completion.
 
 === "As a decorator"
 
@@ -483,7 +485,8 @@ Processing batches from Kinesis works in four stages:
 3.  Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
 4.  Return the appropriate response contract to Lambda via **`.response()`** processor method
 
-!!! info "This code example optionally uses Tracer and Logger for completion"
+???+ info
+    This code example optionally uses Tracer and Logger for completion.
 
 === "As a decorator"
 
@@ -630,7 +633,7 @@ All records in the batch will be passed to this handler for processing, even if 
 * **Partial success with some exceptions**. We will return a list of all item IDs/sequence numbers that failed processing
 * **All records failed to be processed**. We will raise `BatchProcessingError` exception with a list of all exceptions raised when processing
 
-!!! warning
+???+ warning
     You will not have access to the **processed messages** within the Lambda Handler; use context manager for that.
 
     All processing logic will and should be performed by the `record_handler` function.
@@ -783,6 +786,7 @@ Inheritance is importance because we need to access message IDs and sequence num
 
 Use the context manager to access a list of all returned values from your `record_handler` function.
 
+##### - TODO - is this a quote or example? is the right place/ fit?
 > Signature: List[Tuple[Union[SuccessResponse, FailureResponse]]]
 
 * **When successful**. We will include a tuple with `success`, the result of `record_handler`, and the batch record
@@ -999,7 +1003,9 @@ def lambda_handler(event, context: LambdaContext):
 
 As there is no external calls, you can unit test your code with `BatchProcessor` quite easily.
 
-**Example**: Given a SQS batch where the first batch record succeeds and the second fails processing, we should have a single item reported in the function response.
+**Example**:
+
+Given a SQS batch where the first batch record succeeds and the second fails processing, we should have a single item reported in the function response.
 
 === "test_app.py"
 
@@ -1160,18 +1166,21 @@ When using Sentry.io for error monitoring, you can override `failure_handler` to
 
 ## Legacy
 
-!!! tip "This is kept for historical purposes. Use the new [BatchProcessor](#processing-messages-from-sqs) instead."
+???+ tip
+    This is kept for historical purposes. Use the new [BatchProcessor](#processing-messages-from-sqs) instead.
 
 
 ### Migration guide
 
-!!! info "keep reading if you are using `sqs_batch_processor` or `PartialSQSProcessor`"
+???+ info
+    Keep reading if you are using `sqs_batch_processor` or `PartialSQSProcessor`.
 
 [As of Nov 2021](https://aws.amazon.com/about-aws/whats-new/2021/11/aws-lambda-partial-batch-response-sqs-event-source/){target="_blank"}, this is no longer needed as both SQS, Kinesis, and DynamoDB Streams offer this capability natively with one caveat - it's an [opt-in feature](#required-resources).
 
 Being a native feature, we no longer need to instantiate boto3 nor other customizations like exception suppressing – this lowers the cost of your Lambda function as you can delegate deleting partial failures to Lambda.
 
-!!! tip "It's also easier to test since it's mostly a [contract based response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-batchfailurereporting-syntax){target="_blank"}."
+???+ tip
+    It's also easier to test since it's mostly a [contract based response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-batchfailurereporting-syntax){target="_blank"}.
 
 You can migrate in three steps:
 

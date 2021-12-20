@@ -21,28 +21,28 @@ Setting | Description | Environment variable | Constructor parameter
 **Logging level** | Sets how verbose Logger should be (INFO, by default) |  `LOG_LEVEL` | `level`
 **Service** | Sets **service** key that will be present across all log statements | `POWERTOOLS_SERVICE_NAME` | `service`
 
-> Example using AWS Serverless Application Model (SAM)
+???+ example "Example: Using AWS Serverless Application Model (SAM)"
 
-=== "template.yaml"
+    === "template.yaml"
 
-    ```yaml hl_lines="9 10"
-    Resources:
-      HelloWorldFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-          Runtime: python3.8
-          Environment:
-            Variables:
-              LOG_LEVEL: INFO
-              POWERTOOLS_SERVICE_NAME: example
-    ```
-=== "app.py"
+        ```yaml hl_lines="9 10"
+        Resources:
+          HelloWorldFunction:
+            Type: AWS::Serverless::Function
+            Properties:
+              Runtime: python3.8
+              Environment:
+                Variables:
+                  LOG_LEVEL: INFO
+                  POWERTOOLS_SERVICE_NAME: example
+        ```
+    === "app.py"
 
-    ```python hl_lines="2 4"
-    from aws_lambda_powertools import Logger
-    logger = Logger() # Sets service via env var
-    # OR logger = Logger(service="example")
-    ```
+        ```python hl_lines="2 4"
+        from aws_lambda_powertools import Logger
+        logger = Logger() # Sets service via env var
+        # OR logger = Logger(service="example")
+        ```
 
 ### Standard structured keys
 
@@ -129,7 +129,7 @@ Key | Example
 
 When debugging in non-production environments, you can instruct Logger to log the incoming event with `log_event` param or via `POWERTOOLS_LOGGER_LOG_EVENT` env var.
 
-!!! warning
+???+ warning
     This is disabled by default to prevent sensitive info being logged.
 
 === "log_handler_event.py"
@@ -148,7 +148,8 @@ When debugging in non-production environments, you can instruct Logger to log th
 
 You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
 
-!!! tip "You can retrieve correlation IDs via `get_correlation_id` method"
+???+ tip
+    You can retrieve correlation IDs via `get_correlation_id` method
 
 === "collect.py"
 
@@ -237,7 +238,7 @@ We provide [built-in JMESPath expressions](#built-in-correlation-id-expressions)
 
 ### Appending additional keys
 
-!!! info "Custom keys are persisted across warm invocations"
+???+ info "Info: Custom keys are persisted across warm invocations"
     Always set additional keys as part of your handler to ensure they have the latest value, or explicitly clear them with [`clear_state=True`](#clearing-all-state).
 
 You can append additional keys using either mechanism:
@@ -279,7 +280,7 @@ You can append your own keys to your existing Logger via `append_keys(**addition
     }
     ```
 
-!!! tip "Logger will automatically reject any key with a None value"
+???+ tip "Tip: Logger will automatically reject any key with a None value"
     If you conditionally add keys depending on the payload, you can follow the example above.
 
     This example will add `order_id` if its value is not empty, and in subsequent invocations where `order_id` might not be present it'll remove it from the Logger.
@@ -290,7 +291,8 @@ Extra parameter is available for all log levels' methods, as implemented in the 
 
 It accepts any dictionary, and all keyword arguments will be added as part of the root structure of the logs for that log statement.
 
-!!! info "Any keyword argument added using `extra` will not be persisted for subsequent messages."
+???+ info
+    Any keyword argument added using `extra` will not be persisted for subsequent messages.
 
 === "extra_parameter.py"
 
@@ -436,10 +438,10 @@ You can remove any additional key from Logger state using `remove_keys`.
 
 Logger is commonly initialized in the global scope. Due to [Lambda Execution Context reuse](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html), this means that custom keys can be persisted across invocations. If you want all custom keys to be deleted, you can use `clear_state=True` param in `inject_lambda_context` decorator.
 
-!!! info
+???+ info
     This is useful when you add multiple custom keys conditionally, instead of setting a default `None` value if not present. Any key with `None` value is automatically removed by Logger.
 
-!!! danger "This can have unintended side effects if you use Layers"
+???+ danger "Danger: This can have unintended side effects if you use Layers"
     Lambda Layers code is imported before the Lambda handler.
 
     This means that `clear_state=True` will instruct Logger to remove any keys previously added before Lambda handler execution proceeds.
@@ -502,7 +504,7 @@ Logger is commonly initialized in the global scope. Due to [Lambda Execution Con
 
 Use `logger.exception` method to log contextual information about exceptions. Logger will include `exception_name` and `exception` keys to aid troubleshooting and error enumeration.
 
-!!! tip
+???+ tip
     You can use your preferred Log Analytics tool to enumerate and visualize exceptions across all your services using `exception_name` key.
 
 === "collect.py"
@@ -564,7 +566,7 @@ Logger supports inheritance via `child` parameter. This allows you to create mul
 
 In this example, `Logger` will create a parent logger named `payment` and a child logger named `payment.shared`. Changes in either parent or child logger will be propagated bi-directionally.
 
-!!! info "Child loggers will be named after the following convention `{service}.{filename}`"
+???+ info "Info: Child loggers will be named after the following convention `{service}.{filename}`"
     If you forget to use `child` param but the `service` name is the same of the parent, we will return the existing parent `Logger` instead.
 
 ### Sampling debug logs
@@ -573,14 +575,14 @@ Use sampling when you want to dynamically change your log level to **DEBUG** bas
 
 You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOGGER_SAMPLE_RATE` env var or `sample_rate` parameter in Logger.
 
-!!! tip "When is this useful?"
+???+ tip "Tip: When is this useful?"
     Let's imagine a sudden spike increase in concurrency triggered a transient issue downstream. When looking into the logs you might not have enough information, and while you can adjust log levels it might not happen again.
 
     This feature takes into account transient issues where additional debugging information can be useful.
 
 Sampling decision happens at the Logger initialization. This means sampling may happen significantly more or less than depending on your traffic patterns, for example a steady low number of invocations and thus few cold starts.
 
-!!! note
+???+ note
     If you want Logger to calculate sampling upon every invocation, please open a [feature request](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=).
 
 === "collect.py"
@@ -671,7 +673,7 @@ For inheritance, Logger uses a `child=True` parameter along with `service` being
 
 For child Loggers, we introspect the name of your module where `Logger(child=True, service="name")` is called, and we name your Logger as **{service}.{filename}**.
 
-!!! danger
+???+ danger
     A common issue when migrating from other Loggers is that `service` might be defined in the parent Logger (no child param), and not defined in the child Logger:
 
 === "incorrect_logger_inheritance.py"
@@ -706,7 +708,7 @@ For child Loggers, we introspect the name of your module where `Logger(child=Tru
 
 In this case, Logger will register a Logger named `payment`, and a Logger named `service_undefined`. The latter isn't inheriting from the parent, and will have no handler, resulting in no message being logged to standard output.
 
-!!! tip
+???+ tip
     This can be fixed by either ensuring both has the `service` value as `payment`, or simply use the environment variable `POWERTOOLS_SERVICE_NAME` to ensure service value will be the same across all Loggers when not explicitly set.
 
 #### Overriding Log records
@@ -869,7 +871,7 @@ For **minor changes like remapping keys** after all log record processing has co
 
 For **replacing the formatter entirely**, you can subclass `BasePowertoolsFormatter`, implement `append_keys` method, and override `format` standard logging method. This ensures the current feature set of Logger like [injecting Lambda context](#capturing-lambda-context-info) and [sampling](#sampling-debug-logs) will continue to work.
 
-!!! info
+???+ info
     You might need to implement `remove_keys` method if you make use of the feature too.
 
 === "collect.py"
@@ -951,7 +953,7 @@ As parameters don't always translate well between them, you can pass any callabl
 
 You can use any of the following built-in JMESPath expressions as part of [inject_lambda_context decorator](#setting-a-correlation-id).
 
-!!! note "Escaping necessary for the `-` character"
+???+ note "Note: Escaping necessary for the `-` character"
     Any object key named with `-` must be escaped, for example **`request.headers."x-amzn-trace-id"`**.
 
 Name | Expression | Description
@@ -1018,7 +1020,7 @@ This is a Pytest sample that provides the minimum information necessary for Logg
         your_lambda_handler(test_event, lambda_context)
     ```
 
-!!! tip
+???+ tip
     If you're using pytest and are looking to assert plain log messages, do check out the built-in [caplog fixture](https://docs.pytest.org/en/latest/how-to/logging.html){target="_blank"}.
 
 ### Pytest live log feature
@@ -1031,7 +1033,7 @@ Pytest Live Log feature duplicates emitted log messages in order to style log st
     POWERTOOLS_LOG_DEDUPLICATION_DISABLED="1" pytest -o log_cli=1
     ```
 
-!!! warning
+???+ warning
     This feature should be used with care, as it explicitly disables our ability to filter propagated messages to the root logger (if configured).
 
 ## FAQ

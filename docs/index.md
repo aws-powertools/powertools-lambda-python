@@ -5,7 +5,8 @@ description: AWS Lambda Powertools Python
 
 A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, and more.
 
-!!! tip "Looking for a quick read through how the core features are used?"
+???+ tip "Tip: Looking for a quick read through how the core features are used?"
+
     Check out [this detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/) with a practical example.
 
 ## Tenets
@@ -32,7 +33,7 @@ Powertools is available in the following formats:
 
 You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html#invocation-layers-using){target="_blank"}, or your preferred deployment framework.
 
-??? note "Expand to copy any regional Lambda Layer ARN"
+??? note "Note: Expand to copy any regional Lambda Layer ARN"
 
     | Region | Layer ARN
     |--------------------------- | ---------------------------
@@ -179,7 +180,7 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 
     The pre-signed URL to download this Lambda Layer will be within `Location` key.
 
-!!! warning "Limitations"
+???+ warning "Warning: Limitations"
 
 	Container Image deployment (OCI) or inline Lambda functions do not support Lambda Layers.
 
@@ -197,10 +198,10 @@ Despite having more steps compared to the [public Layer ARN](#lambda-layer) opti
 | [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer) | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer](#){: .copyMe} :clipboard: | Core dependencies only; sufficient for nearly all utilities.
 | [aws-lambda-powertools-python-layer-extras](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-extras) | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-extras](#){: .copyMe} :clipboard: | Core plus extra dependencies such as `pydantic` that is required by `parser` utility.
 
-!!! warning
+???+ warning
     **Layer-extras** does not support Python 3.6 runtime. This layer also includes all extra dependencies: `22.4MB zipped`, `~155MB unzipped`.
 
-!!! tip "You can create a shared Lambda Layers stack and make this along with other account level layers stack."
+!!! tip "Tip: You can create a shared Lambda Layers stack and make this along with other account level layers stack."
 
 If using SAM, you can include this SAR App as part of your shared Layers stack, and lock to a specific semantic version. Once deployed, it'll be available across the account this is deployed to.
 
@@ -328,7 +329,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 	}
     ```
 
-??? tip "Example of least-privileged IAM permissions to deploy Layer"
+??? example "Example: Least-privileged IAM permissions to deploy Layer"
 
     > Credits to [mwarkentin](https://github.com/mwarkentin) for providing the scoped down IAM permissions.
 
@@ -433,7 +434,7 @@ You can fetch available versions via SAR API with:
 
 ## Environment variables
 
-!!! info
+???+ info
     **Explicit parameters take precedence over environment variables.**
 
 | Environment variable | Description | Utility | Default |

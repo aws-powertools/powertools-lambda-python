@@ -71,7 +71,8 @@ You can define your functions to match a path and HTTP method, when you use the 
 
 Here's an example where we have two separate functions to resolve two paths: `/hello`.
 
-!!! info "We automatically serialize `Dict` responses as JSON, trim whitespaces for compact responses, and set content-type to `application/json`"
+???+ info
+    We automatically serialize `Dict` responses as JSON, trim whitespaces for compact responses, and set content-type to `application/json`.
 
 === "app.py"
 
@@ -309,13 +310,15 @@ You can also nest paths as configured earlier in [our sample infrastructure](#re
 
 #### Catch-all routes
 
-!!! note "We recommend having explicit routes whenever possible; use catch-all routes sparingly"
+???+ note
+    We recommend having explicit routes whenever possible; use catch-all routes sparingly.
 
 You can use a regex string to handle an arbitrary number of paths within a request, for example `.+`.
 
 You can also combine nested paths with greedy regex to catch in between routes.
 
-!!! warning "We will choose the more explicit registered route that match incoming event"
+???+ warning
+    We will choose the more explicit registered route that match incoming event.
 
 === "app.py"
 
@@ -421,8 +424,8 @@ HTTP methods.
     }
     ```
 
-!!! note "It is usually better to have separate functions for each HTTP method, as the functionality tends to differ
-depending on which method is used."
+???+ note
+    It is usually better to have separate functions for each HTTP method, as the functionality tends to differ depending on which method is used.
 
 ### Accessing request details
 
@@ -569,7 +572,8 @@ You can use **`exception_handler`** decorator with any Python exception. This al
 
 You can easily raise any HTTP Error back to the client using `ServiceError` exception.
 
-!!! info "If you need to send custom headers, use [Response](#fine-grained-responses) class instead."
+???+ info
+    If you need to send custom headers, use [Response](#fine-grained-responses) class instead.
 
 Additionally, we provide pre-defined errors for the most popular ones such as HTTP 400, 401, 404, 500.
 
@@ -664,7 +668,8 @@ This will lead to a HTTP 404 despite having your Lambda configured correctly. Se
     }
     ```
 
-Note: After removing a path prefix with `strip_prefixes`, the new root path will automatically be mapped to the path argument of `/`. For example, when using `strip_prefixes` value of `/pay`, there is no difference between a request path of `/pay` and `/pay/`; and the path argument would be defined as `/`.
+???+ note
+    After removing a path prefix with `strip_prefixes`, the new root path will automatically be mapped to the path argument of `/`. For example, when using `strip_prefixes` value of `/pay`, there is no difference between a request path of `/pay` and `/pay/`; and the path argument would be defined as `/`.
 
 ## Advanced
 
@@ -732,7 +737,8 @@ This will ensure that CORS headers are always returned as part of the response w
     }
     ```
 
-!!! tip "Optionally disable class on a per path basis with `cors=False` parameter"
+???+ tip
+    Optionally disable class on a per path basis with `cors=False` parameter.
 
 #### Pre-flight
 
@@ -744,7 +750,8 @@ For convenience, we automatically handle that for you as long as you [setup CORS
 
 For convenience, these are the default values when using `CORSConfig` to enable CORS:
 
-!!! warning "Always configure `allow_origin` when using in production"
+???+ warning
+    Always configure `allow_origin` when using in production.
 
 Key | Value | Note
 ------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------
@@ -797,7 +804,8 @@ You can use the `Response` class to have full control over the response, for exa
 
 You can compress with gzip and base64 encode your responses via `compress` parameter.
 
-!!! warning "The client must send the `Accept-Encoding` header, otherwise a normal response will be sent"
+???+ warning
+    The client must send the `Accept-Encoding` header, otherwise a normal response will be sent.
 
 === "app.py"
 
@@ -847,7 +855,8 @@ For convenience, we automatically base64 encode binary responses. You can also u
 
 Like `compress` feature, the client must send the `Accept` header with the correct media type.
 
-!!! warning "This feature requires API Gateway to configure binary media types, see [our sample infrastructure](#required-resources) for reference"
+???+ warning
+    This feature requires API Gateway to configure binary media types, see [our sample infrastructure](#required-resources) for reference.
 
 === "app.py"
 
@@ -942,7 +951,8 @@ You can enable debug mode via `debug` param, or via `POWERTOOLS_EVENT_HANDLER_DE
 
 This will enable full tracebacks errors in the response, print request and responses, and set CORS in development mode.
 
-!!! warning "This might reveal sensitive information in your logs and relax CORS restrictions, use it sparingly."
+???+ warning
+    This might reveal sensitive information in your logs and relax CORS restrictions, use it sparingly.
 
 === "debug.py"
 
@@ -1276,7 +1286,8 @@ Event Handler naturally leads to a single Lambda function handling multiple rout
 
 Both single (monolithic) and multiple functions (micro) offer different set of trade-offs worth knowing.
 
-!!! tip "TL;DR. Start with a monolithic function, add additional functions with new handlers, and possibly break into micro functions if necessary."
+???+ tip
+    TL;DR. Start with a monolithic function, add additional functions with new handlers, and possibly break into micro functions if necessary.
 
 #### Monolithic function
 
@@ -1284,13 +1295,13 @@ Both single (monolithic) and multiple functions (micro) offer different set of t
 
 A monolithic function means that your final code artifact will be deployed to a single function. This is generally the best approach to start.
 
-**Benefits**
+_**Benefits**_
 
 * **Code reuse**. It's easier to reason about your service, modularize it and reuse code as it grows. Eventually, it can be turned into a standalone library.
 * **No custom tooling**. Monolithic functions are treated just like normal Python packages; no upfront investment in tooling.
 * **Faster deployment and debugging**. Whether you use all-at-once, linear, or canary deployments, a monolithic function is a single deployable unit. IDEs like PyCharm and VSCode have tooling to quickly profile, visualize, and step through debug any Python package.
 
-**Downsides**
+_**Downsides**_
 
 * **Cold starts**. Frequent deployments and/or high load can diminish the benefit of monolithic functions depending on your latency requirements, due to [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"}. Always load test to pragmatically balance between your customer experience and development cognitive load.
 * **Granular security permissions**. The micro function approach enables you to use fine-grained permissions & access controls, separate external dependencies & code signing at the function level. Conversely, you could have multiple functions while duplicating the final code artifact in a monolithic approach.
@@ -1303,13 +1314,13 @@ A monolithic function means that your final code artifact will be deployed to a 
 
 A micro function means that your final code artifact will be different to each function deployed. This is generally the approach to start if you're looking for fine-grain control and/or high load on certain parts of your service.
 
-**Benefits**
+_**Benefits**_
 
 * **Granular scaling**. A micro function can benefit from the [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"} to scale differently depending on each part of your application. Concurrency controls and provisioned concurrency can also be used at a granular level for capacity management.
 * **Discoverability**. Micro functions are easier do visualize when using distributed tracing. Their high-level architectures can be self-explanatory, and complexity is highly visible — assuming each function is named to the business purpose it serves.
 * **Package size**. An independent function can be significant smaller (KB vs MB) depending on external dependencies it require to perform its purpose. Conversely, a monolithic approach can benefit from [Lambda Layers](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html){target="_blank"} to optimize builds for external dependencies.
 
-**Downsides**
+_**Downsides**_
 
 * **Upfront investment**. Python ecosystem doesn't use a bundler — you need a custom build tooling to ensure each function only has what it needs and account for [C bindings for runtime compatibility](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html){target="_blank"}. Operations become more elaborate — you need to standardize tracing labels/annotations, structured logging, and metrics to pinpoint root causes.
     - Engineering discipline is necessary for both approaches. Micro-function approach however requires further attention in consistency as the number of functions grow, just like any distributed system.

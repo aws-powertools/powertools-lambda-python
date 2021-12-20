@@ -13,7 +13,7 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 
 **Extra dependency**
 
-!!! warning
+???+ warning
     This will increase the overall package size by approximately 75MB due to Pydantic dependency.
 
 Install parser's extra dependencies using **`pip install aws-lambda-powertools[pydantic]`**.
@@ -52,7 +52,8 @@ Use the decorator for fail fast scenarios where you want your Lambda function to
 
 `event_parser` decorator will throw a `ValidationError` if your event cannot be parsed according to the model.
 
-> NOTE: **This decorator will replace the `event` object with the parsed model if successful**. This means you might be careful when nesting other decorators that expect `event` to be a `dict`.
+???+ note
+    **This decorator will replace the `event` object with the parsed model if successful**. This means you might be careful when nesting other decorators that expect `event` to be a `dict`.
 
 === "event_parser_decorator.py"
 
@@ -170,7 +171,8 @@ Parser comes with the following built-in models:
 
 You can extend them to include your own models, and yet have all other known fields parsed along the way.
 
-!!! tip "For Mypy users, we only allow type override for fields where payload is injected e.g. `detail`, `body`, etc."
+???+ tip
+    For Mypy users, we only allow type override for fields where payload is injected e.g. `detail`, `body`, etc.
 
 **EventBridge example**
 
@@ -381,7 +383,7 @@ Here's a snippet of how the EventBridge envelope we demonstrated previously is i
 
 ## Data model validation
 
-!!! warning
+???+ warning
     This is radically different from the **Validator utility** which validates events against JSON Schema.
 
 You can use parser's validator for deep inspection of object values and complex relationships.
@@ -475,14 +477,12 @@ Alternatively, you can pass `'*'` as an argument for the decorator so that you c
     parse(model=UserModel, event=payload)
     ```
 
-!!! info
+???+ info
     You can read more about validating list items, reusing validators, validating raw inputs, and a lot more in <a href="https://pydantic-docs.helpmanual.io/usage/validators/">Pydantic's documentation</a>.
 
 ## Advanced use cases
 
-!!! info
-    **Looking to auto-generate models from JSON, YAML, JSON Schemas, OpenApi, etc?**
-
+???+ tip "Tip: Looking to auto-generate models from JSON, YAML, JSON Schemas, OpenApi, etc?"
     Use Koudai Aono's [data model code generation tool for Pydantic](https://github.com/koxudaxi/datamodel-code-generator)
 
 There are number of advanced use cases well documented in Pydantic's doc such as creating [immutable models](https://pydantic-docs.helpmanual.io/usage/models/#faux-immutability), [declaring fields with dynamic values](https://pydantic-docs.helpmanual.io/usage/models/#field-with-dynamic-default-value)) e.g. UUID, and [helper functions to parse models from files, str](https://pydantic-docs.helpmanual.io/usage/models/#helper-functions), etc.
@@ -555,7 +555,8 @@ Artillery load test sample against a [hello world sample](https://github.com/aws
 
 **No parser**
 
-> **Uncompressed package size**: 55M, **p99**: 180.3ms
+???+ info
+    **Uncompressed package size**: 55M, **p99**: 180.3ms
 
 ```
 Summary report @ 14:36:07(+0200) 2020-10-23
@@ -577,7 +578,8 @@ Codes:
 
 **With parser**
 
-> **Uncompressed package size**: 128M, **p99**: 193.1ms
+???+ info
+    **Uncompressed package size**: 128M, **p99**: 193.1ms
 
 ```
 Summary report @ 14:29:23(+0200) 2020-10-23

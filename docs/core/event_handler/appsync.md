@@ -27,10 +27,10 @@ You must have an existing AppSync GraphQL API and IAM permissions to invoke your
 
 This is the sample infrastructure we are using for the initial examples with a AppSync Direct Lambda Resolver.
 
-=== "schema.graphql"
+???+ tip "Tip: Designing GraphQL Schemas for the first time?"
+    Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html){target="_blank"} for understanding how to define types, nesting, and pagination.
 
-    !!! tip "Designing GraphQL Schemas for the first time?"
-        Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html){target="_blank"} for understanding how to define types, nesting, and pagination.
+=== "schema.graphql"
 
     ```typescript
     --8<-- "docs/shared/getting_started_schema.graphql"
@@ -176,7 +176,8 @@ You can define your functions to match GraphQL types and fields with the `app.re
 
 Here's an example where we have two separate functions to resolve `getTodo` and `listTodos` fields within the `Query` type. For completion, we use Scalar type utilities to generate the right output based on our schema definition.
 
-!!! info "GraphQL arguments are passed as function arguments"
+???+ info
+    GraphQL arguments are passed as function arguments.
 
 === "app.py"
 
@@ -456,8 +457,8 @@ Assuming you have [Amplify CLI installed](https://docs.amplify.aws/cli/start/ins
 
 [Create two new basic Python functions](https://docs.amplify.aws/cli/function#set-up-a-function){target="_blank"} via `amplify add function`.
 
-!!! note "Amplify CLI generated functions use `Pipenv` as a dependency manager"
-    Your function source code is located at **`amplify/backend/function/your-function-name`**.
+???+ note
+    Amplify CLI generated functions use `Pipenv` as a dependency manager. Your function source code is located at **`amplify/backend/function/your-function-name`**.
 
 Within your function's folder, add Lambda Powertools as a dependency with `pipenv install aws-lambda-powertools`.
 
@@ -713,7 +714,8 @@ You can subclass `AppSyncResolverEvent` to bring your own set of methods to hand
 
 ### Split operations with Router
 
-!!! tip "Read the **[considerations section for trade-offs between monolithic and micro functions](./api_gateway.md#considerations){target="_blank"}**, as it's also applicable here."
+???+ tip
+    Read the **[considerations section for trade-offs between monolithic and micro functions](./api_gateway.md#considerations){target="_blank"}**, as it's also applicable here.
 
 As you grow the number of related GraphQL operations a given Lambda function should handle, it is natural to split them into separate files to ease maintenance - That's where the `Router` feature is useful.
 

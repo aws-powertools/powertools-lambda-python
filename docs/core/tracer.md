@@ -97,7 +97,7 @@ When using this `capture_lambda_handler` decorator, Tracer performs these additi
 
 You can trace synchronous functions using the `capture_method` decorator.
 
-!!! warning
+???+ warning
     **When `capture_response` is enabled, the function response will be read and serialized as json.**
 
     The serialization is performed by the aws-xray-sdk which uses the `jsonpickle` module. This can cause
@@ -114,7 +114,7 @@ You can trace synchronous functions using the `capture_method` decorator.
 
 ### Asynchronous and generator functions
 
-!!! warning
+???+ warning
     **We do not support async Lambda handler** - Lambda handler itself must be synchronous
 
 You can trace asynchronous functions and generator functions (including context managers) using `capture_method`.
@@ -201,12 +201,9 @@ If you're looking to shave a few microseconds, or milliseconds depending on your
 
 ### Disabling response auto-capture
 
-> New in 1.9.0
-
 Use **`capture_response=False`** parameter in both `capture_lambda_handler` and `capture_method` decorators to instruct Tracer **not** to serialize function responses as metadata.
 
-!!! info "This is commonly useful in three scenarios"
-
+???+ info "Info: This is commonly useful in three scenarios"
     1. You might **return sensitive** information you don't want it to be added to your traces
     2. You might manipulate **streaming objects that can be read only once**; this prevents subsequent calls from being empty
     3. You might return **more than 64K** of data _e.g., `message too long` error_
@@ -238,13 +235,10 @@ Use **`capture_response=False`** parameter in both `capture_lambda_handler` and 
 
 ### Disabling exception auto-capture
 
-> New in 1.10.0
-
 Use **`capture_error=False`** parameter in both `capture_lambda_handler` and `capture_method` decorators to instruct Tracer **not** to serialize exceptions as metadata.
 
-!!! info "Commonly useful in one scenario"
-
-    1. You might **return sensitive** information from exceptions, stack traces you might not control
+???+ info "Info: Commonly useful in one scenario"
+     You might **return sensitive** information from exceptions, stack traces you might not control
 
 === "sensitive_data_exception.py"
 
@@ -258,7 +252,7 @@ Use **`capture_error=False`** parameter in both `capture_lambda_handler` and `ca
 
 ### Tracing aiohttp requests
 
-!!! info
+???+ info
     This snippet assumes you have **aiohttp** as a dependency
 
 You can use `aiohttp_trace_config` function to create a valid [aiohttp trace_config object](https://docs.aiohttp.org/en/stable/tracing_reference.html). This is necessary since X-Ray utilizes aiohttp trace hooks to capture requests end-to-end.
@@ -303,7 +297,7 @@ This is useful when you need a feature available in X-Ray that is not available 
 
 ### Concurrent asynchronous functions
 
-!!! warning
+???+ warning
     [As of now, X-Ray SDK will raise an exception when async functions are run and traced concurrently](https://github.com/aws/aws-xray-sdk-python/issues/164)
 
 A safe workaround mechanism is to use `in_subsegment_async` available via Tracer escape hatch (`tracer.provider`).
@@ -335,7 +329,7 @@ A safe workaround mechanism is to use `in_subsegment_async` available via Tracer
 
 Tracer keeps a copy of its configuration after the first initialization. This is useful for scenarios where you want to use Tracer in more than one location across your code base.
 
-!!! warning
+???+ warning
     When reusing Tracer in Lambda Layers, or in multiple modules, **do not set `auto_patch=False`**, because import order matters.
 
     This can result in the first Tracer config being inherited by new instances, and their modules not being patched.

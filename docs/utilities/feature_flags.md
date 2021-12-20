@@ -3,7 +3,8 @@ title: Feature flags
 description: Utility
 ---
 
-!!! note "This is currently in Beta, as we might change Store parameters in the next release."
+???+ note
+    This is currently in Beta, as we might change Store parameters in the next release.
 
 The feature flags utility provides a simple rule engine to define when one or multiple features should be enabled depending on the input.
 
@@ -15,9 +16,11 @@ Feature flags are used to modify behaviour without changing the application's co
 
 **Dynamic flags**. Indicates something can have varying states, for example enable a premium feature for customer X not Y.
 
-!!! tip "You can use [Parameters utility](parameters.md) for static flags while this utility can do both static and dynamic feature flags."
+???+ tip
+    You can use [Parameters utility](parameters.md) for static flags while this utility can do both static and dynamic feature flags.
 
-!!! warning "Be mindful that feature flags can increase the complexity of your application over time; use them sparingly."
+???+ warning
+    Be mindful that feature flags can increase the complexity of your application over time; use them sparingly.
 
 If you want to learn more about feature flags, their variations and trade-offs, check these articles:
 
@@ -468,7 +471,8 @@ Action | Equivalent expression
 **VALUE_NOT_IN_KEY** | `lambda a, b: b not in a`
 
 
-!!! info "The `**key**` and `**value**` will be compared to the input from the `**context**` parameter."
+???+ info
+    The `**key**` and `**value**` will be compared to the input from the `**context**` parameter.
 
 **For multiple conditions**, we will evaluate the list of conditions as a logical `AND`, so all conditions needs to match to return `when_match` value.
 
@@ -483,6 +487,8 @@ Now that you've seen all properties of a feature flag schema, this flowchart des
 By default, we cache configuration retrieved from the Store for 5 seconds for performance and reliability reasons.
 
 You can override `max_age` parameter when instantiating the store.
+
+=== "app.py"
 
     ```python hl_lines="7"
     from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
@@ -568,7 +574,8 @@ You can access the configuration fetched from the store via `get_raw_configurati
 
 ### Built-in store provider
 
-!!! info "For GA, you'll be able to bring your own store."
+???+ info
+    For GA, you'll be able to bring your own store.
 
 #### AppConfig
 
@@ -624,7 +631,8 @@ You can unit test your feature flags locally and independently without setting u
 
 `AppConfigStore` only fetches a JSON document with a specific schema. This allows you to mock the response and use it to verify the rule evaluation.
 
-!!! warning "This excerpt relies on `pytest` and `pytest-mock` dependencies"
+???+ warning
+    This excerpt relies on `pytest` and `pytest-mock` dependencies.
 
 === "test_feature_flags_independently.py"
 
