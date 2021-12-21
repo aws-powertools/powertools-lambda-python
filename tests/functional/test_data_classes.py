@@ -272,7 +272,7 @@ def test_cognito_pre_token_generation_trigger_event():
     claims_override_details.set_group_configuration_groups_to_override(expected_groups)
     assert claims_override_details.group_configuration.groups_to_override == expected_groups
     assert event["response"]["claimsOverrideDetails"]["groupOverrideDetails"]["groupsToOverride"] == expected_groups
-    claims_override_details = event.response.claims_override_details  # cached lookups
+    claims_override_details = event.response.claims_override_details
     assert claims_override_details["groupOverrideDetails"]["groupsToOverride"] == expected_groups
 
     claims_override_details.set_group_configuration_iam_roles_to_override(["role"])
@@ -1056,7 +1056,7 @@ def test_base_proxy_event_json_body():
     data = {"message": "Foo"}
     event = BaseProxyEvent({"body": json.dumps(data)})
     assert event.json_body == data
-    assert event.json_body == data  # cached lookup
+    assert event.json_body["message"] == "Foo"
 
 
 def test_base_proxy_event_decode_body_key_error():
@@ -1399,10 +1399,8 @@ def test_code_pipeline_event_decoded_data():
     configuration = event.data.action_configuration.configuration
     decoded_params = configuration.decoded_user_parameters
     assert decoded_params == event.decoded_user_parameters
-    assert "VALUE" == decoded_params["KEY"]
-
-    decoded_params = configuration.decoded_user_parameters  # cached lookup
-    assert decoded_params is not None
+    assert decoded_params["KEY"] == "VALUE"
+    assert configuration.decoded_user_parameters["KEY"] == "VALUE"
 
     assert "my-pipeline-SourceArtifact" == event.data.input_artifacts[0].name
 

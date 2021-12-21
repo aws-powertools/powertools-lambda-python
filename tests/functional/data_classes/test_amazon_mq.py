@@ -34,7 +34,7 @@ def test_active_mq_event():
     messages = list(event.messages)
     message = messages[1]
     assert message.json_data["timeout"] == 0
-    assert message.json_data["timeout"] == 0  # cached lookup
+    assert message.json_data["data"] == "CZrmf0Gw8Ov4bqLQxD4E"
 
 
 def test_rabbit_mq_event():
@@ -48,7 +48,7 @@ def test_rabbit_mq_event():
     assert message.data is not None
     assert message.decoded_data is not None
     assert message.json_data["timeout"] == 0
-    assert message.json_data["timeout"] == 0  # cached lookup
+    assert message.json_data["data"] == "CZrmf0Gw8Ov4bqLQxD4E"
 
     assert isinstance(message, RabbitMessage)
     properties = message.basic_properties
