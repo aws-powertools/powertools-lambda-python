@@ -208,7 +208,7 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
     dynamodb = DynamoDBPersistenceLayer(table_name="idem")
     config =  IdempotencyConfig(
-        event_key_jmespath="messageId",  # see Choosing a payload subset section
+        event_key_jmespath="order_id",  # see Choosing a payload subset section
         use_local_cache=True,
     )
 
@@ -244,7 +244,7 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
     dynamodb = DynamoDBPersistenceLayer(table_name="idem")
     config =  IdempotencyConfig(
-        event_key_jmespath="messageId",  # see Choosing a payload subset section
+        event_key_jmespath="order_id",  # see Choosing a payload subset section
         use_local_cache=True,
     )
 
