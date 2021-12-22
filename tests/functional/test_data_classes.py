@@ -272,6 +272,8 @@ def test_cognito_pre_token_generation_trigger_event():
     claims_override_details.set_group_configuration_groups_to_override(expected_groups)
     assert claims_override_details.group_configuration.groups_to_override == expected_groups
     assert event["response"]["claimsOverrideDetails"]["groupOverrideDetails"]["groupsToOverride"] == expected_groups
+    claims_override_details = event.response.claims_override_details
+    assert claims_override_details["groupOverrideDetails"]["groupsToOverride"] == expected_groups
 
     claims_override_details.set_group_configuration_iam_roles_to_override(["role"])
     assert claims_override_details.group_configuration.iam_roles_to_override == ["role"]
@@ -1054,6 +1056,7 @@ def test_base_proxy_event_json_body():
     data = {"message": "Foo"}
     event = BaseProxyEvent({"body": json.dumps(data)})
     assert event.json_body == data
+    assert event.json_body["message"] == "Foo"
 
 
 def test_base_proxy_event_decode_body_key_error():
@@ -1084,7 +1087,7 @@ def test_base_proxy_event_json_body_with_base64_encoded_data():
     event = BaseProxyEvent({"body": encoded_data, "isBase64Encoded": True})
 
     # WHEN calling json_body
-    # THEN then base64 decode and json load
+    # THEN base64 decode and json load
     assert event.json_body == data
 
 
@@ -1120,7 +1123,8 @@ def test_kinesis_stream_event_json_data():
     json_value = {"test": "value"}
     data = base64.b64encode(bytes(json.dumps(json_value), "utf-8")).decode("utf-8")
     event = KinesisStreamEvent({"Records": [{"kinesis": {"data": data}}]})
-    assert next(event.records).kinesis.data_as_json() == json_value
+    record = next(event.records)
+    assert record.kinesis.data_as_json() == json_value
 
 
 def test_alb_event():
@@ -1392,9 +1396,11 @@ def test_code_pipeline_event_decoded_data():
     event = CodePipelineJobEvent(load_event("codePipelineEventData.json"))
 
     assert event.data.continuation_token is None
-    decoded_params = event.data.action_configuration.configuration.decoded_user_parameters
+    configuration = event.data.action_configuration.configuration
+    decoded_params = configuration.decoded_user_parameters
     assert decoded_params == event.decoded_user_parameters
-    assert "VALUE" == decoded_params["KEY"]
+    assert decoded_params["KEY"] == "VALUE"
+    assert configuration.decoded_user_parameters["KEY"] == "VALUE"
 
     assert "my-pipeline-SourceArtifact" == event.data.input_artifacts[0].name
 
