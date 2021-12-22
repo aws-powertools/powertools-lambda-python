@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2, event_source
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, IdempotencyConfig
+from aws_lambda_powertools.utilities.idempotency.base import _prepare_data
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
@@ -21,7 +22,7 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent, idempotent_function
-from aws_lambda_powertools.utilities.idempotency.persistence.base import BasePersistenceLayer, DataRecord, _prepare_data
+from aws_lambda_powertools.utilities.idempotency.persistence.base import BasePersistenceLayer, DataRecord
 from aws_lambda_powertools.utilities.validation import envelopes, validator
 from tests.functional.idempotency.conftest import serialize
 from tests.functional.utils import load_event
@@ -1060,6 +1061,18 @@ def test_idempotent_function_duplicates(
     assert len(persistence_store.table.method_calls) == 4
 
 
+def test_invalid_dynamodb_persistence_layer():
+    # Scenario constructing a DynamoDBPersistenceLayer with a key_attr matching sort_key_attr should fail
+    with pytest.raises(ValueError) as ve:
+        DynamoDBPersistenceLayer(
+            table_name="Foo",
+            key_attr="id",
+            sort_key_attr="id",
+        )
+    # and raise a ValueError
+    assert str(ve.value) == "key_attr [id] and sort_key_attr [id] cannot be the same!"
+
+
 def test_idempotent_function_dataclasses():
     try:
         # Scenario _prepare_data should convert a python dataclasses to a dict
@@ -1095,15 +1108,3 @@ def test_idempotent_function_pydantic():
 def test_idempotent_function_other(data):
     # All other data types should be left as is
     assert _prepare_data(data) == data
-
-
-def test_invalid_dynamodb_persistence_layer():
-    # Scenario constructing a DynamoDBPersistenceLayer with a key_attr matching sort_key_attr should fail
-    with pytest.raises(ValueError) as ve:
-        DynamoDBPersistenceLayer(
-            table_name="Foo",
-            key_attr="id",
-            sort_key_attr="id",
-        )
-    # and raise a ValueError
-    assert str(ve.value) == "key_attr [id] and sort_key_attr [id] cannot be the same!"

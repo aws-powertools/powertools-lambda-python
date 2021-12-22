@@ -104,20 +104,6 @@ class DataRecord:
         return json.loads(self.response_data)
 
 
-def _prepare_data(data: Any) -> Any:
-    """Prepare data for json serialization.
-    This will convert dataclasses, pydantic models or event source data classes to a dict."""
-    if hasattr(data, "__dataclass_fields__"):
-        import dataclasses
-
-        return dataclasses.asdict(data)
-
-    if callable(getattr(data, "dict", None)):
-        return data.dict()
-
-    return getattr(data, "raw_event", data)
-
-
 class BasePersistenceLayer(ABC):
     """
     Abstract Base Class for Idempotency persistence layer.
@@ -239,7 +225,7 @@ class BasePersistenceLayer(ABC):
             Hashed representation of the provided data
 
         """
-        hashed_data = self.hash_function(json.dumps(_prepare_data(data), cls=Encoder, sort_keys=True).encode())
+        hashed_data = self.hash_function(json.dumps(data, cls=Encoder, sort_keys=True).encode())
         return hashed_data.hexdigest()
 
     def _validate_payload(self, data: Dict[str, Any], data_record: DataRecord) -> None:
