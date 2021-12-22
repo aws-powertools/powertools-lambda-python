@@ -107,13 +107,13 @@ class DataRecord:
 def _prepare_data(data: Any) -> Any:
     """Prepare data for json serialization.
     This will convert dataclasses, pydantic models or event source data classes to a dict."""
-    if callable(getattr(data, "dict", None)):
-        return data.dict()
-
     if hasattr(data, "__dataclass_fields__"):
         import dataclasses
 
         return dataclasses.asdict(data)
+
+    if callable(getattr(data, "dict", None)):
+        return data.dict()
 
     return getattr(data, "raw_event", data)
 
