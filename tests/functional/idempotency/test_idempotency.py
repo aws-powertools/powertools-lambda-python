@@ -30,6 +30,13 @@ from tests.functional.utils import load_event
 TABLE_NAME = "TEST_TABLE"
 
 
+def get_dataclasses_lib():
+    """Python 3.6 doesn't support dataclasses natively"""
+    import dataclasses
+
+    return dataclasses
+
+
 # Using parametrize to run test twice, with two separate instances of persistence store. One instance with caching
 # enabled, and one without.
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
@@ -1073,23 +1080,20 @@ def test_invalid_dynamodb_persistence_layer():
     assert str(ve.value) == "key_attr [id] and sort_key_attr [id] cannot be the same!"
 
 
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher for dataclasses")
 def test_idempotent_function_dataclasses():
-    try:
-        # Scenario _prepare_data should convert a python dataclasses to a dict
-        from dataclasses import asdict, dataclass
+    # Scenario _prepare_data should convert a python dataclasses to a dict
+    dataclasses = get_dataclasses_lib()
 
-        @dataclass
-        class Foo:
-            name: str
+    @dataclasses.dataclass
+    class Foo:
+        name: str
 
-        expected_result = {"name": "Bar"}
-        data = Foo(name="Bar")
-        as_dict = _prepare_data(data)
-        assert as_dict == asdict(data)
-        assert as_dict == expected_result
-
-    except ModuleNotFoundError:
-        pass  # Python 3.6
+    expected_result = {"name": "Bar"}
+    data = Foo(name="Bar")
+    as_dict = _prepare_data(data)
+    assert as_dict == dataclasses.asdict(data)
+    assert as_dict == expected_result
 
 
 def test_idempotent_function_pydantic():
@@ -1108,3 +1112,57 @@ def test_idempotent_function_pydantic():
 def test_idempotent_function_other(data):
     # All other data types should be left as is
     assert _prepare_data(data) == data
+
+
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher for dataclasses")
+def test_idempotent_function_dataclass_with_jmespath():
+    # GIVEN
+    dataclasses = get_dataclasses_lib()
+    config = IdempotencyConfig(event_key_jmespath="transaction_id", use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    persistence_layer = MockPersistenceLayer(
+        expected_idempotency_key="test-func.collect_payment#"
+        + hashlib.md5(serialize(mock_event["transaction_id"]).encode()).hexdigest()
+    )
+
+    @dataclasses.dataclass
+    class Payment:
+        customer_id: str
+        transaction_id: str
+
+    @idempotent_function(data_keyword_argument="payment", persistence_store=persistence_layer, config=config)
+    def collect_payment(payment: Payment):
+        return payment.transaction_id
+
+    # WHEN
+    payment = Payment(**mock_event)
+    result = collect_payment(payment=payment)
+
+    # THEN idempotency key assertion happens at MockPersistenceLayer
+    assert result == payment.transaction_id
+
+
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher for dataclasses")
+def test_idempotent_function_pydantic_with_jmespath():
+    # GIVEN
+    config = IdempotencyConfig(event_key_jmespath="transaction_id", use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    persistence_layer = MockPersistenceLayer(
+        expected_idempotency_key="test-func.collect_payment#"
+        + hashlib.md5(serialize(mock_event["transaction_id"]).encode()).hexdigest()
+    )
+
+    class Payment(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    @idempotent_function(data_keyword_argument="payment", persistence_store=persistence_layer, config=config)
+    def collect_payment(payment: Payment):
+        return payment.transaction_id
+
+    # WHEN
+    payment = Payment(**mock_event)
+    result = collect_payment(payment=payment)
+
+    # THEN idempotency key assertion happens at MockPersistenceLayer
+    assert result == payment.transaction_id

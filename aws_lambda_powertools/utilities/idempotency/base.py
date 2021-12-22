@@ -23,7 +23,10 @@ logger = logging.getLogger(__name__)
 
 def _prepare_data(data: Any) -> Any:
     """Prepare data for json serialization.
-    This will convert dataclasses, pydantic models or event source data classes to a dict."""
+
+    We will convert Python dataclasses, pydantic models or event source data classes to a dict,
+    otherwise return data as-is.
+    """
     if hasattr(data, "__dataclass_fields__"):
         import dataclasses
 
