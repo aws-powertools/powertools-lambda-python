@@ -5,7 +5,7 @@ description: Powertools introduction
 Quickstart introducing core Powertools functionalities.
 
 
-## Installation
+## Installation 
 With [SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) installed, you can follow this Quickstart step by step or you can build a project with the final Quickstart code you can play with.
 If you want to follow it all along, create a new empty project.
 === "shell"
@@ -17,17 +17,17 @@ If you want to play with the final code, then you can download it from [aws-samp
 ```bash
 sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 ```
+### Configuration
+If you decide to deploy code from Quickstart make sure to [set up your AWS credentials](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started-set-up-credentials.html)
 
-
-### Code example and Configuration
+### Code example
 In the `powertools-quickstart` folder, we will modify the following files:
 
-* **app.py** - A file containing our application code.
-* **template.yaml** - Configuring the AWS infrastructure with the SAM template format.
-* **requirements.txt** - Setting up Python pip packages.
+* **app.py** - Application code.
+* **template.yaml** - AWS infrastructure configuration using SAM.
+* **requirements.txt** - List of extra Python packages needed.
 
-Also, be sure to [set up your AWS credentials](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started-set-up-credentials.html) to be able to login and deploy an example code into your AWS account. 
-When done, configure our base application to look like the following code snippet.
+Let's configure our base application to look like the following code snippet.
 === "app.py"
 
     ```python
@@ -73,7 +73,7 @@ The SAM model configures API Gateway, which redirects traffic to Lambda for one 
 !!! Warning 
     For simplicity, we do not set up authentication and authorisation in the example!
 ### Run your code
-At each point, you have two ways to test your code. Locally and within your AWS account. Given that we use SAM, the two methods are just as simple.
+At each point, you have two ways to run your code. Locally and within your AWS account. Given that we use SAM, the two methods are just as simple.
 #### Local test
 SAM allows you to execute a server-less application locally. Perform the next command in a shell.
 ```bash
@@ -122,7 +122,7 @@ This command will build a package and deploy it to your AWS Account. Be sure to 
     For more details on the SAM deployment mechanism, see [link](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-deploy.html).
 
 ## API Gateway router
-Say you were asked to create another method that responds with the name of the caller under the `/hello/<name>` URL path.
+Let's say we want to have another method that acts like an echo server. It takes user input (username) and output it to the caller. We would need to create an API with an URL path /hello/<name>, where the name string is the input from the user.
 One approach would be to create another lambda using the required method and set up the API gateway to call it.
 === "app_name.py"
 
@@ -177,8 +177,11 @@ One approach would be to create another lambda using the required method and set
             Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
     ```
 
-This way certainly works. The downside of this approach is that you need to create a new lambda file for every method or path and also configure the SAM template to add new lambda configuration and configure API Gateway to point into them. For small additional methods it might be too much boilerplate code.  
-Another approach that might be more suitable in this case is to have all of our methods under control of one lambda and "route" into specific method based on a request. 
+This way certainly works for simple use-case. But what happens if your application gets bigger and we need to cover numerous URL paths and HTTP methods for them? If that is the case, we should:
+* Add a new lambda handler with business logic for each new URL path and HTTP method used.
+* Add a new Lambda configuration to a SAM template file to map the lambda function to the required path and HTTP URL method.
+This could result in a number of similar lambda files and large SAM configuration file with similar configuration sections. 
+In this case where we see that the addition of new URL paths lead to the boilerplate code, we should lean towards the routing approach.
 !!! Info
     If you want a more detailed explanation of these two approaches, we have explained the considerations [here](.. /core/event_handler/api_gateway/#considerations)
 The simple code might look similar to the following code snippet.
@@ -255,15 +258,15 @@ The simple code might look similar to the following code snippet.
                 Description: "API Gateway endpoint URL for Prod stage for Hello World function"
                 Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
     ```
-In this example, two `hello_name` and `hello` methods were added side by side. We added the 'Router' class which allows us to record the method that should be called when the specific request arrives. 
+In this example, two `hello_name` and `hello` methods were added. We added the `Router` class which allows us to record the method that should be called when the specific request arrives. 
 We created the instance and added the configuration with the mapping of the processing methods and the http query method. 
 In the lambda handler, we call router instance `get` method to retrieve a reference to the processing method (`hello` or `hello_name`) that will process the query. 
 Lastly, we run this method and send the results back to API Gateway.
 
 This approach allows us to simplify the configuration of our infrastructure since we have added all Gateway API paths in the `HelloWorldFunction` event section. 
-The downside of the current approach is that we have to add custom classes and with every new method or path we want to serve, we have to add an explicit configuration. 
+The downside is that we need to create custom classes and with every new method or path we want to serve, we have to add an explicit configuration. 
 In addition, we need to understand the structure of the API Gateway request events to deduce the requested path and the http method. 
-To compensate for this, we use Lambda Powertools.
+Let's see how we can improve it with Powertools.
 
 === "app.py"
 
@@ -293,18 +296,17 @@ To compensate for this, we use Lambda Powertools.
     aws-lambda-powertools
     ```
 
-Given that we used powertools api_gateway event handler, we don't need to know the internal structure of the event. All we do is we instantiate the ApiGatewayResolver class and we call it in our `lambda_handler.`
-Because we added the route annotation as a decorator for our methods, we can directly use the parameters passed in the request.
-To make SAM build our package properly, we specified lambda powertools package in our requirements file. 
-It is then automatically downloaded by SAM and inserted into the lambda zip file.
+Powertools provides an `ApiGatewayResolver` class, which helps you understand the structure, no need to look it up.
+Because we have added the route annotation as a decorator for our methods, we may directly use the parameters passed in the query.
+For SAM to build our package correctly, we have specified lambda powertools package in our `requirement.txt` file. 
 
 !!! tip
     If you'd like to learn how python decorators work under the hood, you can follow [Real Python](https://realpython.com/primer-on-python-decorators/)'s article.
 ## Structured Logging
 In the next step, you have been given the task of proposing production quality logging capabilities to your lambda code.
-You decided to follow [structured logging approach](https://docs.aws.amazon.com/lambda/latest/operatorguide/parse-logs.html) which means that you don’t write hard-to-parse and hard-to-keep-consistent prose in your logs but that you log events that happen in a context instead. 
-We want our log event to be in JSON format. This will let us easily search in CloudWatch Logs or Cloudwatch Insight.
-The first idea might be to run the logger from the standard library and use the `pythonjsonlogger` library to simplify the creation of structured logs.
+We want our log event to be in a JSON format. Also, You decided to follow [structured logging approach](https://docs.aws.amazon.com/lambda/latest/operatorguide/parse-logs.html). In a result, we expect easy to search, consistent logs containing enough context and data to analyse the status of our system. We can take advantage of CloudWatch Logs and Cloudwatch Insight for this purpose.
+
+The first option could be to use a python logger in combination with the `pythonjsonlogger` library for simple structured logging.
 
 === "app.py"
 
@@ -348,7 +350,11 @@ The first idea might be to run the logger from the standard library and use the 
     aws-lambda-powertools
     python-json-logger
     ```
-On our first try, we create a new Logger. We configure Log Handler, formatter and log level. Then we use this logger to log required information. We will see records structured that way
+On the first try, we did a couple of steps to set up our logging:
+* Create an application logger called `APP`.
+* Configure handler and formatter.
+* Set log level.
+After that, we use this logger in our application code to record the required information. We see logs structured as follows:
 ```json
 {"asctime": "2021-11-22 15:32:02,145", "levelname": "INFO", "name": "APP", "message": "Request from unknown received"}
 ```
@@ -357,10 +363,7 @@ instead of
 [INFO]  2021-11-22T15:32:02.145Z        ba3bea3d-fe3a-45db-a2ce-72e813d55b91    Request from unknown received
 ```
 
-So far everything is fine! You might also decide to add additional context to your logs.
-You can take it out of the lambda context or the event. The downside of this approach is that we would add extra complexity to ensure that you always add these specific attributes in each location.
-In addition, we added the boilerplate code and even with a third-party library, it's not straightforward. 
-Is there anything else we can do? Yes! We may use the powertools logger functions as in the following example.
+So far, so good! To make things easier, we want to add extra context to the logs. We can extract it from a lambda context or an event passed to lambda handler at the time of invocation. We have to make sure that we always add those specific attributes wherever a logger is used. Can we ensure that the required attributes are added automatically on our behalf without having to move them around? Yes! Powertools Logger to the rescue :-)
 === "app.py"
 
     ```python hl_lines="1 6 13 19 23"
@@ -391,9 +394,8 @@ Is there anything else we can do? Yes! We may use the powertools logger function
         return app.resolve(event, context)
     ```
 
-We imported powertools Logger class which we created an instance from in line 6. And this is basically it! By using powertools logger we have all required configuration done out of the box. 
-We used `logger.inject_lambda_context` decorator to inject lambda context into every log. We also instruct logger to log correlation id taken from API Gateway and to log coming event automatically. 
-Correlation id will help with tracking request between API gateway and lambda.
+We added powertools logger in line 6 and all the configuration is done. 
+We also used `logger.inject_lambda_context` decorator to inject lambda context into every log. We instruct logger to log correlation id taken from API Gateway and event automatically. Because powertools library adds a correlation identifier to each log, we can easily correlate all the logs generated for a specific request.
 
 As a result, we should see logs with following attributes.
 === "Example Application Structured Log"
@@ -417,10 +419,10 @@ By having structured logs like this, we might easily search and analyse them in 
 === "CloudWatch Logs Insight Example"
 ![CloudWatch Logs Insight Example](./media/cloudwatch_logs_insight_example.png)
 ## Tracing
-The next task you have chosen to work on is to add an appropriate tracking mechanism to your stack. Developers want to be able to analyze traces of queries that pass via the API gateway to your Lambda. 
+The next task we have chosen to work on is to add an appropriate tracking mechanism to your stack. Developers want to be able to analyze traces of queries that pass via the API gateway to your Lambda. 
 With structured logs, it will be an important step to provide the observability of your application!
-The ideal solution is [AWS X-RAY](https://aws.amazon.com/xray/). How do we send traces from our application to the AWS X-RAY service?
-Let's look first at how we can achieve this with [x-ray SDK](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html) and then try to simplify it using the power tools library.
+The AWS service that has these capabilities is [AWS X-RAY](https://aws.amazon.com/xray/). How do we send application trace to the AWS X-RAY service then?
+Let's first explore how we can achieve this with [x-ray SDK](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html), and then try to simplify it with the Powertools library.
 
 === "app.py"
 
@@ -506,8 +508,13 @@ A lot has happened here. First, we imported required X-ray SDK classes.
 `xray_recorder` is a global AWS X-ray recorder class instance that starts/ends segments/sub-segments and sends them to the X-ray daemon.
 To build new sub-segments, we use `xray_recorder.in_subsegment` method as a context manager. 
 Using customized sub-segments, we were able to add visible granular sub-traces into our X-ray, separated by the method name.
-Also, we track lambda cold start by setting global variable outside of a handler. The variable is defined only when lambda is initialized. 
+Also, we track lambda cold start by setting global variable outside of a handler. The variable is defined only upon lambda initialization. This information provides an overview of how often the runtime is reused by lambda invoked, which directly impacts perceived lambda performance and latency.
+
 To allow the tracking of our Lambda, we need to set it up in our SAM template and add `Tracing: Active` under lambda `Properties` section.
+!!! Info 
+    Want to know more about context managers and understand the benefits of using them? Follow [article](https://realpython.com/python-with-statement/) from Real Python.
+ !!! Info
+    If you want to understand how the Lambda execution environment works and why cold starts can occur, follow [blog series](https://aws.amazon.com/blogs/compute/operating-lambda-performance-optimization-part-1/.
 === "app.py"
 
     ```python hl_lines="1 11 13 19 21 27"
@@ -563,7 +570,6 @@ From here, you can easily browse to specific logs in CloudWatch Logs Insight, Me
 ## Custom Metrics
 The final step to provide complete observability is to add certain measures at the business level. 
 Lambda adds low-level technical metrics (such as Invocations, Duration, Error Count & Success Rate) to the CloudWatch metrics out of the box. 
-You decided to add custom measurements to increase the visibility of what's going on with your app. 
 Let's expand our application with custom metrics without Powertools to see how it works, then let's upgrade it with Powertools:-)
 
 === "app.py"
