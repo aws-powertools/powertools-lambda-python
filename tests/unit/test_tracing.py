@@ -2,6 +2,7 @@ import contextlib
 import sys
 from typing import NamedTuple
 from unittest import mock
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -630,7 +631,22 @@ def test_tracer_lambda_handler_do_not_add_service_annotation_when_missing(
     assert in_subsegment_mock.put_annotation.call_args == mocker.call(key="ColdStart", value=True)
 
 
-def test_ignore_endpoints(provider_stub, in_subsegment_mock):
-    provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
-    tracer = Tracer(provider=provider)
-    tracer.ignore_endpoint(hostname="https://foo.com/", urls=["/bar", "/ignored"])
+@mock.patch("aws_xray_sdk.ext.httplib.add_ignored")
+def test_ignore_endpoints_xray_sdk(mock_add_ignored: MagicMock):
+    # GIVEN a xray sdk provider
+    tracer = Tracer()
+    # WHEN we call ignore_endpoint
+    tracer.ignore_endpoint(hostname="https://www.foo.com/", urls=["/bar", "/ignored"])
+    # THEN call xray add_ignored
+    assert mock_add_ignored.call_count == 1
+    mock_add_ignored.assert_called_with(hostname="https://www.foo.com/", urls=["/bar", "/ignored"])
+
+
+@mock.patch("aws_xray_sdk.ext.httplib.add_ignored")
+def test_ignore_endpoints_mocked_provider(mock_add_ignored: MagicMock, provider_stub, in_subsegment_mock):
+    # GIVEN a mock provider
+    tracer = Tracer(provider=provider_stub(in_subsegment=in_subsegment_mock.in_subsegment))
+    # WHEN we call ignore_endpoint
+    tracer.ignore_endpoint(hostname="https://foo.com/")
+    # THEN don't call xray add_ignored
+    assert mock_add_ignored.call_count == 0

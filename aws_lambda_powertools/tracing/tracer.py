@@ -779,10 +779,11 @@ class Tracer:
     def _is_xray_provider(self):
         return "aws_xray_sdk" in self.provider.__module__
 
-    @staticmethod
-    def ignore_endpoint(hostname: Optional[str] = None, urls: Optional[List[str]] = None):
+    def ignore_endpoint(self, hostname: Optional[str] = None, urls: Optional[List[str]] = None):
         """If you want to ignore certain httplib requests you can do so based on the hostname or URL that is being
         requested.
+
+        > NOTE: If the provider is not xray, nothing will be added to ignore list
 
         Documentation
         --------------
@@ -795,6 +796,9 @@ class Tracer:
         urls: Optional, List[str]
             List of urls to ignore. Example `tracer.ignore_endpoint(urls=["/ignored-url"])`
         """
+        if not self._is_xray_provider():
+            return
+
         from aws_xray_sdk.ext.httplib import add_ignored  # type: ignore
 
         add_ignored(hostname=hostname, urls=urls)
