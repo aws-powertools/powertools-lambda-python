@@ -124,45 +124,50 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
 
 Similar to [idempotent decorator](#idempotent-decorator), you can use `idempotent_function` decorator for any synchronous Python function.
 
-When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`** - Such data must be JSON serializable.
+When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`**.
+
+!!! info "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.7/library/dataclasses.html){target="_blank"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
 
 !!! warning "Make sure to call your decorated function using keyword arguments"
 
-=== "app.py"
+=== "batch_sample.py"
 
     This example also demonstrates how you can integrate with [Batch utility](batch.md), so you can process each record in an idempotent manner.
 
-    ```python hl_lines="4 13 18 25"
-    import uuid
+    ```python hl_lines="4-5 16 21 29"
+    from aws_lambda_powertools.utilities.batch import (BatchProcessor, EventType,
+                                                       batch_processor)
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+    from aws_lambda_powertools.utilities.idempotency import (
+        DynamoDBPersistenceLayer, IdempotencyConfig, idempotent_function)
 
-    from aws_lambda_powertools.utilities.batch import sqs_batch_processor
-    from aws_lambda_powertools.utilities.idempotency import idempotent_function, DynamoDBPersistenceLayer, IdempotencyConfig
 
-
+    processor = BatchProcessor(event_type=EventType.SQS)
     dynamodb = DynamoDBPersistenceLayer(table_name="idem")
     config =  IdempotencyConfig(
-        event_key_jmespath="messageId",  # see "Choosing a payload subset for idempotency" section
+        event_key_jmespath="messageId",  # see Choosing a payload subset section
         use_local_cache=True,
     )
+
+
+    @idempotent_function(data_keyword_argument="record", config=config, persistence_store=dynamodb)
+    def record_handler(record: SQSRecord):
+        return {"message": record["body"]}
+
 
     @idempotent_function(data_keyword_argument="data", config=config, persistence_store=dynamodb)
     def dummy(arg_one, arg_two, data: dict, **kwargs):
         return {"data": data}
 
 
-    @idempotent_function(data_keyword_argument="record", config=config, persistence_store=dynamodb)
-    def record_handler(record):
-        return {"message": record["body"]}
-
-
-    @sqs_batch_processor(record_handler=record_handler)
+    @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context):
         # `data` parameter must be called as a keyword argument to work
         dummy("hello", "universe", data="test")
-        return {"statusCode": 200}
+        return processor.response()
     ```
 
-=== "Example event"
+=== "Batch event"
 
     ```json hl_lines="4"
     {
@@ -193,6 +198,79 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
     }
     ```
 
+=== "dataclass_sample.py"
+
+    ```python hl_lines="3-4 23 32"
+    from dataclasses import dataclass
+
+    from aws_lambda_powertools.utilities.idempotency import (
+        DynamoDBPersistenceLayer, IdempotencyConfig, idempotent_function)
+
+    dynamodb = DynamoDBPersistenceLayer(table_name="idem")
+    config =  IdempotencyConfig(
+        event_key_jmespath="order_id",  # see Choosing a payload subset section
+        use_local_cache=True,
+    )
+
+    @dataclass
+    class OrderItem:
+        sku: str
+        description: str
+
+    @dataclass
+    class Order:
+        item: OrderItem
+        order_id: int
+
+
+    @idempotent_function(data_keyword_argument="order", config=config, persistence_store=dynamodb)
+    def process_order(order: Order):
+        return f"processed order {order.order_id}"
+
+
+    order_item = OrderItem(sku="fake", description="sample")
+    order = Order(item=order_item, order_id="fake-id")
+
+    # `order` parameter must be called as a keyword argument to work
+    process_order(order=order)
+    ```
+
+=== "parser_pydantic_sample.py"
+
+    ```python hl_lines="1-2 22 31"
+    from aws_lambda_powertools.utilities.idempotency import (
+        DynamoDBPersistenceLayer, IdempotencyConfig, idempotent_function)
+    from aws_lambda_powertools.utilities.parser import BaseModel
+
+    dynamodb = DynamoDBPersistenceLayer(table_name="idem")
+    config =  IdempotencyConfig(
+        event_key_jmespath="order_id",  # see Choosing a payload subset section
+        use_local_cache=True,
+    )
+
+
+    class OrderItem(BaseModel):
+        sku: str
+        description: str
+
+
+    class Order(BaseModel):
+        item: OrderItem
+        order_id: int
+
+
+    @idempotent_function(data_keyword_argument="order", config=config, persistence_store=dynamodb)
+    def process_order(order: Order):
+        return f"processed order {order.order_id}"
+
+
+    order_item = OrderItem(sku="fake", description="sample")
+    order = Order(item=order_item, order_id="fake-id")
+
+    # `order` parameter must be called as a keyword argument to work
+    process_order(order=order)
+    ```
+
 ### Choosing a payload subset for idempotency
 
 !!! tip "Dealing with always changing payloads"
@@ -209,7 +287,7 @@ Imagine the function executes successfully, but the client never receives the re
 !!! warning "Idempotency for JSON payloads"
     The payload extracted by the `event_key_jmespath` is treated as a string by default, so will be sensitive to differences in whitespace even when the JSON payload itself is identical.
 
-    To alter this behaviour, we can use the [JMESPath built-in function](jmespath_functions.md#powertools_json-function) `powertools_json()` to treat the payload as a JSON object rather than a string.
+    To alter this behaviour, we can use the [JMESPath built-in function](jmespath_functions.md#powertools_json-function) `powertools_json()` to treat the payload as a JSON object (dict) rather than a string.
 
 === "payment.py"
 

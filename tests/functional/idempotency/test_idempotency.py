@@ -1,6 +1,4 @@
 import copy
-import hashlib
-import json
 import sys
 from hashlib import md5
 from unittest.mock import MagicMock
@@ -8,9 +6,11 @@ from unittest.mock import MagicMock
 import jmespath
 import pytest
 from botocore import stub
+from pydantic import BaseModel
 
 from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2, event_source
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, IdempotencyConfig
+from aws_lambda_powertools.utilities.idempotency.base import _prepare_data
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
@@ -22,10 +22,16 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
 from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent, idempotent_function
 from aws_lambda_powertools.utilities.idempotency.persistence.base import BasePersistenceLayer, DataRecord
 from aws_lambda_powertools.utilities.validation import envelopes, validator
-from tests.functional.idempotency.conftest import serialize
-from tests.functional.utils import load_event
+from tests.functional.utils import hash_idempotency_key, json_serialize, load_event
 
 TABLE_NAME = "TEST_TABLE"
+
+
+def get_dataclasses_lib():
+    """Python 3.6 doesn't support dataclasses natively"""
+    import dataclasses
+
+    return dataclasses
 
 
 # Using parametrize to run test twice, with two separate instances of persistence store. One instance with caching
@@ -744,7 +750,7 @@ def test_default_no_raise_on_missing_idempotency_key(
     hashed_key = persistence_store._get_hashed_idempotency_key({})
 
     # THEN return the hash of None
-    expected_value = f"test-func.{function_name}#" + md5(serialize(None).encode()).hexdigest()
+    expected_value = f"test-func.{function_name}#" + md5(json_serialize(None).encode()).hexdigest()
     assert expected_value == hashed_key
 
 
@@ -788,7 +794,7 @@ def test_jmespath_with_powertools_json(
     expected_value = [sub_attr_value, static_pk_value]
     api_gateway_proxy_event = {
         "requestContext": {"authorizer": {"claims": {"sub": sub_attr_value}}},
-        "body": serialize({"id": static_pk_value}),
+        "body": json_serialize({"id": static_pk_value}),
     }
 
     # WHEN calling _get_hashed_idempotency_key
@@ -872,9 +878,7 @@ class MockPersistenceLayer(BasePersistenceLayer):
 def test_idempotent_lambda_event_source(lambda_context):
     # Scenario to validate that we can use the event_source decorator before or after the idempotent decorator
     mock_event = load_event("apiGatewayProxyV2Event.json")
-    persistence_layer = MockPersistenceLayer(
-        "test-func.lambda_handler#" + hashlib.md5(serialize(mock_event).encode()).hexdigest()
-    )
+    persistence_layer = MockPersistenceLayer("test-func.lambda_handler#" + hash_idempotency_key(mock_event))
     expected_result = {"message": "Foo"}
 
     # GIVEN an event_source decorator
@@ -894,9 +898,8 @@ def test_idempotent_lambda_event_source(lambda_context):
 def test_idempotent_function():
     # Scenario to validate we can use idempotent_function with any function
     mock_event = {"data": "value"}
-    persistence_layer = MockPersistenceLayer(
-        "test-func.record_handler#" + hashlib.md5(serialize(mock_event).encode()).hexdigest()
-    )
+    idempotency_key = "test-func.record_handler#" + hash_idempotency_key(mock_event)
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
 
     @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
@@ -913,9 +916,8 @@ def test_idempotent_function_arbitrary_args_kwargs():
     # Scenario to validate we can use idempotent_function with a function
     # with an arbitrary number of args and kwargs
     mock_event = {"data": "value"}
-    persistence_layer = MockPersistenceLayer(
-        "test-func.record_handler#" + hashlib.md5(serialize(mock_event).encode()).hexdigest()
-    )
+    idempotency_key = "test-func.record_handler#" + hash_idempotency_key(mock_event)
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
 
     @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
@@ -930,9 +932,8 @@ def test_idempotent_function_arbitrary_args_kwargs():
 
 def test_idempotent_function_invalid_data_kwarg():
     mock_event = {"data": "value"}
-    persistence_layer = MockPersistenceLayer(
-        "test-func.record_handler#" + hashlib.md5(serialize(mock_event).encode()).hexdigest()
-    )
+    idempotency_key = "test-func.record_handler#" + hash_idempotency_key(mock_event)
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
     keyword_argument = "payload"
 
@@ -949,9 +950,8 @@ def test_idempotent_function_invalid_data_kwarg():
 
 def test_idempotent_function_arg_instead_of_kwarg():
     mock_event = {"data": "value"}
-    persistence_layer = MockPersistenceLayer(
-        "test-func.record_handler#" + hashlib.md5(serialize(mock_event).encode()).hexdigest()
-    )
+    idempotency_key = "test-func.record_handler#" + hash_idempotency_key(mock_event)
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
     keyword_argument = "record"
 
@@ -969,18 +969,15 @@ def test_idempotent_function_arg_instead_of_kwarg():
 def test_idempotent_function_and_lambda_handler(lambda_context):
     # Scenario to validate we can use both idempotent_function and idempotent decorators
     mock_event = {"data": "value"}
-    persistence_layer = MockPersistenceLayer(
-        "test-func.record_handler#" + hashlib.md5(serialize(mock_event).encode()).hexdigest()
-    )
+    idempotency_key = "test-func.record_handler#" + hash_idempotency_key(mock_event)
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
 
     @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
     def record_handler(record):
         return expected_result
 
-    persistence_layer = MockPersistenceLayer(
-        "test-func.lambda_handler#" + hashlib.md5(serialize(mock_event).encode()).hexdigest()
-    )
+    persistence_layer = MockPersistenceLayer("test-func.lambda_handler#" + hash_idempotency_key(mock_event))
 
     @idempotent(persistence_store=persistence_layer)
     def lambda_handler(event, _):
@@ -1001,18 +998,16 @@ def test_idempotent_data_sorting():
     # Scenario to validate same data in different order hashes to the same idempotency key
     data_one = {"data": "test message 1", "more_data": "more data 1"}
     data_two = {"more_data": "more data 1", "data": "test message 1"}
-
+    idempotency_key = "test-func.dummy#" + hash_idempotency_key(data_one)
     # Assertion will happen in MockPersistenceLayer
-    persistence_layer = MockPersistenceLayer(
-        "test-func.dummy#" + hashlib.md5(json.dumps(data_one).encode()).hexdigest()
-    )
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
 
     # GIVEN
     @idempotent_function(data_keyword_argument="payload", persistence_store=persistence_layer)
     def dummy(payload):
         return {"message": "hello"}
 
-    # WHEN
+    # WHEN/THEN assertion will happen at MockPersistenceLayer
     dummy(payload=data_two)
 
 
@@ -1069,3 +1064,87 @@ def test_invalid_dynamodb_persistence_layer():
         )
     # and raise a ValueError
     assert str(ve.value) == "key_attr [id] and sort_key_attr [id] cannot be the same!"
+
+
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher for dataclasses")
+def test_idempotent_function_dataclasses():
+    # Scenario _prepare_data should convert a python dataclasses to a dict
+    dataclasses = get_dataclasses_lib()
+
+    @dataclasses.dataclass
+    class Foo:
+        name: str
+
+    expected_result = {"name": "Bar"}
+    data = Foo(name="Bar")
+    as_dict = _prepare_data(data)
+    assert as_dict == dataclasses.asdict(data)
+    assert as_dict == expected_result
+
+
+def test_idempotent_function_pydantic():
+    # Scenario _prepare_data should convert a pydantic to a dict
+    class Foo(BaseModel):
+        name: str
+
+    expected_result = {"name": "Bar"}
+    data = Foo(name="Bar")
+    as_dict = _prepare_data(data)
+    assert as_dict == data.dict()
+    assert as_dict == expected_result
+
+
+@pytest.mark.parametrize("data", [None, "foo", ["foo"], 1, True, {}])
+def test_idempotent_function_other(data):
+    # All other data types should be left as is
+    assert _prepare_data(data) == data
+
+
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher for dataclasses")
+def test_idempotent_function_dataclass_with_jmespath():
+    # GIVEN
+    dataclasses = get_dataclasses_lib()
+    config = IdempotencyConfig(event_key_jmespath="transaction_id", use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = "test-func.collect_payment#" + hash_idempotency_key(mock_event["transaction_id"])
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    @dataclasses.dataclass
+    class Payment:
+        customer_id: str
+        transaction_id: str
+
+    @idempotent_function(data_keyword_argument="payment", persistence_store=persistence_layer, config=config)
+    def collect_payment(payment: Payment):
+        return payment.transaction_id
+
+    # WHEN
+    payment = Payment(**mock_event)
+    result = collect_payment(payment=payment)
+
+    # THEN idempotency key assertion happens at MockPersistenceLayer
+    assert result == payment.transaction_id
+
+
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher for dataclasses")
+def test_idempotent_function_pydantic_with_jmespath():
+    # GIVEN
+    config = IdempotencyConfig(event_key_jmespath="transaction_id", use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = "test-func.collect_payment#" + hash_idempotency_key(mock_event["transaction_id"])
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    class Payment(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    @idempotent_function(data_keyword_argument="payment", persistence_store=persistence_layer, config=config)
+    def collect_payment(payment: Payment):
+        return payment.transaction_id
+
+    # WHEN
+    payment = Payment(**mock_event)
+    result = collect_payment(payment=payment)
+
+    # THEN idempotency key assertion happens at MockPersistenceLayer
+    assert result == payment.transaction_id
