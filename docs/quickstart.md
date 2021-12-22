@@ -18,7 +18,7 @@ If you want to play with the final code, then you can download it from [aws-samp
 sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 ```
 ### Configuration
-If you decide to deploy code from Quickstart make sure to [set up your AWS credentials](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started-set-up-credentials.html)
+If you decide to deploy code from Quickstart make sure to [set up your AWS credentials](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started-set-up-credentials.html).
 
 ### Code example
 In the `powertools-quickstart` folder, we will modify the following files:
@@ -87,7 +87,7 @@ As a result API endpoint will be exposed for you. You can trigger it with the 'c
 {"statusCode":200,"body":{"message":"hello unknown!"}}%
 ```
 !!! info
-    To learn more about local testing, please visit [SAM local testing](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-start-api.html)
+    To learn more about local testing, please visit [SAM local testing](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-start-api.html) page
 !!! warning
     **Powertools Tracer** requires X-RAY service to work. This means that you will not see the traces locally. Roll it out on your AWS account instead.
 #### Remote test
@@ -113,7 +113,7 @@ Value               arn:aws:lambda:eu-central-1:123456789012:function:sam-app-He
 ------------------------------------------------------------------------------------------------------------------------------------------
 Successfully created/updated stack - sam-app in eu-central-1
 ```
-This command will build a package and deploy it to your AWS Account. Be sure to set up your AWS credentials beforehand. In the output section, you will find the API Url against which you can launch requests.Now, you can trigger your endpoints:
+This command will build a package and deploy it to your AWS Account. In the output section, you will find the API Url against which you can launch requests. Now, you can trigger your endpoints.
 ```bash
 > curl https://1234567890.execute-api.eu-central-1.amazonaws.com/Prod/hello
 {"statusCode":200,"body":{"message":"hello unknown!"}}%
@@ -178,8 +178,10 @@ One approach would be to create another lambda using the required method and set
     ```
 
 This way certainly works for simple use-case. But what happens if your application gets bigger and we need to cover numerous URL paths and HTTP methods for them? If that is the case, we should:
+
 * Add a new lambda handler with business logic for each new URL path and HTTP method used.
 * Add a new Lambda configuration to a SAM template file to map the lambda function to the required path and HTTP URL method.
+
 This could result in a number of similar lambda files and large SAM configuration file with similar configuration sections. 
 In this case where we see that the addition of new URL paths lead to the boilerplate code, we should lean towards the routing approach.
 !!! Info
@@ -258,14 +260,14 @@ The simple code might look similar to the following code snippet.
                 Description: "API Gateway endpoint URL for Prod stage for Hello World function"
                 Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
     ```
-In this example, two `hello_name` and `hello` methods were added. We added the `Router` class which allows us to record the method that should be called when the specific request arrives. 
-We created the instance and added the configuration with the mapping of the processing methods and the http query method. 
-In the lambda handler, we call router instance `get` method to retrieve a reference to the processing method (`hello` or `hello_name`) that will process the query. 
-Lastly, we run this method and send the results back to API Gateway.
 
-This approach allows us to simplify the configuration of our infrastructure since we have added all Gateway API paths in the `HelloWorldFunction` event section. 
-The downside is that we need to create custom classes and with every new method or path we want to serve, we have to add an explicit configuration. 
-In addition, we need to understand the structure of the API Gateway request events to deduce the requested path and the http method. 
+* We added two `hello_name` and `hello` methods (line 1-7). 
+* We added the `Router` class which allows us to record the method that should be called when the specific request arrives (line 10-23). 
+* We created the instance and added the configuration with the mapping of the processing methods and the http query method (line 26-28). 
+* In the lambda handler, we call router instance `get` method to retrieve a reference to the processing method (`hello` or `hello_name`) that will process the query (line 34). 
+* Finally, we run this method and send the results back to API Gateway (line 35).
+
+This approach allows us to simplify the configuration of our infrastructure since we have added all Gateway API paths in the `HelloWorldFunction` event section. We need to understand the internal structure of the API Gateway request events though, to deduce the requested path, http method and path parameters. This requires us to put additional engineering effort to provide proper error handling. Also, if we decide to use another event source for our lambda, since we are highly coupled it would require rewriting of our lambda handler to get the information we need.
 Let's see how we can improve it with Powertools.
 
 === "app.py"
@@ -297,7 +299,7 @@ Let's see how we can improve it with Powertools.
     ```
 
 Powertools provides an `ApiGatewayResolver` class, which helps you understand the structure, no need to look it up.
-Because we have added the route annotation as a decorator for our methods, we may directly use the parameters passed in the query.
+We can also directly use the parameters passed in the request now, because we have added the route annotation as the decorator for our methods.
 For SAM to build our package correctly, we have specified lambda powertools package in our `requirement.txt` file. 
 
 !!! tip
@@ -351,9 +353,11 @@ The first option could be to use a python logger in combination with the `python
     python-json-logger
     ```
 On the first try, we did a couple of steps to set up our logging:
+
 * Create an application logger called `APP`.
 * Configure handler and formatter.
 * Set log level.
+
 After that, we use this logger in our application code to record the required information. We see logs structured as follows:
 ```json
 {"asctime": "2021-11-22 15:32:02,145", "levelname": "INFO", "name": "APP", "message": "Request from unknown received"}
@@ -513,8 +517,8 @@ Also, we track lambda cold start by setting global variable outside of a handler
 To allow the tracking of our Lambda, we need to set it up in our SAM template and add `Tracing: Active` under lambda `Properties` section.
 !!! Info 
     Want to know more about context managers and understand the benefits of using them? Follow [article](https://realpython.com/python-with-statement/) from Real Python.
- !!! Info
-    If you want to understand how the Lambda execution environment works and why cold starts can occur, follow [blog series](https://aws.amazon.com/blogs/compute/operating-lambda-performance-optimization-part-1/.
+!!! Info
+    If you want to understand how the Lambda execution environment works and why cold starts can occur, follow [blog series](https://aws.amazon.com/blogs/compute/operating-lambda-performance-optimization-part-1/).
 === "app.py"
 
     ```python hl_lines="1 11 13 19 21 27"
@@ -550,7 +554,7 @@ To allow the tracking of our Lambda, we need to set it up in our SAM template an
     ```
     
 Thanks to the help of powertools tracer we have much cleaner code right now. 
-To make our methods visible in the traces, we added @tracer. capture_method' decorator to the processing methods. 
+To make our methods visible in the traces, we added `@tracer.capture_method` decorator to the processing methods. 
 We added annotations directly in the code without adding it with the context handler using the `tracer.put_annotation` method. 
 Since we added the `@tracer.capture_lambda_handler` decorator for our `lambda_handler`, powertools automatically adds cold start information as an annotation. 
 It also automatically adds lambda response as a metadata into trace, so we don't need to worry about it as well.
@@ -672,7 +676,7 @@ Let's expand our application with custom metrics without Powertools to see how i
 
 To add our custom metric in **CloudWatch** we added `boto3` cloudwatch client followed by creation of the new `put_metric_data` method that uses this client to put the metric in CloudWatch synchronously. We call it in our method `hello` and `hello_name`. We divide our measures by type of application and method. Thus, we can follow the frequency at which specific methods are called. We also need to add additional inline policy allowing our lambda to write metrics in the CloudWatch. In `template.yaml` we added `CloudWatchPutMetricPolicy` policy.
 !!! Info
-    We use here direct synchronous call to CloudWatch Metrics API. It will be visible in your AWS X-RAY traces as additional external call. Given your architecture scale, this approach might lead to disadvantages such as increased cost of measuring data collection and increased lambda latency.
+    We use direct synchronous call to CloudWatch Metrics API. It will be visible in your AWS X-RAY traces as additional external call. Given your architecture scale, this approach might lead to disadvantages such as increased cost of measuring data collection and increased lambda latency.
 
 === "app.py"
 
