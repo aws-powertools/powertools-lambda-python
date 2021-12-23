@@ -81,10 +81,13 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     ---------------------------------------------
     datefmt: str, optional
         String directives (strftime) to format log timestamp using `time`, by default it uses RFC
-        3339. Only one of `datefmt` and `datetime_fmt` should be specified.
-    datetime_fmt : str, optional
-        String directives (strftime) to format log timestamp using `datetime`. Only one of `datefmt`
-        and `datetime_fmt` should be specified.
+        3339.
+    use_datetime: str, optional
+        Interpret `datefmt` as a format string for `datetime.datetime.strftime`, rather than
+        `time.strftime`.
+
+        See https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior . This
+        also supports a custom %F directive for milliseconds.
     json_serializer : Callable, optional
         function to serialize `obj` to a JSON formatted `str`, by default json.dumps
     json_deserializer : Callable, optional

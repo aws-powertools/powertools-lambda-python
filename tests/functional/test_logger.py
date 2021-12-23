@@ -615,12 +615,13 @@ def test_inject_lambda_context_allows_handler_with_kwargs(lambda_context, stdout
 
 
 @pytest.mark.parametrize("utc", [False, True])
-def test_datetime_fmt(stdout, service_name, utc):
+def test_use_datetime(stdout, service_name, utc):
     # GIVEN
     logger = Logger(
         service=service_name,
         stream=stdout,
-        datetime_fmt="custom timestamp: milliseconds=%F microseconds=%f timezone=%z",
+        datefmt="custom timestamp: milliseconds=%F microseconds=%f timezone=%z",
+        use_datetime=True,
         utc=utc,
     )
 
