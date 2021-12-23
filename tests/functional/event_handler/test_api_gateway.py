@@ -1142,10 +1142,26 @@ def test_exception_handler_not_found():
         return Response(status_code=404, content_type=content_types.TEXT_PLAIN, body="I am a teapot!")
 
     # WHEN calling the event handler
-    # AND not route is found
+    # AND no route is found
     result = app(LOAD_GW_EVENT, {})
 
     # THEN call the exception_handler
     assert result["statusCode"] == 404
     assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
     assert result["body"] == "I am a teapot!"
+
+
+def test_exception_handler_not_found_alt():
+    # GIVEN a resolver with `@app.not_found()`
+    app = ApiGatewayResolver()
+
+    @app.not_found()
+    def handle_not_found(_) -> Response:
+        return Response(status_code=404, content_type=content_types.APPLICATION_JSON, body="{}")
+
+    # WHEN calling the event handler
+    # AND no route is found
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN call the @app.not_found() function
+    assert result["statusCode"] == 404
