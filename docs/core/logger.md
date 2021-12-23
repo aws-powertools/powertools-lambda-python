@@ -639,6 +639,7 @@ Parameter | Description | Default
 **`json_deserializer`** | function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python obj | `json.loads`
 **`json_default`** | function to coerce unserializable values, when no custom serializer/deserializer is set | `str`
 **`datefmt`** | string directives (strftime) to format log timestamp | `%Y-%m-%d %H:%M:%S,%F%z`, where `%F` is a custom ms directive
+**`use_datetime`** | format the `datefmt` timestamps using `datetime`, not `time`  (also supports the custom `%F` directive for milliseconds) | `False`
 **`utc`** | set logging timestamp to UTC | `False`
 **`log_record_order`** | set order of log keys when logging | `["level", "location", "message", "timestamp"]`
 **`kwargs`** | key-value to be included in log messages | `None`
