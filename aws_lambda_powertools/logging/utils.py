@@ -14,18 +14,18 @@ def copy_config_to_registered_loggers(
     Attach source logger handlers to external loggers.
     Modify logger level based on source logger attribute.
     """
-    root_loggers = _find_root_loggers(source_logger, exclude, include)
-    for logger in root_loggers:
+    registered_loggers = _find_registered_loggers(source_logger, exclude, include)
+    for logger in registered_loggers:
         _configure_logger(source_logger, logger)
 
 
-def _include_root_loggers_filter(logger_list: List[str]):
+def _include_registered_loggers_filter(logger_list: List[str]):
     return [
         logging.getLogger(name) for name in logging.root.manager.loggerDict if "." not in name and name in logger_list
     ]
 
 
-def _exclude_root_loggers_filter(logger_list: List[str]) -> List[logging.Logger]:
+def _exclude_registered_loggers_filter(logger_list: List[str]) -> List[logging.Logger]:
     return [
         logging.getLogger(name)
         for name in logging.root.manager.loggerDict
@@ -33,24 +33,24 @@ def _exclude_root_loggers_filter(logger_list: List[str]) -> List[logging.Logger]
     ]
 
 
-def _find_root_loggers(
+def _find_registered_loggers(
     source_logger: PowertoolsLogger, exclude: Optional[List[str]] = None, include: Optional[List[str]] = None
-) -> list[logging.Logger]:
+) -> List[logging.Logger]:
     """Filter root loggers based on provided parameters.
 
     Ensure powertools logger itself is excluded from final list.
     """
     root_loggers = []
     if include and not exclude:
-        root_loggers = _include_root_loggers_filter(logger_list=include)
+        root_loggers = _include_registered_loggers_filter(logger_list=include)
     elif include and exclude:
         exclude = [source_logger.name, *exclude]
-        root_loggers = _include_root_loggers_filter(logger_list=list(set(include) - set(exclude)))
+        root_loggers = _include_registered_loggers_filter(logger_list=list(set(include) - set(exclude)))
     elif not include and exclude:
         exclude = [source_logger.name, *exclude]
-        root_loggers = _exclude_root_loggers_filter(logger_list=exclude)
+        root_loggers = _exclude_registered_loggers_filter(logger_list=exclude)
     else:
-        root_loggers = _exclude_root_loggers_filter(logger_list=[source_logger.name])
+        root_loggers = _exclude_registered_loggers_filter(logger_list=[source_logger.name])
 
     source_logger.debug(f"Filtered root loggers: {root_loggers}")
     return root_loggers
