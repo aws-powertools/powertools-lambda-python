@@ -1148,3 +1148,49 @@ def test_idempotent_function_pydantic_with_jmespath():
 
     # THEN idempotency key assertion happens at MockPersistenceLayer
     assert result == payment.transaction_id
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}], indirect=True)
+def test_idempotent_lambda_compound_already_completed(
+    idempotency_config: IdempotencyConfig,
+    persistence_store_compound: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    timestamp_future,
+    hashed_idempotency_key,
+    serialized_lambda_response,
+    deserialized_lambda_response,
+    lambda_context,
+):
+    """
+    Test idempotent decorator having a DynamoDBPersistenceLayer with a compound key
+    """
+
+    stubber = stub.Stubber(persistence_store_compound.table.meta.client)
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
+    ddb_response = {
+        "Item": {
+            "id": {"S": "idempotency#"},
+            "sk": {"S": hashed_idempotency_key},
+            "expiration": {"N": timestamp_future},
+            "data": {"S": serialized_lambda_response},
+            "status": {"S": "COMPLETED"},
+        }
+    }
+    expected_params = {
+        "TableName": TABLE_NAME,
+        "Key": {"id": "idempotency#", "sk": hashed_idempotency_key},
+        "ConsistentRead": True,
+    }
+    stubber.add_response("get_item", ddb_response, expected_params)
+
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store_compound)
+    def lambda_handler(event, context):
+        raise ValueError
+
+    lambda_resp = lambda_handler(lambda_apigw_event, lambda_context)
+    assert lambda_resp == deserialized_lambda_response
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
