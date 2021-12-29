@@ -1,7 +1,7 @@
 from typing import Any, Optional, Union
 
 
-def _strtobool(value: str) -> bool:
+def strtobool(value: str) -> bool:
     """Convert a string representation of truth to True or False.
 
     True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
@@ -35,7 +35,7 @@ def resolve_truthy_env_var_choice(env: str, choice: Optional[bool] = None) -> bo
     choice : str
         resolved choice as either bool or environment value
     """
-    return choice if choice is not None else _strtobool(env)
+    return choice if choice is not None else strtobool(env)
 
 
 def resolve_env_var_choice(env: Any, choice: Optional[Any] = None) -> Union[bool, Any]:
