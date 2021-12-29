@@ -548,15 +548,6 @@ def test_dynamo_attribute_value_null_value():
     assert attribute_value.null_value == attribute_value.get_value
 
 
-def test_dynamo_attribute_value_null_value_invalid():
-    example_attribute_value = {"NULL": False}
-
-    attribute_value = AttributeValue(example_attribute_value)
-
-    assert attribute_value.get_type == AttributeValueType.Null
-    assert attribute_value.null_value is None
-
-
 def test_dynamo_attribute_value_s_value():
     example_attribute_value = {"S": "Hello"}
 
