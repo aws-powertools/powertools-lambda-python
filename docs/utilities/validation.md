@@ -186,16 +186,14 @@ Envelope name | JMESPath expression
 
 JSON Schemas with custom formats like `int64` will fail validation. If you have these, you can pass them using `formats` parameter:
 
-=== "custom_json_schema_type_format.json"
-
-    ```json
-    {
-        "lastModifiedTime": {
-            "format": "int64",
-            "type": "integer"
-        }
-    }
-    ```
+```json title="custom_json_schema_type_format.json"
+{
+	"lastModifiedTime": {
+		"format": "int64",
+		"type": "integer"
+	}
+}
+```
 
 For each format defined in a dictionary key, you must use a regex, or a function that returns a boolean to instruct the validator on how to proceed when encountering that type.
 
