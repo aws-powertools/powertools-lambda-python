@@ -579,7 +579,7 @@ class ApiGatewayResolver(BaseRouter):
     @staticmethod
     def _path_starts_with(path: str, prefix: str):
         """Returns true if the `path` starts with a prefix plus a `/`"""
-        if not isinstance(prefix, str) or len(prefix) == 0:
+        if not isinstance(prefix, str) or prefix == "":
             return False
 
         return path.startswith(prefix + "/")
@@ -633,7 +633,9 @@ class ApiGatewayResolver(BaseRouter):
 
             raise
 
-    def not_found(self, func: Callable):
+    def not_found(self, func: Optional[Callable] = None):
+        if func is None:
+            return self.exception_handler(NotFoundError)
         return self.exception_handler(NotFoundError)(func)
 
     def exception_handler(self, exc_class: Type[Exception]):

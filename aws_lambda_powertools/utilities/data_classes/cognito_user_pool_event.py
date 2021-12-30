@@ -687,7 +687,7 @@ class CreateAuthChallengeTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function that you
-        specify for the create auth challenge trigger.."""
+        specify for the create auth challenge trigger."""
         return self["request"].get("clientMetadata")
 
 

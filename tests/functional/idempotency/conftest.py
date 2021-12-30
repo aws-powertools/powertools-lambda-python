@@ -166,6 +166,11 @@ def persistence_store(config):
 
 
 @pytest.fixture
+def persistence_store_compound(config):
+    return DynamoDBPersistenceLayer(table_name=TABLE_NAME, boto_config=config, key_attr="id", sort_key_attr="sk")
+
+
+@pytest.fixture
 def idempotency_config(config, request, default_jmespath):
     return IdempotencyConfig(
         event_key_jmespath=request.param.get("event_key_jmespath") or default_jmespath,
