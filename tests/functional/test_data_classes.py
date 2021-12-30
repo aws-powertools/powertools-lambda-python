@@ -544,6 +544,7 @@ def test_dynamo_attribute_value_null_value():
     attribute_value = AttributeValue(example_attribute_value)
 
     assert attribute_value.get_type == AttributeValueType.Null
+    assert attribute_value.null_value is None
     assert attribute_value.null_value == attribute_value.get_value
 
 
