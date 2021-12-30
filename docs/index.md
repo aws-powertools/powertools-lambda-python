@@ -396,24 +396,18 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
                 - Ref: "PowertoolsLayerIamRole"
         ```
 
-You can fetch available versions via SAR API with:
+You can fetch available versions via SAR ListApplicationVersions API:
 
-=== "shell"
-
-    ```bash
-    aws serverlessrepo list-application-versions \
-        --application-id arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-    ```
+```bash title="AWS CLI example"
+aws serverlessrepo list-application-versions \
+	--application-id arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+```
 
 ## Quick getting started
 
-**Quick hello world example using SAM CLI**
-
-=== "shell"
-
-    ```bash
-    sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
-    ```
+```bash title="Hello world example using SAM CLI"
+sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
+```
 
 ## Features
 
@@ -455,12 +449,10 @@ You can fetch available versions via SAR API with:
 
 ## Debug mode
 
-As a best practice, AWS Lambda Powertools logging statements are suppressed. If necessary, you can enable debugging using `set_package_logger`:
+As a best practice, AWS Lambda Powertools module logging statements are suppressed. If necessary, you can enable debugging using `set_package_logger` for additional information on every internal operation:
 
-=== "app.py"
+```python title="Powertools debug mode example"
+from aws_lambda_powertools.logging.logger import set_package_logger
 
-    ```python
-    from aws_lambda_powertools.logging.logger import set_package_logger
-
-    set_package_logger()
-    ```
+set_package_logger()
+```
