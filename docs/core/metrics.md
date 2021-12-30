@@ -38,32 +38,33 @@ Setting | Description | Environment variable | Constructor parameter
 ???+ tip
     Use your application or main service as the metric namespace to easily group all metrics.
 
-???+ example "Example: Using AWS Serverless Application Model (SAM)"
+???+ example
+	**AWS Serverless Application Model (SAM)**
 
-    === "template.yml"
+=== "template.yml"
 
-        ```yaml hl_lines="9 10"
-        Resources:
-          HelloWorldFunction:
-            Type: AWS::Serverless::Function
-            Properties:
-              Runtime: python3.8
-              Environment:
-              Variables:
-                POWERTOOLS_SERVICE_NAME: payment
-                POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
-        ```
+	```yaml hl_lines="9 10"
+	Resources:
+	  HelloWorldFunction:
+		Type: AWS::Serverless::Function
+		Properties:
+		  Runtime: python3.8
+		  Environment:
+		  Variables:
+			POWERTOOLS_SERVICE_NAME: payment
+			POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
+	```
 
-    === "app.py"
+=== "app.py"
 
-        ```python hl_lines="4 6"
-        from aws_lambda_powertools import Metrics
-        from aws_lambda_powertools.metrics import MetricUnit
+	```python hl_lines="4 6"
+	from aws_lambda_powertools import Metrics
+	from aws_lambda_powertools.metrics import MetricUnit
 
-        metrics = Metrics() # Sets metric namespace and service via env var
-        # OR
-        metrics = Metrics(namespace="ServerlessAirline", service="orders") # Sets metric namespace, and service as a metric dimension
-        ```
+	metrics = Metrics() # Sets metric namespace and service via env var
+	# OR
+	metrics = Metrics(namespace="ServerlessAirline", service="orders") # Sets metric namespace, and service as a metric dimension
+	```
 
 
 ### Creating metrics

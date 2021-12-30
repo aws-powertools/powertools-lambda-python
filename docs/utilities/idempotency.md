@@ -43,35 +43,36 @@ TTL attribute name | `expiration` | This can only be configured after your table
 ???+ tip "Tip: You can share a single state table for all functions"
     You can reuse the same DynamoDB table to store idempotency state. We add your `function_name` in addition to the idempotency key as a hash key.
 
-???+ example "Example: Using AWS Serverless Application Model (SAM)"
+???+ example
+	**AWS Serverless Application Model (SAM)**
 
-    === "template.yml"
+=== "template.yml"
 
-        ```yaml hl_lines="5-13 21-23"
-        Resources:
-          IdempotencyTable:
-            Type: AWS::DynamoDB::Table
-            Properties:
-              AttributeDefinitions:
-                -   AttributeName: id
-                    AttributeType: S
-              KeySchema:
-                -   AttributeName: id
-                    KeyType: HASH
-              TimeToLiveSpecification:
-                AttributeName: expiration
-                Enabled: true
-              BillingMode: PAY_PER_REQUEST
+	```yaml hl_lines="5-13 21-23"
+	Resources:
+	  IdempotencyTable:
+		Type: AWS::DynamoDB::Table
+		Properties:
+		  AttributeDefinitions:
+			-   AttributeName: id
+				AttributeType: S
+		  KeySchema:
+			-   AttributeName: id
+				KeyType: HASH
+		  TimeToLiveSpecification:
+			AttributeName: expiration
+			Enabled: true
+		  BillingMode: PAY_PER_REQUEST
 
-          HelloWorldFunction:
-          Type: AWS::Serverless::Function
-          Properties:
-            Runtime: python3.8
-            ...
-            Policies:
-              - DynamoDBCrudPolicy:
-                  TableName: !Ref IdempotencyTable
-        ```
+	  HelloWorldFunction:
+	  Type: AWS::Serverless::Function
+	  Properties:
+		Runtime: python3.8
+		...
+		Policies:
+		  - DynamoDBCrudPolicy:
+			  TableName: !Ref IdempotencyTable
+	```
 
 ???+ warning "Warning: Large responses with DynamoDB persistence layer"
     When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items).
