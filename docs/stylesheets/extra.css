@@ -38,3 +38,7 @@
 	cursor: pointer;
 	border-bottom: 0.1px dashed black;
 }
+
+p > code {
+	font-weight: bold
+}
