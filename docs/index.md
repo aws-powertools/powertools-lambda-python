@@ -434,8 +434,7 @@ You can fetch available versions via SAR API with:
 
 ## Environment variables
 
-???+ info
-    **Explicit parameters take precedence over environment variables.**
+???+ info "Info: Explicit parameters take precedence over environment variables"
 
 | Environment variable | Description | Utility | Default |
 | ------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------- |

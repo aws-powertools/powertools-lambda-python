@@ -97,8 +97,7 @@ When using this `capture_lambda_handler` decorator, Tracer performs these additi
 
 You can trace synchronous functions using the `capture_method` decorator.
 
-???+ warning
-    **When `capture_response` is enabled, the function response will be read and serialized as json.**
+???+ warning "Warning: When `capture_response` is enabled, the function response will be read and serialized as json"
 
     The serialization is performed by the aws-xray-sdk which uses the `jsonpickle` module. This can cause
     unintended consequences if there are side effects to recursively reading the returned value, for example if the
@@ -114,8 +113,7 @@ You can trace synchronous functions using the `capture_method` decorator.
 
 ### Asynchronous and generator functions
 
-???+ warning
-    **We do not support async Lambda handler** - Lambda handler itself must be synchronous
+!!! warning "Warning: We do not support asynchronous Lambda handler"
 
 You can trace asynchronous functions and generator functions (including context managers) using `capture_method`.
 
@@ -203,7 +201,7 @@ If you're looking to shave a few microseconds, or milliseconds depending on your
 
 Use **`capture_response=False`** parameter in both `capture_lambda_handler` and `capture_method` decorators to instruct Tracer **not** to serialize function responses as metadata.
 
-???+ info "Info: This is commonly useful in three scenarios"
+???+ info "Info: This is useful in three common scenarios"
     1. You might **return sensitive** information you don't want it to be added to your traces
     2. You might manipulate **streaming objects that can be read only once**; this prevents subsequent calls from being empty
     3. You might return **more than 64K** of data _e.g., `message too long` error_
@@ -237,8 +235,7 @@ Use **`capture_response=False`** parameter in both `capture_lambda_handler` and 
 
 Use **`capture_error=False`** parameter in both `capture_lambda_handler` and `capture_method` decorators to instruct Tracer **not** to serialize exceptions as metadata.
 
-???+ info "Info: Commonly useful in one scenario"
-     You might **return sensitive** information from exceptions, stack traces you might not control
+!!! info "Info: Useful when returning sensitive information in exceptions/stack traces you don't control"
 
 === "sensitive_data_exception.py"
 
@@ -252,8 +249,7 @@ Use **`capture_error=False`** parameter in both `capture_lambda_handler` and `ca
 
 ### Tracing aiohttp requests
 
-???+ info
-    This snippet assumes you have **aiohttp** as a dependency
+!!! info "Info: This snippet assumes you have aiohttp as a dependency"
 
 You can use `aiohttp_trace_config` function to create a valid [aiohttp trace_config object](https://docs.aiohttp.org/en/stable/tracing_reference.html). This is necessary since X-Ray utilizes aiohttp trace hooks to capture requests end-to-end.
 
@@ -297,8 +293,7 @@ This is useful when you need a feature available in X-Ray that is not available 
 
 ### Concurrent asynchronous functions
 
-???+ warning
-    [As of now, X-Ray SDK will raise an exception when async functions are run and traced concurrently](https://github.com/aws/aws-xray-sdk-python/issues/164)
+!!! warning "Warning: [X-Ray SDK will raise an exception](https://github.com/aws/aws-xray-sdk-python/issues/164) when async functions are run and traced concurrently"
 
 A safe workaround mechanism is to use `in_subsegment_async` available via Tracer escape hatch (`tracer.provider`).
 
@@ -329,10 +324,12 @@ A safe workaround mechanism is to use `in_subsegment_async` available via Tracer
 
 Tracer keeps a copy of its configuration after the first initialization. This is useful for scenarios where you want to use Tracer in more than one location across your code base.
 
-???+ warning
-    When reusing Tracer in Lambda Layers, or in multiple modules, **do not set `auto_patch=False`**, because import order matters.
+???+ warning "Warning: Import order matters when using Lambda Layers or multiple modules"
+    **Do not set `auto_patch=False`** when reusing Tracer in Lambda Layers, or in multiple modules.
 
     This can result in the first Tracer config being inherited by new instances, and their modules not being patched.
+
+	Tracer will automatically ignore imported modules that have been patched.
 
 === "handler.py"
 
