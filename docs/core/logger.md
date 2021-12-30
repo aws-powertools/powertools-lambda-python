@@ -129,8 +129,7 @@ Key | Example
 
 When debugging in non-production environments, you can instruct Logger to log the incoming event with `log_event` param or via `POWERTOOLS_LOGGER_LOG_EVENT` env var.
 
-???+ warning
-    This is disabled by default to prevent sensitive info being logged.
+!!! warning "Warning: This is disabled by default to prevent sensitive info being logged"
 
 === "log_handler_event.py"
 
@@ -148,8 +147,7 @@ When debugging in non-production environments, you can instruct Logger to log th
 
 You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
 
-???+ tip
-    You can retrieve correlation IDs via `get_correlation_id` method
+!!! tip "Tip: You can retrieve correlation IDs via `get_correlation_id` method"
 
 === "collect.py"
 
@@ -438,8 +436,8 @@ You can remove any additional key from Logger state using `remove_keys`.
 
 Logger is commonly initialized in the global scope. Due to [Lambda Execution Context reuse](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html), this means that custom keys can be persisted across invocations. If you want all custom keys to be deleted, you can use `clear_state=True` param in `inject_lambda_context` decorator.
 
-???+ info
-    This is useful when you add multiple custom keys conditionally, instead of setting a default `None` value if not present. Any key with `None` value is automatically removed by Logger.
+???+ tip "Tip: When is this useful?"
+    It is useful when you add multiple custom keys conditionally, instead of setting a default `None` value if not present. Any key with `None` value is automatically removed by Logger.
 
 ???+ danger "Danger: This can have unintended side effects if you use Layers"
     Lambda Layers code is imported before the Lambda handler.
@@ -536,6 +534,21 @@ Use `logger.exception` method to log contextual information about exceptions. Lo
 
 ## Advanced
 
+### Built-in Correlation ID expressions
+
+You can use any of the following built-in JMESPath expressions as part of [inject_lambda_context decorator](#setting-a-correlation-id).
+
+???+ note "Note: Any object key named with `-` must be escaped"
+    For example, **`request.headers."x-amzn-trace-id"`**.
+
+Name | Expression | Description
+------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
+**API_GATEWAY_REST** | `"requestContext.requestId"` | API Gateway REST API request ID
+**API_GATEWAY_HTTP** | `"requestContext.requestId"` | API Gateway HTTP API request ID
+**APPSYNC_RESOLVER** | `'request.headers."x-amzn-trace-id"'` | AppSync X-Ray Trace ID
+**APPLICATION_LOAD_BALANCER** | `'headers."x-amzn-trace-id"'` | ALB X-Ray Trace ID
+**EVENT_BRIDGE** | `"id"` | EventBridge Event ID
+
 ### Reusing Logger across your code
 
 Logger supports inheritance via `child` parameter. This allows you to create multiple Loggers across your code base, and propagate changes such as new keys to all Loggers.
@@ -582,8 +595,7 @@ You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOG
 
 Sampling decision happens at the Logger initialization. This means sampling may happen significantly more or less than depending on your traffic patterns, for example a steady low number of invocations and thus few cold starts.
 
-???+ note
-    If you want Logger to calculate sampling upon every invocation, please open a [feature request](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=).
+!!! note "Note: Open a [feature request](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=) if you want Logger to calculate sampling for every invocation"
 
 === "collect.py"
 
@@ -871,8 +883,7 @@ For **minor changes like remapping keys** after all log record processing has co
 
 For **replacing the formatter entirely**, you can subclass `BasePowertoolsFormatter`, implement `append_keys` method, and override `format` standard logging method. This ensures the current feature set of Logger like [injecting Lambda context](#capturing-lambda-context-info) and [sampling](#sampling-debug-logs) will continue to work.
 
-???+ info
-    You might need to implement `remove_keys` method if you make use of the feature too.
+!!! info "Info: You might need to implement `remove_keys` method if you make use of the feature too."
 
 === "collect.py"
 
@@ -949,21 +960,6 @@ As parameters don't always translate well between them, you can pass any callabl
     # custom_serializer=functools.partial(orjson.dumps, option=orjson.OPT_SERIALIZE_NUMPY)
     ```
 
-## Built-in Correlation ID expressions
-
-You can use any of the following built-in JMESPath expressions as part of [inject_lambda_context decorator](#setting-a-correlation-id).
-
-???+ note "Note: Escaping necessary for the `-` character"
-    Any object key named with `-` must be escaped, for example **`request.headers."x-amzn-trace-id"`**.
-
-Name | Expression | Description
-------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
-**API_GATEWAY_REST** | `"requestContext.requestId"` | API Gateway REST API request ID
-**API_GATEWAY_HTTP** | `"requestContext.requestId"` | API Gateway HTTP API request ID
-**APPSYNC_RESOLVER** | `'request.headers."x-amzn-trace-id"'` | AppSync X-Ray Trace ID
-**APPLICATION_LOAD_BALANCER** | `'headers."x-amzn-trace-id"'` | ALB X-Ray Trace ID
-**EVENT_BRIDGE** | `"id"` | EventBridge Event ID
-
 ## Testing your code
 
 ### Inject Lambda Context
@@ -1020,8 +1016,7 @@ This is a Pytest sample that provides the minimum information necessary for Logg
         your_lambda_handler(test_event, lambda_context)
     ```
 
-???+ tip
-    If you're using pytest and are looking to assert plain log messages, do check out the built-in [caplog fixture](https://docs.pytest.org/en/latest/how-to/logging.html){target="_blank"}.
+!!! tip "Tip: Check out the built-in [Pytest caplog fixture](https://docs.pytest.org/en/latest/how-to/logging.html){target="_blank"} to assert plain log messages"
 
 ### Pytest live log feature
 
@@ -1114,6 +1109,4 @@ Here's an example where we persist `payment_id` not `request_id`. Note that `pay
 
 **How do I aggregate and search Powertools logs across accounts?**
 
-As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task.
-
-Please see this discussion for more information: https://github.com/awslabs/aws-lambda-powertools-python/issues/460
+As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task. Please refer to this [discussion for more details](https://github.com/awslabs/aws-lambda-powertools-python/issues/460)
