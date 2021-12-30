@@ -65,11 +65,13 @@ Setting | Description | Environment variable | Constructor parameter
         metrics = Metrics(namespace="ServerlessAirline", service="orders") # Sets metric namespace, and service as a metric dimension
         ```
 
-You can initialize Metrics anywhere in your code - It'll keep track of your aggregate metrics in memory.
 
 ### Creating metrics
 
 You can create metrics using `add_metric`, and you can create dimensions for all your aggregate metrics using `add_dimension` method.
+
+!!! tip
+	You can initialize Metrics in any other module too. It'll keep track of your aggregate metrics in memory to optimize costs (one blob instead of multiples).
 
 === "Metrics"
 
@@ -334,8 +336,7 @@ CloudWatch EMF uses the same dimensions across all your metrics. Use `single_met
 
 If you prefer not to use `log_metrics` because you might want to encapsulate additional logic when doing so, you can manually flush and clear metrics as follows:
 
-???+ warning
-    Metrics, dimensions and namespace validation still applies.
+!!! warning "Warning: Metrics, dimensions and namespace validation still applies"
 
 === "manual_metric_serialization.py"
 
@@ -357,9 +358,14 @@ If you prefer not to use `log_metrics` because you might want to encapsulate add
 
 ### Environment variables
 
+!!! tip
+	Ignore this section, if you are explicitly setting namespace/default dimension via `namespace` and `service` parameters.
+
+	For example, `Metrics(namespace=ApplicationName, service=ServiceName)`
+
 Use `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` env vars when unit testing your code to ensure metric namespace and dimension objects are created, and your code doesn't fail validation.
 
-=== "shell"
+=== "test runner"
 
     ```bash
     POWERTOOLS_SERVICE_NAME="Example" POWERTOOLS_METRICS_NAMESPACE="Application" python -m pytest
@@ -377,10 +383,6 @@ If you prefer setting environment variable for specific tests, and are using Pyt
         metrics = Metrics()
         ...
     ```
-
-#### TODO - below statement is related to Clearing metrics section ?
-
-> Ignore this, if you are explicitly setting namespace/default dimension via `namespace` and `service` parameters: `metrics = Metrics(namespace=ApplicationName, service=ServiceName)`
 
 ### Clearing metrics
 
