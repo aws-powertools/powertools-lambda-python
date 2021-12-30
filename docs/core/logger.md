@@ -21,28 +21,29 @@ Setting | Description | Environment variable | Constructor parameter
 **Logging level** | Sets how verbose Logger should be (INFO, by default) |  `LOG_LEVEL` | `level`
 **Service** | Sets **service** key that will be present across all log statements | `POWERTOOLS_SERVICE_NAME` | `service`
 
-???+ example "Example: Using AWS Serverless Application Model (SAM)"
+???+ example
+	**AWS Serverless Application Model (SAM)**
 
-    === "template.yaml"
+=== "template.yaml"
 
-        ```yaml hl_lines="9 10"
-        Resources:
-          HelloWorldFunction:
-            Type: AWS::Serverless::Function
-            Properties:
-              Runtime: python3.8
-              Environment:
-                Variables:
-                  LOG_LEVEL: INFO
-                  POWERTOOLS_SERVICE_NAME: example
-        ```
-    === "app.py"
+	```yaml hl_lines="9 10"
+	Resources:
+	  HelloWorldFunction:
+		Type: AWS::Serverless::Function
+		Properties:
+		  Runtime: python3.8
+		  Environment:
+			Variables:
+			  LOG_LEVEL: INFO
+			  POWERTOOLS_SERVICE_NAME: example
+	```
+=== "app.py"
 
-        ```python hl_lines="2 4"
-        from aws_lambda_powertools import Logger
-        logger = Logger() # Sets service via env var
-        # OR logger = Logger(service="example")
-        ```
+	```python hl_lines="2 4"
+	from aws_lambda_powertools import Logger
+	logger = Logger() # Sets service via env var
+	# OR logger = Logger(service="example")
+	```
 
 ### Standard structured keys
 
