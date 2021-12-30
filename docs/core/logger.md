@@ -129,7 +129,8 @@ Key | Example
 
 When debugging in non-production environments, you can instruct Logger to log the incoming event with `log_event` param or via `POWERTOOLS_LOGGER_LOG_EVENT` env var.
 
-!!! warning "Warning: This is disabled by default to prevent sensitive info being logged"
+???+ warning
+	This is disabled by default to prevent sensitive info being logged
 
 === "log_handler_event.py"
 
@@ -147,7 +148,8 @@ When debugging in non-production environments, you can instruct Logger to log th
 
 You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
 
-!!! tip "Tip: You can retrieve correlation IDs via `get_correlation_id` method"
+???+ tip
+	You can retrieve correlation IDs via `get_correlation_id` method
 
 === "collect.py"
 
@@ -595,7 +597,8 @@ You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOG
 
 Sampling decision happens at the Logger initialization. This means sampling may happen significantly more or less than depending on your traffic patterns, for example a steady low number of invocations and thus few cold starts.
 
-!!! note "Note: Open a [feature request](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=) if you want Logger to calculate sampling for every invocation"
+???+ note
+	Open a [feature request](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=) if you want Logger to calculate sampling for every invocation
 
 === "collect.py"
 
@@ -883,7 +886,8 @@ For **minor changes like remapping keys** after all log record processing has co
 
 For **replacing the formatter entirely**, you can subclass `BasePowertoolsFormatter`, implement `append_keys` method, and override `format` standard logging method. This ensures the current feature set of Logger like [injecting Lambda context](#capturing-lambda-context-info) and [sampling](#sampling-debug-logs) will continue to work.
 
-!!! info "Info: You might need to implement `remove_keys` method if you make use of the feature too."
+???+ info
+	You might need to implement `remove_keys` method if you make use of the feature too.
 
 === "collect.py"
 
@@ -1016,7 +1020,8 @@ This is a Pytest sample that provides the minimum information necessary for Logg
         your_lambda_handler(test_event, lambda_context)
     ```
 
-!!! tip "Tip: Check out the built-in [Pytest caplog fixture](https://docs.pytest.org/en/latest/how-to/logging.html){target="_blank"} to assert plain log messages"
+???+ tip
+	Check out the built-in [Pytest caplog fixture](https://docs.pytest.org/en/latest/how-to/logging.html){target="_blank"} to assert plain log messages
 
 ### Pytest live log feature
 

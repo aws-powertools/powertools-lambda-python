@@ -113,7 +113,8 @@ You can trace synchronous functions using the `capture_method` decorator.
 
 ### Asynchronous and generator functions
 
-!!! warning "Warning: We do not support asynchronous Lambda handler"
+???+ warning
+	We do not support asynchronous Lambda handler
 
 You can trace asynchronous functions and generator functions (including context managers) using `capture_method`.
 
@@ -235,7 +236,8 @@ Use **`capture_response=False`** parameter in both `capture_lambda_handler` and 
 
 Use **`capture_error=False`** parameter in both `capture_lambda_handler` and `capture_method` decorators to instruct Tracer **not** to serialize exceptions as metadata.
 
-!!! info "Info: Useful when returning sensitive information in exceptions/stack traces you don't control"
+???+ info
+	Useful when returning sensitive information in exceptions/stack traces you don't control
 
 === "sensitive_data_exception.py"
 
@@ -249,7 +251,8 @@ Use **`capture_error=False`** parameter in both `capture_lambda_handler` and `ca
 
 ### Tracing aiohttp requests
 
-!!! info "Info: This snippet assumes you have aiohttp as a dependency"
+???+ info
+	This snippet assumes you have aiohttp as a dependency
 
 You can use `aiohttp_trace_config` function to create a valid [aiohttp trace_config object](https://docs.aiohttp.org/en/stable/tracing_reference.html). This is necessary since X-Ray utilizes aiohttp trace hooks to capture requests end-to-end.
 
@@ -293,7 +296,8 @@ This is useful when you need a feature available in X-Ray that is not available 
 
 ### Concurrent asynchronous functions
 
-!!! warning "Warning: [X-Ray SDK will raise an exception](https://github.com/aws/aws-xray-sdk-python/issues/164) when async functions are run and traced concurrently"
+???+ warning
+	[X-Ray SDK will raise an exception](https://github.com/aws/aws-xray-sdk-python/issues/164) when async functions are run and traced concurrently
 
 A safe workaround mechanism is to use `in_subsegment_async` available via Tracer escape hatch (`tracer.provider`).
 

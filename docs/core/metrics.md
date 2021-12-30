@@ -70,7 +70,7 @@ Setting | Description | Environment variable | Constructor parameter
 
 You can create metrics using `add_metric`, and you can create dimensions for all your aggregate metrics using `add_dimension` method.
 
-!!! tip
+???+ tip
 	You can initialize Metrics in any other module too. It'll keep track of your aggregate metrics in memory to optimize costs (one blob instead of multiples).
 
 === "Metrics"
@@ -336,7 +336,8 @@ CloudWatch EMF uses the same dimensions across all your metrics. Use `single_met
 
 If you prefer not to use `log_metrics` because you might want to encapsulate additional logic when doing so, you can manually flush and clear metrics as follows:
 
-!!! warning "Warning: Metrics, dimensions and namespace validation still applies"
+???+ warning
+	Metrics, dimensions and namespace validation still applies
 
 === "manual_metric_serialization.py"
 
@@ -358,7 +359,7 @@ If you prefer not to use `log_metrics` because you might want to encapsulate add
 
 ### Environment variables
 
-!!! tip
+???+ tip
 	Ignore this section, if you are explicitly setting namespace/default dimension via `namespace` and `service` parameters.
 
 	For example, `Metrics(namespace=ApplicationName, service=ServiceName)`

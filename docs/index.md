@@ -201,7 +201,9 @@ Despite having more steps compared to the [public Layer ARN](#lambda-layer) opti
 ???+ warning
     **Layer-extras** does not support Python 3.6 runtime. This layer also includes all extra dependencies: `22.4MB zipped`, `~155MB unzipped`.
 
-!!! tip "Tip: You can create a shared Lambda Layers stack and make this along with other account level layers stack."
+???+ tip
+	You can create a shared Lambda Layers stack and make this along with other account level layers stack.
+
 
 If using SAM, you can include this SAR App as part of your shared Layers stack, and lock to a specific semantic version. Once deployed, it'll be available across the account this is deployed to.
 
@@ -434,7 +436,8 @@ You can fetch available versions via SAR API with:
 
 ## Environment variables
 
-???+ info "Info: Explicit parameters take precedence over environment variables"
+???+ info
+	Explicit parameters take precedence over environment variables
 
 | Environment variable | Description | Utility | Default |
 | ------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------- |
