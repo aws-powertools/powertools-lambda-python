@@ -786,9 +786,6 @@ Inheritance is importance because we need to access message IDs and sequence num
 
 Use the context manager to access a list of all returned values from your `record_handler` function.
 
-##### - TODO - is this a quote or example? is the right place/ fit?
-> Signature: List[Tuple[Union[SuccessResponse, FailureResponse]]]
-
 * **When successful**. We will include a tuple with `success`, the result of `record_handler`, and the batch record
 * **When failed**. We will include a tuple with `fail`, exception as a string, and the batch record
 

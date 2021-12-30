@@ -161,19 +161,16 @@ The AWS Systems Manager Parameter Store provider supports two additional argumen
 | **decrypt**   | `False` | Will automatically decrypt the parameter.
 | **recursive** | `True`  | For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix.
 
-???+ example
-    === "ssm_parameter_store.py"
+```python hl_lines="6 8" title="Example with get() and get_multiple()"
+from aws_lambda_powertools.utilities import parameters
 
-        ```python hl_lines="6 8"
-        from aws_lambda_powertools.utilities import parameters
+ssm_provider = parameters.SSMProvider()
 
-        ssm_provider = parameters.SSMProvider()
+def handler(event, context):
+	decrypted_value = ssm_provider.get("/my/encrypted/parameter", decrypt=True)
 
-        def handler(event, context):
-            decrypted_value = ssm_provider.get("/my/encrypted/parameter", decrypt=True)
-
-            no_recursive_values = ssm_provider.get_multiple("/my/path/prefix", recursive=False)
-        ```
+	no_recursive_values = ssm_provider.get_multiple("/my/path/prefix", recursive=False)
+```
 
 #### SecretsProvider
 

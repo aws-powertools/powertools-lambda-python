@@ -669,7 +669,9 @@ This will lead to a HTTP 404 despite having your Lambda configured correctly. Se
     ```
 
 ???+ note
-    After removing a path prefix with `strip_prefixes`, the new root path will automatically be mapped to the path argument of `/`. For example, when using `strip_prefixes` value of `/pay`, there is no difference between a request path of `/pay` and `/pay/`; and the path argument would be defined as `/`.
+    After removing a path prefix with `strip_prefixes`, the new root path will automatically be mapped to the path argument of `/`.
+
+	For example, when using `strip_prefixes` value of `/pay`, there is no difference between a request path of `/pay` and `/pay/`; and the path argument would be defined as `/`.
 
 ## Advanced
 
@@ -738,7 +740,7 @@ This will ensure that CORS headers are always returned as part of the response w
     ```
 
 ???+ tip
-    Optionally disable class on a per path basis with `cors=False` parameter.
+    Optionally disable CORS on a per path basis with `cors=False` parameter.
 
 #### Pre-flight
 
@@ -951,7 +953,7 @@ You can enable debug mode via `debug` param, or via `POWERTOOLS_EVENT_HANDLER_DE
 
 This will enable full tracebacks errors in the response, print request and responses, and set CORS in development mode.
 
-???+ warning
+???+ danger
     This might reveal sensitive information in your logs and relax CORS restrictions, use it sparingly.
 
 === "debug.py"
