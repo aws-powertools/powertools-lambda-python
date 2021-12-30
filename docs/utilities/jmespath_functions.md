@@ -144,31 +144,29 @@ This sample will decode the value within the `data` key into a valid JSON before
 
 This sample will decode the value within the `body` key of an API Gateway event into a valid JSON object to ensure the Idempotency utility processes a JSON object instead of a string.
 
-=== "powertools_json_jmespath_function.py"
+```python hl_lines="7" title="Deserializing JSON before using as idempotency key"
+import json
+from aws_lambda_powertools.utilities.idempotency import (
+	IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
+)
 
-    ```python hl_lines="8"
-    import json
-    from aws_lambda_powertools.utilities.idempotency import (
-        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-    )
+persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+config = IdempotencyConfig(event_key_jmespath="powertools_json(body)")
 
-    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-
-    config = IdempotencyConfig(event_key_jmespath="powertools_json(body)")
-    @idempotent(config=config, persistence_store=persistence_layer)
-    def handler(event:APIGatewayProxyEvent, context):
-        body = json.loads(event['body'])
-        payment = create_subscription_payment(
-            user=body['user'],
-            product=body['product_id']
-        )
-        ...
-        return {
-            "payment_id": payment.id,
-            "message": "success",
-            "statusCode": 200
-        }
-    ```
+@idempotent(config=config, persistence_store=persistence_layer)
+def handler(event:APIGatewayProxyEvent, context):
+	body = json.loads(event['body'])
+	payment = create_subscription_payment(
+		user=body['user'],
+		product=body['product_id']
+	)
+	...
+	return {
+		"payment_id": payment.id,
+		"message": "success",
+		"statusCode": 200
+	}
+```
 
 #### powertools_base64 function
 
