@@ -3,7 +3,8 @@ title: JMESPath Functions
 description: Utility
 ---
 
-!!! tip "JMESPath is a query language for JSON used by AWS CLI, AWS Python SDK, and AWS Lambda Powertools for Python."
+???+ tip
+    JMESPath is a query language for JSON used by AWS CLI, AWS Python SDK, and AWS Lambda Powertools for Python.
 
 Built-in [JMESPath](https://jmespath.org/){target="_blank"} Functions to easily deserialize common encoded JSON payloads in Lambda functions.
 
@@ -18,7 +19,8 @@ You might have events that contains encoded JSON payloads as string, base64, or 
 
 Lambda Powertools also have utilities like [validation](validation.md), [idempotency](idempotency.md), or [feature flags](feature_flags.md) where you might need to extract a portion of your data before using them.
 
-!!! info "**Envelope** is the terminology we use for the JMESPath expression to extract your JSON object from your data input"
+???+ info
+    **Envelope** is the terminology we use for the JMESPath expression to extract your JSON object from your data input.
 
 ### Extracting data
 
@@ -107,7 +109,7 @@ Envelope | JMESPath expression
 ### Built-in JMESPath functions
 You can use our built-in JMESPath functions within your expressions to do exactly that to decode JSON Strings, base64, and uncompress gzip data.
 
-!!! info
+???+ info
     We use these for built-in envelopes to easily decode and unwrap events from sources like API Gateway, Kinesis, CloudWatch Logs, etc.
 
 #### powertools_json function
@@ -142,31 +144,29 @@ This sample will decode the value within the `data` key into a valid JSON before
 
 This sample will decode the value within the `body` key of an API Gateway event into a valid JSON object to ensure the Idempotency utility processes a JSON object instead of a string.
 
-=== "powertools_json_jmespath_function.py"
+```python hl_lines="7" title="Deserializing JSON before using as idempotency key"
+import json
+from aws_lambda_powertools.utilities.idempotency import (
+	IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
+)
 
-    ```python hl_lines="8"
-    import json
-    from aws_lambda_powertools.utilities.idempotency import (
-        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-    )
+persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+config = IdempotencyConfig(event_key_jmespath="powertools_json(body)")
 
-    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-
-    config = IdempotencyConfig(event_key_jmespath="powertools_json(body)")
-    @idempotent(config=config, persistence_store=persistence_layer)
-    def handler(event:APIGatewayProxyEvent, context):
-        body = json.loads(event['body'])
-        payment = create_subscription_payment(
-            user=body['user'],
-            product=body['product_id']
-        )
-        ...
-        return {
-            "payment_id": payment.id,
-            "message": "success",
-            "statusCode": 200
-        }
-    ```
+@idempotent(config=config, persistence_store=persistence_layer)
+def handler(event:APIGatewayProxyEvent, context):
+	body = json.loads(event['body'])
+	payment = create_subscription_payment(
+		user=body['user'],
+		product=body['product_id']
+	)
+	...
+	return {
+		"payment_id": payment.id,
+		"message": "success",
+		"statusCode": 200
+	}
+```
 
 #### powertools_base64 function
 
@@ -230,7 +230,7 @@ This sample will decompress and decode base64 data, then use JMESPath pipeline e
 
 ### Bring your own JMESPath function
 
-!!! warning
+???+ warning
     This should only be used for advanced use cases where you have special formats not covered by the built-in functions.
 
 For special binary formats that you want to decode before applying JSON Schema validation, you can bring your own [JMESPath function](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"} and any additional option via `jmespath_options` param.

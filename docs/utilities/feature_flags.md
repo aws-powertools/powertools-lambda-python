@@ -3,7 +3,8 @@ title: Feature flags
 description: Utility
 ---
 
-!!! note "This is currently in Beta, as we might change Store parameters in the next release."
+???+ note
+    This is currently in Beta, as we might change Store parameters in the next release.
 
 The feature flags utility provides a simple rule engine to define when one or multiple features should be enabled depending on the input.
 
@@ -15,9 +16,11 @@ Feature flags are used to modify behaviour without changing the application's co
 
 **Dynamic flags**. Indicates something can have varying states, for example enable a premium feature for customer X not Y.
 
-!!! tip "You can use [Parameters utility](parameters.md) for static flags while this utility can do both static and dynamic feature flags."
+???+ tip
+    You can use [Parameters utility](parameters.md) for static flags while this utility can do both static and dynamic feature flags.
 
-!!! warning "Be mindful that feature flags can increase the complexity of your application over time; use them sparingly."
+???+ warning
+    Be mindful that feature flags can increase the complexity of your application over time; use them sparingly.
 
 If you want to learn more about feature flags, their variations and trade-offs, check these articles:
 
@@ -387,15 +390,13 @@ This utility expects a certain schema to be stored as JSON within AWS AppConfig.
 
 A feature can simply have its name and a `default` value. This is either on or off, also known as a [static flag](#static-flags).
 
-=== "minimal_schema.json"
-
-    ```json hl_lines="2-3"
-    {
-        "global_feature": {
-            "default": true
-        }
-    }
-    ```
+```json hl_lines="2-3" title="minimal_schema.json"
+{
+	"global_feature": {
+		"default": true
+	}
+}
+```
 
 If you need more control and want to provide context such as user group, permissions, location, etc., you need to add rules to your feature flag configuration.
 
@@ -407,27 +408,25 @@ When adding `rules` to a feature, they must contain:
 2. `when_match` boolean value that should be used when conditions match
 3. A list of `conditions` for evaluation
 
-=== "feature_with_rules.json"
-
-    ```json hl_lines="4-11"
-    {
-        "premium_feature": {
-            "default": false,
-            "rules": {
-                "customer tier equals premium": {
-                    "when_match": true,
-                    "conditions": [
-                        {
-                            "action": "EQUALS",
-                            "key": "tier",
-                            "value": "premium"
-                        }
-                    ]
-                }
-            }
-        }
-    }
-    ```
+```json hl_lines="4-11" title="feature_with_rules.json"
+{
+	"premium_feature": {
+		"default": false,
+		"rules": {
+			"customer tier equals premium": {
+				"when_match": true,
+				"conditions": [
+					{
+						"action": "EQUALS",
+						"key": "tier",
+						"value": "premium"
+					}
+				]
+			}
+		}
+	}
+}
+```
 
 You can have multiple rules with different names. The rule engine will return the first result `when_match` of the matching rule configuration, or `default` value when none of the rules apply.
 
@@ -435,20 +434,18 @@ You can have multiple rules with different names. The rule engine will return th
 
 The `conditions` block is a list of conditions that contain `action`, `key`, and `value` keys:
 
-=== "conditions.json"
-
-    ```json  hl_lines="5-7"
-    {
-        ...
-        "conditions": [
-            {
-                "action": "EQUALS",
-                "key": "tier",
-                "value": "premium"
-            }
-        ]
-    }
-    ```
+```json  hl_lines="5-7" title="conditions.json"
+{
+	...
+	"conditions": [
+		{
+			"action": "EQUALS",
+			"key": "tier",
+			"value": "premium"
+		}
+	]
+}
+```
 
 The `action` configuration can have the following values, where the expressions **`a`** is the `key` and **`b`** is the `value` above:
 
@@ -468,7 +465,8 @@ Action | Equivalent expression
 **VALUE_NOT_IN_KEY** | `lambda a, b: b not in a`
 
 
-!!! info "The `**key**` and `**value**` will be compared to the input from the `**context**` parameter."
+???+ info
+    The `**key**` and `**value**` will be compared to the input from the `**context**` parameter.
 
 **For multiple conditions**, we will evaluate the list of conditions as a logical `AND`, so all conditions needs to match to return `when_match` value.
 
@@ -484,16 +482,16 @@ By default, we cache configuration retrieved from the Store for 5 seconds for pe
 
 You can override `max_age` parameter when instantiating the store.
 
-    ```python hl_lines="7"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+```python hl_lines="7" title="Adjusting TTL"
+from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
 
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="features",
-        max_age=300
-    )
-    ```
+app_config = AppConfigStore(
+	environment="dev",
+	application="product-catalogue",
+	name="features",
+	max_age=300
+)
+```
 
 ### Envelope
 
@@ -549,26 +547,25 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
 
 You can access the configuration fetched from the store via `get_raw_configuration` property within the store instance.
 
-=== "app.py"
+```python hl_lines="12" title="Accessing entire configuration pulled from the store"
+from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
 
-    ```python hl_lines="12"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+app_config = AppConfigStore(
+	environment="dev",
+	application="product-catalogue",
+	name="configuration",
+	envelope = "feature_flags"
+)
 
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="configuration",
-        envelope = "feature_flags"
-    )
+feature_flags = FeatureFlags(store=app_config)
 
-	feature_flags = FeatureFlags(store=app_config)
-
-	config = app_config.get_raw_configuration
-    ```
+config = app_config.get_raw_configuration
+```
 
 ### Built-in store provider
 
-!!! info "For GA, you'll be able to bring your own store."
+???+ info
+    For GA, you'll be able to bring your own store.
 
 #### AppConfig
 
@@ -587,36 +584,35 @@ Parameter | Default | Description
 **jmespath_options** | `None` | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"}
 **logger** | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools Logger.
 
-=== "appconfig_store_example.py"
 
-    ```python hl_lines="19-25"
-    from botocore.config import Config
+```python hl_lines="19-25" title="AppConfigStore sample"
+from botocore.config import Config
 
-    import jmespath
+import jmespath
 
-    boto_config = Config(read_timeout=10, retries={"total_max_attempts": 2})
+boto_config = Config(read_timeout=10, retries={"total_max_attempts": 2})
 
-    # Custom JMESPath functions
-    class CustomFunctions(jmespath.functions.Functions):
+# Custom JMESPath functions
+class CustomFunctions(jmespath.functions.Functions):
 
-        @jmespath.functions.signature({'types': ['string']})
-        def _func_special_decoder(self, s):
-            return my_custom_decoder_logic(s)
-
-
-    custom_jmespath_options = {"custom_functions": CustomFunctions()}
+	@jmespath.functions.signature({'types': ['string']})
+	def _func_special_decoder(self, s):
+		return my_custom_decoder_logic(s)
 
 
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="configuration",
-        max_age=120,
-        envelope = "features",
-        sdk_config=boto_config,
-        jmespath_options=custom_jmespath_options
-    )
-    ```
+custom_jmespath_options = {"custom_functions": CustomFunctions()}
+
+
+app_config = AppConfigStore(
+	environment="dev",
+	application="product-catalogue",
+	name="configuration",
+	max_age=120,
+	envelope = "features",
+	sdk_config=boto_config,
+	jmespath_options=custom_jmespath_options
+)
+```
 
 ## Testing your code
 
@@ -624,62 +620,61 @@ You can unit test your feature flags locally and independently without setting u
 
 `AppConfigStore` only fetches a JSON document with a specific schema. This allows you to mock the response and use it to verify the rule evaluation.
 
-!!! warning "This excerpt relies on `pytest` and `pytest-mock` dependencies"
+???+ warning
+    This excerpt relies on `pytest` and `pytest-mock` dependencies.
 
-=== "test_feature_flags_independently.py"
+```python hl_lines="9-11" title="Unit testing feature flags"
+from typing import Dict, List, Optional
 
-    ```python hl_lines="9-11"
-    from typing import Dict, List, Optional
-
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore, RuleAction
-
-
-    def init_feature_flags(mocker, mock_schema, envelope="") -> FeatureFlags:
-        """Mock AppConfig Store get_configuration method to use mock schema instead"""
-
-        method_to_mock = "aws_lambda_powertools.utilities.feature_flags.AppConfigStore.get_configuration"
-        mocked_get_conf = mocker.patch(method_to_mock)
-        mocked_get_conf.return_value = mock_schema
-
-        app_conf_store = AppConfigStore(
-            environment="test_env",
-            application="test_app",
-            name="test_conf_name",
-            envelope=envelope,
-        )
-
-        return FeatureFlags(store=app_conf_store)
+from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore, RuleAction
 
 
-    def test_flags_condition_match(mocker):
-        # GIVEN
-        expected_value = True
-        mocked_app_config_schema = {
-            "my_feature": {
-                "default": expected_value,
-                "rules": {
-                    "tenant id equals 12345": {
-                        "when_match": True,
-                        "conditions": [
-                            {
-                                "action": RuleAction.EQUALS.value,
-                                "key": "tenant_id",
-                                "value": "12345",
-                            }
-                        ],
-                    }
-                },
-                }
-        }
+def init_feature_flags(mocker, mock_schema, envelope="") -> FeatureFlags:
+	"""Mock AppConfig Store get_configuration method to use mock schema instead"""
 
-        # WHEN
-        ctx = {"tenant_id": "12345", "username": "a"}
-        feature_flags = init_feature_flags(mocker=mocker, mock_schema=mocked_app_config_schema)
-        flag = feature_flags.evaluate(name="my_feature", context=ctx, default=False)
+	method_to_mock = "aws_lambda_powertools.utilities.feature_flags.AppConfigStore.get_configuration"
+	mocked_get_conf = mocker.patch(method_to_mock)
+	mocked_get_conf.return_value = mock_schema
 
-        # THEN
-        assert flag == expected_value
-    ```
+	app_conf_store = AppConfigStore(
+		environment="test_env",
+		application="test_app",
+		name="test_conf_name",
+		envelope=envelope,
+	)
+
+	return FeatureFlags(store=app_conf_store)
+
+
+def test_flags_condition_match(mocker):
+	# GIVEN
+	expected_value = True
+	mocked_app_config_schema = {
+		"my_feature": {
+			"default": expected_value,
+			"rules": {
+				"tenant id equals 12345": {
+					"when_match": True,
+					"conditions": [
+						{
+							"action": RuleAction.EQUALS.value,
+							"key": "tenant_id",
+							"value": "12345",
+						}
+					],
+				}
+			},
+			}
+	}
+
+	# WHEN
+	ctx = {"tenant_id": "12345", "username": "a"}
+	feature_flags = init_feature_flags(mocker=mocker, mock_schema=mocked_app_config_schema)
+	flag = feature_flags.evaluate(name="my_feature", context=ctx, default=False)
+
+	# THEN
+	assert flag == expected_value
+```
 
 ## Feature flags vs Parameters vs env vars
 

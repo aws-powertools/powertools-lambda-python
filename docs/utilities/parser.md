@@ -13,7 +13,7 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 
 **Extra dependency**
 
-!!! warning
+???+ warning
     This will increase the overall package size by approximately 75MB due to Pydantic dependency.
 
 Install parser's extra dependencies using **`pip install aws-lambda-powertools[pydantic]`**.
@@ -22,23 +22,21 @@ Install parser's extra dependencies using **`pip install aws-lambda-powertools[p
 
 You can define models to parse incoming events by inheriting from `BaseModel`.
 
-=== "hello_world_model.py"
+```python title="Defining an Order data model"
+from aws_lambda_powertools.utilities.parser import BaseModel
+from typing import List, Optional
 
-    ```python
-    from aws_lambda_powertools.utilities.parser import BaseModel
-    from typing import List, Optional
+class OrderItem(BaseModel):
+	id: int
+	quantity: int
+	description: str
 
-    class OrderItem(BaseModel):
-        id: int
-        quantity: int
-        description: str
-
-    class Order(BaseModel):
-        id: int
-        description: str
-        items: List[OrderItem] # nesting models are supported
-        optional_field: Optional[str] # this field may or may not be available when parsing
-    ```
+class Order(BaseModel):
+	id: int
+	description: str
+	items: List[OrderItem] # nesting models are supported
+	optional_field: Optional[str] # this field may or may not be available when parsing
+```
 
 These are simply Python classes that inherit from BaseModel. **Parser** enforces type hints declared in your model at runtime.
 
@@ -52,100 +50,97 @@ Use the decorator for fail fast scenarios where you want your Lambda function to
 
 `event_parser` decorator will throw a `ValidationError` if your event cannot be parsed according to the model.
 
-> NOTE: **This decorator will replace the `event` object with the parsed model if successful**. This means you might be careful when nesting other decorators that expect `event` to be a `dict`.
+???+ note
+    **This decorator will replace the `event` object with the parsed model if successful**. This means you might be careful when nesting other decorators that expect `event` to be a `dict`.
 
-=== "event_parser_decorator.py"
+```python hl_lines="18" title="Parsing and validating upon invocation with event_parser decorator"
+from aws_lambda_powertools.utilities.parser import event_parser, BaseModel
+from aws_lambda_powertools.utilities.typing import LambdaContext
+from typing import List, Optional
 
-    ```python hl_lines="18"
-    from aws_lambda_powertools.utilities.parser import event_parser, BaseModel
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-    from typing import List, Optional
+import json
 
-    import json
+class OrderItem(BaseModel):
+	id: int
+	quantity: int
+	description: str
 
-    class OrderItem(BaseModel):
-        id: int
-        quantity: int
-        description: str
-
-    class Order(BaseModel):
-        id: int
-        description: str
-        items: List[OrderItem] # nesting models are supported
-        optional_field: Optional[str] # this field may or may not be available when parsing
+class Order(BaseModel):
+	id: int
+	description: str
+	items: List[OrderItem] # nesting models are supported
+	optional_field: Optional[str] # this field may or may not be available when parsing
 
 
-    @event_parser(model=Order)
-    def handler(event: Order, context: LambdaContext):
-        print(event.id)
-        print(event.description)
-        print(event.items)
+@event_parser(model=Order)
+def handler(event: Order, context: LambdaContext):
+	print(event.id)
+	print(event.description)
+	print(event.items)
 
-        order_items = [item for item in event.items]
-        ...
+	order_items = [item for item in event.items]
+	...
 
-    payload = {
-        "id": 10876546789,
-        "description": "My order",
-        "items": [
-            {
-                "id": 1015938732,
-                "quantity": 1,
-                "description": "item xpto"
-            }
-        ]
-    }
+payload = {
+	"id": 10876546789,
+	"description": "My order",
+	"items": [
+		{
+			"id": 1015938732,
+			"quantity": 1,
+			"description": "item xpto"
+		}
+	]
+}
 
-    handler(event=payload, context=LambdaContext())
-    handler(event=json.dumps(payload), context=LambdaContext()) # also works if event is a JSON string
-    ```
+handler(event=payload, context=LambdaContext())
+handler(event=json.dumps(payload), context=LambdaContext()) # also works if event is a JSON string
+```
 
 ### parse function
 
 Use this standalone function when you want more control over the data validation process, for example returning a 400 error for malformed payloads.
 
-=== "parse_standalone_example.py"
+```python hl_lines="21 30" title="Using standalone parse function for more flexibility"
+from aws_lambda_powertools.utilities.parser import parse, BaseModel, ValidationError
+from typing import List, Optional
 
-    ```python hl_lines="21 30"
-    from aws_lambda_powertools.utilities.parser import parse, BaseModel, ValidationError
-    from typing import List, Optional
+class OrderItem(BaseModel):
+	id: int
+	quantity: int
+	description: str
 
-    class OrderItem(BaseModel):
-        id: int
-        quantity: int
-        description: str
-
-    class Order(BaseModel):
-        id: int
-        description: str
-        items: List[OrderItem] # nesting models are supported
-        optional_field: Optional[str] # this field may or may not be available when parsing
+class Order(BaseModel):
+	id: int
+	description: str
+	items: List[OrderItem] # nesting models are supported
+	optional_field: Optional[str] # this field may or may not be available when parsing
 
 
-    payload = {
-        "id": 10876546789,
-        "description": "My order",
-        "items": [
-            {
-                # this will cause a validation error
-                "id": [1015938732],
-                "quantity": 1,
-                "description": "item xpto"
-            }
-        ]
-    }
+payload = {
+	"id": 10876546789,
+	"description": "My order",
+	"items": [
+		{
+			# this will cause a validation error
+			"id": [1015938732],
+			"quantity": 1,
+			"description": "item xpto"
+		}
+	]
+}
 
-    def my_function():
-        try:
-            parsed_payload: Order = parse(event=payload, model=Order)
-            # payload dict is now parsed into our model
-            return parsed_payload.items
-        except ValidationError:
-            return {
-                "status_code": 400,
-                "message": "Invalid order"
-            }
-    ```
+def my_function():
+	try:
+		parsed_payload: Order = parse(event=payload, model=Order)
+		# payload dict is now parsed into our model
+		return parsed_payload.items
+	except ValidationError:
+		return {
+			"status_code": 400,
+			"message": "Invalid order"
+		}
+```
 
 ## Built-in models
 
@@ -170,62 +165,60 @@ Parser comes with the following built-in models:
 
 You can extend them to include your own models, and yet have all other known fields parsed along the way.
 
-!!! tip "For Mypy users, we only allow type override for fields where payload is injected e.g. `detail`, `body`, etc."
+???+ tip
+    For Mypy users, we only allow type override for fields where payload is injected e.g. `detail`, `body`, etc.
 
-**EventBridge example**
 
-=== "extending_builtin_models.py"
+```python hl_lines="16-17 28 41" title="Extending EventBridge model as an example"
+from aws_lambda_powertools.utilities.parser import parse, BaseModel
+from aws_lambda_powertools.utilities.parser.models import EventBridgeModel
 
-    ```python hl_lines="16-17 28 41"
-    from aws_lambda_powertools.utilities.parser import parse, BaseModel
-    from aws_lambda_powertools.utilities.parser.models import EventBridgeModel
+from typing import List, Optional
 
-    from typing import List, Optional
+class OrderItem(BaseModel):
+	id: int
+	quantity: int
+	description: str
 
-    class OrderItem(BaseModel):
-        id: int
-        quantity: int
-        description: str
+class Order(BaseModel):
+	id: int
+	description: str
+	items: List[OrderItem]
 
-    class Order(BaseModel):
-        id: int
-        description: str
-        items: List[OrderItem]
+class OrderEventModel(EventBridgeModel):
+	detail: Order
 
-    class OrderEventModel(EventBridgeModel):
-        detail: Order
+payload = {
+	"version": "0",
+	"id": "6a7e8feb-b491-4cf7-a9f1-bf3703467718",
+	"detail-type": "OrderPurchased",
+	"source": "OrderService",
+	"account": "111122223333",
+	"time": "2020-10-22T18:43:48Z",
+	"region": "us-west-1",
+	"resources": ["some_additional"],
+	"detail": {
+		"id": 10876546789,
+		"description": "My order",
+		"items": [
+			{
+				"id": 1015938732,
+				"quantity": 1,
+				"description": "item xpto"
+			}
+		]
+	}
+}
 
-    payload = {
-        "version": "0",
-        "id": "6a7e8feb-b491-4cf7-a9f1-bf3703467718",
-        "detail-type": "OrderPurchased",
-        "source": "OrderService",
-        "account": "111122223333",
-        "time": "2020-10-22T18:43:48Z",
-        "region": "us-west-1",
-        "resources": ["some_additional"],
-        "detail": {
-            "id": 10876546789,
-            "description": "My order",
-            "items": [
-                {
-                    "id": 1015938732,
-                    "quantity": 1,
-                    "description": "item xpto"
-                }
-            ]
-        }
-    }
+ret = parse(model=OrderEventModel, event=payload)
 
-    ret = parse(model=OrderEventModel, event=payload)
+assert ret.source == "OrderService"
+assert ret.detail.description == "My order"
+assert ret.detail_type == "OrderPurchased" # we rename it to snake_case since detail-type is an invalid name
 
-    assert ret.source == "OrderService"
-    assert ret.detail.description == "My order"
-    assert ret.detail_type == "OrderPurchased" # we rename it to snake_case since detail-type is an invalid name
-
-    for order_item in ret.detail.items:
-        ...
-    ```
+for order_item in ret.detail.items:
+	...
+```
 
 **What's going on here, you might ask**:
 
@@ -249,43 +242,41 @@ Envelopes can be used via `envelope` parameter available in both `parse` functio
 
 Here's an example of parsing a model found in an event coming from EventBridge, where all you want is what's inside the `detail` key.
 
-=== "parse_eventbridge_payload.py"
+```python hl_lines="18-22 25 31" title="Parsing payload in a given key only using envelope feature"
+from aws_lambda_powertools.utilities.parser import event_parser, parse, BaseModel, envelopes
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
-    ```python hl_lines="18-22 25 31"
-    from aws_lambda_powertools.utilities.parser import event_parser, parse, BaseModel, envelopes
-    from aws_lambda_powertools.utilities.typing import LambdaContext
+class UserModel(BaseModel):
+	username: str
+	password1: str
+	password2: str
 
-    class UserModel(BaseModel):
-        username: str
-        password1: str
-        password2: str
+payload = {
+	"version": "0",
+	"id": "6a7e8feb-b491-4cf7-a9f1-bf3703467718",
+	"detail-type": "CustomerSignedUp",
+	"source": "CustomerService",
+	"account": "111122223333",
+	"time": "2020-10-22T18:43:48Z",
+	"region": "us-west-1",
+	"resources": ["some_additional_"],
+	"detail": {
+		"username": "universe",
+		"password1": "myp@ssword",
+		"password2": "repeat password"
+	}
+}
 
-    payload = {
-        "version": "0",
-        "id": "6a7e8feb-b491-4cf7-a9f1-bf3703467718",
-        "detail-type": "CustomerSignedUp",
-        "source": "CustomerService",
-        "account": "111122223333",
-        "time": "2020-10-22T18:43:48Z",
-        "region": "us-west-1",
-        "resources": ["some_additional_"],
-        "detail": {
-            "username": "universe",
-            "password1": "myp@ssword",
-            "password2": "repeat password"
-        }
-    }
+ret = parse(model=UserModel, envelope=envelopes.EventBridgeEnvelope, event=payload)
 
-    ret = parse(model=UserModel, envelope=envelopes.EventBridgeEnvelope, event=payload)
+# Parsed model only contains our actual model, not the entire EventBridge + Payload parsed
+assert ret.password1 == ret.password2
 
-    # Parsed model only contains our actual model, not the entire EventBridge + Payload parsed
-    assert ret.password1 == ret.password2
-
-    # Same behaviour but using our decorator
-    @event_parser(model=UserModel, envelope=envelopes.EventBridgeEnvelope)
-    def handler(event: UserModel, context: LambdaContext):
-        assert event.password1 == event.password2
-    ```
+# Same behaviour but using our decorator
+@event_parser(model=UserModel, envelope=envelopes.EventBridgeEnvelope)
+def handler(event: UserModel, context: LambdaContext):
+	assert event.password1 == event.password2
+```
 
 **What's going on here, you might ask**:
 
@@ -316,9 +307,7 @@ You can create your own Envelope model and logic by inheriting from `BaseEnvelop
 
 Here's a snippet of how the EventBridge envelope we demonstrated previously is implemented.
 
-**EventBridge Model**
-
-=== "eventbridge_model.py"
+=== "EventBridge Model"
 
     ```python
     from datetime import datetime
@@ -339,9 +328,7 @@ Here's a snippet of how the EventBridge envelope we demonstrated previously is i
         detail: Dict[str, Any]
     ```
 
-**EventBridge Envelope**
-
-=== "eventbridge_envelope.py"
+=== "EventBridge Envelope"
 
     ```python hl_lines="8 10 25 26"
     from aws_lambda_powertools.utilities.parser import BaseEnvelope, models
@@ -381,7 +368,7 @@ Here's a snippet of how the EventBridge envelope we demonstrated previously is i
 
 ## Data model validation
 
-!!! warning
+???+ warning
     This is radically different from the **Validator utility** which validates events against JSON Schema.
 
 You can use parser's validator for deep inspection of object values and complex relationships.
@@ -400,130 +387,120 @@ Keep the following in mind regardless of which decorator you end up using it:
 
 Quick validation to verify whether the field `message` has the value of `hello world`.
 
-=== "deep_data_validation.py"
+```python hl_lines="6" title="Data field validation with validator"
+from aws_lambda_powertools.utilities.parser import parse, BaseModel, validator
 
-    ```python hl_lines="6"
-    from aws_lambda_powertools.utilities.parser import parse, BaseModel, validator
+class HelloWorldModel(BaseModel):
+	message: str
 
-    class HelloWorldModel(BaseModel):
-        message: str
+	@validator('message')
+	def is_hello_world(cls, v):
+		if v != "hello world":
+			raise ValueError("Message must be hello world!")
+		return v
 
-        @validator('message')
-        def is_hello_world(cls, v):
-            if v != "hello world":
-                raise ValueError("Message must be hello world!")
-            return v
-
-    parse(model=HelloWorldModel, event={"message": "hello universe"})
-    ```
+parse(model=HelloWorldModel, event={"message": "hello universe"})
+```
 
 If you run as-is, you should expect the following error with the message we provided in our exception:
 
-```
+```python title="Sample validation error message"
 message
   Message must be hello world! (type=value_error)
 ```
 
 Alternatively, you can pass `'*'` as an argument for the decorator so that you can validate every value available.
 
-=== "validate_all_field_values.py"
+```python hl_lines="7" title="Validating all data fields with custom logic"
+from aws_lambda_powertools.utilities.parser import parse, BaseModel, validator
 
-    ```python hl_lines="7"
-    from aws_lambda_powertools.utilities.parser import parse, BaseModel, validator
+class HelloWorldModel(BaseModel):
+	message: str
+	sender: str
 
-    class HelloWorldModel(BaseModel):
-        message: str
-        sender: str
+	@validator('*')
+	def has_whitespace(cls, v):
+		if ' ' not in v:
+			raise ValueError("Must have whitespace...")
 
-        @validator('*')
-        def has_whitespace(cls, v):
-            if ' ' not in v:
-                raise ValueError("Must have whitespace...")
+		return v
 
-            return v
-
-    parse(model=HelloWorldModel, event={"message": "hello universe", "sender": "universe"})
-    ```
+parse(model=HelloWorldModel, event={"message": "hello universe", "sender": "universe"})
+```
 
 ### validating entire model
 
 `root_validator` can help when you have a complex validation mechanism. For example finding whether data has been omitted, comparing field values, etc.
 
-=== "validate_all_field_values.py"
+```python title="Comparing and validating multiple fields at once with root_validator"
+from aws_lambda_powertools.utilities.parser import parse, BaseModel, root_validator
 
-    ```python
-    from aws_lambda_powertools.utilities.parser import parse, BaseModel, root_validator
+class UserModel(BaseModel):
+	username: str
+	password1: str
+	password2: str
 
-    class UserModel(BaseModel):
-        username: str
-        password1: str
-        password2: str
+	@root_validator
+	def check_passwords_match(cls, values):
+		pw1, pw2 = values.get('password1'), values.get('password2')
+		if pw1 is not None and pw2 is not None and pw1 != pw2:
+			raise ValueError('passwords do not match')
+		return values
 
-        @root_validator
-        def check_passwords_match(cls, values):
-            pw1, pw2 = values.get('password1'), values.get('password2')
-            if pw1 is not None and pw2 is not None and pw1 != pw2:
-                raise ValueError('passwords do not match')
-            return values
+payload = {
+	"username": "universe",
+	"password1": "myp@ssword",
+	"password2": "repeat password"
+}
 
-    payload = {
-        "username": "universe",
-        "password1": "myp@ssword",
-        "password2": "repeat password"
-    }
+parse(model=UserModel, event=payload)
+```
 
-    parse(model=UserModel, event=payload)
-    ```
-
-!!! info
+???+ info
     You can read more about validating list items, reusing validators, validating raw inputs, and a lot more in <a href="https://pydantic-docs.helpmanual.io/usage/validators/">Pydantic's documentation</a>.
 
 ## Advanced use cases
 
-!!! info
-    **Looking to auto-generate models from JSON, YAML, JSON Schemas, OpenApi, etc?**
-
+???+ tip "Tip: Looking to auto-generate models from JSON, YAML, JSON Schemas, OpenApi, etc?"
     Use Koudai Aono's [data model code generation tool for Pydantic](https://github.com/koxudaxi/datamodel-code-generator)
 
 There are number of advanced use cases well documented in Pydantic's doc such as creating [immutable models](https://pydantic-docs.helpmanual.io/usage/models/#faux-immutability), [declaring fields with dynamic values](https://pydantic-docs.helpmanual.io/usage/models/#field-with-dynamic-default-value)) e.g. UUID, and [helper functions to parse models from files, str](https://pydantic-docs.helpmanual.io/usage/models/#helper-functions), etc.
 
 Two possible unknown use cases are Models and exception' serialization. Models have methods to [export them](https://pydantic-docs.helpmanual.io/usage/exporting_models/) as `dict`, `JSON`, `JSON Schema`, and Validation exceptions can be exported as JSON.
 
-=== "serializing_models_exceptions.py"
+```python hl_lines="21 28-31" title="Converting data models in various formats"
+from aws_lambda_powertools.utilities import Logger
+from aws_lambda_powertools.utilities.parser import parse, BaseModel, ValidationError, validator
 
-    ```python hl_lines="21 28-31"
-    from aws_lambda_powertools.utilities import Logger
-    from aws_lambda_powertools.utilities.parser import parse, BaseModel, ValidationError, validator
+logger = Logger(service="user")
 
-    logger = Logger(service="user")
+class UserModel(BaseModel):
+	username: str
+	password1: str
+	password2: str
 
-    class UserModel(BaseModel):
-        username: str
-        password1: str
-        password2: str
+payload = {
+	"username": "universe",
+	"password1": "myp@ssword",
+	"password2": "repeat password"
+}
 
-    payload = {
-        "username": "universe",
-        "password1": "myp@ssword",
-        "password2": "repeat password"
-    }
+def my_function():
+	try:
+		return parse(model=UserModel, event=payload)
+	except ValidationError as e:
+		logger.exception(e.json())
+		return {
+			"status_code": 400,
+			"message": "Invalid username"
+		}
 
-    def my_function():
-        try:
-            return parse(model=UserModel, event=payload)
-        except ValidationError as e:
-            logger.exception(e.json())
-            return {
-                "status_code": 400,
-                "message": "Invalid username"
-            }
-
-    User: UserModel = my_function()
-    user_dict = User.dict()
-    user_json = User.json()
-    user_json_schema_as_dict = User.schema()
-    user_json_schema_as_json = User.schema_json(indent=2)
-    ```
+User: UserModel = my_function()
+user_dict = User.dict()
+user_json = User.json()
+user_json_schema_as_dict = User.schema()
+user_json_schema_as_json = User.schema_json(indent=2)
+```
 
 These can be quite useful when manipulating models that later need to be serialized as inputs for services like DynamoDB, EventBridge, etc.
 
@@ -541,11 +518,9 @@ We export most common classes, exceptions, and utilities from Pydantic as part o
 
 If what's your trying to use isn't available as part of the high level import system, use the following escape hatch mechanism:
 
-=== "escape_hatch.py"
-
-    ```python
-    from aws_lambda_powertools.utilities.parser.pydantic import <what you'd like to import'>
-    ```
+```python title="Pydantic import escape hatch"
+from aws_lambda_powertools.utilities.parser.pydantic import <what you'd like to import'>
+```
 
 **What is the cold start impact in bringing this additional dependency?**
 
@@ -555,7 +530,8 @@ Artillery load test sample against a [hello world sample](https://github.com/aws
 
 **No parser**
 
-> **Uncompressed package size**: 55M, **p99**: 180.3ms
+???+ info
+    **Uncompressed package size**: 55M, **p99**: 180.3ms
 
 ```
 Summary report @ 14:36:07(+0200) 2020-10-23
@@ -577,7 +553,8 @@ Codes:
 
 **With parser**
 
-> **Uncompressed package size**: 128M, **p99**: 193.1ms
+???+ info
+    **Uncompressed package size**: 128M, **p99**: 193.1ms
 
 ```
 Summary report @ 14:29:23(+0200) 2020-10-23

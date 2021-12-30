@@ -13,7 +13,7 @@ This utility provides JSON Schema validation for events and responses, including
 
 ## Getting started
 
-!!! tip "Using JSON Schemas for the first time?"
+???+ tip "Tip: Using JSON Schemas for the first time?"
     Check this [step-by-step tour in the official JSON Schema website](https://json-schema.org/learn/getting-started-step-by-step.html){target="_blank"}.
 
 You can validate inbound and outbound events using [`validator` decorator](#validator-decorator).
@@ -22,7 +22,7 @@ You can also use the standalone `validate` function, if you want more control ov
 
 We support any JSONSchema draft supported by [fastjsonschema](https://horejsek.github.io/python-fastjsonschema/){target="_blank"} library.
 
-!!! warning
+???+ warning
     Both `validator` decorator and `validate` standalone function expects your JSON Schema to be a **dictionary**, not a filename.
 
 ### Validator decorator
@@ -58,7 +58,7 @@ It will fail fast with `SchemaValidationError` exception if event or response do
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
-!!! note
+???+ note
     It's not a requirement to validate both inbound and outbound schemas - You can either use one, or both.
 
 ### Validate function
@@ -181,21 +181,19 @@ Envelope name | JMESPath expression
 
 ### Validating custom formats
 
-!!! note "New in 1.10.0"
+???+ note
     JSON Schema DRAFT 7 [has many new built-in formats](https://json-schema.org/understanding-json-schema/reference/string.html#format){target="_blank"} such as date, time, and specifically a regex format which might be a better replacement for a custom format, if you do have control over the schema.
 
 JSON Schemas with custom formats like `int64` will fail validation. If you have these, you can pass them using `formats` parameter:
 
-=== "custom_json_schema_type_format.json"
-
-    ```json
-    {
-        "lastModifiedTime": {
-            "format": "int64",
-            "type": "integer"
-        }
-    }
-    ```
+```json title="custom_json_schema_type_format.json"
+{
+	"lastModifiedTime": {
+		"format": "int64",
+		"type": "integer"
+	}
+}
+```
 
 For each format defined in a dictionary key, you must use a regex, or a function that returns a boolean to instruct the validator on how to proceed when encountering that type.
 
@@ -431,5 +429,5 @@ You might have events or responses that contain non-encoded JSON, where you need
 
 You can use our built-in [JMESPath functions](/utilities/jmespath_functions) within your expressions to do exactly that to decode JSON Strings, base64, and uncompress gzip data.
 
-!!! info
+???+ info
     We use these for built-in envelopes to easily to decode and unwrap events from sources like Kinesis, CloudWatch Logs, etc.
