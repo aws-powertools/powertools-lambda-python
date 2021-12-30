@@ -396,30 +396,28 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 
 For Lambda Python3.8+ runtime, this utility supports async functions when you use in conjunction with `asyncio.run`.
 
-=== "async_resolver.py"
+```python hl_lines="4 8 10-12 20" title="Resolving GraphQL resolvers async"
+from aws_lambda_powertools import Logger, Tracer
 
-    ```python hl_lines="4 8 10-12 20"
-    from aws_lambda_powertools import Logger, Tracer
+from aws_lambda_powertools.logging import correlation_paths
+from aws_lambda_powertools.event_handler import AppSyncResolver
 
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import AppSyncResolver
+tracer = Tracer(service="sample_resolver")
+logger = Logger(service="sample_resolver")
+app = AppSyncResolver()
 
-    tracer = Tracer(service="sample_resolver")
-    logger = Logger(service="sample_resolver")
-    app = AppSyncResolver()
+@app.resolver(type_name="Query", field_name="listTodos")
+async def list_todos():
+	todos = await some_async_io_call()
+	return todos
 
-    @app.resolver(type_name="Query", field_name="listTodos")
-    async def list_todos():
-        todos = await some_async_io_call()
-        return todos
+@logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
+@tracer.capture_lambda_handler
+def lambda_handler(event, context):
+	result = app.resolve(event, context)
 
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        result = app.resolve(event, context)
-
-        return asyncio.run(result)
-    ```
+	return asyncio.run(result)
+```
 
 ### Amplify GraphQL Transformer
 
@@ -427,33 +425,31 @@ Assuming you have [Amplify CLI installed](https://docs.amplify.aws/cli/start/ins
 
 <!-- AppSync resolver decorator is a concise way to create lambda functions to handle AppSync resolvers for multiple `typeName` and `fieldName` declarations. -->
 
-=== "schema.graphql"
+```typescript hl_lines="7 15 20 22" title="Example GraphQL Schema"
+@model
+type Merchant {
+	id: String!
+	name: String!
+	description: String
+	# Resolves to `common_field`
+	commonField: String  @function(name: "merchantInfo-${env}")
+}
 
-    ```typescript hl_lines="7 15 20 22"
-    @model
-    type Merchant {
-        id: String!
-        name: String!
-        description: String
-        # Resolves to `common_field`
-        commonField: String  @function(name: "merchantInfo-${env}")
-    }
+type Location {
+	id: ID!
+	name: String!
+	address: String
+	# Resolves to `common_field`
+	commonField: String  @function(name: "merchantInfo-${env}")
+}
 
-    type Location {
-        id: ID!
-        name: String!
-        address: String
-        # Resolves to `common_field`
-        commonField: String  @function(name: "merchantInfo-${env}")
-    }
-
-    type Query {
-      # List of locations resolves to `list_locations`
-      listLocations(page: Int, size: Int): [Location] @function(name: "merchantInfo-${env}")
-      # List of locations resolves to `list_locations`
-      findMerchant(search: str): [Merchant] @function(name: "searchMerchant-${env}")
-    }
-    ```
+type Query {
+  # List of locations resolves to `list_locations`
+  listLocations(page: Int, size: Int): [Location] @function(name: "merchantInfo-${env}")
+  # List of locations resolves to `list_locations`
+  findMerchant(search: str): [Merchant] @function(name: "searchMerchant-${env}")
+}
+```
 
 [Create two new basic Python functions](https://docs.amplify.aws/cli/function#set-up-a-function){target="_blank"} via `amplify add function`.
 
