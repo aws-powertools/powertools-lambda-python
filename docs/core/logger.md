@@ -133,17 +133,15 @@ When debugging in non-production environments, you can instruct Logger to log th
 ???+ warning
 	This is disabled by default to prevent sensitive info being logged
 
-=== "log_handler_event.py"
+```python hl_lines="5" title="Logging incoming event"
+from aws_lambda_powertools import Logger
 
-    ```python hl_lines="5"
-    from aws_lambda_powertools import Logger
+logger = Logger(service="payment")
 
-    logger = Logger(service="payment")
-
-    @logger.inject_lambda_context(log_event=True)
-    def handler(event, context):
-       ...
-    ```
+@logger.inject_lambda_context(log_event=True)
+def handler(event, context):
+   ...
+```
 
 #### Setting a Correlation ID
 
@@ -249,7 +247,8 @@ You can append additional keys using either mechanism:
 
 #### append_keys method
 
-> NOTE: `append_keys` replaces `structure_logs(append=True, **kwargs)` method. Both will continue to work until the next major version.
+???+ note
+	`append_keys` replaces `structure_logs(append=True, **kwargs)` method. structure_logs will be removed in v2.
 
 You can append your own keys to your existing Logger via `append_keys(**additional_key_values)` method.
 
@@ -661,15 +660,13 @@ Parameter | Description | Default
 **`log_record_order`** | set order of log keys when logging | `["level", "location", "message", "timestamp"]`
 **`kwargs`** | key-value to be included in log messages | `None`
 
-=== "LambdaPowertoolsFormatter.py"
+```python hl_lines="2 4-5" title="Pre-configuring Lambda Powertools Formatter"
+from aws_lambda_powertools import Logger
+from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
 
-    ```python hl_lines="2 4-5"
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
-
-    formatter = LambdaPowertoolsFormatter(utc=True, log_record_order=["message"])
-    logger = Logger(service="example", logger_formatter=formatter)
-    ```
+formatter = LambdaPowertoolsFormatter(utc=True, log_record_order=["message"])
+logger = Logger(service="example", logger_formatter=formatter)
+```
 
 ### Migrating from other Loggers
 
@@ -797,17 +794,15 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 
 By default, this Logger and standard logging library emits records using local time timestamp. You can override this behaviour via `utc` parameter:
 
-=== "app.py"
+```python hl_lines="6" title="Setting UTC timestamp by default"
+from aws_lambda_powertools import Logger
 
-    ```python hl_lines="6"
-    from aws_lambda_powertools import Logger
+logger = Logger(service="payment")
+logger.info("Local time")
 
-    logger = Logger(service="payment")
-    logger.info("Local time")
-
-    logger_in_utc = Logger(service="payment", utc=True)
-    logger_in_utc.info("GMT time zone")
-    ```
+logger_in_utc = Logger(service="payment", utc=True)
+logger_in_utc.info("GMT time zone")
+```
 
 #### Custom function for unserializable values
 
@@ -845,20 +840,18 @@ By default, Logger uses `str` to handle values non-serializable by JSON. You can
 
 By default, Logger uses StreamHandler and logs to standard output. You can override this behaviour via `logger_handler` parameter:
 
-=== "collect.py"
+```python hl_lines="3-4 9 12" title="Configure Logger to output to a file"
+import logging
+from pathlib import Path
 
-    ```python hl_lines="3-4 9 12"
-    import logging
-    from pathlib import Path
+from aws_lambda_powertools import Logger
 
-    from aws_lambda_powertools import Logger
+log_file = Path("/tmp/log.json")
+log_file_handler = logging.FileHandler(filename=log_file)
+logger = Logger(service="payment", logger_handler=log_file_handler)
 
-    log_file = Path("/tmp/log.json")
-    log_file_handler = logging.FileHandler(filename=log_file)
-    logger = Logger(service="payment", logger_handler=log_file_handler)
-
-    logger.info("Collecting payment")
-    ```
+logger.info("Collecting payment")
+```
 
 #### Bring your own formatter
 
@@ -868,7 +861,7 @@ For **minor changes like remapping keys** after all log record processing has co
 
 === "custom_formatter.py"
 
-    ```python
+    ```python hl_lines="6-7 12"
     from aws_lambda_powertools import Logger
     from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
 
@@ -880,10 +873,19 @@ For **minor changes like remapping keys** after all log record processing has co
             log["event"] = log.pop("message")  # rename message key to event
             return self.json_serializer(log)   # use configured json serializer
 
-    my_formatter = CustomFormatter()
-    logger = Logger(service="example", logger_formatter=my_formatter)
+    logger = Logger(service="example", logger_formatter=CustomFormatter())
     logger.info("hello")
     ```
+
+=== "Example CloudWatch Logs excerpt"
+	```json hl_lines="5"
+	{
+		"level": "INFO",
+		"location": "<module>:16",
+		"timestamp": "2021-12-30 13:41:53,413+0100",
+		"event": "hello"
+	}
+	```
 
 For **replacing the formatter entirely**, you can subclass `BasePowertoolsFormatter`, implement `append_keys` method, and override `format` standard logging method. This ensures the current feature set of Logger like [injecting Lambda context](#capturing-lambda-context-info) and [sampling](#sampling-debug-logs) will continue to work.
 
@@ -946,24 +948,22 @@ By default, Logger uses `json.dumps` and `json.loads` as serializer and deserial
 
 As parameters don't always translate well between them, you can pass any callable that receives a `Dict` and return a `str`:
 
-=== "collect.py"
+```python hl_lines="1 5-6 9-10" title="Using Rust orjson library as serializer"
+import orjson
 
-    ```python hl_lines="1 5-6 9-10"
-    import orjson
+from aws_lambda_powertools import Logger
 
-    from aws_lambda_powertools import Logger
+custom_serializer = orjson.dumps
+custom_deserializer = orjson.loads
 
-    custom_serializer = orjson.dumps
-    custom_deserializer = orjson.loads
+logger = Logger(service="payment",
+			json_serializer=custom_serializer,
+			json_deserializer=custom_deserializer
+)
 
-    logger = Logger(service="payment",
-                json_serializer=custom_serializer,
-                json_deserializer=custom_deserializer
-    )
-
-    # when using parameters, you can pass a partial
-    # custom_serializer=functools.partial(orjson.dumps, option=orjson.OPT_SERIALIZE_NUMPY)
-    ```
+# when using parameters, you can pass a partial
+# custom_serializer=functools.partial(orjson.dumps, option=orjson.OPT_SERIALIZE_NUMPY)
+```
 
 ## Testing your code
 
@@ -1028,11 +1028,9 @@ This is a Pytest sample that provides the minimum information necessary for Logg
 
 Pytest Live Log feature duplicates emitted log messages in order to style log statements according to their levels, for this to work use `POWERTOOLS_LOG_DEDUPLICATION_DISABLED` env var.
 
-=== "shell"
-
-    ```bash
-    POWERTOOLS_LOG_DEDUPLICATION_DISABLED="1" pytest -o log_cli=1
-    ```
+```bash title="Disabling log deduplication to use Pytest live log"
+POWERTOOLS_LOG_DEDUPLICATION_DISABLED="1" pytest -o log_cli=1
+```
 
 ???+ warning
     This feature should be used with care, as it explicitly disables our ability to filter propagated messages to the root logger (if configured).
@@ -1044,26 +1042,24 @@ Pytest Live Log feature duplicates emitted log messages in order to style log st
 You can enable the `botocore` and `boto3` logs by using the `set_stream_logger` method, this method will add a stream handler
 for the given name and level to the logging module. By default, this logs all boto3 messages to stdout.
 
-=== "log_botocore_and_boto3.py"
+```python hl_lines="6-7" title="Enabling AWS SDK logging"
+from typing import Dict, List
+from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools import Logger
 
-    ```python hl_lines="6-7"
-    from typing import Dict, List
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-    from aws_lambda_powertools import Logger
+import boto3
+boto3.set_stream_logger()
+boto3.set_stream_logger('botocore')
 
-    import boto3
-    boto3.set_stream_logger()
-    boto3.set_stream_logger('botocore')
-
-    logger = Logger()
-    client = boto3.client('s3')
+logger = Logger()
+client = boto3.client('s3')
 
 
-    def handler(event: Dict, context: LambdaContext) -> List:
-        response = client.list_buckets()
+def handler(event: Dict, context: LambdaContext) -> List:
+	response = client.list_buckets()
 
-        return response.get("Buckets", [])
-    ```
+	return response.get("Buckets", [])
+```
 
 **What's the difference between `append_keys` and `extra`?**
 
