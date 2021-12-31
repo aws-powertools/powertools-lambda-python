@@ -389,11 +389,15 @@ A feature can simply have its name and a `default` value. This is either on or o
 
 === "minimal_schema.json"
 
-    ```json hl_lines="2-3"
+    ```json hl_lines="2-3 6-7"
     {
         "global_feature": {
             "default": true
-        }
+        },
+        "non_boolean_global_feature": {
+            "default": {"group": "read-only"},
+			"boolean_type": False
+        },
     }
     ```
 
@@ -404,18 +408,33 @@ If you need more control and want to provide context such as user group, permiss
 When adding `rules` to a feature, they must contain:
 
 1. A rule name as a key
-2. `when_match` boolean value that should be used when conditions match
+2. `when_match` boolean or JSON value that should be used when conditions match
 3. A list of `conditions` for evaluation
 
 === "feature_with_rules.json"
 
-    ```json hl_lines="4-11"
+    ```json hl_lines="4-11 19-26"
     {
         "premium_feature": {
             "default": false,
             "rules": {
                 "customer tier equals premium": {
                     "when_match": true,
+                    "conditions": [
+                        {
+                            "action": "EQUALS",
+                            "key": "tier",
+                            "value": "premium"
+                        }
+                    ]
+                }
+            }
+        },
+        "non_boolean_premium_feature": {
+            "default": [],
+            "rules": {
+                "customer tier equals premium": {
+                    "when_match": ["remove_limits", "remove_ads"],
                     "conditions": [
                         {
                             "action": "EQUALS",
@@ -474,9 +493,9 @@ Action | Equivalent expression
 
 #### Rule engine flowchart
 
-Now that you've seen all properties of a feature flag schema, this flowchart describes how the rule engines makes a decision on when to return `True` or `False`.
+Now that you've seen all properties of a feature flag schema, this flowchart describes how the rule engine decides what value to return.
 
-![Rule engine ](../media/feat_flags_evaluation_workflow.png)
+![Rule engine ](../media/feature_flags_diagram.png)
 
 ### Adjusting in-memory cache
 
