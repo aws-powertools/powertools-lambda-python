@@ -142,7 +142,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     def formatTime(self, record: logging.LogRecord, datefmt: Optional[str] = None) -> str:
         record_ts = self.converter(record.created)  # type: ignore
 
-        if datefmt is None:
+        if datefmt is None:  # pragma: no cover, it'll always be None in std logging, but mypy
             datefmt = self.datefmt
 
         # NOTE: Python `time.strftime` doesn't provide msec directives
