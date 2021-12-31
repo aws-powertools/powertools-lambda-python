@@ -49,13 +49,21 @@ class SchemaValidator(BaseValidator):
     A dictionary containing default value and rules for matching.
     The value MUST be an object and MIGHT contain the following members:
 
-    * **default**: `bool`. Defines default feature value. This MUST be present
+    * **default**: Union[`bool`, `JSONType`]. Defines default feature value. This MUST be present
+    * **boolean_type**: bool. Defines whether feature has non-boolean value (`JSONType`). This MIGHT be present
     * **rules**: `Dict[str, Dict]`. Rules object. This MIGHT be present
+
+    `JSONType` being any JSON primitive value: `Union[str, int, float, bool, None, Dict[str, Any], List[Any]]`
 
     ```python
     {
         "my_feature": {
             "default": True,
+            "rules": {}
+        },
+        "my_non_boolean_feature": {
+            "default": {"group": "read-only"},
+            "boolean_type": False,
             "rules": {}
         }
     }
@@ -66,7 +74,7 @@ class SchemaValidator(BaseValidator):
     A dictionary with each rule and their conditions that a feature might have.
     The value MIGHT be present, and when defined it MUST contain the following members:
 
-    * **when_match**: `bool`. Defines value to return when context matches conditions
+    * **when_match**: Union[`bool`, `JSONType`]. Defines value to return when context matches conditions
     * **conditions**: `List[Dict]`. Conditions object. This MUST be present
 
     ```python
@@ -76,6 +84,16 @@ class SchemaValidator(BaseValidator):
             "rules": {
                 "tenant id equals 345345435": {
                     "when_match": False,
+                    "conditions": []
+                }
+            }
+        },
+        "my_non_boolean_feature": {
+            "default": {"group": "read-only"},
+            "boolean_type": False,
+            "rules": {
+                "tenant id equals 345345435": {
+                    "when_match": {"group": "admin"},
                     "conditions": []
                 }
             }
