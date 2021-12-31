@@ -14,7 +14,7 @@ Feature flags are used to modify behaviour without changing the application's co
 
 **Static flags**. Indicates something is simply `on` or `off`, for example `TRACER_ENABLED=True`.
 
-**Dynamic flags**. Indicates something can have varying states, for example enable a premium feature for customer X not Y.
+**Dynamic flags**. Indicates something can have varying states, for example enable a list of premium features for customer X not Y.
 
 ???+ tip
     You can use [Parameters utility](parameters.md) for static flags while this utility can do both static and dynamic feature flags.
@@ -380,6 +380,71 @@ You can use `get_enabled_features` method for scenarios where you need a list of
     }
     ```
 
+### Beyond boolean feature flags
+
+???+ info "When is this useful?"
+    You might have a list of features to unlock for premium customers, unlock a specific set of features for admin users, etc.
+
+Feature flags can return any JSON values when `boolean_type` parameter is set to `False`. These can be dictionaries, list, string, integers, etc.
+
+
+=== "app.py"
+
+    ```python hl_lines="3 9 13 16 18"
+    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+
+    app_config = AppConfigStore(
+        environment="dev",
+        application="product-catalogue",
+        name="features"
+    )
+
+    feature_flags = FeatureFlags(store=app_config)
+
+    def lambda_handler(event, context):
+        # Get customer's tier from incoming request
+        ctx = { "tier": event.get("tier", "standard") }
+
+        # Evaluate `has_premium_features` base don customer's tier
+        premium_features: list[str] = feature_flags.evaluate(name="premium_features",
+                                                            context=ctx, default=False)
+        for feature in premium_features:
+            # enable premium features
+            ...
+    ```
+
+=== "event.json"
+
+    ```json hl_lines="3"
+    {
+        "username": "lessa",
+        "tier": "premium",
+        "basked_id": "random_id"
+    }
+    ```
+=== "features.json"
+
+    ```json hl_lines="3-4 7"
+    {
+        "premium_features": {
+            "boolean_type": false,
+            "default": [],
+            "rules": {
+                "customer tier equals premium": {
+                    "when_match": ["no_ads", "no_limits", "chat"],
+                    "conditions": [
+                        {
+                            "action": "EQUALS",
+                            "key": "tier",
+                            "value": "premium"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+    ```
+
 ## Advanced
 
 ### Adjusting in-memory cache
@@ -436,11 +501,11 @@ A feature can simply have its name and a `default` value. This is either on or o
 ```json hl_lines="2-3 5-7" title="minimal_schema.json"
 {
     "global_feature": {
-        "default": True
+        "default": true
     },
     "non_boolean_global_feature": {
         "default": {"group": "read-only"},
-        "boolean_type": False
+        "boolean_type": false
     },
 }
 ```

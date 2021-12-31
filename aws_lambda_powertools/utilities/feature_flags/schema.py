@@ -55,7 +55,7 @@ class SchemaValidator(BaseValidator):
 
     `JSONType` being any JSON primitive value: `Union[str, int, float, bool, None, Dict[str, Any], List[Any]]`
 
-    ```python
+    ```json
     {
         "my_feature": {
             "default": True,
@@ -77,10 +77,10 @@ class SchemaValidator(BaseValidator):
     * **when_match**: `Union[bool, JSONType]`. Defines value to return when context matches conditions
     * **conditions**: `List[Dict]`. Conditions object. This MUST be present
 
-    ```python
+    ```json
     {
         "my_feature": {
-            "default": True,
+            "default": true,
             "rules": {
                 "tenant id equals 345345435": {
                     "when_match": False,
@@ -90,7 +90,7 @@ class SchemaValidator(BaseValidator):
         },
         "my_non_boolean_feature": {
             "default": {"group": "read-only"},
-            "boolean_type": False,
+            "boolean_type": false,
             "rules": {
                 "tenant id equals 345345435": {
                     "when_match": {"group": "admin"},
@@ -113,13 +113,13 @@ class SchemaValidator(BaseValidator):
     * **key**: `str`. Key in given context to perform operation
     * **value**: `Any`. Value in given context that should match action operation.
 
-    ```python
+    ```json
     {
         "my_feature": {
-            "default": True,
+            "default": true,
             "rules": {
                 "tenant id equals 345345435": {
-                    "when_match": False,
+                    "when_match": false,
                     "conditions": [
                         {
                             "action": "EQUALS",
