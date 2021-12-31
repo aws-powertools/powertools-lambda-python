@@ -58,12 +58,12 @@ class SchemaValidator(BaseValidator):
     ```json
     {
         "my_feature": {
-            "default": True,
+            "default": true,
             "rules": {}
         },
         "my_non_boolean_feature": {
             "default": {"group": "read-only"},
-            "boolean_type": False,
+            "boolean_type": false,
             "rules": {}
         }
     }
@@ -83,7 +83,7 @@ class SchemaValidator(BaseValidator):
             "default": true,
             "rules": {
                 "tenant id equals 345345435": {
-                    "when_match": False,
+                    "when_match": false,
                     "conditions": []
                 }
             }
