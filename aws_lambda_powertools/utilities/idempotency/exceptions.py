@@ -47,5 +47,5 @@ class IdempotencyPersistenceLayerError(Exception):
 
 class IdempotencyKeyError(Exception):
     """
-    Payload does not contain a idempotent key
+    Payload does not contain an idempotent key
     """

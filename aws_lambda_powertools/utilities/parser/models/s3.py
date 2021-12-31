@@ -6,7 +6,7 @@ from pydantic.fields import Field
 from pydantic.networks import IPvAnyNetwork
 from pydantic.types import NonNegativeFloat
 
-from ..types import Literal
+from aws_lambda_powertools.utilities.parser.types import Literal
 
 
 class S3EventRecordGlacierRestoreEventData(BaseModel):

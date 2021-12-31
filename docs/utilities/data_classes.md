@@ -80,7 +80,7 @@ Event Source | Data_class
 [SNS](#sns) | `SNSEvent`
 [SQS](#sqs) | `SQSEvent`
 
-!!! info
+???+ info
     The examples provided below are far from exhaustive - the data classes themselves are designed to provide a form of
     documentation inherently (via autocompletion, types and docstrings).
 
@@ -542,8 +542,8 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
 
 #### Define Auth Challenge Example
 
-!!! warning "NOTE"
-    In this example we are modifying the wrapped dict response fields, so we need to return the json serializable wrapped event in `event.raw_event`
+???+ note
+    In this example we are modifying the wrapped dict response fields, so we need to return the json serializable wrapped event in `event.raw_event`.
 
 This example is based on the AWS Cognito docs for [Define Auth Challenge Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-define-auth-challenge.html){target="_blank"}.
 
