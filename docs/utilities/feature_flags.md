@@ -379,6 +379,49 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 
 ## Advanced
 
+### Adjusting in-memory cache
+
+By default, we cache configuration retrieved from the Store for 5 seconds for performance and reliability reasons.
+
+You can override `max_age` parameter when instantiating the store.
+
+    ```python hl_lines="7"
+    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+
+    app_config = AppConfigStore(
+        environment="dev",
+        application="product-catalogue",
+        name="features",
+        max_age=300
+    )
+    ```
+
+### Getting fetched configuration
+
+???+ info "When is this useful?"
+	You might have application configuration in addition to feature flags in your store.
+
+	This means you don't need to make another call only to fetch app configuration.
+
+You can access the configuration fetched from the store via `get_raw_configuration` property within the store instance.
+
+=== "app.py"
+
+    ```python hl_lines="12"
+    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+
+    app_config = AppConfigStore(
+        environment="dev",
+        application="product-catalogue",
+        name="configuration",
+        envelope = "feature_flags"
+    )
+
+	feature_flags = FeatureFlags(store=app_config)
+
+	config = app_config.get_raw_configuration
+    ```
+
 ### Schema
 
 This utility expects a certain schema to be stored as JSON within AWS AppConfig.
@@ -497,23 +540,6 @@ Now that you've seen all properties of a feature flag schema, this flowchart des
 
 ![Rule engine ](../media/feature_flags_diagram.png)
 
-### Adjusting in-memory cache
-
-By default, we cache configuration retrieved from the Store for 5 seconds for performance and reliability reasons.
-
-You can override `max_age` parameter when instantiating the store.
-
-    ```python hl_lines="7"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="features",
-        max_age=300
-    )
-    ```
-
 ### Envelope
 
 There are scenarios where you might want to include feature flags as part of an existing application configuration.
@@ -564,26 +590,6 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
     }
     ```
 
-### Getting fetched configuration
-
-You can access the configuration fetched from the store via `get_raw_configuration` property within the store instance.
-
-=== "app.py"
-
-    ```python hl_lines="12"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="configuration",
-        envelope = "feature_flags"
-    )
-
-	feature_flags = FeatureFlags(store=app_config)
-
-	config = app_config.get_raw_configuration
-    ```
 
 ### Built-in store provider
 
