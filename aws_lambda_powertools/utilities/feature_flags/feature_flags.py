@@ -288,9 +288,6 @@ class FeatureFlags:
             boolean_feature = feature.get(
                 schema.FEATURE_DEFAULT_VAL_TYPE_KEY, True
             )  # backwards compatability ,assume feature flag
-            if not boolean_feature:
-                self.logger.debug(f"skipping feature because it is not a boolean feature flag, name={name}")
-                continue
 
             if feature_default_value and not rules:
                 self.logger.debug(f"feature is enabled by default and has no defined rules, name={name}")

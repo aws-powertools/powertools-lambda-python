@@ -630,52 +630,6 @@ def test_multiple_features_enabled(mocker, config):
     assert enabled_list == expected_value
 
 
-def test_multiple_features_only_some_enabled(mocker, config):
-    expected_value = ["my_feature", "my_feature2", "my_feature4"]
-    mocked_app_config_schema = {
-        "my_feature": {  # rule will match here, feature is enabled due to rule match
-            "default": False,
-            "rules": {
-                "tenant id is contained in [6, 2]": {
-                    "when_match": True,
-                    "conditions": [
-                        {
-                            "action": RuleAction.IN.value,
-                            "key": "tenant_id",
-                            "value": ["6", "2"],
-                        }
-                    ],
-                }
-            },
-        },
-        "my_feature2": {
-            "default": True,
-        },
-        "my_feature3": {
-            "default": False,
-        },
-        # rule will not match here, feature is enabled by default
-        "my_feature4": {
-            "default": True,
-            "rules": {
-                "tenant id equals 7": {
-                    "when_match": False,
-                    "conditions": [
-                        {
-                            "action": RuleAction.EQUALS.value,
-                            "key": "tenant_id",
-                            "value": "7",
-                        }
-                    ],
-                }
-            },
-        },
-    }
-    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
-    enabled_list: List[str] = feature_flags.get_enabled_features(context={"tenant_id": "6", "username": "a"})
-    assert enabled_list == expected_value
-
-
 def test_get_feature_toggle_handles_error(mocker, config):
     # GIVEN a schema fetch that raises a ConfigurationStoreError
     schema_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())

@@ -106,9 +106,8 @@ def test_feature_no_rule_match(mocker, config):
     assert feature_value == expected_value
 
 
-# Check multiple features
-def test_multiple_features_enabled_with_complex_toggles_and_boolean_toggles(mocker, config):
-    expected_value = ["my_feature", "my_feature2"]
+def test_get_all_enabled_features_boolean_and_non_boolean(mocker, config):
+    expected_value = ["my_feature", "my_feature2", "my_non_boolean_feature"]
     mocked_app_config_schema = {
         "my_feature": {
             FEATURE_DEFAULT_VAL_KEY: False,
@@ -125,29 +124,56 @@ def test_multiple_features_enabled_with_complex_toggles_and_boolean_toggles(mock
                 }
             },
         },
-        "my_complex_feature": {
-            FEATURE_DEFAULT_VAL_KEY: {},
-            FEATURE_DEFAULT_VAL_TYPE_KEY: False,
-            RULES_KEY: {
-                "tenant id equals 345345435": {
-                    RULE_MATCH_VALUE: {"b": 4},
-                    CONDITIONS_KEY: [
-                        {
-                            CONDITION_ACTION: RuleAction.EQUALS.value,
-                            CONDITION_KEY: "tenant_id",
-                            CONDITION_VALUE: "345345435",
-                        }
-                    ],
-                },
-            },
-        },
         "my_feature2": {
             FEATURE_DEFAULT_VAL_KEY: True,
         },
         "my_feature3": {
             FEATURE_DEFAULT_VAL_KEY: False,
         },
-        "my_feature4": {FEATURE_DEFAULT_VAL_KEY: {"a": "b"}, FEATURE_DEFAULT_VAL_TYPE_KEY: False},
+        "my_non_boolean_feature": {
+            FEATURE_DEFAULT_VAL_KEY: {},
+            FEATURE_DEFAULT_VAL_TYPE_KEY: False,
+            RULES_KEY: {
+                "username equals 'a'": {
+                    RULE_MATCH_VALUE: {"group": "admin"},
+                    CONDITIONS_KEY: [
+                        {
+                            CONDITION_ACTION: RuleAction.EQUALS.value,
+                            CONDITION_KEY: "username",
+                            CONDITION_VALUE: "a",
+                        }
+                    ],
+                },
+            },
+        },
+    }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    enabled_list: List[str] = feature_flags.get_enabled_features(context={"tenant_id": "6", "username": "a"})
+    assert enabled_list == expected_value
+
+
+def test_get_all_enabled_feature_flags_non_boolean_truthy_defaults(mocker, config):
+    expected_value = ["my_feature", "my_truthy_feature"]
+    mocked_app_config_schema = {
+        "my_feature": {
+            FEATURE_DEFAULT_VAL_KEY: {},
+            FEATURE_DEFAULT_VAL_TYPE_KEY: False,
+            RULES_KEY: {
+                "username equals 'a'": {
+                    RULE_MATCH_VALUE: {"group": "admin"},
+                    CONDITIONS_KEY: [
+                        {
+                            CONDITION_ACTION: RuleAction.EQUALS.value,
+                            CONDITION_KEY: "username",
+                            CONDITION_VALUE: "a",
+                        }
+                    ],
+                },
+            },
+        },
+        "my_truthy_feature": {FEATURE_DEFAULT_VAL_KEY: {"a": "b"}, FEATURE_DEFAULT_VAL_TYPE_KEY: False},
+        "my_falsy_feature": {FEATURE_DEFAULT_VAL_KEY: {}, FEATURE_DEFAULT_VAL_TYPE_KEY: False},
     }
 
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
