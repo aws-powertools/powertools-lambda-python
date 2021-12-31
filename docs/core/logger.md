@@ -656,6 +656,7 @@ Parameter | Description | Default
 **`json_deserializer`** | function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python obj | `json.loads`
 **`json_default`** | function to coerce unserializable values, when no custom serializer/deserializer is set | `str`
 **`datefmt`** | string directives (strftime) to format log timestamp | `%Y-%m-%d %H:%M:%S,%F%z`, where `%F` is a custom ms directive
+**`use_datetime_directive`** | format the `datefmt` timestamps using `datetime`, not `time`  (also supports the custom `%F` directive for milliseconds) | `False`
 **`utc`** | set logging timestamp to UTC | `False`
 **`log_record_order`** | set order of log keys when logging | `["level", "location", "message", "timestamp"]`
 **`kwargs`** | key-value to be included in log messages | `None`
@@ -726,13 +727,17 @@ In this case, Logger will register a Logger named `payment`, and a Logger named 
 
 #### Overriding Log records
 
+???+ tip
+	Use `datefmt` for custom date formats - We honour standard [logging library string formats](https://docs.python.org/3/howto/logging.html#displaying-the-date-time-in-messages){target="_blank"}.
+
+	Prefer using [datetime string formats](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes){target="_blank"}? Set `use_datetime_directive` at Logger constructor or at [Lambda Powertools Formatter](#lambdapowertoolsformatter).
+
 You might want to continue to use the same date formatting style, or override `location` to display the `package.function_name:line_number` as you previously had.
 
 Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, `xray_trace_id`.
 
-=== "lambda_handler.py"
-    > We honour standard [logging library string formats](https://docs.python.org/3/howto/logging.html#displaying-the-date-time-in-messages){target="_blank"}.
 
+=== "lambda_handler.py"
     ```python hl_lines="7 10"
     from aws_lambda_powertools import Logger
 

@@ -385,7 +385,7 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 ???+ info "When is this useful?"
     You might have a list of features to unlock for premium customers, unlock a specific set of features for admin users, etc.
 
-Feature flags can return any JSON values when `boolean_type` parameter is set to `False`. These can be dictionaries, list, string, integers, etc.
+Feature flags can return any JSON values when `boolean_type` parameter is set to `false`. These can be dictionaries, list, string, integers, etc.
 
 
 === "app.py"
