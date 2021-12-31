@@ -62,7 +62,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         json_deserializer: Optional[Callable[[Union[Dict, str, bool, int, float]], str]] = None,
         json_default: Optional[Callable[[Any], Any]] = None,
         datefmt: Optional[str] = None,
-        use_datetime: bool = False,
+        use_datetime_directive: bool = False,
         log_record_order: Optional[List[str]] = None,
         utc: bool = False,
         **kwargs,
@@ -91,9 +91,9 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             String directives (strftime) to format log timestamp.
 
             See https://docs.python.org/3/library/time.html#time.strftime or
-        use_datetime: str, optional
+        use_datetime_directive: str, optional
             Interpret `datefmt` as a format string for `datetime.datetime.strftime`, rather than
-            `time.strftime`.
+            `time.strftime` - Only useful when used alongside `datefmt`.
 
             See https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior . This
             also supports a custom %F directive for milliseconds.
@@ -110,7 +110,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         self.json_serializer = json_serializer or partial(json.dumps, default=self.json_default, separators=(",", ":"))
 
         self.datefmt = datefmt
-        self.use_datetime = use_datetime
+        self.use_datetime = use_datetime_directive
 
         self.utc = utc
         self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
@@ -150,19 +150,25 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         # Reason 2 is that std logging doesn't support msec after TZ
         msecs = "%03d" % record.msecs
 
-        if self.use_datetime:
+        # Datetime format codes might be optionally used
+        # however it only makes a difference if `datefmt` is passed
+        # since format codes are the same except %f
+        if self.use_datetime and datefmt:
+            # record.msecs are microseconds, divide by 1000 and we get milliseconds
             timestamp = record.created + record.msecs / 1000
 
-            dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
-            if not self.utc:
-                # convert back to local time
-                dt = dt.astimezone()
+            if self.utc:
+                dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+            else:
+                # make sure local timezone is included
+                dt = datetime.fromtimestamp(timestamp).astimezone()
 
-            custom_fmt = (datefmt or self.default_time_format).replace(self.custom_ms_time_directive, msecs)
+            custom_fmt = datefmt.replace(self.custom_ms_time_directive, msecs)
             return dt.strftime(custom_fmt)
 
         elif datefmt:
-            return time.strftime(datefmt, record_ts)
+            custom_fmt = datefmt.replace(self.custom_ms_time_directive, msecs)
+            return time.strftime(custom_fmt, record_ts)
 
         custom_fmt = self.default_time_format.replace(self.custom_ms_time_directive, msecs)
         return time.strftime(custom_fmt, record_ts)
