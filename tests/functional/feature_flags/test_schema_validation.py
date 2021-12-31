@@ -9,6 +9,7 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
     CONDITION_VALUE,
     CONDITIONS_KEY,
     FEATURE_DEFAULT_VAL_KEY,
+    FEATURE_DEFAULT_VAL_TYPE_KEY,
     RULE_MATCH_VALUE,
     RULES_KEY,
     ConditionsValidator,
@@ -59,6 +60,14 @@ def test_valid_feature_dict():
     schema = {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False}}
     validator = SchemaValidator(schema)
     validator.validate()
+
+
+def test_invalid_feature_default_value_is_not_boolean():
+    #  feature is boolean but default value is a number, not a boolean
+    schema = {"my_feature": {FEATURE_DEFAULT_VAL_KEY: 3, FEATURE_DEFAULT_VAL_TYPE_KEY: True, RULES_KEY: []}}
+    validator = SchemaValidator(schema)
+    with pytest.raises(SchemaValidationError):
+        validator.validate()
 
 
 def test_invalid_rule():
@@ -305,3 +314,53 @@ def test_validate_rule_invalid_rule_name():
     # THEN raise SchemaValidationError
     with pytest.raises(SchemaValidationError, match="Rule name key must have a non-empty string"):
         RulesValidator.validate_rule_name(rule_name="", feature_name="dummy")
+
+
+def test_validate_rule_invalid_when_match_type_boolean_feature_is_set():
+    # GIVEN an invalid rule with non boolean when_match but feature type boolean
+    # WHEN calling validate_rule
+    # THEN raise SchemaValidationError
+    rule_name = "dummy"
+    rule = {
+        RULE_MATCH_VALUE: ["matched_value"],
+        CONDITIONS_KEY: {
+            CONDITION_ACTION: RuleAction.EQUALS.value,
+            CONDITION_KEY: 5,
+            CONDITION_VALUE: "a",
+        },
+    }
+    with pytest.raises(SchemaValidationError, match=f"rule_default_value' key must have be bool, rule={rule_name}"):
+        RulesValidator.validate_rule(rule=rule, rule_name=rule_name, feature_name="dummy", boolean_feature=True)
+
+
+def test_validate_rule_invalid_when_match_type_boolean_feature_is_not_set():
+    # GIVEN an invalid rule with non boolean when_match but feature type boolean. validate_rule is called without validate_rule=True # type: ignore # noqa: E501
+    # WHEN calling validate_rule
+    # THEN raise SchemaValidationError
+    rule_name = "dummy"
+    rule = {
+        RULE_MATCH_VALUE: ["matched_value"],
+        CONDITIONS_KEY: {
+            CONDITION_ACTION: RuleAction.EQUALS.value,
+            CONDITION_KEY: 5,
+            CONDITION_VALUE: "a",
+        },
+    }
+    with pytest.raises(SchemaValidationError, match=f"rule_default_value' key must have be bool, rule={rule_name}"):
+        RulesValidator.validate_rule(rule=rule, rule_name=rule_name, feature_name="dummy")
+
+
+def test_validate_rule_boolean_feature_is_set():
+    # GIVEN a rule with a boolean when_match and feature type boolean
+    # WHEN calling validate_rule
+    # THEN schema is validated and decalared as valid
+    rule_name = "dummy"
+    rule = {
+        RULE_MATCH_VALUE: True,
+        CONDITIONS_KEY: {
+            CONDITION_ACTION: RuleAction.EQUALS.value,
+            CONDITION_KEY: 5,
+            CONDITION_VALUE: "a",
+        },
+    }
+    RulesValidator.validate_rule(rule=rule, rule_name=rule_name, feature_name="dummy", boolean_feature=True)

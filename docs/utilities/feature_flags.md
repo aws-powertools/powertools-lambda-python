@@ -14,7 +14,7 @@ Feature flags are used to modify behaviour without changing the application's co
 
 **Static flags**. Indicates something is simply `on` or `off`, for example `TRACER_ENABLED=True`.
 
-**Dynamic flags**. Indicates something can have varying states, for example enable a premium feature for customer X not Y.
+**Dynamic flags**. Indicates something can have varying states, for example enable a list of premium features for customer X not Y.
 
 ???+ tip
     You can use [Parameters utility](parameters.md) for static flags while this utility can do both static and dynamic feature flags.
@@ -380,7 +380,115 @@ You can use `get_enabled_features` method for scenarios where you need a list of
     }
     ```
 
+### Beyond boolean feature flags
+
+???+ info "When is this useful?"
+    You might have a list of features to unlock for premium customers, unlock a specific set of features for admin users, etc.
+
+Feature flags can return any JSON values when `boolean_type` parameter is set to `False`. These can be dictionaries, list, string, integers, etc.
+
+
+=== "app.py"
+
+    ```python hl_lines="3 9 13 16 18"
+    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+
+    app_config = AppConfigStore(
+        environment="dev",
+        application="product-catalogue",
+        name="features"
+    )
+
+    feature_flags = FeatureFlags(store=app_config)
+
+    def lambda_handler(event, context):
+        # Get customer's tier from incoming request
+        ctx = { "tier": event.get("tier", "standard") }
+
+        # Evaluate `has_premium_features` base don customer's tier
+        premium_features: list[str] = feature_flags.evaluate(name="premium_features",
+                                                            context=ctx, default=False)
+        for feature in premium_features:
+            # enable premium features
+            ...
+    ```
+
+=== "event.json"
+
+    ```json hl_lines="3"
+    {
+        "username": "lessa",
+        "tier": "premium",
+        "basked_id": "random_id"
+    }
+    ```
+=== "features.json"
+
+    ```json hl_lines="3-4 7"
+    {
+        "premium_features": {
+            "boolean_type": false,
+            "default": [],
+            "rules": {
+                "customer tier equals premium": {
+                    "when_match": ["no_ads", "no_limits", "chat"],
+                    "conditions": [
+                        {
+                            "action": "EQUALS",
+                            "key": "tier",
+                            "value": "premium"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+    ```
+
 ## Advanced
+
+### Adjusting in-memory cache
+
+By default, we cache configuration retrieved from the Store for 5 seconds for performance and reliability reasons.
+
+You can override `max_age` parameter when instantiating the store.
+
+    ```python hl_lines="7"
+    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+
+    app_config = AppConfigStore(
+        environment="dev",
+        application="product-catalogue",
+        name="features",
+        max_age=300
+    )
+    ```
+
+### Getting fetched configuration
+
+???+ info "When is this useful?"
+	You might have application configuration in addition to feature flags in your store.
+
+	This means you don't need to make another call only to fetch app configuration.
+
+You can access the configuration fetched from the store via `get_raw_configuration` property within the store instance.
+
+=== "app.py"
+
+    ```python hl_lines="12"
+    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+
+    app_config = AppConfigStore(
+        environment="dev",
+        application="product-catalogue",
+        name="configuration",
+        envelope = "feature_flags"
+    )
+
+	feature_flags = FeatureFlags(store=app_config)
+
+	config = app_config.get_raw_configuration
+    ```
 
 ### Schema
 
@@ -390,11 +498,15 @@ This utility expects a certain schema to be stored as JSON within AWS AppConfig.
 
 A feature can simply have its name and a `default` value. This is either on or off, also known as a [static flag](#static-flags).
 
-```json hl_lines="2-3" title="minimal_schema.json"
+```json hl_lines="2-3 5-7" title="minimal_schema.json"
 {
-	"global_feature": {
-		"default": true
-	}
+    "global_feature": {
+        "default": true
+    },
+    "non_boolean_global_feature": {
+        "default": {"group": "read-only"},
+        "boolean_type": false
+    },
 }
 ```
 
@@ -405,28 +517,43 @@ If you need more control and want to provide context such as user group, permiss
 When adding `rules` to a feature, they must contain:
 
 1. A rule name as a key
-2. `when_match` boolean value that should be used when conditions match
+2. `when_match` boolean or JSON value that should be used when conditions match
 3. A list of `conditions` for evaluation
 
-```json hl_lines="4-11" title="feature_with_rules.json"
-{
-	"premium_feature": {
-		"default": false,
-		"rules": {
-			"customer tier equals premium": {
-				"when_match": true,
-				"conditions": [
-					{
-						"action": "EQUALS",
-						"key": "tier",
-						"value": "premium"
-					}
-				]
-			}
-		}
-	}
-}
-```
+ ```json hl_lines="4-11 19-26" title="feature_with_rules.json"
+ {
+     "premium_feature": {
+         "default": false,
+         "rules": {
+             "customer tier equals premium": {
+                 "when_match": true,
+                 "conditions": [
+                     {
+                         "action": "EQUALS",
+                         "key": "tier",
+                         "value": "premium"
+                     }
+                 ]
+             }
+         }
+     },
+     "non_boolean_premium_feature": {
+         "default": [],
+         "rules": {
+             "customer tier equals premium": {
+                 "when_match": ["remove_limits", "remove_ads"],
+                 "conditions": [
+                     {
+                         "action": "EQUALS",
+                         "key": "tier",
+                         "value": "premium"
+                     }
+                 ]
+             }
+         }
+     }
+ }
+ ```
 
 You can have multiple rules with different names. The rule engine will return the first result `when_match` of the matching rule configuration, or `default` value when none of the rules apply.
 
@@ -472,26 +599,9 @@ Action | Equivalent expression
 
 #### Rule engine flowchart
 
-Now that you've seen all properties of a feature flag schema, this flowchart describes how the rule engines makes a decision on when to return `True` or `False`.
+Now that you've seen all properties of a feature flag schema, this flowchart describes how the rule engine decides what value to return.
 
-![Rule engine ](../media/feat_flags_evaluation_workflow.png)
-
-### Adjusting in-memory cache
-
-By default, we cache configuration retrieved from the Store for 5 seconds for performance and reliability reasons.
-
-You can override `max_age` parameter when instantiating the store.
-
-```python hl_lines="7" title="Adjusting TTL"
-from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-app_config = AppConfigStore(
-	environment="dev",
-	application="product-catalogue",
-	name="features",
-	max_age=300
-)
-```
+![Rule engine ](../media/feature_flags_diagram.png)
 
 ### Envelope
 
@@ -543,24 +653,6 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
     }
     ```
 
-### Getting fetched configuration
-
-You can access the configuration fetched from the store via `get_raw_configuration` property within the store instance.
-
-```python hl_lines="12" title="Accessing entire configuration pulled from the store"
-from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-app_config = AppConfigStore(
-	environment="dev",
-	application="product-catalogue",
-	name="configuration",
-	envelope = "feature_flags"
-)
-
-feature_flags = FeatureFlags(store=app_config)
-
-config = app_config.get_raw_configuration
-```
 
 ### Built-in store provider
 
@@ -691,3 +783,5 @@ Breaking change | Recommendation
 ------------------------------------------------- | ---------------------------------------------------------------------------------
 `IN` RuleAction | Use `KEY_IN_VALUE` instead
 `NOT_IN` RuleAction | Use `KEY_NOT_IN_VALUE` instead
+`get_enabled_features` | Return type changes from `List[str]` to `Dict[str, Any]`. New return will contain a list of features enabled and their values. List of enabled features will be in `enabled_features` key to keep ease of assertion we have in Beta.
+`boolean_type` Schema | This **might** not be necessary anymore before we go GA. We will return either the `default` value when there are no rules as well as `when_match` value. This will simplify on-boarding if we can keep the same set of validations already offered.
