@@ -1,5 +1,21 @@
-from distutils.util import strtobool
 from typing import Any, Optional, Union
+
+
+def strtobool(value: str) -> bool:
+    """Convert a string representation of truth to True or False.
+
+    True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
+    are 'n', 'no', 'f', 'false', 'off', and '0'.  Raises ValueError if
+    'value' is anything else.
+
+    > note:: Copied from distutils.util.
+    """
+    value = value.lower()
+    if value in ("y", "yes", "t", "true", "on", "1"):
+        return True
+    if value in ("n", "no", "f", "false", "off", "0"):
+        return False
+    raise ValueError(f"invalid truth value {value!r}")
 
 
 def resolve_truthy_env_var_choice(env: str, choice: Optional[bool] = None) -> bool:

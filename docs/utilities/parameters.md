@@ -21,7 +21,8 @@ By default, we fetch parameters from System Manager Parameter Store, secrets fro
 
 This utility requires additional permissions to work as expected.
 
-!!! note "Different parameter providers require different permissions"
+???+ note
+    Different parameter providers require different permissions.
 
 Provider | Function/Method | IAM Permission
 ------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
@@ -38,121 +39,111 @@ You can retrieve a single parameter  using `get_parameter` high-level function.
 
 For multiple parameters, you can use `get_parameters` and pass a path to retrieve them recursively.
 
-=== "ssm_parameter_store.py"
+```python hl_lines="1 5 9" title="Fetching multiple parameters recursively"
+from aws_lambda_powertools.utilities import parameters
 
-    ```python hl_lines="1 5 9"
-    from aws_lambda_powertools.utilities import parameters
+def handler(event, context):
+	# Retrieve a single parameter
+	value = parameters.get_parameter("/my/parameter")
 
-    def handler(event, context):
-        # Retrieve a single parameter
-        value = parameters.get_parameter("/my/parameter")
-
-        # Retrieve multiple parameters from a path prefix recursively
-        # This returns a dict with the parameter name as key
-        values = parameters.get_parameters("/my/path/prefix")
-        for k, v in values.items():
-            print(f"{k}: {v}")
-    ```
+	# Retrieve multiple parameters from a path prefix recursively
+	# This returns a dict with the parameter name as key
+	values = parameters.get_parameters("/my/path/prefix")
+	for k, v in values.items():
+		print(f"{k}: {v}")
+```
 
 ### Fetching secrets
 
 You can fetch secrets stored in Secrets Manager using `get_secrets`.
 
-=== "secrets_manager.py"
+```python hl_lines="1 5" title="Fetching secrets"
+from aws_lambda_powertools.utilities import parameters
 
-    ```python hl_lines="1 5"
-    from aws_lambda_powertools.utilities import parameters
-
-    def handler(event, context):
-        # Retrieve a single secret
-        value = parameters.get_secret("my-secret")
-    ```
+def handler(event, context):
+	# Retrieve a single secret
+	value = parameters.get_secret("my-secret")
+```
 
 ### Fetching app configurations
-
-> New in 1.10.0
 
 You can fetch application configurations in AWS AppConfig using `get_app_config`.
 
 The following will retrieve the latest version and store it in the cache.
 
-=== "appconfig.py"
+```python hl_lines="1 5" title="Fetching latest config from AppConfig"
+from aws_lambda_powertools.utilities import parameters
 
-    ```python hl_lines="1 5"
-    from aws_lambda_powertools.utilities import parameters
-
-    def handler(event, context):
-        # Retrieve a single configuration, latest version
-        value: bytes = parameters.get_app_config(name="my_configuration", environment="my_env", application="my_app")
-    ```
+def handler(event, context):
+	# Retrieve a single configuration, latest version
+	value: bytes = parameters.get_app_config(name="my_configuration", environment="my_env", application="my_app")
+```
 
 ## Advanced
 
 ### Adjusting cache TTL
 
+???+ tip
+	`max_age` parameter is also available in high level functions like `get_parameter`, `get_secret`, etc.
+
 By default, we cache parameters retrieved in-memory for 5 seconds.
 
 You can adjust how long we should keep values in cache by using the param `max_age`, when using  `get()` or `get_multiple()` methods across all providers.
 
-=== "app.py"
+```python hl_lines="9" title="Caching parameter(s) value in memory for longer than 5 seconds"
+from aws_lambda_powertools.utilities import parameters
+from botocore.config import Config
 
-    ```python hl_lines="9"
-    from aws_lambda_powertools.utilities import parameters
-    from botocore.config import Config
+config = Config(region_name="us-west-1")
+ssm_provider = parameters.SSMProvider(config=config)
 
-    config = Config(region_name="us-west-1")
-    ssm_provider = parameters.SSMProvider(config=config)
+def handler(event, context):
+	# Retrieve a single parameter
+	value = ssm_provider.get("/my/parameter", max_age=60) # 1 minute
 
-    def handler(event, context):
-        # Retrieve a single parameter
-        value = ssm_provider.get("/my/parameter", max_age=60) # 1 minute
-
-        # Retrieve multiple parameters from a path prefix
-        values = ssm_provider.get_multiple("/my/path/prefix")
-        for k, v in values.items():
-            print(f"{k}: {v}")
-    ```
+	# Retrieve multiple parameters from a path prefix
+	values = ssm_provider.get_multiple("/my/path/prefix", max_age=60)
+	for k, v in values.items():
+		print(f"{k}: {v}")
+```
 
 ### Always fetching the latest
 
 If you'd like to always ensure you fetch the latest parameter from the store regardless if already available in cache, use `force_fetch` param.
 
-=== "app.py"
+```python hl_lines="5" title="Forcefully fetching the latest parameter whether TTL has expired or not"
+from aws_lambda_powertools.utilities import parameters
 
-    ```python hl_lines="5"
-    from aws_lambda_powertools.utilities import parameters
-
-    def handler(event, context):
-        # Retrieve a single parameter
-        value = parameters.get_parameter("/my/parameter", force_fetch=True)
-    ```
+def handler(event, context):
+	# Retrieve a single parameter
+	value = parameters.get_parameter("/my/parameter", force_fetch=True)
+```
 
 ### Built-in provider class
 
 For greater flexibility such as configuring the underlying SDK client used by built-in providers, you can use their respective Provider Classes directly.
 
-!!! tip "This can be used to retrieve values from other regions, change the retry behavior, etc."
+???+ tip
+    This can be used to retrieve values from other regions, change the retry behavior, etc.
 
 #### SSMProvider
 
-=== "ssm_parameter_store.py"
+```python hl_lines="5 9 12" title="Example with SSMProvider for further extensibility"
+from aws_lambda_powertools.utilities import parameters
+from botocore.config import Config
 
-    ```python hl_lines="5 9 12"
-    from aws_lambda_powertools.utilities import parameters
-    from botocore.config import Config
+config = Config(region_name="us-west-1")
+ssm_provider = parameters.SSMProvider(config=config) # or boto3_session=boto3.Session()
 
-    config = Config(region_name="us-west-1")
-    ssm_provider = parameters.SSMProvider(config=config)
+def handler(event, context):
+	# Retrieve a single parameter
+	value = ssm_provider.get("/my/parameter")
 
-    def handler(event, context):
-        # Retrieve a single parameter
-        value = ssm_provider.get("/my/parameter")
-
-        # Retrieve multiple parameters from a path prefix
-        values = ssm_provider.get_multiple("/my/path/prefix")
-        for k, v in values.items():
-            print(f"{k}: {v}")
-    ```
+	# Retrieve multiple parameters from a path prefix
+	values = ssm_provider.get_multiple("/my/path/prefix")
+	for k, v in values.items():
+		print(f"{k}: {v}")
+```
 
 The AWS Systems Manager Parameter Store provider supports two additional arguments for the `get()` and `get_multiple()` methods:
 
@@ -161,118 +152,114 @@ The AWS Systems Manager Parameter Store provider supports two additional argumen
 | **decrypt**   | `False` | Will automatically decrypt the parameter.
 | **recursive** | `True`  | For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix.
 
-> **Example**
+```python hl_lines="6 8" title="Example with get() and get_multiple()"
+from aws_lambda_powertools.utilities import parameters
 
-=== "ssm_parameter_store.py"
+ssm_provider = parameters.SSMProvider()
 
-    ```python hl_lines="6 8"
-    from aws_lambda_powertools.utilities import parameters
+def handler(event, context):
+	decrypted_value = ssm_provider.get("/my/encrypted/parameter", decrypt=True)
 
-    ssm_provider = parameters.SSMProvider()
-
-    def handler(event, context):
-        decrypted_value = ssm_provider.get("/my/encrypted/parameter", decrypt=True)
-
-        no_recursive_values = ssm_provider.get_multiple("/my/path/prefix", recursive=False)
-    ```
+	no_recursive_values = ssm_provider.get_multiple("/my/path/prefix", recursive=False)
+```
 
 #### SecretsProvider
 
-=== "secrets_manager.py"
+```python hl_lines="5 9" title="Example with SecretsProvider for further extensibility"
+from aws_lambda_powertools.utilities import parameters
+from botocore.config import Config
 
-    ```python hl_lines="5 9"
-    from aws_lambda_powertools.utilities import parameters
-    from botocore.config import Config
+config = Config(region_name="us-west-1")
+secrets_provider = parameters.SecretsProvider(config=config)
 
-    config = Config(region_name="us-west-1")
-    secrets_provider = parameters.SecretsProvider(config=config)
-
-    def handler(event, context):
-        # Retrieve a single secret
-        value = secrets_provider.get("my-secret")
-    ```
+def handler(event, context):
+	# Retrieve a single secret
+	value = secrets_provider.get("my-secret")
+```
 
 #### DynamoDBProvider
 
 The DynamoDB Provider does not have any high-level functions, as it needs to know the name of the DynamoDB table containing the parameters.
 
-**Local testing with DynamoDB Local**
-
-You can initialize the DynamoDB provider pointing to [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html) using **`endpoint_url`** parameter:
-
-=== "dynamodb_local.py"
-
-    ```python hl_lines="3"
-    from aws_lambda_powertools.utilities import parameters
-
-    dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table", endpoint_url="http://localhost:8000")
-    ```
-
 **DynamoDB table structure for single parameters**
 
 For single parameters, you must use `id` as the [partition key](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html#HowItWorks.CoreComponents.PrimaryKey) for that table.
 
-| id         | value  |
-|--------------|----------|
-| my-parameter | my-value |
+???+ example
 
-> **Example**
+	DynamoDB table with `id` partition key and `value` as attribute
+
+	| id         | value  |
+	|--------------|----------|
+	| my-parameter | my-value |
+
+With this table, `dynamodb_provider.get("my-param")` will return `my-value`.
 
 === "app.py"
-    With this table, the return value of `dynamodb_provider.get("my-param")` call will be `my-value`.
+	```python hl_lines="3 7"
+	from aws_lambda_powertools.utilities import parameters
 
-    ```python hl_lines="3 7"
-    from aws_lambda_powertools.utilities import parameters
+	dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table")
 
-    dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table")
+	def handler(event, context):
+		# Retrieve a value from DynamoDB
+		value = dynamodb_provider.get("my-parameter")
+	```
 
-    def handler(event, context):
-        # Retrieve a value from DynamoDB
-        value = dynamodb_provider.get("my-parameter")
-    ```
+=== "DynamoDB Local example"
+	You can initialize the DynamoDB provider pointing to [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html) using `endpoint_url` parameter:
+
+	```python hl_lines="3"
+	from aws_lambda_powertools.utilities import parameters
+
+	dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table", endpoint_url="http://localhost:8000")
+	```
 
 **DynamoDB table structure for multiple values parameters**
 
-If you want to be able to retrieve multiple parameters at once sharing the same `id`, your table needs to contain a sort key name `sk`.
+You can retrieve multiple parameters sharing the same `id` by having a sort key named `sk`.
 
-For example, if you want to retrieve multiple parameters having `my-hash-key` as ID:
+???+ example
 
-| id        | sk    |   value  |
-|-------------|---------|------------|
-| my-hash-key | param-a | my-value-a |
-| my-hash-key | param-b | my-value-b |
-| my-hash-key | param-c | my-value-c |
+	DynamoDB table with `id` primary key, `sk` as sort key` and `value` as attribute
 
-With this table, the return of `dynamodb_provider.get_multiple("my-hash-key")` call will be a dictionary like:
+	| id        | sk    |   value  |
+	|-------------|---------|------------|
+	| my-hash-key | param-a | my-value-a |
+	| my-hash-key | param-b | my-value-b |
+	| my-hash-key | param-c | my-value-c |
 
-```json
-{
-    "param-a": "my-value-a",
-    "param-b": "my-value-b",
-    "param-c": "my-value-c"
-}
-```
+With this table, `dynamodb_provider.get_multiple("my-hash-key")` will return a dictionary response in the shape of `sk:value`.
 
-> **Example**
+=== "app.py"
+	```python hl_lines="3 8"
+	from aws_lambda_powertools.utilities import parameters
 
-=== "app_multiple_parameters.py"
+	dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table")
 
-    ```python hl_lines="3 8"
-    from aws_lambda_powertools.utilities import parameters
+	def handler(event, context):
+		# Retrieve multiple values by performing a Query on the DynamoDB table
+		# This returns a dict with the sort key attribute as dict key.
+		parameters = dynamodb_provider.get_multiple("my-hash-key")
+		for k, v in parameters.items():
+			# k: param-a
+			# v: "my-value-a"
+			print(f"{k}: {v}")
+	```
 
-    dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table")
+=== "parameters dict response"
 
-    def handler(event, context):
-        # Retrieve multiple values by performing a Query on the DynamoDB table
-        # This returns a dict with the sort key attribute as dict key.
-        values = dynamodb_provider.get_multiple("my-hash-key")
-        for k, v in values.items():
-            print(f"{k}: {v}")
-    ```
+	```json
+	{
+		"param-a": "my-value-a",
+		"param-b": "my-value-b",
+		"param-c": "my-value-c"
+	}
+	```
 
-**Additional arguments**
+**Customizing DynamoDBProvider**
 
-The DynamoDB provider supports four additional arguments at initialization. These can be used if you require a custom table structure:
+DynamoDB provider can be customized at initialization to match your table structure:
 
 | Parameter      | Mandatory | Default | Description |
 |----------------|-----------|---------|-------------|
@@ -281,39 +268,33 @@ The DynamoDB provider supports four additional arguments at initialization. Thes
 | **sort_attr**  | No        | `sk`    | Range key for the DynamoDB table. You don't need to set this if you don't use the `get_multiple()` method.
 | **value_attr** | No        | `value` | Name of the attribute containing the parameter value.
 
-> **Example**
+```python hl_lines="3-8" title="Customizing DynamoDBProvider to suit your table design"
+from aws_lambda_powertools.utilities import parameters
 
-=== "app.py"
+dynamodb_provider = parameters.DynamoDBProvider(
+	table_name="my-table",
+	key_attr="MyKeyAttr",
+	sort_attr="MySortAttr",
+	value_attr="MyvalueAttr"
+)
 
-    ```python hl_lines="3-8"
-    from aws_lambda_powertools.utilities import parameters
-
-    dynamodb_provider = parameters.DynamoDBProvider(
-        table_name="my-table",
-        key_attr="MyKeyAttr",
-        sort_attr="MySortAttr",
-        value_attr="MyvalueAttr"
-    )
-
-    def handler(event, context):
-        value = dynamodb_provider.get("my-parameter")
-    ```
+def handler(event, context):
+	value = dynamodb_provider.get("my-parameter")
+```
 
 #### AppConfigProvider
 
-=== "app.py"
+```python hl_lines="5 9" title="Using AppConfigProvider"
+from aws_lambda_powertools.utilities import parameters
+from botocore.config import Config
 
-    ```python hl_lines="5 9"
-    from aws_lambda_powertools.utilities import parameters
-    from botocore.config import Config
+config = Config(region_name="us-west-1")
+appconf_provider = parameters.AppConfigProvider(environment="my_env", application="my_app", config=config)
 
-    config = Config(region_name="us-west-1")
-    appconf_provider = parameters.AppConfigProvider(environment="my_env", application="my_app", config=config)
-
-    def handler(event, context):
-        # Retrieve a single secret
-        value: bytes = appconf_provider.get("my_conf")
-    ```
+def handler(event, context):
+	# Retrieve a single secret
+	value: bytes = appconf_provider.get("my_conf")
+```
 
 ### Create your own provider
 
@@ -323,67 +304,65 @@ All transformation and caching logic is handled by the `get()` and `get_multiple
 
 Here is an example implementation using S3 as a custom parameter store:
 
-=== "custom_provider.py"
+```python hl_lines="3 6 17 27" title="Creating a S3 Provider to fetch parameters"
+import copy
 
-    ```python hl_lines="3 6 17 27"
-    import copy
+from aws_lambda_powertools.utilities import BaseProvider
+import boto3
 
-    from aws_lambda_powertools.utilities import BaseProvider
-    import boto3
+class S3Provider(BaseProvider):
+	bucket_name = None
+	client = None
 
-    class S3Provider(BaseProvider):
-        bucket_name = None
-        client = None
+	def __init__(self, bucket_name: str):
+		# Initialize the client to your custom parameter store
+		# E.g.:
 
-        def __init__(self, bucket_name: str):
-            # Initialize the client to your custom parameter store
-            # E.g.:
+		self.bucket_name = bucket_name
+		self.client = boto3.client("s3")
 
-            self.bucket_name = bucket_name
-            self.client = boto3.client("s3")
+	def _get(self, name: str, **sdk_options) -> str:
+		# Retrieve a single value
+		# E.g.:
 
-        def _get(self, name: str, **sdk_options) -> str:
-            # Retrieve a single value
-            # E.g.:
+		sdk_options["Bucket"] = self.bucket_name
+		sdk_options["Key"] = name
 
-            sdk_options["Bucket"] = self.bucket_name
-            sdk_options["Key"] = name
+		response = self.client.get_object(**sdk_options)
+		return
 
-            response = self.client.get_object(**sdk_options)
-            return
+	def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
+		# Retrieve multiple values
+		# E.g.:
 
-        def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
-            # Retrieve multiple values
-            # E.g.:
+		list_sdk_options = copy.deepcopy(sdk_options)
 
-            list_sdk_options = copy.deepcopy(sdk_options)
+		list_sdk_options["Bucket"] = self.bucket_name
+		list_sdk_options["Prefix"] = path
 
-            list_sdk_options["Bucket"] = self.bucket_name
-            list_sdk_options["Prefix"] = path
+		list_response = self.client.list_objects_v2(**list_sdk_options)
 
-            list_response = self.client.list_objects_v2(**list_sdk_options)
+		parameters = {}
 
-            parameters = {}
+		for obj in list_response.get("Contents", []):
+			get_sdk_options = copy.deepcopy(sdk_options)
 
-            for obj in list_response.get("Contents", []):
-                get_sdk_options = copy.deepcopy(sdk_options)
+			get_sdk_options["Bucket"] = self.bucket_name
+			get_sdk_options["Key"] = obj["Key"]
 
-                get_sdk_options["Bucket"] = self.bucket_name
-                get_sdk_options["Key"] = obj["Key"]
+			get_response = self.client.get_object(**get_sdk_options)
 
-                get_response = self.client.get_object(**get_sdk_options)
+			parameters[obj["Key"]] = get_response["Body"].read().decode()
 
-                parameters[obj["Key"]] = get_response["Body"].read().decode()
-
-            return parameters
-
-    ```
+		return parameters
+```
 
 ### Deserializing values with transform parameter
 
 For parameters stored in JSON or Base64 format, you can use the `transform` argument for deserialization.
 
-!!! info "The `transform` argument is available across all providers, including the high level functions"
+???+ info
+    The `transform` argument is available across all providers, including the high level functions.
 
 === "High level functions"
 
@@ -417,25 +396,26 @@ You can override this by setting the `raise_on_transform_error` argument to `Tru
 
 For example, if you have three parameters, */param/a*, */param/b* and */param/c*, but */param/c* is malformed:
 
-=== "partial_failures.py"
+```python hl_lines="9 16" title="Raising TransformParameterError at first malformed parameter"
+from aws_lambda_powertools.utilities import parameters
 
-    ```python hl_lines="9 14-15"
-    from aws_lambda_powertools.utilities import parameters
+ssm_provider = parameters.SSMProvider()
 
-    ssm_provider = parameters.SSMProvider()
+def handler(event, context):
+	# This will display:
+	# /param/a: [some value]
+	# /param/b: [some value]
+	# /param/c: None
+	values = ssm_provider.get_multiple("/param", transform="json")
+	for k, v in values.items():
+		print(f"{k}: {v}")
 
-    def handler(event, context):
-        # This will display:
-        # /param/a: [some value]
-        # /param/b: [some value]
-        # /param/c: None
-        values = ssm_provider.get_multiple("/param", transform="json")
-        for k, v in values.items():
-            print(f"{k}: {v}")
-
-        # This will raise a TransformParameterError exception
-        values = ssm_provider.get_multiple("/param", transform="json", raise_on_transform_error=True)
-    ```
+	try:
+		# This will raise a TransformParameterError exception
+		values = ssm_provider.get_multiple("/param", transform="json", raise_on_transform_error=True)
+	except parameters.exceptions.TransformParameterError:
+		...
+```
 
 #### Auto-transform values on suffix
 
@@ -443,18 +423,17 @@ If you use `transform` with `get_multiple()`, you might want to retrieve and tra
 
 You can do this with a single request by using `transform="auto"`. This will instruct any Parameter to to infer its type based on the suffix and transform it accordingly.
 
-!!! info "`transform="auto"` feature is available across all providers, including the high level functions"
+???+ info
+    `transform="auto"` feature is available across all providers, including the high level functions.
 
-=== "transform_auto.py"
+```python hl_lines="6" title="Deserializing parameter values based on their suffix"
+from aws_lambda_powertools.utilities import parameters
 
-    ```python hl_lines="6"
-    from aws_lambda_powertools.utilities import parameters
+ssm_provider = parameters.SSMProvider()
 
-    ssm_provider = parameters.SSMProvider()
-
-    def handler(event, context):
-        values = ssm_provider.get_multiple("/param", transform="auto")
-    ```
+def handler(event, context):
+	values = ssm_provider.get_multiple("/param", transform="auto")
+```
 
 For example, if you have two parameters with the following suffixes `.json` and `.binary`:
 
@@ -476,17 +455,15 @@ The return of `ssm_provider.get_multiple("/param", transform="auto")` call will 
 
 You can use arbitrary keyword arguments to pass it directly to the underlying SDK method.
 
-=== "ssm_parameter_store.py"
+```python hl_lines="8" title=""
+from aws_lambda_powertools.utilities import parameters
 
-    ```python hl_lines="7"
-    from aws_lambda_powertools.utilities import parameters
+secrets_provider = parameters.SecretsProvider()
 
-    secrets_provider = parameters.SecretsProvider()
-
-    def handler(event, context):
-        # The 'VersionId' argument will be passed to the underlying get_secret_value() call.
-        value = secrets_provider.get("my-secret", VersionId="e62ec170-6b01-48c7-94f3-d7497851a8d2")
-    ```
+def handler(event, context):
+	# The 'VersionId' argument will be passed to the underlying get_secret_value() call.
+	value = secrets_provider.get("my-secret", VersionId="e62ec170-6b01-48c7-94f3-d7497851a8d2")
+```
 
 Here is the mapping between this utility's functions and methods and the underlying SDK:
 
@@ -507,34 +484,34 @@ Here is the mapping between this utility's functions and methods and the underly
 
 The **`config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html) when constructing any of the built-in provider classes.
 
-> **Example**
-
+???+ tip
+	You can use a custom session for retrieving parameters cross-account/region and for snapshot testing.
 
 === "Custom session"
 
-    ```python hl_lines="2 4 5"
-    from aws_lambda_powertools.utilities import parameters
-    import boto3
+	```python hl_lines="2 4 5"
+	from aws_lambda_powertools.utilities import parameters
+	import boto3
 
-    boto3_session = boto3.session.Session()
-    ssm_provider = parameters.SSMProvider(boto3_session=boto3_session)
+	boto3_session = boto3.session.Session()
+	ssm_provider = parameters.SSMProvider(boto3_session=boto3_session)
 
-    def handler(event, context):
-        # Retrieve a single parameter
-        value = ssm_provider.get("/my/parameter")
-        ...
-    ```
+	def handler(event, context):
+		# Retrieve a single parameter
+		value = ssm_provider.get("/my/parameter")
+		...
+	```
 === "Custom config"
 
-    ```python hl_lines="2 4 5"
-    from aws_lambda_powertools.utilities import parameters
-    from botocore.config import Config
+	```python hl_lines="2 4 5"
+	from aws_lambda_powertools.utilities import parameters
+	from botocore.config import Config
 
-    boto_config = Config()
-    ssm_provider = parameters.SSMProvider(config=boto_config)
+	boto_config = Config()
+	ssm_provider = parameters.SSMProvider(config=boto_config)
 
-    def handler(event, context):
-        # Retrieve a single parameter
-        value = ssm_provider.get("/my/parameter")
-        ...
-    ```
+	def handler(event, context):
+		# Retrieve a single parameter
+		value = ssm_provider.get("/my/parameter")
+		...
+	```

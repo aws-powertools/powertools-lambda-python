@@ -7,7 +7,17 @@ from aws_lambda_powertools.utilities.feature_flags import ConfigurationStoreErro
 from aws_lambda_powertools.utilities.feature_flags.appconfig import AppConfigStore
 from aws_lambda_powertools.utilities.feature_flags.exceptions import StoreClientError
 from aws_lambda_powertools.utilities.feature_flags.feature_flags import FeatureFlags
-from aws_lambda_powertools.utilities.feature_flags.schema import RuleAction
+from aws_lambda_powertools.utilities.feature_flags.schema import (
+    CONDITION_ACTION,
+    CONDITION_KEY,
+    CONDITION_VALUE,
+    CONDITIONS_KEY,
+    FEATURE_DEFAULT_VAL_KEY,
+    FEATURE_DEFAULT_VAL_TYPE_KEY,
+    RULE_MATCH_VALUE,
+    RULES_KEY,
+    RuleAction,
+)
 from aws_lambda_powertools.utilities.parameters import GetParameterError
 
 
@@ -630,52 +640,6 @@ def test_multiple_features_enabled(mocker, config):
     assert enabled_list == expected_value
 
 
-def test_multiple_features_only_some_enabled(mocker, config):
-    expected_value = ["my_feature", "my_feature2", "my_feature4"]
-    mocked_app_config_schema = {
-        "my_feature": {  # rule will match here, feature is enabled due to rule match
-            "default": False,
-            "rules": {
-                "tenant id is contained in [6, 2]": {
-                    "when_match": True,
-                    "conditions": [
-                        {
-                            "action": RuleAction.IN.value,
-                            "key": "tenant_id",
-                            "value": ["6", "2"],
-                        }
-                    ],
-                }
-            },
-        },
-        "my_feature2": {
-            "default": True,
-        },
-        "my_feature3": {
-            "default": False,
-        },
-        # rule will not match here, feature is enabled by default
-        "my_feature4": {
-            "default": True,
-            "rules": {
-                "tenant id equals 7": {
-                    "when_match": False,
-                    "conditions": [
-                        {
-                            "action": RuleAction.EQUALS.value,
-                            "key": "tenant_id",
-                            "value": "7",
-                        }
-                    ],
-                }
-            },
-        },
-    }
-    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
-    enabled_list: List[str] = feature_flags.get_enabled_features(context={"tenant_id": "6", "username": "a"})
-    assert enabled_list == expected_value
-
-
 def test_get_feature_toggle_handles_error(mocker, config):
     # GIVEN a schema fetch that raises a ConfigurationStoreError
     schema_fetcher = init_fetcher_side_effect(mocker, config, GetParameterError())
@@ -1197,3 +1161,130 @@ def test_flags_greater_than_or_equal_match_2(mocker, config):
         default=False,
     )
     assert toggle == expected_value
+
+
+def test_non_boolean_feature_match(mocker, config):
+    expected_value = ["value1"]
+    # GIVEN
+    mocked_app_config_schema = {
+        "my_feature": {
+            FEATURE_DEFAULT_VAL_KEY: [],
+            FEATURE_DEFAULT_VAL_TYPE_KEY: False,
+            RULES_KEY: {
+                "tenant id equals 345345435": {
+                    RULE_MATCH_VALUE: expected_value,
+                    CONDITIONS_KEY: [
+                        {
+                            CONDITION_ACTION: RuleAction.EQUALS.value,
+                            CONDITION_KEY: "tenant_id",
+                            CONDITION_VALUE: "345345435",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+
+    # WHEN
+    features = init_feature_flags(mocker, mocked_app_config_schema, config)
+    feature_value = features.evaluate(name="my_feature", context={"tenant_id": "345345435"}, default=[])
+    # THEN
+    assert feature_value == expected_value
+
+
+def test_non_boolean_feature_with_no_rules(mocker, config):
+    expected_value = ["value1"]
+    # GIVEN
+    mocked_app_config_schema = {
+        "my_feature": {FEATURE_DEFAULT_VAL_KEY: expected_value, FEATURE_DEFAULT_VAL_TYPE_KEY: False}
+    }
+    # WHEN
+    features = init_feature_flags(mocker, mocked_app_config_schema, config)
+    feature_value = features.evaluate(name="my_feature", context={"tenant_id": "345345435"}, default=[])
+    # THEN
+    assert feature_value == expected_value
+
+
+def test_non_boolean_feature_with_no_rule_match(mocker, config):
+    expected_value = []
+    mocked_app_config_schema = {
+        "my_feature": {
+            FEATURE_DEFAULT_VAL_KEY: expected_value,
+            FEATURE_DEFAULT_VAL_TYPE_KEY: False,
+            RULES_KEY: {
+                "tenant id equals 345345435": {
+                    RULE_MATCH_VALUE: ["value1"],
+                    CONDITIONS_KEY: [
+                        {
+                            CONDITION_ACTION: RuleAction.EQUALS.value,
+                            CONDITION_KEY: "tenant_id",
+                            CONDITION_VALUE: "345345435",
+                        }
+                    ],
+                }
+            },
+        }
+    }
+
+    features = init_feature_flags(mocker, mocked_app_config_schema, config)
+    feature_value = features.evaluate(name="my_feature", context={}, default=[])
+    assert feature_value == expected_value
+
+
+def test_get_all_enabled_features_boolean_and_non_boolean(mocker, config):
+    expected_value = ["my_feature", "my_feature2", "my_non_boolean_feature"]
+    mocked_app_config_schema = {
+        "my_feature": {
+            FEATURE_DEFAULT_VAL_KEY: False,
+            RULES_KEY: {
+                "tenant id is contained in [6, 2]": {
+                    RULE_MATCH_VALUE: True,
+                    CONDITIONS_KEY: [
+                        {
+                            CONDITION_ACTION: RuleAction.IN.value,
+                            CONDITION_KEY: "tenant_id",
+                            CONDITION_VALUE: ["6", "2"],
+                        }
+                    ],
+                }
+            },
+        },
+        "my_feature2": {
+            FEATURE_DEFAULT_VAL_KEY: True,
+        },
+        "my_feature3": {
+            FEATURE_DEFAULT_VAL_KEY: False,
+        },
+        "my_non_boolean_feature": {
+            FEATURE_DEFAULT_VAL_KEY: {},
+            FEATURE_DEFAULT_VAL_TYPE_KEY: False,
+            RULES_KEY: {
+                "username equals 'a'": {
+                    RULE_MATCH_VALUE: {"group": "admin"},
+                    CONDITIONS_KEY: [
+                        {
+                            CONDITION_ACTION: RuleAction.EQUALS.value,
+                            CONDITION_KEY: "username",
+                            CONDITION_VALUE: "a",
+                        }
+                    ],
+                },
+            },
+        },
+    }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    enabled_list: List[str] = feature_flags.get_enabled_features(context={"tenant_id": "6", "username": "a"})
+    assert enabled_list == expected_value
+
+
+def test_get_all_enabled_features_non_boolean_truthy_defaults(mocker, config):
+    expected_value = ["my_truthy_feature"]
+    mocked_app_config_schema = {
+        "my_truthy_feature": {FEATURE_DEFAULT_VAL_KEY: {"a": "b"}, FEATURE_DEFAULT_VAL_TYPE_KEY: False},
+        "my_falsy_feature": {FEATURE_DEFAULT_VAL_KEY: {}, FEATURE_DEFAULT_VAL_TYPE_KEY: False},
+    }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    enabled_list: List[str] = feature_flags.get_enabled_features(context={"tenant_id": "6", "username": "a"})
+    assert enabled_list == expected_value

@@ -23,7 +23,7 @@ With this utility, batch records are processed individually – only messages th
 1.  `ReportBatchItemFailures` is set in your SQS, Kinesis, or DynamoDB event source properties
 2.  [A specific response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-batchfailurereporting-syntax){target="_blank"} is returned so Lambda knows which records should not be deleted during partial responses
 
-!!! warning "This utility lowers the chance of processing records more than once; it does not guarantee it"
+???+ warning "Warning: This utility lowers the chance of processing records more than once; it does not guarantee it"
     We recommend implementing processing logic in an [idempotent manner](idempotency.md){target="_blank"} wherever possible.
 
     You can find more details on how Lambda works with either [SQS](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html){target="_blank"}, [Kinesis](https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html){target="_blank"}, or [DynamoDB](https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html){target="_blank"} in the AWS Documentation.
@@ -225,7 +225,8 @@ Processing batches from SQS works in four stages:
 3.  Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
 4.  Return the appropriate response contract to Lambda via **`.response()`** processor method
 
-!!! info "This code example optionally uses Tracer and Logger for completion"
+???+ info
+    This code example optionally uses Tracer and Logger for completion.
 
 === "As a decorator"
 
@@ -354,7 +355,8 @@ Processing batches from Kinesis works in four stages:
 3.  Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
 4.  Return the appropriate response contract to Lambda via **`.response()`** processor method
 
-!!! info "This code example optionally uses Tracer and Logger for completion"
+???+ info
+    This code example optionally uses Tracer and Logger for completion.
 
 === "As a decorator"
 
@@ -483,7 +485,8 @@ Processing batches from Kinesis works in four stages:
 3.  Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
 4.  Return the appropriate response contract to Lambda via **`.response()`** processor method
 
-!!! info "This code example optionally uses Tracer and Logger for completion"
+???+ info
+    This code example optionally uses Tracer and Logger for completion.
 
 === "As a decorator"
 
@@ -630,7 +633,7 @@ All records in the batch will be passed to this handler for processing, even if 
 * **Partial success with some exceptions**. We will return a list of all item IDs/sequence numbers that failed processing
 * **All records failed to be processed**. We will raise `BatchProcessingError` exception with a list of all exceptions raised when processing
 
-!!! warning
+???+ warning
     You will not have access to the **processed messages** within the Lambda Handler; use context manager for that.
 
     All processing logic will and should be performed by the `record_handler` function.
@@ -783,57 +786,53 @@ Inheritance is importance because we need to access message IDs and sequence num
 
 Use the context manager to access a list of all returned values from your `record_handler` function.
 
-> Signature: List[Tuple[Union[SuccessResponse, FailureResponse]]]
-
 * **When successful**. We will include a tuple with `success`, the result of `record_handler`, and the batch record
 * **When failed**. We will include a tuple with `fail`, exception as a string, and the batch record
 
 
-=== "app.py"
+```python hl_lines="31-38" title="Accessing processed messages via context manager"
+import json
 
-    ```python hl_lines="31-38"
-    import json
+from typing import Any, List, Literal, Union
 
-    from typing import Any, List, Literal, Union
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import (BatchProcessor,
-                                                       EventType,
-                                                       FailureResponse,
-                                                       SuccessResponse,
-                                                       batch_processor)
-    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-    from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools import Logger, Tracer
+from aws_lambda_powertools.utilities.batch import (BatchProcessor,
+												   EventType,
+												   FailureResponse,
+												   SuccessResponse,
+												   batch_processor)
+from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
-    processor = BatchProcessor(event_type=EventType.SQS)
-    tracer = Tracer()
-    logger = Logger()
+processor = BatchProcessor(event_type=EventType.SQS)
+tracer = Tracer()
+logger = Logger()
 
 
-    @tracer.capture_method
-    def record_handler(record: SQSRecord):
-        payload: str = record.body
-        if payload:
-            item: dict = json.loads(payload)
-        ...
+@tracer.capture_method
+def record_handler(record: SQSRecord):
+	payload: str = record.body
+	if payload:
+		item: dict = json.loads(payload)
+	...
 
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context: LambdaContext):
-        batch = event["Records"]
-        with processor(records=batch, processor=processor):
-            processed_messages: List[Union[SuccessResponse, FailureResponse]] = processor.process()
+@logger.inject_lambda_context
+@tracer.capture_lambda_handler
+def lambda_handler(event, context: LambdaContext):
+	batch = event["Records"]
+	with processor(records=batch, processor=processor):
+		processed_messages: List[Union[SuccessResponse, FailureResponse]] = processor.process()
 
-        for messages in processed_messages:
-            for message in messages:
-                status: Union[Literal["success"], Literal["fail"]] = message[0]
-                result: Any = message[1]
-                record: SQSRecord = message[2]
+	for messages in processed_messages:
+		for message in messages:
+			status: Union[Literal["success"], Literal["fail"]] = message[0]
+			result: Any = message[1]
+			record: SQSRecord = message[2]
 
 
-        return processor.response()
-    ```
+	return processor.response()
+```
 
 
 ### Extending BatchProcessor
@@ -845,43 +844,40 @@ For these scenarios, you can subclass `BatchProcessor` and quickly override `suc
 * **`success_handler()`** – Keeps track of successful batch records
 * **`failure_handler()`** – Keeps track of failed batch records
 
-**Example**
+???+ example
+	Let's suppose you'd like to add a metric named `BatchRecordFailures` for each batch record that failed processing
 
-Let's suppose you'd like to add a metric named `BatchRecordFailures` for each batch record that failed processing:
+```python title="Extending failure handling mechanism in BatchProcessor"
 
-=== "app.py"
+from typing import Tuple
 
-    ```python
-
-    from typing import Tuple
-
-    from aws_lambda_powertools import Metrics
-    from aws_lambda_powertools.metrics import MetricUnit
-    from aws_lambda_powertools.utilities.batch import batch_processor, BatchProcessor, ExceptionInfo, EventType, FailureResponse
-    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+from aws_lambda_powertools import Metrics
+from aws_lambda_powertools.metrics import MetricUnit
+from aws_lambda_powertools.utilities.batch import batch_processor, BatchProcessor, ExceptionInfo, EventType, FailureResponse
+from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 
 
-    class MyProcessor(BatchProcessor):
-        def failure_handler(self, record: SQSRecord, exception: ExceptionInfo) -> FailureResponse:
-            metrics.add_metric(name="BatchRecordFailures", unit=MetricUnit.Count, value=1)
-            return super().failure_handler(record, exception)
+class MyProcessor(BatchProcessor):
+	def failure_handler(self, record: SQSRecord, exception: ExceptionInfo) -> FailureResponse:
+		metrics.add_metric(name="BatchRecordFailures", unit=MetricUnit.Count, value=1)
+		return super().failure_handler(record, exception)
 
-    processor = MyProcessor(event_type=EventType.SQS)
-    metrics = Metrics(namespace="test")
+processor = MyProcessor(event_type=EventType.SQS)
+metrics = Metrics(namespace="test")
 
 
-    @tracer.capture_method
-    def record_handler(record: SQSRecord):
-        payload: str = record.body
-        if payload:
-            item: dict = json.loads(payload)
-        ...
+@tracer.capture_method
+def record_handler(record: SQSRecord):
+	payload: str = record.body
+	if payload:
+		item: dict = json.loads(payload)
+	...
 
-    @metrics.log_metrics(capture_cold_start_metric=True)
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context: LambdaContext):
-        return processor.response()
-    ```
+@metrics.log_metrics(capture_cold_start_metric=True)
+@batch_processor(record_handler=record_handler, processor=processor)
+def lambda_handler(event, context: LambdaContext):
+	return processor.response()
+```
 
 ### Create your own partial processor
 
@@ -893,69 +889,67 @@ You can create your own partial batch processor from scratch by inheriting the `
 
 You can then use this class as a context manager, or pass it to `batch_processor` to use as a decorator on your Lambda handler function.
 
-=== "custom_processor.py"
+```python hl_lines="3 9 24 30 37 57" title="Creating a custom batch processor"
+from random import randint
 
-    ```python hl_lines="3 9 24 30 37 57"
-    from random import randint
+from aws_lambda_powertools.utilities.batch import BasePartialProcessor, batch_processor
+import boto3
+import os
 
-    from aws_lambda_powertools.utilities.batch import BasePartialProcessor, batch_processor
-    import boto3
-    import os
+table_name = os.getenv("TABLE_NAME", "table_not_found")
 
-    table_name = os.getenv("TABLE_NAME", "table_not_found")
+class MyPartialProcessor(BasePartialProcessor):
+	"""
+	Process a record and stores successful results at a Amazon DynamoDB Table
 
-    class MyPartialProcessor(BasePartialProcessor):
-        """
-        Process a record and stores successful results at a Amazon DynamoDB Table
+	Parameters
+	----------
+	table_name: str
+		DynamoDB table name to write results to
+	"""
 
-        Parameters
-        ----------
-        table_name: str
-            DynamoDB table name to write results to
-        """
+	def __init__(self, table_name: str):
+		self.table_name = table_name
 
-        def __init__(self, table_name: str):
-            self.table_name = table_name
+		super().__init__()
 
-            super().__init__()
+	def _prepare(self):
+		# It's called once, *before* processing
+		# Creates table resource and clean previous results
+		self.ddb_table = boto3.resource("dynamodb").Table(self.table_name)
+		self.success_messages.clear()
 
-        def _prepare(self):
-            # It's called once, *before* processing
-            # Creates table resource and clean previous results
-            self.ddb_table = boto3.resource("dynamodb").Table(self.table_name)
-            self.success_messages.clear()
+	def _clean(self):
+		# It's called once, *after* closing processing all records (closing the context manager)
+		# Here we're sending, at once, all successful messages to a ddb table
+		with ddb_table.batch_writer() as batch:
+			for result in self.success_messages:
+				batch.put_item(Item=result)
 
-        def _clean(self):
-            # It's called once, *after* closing processing all records (closing the context manager)
-            # Here we're sending, at once, all successful messages to a ddb table
-            with ddb_table.batch_writer() as batch:
-                for result in self.success_messages:
-                    batch.put_item(Item=result)
+	def _process_record(self, record):
+		# It handles how your record is processed
+		# Here we're keeping the status of each run
+		# where self.handler is the record_handler function passed as an argument
+		try:
+			result = self.handler(record) # record_handler passed to decorator/context manager
+			return self.success_handler(record, result)
+		except Exception as exc:
+			return self.failure_handler(record, exc)
 
-        def _process_record(self, record):
-            # It handles how your record is processed
-            # Here we're keeping the status of each run
-            # where self.handler is the record_handler function passed as an argument
-            try:
-                result = self.handler(record) # record_handler passed to decorator/context manager
-                return self.success_handler(record, result)
-            except Exception as exc:
-                return self.failure_handler(record, exc)
-
-        def success_handler(self, record):
-            entry = ("success", result, record)
-            message = {"age": result}
-            self.success_messages.append(message)
-            return entry
+	def success_handler(self, record):
+		entry = ("success", result, record)
+		message = {"age": result}
+		self.success_messages.append(message)
+		return entry
 
 
-    def record_handler(record):
-        return randint(0, 100)
+def record_handler(record):
+	return randint(0, 100)
 
-    @batch_processor(record_handler=record_handler, processor=MyPartialProcessor(table_name))
-    def lambda_handler(event, context):
-        return {"statusCode": 200}
-    ```
+@batch_processor(record_handler=record_handler, processor=MyPartialProcessor(table_name))
+def lambda_handler(event, context):
+	return {"statusCode": 200}
+```
 
 ### Caveats
 
@@ -999,7 +993,9 @@ def lambda_handler(event, context: LambdaContext):
 
 As there is no external calls, you can unit test your code with `BatchProcessor` quite easily.
 
-**Example**: Given a SQS batch where the first batch record succeeds and the second fails processing, we should have a single item reported in the function response.
+**Example**:
+
+Given a SQS batch where the first batch record succeeds and the second fails processing, we should have a single item reported in the function response.
 
 === "test_app.py"
 
@@ -1142,36 +1138,37 @@ When using Sentry.io for error monitoring, you can override `failure_handler` to
 
 > Credits to [Charles-Axel Dein](https://github.com/awslabs/aws-lambda-powertools-python/issues/293#issuecomment-781961732)
 
-=== "sentry_integration.py"
+```python hl_lines="4 7-8" title="Integrating error tracking with Sentry.io"
+from typing import Tuple
 
-    ```python hl_lines="4 7-8"
-    from typing import Tuple
-
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, FailureResponse
-    from sentry_sdk import capture_exception
+from aws_lambda_powertools.utilities.batch import BatchProcessor, FailureResponse
+from sentry_sdk import capture_exception
 
 
-    class MyProcessor(BatchProcessor):
-        def failure_handler(self, record, exception) -> FailureResponse:
-            capture_exception()  # send exception to Sentry
-            return super().failure_handler(record, exception)
-    ```
+class MyProcessor(BatchProcessor):
+	def failure_handler(self, record, exception) -> FailureResponse:
+		capture_exception()  # send exception to Sentry
+		return super().failure_handler(record, exception)
+```
 
 
 ## Legacy
 
-!!! tip "This is kept for historical purposes. Use the new [BatchProcessor](#processing-messages-from-sqs) instead."
+???+ tip
+    This is kept for historical purposes. Use the new [BatchProcessor](#processing-messages-from-sqs) instead.
 
 
 ### Migration guide
 
-!!! info "keep reading if you are using `sqs_batch_processor` or `PartialSQSProcessor`"
+???+ info
+    Keep reading if you are using `sqs_batch_processor` or `PartialSQSProcessor`.
 
 [As of Nov 2021](https://aws.amazon.com/about-aws/whats-new/2021/11/aws-lambda-partial-batch-response-sqs-event-source/){target="_blank"}, this is no longer needed as both SQS, Kinesis, and DynamoDB Streams offer this capability natively with one caveat - it's an [opt-in feature](#required-resources).
 
 Being a native feature, we no longer need to instantiate boto3 nor other customizations like exception suppressing – this lowers the cost of your Lambda function as you can delegate deleting partial failures to Lambda.
 
-!!! tip "It's also easier to test since it's mostly a [contract based response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-batchfailurereporting-syntax){target="_blank"}."
+???+ tip
+    It's also easier to test since it's mostly a [contract based response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-batchfailurereporting-syntax){target="_blank"}.
 
 You can migrate in three steps:
 

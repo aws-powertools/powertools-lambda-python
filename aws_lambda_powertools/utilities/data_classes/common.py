@@ -8,6 +8,7 @@ class DictWrapper:
 
     def __init__(self, data: Dict[str, Any]):
         self._data = data
+        self._json_data: Optional[Any] = None
 
     def __getitem__(self, key: str) -> Any:
         return self._data[key]
@@ -37,7 +38,7 @@ def get_header_value(
     name_lower = name.lower()
 
     return next(
-        # Iterate over the dict and do a case insensitive key comparison
+        # Iterate over the dict and do a case-insensitive key comparison
         (value for key, value in headers.items() if key.lower() == name_lower),
         # Default value is returned if no matches was found
         default_value,
@@ -65,7 +66,9 @@ class BaseProxyEvent(DictWrapper):
     @property
     def json_body(self) -> Any:
         """Parses the submitted body as json"""
-        return json.loads(self.decoded_body)
+        if self._json_data is None:
+            self._json_data = json.loads(self.decoded_body)
+        return self._json_data
 
     @property
     def decoded_body(self) -> str:
@@ -113,7 +116,7 @@ class BaseProxyEvent(DictWrapper):
         default_value: str, optional
             Default value if no value was found by name
         case_sensitive: bool
-            Whether to use a case sensitive look up
+            Whether to use a case-sensitive look up
         Returns
         -------
         str, optional
