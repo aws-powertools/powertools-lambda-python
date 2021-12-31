@@ -621,7 +621,7 @@ def test_use_datetime(stdout, service_name, utc):
         service=service_name,
         stream=stdout,
         datefmt="custom timestamp: milliseconds=%F microseconds=%f timezone=%z",
-        use_datetime=True,
+        use_datetime_directive=True,
         utc=utc,
     )
 

@@ -110,7 +110,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         self.json_serializer = json_serializer or partial(json.dumps, default=self.json_default, separators=(",", ":"))
 
         self.datefmt = datefmt
-        self.use_datetime = use_datetime_directive
+        self.use_datetime_directive = use_datetime_directive
 
         self.utc = utc
         self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
@@ -153,7 +153,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         # Datetime format codes might be optionally used
         # however it only makes a difference if `datefmt` is passed
         # since format codes are the same except %f
-        if self.use_datetime and datefmt:
+        if self.use_datetime_directive and datefmt:
             # record.msecs are microseconds, divide by 1000 and we get milliseconds
             timestamp = record.created + record.msecs / 1000
 
