@@ -696,3 +696,5 @@ Breaking change | Recommendation
 ------------------------------------------------- | ---------------------------------------------------------------------------------
 `IN` RuleAction | Use `KEY_IN_VALUE` instead
 `NOT_IN` RuleAction | Use `KEY_NOT_IN_VALUE` instead
+`get_enabled_features` | Return type changes from `List[str]` to `Dict[str, Any]`. New return will contain a list of features enabled and their values. List of enabled features will be in `enabled_features` key to keep ease of assertion we have in Beta.
+`boolean_type` Schema | This **might** not be necessary anymore before we go GA. We will return either the `default` value when there are no rules as well as `when_match` value. This will simplify on-boarding if we can keep the same set of validations already offered.
