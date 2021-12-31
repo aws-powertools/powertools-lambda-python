@@ -78,11 +78,11 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         custom logging handler e.g. logging.FileHandler("file.log")
 
     Parameters propagated to LambdaPowertoolsFormatter
-    ---------------------------------------------
+    --------------------------------------------------
     datefmt: str, optional
         String directives (strftime) to format log timestamp using `time`, by default it uses RFC
         3339.
-    use_datetime: str, optional
+    use_datetime_directive: str, optional
         Interpret `datefmt` as a format string for `datetime.datetime.strftime`, rather than
         `time.strftime`.
 
