@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional, Union, cast
 
 from ... import Logger
+from ...shared.types import JSONType
 from . import schema
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError
@@ -111,14 +112,15 @@ class FeatureFlags:
 
             # Context might contain PII data; do not log its value
             self.logger.debug(
-                f"Evaluating rule matching, rule={rule_name}, feature={feature_name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # type: ignore # noqa: E501
+                f"Evaluating rule matching, rule={rule_name}, feature={feature_name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # noqa: E501
             )
             if self._evaluate_conditions(rule_name=rule_name, feature_name=feature_name, rule=rule, context=context):
+                # Maintenance: Revisit before going GA.
                 return bool(rule_match_value) if boolean_feature else rule_match_value
 
         # no rule matched, return default value of feature
         self.logger.debug(
-            f"no rule matched, returning feature default, default={str(feat_default)}, name={feature_name}, boolean_feature={boolean_feature}"  # type: ignore # noqa: E501
+            f"no rule matched, returning feature default, default={str(feat_default)}, name={feature_name}, boolean_feature={boolean_feature}"  # noqa: E501
         )
         return feat_default
 
@@ -172,7 +174,7 @@ class FeatureFlags:
 
         return config
 
-    def evaluate(self, *, name: str, context: Optional[Dict[str, Any]] = None, default: Any) -> Any:
+    def evaluate(self, *, name: str, context: Optional[Dict[str, Any]] = None, default: JSONType) -> JSONType:
         """Evaluate whether a feature flag should be enabled according to stored schema and input context
 
         **Logic when evaluating a feature flag**
@@ -189,15 +191,15 @@ class FeatureFlags:
             Attributes that should be evaluated against the stored schema.
 
             for example: `{"tenant_id": "X", "username": "Y", "region": "Z"}`
-        default: Any
+        default: JSONType
             default value if feature flag doesn't exist in the schema,
             or there has been an error when fetching the configuration from the store
-            Can be boolean (the default for feature flags) or any JSON values for advanced features
+            Can be boolean or any JSON values for non-boolean features.
 
         Returns
         ------
-        bool
-            whether feature should be enabled or not for boolean feature flag or any other JSON type
+        JSONType
+            whether feature should be enabled (bool flags) or JSON value when non-bool feature matches
 
         Raises
         ------
@@ -220,17 +222,23 @@ class FeatureFlags:
 
         rules = feature.get(schema.RULES_KEY)
         feat_default = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
+        # Maintenance: Revisit before going GA. We might to simplify customers on-boarding by not requiring it
+        # for non-boolean flags. It'll need minor implementation changes, docs changes, and maybe refactor
+        # get_enabled_features. We can minimize breaking change, despite Beta label, by having a new
+        # method `get_matching_features` returning Dict[feature_name, feature_value]
         boolean_feature = feature.get(
             schema.FEATURE_DEFAULT_VAL_TYPE_KEY, True
         )  # backwards compatability ,assume feature flag
         if not rules:
             self.logger.debug(
-                f"no rules found, returning feature default, name={name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # type: ignore # noqa: E501
+                f"no rules found, returning feature default, name={name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # noqa: E501
             )
+            # Maintenance: Revisit before going GA. We might to simplify customers on-boarding by not requiring it
+            # for non-boolean flags.
             return bool(feat_default) if boolean_feature else feat_default
 
         self.logger.debug(
-            f"looking for rule match, name={name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # type: ignore # noqa: E501
+            f"looking for rule match, name={name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # noqa: E501
         )
         return self._evaluate_rules(
             feature_name=name, context=context, feat_default=feat_default, rules=rules, boolean_feature=boolean_feature

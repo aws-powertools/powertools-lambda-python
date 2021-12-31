@@ -153,6 +153,8 @@ class FeaturesValidator(BaseValidator):
         boolean_feature: bool = feature.get(FEATURE_DEFAULT_VAL_TYPE_KEY, True)
         # if feature is boolean_feature, default_value must be a boolean type.
         # default_value must exist
+        # Maintenance: Revisit before going GA. We might to simplify customers on-boarding by not requiring it
+        # for non-boolean flags.
         if default_value is None or (not isinstance(default_value, bool) and boolean_feature):
             raise SchemaValidationError(f"feature 'default' boolean key must be present, feature={name}")
         return boolean_feature
@@ -187,7 +189,7 @@ class RulesValidator(BaseValidator):
             conditions.validate()
 
     @staticmethod
-    def validate_rule(rule: Dict, rule_name: str, feature_name: str, boolean_feature: Optional[bool] = True):
+    def validate_rule(rule: Dict, rule_name: str, feature_name: str, boolean_feature: bool = True):
         if not rule or not isinstance(rule, dict):
             raise SchemaValidationError(f"Feature rule must be a dictionary, feature={feature_name}")
 
