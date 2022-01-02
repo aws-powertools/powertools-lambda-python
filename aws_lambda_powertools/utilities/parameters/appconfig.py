@@ -92,10 +92,8 @@ class AppConfigProvider(BaseProvider):
         ----------
         name: str
             Name of the configuration
-        environment: str
-            Environment of the configuration
         sdk_options: dict, optional
-            Dictionary of options that will be passed to the Parameter Store get_parameter API call
+            Dictionary of options that will be passed to the client's get_configuration API call
         """
 
         sdk_options["Configuration"] = name
