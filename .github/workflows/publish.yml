@@ -22,6 +22,7 @@ name: Publish to PyPi
 # 8. Builds a fresh version of docs including Changelog updates
 # 9. Push latest release source code to master using release title as the commit message
 # 10. Builds latest documentation for new release, and update latest alias pointing to the new release tag
+# 11. Close and notify all issues labeled "status/staged-next-release" about the release details
 
 #
 # === Fallback mechanism due to external failures ===
@@ -107,6 +108,12 @@ jobs:
         publish_dir: ./api
         keep_files: true
         destination_dir: latest/api
+    - name: Close issues related to this release
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const post_release = require('.github/workflows/post_release.js')
+          await post_release({github, context, core})
 
   sync_master:
     needs: release
