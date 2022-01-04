@@ -32,7 +32,7 @@ class APIGatewayRouteArn:
 
     @property
     def arn(self) -> str:
-        """Build an arn from it's parts
+        """Build an arn from its parts
         eg: arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/request"""
         return (
             f"arn:{self.partition}:execute-api:{self.region}:{self.aws_account_id}:{self.api_id}/{self.stage}/"
@@ -168,7 +168,7 @@ class APIGatewayAuthorizerRequestEvent(DictWrapper):
         default_value: str, optional
             Default value if no value was found by name
         case_sensitive: bool
-            Whether to use a case sensitive look up
+            Whether to use a case-sensitive look up
         Returns
         -------
         str, optional
@@ -270,7 +270,7 @@ class APIGatewayAuthorizerEventV2(DictWrapper):
         default_value: str, optional
             Default value if no value was found by name
         case_sensitive: bool
-            Whether to use a case sensitive look up
+            Whether to use a case-sensitive look up
         Returns
         -------
         str, optional
@@ -440,7 +440,7 @@ class APIGatewayAuthorizerResponse:
         if not self._resource_pattern.match(resource):
             raise ValueError(f"Invalid resource path: {resource}. Path should match {self.path_regex}")
 
-        if resource[:1] == "/":
+        if resource.startswith("/"):
             resource = resource[1:]
 
         resource_arn = APIGatewayRouteArn(

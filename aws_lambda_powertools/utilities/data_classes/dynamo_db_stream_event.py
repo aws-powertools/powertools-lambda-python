@@ -231,7 +231,7 @@ class DynamoDBRecord(DictWrapper):
 
     @property
     def dynamodb(self) -> Optional[StreamRecord]:
-        """The main body of the stream record, containing all of the DynamoDB-specific fields."""
+        """The main body of the stream record, containing all the DynamoDB-specific fields."""
         stream_record = self.get("dynamodb")
         return None if stream_record is None else StreamRecord(stream_record)
 
