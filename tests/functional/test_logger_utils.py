@@ -21,6 +21,8 @@ def log_level():
     class LogLevel(Enum):
         NOTSET = 0
         INFO = 20
+        WARNING = 30
+        CRITICAL = 50
 
     return LogLevel
 
@@ -83,7 +85,7 @@ def test_copy_config_to_ext_loggers_include(stdout, logger, log_level):
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
     # WHEN configuration copied from powertools logger to ALL external loggers AND our external logger used
-    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include=[logger.name])
+    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={logger.name})
     logger.info(msg)
     log = capture_logging_output(stdout)
 
@@ -103,7 +105,7 @@ def test_copy_config_to_ext_loggers_wrong_include(stdout, logger, log_level):
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
     # WHEN configuration copied from powertools logger to ALL external loggers AND our external logger used
-    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include=["non-existing-logger"])
+    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={"non-existing-logger"})
 
     # THEN
     assert not logger.handlers
@@ -116,7 +118,7 @@ def test_copy_config_to_ext_loggers_exclude(stdout, logger, log_level):
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
     # WHEN configuration copied from powertools logger to ALL external loggers AND our external logger used
-    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, exclude=[logger.name])
+    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, exclude={logger.name})
 
     # THEN
     assert not logger.handlers
@@ -134,7 +136,7 @@ def test_copy_config_to_ext_loggers_include_exclude(stdout, logger, log_level):
 
     # WHEN configuration copied from powertools logger to ALL external loggers AND our external logger used
     utils.copy_config_to_registered_loggers(
-        source_logger=powertools_logger, include=[logger_1.name, logger_2.name], exclude=[logger_1.name]
+        source_logger=powertools_logger, include={logger_1.name, logger_2.name}, exclude={logger_1.name}
     )
     logger_2.info(msg)
     log = capture_logging_output(stdout)
@@ -164,3 +166,28 @@ def test_copy_config_to_ext_loggers_clean_old_handlers(stdout, logger, log_level
     assert len(logger.handlers) == 1
     assert type(logger.handlers[0]) is logging.StreamHandler
     assert type(logger.handlers[0].formatter) is formatter.LambdaPowertoolsFormatter
+
+
+def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level):
+
+    msg = "test message"
+
+    # GIVEN a external logger and powertools logger initialized
+    logger = logger()
+    powertools_logger = Logger(service=service_name(), level=log_level.CRITICAL.value, stream=stdout)
+    level = log_level.WARNING.name
+
+    # WHEN configuration copied from powertools logger to ALL external loggers
+    # AND our external logger used with custom log_level
+    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={logger.name}, log_level=level)
+    logger.warning(msg)
+    log = capture_logging_output(stdout)
+
+    # THEN
+    assert len(logger.handlers) == 1
+    assert type(logger.handlers[0]) is logging.StreamHandler
+    assert type(logger.handlers[0].formatter) is formatter.LambdaPowertoolsFormatter
+    assert powertools_logger.level == log_level.CRITICAL.value
+    assert logger.level == log_level.WARNING.value
+    assert log["message"] == msg
+    assert log["level"] == log_level.WARNING.name
