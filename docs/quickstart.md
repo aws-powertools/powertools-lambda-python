@@ -7,7 +7,7 @@ Quickstart introducing core Powertools functionalities.
 
 ## Installation 
 With [SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) installed, you can follow this Quickstart step by step or you can build a project with the final Quickstart code you can play with.
-If you want to follow it all along, create a new empty project.
+If you follow it all along, create a new empty project.
 === "shell"
 ```bash
 sam init --runtime python3.9 --dependency-manager pip --app-template hello-world --name powertools-quickstart
@@ -18,10 +18,10 @@ If you want to play with the final code, then you can download it from [aws-samp
 sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 ```
 ### Configuration
-If you decide to deploy code from Quickstart make sure to [set up your AWS credentials](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started-set-up-credentials.html).
+If you deploy code from Quickstart make sure to [set up your AWS credentials](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started-set-up-credentials.html).
 
 ### Code example
-In the `powertools-quickstart` folder, we will modify the following files:
+In the `powertools-quickstart` folder, we modify the following files:
 
 * **app.py** - Application code.
 * **template.yaml** - AWS infrastructure configuration using SAM.
@@ -75,7 +75,7 @@ The SAM model configures API Gateway, which redirects traffic to Lambda for one 
 ### Run your code
 At each point, you have two ways to run your code. Locally and within your AWS account. Given that we use SAM, the two methods are just as simple.
 #### Local test
-SAM allows you to execute a server-less application locally. Perform the next command in a shell.
+SAM allows you to execute a serverless application locally. Perform the next command in a shell.
 ```bash
 > sam build && sam local start-api
 ...
@@ -113,7 +113,7 @@ Value               arn:aws:lambda:eu-central-1:123456789012:function:sam-app-He
 ------------------------------------------------------------------------------------------------------------------------------------------
 Successfully created/updated stack - sam-app in eu-central-1
 ```
-This command will build a package and deploy it to your AWS Account. In the output section, you will find the API Url against which you can launch requests. Now, you can trigger your endpoints.
+This command builds a package and deploy it to your AWS Account. You find the API Url against which you can launch requests in the output section. Now, you can trigger your endpoints.
 ```bash
 > curl https://1234567890.execute-api.eu-central-1.amazonaws.com/Prod/hello
 {"statusCode":200,"body":{"message":"hello unknown!"}}%
@@ -122,8 +122,8 @@ This command will build a package and deploy it to your AWS Account. In the outp
     For more details on the SAM deployment mechanism, see [link](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-deploy.html).
 
 ## API Gateway router
-Let's say we want to have another method that acts like an echo server. It takes user input (username) and output it to the caller. We would need to create an API with an URL path /hello/<name>, where the name string is the input from the user.
-One approach would be to create another lambda using the required method and set up the API gateway to call it.
+Let's say we want to have different method that acts like an echo server. It takes user input (username) and output it to the caller. We need to create an API with an URL path `/hello/<name>`, where the `name` string is the input from the user.
+One approach is to create another lambda with required method and set up the API gateway to call it.
 === "app_name.py"
 
     ```python
@@ -177,13 +177,13 @@ One approach would be to create another lambda using the required method and set
             Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
     ```
 
-This way certainly works for simple use-case. But what happens if your application gets bigger and we need to cover numerous URL paths and HTTP methods for them? If that is the case, we should:
+This way certainly works for simple use case. But what happens if your application gets bigger and we need to cover numerous URL paths and HTTP methods for them? If that is the case, we should:
 
 * Add a new lambda handler with business logic for each new URL path and HTTP method used.
 * Add a new Lambda configuration to a SAM template file to map the lambda function to the required path and HTTP URL method.
 
-This could result in a number of similar lambda files and large SAM configuration file with similar configuration sections. 
-In this case where we see that the addition of new URL paths lead to the boilerplate code, we should lean towards the routing approach.
+This could result in a number of alike lambda files and large SAM configuration file with similar configuration sections. 
+In this case if we see that the addition of new URL paths lead to the boilerplate code, we should lean towards the routing approach.
 !!! Info
     If you want a more detailed explanation of these two approaches, we have explained the considerations [here](.. /core/event_handler/api_gateway/#considerations)
 The simple code might look similar to the following code snippet.
@@ -261,13 +261,13 @@ The simple code might look similar to the following code snippet.
                 Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
     ```
 
-* We added two `hello_name` and `hello` methods (line 1-7). 
-* We added the `Router` class which allows us to record the method that should be called when the specific request arrives (line 10-23). 
-* We created the instance and added the configuration with the mapping of the processing methods and the http query method (line 26-28). 
+* We add two methods: `hello_name` and `hello` (line 1-7). 
+* We add the `Router` class which allows us to record the method that should be called when the specific request arrives (line 10-23). 
+* We creat the instance and added the configuration with the mapping of the processing methods and the http query method (line 26-28). 
 * In the lambda handler, we call router instance `get` method to retrieve a reference to the processing method (`hello` or `hello_name`) that will process the query (line 34). 
 * Finally, we run this method and send the results back to API Gateway (line 35).
 
-This approach allows us to simplify the configuration of our infrastructure since we have added all Gateway API paths in the `HelloWorldFunction` event section. We need to understand the internal structure of the API Gateway request events though, to deduce the requested path, http method and path parameters. This requires us to put additional engineering effort to provide proper error handling. Also, if we decide to use another event source for our lambda, since we are highly coupled it would require rewriting of our lambda handler to get the information we need.
+This approach simplifies the configuration of our infrastructure since we have added all API Gateway paths in the `HelloWorldFunction` event section. We need to understand the internal structure of the API Gateway request events, to deduce the requested path, http method and path parameters. This puts additional engineering effort to provide proper error handling. Also, if we decide to use another event source for our lambda, since we are highly coupled it requires rewriting of our lambda handler to get the information we need.
 Let's see how we can improve it with Powertools.
 
 === "app.py"
@@ -298,15 +298,15 @@ Let's see how we can improve it with Powertools.
     aws-lambda-powertools
     ```
 
-Powertools provides an `ApiGatewayResolver` class, which helps you understand the structure, no need to look it up.
+Powertools provides an `ApiGatewayResolver` class, which helps understand the structure, no need to look it up.
 We can also directly use the parameters passed in the request now, because we have added the route annotation as the decorator for our methods.
 For SAM to build our package correctly, we have specified lambda powertools package in our `requirement.txt` file. 
 
 !!! tip
     If you'd like to learn how python decorators work under the hood, you can follow [Real Python](https://realpython.com/primer-on-python-decorators/)'s article.
 ## Structured Logging
-In the next step, you have been given the task of proposing production quality logging capabilities to your lambda code.
-We want our log event to be in a JSON format. Also, You decided to follow [structured logging approach](https://docs.aws.amazon.com/lambda/latest/operatorguide/parse-logs.html). In a result, we expect easy to search, consistent logs containing enough context and data to analyse the status of our system. We can take advantage of CloudWatch Logs and Cloudwatch Insight for this purpose.
+In the next step, you decided to propose production quality logging capabilities to your lambda code.
+We want our log event to be in a JSON format. Also, You follow [structured logging approach](https://docs.aws.amazon.com/lambda/latest/operatorguide/parse-logs.html). In a result, we expect easy to search, consistent logs containing enough context and data to analyse the status of our system. We can take advantage of CloudWatch Logs and Cloudwatch Insight for this purpose.
 
 The first option could be to use a python logger in combination with the `pythonjsonlogger` library for simple structured logging.
 
@@ -352,7 +352,7 @@ The first option could be to use a python logger in combination with the `python
     aws-lambda-powertools
     python-json-logger
     ```
-On the first try, we did a couple of steps to set up our logging:
+On the first try, we do a couple of steps to set up our logging:
 
 * Create an application logger called `APP`.
 * Configure handler and formatter.
@@ -367,7 +367,8 @@ instead of
 [INFO]  2021-11-22T15:32:02.145Z        ba3bea3d-fe3a-45db-a2ce-72e813d55b91    Request from unknown received
 ```
 
-So far, so good! To make things easier, we want to add extra context to the logs. We can extract it from a lambda context or an event passed to lambda handler at the time of invocation. We have to make sure that we always add those specific attributes wherever a logger is used. Can we ensure that the required attributes are added automatically on our behalf without having to move them around? Yes! Powertools Logger to the rescue :-)
+So far, so good! To make things easier, we want to add extra context to the logs. 
+We can extract it from a lambda context or an event passed to lambda handler at the time of invocation. We add those specific attributes wherever a logger is used. Can we ensure that the required attributes are added automatically on our behalf without having to move them around? Yes! Powertools Logger to the rescue :-)
 === "app.py"
 
     ```python hl_lines="1 6 13 19 23"
@@ -398,10 +399,10 @@ So far, so good! To make things easier, we want to add extra context to the logs
         return app.resolve(event, context)
     ```
 
-We added powertools logger in line 6 and all the configuration is done. 
-We also used `logger.inject_lambda_context` decorator to inject lambda context into every log. We instruct logger to log correlation id taken from API Gateway and event automatically. Because powertools library adds a correlation identifier to each log, we can easily correlate all the logs generated for a specific request.
+We add powertools logger (line 6) and all the configuration is done. 
+We also use `logger.inject_lambda_context` decorator to inject lambda context into every log. We instruct logger to log correlation id taken from API Gateway and event automatically. Because powertools library adds a correlation identifier to each log, we can easily correlate all the logs generated for a specific request.
 
-As a result, we should see logs with following attributes.
+In result, we should see logs with following attributes.
 === "Example Application Structured Log"
 ```json
 {
@@ -419,12 +420,12 @@ As a result, we should see logs with following attributes.
     "correlation_id":"bf9b584c-e5d9-4ad5-af3d-db953f2b10dc"
     }
 ```
-By having structured logs like this, we might easily search and analyse them in [CloudWatch Logs Insight](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html).
+By having structured logs like this, we can easily search and analyse them in [CloudWatch Logs Insight](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html).
 === "CloudWatch Logs Insight Example"
 ![CloudWatch Logs Insight Example](./media/cloudwatch_logs_insight_example.png)
 ## Tracing
-The next task we have chosen to work on is to add an appropriate tracking mechanism to your stack. Developers want to be able to analyze traces of queries that pass via the API gateway to your Lambda. 
-With structured logs, it will be an important step to provide the observability of your application!
+The next improvement is to add an appropriate tracking mechanism to your stack. Developers want to analyze traces of queries that pass via the API gateway to your Lambda. 
+With structured logs, it is an important step to provide the observability of your application!
 The AWS service that has these capabilities is [AWS X-RAY](https://aws.amazon.com/xray/). How do we send application trace to the AWS X-RAY service then?
 Let's first explore how we can achieve this with [x-ray SDK](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html), and then try to simplify it with the Powertools library.
 
@@ -508,11 +509,11 @@ Let's first explore how we can achieve this with [x-ray SDK](https://docs.aws.am
             Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
     ```
 
-A lot has happened here. First, we imported required X-ray SDK classes. 
+A lot happens here. First, we import required X-ray SDK classes. 
 `xray_recorder` is a global AWS X-ray recorder class instance that starts/ends segments/sub-segments and sends them to the X-ray daemon.
 To build new sub-segments, we use `xray_recorder.in_subsegment` method as a context manager. 
-Using customized sub-segments, we were able to add visible granular sub-traces into our X-ray, separated by the method name.
-Also, we track lambda cold start by setting global variable outside of a handler. The variable is defined only upon lambda initialization. This information provides an overview of how often the runtime is reused by lambda invoked, which directly impacts perceived lambda performance and latency.
+We can add visible granular sub-traces into our X-ray by using customized sub-segments.
+Also, we track lambda cold start by setting global variable outside of a handler. The variable is defined only upon lambda initialization. This information provides an overview of how often the runtime is reused by lambda invoked, which directly impacts lambda performance and latency.
 
 To allow the tracking of our Lambda, we need to set it up in our SAM template and add `Tracing: Active` under lambda `Properties` section.
 !!! Info 
@@ -553,27 +554,27 @@ To allow the tracking of our Lambda, we need to set it up in our SAM template an
         return app.resolve(event, context)
     ```
     
-Thanks to the help of powertools tracer we have much cleaner code right now. 
-To make our methods visible in the traces, we added `@tracer.capture_method` decorator to the processing methods. 
-We added annotations directly in the code without adding it with the context handler using the `tracer.put_annotation` method. 
-Since we added the `@tracer.capture_lambda_handler` decorator for our `lambda_handler`, powertools automatically adds cold start information as an annotation. 
-It also automatically adds lambda response as a metadata into trace, so we don't need to worry about it as well.
+With powertools tracer we have much cleaner code right now. 
+To make our methods visible in the traces, we add `@tracer.capture_method` decorator to the processing methods. 
+We add annotations directly in the code without adding it with the context handler using the `tracer.put_annotation` method. 
+Since we add the `@tracer.capture_lambda_handler` decorator for our `lambda_handler`, powertools automatically adds cold start information as an annotation. 
+It also automatically append lambda response as a metadata into trace, so we don't need to worry about it as well.
 !!! tip 
     For differences between annotations and metadata in traces, please follow [link](https://awslabs.github.io/aws-lambda-powertools-python/latest/core/tracer/#annotations-metadata). 
 Therefore, you should see traces of your lambda in the X-ray console.
 === "Example X-RAY Console View"
 ![Tracer utility](./media/tracer_utility_showcase_2.png)
 
-You may also consider using **CloudWatch ServiceLens** which links the CloudWatch metrics and logs, in addition to traces from the AWS X-Ray.
+You may consider using **CloudWatch ServiceLens** which links the CloudWatch metrics and logs, in addition to traces from the AWS X-Ray.
 It gives you a complete view of your apps and their dependencies, making your services more observable. 
-From here, you can easily browse to specific logs in CloudWatch Logs Insight, Metrics Dashboard or Traces in CloudWatch X-Ray traces.
+From here, you can browse to specific logs in CloudWatch Logs Insight, Metrics Dashboard or Traces in CloudWatch X-Ray traces.
 === "Example CloudWatch ServiceLens View"
 ![CloudWatch ServiceLens View](./media/tracer_utility_showcase_3.png)
 !!! Info
     For more information on CloudWatch ServiceLens, please visit [link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ServiceLens.html).
 ## Custom Metrics
-The final step to provide complete observability is to add certain measures at the business level. 
-Lambda adds low-level technical metrics (such as Invocations, Duration, Error Count & Success Rate) to the CloudWatch metrics out of the box. 
+The final step to provide complete observability is to add business metrics (such as number of sales or reservations). 
+Lambda adds technical metrics (such as Invocations, Duration, Error Count & Success Rate) to the CloudWatch metrics out of the box. 
 Let's expand our application with custom metrics without Powertools to see how it works, then let's upgrade it with Powertools:-)
 
 === "app.py"
@@ -674,7 +675,7 @@ Let's expand our application with custom metrics without Powertools to see how i
 
     ```
 
-To add our custom metric in **CloudWatch** we added `boto3` cloudwatch client followed by creation of the new `put_metric_data` method that uses this client to put the metric in CloudWatch synchronously. We call it in our method `hello` and `hello_name`. We divide our measures by type of application and method. Thus, we can follow the frequency at which specific methods are called. We also need to add additional inline policy allowing our lambda to write metrics in the CloudWatch. In `template.yaml` we added `CloudWatchPutMetricPolicy` policy.
+To add custom metric in **CloudWatch** we add the `boto3` cloudwatch client. Next, we create the new `put_metric_data` method that uses this client to put the metric in CloudWatch synchronously. We call it in our method `hello` and `hello_name`. We divide our metrics by type of application and method. Thus, we can follow the frequency at which specific methods are called. We also need to add additional inline policy allowing our lambda to write metrics in the CloudWatch. In `template.yaml` we add `CloudWatchPutMetricPolicy` policy.
 !!! Info
     We use direct synchronous call to CloudWatch Metrics API. It will be visible in your AWS X-RAY traces as additional external call. Given your architecture scale, this approach might lead to disadvantages such as increased cost of measuring data collection and increased lambda latency.
 
@@ -725,7 +726,7 @@ To add our custom metric in **CloudWatch** we added `boto3` cloudwatch client fo
             logger.exception(e)
             raise
     ```
-We imported Powertools `Metric` class which we create metrics instance in line 10. We use it in the `hello` and `hello_name` method to first configure the dimension specific to the called method and we add our custom `AppMethodsInvocations` metric. To ensure that our metrics are aligned with the standard output and validated, we have added the metrics.log_metrics designer for our lambda_handler'.
+We import Powertools `Metric` class which we create metrics instance from (line 10). We use it in the `hello` and `hello_name` method to first configure the dimension specific to the called method and we add our custom `AppMethodsInvocations` metric. To ensure that our metrics are aligned with the standard output and validated, we add the `metrics.log_metrics` decorator'.
 Powertools Metrics uses [Amazon CloudWatch Embedded Metric Format (EMF)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html) to create custom metrics. In
 general we create log with specific format. This log, once pushed toward the CloudWatch Log Service, is automatically transformed into a CloudWatch metric.
 !!!Info
