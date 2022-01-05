@@ -1066,6 +1066,24 @@ def handler(event: Dict, context: LambdaContext) -> List:
 	return response.get("Buckets", [])
 ```
 
+**How can I enable powertools logging for imported libraries?**
+
+You can copy the Logger setup to all or sub-sets of registered external loggers. Use the `copy_config_to_registered_logger` method to do this. By default all registered loggers will be modified. You can change this behaviour by providing `include` and `exclude` attributes. You can also provide optional `log_level` attribute external loggers will be configured with.
+
+
+```python hl_lines="10" title="Cloning Logger config to all other registered standard loggers"
+import logging
+
+from aws_lambda_powertools import Logger
+from aws_lambda_powertools.logging import utils
+
+logger = Logger()
+
+external_logger = logging.logger()
+
+utils.copy_config_to_registered_loggers(source_logger=logger)
+external_logger.info("test message")
+
 **What's the difference between `append_keys` and `extra`?**
 
 Keys added with `append_keys` will persist across multiple log messages while keys added via `extra` will only be available in a given log message operation.
