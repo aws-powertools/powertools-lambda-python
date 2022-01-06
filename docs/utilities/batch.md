@@ -285,7 +285,7 @@ Processing batches from SQS works in four stages:
     @tracer.capture_lambda_handler
     def lambda_handler(event, context: LambdaContext):
         batch = event["Records"]
-        with processor(records=batch, processor=processor):
+        with processor(records=batch, handler=record_handler):
             processed_messages = processor.process() # kick off processing, return list[tuple]
 
         return processor.response()
@@ -413,7 +413,7 @@ Processing batches from Kinesis works in four stages:
     @tracer.capture_lambda_handler
     def lambda_handler(event, context: LambdaContext):
         batch = event["Records"]
-        with processor(records=batch, processor=processor):
+        with processor(records=batch, handler=record_handler):
             processed_messages = processor.process() # kick off processing, return list[tuple]
 
         return processor.response()
@@ -549,7 +549,7 @@ Processing batches from Kinesis works in four stages:
     @tracer.capture_lambda_handler
     def lambda_handler(event, context: LambdaContext):
         batch = event["Records"]
-        with processor(records=batch, processor=processor):
+        with processor(records=batch, handler=record_handler):
             processed_messages = processor.process() # kick off processing, return list[tuple]
 
         return processor.response()
@@ -821,7 +821,7 @@ def record_handler(record: SQSRecord):
 @tracer.capture_lambda_handler
 def lambda_handler(event, context: LambdaContext):
 	batch = event["Records"]
-	with processor(records=batch, processor=processor):
+	with processor(records=batch, handler=record_handler):
 		processed_messages: List[Union[SuccessResponse, FailureResponse]] = processor.process()
 
 	for messages in processed_messages:
