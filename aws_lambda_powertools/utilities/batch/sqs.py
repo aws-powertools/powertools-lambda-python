@@ -5,10 +5,12 @@ Batch SQS utilities
 """
 import logging
 import sys
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, cast
 
 import boto3
 from botocore.config import Config
+
+from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 
 from ...middleware_factory import lambda_handler_decorator
 from .base import BasePartialProcessor
@@ -84,11 +86,14 @@ class PartialSQSProcessor(BasePartialProcessor):
         *_, account_id, queue_name = self.records[0]["eventSourceARN"].split(":")
         return f"{self.client._endpoint.host}/{account_id}/{queue_name}"
 
-    def _get_entries_to_clean(self) -> List:
+    def _get_entries_to_clean(self) -> List[Dict[str, str]]:
         """
         Format messages to use in batch deletion
         """
-        return [{"Id": msg["messageId"], "ReceiptHandle": msg["receiptHandle"]} for msg in self.success_messages]
+        return [
+            {"Id": msg["messageId"], "ReceiptHandle": msg["receiptHandle"]}
+            for msg in cast(List[SQSRecord], self.success_messages)
+        ]
 
     def _process_record(self, record) -> Tuple:
         """

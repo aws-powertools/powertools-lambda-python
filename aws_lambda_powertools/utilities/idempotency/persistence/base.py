@@ -40,7 +40,7 @@ class DataRecord:
         idempotency_key,
         status: str = "",
         expiry_timestamp: Optional[int] = None,
-        response_data: Optional[str] = "",
+        response_data: str = "",
         payload_hash: Optional[str] = None,
     ) -> None:
         """
@@ -279,14 +279,14 @@ class BasePersistenceLayer(ABC):
         -------
 
         """
-        if not self.use_local_cache:
+        if not self.use_local_cache or self._cache is None:
             return
         if data_record.status == STATUS_CONSTANTS["INPROGRESS"]:
             return
         self._cache[data_record.idempotency_key] = data_record
 
     def _retrieve_from_cache(self, idempotency_key: str):
-        if not self.use_local_cache:
+        if not self.use_local_cache or self._cache is None:
             return
         cached_record = self._cache.get(key=idempotency_key)
         if cached_record:
@@ -296,7 +296,7 @@ class BasePersistenceLayer(ABC):
             self._delete_from_cache(idempotency_key=idempotency_key)
 
     def _delete_from_cache(self, idempotency_key: str):
-        if not self.use_local_cache:
+        if not self.use_local_cache or self._cache is None:
             return
         if idempotency_key in self._cache:
             del self._cache[idempotency_key]

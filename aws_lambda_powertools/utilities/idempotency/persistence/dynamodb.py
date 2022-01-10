@@ -130,7 +130,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             idempotency_key=item[self.key_attr],
             status=item[self.status_attr],
             expiry_timestamp=item[self.expiry_attr],
-            response_data=item.get(self.data_attr),
+            response_data=item.get(self.data_attr, ""),
             payload_hash=item.get(self.validation_key_attr),
         )
 

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, Generic, List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -49,7 +49,7 @@ class SqsMsgAttributeModel(BaseModel):
     #     return values # noqa: E800
 
 
-class SqsRecordModel(BaseModel):
+class SqsRecordModel(BaseModel, Generic[Model]):
     messageId: str
     receiptHandle: str
     body: Union[str, Model]

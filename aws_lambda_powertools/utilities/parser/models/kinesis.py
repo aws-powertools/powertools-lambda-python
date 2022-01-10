@@ -1,7 +1,7 @@
 import base64
 import logging
 from binascii import Error as BinAsciiError
-from typing import List, Union
+from typing import Generic, List, Union
 
 from pydantic import BaseModel, validator
 
@@ -10,7 +10,7 @@ from aws_lambda_powertools.utilities.parser.types import Literal, Model
 logger = logging.getLogger(__name__)
 
 
-class KinesisDataStreamRecordPayload(BaseModel):
+class KinesisDataStreamRecordPayload(BaseModel, Generic[Model]):
     kinesisSchemaVersion: str
     partitionKey: str
     sequenceNumber: str

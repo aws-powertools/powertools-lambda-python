@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Generic, List, Optional, Union
 
 from pydantic import BaseModel, Field
 from pydantic.networks import IPvAnyNetwork
@@ -56,7 +56,7 @@ class RequestContextV2(BaseModel):
     http: RequestContextV2Http
 
 
-class APIGatewayProxyEventV2Model(BaseModel):
+class APIGatewayProxyEventV2Model(BaseModel, Generic[Model]):
     version: str
     routeKey: str
     rawPath: str

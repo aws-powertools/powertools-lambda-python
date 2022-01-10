@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict, Generic, Union
 
 from pydantic import BaseModel
 
@@ -13,7 +13,7 @@ class AlbRequestContext(BaseModel):
     elb: AlbRequestContextData
 
 
-class AlbModel(BaseModel):
+class AlbModel(BaseModel, Generic[Model]):
     httpMethod: str
     path: str
     body: Union[str, Model]

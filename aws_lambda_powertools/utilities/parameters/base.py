@@ -15,6 +15,7 @@ DEFAULT_MAX_AGE_SECS = 5
 ExpirableValue = namedtuple("ExpirableValue", ["value", "ttl"])
 # These providers will be dynamically initialized on first use of the helper functions
 DEFAULT_PROVIDERS: Dict[str, Any] = {}
+MULTIPLE_VALUES_TYPE: Union[Dict[str, str], Dict[str, dict], Dict[str, bytes], Dict[str, None]]
 TRANSFORM_METHOD_JSON = "json"
 TRANSFORM_METHOD_BINARY = "binary"
 SUPPORTED_TRANSFORM_METHODS = [TRANSFORM_METHOD_JSON, TRANSFORM_METHOD_BINARY]
@@ -44,7 +45,7 @@ class BaseProvider(ABC):
         transform: Optional[str] = None,
         force_fetch: bool = False,
         **sdk_options,
-    ) -> Union[str, list, dict, bytes]:
+    ) -> Optional[Union[str, dict, bytes]]:
         """
         Retrieve a parameter value or return the cached value
 
@@ -81,6 +82,7 @@ class BaseProvider(ABC):
         # of supported transform is small and the probability that a given
         # parameter will always be used in a specific transform, this should be
         # an acceptable tradeoff.
+        value: Optional[Union[str, bytes, dict]] = None
         key = (name, transform)
 
         if not force_fetch and self._has_not_expired(key):
@@ -92,12 +94,12 @@ class BaseProvider(ABC):
         except Exception as exc:
             raise GetParameterError(str(exc))
 
-        if transform is not None:
+        if transform:
             if isinstance(value, bytes):
                 value = value.decode("utf-8")
             value = transform_value(value, transform)
-
-        self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
+            if value:
+                self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
 
         return value
 
@@ -146,26 +148,25 @@ class BaseProvider(ABC):
         TransformParameterError
             When the parameter provider fails to transform a parameter value.
         """
-
         key = (path, transform)
 
         if not force_fetch and self._has_not_expired(key):
             return self.store[key].value
 
         try:
-            values: Dict[str, Union[str, bytes, dict, None]] = self._get_multiple(path, **sdk_options)
+            values = self._get_multiple(path, **sdk_options)
         # Encapsulate all errors into a generic GetParameterError
         except Exception as exc:
             raise GetParameterError(str(exc))
 
-        if transform is not None:
-            for (key, value) in values.items():
-                _transform = get_transform_method(key, transform)
-                if _transform is None:
+        if transform:
+            transformed_values: dict = {}
+            for (item, value) in values.items():
+                _transform = get_transform_method(item, transform)
+                if not _transform:
                     continue
-
-                values[key] = transform_value(value, _transform, raise_on_transform_error)
-
+                transformed_values[item] = transform_value(value, _transform, raise_on_transform_error)
+            values.update(transformed_values)
         self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age))
 
         return values
@@ -217,7 +218,9 @@ def get_transform_method(key: str, transform: Optional[str] = None) -> Optional[
     return None
 
 
-def transform_value(value: str, transform: str, raise_on_transform_error: bool = True) -> Union[dict, bytes, None]:
+def transform_value(
+    value: str, transform: str, raise_on_transform_error: Optional[bool] = True
+) -> Optional[Union[dict, bytes]]:
     """
     Apply a transform to a value
 

@@ -1,12 +1,12 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Generic, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
 from aws_lambda_powertools.utilities.parser.types import Model
 
 
-class EventBridgeModel(BaseModel):
+class EventBridgeModel(BaseModel, Generic[Model]):
     version: str
     id: str  # noqa: A003,VNE003
     source: str

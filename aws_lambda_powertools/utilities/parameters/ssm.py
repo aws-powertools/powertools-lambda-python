@@ -95,7 +95,7 @@ class SSMProvider(BaseProvider):
         decrypt: bool = False,
         force_fetch: bool = False,
         **sdk_options
-    ) -> Union[str, list, dict, bytes]:
+    ) -> Optional[Union[str, dict, bytes]]:
         """
         Retrieve a parameter value or return the cached value
 

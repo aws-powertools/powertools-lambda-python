@@ -1,12 +1,12 @@
 from datetime import date
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Generic, List, Optional, Union
 
 from pydantic import BaseModel
 
 from aws_lambda_powertools.utilities.parser.types import Literal, Model
 
 
-class DynamoDBStreamChangedRecordModel(BaseModel):
+class DynamoDBStreamChangedRecordModel(BaseModel, Generic[Model]):
     ApproximateCreationDateTime: Optional[date]
     Keys: Dict[str, Dict[str, Any]]
     NewImage: Optional[Union[Dict[str, Any], Model]]

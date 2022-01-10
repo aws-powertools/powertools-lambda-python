@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Generic, List, Optional, Union
 
 from pydantic import BaseModel, root_validator
 from pydantic.networks import IPvAnyNetwork
@@ -76,7 +76,7 @@ class APIGatewayEventRequestContext(BaseModel):
         return values
 
 
-class APIGatewayProxyEventModel(BaseModel):
+class APIGatewayProxyEventModel(BaseModel, Generic[Model]):
     version: Optional[str]
     resource: str
     path: str

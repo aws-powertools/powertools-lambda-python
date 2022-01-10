@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, Generic, List, Optional, Union
 
 from pydantic import BaseModel, root_validator
 from pydantic.networks import HttpUrl
@@ -12,7 +12,7 @@ class SnsMsgAttributeModel(BaseModel):
     Value: str
 
 
-class SnsNotificationModel(BaseModel):
+class SnsNotificationModel(BaseModel, Generic[Model]):
     Subject: Optional[str]
     TopicArn: str
     UnsubscribeUrl: HttpUrl
