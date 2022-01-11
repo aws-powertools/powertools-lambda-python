@@ -36,8 +36,15 @@ class APIGatewayRouteArn:
         eg: arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/request"""
         return (
             f"arn:{self.partition}:execute-api:{self.region}:{self.aws_account_id}:{self.api_id}/{self.stage}/"
-            f"{self.http_method}/{self.resource}"
+            f"{self.http_method}/{self._resource}"
         )
+
+    @property
+    def _resource(self) -> str:
+        """Remove matching "/" from `resource`. To be replaced with built-in `removeprefix`"""
+        if self.resource.startswith("/"):
+            return self.resource[1:]
+        return self.resource
 
 
 def parse_api_gateway_arn(arn: str) -> APIGatewayRouteArn:
@@ -440,8 +447,6 @@ class APIGatewayAuthorizerResponse:
         if not self._resource_pattern.match(resource):
             raise ValueError(f"Invalid resource path: {resource}. Path should match {self.path_regex}")
 
-        resource = self._removeprefix(resource, "/")
-
         resource_arn = APIGatewayRouteArn(
             self.region, self.aws_account_id, self.api_id, self.stage, http_method, resource
         ).arn
@@ -452,14 +457,6 @@ class APIGatewayAuthorizerResponse:
             self._allow_routes.append(route)
         else:  # deny
             self._deny_routes.append(route)
-
-    @staticmethod
-    def _removeprefix(value: str, prefix: str) -> str:
-        """Remove matching prefix from value. To be replaced with built-in `removeprefix`"""
-        length = len(prefix)
-        if value[:length] == prefix:
-            return value[length:]
-        return value
 
     @staticmethod
     def _get_empty_statement(effect: str) -> Dict[str, Any]:
