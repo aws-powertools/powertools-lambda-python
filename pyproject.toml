@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "1.22.0"
+version = "1.24.0"
 description = "A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, batching, idempotency, feature flags, and more."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -29,9 +29,9 @@ pydantic = {version = "^1.8.2", optional = true }
 email-validator = {version = "*", optional = true }
 
 [tool.poetry.dev-dependencies]
-coverage = {extras = ["toml"], version = "^6.1"}
+coverage = {extras = ["toml"], version = "^6.2"}
 pytest = "^6.2.5"
-black = "^21.11b1"
+black = "^21.12b0"
 flake8 = "^4.0.1"
 flake8-black = "^0.2.3"
 flake8-builtins = "^1.5.3"
@@ -45,15 +45,15 @@ pytest-cov = "^3.0.0"
 pytest-mock = "^3.5.1"
 pdoc3 = "^0.10.0"
 pytest-asyncio = "^0.16.0"
-bandit = "^1.7.0"
+bandit = "^1.7.1"
 radon = "^5.1.0"
 xenon = "^0.8.0"
 flake8-eradicate = "^1.2.0"
-flake8-bugbear = "^21.9.2"
+flake8-bugbear = "^21.11.29"
 mkdocs-material = "^7.3.6"
 mkdocs-git-revision-date-plugin = "^0.3.1"
 mike = "^0.6.0"
-mypy = "^0.910"
+mypy = "^0.930"
 
 
 [tool.poetry.extras]
@@ -85,6 +85,9 @@ exclude_lines = [
     # Don't complain if non-runnable code isn't run:
     "if 0:",
     "if __name__ == .__main__.:",
+
+	# Ignore type function overload
+	"@overload",
 ]
 
 [tool.isort]

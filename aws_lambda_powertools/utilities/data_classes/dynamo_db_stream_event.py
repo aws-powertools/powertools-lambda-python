@@ -106,14 +106,13 @@ class AttributeValue(DictWrapper):
         return self.get("NS")
 
     @property
-    def null_value(self) -> Optional[bool]:
+    def null_value(self) -> None:
         """An attribute of type Null.
 
         Example:
             >>> {"NULL": True}
         """
-        item = self.get("NULL")
-        return None if item is None else bool(item)
+        return None
 
     @property
     def s_value(self) -> Optional[str]:

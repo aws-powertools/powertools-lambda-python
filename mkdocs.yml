@@ -28,6 +28,7 @@ nav:
       - utilities/idempotency.md
       - utilities/feature_flags.md
       - utilities/jmespath_functions.md
+      - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
 
 theme:
   name: material
@@ -49,6 +50,7 @@ theme:
     - navigation.sections
     - navigation.expand
     - navigation.top
+    - navigation.instant
   icon:
     repo: fontawesome/brands/github
   logo: media/aws-logo-light.svg

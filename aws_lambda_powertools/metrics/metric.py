@@ -1,7 +1,7 @@
 import json
 import logging
 from contextlib import contextmanager
-from typing import Dict, Optional, Union
+from typing import Dict, Generator, Optional, Union
 
 from .base import MetricManager, MetricUnit
 
@@ -61,7 +61,9 @@ class SingleMetric(MetricManager):
 
 
 @contextmanager
-def single_metric(name: str, unit: MetricUnit, value: float, namespace: Optional[str] = None):
+def single_metric(
+    name: str, unit: MetricUnit, value: float, namespace: Optional[str] = None
+) -> Generator[SingleMetric, None, None]:
     """Context manager to simplify creation of a single metric
 
     Example

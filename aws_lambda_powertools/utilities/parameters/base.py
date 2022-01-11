@@ -93,6 +93,8 @@ class BaseProvider(ABC):
             raise GetParameterError(str(exc))
 
         if transform is not None:
+            if isinstance(value, bytes):
+                value = value.decode("utf-8")
             value = transform_value(value, transform)
 
         self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
@@ -100,7 +102,7 @@ class BaseProvider(ABC):
         return value
 
     @abstractmethod
-    def _get(self, name: str, **sdk_options) -> str:
+    def _get(self, name: str, **sdk_options) -> Union[str, bytes]:
         """
         Retrieve parameter value from the underlying parameter store
         """

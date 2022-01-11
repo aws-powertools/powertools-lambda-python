@@ -3,9 +3,11 @@ import json
 import logging
 import zlib
 from datetime import datetime
-from typing import List
+from typing import List, Union
 
 from pydantic import BaseModel, Field, validator
+
+from aws_lambda_powertools.utilities.parser.types import Model
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +15,7 @@ logger = logging.getLogger(__name__)
 class CloudWatchLogsLogEvent(BaseModel):
     id: str  # noqa AA03 VNE003
     timestamp: datetime
-    message: str
+    message: Union[str, Model]
 
 
 class CloudWatchLogsDecode(BaseModel):

@@ -41,6 +41,7 @@ With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip insta
 * [Serverless Shopping cart](https://github.com/aws-samples/aws-serverless-shopping-cart)
 * [Serverless Airline](https://github.com/aws-samples/aws-serverless-airline-booking)
 * [Serverless E-commerce platform](https://github.com/aws-samples/aws-serverless-ecommerce-platform)
+* [Serverless GraphQL Nanny Booking Api](https://github.com/trey-rosius/babysitter_api)
 
 ## Credits
 

@@ -1,10 +1,5 @@
 ##### Labeler ##########################################################################################################
 labelPRBasedOnFilePath:
-  area/utilities:
-    - aws_lambda_powertools/utilities/*
-    - aws_lambda_powertools/utilities/**/*
-    - aws_lambda_powertools/middleware_factory/*
-    - aws_lambda_powertools/middleware_factory/**/*
   area/logger:
     - aws_lambda_powertools/logging/*
     - aws_lambda_powertools/logging/**/*
@@ -42,6 +37,13 @@ labelPRBasedOnFilePath:
   area/feature_flags:
     - aws_lambda_powertools/feature_flags/*
     - aws_lambda_powertools/feature_flags/**/*
+  area/jmespath_util:
+    - aws_lambda_powertools/utilities/jmespath_utils/*
+  area/utilities:
+    - aws_lambda_powertools/utilities/*
+    - aws_lambda_powertools/utilities/**/*
+    - aws_lambda_powertools/middleware_factory/*
+    - aws_lambda_powertools/middleware_factory/**/*
 
   documentation:
     - docs/*

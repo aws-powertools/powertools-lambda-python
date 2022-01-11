@@ -523,8 +523,9 @@ class ClaimsOverrideDetails(DictWrapper):
 class PreTokenGenerationTriggerEventResponse(DictWrapper):
     @property
     def claims_override_details(self) -> ClaimsOverrideDetails:
-        # Ensure we have a `claimsOverrideDetails` element
-        self._data["response"].setdefault("claimsOverrideDetails", {})
+        # Ensure we have a `claimsOverrideDetails` element and is not set to None
+        if self._data["response"].get("claimsOverrideDetails") is None:
+            self._data["response"]["claimsOverrideDetails"] = {}
         return ClaimsOverrideDetails(self._data["response"]["claimsOverrideDetails"])
 
 
@@ -686,7 +687,7 @@ class CreateAuthChallengeTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function that you
-        specify for the create auth challenge trigger.."""
+        specify for the create auth challenge trigger."""
         return self["request"].get("clientMetadata")
 
 
