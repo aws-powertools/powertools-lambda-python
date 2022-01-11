@@ -5,7 +5,7 @@ description: Powertools introduction
 Quickstart introducing core Powertools functionalities.
 
 
-## Installation 
+## Getting started 
 With [SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) installed, let's clone our sample project before we add one feature at a time.
 
 ???+ tip "Tip: Want to skip to the final project?"
