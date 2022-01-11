@@ -11,7 +11,7 @@ A suite of utilities for AWS Lambda functions to ease adopting best practices su
 
 ## Tenets
 
-This project separates core utilities that will be available in other runtimes vs general utilities that might not be available across all runtimes.
+Core utilities such as Tracing, Logging, Metrics, and Event Handler will be available across all Lambda Powertools runtimes. Additional utilities are subjective to each language ecosystem and customer demand.
 
 * **AWS Lambda only**. We optimise for AWS Lambda function environments and supported runtimes only. Utilities might work with web frameworks and non-Lambda environments, though they are not officially supported.
 * **Eases the adoption of best practices**. The main priority of the utilities is to facilitate best practices adoption, as defined in the AWS Well-Architected Serverless Lens; all other functionality is optional.
