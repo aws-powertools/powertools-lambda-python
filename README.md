@@ -51,7 +51,7 @@ With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip insta
 
 ## Connect
 
-* **AWS Developers Slack**: `#lambda-powertools`**
+* **AWS Developers Slack**: `#lambda-powertools`** - **[Invite, if you don't have an account](https://join.slack.com/t/awsdevelopers/shared_invite/zt-gu30gquv-EhwIYq3kHhhysaZ2aIX7ew)**
 * **Email**: aws-lambda-powertools-feedback@amazon.com
 
 ## License

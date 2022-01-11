@@ -4,9 +4,13 @@ description: Powertools introduction
 ---
 Quickstart introducing core Powertools functionalities.
 
+## Requirements
+* [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) installed.
+* [SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) installed.
+* [AWS Credentials to your AWS Account](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started-set-up-credentials.html) configured.
 
 ## Getting started 
-With [SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) installed, let's clone our sample project before we add one feature at a time.
+Let's clone our sample project before we add one feature at a time.
 
 ???+ tip "Tip: Want to skip to the final project?"
     Bootstrap directly via SAM CLI: `sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python`
@@ -14,13 +18,6 @@ With [SAM](https://docs.aws.amazon.com/serverless-application-model/latest/devel
 ```bash
 sam init --runtime python3.9 --dependency-manager pip --app-template hello-world --name powertools-quickstart
 ```
-If you want to play with the final code, then you can download it from [aws-samples](https://github.com/aws-samples/cookiecutter-aws-sam-python) github repository.
-=== "shell"
-```bash
-sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
-```
-### Configuration
-If you deploy code from Quickstart make sure to [set up your AWS credentials](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started-set-up-credentials.html).
 
 ### Code example
 Within the `powertools-quickstart` folder, we will modify the following files:
@@ -266,7 +263,7 @@ The simple code might look similar to the following code snippet.
 
 * We add two methods: `hello_name` and `hello` (line 1-7). 
 * We add the `Router` class which allows us to record the method that should be called when the specific request arrives (line 10-23). 
-* We creat the instance and added the configuration with the mapping of the processing methods and the http query method (line 26-28). 
+* We create the instance and added the configuration with the mapping of the processing methods and the http query method (line 26-28). 
 * In the lambda handler, we call router instance `get` method to retrieve a reference to the processing method (`hello` or `hello_name`) that will process the query (line 34). 
 * Finally, we run this method and send the results back to API Gateway (line 35).
 
