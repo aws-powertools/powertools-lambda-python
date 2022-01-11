@@ -455,7 +455,7 @@ class APIGatewayAuthorizerResponse:
 
     @staticmethod
     def _removeprefix(value: str, prefix: str) -> str:
-        """Remove matching prefix from value. To be replaced with builtin `removeprefix`"""
+        """Remove matching prefix from value. To be replaced with built-in `removeprefix`"""
         length = len(prefix)
         if value[:length] == prefix:
             return value[length:]
