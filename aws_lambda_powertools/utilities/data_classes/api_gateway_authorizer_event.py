@@ -28,7 +28,8 @@ class APIGatewayRouteArn:
         self.api_id = api_id
         self.stage = stage
         self.http_method = http_method
-        self.resource = resource
+        # Remove matching "/" from `resource`.
+        self.resource = resource.lstrip("/")
 
     @property
     def arn(self) -> str:
@@ -36,15 +37,8 @@ class APIGatewayRouteArn:
         eg: arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/request"""
         return (
             f"arn:{self.partition}:execute-api:{self.region}:{self.aws_account_id}:{self.api_id}/{self.stage}/"
-            f"{self.http_method}/{self._resource}"
+            f"{self.http_method}/{self.resource}"
         )
-
-    @property
-    def _resource(self) -> str:
-        """Remove matching "/" from `resource`. To be replaced with built-in `removeprefix`"""
-        if self.resource.startswith("/"):
-            return self.resource[1:]
-        return self.resource
 
 
 def parse_api_gateway_arn(arn: str) -> APIGatewayRouteArn:
