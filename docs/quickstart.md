@@ -69,7 +69,9 @@ Let's configure our base application to look like the following code snippet.
             Description: "API Gateway endpoint URL for Prod stage for Hello World function"
             Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
     ```
-Our lambda code consists of the `lambda_handler` method that is invoked by the API and the `hello` method that returns the results to the API gateway and is invoked by the handler itself.
+Our Lambda code consists of an entry point function named `lambda_handler`, and a `hello` function. 
+
+When API Gateway receives a request, Lambda will call our `lambda_handler` function, subsequently calling the `hello` function. API Gateway will use this response to return the correct HTTP Status Code and payload back to the caller.
 The SAM model configures API Gateway, which redirects traffic to Lambda for one path only: `hello`.
 !!! Warning 
     For simplicity, we do not set up authentication and authorisation in the example!
