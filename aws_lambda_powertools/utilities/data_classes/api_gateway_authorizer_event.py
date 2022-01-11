@@ -440,8 +440,7 @@ class APIGatewayAuthorizerResponse:
         if not self._resource_pattern.match(resource):
             raise ValueError(f"Invalid resource path: {resource}. Path should match {self.path_regex}")
 
-        if resource.startswith("/"):
-            resource = resource[1:]
+        resource = self._removeprefix(resource, "/")
 
         resource_arn = APIGatewayRouteArn(
             self.region, self.aws_account_id, self.api_id, self.stage, http_method, resource
@@ -453,6 +452,14 @@ class APIGatewayAuthorizerResponse:
             self._allow_routes.append(route)
         else:  # deny
             self._deny_routes.append(route)
+
+    @staticmethod
+    def _removeprefix(value: str, prefix: str) -> str:
+        """Remove matching prefix from value. To be replaced with builtin `removeprefix`"""
+        length = len(prefix)
+        if value[:length] == prefix:
+            return value[length:]
+        return value
 
     @staticmethod
     def _get_empty_statement(effect: str) -> Dict[str, Any]:
