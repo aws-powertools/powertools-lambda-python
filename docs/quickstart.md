@@ -23,7 +23,7 @@ sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 If you deploy code from Quickstart make sure to [set up your AWS credentials](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started-set-up-credentials.html).
 
 ### Code example
-In the `powertools-quickstart` folder, we modify the following files:
+Within the `powertools-quickstart` folder, we will modify the following files:
 
 * **app.py** - Application code.
 * **template.yaml** - AWS infrastructure configuration using SAM.
