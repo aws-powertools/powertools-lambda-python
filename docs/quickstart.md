@@ -45,26 +45,25 @@ Let's configure our base application to look like the following code snippet.
     ```yaml
     AWSTemplateFormatVersion: '2010-09-09'
     Transform: AWS::Serverless-2016-10-31
-    Description: >
-        Sample SAM Template for powertools-quickstart
+    Description: Sample SAM Template for powertools-quickstart
     Globals:
-    Function:
-        Timeout: 3
+        Function:
+            Timeout: 3
     Resources:
-    HelloWorldFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-        CodeUri: hello_world/
-        Handler: app.lambda_handler
-        Runtime: python3.9
-        Architectures:
-            - x86_64
-        Events:
-            HelloWorld:
-            Type: Api 
+        HelloWorldFunction:
+            Type: AWS::Serverless::Function
             Properties:
-                Path: /hello
-                Method: get
+                CodeUri: hello_world/
+                Handler: app.lambda_handler
+                Runtime: python3.9
+                Architectures:
+                    - x86_64
+                Events:
+                    HelloWorld:
+                      Type: Api 
+                      Properties:
+                          Path: /hello
+                          Method: get
     Outputs:
         HelloWorldApi:
             Description: "API Gateway endpoint URL for Prod stage for Hello World function"
