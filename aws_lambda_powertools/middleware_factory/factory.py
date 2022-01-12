@@ -122,9 +122,9 @@ def lambda_handler_decorator(decorator: Optional[Callable] = None, trace_executi
             )
 
         @functools.wraps(func)
-        def wrapper(event, context):
+        def wrapper(**kwargs_wrapper):
             try:
-                middleware = functools.partial(decorator, func, event, context, **kwargs)
+                middleware = functools.partial(decorator, func, **(kwargs_wrapper | kwargs))
                 if trace_execution:
                     tracer = Tracer(auto_patch=False)
                     with tracer.provider.in_subsegment(name=f"## {decorator.__qualname__}"):
