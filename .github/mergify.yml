@@ -26,5 +26,4 @@ pull_request_rules:
     actions:
       queue:
         method: squash
-        strict_method: merge
         commit_message: title+body
