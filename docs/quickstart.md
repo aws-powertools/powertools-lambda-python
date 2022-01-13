@@ -58,10 +58,10 @@ Let's configure our base application to look like the following code snippet.
                     - x86_64
                 Events:
                     HelloWorld:
-                      Type: Api 
-                      Properties:
-                          Path: /hello
-                          Method: get
+                        Type: Api 
+                        Properties:
+                            Path: /hello
+                            Method: get
     Outputs:
         HelloWorldApi:
             Description: "API Gateway endpoint URL for Prod stage for Hello World function"
@@ -142,8 +142,7 @@ One approach is to create another lambda with required method and set up the API
     ```yaml hl_lines="21-32"
     AWSTemplateFormatVersion: "2010-09-09"
     Transform: AWS::Serverless-2016-10-31
-    Description: > 
-        Sample SAM Template for powertools-quickstart
+    Description: Sample SAM Template for powertools-quickstart
     Globals:
         Function:
             Timeout: 3
@@ -151,27 +150,27 @@ One approach is to create another lambda with required method and set up the API
         HelloWorldFunction:
             Type: AWS::Serverless::Function
             Properties:
-            CodeUri: hello_world/
-            Handler: app.lambda_handler
-            Runtime: python3.9
-            Events:
-                HelloWorld:
-                Type: Api 
-                Properties:
-                    Path: /hello
-                    Method: get
+                CodeUri: hello_world/
+                Handler: app.lambda_handler
+                Runtime: python3.9
+                Events:
+                    HelloWorld:
+                        Type: Api 
+                        Properties:
+                            Path: /hello
+                            Method: get
         HelloWorldFunctionName:
             Type: AWS::Serverless::Function
             Properties:
-            CodeUri: hello_world/
-            Handler: app_name.lambda_handler
-            Runtime: python3.9
-            Events:
-                HelloWorldName:
-                Type: Api
-                Properties:
-                    Path: /hello/{name}
-                    Method: get
+                CodeUri: hello_world/
+                Handler: app_name.lambda_handler
+                Runtime: python3.9
+                Events:
+                    HelloWorldName:
+                        Type: Api
+                        Properties:
+                            Path: /hello/{name}
+                            Method: get
     Outputs:
         HelloWorldApi:
             Description: "API Gateway endpoint URL for Prod stage for Hello World function"
@@ -233,11 +232,10 @@ The simple code might look similar to the following code snippet.
     ```yaml hl_lines="15-25"
         AWSTemplateFormatVersion: "2010-09-09"
         Transform: AWS::Serverless-2016-10-31
-        Description: >
-            Sample SAM Template for powertools-quickstart
+        Description: Sample SAM Template for powertools-quickstart
         Globals:
             Function:
-            Timeout: 3
+                Timeout: 3
         Resources:
             HelloWorldFunction:
             Type: AWS::Serverless::Function
@@ -249,13 +247,13 @@ The simple code might look similar to the following code snippet.
                     HelloWorld:
                         Type: Api
                         Properties:
-                        Path: /hello
-                        Method: get
+                            Path: /hello
+                            Method: get
                     HelloWorldName:
                         Type: Api 
                         Properties:
-                        Path: /hello/{name}
-                        Method: get
+                            Path: /hello/{name}
+                            Method: get
         Outputs:
             HelloWorldApi:
                 Description: "API Gateway endpoint URL for Prod stage for Hello World function"
@@ -480,11 +478,10 @@ Let's first explore how we can achieve this with [x-ray SDK](https://docs.aws.am
     ```yaml hl_lines="15"
     AWSTemplateFormatVersion: "2010-09-09"
     Transform: AWS::Serverless-2016-10-31
-    Description: >
-        Sample SAM Template for powertools-quickstart
+    Description: Sample SAM Template for powertools-quickstart
     Globals:
-    Function:
-        Timeout: 3
+        Function:
+            Timeout: 3
     Resources:
         HelloWorldFunction:
             Type: AWS::Serverless::Function
@@ -495,15 +492,15 @@ Let's first explore how we can achieve this with [x-ray SDK](https://docs.aws.am
                 Tracing: Active
                 Events:
                     HelloWorld:
-                    Type: Api
-                    Properties:
-                        Path: /hello
-                        Method: get
+                        Type: Api
+                        Properties:
+                            Path: /hello
+                            Method: get
                     HelloWorldName:
-                    Type: Api 
-                    Properties:
-                        Path: /hello/{name}
-                        Method: get
+                        Type: Api 
+                        Properties:
+                            Path: /hello/{name}
+                            Method: get
     Outputs:
         HelloWorldApi:
             Description: "API Gateway endpoint URL for Prod stage for Hello World function"
@@ -643,8 +640,7 @@ Let's expand our application with custom metrics without Powertools to see how i
     ```yaml hl_lines="27 28"
     AWSTemplateFormatVersion: "2010-09-09"
     Transform: AWS::Serverless-2016-10-31
-    Description: >
-        Sample SAM Template for powertools-quickstart
+    Description: Sample SAM Template for powertools-quickstart
     Globals:
         Function:
             Timeout: 3
@@ -652,23 +648,23 @@ Let's expand our application with custom metrics without Powertools to see how i
         HelloWorldFunction:
             Type: AWS::Serverless::Function
             Properties:
-            CodeUri: hello_world/
-            Handler: app.lambda_handler
-            Runtime: python3.9
-            Tracing: Active
-            Events:
-                HelloWorld:
-                Type: Api
-                Properties:
-                    Path: /hello
-                    Method: get
-                HelloWorldName:
-                Type: Api
-                Properties:
-                    Path: /hello/{name}
-                    Method: get
-            Policies:
-                - CloudWatchPutMetricPolicy: {}
+                CodeUri: hello_world/
+                Handler: app.lambda_handler
+                Runtime: python3.9
+                Tracing: Active
+                Events:
+                    HelloWorld:
+                        Type: Api
+                        Properties:
+                            Path: /hello
+                            Method: get
+                    HelloWorldName:
+                        Type: Api
+                        Properties:
+                            Path: /hello/{name}
+                            Method: get
+                Policies:
+                    - CloudWatchPutMetricPolicy: {}
     Outputs:
         HelloWorldApi:
             Description: "API Gateway endpoint URL for Prod stage for Hello World function"
