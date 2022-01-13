@@ -19,13 +19,14 @@ Let's clone our sample project before we add one feature at a time.
 sam init --runtime python3.9 --dependency-manager pip --app-template hello-world --name powertools-quickstart
 ```
 
-### Code example
-Within the `powertools-quickstart` folder, we will modify the following files:
+### Project structure
+As we move forward, we will modify the following files within the `powertools-quickstart` folder:
 
 * **app.py** - Application code.
 * **template.yaml** - AWS infrastructure configuration using SAM.
 * **requirements.txt** - List of extra Python packages needed.
 
+### Code example
 Let's configure our base application to look like the following code snippet.
 === "app.py"
 
