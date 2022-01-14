@@ -8,19 +8,21 @@ This quickstart progressively introduces Lambda Powertools core utilities by usi
 ## Requirements
 
 * [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html){target="_blank"} and [configured with your credentials](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started-set-up-credentials.html){target="_blank"}.
-* [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html){target="_blank"} installed.
+* [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html){target="_blank"} installed.
 
 ## Getting started
+
 Let's clone our sample project before we add one feature at a time.
 
 ???+ tip "Tip: Want to skip to the final project?"
     Bootstrap directly via SAM CLI: `sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python`
-=== "shell"
-```bash
+
+```bash title="Use SAM CLI to initialize the sample project"
 sam init --runtime python3.9 --dependency-manager pip --app-template hello-world --name powertools-quickstart
 ```
 
 ### Project structure
+
 As we move forward, we will modify the following files within the `powertools-quickstart` folder:
 
 * **app.py** - Application code.
@@ -28,7 +30,9 @@ As we move forward, we will modify the following files within the `powertools-qu
 * **requirements.txt** - List of extra Python packages needed.
 
 ### Code example
+
 Let's configure our base application to look like the following code snippet.
+
 === "app.py"
 
     ```python
@@ -74,37 +78,40 @@ Let's configure our base application to look like the following code snippet.
     ```
 Our Lambda code consists of an entry point function named `lambda_handler`, and a `hello` function.
 
-When API Gateway receives a request, Lambda will call our `lambda_handler` function, subsequently calling the `hello` function. API Gateway will use this response to return the correct HTTP Status Code and payload back to the caller.
-The SAM model configures API Gateway, which redirects traffic to Lambda for one path only: `hello`.
+When API Gateway receives a HTTP GET request on `/hello` route, Lambda will call our `lambda_handler` function, subsequently calling the `hello` function. API Gateway will use this response to return the correct HTTP Status Code and payload back to the caller.
+
 !!! Warning
-    For simplicity, we do not set up authentication and authorization in the example! Feel free to [implement](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-controlling-access-to-apis.html) it on your own.
+    For simplicity, we do not set up authentication and authorization! You can find more information on how to implement it on [AWS SAM documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-controlling-access-to-apis.html){target="_blank"}.
 ### Run your code
-At each point, you have two ways to run your code. Locally and within your AWS account. Given that we use SAM, the two methods are just as simple.
+
+At each point, you have two ways to run your code: locally and within your AWS account.
+
 #### Local test
-SAM allows you to execute a serverless application locally. Perform the next command in a shell.
-```bash
+
+AWS SAM allows you to execute a serverless application locally by running `sam build && sam local start-api` in your preferred shell.
+
+```bash title="Build and run API Gateway locally"
 > sam build && sam local start-api
 ...
 2021-11-26 17:43:08  * Running on http://127.0.0.1:3000/ (Press CTRL+C to quit)
 ```
-As a result API endpoint will be exposed for you. You can trigger it with the `curl` command like in the following example.
-```bash
+
+As a result, a local API endpoint will be exposed and you can invoke it using your browser, or your preferred HTTP API client e.g., [Postman](https://www.postman.com/downloads/){target="_blank"}, [httpie](https://httpie.io/){target="_blank"}, etc.
+
+```bash title="Invoking our function locally via curl"
 > curl http://127.0.0.1:3000/hello
 {"message": "hello unknown!"}
 ```
-!!! info
-    To learn more about local testing, please visit [SAM local testing](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-start-api.html) page
-???+ tip "Tip: Want to use different tool for API testing?"
-    Instead of `curl` you have many other options to choose from.
 
-    * Choose different command line tool like `HTTPie`.
-    * Type the url in the browser directly
-    * Use REST API client like `Postman` or `SoupUI`.
-!!! warning
-    **Powertools Tracer** requires X-RAY service to work. This means that you will not see the traces locally. Roll it out on your AWS account instead.
-#### Remote test
-You may also deploy your application into AWS Account by issuing the following command.
-```bash
+!!! info
+    To learn more about local testing, please visit the [AWS SAM CLI local testing](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-start-api.html) documentation.
+
+
+#### Live test
+
+First, you need to deploy your application into your AWS Account by issuing `sam build && sam deploy --guided` command. This command builds a ZIP package of your source code, and deploy it to your AWS Account.
+
+```bash title="Build and deploy your serverless application"
 > sam build && sam deploy --guided
 ...
 CloudFormation outputs from deployed stack
@@ -125,14 +132,15 @@ Value               arn:aws:lambda:eu-central-1:123456789012:function:sam-app-He
 ------------------------------------------------------------------------------------------------------------------------------------------
 Successfully created/updated stack - sam-app in eu-central-1
 ```
-This command builds a package and deploy it to your AWS Account. You find the API Gateway URL path against which you can launch requests in the output section.
-Now, you can trigger your endpoints.
-```bash
+
+At the end of the deployment, you will find the API endpoint URL within `Outputs` section. You can use this URL to test your serverless application.
+
+```bash title="Invoking our application via API endpoint"
 > curl https://1234567890.execute-api.eu-central-1.amazonaws.com/Prod/hello
 {"message": "hello unknown!"}%
 ```
 !!! Info
-    For more details on the SAM deployment mechanism, see [link](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-deploy.html).
+    For more details on AWS SAM deployment mechanism, see [SAM Deploy reference docs](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-deploy.html).
 
 ## API Gateway router
 Let's expand our application with a new method. It takes  an username as a input and return it in the response.
@@ -450,6 +458,10 @@ By having structured logs like this, we can easily search and analyse them in [C
 === "CloudWatch Logs Insight Example"
 ![CloudWatch Logs Insight Example](./media/cloudwatch_logs_insight_example.png)
 ## Tracing
+
+!!! warning
+    **Tracer** uses AWS X-Ray and you will not see any traces when executing your function locally.
+
 The next improvement is to add an appropriate tracking mechanism to your stack. Developers want to analyze traces of queries that pass via the API gateway to your Lambda.
 With structured logs, it is an important step to provide the observability of your application!
 The AWS service that has these capabilities is [AWS X-RAY](https://aws.amazon.com/xray/). How do we send application trace to the AWS X-RAY service then?
