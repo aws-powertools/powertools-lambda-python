@@ -76,7 +76,7 @@ Our Lambda code consists of an entry point function named `lambda_handler`, and 
 When API Gateway receives a request, Lambda will call our `lambda_handler` function, subsequently calling the `hello` function. API Gateway will use this response to return the correct HTTP Status Code and payload back to the caller.
 The SAM model configures API Gateway, which redirects traffic to Lambda for one path only: `hello`.
 !!! Warning 
-    For simplicity, we do not set up authentication and authorisation in the example!
+    For simplicity, we do not set up authentication and authorization in the example! Feel free to [implement](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-controlling-access-to-apis.html) it on your own.
 ### Run your code
 At each point, you have two ways to run your code. Locally and within your AWS account. Given that we use SAM, the two methods are just as simple.
 #### Local test
