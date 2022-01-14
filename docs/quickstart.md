@@ -142,11 +142,15 @@ At the end of the deployment, you will find the API endpoint URL within `Outputs
 !!! Info
     For more details on AWS SAM deployment mechanism, see [SAM Deploy reference docs](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-deploy.html).
 
-## API Gateway router
-Let's expand our application with a new method. It takes  an username as a input and return it in the response.
+## Routing
 
-We decided to write another Lambda including required method. Next, we configure our API Gateway to expose this Lambda under a new unique path `/hello/{name}`.
-=== "app_name.py"
+### Adding a new route
+
+Let's expand our application with a new route - `/hello/{name}`. It will accept an username as a path input and return it in the response.
+
+For this to work, we could create a new Lambda function to handle incoming requests for `/hello/{name}` - It'd look like this:
+
+=== "hello_by_name.py"
 
     ```python
     import json
@@ -163,7 +167,7 @@ We decided to write another Lambda including required method. Next, we configure
 
 === "template.yaml"
 
-    ```yaml hl_lines="20-31"
+    ```yaml hl_lines="21-32"
     AWSTemplateFormatVersion: "2010-09-09"
     Transform: AWS::Serverless-2016-10-31
     Description: Sample SAM Template for powertools-quickstart
@@ -183,11 +187,12 @@ We decided to write another Lambda including required method. Next, we configure
                         Properties:
                             Path: /hello
                             Method: get
-        HelloWorldFunctionName:
+
+        HelloWorldByNameFunctionName:
             Type: AWS::Serverless::Function
             Properties:
                 CodeUri: hello_world/
-                Handler: app_name.lambda_handler
+                Handler: hello_by_name.lambda_handler
                 Runtime: python3.9
                 Events:
                     HelloWorldName:
@@ -201,20 +206,26 @@ We decided to write another Lambda including required method. Next, we configure
             Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
     ```
 
-This way certainly works for simple use case. But what happens if your application gets bigger and we need to cover numerous URL paths and HTTP methods for them? If that is the case, we should:
+???+ question
+    But what happens if your application gets bigger and we need to cover numerous URL paths and HTTP methods for them?
 
-* Add a new Lambda handler with business logic for each new URL path and HTTP method used.
-* Add a new Lambda configuration to a SAM template file to map the Lambda function to the required path and HTTP URL method.
+**This would quickly become non-trivial to maintain**. Adding new Lambda function for each path, or multiple if/else to handle several routes & HTTP Methods can be error prone.
 
-This could result in a number of alike Lambda files and large SAM configuration file with similar configuration sections.
-if we see that the addition of new URL paths lead to the boilerplate code, we should lean towards the routing approach.
-!!! Info
-    If you want a more detailed explanation of these two approaches, we have explained the considerations [here](.. /core/event_handler/api_gateway/#considerations)
+### Creating our own router
 
-The simple code might look similar to the following code snippet.
+???+ question
+    What if we create a simple router to reduce boilerplate?
+
+We could group similar routes and intents, separate read and write operations resulting in fewer functions. It doesn't address the boilerplate routing code, but maybe it will be easier to add additional URLs.
+
+!!! Info "Info: You might be already asking yourself about mono vs micro-functions"
+    If you want a more detailed explanation of these two approaches, head over to the [trade-offs on each approach](../core/event_handler/api_gateway/#considerations){target="_blank"} later.
+
+A first attempt at the routing logic might look similar to the following code snippet.
+
 === "app.py"
 
-    ```python hl_lines="4 9 13 29-31 37-38"
+    ```python hl_lines="4 9 13 27-29 35-36"
         import json
 
 
@@ -237,11 +248,9 @@ The simple code might look similar to the following code snippet.
             def get(self, path, method):
                 try:
                     route = self.routes[f"{path}-{method}"]
-                except:
-                    print("Cannot route request to correct method")
-                    raise NotImplemented
+                except KeyError:
+                    raise RuntimeError(f"Cannot route request to correct method. path={path}, method={method}")
                 return route
-
 
         router = Router()
         router.set(path="/hello", method="GET", handler=hello)
@@ -257,7 +266,7 @@ The simple code might look similar to the following code snippet.
 
 === "template.yaml"
 
-    ```yaml hl_lines="15-25"
+    ```yaml hl_lines="15-24"
         AWSTemplateFormatVersion: "2010-09-09"
         Transform: AWS::Serverless-2016-10-31
         Description: Sample SAM Template for powertools-quickstart
@@ -288,15 +297,26 @@ The simple code might look similar to the following code snippet.
                 Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
     ```
 
-* We add two methods: `hello_name` and `hello` (line 4,9).
-* We add the `Router` class which allows us to record the method that should be called when the specific request arrives (line 13).
-* We create the instance and added the configuration with the mapping of the processing methods and the http query method (line 29-31).
-* In the Lambda handler, we call router instance `get` method to retrieve a reference to the processing method (`hello` or `hello_name`).(line 37).
-* Finally, we run this method and send the results back to API Gateway (line 38).
+Let's break this down:
 
-This approach simplifies the configuration of our infrastructure since we have added all API Gateway paths in the `HelloWorldFunction` event section. We need to understand the internal structure of the API Gateway request events, to deduce the requested path, http method and path parameters. This puts additional engineering effort to provide proper error handling. Also, if we decide to use another event source for our Lambda, since we are highly coupled it requires rewriting of our Lambda handler to get the information we need.
+* **L4-9**: We defined two `hello_name` and `hello` functions to handle `/hello/{name}` and `/hello` routes
+* **L13:** We added a `Router` class to map a path, a method, and the function to call
+* **L27-29**: We create a `Router` instance and map both `/hello` and `/hello/{name}`
+* **L35:** We use Router's `get` method to retrieve a reference to the processing method (`hello` or `hello_name`)
+* **L36:** Finally, we run this method and send the results back to API Gateway
 
-Let's see how we can improve it with Powertools.
+This approach simplifies the configuration of our infrastructure since we have added all API Gateway paths in the `HelloWorldFunction` event section.
+
+However, it forces us to understand the internal structure of the API Gateway request events, responses, and it could lead to other errors such as CORS not being handled properly, error handling, etc.
+
+### Simplifying with Event Handler
+
+We can massively simplify cross-cutting concerns while keeping it lightweight by using [Event Handler](./core/event_handler/api_gateway.md){target="_blank"}
+
+!!! tip
+    This is available for both [REST API (API Gateway, ALB)](./core/event_handler/api_gateway.md){target="_blank"} and [GraphQL API (AppSync)](./core/event_handler/appsync.md){target="_blank"}.
+
+Let's include Lambda Powertools as a dependency in `requirement.txt`, and use Event Handler to refactor our previous example.
 
 === "app.py"
 
@@ -310,12 +330,12 @@ Let's see how we can improve it with Powertools.
 
     @app.get("/hello/<name>")
     def hello_name(name):
-        return {"statusCode": 200, "body": json.dumps({"message": f"hello {name}!"})}
+        return {"message": f"hello {name}!"}
 
 
     @app.get("/hello")
     def hello():
-        return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
+        return {"message": "hello unknown!"}
 
 
     def lambda_handler(event, context):
@@ -327,10 +347,17 @@ Let's see how we can improve it with Powertools.
     aws-lambda-powertools
     ```
 
-Powertools provides an `ApiGatewayResolver` class, which helps understand the structure, no need to look it up.
+Use `sam build && sam local start-api` and try run it locally again.
 
-We have added the route annotation as the decorator for our methods. It enables us to use the parameters passed in the request directly.
-We have also specified Lambda Powertools package in our `requirement.txt` file to ensure SAM is able to build our Lambda.
+???+ note
+    If you're coming from [Flask](https://flask.palletsprojects.com/en/2.0.x/){target="_blank"}, you will be familiar with this experience already. [Event Handler for API Gateway](./core/event_handler/api_gateway.md){target="_blank"} uses `ApiGatewayResolver` to give a Flask-like experience while staying true to our tenet `Keep it lean`.
+
+We have added the route annotation as the decorator for our methods. It enables us to use the parameters passed in the request directly, and our responses are simply dictionaries.
+
+Lastly, we used `return app.resolve(event, context)` so Event Handler can resolve routes, inject the current request, handle serialization, route validation, etc.
+
+From here, we could handle [404 routes](./core/event_handler/api_gateway.md#handling-not-found-routes){target="_blank"}, [error handling](./core/event_handler/api_gateway.md#http://127.0.0.1:8000/core/event_handler/api_gateway/#exception-handling){target="_blank"}, [access query strings, payload, etc.](./core/event_handler/api_gateway.md#http://127.0.0.1:8000/core/event_handler/api_gateway#accessing-request-details){target="_blank"}.
+
 
 !!! tip
     If you'd like to learn how python decorators work under the hood, you can follow [Real Python](https://realpython.com/primer-on-python-decorators/)'s article.
