@@ -362,10 +362,16 @@ From here, we could handle [404 routes](./core/event_handler/api_gateway.md#hand
 !!! tip
     If you'd like to learn how python decorators work under the hood, you can follow [Real Python](https://realpython.com/primer-on-python-decorators/)'s article.
 ## Structured Logging
-In the next step, you decided to propose production quality logging capabilities to your Lambda code.
-We want our log event to be in a JSON format. Also, You follow [structured logging approach](https://docs.aws.amazon.com/lambda/latest/operatorguide/parse-logs.html). In a result, we expect easy to search, consistent logs containing enough context and data to analyse the status of our system. We can take advantage of CloudWatch Logs and Cloudwatch Insight for this purpose.
 
-The first option could be to use a python logger in combination with the `pythonjsonlogger` library for simple structured logging.
+Over time, you realize that searching logs as text results in poor observability, it's hard to create metrics from, enumerate common exceptions, etc.
+
+Then, you decided to propose production quality logging capabilities to your Lambda code. You found out that by having logs as `JSON` you can [structure them](https://docs.aws.amazon.com/lambda/latest/operatorguide/parse-logs.html), so that you can use any Log Analytics tool out there to quickly analyze them.
+
+This helps not only in searching, but produces consistent logs containing enough context and data to ask arbitrary questions on the status of your system. We can take advantage of CloudWatch Logs and Cloudwatch Insight for this purpose.
+
+### Logs as JSON with pythonjsonlogger
+
+The first option could be to use the standard Python Logger, and use a specialized library like `pythonjsonlogger` to create a JSON Formatter.
 
 === "app.py"
 
@@ -378,7 +384,7 @@ The first option could be to use a python logger in combination with the `python
 
     from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
-    logger = logging.getLogger("APP")
+    logger = logging.getLogger("hello")
     logHandler = logging.StreamHandler()
     formatter = jsonlogger.JsonFormatter(fmt="%(asctime)s %(levelname)s %(name)s %(message)s")
     logHandler.setFormatter(formatter)
@@ -410,35 +416,54 @@ The first option could be to use a python logger in combination with the `python
     aws-lambda-powertools
     python-json-logger
     ```
-On the first try, we do a couple of steps to set up our logging:
 
-* Create an application logger called `APP`.
-* Configure handler and formatter.
-* Set log level.
+With just a few lines our logs will now output to `JSON` format. We've taken the following steps to make that work:
+
+* **L9**: Creates an application logger named `hello`
+* **L10-13**: Configures handler and formatter
+* **L14**: Sets the logging level set in the `LOG_LEVEL` environment variable, or `INFO` as a sentinel value
 
 After that, we use this logger in our application code to record the required information. We see logs structured as follows:
-```json
-{"asctime": "2021-11-22 15:32:02,145", "levelname": "INFO", "name": "APP", "message": "Request from unknown received"}
-```
-instead of
-```json
-[INFO]  2021-11-22T15:32:02.145Z        ba3bea3d-fe3a-45db-a2ce-72e813d55b91    Request from unknown received
-```
 
-So far, so good! To make things easier, we want to add extra context to the logs.
-We can extract it from a Lambda context or an event passed to Lambda handler at the time of invocation. We add those specific attributes wherever a logger is used.
+=== "JSON output"
 
-Can we ensure that the required attributes are added automatically on our behalf without having to move them around? Yes! Powertools Logger to the rescue :-)
+    ```json
+    {
+        "asctime": "2021-11-22 15:32:02,145",
+        "levelname": "INFO",
+        "name": "hello",
+        "message": "Request from unknown received"
+    }
+    ```
+
+=== "Normal output"
+
+    ```python
+    [INFO]  2021-11-22T15:32:02.145Z        ba3bea3d-fe3a-45db-a2ce-72e813d55b91    Request from unknown received
+    ```
+
+So far, so good! We can take a step further now by adding additional context to the logs.
+
+We could start by creating a dictionary with Lambda context information or something from the incoming event, which should always be logged. Additional attributes could be added on every `logger.info` using `extra` keyword like in any standard Python logger.
+
+
+### Simplifying with Logger
+
+???+ question "Surely this could be easier, right?"
+    Yes! Powertools Logger to the rescue :-)
+
+As we already have Lambda Powertools as a dependency, we can simply import [Logger](./core/logger.md){target="_blank"}.
+
 === "app.py"
 
-    ```python hl_lines="3 7 14 20 24"
+    ```python hl_lines="3 5 7 14 20 24"
     import json
 
     from aws_lambda_powertools import Logger
     from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
     from aws_lambda_powertools.logging import correlation_paths
 
-    logger = Logger(service="APP")
+    logger = Logger(service="order")
 
     app = ApiGatewayResolver()
 
@@ -460,12 +485,18 @@ Can we ensure that the required attributes are added automatically on our behalf
         return app.resolve(event, context)
     ```
 
-We add powertools logger (line 8) and all the configuration is done.
-We also use `logger.inject_lambda_context` decorator to inject Lambda context into every log. We instruct logger to log correlation id taken from API Gateway and event automatically. Because powertools library adds a correlation identifier to each log, we can easily correlate all the logs generated for a specific request.
+Let's break this down:
 
-In result, we should see logs with following attributes.
-=== "Example Application Structured Log"
-```json
+* **L8**: We add Lambda Powertools Logger; the boilerplate is now done for you. By default, we set `INFO` as the logging level if `LOG_LEVEL` env var isn't set
+* **L24**: We use `logger.inject_lambda_context` decorator to inject key information from Lambda context into every log.
+* **L24**: We also instruct Logger to use the incoming API Gateway Request ID as a [correlation id](./core/logger.md##set_correlation_id-method) automatically.
+* **L24**: Since we're in dev, we also use `log_event=True` to automatically log each incoming request for debugging. This can be also set via [environment variables](./index.md#environment-variables){target="_blank"}.
+
+We can now search our logs by the request ID to find a specific operation. Additionally, we can also search our logs for function name, Lambda request ID, Lambda function ARN, find out whether an operation was a cold start, etc.
+
+This is how the logs would look like now:
+
+```json title="Our logs are now structured consistently"
 {
     "level":"INFO",
     "location":"hello:17",
@@ -481,7 +512,11 @@ In result, we should see logs with following attributes.
     "correlation_id":"bf9b584c-e5d9-4ad5-af3d-db953f2b10dc"
     }
 ```
-By having structured logs like this, we can easily search and analyse them in [CloudWatch Logs Insight](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html).
+
+From here, we could [set specific keys](./core/logger.md#append_keys-method){target="_blank"} to add additional contextual information about a given operation, [log exceptions](./core/logger.md#logging-exceptions){target="_blank"} to easily enumerate them later, [sample debug logs](./core/logger.md#sampling-debug-logs){target="_blank"}, etc.
+
+By having structured logs like this, we can easily search and analyse them in [CloudWatch Logs Insight](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html){target="_blank"}.
+
 === "CloudWatch Logs Insight Example"
 ![CloudWatch Logs Insight Example](./media/cloudwatch_logs_insight_example.png)
 ## Tracing
