@@ -93,8 +93,12 @@ As a result API endpoint will be exposed for you. You can trigger it with the 'c
 ```
 !!! info
     To learn more about local testing, please visit [SAM local testing](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-start-api.html) page
-!!! warning
-    **Powertools Tracer** requires X-RAY service to work. This means that you will not see the traces locally. Roll it out on your AWS account instead.
+???+ tip "Tip: Want to use different tool for API testing?"
+    Instead of `curl` you have many other options to choose from.
+
+    * Choose different command line tool like `HTTPie`.
+    * Type the url in the browser directly
+    * Use REST API client like `Postman` or `SoupUI`.
 #### Remote test
 You may also deploy your application into AWS Account by issuing the following command.
 ```bash
