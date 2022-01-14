@@ -99,6 +99,8 @@ As a result API endpoint will be exposed for you. You can trigger it with the 'c
     * Choose different command line tool like `HTTPie`.
     * Type the url in the browser directly
     * Use REST API client like `Postman` or `SoupUI`.
+!!! warning
+    **Powertools Tracer** requires X-RAY service to work. This means that you will not see the traces locally. Roll it out on your AWS account instead.
 #### Remote test
 You may also deploy your application into AWS Account by issuing the following command.
 ```bash
@@ -131,8 +133,9 @@ This command builds a package and deploy it to your AWS Account. You find the AP
     For more details on the SAM deployment mechanism, see [link](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-deploy.html).
 
 ## API Gateway router
-Let's say we want to have different method that acts like an echo server. It takes user input (username) and output it to the caller. We need to create an API with an URL path `/hello/<name>`, where the `name` string is the input from the user.
-One approach is to create another lambda with required method and set up the API gateway to call it.
+Let's expand our application with a new method. It takes  an username as a input and return it in the response.
+
+We decided to write another Lambda including required method. Next, we configure our API Gateway to expose this Lambda under a new unique path `/hello/{name}`.
 === "app_name.py"
 
     ```python
@@ -190,10 +193,10 @@ One approach is to create another lambda with required method and set up the API
 
 This way certainly works for simple use case. But what happens if your application gets bigger and we need to cover numerous URL paths and HTTP methods for them? If that is the case, we should:
 
-* Add a new lambda handler with business logic for each new URL path and HTTP method used.
-* Add a new Lambda configuration to a SAM template file to map the lambda function to the required path and HTTP URL method.
+* Add a new Lambda handler with business logic for each new URL path and HTTP method used.
+* Add a new Lambda configuration to a SAM template file to map the Lambda function to the required path and HTTP URL method.
 
-This could result in a number of alike lambda files and large SAM configuration file with similar configuration sections. 
+This could result in a number of alike Lambda files and large SAM configuration file with similar configuration sections. 
 In this case if we see that the addition of new URL paths lead to the boilerplate code, we should lean towards the routing approach.
 !!! Info
     If you want a more detailed explanation of these two approaches, we have explained the considerations [here](.. /core/event_handler/api_gateway/#considerations)
@@ -277,10 +280,10 @@ The simple code might look similar to the following code snippet.
 * We add two methods: `hello_name` and `hello` (line 4,9). 
 * We add the `Router` class which allows us to record the method that should be called when the specific request arrives (line 13). 
 * We create the instance and added the configuration with the mapping of the processing methods and the http query method (line 29-31). 
-* In the lambda handler, we call router instance `get` method to retrieve a reference to the processing method (`hello` or `hello_name`) that will process the query (line 37). 
+* In the Lambda handler, we call router instance `get` method to retrieve a reference to the processing method (`hello` or `hello_name`) that will process the query (line 37). 
 * Finally, we run this method and send the results back to API Gateway (line 38).
 
-This approach simplifies the configuration of our infrastructure since we have added all API Gateway paths in the `HelloWorldFunction` event section. We need to understand the internal structure of the API Gateway request events, to deduce the requested path, http method and path parameters. This puts additional engineering effort to provide proper error handling. Also, if we decide to use another event source for our lambda, since we are highly coupled it requires rewriting of our lambda handler to get the information we need.
+This approach simplifies the configuration of our infrastructure since we have added all API Gateway paths in the `HelloWorldFunction` event section. We need to understand the internal structure of the API Gateway request events, to deduce the requested path, http method and path parameters. This puts additional engineering effort to provide proper error handling. Also, if we decide to use another event source for our Lambda, since we are highly coupled it requires rewriting of our Lambda handler to get the information we need.
 Let's see how we can improve it with Powertools.
 
 === "app.py"
@@ -314,12 +317,12 @@ Let's see how we can improve it with Powertools.
 
 Powertools provides an `ApiGatewayResolver` class, which helps understand the structure, no need to look it up.
 We can also directly use the parameters passed in the request now, because we have added the route annotation as the decorator for our methods.
-For SAM to build our package correctly, we have specified lambda powertools package in our `requirement.txt` file. 
+For SAM to build our package correctly, we have specified Lambda powertools package in our `requirement.txt` file. 
 
 !!! tip
     If you'd like to learn how python decorators work under the hood, you can follow [Real Python](https://realpython.com/primer-on-python-decorators/)'s article.
 ## Structured Logging
-In the next step, you decided to propose production quality logging capabilities to your lambda code.
+In the next step, you decided to propose production quality logging capabilities to your Lambda code.
 We want our log event to be in a JSON format. Also, You follow [structured logging approach](https://docs.aws.amazon.com/lambda/latest/operatorguide/parse-logs.html). In a result, we expect easy to search, consistent logs containing enough context and data to analyse the status of our system. We can take advantage of CloudWatch Logs and Cloudwatch Insight for this purpose.
 
 The first option could be to use a python logger in combination with the `pythonjsonlogger` library for simple structured logging.
@@ -383,7 +386,7 @@ instead of
 ```
 
 So far, so good! To make things easier, we want to add extra context to the logs. 
-We can extract it from a lambda context or an event passed to lambda handler at the time of invocation. We add those specific attributes wherever a logger is used. Can we ensure that the required attributes are added automatically on our behalf without having to move them around? Yes! Powertools Logger to the rescue :-)
+We can extract it from a Lambda context or an event passed to Lambda handler at the time of invocation. We add those specific attributes wherever a logger is used. Can we ensure that the required attributes are added automatically on our behalf without having to move them around? Yes! Powertools Logger to the rescue :-)
 === "app.py"
 
     ```python hl_lines="3 7 14 20 24"
@@ -416,7 +419,7 @@ We can extract it from a lambda context or an event passed to lambda handler at 
     ```
 
 We add powertools logger (line 8) and all the configuration is done. 
-We also use `logger.inject_lambda_context` decorator to inject lambda context into every log. We instruct logger to log correlation id taken from API Gateway and event automatically. Because powertools library adds a correlation identifier to each log, we can easily correlate all the logs generated for a specific request.
+We also use `logger.inject_lambda_context` decorator to inject Lambda context into every log. We instruct logger to log correlation id taken from API Gateway and event automatically. Because powertools library adds a correlation identifier to each log, we can easily correlate all the logs generated for a specific request.
 
 In result, we should see logs with following attributes.
 === "Example Application Structured Log"
@@ -530,9 +533,9 @@ A lot happens here. First, we import required X-ray SDK classes.
 `xray_recorder` is a global AWS X-ray recorder class instance that starts/ends segments/sub-segments and sends them to the X-ray daemon.
 To build new sub-segments, we use `xray_recorder.in_subsegment` method as a context manager. 
 We can add visible granular sub-traces into our X-ray by using customized sub-segments.
-Also, we track lambda cold start by setting global variable outside of a handler. The variable is defined only upon lambda initialization. This information provides an overview of how often the runtime is reused by lambda invoked, which directly impacts lambda performance and latency.
+Also, we track Lambda cold start by setting global variable outside of a handler. The variable is defined only upon Lambda initialization. This information provides an overview of how often the runtime is reused by Lambda invoked, which directly impacts Lambda performance and latency.
 
-To allow the tracking of our Lambda, we need to set it up in our SAM template and add `Tracing: Active` under lambda `Properties` section.
+To allow the tracking of our Lambda, we need to set it up in our SAM template and add `Tracing: Active` under Lambda `Properties` section.
 !!! Info 
     Want to know more about context managers and understand the benefits of using them? Follow [article](https://realpython.com/python-with-statement/) from Real Python.
 !!! Info
@@ -580,10 +583,10 @@ With powertools tracer we have much cleaner code right now.
 To make our methods visible in the traces, we add `@tracer.capture_method` decorator to the processing methods. 
 We add annotations directly in the code without adding it with the context handler using the `tracer.put_annotation` method. 
 Since we add the `@tracer.capture_lambda_handler` decorator for our `lambda_handler`, powertools automatically adds cold start information as an annotation. 
-It also automatically append lambda response as a metadata into trace, so we don't need to worry about it as well.
+It also automatically append Lambda response as a metadata into trace, so we don't need to worry about it as well.
 !!! tip 
     For differences between annotations and metadata in traces, please follow [link](https://awslabs.github.io/aws-lambda-powertools-python/latest/core/tracer/#annotations-metadata). 
-Therefore, you should see traces of your lambda in the X-ray console.
+Therefore, you should see traces of your Lambda in the X-ray console.
 === "Example X-RAY Console View"
 ![Tracer utility](./media/tracer_utility_showcase_2.png)
 
@@ -699,9 +702,9 @@ Let's expand our application with custom metrics without Powertools to see how i
 
     ```
 
-To add custom metric in **CloudWatch** we add the `boto3` cloudwatch client. Next, we create the new `put_metric_data` method that uses this client to put the metric in CloudWatch synchronously. We call it in our method `hello` and `hello_name`. We divide our metrics by type of application and method. Thus, we can follow the frequency at which specific methods are called. We also need to add additional inline policy allowing our lambda to write metrics in the CloudWatch. In `template.yaml` we add `CloudWatchPutMetricPolicy` policy.
+To add custom metric in **CloudWatch** we add the `boto3` cloudwatch client. Next, we create the new `put_metric_data` method that uses this client to put the metric in CloudWatch synchronously. We call it in our method `hello` and `hello_name`. We divide our metrics by type of application and method. Thus, we can follow the frequency at which specific methods are called. We also need to add additional inline policy allowing our Lambda to write metrics in the CloudWatch. In `template.yaml` we add `CloudWatchPutMetricPolicy` policy.
 !!! Info
-    We use direct synchronous call to CloudWatch Metrics API. It will be visible in your AWS X-RAY traces as additional external call. Given your architecture scale, this approach might lead to disadvantages such as increased cost of measuring data collection and increased lambda latency.
+    We use direct synchronous call to CloudWatch Metrics API. It will be visible in your AWS X-RAY traces as additional external call. Given your architecture scale, this approach might lead to disadvantages such as increased cost of measuring data collection and increased Lambda latency.
 
 === "app.py"
 
