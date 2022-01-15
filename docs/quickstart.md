@@ -718,69 +718,80 @@ Repeat the process of building, deploying, and invoking your application via the
 
 If you choose any of the traces available, try opening the `handler` subsegment and you should see the response of your Lambda function under the `Metadata` tab.
 
-![Filtering traces by annotations](./media/tracer_xray_sdk_enriched_2.png)
+![Filtering traces by metadata](./media/tracer_xray_sdk_enriched_2.png)
 
 ### Simplifying with Tracer
 
-Now, let's try to simplify it with Lambda Powertools:
+Cross-cutting concerns like filtering traces by Cold Start, including response as well as exceptions as tracing metadata can take a considerable amount of boilerplate.
 
-=== "app.py"
+We can simplify our previous patterns by using [Lambda Powertools Tracer](core/tracer.md){target="_blank"}; a thin wrapper on top of X-Ray SDK.
 
-    ```python hl_lines="3 13 15 21 23 29"
-    import json
+!!! note
+    You can now safely remove `aws-xray-sdk` from `requirements.txt`; keep `aws-lambda-powertools` only.
 
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
-    from aws_lambda_powertools.logging import correlation_paths
+```python title="Refactoring with Lambda Powertools Tracer" hl_lines="3 8 13 15 21 23 29"
+import json
 
-    logger = Logger(service="APP")
-    tracer = Tracer()
-    app = ApiGatewayResolver()
+from aws_lambda_powertools import Logger, Tracer
+from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+from aws_lambda_powertools.logging import correlation_paths
 
-
-    @app.get("/hello/<name>")
-    @tracer.capture_method
-    def hello_name(name):
-        tracer.put_annotation("User", name)
-        logger.info(f"Request from {name} received")
-        return {"message": f"hello {name}!"}
+logger = Logger(service="APP")
+tracer = Tracer(service="APP")
+app = ApiGatewayResolver()
 
 
-    @app.get("/hello")
-    @tracer.capture_method
-    def hello():
-        tracer.put_annotation("User", "unknown")
-        logger.info("Request from unknown received")
-        return {"message": "hello unknown!"}
+@app.get("/hello/<name>")
+@tracer.capture_method
+def hello_name(name):
+    tracer.put_annotation(key="User", value=name)
+    logger.info(f"Request from {name} received")
+    return {"message": f"hello {name}!"}
 
 
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
-    ```
+@app.get("/hello")
+@tracer.capture_method
+def hello():
+    tracer.put_annotation(key="User", value="unknown")
+    logger.info("Request from unknown received")
+    return {"message": "hello unknown!"}
 
-With powertools tracer we have much cleaner code right now.
 
-To make our methods visible in the traces, we add `@tracer.capture_method` decorator to the processing methods.
-We add annotations directly in the code without adding it with the context handler using the `tracer.put_annotation` method.
-Since we add the `@tracer.capture_lambda_handler` decorator for our `lambda_handler`, powertools automatically adds cold start information as an annotation.
-It also automatically append Lambda response as a metadata into trace, so we don't need to worry about it.
+@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
+@tracer.capture_lambda_handler
+def lambda_handler(event, context):
+    return app.resolve(event, context)
+```
+
+Decorators, annotations and metadata are largely the same, except we now have a much cleaner code as the boilerplate is gone. Here's what's changed compared to AWS X-Ray SDK approach:
+
+* **L8**: We initialize `Tracer` and define the name of our service (`APP`). We automatically run `patch_all` from AWS X-Ray SDK on your behalf. Any previously patched or non-imported library is simply ignored
+* **L13**: We use `@tracer.capture_method` decorator instead of `xray_recorder.capture`. We automatically **1/** create a subsegment named after the function name (`## hello_name`), and **2/** add the response/exception as tracing metadata
+* **L15**: Putting annotations remain exactly the same UX
+* **L29**: We use `@tracer.lambda_handler` so we automatically add `ColdStart` annotation within Tracer itself. We also add a new `Service` annotation using the value of `Tracer(service="APP")`, so that you can filter traces by the service your function(s) represent.
+
+Another subtle difference is that you can now run your Lambda functions and unit test them locally without having to explicitly disable Tracer.
+
+Lambda Powertools optimizes for Lambda compute environment. As such, we add these and other common approaches to accelerate your development, so you don't worry about implementing every cross-cutting concern.
+
 !!! tip
-    For differences between annotations and metadata in traces, please follow [link](https://awslabs.github.io/aws-lambda-powertools-python/latest/core/tracer/#annotations-metadata).
+    You can [opt-out some of these behaviours](./core/tracer/#advanced){target="_blank"} like disabling response capturing,  explicitly patching only X modules, etc.
 
-Therefore, you should see traces of your Lambda in the X-ray console.
-=== "Example X-RAY Console View"
-![Tracer utility](./media/tracer_utility_showcase_2.png)
+Repeat the process of building, deploying, and invoking your application via the API endpoint. Within the [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"}, you should see a similar view:
 
-You may consider using **CloudWatch ServiceLens** which links the CloudWatch metrics and logs, in addition to traces from the AWS X-Ray.
 
-It gives you a complete view of your apps and their dependencies, making your services more observable.
-From here, you can browse to specific logs in CloudWatch Logs Insight, Metrics Dashboard or Traces in CloudWatch X-Ray traces.
-=== "Example CloudWatch ServiceLens View"
+![AWS X-Ray Console trace view using Lambda Powertools Tracer](./media/tracer_utility_showcase_2.png)
+
+!!! tip
+    Consider using **Amazon CloudWatch ServiceLens** view as it aggregates AWS X-Ray traces and CloudWatch metrics and logs in one view.
+
+From here, you can browse to specific logs in CloudWatch Logs Insight, Metrics Dashboard or AWS X-Ray traces.
+
 ![CloudWatch ServiceLens View](./media/tracer_utility_showcase_3.png)
+
 !!! Info
-    For more information on CloudWatch ServiceLens, please visit [link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ServiceLens.html).
+    For more information on Amazon CloudWatch ServiceLens, please visit [link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ServiceLens.html).
+
 ## Custom Metrics
 The final step to provide complete observability is to add business metrics (such as number of sales or reservations).
 Lambda adds technical metrics (such as Invocations, Duration, Error Count & Success Rate) to the CloudWatch metrics out of the box.
