@@ -523,18 +523,22 @@ By having structured logs like this, we can easily search and analyse them in [C
 !!! note
     You won't see any traces in AWS X-Ray when executing your function locally.
 
-The next improvement is to add an appropriate tracking mechanism to your stack. Developers want to analyze traces of queries that pass via the API gateway to your Lambda.
-With structured logs, it is an important step to provide the observability of your application!
-The AWS service that has these capabilities is [AWS X-RAY](https://aws.amazon.com/xray/). How do we send application trace to the AWS X-RAY service then?
+The next improvement is to add distributed tracing to your stack. Traces help you visualize end-to-end transactions or parts of it to easily debug upstream/downstream anomalies.
 
-Let's first explore how we can achieve this with [x-ray SDK](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html), and then try to simplify it with the Powertools library.
+Combined with structured logs, it is an important step to be able to observe how your application runs in production.
+
+### Generating traces
+
+[AWS X-Ray](https://aws.amazon.com/xray/){target="_blank"} is the distributed tracing service we're going to use. But how do we generate application traces in the first place?
+
+It's a [two-step process](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html){target="_blank"}: **1/** enable tracing in your Lambda function, and **2/** instrument your application code. Let's explore how we can instrument our code with [AWS X-Ray SDK](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html){target="_blank"}, and then simplify it with [Lambda Powertools Tracer](core/tracer.md){target="_blank"} feature.
 
 === "app.py"
 
-    ```python hl_lines="3 14 19-20 27-28 35-41"
+    ```python hl_lines="3 12 16 23 30"
     import json
 
-    from aws_xray_sdk.core import xray_recorder
+    from aws_xray_sdk.core import patch_all, xray_recorder
 
     from aws_lambda_powertools import Logger
     from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
@@ -543,42 +547,32 @@ Let's first explore how we can achieve this with [x-ray SDK](https://docs.aws.am
     logger = Logger(service="APP")
 
     app = ApiGatewayResolver()
-
-
-    cold_start = True
+    patch_all()
 
 
     @app.get("/hello/<name>")
+    @xray_recorder.capture('hello_name')
     def hello_name(name):
-        with xray_recorder.in_subsegment("hello_name") as subsegment:
-            subsegment.put_annotation("User", name)
-            logger.info(f"Request from {name} received")
-            return {"statusCode": 200, "body": json.dumps({"message": f"hello {name}!"})}
+        logger.info(f"Request from {name} received")
+        return {"statusCode": 200, "body": json.dumps({"message": f"hello {name}!"})}
 
 
     @app.get("/hello")
+    @xray_recorder.capture('hello')
     def hello():
-        with xray_recorder.in_subsegment("hello") as subsegment:
-            subsegment.put_annotation("User", "unknown")
-            logger.info("Request from unknown received")
-            return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
+        logger.info("Request from unknown received")
+        return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
 
 
     @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
+    @xray_recorder.capture('handler')
     def lambda_handler(event, context):
-        global cold_start
-        with xray_recorder.in_subsegment("handler") as subsegment:
-            if cold_start:
-                subsegment.put_annotation("ColdStart", "True")
-                cold_start = False
-            else:
-                subsegment.put_annotation("ColdStart", "False")
-            return app.resolve(event, context)
+        return app.resolve(event, context)
     ```
 
 === "template.yaml"
 
-    ```yaml hl_lines="15"
+    ```yaml hl_lines="14"
     AWSTemplateFormatVersion: "2010-09-09"
     Transform: AWS::Serverless-2016-10-31
     Description: Sample SAM Template for powertools-quickstart
@@ -610,15 +604,84 @@ Let's first explore how we can achieve this with [x-ray SDK](https://docs.aws.am
             Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
     ```
 
-* First, we import required X-ray SDK classes. `xray_recorder` is a global AWS X-ray recorder class instance that starts/ends segments/sub-segments and sends them to the X-ray daemon.
-* To build new sub-segments, we use `xray_recorder.in_subsegment` method as a context manager.
-* We track Lambda cold start by setting global variable outside of a handler. The variable is defined only upon Lambda initialization. This information provides an overview of how often the runtime is reused by Lambda invoked, which directly impacts Lambda performance and latency.
+Let's break it down:
 
-To allow the tracking of our Lambda, we need to set it up in our SAM template and add `Tracing: Active` under Lambda `Properties` section.
+* **L1**: First, we import AWS X-Ray SDK. `xray_recorder` records blocks of code being traced ([subsegment](https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html#xray-concepts-subsegments){target="_blank"}). It also sends generated traces to the AWS X-Ray daemon running in the Lambda service who subsequently forwards them to AWS X-Ray service
+* **L12**: We patch [supported libraries](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/thirdparty.html#patching-supported-libraries){target="_blank"} that might have been imported, e.g., AWS SDK, requests, httplib, etc.
+* **L16**: We decorate our function so the SDK traces the end-to-end execution, and the argument names the generated block being traced
+
+???+ question
+    But how do I enable tracing for the Lambda function and what permissions do I need?
+
+Within `template.yaml` on line 14, we added a new Serverless Function property: `Tracing: Active`. This will enable tracing for the [Lambda function resource](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray-cloudformation){target="_blank"}, and add a managed IAM Policy named [AWSXRayDaemonWriteAccess](https://console.aws.amazon.com/iam/home#/policies/arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess){target="_blank"} to allow Lambda to send traces to AWS X-Ray.
+
+!!! danger "TODO: Revisit to see if it's still necessary"
+
 !!! Info
     Want to know more about context managers and understand the benefits of using them? Follow [article](https://realpython.com/python-with-statement/) from Real Python.
+
+
+### Enriching our generates traces
+
+
+cold start invocations
+
+> Annotations are simple key-value pairs that are indexed for use with filter expressionsMetadata are key-value pairs with values of any type, including objects and lists, but that are not indexed
+
+> Metadata are key-value pairs with values of any type, including objects and lists, but that are not indexed
+
+
+```python title="Capturing cold start as a tracing annotation" hl_lines="3 12-13 17-18 25-26 35-40 42"
+import json
+
+from aws_xray_sdk.core import patch_all, xray_recorder
+
+from aws_lambda_powertools import Logger
+from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+from aws_lambda_powertools.logging import correlation_paths
+
+logger = Logger(service="APP")
+
+app = ApiGatewayResolver()
+cold_start = True
+patch_all()
+
+
+@app.get("/hello/<name>")
+def hello_name(name):
+    with xray_recorder.in_subsegment("hello_name") as subsegment:
+        subsegment.put_annotation("User", name)
+        logger.info(f"Request from {name} received")
+        return {"message": f"hello {name}!"}
+
+
+@app.get("/hello")
+def hello():
+    with xray_recorder.in_subsegment("hello") as subsegment:
+        subsegment.put_annotation("User", "unknown")
+        logger.info("Request from unknown received")
+        return {"message": "hello unknown!"}
+
+
+@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
+def lambda_handler(event, context):
+    global cold_start
+    if cold_start:
+        subsegment.put_annotation("ColdStart", cold_start)
+        cold_start = False
+    else:
+        subsegment.put_annotation("ColdStart", cold_start)
+
+    with xray_recorder.in_subsegment("handler") as subsegment:
+        return app.resolve(event, context)
+```
+
+* We track Lambda cold start by setting global variable outside of a handler. The variable is defined only upon Lambda initialization. This information provides an overview of how often the runtime is reused by Lambda invoked, which directly impacts Lambda performance and latency.
+
 !!! Info
     If you want to understand how the Lambda execution environment works and why cold starts can occur, follow [blog series](https://aws.amazon.com/blogs/compute/operating-lambda-performance-optimization-part-1/).
+
+### Simplifying with Tracer
 
 Now, let's try to simplify it with Lambda Powertools:
 
