@@ -369,7 +369,7 @@ Then, you decided to propose production quality logging capabilities to your Lam
 
 This helps not only in searching, but produces consistent logs containing enough context and data to ask arbitrary questions on the status of your system. We can take advantage of CloudWatch Logs and Cloudwatch Insight for this purpose.
 
-### Logs as JSON with pythonjsonlogger
+### JSON as output
 
 The first option could be to use the standard Python Logger, and use a specialized library like `pythonjsonlogger` to create a JSON Formatter.
 
