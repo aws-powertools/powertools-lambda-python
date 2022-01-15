@@ -1,9 +1,9 @@
 ---
-title: QuickStart
+title: Tutorial
 description: Powertools introduction
 ---
 
-This quickstart progressively introduces Lambda Powertools core utilities by using one feature at a time.
+This tutorial progressively introduces Lambda Powertools core utilities by using one feature at a time.
 
 ## Requirements
 
