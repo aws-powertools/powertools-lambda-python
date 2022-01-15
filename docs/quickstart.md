@@ -1019,3 +1019,19 @@ If you're curious about how the EMF portion of your function logs look like, you
   ]
 }
 ```
+
+# Final considerations
+
+We covered a lot of ground here and we only scratched the surface of the feature set available within Lambda Powertools.
+
+When it comes to the observability features ([Tracer](./core/tracer.md){target="_blank"}, [Metrics](./core/metrics.md){target="_blank"}, [Logging](./core/logger.md){target="_blank"}), don't stop there! The goal here is to ensure you can ask arbitrary questions to assess your system's health; these features are only part of the wider story!
+
+This requires a change in mindset to ensure operational excellence is part of the software development lifecycle.
+
+???+ tip
+    You can find more details on other leading practices described in the [Well-Architected Serverless Lens](https://aws.amazon.com/blogs/aws/new-serverless-lens-in-aws-well-architected-tool/).
+
+    Lambda Powertools is largely designed to make some of these practices easier to adopt from day 1.
+
+???+ question "Have ideas for other tutorials?"
+    You can open up a documentation issue, or connect with us on the [AWS Developers Slack](https://github.com/awslabs/aws-lambda-powertools-python/#connect) at `lambda-powertools` channel, or via e-mail [aws-lambda-powertools-feedback@amazon.com](mailto:aws-lambda-powertools-feedback@amazon.com).
