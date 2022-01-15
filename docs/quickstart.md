@@ -320,9 +320,7 @@ Let's include Lambda Powertools as a dependency in `requirement.txt`, and use Ev
 
 === "app.py"
 
-    ```python hl_lines="3 5 8 13 19"
-    import json
-
+    ```python hl_lines="1 3 6 11 17"
     from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
     app = ApiGatewayResolver()
@@ -375,13 +373,11 @@ The first option could be to use the standard Python Logger, and use a specializ
 
 === "app.py"
 
-    ```python hl_lines="2 5 9-14 21 27 32"
-    import json
+    ```python hl_lines="4 5 7-12 19 25 30"
     import logging
     import os
 
     from pythonjsonlogger import jsonlogger
-
     from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
     logger = logging.getLogger("APP")
@@ -454,9 +450,7 @@ We could start by creating a dictionary with Lambda context information or somet
 
 As we already have Lambda Powertools as a dependency, we can simply import [Logger](./core/logger.md){target="_blank"}.
 
-```python title="Refactoring with Lambda Powertools Logger" hl_lines="3 5 7 14 20 24"
-import json
-
+```python title="Refactoring with Lambda Powertools Logger" hl_lines="1 3 5 12 18 22"
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 from aws_lambda_powertools.logging import correlation_paths
@@ -535,9 +529,7 @@ It's a [two-step process](https://docs.aws.amazon.com/lambda/latest/dg/services-
 
 === "app.py"
 
-    ```python hl_lines="3 12 16 23 30"
-    import json
-
+    ```python hl_lines="1 10 14 21 28"
     from aws_xray_sdk.core import patch_all, xray_recorder
 
     from aws_lambda_powertools import Logger
@@ -648,9 +640,7 @@ Within AWS X-Ray, we can answer these questions by using two features: tracing *
 
 Let's put them into action.
 
-```python title="Enriching traces with annotations and metadata" hl_lines="12 19-20 28-29 37 39-44 47"
-import json
-
+```python title="Enriching traces with annotations and metadata" hl_lines="10 17-19 26-27 35 37-42 45"
 from aws_xray_sdk.core import patch_all, xray_recorder
 
 from aws_lambda_powertools import Logger
@@ -729,9 +719,7 @@ We can simplify our previous patterns by using [Lambda Powertools Tracer](core/t
 !!! note
     You can now safely remove `aws-xray-sdk` from `requirements.txt`; keep `aws-lambda-powertools` only.
 
-```python title="Refactoring with Lambda Powertools Tracer" hl_lines="3 8 13 15 21 23 29"
-import json
-
+```python title="Refactoring with Lambda Powertools Tracer" hl_lines="1 6 11 13 19 21 27"
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 from aws_lambda_powertools.logging import correlation_paths
