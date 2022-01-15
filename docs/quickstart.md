@@ -384,7 +384,7 @@ The first option could be to use the standard Python Logger, and use a specializ
 
     from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
-    logger = logging.getLogger("hello")
+    logger = logging.getLogger("APP")
     logHandler = logging.StreamHandler()
     formatter = jsonlogger.JsonFormatter(fmt="%(asctime)s %(levelname)s %(name)s %(message)s")
     logHandler.setFormatter(formatter)
@@ -431,7 +431,7 @@ After that, we use this logger in our application code to record the required in
     {
         "asctime": "2021-11-22 15:32:02,145",
         "levelname": "INFO",
-        "name": "hello",
+        "name": "APP",
         "message": "Request from unknown received"
     }
     ```
@@ -461,7 +461,7 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 from aws_lambda_powertools.logging import correlation_paths
 
-logger = Logger(service="order")
+logger = Logger(service="APP")
 
 app = ApiGatewayResolver()
 
@@ -490,7 +490,6 @@ Let's break this down:
 * **L24**: We also instruct Logger to use the incoming API Gateway Request ID as a [correlation id](./core/logger.md##set_correlation_id-method) automatically.
 * **L24**: Since we're in dev, we also use `log_event=True` to automatically log each incoming request for debugging. This can be also set via [environment variables](./index.md#environment-variables){target="_blank"}.
 
-We can now search our logs by the request ID to find a specific operation. Additionally, we can also search our logs for function name, Lambda request ID, Lambda function ARN, find out whether an operation was a cold start, etc.
 
 This is how the logs would look like now:
 
@@ -500,7 +499,7 @@ This is how the logs would look like now:
     "location":"hello:17",
     "message":"Request from unknown received",
     "timestamp":"2021-10-22 16:29:58,367+0000",
-    "service":"hello",
+    "service":"APP",
     "cold_start":true,
     "function_name":"HelloWorldFunction",
     "function_memory_size":"256",
@@ -509,6 +508,8 @@ This is how the logs would look like now:
     "correlation_id":"bf9b584c-e5d9-4ad5-af3d-db953f2b10dc"
 }
 ```
+
+We can now search our logs by the request ID to find a specific operation. Additionally, we can also search our logs for function name, Lambda request ID, Lambda function ARN, find out whether an operation was a cold start, etc.
 
 From here, we could [set specific keys](./core/logger.md#append_keys-method){target="_blank"} to add additional contextual information about a given operation, [log exceptions](./core/logger.md#logging-exceptions){target="_blank"} to easily enumerate them later, [sample debug logs](./core/logger.md#sampling-debug-logs){target="_blank"}, etc.
 
