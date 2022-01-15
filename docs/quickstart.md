@@ -627,22 +627,28 @@ We've made the following changes in `template.yaml` for this to work seamless:
 * **L7-8**: Enables tracing for Amazon API Gateway
 * **L14**: Enables tracing for our Serverless Function. This will also add a managed IAM Policy named [AWSXRayDaemonWriteAccess](https://console.aws.amazon.com/iam/home#/policies/arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess){target="_blank"} to allow Lambda to send traces to AWS X-Ray.
 
-You can now build and deploy our updates with `sam build && sam deploy`. Once deployed, try invoking the application via the API endpoint, then you should see the following result within the [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"}.
+You can now build and deploy our updates with `sam build && sam deploy`. Once deployed, try invoking the application via the API endpoint, and visit [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"} to see how much progress we've made so far!!
 
 ![AWS X-Ray Console trace view](./media/tracer_xray_sdk_showcase.png)
 
 ### Enriching our generates traces
 
-What we've done helps bring an initial visibility
+What we've done helps bring an initial visibility, but we can do so much more.
 
-cold start invocations
+???+ question
+    You're probably asking yourself at least the following questions:
 
-> Annotations are simple key-value pairs that are indexed for use with filter expressionsMetadata are key-value pairs with values of any type, including objects and lists, but that are not indexed
+    * What if I know to search traces by customer name?
+    * What about grouping traces with cold starts?
+    * Better yet, what if we want to include the request or response of our functions as part of the trace?
 
-> Metadata are key-value pairs with values of any type, including objects and lists, but that are not indexed
+Within AWS X-Ray, we can answer these questions by using two features: tracing **Annotations** and **Metadata**.
 
+**Annotations** are simple key-value pairs that are indexed for use with [filter expressions](https://docs.aws.amazon.com/xray/latest/devguide/xray-console-filters.html){target="_blank"}. **Metadata** are key-value pairs with values of any type, including objects and lists, but that are not indexed
 
-```python title="Capturing cold start as a tracing annotation" hl_lines="3 12-13 17-18 25-26 35-40 42"
+Let's put them into action.
+
+```python title="Enriching traces with annotations and metadata" hl_lines="12 19-20 28-29 37 39-44 47"
 import json
 
 from aws_xray_sdk.core import patch_all, xray_recorder
@@ -659,38 +665,60 @@ patch_all()
 
 
 @app.get("/hello/<name>")
+@xray_recorder.capture('hello_name')
 def hello_name(name):
-    with xray_recorder.in_subsegment("hello_name") as subsegment:
-        subsegment.put_annotation("User", name)
-        logger.info(f"Request from {name} received")
-        return {"message": f"hello {name}!"}
+    subsegment = xray_recorder.current_subsegment()
+    subsegment.put_annotation("User", name)
+    logger.info(f"Request from {name} received")
+    return {"message": f"hello {name}!"}
 
 
 @app.get("/hello")
+@xray_recorder.capture('hello')
 def hello():
-    with xray_recorder.in_subsegment("hello") as subsegment:
-        subsegment.put_annotation("User", "unknown")
-        logger.info("Request from unknown received")
-        return {"message": "hello unknown!"}
+    subsegment = xray_recorder.current_subsegment()
+    subsegment.put_annotation("User", "unknown")
+    logger.info("Request from unknown received")
+    return {"message": "hello unknown!"}
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
+@xray_recorder.capture('handler')
 def lambda_handler(event, context):
     global cold_start
+
+    subsegment = xray_recorder.current_subsegment()
     if cold_start:
         subsegment.put_annotation("ColdStart", cold_start)
         cold_start = False
     else:
         subsegment.put_annotation("ColdStart", cold_start)
 
-    with xray_recorder.in_subsegment("handler") as subsegment:
-        return app.resolve(event, context)
+    result = app.resolve(event, context)
+    subsegment.put_metadata("response", result)
+
+    return result
 ```
 
-* We track Lambda cold start by setting global variable outside of a handler. The variable is defined only upon Lambda initialization. This information provides an overview of how often the runtime is reused by Lambda invoked, which directly impacts Lambda performance and latency.
+Let's break it down:
+
+* **L12**: We track Lambda cold start by setting global variable outside the handler; this is executed once per sandbox Lambda creates. This information provides an overview of how often the sandbox is reused by Lambda, which directly impacts the performance of each transaction
+* **L19-20**: We use AWS X-Ray SDK to add `User` annotation on `hello_name` subsegment. This will allow us to filter traces using the `User` value
+* **L28-29**: We repeat what we did in L19-29 except we use the value `unknown` since we don't have that information
+* **L37**: We use `global` to modify our global variable defined in the outer scope
+* **39-44**: We add `ColdStart` annotation and flip the value of `cold_start` variable, so that subsequent requests annotates the value `false` when the sandbox is reused
+* **L47**: We include the final response under `response` key as part of the `handler` subsegment
 
 !!! Info
-    If you want to understand how the Lambda execution environment works and why cold starts can occur, follow [blog series](https://aws.amazon.com/blogs/compute/operating-lambda-performance-optimization-part-1/).
+    If you want to understand how the Lambda execution environment (sandbox) works and why cold starts can occur, see this [blog series on Lambda performance](https://aws.amazon.com/blogs/compute/operating-lambda-performance-optimization-part-1/).
+
+Repeat the process of building, deploying, and invoking your application via the API endpoint. Within the [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"}, you should now be able to group traces by the `User` and `ColdStart` annotation.
+
+![Filtering traces by annotations](./media/tracer_xray_sdk_enriched.png)
+
+If you choose any of the traces available, try opening the `handler` subsegment and you should see the response of your Lambda function under the `Metadata` tab.
+
+![Filtering traces by annotations](./media/tracer_xray_sdk_enriched_2.png)
 
 ### Simplifying with Tracer
 
