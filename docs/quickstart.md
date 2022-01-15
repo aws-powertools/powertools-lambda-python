@@ -517,10 +517,11 @@ By having structured logs like this, we can easily search and analyse them in [C
 
 === "CloudWatch Logs Insight Example"
 ![CloudWatch Logs Insight Example](./media/cloudwatch_logs_insight_example.png)
+
 ## Tracing
 
-!!! warning
-    **Tracer** uses AWS X-Ray and you will not see any traces when executing your function locally.
+!!! note
+    You won't see any traces in AWS X-Ray when executing your function locally.
 
 The next improvement is to add an appropriate tracking mechanism to your stack. Developers want to analyze traces of queries that pass via the API gateway to your Lambda.
 With structured logs, it is an important step to provide the observability of your application!
