@@ -606,6 +606,13 @@ It's a [two-step process](https://docs.aws.amazon.com/lambda/latest/dg/services-
             Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
     ```
 
+=== "requirements.txt"
+
+    ```bash
+    aws-lambda-powertools
+    aws-xray-sdk
+    ```
+
 Let's break it down:
 
 * **L1**: First, we import AWS X-Ray SDK. `xray_recorder` records blocks of code being traced ([subsegment](https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html#xray-concepts-subsegments){target="_blank"}). It also sends generated traces to the AWS X-Ray daemon running in the Lambda service who subsequently forwards them to AWS X-Ray service
@@ -620,11 +627,9 @@ We've made the following changes in `template.yaml` for this to work seamless:
 * **L7-8**: Enables tracing for Amazon API Gateway
 * **L14**: Enables tracing for our Serverless Function. This will also add a managed IAM Policy named [AWSXRayDaemonWriteAccess](https://console.aws.amazon.com/iam/home#/policies/arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess){target="_blank"} to allow Lambda to send traces to AWS X-Ray.
 
-!!! danger "TODO: Revisit to see if it's still necessary"
+You can now build and deploy our updates with `sam build && sam deploy`. Once deployed, try invoking the application via the API endpoint, then you should see the following result within the [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"}.
 
-!!! Info
-    Want to know more about context managers and understand the benefits of using them? Follow [article](https://realpython.com/python-with-statement/) from Real Python.
-
+![AWS X-Ray Console trace view](./media/tracer_xray_sdk_showcase.png)
 
 ### Enriching our generates traces
 
