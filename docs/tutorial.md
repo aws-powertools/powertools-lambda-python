@@ -300,11 +300,11 @@ A first attempt at the routing logic might look similar to the following code sn
 
 Let's break this down:
 
-* **L4-9**: We defined two `hello_name` and `hello` functions to handle `/hello/{name}` and `/hello` routes
-* **L13:** We added a `Router` class to map a path, a method, and the function to call
-* **L27-29**: We create a `Router` instance and map both `/hello` and `/hello/{name}`
-* **L35:** We use Router's `get` method to retrieve a reference to the processing method (`hello` or `hello_name`)
-* **L36:** Finally, we run this method and send the results back to API Gateway
+* **L4,9**: We defined two `hello_name` and `hello` functions to handle `/hello/{name}` and `/hello` routes.
+* **L13:** We added a `Router` class to map a path, a method, and the function to call.
+* **L27-29**: We create a `Router` instance and map both `/hello` and `/hello/{name}`.
+* **L35:** We use Router's `get` method to retrieve a reference to the processing method (`hello` or `hello_name`).
+* **L36:** Finally, we run this method and send the results back to API Gateway.
 
 This approach simplifies the configuration of our infrastructure since we have added all API Gateway paths in the `HelloWorldFunction` event section.
 
@@ -312,7 +312,7 @@ However, it forces us to understand the internal structure of the API Gateway re
 
 ### Simplifying with Event Handler
 
-We can massively simplify cross-cutting concerns while keeping it lightweight by using [Event Handler](./core/event_handler/api_gateway.md){target="_blank"}
+We can massively simplify cross-cutting concerns while keeping it lightweight by using [Event Handler](./core/event_handler/api_gateway.md){target="_blank"}.
 
 ???+ tip
     This is available for both [REST API (API Gateway, ALB)](./core/event_handler/api_gateway.md){target="_blank"} and [GraphQL API (AppSync)](./core/event_handler/appsync.md){target="_blank"}.
@@ -355,7 +355,7 @@ We have added the route annotation as the decorator for our methods. It enables 
 
 Lastly, we used `return app.resolve(event, context)` so Event Handler can resolve routes, inject the current request, handle serialization, route validation, etc.
 
-From here, we could handle [404 routes](./core/event_handler/api_gateway.md#handling-not-found-routes){target="_blank"}, [error handling](./core/event_handler/api_gateway.md#http://127.0.0.1:8000/core/event_handler/api_gateway/#exception-handling){target="_blank"}, [access query strings, payload, etc.](./core/event_handler/api_gateway.md#http://127.0.0.1:8000/core/event_handler/api_gateway#accessing-request-details){target="_blank"}.
+From here, we could handle [404 routes](./core/event_handler/api_gateway.md#handling-not-found-routes){target="_blank"}, [error handling](./core/event_handler/api_gateway.md#http://127.0.0.1:8000/core/event_handler/api_gateway/#exception-handling){target="_blank"}, [access query strings, payload](./core/event_handler/api_gateway.md#http://127.0.0.1:8000/core/event_handler/api_gateway#accessing-request-details){target="_blank"}, etc.
 
 
 ???+ tip
@@ -416,9 +416,9 @@ The first option could be to use the standard Python Logger, and use a specializ
 
 With just a few lines our logs will now output to `JSON` format. We've taken the following steps to make that work:
 
-* **L9**: Creates an application logger named `hello`
-* **L10-13**: Configures handler and formatter
-* **L14**: Sets the logging level set in the `LOG_LEVEL` environment variable, or `INFO` as a sentinel value
+* **L7**: Creates an application logger named `APP`.
+* **L8-11**: Configures handler and formatter.
+* **L12**: Sets the logging level set in the `LOG_LEVEL` environment variable, or `INFO` as a sentinel value.
 
 After that, we use this logger in our application code to record the required information. We see logs structured as follows:
 
@@ -480,10 +480,10 @@ def lambda_handler(event, context):
 
 Let's break this down:
 
-* **L8**: We add Lambda Powertools Logger; the boilerplate is now done for you. By default, we set `INFO` as the logging level if `LOG_LEVEL` env var isn't set
-* **L24**: We use `logger.inject_lambda_context` decorator to inject key information from Lambda context into every log.
-* **L24**: We also instruct Logger to use the incoming API Gateway Request ID as a [correlation id](./core/logger.md##set_correlation_id-method) automatically.
-* **L24**: Since we're in dev, we also use `log_event=True` to automatically log each incoming request for debugging. This can be also set via [environment variables](./index.md#environment-variables){target="_blank"}.
+* **L5**: We add Lambda Powertools Logger; the boilerplate is now done for you. By default, we set `INFO` as the logging level if `LOG_LEVEL` env var isn't set.
+* **L22**: We use `logger.inject_lambda_context` decorator to inject key information from Lambda context into every log.
+* **L22**: We also instruct Logger to use the incoming API Gateway Request ID as a [correlation id](./core/logger.md##set_correlation_id-method) automatically.
+* **L22**: Since we're in dev, we also use `log_event=True` to automatically log each incoming request for debugging. This can be also set via [environment variables](./index.md#environment-variables){target="_blank"}.
 
 
 This is how the logs would look like now:
@@ -526,12 +526,17 @@ Combined with structured logs, it is an important step to be able to observe how
 
 [AWS X-Ray](https://aws.amazon.com/xray/){target="_blank"} is the distributed tracing service we're going to use. But how do we generate application traces in the first place?
 
-It's a [two-step process](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html){target="_blank"}: **1/** enable tracing in your Lambda function, and **2/** instrument your application code. Let's explore how we can instrument our code with [AWS X-Ray SDK](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html){target="_blank"}, and then simplify it with [Lambda Powertools Tracer](core/tracer.md){target="_blank"} feature.
+It's a [two-step process](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html){target="_blank"}:
+
+1. Enable tracing in your Lambda function.
+2. Instrument your application code. 
+
+Let's explore how we can instrument our code with [AWS X-Ray SDK](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html){target="_blank"}, and then simplify it with [Lambda Powertools Tracer](core/tracer.md){target="_blank"} feature.
 
 === "app.py"
 
-    ```python hl_lines="1 10 14 21 28"
-    from aws_xray_sdk.core import patch_all, xray_recorder
+    ```python hl_lines="1 13 20 27"
+    from aws_xray_sdk.core import xray_recorder
 
     from aws_lambda_powertools import Logger
     from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
@@ -540,7 +545,6 @@ It's a [two-step process](https://docs.aws.amazon.com/lambda/latest/dg/services-
     logger = Logger(service="APP")
 
     app = ApiGatewayResolver()
-    patch_all()
 
 
     @app.get("/hello/<name>")
@@ -565,7 +569,7 @@ It's a [two-step process](https://docs.aws.amazon.com/lambda/latest/dg/services-
 
 === "template.yaml"
 
-    ```yaml hl_lines="7-8 14"
+    ```yaml hl_lines="7-8 16"
     AWSTemplateFormatVersion: "2010-09-09"
     Transform: AWS::Serverless-2016-10-31
     Description: Sample SAM Template for powertools-quickstart
@@ -608,40 +612,40 @@ It's a [two-step process](https://docs.aws.amazon.com/lambda/latest/dg/services-
 
 Let's break it down:
 
-* **L1**: First, we import AWS X-Ray SDK. `xray_recorder` records blocks of code being traced ([subsegment](https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html#xray-concepts-subsegments){target="_blank"}). It also sends generated traces to the AWS X-Ray daemon running in the Lambda service who subsequently forwards them to AWS X-Ray service
-* **L12**: We patch [supported libraries](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/thirdparty.html#patching-supported-libraries){target="_blank"} that might have been imported, e.g., AWS SDK, requests, httplib, etc.
-* **L16**: We decorate our function so the SDK traces the end-to-end execution, and the argument names the generated block being traced
+* **L1**: First, we import AWS X-Ray SDK. `xray_recorder` records blocks of code being traced ([subsegment](https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html#xray-concepts-subsegments){target="_blank"}). It also sends generated traces to the AWS X-Ray daemon running in the Lambda service who subsequently forwards them to AWS X-Ray service.
+* **L13,20,27**: We decorate our function so the SDK traces the end-to-end execution, and the argument names the generated block being traced.
 
 ???+ question
     But how do I enable tracing for the Lambda function and what permissions do I need?
 
 We've made the following changes in `template.yaml` for this to work seamless:
 
-* **L7-8**: Enables tracing for Amazon API Gateway
-* **L14**: Enables tracing for our Serverless Function. This will also add a managed IAM Policy named [AWSXRayDaemonWriteAccess](https://console.aws.amazon.com/iam/home#/policies/arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess){target="_blank"} to allow Lambda to send traces to AWS X-Ray.
+* **L7-8**: Enables tracing for Amazon API Gateway.
+* **L16**: Enables tracing for our Serverless Function. This will also add a managed IAM Policy named [AWSXRayDaemonWriteAccess](https://console.aws.amazon.com/iam/home#/policies/arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess){target="_blank"} to allow Lambda to send traces to AWS X-Ray.
 
 You can now build and deploy our updates with `sam build && sam deploy`. Once deployed, try invoking the application via the API endpoint, and visit [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"} to see how much progress we've made so far!!
 
 ![AWS X-Ray Console trace view](./media/tracer_xray_sdk_showcase.png)
 
-### Enriching our generates traces
+### Enriching our generated traces
 
 What we've done helps bring an initial visibility, but we can do so much more.
 
 ???+ question
     You're probably asking yourself at least the following questions:
 
-    * What if I know to search traces by customer name?
+    * What if I want to search traces by customer name?
     * What about grouping traces with cold starts?
     * Better yet, what if we want to include the request or response of our functions as part of the trace?
 
 Within AWS X-Ray, we can answer these questions by using two features: tracing **Annotations** and **Metadata**.
 
-**Annotations** are simple key-value pairs that are indexed for use with [filter expressions](https://docs.aws.amazon.com/xray/latest/devguide/xray-console-filters.html){target="_blank"}. **Metadata** are key-value pairs with values of any type, including objects and lists, but that are not indexed
+**Annotations** are simple key-value pairs that are indexed for use with [filter expressions](https://docs.aws.amazon.com/xray/latest/devguide/xray-console-filters.html){target="_blank"}.  
+**Metadata** are key-value pairs with values of any type, including objects and lists, but that are not indexed.
 
 Let's put them into action.
 
-```python title="Enriching traces with annotations and metadata" hl_lines="10 17-19 26-27 35 37-42 45"
+```python title="Enriching traces with annotations and metadata" hl_lines="10 17-18 26-27 35 37-42 45"
 from aws_xray_sdk.core import patch_all, xray_recorder
 
 from aws_lambda_powertools import Logger
@@ -659,7 +663,7 @@ patch_all()
 @xray_recorder.capture('hello_name')
 def hello_name(name):
     subsegment = xray_recorder.current_subsegment()
-    subsegment.put_annotation("User", name)
+    subsegment.put_annotation(key="User", value=name)
     logger.info(f"Request from {name} received")
     return {"message": f"hello {name}!"}
 
@@ -668,7 +672,7 @@ def hello_name(name):
 @xray_recorder.capture('hello')
 def hello():
     subsegment = xray_recorder.current_subsegment()
-    subsegment.put_annotation("User", "unknown")
+    subsegment.put_annotation(key="User", value="unknown")
     logger.info("Request from unknown received")
     return {"message": "hello unknown!"}
 
@@ -680,10 +684,10 @@ def lambda_handler(event, context):
 
     subsegment = xray_recorder.current_subsegment()
     if cold_start:
-        subsegment.put_annotation("ColdStart", cold_start)
+        subsegment.put_annotation(key="ColdStart", value=cold_start)
         cold_start = False
     else:
-        subsegment.put_annotation("ColdStart", cold_start)
+        subsegment.put_annotation(key="ColdStart", value=cold_start)
 
     result = app.resolve(event, context)
     subsegment.put_metadata("response", result)
@@ -693,12 +697,12 @@ def lambda_handler(event, context):
 
 Let's break it down:
 
-* **L12**: We track Lambda cold start by setting global variable outside the handler; this is executed once per sandbox Lambda creates. This information provides an overview of how often the sandbox is reused by Lambda, which directly impacts the performance of each transaction
-* **L19-20**: We use AWS X-Ray SDK to add `User` annotation on `hello_name` subsegment. This will allow us to filter traces using the `User` value
-* **L28-29**: We repeat what we did in L19-29 except we use the value `unknown` since we don't have that information
-* **L37**: We use `global` to modify our global variable defined in the outer scope
-* **39-44**: We add `ColdStart` annotation and flip the value of `cold_start` variable, so that subsequent requests annotates the value `false` when the sandbox is reused
-* **L47**: We include the final response under `response` key as part of the `handler` subsegment
+* **L10**: We track Lambda cold start by setting global variable outside the handler; this is executed once per sandbox Lambda creates. This information provides an overview of how often the sandbox is reused by Lambda, which directly impacts the performance of each transaction.
+* **L17-18**: We use AWS X-Ray SDK to add `User` annotation on `hello_name` subsegment. This will allow us to filter traces using the `User` value.
+* **L26-27**: We repeat what we did in L17-18 except we use the value `unknown` since we don't have that information.
+* **L35**: We use `global` to modify our global variable defined in the outer scope.
+* **37-42**: We add `ColdStart` annotation and flip the value of `cold_start` variable, so that subsequent requests annotates the value `false` when the sandbox is reused.
+* **L45**: We include the final response under `response` key as part of the `handler` subsegment.
 
 ???+ info
     If you want to understand how the Lambda execution environment (sandbox) works and why cold starts can occur, see this [blog series on Lambda performance](https://aws.amazon.com/blogs/compute/operating-lambda-performance-optimization-part-1/).
@@ -754,10 +758,10 @@ def lambda_handler(event, context):
 
 Decorators, annotations and metadata are largely the same, except we now have a much cleaner code as the boilerplate is gone. Here's what's changed compared to AWS X-Ray SDK approach:
 
-* **L8**: We initialize `Tracer` and define the name of our service (`APP`). We automatically run `patch_all` from AWS X-Ray SDK on your behalf. Any previously patched or non-imported library is simply ignored
-* **L13**: We use `@tracer.capture_method` decorator instead of `xray_recorder.capture`. We automatically **1/** create a subsegment named after the function name (`## hello_name`), and **2/** add the response/exception as tracing metadata
-* **L15**: Putting annotations remain exactly the same UX
-* **L29**: We use `@tracer.lambda_handler` so we automatically add `ColdStart` annotation within Tracer itself. We also add a new `Service` annotation using the value of `Tracer(service="APP")`, so that you can filter traces by the service your function(s) represent.
+* **L6**: We initialize `Tracer` and define the name of our service (`APP`). We automatically run `patch_all` from AWS X-Ray SDK on your behalf. Any previously patched or non-imported library is simply ignored.
+* **L11**: We use `@tracer.capture_method` decorator instead of `xray_recorder.capture`. We automatically create a subsegment named after the function name (`## hello_name`), and add the response/exception as tracing metadata.
+* **L13**: Putting annotations remain exactly the same UX.
+* **L27**: We use `@tracer.lambda_handler` so we automatically add `ColdStart` annotation within Tracer itself. We also add a new `Service` annotation using the value of `Tracer(service="APP")`, so that you can filter traces by the service your function(s) represent.
 
 Another subtle difference is that you can now run your Lambda functions and unit test them locally without having to explicitly disable Tracer.
 
@@ -785,7 +789,7 @@ From here, you can browse to specific logs in CloudWatch Logs Insight, Metrics D
 
 ### Creating metrics
 
-Let's add custom metrics to better understand our application and business behaviour (e.g., number of reservations, etc.).
+Let's add custom metrics to better understand our application and business behavior (e.g. number of reservations, etc.).
 
 Out of the box, AWS Lambda adds [invocation, performance, and concurrency metrics](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-metrics.html#monitoring-metrics-types){target="_blank"}. Amazon API Gateway also adds [general metrics at the aggregate level](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-metrics-and-dimensions.html#api-gateway-metrics) such as latency, number of requests received, etc.
 
@@ -796,7 +800,7 @@ Let's expand our application with custom metrics using AWS SDK to see how it wor
 
 === "app.py"
 
-    ```python hl_lines="3 19-47"
+    ```python hl_lines="3 10 14 19-47 55 64"
     import os
 
     import boto3
@@ -849,7 +853,7 @@ Let's expand our application with custom metrics using AWS SDK to see how it wor
     @app.get("/hello/<name>")
     @tracer.capture_method
     def hello_name(name):
-        tracer.put_annotation("User", name)
+        tracer.put_annotation(key="User", value=name)
         logger.info(f"Request from {name} received")
         add_greeting_metric()
         return {"message": f"hello {name}!"}
@@ -858,7 +862,7 @@ Let's expand our application with custom metrics using AWS SDK to see how it wor
     @app.get("/hello")
     @tracer.capture_method
     def hello():
-        tracer.put_annotation("User", "unknown")
+        tracer.put_annotation(key="User", value="unknown")
         logger.info("Request from unknown received")
         add_greeting_metric()
         return {"message": "hello unknown!"}
@@ -909,10 +913,10 @@ Let's expand our application with custom metrics using AWS SDK to see how it wor
 
 There's a lot going on, let's break this down:
 
-* **L10**: We define a container where all of our application metrics will live `MyApp`, a.k.a [Metrics Namespace](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html){target="_blank"}
-* **L14**: We initialize a CloudWatch client to send metrics later
+* **L10**: We define a container where all of our application metrics will live `MyApp`, a.k.a [Metrics Namespace](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html){target="_blank"}.
+* **L14**: We initialize a CloudWatch client to send metrics later.
 * **L19-47**: We create a custom function to prepare and send `ColdStart` and `SuccessfulGreetings` metrics using CloudWatch expected data structure. We also set [dimensions](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Dimension){target="_blank"} of these metrics - Think of them as metadata to define to slice and dice them later; an unique metric is a combination of metric name + metric dimension(s).
-* **L55,64**: We call our custom function to create metrics for every greeting received
+* **L55,64**: We call our custom function to create metrics for every greeting received.
 
 ???+ question
     But what permissions do I need to send metrics to CloudWatch?
@@ -951,7 +955,7 @@ app = ApiGatewayResolver()
 @app.get("/hello/<name>")
 @tracer.capture_method
 def hello_name(name):
-    tracer.put_annotation("User", name)
+    tracer.put_annotation(key="User", value=name)
     logger.info(f"Request from {name} received")
     metrics.add_metric(name="SuccessfulGreetings", unit=MetricUnit.Count, value=1)
     return {"message": f"hello {name}!"}
@@ -960,7 +964,7 @@ def hello_name(name):
 @app.get("/hello")
 @tracer.capture_method
 def hello():
-    tracer.put_annotation("User", "unknown")
+    tracer.put_annotation(key="User", value="unknown")
     logger.info("Request from unknown received")
     metrics.add_metric(name="SuccessfulGreetings", unit=MetricUnit.Count, value=1)
     return {"message": "hello unknown!"}
