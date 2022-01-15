@@ -397,13 +397,13 @@ The first option could be to use the standard Python Logger, and use a specializ
     @app.get("/hello/<name>")
     def hello_name(name):
         logger.info(f"Request from {name} received")
-        return {"statusCode": 200, "body": json.dumps({"message": f"hello {name}!"})}
+        return {"message": f"hello {name}!"}
 
 
     @app.get("/hello")
     def hello():
         logger.info("Request from unknown received")
-        return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
+        return {"message": "hello unknown!"}
 
 
     def lambda_handler(event, context):
@@ -469,13 +469,13 @@ app = ApiGatewayResolver()
 @app.get("/hello/<name>")
 def hello_name(name):
     logger.info(f"Request from {name} received")
-    return {"statusCode": 200, "body": json.dumps({"message": f"hello {name}!"})}
+    return {"message": f"hello {name}!"}
 
 
 @app.get("/hello")
 def hello():
     logger.info("Request from unknown received")
-    return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
+    return {"message": "hello unknown!"}
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
@@ -554,14 +554,14 @@ It's a [two-step process](https://docs.aws.amazon.com/lambda/latest/dg/services-
     @xray_recorder.capture('hello_name')
     def hello_name(name):
         logger.info(f"Request from {name} received")
-        return {"statusCode": 200, "body": json.dumps({"message": f"hello {name}!"})}
+        return {"message": f"hello {name}!"}
 
 
     @app.get("/hello")
     @xray_recorder.capture('hello')
     def hello():
         logger.info("Request from unknown received")
-        return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
+        return {"message": "hello unknown!"}
 
 
     @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
@@ -572,13 +572,15 @@ It's a [two-step process](https://docs.aws.amazon.com/lambda/latest/dg/services-
 
 === "template.yaml"
 
-    ```yaml hl_lines="14"
+    ```yaml hl_lines="7-8 14"
     AWSTemplateFormatVersion: "2010-09-09"
     Transform: AWS::Serverless-2016-10-31
     Description: Sample SAM Template for powertools-quickstart
     Globals:
         Function:
             Timeout: 3
+        Api:
+          TracingEnabled: true
     Resources:
         HelloWorldFunction:
             Type: AWS::Serverless::Function
@@ -613,7 +615,10 @@ Let's break it down:
 ???+ question
     But how do I enable tracing for the Lambda function and what permissions do I need?
 
-Within `template.yaml` on line 14, we added a new Serverless Function property: `Tracing: Active`. This will enable tracing for the [Lambda function resource](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray-cloudformation){target="_blank"}, and add a managed IAM Policy named [AWSXRayDaemonWriteAccess](https://console.aws.amazon.com/iam/home#/policies/arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess){target="_blank"} to allow Lambda to send traces to AWS X-Ray.
+We've made the following changes in `template.yaml` for this to work seamless:
+
+* **L7-8**: Enables tracing for Amazon API Gateway
+* **L14**: Enables tracing for our Serverless Function. This will also add a managed IAM Policy named [AWSXRayDaemonWriteAccess](https://console.aws.amazon.com/iam/home#/policies/arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess){target="_blank"} to allow Lambda to send traces to AWS X-Ray.
 
 !!! danger "TODO: Revisit to see if it's still necessary"
 
@@ -623,6 +628,7 @@ Within `template.yaml` on line 14, we added a new Serverless Function property: 
 
 ### Enriching our generates traces
 
+What we've done helps bring an initial visibility
 
 cold start invocations
 
@@ -704,7 +710,7 @@ Now, let's try to simplify it with Lambda Powertools:
     def hello_name(name):
         tracer.put_annotation("User", name)
         logger.info(f"Request from {name} received")
-        return {"statusCode": 200, "body": json.dumps({"message": f"hello {name}!"})}
+        return {"message": f"hello {name}!"}
 
 
     @app.get("/hello")
@@ -712,7 +718,7 @@ Now, let's try to simplify it with Lambda Powertools:
     def hello():
         tracer.put_annotation("User", "unknown")
         logger.info("Request from unknown received")
-        return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
+        return {"message": "hello unknown!"}
 
 
     @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
@@ -793,7 +799,7 @@ Let's expand our application with custom metrics without Powertools to see how i
         logger.info(f"Request from {name} received")
         put_metric_data(service=service, method="/hello/<name>")
         tracer.put_annotation("User", name)
-        return {"statusCode": 200, "body": json.dumps({"message": f"hello {name}!"})}
+        return {"message": f"hello {name}!"}
 
 
     @app.get("/hello")
@@ -802,7 +808,7 @@ Let's expand our application with custom metrics without Powertools to see how i
         tracer.put_annotation("User", "unknown")
         logger.info("Request from unknown received")
         put_metric_data(service=service, method="/hello")
-        return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
+        return {"message": "hello unknown!"}
 
 
     @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
@@ -878,7 +884,7 @@ To add custom metric in **CloudWatch** we add the `boto3` cloudwatch client. Nex
         logger.info(f"Request from {name} received")
         metrics.add_dimension(name="method", value="/hello/<name>")
         metrics.add_metric(name="AppMethodsInvocations", unit=MetricUnit.Count, value=1)
-        return {"statusCode": 200, "body": json.dumps({"message": f"hello {name}!"})}
+        return {"message": f"hello {name}!"}
 
 
     @app.get("/hello")
@@ -888,7 +894,7 @@ To add custom metric in **CloudWatch** we add the `boto3` cloudwatch client. Nex
         logger.info("Request from unknown received")
         metrics.add_dimension(name="method", value="/hello/<name>")
         metrics.add_metric(name="AppMethodsInvocations", unit=MetricUnit.Count, value=1)
-        return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
+        return {"message": "hello unknown!"}
 
 
     @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
