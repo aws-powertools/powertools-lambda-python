@@ -249,7 +249,7 @@ A first attempt at the routing logic might look similar to the following code sn
                 try:
                     route = self.routes[f"{path}-{method}"]
                 except KeyError:
-                    raise RuntimeError(f"Cannot route request to correct method. path={path}, method={method}")
+                    raise RuntimeError(f"Cannot route request to the correct method. path={path}, method={method}")
                 return route
 
         router = Router()
@@ -402,7 +402,7 @@ The first option could be to use the standard Python Logger, and use a specializ
 
     @app.get("/hello")
     def hello():
-        logger.info(f"Request from unknown received")
+        logger.info("Request from unknown received")
         return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
 
 
@@ -476,7 +476,7 @@ As we already have Lambda Powertools as a dependency, we can simply import [Logg
 
     @app.get("/hello")
     def hello():
-        logger.info(f"Request from unknown received")
+        logger.info("Request from unknown received")
         return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
 
 
@@ -561,7 +561,7 @@ Let's first explore how we can achieve this with [x-ray SDK](https://docs.aws.am
     def hello():
         with xray_recorder.in_subsegment("hello") as subsegment:
             subsegment.put_annotation("User", "unknown")
-            logger.info(f"Request from unknown received")
+            logger.info("Request from unknown received")
             return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
 
 
@@ -649,7 +649,7 @@ Now, let's try to simplify it with Lambda Powertools:
     @tracer.capture_method
     def hello():
         tracer.put_annotation("User", "unknown")
-        logger.info(f"Request from unknown received")
+        logger.info("Request from unknown received")
         return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
 
 
@@ -738,7 +738,7 @@ Let's expand our application with custom metrics without Powertools to see how i
     @tracer.capture_method
     def hello():
         tracer.put_annotation("User", "unknown")
-        logger.info(f"Request from unknown received")
+        logger.info("Request from unknown received")
         put_metric_data(service=service, method="/hello")
         return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
 
@@ -823,7 +823,7 @@ To add custom metric in **CloudWatch** we add the `boto3` cloudwatch client. Nex
     @tracer.capture_method
     def hello():
         tracer.put_annotation("User", "unknown")
-        logger.info(f"Request from unknown received")
+        logger.info("Request from unknown received")
         metrics.add_dimension(name="method", value="/hello/<name>")
         metrics.add_metric(name="AppMethodsInvocations", unit=MetricUnit.Count, value=1)
         return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
