@@ -92,10 +92,8 @@ class AppConfigProvider(BaseProvider):
         ----------
         name: str
             Name of the configuration
-        environment: str
-            Environment of the configuration
         sdk_options: dict, optional
-            Dictionary of options that will be passed to the Parameter Store get_parameter API call
+            Dictionary of options that will be passed to the client's get_configuration API call
         """
 
         sdk_options["Configuration"] = name
@@ -140,7 +138,7 @@ def get_app_config(
     max_age: int
         Maximum age of the cached value
     sdk_options: dict, optional
-        Dictionary of options that will be passed to the Parameter Store get_parameter API call
+        Dictionary of options that will be passed to the boto client get_configuration API call
 
     Raises
     ------
@@ -163,7 +161,7 @@ def get_app_config(
 
     **Retrieves a configuration value and decodes it using a JSON decoder**
 
-        >>> from aws_lambda_powertools.utilities.parameters import get_parameter
+        >>> from aws_lambda_powertools.utilities.parameters import get_app_config
         >>>
         >>> value = get_app_config("my_config", environment="my_env", application="my_env", transform='json')
         >>>
