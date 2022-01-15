@@ -15,6 +15,7 @@ pull_request_rules:
 #       - check-success=build  # matrix jobs aren't working in mergify
     actions:
       queue:
+        name: dependabot
         method: squash
         commit_message: title+body
 
@@ -25,5 +26,6 @@ pull_request_rules:
       - "#approved-reviews-by>=2"
     actions:
       queue:
+        name: default
         method: squash
         commit_message: title+body
