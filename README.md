@@ -33,9 +33,9 @@ A suite of Python utilities for AWS Lambda functions to ease adopting best pract
 With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip install aws-lambda-powertools``
 
 
-## Quickstart and Examples
+## Tutorial and Examples
 
-* [Quickstart](https://awslabs.github.io/aws-lambda-powertools-python/quickstart)
+* [Tutorial](https://awslabs.github.io/aws-lambda-powertools-python/latest/tutorial)
 * [Serverless Shopping cart](https://github.com/aws-samples/aws-serverless-shopping-cart)
 * [Serverless Airline](https://github.com/aws-samples/aws-serverless-airline-booking)
 * [Serverless E-commerce platform](https://github.com/aws-samples/aws-serverless-ecommerce-platform)
