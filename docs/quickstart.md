@@ -454,36 +454,34 @@ We could start by creating a dictionary with Lambda context information or somet
 
 As we already have Lambda Powertools as a dependency, we can simply import [Logger](./core/logger.md){target="_blank"}.
 
-=== "app.py"
+```python title="Refactoring with Lambda Powertools Logger" hl_lines="3 5 7 14 20 24"
+import json
 
-    ```python hl_lines="3 5 7 14 20 24"
-    import json
+from aws_lambda_powertools import Logger
+from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+from aws_lambda_powertools.logging import correlation_paths
 
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
-    from aws_lambda_powertools.logging import correlation_paths
+logger = Logger(service="order")
 
-    logger = Logger(service="order")
-
-    app = ApiGatewayResolver()
+app = ApiGatewayResolver()
 
 
-    @app.get("/hello/<name>")
-    def hello_name(name):
-        logger.info(f"Request from {name} received")
-        return {"statusCode": 200, "body": json.dumps({"message": f"hello {name}!"})}
+@app.get("/hello/<name>")
+def hello_name(name):
+    logger.info(f"Request from {name} received")
+    return {"statusCode": 200, "body": json.dumps({"message": f"hello {name}!"})}
 
 
-    @app.get("/hello")
-    def hello():
-        logger.info("Request from unknown received")
-        return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
+@app.get("/hello")
+def hello():
+    logger.info("Request from unknown received")
+    return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
 
 
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
-    ```
+@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
+def lambda_handler(event, context):
+    return app.resolve(event, context)
+```
 
 Let's break this down:
 
@@ -503,14 +501,13 @@ This is how the logs would look like now:
     "message":"Request from unknown received",
     "timestamp":"2021-10-22 16:29:58,367+0000",
     "service":"hello",
-    "sampling_rate":"0.1",
     "cold_start":true,
     "function_name":"HelloWorldFunction",
     "function_memory_size":"256",
     "function_arn":"arn:aws:lambda:us-east-1:123456789012:function:HelloWorldFunction",
     "function_request_id":"d50bb07a-7712-4b2d-9f5d-c837302221a2",
     "correlation_id":"bf9b584c-e5d9-4ad5-af3d-db953f2b10dc"
-    }
+}
 ```
 
 From here, we could [set specific keys](./core/logger.md#append_keys-method){target="_blank"} to add additional contextual information about a given operation, [log exceptions](./core/logger.md#logging-exceptions){target="_blank"} to easily enumerate them later, [sample debug logs](./core/logger.md#sampling-debug-logs){target="_blank"}, etc.
