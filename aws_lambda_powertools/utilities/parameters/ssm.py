@@ -87,7 +87,7 @@ class SSMProvider(BaseProvider):
 
         super().__init__()
 
-    def get(
+    def get(  # type: ignore[override]
         self,
         name: str,
         max_age: int = DEFAULT_MAX_AGE_SECS,
