@@ -1,5 +1,5 @@
 ---
-title: Appsync
+title: GraphQL API
 description: Core utility
 ---
 

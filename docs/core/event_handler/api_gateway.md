@@ -1,5 +1,5 @@
 ---
-title: API Gateway
+title: REST API
 description: Core utility
 ---
 
