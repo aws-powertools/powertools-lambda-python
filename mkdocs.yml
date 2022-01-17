@@ -7,6 +7,7 @@ edit_uri: edit/develop/docs
 nav:
   - Homepage: index.md
   - Changelog: changelog.md
+  - Tutorial: tutorial/index.md
   - Roadmap: https://github.com/awslabs/aws-lambda-powertools-roadmap/projects/1" target="_blank
   - API reference: api/" target="_blank
   - Core utilities:
@@ -14,8 +15,8 @@ nav:
       - core/logger.md
       - core/metrics.md
       - Event Handler:
-        - core/event_handler/appsync.md
-        - core/event_handler/api_gateway.md
+          - core/event_handler/api_gateway.md
+          - core/event_handler/appsync.md
   - Utilities:
       - utilities/middleware_factory.md
       - utilities/parameters.md
@@ -50,6 +51,7 @@ theme:
     - navigation.expand
     - navigation.top
     - navigation.instant
+    - navigation.indexes
   icon:
     repo: fontawesome/brands/github
   logo: media/aws-logo-light.svg
@@ -64,7 +66,7 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.details
   - pymdownx.snippets:
-      base_path: '.'
+      base_path: "."
       check_paths: true
   - meta
   - toc:

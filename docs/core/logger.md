@@ -1083,6 +1083,7 @@ external_logger = logging.logger()
 
 utils.copy_config_to_registered_loggers(source_logger=logger)
 external_logger.info("test message")
+```
 
 **What's the difference between `append_keys` and `extra`?**
 

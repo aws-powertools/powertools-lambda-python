@@ -82,7 +82,7 @@ class S3ObjectUserRequest(DictWrapper):
         default_value: str, optional
             Default value if no value was found by name
         case_sensitive: bool
-            Whether to use a case sensitive look up
+            Whether to use a case-sensitive look up
         Returns
         -------
         str, optional
@@ -128,7 +128,7 @@ class S3ObjectSessionAttributes(DictWrapper):
     @property
     def mfa_authenticated(self) -> str:
         """The value is true if the root user or IAM user whose credentials were used for the request also was
-        authenticated with an MFA device; otherwise, false.."""
+        authenticated with an MFA device; otherwise, false."""
         return self["mfaAuthenticated"]
 
 

@@ -101,7 +101,7 @@ class CORSConfig:
             only be used during development.
         allow_headers: Optional[List[str]]
             The list of additional allowed headers. This list is added to list of
-            built in allowed headers: `Authorization`, `Content-Type`, `X-Amz-Date`,
+            built-in allowed headers: `Authorization`, `Content-Type`, `X-Amz-Date`,
             `X-Api-Key`, `X-Amz-Security-Token`.
         expose_headers: Optional[List[str]]
             A list of values to return for the Access-Control-Expose-Headers
