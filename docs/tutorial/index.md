@@ -529,7 +529,7 @@ Combined with structured logs, it is an important step to be able to observe how
 It's a [two-step process](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html){target="_blank"}:
 
 1. Enable tracing in your Lambda function.
-2. Instrument your application code. 
+2. Instrument your application code.
 
 Let's explore how we can instrument our code with [AWS X-Ray SDK](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html){target="_blank"}, and then simplify it with [Lambda Powertools Tracer](core/tracer.md){target="_blank"} feature.
 
@@ -640,7 +640,7 @@ What we've done helps bring an initial visibility, but we can do so much more.
 
 Within AWS X-Ray, we can answer these questions by using two features: tracing **Annotations** and **Metadata**.
 
-**Annotations** are simple key-value pairs that are indexed for use with [filter expressions](https://docs.aws.amazon.com/xray/latest/devguide/xray-console-filters.html){target="_blank"}.  
+**Annotations** are simple key-value pairs that are indexed for use with [filter expressions](https://docs.aws.amazon.com/xray/latest/devguide/xray-console-filters.html){target="_blank"}.
 **Metadata** are key-value pairs with values of any type, including objects and lists, but that are not indexed.
 
 Let's put them into action.
@@ -1038,4 +1038,4 @@ This requires a change in mindset to ensure operational excellence is part of th
     Lambda Powertools is largely designed to make some of these practices easier to adopt from day 1.
 
 ???+ question "Have ideas for other tutorials?"
-    You can open up a documentation issue, or connect with us on the [AWS Developers Slack](https://github.com/awslabs/aws-lambda-powertools-python/#connect) at `lambda-powertools` channel, or via e-mail [aws-lambda-powertools-feedback@amazon.com](mailto:aws-lambda-powertools-feedback@amazon.com).
+    You can open up a [documentation issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=documentation&template=documentation-improvements.md&title=Tutorial%20Suggestion){target="_blank"}, or connect with us on the [AWS Developers Slack](https://github.com/awslabs/aws-lambda-powertools-python/#connect) at `lambda-powertools` channel, or via e-mail [aws-lambda-powertools-feedback@amazon.com](mailto:aws-lambda-powertools-feedback@amazon.com).
