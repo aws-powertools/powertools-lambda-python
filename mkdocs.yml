@@ -7,7 +7,7 @@ edit_uri: edit/develop/docs
 nav:
   - Homepage: index.md
   - Changelog: changelog.md
-  - Tutorial: tutorial.md
+  - Tutorial: tutorial/index.md
   - Roadmap: https://github.com/awslabs/aws-lambda-powertools-roadmap/projects/1" target="_blank
   - API reference: api/" target="_blank
   - Core utilities:
@@ -51,6 +51,7 @@ theme:
     - navigation.expand
     - navigation.top
     - navigation.instant
+    - navigation.indexes
   icon:
     repo: fontawesome/brands/github
   logo: media/aws-logo-light.svg
