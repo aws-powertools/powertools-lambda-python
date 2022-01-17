@@ -824,11 +824,10 @@ def lambda_handler(event, context: LambdaContext):
 	with processor(records=batch, handler=record_handler):
 		processed_messages: List[Union[SuccessResponse, FailureResponse]] = processor.process()
 
-	for messages in processed_messages:
-		for message in messages:
-			status: Union[Literal["success"], Literal["fail"]] = message[0]
-			result: Any = message[1]
-			record: SQSRecord = message[2]
+	for message in processed_messages:
+        status: Union[Literal["success"], Literal["fail"]] = message[0]
+        result: Any = message[1]
+        record: SQSRecord = message[2]
 
 
 	return processor.response()
