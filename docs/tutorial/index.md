@@ -1038,4 +1038,4 @@ This requires a change in mindset to ensure operational excellence is part of th
     Lambda Powertools is largely designed to make some of these practices easier to adopt from day 1.
 
 ???+ question "Have ideas for other tutorials?"
-    You can open up a documentation issue, or connect with us on the [AWS Developers Slack](https://github.com/awslabs/aws-lambda-powertools-python/#connect) at `lambda-powertools` channel, or via e-mail [aws-lambda-powertools-feedback@amazon.com](mailto:aws-lambda-powertools-feedback@amazon.com).
+    You can open up a [documentation issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=documentation&template=documentation-improvements.md&title=Tutorial%20Suggestion){target="_blank"}, or connect with us on the [AWS Developers Slack](https://github.com/awslabs/aws-lambda-powertools-python/#connect) at `lambda-powertools` channel, or via e-mail [aws-lambda-powertools-feedback@amazon.com](mailto:aws-lambda-powertools-feedback@amazon.com).
