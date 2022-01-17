@@ -12,17 +12,15 @@ pull_request_rules:
   - name: automatic merge for Dependabot pull requests
     conditions:
       - author~=^dependabot(|-preview)\[bot\]$
-#       - check-success=build  # matrix jobs aren't working in mergify
     actions:
       queue:
-        name: dependabot
+        name: default
         method: squash
         commit_message: title+body
 
   - name: Automatic merge ⬇️ on approval ✔
     conditions:
       - base!=master
-#       - check-success=build  # matrix jobs aren't working in mergify
       - "#approved-reviews-by>=2"
     actions:
       queue:
