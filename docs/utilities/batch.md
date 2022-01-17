@@ -921,7 +921,7 @@ class MyPartialProcessor(BasePartialProcessor):
 	def _clean(self):
 		# It's called once, *after* closing processing all records (closing the context manager)
 		# Here we're sending, at once, all successful messages to a ddb table
-		with ddb_table.batch_writer() as batch:
+		with self.ddb_table.batch_writer() as batch:
 			for result in self.success_messages:
 				batch.put_item(Item=result)
 
