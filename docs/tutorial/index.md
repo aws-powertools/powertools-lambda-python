@@ -511,7 +511,7 @@ From here, we could [set specific keys](./core/logger.md#append_keys-method){tar
 By having structured logs like this, we can easily search and analyse them in [CloudWatch Logs Insight](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html){target="_blank"}.
 
 === "CloudWatch Logs Insight Example"
-![CloudWatch Logs Insight Example](./media/cloudwatch_logs_insight_example.png)
+![CloudWatch Logs Insight Example](../media/cloudwatch_logs_insight_example.png)
 
 ## Tracing
 
@@ -625,7 +625,7 @@ We've made the following changes in `template.yaml` for this to work seamless:
 
 You can now build and deploy our updates with `sam build && sam deploy`. Once deployed, try invoking the application via the API endpoint, and visit [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"} to see how much progress we've made so far!!
 
-![AWS X-Ray Console trace view](./media/tracer_xray_sdk_showcase.png)
+![AWS X-Ray Console trace view](../media/tracer_xray_sdk_showcase.png)
 
 ### Enriching our generated traces
 
@@ -709,11 +709,11 @@ Let's break it down:
 
 Repeat the process of building, deploying, and invoking your application via the API endpoint. Within the [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"}, you should now be able to group traces by the `User` and `ColdStart` annotation.
 
-![Filtering traces by annotations](./media/tracer_xray_sdk_enriched.png)
+![Filtering traces by annotations](../media/tracer_xray_sdk_enriched.png)
 
 If you choose any of the traces available, try opening the `handler` subsegment and you should see the response of your Lambda function under the `Metadata` tab.
 
-![Filtering traces by metadata](./media/tracer_xray_sdk_enriched_2.png)
+![Filtering traces by metadata](../media/tracer_xray_sdk_enriched_2.png)
 
 ### Simplifying with Tracer
 
@@ -773,14 +773,14 @@ Lambda Powertools optimizes for Lambda compute environment. As such, we add thes
 Repeat the process of building, deploying, and invoking your application via the API endpoint. Within the [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"}, you should see a similar view:
 
 
-![AWS X-Ray Console trace view using Lambda Powertools Tracer](./media/tracer_utility_showcase_2.png)
+![AWS X-Ray Console trace view using Lambda Powertools Tracer](../media/tracer_utility_showcase_2.png)
 
 ???+ tip
     Consider using [Amazon CloudWatch ServiceLens view](https://console.aws.amazon.com/cloudwatch/home#servicelens:service-map/map){target="_blank"} as it aggregates AWS X-Ray traces and CloudWatch metrics and logs in one view.
 
 From here, you can browse to specific logs in CloudWatch Logs Insight, Metrics Dashboard or AWS X-Ray traces.
 
-![CloudWatch ServiceLens View](./media/tracer_utility_showcase_3.png)
+![CloudWatch ServiceLens View](../media/tracer_utility_showcase_3.png)
 
 ???+ info
     For more information on Amazon CloudWatch ServiceLens, please visit [link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ServiceLens.html).
@@ -990,7 +990,7 @@ That's a lot less boilerplate code! Let's break this down:
 
 Repeat the process of building, deploying, and invoking your application via the API endpoint a few times to generate metrics - [Artillery](https://www.artillery.io/){target="_blank"} and [K6.io](https://k6.io/open-source){target="_blank"} are quick ways to generate some load. Within [CloudWatch Metrics view](https://console.aws.amazon.com/cloudwatch/home#metricsV2:graph=~()){target="_blank}, you should see `MyApp` custom namespace with your custom metrics there and `SuccessfulGreetings` available to graph.
 
-![Custom Metrics Example](./media/metrics_utility_showcase.png)
+![Custom Metrics Example](../media/metrics_utility_showcase.png)
 
 If you're curious about how the EMF portion of your function logs look like, you can quickly go to [CloudWatch ServiceLens view](https://console.aws.amazon.com/cloudwatch/home#servicelens:service-map/map){target="_blank"}, choose your function and open logs. You will see a similar entry that looks like this:
 
