@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import Dict, Generic, List, Optional, Union
+from typing import Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel
 
-from aws_lambda_powertools.utilities.parser.types import Literal, Model
+from aws_lambda_powertools.utilities.parser.types import Literal
 
 
 class SqsAttributesModel(BaseModel):
@@ -49,10 +49,10 @@ class SqsMsgAttributeModel(BaseModel):
     #     return values # noqa: E800
 
 
-class SqsRecordModel(BaseModel, Generic[Model]):
+class SqsRecordModel(BaseModel):
     messageId: str
     receiptHandle: str
-    body: Union[str, Model]
+    body: Union[str, Type[BaseModel]]
     attributes: SqsAttributesModel
     messageAttributes: Dict[str, SqsMsgAttributeModel]
     md5OfBody: str

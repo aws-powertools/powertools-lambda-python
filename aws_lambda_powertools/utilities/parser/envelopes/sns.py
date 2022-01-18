@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union, cast
 
 from ..models import SnsModel, SnsNotificationModel, SqsModel
 from ..types import Model
@@ -69,6 +69,6 @@ class SnsSqsEnvelope(BaseEnvelope):
         parsed_envelope = SqsModel.parse_obj(data)
         output = []
         for record in parsed_envelope.Records:
-            sns_notification: SnsNotificationModel = SnsNotificationModel.parse_raw(record.body)
+            sns_notification: SnsNotificationModel = SnsNotificationModel.parse_raw(cast(str, record.body))
             output.append(self._parse(data=sns_notification.Message, model=model))
         return output

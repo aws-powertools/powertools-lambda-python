@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union, cast
 
 from ..models import KinesisDataStreamModel
 from ..types import Model
@@ -38,5 +38,6 @@ class KinesisDataStreamEnvelope(BaseEnvelope):
         parsed_envelope: KinesisDataStreamModel = KinesisDataStreamModel.parse_obj(data)
         logger.debug(f"Parsing Kinesis records in `body` with {model}")
         return [
-            self._parse(data=record.kinesis.data.decode("utf-8"), model=model) for record in parsed_envelope.Records
+            self._parse(data=cast(bytes, record.kinesis.data).decode("utf-8"), model=model)
+            for record in parsed_envelope.Records
         ]

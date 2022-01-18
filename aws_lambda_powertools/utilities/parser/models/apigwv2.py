@@ -1,10 +1,10 @@
 from datetime import datetime
-from typing import Any, Dict, Generic, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel, Field
 from pydantic.networks import IPvAnyNetwork
 
-from aws_lambda_powertools.utilities.parser.types import Literal, Model
+from aws_lambda_powertools.utilities.parser.types import Literal
 
 
 class RequestContextV2AuthorizerIamCognito(BaseModel):
@@ -56,7 +56,7 @@ class RequestContextV2(BaseModel):
     http: RequestContextV2Http
 
 
-class APIGatewayProxyEventV2Model(BaseModel, Generic[Model]):
+class APIGatewayProxyEventV2Model(BaseModel):
     version: str
     routeKey: str
     rawPath: str
@@ -67,5 +67,5 @@ class APIGatewayProxyEventV2Model(BaseModel, Generic[Model]):
     pathParameters: Optional[Dict[str, str]]
     stageVariables: Optional[Dict[str, str]]
     requestContext: RequestContextV2
-    body: Optional[Union[str, Model]]
+    body: Optional[Union[str, Type[BaseModel]]]
     isBase64Encoded: bool
