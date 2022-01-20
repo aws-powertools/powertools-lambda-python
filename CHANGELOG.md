@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format for changes and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## 1.24.1 - 2022-01-20
+
+### Bug Fixes
+
+* **data-classes:** docstring typos and clean up ([#937](https://github.com/awslabs/aws-lambda-powertools-python/issues/937))
+* **parameters:** appconfig internal _get docstrings ([#934](https://github.com/awslabs/aws-lambda-powertools-python/issues/934))
+
+### Documentation
+
+* rename quickstart to tutorial in readme
+* **batch:** snippet typo on batch processed messages iteration ([#951](https://github.com/awslabs/aws-lambda-powertools-python/issues/951))
+* **batch:** fix typo in context manager keyword ([#938](https://github.com/awslabs/aws-lambda-powertools-python/issues/938))
+* **homepage:** link to typescript version ([#950](https://github.com/awslabs/aws-lambda-powertools-python/issues/950))
+* **install:** new lambda layer for 1.24.0 release
+* **metrics:** keep it consistent with other sections, update metric names
+* **nav:** make REST and GraphQL event handlers more explicit ([#959](https://github.com/awslabs/aws-lambda-powertools-python/issues/959))
+* **quickstart:** expand on intro line
+* **quickstart:** tidy requirements up
+* **quickstart:** same process for Logger
+* **quickstart:** add sub-sections, fix highlight & code
+* **quickstart:** sentence fragmentation, tidy up
+* **quickstart:** make section agnostic to json lib
+* **tenets:** make core, non-core more explicit
+* **tracer:** update ServiceLens image w/ API GW, copywriting
+* **tracer:** warning to note on local traces
+* **tracer:** add initial image, requirements
+* **tracer:** add annotation, metadata, and image
+
 ## 1.24.0 - 2021-12-31
 
 ### Bug Fixes
