@@ -385,7 +385,7 @@ class BatchProcessor(BasePartialProcessor):
             )
 
         messages = self._get_messages_to_report()
-        self.batch_response = {"batchItemFailures": [messages]}
+        self.batch_response = {"batchItemFailures": messages}
 
     def _has_messages_to_report(self) -> bool:
         if self.fail_messages:
@@ -397,7 +397,7 @@ class BatchProcessor(BasePartialProcessor):
     def _entire_batch_failed(self) -> bool:
         return len(self.exceptions) == len(self.records)
 
-    def _get_messages_to_report(self) -> Dict[str, str]:
+    def _get_messages_to_report(self) -> List[Dict[str, str]]:
         """
         Format messages to use in batch deletion
         """
@@ -406,20 +406,25 @@ class BatchProcessor(BasePartialProcessor):
     # Event Source Data Classes follow python idioms for fields
     # while Parser/Pydantic follows the event field names to the latter
     def _collect_sqs_failures(self):
-        if self.model:
-            return {"itemIdentifier": msg.messageId for msg in self.fail_messages}
-        return {"itemIdentifier": msg.message_id for msg in self.fail_messages}
+        failures = []
+        for msg in self.fail_messages:
+            msg_id = msg.messageId if self.model else msg.message_id
+            failures.append({"itemIdentifier": msg_id})
+        return failures
 
     def _collect_kinesis_failures(self):
-        if self.model:
-            # Pydantic model uses int but Lambda poller expects str
-            return {"itemIdentifier": msg.kinesis.sequenceNumber for msg in self.fail_messages}
-        return {"itemIdentifier": msg.kinesis.sequence_number for msg in self.fail_messages}
+        failures = []
+        for msg in self.fail_messages:
+            msg_id = msg.kinesis.sequenceNumber if self.model else msg.kinesis.sequence_number
+            failures.append({"itemIdentifier": msg_id})
+        return failures
 
     def _collect_dynamodb_failures(self):
-        if self.model:
-            return {"itemIdentifier": msg.dynamodb.SequenceNumber for msg in self.fail_messages}
-        return {"itemIdentifier": msg.dynamodb.sequence_number for msg in self.fail_messages}
+        failures = []
+        for msg in self.fail_messages:
+            msg_id = msg.dynamodb.SequenceNumber if self.model else msg.dynamodb.sequence_number
+            failures.append({"itemIdentifier": msg_id})
+        return failures
 
     @overload
     def _to_batch_type(self, record: dict, event_type: EventType, model: "BatchTypeModels") -> "BatchTypeModels":
