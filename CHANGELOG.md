@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format for changes and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## 1.24.2 - 2022-01-21
+
+### Bug Fixes
+
+* **data-classes**: underscore support in api gateway authorizer resource name
+
 ## 1.24.1 - 2022-01-20
 
 ### Bug Fixes
