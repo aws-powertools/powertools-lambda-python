@@ -30,9 +30,8 @@ def log_level():
 @pytest.fixture
 def logger(stdout, log_level):
     def _logger():
-        logging.basicConfig(stream=stdout, level=log_level.NOTSET.value)
-        logger = logging.getLogger(name=service_name())
-        return logger
+        logging.basicConfig(stream=stdout, level=log_level.INFO.value)
+        return logging.getLogger(name=service_name())
 
     return _logger
 
@@ -51,10 +50,7 @@ def service_name():
 
 
 def test_copy_config_to_ext_loggers(stdout, logger, log_level):
-
-    msg = "test message"
-
-    # GIVEN a external logger and powertools logger initialized
+    # GIVEN an external logger and powertools logger initialized
     logger_1 = logger()
     logger_2 = logger()
 
@@ -62,6 +58,7 @@ def test_copy_config_to_ext_loggers(stdout, logger, log_level):
 
     # WHEN configuration copied from powertools logger to ALL external loggers AND our external logger used
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger)
+    msg = "test message1"
     logger_1.info(msg)
     logger_2.info(msg)
     logs = capture_multiple_logging_statements_output(stdout)
@@ -77,15 +74,13 @@ def test_copy_config_to_ext_loggers(stdout, logger, log_level):
 
 
 def test_copy_config_to_ext_loggers_include(stdout, logger, log_level):
-
-    msg = "test message"
-
-    # GIVEN a external logger and powertools logger initialized
+    # GIVEN an external logger and powertools logger initialized
     logger = logger()
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
     # WHEN configuration copied from powertools logger to ALL external loggers AND our external logger used
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={logger.name})
+    msg = "test message2"
     logger.info(msg)
     log = capture_logging_output(stdout)
 
@@ -99,8 +94,7 @@ def test_copy_config_to_ext_loggers_include(stdout, logger, log_level):
 
 
 def test_copy_config_to_ext_loggers_wrong_include(stdout, logger, log_level):
-
-    # GIVEN a external logger and powertools logger initialized
+    # GIVEN an external logger and powertools logger initialized
     logger = logger()
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
@@ -112,8 +106,7 @@ def test_copy_config_to_ext_loggers_wrong_include(stdout, logger, log_level):
 
 
 def test_copy_config_to_ext_loggers_exclude(stdout, logger, log_level):
-
-    # GIVEN a external logger and powertools logger initialized
+    # GIVEN an external logger and powertools logger initialized
     logger = logger()
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
@@ -125,10 +118,7 @@ def test_copy_config_to_ext_loggers_exclude(stdout, logger, log_level):
 
 
 def test_copy_config_to_ext_loggers_include_exclude(stdout, logger, log_level):
-
-    msg = "test message"
-
-    # GIVEN a external logger and powertools logger initialized
+    # GIVEN an external logger and powertools logger initialized
     logger_1 = logger()
     logger_2 = logger()
 
@@ -138,6 +128,7 @@ def test_copy_config_to_ext_loggers_include_exclude(stdout, logger, log_level):
     utils.copy_config_to_registered_loggers(
         source_logger=powertools_logger, include={logger_1.name, logger_2.name}, exclude={logger_1.name}
     )
+    msg = "test message3"
     logger_2.info(msg)
     log = capture_logging_output(stdout)
 
@@ -152,10 +143,9 @@ def test_copy_config_to_ext_loggers_include_exclude(stdout, logger, log_level):
 
 
 def test_copy_config_to_ext_loggers_clean_old_handlers(stdout, logger, log_level):
-
-    # GIVEN a external logger with handler and powertools logger initialized
+    # GIVEN an external logger with handler and powertools logger initialized
     logger = logger()
-    handler = logging.FileHandler("logfile")
+    handler = logging.NullHandler()
     logger.addHandler(handler)
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
@@ -169,10 +159,7 @@ def test_copy_config_to_ext_loggers_clean_old_handlers(stdout, logger, log_level
 
 
 def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level):
-
-    msg = "test message"
-
-    # GIVEN a external logger and powertools logger initialized
+    # GIVEN an external logger and powertools logger initialized
     logger = logger()
     powertools_logger = Logger(service=service_name(), level=log_level.CRITICAL.value, stream=stdout)
     level = log_level.WARNING.name
@@ -180,6 +167,7 @@ def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level):
     # WHEN configuration copied from powertools logger to ALL external loggers
     # AND our external logger used with custom log_level
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={logger.name}, log_level=level)
+    msg = "test message4"
     logger.warning(msg)
     log = capture_logging_output(stdout)
 
