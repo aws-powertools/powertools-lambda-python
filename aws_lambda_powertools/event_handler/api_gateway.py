@@ -735,3 +735,84 @@ class Router(BaseRouter):
             self._routes[(rule, methods, cors, compress, cache_control)] = func
 
         return register_route
+
+
+class APIGatewayProxyEventResolver(ApiGatewayResolver):
+    current_event: APIGatewayProxyEvent
+
+    def __init__(
+        self,
+        cors: Optional[CORSConfig] = None,
+        debug: Optional[bool] = None,
+        serializer: Optional[Callable[[Dict], str]] = None,
+        strip_prefixes: Optional[List[str]] = None,
+    ):
+        """
+        Parameters
+        ----------
+        cors: CORSConfig
+            Optionally configure and enabled CORS. Not each route will need to have to cors=True
+        debug: Optional[bool]
+            Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_EVENT_HANDLER_DEBUG"
+            environment variable
+        serializer : Callable, optional
+            function to serialize `obj` to a JSON formatted `str`, by default json.dumps
+        strip_prefixes: List[str], optional
+            list of prefixes to be removed from the request path before doing the routing. This is often used
+            with api gateways with multiple custom mappings.
+        """
+        super().__init__(ProxyEventType.APIGatewayProxyEvent, cors, debug, serializer, strip_prefixes)
+
+
+class APIGatewayProxyEventV2Resolver(ApiGatewayResolver):
+    current_event: APIGatewayProxyEventV2
+
+    def __init__(
+        self,
+        cors: Optional[CORSConfig] = None,
+        debug: Optional[bool] = None,
+        serializer: Optional[Callable[[Dict], str]] = None,
+        strip_prefixes: Optional[List[str]] = None,
+    ):
+        """
+        Parameters
+        ----------
+        cors: CORSConfig
+            Optionally configure and enabled CORS. Not each route will need to have to cors=True
+        debug: Optional[bool]
+            Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_EVENT_HANDLER_DEBUG"
+            environment variable
+        serializer : Callable, optional
+            function to serialize `obj` to a JSON formatted `str`, by default json.dumps
+        strip_prefixes: List[str], optional
+            list of prefixes to be removed from the request path before doing the routing. This is often used
+            with api gateways with multiple custom mappings.
+        """
+        super().__init__(ProxyEventType.APIGatewayProxyEventV2, cors, debug, serializer, strip_prefixes)
+
+
+class ALBEventResolver(ApiGatewayResolver):
+    current_event: ALBEvent
+
+    def __init__(
+        self,
+        cors: Optional[CORSConfig] = None,
+        debug: Optional[bool] = None,
+        serializer: Optional[Callable[[Dict], str]] = None,
+        strip_prefixes: Optional[List[str]] = None,
+    ):
+        """
+        Parameters
+        ----------
+        cors: CORSConfig
+            Optionally configure and enabled CORS. Not each route will need to have to cors=True
+        debug: Optional[bool]
+            Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_EVENT_HANDLER_DEBUG"
+            environment variable
+        serializer : Callable, optional
+            function to serialize `obj` to a JSON formatted `str`, by default json.dumps
+        strip_prefixes: List[str], optional
+            list of prefixes to be removed from the request path before doing the routing. This is often used
+            with api gateways with multiple custom mappings.
+        """
+        super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes)
