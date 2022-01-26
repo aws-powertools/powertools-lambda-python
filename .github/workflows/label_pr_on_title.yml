@@ -53,12 +53,12 @@ jobs:
             const pr_number = Number(fs.readFileSync('./number'));
             const pr_title = fs.readFileSync('./title', 'utf-8').trim();
 
-            const FEAT_REGEX = /feat(\((\w+)\))?(\:.+)/
-            const BUG_REGEX = /(fix|bug)(\((\w+)\))?(\:.+)/
-            const DOCS_REGEX = /(docs|doc)(\((\w+)\))?(\:.+)/
-            const CHORE_REGEX = /(chore)(\((\w+)\))?(\:.+)/
-            const DEPRECATED_REGEX = /(deprecated)(\((\w+)\))?(\:.+)/
-            const REFACTOR_REGEX = /(refactor)(\((\w+)\))?(\:.+)/
+            const FEAT_REGEX = /feat(\((.+)\))?(\:.+)/
+            const BUG_REGEX = /(fix|bug)(\((.+)\))?(\:.+)/
+            const DOCS_REGEX = /(docs|doc)(\((.+)\))?(\:.+)/
+            const CHORE_REGEX = /(chore)(\((.+)\))?(\:.+)/
+            const DEPRECATED_REGEX = /(deprecated)(\((.+)\))?(\:.+)/
+            const REFACTOR_REGEX = /(refactor)(\((.+)\))?(\:.+)/
 
             const labels = {
                 "feature": FEAT_REGEX,
