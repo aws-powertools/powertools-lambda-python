@@ -69,6 +69,8 @@ class SnsSqsEnvelope(BaseEnvelope):
         parsed_envelope = SqsModel.parse_obj(data)
         output = []
         for record in parsed_envelope.Records:
-            sns_notification: SnsNotificationModel = SnsNotificationModel.parse_raw(cast(str, record.body))
+            # We allow either AWS expected contract (str) or a custom Model, see #943
+            body = cast(str, record.body)
+            sns_notification = SnsNotificationModel.parse_raw(body)
             output.append(self._parse(data=sns_notification.Message, model=model))
         return output

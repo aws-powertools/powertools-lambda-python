@@ -40,7 +40,7 @@ class DataRecord:
         idempotency_key,
         status: str = "",
         expiry_timestamp: Optional[int] = None,
-        response_data: str = "",
+        response_data: Optional[str] = "",
         payload_hash: Optional[str] = None,
     ) -> None:
         """
@@ -92,16 +92,16 @@ class DataRecord:
         else:
             raise IdempotencyInvalidStatusError(self._status)
 
-    def response_json_as_dict(self) -> dict:
+    def response_json_as_dict(self) -> Optional[dict]:
         """
         Get response data deserialized to python dict
 
         Returns
         -------
-        dict
+        Optional[dict]
             previous response data deserialized
         """
-        return json.loads(self.response_data)
+        return json.loads(self.response_data) if self.response_data else None
 
 
 class BasePersistenceLayer(ABC):
@@ -121,7 +121,6 @@ class BasePersistenceLayer(ABC):
         self.raise_on_no_idempotency_key = False
         self.expires_after_seconds: int = 60 * 60  # 1 hour default
         self.use_local_cache = False
-        self._cache: Optional[LRUDict] = None
         self.hash_function = None
 
     def configure(self, config: IdempotencyConfig, function_name: Optional[str] = None) -> None:
@@ -279,14 +278,14 @@ class BasePersistenceLayer(ABC):
         -------
 
         """
-        if not self.use_local_cache or self._cache is None:
+        if not self.use_local_cache:
             return
         if data_record.status == STATUS_CONSTANTS["INPROGRESS"]:
             return
         self._cache[data_record.idempotency_key] = data_record
 
     def _retrieve_from_cache(self, idempotency_key: str):
-        if not self.use_local_cache or self._cache is None:
+        if not self.use_local_cache:
             return
         cached_record = self._cache.get(key=idempotency_key)
         if cached_record:
@@ -296,7 +295,7 @@ class BasePersistenceLayer(ABC):
             self._delete_from_cache(idempotency_key=idempotency_key)
 
     def _delete_from_cache(self, idempotency_key: str):
-        if not self.use_local_cache or self._cache is None:
+        if not self.use_local_cache:
             return
         if idempotency_key in self._cache:
             del self._cache[idempotency_key]

@@ -87,6 +87,8 @@ class SSMProvider(BaseProvider):
 
         super().__init__()
 
+    # We break Liskov substitution principle due to differences in signatures of this method and superclass get method
+    # We ignore mypy error, as changes to the signature here or in a superclass is a breaking change to users
     def get(  # type: ignore[override]
         self,
         name: str,

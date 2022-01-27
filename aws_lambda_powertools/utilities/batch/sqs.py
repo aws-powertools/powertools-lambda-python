@@ -90,10 +90,13 @@ class PartialSQSProcessor(BasePartialProcessor):
         """
         Format messages to use in batch deletion
         """
-        return [
-            {"Id": msg["messageId"], "ReceiptHandle": msg["receiptHandle"]}
-            for msg in cast(List[SQSRecord], self.success_messages)
-        ]
+        entries = []
+        # success_messages has generic type of union of SQS, Dynamodb and Kinesis Streams records or Pydantic models.
+        # Here we get SQS Record only
+        messages = cast(List[SQSRecord], self.success_messages)
+        for msg in messages:
+            entries.append({"Id": msg["messageId"], "ReceiptHandle": msg["receiptHandle"]})
+        return entries
 
     def _process_record(self, record) -> Tuple:
         """
