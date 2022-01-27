@@ -41,5 +41,5 @@ class KinesisDataStreamEnvelope(BaseEnvelope):
         for record in parsed_envelope.Records:
             # We allow either AWS expected contract (bytes) or a custom Model, see #943
             data = cast(bytes, record.kinesis.data)
-            models.append(self._parse(data=cast(bytes, record.kinesis.data).decode("utf-8"), model=model))
+            models.append(self._parse(data=data.decode("utf-8"), model=model))
         return models

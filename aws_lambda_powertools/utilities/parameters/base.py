@@ -15,7 +15,6 @@ DEFAULT_MAX_AGE_SECS = 5
 ExpirableValue = namedtuple("ExpirableValue", ["value", "ttl"])
 # These providers will be dynamically initialized on first use of the helper functions
 DEFAULT_PROVIDERS: Dict[str, Any] = {}
-MULTIPLE_VALUES_TYPE: Union[Dict[str, str], Dict[str, dict], Dict[str, bytes], Dict[str, None]]
 TRANSFORM_METHOD_JSON = "json"
 TRANSFORM_METHOD_BINARY = "binary"
 SUPPORTED_TRANSFORM_METHODS = [TRANSFORM_METHOD_JSON, TRANSFORM_METHOD_BINARY]
