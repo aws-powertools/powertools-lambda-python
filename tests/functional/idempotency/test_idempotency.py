@@ -648,6 +648,29 @@ def test_data_record_invalid_status_value():
     assert e.value.args[0] == "UNSUPPORTED_STATUS"
 
 
+def test_data_record_json_to_dict_mapping():
+    # GIVEN a data record with status "COMPLETED" and provided response data
+    data_record = DataRecord(
+        "key", status="INPROGRESS", response_data='{"body": "execution finished","statusCode": "200"}'
+    )
+
+    # WHEN translating response data to dictionary
+    response_data = data_record.response_json_as_dict()
+
+    # THEN return dictionary
+    assert isinstance(response_data, dict)
+
+
+def test_data_record_json_to_dict_mapping_when_response_data_none():
+    # GIVEN a data record with status "INPROGRESS" and not set response data
+    data_record = DataRecord("key", status="INPROGRESS", response_data=None)
+    # WHEN translating response data to dictionary
+    response_data = data_record.response_json_as_dict()
+
+    # THEN return null value
+    assert response_data is None
+
+
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_in_progress_never_saved_to_cache(
     idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
