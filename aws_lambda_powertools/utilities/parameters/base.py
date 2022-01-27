@@ -98,8 +98,8 @@ class BaseProvider(ABC):
             if isinstance(value, bytes):
                 value = value.decode("utf-8")
             value = transform_value(value, transform)
-            if value:
-                self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
+
+        self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
 
         return value
 
