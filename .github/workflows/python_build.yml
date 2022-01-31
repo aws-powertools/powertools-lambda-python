@@ -30,7 +30,7 @@ jobs:
         run: make dev
       - name: Formatting and Linting
         run: make lint
-      - name: Typing
+      - name: Static type checking
         run: make mypy
       - name: Test with pytest
         run: make test
