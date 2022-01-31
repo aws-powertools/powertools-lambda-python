@@ -1,5 +1,5 @@
-import enum
 import re
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import (
@@ -316,7 +316,7 @@ class APIGatewayAuthorizerResponseV2:
         return response
 
 
-class HttpVerb(enum.Enum):
+class HttpVerb(Enum):
     """Enum of http methods / verbs"""
 
     GET = "GET"
