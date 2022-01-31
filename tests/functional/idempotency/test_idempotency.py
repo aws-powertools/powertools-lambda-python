@@ -649,7 +649,7 @@ def test_data_record_invalid_status_value():
 
 
 def test_data_record_json_to_dict_mapping():
-    # GIVEN a data record with status "COMPLETED" and provided response data
+    # GIVEN a data record with status "INPROGRESS" and provided response data
     data_record = DataRecord(
         "key", status="INPROGRESS", response_data='{"body": "execution finished","statusCode": "200"}'
     )
