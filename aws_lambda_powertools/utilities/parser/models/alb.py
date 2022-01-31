@@ -1,8 +1,6 @@
-from typing import Dict, Union
+from typing import Dict, Type, Union
 
 from pydantic import BaseModel
-
-from aws_lambda_powertools.utilities.parser.types import Model
 
 
 class AlbRequestContextData(BaseModel):
@@ -16,7 +14,7 @@ class AlbRequestContext(BaseModel):
 class AlbModel(BaseModel):
     httpMethod: str
     path: str
-    body: Union[str, Model]
+    body: Union[str, Type[BaseModel]]
     isBase64Encoded: bool
     headers: Dict[str, str]
     queryStringParameters: Dict[str, str]

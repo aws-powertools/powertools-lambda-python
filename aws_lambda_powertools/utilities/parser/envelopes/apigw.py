@@ -27,6 +27,6 @@ class ApiGatewayEnvelope(BaseEnvelope):
             Parsed detail payload with model provided
         """
         logger.debug(f"Parsing incoming data with Api Gateway model {APIGatewayProxyEventModel}")
-        parsed_envelope = APIGatewayProxyEventModel.parse_obj(data)
+        parsed_envelope: APIGatewayProxyEventModel = APIGatewayProxyEventModel.parse_obj(data)
         logger.debug(f"Parsing event payload in `detail` with {model}")
         return self._parse(data=parsed_envelope.body, model=model)
