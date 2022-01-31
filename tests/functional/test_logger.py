@@ -17,6 +17,7 @@ from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateEr
 from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter
 from aws_lambda_powertools.logging.logger import set_package_logger
 from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.utilities.data_classes import S3Event, event_source
 
 
 @pytest.fixture
@@ -635,3 +636,21 @@ def test_use_datetime(stdout, service_name, utc):
     assert re.fullmatch(
         f"custom timestamp: milliseconds=[0-9]+ microseconds=[0-9]+ timezone={re.escape(expected_tz)}", log["timestamp"]
     )
+
+
+def test_inject_lambda_context_log_event_request_data_classes(lambda_context, stdout, lambda_event, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN a lambda function is decorated with logger instructed to log event
+    # AND the event is an event source data class
+    @event_source(data_class=S3Event)
+    @logger.inject_lambda_context(log_event=True)
+    def handler(event, context):
+        logger.info("Hello")
+
+    handler(lambda_event, lambda_context)
+
+    # THEN logger should log event received from Lambda
+    logged_event, _ = capture_multiple_logging_statements_output(stdout)
+    assert logged_event["message"] == lambda_event
