@@ -112,7 +112,7 @@ def idempotent_function(
             return {"StatusCode": 200}
     """
 
-    if function is None:
+    if not function:
         return cast(
             AnyCallableT,
             functools.partial(
@@ -132,7 +132,7 @@ def idempotent_function(
 
         payload = kwargs.get(data_keyword_argument)
 
-        if payload is None:
+        if not payload:
             raise RuntimeError(
                 f"Unable to extract '{data_keyword_argument}' from keyword arguments."
                 f" Ensure this exists in your function's signature as well as the caller used it as a keyword argument"

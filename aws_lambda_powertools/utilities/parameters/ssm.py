@@ -87,7 +87,9 @@ class SSMProvider(BaseProvider):
 
         super().__init__()
 
-    def get(
+    # We break Liskov substitution principle due to differences in signatures of this method and superclass get method
+    # We ignore mypy error, as changes to the signature here or in a superclass is a breaking change to users
+    def get(  # type: ignore[override]
         self,
         name: str,
         max_age: int = DEFAULT_MAX_AGE_SECS,
@@ -95,7 +97,7 @@ class SSMProvider(BaseProvider):
         decrypt: bool = False,
         force_fetch: bool = False,
         **sdk_options
-    ) -> Union[str, list, dict, bytes]:
+    ) -> Optional[Union[str, dict, bytes]]:
         """
         Retrieve a parameter value or return the cached value
 

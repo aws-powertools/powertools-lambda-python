@@ -35,6 +35,12 @@ from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayPro
 from tests.functional.utils import load_event
 
 
+@pytest.fixture
+def json_dump():
+    # our serializers reduce length to save on costs; fixture to replicate separators
+    return lambda obj: json.dumps(obj, separators=(",", ":"))
+
+
 def read_media(file_name: str) -> bytes:
     path = Path(str(Path(__file__).parent.parent.parent.parent) + "/docs/media/" + file_name)
     return path.read_bytes()
@@ -512,12 +518,9 @@ def test_custom_preflight_response():
     assert headers["Access-Control-Allow-Methods"] == "CUSTOM"
 
 
-def test_service_error_responses():
+def test_service_error_responses(json_dump):
     # SCENARIO handling different kind of service errors being raised
     app = ApiGatewayResolver(cors=CORSConfig())
-
-    def json_dump(obj):
-        return json.dumps(obj, separators=(",", ":"))
 
     # GIVEN an BadRequestError
     @app.get(rule="/bad-request-error", cors=False)
@@ -647,7 +650,7 @@ def test_debug_mode_environment_variable(monkeypatch):
     assert app._debug
 
 
-def test_debug_json_formatting():
+def test_debug_json_formatting(json_dump):
     # GIVEN debug is True
     app = ApiGatewayResolver(debug=True)
     response = {"message": "Foo"}
@@ -660,7 +663,7 @@ def test_debug_json_formatting():
     result = app({"path": "/foo", "httpMethod": "GET"}, None)
 
     # THEN return a pretty print json in the body
-    assert result["body"] == json.dumps(response, indent=4)
+    assert result["body"] == json_dump(response)
 
 
 def test_debug_print_event(capsys):
