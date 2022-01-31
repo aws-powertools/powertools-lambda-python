@@ -446,10 +446,6 @@ class ApiGatewayResolver(BaseRouter):
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
 
-        if self._debug:
-            # Always does a pretty print when in debug mode
-            self._serializer = partial(json.dumps, indent=4, cls=Encoder)
-
     def route(
         self,
         rule: str,
@@ -496,7 +492,7 @@ class ApiGatewayResolver(BaseRouter):
             Returns the dict response
         """
         if self._debug:
-            print(self._json_dump(event))
+            print(self._json_dump(event), end="")
         BaseRouter.current_event = self._to_proxy_event(event)
         BaseRouter.lambda_context = context
         return self._resolve().build(self.current_event, self._cors)

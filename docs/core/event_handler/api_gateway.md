@@ -940,6 +940,8 @@ This will enable full tracebacks errors in the response, print request and respo
 ???+ danger
     This might reveal sensitive information in your logs and relax CORS restrictions, use it sparingly.
 
+    It's best to use for local development only!
+
 ```python hl_lines="3" title="Enabling debug mode"
 from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 
