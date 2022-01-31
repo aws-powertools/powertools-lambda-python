@@ -5,7 +5,7 @@ import traceback
 from types import TracebackType
 from typing import List, Optional, Tuple, Type
 
-ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
+ExceptionInfo = Tuple[Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]]
 
 
 class BaseBatchProcessingError(Exception):

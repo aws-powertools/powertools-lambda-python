@@ -349,7 +349,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
             if log_event:
                 logger.debug("Event received")
-                self.info(event)
+                self.info(getattr(event, "raw_event", event))
 
             return lambda_handler(event, context)
 

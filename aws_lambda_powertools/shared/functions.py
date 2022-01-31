@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 
 def strtobool(value: str) -> bool:
@@ -38,21 +38,23 @@ def resolve_truthy_env_var_choice(env: str, choice: Optional[bool] = None) -> bo
     return choice if choice is not None else strtobool(env)
 
 
-def resolve_env_var_choice(env: Any, choice: Optional[Any] = None) -> Union[bool, Any]:
+def resolve_env_var_choice(
+    env: Optional[str] = None, choice: Optional[Union[str, float]] = None
+) -> Optional[Union[str, float]]:
     """Pick explicit choice over env, if available, otherwise return env value received
 
     NOTE: Environment variable should be resolved by the caller.
 
     Parameters
     ----------
-    env : Any
+    env : str, Optional
         environment variable actual value
-    choice : bool
+    choice : str|float, optional
         explicit choice
 
     Returns
     -------
-    choice : str
+    choice : str, Optional
         resolved choice as either bool or environment value
     """
     return choice if choice is not None else env
