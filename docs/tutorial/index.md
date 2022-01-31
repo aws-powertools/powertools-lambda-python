@@ -227,75 +227,75 @@ A first attempt at the routing logic might look similar to the following code sn
 === "app.py"
 
     ```python hl_lines="4 9 13 27-29 35-36"
-        import json
+    import json
 
 
-        def hello_name(event, **kargs):
-            username = event["pathParameters"]["name"]
-            return {"statusCode": 200, "body": json.dumps({"message": f"hello {username}!"})}
+    def hello_name(event, **kargs):
+        username = event["pathParameters"]["name"]
+        return {"statusCode": 200, "body": json.dumps({"message": f"hello {username}!"})}
 
 
-        def hello(**kargs):
-            return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
+    def hello(**kargs):
+        return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
 
 
-        class Router:
-            def __init__(self):
-                self.routes = {}
+    class Router:
+        def __init__(self):
+            self.routes = {}
 
-            def set(self, path, method, handler):
-                self.routes[f"{path}-{method}"] = handler
+        def set(self, path, method, handler):
+            self.routes[f"{path}-{method}"] = handler
 
-            def get(self, path, method):
-                try:
-                    route = self.routes[f"{path}-{method}"]
-                except KeyError:
-                    raise RuntimeError(f"Cannot route request to the correct method. path={path}, method={method}")
-                return route
+        def get(self, path, method):
+            try:
+                route = self.routes[f"{path}-{method}"]
+            except KeyError:
+                raise RuntimeError(f"Cannot route request to the correct method. path={path}, method={method}")
+            return route
 
-        router = Router()
-        router.set(path="/hello", method="GET", handler=hello)
-        router.set(path="/hello/{name}", method="GET", handler=hello_name)
+    router = Router()
+    router.set(path="/hello", method="GET", handler=hello)
+    router.set(path="/hello/{name}", method="GET", handler=hello_name)
 
 
-        def lambda_handler(event, context):
-            path = event["resource"]
-            http_method = event["httpMethod"]
-            method = router.get(path=path, method=http_method)
-            return method(event=event)
+    def lambda_handler(event, context):
+        path = event["resource"]
+        http_method = event["httpMethod"]
+        method = router.get(path=path, method=http_method)
+        return method(event=event)
     ```
 
 === "template.yaml"
 
     ```yaml hl_lines="15-24"
-        AWSTemplateFormatVersion: "2010-09-09"
-        Transform: AWS::Serverless-2016-10-31
-        Description: Sample SAM Template for powertools-quickstart
-        Globals:
-            Function:
-                Timeout: 3
-        Resources:
-            HelloWorldFunction:
-                Type: AWS::Serverless::Function
-                Properties:
-                    CodeUri: hello_world/
-                    Handler: app.lambda_handler
-                    Runtime: python3.9
-                    Events:
-                        HelloWorld:
-                            Type: Api
-                            Properties:
-                                Path: /hello
-                                Method: get
-                        HelloWorldName:
-                            Type: Api
-                            Properties:
-                                Path: /hello/{name}
-                                Method: get
-        Outputs:
-            HelloWorldApi:
-                Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-                Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+    AWSTemplateFormatVersion: "2010-09-09"
+    Transform: AWS::Serverless-2016-10-31
+    Description: Sample SAM Template for powertools-quickstart
+    Globals:
+        Function:
+            Timeout: 3
+    Resources:
+        HelloWorldFunction:
+            Type: AWS::Serverless::Function
+            Properties:
+                CodeUri: hello_world/
+                Handler: app.lambda_handler
+                Runtime: python3.9
+                Events:
+                    HelloWorld:
+                        Type: Api
+                        Properties:
+                            Path: /hello
+                            Method: get
+                    HelloWorldName:
+                        Type: Api
+                        Properties:
+                            Path: /hello/{name}
+                            Method: get
+    Outputs:
+        HelloWorldApi:
+            Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
     ```
 
 Let's break this down:
