@@ -53,7 +53,7 @@ class Metrics(MetricManager):
     ----------
     service : str, optional
         service name to be used as metric dimension, by default "service_undefined"
-    namespace : str
+    namespace : str, optional
         Namespace for metrics
 
     Raises
@@ -209,5 +209,6 @@ class Metrics(MetricManager):
             logger.debug("Adding cold start metric and function_name dimension")
             with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace=self.namespace) as metric:
                 metric.add_dimension(name="function_name", value=context.function_name)
-                metric.add_dimension(name="service", value=self.service)
+                if self.service:
+                    metric.add_dimension(name="service", value=str(self.service))
                 is_cold_start = False

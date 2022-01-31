@@ -29,7 +29,7 @@ coverage-html:
 pre-commit:
 	pre-commit run --show-diff-on-failure
 
-pr: lint pre-commit test security-baseline complexity-baseline
+pr: lint mypy pre-commit test security-baseline complexity-baseline
 
 build: pr
 	poetry build

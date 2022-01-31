@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from functools import partial
 from http import HTTPStatus
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Match, Optional, Pattern, Set, Tuple, Type, Union
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
@@ -167,7 +167,7 @@ class Route:
     """Internally used Route Configuration"""
 
     def __init__(
-        self, method: str, rule: Any, func: Callable, cors: bool, compress: bool, cache_control: Optional[str]
+        self, method: str, rule: Pattern, func: Callable, cors: bool, compress: bool, cache_control: Optional[str]
     ):
         self.method = method.upper()
         self.rule = rule
@@ -555,7 +555,7 @@ class ApiGatewayResolver(BaseRouter):
         for route in self._routes:
             if method != route.method:
                 continue
-            match_results: Optional[re.Match] = route.rule.match(path)
+            match_results: Optional[Match] = route.rule.match(path)
             if match_results:
                 logger.debug("Found a registered route. Calling function")
                 return self._call_route(route, match_results.groupdict())  # pass fn args
