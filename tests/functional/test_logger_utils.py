@@ -50,20 +50,21 @@ def service_name():
 
 
 def test_copy_config_to_ext_loggers(stdout, logger, log_level):
-    # GIVEN an external logger and powertools logger initialized
+    # GIVEN two external loggers and powertools logger initialized
     logger_1 = logger()
     logger_2 = logger()
 
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to ALL external loggers AND our external logger used
+    # WHEN configuration copied from powertools logger to ALL external loggers
+    # AND external loggers used
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger)
     msg = "test message1"
     logger_1.info(msg)
     logger_2.info(msg)
     logs = capture_multiple_logging_statements_output(stdout)
 
-    # THEN
+    # THEN all external loggers used Powertools handler, formatter and log level
     for index, logger in enumerate([logger_1, logger_2]):
         assert len(logger.handlers) == 1
         assert type(logger.handlers[0]) is logging.StreamHandler
@@ -78,13 +79,14 @@ def test_copy_config_to_ext_loggers_include(stdout, logger, log_level):
     logger = logger()
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to ALL external loggers AND our external logger used
+    # WHEN configuration copied from powertools logger to INCLUDED external loggers
+    # AND our external logger used
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={logger.name})
     msg = "test message2"
     logger.info(msg)
     log = capture_logging_output(stdout)
 
-    # THEN
+    # THEN included external loggers used Powertools handler, formatter and log level.
     assert len(logger.handlers) == 1
     assert type(logger.handlers[0]) is logging.StreamHandler
     assert type(logger.handlers[0].formatter) is formatter.LambdaPowertoolsFormatter
@@ -98,10 +100,10 @@ def test_copy_config_to_ext_loggers_wrong_include(stdout, logger, log_level):
     logger = logger()
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to ALL external loggers AND our external logger used
+    # THEN included external loggers used Powertools handler, formatter and log level.
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={"non-existing-logger"})
 
-    # THEN
+    # THEN existing external logger is not modified
     assert not logger.handlers
 
 
@@ -110,21 +112,22 @@ def test_copy_config_to_ext_loggers_exclude(stdout, logger, log_level):
     logger = logger()
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to ALL external loggers AND our external logger used
+    # WHEN configuration copied from powertools logger to ALL BUT external logger
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger, exclude={logger.name})
 
-    # THEN
+    # THEN external logger is not modified
     assert not logger.handlers
 
 
 def test_copy_config_to_ext_loggers_include_exclude(stdout, logger, log_level):
-    # GIVEN an external logger and powertools logger initialized
+    # GIVEN two external loggers and powertools logger initialized
     logger_1 = logger()
     logger_2 = logger()
 
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to ALL external loggers AND our external logger used
+    # WHEN configuration copied from powertools logger to INCLUDED external loggers
+    # AND external logger_1 is also in EXCLUDE list
     utils.copy_config_to_registered_loggers(
         source_logger=powertools_logger, include={logger_1.name, logger_2.name}, exclude={logger_1.name}
     )
@@ -132,7 +135,7 @@ def test_copy_config_to_ext_loggers_include_exclude(stdout, logger, log_level):
     logger_2.info(msg)
     log = capture_logging_output(stdout)
 
-    # THEN
+    # THEN logger_1 is not modified and Logger_2 used Powertools handler, formatter and log level
     assert not logger_1.handlers
     assert len(logger_2.handlers) == 1
     assert type(logger_2.handlers[0]) is logging.StreamHandler
@@ -149,10 +152,10 @@ def test_copy_config_to_ext_loggers_clean_old_handlers(stdout, logger, log_level
     logger.addHandler(handler)
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to ALL external loggers AND our external logger used
+    # WHEN configuration copied from powertools logger to ALL external loggers
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger)
 
-    # THEN
+    # THEN old logger's handler removed and Powertools configuration used instead
     assert len(logger.handlers) == 1
     assert type(logger.handlers[0]) is logging.StreamHandler
     assert type(logger.handlers[0].formatter) is formatter.LambdaPowertoolsFormatter
@@ -164,14 +167,14 @@ def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level):
     powertools_logger = Logger(service=service_name(), level=log_level.CRITICAL.value, stream=stdout)
     level = log_level.WARNING.name
 
-    # WHEN configuration copied from powertools logger to ALL external loggers
-    # AND our external logger used with custom log_level
+    # WHEN configuration copied from powertools logger to INCLUDED external logger
+    # AND external logger used with custom log_level
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={logger.name}, log_level=level)
     msg = "test message4"
     logger.warning(msg)
     log = capture_logging_output(stdout)
 
-    # THEN
+    # THEN external logger used Powertools handler, formatter and CUSTOM log level.
     assert len(logger.handlers) == 1
     assert type(logger.handlers[0]) is logging.StreamHandler
     assert type(logger.handlers[0].formatter) is formatter.LambdaPowertoolsFormatter
