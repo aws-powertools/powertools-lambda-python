@@ -733,7 +733,7 @@ class Router(BaseRouter):
         return register_route
 
 
-class APIGatewayProxyEventResolver(ApiGatewayResolver):
+class APIGatewayRestResolver(ApiGatewayResolver):
     current_event: APIGatewayProxyEvent
 
     def __init__(
