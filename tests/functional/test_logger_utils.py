@@ -67,8 +67,8 @@ def test_copy_config_to_ext_loggers(stdout, logger, log_level):
     # THEN all external loggers used Powertools handler, formatter and log level
     for index, logger in enumerate([logger_1, logger_2]):
         assert len(logger.handlers) == 1
-        assert type(logger.handlers[0]) is logging.StreamHandler
-        assert type(logger.handlers[0].formatter) is formatter.LambdaPowertoolsFormatter
+        assert isinstance(logger.handlers[0], logging.StreamHandler)
+        assert isinstance(logger.handlers[0].formatter, formatter.LambdaPowertoolsFormatter)
         assert logger.level == log_level.INFO.value
         assert logs[index]["message"] == msg
         assert logs[index]["level"] == log_level.INFO.name
@@ -88,8 +88,8 @@ def test_copy_config_to_ext_loggers_include(stdout, logger, log_level):
 
     # THEN included external loggers used Powertools handler, formatter and log level.
     assert len(logger.handlers) == 1
-    assert type(logger.handlers[0]) is logging.StreamHandler
-    assert type(logger.handlers[0].formatter) is formatter.LambdaPowertoolsFormatter
+    assert isinstance(logger.handlers[0], logging.StreamHandler)
+    assert isinstance(logger.handlers[0].formatter, formatter.LambdaPowertoolsFormatter)
     assert logger.level == log_level.INFO.value
     assert log["message"] == msg
     assert log["level"] == log_level.INFO.name
@@ -138,8 +138,8 @@ def test_copy_config_to_ext_loggers_include_exclude(stdout, logger, log_level):
     # THEN logger_1 is not modified and Logger_2 used Powertools handler, formatter and log level
     assert not logger_1.handlers
     assert len(logger_2.handlers) == 1
-    assert type(logger_2.handlers[0]) is logging.StreamHandler
-    assert type(logger_2.handlers[0].formatter) is formatter.LambdaPowertoolsFormatter
+    assert isinstance(logger_2.handlers[0], logging.StreamHandler)
+    assert isinstance(logger_2.handlers[0].formatter, formatter.LambdaPowertoolsFormatter)
     assert logger_2.level == log_level.INFO.value
     assert log["message"] == msg
     assert log["level"] == log_level.INFO.name
@@ -157,8 +157,8 @@ def test_copy_config_to_ext_loggers_clean_old_handlers(stdout, logger, log_level
 
     # THEN old logger's handler removed and Powertools configuration used instead
     assert len(logger.handlers) == 1
-    assert type(logger.handlers[0]) is logging.StreamHandler
-    assert type(logger.handlers[0].formatter) is formatter.LambdaPowertoolsFormatter
+    assert isinstance(logger.handlers[0], logging.StreamHandler)
+    assert isinstance(logger.handlers[0].formatter, formatter.LambdaPowertoolsFormatter)
 
 
 def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level):
@@ -176,8 +176,8 @@ def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level):
 
     # THEN external logger used Powertools handler, formatter and CUSTOM log level.
     assert len(logger.handlers) == 1
-    assert type(logger.handlers[0]) is logging.StreamHandler
-    assert type(logger.handlers[0].formatter) is formatter.LambdaPowertoolsFormatter
+    assert isinstance(logger.handlers[0], logging.StreamHandler)
+    assert isinstance(logger.handlers[0].formatter, formatter.LambdaPowertoolsFormatter)
     assert powertools_logger.level == log_level.CRITICAL.value
     assert logger.level == log_level.WARNING.value
     assert log["message"] == msg
