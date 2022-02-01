@@ -759,7 +759,7 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
         super().__init__(ProxyEventType.APIGatewayProxyEventV2, cors, debug, serializer, strip_prefixes)
 
 
-class ALBEventResolver(ApiGatewayResolver):
+class ALBResolver(ApiGatewayResolver):
     current_event: ALBEvent
 
     def __init__(
