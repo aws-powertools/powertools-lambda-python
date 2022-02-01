@@ -12,10 +12,10 @@ import pytest
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.api_gateway import (
-    ALBEventResolver,
-    APIGatewayProxyEventResolver,
-    APIGatewayProxyEventV2Resolver,
+    ALBResolver,
+    APIGatewayHttpResolver,
     ApiGatewayResolver,
+    APIGatewayRestResolver,
     CORSConfig,
     ProxyEventType,
     Response,
@@ -51,7 +51,7 @@ LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
 
 def test_alb_event():
     # GIVEN an Application Load Balancer proxy type event
-    app = ALBEventResolver()
+    app = ALBResolver()
 
     @app.get("/lambda")
     def foo():
@@ -72,7 +72,7 @@ def test_alb_event():
 
 def test_api_gateway_v1():
     # GIVEN a Http API V1 proxy type event
-    app = APIGatewayProxyEventResolver()
+    app = APIGatewayRestResolver()
 
     @app.get("/my/path")
     def get_lambda() -> Response:
@@ -111,7 +111,7 @@ def test_api_gateway():
 
 def test_api_gateway_v2():
     # GIVEN a Http API V2 proxy type event
-    app = APIGatewayProxyEventV2Resolver()
+    app = APIGatewayHttpResolver()
 
     @app.post("/my/path")
     def my_path() -> Response:
