@@ -756,20 +756,6 @@ class APIGatewayProxyEventV2Resolver(ApiGatewayResolver):
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[str]] = None,
     ):
-        """
-        Parameters
-        ----------
-        cors: CORSConfig
-            Optionally configure and enabled CORS. Not each route will need to have to cors=True
-        debug: Optional[bool]
-            Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_EVENT_HANDLER_DEBUG"
-            environment variable
-        serializer : Callable, optional
-            function to serialize `obj` to a JSON formatted `str`, by default json.dumps
-        strip_prefixes: List[str], optional
-            list of prefixes to be removed from the request path before doing the routing. This is often used
-            with api gateways with multiple custom mappings.
-        """
         super().__init__(ProxyEventType.APIGatewayProxyEventV2, cors, debug, serializer, strip_prefixes)
 
 
