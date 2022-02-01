@@ -746,7 +746,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         super().__init__(ProxyEventType.APIGatewayProxyEvent, cors, debug, serializer, strip_prefixes)
 
 
-class APIGatewayProxyEventV2Resolver(ApiGatewayResolver):
+class APIGatewayHttpResolver(ApiGatewayResolver):
     current_event: APIGatewayProxyEventV2
 
     def __init__(
