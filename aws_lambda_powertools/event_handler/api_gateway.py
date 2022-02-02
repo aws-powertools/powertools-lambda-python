@@ -47,9 +47,9 @@ class CORSConfig:
     Simple cors example using the default permissive cors, not this should only be used during early prototyping
 
     ```python
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     @app.get("/my/path", cors=True)
     def with_cors():
@@ -61,7 +61,7 @@ class CORSConfig:
 
     ```python
     from aws_lambda_powertools.event_handler.api_gateway import (
-        ApiGatewayResolver, CORSConfig
+        APIGatewayRestResolver, CORSConfig
     )
 
     cors_config = CORSConfig(
@@ -71,7 +71,7 @@ class CORSConfig:
         max_age=100,
         allow_credentials=True,
     )
-    app = ApiGatewayResolver(cors=cors_config)
+    app = APIGatewayRestResolver(cors=cors_config)
 
     @app.get("/my/path")
     def with_cors():
@@ -252,10 +252,10 @@ class BaseRouter(ABC):
 
         ```python
         from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
         tracer = Tracer()
-        app = ApiGatewayResolver()
+        app = APIGatewayRestResolver()
 
         @app.get("/get-call")
         def simple_get():
@@ -277,10 +277,10 @@ class BaseRouter(ABC):
 
         ```python
         from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
         tracer = Tracer()
-        app = ApiGatewayResolver()
+        app = APIGatewayRestResolver()
 
         @app.post("/post-call")
         def simple_post():
@@ -303,10 +303,10 @@ class BaseRouter(ABC):
 
         ```python
         from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
         tracer = Tracer()
-        app = ApiGatewayResolver()
+        app = APIGatewayRestResolver()
 
         @app.put("/put-call")
         def simple_put():
@@ -331,10 +331,10 @@ class BaseRouter(ABC):
 
         ```python
         from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
         tracer = Tracer()
-        app = ApiGatewayResolver()
+        app = APIGatewayRestResolver()
 
         @app.delete("/delete-call")
         def simple_delete():
@@ -358,10 +358,10 @@ class BaseRouter(ABC):
 
         ```python
         from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
         tracer = Tracer()
-        app = ApiGatewayResolver()
+        app = APIGatewayRestResolver()
 
         @app.patch("/patch-call")
         def simple_patch():
@@ -387,10 +387,10 @@ class ApiGatewayResolver(BaseRouter):
 
     ```python
     from aws_lambda_powertools import Tracer
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
     tracer = Tracer()
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     @app.get("/get-call")
     def simple_get():
