@@ -743,6 +743,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[str]] = None,
     ):
+        """Amazon API Gateway REST and HTTP API v1 payload resolver"""
         super().__init__(ProxyEventType.APIGatewayProxyEvent, cors, debug, serializer, strip_prefixes)
 
 
@@ -756,6 +757,7 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[str]] = None,
     ):
+        """Amazon API Gateway HTTP API v2 payload resolver"""
         super().__init__(ProxyEventType.APIGatewayProxyEventV2, cors, debug, serializer, strip_prefixes)
 
 
@@ -769,4 +771,5 @@ class ALBResolver(ApiGatewayResolver):
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[str]] = None,
     ):
+        """Amazon Application Load Balancer (ALB) resolver"""
         super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes)
