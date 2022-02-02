@@ -100,7 +100,7 @@ def test_copy_config_to_ext_loggers_wrong_include(stdout, logger, log_level):
     logger = logger()
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # THEN included external loggers used Powertools handler, formatter and log level.
+    # WHEN configuration copied from powertools logger to INCLUDED NON EXISTING
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={"non-existing-logger"})
 
     # THEN existing external logger is not modified
