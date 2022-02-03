@@ -322,9 +322,9 @@ Let's include Lambda Powertools as a dependency in `requirement.txt`, and use Ev
 === "app.py"
 
     ```python hl_lines="1 3 6 11 17"
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
 
     @app.get("/hello/<name>")
@@ -349,7 +349,7 @@ Let's include Lambda Powertools as a dependency in `requirement.txt`, and use Ev
 Use `sam build && sam local start-api` and try run it locally again.
 
 ???+ note
-    If you're coming from [Flask](https://flask.palletsprojects.com/en/2.0.x/){target="_blank"}, you will be familiar with this experience already. [Event Handler for API Gateway](./core/event_handler/api_gateway.md){target="_blank"} uses `ApiGatewayResolver` to give a Flask-like experience while staying true to our tenet `Keep it lean`.
+    If you're coming from [Flask](https://flask.palletsprojects.com/en/2.0.x/){target="_blank"}, you will be familiar with this experience already. [Event Handler for API Gateway](./core/event_handler/api_gateway.md){target="_blank"} uses `APIGatewayRestResolver` to give a Flask-like experience while staying true to our tenet `Keep it lean`.
 
 We have added the route annotation as the decorator for our methods. It enables us to use the parameters passed in the request directly, and our responses are simply dictionaries.
 
@@ -379,7 +379,7 @@ The first option could be to use the standard Python Logger, and use a specializ
     import os
 
     from pythonjsonlogger import jsonlogger
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
     logger = logging.getLogger("APP")
     logHandler = logging.StreamHandler()
@@ -388,7 +388,7 @@ The first option could be to use the standard Python Logger, and use a specializ
     logger.addHandler(logHandler)
     logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
 
     @app.get("/hello/<name>")
@@ -453,12 +453,12 @@ As we already have Lambda Powertools as a dependency, we can simply import [Logg
 
 ```python title="Refactoring with Lambda Powertools Logger" hl_lines="1 3 5 12 18 22"
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.logging import correlation_paths
 
 logger = Logger(service="APP")
 
-app = ApiGatewayResolver()
+app = APIGatewayRestResolver()
 
 
 @app.get("/hello/<name>")
@@ -539,12 +539,12 @@ Let's explore how we can instrument our code with [AWS X-Ray SDK](https://docs.a
     from aws_xray_sdk.core import xray_recorder
 
     from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
     from aws_lambda_powertools.logging import correlation_paths
 
     logger = Logger(service="APP")
 
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
 
     @app.get("/hello/<name>")
@@ -649,12 +649,12 @@ Let's put them into action.
 from aws_xray_sdk.core import patch_all, xray_recorder
 
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.logging import correlation_paths
 
 logger = Logger(service="APP")
 
-app = ApiGatewayResolver()
+app = APIGatewayRestResolver()
 cold_start = True
 patch_all()
 
@@ -726,12 +726,12 @@ We can simplify our previous patterns by using [Lambda Powertools Tracer](core/t
 
 ```python title="Refactoring with Lambda Powertools Tracer" hl_lines="1 6 11 13 19 21 27"
 from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.logging import correlation_paths
 
 logger = Logger(service="APP")
 tracer = Tracer(service="APP")
-app = ApiGatewayResolver()
+app = APIGatewayRestResolver()
 
 
 @app.get("/hello/<name>")
@@ -806,7 +806,7 @@ Let's expand our application with custom metrics using AWS SDK to see how it wor
     import boto3
 
     from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
     from aws_lambda_powertools.logging import correlation_paths
 
     cold_start = True
@@ -815,7 +815,7 @@ Let's expand our application with custom metrics using AWS SDK to see how it wor
     logger = Logger(service="APP")
     tracer = Tracer(service="APP")
     metrics = boto3.client("cloudwatch")
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
 
     @tracer.capture_method
@@ -941,7 +941,7 @@ Let's implement that using [Metrics](./core/metrics.md){target="_blank}:
 
 ```python title="Refactoring with Lambda Powertools Metrics" hl_lines="1 4 9 18 27 33"
 from aws_lambda_powertools import Logger, Tracer, Metrics
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.metrics import MetricUnit
 
@@ -949,7 +949,7 @@ from aws_lambda_powertools.metrics import MetricUnit
 logger = Logger(service="APP")
 tracer = Tracer(service="APP")
 metrics = Metrics(namespace="MyApp", service="APP")
-app = ApiGatewayResolver()
+app = APIGatewayRestResolver()
 
 
 @app.get("/hello/<name>")
