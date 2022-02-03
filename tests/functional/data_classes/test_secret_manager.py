@@ -46,5 +46,5 @@ def test_secret_manager_rotation_event():
     # WHEN accessing properties
     # THEN expect the values to match
     assert event.step == SecretsManagerRotationEventStep.CREATE_SECRET
-    assert event.secret_id == "NhcZoZ7TOTaq5OGrekc"
+    assert event.secret_id == "arn:aws:secretsmanager:us-east-2:111122223333:secret:DatabaseSecret"
     assert event.client_request_token == "51f72378-6a5d-5dc7-8fd8-29e4319f482a"
