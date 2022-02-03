@@ -65,7 +65,7 @@ Resources:
 
 ### API Gateway decorator
 
-You can define your functions to match a path and HTTP method, when you use the decorator `ApiGatewayResolver`.
+You can define your functions to match a path and HTTP method, when you use the decorator `APIGatewayRestResolver`.
 
 Here's an example where we have two separate functions to resolve two paths: `/hello`.
 
@@ -77,11 +77,11 @@ Here's an example where we have two separate functions to resolve two paths: `/h
     ```python hl_lines="3 7 9 12 18"
     from aws_lambda_powertools import Logger, Tracer
     from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
     tracer = Tracer()
     logger = Logger()
-    app = ApiGatewayResolver()  # by default API Gateway REST API (v1)
+    app = APIGatewayRestResolver()  # API Gateway REST API (v1)
 
     @app.get("/hello")
     @tracer.capture_method
@@ -178,16 +178,16 @@ Here's an example where we have two separate functions to resolve two paths: `/h
 
 #### HTTP API
 
-When using API Gateway HTTP API to front your Lambda functions, you can instruct `ApiGatewayResolver` to conform with their contract via `proxy_type` param:
+When using API Gateway HTTP API to front your Lambda functions, you can instruct `APIGatewayHttpResolver`:
 
 ```python hl_lines="3 7" title="Using HTTP API resolver"
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, ProxyEventType
+from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 
 tracer = Tracer()
 logger = Logger()
-app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEventV2)
+app = APIGatewayHttpResolver()
 
 @app.get("/hello")
 @tracer.capture_method
@@ -203,16 +203,16 @@ def lambda_handler(event, context):
 
 #### ALB
 
-When using ALB to front your Lambda functions, you can instruct `ApiGatewayResolver` to conform with their contract via `proxy_type` param:
+When using ALB to front your Lambda functions, you can instruct `ALBResolver`:
 
 ```python hl_lines="3 7" title="Using ALB resolver"
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, ProxyEventType
+from aws_lambda_powertools.event_handler import ALBResolver
 
 tracer = Tracer()
 logger = Logger()
-app = ApiGatewayResolver(proxy_type=ProxyEventType.ALBEvent)
+app = ALBResolver()
 
 @app.get("/hello")
 @tracer.capture_method
@@ -235,11 +235,11 @@ You can use `/path/{dynamic_value}` when configuring dynamic URL paths. This all
     ```python hl_lines="9 11"
     from aws_lambda_powertools import Logger, Tracer
     from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
     tracer = Tracer()
     logger = Logger()
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     @app.get("/hello/<name>")
     @tracer.capture_method
@@ -273,11 +273,11 @@ You can also nest paths as configured earlier in [our sample infrastructure](#re
     ```python hl_lines="9 11"
     from aws_lambda_powertools import Logger, Tracer
     from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
     tracer = Tracer()
     logger = Logger()
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     @app.get("/<message>/<name>")
     @tracer.capture_method
@@ -317,9 +317,9 @@ You can also combine nested paths with greedy regex to catch in between routes.
 === "app.py"
 
     ```python hl_lines="5"
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     @app.get(".+")
     def catch_any_route_after_any():
@@ -348,11 +348,11 @@ You can use named decorators to specify the HTTP method that should be handled i
     ```python hl_lines="9-10"
     from aws_lambda_powertools import Logger, Tracer
     from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
     tracer = Tracer()
     logger = Logger()
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     # Only POST HTTP requests to the path /hello will route to this function
     @app.post("/hello")
@@ -387,11 +387,11 @@ HTTP methods.
     ```python hl_lines="9-10"
     from aws_lambda_powertools import Logger, Tracer
     from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
     tracer = Tracer()
     logger = Logger()
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     # PUT and POST HTTP requests to the path /hello will route to this function
     @app.route("/hello", method=["PUT", "POST"])
@@ -425,7 +425,7 @@ HTTP methods.
 
 By integrating with [Data classes utilities](../../utilities/data_classes.md){target="_blank"}, you have access to request details, Lambda context and also some convenient methods.
 
-These are made available in the response returned when instantiating `ApiGatewayResolver`, for example `app.current_event` and `app.lambda_context`.
+These are made available in the response returned when instantiating `APIGatewayRestResolver`, for example `app.current_event` and `app.lambda_context`.
 
 #### Query strings and payload
 
@@ -434,9 +434,9 @@ Within `app.current_event` property, you can access query strings as dictionary 
 You can access the raw payload via `body` property, or if it's a JSON string you can quickly deserialize it via `json_body` property.
 
 ```python hl_lines="7-9 11" title="Accessing query strings, JSON payload, and raw payload"
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
-app = ApiGatewayResolver()
+app = APIGatewayRestResolver()
 
 @app.get("/hello")
 def get_hello_you():
@@ -456,9 +456,9 @@ def lambda_handler(event, context):
 Similarly to [Query strings](#query-strings-and-payload), you can access headers as dictionary via `app.current_event.headers`, or by name via `get_header_value`.
 
 ```python hl_lines="7-8" title="Accessing HTTP Headers"
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
-app = ApiGatewayResolver()
+app = APIGatewayRestResolver()
 
 @app.get("/hello")
 def get_hello_you():
@@ -482,12 +482,12 @@ You can use **`not_found`** decorator to override this behaviour, and return a c
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.event_handler import content_types
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError
 
 tracer = Tracer()
 logger = Logger()
-app = ApiGatewayResolver()
+app = APIGatewayRestResolver()
 
 @app.not_found
 @tracer.capture_method
@@ -521,11 +521,11 @@ You can use **`exception_handler`** decorator with any Python exception. This al
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.event_handler import content_types
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
 
 tracer = Tracer()
 logger = Logger()
-app = ApiGatewayResolver()
+app = APIGatewayRestResolver()
 
 @app.exception_handler(ValueError)
 def handle_value_error(ex: ValueError):
@@ -553,7 +553,6 @@ def lambda_handler(event, context):
 	return app.resolve(event, context)
 ```
 
-
 ### Raising HTTP errors
 
 You can easily raise any HTTP Error back to the client using `ServiceError` exception.
@@ -566,7 +565,7 @@ Additionally, we provide pre-defined errors for the most popular ones such as HT
 ```python hl_lines="4-10 20 25 30 35 39" title="Raising common HTTP Status errors (4xx, 5xx)"
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.exceptions import (
 	BadRequestError,
 	InternalServerError,
@@ -578,7 +577,7 @@ from aws_lambda_powertools.event_handler.exceptions import (
 tracer = Tracer()
 logger = Logger()
 
-app = ApiGatewayResolver()
+app = APIGatewayRestResolver()
 
 @app.get(rule="/bad-request-error")
 def bad_request_error():
@@ -613,7 +612,7 @@ def handler(event, context):
 
 ### Custom Domain API Mappings
 
-When using Custom Domain API Mappings feature, you must use **`strip_prefixes`** param in the `ApiGatewayResolver` constructor.
+When using Custom Domain API Mappings feature, you must use **`strip_prefixes`** param in the `APIGatewayRestResolver` constructor.
 
 Scenario: You have a custom domain `api.mydomain.dev` and set an API Mapping `payment` to forward requests to your Payments API, the path argument will be `/payment/<your_actual_path>`.
 
@@ -624,11 +623,11 @@ This will lead to a HTTP 404 despite having your Lambda configured correctly. Se
     ```python hl_lines="7"
     from aws_lambda_powertools import Logger, Tracer
     from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
     tracer = Tracer()
     logger = Logger()
-    app = ApiGatewayResolver(strip_prefixes=["/payment"])
+    app = APIGatewayRestResolver(strip_prefixes=["/payment"])
 
     @app.get("/subscriptions/<subscription>")
     @tracer.capture_method
@@ -661,7 +660,7 @@ This will lead to a HTTP 404 despite having your Lambda configured correctly. Se
 
 ### CORS
 
-You can configure CORS at the `ApiGatewayResolver` constructor via `cors` parameter using the `CORSConfig` class.
+You can configure CORS at the `APIGatewayRestResolver` constructor via `cors` parameter using the `CORSConfig` class.
 
 This will ensure that CORS headers are always returned as part of the response when your functions match the path invoked.
 
@@ -670,13 +669,13 @@ This will ensure that CORS headers are always returned as part of the response w
     ```python hl_lines="9 11"
     from aws_lambda_powertools import Logger, Tracer
     from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, CORSConfig
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver, CORSConfig
 
     tracer = Tracer()
     logger = Logger()
 
     cors_config = CORSConfig(allow_origin="https://example.com", max_age=300)
-    app = ApiGatewayResolver(cors=cors_config)
+    app = APIGatewayRestResolver(cors=cors_config)
 
     @app.get("/hello/<name>")
     @tracer.capture_method
@@ -754,9 +753,9 @@ You can use the `Response` class to have full control over the response, for exa
 === "app.py"
 
     ```python hl_lines="10-14"
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+    from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response
 
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     @app.get("/hello")
     def get_hello_you():
@@ -796,9 +795,9 @@ You can compress with gzip and base64 encode your responses via `compress` param
 === "app.py"
 
     ```python hl_lines="5 7"
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     @app.get("/hello", compress=True)
     def get_hello_you():
@@ -850,9 +849,9 @@ Like `compress` feature, the client must send the `Accept` header with the corre
     import os
     from pathlib import Path
 
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+    from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response
 
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
     logo_file: bytes = Path(os.getenv("LAMBDA_TASK_ROOT") + "/logo.svg").read_bytes()
 
     @app.get("/logo")
@@ -943,9 +942,9 @@ This will enable full tracebacks errors in the response, print request and respo
     It's best to use for local development only!
 
 ```python hl_lines="3" title="Enabling debug mode"
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
-app = ApiGatewayResolver(debug=True)
+app = APIGatewayRestResolver(debug=True)
 
 @app.get("/hello")
 def get_hello_universe():
@@ -965,6 +964,8 @@ from enum import Enum
 from json import JSONEncoder
 from typing import Dict
 
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
+
 class CustomEncoder(JSONEncoder):
 	"""Your customer json encoder"""
 	def default(self, obj):
@@ -979,11 +980,11 @@ class CustomEncoder(JSONEncoder):
 		return JSONEncoder.default(self, obj)
 
 def custom_serializer(obj) -> str:
-	"""Your custom serializer function ApiGatewayResolver will use"""
+	"""Your custom serializer function APIGatewayRestResolver will use"""
 	return json.dumps(obj, cls=CustomEncoder)
 
 # Assigning your custom serializer
-app = ApiGatewayResolver(serializer=custom_serializer)
+app = APIGatewayRestResolver(serializer=custom_serializer)
 
 class Color(Enum):
 	RED = 1
@@ -1006,7 +1007,7 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
 
 === "users.py"
 
-	We import **Router** instead of **ApiGatewayResolver**; syntax wise is exactly the same.
+	We import **Router** instead of **APIGatewayRestResolver**; syntax wise is exactly the same.
 
     ```python hl_lines="4 8 12 15 21"
     import itertools
@@ -1045,13 +1046,13 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
 	from typing import Dict
 
     from aws_lambda_powertools import Logger
-	from aws_lambda_powertools.event_handler import ApiGatewayResolver
+	from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 	from aws_lambda_powertools.utilities.typing import LambdaContext
 
 	import users
 
     logger = Logger()
-	app = ApiGatewayResolver()
+	app = APIGatewayRestResolver()
 	app.include_router(users.router)
 
 
@@ -1070,12 +1071,12 @@ When necessary, you can set a prefix when including a router object. This means 
 	```python hl_lines="9"
 	from typing import Dict
 
-	from aws_lambda_powertools.event_handler import ApiGatewayResolver
+	from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 	from aws_lambda_powertools.utilities.typing import LambdaContext
 
 	import users
 
-	app = ApiGatewayResolver()
+	app = APIGatewayRestResolver()
 	app.include_router(users.router, prefix="/users") # prefix '/users' to any route in `users.router`
 
 
@@ -1208,8 +1209,7 @@ This sample project contains a Users function with two distinct set of routes, `
     from typing import Dict
 
     from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.event_handler import ApiGatewayResolver
-    from aws_lambda_powertools.event_handler.api_gateway import ProxyEventType
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
     from aws_lambda_powertools.logging.correlation_paths import APPLICATION_LOAD_BALANCER
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -1217,7 +1217,7 @@ This sample project contains a Users function with two distinct set of routes, `
 
     tracer = Tracer()
     logger = Logger()
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
+    app = APIGatewayRestResolver()
 
     app.include_router(health.router)
     app.include_router(users.router)
@@ -1354,10 +1354,10 @@ You can test your routes by passing a proxy event request where `path` and `http
     ```python
     from aws_lambda_powertools import Logger
     from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
     logger = Logger()
-    app = ApiGatewayResolver()  # by default API Gateway REST API (v1)
+    app = APIGatewayRestResolver()  # API Gateway REST API (v1)
 
     @app.get("/hello")
     def get_hello_universe():
