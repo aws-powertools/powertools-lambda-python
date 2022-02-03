@@ -12,7 +12,10 @@ import pytest
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.api_gateway import (
+    ALBResolver,
+    APIGatewayHttpResolver,
     ApiGatewayResolver,
+    APIGatewayRestResolver,
     CORSConfig,
     ProxyEventType,
     Response,
@@ -47,13 +50,14 @@ LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
 
 
 def test_alb_event():
-    # GIVEN a Application Load Balancer proxy type event
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.ALBEvent)
+    # GIVEN an Application Load Balancer proxy type event
+    app = ALBResolver()
 
     @app.get("/lambda")
     def foo():
         assert isinstance(app.current_event, ALBEvent)
         assert app.lambda_context == {}
+        assert app.current_event.request_context.elb_target_group_arn is not None
         return Response(200, content_types.TEXT_HTML, "foo")
 
     # WHEN calling the event handler
@@ -68,12 +72,13 @@ def test_alb_event():
 
 def test_api_gateway_v1():
     # GIVEN a Http API V1 proxy type event
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
+    app = APIGatewayRestResolver()
 
     @app.get("/my/path")
     def get_lambda() -> Response:
         assert isinstance(app.current_event, APIGatewayProxyEvent)
         assert app.lambda_context == {}
+        assert app.current_event.request_context.domain_name == "id.execute-api.us-east-1.amazonaws.com"
         return Response(200, content_types.APPLICATION_JSON, json.dumps({"foo": "value"}))
 
     # WHEN calling the event handler
@@ -106,12 +111,13 @@ def test_api_gateway():
 
 def test_api_gateway_v2():
     # GIVEN a Http API V2 proxy type event
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEventV2)
+    app = APIGatewayHttpResolver()
 
     @app.post("/my/path")
     def my_path() -> Response:
         assert isinstance(app.current_event, APIGatewayProxyEventV2)
         post_data = app.current_event.json_body
+        assert app.current_event.cookies[0] == "cookie1"
         return Response(200, content_types.TEXT_PLAIN, post_data["username"])
 
     # WHEN calling the event handler

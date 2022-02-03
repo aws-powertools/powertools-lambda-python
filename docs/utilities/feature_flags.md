@@ -291,10 +291,10 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 === "app.py"
 
     ```python hl_lines="17-20 23"
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
     from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
 
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     app_config = AppConfigStore(
         environment="dev",
