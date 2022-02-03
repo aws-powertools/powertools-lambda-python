@@ -191,6 +191,9 @@ Here's an example on how we can handle the `/hello` path.
 
 When using Amazon API Gateway HTTP API to front your Lambda functions, you can use `APIGatewayHttpResolver`.
 
+???+ note
+    Using HTTP API v1 payload? Use `APIGatewayRestResolver` instead. `APIGatewayHttpResolver` defaults to v2 payload.
+
 Here's an example on how we can handle the `/hello` path.
 
 ```python hl_lines="3 7" title="Using HTTP API resolver"
