@@ -785,7 +785,7 @@ Here's an example of how you can test your synchronous resolvers:
 
     def test_direct_resolver():
       # Load mock event from a file
-      json_file = "../../events/appSyncDirectResolver.json"
+      json_file = "appSyncDirectResolver.json"
       fh = open(file)
       mock_event = json.load(fh)
 
@@ -827,7 +827,7 @@ And an example for testing asynchronous resolvers. Note that this requires the `
     @pytest.mark.asyncio
     async def test_direct_resolver():
       # Load mock event from a file
-      json_file = "../../events/appSyncDirectResolver.json"
+      json_file = "appSyncDirectResolver.json"
       fh = open(file)
       mock_event = json.load(fh)
 
