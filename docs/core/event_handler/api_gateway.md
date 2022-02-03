@@ -63,14 +63,25 @@ Resources:
 				Method: ANY  # Send requests using any http method to the lambda function
 ```
 
-### API Gateway decorator
+### Event Resolvers
 
-You can define your functions to match a path and HTTP method, when you use the decorator `APIGatewayRestResolver`.
+Before you decorate your functions to handle a given path and HTTP method(s), you need to initialize a resolver.
 
-Here's an example where we have two separate functions to resolve two paths: `/hello`.
+A resolver will handle request resolution, include [one or more routers](#split-routes-with-router), and give you access to the current event via typed properties.
+
+For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, and `ALBResolver`.
 
 ???+ info
-    We automatically serialize `Dict` responses as JSON, trim whitespaces for compact responses, and set content-type to `application/json`.
+    We will use `APIGatewayRestResolver` as the default across examples.
+
+#### API Gateway REST API
+
+When using Amazon API Gateway REST API to front your Lambda functions, you can use `APIGatewayRestResolver`.
+
+Here's an example on how we can handle the `/hello` path.
+
+???+ info
+    We automatically serialize `Dict` responses as JSON, trim whitespace for compact responses, and set content-type to `application/json`.
 
 === "app.py"
 
@@ -81,7 +92,7 @@ Here's an example where we have two separate functions to resolve two paths: `/h
 
     tracer = Tracer()
     logger = Logger()
-    app = APIGatewayRestResolver()  # API Gateway REST API (v1)
+    app = APIGatewayRestResolver()
 
     @app.get("/hello")
     @tracer.capture_method
@@ -106,32 +117,32 @@ Here's an example where we have two separate functions to resolve two paths: `/h
         "httpMethod": "GET",
         "isBase64Encoded": false,
         "queryStringParameters": {
-        "foo": "bar"
+            "foo": "bar"
         },
         "multiValueQueryStringParameters": {},
         "pathParameters": {
-        "hello": "/hello"
+            "hello": "/hello"
         },
         "stageVariables": {},
         "headers": {
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Encoding": "gzip, deflate, sdch",
-        "Accept-Language": "en-US,en;q=0.8",
-        "Cache-Control": "max-age=0",
-        "CloudFront-Forwarded-Proto": "https",
-        "CloudFront-Is-Desktop-Viewer": "true",
-        "CloudFront-Is-Mobile-Viewer": "false",
-        "CloudFront-Is-SmartTV-Viewer": "false",
-        "CloudFront-Is-Tablet-Viewer": "false",
-        "CloudFront-Viewer-Country": "US",
-        "Host": "1234567890.execute-api.us-east-1.amazonaws.com",
-        "Upgrade-Insecure-Requests": "1",
-        "User-Agent": "Custom User Agent String",
-        "Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",
-        "X-Amz-Cf-Id": "cDehVQoZnx43VYQb9j2-nvCh-9z396Uhbp027Y2JvkCPNLmGJHqlaA==",
-        "X-Forwarded-For": "127.0.0.1, 127.0.0.2",
-        "X-Forwarded-Port": "443",
-        "X-Forwarded-Proto": "https"
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Encoding": "gzip, deflate, sdch",
+            "Accept-Language": "en-US,en;q=0.8",
+            "Cache-Control": "max-age=0",
+            "CloudFront-Forwarded-Proto": "https",
+            "CloudFront-Is-Desktop-Viewer": "true",
+            "CloudFront-Is-Mobile-Viewer": "false",
+            "CloudFront-Is-SmartTV-Viewer": "false",
+            "CloudFront-Is-Tablet-Viewer": "false",
+            "CloudFront-Viewer-Country": "US",
+            "Host": "1234567890.execute-api.us-east-1.amazonaws.com",
+            "Upgrade-Insecure-Requests": "1",
+            "User-Agent": "Custom User Agent String",
+            "Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",
+            "X-Amz-Cf-Id": "cDehVQoZnx43VYQb9j2-nvCh-9z396Uhbp027Y2JvkCPNLmGJHqlaA==",
+            "X-Forwarded-For": "127.0.0.1, 127.0.0.2",
+            "X-Forwarded-Port": "443",
+            "X-Forwarded-Proto": "https"
         },
         "multiValueHeaders": {},
         "requestContext": {
@@ -176,9 +187,11 @@ Here's an example where we have two separate functions to resolve two paths: `/h
     }
     ```
 
-#### HTTP API
+#### API Gateway HTTP API
 
-When using API Gateway HTTP API to front your Lambda functions, you can instruct `APIGatewayHttpResolver`:
+When using Amazon API Gateway HTTP API to front your Lambda functions, you can use `APIGatewayHttpResolver`.
+
+Here's an example on how we can handle the `/hello` path.
 
 ```python hl_lines="3 7" title="Using HTTP API resolver"
 from aws_lambda_powertools import Logger, Tracer
@@ -201,9 +214,9 @@ def lambda_handler(event, context):
 	return app.resolve(event, context)
 ```
 
-#### ALB
+#### Application Load Balancer
 
-When using ALB to front your Lambda functions, you can instruct `ALBResolver`:
+When using Amazon Application Load Balancer to front your Lambda functions, you can use `ALBResolver`.
 
 ```python hl_lines="3 7" title="Using ALB resolver"
 from aws_lambda_powertools import Logger, Tracer
@@ -1376,3 +1389,14 @@ You can test your routes by passing a proxy event request where `path` and `http
 Chalice is a full featured microframework that manages application and infrastructure. This utility, however, is largely focused on routing to reduce boilerplate and expects you to setup and manage infrastructure with your framework of choice.
 
 That said, [Chalice has native integration with Lambda Powertools](https://aws.github.io/chalice/topics/middleware.html){target="_blank"} if you're looking for a more opinionated and web framework feature set.
+
+**What happened to `ApiGatewayResolver`?**
+
+It's been superseded by more explicit resolvers like `APIGatewayRestResolver`, `APIGatewayHttpResolver`, and `ALBResolver`.
+
+`ApiGatewayResolver` handled multiple types of event resolvers for convenience via `proxy_type` param. However,
+it made it impossible for static checkers like Mypy and IDEs IntelliSense to know what properties a `current_event` would have due to late bound resolution.
+
+This provided a suboptimal experience for customers not being able to find all properties available besides common ones between API Gateway REST, HTTP, and ALB - while manually annotating `app.current_event` would work it is not the experience we want to provide to customers.
+
+`ApiGatewayResolver` will be deprecated in v2 and have appropriate warnings as soon as we have a v2 draft.
