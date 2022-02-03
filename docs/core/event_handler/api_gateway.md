@@ -3,7 +3,7 @@ title: REST API
 description: Core utility
 ---
 
-Event handler for Amazon API Gateway REST/HTTP APIs and Application Loader Balancer (ALB).
+Event handler for Amazon API Gateway REST and HTTP APIs, and Application Loader Balancer (ALB).
 
 ### Key Features
 
