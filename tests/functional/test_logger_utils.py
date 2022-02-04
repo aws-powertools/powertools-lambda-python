@@ -182,3 +182,14 @@ def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level):
     assert logger.level == log_level.WARNING.value
     assert log["message"] == msg
     assert log["level"] == log_level.WARNING.name
+
+
+def test_copy_config_to_ext_loggers_should_not_break_append_keys(stdout, logger, log_level):
+    # GIVEN powertools logger initialized
+    powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
+
+    # WHEN configuration copied from powertools logger to ALL external loggers
+    utils.copy_config_to_registered_loggers(source_logger=powertools_logger)
+
+    # THEN append_keys should not raise an exception
+    powertools_logger.append_keys(key="value")
