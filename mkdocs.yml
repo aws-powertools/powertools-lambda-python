@@ -60,7 +60,8 @@ theme:
 
 markdown_extensions:
   - admonition
-  - pymdownx.tabbed
+  - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.highlight:
       linenums: true
   - pymdownx.superfences
