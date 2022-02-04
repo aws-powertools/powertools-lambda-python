@@ -346,24 +346,24 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 === "nested_mappings.py"
 
     ```python hl_lines="4 8 10-12 18"
-      from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools import Logger, Tracer
 
-      from aws_lambda_powertools.logging import correlation_paths
-      from aws_lambda_powertools.event_handler import AppSyncResolver
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler import AppSyncResolver
 
-      tracer = Tracer(service="sample_resolver")
-      logger = Logger(service="sample_resolver")
-      app = AppSyncResolver()
+    tracer = Tracer(service="sample_resolver")
+    logger = Logger(service="sample_resolver")
+    app = AppSyncResolver()
 
-      @app.resolver(field_name="listLocations")
-      @app.resolver(field_name="locations")
-      def get_locations(name: str, description: str = ""):
-          return name + description
+    @app.resolver(field_name="listLocations")
+    @app.resolver(field_name="locations")
+    def get_locations(name: str, description: str = ""):
+        return name + description
 
-      @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-      @tracer.capture_lambda_handler
-      def lambda_handler(event, context):
-          return app.resolve(event, context)
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
     ```
 
 === "schema.graphql"
@@ -396,7 +396,8 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 
 For Lambda Python3.8+ runtime, this utility supports async functions when you use in conjunction with `asyncio.run`.
 
-```python hl_lines="4 8 10-12 20" title="Resolving GraphQL resolvers async"
+```python hl_lines="5 9 11-13 21" title="Resolving GraphQL resolvers async"
+import asyncio
 from aws_lambda_powertools import Logger, Tracer
 
 from aws_lambda_powertools.logging import correlation_paths
@@ -603,33 +604,34 @@ You can subclass `AppSyncResolverEvent` to bring your own set of methods to hand
 
 === "custom_model.py"
 
-    ```python hl_lines="11-14 19 26"
-      from aws_lambda_powertools import Logger, Tracer
+    ```python hl_lines="12-15 20 27"
+    from aws_lambda_powertools import Logger, Tracer
 
-      from aws_lambda_powertools.logging import correlation_paths
-      from aws_lambda_powertools.event_handler import AppSyncResolver
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler import AppSyncResolver
+    from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import AppSyncResolverEvent
 
-      tracer = Tracer(service="sample_resolver")
-      logger = Logger(service="sample_resolver")
-      app = AppSyncResolver()
+    tracer = Tracer(service="sample_resolver")
+    logger = Logger(service="sample_resolver")
+    app = AppSyncResolver()
 
 
-      class MyCustomModel(AppSyncResolverEvent):
-          @property
-          def country_viewer(self) -> str:
-              return self.request_headers.get("cloudfront-viewer-country")
+    class MyCustomModel(AppSyncResolverEvent):
+        @property
+        def country_viewer(self) -> str:
+            return self.request_headers.get("cloudfront-viewer-country")
 
-      @app.resolver(field_name="listLocations")
-      @app.resolver(field_name="locations")
-      def get_locations(name: str, description: str = ""):
-          if app.current_event.country_viewer == "US":
-            ...
-          return name + description
+    @app.resolver(field_name="listLocations")
+    @app.resolver(field_name="locations")
+    def get_locations(name: str, description: str = ""):
+        if app.current_event.country_viewer == "US":
+          ...
+        return name + description
 
-      @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-      @tracer.capture_lambda_handler
-      def lambda_handler(event, context):
-          return app.resolve(event, context, data_model=MyCustomModel)
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context, data_model=MyCustomModel)
     ```
 
 === "schema.graphql"
@@ -819,7 +821,6 @@ Here's an example of how you can test your synchronous resolvers:
     ```
 
 And an example for testing asynchronous resolvers. Note that this requires the `pytest-asyncio` package:
-
 
 === "test_async_resolver.py"
 
