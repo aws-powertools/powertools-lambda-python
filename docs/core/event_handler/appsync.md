@@ -781,13 +781,15 @@ Here's an example of how you can test your synchronous resolvers:
 
     ```python
     import pytest
+    from pathlib import Path
+
     from src.index import app  # import the instance of AppSyncResolver from your code
 
     def test_direct_resolver():
       # Load mock event from a file
-      json_file = "appSyncDirectResolver.json"
-      fh = open(file)
-      mock_event = json.load(fh)
+      json_file_path = Path("appSyncDirectResolver.json")
+      with open(json_file_path) as json_file:
+        mock_event = json.load(json_file)
 
       # Call the implicit handler
       result = app(mock_event, {})
@@ -822,14 +824,16 @@ And an example for testing asynchronous resolvers. Note that this requires the `
 
     ```python
     import pytest
+    from pathlib import Path
+
     from src.index import app  # import the instance of AppSyncResolver from your code
 
     @pytest.mark.asyncio
     async def test_direct_resolver():
       # Load mock event from a file
-      json_file = "appSyncDirectResolver.json"
-      fh = open(file)
-      mock_event = json.load(fh)
+      json_file_path = Path("appSyncDirectResolver.json")
+      with open(json_file_path) as json_file:
+        mock_event = json.load(json_file)
 
       # Call the implicit handler
       result = await app(mock_event, {})
