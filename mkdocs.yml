@@ -52,6 +52,8 @@ theme:
     - navigation.top
     - navigation.instant
     - navigation.indexes
+    - navigation.tracking
+    - content.code.annotate
   icon:
     repo: fontawesome/brands/github
   logo: media/aws-logo-light.svg
@@ -63,7 +65,6 @@ markdown_extensions:
       alternate_style: true
   - pymdownx.highlight:
       linenums: true
-  - pymdownx.superfences
   - pymdownx.details
   - pymdownx.snippets:
       base_path: "."
@@ -75,7 +76,7 @@ markdown_extensions:
   - attr_list
   - pymdownx.emoji
   - pymdownx.inlinehilite
-  - attr_list
+  - pymdownx.superfences
 
 copyright: Copyright &copy; 2021 Amazon Web Services
 
