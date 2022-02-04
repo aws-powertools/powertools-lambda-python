@@ -780,6 +780,7 @@ Here's an example of how you can test your synchronous resolvers:
 === "test_resolver.py"
 
     ```python
+    import json
     import pytest
     from pathlib import Path
 
@@ -823,6 +824,7 @@ And an example for testing asynchronous resolvers. Note that this requires the `
 === "test_async_resolver.py"
 
     ```python
+    import json
     import pytest
     from pathlib import Path
 
