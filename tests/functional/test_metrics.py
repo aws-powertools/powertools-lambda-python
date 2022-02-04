@@ -552,6 +552,7 @@ def test_log_metrics_decorator_no_metrics_warning(dimensions, namespace, service
 
     # THEN it should raise a warning instead of throwing an exception
     with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
         lambda_handler({}, {})
         assert len(w) == 1
         assert str(w[-1].message) == "No metrics to publish, skipping"
