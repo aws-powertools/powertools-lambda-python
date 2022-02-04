@@ -188,7 +188,7 @@ def test_copy_config_to_ext_loggers_should_not_break_append_keys(stdout, logger,
     # GIVEN powertools logger initialized
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to ALL external loggers two times
+    # WHEN configuration copied from powertools logger to ALL external loggers
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger)
 
     # THEN append_keys should not raise an exception
