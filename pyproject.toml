@@ -33,7 +33,7 @@ coverage = {extras = ["toml"], version = "^6.2"}
 pytest = "^6.2.5"
 black = "^21.12b0"
 flake8 = "^4.0.1"
-flake8-black = "^0.2.3"
+flake8-black = "^0.2.4"
 flake8-builtins = "^1.5.3"
 flake8-comprehensions = "^3.7.0"
 flake8-debugger = "^4.0.0"
