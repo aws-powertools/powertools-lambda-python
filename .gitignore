@@ -1,4 +1,3 @@
-
 # Created by https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=osx,linux,python,windows,pycharm,visualstudiocode
 
@@ -304,3 +303,4 @@ node_modules
 api/
 site/
 !404.html
+!docs/overrides/*.html

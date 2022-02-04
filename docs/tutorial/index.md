@@ -312,10 +312,10 @@ However, it forces us to understand the internal structure of the API Gateway re
 
 ### Simplifying with Event Handler
 
-We can massively simplify cross-cutting concerns while keeping it lightweight by using [Event Handler](./core/event_handler/api_gateway.md){target="_blank"}.
+We can massively simplify cross-cutting concerns while keeping it lightweight by using [Event Handler](../core/event_handler/api_gateway.md){target="_blank"}.
 
 ???+ tip
-    This is available for both [REST API (API Gateway, ALB)](./core/event_handler/api_gateway.md){target="_blank"} and [GraphQL API (AppSync)](./core/event_handler/appsync.md){target="_blank"}.
+    This is available for both [REST API (API Gateway, ALB)](../core/event_handler/api_gateway.md){target="_blank"} and [GraphQL API (AppSync)](../core/event_handler/appsync.md){target="_blank"}.
 
 Let's include Lambda Powertools as a dependency in `requirement.txt`, and use Event Handler to refactor our previous example.
 
@@ -349,13 +349,13 @@ Let's include Lambda Powertools as a dependency in `requirement.txt`, and use Ev
 Use `sam build && sam local start-api` and try run it locally again.
 
 ???+ note
-    If you're coming from [Flask](https://flask.palletsprojects.com/en/2.0.x/){target="_blank"}, you will be familiar with this experience already. [Event Handler for API Gateway](./core/event_handler/api_gateway.md){target="_blank"} uses `APIGatewayRestResolver` to give a Flask-like experience while staying true to our tenet `Keep it lean`.
+    If you're coming from [Flask](https://flask.palletsprojects.com/en/2.0.x/){target="_blank"}, you will be familiar with this experience already. [Event Handler for API Gateway](../core/event_handler/api_gateway.md){target="_blank"} uses `APIGatewayRestResolver` to give a Flask-like experience while staying true to our tenet `Keep it lean`.
 
 We have added the route annotation as the decorator for our methods. It enables us to use the parameters passed in the request directly, and our responses are simply dictionaries.
 
 Lastly, we used `return app.resolve(event, context)` so Event Handler can resolve routes, inject the current request, handle serialization, route validation, etc.
 
-From here, we could handle [404 routes](./core/event_handler/api_gateway.md#handling-not-found-routes){target="_blank"}, [error handling](./core/event_handler/api_gateway.md#http://127.0.0.1:8000/core/event_handler/api_gateway/#exception-handling){target="_blank"}, [access query strings, payload](./core/event_handler/api_gateway.md#http://127.0.0.1:8000/core/event_handler/api_gateway#accessing-request-details){target="_blank"}, etc.
+From here, we could handle [404 routes](../core/event_handler/api_gateway.md#handling-not-found-routes){target="_blank"}, [error handling](../core/event_handler/api_gateway.md#exception-handling){target="_blank"}, [access query strings, payload](../core/event_handler/api_gateway.md#accessing-request-details){target="_blank"}, etc.
 
 
 ???+ tip
@@ -449,7 +449,7 @@ We could start by creating a dictionary with Lambda context information or somet
 ???+ question "Surely this could be easier, right?"
     Yes! Powertools Logger to the rescue :-)
 
-As we already have Lambda Powertools as a dependency, we can simply import [Logger](./core/logger.md){target="_blank"}.
+As we already have Lambda Powertools as a dependency, we can simply import [Logger](../core/logger.md){target="_blank"}.
 
 ```python title="Refactoring with Lambda Powertools Logger" hl_lines="1 3 5 12 18 22"
 from aws_lambda_powertools import Logger
@@ -482,7 +482,7 @@ Let's break this down:
 
 * **L5**: We add Lambda Powertools Logger; the boilerplate is now done for you. By default, we set `INFO` as the logging level if `LOG_LEVEL` env var isn't set.
 * **L22**: We use `logger.inject_lambda_context` decorator to inject key information from Lambda context into every log.
-* **L22**: We also instruct Logger to use the incoming API Gateway Request ID as a [correlation id](./core/logger.md##set_correlation_id-method) automatically.
+* **L22**: We also instruct Logger to use the incoming API Gateway Request ID as a [correlation id](../core/logger.md##set_correlation_id-method) automatically.
 * **L22**: Since we're in dev, we also use `log_event=True` to automatically log each incoming request for debugging. This can be also set via [environment variables](./index.md#environment-variables){target="_blank"}.
 
 
@@ -506,7 +506,7 @@ This is how the logs would look like now:
 
 We can now search our logs by the request ID to find a specific operation. Additionally, we can also search our logs for function name, Lambda request ID, Lambda function ARN, find out whether an operation was a cold start, etc.
 
-From here, we could [set specific keys](./core/logger.md#append_keys-method){target="_blank"} to add additional contextual information about a given operation, [log exceptions](./core/logger.md#logging-exceptions){target="_blank"} to easily enumerate them later, [sample debug logs](./core/logger.md#sampling-debug-logs){target="_blank"}, etc.
+From here, we could [set specific keys](../core/logger.md#append_keys-method){target="_blank"} to add additional contextual information about a given operation, [log exceptions](../core/logger.md#logging-exceptions){target="_blank"} to easily enumerate them later, [sample debug logs](../core/logger.md#sampling-debug-logs){target="_blank"}, etc.
 
 By having structured logs like this, we can easily search and analyse them in [CloudWatch Logs Insight](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html){target="_blank"}.
 
@@ -531,7 +531,7 @@ It's a [two-step process](https://docs.aws.amazon.com/lambda/latest/dg/services-
 1. Enable tracing in your Lambda function.
 2. Instrument your application code.
 
-Let's explore how we can instrument our code with [AWS X-Ray SDK](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html){target="_blank"}, and then simplify it with [Lambda Powertools Tracer](core/tracer.md){target="_blank"} feature.
+Let's explore how we can instrument our code with [AWS X-Ray SDK](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html){target="_blank"}, and then simplify it with [Lambda Powertools Tracer](../core/tracer.md){target="_blank"} feature.
 
 === "app.py"
 
@@ -719,7 +719,7 @@ If you choose any of the traces available, try opening the `handler` subsegment 
 
 Cross-cutting concerns like filtering traces by Cold Start, including response as well as exceptions as tracing metadata can take a considerable amount of boilerplate.
 
-We can simplify our previous patterns by using [Lambda Powertools Tracer](core/tracer.md){target="_blank"}; a thin wrapper on top of X-Ray SDK.
+We can simplify our previous patterns by using [Lambda Powertools Tracer](../core/tracer.md){target="_blank"}; a thin wrapper on top of X-Ray SDK.
 
 ???+ note
     You can now safely remove `aws-xray-sdk` from `requirements.txt`; keep `aws-lambda-powertools` only.
@@ -768,7 +768,7 @@ Another subtle difference is that you can now run your Lambda functions and unit
 Lambda Powertools optimizes for Lambda compute environment. As such, we add these and other common approaches to accelerate your development, so you don't worry about implementing every cross-cutting concern.
 
 ???+ tip
-    You can [opt-out some of these behaviours](./core/tracer/#advanced){target="_blank"} like disabling response capturing,  explicitly patching only X modules, etc.
+    You can [opt-out some of these behaviours](../core/tracer/#advanced){target="_blank"} like disabling response capturing,  explicitly patching only X modules, etc.
 
 Repeat the process of building, deploying, and invoking your application via the API endpoint. Within the [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"}, you should see a similar view:
 
@@ -930,14 +930,14 @@ Within `template.yaml`, we add [CloudWatchPutMetricPolicy](https://docs.aws.amaz
 
 ### Simplifying with Metrics
 
-[Lambda Powertools Metrics](./core/metrics.md){target="_blank} uses [Amazon CloudWatch Embedded Metric Format (EMF)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html) to create custom metrics **asynchronously** via a native integration with Lambda.
+[Lambda Powertools Metrics](../core/metrics.md){target="_blank} uses [Amazon CloudWatch Embedded Metric Format (EMF)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html) to create custom metrics **asynchronously** via a native integration with Lambda.
 
 In general terms, EMF is a specification that expects metrics in a JSON payload within CloudWatch Logs. Lambda ingests all logs emitted by a given function into CloudWatch Logs. CloudWatch automatically looks up for log entries that follow the EMF format and transforms them into a CloudWatch metric.
 
 ???+ info
     If you are interested in the details of the EMF mechanism, follow [blog post](https://aws.amazon.com/blogs/mt/enhancing-workload-observability-using-amazon-cloudwatch-embedded-metric-format/){target="_blank"}.
 
-Let's implement that using [Metrics](./core/metrics.md){target="_blank}:
+Let's implement that using [Metrics](../core/metrics.md){target="_blank}:
 
 ```python title="Refactoring with Lambda Powertools Metrics" hl_lines="1 4 9 18 27 33"
 from aws_lambda_powertools import Logger, Tracer, Metrics
@@ -986,7 +986,7 @@ That's a lot less boilerplate code! Let's break this down:
 * **L9**: We initialize `Metrics` with our service name (`APP`) and metrics namespace (`MyApp`), reducing the need to add the `service` dimension for every metric and setting the namespace later
 * **L18, 27**: We use `add_metric` similarly to our custom function, except we now have an enum `MetricCount` to help us understand which Metric Units we have at our disposal
 * **L33**: We use `@metrics.log_metrics` decorator to ensure that our metrics are aligned with the EMF output and validated before-hand, like in case we forget to set namespace, or accidentally use a metric unit as a string that doesn't exist in CloudWatch.
-* **L33**: We also use `capture_cold_start_metric=True` so we don't have to handle that logic either. Note that [Metrics](./core/metrics.md){target="_blank"} does not publish a warm invocation metric (ColdStart=0) for cost reasons. As such, treat the absence (sparse metric) as a non-cold start invocation.
+* **L33**: We also use `capture_cold_start_metric=True` so we don't have to handle that logic either. Note that [Metrics](../core/metrics.md){target="_blank"} does not publish a warm invocation metric (ColdStart=0) for cost reasons. As such, treat the absence (sparse metric) as a non-cold start invocation.
 
 Repeat the process of building, deploying, and invoking your application via the API endpoint a few times to generate metrics - [Artillery](https://www.artillery.io/){target="_blank"} and [K6.io](https://k6.io/open-source){target="_blank"} are quick ways to generate some load. Within [CloudWatch Metrics view](https://console.aws.amazon.com/cloudwatch/home#metricsV2:graph=~()){target="_blank}, you should see `MyApp` custom namespace with your custom metrics there and `SuccessfulGreetings` available to graph.
 
@@ -1028,7 +1028,7 @@ If you're curious about how the EMF portion of your function logs look like, you
 
 We covered a lot of ground here and we only scratched the surface of the feature set available within Lambda Powertools.
 
-When it comes to the observability features ([Tracer](./core/tracer.md){target="_blank"}, [Metrics](./core/metrics.md){target="_blank"}, [Logging](./core/logger.md){target="_blank"}), don't stop there! The goal here is to ensure you can ask arbitrary questions to assess your system's health; these features are only part of the wider story!
+When it comes to the observability features ([Tracer](../core/tracer.md){target="_blank"}, [Metrics](../core/metrics.md){target="_blank"}, [Logging](../core/logger.md){target="_blank"}), don't stop there! The goal here is to ensure you can ask arbitrary questions to assess your system's health; these features are only part of the wider story!
 
 This requires a change in mindset to ensure operational excellence is part of the software development lifecycle.
 
