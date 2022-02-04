@@ -38,7 +38,7 @@ def copy_config_to_registered_loggers(
     if exclude:
         exclude.add(source_logger.name)
     else:
-        exclude = set(source_logger.name)
+        exclude = {source_logger.name}
 
     # Prepare loggers set
     if include:
