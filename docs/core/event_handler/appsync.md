@@ -775,27 +775,88 @@ You can test your resolvers by passing a mocked or actual AppSync Lambda event t
 
 You can use either `app.resolve(event, context)` or simply `app(event, context)`.
 
-Here's an example from our internal functional test.
+Here's an example of how you can test your synchronous resolvers:
 
-=== "test_direct_resolver.py"
+=== "test_resolver.py"
 
     ```python
+    import json
+    import pytest
+    from pathlib import Path
+
+    from src.index import app  # import the instance of AppSyncResolver from your code
+
     def test_direct_resolver():
-      # Check whether we can handle an example appsync direct resolver
-      # load_event primarily deserialize the JSON event into a dict
-      mock_event = load_event("appSyncDirectResolver.json")
-
-      app = AppSyncResolver()
-
-      @app.resolver(field_name="createSomething")
-      def create_something(id: str):
-          assert app.lambda_context == {}
-          return id
+      # Load mock event from a file
+      json_file_path = Path("appSyncDirectResolver.json")
+      with open(json_file_path) as json_file:
+        mock_event = json.load(json_file)
 
       # Call the implicit handler
       result = app(mock_event, {})
 
-      assert result == "my identifier"
+      assert result == "created this value"
+    ```
+
+=== "src/index.py"
+
+    ```python
+
+    from aws_lambda_powertools.event_handler import AppSyncResolver
+
+    app = AppSyncResolver()
+
+    @app.resolver(field_name="createSomething")
+    def create_something():
+        return "created this value"
+
+    ```
+
+=== "appSyncDirectResolver.json"
+
+    ```json
+    --8<-- "tests/events/appSyncDirectResolver.json"
+    ```
+
+And an example for testing asynchronous resolvers. Note that this requires the `pytest-asyncio` package:
+
+
+=== "test_async_resolver.py"
+
+    ```python
+    import json
+    import pytest
+    from pathlib import Path
+
+    from src.index import app  # import the instance of AppSyncResolver from your code
+
+    @pytest.mark.asyncio
+    async def test_direct_resolver():
+      # Load mock event from a file
+      json_file_path = Path("appSyncDirectResolver.json")
+      with open(json_file_path) as json_file:
+        mock_event = json.load(json_file)
+
+      # Call the implicit handler
+      result = await app(mock_event, {})
+
+      assert result == "created this value"
+    ```
+
+=== "src/index.py"
+
+    ```python
+    import asyncio
+
+    from aws_lambda_powertools.event_handler import AppSyncResolver
+
+    app = AppSyncResolver()
+
+    @app.resolver(field_name="createSomething")
+    async def create_something_async():
+        await asyncio.sleep(1)  # Do async stuff
+        return "created this value"
+
     ```
 
 === "appSyncDirectResolver.json"
