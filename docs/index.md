@@ -454,5 +454,7 @@ As a best practice, AWS Lambda Powertools module logging statements are suppress
 ```python title="Powertools debug mode example"
 from aws_lambda_powertools.logging.logger import set_package_logger
 
-set_package_logger()
+set_package_logger() # (1)
 ```
+
+1.  :information_source: this will configure our `aws_lambda_powertools` logger with debug.
