@@ -1,3 +1,4 @@
+import json
 from typing import Any, Dict, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
@@ -67,3 +68,18 @@ class EventBridgeEvent(DictWrapper):
     def replay_name(self) -> Optional[str]:
         """Identifies whether the event is being replayed and what is the name of the replay."""
         return self["replay-name"]
+
+    @property
+    def event_size(self) -> int:
+        """Returns the EventBridge Event Size."""
+
+        size = 0
+        if self["time"] is not None:
+            size += 14
+        size += len(self["source"].encode("utf-8"))
+        size += len(self["detail-type"].encode("utf-8"))
+        size += len(json.dumps(self["detail"]).encode("utf-8"))
+        for resource in self["resources"]:
+            if resource:
+                size += len(resource.encode("utf-8"))
+        return size
