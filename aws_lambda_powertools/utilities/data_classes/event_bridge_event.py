@@ -71,7 +71,11 @@ class EventBridgeEvent(DictWrapper):
 
     @property
     def event_size(self) -> int:
-        """Returns the EventBridge Event Size."""
+        """Returns the EventBridge Event Size.
+
+        URLs:
+            https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-putevent-size.html
+        """
 
         size = 0
         if self["time"] is not None:
