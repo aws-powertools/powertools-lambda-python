@@ -27,7 +27,7 @@ _DYNAMIC_ROUTE_PATTERN = r"(<\w+>)"
 _SAFE_URI = "-._~()'!*:@,;"  # https://www.ietf.org/rfc/rfc3986.txt
 # API GW/ALB decode non-safe URI chars; we must support them too
 _UNSAFE_URI = "%<>\[\]{}|^"  # noqa: W605
-_NAMED_GROUP_BOUNDARY_PATTERN = fr"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
+_NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 
 
 class ProxyEventType(Enum):
@@ -92,6 +92,7 @@ class CORSConfig:
         expose_headers: Optional[List[str]] = None,
         max_age: Optional[int] = None,
         allow_credentials: bool = False,
+        allow_origins: Optional[List[str]] = None,
     ):
         """
         Parameters
@@ -111,15 +112,16 @@ class CORSConfig:
             A boolean value that sets the value of `Access-Control-Allow-Credentials`
         """
         self.allow_origin = allow_origin
+        self.allow_origins = allow_origins
         self.allow_headers = set(self._REQUIRED_HEADERS + (allow_headers or []))
         self.expose_headers = expose_headers or []
         self.max_age = max_age
         self.allow_credentials = allow_credentials
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self, current_event: Optional[BaseProxyEvent]) -> Dict[str, str]:
         """Builds the configured Access-Control http headers"""
         headers = {
-            "Access-Control-Allow-Origin": self.allow_origin,
+            "Access-Control-Allow-Origin": self._allow_origin(current_event),
             "Access-Control-Allow-Headers": ",".join(sorted(self.allow_headers)),
         }
         if self.expose_headers:
@@ -129,6 +131,16 @@ class CORSConfig:
         if self.allow_credentials is True:
             headers["Access-Control-Allow-Credentials"] = "true"
         return headers
+
+    def _allow_origin(self, current_event: Optional[BaseProxyEvent]) -> str:
+        if self.allow_origins is None or current_event is None:
+            return self.allow_origin
+
+        origin = current_event.get_header_value("origin", "")
+        if origin in self.allow_origins:
+            return origin
+
+        return self.allow_origin
 
 
 class Response:
@@ -180,13 +192,19 @@ class Route:
 class ResponseBuilder:
     """Internally used Response builder"""
 
-    def __init__(self, response: Response, route: Optional[Route] = None):
+    def __init__(
+        self,
+        response: Response,
+        route: Optional[Route] = None,
+        current_event: Optional[BaseProxyEvent] = None,
+    ):
         self.response = response
         self.route = route
+        self.current_event = current_event
 
     def _add_cors(self, cors: CORSConfig):
         """Update headers to include the configured Access-Control headers"""
-        self.response.headers.update(cors.to_dict())
+        self.response.headers.update(cors.to_dict(current_event=self.current_event))
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
@@ -585,16 +603,19 @@ class ApiGatewayResolver(BaseRouter):
         headers = {}
         if self._cors:
             logger.debug("CORS is enabled, updating headers.")
-            headers.update(self._cors.to_dict())
+            headers.update(self._cors.to_dict(current_event=self.current_event))
 
             if method == "OPTIONS":
                 logger.debug("Pre-flight request detected. Returning CORS with null response")
                 headers["Access-Control-Allow-Methods"] = ",".join(sorted(self._cors_methods))
-                return ResponseBuilder(Response(status_code=204, content_type=None, headers=headers, body=None))
+                return ResponseBuilder(
+                    Response(status_code=204, content_type=None, headers=headers, body=None),
+                    current_event=self.current_event,
+                )
 
         handler = self._lookup_exception_handler(NotFoundError)
         if handler:
-            return ResponseBuilder(handler(NotFoundError()))
+            return ResponseBuilder(handler(NotFoundError()), current_event=self.current_event)
 
         return ResponseBuilder(
             Response(
@@ -602,13 +623,14 @@ class ApiGatewayResolver(BaseRouter):
                 content_type=content_types.APPLICATION_JSON,
                 headers=headers,
                 body=self._json_dump({"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"}),
-            )
+            ),
+            current_event=self.current_event,
         )
 
     def _call_route(self, route: Route, args: Dict[str, str]) -> ResponseBuilder:
         """Actually call the matching route with any provided keyword arguments."""
         try:
-            return ResponseBuilder(self._to_response(route.func(**args)), route)
+            return ResponseBuilder(self._to_response(route.func(**args)), route, self.current_event)
         except Exception as exc:
             response_builder = self._call_exception_handler(exc, route)
             if response_builder:
@@ -625,6 +647,7 @@ class ApiGatewayResolver(BaseRouter):
                         body="".join(traceback.format_exc()),
                     ),
                     route,
+                    self.current_event,
                 )
 
             raise
@@ -651,7 +674,7 @@ class ApiGatewayResolver(BaseRouter):
     def _call_exception_handler(self, exp: Exception, route: Route) -> Optional[ResponseBuilder]:
         handler = self._lookup_exception_handler(type(exp))
         if handler:
-            return ResponseBuilder(handler(exp), route)
+            return ResponseBuilder(handler(exp), route=route, current_event=self.current_event)
 
         if isinstance(exp, ServiceError):
             return ResponseBuilder(
@@ -661,6 +684,7 @@ class ApiGatewayResolver(BaseRouter):
                     body=self._json_dump({"statusCode": exp.status_code, "message": exp.msg}),
                 ),
                 route,
+                self.current_event,
             )
 
         return None

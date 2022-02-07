@@ -1174,3 +1174,27 @@ def test_exception_handler_not_found_alt():
 
     # THEN call the @app.not_found() function
     assert result["statusCode"] == 404
+
+
+def test_allow_origins_no_matching_origin():
+    # GIVEN
+    allow_origin = "https://www.foo.com/"
+    app = APIGatewayRestResolver(cors=CORSConfig(allow_origin=allow_origin, allow_origins=["https://staging.foo.com/"]))
+
+    # WHEN
+    result = app({"path": "/another-one", "httpMethod": "GET", "headers": {}}, None)
+
+    # THEN
+    assert result["headers"]["Access-Control-Allow-Origin"] == allow_origin
+
+
+def test_allow_origins_match_origin():
+    # GIVEN
+    allow_origin = "https://staging.example.com/"
+    app = APIGatewayRestResolver(cors=CORSConfig(allow_origin="https://www.example.com/", allow_origins=[allow_origin]))
+
+    # WHEN
+    result = app({"path": "/another-one", "httpMethod": "GET", "headers": {"Origin": allow_origin}}, None)
+
+    # THEN
+    assert result["headers"]["Access-Control-Allow-Origin"] == allow_origin
