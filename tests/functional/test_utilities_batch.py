@@ -1,4 +1,5 @@
 import json
+import math
 from random import randint
 from typing import Callable, Dict, Optional
 from unittest.mock import patch
@@ -166,20 +167,26 @@ def order_event_factory() -> Callable:
     return factory
 
 
-def test_partial_sqs_processor_context_with_failure(sqs_event_factory, record_handler, partial_processor):
+@pytest.mark.parametrize(
+    "success_messages_count",
+    ([1, 18, 34]),
+)
+def test_partial_sqs_processor_context_with_failure(
+    success_messages_count, sqs_event_factory, record_handler, partial_processor
+):
     """
     Test processor with one failing record
     """
     fail_record = sqs_event_factory("fail")
-    success_record = sqs_event_factory("success")
+    success_records = [sqs_event_factory("success") for i in range(0, success_messages_count)]
 
-    records = [fail_record, success_record]
+    records = [fail_record, *success_records]
 
     response = {"Successful": [{"Id": fail_record["messageId"]}], "Failed": []}
 
     with Stubber(partial_processor.client) as stubber:
-        stubber.add_response("delete_message_batch", response)
-
+        for _ in range(0, math.ceil((success_messages_count / partial_processor.max_message_batch))):
+            stubber.add_response("delete_message_batch", response)
         with pytest.raises(SQSBatchProcessingError) as error:
             with partial_processor(records, record_handler) as ctx:
                 ctx.process()
