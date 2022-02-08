@@ -27,7 +27,7 @@ class AppSyncIdentityIAM(DictWrapper):
 
     @property
     def username(self) -> str:
-        """The user name of the authenticated user. IAM user principal"""
+        """The username of the authenticated user. IAM user principal"""
         return self["username"]
 
     @property
@@ -72,7 +72,7 @@ class AppSyncIdentityCognito(DictWrapper):
 
     @property
     def username(self) -> str:
-        """The user name of the authenticated user."""
+        """The username of the authenticated user."""
         return self["username"]
 
     @property
@@ -172,7 +172,7 @@ class AppSyncResolverEvent(DictWrapper):
     def identity(self) -> Union[None, AppSyncIdentityIAM, AppSyncIdentityCognito]:
         """An object that contains information about the caller.
 
-        Depending of the type of identify found:
+        Depending on the type of identify found:
 
         - API_KEY authorization - returns None
         - AWS_IAM authorization - returns AppSyncIdentityIAM
@@ -223,7 +223,7 @@ class AppSyncResolverEvent(DictWrapper):
         default_value: str, optional
             Default value if no value was found by name
         case_sensitive: bool
-            Whether to use a case sensitive look up
+            Whether to use a case-sensitive look up
         Returns
         -------
         str, optional

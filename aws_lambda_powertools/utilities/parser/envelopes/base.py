@@ -2,7 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Type, TypeVar, Union
 
-from ..types import Model
+from aws_lambda_powertools.utilities.parser.types import Model
 
 logger = logging.getLogger(__name__)
 

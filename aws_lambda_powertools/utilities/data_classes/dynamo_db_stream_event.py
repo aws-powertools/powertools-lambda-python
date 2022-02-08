@@ -106,14 +106,13 @@ class AttributeValue(DictWrapper):
         return self.get("NS")
 
     @property
-    def null_value(self) -> Optional[bool]:
+    def null_value(self) -> None:
         """An attribute of type Null.
 
         Example:
             >>> {"NULL": True}
         """
-        item = self.get("NULL")
-        return None if item is None else bool(item)
+        return None
 
     @property
     def s_value(self) -> Optional[str]:
@@ -232,7 +231,7 @@ class DynamoDBRecord(DictWrapper):
 
     @property
     def dynamodb(self) -> Optional[StreamRecord]:
-        """The main body of the stream record, containing all of the DynamoDB-specific fields."""
+        """The main body of the stream record, containing all the DynamoDB-specific fields."""
         stream_record = self.get("dynamodb")
         return None if stream_record is None else StreamRecord(stream_record)
 

@@ -10,10 +10,10 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from functools import partial
 from http import HTTPStatus
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Callable, Dict, List, Match, Optional, Pattern, Set, Tuple, Type, Union
 
 from aws_lambda_powertools.event_handler import content_types
-from aws_lambda_powertools.event_handler.exceptions import ServiceError
+from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -27,7 +27,6 @@ _DYNAMIC_ROUTE_PATTERN = r"(<\w+>)"
 _SAFE_URI = "-._~()'!*:@,;"  # https://www.ietf.org/rfc/rfc3986.txt
 # API GW/ALB decode non-safe URI chars; we must support them too
 _UNSAFE_URI = "%<>\[\]{}|^"  # noqa: W605
-
 _NAMED_GROUP_BOUNDARY_PATTERN = fr"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 
 
@@ -48,9 +47,9 @@ class CORSConfig:
     Simple cors example using the default permissive cors, not this should only be used during early prototyping
 
     ```python
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     @app.get("/my/path", cors=True)
     def with_cors():
@@ -62,7 +61,7 @@ class CORSConfig:
 
     ```python
     from aws_lambda_powertools.event_handler.api_gateway import (
-        ApiGatewayResolver, CORSConfig
+        APIGatewayRestResolver, CORSConfig
     )
 
     cors_config = CORSConfig(
@@ -72,7 +71,7 @@ class CORSConfig:
         max_age=100,
         allow_credentials=True,
     )
-    app = ApiGatewayResolver(cors=cors_config)
+    app = APIGatewayRestResolver(cors=cors_config)
 
     @app.get("/my/path")
     def with_cors():
@@ -102,7 +101,7 @@ class CORSConfig:
             only be used during development.
         allow_headers: Optional[List[str]]
             The list of additional allowed headers. This list is added to list of
-            built in allowed headers: `Authorization`, `Content-Type`, `X-Amz-Date`,
+            built-in allowed headers: `Authorization`, `Content-Type`, `X-Amz-Date`,
             `X-Api-Key`, `X-Amz-Security-Token`.
         expose_headers: Optional[List[str]]
             A list of values to return for the Access-Control-Expose-Headers
@@ -168,7 +167,7 @@ class Route:
     """Internally used Route Configuration"""
 
     def __init__(
-        self, method: str, rule: Any, func: Callable, cors: bool, compress: bool, cache_control: Optional[str]
+        self, method: str, rule: Pattern, func: Callable, cors: bool, compress: bool, cache_control: Optional[str]
     ):
         self.method = method.upper()
         self.rule = rule
@@ -253,10 +252,10 @@ class BaseRouter(ABC):
 
         ```python
         from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
         tracer = Tracer()
-        app = ApiGatewayResolver()
+        app = APIGatewayRestResolver()
 
         @app.get("/get-call")
         def simple_get():
@@ -278,10 +277,10 @@ class BaseRouter(ABC):
 
         ```python
         from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
         tracer = Tracer()
-        app = ApiGatewayResolver()
+        app = APIGatewayRestResolver()
 
         @app.post("/post-call")
         def simple_post():
@@ -304,10 +303,10 @@ class BaseRouter(ABC):
 
         ```python
         from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
         tracer = Tracer()
-        app = ApiGatewayResolver()
+        app = APIGatewayRestResolver()
 
         @app.put("/put-call")
         def simple_put():
@@ -332,10 +331,10 @@ class BaseRouter(ABC):
 
         ```python
         from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
         tracer = Tracer()
-        app = ApiGatewayResolver()
+        app = APIGatewayRestResolver()
 
         @app.delete("/delete-call")
         def simple_delete():
@@ -359,10 +358,10 @@ class BaseRouter(ABC):
 
         ```python
         from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
         tracer = Tracer()
-        app = ApiGatewayResolver()
+        app = APIGatewayRestResolver()
 
         @app.patch("/patch-call")
         def simple_patch():
@@ -388,10 +387,10 @@ class ApiGatewayResolver(BaseRouter):
 
     ```python
     from aws_lambda_powertools import Tracer
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
     tracer = Tracer()
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     @app.get("/get-call")
     def simple_get():
@@ -435,6 +434,7 @@ class ApiGatewayResolver(BaseRouter):
         self._proxy_type = proxy_type
         self._routes: List[Route] = []
         self._route_keys: List[str] = []
+        self._exception_handlers: Dict[Type, Callable] = {}
         self._cors = cors
         self._cors_enabled: bool = cors is not None
         self._cors_methods: Set[str] = {"OPTIONS"}
@@ -446,14 +446,10 @@ class ApiGatewayResolver(BaseRouter):
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
 
-        if self._debug:
-            # Always does a pretty print when in debug mode
-            self._serializer = partial(json.dumps, indent=4, cls=Encoder)
-
     def route(
         self,
         rule: str,
-        method: str,
+        method: Union[str, Union[List[str], Tuple[str]]],
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
@@ -461,19 +457,22 @@ class ApiGatewayResolver(BaseRouter):
         """Route decorator includes parameter `method`"""
 
         def register_resolver(func: Callable):
-            logger.debug(f"Adding route using rule {rule} and method {method.upper()}")
+            methods = (method,) if isinstance(method, str) else method
+            logger.debug(f"Adding route using rule {rule} and methods: {','.join((m.upper() for m in methods))}")
             if cors is None:
                 cors_enabled = self._cors_enabled
             else:
                 cors_enabled = cors
-            self._routes.append(Route(method, self._compile_regex(rule), func, cors_enabled, compress, cache_control))
-            route_key = method + rule
-            if route_key in self._route_keys:
-                warnings.warn(f"A route like this was already registered. method: '{method}' rule: '{rule}'")
-            self._route_keys.append(route_key)
-            if cors_enabled:
-                logger.debug(f"Registering method {method.upper()} to Allow Methods in CORS")
-                self._cors_methods.add(method.upper())
+
+            for item in methods:
+                self._routes.append(Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control))
+                route_key = item + rule
+                if route_key in self._route_keys:
+                    warnings.warn(f"A route like this was already registered. method: '{item}' rule: '{rule}'")
+                self._route_keys.append(route_key)
+                if cors_enabled:
+                    logger.debug(f"Registering method {item.upper()} to Allow Methods in CORS")
+                    self._cors_methods.add(item.upper())
             return func
 
         return register_resolver
@@ -493,7 +492,7 @@ class ApiGatewayResolver(BaseRouter):
             Returns the dict response
         """
         if self._debug:
-            print(self._json_dump(event))
+            print(self._json_dump(event), end="")
         BaseRouter.current_event = self._to_proxy_event(event)
         BaseRouter.lambda_context = context
         return self._resolve().build(self.current_event, self._cors)
@@ -552,7 +551,7 @@ class ApiGatewayResolver(BaseRouter):
         for route in self._routes:
             if method != route.method:
                 continue
-            match_results: Optional[re.Match] = route.rule.match(path)
+            match_results: Optional[Match] = route.rule.match(path)
             if match_results:
                 logger.debug("Found a registered route. Calling function")
                 return self._call_route(route, match_results.groupdict())  # pass fn args
@@ -576,7 +575,7 @@ class ApiGatewayResolver(BaseRouter):
     @staticmethod
     def _path_starts_with(path: str, prefix: str):
         """Returns true if the `path` starts with a prefix plus a `/`"""
-        if not isinstance(prefix, str) or len(prefix) == 0:
+        if not isinstance(prefix, str) or prefix == "":
             return False
 
         return path.startswith(prefix + "/")
@@ -593,6 +592,10 @@ class ApiGatewayResolver(BaseRouter):
                 headers["Access-Control-Allow-Methods"] = ",".join(sorted(self._cors_methods))
                 return ResponseBuilder(Response(status_code=204, content_type=None, headers=headers, body=None))
 
+        handler = self._lookup_exception_handler(NotFoundError)
+        if handler:
+            return ResponseBuilder(handler(NotFoundError()))
+
         return ResponseBuilder(
             Response(
                 status_code=HTTPStatus.NOT_FOUND.value,
@@ -606,16 +609,11 @@ class ApiGatewayResolver(BaseRouter):
         """Actually call the matching route with any provided keyword arguments."""
         try:
             return ResponseBuilder(self._to_response(route.func(**args)), route)
-        except ServiceError as e:
-            return ResponseBuilder(
-                Response(
-                    status_code=e.status_code,
-                    content_type=content_types.APPLICATION_JSON,
-                    body=self._json_dump({"statusCode": e.status_code, "message": e.msg}),
-                ),
-                route,
-            )
-        except Exception:
+        except Exception as exc:
+            response_builder = self._call_exception_handler(exc, route)
+            if response_builder:
+                return response_builder
+
             if self._debug:
                 # If the user has turned on debug mode,
                 # we'll let the original exception propagate so
@@ -625,9 +623,47 @@ class ApiGatewayResolver(BaseRouter):
                         status_code=500,
                         content_type=content_types.TEXT_PLAIN,
                         body="".join(traceback.format_exc()),
-                    )
+                    ),
+                    route,
                 )
+
             raise
+
+    def not_found(self, func: Optional[Callable] = None):
+        if func is None:
+            return self.exception_handler(NotFoundError)
+        return self.exception_handler(NotFoundError)(func)
+
+    def exception_handler(self, exc_class: Type[Exception]):
+        def register_exception_handler(func: Callable):
+            self._exception_handlers[exc_class] = func
+
+        return register_exception_handler
+
+    def _lookup_exception_handler(self, exp_type: Type) -> Optional[Callable]:
+        # Use "Method Resolution Order" to allow for matching against a base class
+        # of an exception
+        for cls in exp_type.__mro__:
+            if cls in self._exception_handlers:
+                return self._exception_handlers[cls]
+        return None
+
+    def _call_exception_handler(self, exp: Exception, route: Route) -> Optional[ResponseBuilder]:
+        handler = self._lookup_exception_handler(type(exp))
+        if handler:
+            return ResponseBuilder(handler(exp), route)
+
+        if isinstance(exp, ServiceError):
+            return ResponseBuilder(
+                Response(
+                    status_code=exp.status_code,
+                    content_type=content_types.APPLICATION_JSON,
+                    body=self._json_dump({"statusCode": exp.status_code, "message": exp.msg}),
+                ),
+                route,
+            )
+
+        return None
 
     def _to_response(self, result: Union[Dict, Response]) -> Response:
         """Convert the route's result to a Response
@@ -661,6 +697,10 @@ class ApiGatewayResolver(BaseRouter):
         prefix : str, optional
             An optional prefix to be added to the originally defined rule
         """
+
+        # Add reference to parent ApiGatewayResolver to support use cases where people subclass it to add custom logic
+        router.api_resolver = self
+
         for route, func in router._routes.items():
             if prefix:
                 rule = route[0]
@@ -675,18 +715,61 @@ class Router(BaseRouter):
 
     def __init__(self):
         self._routes: Dict[tuple, Callable] = {}
+        self.api_resolver: Optional[BaseRouter] = None
 
     def route(
         self,
         rule: str,
-        method: Union[str, List[str]],
+        method: Union[str, Union[List[str], Tuple[str]]],
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
     ):
         def register_route(func: Callable):
-            methods = method if isinstance(method, list) else [method]
-            for item in methods:
-                self._routes[(rule, item, cors, compress, cache_control)] = func
+            # Convert methods to tuple. It needs to be hashable as its part of the self._routes dict key
+            methods = (method,) if isinstance(method, str) else tuple(method)
+            self._routes[(rule, methods, cors, compress, cache_control)] = func
 
         return register_route
+
+
+class APIGatewayRestResolver(ApiGatewayResolver):
+    current_event: APIGatewayProxyEvent
+
+    def __init__(
+        self,
+        cors: Optional[CORSConfig] = None,
+        debug: Optional[bool] = None,
+        serializer: Optional[Callable[[Dict], str]] = None,
+        strip_prefixes: Optional[List[str]] = None,
+    ):
+        """Amazon API Gateway REST and HTTP API v1 payload resolver"""
+        super().__init__(ProxyEventType.APIGatewayProxyEvent, cors, debug, serializer, strip_prefixes)
+
+
+class APIGatewayHttpResolver(ApiGatewayResolver):
+    current_event: APIGatewayProxyEventV2
+
+    def __init__(
+        self,
+        cors: Optional[CORSConfig] = None,
+        debug: Optional[bool] = None,
+        serializer: Optional[Callable[[Dict], str]] = None,
+        strip_prefixes: Optional[List[str]] = None,
+    ):
+        """Amazon API Gateway HTTP API v2 payload resolver"""
+        super().__init__(ProxyEventType.APIGatewayProxyEventV2, cors, debug, serializer, strip_prefixes)
+
+
+class ALBResolver(ApiGatewayResolver):
+    current_event: ALBEvent
+
+    def __init__(
+        self,
+        cors: Optional[CORSConfig] = None,
+        debug: Optional[bool] = None,
+        serializer: Optional[Callable[[Dict], str]] = None,
+        strip_prefixes: Optional[List[str]] = None,
+    ):
+        """Amazon Application Load Balancer (ALB) resolver"""
+        super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes)

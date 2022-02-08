@@ -3,8 +3,10 @@ import io
 import json
 import logging
 import random
+import re
 import string
 from collections import namedtuple
+from datetime import datetime, timezone
 from typing import Iterable
 
 import pytest
@@ -15,6 +17,7 @@ from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateEr
 from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter
 from aws_lambda_powertools.logging.logger import set_package_logger
 from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.utilities.data_classes import S3Event, event_source
 
 
 @pytest.fixture
@@ -597,3 +600,57 @@ def test_clear_state_on_inject_lambda_context(lambda_context, stdout, service_na
     first_log, second_log = capture_multiple_logging_statements_output(stdout)
     assert "my_key" in first_log
     assert "my_key" not in second_log
+
+
+def test_inject_lambda_context_allows_handler_with_kwargs(lambda_context, stdout, service_name):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN
+    @logger.inject_lambda_context(clear_state=True)
+    def handler(event, context, my_custom_option=None):
+        pass
+
+    # THEN
+    handler({}, lambda_context, my_custom_option="blah")
+
+
+@pytest.mark.parametrize("utc", [False, True])
+def test_use_datetime(stdout, service_name, utc):
+    # GIVEN
+    logger = Logger(
+        service=service_name,
+        stream=stdout,
+        datefmt="custom timestamp: milliseconds=%F microseconds=%f timezone=%z",
+        use_datetime_directive=True,
+        utc=utc,
+    )
+
+    # WHEN a log statement happens
+    logger.info({})
+
+    # THEN the timestamp has the appropriate formatting
+    log = capture_logging_output(stdout)
+
+    expected_tz = datetime.now().astimezone(timezone.utc if utc else None).strftime("%z")
+    assert re.fullmatch(
+        f"custom timestamp: milliseconds=[0-9]+ microseconds=[0-9]+ timezone={re.escape(expected_tz)}", log["timestamp"]
+    )
+
+
+def test_inject_lambda_context_log_event_request_data_classes(lambda_context, stdout, lambda_event, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN a lambda function is decorated with logger instructed to log event
+    # AND the event is an event source data class
+    @event_source(data_class=S3Event)
+    @logger.inject_lambda_context(log_event=True)
+    def handler(event, context):
+        logger.info("Hello")
+
+    handler(lambda_event, lambda_context)
+
+    # THEN logger should log event received from Lambda
+    logged_event, _ = capture_multiple_logging_statements_output(stdout)
+    assert logged_event["message"] == lambda_event

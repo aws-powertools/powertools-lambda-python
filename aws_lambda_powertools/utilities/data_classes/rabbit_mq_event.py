@@ -88,7 +88,9 @@ class RabbitMessage(DictWrapper):
     @property
     def json_data(self) -> Any:
         """Parses the data as json"""
-        return json.loads(self.decoded_data)
+        if self._json_data is None:
+            self._json_data = json.loads(self.decoded_data)
+        return self._json_data
 
 
 class RabbitMQEvent(DictWrapper):

@@ -493,9 +493,30 @@ def test_log_metrics_capture_cold_start_metric(capsys, namespace, service):
 
     output = capture_metrics_output(capsys)
 
+    # THEN ColdStart metric and function_name and service dimension should be logged
+    assert output["ColdStart"] == [1.0]
+    assert output["function_name"] == "example_fn"
+    assert output["service"] == service
+
+
+def test_log_metrics_capture_cold_start_metric_no_service(capsys, namespace):
+    # GIVEN Metrics is initialized without service
+    my_metrics = Metrics(namespace=namespace)
+
+    # WHEN log_metrics is used with capture_cold_start_metric
+    @my_metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(evt, context):
+        pass
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+    lambda_handler({}, LambdaContext("example_fn"))
+
+    output = capture_metrics_output(capsys)
+
     # THEN ColdStart metric and function_name dimension should be logged
     assert output["ColdStart"] == [1.0]
     assert output["function_name"] == "example_fn"
+    assert output.get("service") is None
 
 
 def test_emit_cold_start_metric_only_once(capsys, namespace, service, metric):
@@ -531,6 +552,7 @@ def test_log_metrics_decorator_no_metrics_warning(dimensions, namespace, service
 
     # THEN it should raise a warning instead of throwing an exception
     with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
         lambda_handler({}, {})
         assert len(w) == 1
         assert str(w[-1].message) == "No metrics to publish, skipping"

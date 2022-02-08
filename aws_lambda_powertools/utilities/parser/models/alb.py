@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Type, Union
 
 from pydantic import BaseModel
 
@@ -14,7 +14,7 @@ class AlbRequestContext(BaseModel):
 class AlbModel(BaseModel):
     httpMethod: str
     path: str
-    body: str
+    body: Union[str, Type[BaseModel]]
     isBase64Encoded: bool
     headers: Dict[str, str]
     queryStringParameters: Dict[str, str]

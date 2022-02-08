@@ -1,0 +1,21 @@
+name: Record PR number
+
+on:
+  pull_request:
+    types: [opened, edited]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Save PR number
+        run: |
+          mkdir -p ./pr
+          echo ${{ github.event.number }} > ./pr/number
+          echo "${{ github.event.pull_request.title }}" > ./pr/title
+      - uses: actions/upload-artifact@v2
+        with:
+          name: pr
+          path: pr/

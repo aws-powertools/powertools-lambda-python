@@ -195,7 +195,7 @@ class UserMigrationTriggerEventResponse(DictWrapper):
     @final_user_status.setter
     def final_user_status(self, value: str):
         """During sign-in, this attribute can be set to CONFIRMED, or not set, to auto-confirm your users and
-        allow them to sign-in with their previous passwords. This is the simplest experience for the user.
+        allow them to sign in with their previous passwords. This is the simplest experience for the user.
 
         If this attribute is set to RESET_REQUIRED, the user is required to change his or her password immediately
         after migration at the time of sign-in, and your client app needs to handle the PasswordResetRequiredException
@@ -333,7 +333,7 @@ class CustomMessageTriggerEvent(BaseTriggerEvent):
        verification code automatically to the user. Cannot be used for other attributes.
     - `CustomMessage_VerifyUserAttribute`  This trigger sends a verification code to the user when they manually
        request it for a new email or phone number.
-    - `CustomMessage_Authentication` To send MFA code during authentication.
+    - `CustomMessage_Authentication` To send MFA codes during authentication.
 
     Documentation:
     --------------
@@ -523,8 +523,9 @@ class ClaimsOverrideDetails(DictWrapper):
 class PreTokenGenerationTriggerEventResponse(DictWrapper):
     @property
     def claims_override_details(self) -> ClaimsOverrideDetails:
-        # Ensure we have a `claimsOverrideDetails` element
-        self._data["response"].setdefault("claimsOverrideDetails", {})
+        # Ensure we have a `claimsOverrideDetails` element and is not set to None
+        if self._data["response"].get("claimsOverrideDetails") is None:
+            self._data["response"]["claimsOverrideDetails"] = {}
         return ClaimsOverrideDetails(self._data["response"]["claimsOverrideDetails"])
 
 
@@ -589,7 +590,7 @@ class DefineAuthChallengeTriggerEventRequest(DictWrapper):
     @property
     def user_not_found(self) -> Optional[bool]:
         """A Boolean that is populated when PreventUserExistenceErrors is set to ENABLED for your user pool client.
-        A value of true means that the user id (user name, email address, etc.) did not match any existing users."""
+        A value of true means that the user id (username, email address, etc.) did not match any existing users."""
         return self["request"].get("userNotFound")
 
     @property
@@ -600,7 +601,7 @@ class DefineAuthChallengeTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function that you specify
-        for the define auth challenge trigger."""
+        for the defined auth challenge trigger."""
         return self["request"].get("clientMetadata")
 
 
@@ -686,7 +687,7 @@ class CreateAuthChallengeTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function that you
-        specify for the create auth challenge trigger.."""
+        specify for the creation auth challenge trigger."""
         return self["request"].get("clientMetadata")
 
 
@@ -698,7 +699,7 @@ class CreateAuthChallengeTriggerEventResponse(DictWrapper):
     @public_challenge_parameters.setter
     def public_challenge_parameters(self, value: Dict[str, str]):
         """One or more key-value pairs for the client app to use in the challenge to be presented to the user.
-        This parameter should contain all of the necessary information to accurately present the challenge to
+        This parameter should contain all the necessary information to accurately present the challenge to
         the user."""
         self["response"]["publicChallengeParameters"] = value
 
@@ -708,8 +709,8 @@ class CreateAuthChallengeTriggerEventResponse(DictWrapper):
 
     @private_challenge_parameters.setter
     def private_challenge_parameters(self, value: Dict[str, str]):
-        """This parameter is only used by the Verify Auth Challenge Response Lambda trigger.
-        This parameter should contain all of the information that is required to validate the user's
+        """This parameter is only used by the "Verify Auth Challenge" Response Lambda trigger.
+        This parameter should contain all the information that is required to validate the user's
         response to the challenge. In other words, the publicChallengeParameters parameter contains the
         question that is presented to the user and privateChallengeParameters contains the valid answers
         for the question."""
@@ -729,7 +730,7 @@ class CreateAuthChallengeTriggerEvent(BaseTriggerEvent):
     """Create Auth Challenge Lambda Trigger
 
     Amazon Cognito invokes this trigger after Define Auth Challenge if a custom challenge has been
-    specified as part of the Define Auth Challenge trigger.
+    specified as part of the "Define Auth Challenge" trigger.
     It creates a custom authentication flow.
 
     Notes:
@@ -774,7 +775,7 @@ class VerifyAuthChallengeResponseTriggerEventRequest(DictWrapper):
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function that
-        you specify for the verify auth challenge trigger."""
+        you specify for the "Verify Auth Challenge" trigger."""
         return self["request"].get("clientMetadata")
 
     @property

@@ -12,7 +12,10 @@ import pytest
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.api_gateway import (
+    ALBResolver,
+    APIGatewayHttpResolver,
     ApiGatewayResolver,
+    APIGatewayRestResolver,
     CORSConfig,
     ProxyEventType,
     Response,
@@ -32,6 +35,12 @@ from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayPro
 from tests.functional.utils import load_event
 
 
+@pytest.fixture
+def json_dump():
+    # our serializers reduce length to save on costs; fixture to replicate separators
+    return lambda obj: json.dumps(obj, separators=(",", ":"))
+
+
 def read_media(file_name: str) -> bytes:
     path = Path(str(Path(__file__).parent.parent.parent.parent) + "/docs/media/" + file_name)
     return path.read_bytes()
@@ -41,13 +50,14 @@ LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
 
 
 def test_alb_event():
-    # GIVEN a Application Load Balancer proxy type event
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.ALBEvent)
+    # GIVEN an Application Load Balancer proxy type event
+    app = ALBResolver()
 
     @app.get("/lambda")
     def foo():
         assert isinstance(app.current_event, ALBEvent)
         assert app.lambda_context == {}
+        assert app.current_event.request_context.elb_target_group_arn is not None
         return Response(200, content_types.TEXT_HTML, "foo")
 
     # WHEN calling the event handler
@@ -62,12 +72,13 @@ def test_alb_event():
 
 def test_api_gateway_v1():
     # GIVEN a Http API V1 proxy type event
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
+    app = APIGatewayRestResolver()
 
     @app.get("/my/path")
     def get_lambda() -> Response:
         assert isinstance(app.current_event, APIGatewayProxyEvent)
         assert app.lambda_context == {}
+        assert app.current_event.request_context.domain_name == "id.execute-api.us-east-1.amazonaws.com"
         return Response(200, content_types.APPLICATION_JSON, json.dumps({"foo": "value"}))
 
     # WHEN calling the event handler
@@ -100,12 +111,13 @@ def test_api_gateway():
 
 def test_api_gateway_v2():
     # GIVEN a Http API V2 proxy type event
-    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEventV2)
+    app = APIGatewayHttpResolver()
 
     @app.post("/my/path")
     def my_path() -> Response:
         assert isinstance(app.current_event, APIGatewayProxyEventV2)
         post_data = app.current_event.json_body
+        assert app.current_event.cookies[0] == "cookie1"
         return Response(200, content_types.TEXT_PLAIN, post_data["username"])
 
     # WHEN calling the event handler
@@ -163,7 +175,7 @@ def test_no_matches():
     def handler(event, context):
         return app.resolve(event, context)
 
-    # Also check check the route configurations
+    # Also check the route configurations
     routes = app._routes
     assert len(routes) == 5
     for route in routes:
@@ -506,12 +518,9 @@ def test_custom_preflight_response():
     assert headers["Access-Control-Allow-Methods"] == "CUSTOM"
 
 
-def test_service_error_responses():
+def test_service_error_responses(json_dump):
     # SCENARIO handling different kind of service errors being raised
     app = ApiGatewayResolver(cors=CORSConfig())
-
-    def json_dump(obj):
-        return json.dumps(obj, separators=(",", ":"))
 
     # GIVEN an BadRequestError
     @app.get(rule="/bad-request-error", cors=False)
@@ -641,7 +650,7 @@ def test_debug_mode_environment_variable(monkeypatch):
     assert app._debug
 
 
-def test_debug_json_formatting():
+def test_debug_json_formatting(json_dump):
     # GIVEN debug is True
     app = ApiGatewayResolver(debug=True)
     response = {"message": "Foo"}
@@ -654,7 +663,7 @@ def test_debug_json_formatting():
     result = app({"path": "/foo", "httpMethod": "GET"}, None)
 
     # THEN return a pretty print json in the body
-    assert result["body"] == json.dumps(response, indent=4)
+    assert result["body"] == json_dump(response)
 
 
 def test_debug_print_event(capsys):
@@ -1021,3 +1030,147 @@ def test_duplicate_routes():
     # THEN only execute the first registered route
     # AND print warnings
     assert result["statusCode"] == 200
+
+
+def test_route_multiple_methods():
+    # GIVEN a function with http methods passed as a list
+    app = ApiGatewayResolver()
+    req = "foo"
+    get_event = deepcopy(LOAD_GW_EVENT)
+    get_event["resource"] = "/accounts/{account_id}"
+    get_event["path"] = f"/accounts/{req}"
+
+    post_event = deepcopy(get_event)
+    post_event["httpMethod"] = "POST"
+
+    put_event = deepcopy(get_event)
+    put_event["httpMethod"] = "PUT"
+
+    lambda_context = {}
+
+    @app.route(rule="/accounts/<account_id>", method=["GET", "POST"])
+    def foo(account_id):
+        assert app.lambda_context == lambda_context
+        assert account_id == f"{req}"
+        return {}
+
+    # WHEN calling the event handler with the supplied methods
+    get_result = app(get_event, lambda_context)
+    post_result = app(post_event, lambda_context)
+    put_result = app(put_event, lambda_context)
+
+    # THEN events are processed correctly
+    assert get_result["statusCode"] == 200
+    assert get_result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert post_result["statusCode"] == 200
+    assert post_result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert put_result["statusCode"] == 404
+    assert put_result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+
+
+def test_api_gateway_app_router_access_to_resolver():
+    # GIVEN a Router with registered routes
+    app = ApiGatewayResolver()
+    router = Router()
+
+    @router.get("/my/path")
+    def foo():
+        # WHEN accessing the api resolver instance via the router
+        # THEN it is accessible and equal to the instantiated api resolver
+        assert app == router.api_resolver
+        return {}
+
+    app.include_router(router)
+    result = app(LOAD_GW_EVENT, {})
+
+    assert result["statusCode"] == 200
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+
+
+def test_exception_handler():
+    # GIVEN a resolver with an exception handler defined for ValueError
+    app = ApiGatewayResolver()
+
+    @app.exception_handler(ValueError)
+    def handle_value_error(ex: ValueError):
+        print(f"request path is '{app.current_event.path}'")
+        return Response(
+            status_code=418,
+            content_type=content_types.TEXT_HTML,
+            body=str(ex),
+        )
+
+    @app.get("/my/path")
+    def get_lambda() -> Response:
+        raise ValueError("Foo!")
+
+    # WHEN calling the event handler
+    # AND a ValueError is raised
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN call the exception_handler
+    assert result["statusCode"] == 418
+    assert result["headers"]["Content-Type"] == content_types.TEXT_HTML
+    assert result["body"] == "Foo!"
+
+
+def test_exception_handler_service_error():
+    # GIVEN
+    app = ApiGatewayResolver()
+
+    @app.exception_handler(ServiceError)
+    def service_error(ex: ServiceError):
+        print(ex.msg)
+        return Response(
+            status_code=ex.status_code,
+            content_type=content_types.APPLICATION_JSON,
+            body="CUSTOM ERROR FORMAT",
+        )
+
+    @app.get("/my/path")
+    def get_lambda() -> Response:
+        raise InternalServerError("Something sensitive")
+
+    # WHEN calling the event handler
+    # AND a ServiceError is raised
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN call the exception_handler
+    assert result["statusCode"] == 500
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["body"] == "CUSTOM ERROR FORMAT"
+
+
+def test_exception_handler_not_found():
+    # GIVEN a resolver with an exception handler defined for a 404 not found
+    app = ApiGatewayResolver()
+
+    @app.not_found
+    def handle_not_found(exc: NotFoundError) -> Response:
+        assert isinstance(exc, NotFoundError)
+        return Response(status_code=404, content_type=content_types.TEXT_PLAIN, body="I am a teapot!")
+
+    # WHEN calling the event handler
+    # AND no route is found
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN call the exception_handler
+    assert result["statusCode"] == 404
+    assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
+    assert result["body"] == "I am a teapot!"
+
+
+def test_exception_handler_not_found_alt():
+    # GIVEN a resolver with `@app.not_found()`
+    app = ApiGatewayResolver()
+
+    @app.not_found()
+    def handle_not_found(_) -> Response:
+        return Response(status_code=404, content_type=content_types.APPLICATION_JSON, body="{}")
+
+    # WHEN calling the event handler
+    # AND no route is found
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN call the @app.not_found() function
+    assert result["statusCode"] == 404

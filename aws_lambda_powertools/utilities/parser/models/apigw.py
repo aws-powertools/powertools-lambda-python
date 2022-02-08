@@ -1,10 +1,10 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel, root_validator
 from pydantic.networks import IPvAnyNetwork
 
-from ..types import Literal
+from aws_lambda_powertools.utilities.parser.types import Literal
 
 
 class ApiGatewayUserCertValidity(BaseModel):
@@ -89,4 +89,4 @@ class APIGatewayProxyEventModel(BaseModel):
     pathParameters: Optional[Dict[str, str]]
     stageVariables: Optional[Dict[str, str]]
     isBase64Encoded: bool
-    body: str
+    body: Optional[Union[str, Type[BaseModel]]]

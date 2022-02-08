@@ -5,7 +5,7 @@ import inspect
 import logging
 import numbers
 import os
-from typing import Any, Callable, Dict, Optional, Sequence, Union, cast, overload
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union, cast, overload
 
 from ..shared import constants
 from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
@@ -17,7 +17,6 @@ is_cold_start = True
 logger = logging.getLogger(__name__)
 
 aws_xray_sdk = LazyLoader(constants.XRAY_SDK_MODULE, globals(), constants.XRAY_SDK_MODULE)
-aws_xray_sdk.core = LazyLoader(constants.XRAY_SDK_CORE_MODULE, globals(), constants.XRAY_SDK_CORE_MODULE)  # type: ignore # noqa: E501
 
 
 class Tracer:
@@ -137,7 +136,7 @@ class Tracer:
     """
 
     _default_config: Dict[str, Any] = {
-        "service": "service_undefined",
+        "service": "",
         "disabled": False,
         "auto_patch": True,
         "patch_modules": None,
@@ -156,7 +155,7 @@ class Tracer:
         self.__build_config(
             service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
         )
-        self.provider: BaseProvider = self._config["provider"]
+        self.provider = self._config["provider"]
         self.disabled = self._config["disabled"]
         self.service = self._config["service"]
         self.auto_patch = self._config["auto_patch"]
@@ -167,10 +166,8 @@ class Tracer:
         if self.auto_patch:
             self.patch(modules=patch_modules)
 
-        # Set the streaming threshold to 0 on the default recorder to force sending
-        # subsegments individually, rather than batching them.
-        # See https://github.com/awslabs/aws-lambda-powertools-python/issues/283
-        aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0)  # noqa: E800
+        if self._is_xray_provider():
+            self._disable_xray_trace_batching()
 
     def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]):
         """Adds annotation to existing segment or subsegment
@@ -239,9 +236,9 @@ class Tracer:
             return
 
         if modules is None:
-            aws_xray_sdk.core.patch_all()
+            self.provider.patch_all()
         else:
-            aws_xray_sdk.core.patch(modules)
+            self.provider.patch(modules)
 
     def capture_lambda_handler(
         self,
@@ -304,10 +301,14 @@ class Tracer:
         def decorate(event, context, **kwargs):
             with self.provider.in_subsegment(name=f"## {lambda_handler_name}") as subsegment:
                 global is_cold_start
+                logger.debug("Annotating cold start")
+                subsegment.put_annotation(key="ColdStart", value=is_cold_start)
+
                 if is_cold_start:
-                    logger.debug("Annotating cold start")
-                    subsegment.put_annotation(key="ColdStart", value=True)
                     is_cold_start = False
+
+                if self.service:
+                    subsegment.put_annotation(key="Service", value=self.service)
 
                 try:
                     logger.debug("Calling lambda handler")
@@ -742,7 +743,8 @@ class Tracer:
         is_disabled = disabled if disabled is not None else self._is_tracer_disabled()
         is_service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
 
-        self._config["provider"] = provider or self._config["provider"] or aws_xray_sdk.core.xray_recorder
+        # Logic: Choose overridden option first, previously cached config, or default if available
+        self._config["provider"] = provider or self._config["provider"] or self._patch_xray_provider()
         self._config["auto_patch"] = auto_patch if auto_patch is not None else self._config["auto_patch"]
         self._config["service"] = is_service or self._config["service"]
         self._config["disabled"] = is_disabled or self._config["disabled"]
@@ -751,3 +753,52 @@ class Tracer:
     @classmethod
     def _reset_config(cls):
         cls._config = copy.copy(cls._default_config)
+
+    def _patch_xray_provider(self):
+        # Due to Lazy Import, we need to activate `core` attrib via import
+        # we also need to include `patch`, `patch_all` methods
+        # to ensure patch calls are done via the provider
+        from aws_xray_sdk.core import xray_recorder  # type: ignore
+
+        provider = xray_recorder
+        provider.patch = aws_xray_sdk.core.patch
+        provider.patch_all = aws_xray_sdk.core.patch_all
+
+        return provider
+
+    def _disable_xray_trace_batching(self):
+        """Configure X-Ray SDK to send subsegment individually over batching
+        Known issue: https://github.com/awslabs/aws-lambda-powertools-python/issues/283
+        """
+        if self.disabled:
+            logger.debug("Tracing has been disabled, aborting streaming override")
+            return
+
+        aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0)
+
+    def _is_xray_provider(self):
+        return "aws_xray_sdk" in self.provider.__module__
+
+    def ignore_endpoint(self, hostname: Optional[str] = None, urls: Optional[List[str]] = None):
+        """If you want to ignore certain httplib requests you can do so based on the hostname or URL that is being
+        requested.
+
+        > NOTE: If the provider is not xray, nothing will be added to ignore list
+
+        Documentation
+        --------------
+        - https://github.com/aws/aws-xray-sdk-python#ignoring-httplib-requests
+
+        Parameters
+        ----------
+        hostname : Optional, str
+            The hostname is matched using the Python fnmatch library which does Unix glob style matching.
+        urls: Optional, List[str]
+            List of urls to ignore. Example `tracer.ignore_endpoint(urls=["/ignored-url"])`
+        """
+        if not self._is_xray_provider():
+            return
+
+        from aws_xray_sdk.ext.httplib import add_ignored  # type: ignore
+
+        add_ignored(hostname=hostname, urls=urls)

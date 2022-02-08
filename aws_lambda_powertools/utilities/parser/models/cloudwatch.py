@@ -3,7 +3,7 @@ import json
 import logging
 import zlib
 from datetime import datetime
-from typing import List
+from typing import List, Type, Union
 
 from pydantic import BaseModel, Field, validator
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class CloudWatchLogsLogEvent(BaseModel):
     id: str  # noqa AA03 VNE003
     timestamp: datetime
-    message: str
+    message: Union[str, Type[BaseModel]]
 
 
 class CloudWatchLogsDecode(BaseModel):

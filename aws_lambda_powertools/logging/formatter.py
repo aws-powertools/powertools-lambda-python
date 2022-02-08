@@ -3,6 +3,7 @@ import logging
 import os
 import time
 from abc import ABCMeta, abstractmethod
+from datetime import datetime, timezone
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -61,9 +62,10 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         json_deserializer: Optional[Callable[[Union[Dict, str, bool, int, float]], str]] = None,
         json_default: Optional[Callable[[Any], Any]] = None,
         datefmt: Optional[str] = None,
+        use_datetime_directive: bool = False,
         log_record_order: Optional[List[str]] = None,
         utc: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """Return a LambdaPowertoolsFormatter instance.
 
@@ -86,20 +88,30 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             Only used when no custom JSON encoder is set
 
         datefmt : str, optional
-            String directives (strftime) to format log timestamp
+            String directives (strftime) to format log timestamp.
 
-            See https://docs.python.org/3/library/time.html#time.strftime
+            See https://docs.python.org/3/library/time.html#time.strftime or
+        use_datetime_directive: str, optional
+            Interpret `datefmt` as a format string for `datetime.datetime.strftime`, rather than
+            `time.strftime` - Only useful when used alongside `datefmt`.
+
+            See https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior . This
+            also supports a custom %F directive for milliseconds.
         utc : bool, optional
             set logging timestamp to UTC, by default False to continue to use local time as per stdlib
         log_record_order : list, optional
             set order of log keys when logging, by default ["level", "location", "message", "timestamp"]
         kwargs
             Key-value to be included in log messages
+
         """
         self.json_deserializer = json_deserializer or json.loads
         self.json_default = json_default or str
         self.json_serializer = json_serializer or partial(json.dumps, default=self.json_default, separators=(",", ":"))
+
         self.datefmt = datefmt
+        self.use_datetime_directive = use_datetime_directive
+
         self.utc = utc
         self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
         self.log_format = dict.fromkeys(self.log_record_order)  # Set the insertion order for the log messages
@@ -129,13 +141,35 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
     def formatTime(self, record: logging.LogRecord, datefmt: Optional[str] = None) -> str:
         record_ts = self.converter(record.created)  # type: ignore
-        if datefmt:
-            return time.strftime(datefmt, record_ts)
+
+        if datefmt is None:  # pragma: no cover, it'll always be None in std logging, but mypy
+            datefmt = self.datefmt
 
         # NOTE: Python `time.strftime` doesn't provide msec directives
         # so we create a custom one (%F) and replace logging record ts
         # Reason 2 is that std logging doesn't support msec after TZ
         msecs = "%03d" % record.msecs
+
+        # Datetime format codes might be optionally used
+        # however it only makes a difference if `datefmt` is passed
+        # since format codes are the same except %f
+        if self.use_datetime_directive and datefmt:
+            # record.msecs are microseconds, divide by 1000 and we get milliseconds
+            timestamp = record.created + record.msecs / 1000
+
+            if self.utc:
+                dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+            else:
+                # make sure local timezone is included
+                dt = datetime.fromtimestamp(timestamp).astimezone()
+
+            custom_fmt = datefmt.replace(self.custom_ms_time_directive, msecs)
+            return dt.strftime(custom_fmt)
+
+        elif datefmt:
+            custom_fmt = datefmt.replace(self.custom_ms_time_directive, msecs)
+            return time.strftime(custom_fmt, record_ts)
+
         custom_fmt = self.default_time_format.replace(self.custom_ms_time_directive, msecs)
         return time.strftime(custom_fmt, record_ts)
 
@@ -219,7 +253,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             Structured log as dictionary
         """
         record_dict = log_record.__dict__.copy()
-        record_dict["asctime"] = self.formatTime(record=log_record, datefmt=self.datefmt)
+        record_dict["asctime"] = self.formatTime(record=log_record)
         extras = {k: v for k, v in record_dict.items() if k not in RESERVED_LOG_ATTRS}
 
         formatted_log = {}

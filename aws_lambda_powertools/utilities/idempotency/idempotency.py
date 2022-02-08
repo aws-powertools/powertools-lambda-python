@@ -7,7 +7,7 @@ import os
 from typing import Any, Callable, Dict, Optional, cast
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.shared.constants import IDEMPOTENCY_DISABLED_ENV
+from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.types import AnyCallableT
 from aws_lambda_powertools.utilities.idempotency.base import IdempotencyHandler
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
@@ -58,7 +58,7 @@ def idempotent(
         >>>     return {"StatusCode": 200}
     """
 
-    if os.getenv(IDEMPOTENCY_DISABLED_ENV):
+    if os.getenv(constants.IDEMPOTENCY_DISABLED_ENV):
         return handler(event, context)
 
     config = config or IdempotencyConfig()
@@ -112,7 +112,7 @@ def idempotent_function(
             return {"StatusCode": 200}
     """
 
-    if function is None:
+    if not function:
         return cast(
             AnyCallableT,
             functools.partial(
@@ -127,12 +127,12 @@ def idempotent_function(
 
     @functools.wraps(function)
     def decorate(*args, **kwargs):
-        if os.getenv(IDEMPOTENCY_DISABLED_ENV):
+        if os.getenv(constants.IDEMPOTENCY_DISABLED_ENV):
             return function(*args, **kwargs)
 
         payload = kwargs.get(data_keyword_argument)
 
-        if payload is None:
+        if not payload:
             raise RuntimeError(
                 f"Unable to extract '{data_keyword_argument}' from keyword arguments."
                 f" Ensure this exists in your function's signature as well as the caller used it as a keyword argument"

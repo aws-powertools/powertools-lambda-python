@@ -20,13 +20,16 @@ test:
 	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=xml
 	poetry run pytest --cache-clear tests/performance
 
+unit-test:
+	poetry run pytest tests/unit
+
 coverage-html:
 	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=html
 
 pre-commit:
 	pre-commit run --show-diff-on-failure
 
-pr: lint pre-commit test security-baseline complexity-baseline
+pr: lint mypy pre-commit test security-baseline complexity-baseline
 
 build: pr
 	poetry build

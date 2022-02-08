@@ -1,5 +1,4 @@
 import datetime
-import hashlib
 import json
 from collections import namedtuple
 from decimal import Decimal
@@ -11,18 +10,13 @@ from botocore import stub
 from botocore.config import Config
 from jmespath import functions
 
-from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.idempotency import IdempotencyConfig
 from aws_lambda_powertools.utilities.jmespath_utils import extract_data_from_envelope
 from aws_lambda_powertools.utilities.validation import envelopes
-from tests.functional.utils import load_event
+from tests.functional.utils import hash_idempotency_key, json_serialize, load_event
 
 TABLE_NAME = "TEST_TABLE"
-
-
-def serialize(data):
-    return json.dumps(data, sort_keys=True, cls=Encoder)
 
 
 @pytest.fixture(scope="module")
@@ -66,12 +60,12 @@ def lambda_response():
 
 @pytest.fixture(scope="module")
 def serialized_lambda_response(lambda_response):
-    return serialize(lambda_response)
+    return json_serialize(lambda_response)
 
 
 @pytest.fixture(scope="module")
 def deserialized_lambda_response(lambda_response):
-    return json.loads(serialize(lambda_response))
+    return json.loads(json_serialize(lambda_response))
 
 
 @pytest.fixture
@@ -150,7 +144,7 @@ def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_vali
 def hashed_idempotency_key(lambda_apigw_event, default_jmespath, lambda_context):
     compiled_jmespath = jmespath.compile(default_jmespath)
     data = compiled_jmespath.search(lambda_apigw_event)
-    return "test-func#" + hashlib.md5(serialize(data).encode()).hexdigest()
+    return "test-func.lambda_handler#" + hash_idempotency_key(data)
 
 
 @pytest.fixture
@@ -158,17 +152,22 @@ def hashed_idempotency_key_with_envelope(lambda_apigw_event):
     event = extract_data_from_envelope(
         data=lambda_apigw_event, envelope=envelopes.API_GATEWAY_HTTP, jmespath_options={}
     )
-    return "test-func#" + hashlib.md5(serialize(event).encode()).hexdigest()
+    return "test-func.lambda_handler#" + hash_idempotency_key(event)
 
 
 @pytest.fixture
 def hashed_validation_key(lambda_apigw_event):
-    return hashlib.md5(serialize(lambda_apigw_event["requestContext"]).encode()).hexdigest()
+    return hash_idempotency_key(lambda_apigw_event["requestContext"])
 
 
 @pytest.fixture
 def persistence_store(config):
     return DynamoDBPersistenceLayer(table_name=TABLE_NAME, boto_config=config)
+
+
+@pytest.fixture
+def persistence_store_compound(config):
+    return DynamoDBPersistenceLayer(table_name=TABLE_NAME, boto_config=config, key_attr="id", sort_key_attr="sk")
 
 
 @pytest.fixture
