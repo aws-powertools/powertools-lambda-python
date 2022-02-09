@@ -524,17 +524,16 @@ to patch the `parameters.get_parameter` method:
 
 === "tests.py"
 	```python
-	from src.index import handler
+	from src import index
 
 	def test_handler(monkeypatch):
 
 		def mockreturn(name):
 			return "mock_value"
 
-		monkeypatch.setattr(parameters, "get_parameter", mockreturn)
-		return_val = handler({}, {})
+		monkeypatch.setattr(index.parameters, "get_parameter", mockreturn)
+		return_val = index.handler({}, {})
 		assert return_val.get('message') == 'mock_value'
-
 	```
 
 === "src/index.py"
@@ -553,18 +552,18 @@ If we need to use this pattern across multiple tests, we can avoid repetition by
 	```python
 	import pytest
 
-	from src.index import handler
+	from src import index
 
 	@pytest.fixture
 	def mock_parameter_response(monkeypatch):
 		def mockreturn(name):
 			return "mock_value"
 
-    	monkeypatch.setattr(parameters, "get_parameter", mockreturn)
+    	monkeypatch.setattr(index.parameters, "get_parameter", mockreturn)
 
 	# Pass our fixture as an argument to all tests where we want to mock the get_parameter response
 	def test_handler(mock_parameter_response):
-		return_val = handler({}, {})
+		return_val = index.handler({}, {})
 		assert return_val.get('message') == 'mock_value'
 
 	```
@@ -577,13 +576,14 @@ object named `get_parameter_mock`.
 === "tests.py"
 	```python
 	from unittest.mock import patch
+	from src import index
 
 	# Replaces "aws_lambda_powertools.utilities.parameters.get_parameter" with a Mock object
 	@patch("aws_lambda_powertools.utilities.parameters.get_parameter")
 	def test_handler(get_parameter_mock):
 		get_parameter_mock.return_value = 'mock_value'
 
-		return_val = handler({}, {})
+		return_val = index.handler({}, {})
 		get_parameter_mock.assert_called_with("my-parameter-name")
 		assert return_val.get('message') == 'mock_value'
 
