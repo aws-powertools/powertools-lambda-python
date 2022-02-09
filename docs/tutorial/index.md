@@ -822,7 +822,7 @@ Let's expand our application with custom metrics using AWS SDK to see how it wor
     def add_greeting_metric(service: str = "APP"):
         function_name = os.getenv("AWS_LAMBDA_FUNCTION_NAME", "undefined")
         service_dimension = {"Name": "service", "Value": service}
-        function_dimension = {"Name": "function_name": "Value": function_name}
+        function_dimension = {"Name": "function_name", "Value": function_name}
         is_cold_start = True
 
         global cold_start
