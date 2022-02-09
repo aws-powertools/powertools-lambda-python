@@ -1,4 +1,5 @@
 import json
+import math
 from random import randint
 from typing import Callable, Dict, Optional
 from unittest.mock import patch
@@ -166,7 +167,35 @@ def order_event_factory() -> Callable:
     return factory
 
 
-def test_partial_sqs_processor_context_with_failure(sqs_event_factory, record_handler, partial_processor):
+@pytest.mark.parametrize(
+    "success_messages_count",
+    ([1, 18, 34]),
+)
+def test_partial_sqs_processor_context_with_failure(
+    success_messages_count, sqs_event_factory, record_handler, partial_processor
+):
+    """
+    Test processor with one failing record and multiple processed records
+    """
+    fail_record = sqs_event_factory("fail")
+    success_records = [sqs_event_factory("success") for i in range(0, success_messages_count)]
+
+    records = [fail_record, *success_records]
+
+    response = {"Successful": [{"Id": fail_record["messageId"]}], "Failed": []}
+
+    with Stubber(partial_processor.client) as stubber:
+        for _ in range(0, math.ceil((success_messages_count / partial_processor.max_message_batch))):
+            stubber.add_response("delete_message_batch", response)
+        with pytest.raises(SQSBatchProcessingError) as error:
+            with partial_processor(records, record_handler) as ctx:
+                ctx.process()
+
+        assert len(error.value.child_exceptions) == 1
+        stubber.assert_no_pending_responses()
+
+
+def test_partial_sqs_processor_context_with_failure_exception(sqs_event_factory, record_handler, partial_processor):
     """
     Test processor with one failing record
     """
@@ -175,16 +204,15 @@ def test_partial_sqs_processor_context_with_failure(sqs_event_factory, record_ha
 
     records = [fail_record, success_record]
 
-    response = {"Successful": [{"Id": fail_record["messageId"]}], "Failed": []}
-
     with Stubber(partial_processor.client) as stubber:
-        stubber.add_response("delete_message_batch", response)
-
-        with pytest.raises(SQSBatchProcessingError) as error:
+        stubber.add_client_error(
+            method="delete_message_batch", service_error_code="ServiceUnavailable", http_status_code=503
+        )
+        with pytest.raises(Exception) as error:
             with partial_processor(records, record_handler) as ctx:
                 ctx.process()
 
-        assert len(error.value.child_exceptions) == 1
+        assert "ServiceUnavailable" in str(error.value)
         stubber.assert_no_pending_responses()
 
 
