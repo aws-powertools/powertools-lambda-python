@@ -515,3 +515,76 @@ The **`config`** and **`boto3_session`** parameters enable you to pass in a cust
 		value = ssm_provider.get("/my/parameter")
 		...
 	```
+
+## Testing your code
+
+For unit testing your applications, you can mock the calls to the parameters utility to avoid calling AWS APIs. This
+can be achieved in a number of ways - in this example, we use the [pytest monkeypatch fixture](https://docs.pytest.org/en/latest/how-to/monkeypatch.html)
+to patch the `parameters.get_parameter` method:
+
+=== "tests.py"
+	```python
+	from src.index import handler
+
+	def test_handler(monkeypatch):
+
+		def mockreturn(name):
+			return "mock_value"
+
+		monkeypatch.setattr(parameters, "get_parameter", mockreturn)
+		return_val = handler({}, {})
+		assert return_val.get('message') == 'mock_value'
+
+	```
+
+=== "src/index.py"
+	```python
+	from aws_lambda_powertools.utilities import parameters
+
+	def handler(event, context):
+		# Retrieve a single parameter
+		value = parameters.get_parameter("my-parameter-name")
+		return {"message": value}
+	```
+
+If we need to use this pattern across multiple tests, we can avoid repetition by refactoring to use our own pytest fixture:
+
+=== "tests.py"
+	```python
+	import pytest
+
+	from src.index import handler
+
+	@pytest.fixture
+	def mock_parameter_response(monkeypatch):
+		def mockreturn(name):
+			return "mock_value"
+
+    	monkeypatch.setattr(parameters, "get_parameter", mockreturn)
+
+	# Pass our fixture as an argument to all tests where we want to mock the get_parameter response
+	def test_handler(mock_parameter_response):
+		return_val = handler({}, {})
+		assert return_val.get('message') == 'mock_value'
+
+	```
+
+Alternatively, if we need more fully featured mocking (for example checking the arguments passed to `get_parameter`), we
+can use [unittest.mock](https://docs.python.org/3/library/unittest.mock.html) from the python stdlib instead of pytest's `monkeypatch` fixture. In this example, we use the
+[patch](https://docs.python.org/3/library/unittest.mock.html#unittest.mock.patch) decorator to replace the `aws_lambda_powertools.utilities.parameters.get_parameter` function with a [MagicMock](https://docs.python.org/3/library/unittest.mock.html#unittest.mock.MagicMock)
+object named `get_parameter_mock`.
+
+=== "tests.py"
+	```python
+	from unittest.mock import patch
+
+	# Replaces "aws_lambda_powertools.utilities.parameters.get_parameter" with a Mock object
+	@patch("aws_lambda_powertools.utilities.parameters.get_parameter")
+	def test_handler(get_parameter_mock):
+		get_parameter_mock.return_value = 'mock_value'
+
+		return_val = handler({}, {})
+		get_parameter_mock.assert_called_with("my-parameter-name")
+		assert return_val.get('message') == 'mock_value'
+
+	```
