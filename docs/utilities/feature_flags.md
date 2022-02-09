@@ -453,6 +453,8 @@ By default, we cache configuration retrieved from the Store for 5 seconds for pe
 
 You can override `max_age` parameter when instantiating the store.
 
+=== "app.py"
+
     ```python hl_lines="7"
     from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
 
@@ -677,10 +679,12 @@ Parameter | Default | Description
 **logger** | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools Logger.
 
 
-```python hl_lines="19-25" title="AppConfigStore sample"
+```python hl_lines="21-27" title="AppConfigStore sample"
 from botocore.config import Config
 
 import jmespath
+
+from aws_lambda_powertools.utilities.feature_flags import AppConfigStore
 
 boto_config = Config(read_timeout=10, retries={"total_max_attempts": 2})
 
@@ -715,9 +719,7 @@ You can unit test your feature flags locally and independently without setting u
 ???+ warning
     This excerpt relies on `pytest` and `pytest-mock` dependencies.
 
-```python hl_lines="9-11" title="Unit testing feature flags"
-from typing import Dict, List, Optional
-
+```python hl_lines="7-9" title="Unit testing feature flags"
 from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore, RuleAction
 
 
