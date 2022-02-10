@@ -685,7 +685,7 @@ This will ensure that CORS headers are always returned as part of the response w
     ```python hl_lines="9 11"
     from aws_lambda_powertools import Logger, Tracer
     from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver, CORSConfig
+    from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, CORSConfig
 
     tracer = Tracer()
     logger = Logger()
