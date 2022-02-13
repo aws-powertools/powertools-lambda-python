@@ -1,4 +1,4 @@
-from typing import Iterator, List
+from typing import Iterator, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -26,7 +26,7 @@ class SESMailCommonHeaders(DictWrapper):
         return self["from"]
 
     @property
-    def date(self) -> List[str]:
+    def date(self) -> str:
         """The date and time when Amazon SES received the message."""
         return self["date"]
 
@@ -44,6 +44,26 @@ class SESMailCommonHeaders(DictWrapper):
     def subject(self) -> str:
         """The value of the Subject header for the email."""
         return str(self["subject"])
+
+    @property
+    def cc(self) -> Optional[List[str]]:
+        """The values in the CC header of the email."""
+        return self.get("cc")
+
+    @property
+    def bcc(self) -> Optional[List[str]]:
+        """The values in the BCC header of the email."""
+        return self.get("bcc")
+
+    @property
+    def sender(self) -> Optional[List[str]]:
+        """The values in the Sender header of the email."""
+        return self.get("sender")
+
+    @property
+    def reply_to(self) -> Optional[List[str]]:
+        """The values in the replyTo header of the email."""
+        return self.get("replyTo")
 
 
 class SESMail(DictWrapper):
@@ -94,6 +114,10 @@ class SESMail(DictWrapper):
 class SESReceiptStatus(DictWrapper):
     @property
     def status(self) -> str:
+        """Receipt status
+
+        Possible values: 'PASS', 'FAIL', 'GRAY', 'PROCESSING_FAILED', 'DISABLED'
+        """
         return str(self["status"])
 
 
@@ -108,16 +132,76 @@ class SESReceiptAction(DictWrapper):
         return self["type"]
 
     @property
+    def topic_arn(self) -> Optional[str]:
+        """String that contains the Amazon Resource Name (ARN) of the Amazon SNS topic to which the
+        notification was published."""
+        return self.get("topicArn")
+
+    @property
     def function_arn(self) -> str:
         """String that contains the ARN of the Lambda function that was triggered.
+
         Present only for the Lambda action type."""
         return self["functionArn"]
 
     @property
     def invocation_type(self) -> str:
         """String that contains the invocation type of the Lambda function. Possible values are RequestResponse
-        and Event. Present only for the Lambda action type."""
+        and Event.
+
+        Present only for the Lambda action type."""
         return self["invocationType"]
+
+    @property
+    def bucket_name(self) -> str:
+        """String that contains the name of the Amazon S3 bucket to which the message was published.
+
+        Present only for the S3 action type."""
+        return str(self["bucketName"])
+
+    @property
+    def object_key(self) -> str:
+        """String that contains a name that uniquely identifies the email in the Amazon S3 bucket.
+        This is the same as the messageId in the mail object.
+
+        Present only for the S3 action type."""
+        return str(self["objectKey"])
+
+    @property
+    def smtp_reply_code(self) -> str:
+        """String that contains the SMTP reply code, as defined by RFC 5321.
+
+        Present only for the bounce action type."""
+        return str(self["smtpReplyCode"])
+
+    @property
+    def status_code(self) -> str:
+        """String that contains the SMTP enhanced status code, as defined by RFC 3463.
+
+        Present only for the bounce action type."""
+        return self["statusCode"]
+
+    @property
+    def message(self) -> str:
+        """String that contains the human-readable text to include in the bounce message.
+
+        Present only for the bounce action type."""
+        return str(self["message"])
+
+    @property
+    def sender(self) -> str:
+        """String that contains the email address of the sender of the email that bounced.
+        This is the address from which the bounce message was sent.
+
+        Present only for the bounce action type."""
+        return str(self["sender"])
+
+    @property
+    def organization_arn(self) -> str:
+        """String that contains the ARN of the Amazon WorkMail organization.
+
+        Present only for the WorkMail action type."""
+        return str(self["organizationArn"])
 
 
 class SESReceipt(DictWrapper):
@@ -155,10 +239,23 @@ class SESReceipt(DictWrapper):
         return SESReceiptStatus(self["spfVerdict"])
 
     @property
+    def dkim_verdict(self) -> SESReceiptStatus:
+        """Object that indicates whether the DomainKeys Identified Mail (DKIM) check passed"""
+        return SESReceiptStatus(self["dkimVerdict"])
+
+    @property
     def dmarc_verdict(self) -> SESReceiptStatus:
         """Object that indicates whether the Domain-based Message Authentication,
         Reporting & Conformance (DMARC) check passed."""
         return SESReceiptStatus(self["dmarcVerdict"])
+
+    @property
+    def dmarc_policy(self) -> Optional[str]:
+        """Indicates the Domain-based Message Authentication, Reporting & Conformance (DMARC) settings for
+        the sending domain. This field only appears if the message fails DMARC authentication.
+
+        Possible values for this field are: none, quarantine, reject"""
+        return self.get("dmarcPolicy")
 
     @property
     def action(self) -> SESReceiptAction:
