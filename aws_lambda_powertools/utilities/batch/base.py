@@ -351,6 +351,7 @@ class BatchProcessor(BasePartialProcessor):
         """
         self.success_messages.clear()
         self.fail_messages.clear()
+        self.exceptions.clear()
         self.batch_response = copy.deepcopy(self.DEFAULT_RESPONSE)
 
     def _process_record(self, record: dict) -> Union[SuccessResponse, FailureResponse]:
