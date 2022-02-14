@@ -729,6 +729,15 @@ def test_ses_trigger_event_s3():
     assert action.object_key == "email"
 
 
+def test_ses_trigger_event_sns():
+    event = SESEvent(load_event("sesEventSNS.json"))
+    records = list(event.records)
+    record = records[0]
+    action = record.ses.receipt.action
+    assert action.get_type == "SNS"
+    assert action.topic_arn == "arn:aws:sns:us-east-1:012345678912:example-topic"
+
+
 def test_ses_trigger_event_bounce():
     action = SESReceiptAction(
         {
