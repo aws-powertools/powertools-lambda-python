@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format for changes and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## 1.25.1 - 2022-02-14
+
+### Bug Fixes
+
+**batch:** bugfix to clear exceptions between executions ([#1022](https://github.com/awslabs/aws-lambda-powertools-python/issues/1022))
+
 ## 1.25.0 - 2022-02-09
 
 ### Bug Fixes

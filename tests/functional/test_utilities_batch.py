@@ -895,8 +895,16 @@ def test_batch_processor_error_when_entire_batch_fails(sqs_event_factory, record
     def lambda_handler(event, context):
         return processor.response()
 
-    # WHEN/THEN
+    # WHEN calling `lambda_handler` in cold start
     with pytest.raises(BatchProcessingError) as e:
         lambda_handler(event, {})
-        ret = str(e)
-        assert ret is not None
+
+    # THEN raise BatchProcessingError
+    assert "All records failed processing. " in str(e.value)
+
+    # WHEN calling `lambda_handler` in warm start
+    with pytest.raises(BatchProcessingError) as e:
+        lambda_handler(event, {})
+
+    # THEN raise BatchProcessingError
+    assert "All records failed processing. " in str(e.value)
