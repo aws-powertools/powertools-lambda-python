@@ -13,6 +13,8 @@ from .exceptions import ConfigurationStoreError, StoreClientError
 
 TRANSFORM_TYPE = "json"
 
+MAX_AGE_DEFAULT_SECONDS = 5
+
 
 class AppConfigStore(StoreProvider):
     def __init__(
@@ -53,7 +55,7 @@ class AppConfigStore(StoreProvider):
         self.environment = environment
         self.application = application
         self.name = name
-        self.cache_seconds = 5 if max_age is None else max_age
+        self.cache_seconds = MAX_AGE_DEFAULT_SECONDS if max_age is None else max_age
         self.config = sdk_config
         self.envelope = envelope
         self.jmespath_options = jmespath_options
