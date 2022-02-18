@@ -1,4 +1,5 @@
-from typing import Iterator, List, Optional
+from enum import Enum
+from typing import Dict, Iterator, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -316,3 +317,17 @@ class SESEvent(DictWrapper):
     @property
     def receipt(self) -> SESReceipt:
         return self.record.ses.receipt
+
+
+class Disposition(Enum):
+    """No further actions in the current receipt rule will be processed, but further receipt rules can be processed."""
+
+    STOP_RULE = "STOP_RULE"
+    """No further actions or receipt rules will be processed."""
+    STOP_RULE_SET = "STOP_RULE_SET"
+    """This means that further actions and receipt rules can be processed."""
+    CONTINUE = "CONTINUE"
+
+
+def disposition_response(disposition: Disposition) -> Dict[str, str]:
+    return {"disposition": disposition.value}

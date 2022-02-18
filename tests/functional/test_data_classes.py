@@ -76,7 +76,7 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
 )
 from aws_lambda_powertools.utilities.data_classes.event_source import event_source
 from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
-from aws_lambda_powertools.utilities.data_classes.ses_event import SESReceiptAction
+from aws_lambda_powertools.utilities.data_classes.ses_event import Disposition, SESReceiptAction, disposition_response
 from tests.functional.utils import load_event
 
 
@@ -767,6 +767,11 @@ def test_ses_trigger_event_work_mail():
     )
     assert action.get_type == "WorkMail"
     assert action.organization_arn == action["organizationArn"]
+
+
+def test_ses_disposition_response():
+    response = disposition_response(Disposition.STOP_RULE_SET)
+    assert response == {"disposition": "STOP_RULE_SET"}
 
 
 def test_sns_trigger_event():
