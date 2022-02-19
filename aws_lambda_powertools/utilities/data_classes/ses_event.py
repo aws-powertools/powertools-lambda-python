@@ -320,13 +320,12 @@ class SESEvent(DictWrapper):
 
 
 class Disposition(Enum):
-    """No further actions in the current receipt rule will be processed, but further receipt rules can be processed."""
-
     STOP_RULE = "STOP_RULE"
-    """No further actions or receipt rules will be processed."""
+    """No further actions in the current receipt rule will be processed, but further receipt rules can be processed."""
     STOP_RULE_SET = "STOP_RULE_SET"
-    """This means that further actions and receipt rules can be processed."""
+    """No further actions or receipt rules will be processed."""
     CONTINUE = "CONTINUE"
+    """This means that further actions and receipt rules can be processed."""
 
 
 def disposition_response(disposition: Disposition) -> Dict[str, str]:
