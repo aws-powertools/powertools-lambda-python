@@ -298,7 +298,7 @@ You can also nest paths as configured earlier in [our sample infrastructure](#re
     @app.get("/<message>/<name>")
     @tracer.capture_method
     def get_message(message, name):
-        return {"message": f"{message}, {name}}"}
+        return {"message": f"{message}, {name}"}
 
     # You can continue to use other utilities just as before
     @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
@@ -461,7 +461,7 @@ def get_hello_you():
 	payload = app.current_event.body
 
 	name = app.current_event.get_query_string_value(name="name", default_value="")
-	return {"message": f"hello {name}}"}
+	return {"message": f"hello {name}"}
 
 def lambda_handler(event, context):
 	return app.resolve(event, context)
@@ -481,7 +481,7 @@ def get_hello_you():
 	headers_as_dict = app.current_event.headers
 	name = app.current_event.get_header_value(name="X-Name", default_value="")
 
-	return {"message": f"hello {name}}"}
+	return {"message": f"hello {name}"}
 
 def lambda_handler(event, context):
 	return app.resolve(event, context)
@@ -537,7 +537,7 @@ You can use **`exception_handler`** decorator with any Python exception. This al
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.event_handler import content_types
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
+from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response
 
 tracer = Tracer()
 logger = Logger()
@@ -685,7 +685,7 @@ This will ensure that CORS headers are always returned as part of the response w
     ```python hl_lines="9 11"
     from aws_lambda_powertools import Logger, Tracer
     from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver, CORSConfig
+    from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, CORSConfig
 
     tracer = Tracer()
     logger = Logger()
@@ -768,7 +768,8 @@ You can use the `Response` class to have full control over the response, for exa
 
 === "app.py"
 
-    ```python hl_lines="10-14"
+    ```python hl_lines="11-16"
+    import json
     from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response
 
     app = APIGatewayRestResolver()
@@ -778,10 +779,11 @@ You can use the `Response` class to have full control over the response, for exa
         payload = json.dumps({"message": "I'm a teapot"})
         custom_headers = {"X-Custom": "X-Value"}
 
-        return Response(status_code=418,
-                        content_type="application/json",
-                        body=payload,
-                        headers=custom_headers
+        return Response(
+            status_code=418,
+            content_type="application/json",
+            body=payload,
+            headers=custom_headers,
         )
 
     def lambda_handler(event, context):
@@ -974,7 +976,7 @@ def lambda_handler(event, context):
 
 You can instruct API Gateway handler to use a custom serializer to best suit your needs, for example take into account Enums when serializing.
 
-```python hl_lines="19-20 24" title="Using a custom JSON serializer for responses"
+```python hl_lines="21-22 26" title="Using a custom JSON serializer for responses"
 import json
 from enum import Enum
 from json import JSONEncoder
@@ -1025,7 +1027,7 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
 
 	We import **Router** instead of **APIGatewayRestResolver**; syntax wise is exactly the same.
 
-    ```python hl_lines="4 8 12 15 21"
+    ```python hl_lines="5 8 12 15 21"
     import itertools
 	from typing import Dict
 
@@ -1221,7 +1223,7 @@ This sample project contains a Users function with two distinct set of routes, `
 
 === "src/users/main.py"
 
-    ```python hl_lines="9 15-16"
+    ```python hl_lines="8 14-15"
     from typing import Dict
 
     from aws_lambda_powertools import Logger, Tracer
@@ -1356,7 +1358,7 @@ You can test your routes by passing a proxy event request where `path` and `http
     def test_lambda_handler(lambda_context):
         minimal_event = {
             "path": "/hello",
-            "httpMethod": "GET"
+            "httpMethod": "GET",
             "requestContext": {  # correlation ID
                 "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef"
             }
