@@ -127,7 +127,7 @@ class MetricManager:
         logger.debug(f"Adding metric: {name} with {metric}")
         self.metric_set[name] = metric
 
-        if len(self.metric_set) == MAX_METRICS:
+        if len(self.metric_set) == MAX_METRICS or len(metric["Value"]) == MAX_METRICS:
             logger.debug(f"Exceeded maximum of {MAX_METRICS} metrics - Publishing existing metric set")
             metrics = self.serialize_metric_set()
             print(json.dumps(metrics))
