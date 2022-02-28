@@ -53,7 +53,7 @@ flake8-bugbear = "^22.1.11"
 mkdocs-git-revision-date-plugin = "^0.3.1"
 mike = "^0.6.0"
 mypy = "^0.931"
-mkdocs-material = "^8.1.9"
+mkdocs-material = "^8.2.3"
 
 
 [tool.poetry.extras]
