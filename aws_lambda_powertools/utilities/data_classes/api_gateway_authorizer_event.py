@@ -60,7 +60,7 @@ def parse_api_gateway_arn(arn: str) -> APIGatewayRouteArn:
         api_id=api_gateway_arn_parts[0],
         stage=api_gateway_arn_parts[1],
         http_method=api_gateway_arn_parts[2],
-        resource=api_gateway_arn_parts[3] if len(api_gateway_arn_parts) == 4 else "",
+        resource="/".join(api_gateway_arn_parts[3:]) if len(api_gateway_arn_parts) >= 4 else "",
     )
 
 
