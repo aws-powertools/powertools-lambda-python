@@ -201,12 +201,12 @@ def test_authorizer_response_allow_route_with_underscore(builder: APIGatewayAuth
 def test_parse_api_gateway_arn_with_resource():
     mock_event = {
         "type": "TOKEN",
-        "authorizationToken": "allow",
-        "methodArn": "arn:aws:execute-api:us-west-2:123456789012:ymy8tbxw7b/*/GET/foo/bar",
+        "methodArn": "arn:aws:execute-api:us-east-2:1234567890:abcd1234/latest/GET/path/part/part/1",
+        "authorizationToken": "Bearer TOKEN",
     }
     event = APIGatewayAuthorizerTokenEvent(mock_event)
     event_arn = event.parsed_arn
-    assert "foo/bar" == event_arn.resource
+    assert event_arn.resource == "path/part/part/1"
 
     authorizer_policy = APIGatewayAuthorizerResponse(
         principal_id="fooPrinciple",
