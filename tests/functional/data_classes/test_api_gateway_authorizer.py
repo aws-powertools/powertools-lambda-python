@@ -3,6 +3,7 @@ import pytest
 from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
     DENY_ALL_RESPONSE,
     APIGatewayAuthorizerResponse,
+    APIGatewayAuthorizerTokenEvent,
     HttpVerb,
 )
 
@@ -195,3 +196,26 @@ def test_authorizer_response_allow_route_with_underscore(builder: APIGatewayAuth
             ],
         },
     }
+
+
+def test_parse_api_gateway_arn_with_resource():
+    mock_event = {
+        "type": "TOKEN",
+        "methodArn": "arn:aws:execute-api:us-east-2:1234567890:abcd1234/latest/GET/path/part/part/1",
+        "authorizationToken": "Bearer TOKEN",
+    }
+    event = APIGatewayAuthorizerTokenEvent(mock_event)
+    event_arn = event.parsed_arn
+    assert event_arn.resource == "path/part/part/1"
+
+    authorizer_policy = APIGatewayAuthorizerResponse(
+        principal_id="fooPrinciple",
+        region=event_arn.region,
+        aws_account_id=event_arn.aws_account_id,
+        api_id=event_arn.api_id,
+        stage=event_arn.stage,
+    )
+    authorizer_policy.allow_route(http_method=event_arn.http_method, resource=event_arn.resource)
+    response = authorizer_policy.asdict()
+
+    assert mock_event["methodArn"] == response["policyDocument"]["Statement"][0]["Resource"][0]
