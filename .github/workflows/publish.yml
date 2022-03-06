@@ -109,7 +109,7 @@ jobs:
         keep_files: true
         destination_dir: latest/api
     - name: Close issues related to this release
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const post_release = require('.github/workflows/post_release.js')
