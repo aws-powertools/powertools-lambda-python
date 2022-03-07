@@ -146,20 +146,20 @@ def my_function():
 
 Parser comes with the following built-in models:
 
-| Model name                 | Description                                                        |
-| -------------------------- | ------------------------------------------------------------------ |
-| **DynamoDBStreamModel**    | Lambda Event Source payload for Amazon DynamoDB Streams            |
-| **EventBridgeModel**       | Lambda Event Source payload for Amazon EventBridge                 |
-| **SqsModel**               | Lambda Event Source payload for Amazon SQS                         |
-| **AlbModel**               | Lambda Event Source payload for Amazon Application Load Balancer   |
-| **CloudwatchLogsModel**    | Lambda Event Source payload for Amazon CloudWatch Logs             |
-| **S3Model**                | Lambda Event Source payload for Amazon S3                          |
-| **S3ObjectLambdaEvent**    | Lambda Event Source payload for Amazon S3 Object Lambda            |
-| **KinesisDataStreamModel** | Lambda Event Source payload for Amazon Kinesis Data Streams        |
-| **SesModel**               | Lambda Event Source payload for Amazon Simple Email Service        |
-| **SnsModel**               | Lambda Event Source payload for Amazon Simple Notification Service |
-| **APIGatewayProxyEvent**   | Lambda Event Source payload for Amazon API Gateway                 |
-| **APIGatewayProxyEventV2Model**  | Lambda Event Source payload for Amazon API Gateway v2 payload |
+| Model name                       | Description                                                        |
+| ---------------------------------| ------------------------------------------------------------------ |
+| **DynamoDBStreamModel**          | Lambda Event Source payload for Amazon DynamoDB Streams            |
+| **EventBridgeModel**             | Lambda Event Source payload for Amazon EventBridge                 |
+| **SqsModel**                     | Lambda Event Source payload for Amazon SQS                         |
+| **AlbModel**                     | Lambda Event Source payload for Amazon Application Load Balancer   |
+| **CloudwatchLogsModel**          | Lambda Event Source payload for Amazon CloudWatch Logs             |
+| **S3Model**                      | Lambda Event Source payload for Amazon S3                          |
+| **S3ObjectLambdaEvent**          | Lambda Event Source payload for Amazon S3 Object Lambda            |
+| **KinesisDataStreamModel**       | Lambda Event Source payload for Amazon Kinesis Data Streams        |
+| **SesModel**                     | Lambda Event Source payload for Amazon Simple Email Service        |
+| **SnsModel**                     | Lambda Event Source payload for Amazon Simple Notification Service |
+| **APIGatewayProxyEventModel**    | Lambda Event Source payload for Amazon API Gateway                 |
+| **APIGatewayProxyEventV2Model**  | Lambda Event Source payload for Amazon API Gateway v2 payload      |
 
 ### extending built-in models
 
