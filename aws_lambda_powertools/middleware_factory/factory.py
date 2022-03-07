@@ -1,18 +1,64 @@
 import functools
 import inspect
 import logging
+import sys
 import os
-from typing import Callable, Optional
+from typing import Any, Callable, Dict, Optional, Union, cast, overload
+
+if sys.version_info >= (3, 8):
+    from typing import Protocol
+else:
+    from typing_extensions import Protocol
 
 from ..shared import constants
 from ..shared.functions import resolve_truthy_env_var_choice
 from ..tracing import Tracer
+from ..utilities.typing import LambdaContext
 from .exceptions import MiddlewareInvalidArgumentError
 
 logger = logging.getLogger(__name__)
 
+# context: Any to avoid forcing users to type it as context: LambdaContext
+_Handler = Callable[[Any, LambdaContext], Any]
+_RawHandlerDecorator = Callable[[_Handler], _Handler]
 
-def lambda_handler_decorator(decorator: Optional[Callable] = None, trace_execution: Optional[bool] = None):
+
+class _FactoryDecorator(Protocol):
+    # it'd be better for this to be using ParamSpec (available from 3.10)
+    def __call__(
+        self, handler: _Handler, event: Dict[str, Any], context: LambdaContext, **kwargs: Any
+    ) -> _RawHandlerDecorator:
+        ...
+
+
+class _HandlerDecorator(Protocol):
+    @overload
+    def __call__(self, decorator: _Handler) -> _Handler:
+        ...
+
+    @overload
+    def __call__(self, decorator: None = None, **kwargs: Any) -> _RawHandlerDecorator:
+        ...
+
+    def __call__(self, decorator: Optional[_Handler] = None, **kwargs: Any) -> Union[_Handler, _RawHandlerDecorator]:
+        ...
+
+
+@overload
+def lambda_handler_decorator(decorator: _FactoryDecorator) -> _HandlerDecorator:
+    ...
+
+
+@overload
+def lambda_handler_decorator(
+    decorator: None = None, trace_execution: Optional[bool] = None
+) -> Callable[[_FactoryDecorator], _HandlerDecorator]:
+    ...
+
+
+def lambda_handler_decorator(
+    decorator: Optional[_FactoryDecorator] = None, trace_execution: Optional[bool] = None
+) -> Union[_HandlerDecorator, Callable[[_FactoryDecorator], _HandlerDecorator]]:
     """Decorator factory for decorating Lambda handlers.
 
     You can use lambda_handler_decorator to create your own middlewares,
@@ -103,19 +149,25 @@ def lambda_handler_decorator(decorator: Optional[Callable] = None, trace_executi
     """
 
     if decorator is None:
-        return functools.partial(lambda_handler_decorator, trace_execution=trace_execution)
+        return cast(
+            Callable[[_FactoryDecorator], _HandlerDecorator],
+            functools.partial(lambda_handler_decorator, trace_execution=trace_execution),
+        )
 
     trace_execution = resolve_truthy_env_var_choice(
         env=os.getenv(constants.MIDDLEWARE_FACTORY_TRACE_ENV, "false"), choice=trace_execution
     )
 
     @functools.wraps(decorator)
-    def final_decorator(func: Optional[Callable] = None, **kwargs):
+    def final_decorator(
+        func: Optional[_RawHandlerDecorator] = None, **kwargs: Any
+    ) -> Union[_Handler, _RawHandlerDecorator]:
         # If called with kwargs return new func with kwargs
         if func is None:
             return functools.partial(final_decorator, **kwargs)
 
         if not inspect.isfunction(func):
+            assert decorator is not None
             # @custom_middleware(True) vs @custom_middleware(log_event=True)
             raise MiddlewareInvalidArgumentError(
                 f"Only keyword arguments is supported for middlewares: {decorator.__qualname__} received {func}"  # type: ignore # noqa: E501
@@ -138,4 +190,4 @@ def lambda_handler_decorator(decorator: Optional[Callable] = None, trace_executi
 
         return wrapper
 
-    return final_decorator
+    return cast(_HandlerDecorator, final_decorator)
