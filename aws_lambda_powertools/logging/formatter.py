@@ -45,6 +45,10 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
     def remove_keys(self, keys: Iterable[str]):
         raise NotImplementedError()
 
+    def clear_state(self):
+        """Removes any previously added logging keys"""
+        raise NotImplementedError()
+
 
 class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     """AWS Lambda Powertools Logging formatter.
@@ -179,6 +183,9 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     def remove_keys(self, keys: Iterable[str]):
         for key in keys:
             self.log_format.pop(key, None)
+
+    def clear_state(self):
+        self.log_format = dict.fromkeys(self.log_record_order)
 
     @staticmethod
     def _build_default_keys():

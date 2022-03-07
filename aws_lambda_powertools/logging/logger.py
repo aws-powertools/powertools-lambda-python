@@ -385,14 +385,29 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         append : bool, optional
             append keys provided to logger formatter, by default False
         """
+        # There are 3 operational modes for this method
+        ## 1. Append new keys to the current logger formatter; deprecated in favour of append_keys
+        ## 2. Register a Powertools Formatter for the first time
+        ## 3. Add new keys and discard existing to the registered formatter
 
         if append:
-            # Maintenance: Add deprecation warning for major version. Refer to append_keys() when docs are updated
-            self.append_keys(**keys)
-        else:
-            log_keys = {**self._default_log_keys, **keys}
+            # Maintenance: Add deprecation warning for major version
+            return self.append_keys(**keys)
+
+        log_keys = {**self._default_log_keys, **keys}
+
+        # Behaviour 2
+        is_logger_preconfigured = getattr(self._logger, "init", False)
+        if not is_logger_preconfigured:
             formatter = self.logger_formatter or LambdaPowertoolsFormatter(**log_keys)  # type: ignore
-            self.registered_handler.setFormatter(formatter)
+            return self.registered_handler.setFormatter(formatter)
+
+        # Behaviour 3
+        try:
+            self.registered_formatter.clear_state()
+            self.registered_formatter.append_keys(**log_keys)
+        except (AttributeError, NotImplementedError):
+            logger.warning(f"Formatter {self.registered_formatter} doesn't implement clear_state method; ignoring...")
 
     def set_correlation_id(self, value: Optional[str]):
         """Sets the correlation_id in the logging json
@@ -437,6 +452,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         frame = inspect.currentframe()
         caller_frame = frame.f_back.f_back.f_back
         return caller_frame.f_globals["__name__"]
+
+    def _reset_logger_state(self):
+        self.registered_formatter.clear_state()
 
 
 def set_package_logger(
