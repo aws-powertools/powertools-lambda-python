@@ -45,6 +45,7 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
     def remove_keys(self, keys: Iterable[str]):
         raise NotImplementedError()
 
+    @abstractmethod
     def clear_state(self):
         """Removes any previously added logging keys"""
         raise NotImplementedError()

@@ -525,6 +525,9 @@ def test_logger_custom_formatter(stdout, service_name, lambda_context):
             for key in keys:
                 self.custom_format.pop(key, None)
 
+        def clear_state(self):
+            self.custom_format.clear()
+
         def format(self, record: logging.LogRecord) -> str:  # noqa: A003
             return json.dumps(
                 {
