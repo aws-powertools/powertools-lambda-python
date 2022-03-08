@@ -230,27 +230,8 @@ You can use named decorators to specify the HTTP method that should be handled i
 
 === "app.py"
 
-    ```python hl_lines="9-10"
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    tracer = Tracer()
-    logger = Logger()
-    app = APIGatewayRestResolver()
-
-    # Only POST HTTP requests to the path /hello will route to this function
-    @app.post("/hello")
-    @tracer.capture_method
-    def get_hello_you():
-        name = app.current_event.json_body.get("name")
-        return {"message": f"hello {name}"}
-
-    # You can continue to use other utilities just as before
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="10-11"
+    --8<-- "docs_examples/core/api_gateway/app_http_methods.py"
     ```
 
 === "sample_request.json"
@@ -269,27 +250,8 @@ HTTP methods.
 
 === "app.py"
 
-    ```python hl_lines="9-10"
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    tracer = Tracer()
-    logger = Logger()
-    app = APIGatewayRestResolver()
-
-    # PUT and POST HTTP requests to the path /hello will route to this function
-    @app.route("/hello", method=["PUT", "POST"])
-    @tracer.capture_method
-    def get_hello_you():
-        name = app.current_event.json_body.get("name")
-        return {"message": f"hello {name}"}
-
-    # You can continue to use other utilities just as before
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="10-11"
+    --8<-- "docs_examples/core/api_gateway/app_multi_http_methods.py"
     ```
 
 === "sample_request.json"
@@ -318,44 +280,17 @@ Within `app.current_event` property, you can access query strings as dictionary 
 
 You can access the raw payload via `body` property, or if it's a JSON string you can quickly deserialize it via `json_body` property.
 
-```python hl_lines="7-9 11" title="Accessing query strings, JSON payload, and raw payload"
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-app = APIGatewayRestResolver()
-
-@app.get("/hello")
-def get_hello_you():
-	query_strings_as_dict = app.current_event.query_string_parameters
-	json_payload = app.current_event.json_body
-	payload = app.current_event.body
-
-	name = app.current_event.get_query_string_value(name="name", default_value="")
-	return {"message": f"hello {name}"}
-
-def lambda_handler(event, context):
-	return app.resolve(event, context)
+```python hl_lines="8-10 12" title="Accessing query strings, JSON payload, and raw payload"
+--8<-- "docs_examples/core/api_gateway/app_query_string.py"
 ```
 
 #### Headers
 
 Similarly to [Query strings](#query-strings-and-payload), you can access headers as dictionary via `app.current_event.headers`, or by name via `get_header_value`.
 
-```python hl_lines="7-8" title="Accessing HTTP Headers"
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-app = APIGatewayRestResolver()
-
-@app.get("/hello")
-def get_hello_you():
-	headers_as_dict = app.current_event.headers
-	name = app.current_event.get_header_value(name="X-Name", default_value="")
-
-	return {"message": f"hello {name}"}
-
-def lambda_handler(event, context):
-	return app.resolve(event, context)
+```python hl_lines="8-9" title="Accessing HTTP Headers"
+--8<-- "docs_examples/core/api_gateway/app_headers.py"
 ```
-
 
 ### Handling not found routes
 
@@ -363,79 +298,16 @@ By default, we return `404` for any unmatched route.
 
 You can use **`not_found`** decorator to override this behaviour, and return a custom **`Response`**.
 
-```python hl_lines="11 13 16" title="Handling not found"
-from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.event_handler import content_types
-from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response
-from aws_lambda_powertools.event_handler.exceptions import NotFoundError
-
-tracer = Tracer()
-logger = Logger()
-app = APIGatewayRestResolver()
-
-@app.not_found
-@tracer.capture_method
-def handle_not_found_errors(exc: NotFoundError) -> Response:
-	# Return 418 upon 404 errors
-	logger.info(f"Not found route: {app.current_event.path}")
-	return Response(
-		status_code=418,
-		content_type=content_types.TEXT_PLAIN,
-		body="I'm a teapot!"
-	)
-
-
-@app.get("/catch/me/if/you/can")
-@tracer.capture_method
-def catch_me_if_you_can():
-	return {"message": "oh hey"}
-
-@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-@tracer.capture_lambda_handler
-def lambda_handler(event, context):
-	return app.resolve(event, context)
+```python hl_lines="12 14 17" title="Handling not found"
+--8<-- "docs_examples/core/api_gateway/app_not_found.py"
 ```
-
 
 ### Exception handling
 
 You can use **`exception_handler`** decorator with any Python exception. This allows you to handle a common exception outside your route, for example validation errors.
 
-```python hl_lines="10 15" title="Exception handling"
-from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.event_handler import content_types
-from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response
-
-tracer = Tracer()
-logger = Logger()
-app = APIGatewayRestResolver()
-
-@app.exception_handler(ValueError)
-def handle_value_error(ex: ValueError):
-	metadata = {"path": app.current_event.path}
-	logger.error(f"Malformed request: {ex}", extra=metadata)
-
-	return Response(
-		status_code=400,
-		content_type=content_types.TEXT_PLAIN,
-		body="Invalid request",
-	)
-
-
-@app.get("/hello")
-@tracer.capture_method
-def hello_name():
-	name = app.current_event.get_query_string_value(name="name")
-	if name is not None:
-		raise ValueError("name query string must be present")
-	return {"message": f"hello {name}"}
-
-@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-@tracer.capture_lambda_handler
-def lambda_handler(event, context):
-	return app.resolve(event, context)
+```python hl_lines="11 16" title="Exception handling"
+--8<-- "docs_examples/core/api_gateway/app_exception_handler.py"
 ```
 
 ### Raising HTTP errors
@@ -447,52 +319,8 @@ You can easily raise any HTTP Error back to the client using `ServiceError` exce
 
 Additionally, we provide pre-defined errors for the most popular ones such as HTTP 400, 401, 404, 500.
 
-```python hl_lines="4-10 20 25 30 35 39" title="Raising common HTTP Status errors (4xx, 5xx)"
-from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.event_handler.exceptions import (
-	BadRequestError,
-	InternalServerError,
-	NotFoundError,
-	ServiceError,
-	UnauthorizedError,
-)
-
-tracer = Tracer()
-logger = Logger()
-
-app = APIGatewayRestResolver()
-
-@app.get(rule="/bad-request-error")
-def bad_request_error():
-	# HTTP  400
-	raise BadRequestError("Missing required parameter")
-
-@app.get(rule="/unauthorized-error")
-def unauthorized_error():
-	# HTTP 401
-	raise UnauthorizedError("Unauthorized")
-
-@app.get(rule="/not-found-error")
-def not_found_error():
-	# HTTP 404
-	raise NotFoundError
-
-@app.get(rule="/internal-server-error")
-def internal_server_error():
-	# HTTP 500
-	raise InternalServerError("Internal server error")
-
-@app.get(rule="/service-error", cors=True)
-def service_error():
-	raise ServiceError(502, "Something went wrong!")
-	# alternatively
-	# from http import HTTPStatus
-	# raise ServiceError(HTTPStatus.BAD_GATEWAY.value, "Something went wrong)
-
-def handler(event, context):
-	return app.resolve(event, context)
+```python hl_lines="3-9 21 27 33 39 44" title="Raising common HTTP Status errors (4xx, 5xx)"
+--8<-- "docs_examples/core/api_gateway/app_http_errors.py"
 ```
 
 ### Custom Domain API Mappings
@@ -506,23 +334,7 @@ This will lead to a HTTP 404 despite having your Lambda configured correctly. Se
 === "app.py"
 
     ```python hl_lines="7"
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    tracer = Tracer()
-    logger = Logger()
-    app = APIGatewayRestResolver(strip_prefixes=["/payment"])
-
-    @app.get("/subscriptions/<subscription>")
-    @tracer.capture_method
-    def get_subscription(subscription):
-        return {"subscription_id": subscription}
-
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    --8<-- "docs_examples/core/api_gateway/app_custom_domain.py"
     ```
 
 === "sample_request.json"
