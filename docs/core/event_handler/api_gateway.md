@@ -635,7 +635,6 @@ This sample project contains a Users function with two distinct set of routes, `
 
 === "Project layout"
 
-
     ```python hl_lines="1 8 10 12-15"
     .
     ├── Pipfile                    # project app & dev dependencies; poetry, pipenv, etc.
@@ -667,121 +666,25 @@ This sample project contains a Users function with two distinct set of routes, `
 === "template.yml"
 
     ```yaml  hl_lines="22-23"
-    AWSTemplateFormatVersion: '2010-09-09'
-    Transform: AWS::Serverless-2016-10-31
-    Description: Example service with multiple routes
-    Globals:
-        Function:
-            Timeout: 10
-            MemorySize: 512
-            Runtime: python3.9
-            Tracing: Active
-            Architectures:
-                - x86_64
-            Environment:
-                Variables:
-                    LOG_LEVEL: INFO
-                    POWERTOOLS_LOGGER_LOG_EVENT: true
-                    POWERTOOLS_METRICS_NAMESPACE: MyServerlessApplication
-                    POWERTOOLS_SERVICE_NAME: users
-    Resources:
-        UsersService:
-            Type: AWS::Serverless::Function
-            Properties:
-                Handler: users.main.lambda_handler
-                CodeUri: src
-                Layers:
-                    # Latest version: https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer
-                    - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:4
-                Events:
-                    ByUser:
-                        Type: Api
-                        Properties:
-                            Path: /users/{name}
-                            Method: GET
-                    AllUsers:
-                        Type: Api
-                        Properties:
-                            Path: /users
-                            Method: GET
-                    HealthCheck:
-                        Type: Api
-                        Properties:
-                            Path: /status
-                            Method: GET
-    Outputs:
-        UsersApiEndpoint:
-            Description: "API Gateway endpoint URL for Prod environment for Users Function"
-            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
-        AllUsersURL:
-            Description: "URL to fetch all registered users"
-            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users"
-        ByUserURL:
-            Description: "URL to retrieve details by user"
-            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users/test"
-        UsersServiceFunctionArn:
-            Description: "Users Lambda Function ARN"
-            Value: !GetAtt UsersService.Arn
+    --8<-- "docs_examples/core/api_gateway/layout/template.yml"
     ```
 
 === "src/users/main.py"
 
     ```python hl_lines="8 14-15"
-    from typing import Dict
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-    from aws_lambda_powertools.logging.correlation_paths import APPLICATION_LOAD_BALANCER
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-    from .routers import health, users
-
-    tracer = Tracer()
-    logger = Logger()
-    app = APIGatewayRestResolver()
-
-    app.include_router(health.router)
-    app.include_router(users.router)
-
-
-    @logger.inject_lambda_context(correlation_id_path=API_GATEWAY_REST)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event: Dict, context: LambdaContext):
-        return app.resolve(event, context)
+    --8<-- "docs_examples/core/api_gateway/layout/main.py"
     ```
 
 === "src/users/routers/health.py"
 
     ```python hl_lines="4 6-7 10"
-    from typing import Dict
-
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.event_handler.api_gateway import Router
-
-    router = Router()
-    logger = Logger(child=True)
-
-
-    @router.get("/status")
-    def health() -> Dict:
-        logger.debug("Health check called")
-        return {"status": "OK"}
+    --8<-- "docs_examples/core/api_gateway/layout/health.py"
     ```
 
 === "tests/functional/test_users.py"
 
     ```python  hl_lines="3"
-    import json
-
-    from src.users import main  # follows namespace package from root
-
-
-    def test_lambda_handler(apigw_event, lambda_context):
-        ret = main.lambda_handler(apigw_event, lambda_context)
-        expected = json.dumps({"message": "hello universe"}, separators=(",", ":"))
-
-        assert ret["statusCode"] == 200
-        assert ret["body"] == expected
+    --8<-- "docs_examples/core/api_gateway/layout/test_users.py"
     ```
 
 ### Considerations
