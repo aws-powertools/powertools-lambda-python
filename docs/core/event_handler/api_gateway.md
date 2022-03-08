@@ -452,17 +452,8 @@ You can compress with gzip and base64 encode your responses via `compress` param
 
 === "app.py"
 
-    ```python hl_lines="5 7"
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    app = APIGatewayRestResolver()
-
-    @app.get("/hello", compress=True)
-    def get_hello_you():
-        return {"message": "hello universe"}
-
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="6 8"
+    --8<-- "docs_examples/core/api_gateway/app_compress.py"
     ```
 
 === "sample_request.json"
@@ -503,21 +494,8 @@ Like `compress` feature, the client must send the `Accept` header with the corre
 
 === "app.py"
 
-    ```python hl_lines="4 7 11"
-    import os
-    from pathlib import Path
-
-    from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response
-
-    app = APIGatewayRestResolver()
-    logo_file: bytes = Path(os.getenv("LAMBDA_TASK_ROOT") + "/logo.svg").read_bytes()
-
-    @app.get("/logo")
-    def get_logo():
-        return Response(status_code=200, content_type="image/svg+xml", body=logo_file)
-
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="4 7 12"
+    --8<-- "docs_examples/core/api_gateway/app_binary.py"
     ```
 
 === "logo.svg"
@@ -600,61 +578,15 @@ This will enable full tracebacks errors in the response, print request and respo
     It's best to use for local development only!
 
 ```python hl_lines="3" title="Enabling debug mode"
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-app = APIGatewayRestResolver(debug=True)
-
-@app.get("/hello")
-def get_hello_universe():
-	return {"message": "hello universe"}
-
-def lambda_handler(event, context):
-	return app.resolve(event, context)
+--8<-- "docs_examples/core/api_gateway/app_debug.py"
 ```
 
 ### Custom serializer
 
 You can instruct API Gateway handler to use a custom serializer to best suit your needs, for example take into account Enums when serializing.
 
-```python hl_lines="21-22 26" title="Using a custom JSON serializer for responses"
-import json
-from enum import Enum
-from json import JSONEncoder
-from typing import Dict
-
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-class CustomEncoder(JSONEncoder):
-	"""Your customer json encoder"""
-	def default(self, obj):
-		if isinstance(obj, Enum):
-			return obj.value
-		try:
-			iterable = iter(obj)
-		except TypeError:
-			pass
-		else:
-			return sorted(iterable)
-		return JSONEncoder.default(self, obj)
-
-def custom_serializer(obj) -> str:
-	"""Your custom serializer function APIGatewayRestResolver will use"""
-	return json.dumps(obj, cls=CustomEncoder)
-
-# Assigning your custom serializer
-app = APIGatewayRestResolver(serializer=custom_serializer)
-
-class Color(Enum):
-	RED = 1
-	BLUE = 2
-
-@app.get("/colors")
-def get_color() -> Dict:
-	return {
-		# Color.RED will be serialized to 1 as expected now
-		"color": Color.RED,
-		"variations": {"light", "dark"},
-	}
+```python hl_lines="24-25 30" title="Using a custom JSON serializer for responses"
+--8<-- "docs_examples/core/api_gateway/app_custom_serializer.py"
 ```
 
 ### Split routes with Router
@@ -978,53 +910,14 @@ You can test your routes by passing a proxy event request where `path` and `http
 
 === "test_app.py"
 
-    ```python hl_lines="18-24"
-    from dataclasses import dataclass
-
-    import pytest
-    import app
-
-    @pytest.fixture
-    def lambda_context():
-        @dataclass
-        class LambdaContext:
-            function_name: str = "test"
-            memory_limit_in_mb: int = 128
-            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
-            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
-
-        return LambdaContext()
-
-    def test_lambda_handler(lambda_context):
-        minimal_event = {
-            "path": "/hello",
-            "httpMethod": "GET",
-            "requestContext": {  # correlation ID
-                "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef"
-            }
-        }
-
-        app.lambda_handler(minimal_event, lambda_context)
+    ```python hl_lines="20-26"
+    --8<-- "docs_examples/core/api_gateway/test_app.py"
     ```
 
 === "app.py"
 
     ```python
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    logger = Logger()
-    app = APIGatewayRestResolver()  # API Gateway REST API (v1)
-
-    @app.get("/hello")
-    def get_hello_universe():
-        return {"message": "hello universe"}
-
-    # You can continue to use other utilities just as before
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    --8<-- "docs_examples/core/api_gateway/app_test.py"
     ```
 
 ## FAQ
