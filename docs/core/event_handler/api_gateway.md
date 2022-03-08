@@ -363,32 +363,8 @@ This will ensure that CORS headers are always returned as part of the response w
 
 === "app.py"
 
-    ```python hl_lines="9 11"
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, CORSConfig
-
-    tracer = Tracer()
-    logger = Logger()
-
-    cors_config = CORSConfig(allow_origin="https://example.com", max_age=300)
-    app = APIGatewayRestResolver(cors=cors_config)
-
-    @app.get("/hello/<name>")
-    @tracer.capture_method
-    def get_hello_you(name):
-        return {"message": f"hello {name}"}
-
-    @app.get("/hello", cors=False)  # optionally exclude CORS from response, if needed
-    @tracer.capture_method
-    def get_hello_no_cors_needed():
-        return {"message": "hello, no CORS needed for this path ;)"}
-
-    # You can continue to use other utilities just as before
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="8-9 12 18"
+    --8<-- "docs_examples/core/api_gateway/app_cors.py"
     ```
 
 === "response.json"
@@ -449,26 +425,8 @@ You can use the `Response` class to have full control over the response, for exa
 
 === "app.py"
 
-    ```python hl_lines="11-16"
-    import json
-    from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response
-
-    app = APIGatewayRestResolver()
-
-    @app.get("/hello")
-    def get_hello_you():
-        payload = json.dumps({"message": "I'm a teapot"})
-        custom_headers = {"X-Custom": "X-Value"}
-
-        return Response(
-            status_code=418,
-            content_type="application/json",
-            body=payload,
-            headers=custom_headers,
-        )
-
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="13-18"
+    --8<-- "docs_examples/core/api_gateway/app_response.py"
     ```
 
 === "response.json"
@@ -483,6 +441,7 @@ You can use the `Response` class to have full control over the response, for exa
         "isBase64Encoded": false,
         "statusCode": 418
     }
+    ```
 
 ### Compress
 
