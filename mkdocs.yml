@@ -77,9 +77,13 @@ markdown_extensions:
   - attr_list
   - pymdownx.emoji
   - pymdownx.inlinehilite
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 
-copyright: Copyright &copy; 2021 Amazon Web Services
+copyright: Copyright &copy; 2022 Amazon Web Services
 
 plugins:
   - git-revision-date
@@ -95,3 +99,4 @@ extra:
   version:
     provider: mike
     default: latest
+
