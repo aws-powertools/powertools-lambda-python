@@ -450,9 +450,6 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         caller_frame = frame.f_back.f_back.f_back
         return caller_frame.f_globals["__name__"]
 
-    def _reset_logger_state(self):
-        self.registered_formatter.clear_state()
-
 
 def set_package_logger(
     level: Union[str, int] = logging.DEBUG,
