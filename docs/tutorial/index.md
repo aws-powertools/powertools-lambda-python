@@ -462,114 +462,13 @@ Let's expand our application with custom metrics using AWS SDK to see how it wor
 === "app.py"
 
     ```python hl_lines="3 10 14 19-47 55 64"
-    import os
-
-    import boto3
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-    from aws_lambda_powertools.logging import correlation_paths
-
-    cold_start = True
-    metric_namespace = "MyApp"
-
-    logger = Logger(service="APP")
-    tracer = Tracer(service="APP")
-    metrics = boto3.client("cloudwatch")
-    app = APIGatewayRestResolver()
-
-
-    @tracer.capture_method
-    def add_greeting_metric(service: str = "APP"):
-        function_name = os.getenv("AWS_LAMBDA_FUNCTION_NAME", "undefined")
-        service_dimension = {"Name": "service", "Value": service}
-        function_dimension = {"Name": "function_name", "Value": function_name}
-        is_cold_start = True
-
-        global cold_start
-        if cold_start:
-            cold_start = False
-        else:
-            is_cold_start = False
-
-        return metrics.put_metric_data(
-            MetricData=[
-                {
-                    "MetricName": "SuccessfulGreetings",
-                    "Dimensions": [service_dimension],
-                    "Unit": "Count",
-                    "Value": 1,
-                },
-                {
-                    "MetricName": "ColdStart",
-                    "Dimensions": [service_dimension, function_dimension],
-                    "Unit": "Count",
-                    "Value": int(is_cold_start)
-                }
-            ],
-            Namespace=metric_namespace,
-        )
-
-
-    @app.get("/hello/<name>")
-    @tracer.capture_method
-    def hello_name(name):
-        tracer.put_annotation(key="User", value=name)
-        logger.info(f"Request from {name} received")
-        add_greeting_metric()
-        return {"message": f"hello {name}!"}
-
-
-    @app.get("/hello")
-    @tracer.capture_method
-    def hello():
-        tracer.put_annotation(key="User", value="unknown")
-        logger.info("Request from unknown received")
-        add_greeting_metric()
-        return {"message": "hello unknown!"}
-
-
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    --8<-- "docs_examples/tutorial/create_metrics_app.py"
     ```
 
 === "template.yaml"
 
-    ```yaml hl_lines="27 28"
-    AWSTemplateFormatVersion: "2010-09-09"
-    Transform: AWS::Serverless-2016-10-31
-    Description: Sample SAM Template for powertools-quickstart
-    Globals:
-        Function:
-            Timeout: 3
-    Resources:
-        HelloWorldFunction:
-            Type: AWS::Serverless::Function
-            Properties:
-                CodeUri: hello_world/
-                Handler: app.lambda_handler
-                Runtime: python3.9
-                Tracing: Active
-                Events:
-                    HelloWorld:
-                        Type: Api
-                        Properties:
-                            Path: /hello
-                            Method: get
-                    HelloWorldName:
-                        Type: Api
-                        Properties:
-                            Path: /hello/{name}
-                            Method: get
-                Policies:
-                    - CloudWatchPutMetricPolicy: {}
-    Outputs:
-        HelloWorldApi:
-            Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-
+    ```yaml hl_lines="26 27"
+    --8<-- "docs_examples/tutorial/create_metrics_template.yml"
     ```
 
 There's a lot going on, let's break this down:
@@ -600,54 +499,16 @@ In general terms, EMF is a specification that expects metrics in a JSON payload 
 
 Let's implement that using [Metrics](../core/metrics.md){target="_blank}:
 
-```python title="Refactoring with Lambda Powertools Metrics" hl_lines="1 4 9 18 27 33"
-from aws_lambda_powertools import Logger, Tracer, Metrics
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.metrics import MetricUnit
-
-
-logger = Logger(service="APP")
-tracer = Tracer(service="APP")
-metrics = Metrics(namespace="MyApp", service="APP")
-app = APIGatewayRestResolver()
-
-
-@app.get("/hello/<name>")
-@tracer.capture_method
-def hello_name(name):
-    tracer.put_annotation(key="User", value=name)
-    logger.info(f"Request from {name} received")
-    metrics.add_metric(name="SuccessfulGreetings", unit=MetricUnit.Count, value=1)
-    return {"message": f"hello {name}!"}
-
-
-@app.get("/hello")
-@tracer.capture_method
-def hello():
-    tracer.put_annotation(key="User", value="unknown")
-    logger.info("Request from unknown received")
-    metrics.add_metric(name="SuccessfulGreetings", unit=MetricUnit.Count, value=1)
-    return {"message": "hello unknown!"}
-
-
-@tracer.capture_lambda_handler
-@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
-@metrics.log_metrics(capture_cold_start_metric=True)
-def lambda_handler(event, context):
-    try:
-        return app.resolve(event, context)
-    except Exception as e:
-        logger.exception(e)
-        raise
+```python title="Refactoring with Lambda Powertools Metrics" hl_lines="1 4 8 17 26 32"
+--8<-- "docs_examples/tutorial/metrics_app.py"
 ```
 
 That's a lot less boilerplate code! Let's break this down:
 
-* **L9**: We initialize `Metrics` with our service name (`APP`) and metrics namespace (`MyApp`), reducing the need to add the `service` dimension for every metric and setting the namespace later
-* **L18, 27**: We use `add_metric` similarly to our custom function, except we now have an enum `MetricCount` to help us understand which Metric Units we have at our disposal
-* **L33**: We use `@metrics.log_metrics` decorator to ensure that our metrics are aligned with the EMF output and validated before-hand, like in case we forget to set namespace, or accidentally use a metric unit as a string that doesn't exist in CloudWatch.
-* **L33**: We also use `capture_cold_start_metric=True` so we don't have to handle that logic either. Note that [Metrics](../core/metrics.md){target="_blank"} does not publish a warm invocation metric (ColdStart=0) for cost reasons. As such, treat the absence (sparse metric) as a non-cold start invocation.
+* **L8**: We initialize `Metrics` with our service name (`APP`) and metrics namespace (`MyApp`), reducing the need to add the `service` dimension for every metric and setting the namespace later
+* **L17, 26**: We use `add_metric` similarly to our custom function, except we now have an enum `MetricCount` to help us understand which Metric Units we have at our disposal
+* **L32**: We use `@metrics.log_metrics` decorator to ensure that our metrics are aligned with the EMF output and validated before-hand, like in case we forget to set namespace, or accidentally use a metric unit as a string that doesn't exist in CloudWatch.
+* **L32**: We also use `capture_cold_start_metric=True` so we don't have to handle that logic either. Note that [Metrics](../core/metrics.md){target="_blank"} does not publish a warm invocation metric (ColdStart=0) for cost reasons. As such, treat the absence (sparse metric) as a non-cold start invocation.
 
 Repeat the process of building, deploying, and invoking your application via the API endpoint a few times to generate metrics - [Artillery](https://www.artillery.io/){target="_blank"} and [K6.io](https://k6.io/open-source){target="_blank"} are quick ways to generate some load. Within [CloudWatch Metrics view](https://console.aws.amazon.com/cloudwatch/home#metricsV2:graph=~()){target="_blank}, you should see `MyApp` custom namespace with your custom metrics there and `SuccessfulGreetings` available to graph.
 
