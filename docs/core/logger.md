@@ -862,7 +862,10 @@ logger.info("Collecting payment")
 
 By default, Logger uses [LambdaPowertoolsFormatter](#lambdapowertoolsformatter) that persists its custom structure between non-cold start invocations. There could be scenarios where the existing feature set isn't sufficient to your formatting needs.
 
-For **minor changes like remapping keys** after all log record processing has completed, you can override `serialize` method from [LambdaPowertoolsFormatter](#lambdapowertoolsformatter):
+???+ info
+    The most common use cases are remapping keys by bringing your existing schema, and redacting sensitive information you know upfront.
+
+For these, you can override the `serialize` method from [LambdaPowertoolsFormatter](#lambdapowertoolsformatter).
 
 === "custom_formatter.py"
 
@@ -892,28 +895,39 @@ For **minor changes like remapping keys** after all log record processing has co
 	}
 	```
 
-For **replacing the formatter entirely**, you can subclass `BasePowertoolsFormatter`, implement `append_keys` method, and override `format` standard logging method. This ensures the current feature set of Logger like [injecting Lambda context](#capturing-lambda-context-info) and [sampling](#sampling-debug-logs) will continue to work.
+The `log` argument is the final log record containing [our standard keys](#standard-structured-keys), optionally [Lambda context keys](#capturing-lambda-context-info), and any custom key you might have added via [append_keys](#append_keys-method) or the [extra parameter](#extra-parameter).
 
-???+ info
-	You might need to implement `remove_keys` method if you make use of the feature too.
+For exceptional cases where you want to completely replace our formatter logic, you can subclass `BasePowertoolsFormatter`.
+
+???+ warning
+    You will need to implement `append_keys`, `clear_state`, override `format`, and optionally `remove_keys` to keep the same feature set Powertools Logger provides. This also means keeping state of logging keys added.
+
 
 === "collect.py"
 
-    ```python hl_lines="2 4 7 12 16 27"
+    ```python hl_lines="5 7 9-10 13 17 21 24 35"
+    import logging
+    from typing import Iterable, List, Optional
+
     from aws_lambda_powertools import Logger
     from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter
 
     class CustomFormatter(BasePowertoolsFormatter):
-        custom_format = {}  # arbitrary dict to hold our structured keys
+        def __init__(self, log_record_order: Optional[List[str]], *args, **kwargs):
+            self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
+            self.log_format = dict.fromkeys(self.log_record_order)
+            super().__init__(*args, **kwargs)
 
         def append_keys(self, **additional_keys):
             # also used by `inject_lambda_context` decorator
-            self.custom_format.update(additional_keys)
+            self.log_format.update(additional_keys)
 
-        # Optional unless you make use of this Logger feature
         def remove_keys(self, keys: Iterable[str]):
             for key in keys:
-                self.custom_format.pop(key, None)
+                self.log_format.pop(key, None)
+
+        def clear_state(self):
+            self.log_format = dict.fromkeys(self.log_record_order)
 
         def format(self, record: logging.LogRecord) -> str:  # noqa: A003
             """Format logging record as structured JSON str"""
@@ -922,7 +936,7 @@ For **replacing the formatter entirely**, you can subclass `BasePowertoolsFormat
                     "event": super().format(record),
                     "timestamp": self.formatTime(record),
                     "my_default_key": "test",
-                    **self.custom_format,
+                    **self.log_format,
                 }
             )
 
