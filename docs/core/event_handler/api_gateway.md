@@ -23,7 +23,7 @@ You must have an existing [API Gateway Proxy integration](https://docs.aws.amazo
 This is the sample infrastructure for API Gateway we are using for the examples in this documentation.
 
 ```yaml title="AWS Serverless Application Model (SAM) example"
---8<-- "docs_examples/core/api_gateway/template.yml"
+--8<-- "docs/examples/core/api_gateway/template.yml"
 ```
 
 ### Event Resolvers
@@ -49,7 +49,7 @@ Here's an example on how we can handle the `/hello` path.
 === "app.py"
 
     ```python hl_lines="2 7 10 13 20"
-    --8<-- "docs_examples/core/api_gateway/app_rest_api.py"
+    --8<-- "docs/examples/core/api_gateway/app_rest_api.py"
     ```
 === "hello_event.json"
 
@@ -143,7 +143,7 @@ When using Amazon API Gateway HTTP API to front your Lambda functions, you can u
 Here's an example on how we can handle the `/hello` path.
 
 ```python hl_lines="2 7 20" title="Using HTTP API resolver"
---8<-- "docs_examples/core/api_gateway/app_http_api.py"
+--8<-- "docs/examples/core/api_gateway/app_http_api.py"
 ```
 
 #### Application Load Balancer
@@ -151,7 +151,7 @@ Here's an example on how we can handle the `/hello` path.
 When using Amazon Application Load Balancer to front your Lambda functions, you can use `ALBResolver`.
 
 ```python hl_lines="2 7 20" title="Using ALB resolver"
---8<-- "docs_examples/core/api_gateway/app_alb.py"
+--8<-- "docs/examples/core/api_gateway/app_alb.py"
 ```
 
 ### Dynamic routes
@@ -161,7 +161,7 @@ You can use `/path/{dynamic_value}` when configuring dynamic URL paths. This all
 === "app.py"
 
     ```python hl_lines="10 12"
-    --8<-- "docs_examples/core/api_gateway/app_dynamic_routes.py"
+    --8<-- "docs/examples/core/api_gateway/app_dynamic_routes.py"
     ```
 
 === "sample_request.json"
@@ -182,7 +182,7 @@ You can also nest paths as configured earlier in [our sample infrastructure](#re
 === "app.py"
 
     ```python hl_lines="10 12"
-    --8<-- "docs_examples/core/api_gateway/app_nested_routes.py"
+    --8<-- "docs/examples/core/api_gateway/app_nested_routes.py"
     ```
 
 === "sample_request.json"
@@ -211,7 +211,7 @@ You can also combine nested paths with greedy regex to catch in between routes.
 === "app.py"
 
     ```python hl_lines="6"
-    --8<-- "docs_examples/core/api_gateway/app_catch_all_routes.py"
+    --8<-- "docs/examples/core/api_gateway/app_catch_all_routes.py"
     ```
 
 === "sample_request.json"
@@ -231,7 +231,7 @@ You can use named decorators to specify the HTTP method that should be handled i
 === "app.py"
 
     ```python hl_lines="10-11"
-    --8<-- "docs_examples/core/api_gateway/app_http_methods.py"
+    --8<-- "docs/examples/core/api_gateway/app_http_methods.py"
     ```
 
 === "sample_request.json"
@@ -251,7 +251,7 @@ HTTP methods.
 === "app.py"
 
     ```python hl_lines="10-11"
-    --8<-- "docs_examples/core/api_gateway/app_multi_http_methods.py"
+    --8<-- "docs/examples/core/api_gateway/app_multi_http_methods.py"
     ```
 
 === "sample_request.json"
@@ -281,7 +281,7 @@ Within `app.current_event` property, you can access query strings as dictionary 
 You can access the raw payload via `body` property, or if it's a JSON string you can quickly deserialize it via `json_body` property.
 
 ```python hl_lines="8-10 12" title="Accessing query strings, JSON payload, and raw payload"
---8<-- "docs_examples/core/api_gateway/app_query_string.py"
+--8<-- "docs/examples/core/api_gateway/app_query_string.py"
 ```
 
 #### Headers
@@ -289,7 +289,7 @@ You can access the raw payload via `body` property, or if it's a JSON string you
 Similarly to [Query strings](#query-strings-and-payload), you can access headers as dictionary via `app.current_event.headers`, or by name via `get_header_value`.
 
 ```python hl_lines="8-9" title="Accessing HTTP Headers"
---8<-- "docs_examples/core/api_gateway/app_headers.py"
+--8<-- "docs/examples/core/api_gateway/app_headers.py"
 ```
 
 ### Handling not found routes
@@ -299,7 +299,7 @@ By default, we return `404` for any unmatched route.
 You can use **`not_found`** decorator to override this behaviour, and return a custom **`Response`**.
 
 ```python hl_lines="12 14 17" title="Handling not found"
---8<-- "docs_examples/core/api_gateway/app_not_found.py"
+--8<-- "docs/examples/core/api_gateway/app_not_found.py"
 ```
 
 ### Exception handling
@@ -307,7 +307,7 @@ You can use **`not_found`** decorator to override this behaviour, and return a c
 You can use **`exception_handler`** decorator with any Python exception. This allows you to handle a common exception outside your route, for example validation errors.
 
 ```python hl_lines="11 16" title="Exception handling"
---8<-- "docs_examples/core/api_gateway/app_exception_handler.py"
+--8<-- "docs/examples/core/api_gateway/app_exception_handler.py"
 ```
 
 ### Raising HTTP errors
@@ -320,7 +320,7 @@ You can easily raise any HTTP Error back to the client using `ServiceError` exce
 Additionally, we provide pre-defined errors for the most popular ones such as HTTP 400, 401, 404, 500.
 
 ```python hl_lines="3-9 21 27 33 39 44" title="Raising common HTTP Status errors (4xx, 5xx)"
---8<-- "docs_examples/core/api_gateway/app_http_errors.py"
+--8<-- "docs/examples/core/api_gateway/app_http_errors.py"
 ```
 
 ### Custom Domain API Mappings
@@ -334,7 +334,7 @@ This will lead to a HTTP 404 despite having your Lambda configured correctly. Se
 === "app.py"
 
     ```python hl_lines="7"
-    --8<-- "docs_examples/core/api_gateway/app_custom_domain.py"
+    --8<-- "docs/examples/core/api_gateway/app_custom_domain.py"
     ```
 
 === "sample_request.json"
@@ -364,7 +364,7 @@ This will ensure that CORS headers are always returned as part of the response w
 === "app.py"
 
     ```python hl_lines="8-9 12 18"
-    --8<-- "docs_examples/core/api_gateway/app_cors.py"
+    --8<-- "docs/examples/core/api_gateway/app_cors.py"
     ```
 
 === "response.json"
@@ -426,7 +426,7 @@ You can use the `Response` class to have full control over the response, for exa
 === "app.py"
 
     ```python hl_lines="13-18"
-    --8<-- "docs_examples/core/api_gateway/app_response.py"
+    --8<-- "docs/examples/core/api_gateway/app_response.py"
     ```
 
 === "response.json"
@@ -453,7 +453,7 @@ You can compress with gzip and base64 encode your responses via `compress` param
 === "app.py"
 
     ```python hl_lines="6 8"
-    --8<-- "docs_examples/core/api_gateway/app_compress.py"
+    --8<-- "docs/examples/core/api_gateway/app_compress.py"
     ```
 
 === "sample_request.json"
@@ -495,7 +495,7 @@ Like `compress` feature, the client must send the `Accept` header with the corre
 === "app.py"
 
     ```python hl_lines="4 7 12"
-    --8<-- "docs_examples/core/api_gateway/app_binary.py"
+    --8<-- "docs/examples/core/api_gateway/app_binary.py"
     ```
 
 === "logo.svg"
@@ -578,7 +578,7 @@ This will enable full tracebacks errors in the response, print request and respo
     It's best to use for local development only!
 
 ```python hl_lines="3" title="Enabling debug mode"
---8<-- "docs_examples/core/api_gateway/app_debug.py"
+--8<-- "docs/examples/core/api_gateway/app_debug.py"
 ```
 
 ### Custom serializer
@@ -586,7 +586,7 @@ This will enable full tracebacks errors in the response, print request and respo
 You can instruct API Gateway handler to use a custom serializer to best suit your needs, for example take into account Enums when serializing.
 
 ```python hl_lines="24-25 30" title="Using a custom JSON serializer for responses"
---8<-- "docs_examples/core/api_gateway/app_custom_serializer.py"
+--8<-- "docs/examples/core/api_gateway/app_custom_serializer.py"
 ```
 
 ### Split routes with Router
@@ -600,7 +600,7 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
 	We import **Router** instead of **APIGatewayRestResolver**; syntax wise is exactly the same.
 
     ```python hl_lines="5 8 12 15 21"
-    --8<-- "docs_examples/core/api_gateway/users_split_routes.py"
+    --8<-- "docs/examples/core/api_gateway/users_split_routes.py"
     ```
 
 === "app.py"
@@ -608,7 +608,7 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
 	We use `include_router` method and include all user routers registered in the `router` global object.
 
 	```python hl_lines="3 10-11"
-    --8<-- "docs_examples/core/api_gateway/app_split_routes.py"
+    --8<-- "docs/examples/core/api_gateway/app_split_routes.py"
 	```
 
 #### Route prefix
@@ -620,13 +620,13 @@ When necessary, you can set a prefix when including a router object. This means 
 === "app.py"
 
 	```python hl_lines="9"
-    --8<-- "docs_examples/core/api_gateway/app_route_prefix.py"
+    --8<-- "docs/examples/core/api_gateway/app_route_prefix.py"
 	```
 
 === "users.py"
 
     ```python hl_lines="11 16"
-    --8<-- "docs_examples/core/api_gateway/users_route_prefix.py"
+    --8<-- "docs/examples/core/api_gateway/users_route_prefix.py"
     ```
 
 #### Sample layout
@@ -666,25 +666,25 @@ This sample project contains a Users function with two distinct set of routes, `
 === "template.yml"
 
     ```yaml  hl_lines="22-23"
-    --8<-- "docs_examples/core/api_gateway/layout/template.yml"
+    --8<-- "docs/examples/core/api_gateway/layout/template.yml"
     ```
 
 === "src/users/main.py"
 
     ```python hl_lines="8 14-15"
-    --8<-- "docs_examples/core/api_gateway/layout/main.py"
+    --8<-- "docs/examples/core/api_gateway/layout/main.py"
     ```
 
 === "src/users/routers/health.py"
 
     ```python hl_lines="4 6-7 10"
-    --8<-- "docs_examples/core/api_gateway/layout/health.py"
+    --8<-- "docs/examples/core/api_gateway/layout/health.py"
     ```
 
 === "tests/functional/test_users.py"
 
     ```python  hl_lines="3"
-    --8<-- "docs_examples/core/api_gateway/layout/test_users.py"
+    --8<-- "docs/examples/core/api_gateway/layout/test_users.py"
     ```
 
 ### Considerations
@@ -745,13 +745,13 @@ You can test your routes by passing a proxy event request where `path` and `http
 === "test_app.py"
 
     ```python hl_lines="20-26"
-    --8<-- "docs_examples/core/api_gateway/test_app.py"
+    --8<-- "docs/examples/core/api_gateway/test_app.py"
     ```
 
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/core/api_gateway/app_test.py"
+    --8<-- "docs/examples/core/api_gateway/app_test.py"
     ```
 
 ## FAQ

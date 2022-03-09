@@ -13,6 +13,12 @@ format:
 	poetry run isort aws_lambda_powertools tests
 	poetry run black aws_lambda_powertools tests
 
+format-examples:
+	poetry run isort docs/examples
+	poetry run black docs/examples/*/*.py
+	poetry run black docs/examples/*/*/*.py
+	poetry run black docs/examples/*/*/*/*.py
+
 lint: format
 	poetry run flake8 aws_lambda_powertools/* tests/*
 

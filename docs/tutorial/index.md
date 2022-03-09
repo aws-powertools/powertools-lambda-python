@@ -36,13 +36,13 @@ Let's configure our base application to look like the following code snippet.
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/tutorial/code_example_app.py"
+    --8<-- "docs/examples/tutorial/code_example_app.py"
     ```
 
 === "template.yaml"
 
     ```yaml
-    --8<-- "docs_examples/tutorial/code_example_template.yml"
+    --8<-- "docs/examples/tutorial/code_example_template.yml"
     ```
 
 Our Lambda code consists of an entry point function named `lambda_handler`, and a `hello` function.
@@ -123,13 +123,13 @@ For this to work, we could create a new Lambda function to handle incoming reque
 === "hello_by_name.py"
 
     ```python
-    --8<-- "docs_examples/tutorial/add_route_hello_by_name.py"
+    --8<-- "docs/examples/tutorial/add_route_hello_by_name.py"
     ```
 
 === "template.yaml"
 
     ```yaml hl_lines="21-32"
-    --8<-- "docs_examples/tutorial/add_route_temaplate.yml"
+    --8<-- "docs/examples/tutorial/add_route_temaplate.yml"
     ```
 
 ???+ question
@@ -152,13 +152,13 @@ A first attempt at the routing logic might look similar to the following code sn
 === "app.py"
 
     ```python hl_lines="4 9 13 28-30 36-37"
-    --8<-- "docs_examples/tutorial/create_own_router_app.py"
+    --8<-- "docs/examples/tutorial/create_own_router_app.py"
     ```
 
 === "template.yaml"
 
     ```yaml hl_lines="15-24"
-    --8<-- "docs_examples/tutorial/create_own_router_template.yml"
+    --8<-- "docs/examples/tutorial/create_own_router_template.yml"
     ```
 
 Let's break this down:
@@ -185,7 +185,7 @@ Let's include Lambda Powertools as a dependency in `requirement.txt`, and use Ev
 === "app.py"
 
     ```python hl_lines="1 3 6 11 17"
-    --8<-- "docs_examples/tutorial/event_handler_app.py"
+    --8<-- "docs/examples/tutorial/event_handler_app.py"
     ```
 === "requirements.txt"
 
@@ -222,7 +222,7 @@ The first option could be to use the standard Python Logger, and use a specializ
 === "app.py"
 
     ```python hl_lines="4 6 8-13 19 25 30"
-    --8<-- "docs_examples/tutorial/json_logger_app.py"
+    --8<-- "docs/examples/tutorial/json_logger_app.py"
     ```
 
 === "requirements.txt"
@@ -269,7 +269,7 @@ We could start by creating a dictionary with Lambda context information or somet
 As we already have Lambda Powertools as a dependency, we can simply import [Logger](../core/logger.md){target="_blank"}.
 
 ```python title="Refactoring with Lambda Powertools Logger" hl_lines="1 3 5 12 18 22"
---8<-- "docs_examples/tutorial/logger_app.py"
+--8<-- "docs/examples/tutorial/logger_app.py"
 ```
 
 Let's break this down:
@@ -329,13 +329,13 @@ Let's explore how we can instrument our code with [AWS X-Ray SDK](https://docs.a
 === "app.py"
 
     ```python hl_lines="1 13 20 27"
-    --8<-- "docs_examples/tutorial/generate_traces_app.py"
+    --8<-- "docs/examples/tutorial/generate_traces_app.py"
     ```
 
 === "template.yaml"
 
     ```yaml hl_lines="7-8 16"
-    --8<-- "docs_examples/tutorial/generate_traces_template.yml"
+    --8<-- "docs/examples/tutorial/generate_traces_template.yml"
     ```
 
 === "requirements.txt"
@@ -381,7 +381,7 @@ Within AWS X-Ray, we can answer these questions by using two features: tracing *
 Let's put them into action.
 
 ```python title="Enriching traces with annotations and metadata" hl_lines="10 17-18 26-27 35 37-42 45"
---8<-- "docs_examples/tutorial/enrich_generate_traces_app.py"
+--8<-- "docs/examples/tutorial/enrich_generate_traces_app.py"
 ```
 
 Let's break it down:
@@ -414,7 +414,7 @@ We can simplify our previous patterns by using [Lambda Powertools Tracer](../cor
     You can now safely remove `aws-xray-sdk` from `requirements.txt`; keep `aws-lambda-powertools` only.
 
 ```python title="Refactoring with Lambda Powertools Tracer" hl_lines="1 6 11 13 19 21 27"
---8<-- "docs_examples/tutorial/tracer_app.py"
+--8<-- "docs/examples/tutorial/tracer_app.py"
 ```
 
 Decorators, annotations and metadata are largely the same, except we now have a much cleaner code as the boilerplate is gone. Here's what's changed compared to AWS X-Ray SDK approach:
@@ -462,13 +462,13 @@ Let's expand our application with custom metrics using AWS SDK to see how it wor
 === "app.py"
 
     ```python hl_lines="3 10 14 19-47 55 64"
-    --8<-- "docs_examples/tutorial/create_metrics_app.py"
+    --8<-- "docs/examples/tutorial/create_metrics_app.py"
     ```
 
 === "template.yaml"
 
     ```yaml hl_lines="26 27"
-    --8<-- "docs_examples/tutorial/create_metrics_template.yml"
+    --8<-- "docs/examples/tutorial/create_metrics_template.yml"
     ```
 
 There's a lot going on, let's break this down:
@@ -500,7 +500,7 @@ In general terms, EMF is a specification that expects metrics in a JSON payload 
 Let's implement that using [Metrics](../core/metrics.md){target="_blank}:
 
 ```python title="Refactoring with Lambda Powertools Metrics" hl_lines="1 4 8 17 26 32"
---8<-- "docs_examples/tutorial/metrics_app.py"
+--8<-- "docs/examples/tutorial/metrics_app.py"
 ```
 
 That's a lot less boilerplate code! Let's break this down:

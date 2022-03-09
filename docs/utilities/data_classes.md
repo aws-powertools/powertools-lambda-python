@@ -30,7 +30,7 @@ For example, if your Lambda function is being triggered by an API Gateway proxy 
 === "app.py"
 
     ```python hl_lines="1 5"
-    --8<-- "docs_examples/utilities/data_classes/using_data_classes.py"
+    --8<-- "docs/examples/utilities/data_classes/using_data_classes.py"
     ```
 
 Same example as above, but using the `event_source` decorator
@@ -38,7 +38,7 @@ Same example as above, but using the `event_source` decorator
 === "app.py"
 
     ```python hl_lines="1 4"
-    --8<-- "docs_examples/utilities/data_classes/using_data_classes_event_source.py"
+    --8<-- "docs/examples/utilities/data_classes/using_data_classes_event_source.py"
     ```
 
 **Autocomplete with self-documented properties and methods**
@@ -84,7 +84,7 @@ for more details.
 === "app.py"
 
     ```python hl_lines="4-5 10-11"
-    --8<-- "docs_examples/utilities/data_classes/app_active_mq.py"
+    --8<-- "docs/examples/utilities/data_classes/app_active_mq.py"
     ```
 
 ### API Gateway Authorizer
@@ -102,12 +102,12 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
     When the user is found, it includes the user details in the request context that will be available to the back-end, and returns a full access policy for admin users.
 
     ```python hl_lines="4-9 30 37-44 48 50 52"
-    --8<-- "docs_examples/utilities/data_classes/app_rest_api_type_request.py"
+    --8<-- "docs/examples/utilities/data_classes/app_rest_api_type_request.py"
     ```
 === "app_type_token.py"
 
     ```python hl_lines="2-5 12-18 21 23-24"
-    --8<-- "docs_examples/utilities/data_classes/app_rest_api_type_token.py"
+    --8<-- "docs/examples/utilities/data_classes/app_rest_api_type_token.py"
     ```
 
 ### API Gateway Authorizer V2
@@ -122,7 +122,7 @@ See also [this blog post](https://aws.amazon.com/blogs/compute/introducing-iam-a
     This example looks up user details via `x-token` header. It uses `APIGatewayAuthorizerResponseV2` to return a deny policy when user is not found or authorized.
 
     ```python hl_lines="4-7 21 24"
-    --8<-- "docs_examples/utilities/data_classes/app_http_api_authorizer.py"
+    --8<-- "docs/examples/utilities/data_classes/app_http_api_authorizer.py"
     ```
 
 ### API Gateway Proxy
@@ -132,7 +132,7 @@ It is used for either API Gateway REST API or HTTP API using v1 proxy event.
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_rest_api.py"
+    --8<-- "docs/examples/utilities/data_classes/app_rest_api.py"
     ```
 
 ### API Gateway Proxy V2
@@ -142,7 +142,7 @@ It is used for HTTP API using v2 proxy event.
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_http_api.py"
+    --8<-- "docs/examples/utilities/data_classes/app_http_api.py"
     ```
 
 ### Application Load Balancer
@@ -152,7 +152,7 @@ Is it used for Application load balancer event.
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_alb.py"
+    --8<-- "docs/examples/utilities/data_classes/app_alb.py"
     ```
 
 ### AppSync Authorizer
@@ -168,7 +168,7 @@ In this example extract the `requestId` as the `correlation_id` for logging, use
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_appsync_authorizer.py"
+    --8<-- "docs/examples/utilities/data_classes/app_appsync_authorizer.py"
     ```
 
 ### AppSync Resolver
@@ -183,7 +183,7 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
 === "app.py"
 
     ```python hl_lines="2-5 14 16 21 23 33-34"
-    --8<-- "docs_examples/utilities/data_classes/app_appsync_resolver.py"
+    --8<-- "docs/examples/utilities/data_classes/app_appsync_resolver.py"
     ```
 
 === "Example AppSync Event"
@@ -246,7 +246,7 @@ decompress and parse json data from the event.
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_cloudwatch_logs.py"
+    --8<-- "docs/examples/utilities/data_classes/app_cloudwatch_logs.py"
     ```
 
 ### CodePipeline Job
@@ -256,7 +256,7 @@ Data classes and utility functions to help create continuous delivery pipelines 
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_codepipeline_job.py"
+    --8<-- "docs/examples/utilities/data_classes/app_codepipeline_job.py"
     ```
 
 ### Cognito User Pool
@@ -282,7 +282,7 @@ Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChalleng
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_cognito_post_confirmation.py"
+    --8<-- "docs/examples/utilities/data_classes/app_cognito_post_confirmation.py"
     ```
 
 #### Define Auth Challenge Example
@@ -295,7 +295,7 @@ This example is based on the AWS Cognito docs for [Define Auth Challenge Lambda 
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_cognito_define_auth_challenge.py"
+    --8<-- "docs/examples/utilities/data_classes/app_cognito_define_auth_challenge.py"
     ```
 === "SPR_A response"
 
@@ -419,7 +419,7 @@ This example is based on the AWS Cognito docs for [Create Auth Challenge Lambda 
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_cognito_create_auth_challenge.py"
+    --8<-- "docs/examples/utilities/data_classes/app_cognito_create_auth_challenge.py"
     ```
 
 #### Verify Auth Challenge Response Example
@@ -429,7 +429,7 @@ This example is based on the AWS Cognito docs for [Verify Auth Challenge Respons
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_cognito_verify_auth_challenge_response.py"
+    --8<-- "docs/examples/utilities/data_classes/app_cognito_verify_auth_challenge_response.py"
     ```
 
 ### Connect Contact Flow
@@ -439,7 +439,7 @@ This example is based on the AWS Cognito docs for [Verify Auth Challenge Respons
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_connect_contact_flow.py"
+    --8<-- "docs/examples/utilities/data_classes/app_connect_contact_flow.py"
     ```
 
 ### DynamoDB Streams
@@ -451,13 +451,13 @@ attributes values (`AttributeValue`), as well as enums for stream view type (`St
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_dynamodb.py"
+    --8<-- "docs/examples/utilities/data_classes/app_dynamodb.py"
     ```
 
 === "multiple_records_types.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_dynamodb_multiple_records_types.py"
+    --8<-- "docs/examples/utilities/data_classes/app_dynamodb_multiple_records_types.py"
     ```
 
 ### EventBridge
@@ -465,7 +465,7 @@ attributes values (`AttributeValue`), as well as enums for stream view type (`St
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_event_bridge.py"
+    --8<-- "docs/examples/utilities/data_classes/app_event_bridge.py"
     ```
 
 ### Kinesis streams
@@ -476,7 +476,7 @@ or plain text, depending on the original payload.
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_kinesis_data_streams.py"
+    --8<-- "docs/examples/utilities/data_classes/app_kinesis_data_streams.py"
     ```
 
 ### Rabbit MQ
@@ -488,7 +488,7 @@ for more details.
 === "app.py"
 
     ```python hl_lines="4-5 10-11"
-    --8<-- "docs_examples/utilities/data_classes/app_rabbit_mq.py"
+    --8<-- "docs/examples/utilities/data_classes/app_rabbit_mq.py"
     ```
 
 ### S3
@@ -496,7 +496,7 @@ for more details.
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_s3.py"
+    --8<-- "docs/examples/utilities/data_classes/app_s3.py"
     ```
 
 ### S3 Object Lambda
@@ -506,7 +506,7 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
 === "app.py"
 
     ```python  hl_lines="5-6 13 15"
-    --8<-- "docs_examples/utilities/data_classes/app_s3_object_lambda.py"
+    --8<-- "docs/examples/utilities/data_classes/app_s3_object_lambda.py"
     ```
 
 ### SES
@@ -514,7 +514,7 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_ses.py"
+    --8<-- "docs/examples/utilities/data_classes/app_ses.py"
     ```
 
 ### SNS
@@ -522,7 +522,7 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_sns.py"
+    --8<-- "docs/examples/utilities/data_classes/app_sns.py"
     ```
 
 ### SQS
@@ -530,5 +530,5 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
 === "app.py"
 
     ```python
-    --8<-- "docs_examples/utilities/data_classes/app_sqs.py"
+    --8<-- "docs/examples/utilities/data_classes/app_sqs.py"
     ```

@@ -39,7 +39,7 @@ This is the sample infrastructure we are using for the initial examples with a A
 === "template.yml"
 
     ```yaml hl_lines="37-42 50-55 61-62 78-92 96-120"
-    --8<-- "docs_examples/core/event_handler/template.yml"
+    --8<-- "docs/examples/core/event_handler/template.yml"
     ```
 
 ### Resolver decorator
@@ -54,7 +54,7 @@ Here's an example where we have two separate functions to resolve `getTodo` and 
 === "app.py"
 
     ```python hl_lines="2-4 8 30-31 38-39 46"
-    --8<-- "docs_examples/core/event_handler/app_resolver_decorator.py"
+    --8<-- "docs/examples/core/event_handler/app_resolver_decorator.py"
     ```
 
 === "schema.graphql"
@@ -172,7 +172,7 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 === "nested_mappings.py"
 
     ```python hl_lines="2 7 10-12 19"
-    --8<-- "docs_examples/core/event_handler/app_nested_mappings.py"
+    --8<-- "docs/examples/core/event_handler/app_nested_mappings.py"
     ```
 
 === "schema.graphql"
@@ -206,7 +206,7 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 For Lambda Python3.8+ runtime, this utility supports async functions when you use in conjunction with `asyncio.run`.
 
 ```python hl_lines="4 9 12-14 23" title="Resolving GraphQL resolvers async"
---8<-- "docs_examples/core/event_handler/app_async_functions.py"
+--8<-- "docs/examples/core/event_handler/app_async_functions.py"
 ```
 
 ### Amplify GraphQL Transformer
@@ -253,12 +253,12 @@ Use the following code for `merchantInfo` and `searchMerchant` functions respect
 === "merchantInfo/src/app.py"
 
     ```python hl_lines="2 4 8 11-12 16-17 25"
-    --8<-- "docs_examples/core/event_handler/app_merchant_info.py"
+    --8<-- "docs/examples/core/event_handler/app_merchant_info.py"
     ```
 === "searchMerchant/src/app.py"
 
     ```python hl_lines="1 4 7-8"
-    --8<-- "docs_examples/core/event_handler/app_merchant_search.py"
+    --8<-- "docs/examples/core/event_handler/app_merchant_search.py"
     ```
 
 **Example AppSync GraphQL Transformer Function resolver events**
@@ -354,7 +354,7 @@ You can subclass `AppSyncResolverEvent` to bring your own set of methods to hand
 === "custom_model.py"
 
     ```python hl_lines="11-14 20 28"
-    --8<-- "docs_examples/core/event_handler/app_custom_model.py"
+    --8<-- "docs/examples/core/event_handler/app_custom_model.py"
     ```
 
 === "schema.graphql"
@@ -447,7 +447,7 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
     We import **Router** instead of **AppSyncResolver**; syntax wise is exactly the same.
 
     ```python hl_lines="4 7 10 15"
-    --8<-- "docs_examples/core/event_handler/resolvers_location.py"
+    --8<-- "docs/examples/core/event_handler/resolvers_location.py"
     ```
 
 === "app.py"
@@ -455,7 +455,7 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
 	We use `include_router` method and include all `location` operations registered in the `router` global object.
 
     ```python hl_lines="3 13"
-    --8<-- "docs_examples/core/event_handler/app_router.py"
+    --8<-- "docs/examples/core/event_handler/app_router.py"
     ```
 
 
@@ -470,13 +470,13 @@ Here's an example of how you can test your synchronous resolvers:
 === "test_resolver.py"
 
     ```python
-    --8<-- "docs_examples/core/event_handler/test_resolver.py"
+    --8<-- "docs/examples/core/event_handler/test_resolver.py"
     ```
 
 === "src/index.py"
 
     ```python
-    --8<-- "docs_examples/core/event_handler/app_test.py"
+    --8<-- "docs/examples/core/event_handler/app_test.py"
     ```
 
 === "appSyncDirectResolver.json"
@@ -490,13 +490,13 @@ And an example for testing asynchronous resolvers. Note that this requires the `
 === "test_async_resolver.py"
 
     ```python
-    --8<-- "docs_examples/core/event_handler/test_async_resolver.py"
+    --8<-- "docs/examples/core/event_handler/test_async_resolver.py"
     ```
 
 === "src/index.py"
 
     ```python
-    --8<-- "docs_examples/core/event_handler/app_async_test.py"
+    --8<-- "docs/examples/core/event_handler/app_async_test.py"
     ```
 
 === "appSyncDirectResolver.json"
