@@ -36,52 +36,22 @@ Let's configure our base application to look like the following code snippet.
 === "app.py"
 
     ```python
-    import json
-
-
-    def hello():
-        return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
-
-
-    def lambda_handler(event, context):
-        return hello()
+    --8<-- "docs_examples/tutorial/code_example_app.py"
     ```
 
 === "template.yaml"
 
     ```yaml
-    AWSTemplateFormatVersion: '2010-09-09'
-    Transform: AWS::Serverless-2016-10-31
-    Description: Sample SAM Template for powertools-quickstart
-    Globals:
-        Function:
-            Timeout: 3
-    Resources:
-        HelloWorldFunction:
-            Type: AWS::Serverless::Function
-            Properties:
-                CodeUri: hello_world/
-                Handler: app.lambda_handler
-                Runtime: python3.9
-                Architectures:
-                    - x86_64
-                Events:
-                    HelloWorld:
-                        Type: Api
-                        Properties:
-                            Path: /hello
-                            Method: get
-    Outputs:
-        HelloWorldApi:
-            Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+    --8<-- "docs_examples/tutorial/code_example_template.yml"
     ```
+
 Our Lambda code consists of an entry point function named `lambda_handler`, and a `hello` function.
 
 When API Gateway receives a HTTP GET request on `/hello` route, Lambda will call our `lambda_handler` function, subsequently calling the `hello` function. API Gateway will use this response to return the correct HTTP Status Code and payload back to the caller.
 
 ???+ warning
     For simplicity, we do not set up authentication and authorization! You can find more information on how to implement it on [AWS SAM documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-controlling-access-to-apis.html){target="_blank"}.
+
 ### Run your code
 
 At each point, you have two ways to run your code: locally and within your AWS account.
@@ -105,7 +75,6 @@ As a result, a local API endpoint will be exposed and you can invoke it using yo
 
 ???+ info
     To learn more about local testing, please visit the [AWS SAM CLI local testing](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-start-api.html) documentation.
-
 
 #### Live test
 
@@ -154,57 +123,13 @@ For this to work, we could create a new Lambda function to handle incoming reque
 === "hello_by_name.py"
 
     ```python
-    import json
-
-
-    def hello_name(name):
-        return {"statusCode": 200, "body": json.dumps({"message": f"hello {name}!"})}
-
-
-    def lambda_handler(event, context):
-        name = event["pathParameters"]["name"]
-        return hello_name(name)
+    --8<-- "docs_examples/tutorial/add_route_hello_by_name.py"
     ```
 
 === "template.yaml"
 
     ```yaml hl_lines="21-32"
-    AWSTemplateFormatVersion: "2010-09-09"
-    Transform: AWS::Serverless-2016-10-31
-    Description: Sample SAM Template for powertools-quickstart
-    Globals:
-        Function:
-            Timeout: 3
-    Resources:
-        HelloWorldFunction:
-            Type: AWS::Serverless::Function
-            Properties:
-                CodeUri: hello_world/
-                Handler: app.lambda_handler
-                Runtime: python3.9
-                Events:
-                    HelloWorld:
-                        Type: Api
-                        Properties:
-                            Path: /hello
-                            Method: get
-
-        HelloWorldByNameFunctionName:
-            Type: AWS::Serverless::Function
-            Properties:
-                CodeUri: hello_world/
-                Handler: hello_by_name.lambda_handler
-                Runtime: python3.9
-                Events:
-                    HelloWorldName:
-                        Type: Api
-                        Properties:
-                            Path: /hello/{name}
-                            Method: get
-    Outputs:
-        HelloWorldApi:
-            Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+    --8<-- "docs_examples/tutorial/add_route_temaplate.yml"
     ```
 
 ???+ question
@@ -226,76 +151,14 @@ A first attempt at the routing logic might look similar to the following code sn
 
 === "app.py"
 
-    ```python hl_lines="4 9 13 27-29 35-36"
-    import json
-
-
-    def hello_name(event, **kargs):
-        username = event["pathParameters"]["name"]
-        return {"statusCode": 200, "body": json.dumps({"message": f"hello {username}!"})}
-
-
-    def hello(**kargs):
-        return {"statusCode": 200, "body": json.dumps({"message": "hello unknown!"})}
-
-
-    class Router:
-        def __init__(self):
-            self.routes = {}
-
-        def set(self, path, method, handler):
-            self.routes[f"{path}-{method}"] = handler
-
-        def get(self, path, method):
-            try:
-                route = self.routes[f"{path}-{method}"]
-            except KeyError:
-                raise RuntimeError(f"Cannot route request to the correct method. path={path}, method={method}")
-            return route
-
-    router = Router()
-    router.set(path="/hello", method="GET", handler=hello)
-    router.set(path="/hello/{name}", method="GET", handler=hello_name)
-
-
-    def lambda_handler(event, context):
-        path = event["resource"]
-        http_method = event["httpMethod"]
-        method = router.get(path=path, method=http_method)
-        return method(event=event)
+    ```python hl_lines="4 9 13 28-30 36-37"
+    --8<-- "docs_examples/tutorial/create_own_router_app.py"
     ```
 
 === "template.yaml"
 
     ```yaml hl_lines="15-24"
-    AWSTemplateFormatVersion: "2010-09-09"
-    Transform: AWS::Serverless-2016-10-31
-    Description: Sample SAM Template for powertools-quickstart
-    Globals:
-        Function:
-            Timeout: 3
-    Resources:
-        HelloWorldFunction:
-            Type: AWS::Serverless::Function
-            Properties:
-                CodeUri: hello_world/
-                Handler: app.lambda_handler
-                Runtime: python3.9
-                Events:
-                    HelloWorld:
-                        Type: Api
-                        Properties:
-                            Path: /hello
-                            Method: get
-                    HelloWorldName:
-                        Type: Api
-                        Properties:
-                            Path: /hello/{name}
-                            Method: get
-    Outputs:
-        HelloWorldApi:
-            Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+    --8<-- "docs_examples/tutorial/create_own_router_template.yml"
     ```
 
 Let's break this down:
@@ -322,23 +185,7 @@ Let's include Lambda Powertools as a dependency in `requirement.txt`, and use Ev
 === "app.py"
 
     ```python hl_lines="1 3 6 11 17"
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    app = APIGatewayRestResolver()
-
-
-    @app.get("/hello/<name>")
-    def hello_name(name):
-        return {"message": f"hello {name}!"}
-
-
-    @app.get("/hello")
-    def hello():
-        return {"message": "hello unknown!"}
-
-
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    --8<-- "docs_examples/tutorial/event_handler_app.py"
     ```
 === "requirements.txt"
 
@@ -374,39 +221,10 @@ The first option could be to use the standard Python Logger, and use a specializ
 
 === "app.py"
 
-    ```python hl_lines="4 5 7-12 19 25 30"
-    import logging
-    import os
-
-    from pythonjsonlogger import jsonlogger
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    logger = logging.getLogger("APP")
-    logHandler = logging.StreamHandler()
-    formatter = jsonlogger.JsonFormatter(fmt="%(asctime)s %(levelname)s %(name)s %(message)s")
-    logHandler.setFormatter(formatter)
-    logger.addHandler(logHandler)
-    logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
-
-    app = APIGatewayRestResolver()
-
-
-    @app.get("/hello/<name>")
-    def hello_name(name):
-        logger.info(f"Request from {name} received")
-        return {"message": f"hello {name}!"}
-
-
-    @app.get("/hello")
-    def hello():
-        logger.info("Request from unknown received")
-        return {"message": "hello unknown!"}
-
-
-    def lambda_handler(event, context):
-        logger.debug(event)
-        return app.resolve(event, context)
+    ```python hl_lines="4 6 8-13 19 25 30"
+    --8<-- "docs_examples/tutorial/json_logger_app.py"
     ```
+
 === "requirements.txt"
 
     ```bash
@@ -416,9 +234,9 @@ The first option could be to use the standard Python Logger, and use a specializ
 
 With just a few lines our logs will now output to `JSON` format. We've taken the following steps to make that work:
 
-* **L7**: Creates an application logger named `APP`.
-* **L8-11**: Configures handler and formatter.
-* **L12**: Sets the logging level set in the `LOG_LEVEL` environment variable, or `INFO` as a sentinel value.
+* **L8**: Creates an application logger named `APP`.
+* **L9-12**: Configures handler and formatter.
+* **L13**: Sets the logging level set in the `LOG_LEVEL` environment variable, or `INFO` as a sentinel value.
 
 After that, we use this logger in our application code to record the required information. We see logs structured as follows:
 
@@ -443,7 +261,6 @@ So far, so good! We can take a step further now by adding additional context to 
 
 We could start by creating a dictionary with Lambda context information or something from the incoming event, which should always be logged. Additional attributes could be added on every `logger.info` using `extra` keyword like in any standard Python logger.
 
-
 ### Simplifying with Logger
 
 ???+ question "Surely this could be easier, right?"
@@ -452,30 +269,7 @@ We could start by creating a dictionary with Lambda context information or somet
 As we already have Lambda Powertools as a dependency, we can simply import [Logger](../core/logger.md){target="_blank"}.
 
 ```python title="Refactoring with Lambda Powertools Logger" hl_lines="1 3 5 12 18 22"
-from aws_lambda_powertools import Logger
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.logging import correlation_paths
-
-logger = Logger(service="APP")
-
-app = APIGatewayRestResolver()
-
-
-@app.get("/hello/<name>")
-def hello_name(name):
-    logger.info(f"Request from {name} received")
-    return {"message": f"hello {name}!"}
-
-
-@app.get("/hello")
-def hello():
-    logger.info("Request from unknown received")
-    return {"message": "hello unknown!"}
-
-
-@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
-def lambda_handler(event, context):
-    return app.resolve(event, context)
+--8<-- "docs_examples/tutorial/logger_app.py"
 ```
 
 Let's break this down:
@@ -484,7 +278,6 @@ Let's break this down:
 * **L22**: We use `logger.inject_lambda_context` decorator to inject key information from Lambda context into every log.
 * **L22**: We also instruct Logger to use the incoming API Gateway Request ID as a [correlation id](../core/logger.md##set_correlation_id-method) automatically.
 * **L22**: Since we're in dev, we also use `log_event=True` to automatically log each incoming request for debugging. This can be also set via [environment variables](./index.md#environment-variables){target="_blank"}.
-
 
 This is how the logs would look like now:
 
@@ -536,71 +329,13 @@ Let's explore how we can instrument our code with [AWS X-Ray SDK](https://docs.a
 === "app.py"
 
     ```python hl_lines="1 13 20 27"
-    from aws_xray_sdk.core import xray_recorder
-
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-    from aws_lambda_powertools.logging import correlation_paths
-
-    logger = Logger(service="APP")
-
-    app = APIGatewayRestResolver()
-
-
-    @app.get("/hello/<name>")
-    @xray_recorder.capture('hello_name')
-    def hello_name(name):
-        logger.info(f"Request from {name} received")
-        return {"message": f"hello {name}!"}
-
-
-    @app.get("/hello")
-    @xray_recorder.capture('hello')
-    def hello():
-        logger.info("Request from unknown received")
-        return {"message": "hello unknown!"}
-
-
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
-    @xray_recorder.capture('handler')
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    --8<-- "docs_examples/tutorial/generate_traces_app.py"
     ```
 
 === "template.yaml"
 
     ```yaml hl_lines="7-8 16"
-    AWSTemplateFormatVersion: "2010-09-09"
-    Transform: AWS::Serverless-2016-10-31
-    Description: Sample SAM Template for powertools-quickstart
-    Globals:
-        Function:
-            Timeout: 3
-        Api:
-          TracingEnabled: true
-    Resources:
-        HelloWorldFunction:
-            Type: AWS::Serverless::Function
-            Properties:
-                CodeUri: hello_world/
-                Handler: app.lambda_handler
-                Runtime: python3.9
-                Tracing: Active
-                Events:
-                    HelloWorld:
-                        Type: Api
-                        Properties:
-                            Path: /hello
-                            Method: get
-                    HelloWorldName:
-                        Type: Api
-                        Properties:
-                            Path: /hello/{name}
-                            Method: get
-    Outputs:
-        HelloWorldApi:
-            Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+    --8<-- "docs_examples/tutorial/generate_traces_template.yml"
     ```
 
 === "requirements.txt"
@@ -646,53 +381,7 @@ Within AWS X-Ray, we can answer these questions by using two features: tracing *
 Let's put them into action.
 
 ```python title="Enriching traces with annotations and metadata" hl_lines="10 17-18 26-27 35 37-42 45"
-from aws_xray_sdk.core import patch_all, xray_recorder
-
-from aws_lambda_powertools import Logger
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.logging import correlation_paths
-
-logger = Logger(service="APP")
-
-app = APIGatewayRestResolver()
-cold_start = True
-patch_all()
-
-
-@app.get("/hello/<name>")
-@xray_recorder.capture('hello_name')
-def hello_name(name):
-    subsegment = xray_recorder.current_subsegment()
-    subsegment.put_annotation(key="User", value=name)
-    logger.info(f"Request from {name} received")
-    return {"message": f"hello {name}!"}
-
-
-@app.get("/hello")
-@xray_recorder.capture('hello')
-def hello():
-    subsegment = xray_recorder.current_subsegment()
-    subsegment.put_annotation(key="User", value="unknown")
-    logger.info("Request from unknown received")
-    return {"message": "hello unknown!"}
-
-
-@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
-@xray_recorder.capture('handler')
-def lambda_handler(event, context):
-    global cold_start
-
-    subsegment = xray_recorder.current_subsegment()
-    if cold_start:
-        subsegment.put_annotation(key="ColdStart", value=cold_start)
-        cold_start = False
-    else:
-        subsegment.put_annotation(key="ColdStart", value=cold_start)
-
-    result = app.resolve(event, context)
-    subsegment.put_metadata("response", result)
-
-    return result
+--8<-- "docs_examples/tutorial/enrich_generate_traces_app.py"
 ```
 
 Let's break it down:
@@ -725,35 +414,7 @@ We can simplify our previous patterns by using [Lambda Powertools Tracer](../cor
     You can now safely remove `aws-xray-sdk` from `requirements.txt`; keep `aws-lambda-powertools` only.
 
 ```python title="Refactoring with Lambda Powertools Tracer" hl_lines="1 6 11 13 19 21 27"
-from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.logging import correlation_paths
-
-logger = Logger(service="APP")
-tracer = Tracer(service="APP")
-app = APIGatewayRestResolver()
-
-
-@app.get("/hello/<name>")
-@tracer.capture_method
-def hello_name(name):
-    tracer.put_annotation(key="User", value=name)
-    logger.info(f"Request from {name} received")
-    return {"message": f"hello {name}!"}
-
-
-@app.get("/hello")
-@tracer.capture_method
-def hello():
-    tracer.put_annotation(key="User", value="unknown")
-    logger.info("Request from unknown received")
-    return {"message": "hello unknown!"}
-
-
-@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST, log_event=True)
-@tracer.capture_lambda_handler
-def lambda_handler(event, context):
-    return app.resolve(event, context)
+--8<-- "docs_examples/tutorial/tracer_app.py"
 ```
 
 Decorators, annotations and metadata are largely the same, except we now have a much cleaner code as the boilerplate is gone. Here's what's changed compared to AWS X-Ray SDK approach:
