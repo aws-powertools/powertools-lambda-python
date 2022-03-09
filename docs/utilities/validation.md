@@ -33,14 +33,8 @@ It will fail fast with `SchemaValidationError` exception if event or response do
 
 === "validator_decorator.py"
 
-    ```python hl_lines="3 5"
-    from aws_lambda_powertools.utilities.validation import validator
-
-    import schemas
-
-    @validator(inbound_schema=schemas.INPUT, outbound_schema=schemas.OUTPUT)
-    def handler(event, context):
-        return event
+    ```python hl_lines="1 6"
+    --8<-- "docs/examples/utilities/validation/validator_decorator.py"
     ```
 
 === "event.json"
@@ -67,22 +61,10 @@ It will fail fast with `SchemaValidationError` exception if event or response do
 
 You can also gracefully handle schema validation errors by catching `SchemaValidationError` exception.
 
-=== "validator_decorator.py"
+=== "validator_function.py"
 
-    ```python hl_lines="8"
-    from aws_lambda_powertools.utilities.validation import validate
-    from aws_lambda_powertools.utilities.validation.exceptions import SchemaValidationError
-
-    import schemas
-
-    def handler(event, context):
-        try:
-            validate(event=event, schema=schemas.INPUT)
-        except SchemaValidationError as e:
-            # do something before re-raising
-            raise
-
-        return event
+    ```python hl_lines="9"
+    --8<-- "docs/examples/utilities/validation/validator_function.py"
     ```
 
 === "event.json"
@@ -112,14 +94,8 @@ Here is a sample custom EventBridge event, where we only validate what's inside 
 
     We use the `envelope` parameter to extract the payload inside the `detail` key before validating.
 
-    ```python hl_lines="5"
-    from aws_lambda_powertools.utilities.validation import validator
-
-    import schemas
-
-    @validator(inbound_schema=schemas.INPUT, envelope="detail")
-    def handler(event, context):
-        return event
+    ```python hl_lines="6"
+    --8<-- "docs/examples/utilities/validation/unwrapping_events.py"
     ```
 
 === "sample_wrapped_event.json"
@@ -142,14 +118,8 @@ This utility comes with built-in envelopes to easily extract the payload from po
 
 === "unwrapping_popular_event_sources.py"
 
-    ```python hl_lines="5 7"
-    from aws_lambda_powertools.utilities.validation import envelopes, validator
-
-    import schemas
-
-    @validator(inbound_schema=schemas.INPUT, envelope=envelopes.EVENTBRIDGE)
-    def handler(event, context):
-        return event
+    ```python hl_lines="6 8"
+    --8<-- "docs/examples/utilities/validation/unwrapping_popular_event_sources.py"
     ```
 
 === "sample_wrapped_event.json"
@@ -200,16 +170,7 @@ For each format defined in a dictionary key, you must use a regex, or a function
 === "validate_custom_format.py"
 
     ```python hl_lines="5-8 10"
-    from aws_lambda_powertools.utilities.validation import validate
-
-    import schema
-
-    custom_format = {
-        "int64": True, # simply ignore it,
-        "positive": lambda x: False if x < 0 else True
-    }
-
-    validate(event=event, schema=schemas.INPUT, formats=custom_format)
+    --8<-- "docs/examples/utilities/validation/validate_custom_format.py"
     ```
 
 === "schemas.py"
