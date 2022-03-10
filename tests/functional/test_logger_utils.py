@@ -184,7 +184,7 @@ def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level):
     assert log["level"] == log_level.WARNING.name
 
 
-def test_copy_config_to_ext_loggers_should_not_break_append_keys(stdout, logger, log_level):
+def test_copy_config_to_ext_loggers_should_not_break_append_keys(stdout, log_level):
     # GIVEN powertools logger initialized
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
@@ -193,3 +193,29 @@ def test_copy_config_to_ext_loggers_should_not_break_append_keys(stdout, logger,
 
     # THEN append_keys should not raise an exception
     powertools_logger.append_keys(key="value")
+
+
+def test_copy_config_to_ext_loggers_no_duplicate_logs(stdout, logger, log_level):
+    # GIVEN an root logger, external logger and powertools logger initialized
+
+    root_logger = logging.getLogger()
+    handler = logging.StreamHandler(stdout)
+    formatter = logging.Formatter('{"message": "%(message)s"}')
+    handler.setFormatter(formatter)
+    root_logger.handlers = [handler]
+
+    logger = logger()
+
+    powertools_logger = Logger(service=service_name(), level=log_level.CRITICAL.value, stream=stdout)
+    level = log_level.WARNING.name
+
+    # WHEN configuration copied from powertools logger
+    # AND external logger used with custom log_level
+    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={logger.name}, log_level=level)
+    msg = "test message4"
+    logger.warning(msg)
+
+    # THEN no root logger logs AND log is not duplicated
+    logs = capture_multiple_logging_statements_output(stdout)
+    assert not {"message": msg} in logs
+    assert sum(msg in log.values() for log in logs) == 1

@@ -24,7 +24,7 @@ def copy_config_to_registered_loggers(
     exclude : Optional[Set[str]], optional
         List of logger names to exclude, by default None
     """
-
+    package_logger = logging.getLogger("aws_lambda_powertools")
     level = log_level or source_logger.level
 
     # Assumptions: Only take parent loggers not children (dot notation rule)
@@ -34,11 +34,11 @@ def copy_config_to_registered_loggers(
     # 3. Include and exclude set? Add Logger if it’s in include and not in exclude
     # 4. Only exclude set? Ignore Logger in the excluding list
 
-    # Exclude source logger by default
+    # Exclude source and powertools package logger by default
     if exclude:
-        exclude.add(source_logger.name)
+        exclude.update(source_logger.name, package_logger.name)
     else:
-        exclude = {source_logger.name}
+        exclude = {source_logger.name, package_logger.name}
 
     # Prepare loggers set
     if include:
@@ -75,6 +75,7 @@ def _find_registered_loggers(
 def _configure_logger(source_logger: Logger, logger: logging.Logger, level: Union[int, str]) -> None:
     logger.handlers = []
     logger.setLevel(level)
+    logger.propagate = False
     source_logger.debug(f"Logger {logger} reconfigured to use logging level {level}")
     for source_handler in source_logger.handlers:
         logger.addHandler(source_handler)
