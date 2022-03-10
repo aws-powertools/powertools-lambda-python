@@ -11,11 +11,6 @@ This typing utility provides static typing classes that can be used to ease the 
 
 The `LambdaContext` typing is typically used in the handler method for the Lambda function.
 
-```python hl_lines="4" title="Annotating Lambda context type"
-from typing import Any, Dict
-from aws_lambda_powertools.utilities.typing import LambdaContext
-
-def handler(event: Dict[str, Any], context: LambdaContext) -> Dict[str, Any]:
-	# Insert business logic
-	return event
+```python hl_lines="6" title="Annotating Lambda context type"
+--8<-- "docs/examples/utilities/typing/lambda_context.py"
 ```
