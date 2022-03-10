@@ -28,7 +28,7 @@ You can use the `extract_data_from_envelope` function along with any [JMESPath e
 
 === "app.py"
 
-	```python hl_lines="1 7"
+	```python hl_lines="1 6"
     --8<-- "docs/examples/utilities/jmespath_functions/extract_data_jmespath.py"
 	```
 
@@ -121,7 +121,7 @@ This sample will decode the value within the `data` key into a valid JSON before
 
 This sample will decode the value within the `body` key of an API Gateway event into a valid JSON object to ensure the Idempotency utility processes a JSON object instead of a string.
 
-```python hl_lines="7" title="Deserializing JSON before using as idempotency key"
+```python hl_lines="6" title="Deserializing JSON before using as idempotency key"
 --8<-- "docs/examples/utilities/jmespath_functions/powertools_json_jmespath_function_idempotency.py"
 ```
 
