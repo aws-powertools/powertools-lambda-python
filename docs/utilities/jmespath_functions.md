@@ -29,15 +29,7 @@ You can use the `extract_data_from_envelope` function along with any [JMESPath e
 === "app.py"
 
 	```python hl_lines="1 7"
-    from aws_lambda_powertools.utilities.jmespath_utils import extract_data_from_envelope
-
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    def handler(event: dict, context: LambdaContext):
-        payload = extract_data_from_envelope(data=event, envelope="powertools_json(body)")
-        customer = payload.get("customerId")  # now deserialized
-        ...
+    --8<-- "docs/examples/utilities/jmespath_functions/extract_data_jmespath.py"
 	```
 
 === "event.json"
@@ -54,16 +46,8 @@ We provide built-in envelopes for popular JMESPath expressions used when looking
 
 === "app.py"
 
-	```python hl_lines="1 7"
-    from aws_lambda_powertools.utilities.jmespath_utils import extract_data_from_envelope, envelopes
-
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    def handler(event: dict, context: LambdaContext):
-        payload = extract_data_from_envelope(data=event, envelope=envelopes.SNS)
-        customer = payload.get("customerId")  # now deserialized
-        ...
+	```python hl_lines="1 6"
+    --8<-- "docs/examples/utilities/jmespath_functions/extract_data_built_in_jmespath.py"
 	```
 
 === "event.json"
@@ -107,6 +91,7 @@ Envelope | JMESPath expression
 ## Advanced
 
 ### Built-in JMESPath functions
+
 You can use our built-in JMESPath functions within your expressions to do exactly that to decode JSON Strings, base64, and uncompress gzip data.
 
 ???+ info
@@ -123,15 +108,7 @@ This sample will decode the value within the `data` key into a valid JSON before
 === "powertools_json_jmespath_function.py"
 
     ```python hl_lines="9"
-    from aws_lambda_powertools.utilities.validation import validate
-
-    import schemas
-
-    sample_event = {
-        'data': '{"payload": {"message": "hello hello", "username": "blah blah"}}'
-    }
-
-    validate(event=sample_event, schema=schemas.INPUT, envelope="powertools_json(data)")
+    --8<-- "docs/examples/utilities/jmespath_functions/powertools_json_jmespath_function.py"
     ```
 
 === "schemas.py"
@@ -145,27 +122,7 @@ This sample will decode the value within the `data` key into a valid JSON before
 This sample will decode the value within the `body` key of an API Gateway event into a valid JSON object to ensure the Idempotency utility processes a JSON object instead of a string.
 
 ```python hl_lines="7" title="Deserializing JSON before using as idempotency key"
-import json
-from aws_lambda_powertools.utilities.idempotency import (
-	IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-)
-
-persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-config = IdempotencyConfig(event_key_jmespath="powertools_json(body)")
-
-@idempotent(config=config, persistence_store=persistence_layer)
-def handler(event:APIGatewayProxyEvent, context):
-	body = json.loads(event['body'])
-	payment = create_subscription_payment(
-		user=body['user'],
-		product=body['product_id']
-	)
-	...
-	return {
-		"payment_id": payment.id,
-		"message": "success",
-		"statusCode": 200
-	}
+--8<-- "docs/examples/utilities/jmespath_functions/powertools_json_jmespath_function_idempotency.py"
 ```
 
 #### powertools_base64 function
@@ -174,22 +131,10 @@ Use `powertools_base64` function to decode any base64 data.
 
 This sample will decode the base64 value within the `data` key, and decode the JSON string into a valid JSON before we can validate it.
 
-=== "powertools_json_jmespath_function.py"
+=== "powertools_base64_jmespath_function.py"
 
     ```python hl_lines="12"
-    from aws_lambda_powertools.utilities.validation import validate
-
-    import schemas
-
-    sample_event = {
-        "data": "eyJtZXNzYWdlIjogImhlbGxvIGhlbGxvIiwgInVzZXJuYW1lIjogImJsYWggYmxhaCJ9="
-    }
-
-    validate(
-          event=sample_event,
-          schema=schemas.INPUT,
-          envelope="powertools_json(powertools_base64(data))"
-    )
+    --8<-- "docs/examples/utilities/jmespath_functions/powertools_base64_jmespath_function.py"
     ```
 
 === "schemas.py"
@@ -204,22 +149,10 @@ Use `powertools_base64_gzip` function to decompress and decode base64 data.
 
 This sample will decompress and decode base64 data, then use JMESPath pipeline expression to pass the result for decoding its JSON string.
 
-=== "powertools_json_jmespath_function.py"
+=== "powertools_base64_gzip_jmespath_function.py"
 
     ```python hl_lines="12"
-    from aws_lambda_powertools.utilities.validation import validate
-
-    import schemas
-
-    sample_event = {
-        "data": "H4sIACZAXl8C/52PzUrEMBhFX2UILpX8tPbHXWHqIOiq3Q1F0ubrWEiakqTWofTdTYYB0YWL2d5zvnuTFellBIOedoiyKH5M0iwnlKH7HZL6dDB6ngLDfLFYctUKjie9gHFaS/sAX1xNEq525QxwFXRGGMEkx4Th491rUZdV3YiIZ6Ljfd+lfSyAtZloacQgAkqSJCGhxM6t7cwwuUGPz4N0YKyvO6I9WDeMPMSo8Z4Ca/kJ6vMEYW5f1MX7W1lVxaG8vqX8hNFdjlc0iCBBSF4ERT/3Pl7RbMGMXF2KZMh/C+gDpNS7RRsp0OaRGzx0/t8e0jgmcczyLCWEePhni/23JWalzjdu0a3ZvgEaNLXeugEAAA=="
-    }
-
-    validate(
-        event=sample_event,
-        schema=schemas.INPUT,
-        envelope="powertools_base64_gzip(data) | powertools_json(@)"
-    )
+    --8<-- "docs/examples/utilities/jmespath_functions/powertools_base64_gzip_jmespath_function.py"
     ```
 
 === "schemas.py"
@@ -239,25 +172,8 @@ In order to keep the built-in functions from Powertools, you can subclass from `
 
 === "custom_jmespath_function.py"
 
-    ```python hl_lines="2-3 6-9 11 17"
-	from aws_lambda_powertools.utilities.jmespath_utils import (
-	    PowertoolsFunctions, extract_data_from_envelope)
-	from jmespath.functions import signature
-
-
-    class CustomFunctions(PowertoolsFunctions):
-        @signature({'types': ['string']})  # Only decode if value is a string
-        def _func_special_decoder(self, s):
-            return my_custom_decoder_logic(s)
-
-    custom_jmespath_options = {"custom_functions": CustomFunctions()}
-
-    def handler(event, context):
-		# use the custom name after `_func_`
-		extract_data_from_envelope(data=event,
-								  envelope="special_decoder(body)",
-								  jmespath_options=**custom_jmespath_options)
-        ...
+    ```python hl_lines="1 3 6-9 12 20"
+    --8<-- "docs/examples/utilities/jmespath_functions/custom_jmespath_function.py"
     ```
 
 === "event.json"
