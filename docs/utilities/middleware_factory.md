@@ -18,39 +18,16 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
 * **event** - Lambda function invocation event
 * **context** - Lambda function context object
 
-```python hl_lines="3-4 10" title="Creating your own middleware for before/after logic"
-from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-
-@lambda_handler_decorator
-def middleware_before_after(handler, event, context):
-	# logic_before_handler_execution()
-	response = handler(event, context)
-	# logic_after_handler_execution()
-	return response
-
-@middleware_before_after
-def lambda_handler(event, context):
-	...
+```python hl_lines="4-5 12" title="Creating your own middleware for before/after logic"
+--8<-- "docs/examples/utilities/middleware_factory/middleware_no_params.py"
 ```
 
 ## Middleware with params
 
 You can also have your own keyword arguments after the mandatory arguments.
 
-```python hl_lines="2 12" title="Accepting arbitrary keyword arguments"
-@lambda_handler_decorator
-def obfuscate_sensitive_data(handler, event, context, fields: List = None):
-	# Obfuscate email before calling Lambda handler
-	if fields:
-		for field in fields:
-			if field in event:
-				event[field] = obfuscate(event[field])
-
-	return handler(event, context)
-
-@obfuscate_sensitive_data(fields=["email"])
-def lambda_handler(event, context):
-	...
+```python hl_lines="7 17" title="Accepting arbitrary keyword arguments"
+--8<-- "docs/examples/utilities/middleware_factory/middleware_with_params.py"
 ```
 
 ## Tracing middleware execution
@@ -59,32 +36,16 @@ If you are making use of [Tracer](../core/tracer.md), you can trace the executio
 
 This makes use of an existing Tracer instance that you may have initialized anywhere in your code.
 
-```python hl_lines="3" title="Tracing custom middlewares with Tracer"
-from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-
-@lambda_handler_decorator(trace_execution=True)
-def my_middleware(handler, event, context):
-	return handler(event, context)
-
-@my_middleware
-def lambda_handler(event, context):
-	...
+```python hl_lines="4" title="Tracing custom middlewares with Tracer"
+--8<-- "docs/examples/utilities/middleware_factory/middleware_trace_execution.py"
 ```
 
 When executed, your middleware name will [appear in AWS X-Ray Trace details as](../core/tracer.md) `## middleware_name`.
 
 For advanced use cases, you can instantiate [Tracer](../core/tracer.md) inside your middleware, and add annotations as well as metadata for additional operational insights.
 
-```python hl_lines="6-8" title="Add custom tracing insights before/after in your middlware"
-from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools import Tracer
-
-@lambda_handler_decorator(trace_execution=True)
-def middleware_name(handler, event, context):
-	# tracer = Tracer() # Takes a copy of an existing tracer instance
-	# tracer.add_annotation...
-	# tracer.add_metadata...
-	return handler(event, context)
+```python hl_lines="7-9" title="Add custom tracing insights before/after in your middlware"
+--8<-- "docs/examples/utilities/middleware_factory/middleware_trace_custom.py"
 ```
 
 ## Tips
