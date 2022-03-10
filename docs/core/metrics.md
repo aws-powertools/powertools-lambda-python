@@ -41,31 +41,17 @@ Setting | Description | Environment variable | Constructor parameter
 ???+ example
 	**AWS Serverless Application Model (SAM)**
 
-=== "template.yml"
+    === "template.yml"
 
-	```yaml hl_lines="9 10"
-	Resources:
-	  HelloWorldFunction:
-		Type: AWS::Serverless::Function
-		Properties:
-		  Runtime: python3.8
-		  Environment:
-		  Variables:
-			POWERTOOLS_SERVICE_NAME: payment
-			POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
-	```
+        ```yaml hl_lines="12-13"
+        --8<-- "docs/examples/core/metrics/template.yml"
+        ```
 
-=== "app.py"
+    === "app.py"
 
-	```python hl_lines="4 6"
-	from aws_lambda_powertools import Metrics
-	from aws_lambda_powertools.metrics import MetricUnit
-
-	metrics = Metrics() # Sets metric namespace and service via env var
-	# OR
-	metrics = Metrics(namespace="ServerlessAirline", service="orders") # Sets metric namespace, and service as a metric dimension
-	```
-
+        ```python hl_lines="4 6-8"
+        --8<-- "docs/examples/core/metrics/example_app.py"
+        ```
 
 ### Creating metrics
 
@@ -76,28 +62,13 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 
 === "Metrics"
 
-    ```python hl_lines="8"
-    from aws_lambda_powertools import Metrics
-    from aws_lambda_powertools.metrics import MetricUnit
-
-    metrics = Metrics(namespace="ExampleApplication", service="booking")
-
-    @metrics.log_metrics
-    def lambda_handler(evt, ctx):
-        metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
+    ```python hl_lines="9"
+    --8<-- "docs/examples/core/metrics/metrics_app.py"
     ```
 === "Metrics with custom dimensions"
 
-    ```python hl_lines="8-9"
-    from aws_lambda_powertools import Metrics
-    from aws_lambda_powertools.metrics import MetricUnit
-
-    metrics = Metrics(namespace="ExampleApplication", service="booking")
-
-    @metrics.log_metrics
-    def lambda_handler(evt, ctx):
-        metrics.add_dimension(name="environment", value="prod")
-        metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
+    ```python hl_lines="9-10"
+    --8<-- "docs/examples/core/metrics/metrics_custom_dimensions_app.py"
     ```
 
 ???+ tip "Tip: Autocomplete Metric Units"
@@ -118,28 +89,12 @@ If you'd like to remove them at some point, you can use `clear_default_dimension
 === "set_default_dimensions method"
 
     ```python hl_lines="5"
-    from aws_lambda_powertools import Metrics
-    from aws_lambda_powertools.metrics import MetricUnit
-
-    metrics = Metrics(namespace="ExampleApplication", service="booking")
-    metrics.set_default_dimensions(environment="prod", another="one")
-
-    @metrics.log_metrics
-    def lambda_handler(evt, ctx):
-        metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
+    --8<-- "docs/examples/core/metrics/set_default_dimensions.py"
     ```
 === "with log_metrics decorator"
 
-    ```python hl_lines="5 7"
-    from aws_lambda_powertools import Metrics
-    from aws_lambda_powertools.metrics import MetricUnit
-
-    metrics = Metrics(namespace="ExampleApplication", service="booking")
-    DEFAULT_DIMENSIONS = {"environment": "prod", "another": "one"}
-
-    @metrics.log_metrics(default_dimensions=DEFAULT_DIMENSIONS)
-    def lambda_handler(evt, ctx):
-        metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
+    ```python hl_lines="5 8"
+    --8<-- "docs/examples/core/metrics/log_metrics_default_dimensions.py"
     ```
 
 ### Flushing metrics
@@ -150,15 +105,8 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 
 === "app.py"
 
-    ```python hl_lines="6"
-    from aws_lambda_powertools import Metrics
-    from aws_lambda_powertools.metrics import MetricUnit
-
-    metrics = Metrics(namespace="ExampleApplication", service="ExampleService")
-
-    @metrics.log_metrics
-    def lambda_handler(evt, ctx):
-        metrics.add_metric(name="BookingConfirmation", unit=MetricUnit.Count, value=1)
+    ```python hl_lines="7"
+    --8<-- "docs/examples/core/metrics/flush_metrics.py"
     ```
 === "Example CloudWatch Logs excerpt"
 
@@ -199,14 +147,8 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 
 If you want to ensure at least one metric is always emitted, you can pass `raise_on_empty_metrics` to the **log_metrics** decorator:
 
-```python hl_lines="5" title="Raising SchemaValidationError exception if no metrics are added"
-from aws_lambda_powertools.metrics import Metrics
-
-metrics = Metrics()
-
-@metrics.log_metrics(raise_on_empty_metrics=True)
-def lambda_handler(evt, ctx):
-	...
+```python hl_lines="6" title="Raising SchemaValidationError exception if no metrics are added"
+--8<-- "docs/examples/core/metrics/log_metrics_raise_on_empty_metrics.py"
 ```
 
 ???+ tip "Suppressing warning messages on empty metrics"
@@ -216,31 +158,16 @@ def lambda_handler(evt, ctx):
 
 When using multiple middlewares, use `log_metrics` as your **last decorator** wrapping all subsequent ones to prevent early Metric validations when code hasn't been run yet.
 
-```python hl_lines="7-8" title="Example with multiple decorators"
-from aws_lambda_powertools import Metrics, Tracer
-from aws_lambda_powertools.metrics import MetricUnit
-
-tracer = Tracer(service="booking")
-metrics = Metrics(namespace="ExampleApplication", service="booking")
-
-@metrics.log_metrics
-@tracer.capture_lambda_handler
-def lambda_handler(evt, ctx):
-	metrics.add_metric(name="BookingConfirmation", unit=MetricUnit.Count, value=1)
+```python hl_lines="8-9" title="Example with multiple decorators"
+--8<-- "docs/examples/core/metrics/log_metrics_multiple_decorators.py"
 ```
 
 ### Capturing cold start metric
 
 You can optionally capture cold start metrics with `log_metrics` decorator via `capture_cold_start_metric` param.
 
-```python hl_lines="5" title="Generating function cold start metric"
-from aws_lambda_powertools import Metrics
-
-metrics = Metrics(service="ExampleService")
-
-@metrics.log_metrics(capture_cold_start_metric=True)
-def lambda_handler(evt, ctx):
-	...
+```python hl_lines="6" title="Generating function cold start metric"
+--8<-- "docs/examples/core/metrics/log_metrics_capture_cold_start_metric.py"
 ```
 
 If it's a cold start invocation, this feature will:

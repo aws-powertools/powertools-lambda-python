@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: payment
+          POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
