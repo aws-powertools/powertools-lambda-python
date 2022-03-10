@@ -15,11 +15,13 @@ reported the issue. Please try to include as much information as you can.
 
 ## Contributing via Pull Requests
 
-Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
+We are temporarily de-prioritizing and pausing external contributions until end of July 2022. You can read more here: https://github.com/awslabs/aws-lambda-powertools-python/issues/1076
+
+<!-- Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
 
 1. You are working against the latest source on the **develop** branch.
 2. You check existing open, and recently merged pull requests to make sure someone else hasn't addressed the problem already.
-3. You open a [RFC issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2C+triage&template=rfc.md&title=RFC%3A+) to discuss any significant work - we would hate for your time to be wasted.
+3. You open a [RFC issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2C+triage&template=rfc.md&title=RFC%3A+) to discuss any significant work - we would hate for your time to be wasted. -->
 
 ### Dev setup
 
