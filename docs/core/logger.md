@@ -639,7 +639,7 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 By default, this Logger and standard logging library emits records using local time timestamp. You can override this behaviour via `utc` parameter:
 
 ```python hl_lines="6" title="Setting UTC timestamp by default"
-    --8<-- "docs/examples/core/logger/logger_utc.py"
+--8<-- "docs/examples/core/logger/logger_utc.py"
 ```
 
 #### Custom function for unserializable values
@@ -894,42 +894,16 @@ POWERTOOLS_LOG_DEDUPLICATION_DISABLED="1" pytest -o log_cli=1
 You can enable the `botocore` and `boto3` logs by using the `set_stream_logger` method, this method will add a stream handler
 for the given name and level to the logging module. By default, this logs all boto3 messages to stdout.
 
-```python hl_lines="6-7" title="Enabling AWS SDK logging"
-from typing import Dict, List
-from aws_lambda_powertools.utilities.typing import LambdaContext
-from aws_lambda_powertools import Logger
-
-import boto3
-boto3.set_stream_logger()
-boto3.set_stream_logger('botocore')
-
-logger = Logger()
-client = boto3.client('s3')
-
-
-def handler(event: Dict, context: LambdaContext) -> List:
-	response = client.list_buckets()
-
-	return response.get("Buckets", [])
+```python hl_lines="7-8" title="Enabling AWS SDK logging"
+--8<-- "docs/examples/core/logger/faq_enable_boto3_logger.py"
 ```
 
 **How can I enable powertools logging for imported libraries?**
 
 You can copy the Logger setup to all or sub-sets of registered external loggers. Use the `copy_config_to_registered_logger` method to do this. By default all registered loggers will be modified. You can change this behaviour by providing `include` and `exclude` attributes. You can also provide optional `log_level` attribute external loggers will be configured with.
 
-
 ```python hl_lines="10" title="Cloning Logger config to all other registered standard loggers"
-import logging
-
-from aws_lambda_powertools import Logger
-from aws_lambda_powertools.logging import utils
-
-logger = Logger()
-
-external_logger = logging.logger()
-
-utils.copy_config_to_registered_loggers(source_logger=logger)
-external_logger.info("test message")
+--8<-- "docs/examples/core/logger/faq_utils_copy_config_to_registered_loggers.py"
 ```
 
 **What's the difference between `append_keys` and `extra`?**
@@ -940,21 +914,8 @@ Here's an example where we persist `payment_id` not `request_id`. Note that `pay
 
 === "lambda_handler.py"
 
-    ```python hl_lines="6 10"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    def handler(event, context):
-        logger.append_keys(payment_id="123456789")
-
-        try:
-            booking_id = book_flight()
-            logger.info("Flight booked successfully", extra={ "booking_id": booking_id})
-        except BookingReservationError:
-            ...
-
-        logger.info("goodbye")
+    ```python hl_lines="7 11"
+    --8<-- "docs/examples/core/logger/faq_append_keys_vs_extra.py"
     ```
 === "Example CloudWatch Logs excerpt"
 
