@@ -24,26 +24,16 @@ Setting | Description | Environment variable | Constructor parameter
 ???+ example
 	**AWS Serverless Application Model (SAM)**
 
-=== "template.yaml"
+    === "template.yaml"
 
-	```yaml hl_lines="9 10"
-	Resources:
-	  HelloWorldFunction:
-		Type: AWS::Serverless::Function
-		Properties:
-		  Runtime: python3.8
-		  Environment:
-			Variables:
-			  LOG_LEVEL: INFO
-			  POWERTOOLS_SERVICE_NAME: example
-	```
-=== "app.py"
+        ```yaml hl_lines="12 13"
+        --8<-- "docs/examples/core/logger/template.yml"
+        ```
+    === "app.py"
 
-	```python hl_lines="2 4"
-	from aws_lambda_powertools import Logger
-	logger = Logger() # Sets service via env var
-	# OR logger = Logger(service="example")
-	```
+        ```python hl_lines="3-4"
+        --8<-- "docs/examples/core/logger/app.py"
+        ```
 
 ### Standard structured keys
 
@@ -67,21 +57,8 @@ You can enrich your structured logs with key Lambda context information via `inj
 
 === "collect.py"
 
-    ```python hl_lines="5"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    @logger.inject_lambda_context
-    def handler(event, context):
-        logger.info("Collecting payment")
-
-        # You can log entire objects too
-        logger.info({
-        "operation": "collect_payment",
-        "charge_id": event['charge_id']
-        })
-        ...
+    ```python hl_lines="6"
+    --8<-- "docs/examples/core/logger/collect.py"
     ```
 
 === "Example CloudWatch Logs excerpt"
@@ -133,14 +110,8 @@ When debugging in non-production environments, you can instruct Logger to log th
 ???+ warning
 	This is disabled by default to prevent sensitive info being logged
 
-```python hl_lines="5" title="Logging incoming event"
-from aws_lambda_powertools import Logger
-
-logger = Logger(service="payment")
-
-@logger.inject_lambda_context(log_event=True)
-def handler(event, context):
-   ...
+```python hl_lines="6" title="Logging incoming event"
+--8<-- "docs/examples/core/logger/logging_incoming_event.py"
 ```
 
 #### Setting a Correlation ID
@@ -152,15 +123,8 @@ You can set a Correlation ID using `correlation_id_path` param by passing a [JME
 
 === "collect.py"
 
-    ```python hl_lines="5"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    @logger.inject_lambda_context(correlation_id_path="headers.my_request_id_header")
-    def handler(event, context):
-        logger.debug(f"Correlation ID => {logger.get_correlation_id()}")
-        logger.info("Collecting payment")
+    ```python hl_lines="6"
+    --8<-- "docs/examples/core/logger/inject_lambda_context_correlation_id_path.py"
     ```
 
 === "Example Event"
@@ -195,16 +159,8 @@ We provide [built-in JMESPath expressions](#built-in-correlation-id-expressions)
 
 === "collect.py"
 
-    ```python hl_lines="2 6"
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.logging import correlation_paths
-
-    logger = Logger(service="payment")
-
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    def handler(event, context):
-        logger.debug(f"Correlation ID => {logger.get_correlation_id()}")
-        logger.info("Collecting payment")
+    ```python hl_lines="2 7"
+    --8<-- "docs/examples/core/logger/inject_lambda_context_correlation_paths.py"
     ```
 
 === "Example Event"
@@ -254,18 +210,8 @@ You can append your own keys to your existing Logger via `append_keys(**addition
 
 === "collect.py"
 
-    ```python hl_lines="9"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    def handler(event, context):
-        order_id = event.get("order_id")
-
-        # this will ensure order_id key always has the latest value before logging
-        logger.append_keys(order_id=order_id)
-
-        logger.info("Collecting payment")
+    ```python hl_lines="10"
+    --8<-- "docs/examples/core/logger/logger_append_keys.py"
     ```
 === "Example CloudWatch Logs excerpt"
 
@@ -297,12 +243,7 @@ It accepts any dictionary, and all keyword arguments will be added as part of th
 === "extra_parameter.py"
 
     ```python hl_lines="6"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    fields = { "request_id": "1123" }
-    logger.info("Collecting payment", extra=fields)
+    --8<-- "docs/examples/core/logger/logger_extra_parameter.py"
     ```
 === "Example CloudWatch Logs excerpt"
 
@@ -323,14 +264,8 @@ You can set a correlation_id to your existing Logger via `set_correlation_id(val
 
 === "collect.py"
 
-    ```python hl_lines="6"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    def handler(event, context):
-        logger.set_correlation_id(event["requestContext"]["requestId"])
-        logger.info("Collecting payment")
+    ```python hl_lines="7"
+    --8<-- "docs/examples/core/logger/logger_set_correlation_id.py"
     ```
 
 === "Example Event"
@@ -338,7 +273,7 @@ You can set a correlation_id to your existing Logger via `set_correlation_id(val
     ```json hl_lines="3"
     {
         "requestContext": {
-        "requestId": "correlation_id_value"
+            "requestId": "correlation_id_value"
         }
     }
     ```
@@ -360,23 +295,15 @@ Alternatively, you can combine [Data Classes utility](../utilities/data_classes.
 
 === "collect.py"
 
-    ```python hl_lines="2 7-8"
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
-
-    logger = Logger(service="payment")
-
-    def handler(event, context):
-        event = APIGatewayProxyEvent(event)
-        logger.set_correlation_id(event.request_context.request_id)
-        logger.info("Collecting payment")
+    ```python hl_lines="2 8-9"
+    --8<-- "docs/examples/core/logger/logger_set_correlation_id_data_class.py"
     ```
 === "Example Event"
 
     ```json hl_lines="3"
     {
         "requestContext": {
-        "requestId": "correlation_id_value"
+            "requestId": "correlation_id_value"
         }
     }
     ```
@@ -401,17 +328,8 @@ You can remove any additional key from Logger state using `remove_keys`.
 
 === "collect.py"
 
-    ```python hl_lines="9"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    def handler(event, context):
-        logger.append_keys(sample_key="value")
-        logger.info("Collecting payment")
-
-        logger.remove_keys(["sample_key"])
-        logger.info("Collecting payment without sample key")
+    ```python hl_lines="10"
+    --8<-- "docs/examples/core/logger/logger_remove_keys.py"
     ```
 
 === "Example CloudWatch Logs excerpt"
