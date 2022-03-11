@@ -368,19 +368,8 @@ Logger is commonly initialized in the global scope. Due to [Lambda Execution Con
 
 === "collect.py"
 
-    ```python hl_lines="5 8"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    @logger.inject_lambda_context(clear_state=True)
-    def handler(event, context):
-        if event.get("special_key"):
-            # Should only be available in the first request log
-            # as the second request doesn't contain `special_key`
-            logger.append_keys(debugging_key="value")
-
-        logger.info("Collecting payment")
+    ```python hl_lines="6 9-11"
+    --8<-- "docs/examples/core/logger/inject_lambda_context_clear_state.py"
     ```
 
 === "#1 request"
@@ -428,14 +417,7 @@ Use `logger.exception` method to log contextual information about exceptions. Lo
 === "collect.py"
 
     ```python hl_lines="8"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    try:
-        raise ValueError("something went wrong")
-    except Exception:
-        logger.exception("Received an exception")
+    --8<-- "docs/examples/core/logger/logger_exception.py"
     ```
 
 === "Example CloudWatch Logs excerpt"
@@ -475,26 +457,14 @@ Logger supports inheritance via `child` parameter. This allows you to create mul
 
 === "collect.py"
 
-    ```python hl_lines="1 7"
-    import shared # Creates a child logger named "payment.shared"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger() # POWERTOOLS_SERVICE_NAME: "payment"
-
-    def handler(event, context):
-        shared.inject_payment_id(event)
-        ...
+    ```python hl_lines="1 9"
+    --8<-- "docs/examples/core/logger/shared_app.py"
     ```
 
 === "shared.py"
 
-    ```python hl_lines="6"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(child=True) # POWERTOOLS_SERVICE_NAME: "payment"
-
-    def inject_payment_id(event):
-        logger.structure_logs(append=True, payment_id=event.get("payment_id"))
+    ```python hl_lines="7"
+    --8<-- "docs/examples/core/logger/shared.py"
     ```
 
 In this example, `Logger` will create a parent logger named `payment` and a child logger named `payment.shared`. Changes in either parent or child logger will be propagated bi-directionally.
@@ -520,15 +490,8 @@ Sampling decision happens at the Logger initialization. This means sampling may 
 
 === "collect.py"
 
-    ```python hl_lines="4 7"
-    from aws_lambda_powertools import Logger
-
-    # Sample 10% of debug logs e.g. 0.1
-    logger = Logger(service="payment", sample_rate=0.1)
-
-    def handler(event, context):
-        logger.debug("Verifying whether order_id is present")
-        logger.info("Collecting payment")
+    ```python hl_lines="4 8"
+    --8<-- "docs/examples/core/logger/logger_sample_rate.py"
     ```
 
 === "Example CloudWatch Logs excerpt"
@@ -579,12 +542,8 @@ Parameter | Description | Default
 **`log_record_order`** | set order of log keys when logging | `["level", "location", "message", "timestamp"]`
 **`kwargs`** | key-value to be included in log messages | `None`
 
-```python hl_lines="2 4-5" title="Pre-configuring Lambda Powertools Formatter"
-from aws_lambda_powertools import Logger
-from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
-
-formatter = LambdaPowertoolsFormatter(utc=True, log_record_order=["message"])
-logger = Logger(service="example", logger_formatter=formatter)
+```python hl_lines="2 4-8" title="Pre-configuring Lambda Powertools Formatter"
+--8<-- "docs/examples/core/logger/logging_formatter.py"
 ```
 
 ### Migrating from other Loggers
@@ -610,32 +569,14 @@ For child Loggers, we introspect the name of your module where `Logger(child=Tru
 
 === "incorrect_logger_inheritance.py"
 
-    ```python hl_lines="4 10"
-    import my_module
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-    ...
-
-    # my_module.py
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(child=True)
+    ```python hl_lines="5 11"
+    --8<-- "docs/examples/core/logger/incorrect_logger_inheritance.py"
     ```
 
 === "correct_logger_inheritance.py"
 
-    ```python hl_lines="4 10"
-    import my_module
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-    ...
-
-    # my_module.py
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment", child=True)
+    ```python hl_lines="5 11"
+    --8<-- "docs/examples/core/logger/correct_logger_inheritance.py"
     ```
 
 In this case, Logger will register a Logger named `payment`, and a Logger named `service_undefined`. The latter isn't inheriting from the parent, and will have no handler, resulting in no message being logged to standard output.
@@ -656,19 +597,8 @@ Logger allows you to either change the format or suppress the following keys alt
 
 
 === "lambda_handler.py"
-    ```python hl_lines="7 10"
-    from aws_lambda_powertools import Logger
-
-    date_format = "%m/%d/%Y %I:%M:%S %p"
-    location_format = "[%(funcName)s] %(module)s"
-
-    # override location and timestamp format
-    logger = Logger(service="payment", location=location_format, datefmt=date_format)
-
-    # suppress the location key with a None value
-    logger_two = Logger(service="payment", location=None)
-
-    logger.info("Collecting payment")
+    ```python hl_lines="3-4 7-11 14"
+    --8<-- "docs/examples/core/logger/overriding_log_records.py"
     ```
 === "Example CloudWatch Logs excerpt"
 
@@ -688,17 +618,8 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 
 === "lambda_handler.py"
 
-    ```python hl_lines="4 7"
-    from aws_lambda_powertools import Logger
-
-    # make message as the first key
-    logger = Logger(service="payment", log_record_order=["message"])
-
-    # make request_id that will be added later as the first key
-    # Logger(service="payment", log_record_order=["request_id"])
-
-    # Default key sorting order when omit
-    # Logger(service="payment", log_record_order=["level","location","message","timestamp"])
+    ```python hl_lines="4 7 10"
+    --8<-- "docs/examples/core/logger/logger_log_record_order.py"
     ```
 === "Example CloudWatch Logs excerpt"
 
@@ -718,13 +639,7 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 By default, this Logger and standard logging library emits records using local time timestamp. You can override this behaviour via `utc` parameter:
 
 ```python hl_lines="6" title="Setting UTC timestamp by default"
-from aws_lambda_powertools import Logger
-
-logger = Logger(service="payment")
-logger.info("Local time")
-
-logger_in_utc = Logger(service="payment", utc=True)
-logger_in_utc.info("GMT time zone")
+    --8<-- "docs/examples/core/logger/logger_utc.py"
 ```
 
 #### Custom function for unserializable values
