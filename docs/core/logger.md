@@ -648,19 +648,8 @@ By default, Logger uses `str` to handle values non-serializable by JSON. You can
 
 === "collect.py"
 
-    ```python hl_lines="3-4 9 12"
-    from aws_lambda_powertools import Logger
-
-    def custom_json_default(value):
-        return f"<non-serializable: {type(value).__name__}>"
-
-    class Unserializable:
-        pass
-
-    logger = Logger(service="payment", json_default=custom_json_default)
-
-    def handler(event, context):
-        logger.info(Unserializable())
+    ```python hl_lines="4-5 12 16"
+    --8<-- "docs/examples/core/logger/logger_json_default.py"
     ```
 === "Example CloudWatch Logs excerpt"
 
@@ -678,17 +667,8 @@ By default, Logger uses `str` to handle values non-serializable by JSON. You can
 
 By default, Logger uses StreamHandler and logs to standard output. You can override this behaviour via `logger_handler` parameter:
 
-```python hl_lines="3-4 9 12" title="Configure Logger to output to a file"
-import logging
-from pathlib import Path
-
-from aws_lambda_powertools import Logger
-
-log_file = Path("/tmp/log.json")
-log_file_handler = logging.FileHandler(filename=log_file)
-logger = Logger(service="payment", logger_handler=log_file_handler)
-
-logger.info("Collecting payment")
+```python hl_lines="6-8" title="Configure Logger to output to a file"
+--8<-- "docs/examples/core/logger/logger_logger_handler.py"
 ```
 
 #### Bring your own formatter
@@ -702,20 +682,8 @@ For these, you can override the `serialize` method from [LambdaPowertoolsFormatt
 
 === "custom_formatter.py"
 
-    ```python hl_lines="6-7 12"
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
-
-    from typing import Dict
-
-    class CustomFormatter(LambdaPowertoolsFormatter):
-        def serialize(self, log: Dict) -> str:
-            """Serialize final structured log dict to JSON str"""
-            log["event"] = log.pop("message")  # rename message key to event
-            return self.json_serializer(log)   # use configured json serializer
-
-    logger = Logger(service="example", logger_formatter=CustomFormatter())
-    logger.info("hello")
+    ```python hl_lines="7-8 14"
+    --8<-- "docs/examples/core/logger/logger_logger_formatter.py"
     ```
 
 === "Example CloudWatch Logs excerpt"
@@ -738,46 +706,8 @@ For exceptional cases where you want to completely replace our formatter logic, 
 
 === "collect.py"
 
-    ```python hl_lines="5 7 9-10 13 17 21 24 35"
-    import logging
-    from typing import Iterable, List, Optional
-
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter
-
-    class CustomFormatter(BasePowertoolsFormatter):
-        def __init__(self, log_record_order: Optional[List[str]], *args, **kwargs):
-            self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
-            self.log_format = dict.fromkeys(self.log_record_order)
-            super().__init__(*args, **kwargs)
-
-        def append_keys(self, **additional_keys):
-            # also used by `inject_lambda_context` decorator
-            self.log_format.update(additional_keys)
-
-        def remove_keys(self, keys: Iterable[str]):
-            for key in keys:
-                self.log_format.pop(key, None)
-
-        def clear_state(self):
-            self.log_format = dict.fromkeys(self.log_record_order)
-
-        def format(self, record: logging.LogRecord) -> str:  # noqa: A003
-            """Format logging record as structured JSON str"""
-            return json.dumps(
-                {
-                    "event": super().format(record),
-                    "timestamp": self.formatTime(record),
-                    "my_default_key": "test",
-                    **self.log_format,
-                }
-            )
-
-    logger = Logger(service="payment", logger_formatter=CustomFormatter())
-
-    @logger.inject_lambda_context
-    def handler(event, context):
-        logger.info("Collecting payment")
+    ```python hl_lines="5 8 10-11 14 18 22 25 37"
+    --8<-- "docs/examples/core/logger/logger_logger_formatter_base_powertools_formatter.py"
     ```
 === "Example CloudWatch Logs excerpt"
 
@@ -800,21 +730,8 @@ By default, Logger uses `json.dumps` and `json.loads` as serializer and deserial
 
 As parameters don't always translate well between them, you can pass any callable that receives a `Dict` and return a `str`:
 
-```python hl_lines="1 5-6 9-10" title="Using Rust orjson library as serializer"
-import orjson
-
-from aws_lambda_powertools import Logger
-
-custom_serializer = orjson.dumps
-custom_deserializer = orjson.loads
-
-logger = Logger(service="payment",
-			json_serializer=custom_serializer,
-			json_deserializer=custom_deserializer
-)
-
-# when using parameters, you can pass a partial
-# custom_serializer=functools.partial(orjson.dumps, option=orjson.OPT_SERIALIZE_NUMPY)
+```python hl_lines="1 5-6 10-11" title="Using Rust orjson library as serializer"
+--8<-- "docs/examples/core/logger/logger_json_serializer.py"
 ```
 
 ## Testing your code
@@ -829,48 +746,12 @@ This is a Pytest sample that provides the minimum information necessary for Logg
     Note that dataclasses are available in Python 3.7+ only.
 
     ```python
-    from dataclasses import dataclass
-
-    import pytest
-
-    @pytest.fixture
-    def lambda_context():
-        @dataclass
-        class LambdaContext:
-            function_name: str = "test"
-            memory_limit_in_mb: int = 128
-            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
-            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
-
-        return LambdaContext()
-
-    def test_lambda_handler(lambda_context):
-        test_event = {'test': 'event'}
-        your_lambda_handler(test_event, lambda_context) # this will now have a Context object populated
+    --8<-- "docs/examples/core/logger/fake_lambda_context_for_logger.py"
     ```
 === "fake_lambda_context_for_logger_py36.py"
 
     ```python
-    from collections import namedtuple
-
-    import pytest
-
-    @pytest.fixture
-    def lambda_context():
-        lambda_context = {
-            "function_name": "test",
-            "memory_limit_in_mb": 128,
-            "invoked_function_arn": "arn:aws:lambda:eu-west-1:809313241:function:test",
-            "aws_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
-        }
-
-        return namedtuple("LambdaContext", lambda_context.keys())(*lambda_context.values())
-
-    def test_lambda_handler(lambda_context):
-        test_event = {'test': 'event'}
-
-        # this will now have a Context object populated
-        your_lambda_handler(test_event, lambda_context)
+    --8<-- "docs/examples/core/logger/fake_lambda_context_for_logger_py36.py"
     ```
 
 ???+ tip
