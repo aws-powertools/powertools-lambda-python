@@ -198,7 +198,6 @@ Imagine the function executes successfully, but the client never receives the re
     }
     ```
 
-
 ### Idempotency request flow
 
 This sequence diagram shows an example flow of what happens in the payment scenario:
@@ -477,36 +476,19 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
 The idempotency utility provides several routes to test your code.
 
 ### Disabling the idempotency utility
+
 When testing your code, you may wish to disable the idempotency logic altogether and focus on testing your business logic. To do this, you can set the environment variable `POWERTOOLS_IDEMPOTENCY_DISABLED`
 with a truthy value. If you prefer setting this for specific tests, and are using Pytest, you can use [monkeypatch](https://docs.pytest.org/en/latest/monkeypatch.html) fixture:
 
 === "tests.py"
 
-    ```python hl_lines="2 3"
-    def test_idempotent_lambda_handler(monkeypatch):
-        # Set POWERTOOLS_IDEMPOTENCY_DISABLED before calling decorated functions
-        monkeypatch.setenv("POWERTOOLS_IDEMPOTENCY_DISABLED", 1)
-
-        result = handler()
-        ...
+    ```python hl_lines="5-6"
+    --8<-- "docs/examples/utilities/idempotency/testing_idempotency_disabled_test.py"
     ```
 === "app.py"
 
     ```python
-    from aws_lambda_powertools.utilities.idempotency import (
-    DynamoDBPersistenceLayer, idempotent
-    )
-
-    persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency")
-
-    @idempotent(persistence_store=persistence_layer)
-    def handler(event, context):
-        print('expensive operation')
-        return {
-            "payment_id": 12345,
-            "message": "success",
-            "statusCode": 200,
-        }
+    --8<-- "docs/examples/utilities/idempotency/testing_idempotency_disabled_app.py"
     ```
 
 ### Testing with DynamoDB Local
@@ -516,37 +498,13 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
 === "tests.py"
 
     ```python hl_lines="6 7 8"
-    import boto3
-
-    import app
-
-    def test_idempotent_lambda():
-        # Create our own Table resource using the endpoint for our DynamoDB Local instance
-        resource = boto3.resource("dynamodb", endpoint_url='http://localhost:8000')
-        table = resource.Table(app.persistence_layer.table_name)
-        app.persistence_layer.table = table
-
-        result = app.handler({'testkey': 'testvalue'}, {})
-        assert result['payment_id'] == 12345
+    --8<-- "docs/examples/utilities/idempotency/testing_with_dynamodb_local_test.py"
     ```
 
 === "app.py"
 
     ```python
-    from aws_lambda_powertools.utilities.idempotency import (
-    DynamoDBPersistenceLayer, idempotent
-    )
-
-    persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency")
-
-    @idempotent(persistence_store=persistence_layer)
-    def handler(event, context):
-        print('expensive operation')
-        return {
-            "payment_id": 12345,
-            "message": "success",
-            "statusCode": 200,
-        }
+    --8<-- "docs/examples/utilities/idempotency/testing_with_dynamodb_local_app.py"
     ```
 
 ### How do I mock all DynamoDB I/O operations
@@ -556,39 +514,17 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 
 === "tests.py"
 
-    ```python hl_lines="6 7 8 9"
-    from unittest.mock import MagicMock
-
-    import app
-
-    def test_idempotent_lambda():
-        table = MagicMock()
-        app.persistence_layer.table = table
-        result = app.handler({'testkey': 'testvalue'}, {})
-        table.put_item.assert_called()
-        ...
+    ```python hl_lines="7-10"
+    --8<-- "docs/examples/utilities/idempotency/testing_with_mocked_dynamodb_test.py"
     ```
 
 === "app.py"
 
     ```python
-    from aws_lambda_powertools.utilities.idempotency import (
-    DynamoDBPersistenceLayer, idempotent
-    )
-
-    persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency")
-
-    @idempotent(persistence_store=persistence_layer)
-    def handler(event, context):
-        print('expensive operation')
-        return {
-            "payment_id": 12345,
-            "message": "success",
-            "statusCode": 200,
-        }
+    --8<-- "docs/examples/utilities/idempotency/testing_with_mocked_dynamodb_app.py"
     ```
 
 ## Extra resources
 
 If you're interested in a deep dive on how Amazon uses idempotency when building our APIs, check out
-[this article](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/).
+[this article](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/){target="_blank"}.
