@@ -27,12 +27,12 @@ Setting | Description | Environment variable | Constructor parameter
     === "template.yaml"
 
         ```yaml hl_lines="12 13"
-        --8<-- "docs/examples/core/logger/template.yml"
+        --8<-- "docs/examples/core/logger/getting_started_template.yml"
         ```
     === "app.py"
 
         ```python hl_lines="3-4"
-        --8<-- "docs/examples/core/logger/app.py"
+        --8<-- "docs/examples/core/logger/getting_started_app.py"
         ```
 
 ### Standard structured keys
@@ -58,7 +58,7 @@ You can enrich your structured logs with key Lambda context information via `inj
 === "collect.py"
 
     ```python hl_lines="6"
-    --8<-- "docs/examples/core/logger/collect.py"
+    --8<-- "docs/examples/core/logger/inject_lambda_context.py"
     ```
 
 === "Example CloudWatch Logs excerpt"
@@ -111,7 +111,7 @@ When debugging in non-production environments, you can instruct Logger to log th
 	This is disabled by default to prevent sensitive info being logged
 
 ```python hl_lines="6" title="Logging incoming event"
---8<-- "docs/examples/core/logger/logging_incoming_event.py"
+--8<-- "docs/examples/core/logger/inject_lambda_context_log_event.py"
 ```
 
 #### Setting a Correlation ID
