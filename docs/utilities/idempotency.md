@@ -43,30 +43,8 @@ TTL attribute name | `expiration` | This can only be configured after your table
 ???+ tip "Tip: You can share a single state table for all functions"
     You can reuse the same DynamoDB table to store idempotency state. We add your `function_name` in addition to the idempotency key as a hash key.
 
-```yaml hl_lines="5-13 21-23" title="AWS Serverless Application Model (SAM) example"
-Resources:
-  IdempotencyTable:
-	Type: AWS::DynamoDB::Table
-	Properties:
-	  AttributeDefinitions:
-		-   AttributeName: id
-			AttributeType: S
-	  KeySchema:
-		-   AttributeName: id
-			KeyType: HASH
-	  TimeToLiveSpecification:
-		AttributeName: expiration
-		Enabled: true
-	  BillingMode: PAY_PER_REQUEST
-
-  HelloWorldFunction:
-  Type: AWS::Serverless::Function
-  Properties:
-	Runtime: python3.8
-	...
-	Policies:
-	  - DynamoDBCrudPolicy:
-		  TableName: !Ref IdempotencyTable
+```yaml hl_lines="7-15 24-26" title="AWS Serverless Application Model (SAM) example"
+--8<-- "docs/examples/utilities/idempotency/template.yml"
 ```
 
 ???+ warning "Warning: Large responses with DynamoDB persistence layer"
@@ -86,25 +64,8 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
 
 === "app.py"
 
-    ```python hl_lines="1-3 5 7 14"
-    from aws_lambda_powertools.utilities.idempotency import (
-        DynamoDBPersistenceLayer, idempotent
-    )
-
-    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-
-    @idempotent(persistence_store=persistence_layer)
-    def handler(event, context):
-        payment = create_subscription_payment(
-            user=event['user'],
-            product=event['product_id']
-        )
-        ...
-        return {
-            "payment_id": payment.id,
-            "message": "success",
-            "statusCode": 200,
-        }
+    ```python hl_lines="1 3 6 10"
+    --8<-- "docs/examples/utilities/idempotency/idempotent_decorator.py"
     ```
 
 === "Example event"
@@ -116,7 +77,7 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
     }
     ```
 
-### Idempotent_function decorator
+### Idempotent function decorator
 
 Similar to [idempotent decorator](#idempotent-decorator), you can use `idempotent_function` decorator for any synchronous Python function.
 
@@ -131,37 +92,8 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
     This example also demonstrates how you can integrate with [Batch utility](batch.md), so you can process each record in an idempotent manner.
 
-    ```python hl_lines="4-5 16 21 29"
-    from aws_lambda_powertools.utilities.batch import (BatchProcessor, EventType,
-                                                       batch_processor)
-    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-    from aws_lambda_powertools.utilities.idempotency import (
-        DynamoDBPersistenceLayer, IdempotencyConfig, idempotent_function)
-
-
-    processor = BatchProcessor(event_type=EventType.SQS)
-    dynamodb = DynamoDBPersistenceLayer(table_name="idem")
-    config =  IdempotencyConfig(
-        event_key_jmespath="messageId",  # see Choosing a payload subset section
-        use_local_cache=True,
-    )
-
-
-    @idempotent_function(data_keyword_argument="record", config=config, persistence_store=dynamodb)
-    def record_handler(record: SQSRecord):
-        return {"message": record["body"]}
-
-
-    @idempotent_function(data_keyword_argument="data", config=config, persistence_store=dynamodb)
-    def dummy(arg_one, arg_two, data: dict, **kwargs):
-        return {"data": data}
-
-
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context):
-        # `data` parameter must be called as a keyword argument to work
-        dummy("hello", "universe", data="test")
-        return processor.response()
+    ```python hl_lines="3 13 18 26"
+    --8<-- "docs/examples/utilities/idempotency/batch_sample.py"
     ```
 
 === "Batch event"
@@ -197,75 +129,14 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
 === "dataclass_sample.py"
 
-    ```python hl_lines="3-4 23 32"
-    from dataclasses import dataclass
-
-    from aws_lambda_powertools.utilities.idempotency import (
-        DynamoDBPersistenceLayer, IdempotencyConfig, idempotent_function)
-
-    dynamodb = DynamoDBPersistenceLayer(table_name="idem")
-    config =  IdempotencyConfig(
-        event_key_jmespath="order_id",  # see Choosing a payload subset section
-        use_local_cache=True,
-    )
-
-    @dataclass
-    class OrderItem:
-        sku: str
-        description: str
-
-    @dataclass
-    class Order:
-        item: OrderItem
-        order_id: int
-
-
-    @idempotent_function(data_keyword_argument="order", config=config, persistence_store=dynamodb)
-    def process_order(order: Order):
-        return f"processed order {order.order_id}"
-
-
-    order_item = OrderItem(sku="fake", description="sample")
-    order = Order(item=order_item, order_id="fake-id")
-
-    # `order` parameter must be called as a keyword argument to work
-    process_order(order=order)
+    ```python hl_lines="3 24 33"
+    --8<-- "docs/examples/utilities/idempotency/dataclass_sample.py"
     ```
 
 === "parser_pydantic_sample.py"
 
-    ```python hl_lines="1-2 22 31"
-    from aws_lambda_powertools.utilities.idempotency import (
-        DynamoDBPersistenceLayer, IdempotencyConfig, idempotent_function)
-    from aws_lambda_powertools.utilities.parser import BaseModel
-
-    dynamodb = DynamoDBPersistenceLayer(table_name="idem")
-    config =  IdempotencyConfig(
-        event_key_jmespath="order_id",  # see Choosing a payload subset section
-        use_local_cache=True,
-    )
-
-
-    class OrderItem(BaseModel):
-        sku: str
-        description: str
-
-
-    class Order(BaseModel):
-        item: OrderItem
-        order_id: int
-
-
-    @idempotent_function(data_keyword_argument="order", config=config, persistence_store=dynamodb)
-    def process_order(order: Order):
-        return f"processed order {order.order_id}"
-
-
-    order_item = OrderItem(sku="fake", description="sample")
-    order = Order(item=order_item, order_id="fake-id")
-
-    # `order` parameter must be called as a keyword argument to work
-    process_order(order=order)
+    ```python hl_lines="1 21 30"
+    --8<-- "docs/examples/utilities/idempotency/parser_pydantic_sample.py"
     ```
 
 ### Choosing a payload subset for idempotency
