@@ -159,31 +159,8 @@ Imagine the function executes successfully, but the client never receives the re
 
 === "payment.py"
 
-    ```python hl_lines="2-4 10 12 15 20"
-    import json
-    from aws_lambda_powertools.utilities.idempotency import (
-        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-    )
-
-    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-
-    # Treat everything under the "body" key
-    # in the event json object as our payload
-    config = IdempotencyConfig(event_key_jmespath="powertools_json(body)")
-
-    @idempotent(config=config, persistence_store=persistence_layer)
-    def handler(event, context):
-        body = json.loads(event['body'])
-        payment = create_subscription_payment(
-            user=body['user'],
-            product=body['product_id']
-        )
-        ...
-        return {
-            "payment_id": payment.id,
-            "message": "success",
-            "statusCode": 200
-        }
+    ```python hl_lines="3 9 12 15 20"
+    --8<-- "docs/examples/utilities/idempotency/payment.py"
     ```
 
 === "Example event"
@@ -238,30 +215,14 @@ The client was successful in receiving the result after the retry. Since the Lam
 If you are using the `idempotent` decorator on your Lambda handler, any unhandled exceptions that are raised during the code execution will cause **the record in the persistence layer to be deleted**.
 This means that new invocations will execute your code again despite having the same payload. If you don't want the record to be deleted, you need to catch exceptions within the idempotent function and return a successful response.
 
-
 ![Idempotent sequence exception](../media/idempotent_sequence_exception.png)
 
 If you are using `idempotent_function`, any unhandled exceptions that are raised _inside_ the decorated function will cause the record in the persistence layer to be deleted, and allow the function to be executed again if retried.
 
 If an Exception is raised _outside_ the scope of the decorated function and after your function has been called, the persistent record will not be affected. In this case, idempotency will be maintained for your decorated function. Example:
 
-```python hl_lines="2-4 8-10" title="Exception not affecting idempotency record sample"
-def lambda_handler(event, context):
-    # If an exception is raised here, no idempotent record will ever get created as the
-    # idempotent function does not get called
-    do_some_stuff()
-
-    result = call_external_service(data={"user": "user1", "id": 5})
-
-    # This exception will not cause the idempotent record to be deleted, since it
-    # happens after the decorated function has been successfully called
-    raise Exception
-
-
-@idempotent_function(data_keyword_argument="data", config=config, persistence_store=dynamodb)
-def call_external_service(data: dict, **kwargs):
-    result = requests.post('http://example.com', json={"user": data['user'], "transaction_id": data['id']}
-    return result.json()
+```python hl_lines="10-12 16-18" title="Exception not affecting idempotency record sample"
+--8<-- "docs/examples/utilities/idempotency/idempotency_exception_sample.py"
 ```
 
 ???+ warning
@@ -276,16 +237,7 @@ def call_external_service(data: dict, **kwargs):
 This persistence layer is built-in, and you can either use an existing DynamoDB table or create a new one dedicated for idempotency state (recommended).
 
 ```python hl_lines="5-9" title="Customizing DynamoDBPersistenceLayer to suit your table structure"
-from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
-
-persistence_layer = DynamoDBPersistenceLayer(
-	table_name="IdempotencyTable",
-	key_attr="idempotency_key",
-	expiry_attr="expires_at",
-	status_attr="current_status",
-	data_attr="result_data",
-	validation_key_attr="validation_key",
-)
+--8<-- "docs/examples/utilities/idempotency/dynamodb_persistence_layer_customization.py"
 ```
 
 When using DynamoDB as a persistence layer, you can alter the attribute names by passing these parameters when initializing the persistence layer:
