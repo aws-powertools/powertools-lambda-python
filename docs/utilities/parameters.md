@@ -219,26 +219,14 @@ For parameters stored in JSON or Base64 format, you can use the `transform` argu
 
 === "High level functions"
 
-    ```python hl_lines="4"
-    from aws_lambda_powertools.utilities import parameters
-
-    def handler(event, context):
-        value_from_json = parameters.get_parameter("/my/json/parameter", transform="json")
+    ```python hl_lines="5"
+	--8<-- "docs/examples/utilities/parameters/parameters_transform.py"
     ```
 
 === "Providers"
 
-    ```python hl_lines="7 10"
-    from aws_lambda_powertools.utilities import parameters
-
-    ssm_provider = parameters.SSMProvider()
-
-    def handler(event, context):
-        # Transform a JSON string
-        value_from_json = ssm_provider.get("/my/json/parameter", transform="json")
-
-        # Transform a Base64 encoded string
-        value_from_binary = ssm_provider.get("/my/binary/parameter", transform="binary")
+    ```python hl_lines="8 11"
+	--8<-- "docs/examples/utilities/parameters/parameters_transform_providers.py"
     ```
 
 #### Partial transform failures with `get_multiple()`
@@ -249,25 +237,8 @@ You can override this by setting the `raise_on_transform_error` argument to `Tru
 
 For example, if you have three parameters, */param/a*, */param/b* and */param/c*, but */param/c* is malformed:
 
-```python hl_lines="9 16" title="Raising TransformParameterError at first malformed parameter"
-from aws_lambda_powertools.utilities import parameters
-
-ssm_provider = parameters.SSMProvider()
-
-def handler(event, context):
-	# This will display:
-	# /param/a: [some value]
-	# /param/b: [some value]
-	# /param/c: None
-	values = ssm_provider.get_multiple("/param", transform="json")
-	for k, v in values.items():
-		print(f"{k}: {v}")
-
-	try:
-		# This will raise a TransformParameterError exception
-		values = ssm_provider.get_multiple("/param", transform="json", raise_on_transform_error=True)
-	except parameters.exceptions.TransformParameterError:
-		...
+```python hl_lines="11 17" title="Raising TransformParameterError at first malformed parameter"
+--8<-- "docs/examples/utilities/parameters/parameters_transform_raise_on_transform_error.py"
 ```
 
 #### Auto-transform values on suffix
@@ -279,13 +250,8 @@ You can do this with a single request by using `transform="auto"`. This will ins
 ???+ info
     `transform="auto"` feature is available across all providers, including the high level functions.
 
-```python hl_lines="6" title="Deserializing parameter values based on their suffix"
-from aws_lambda_powertools.utilities import parameters
-
-ssm_provider = parameters.SSMProvider()
-
-def handler(event, context):
-	values = ssm_provider.get_multiple("/param", transform="auto")
+```python hl_lines="7" title="Deserializing parameter values based on their suffix"
+--8<-- "docs/examples/utilities/parameters/parameters_transform_auto.py"
 ```
 
 For example, if you have two parameters with the following suffixes `.json` and `.binary`:
@@ -308,14 +274,8 @@ The return of `ssm_provider.get_multiple("/param", transform="auto")` call will 
 
 You can use arbitrary keyword arguments to pass it directly to the underlying SDK method.
 
-```python hl_lines="8" title=""
-from aws_lambda_powertools.utilities import parameters
-
-secrets_provider = parameters.SecretsProvider()
-
-def handler(event, context):
-	# The 'VersionId' argument will be passed to the underlying get_secret_value() call.
-	value = secrets_provider.get("my-secret", VersionId="e62ec170-6b01-48c7-94f3-d7497851a8d2")
+```python hl_lines="7-8" title=""
+--8<-- "docs/examples/utilities/parameters/parameters_sdk_args.py"
 ```
 
 Here is the mapping between this utility's functions and methods and the underlying SDK:
@@ -332,7 +292,6 @@ Here is the mapping between this utility's functions and methods and the underly
 | DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table)) | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)
 | App Config          | `get_app_config`                | `appconfig`      | [get_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfig.html#AppConfig.Client.get_configuration) |
 
-
 ### Customizing boto configuration
 
 The **`config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html) when constructing any of the built-in provider classes.
@@ -342,31 +301,13 @@ The **`config`** and **`boto3_session`** parameters enable you to pass in a cust
 
 === "Custom session"
 
-	```python hl_lines="2 4 5"
-	from aws_lambda_powertools.utilities import parameters
-	import boto3
-
-	boto3_session = boto3.session.Session()
-	ssm_provider = parameters.SSMProvider(boto3_session=boto3_session)
-
-	def handler(event, context):
-		# Retrieve a single parameter
-		value = ssm_provider.get("/my/parameter")
-		...
+	```python hl_lines="1 5-6"
+	--8<-- "docs/examples/utilities/parameters/parameters_custom_session.py"
 	```
 === "Custom config"
 
-	```python hl_lines="2 4 5"
-	from aws_lambda_powertools.utilities import parameters
-	from botocore.config import Config
-
-	boto_config = Config()
-	ssm_provider = parameters.SSMProvider(config=boto_config)
-
-	def handler(event, context):
-		# Retrieve a single parameter
-		value = ssm_provider.get("/my/parameter")
-		...
+	```python hl_lines="1 5-6"
+	--8<-- "docs/examples/utilities/parameters/parameters_custom_config.py"
 	```
 
 ## Testing your code
