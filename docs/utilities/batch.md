@@ -353,47 +353,8 @@ Use the context manager to access a list of all returned values from your `recor
 * **When successful**. We will include a tuple with `success`, the result of `record_handler`, and the batch record
 * **When failed**. We will include a tuple with `fail`, exception as a string, and the batch record
 
-```python hl_lines="31-38" title="Accessing processed messages via context manager"
-import json
-
-from typing import Any, List, Literal, Union
-
-from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.utilities.batch import (BatchProcessor,
-												   EventType,
-												   FailureResponse,
-												   SuccessResponse,
-												   batch_processor)
-from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-processor = BatchProcessor(event_type=EventType.SQS)
-tracer = Tracer()
-logger = Logger()
-
-
-@tracer.capture_method
-def record_handler(record: SQSRecord):
-	payload: str = record.body
-	if payload:
-		item: dict = json.loads(payload)
-	...
-
-@logger.inject_lambda_context
-@tracer.capture_lambda_handler
-def lambda_handler(event, context: LambdaContext):
-	batch = event["Records"]
-	with processor(records=batch, handler=record_handler):
-		processed_messages: List[Union[SuccessResponse, FailureResponse]] = processor.process()
-
-	for message in processed_messages:
-        status: Union[Literal["success"], Literal["fail"]] = message[0]
-        result: Any = message[1]
-        record: SQSRecord = message[2]
-
-
-	return processor.response()
+```python hl_lines="5 26-27 29-32" title="Accessing processed messages via context manager"
+--8<-- "docs/examples/utilities/batch/sqs_processed_messages_context_manager.py"
 ```
 
 ### Extending BatchProcessor
