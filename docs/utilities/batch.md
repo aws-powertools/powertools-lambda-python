@@ -370,35 +370,7 @@ For these scenarios, you can subclass `BatchProcessor` and quickly override `suc
 	Let's suppose you'd like to add a metric named `BatchRecordFailures` for each batch record that failed processing
 
 ```python title="Extending failure handling mechanism in BatchProcessor"
-
-from typing import Tuple
-
-from aws_lambda_powertools import Metrics
-from aws_lambda_powertools.metrics import MetricUnit
-from aws_lambda_powertools.utilities.batch import batch_processor, BatchProcessor, ExceptionInfo, EventType, FailureResponse
-from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-
-
-class MyProcessor(BatchProcessor):
-	def failure_handler(self, record: SQSRecord, exception: ExceptionInfo) -> FailureResponse:
-		metrics.add_metric(name="BatchRecordFailures", unit=MetricUnit.Count, value=1)
-		return super().failure_handler(record, exception)
-
-processor = MyProcessor(event_type=EventType.SQS)
-metrics = Metrics(namespace="test")
-
-
-@tracer.capture_method
-def record_handler(record: SQSRecord):
-	payload: str = record.body
-	if payload:
-		item: dict = json.loads(payload)
-	...
-
-@metrics.log_metrics(capture_cold_start_metric=True)
-@batch_processor(record_handler=record_handler, processor=processor)
-def lambda_handler(event, context: LambdaContext):
-	return processor.response()
+--8<-- "docs/examples/utilities/batch/sqs_batch_processor_extension.py"
 ```
 
 ### Create your own partial processor
