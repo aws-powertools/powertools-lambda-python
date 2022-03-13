@@ -317,49 +317,23 @@ can be achieved in a number of ways - in this example, we use the [pytest monkey
 to patch the `parameters.get_parameter` method:
 
 === "tests.py"
+
 	```python
-	from src import index
-
-	def test_handler(monkeypatch):
-
-		def mockreturn(name):
-			return "mock_value"
-
-		monkeypatch.setattr(index.parameters, "get_parameter", mockreturn)
-		return_val = index.handler({}, {})
-		assert return_val.get('message') == 'mock_value'
+	--8<-- "docs/examples/utilities/parameters/testing_parameters_tests.py"
 	```
 
 === "src/index.py"
-	```python
-	from aws_lambda_powertools.utilities import parameters
 
-	def handler(event, context):
-		# Retrieve a single parameter
-		value = parameters.get_parameter("my-parameter-name")
-		return {"message": value}
+	```python
+	--8<-- "docs/examples/utilities/parameters/testing_parameters_index.py"
 	```
 
 If we need to use this pattern across multiple tests, we can avoid repetition by refactoring to use our own pytest fixture:
 
 === "tests.py"
+
 	```python
-	import pytest
-
-	from src import index
-
-	@pytest.fixture
-	def mock_parameter_response(monkeypatch):
-		def mockreturn(name):
-			return "mock_value"
-
-    	monkeypatch.setattr(index.parameters, "get_parameter", mockreturn)
-
-	# Pass our fixture as an argument to all tests where we want to mock the get_parameter response
-	def test_handler(mock_parameter_response):
-		return_val = index.handler({}, {})
-		assert return_val.get('message') == 'mock_value'
-
+	--8<-- "docs/examples/utilities/parameters/testing_parameters_fixture.py"
 	```
 
 Alternatively, if we need more fully featured mocking (for example checking the arguments passed to `get_parameter`), we
@@ -369,16 +343,5 @@ object named `get_parameter_mock`.
 
 === "tests.py"
 	```python
-	from unittest.mock import patch
-	from src import index
-
-	# Replaces "aws_lambda_powertools.utilities.parameters.get_parameter" with a Mock object
-	@patch("aws_lambda_powertools.utilities.parameters.get_parameter")
-	def test_handler(get_parameter_mock):
-		get_parameter_mock.return_value = 'mock_value'
-
-		return_val = index.handler({}, {})
-		get_parameter_mock.assert_called_with("my-parameter-name")
-		assert return_val.get('message') == 'mock_value'
-
+	--8<-- "docs/examples/utilities/parameters/testing_parameters_mock.py"
 	```
