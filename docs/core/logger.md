@@ -595,8 +595,8 @@ You might want to continue to use the same date formatting style, or override `l
 
 Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, `xray_trace_id`.
 
-
 === "lambda_handler.py"
+
     ```python hl_lines="3-4 7-11 14"
     --8<-- "docs/examples/core/logger/overriding_log_records.py"
     ```
@@ -687,14 +687,15 @@ For these, you can override the `serialize` method from [LambdaPowertoolsFormatt
     ```
 
 === "Example CloudWatch Logs excerpt"
-	```json hl_lines="5"
-	{
-		"level": "INFO",
-		"location": "<module>:16",
-		"timestamp": "2021-12-30 13:41:53,413+0100",
-		"event": "hello"
-	}
-	```
+
+    ```json hl_lines="5"
+    {
+        "level": "INFO",
+        "location": "<module>:16",
+        "timestamp": "2021-12-30 13:41:53,413+0100",
+        "event": "hello"
+    }
+    ```
 
 The `log` argument is the final log record containing [our standard keys](#standard-structured-keys), optionally [Lambda context keys](#capturing-lambda-context-info), and any custom key you might have added via [append_keys](#append_keys-method) or the [extra parameter](#extra-parameter).
 
@@ -702,7 +703,6 @@ For exceptional cases where you want to completely replace our formatter logic, 
 
 ???+ warning
     You will need to implement `append_keys`, `clear_state`, override `format`, and optionally `remove_keys` to keep the same feature set Powertools Logger provides. This also means keeping state of logging keys added.
-
 
 === "collect.py"
 

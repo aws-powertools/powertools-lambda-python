@@ -330,136 +330,20 @@ Inheritance is importance because we need to access message IDs and sequence num
 
 === "SQS"
 
-    ```python hl_lines="5 9-10 12-19 21 27"
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-    from aws_lambda_powertools.utilities.parser.models import SqsRecordModel
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    class Order(BaseModel):
-        item: dict
-
-    class OrderSqsRecord(SqsRecordModel):
-        body: Order
-
-        # auto transform json string
-        # so Pydantic can auto-initialize nested Order model
-        @validator("body", pre=True)
-        def transform_body_to_dict(cls, value: str):
-            return json.loads(value)
-
-    processor = BatchProcessor(event_type=EventType.SQS, model=OrderSqsRecord)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: OrderSqsRecord):
-        return record.body.item
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context: LambdaContext):
-        return processor.response()
+    ```python hl_lines="6 10-11 14-21 24 30"
+    --8<-- "docs/examples/utilities/batch/sqs_pydantic_inheritance.py"
     ```
 
 === "Kinesis Data Streams"
 
-    ```python hl_lines="5 9-10 12-20 22-23 26 32"
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-    from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecord
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    class Order(BaseModel):
-        item: dict
-
-    class OrderKinesisPayloadRecord(KinesisDataStreamRecordPayload):
-        data: Order
-
-        # auto transform json string
-        # so Pydantic can auto-initialize nested Order model
-        @validator("data", pre=True)
-        def transform_message_to_dict(cls, value: str):
-            # Powertools KinesisDataStreamRecordModel already decodes b64 to str here
-            return json.loads(value)
-
-    class OrderKinesisRecord(KinesisDataStreamRecordModel):
-        kinesis: OrderKinesisPayloadRecord
-
-
-    processor = BatchProcessor(event_type=EventType.KinesisDataStreams, model=OrderKinesisRecord)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: OrderKinesisRecord):
-        return record.kinesis.data.item
-
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context: LambdaContext):
-        return processor.response()
+    ```python hl_lines="8 12-13 16-24 27-28 31 37"
+    --8<-- "docs/examples/utilities/batch/kinesis_data_streams_pydantic_inheritance.py"
     ```
 
 === "DynamoDB Streams"
 
-    ```python hl_lines="7 11-12 14-21 23-25 27-28 31 37"
-    import json
-
-    from typing import Dict, Literal
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-    from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamRecordModel
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    class Order(BaseModel):
-        item: dict
-
-    class OrderDynamoDB(BaseModel):
-        Message: Order
-
-        # auto transform json string
-        # so Pydantic can auto-initialize nested Order model
-        @validator("Message", pre=True)
-        def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
-            return json.loads(value["S"])
-
-    class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-        NewImage: Optional[OrderDynamoDB]
-        OldImage: Optional[OrderDynamoDB]
-
-    class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
-        dynamodb: OrderDynamoDBChangeRecord
-
-
-    processor = BatchProcessor(event_type=EventType.DynamoDBStreams, model=OrderKinesisRecord)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: OrderDynamoDBRecord):
-        return record.dynamodb.NewImage.Message.item
-
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context: LambdaContext):
-        return processor.response()
+    ```python hl_lines="7 11-12 15-22 25-27 30-31 34 40"
+    --8<-- "docs/examples/utilities/batch/dynamodb_streams_pydantic_inheritance.py"
     ```
 
 ### Accessing processed messages
