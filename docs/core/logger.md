@@ -458,13 +458,13 @@ Logger supports inheritance via `child` parameter. This allows you to create mul
 === "collect.py"
 
     ```python hl_lines="1 9"
-    --8<-- "docs/examples/core/logger/shared_app.py"
+    --8<-- "docs/examples/core/logger/shared_logger_app.py"
     ```
 
 === "shared.py"
 
     ```python hl_lines="7"
-    --8<-- "docs/examples/core/logger/shared.py"
+    --8<-- "docs/examples/core/logger/shared_logger_child.py"
     ```
 
 In this example, `Logger` will create a parent logger named `payment` and a child logger named `payment.shared`. Changes in either parent or child logger will be propagated bi-directionally.
