@@ -383,66 +383,8 @@ You can create your own partial batch processor from scratch by inheriting the `
 
 You can then use this class as a context manager, or pass it to `batch_processor` to use as a decorator on your Lambda handler function.
 
-```python hl_lines="3 9 24 30 37 57" title="Creating a custom batch processor"
-from random import randint
-
-from aws_lambda_powertools.utilities.batch import BasePartialProcessor, batch_processor
-import boto3
-import os
-
-table_name = os.getenv("TABLE_NAME", "table_not_found")
-
-class MyPartialProcessor(BasePartialProcessor):
-	"""
-	Process a record and stores successful results at a Amazon DynamoDB Table
-
-	Parameters
-	----------
-	table_name: str
-		DynamoDB table name to write results to
-	"""
-
-	def __init__(self, table_name: str):
-		self.table_name = table_name
-
-		super().__init__()
-
-	def _prepare(self):
-		# It's called once, *before* processing
-		# Creates table resource and clean previous results
-		self.ddb_table = boto3.resource("dynamodb").Table(self.table_name)
-		self.success_messages.clear()
-
-	def _clean(self):
-		# It's called once, *after* closing processing all records (closing the context manager)
-		# Here we're sending, at once, all successful messages to a ddb table
-		with self.ddb_table.batch_writer() as batch:
-			for result in self.success_messages:
-				batch.put_item(Item=result)
-
-	def _process_record(self, record):
-		# It handles how your record is processed
-		# Here we're keeping the status of each run
-		# where self.handler is the record_handler function passed as an argument
-		try:
-			result = self.handler(record) # record_handler passed to decorator/context manager
-			return self.success_handler(record, result)
-		except Exception as exc:
-			return self.failure_handler(record, exc)
-
-	def success_handler(self, record):
-		entry = ("success", result, record)
-		message = {"age": result}
-		self.success_messages.append(message)
-		return entry
-
-
-def record_handler(record):
-	return randint(0, 100)
-
-@batch_processor(record_handler=record_handler, processor=MyPartialProcessor(table_name))
-def lambda_handler(event, context):
-	return {"statusCode": 200}
+```python hl_lines="6 11 26 32 39 60" title="Creating a custom batch processor"
+--8<-- "docs/examples/utilities/batch/custom_batch_processor.py"
 ```
 
 ### Caveats
@@ -452,7 +394,6 @@ def lambda_handler(event, context):
 When using Tracer to capture responses for each batch record processing, you might exceed 64K of tracing data depending on what you return from your `record_handler` function, or how big is your batch size.
 
 If that's the case, you can configure [Tracer to disable response auto-capturing](../core/tracer.md#disabling-response-auto-capture){target="_blank"}.
-
 
 ```python hl_lines="14" title="Disabling Tracer response auto-capturing"
 import json
@@ -618,8 +559,6 @@ Given a SQS batch where the first batch record succeeds and the second fails pro
     }
     ```
 
-
-
 ## FAQ
 
 ### Choosing between decorator and context manager
@@ -645,12 +584,10 @@ class MyProcessor(BatchProcessor):
 		return super().failure_handler(record, exception)
 ```
 
-
 ## Legacy
 
 ???+ tip
     This is kept for historical purposes. Use the new [BatchProcessor](#processing-messages-from-sqs) instead.
-
 
 ### Migration guide
 
@@ -669,7 +606,6 @@ You can migrate in three steps:
 1. If you are using **`sqs_batch_decorator`** you can now use **`batch_processor`** decorator
 2. If you were using **`PartialSQSProcessor`** you can now use **`BatchProcessor`**
 3. Change your Lambda Handler to return the new response format
-
 
 === "Decorator: Before"
 
@@ -701,7 +637,6 @@ You can migrate in three steps:
     def lambda_handler(event, context):
         return processor.response()
     ```
-
 
 === "Context manager: Before"
 
