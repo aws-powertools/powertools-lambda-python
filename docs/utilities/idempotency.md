@@ -287,20 +287,8 @@ This is a locking mechanism for correctness. Since we don't know the result from
 
 You can enable in-memory caching with the **`use_local_cache`** parameter:
 
-```python hl_lines="8 11" title="Caching idempotent transactions in-memory to prevent multiple calls to storage"
-from aws_lambda_powertools.utilities.idempotency import (
-	IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-)
-
-persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-config =  IdempotencyConfig(
-	event_key_jmespath="body",
-	use_local_cache=True,
-)
-
-@idempotent(config=config, persistence_store=persistence_layer)
-def handler(event, context):
-	...
+```python hl_lines="6 10" title="Caching idempotent transactions in-memory to prevent multiple calls to storage"
+--8<-- "docs/examples/utilities/idempotency/idempotency_in_memory_cache.py"
 ```
 
 When enabled, the default is to cache a maximum of 256 records in each Lambda execution environment - You can change it with the **`local_cache_max_items`** parameter.
@@ -314,20 +302,8 @@ In most cases, it is not desirable to store the idempotency records forever. Rat
 
 You can change this window with the **`expires_after_seconds`** parameter:
 
-```python hl_lines="8 11" title="Adjusting cache TTL"
-from aws_lambda_powertools.utilities.idempotency import (
-	IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-)
-
-persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-config =  IdempotencyConfig(
-	event_key_jmespath="body",
-	expires_after_seconds=5*60,  # 5 minutes
-)
-
-@idempotent(config=config, persistence_store=persistence_layer)
-def handler(event, context):
-	...
+```python hl_lines="6 10" title="Adjusting cache TTL"
+--8<-- "docs/examples/utilities/idempotency/idempotency_cache_ttl.py"
 ```
 
 This will mark any records older than 5 minutes as expired, and the lambda handler will be executed as normal if it is invoked with a matching payload.
@@ -346,33 +322,8 @@ With **`payload_validation_jmespath`**, you can provide an additional JMESPath e
 
 === "app.py"
 
-    ```python hl_lines="7 11 18 25"
-    from aws_lambda_powertools.utilities.idempotency import (
-        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-    )
-
-    config = IdempotencyConfig(
-        event_key_jmespath="[userDetail, productId]",
-        payload_validation_jmespath="amount"
-    )
-    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-
-    @idempotent(config=config, persistence_store=persistence_layer)
-    def handler(event, context):
-        # Creating a subscription payment is a side
-        # effect of calling this function!
-        payment = create_subscription_payment(
-          user=event['userDetail']['username'],
-          product=event['product_id'],
-          amount=event['amount']
-        )
-        ...
-        return {
-            "message": "success",
-            "statusCode": 200,
-            "payment_id": payment.id,
-            "amount": payment.amount
-        }
+    ```python hl_lines="5 10 17 24"
+    --8<-- "docs/examples/utilities/idempotency/idempotency_payload_validation.py"
     ```
 
 === "Example Event 1"
@@ -420,22 +371,8 @@ This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`
 
 === "app.py"
 
-    ```python hl_lines="9-10 13"
-    from aws_lambda_powertools.utilities.idempotency import (
-        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-    )
-
-    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-
-    # Requires "user"."uid" and "order_id" to be present
-    config = IdempotencyConfig(
-        event_key_jmespath="[user.uid, order_id]",
-        raise_on_no_idempotency_key=True,
-    )
-
-    @idempotent(config=config, persistence_store=persistence_layer)
-    def handler(event, context):
-        pass
+    ```python hl_lines="7-8 12"
+    --8<-- "docs/examples/utilities/idempotency/idempotency_key_required.py"
     ```
 
 === "Success Event"
@@ -470,42 +407,14 @@ The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a
 
 === "Custom session"
 
-    ```python hl_lines="1 6 9 14"
-    import boto3
-    from aws_lambda_powertools.utilities.idempotency import (
-        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-    )
-
-    boto3_session = boto3.session.Session()
-    persistence_layer = DynamoDBPersistenceLayer(
-        table_name="IdempotencyTable",
-        boto3_session=boto3_session
-    )
-
-    config = IdempotencyConfig(event_key_jmespath="body")
-
-    @idempotent(config=config, persistence_store=persistence_layer)
-    def handler(event, context):
-       ...
+    ```python hl_lines="1 5 8 14"
+    --8<-- "docs/examples/utilities/idempotency/idempotency_custom_session.py"
     ```
+
 === "Custom config"
 
-    ```python hl_lines="1 7 10"
-    from botocore.config import Config
-    from aws_lambda_powertools.utilities.idempotency import (
-        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-    )
-
-    config = IdempotencyConfig(event_key_jmespath="body")
-    boto_config = Config()
-    persistence_layer = DynamoDBPersistenceLayer(
-        table_name="IdempotencyTable",
-        boto_config=boto_config
-    )
-
-    @idempotent(config=config, persistence_store=persistence_layer)
-    def handler(event, context):
-       ...
+    ```python hl_lines="1 6 9 13"
+    --8<-- "docs/examples/utilities/idempotency/idempotency_custom_config.py"
     ```
 
 ### Using a DynamoDB table with a composite primary key
@@ -517,16 +426,7 @@ With this setting, we will save the idempotency key in the sort key instead of t
 You can optionally set a static value for the partition key using the `static_pk_value` parameter.
 
 ```python hl_lines="5" title="Reusing a DynamoDB table that uses a composite primary key"
-from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent
-
-persistence_layer = DynamoDBPersistenceLayer(
-	table_name="IdempotencyTable",
-	sort_key_attr='sort_key')
-
-
-@idempotent(persistence_store=persistence_layer)
-def handler(event, context):
-	return {"message": "success": "id": event['body']['id]}
+--8<-- "docs/examples/utilities/idempotency/idempotency_composite_primary_key.py"
 ```
 
 The example function above would cause data to be stored in DynamoDB like this:
