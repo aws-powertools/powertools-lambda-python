@@ -395,33 +395,8 @@ When using Tracer to capture responses for each batch record processing, you mig
 
 If that's the case, you can configure [Tracer to disable response auto-capturing](../core/tracer.md#disabling-response-auto-capture){target="_blank"}.
 
-```python hl_lines="14" title="Disabling Tracer response auto-capturing"
-import json
-
-from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-processor = BatchProcessor(event_type=EventType.SQS)
-tracer = Tracer()
-logger = Logger()
-
-
-@tracer.capture_method(capture_response=False)
-def record_handler(record: SQSRecord):
-    payload: str = record.body
-    if payload:
-        item: dict = json.loads(payload)
-    ...
-
-@logger.inject_lambda_context
-@tracer.capture_lambda_handler
-@batch_processor(record_handler=record_handler, processor=processor)
-def lambda_handler(event, context: LambdaContext):
-    return processor.response()
-
+```python hl_lines="13" title="Disabling Tracer response auto-capturing"
+--8<-- "docs/examples/utilities/batch/caveats_tracer_response_auto_capture.py"
 ```
 
 ## Testing your code
@@ -435,87 +410,13 @@ Given a SQS batch where the first batch record succeeds and the second fails pro
 === "test_app.py"
 
     ```python
-    import json
-
-    from pathlib import Path
-    from dataclasses import dataclass
-
-    import pytest
-    from src.app import lambda_handler, processor
-
-
-    def load_event(path: Path):
-        with path.open() as f:
-            return json.load(f)
-
-
-    @pytest.fixture
-    def lambda_context():
-        @dataclass
-        class LambdaContext:
-            function_name: str = "test"
-            memory_limit_in_mb: int = 128
-            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
-            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
-
-        return LambdaContext()
-
-    @pytest.fixture()
-    def sqs_event():
-        """Generates API GW Event"""
-        return load_event(path=Path("events/sqs_event.json"))
-
-
-    def test_app_batch_partial_response(sqs_event, lambda_context):
-        # GIVEN
-        processor = app.processor  # access processor for additional assertions
-        successful_record = sqs_event["Records"][0]
-        failed_record = sqs_event["Records"][1]
-        expected_response = {
-            "batchItemFailures: [
-                {
-                    "itemIdentifier": failed_record["messageId"]
-                }
-            ]
-        }
-
-        # WHEN
-        ret = app.lambda_handler(sqs_event, lambda_context)
-
-        # THEN
-        assert ret == expected_response
-        assert len(processor.fail_messages) == 1
-        assert processor.success_messages[0] == successful_record
+    --8<-- "docs/examples/utilities/batch/testing_test_app.py"
     ```
 
 === "src/app.py"
 
     ```python
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    processor = BatchProcessor(event_type=EventType.SQS)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: SQSRecord):
-        payload: str = record.body
-        if payload:
-            item: dict = json.loads(payload)
-        ...
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context: LambdaContext):
-        return processor.response()
+    --8<-- "docs/examples/utilities/batch/testing_src_app.py"
     ```
 
 === "Sample SQS event"
