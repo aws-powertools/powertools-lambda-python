@@ -178,19 +178,8 @@ Keep the following in mind regardless of which decorator you end up using it:
 
 Quick validation to verify whether the field `message` has the value of `hello world`.
 
-```python hl_lines="6" title="Data field validation with validator"
-from aws_lambda_powertools.utilities.parser import parse, BaseModel, validator
-
-class HelloWorldModel(BaseModel):
-	message: str
-
-	@validator('message')
-	def is_hello_world(cls, v):
-		if v != "hello world":
-			raise ValueError("Message must be hello world!")
-		return v
-
-parse(model=HelloWorldModel, event={"message": "hello universe"})
+```python hl_lines="7" title="Data field validation with validator"
+--8<-- "docs/examples/utilities/parser/parser_validator.py"
 ```
 
 If you run as-is, you should expect the following error with the message we provided in our exception:
@@ -202,21 +191,8 @@ message
 
 Alternatively, you can pass `'*'` as an argument for the decorator so that you can validate every value available.
 
-```python hl_lines="7" title="Validating all data fields with custom logic"
-from aws_lambda_powertools.utilities.parser import parse, BaseModel, validator
-
-class HelloWorldModel(BaseModel):
-	message: str
-	sender: str
-
-	@validator('*')
-	def has_whitespace(cls, v):
-		if ' ' not in v:
-			raise ValueError("Must have whitespace...")
-
-		return v
-
-parse(model=HelloWorldModel, event={"message": "hello universe", "sender": "universe"})
+```python hl_lines="8" title="Validating all data fields with custom logic"
+--8<-- "docs/examples/utilities/parser/parser_validator_all.py"
 ```
 
 ### validating entire model
@@ -224,27 +200,7 @@ parse(model=HelloWorldModel, event={"message": "hello universe", "sender": "univ
 `root_validator` can help when you have a complex validation mechanism. For example finding whether data has been omitted, comparing field values, etc.
 
 ```python title="Comparing and validating multiple fields at once with root_validator"
-from aws_lambda_powertools.utilities.parser import parse, BaseModel, root_validator
-
-class UserModel(BaseModel):
-	username: str
-	password1: str
-	password2: str
-
-	@root_validator
-	def check_passwords_match(cls, values):
-		pw1, pw2 = values.get('password1'), values.get('password2')
-		if pw1 is not None and pw2 is not None and pw1 != pw2:
-			raise ValueError('passwords do not match')
-		return values
-
-payload = {
-	"username": "universe",
-	"password1": "myp@ssword",
-	"password2": "repeat password"
-}
-
-parse(model=UserModel, event=payload)
+--8<-- "docs/examples/utilities/parser/parser_validator_root.py"
 ```
 
 ???+ info
@@ -259,38 +215,8 @@ There are number of advanced use cases well documented in Pydantic's doc such as
 
 Two possible unknown use cases are Models and exception' serialization. Models have methods to [export them](https://pydantic-docs.helpmanual.io/usage/exporting_models/) as `dict`, `JSON`, `JSON Schema`, and Validation exceptions can be exported as JSON.
 
-```python hl_lines="21 28-31" title="Converting data models in various formats"
-from aws_lambda_powertools.utilities import Logger
-from aws_lambda_powertools.utilities.parser import parse, BaseModel, ValidationError, validator
-
-logger = Logger(service="user")
-
-class UserModel(BaseModel):
-	username: str
-	password1: str
-	password2: str
-
-payload = {
-	"username": "universe",
-	"password1": "myp@ssword",
-	"password2": "repeat password"
-}
-
-def my_function():
-	try:
-		return parse(model=UserModel, event=payload)
-	except ValidationError as e:
-		logger.exception(e.json())
-		return {
-			"status_code": 400,
-			"message": "Invalid username"
-		}
-
-User: UserModel = my_function()
-user_dict = User.dict()
-user_json = User.json()
-user_json_schema_as_dict = User.schema()
-user_json_schema_as_json = User.schema_json(indent=2)
+```python hl_lines="24 29-32" title="Converting data models in various formats"
+--8<-- "docs/examples/utilities/parser/parser_model_export.py"
 ```
 
 These can be quite useful when manipulating models that later need to be serialized as inputs for services like DynamoDB, EventBridge, etc.
