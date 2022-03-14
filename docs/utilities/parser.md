@@ -23,19 +23,7 @@ Install parser's extra dependencies using **`pip install aws-lambda-powertools[p
 You can define models to parse incoming events by inheriting from `BaseModel`.
 
 ```python title="Defining an Order data model"
-from aws_lambda_powertools.utilities.parser import BaseModel
-from typing import List, Optional
-
-class OrderItem(BaseModel):
-	id: int
-	quantity: int
-	description: str
-
-class Order(BaseModel):
-	id: int
-	description: str
-	items: List[OrderItem] # nesting models are supported
-	optional_field: Optional[str] # this field may or may not be available when parsing
+--8<-- "docs/examples/utilities/parser/parser_models.py"
 ```
 
 These are simply Python classes that inherit from BaseModel. **Parser** enforces type hints declared in your model at runtime.
@@ -53,93 +41,16 @@ Use the decorator for fail fast scenarios where you want your Lambda function to
 ???+ note
     **This decorator will replace the `event` object with the parsed model if successful**. This means you might be careful when nesting other decorators that expect `event` to be a `dict`.
 
-```python hl_lines="18" title="Parsing and validating upon invocation with event_parser decorator"
-from aws_lambda_powertools.utilities.parser import event_parser, BaseModel
-from aws_lambda_powertools.utilities.typing import LambdaContext
-from typing import List, Optional
-
-import json
-
-class OrderItem(BaseModel):
-	id: int
-	quantity: int
-	description: str
-
-class Order(BaseModel):
-	id: int
-	description: str
-	items: List[OrderItem] # nesting models are supported
-	optional_field: Optional[str] # this field may or may not be available when parsing
-
-
-@event_parser(model=Order)
-def handler(event: Order, context: LambdaContext):
-	print(event.id)
-	print(event.description)
-	print(event.items)
-
-	order_items = [item for item in event.items]
-	...
-
-payload = {
-	"id": 10876546789,
-	"description": "My order",
-	"items": [
-		{
-			"id": 1015938732,
-			"quantity": 1,
-			"description": "item xpto"
-		}
-	]
-}
-
-handler(event=payload, context=LambdaContext())
-handler(event=json.dumps(payload), context=LambdaContext()) # also works if event is a JSON string
+```python hl_lines="21" title="Parsing and validating upon invocation with event_parser decorator"
+--8<-- "docs/examples/utilities/parser/parser_event_parser_decorator.py"
 ```
 
 ### parse function
 
 Use this standalone function when you want more control over the data validation process, for example returning a 400 error for malformed payloads.
 
-```python hl_lines="21 30" title="Using standalone parse function for more flexibility"
-from aws_lambda_powertools.utilities.parser import parse, BaseModel, ValidationError
-from typing import List, Optional
-
-class OrderItem(BaseModel):
-	id: int
-	quantity: int
-	description: str
-
-class Order(BaseModel):
-	id: int
-	description: str
-	items: List[OrderItem] # nesting models are supported
-	optional_field: Optional[str] # this field may or may not be available when parsing
-
-
-payload = {
-	"id": 10876546789,
-	"description": "My order",
-	"items": [
-		{
-			# this will cause a validation error
-			"id": [1015938732],
-			"quantity": 1,
-			"description": "item xpto"
-		}
-	]
-}
-
-def my_function():
-	try:
-		parsed_payload: Order = parse(event=payload, model=Order)
-		# payload dict is now parsed into our model
-		return parsed_payload.items
-	except ValidationError:
-		return {
-			"status_code": 400,
-			"message": "Invalid order"
-		}
+```python hl_lines="24 35" title="Using standalone parse function for more flexibility"
+--8<-- "docs/examples/utilities/parser/parser_parse_function.py"
 ```
 
 ## Built-in models
@@ -168,56 +79,8 @@ You can extend them to include your own models, and yet have all other known fie
 ???+ tip
     For Mypy users, we only allow type override for fields where payload is injected e.g. `detail`, `body`, etc.
 
-
-```python hl_lines="16-17 28 41" title="Extending EventBridge model as an example"
-from aws_lambda_powertools.utilities.parser import parse, BaseModel
-from aws_lambda_powertools.utilities.parser.models import EventBridgeModel
-
-from typing import List, Optional
-
-class OrderItem(BaseModel):
-	id: int
-	quantity: int
-	description: str
-
-class Order(BaseModel):
-	id: int
-	description: str
-	items: List[OrderItem]
-
-class OrderEventModel(EventBridgeModel):
-	detail: Order
-
-payload = {
-	"version": "0",
-	"id": "6a7e8feb-b491-4cf7-a9f1-bf3703467718",
-	"detail-type": "OrderPurchased",
-	"source": "OrderService",
-	"account": "111122223333",
-	"time": "2020-10-22T18:43:48Z",
-	"region": "us-west-1",
-	"resources": ["some_additional"],
-	"detail": {
-		"id": 10876546789,
-		"description": "My order",
-		"items": [
-			{
-				"id": 1015938732,
-				"quantity": 1,
-				"description": "item xpto"
-			}
-		]
-	}
-}
-
-ret = parse(model=OrderEventModel, event=payload)
-
-assert ret.source == "OrderService"
-assert ret.detail.description == "My order"
-assert ret.detail_type == "OrderPurchased" # we rename it to snake_case since detail-type is an invalid name
-
-for order_item in ret.detail.items:
-	...
+```python hl_lines="19-20 32 45" title="Extending EventBridge model as an example"
+--8<-- "docs/examples/utilities/parser/parser_extending_builtin_models.py"
 ```
 
 **What's going on here, you might ask**:
@@ -242,40 +105,8 @@ Envelopes can be used via `envelope` parameter available in both `parse` functio
 
 Here's an example of parsing a model found in an event coming from EventBridge, where all you want is what's inside the `detail` key.
 
-```python hl_lines="18-22 25 31" title="Parsing payload in a given key only using envelope feature"
-from aws_lambda_powertools.utilities.parser import event_parser, parse, BaseModel, envelopes
-from aws_lambda_powertools.utilities.typing import LambdaContext
-
-class UserModel(BaseModel):
-	username: str
-	password1: str
-	password2: str
-
-payload = {
-	"version": "0",
-	"id": "6a7e8feb-b491-4cf7-a9f1-bf3703467718",
-	"detail-type": "CustomerSignedUp",
-	"source": "CustomerService",
-	"account": "111122223333",
-	"time": "2020-10-22T18:43:48Z",
-	"region": "us-west-1",
-	"resources": ["some_additional_"],
-	"detail": {
-		"username": "universe",
-		"password1": "myp@ssword",
-		"password2": "repeat password"
-	}
-}
-
-ret = parse(model=UserModel, envelope=envelopes.EventBridgeEnvelope, event=payload)
-
-# Parsed model only contains our actual model, not the entire EventBridge + Payload parsed
-assert ret.password1 == ret.password2
-
-# Same behaviour but using our decorator
-@event_parser(model=UserModel, envelope=envelopes.EventBridgeEnvelope)
-def handler(event: UserModel, context: LambdaContext):
-	assert event.password1 == event.password2
+```python hl_lines="20-24 27 33" title="Parsing payload in a given key only using envelope feature"
+--8<-- "docs/examples/utilities/parser/parser_envelope.py"
 ```
 
 **What's going on here, you might ask**:
@@ -310,53 +141,13 @@ Here's a snippet of how the EventBridge envelope we demonstrated previously is i
 === "EventBridge Model"
 
     ```python
-    from datetime import datetime
-    from typing import Any, Dict, List
-
-    from aws_lambda_powertools.utilities.parser import BaseModel, Field
-
-
-    class EventBridgeModel(BaseModel):
-        version: str
-        id: str  # noqa: A003,VNE003
-        source: str
-        account: str
-        time: datetime
-        region: str
-        resources: List[str]
-        detail_type: str = Field(None, alias="detail-type")
-        detail: Dict[str, Any]
+	--8<-- "docs/examples/utilities/parser/parser_event_bridge_model.py"
     ```
 
 === "EventBridge Envelope"
 
-    ```python hl_lines="8 10 25 26"
-    from aws_lambda_powertools.utilities.parser import BaseEnvelope, models
-    from aws_lambda_powertools.utilities.parser.models import EventBridgeModel
-
-    from typing import Any, Dict, Optional, TypeVar
-
-    Model = TypeVar("Model", bound=BaseModel)
-
-    class EventBridgeEnvelope(BaseEnvelope):
-
-        def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Model) -> Optional[Model]:
-            """Parses data found with model provided
-
-            Parameters
-            ----------
-            data : Dict
-                Lambda event to be parsed
-            model : Model
-                Data model provided to parse after extracting data using envelope
-
-            Returns
-            -------
-            Any
-                Parsed detail payload with model provided
-            """
-            parsed_envelope = EventBridgeModel.parse_obj(data)
-            return self._parse(data=parsed_envelope.detail, model=model)
+    ```python hl_lines="9-10 25 26"
+	--8<-- "docs/examples/utilities/parser/parser_event_bridge_envelope.py"
     ```
 
 **What's going on here, you might ask**:

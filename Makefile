@@ -100,11 +100,11 @@ format-examples:
 	poetry run black docs/examples/*/*/*/*/*.py
 
 lint-examples:
-	python -m py_compile docs/examples/*.py
-	python -m py_compile docs/examples/*/*.py
-	python -m py_compile docs/examples/*/*/*.py
-	python -m py_compile docs/examples/*/*/*/*.py
-	python -m py_compile docs/examples/*/*/*/*/*.py
+	poetry run python3 -m py_compile docs/examples/*.py
+	poetry run python3 -m py_compile docs/examples/*/*.py
+	poetry run python3 -m py_compile docs/examples/*/*/*.py
+	poetry run python3 -m py_compile docs/examples/*/*/*/*.py
+	poetry run python3 -m py_compile docs/examples/*/*/*/*/*.py
 	cfn-lint docs/examples/*.yml
 	cfn-lint docs/examples/*/*.yml
 	cfn-lint docs/examples/*/*/*.yml
