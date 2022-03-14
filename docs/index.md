@@ -57,12 +57,8 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 
 === "SAM"
 
-    ```yaml hl_lines="5"
-    MyLambdaFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            Layers:
-                - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:13
+    ```yaml hl_lines="11"
+    --8<-- "docs/examples/index/lambda_layer_template.yml"
     ```
 
 === "Serverless framework"
@@ -78,13 +74,13 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 === "CDK"
 
     ```python hl_lines="11 16"
-    --8<-- "docs/examples/cdk_app.py"
+    --8<-- "docs/examples/index/lambda_layer_cdk_app.py"
     ```
 
 === "Terraform"
 
     ```terraform hl_lines="9 35"
-    --8<-- "docs/examples/main.tf"
+    --8<-- "docs/examples/index/lambda_layer_main.tf"
     ```
 
 === "Amplify"
@@ -149,20 +145,8 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 
 === "SAM"
 
-    ```yaml hl_lines="5-6 12-13"
-    AwsLambdaPowertoolsPythonLayer:
-        Type: AWS::Serverless::Application
-        Properties:
-            Location:
-                ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-                SemanticVersion: 1.24.1 # change to latest semantic version available in SAR
-
-    MyLambdaFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            Layers:
-                # fetch Layer ARN from SAR App stack output
-                - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
+    ```yaml hl_lines="8-9 18-19"
+    --8<-- "docs/examples/index/sar_template.yml"
     ```
 
 === "Serverless framework"
@@ -183,13 +167,13 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
                 Location:
                     ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
                     # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
-                    SemanticVersion: 1.24.1
+                    SemanticVersion: 1.25.3
     ```
 
 === "CDK"
 
-    ```python hl_lines="16 22-25 34"
-    --8<-- "docs/examples/sar_cdk_app.py"
+    ```python hl_lines="19 22-25 34"
+    --8<-- "docs/examples/index/sar_cdk_app.py"
     ```
 
 === "Terraform"
@@ -197,7 +181,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 	> Credits to [Dani Comnea](https://github.com/DanyC97) for providing the Terraform equivalent.
 
     ```terraform hl_lines="12-13 15-20 23-25 40"
-    --8<-- "docs/examples/sar_main.tf"
+    --8<-- "docs/examples/index/sar_main.tf"
     ```
 
 ??? example "Example: Least-privileged IAM permissions to deploy Layer"
@@ -209,7 +193,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
     === "template.yml"
 
         ```yaml hl_lines="21-52"
-        --8<-- "docs/examples/least_priviledged_template.yml"
+        --8<-- "docs/examples/index/least_priviledged_template.yml"
         ```
 
 You can fetch available versions via SAR ListApplicationVersions API:

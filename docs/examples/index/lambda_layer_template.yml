@@ -1,0 +1,11 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  MyLambdaFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+          CodeUri: src
+          Handler: app.lambda_handler
+          Runtime: python3.9
+          Layers:
+              - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:13

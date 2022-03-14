@@ -5,7 +5,7 @@ Description: Hello world Direct Lambda Resolver
 Globals:
   Function:
     Timeout: 5
-    Runtime: python3.8
+    Runtime: python3.9
     Tracing: Active
     Environment:
         Variables:
