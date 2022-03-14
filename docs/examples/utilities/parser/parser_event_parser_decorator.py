@@ -31,7 +31,13 @@ def handler(event: Order, context: LambdaContext):
 payload = {
     "id": 10876546789,
     "description": "My order",
-    "items": [{"id": 1015938732, "quantity": 1, "description": "item xpto"}],
+    "items": [
+        {
+            "id": 1015938732,
+            "quantity": 1,
+            "description": "item xpto",
+        },
+    ],
 }
 
 handler(event=payload, context=LambdaContext())
