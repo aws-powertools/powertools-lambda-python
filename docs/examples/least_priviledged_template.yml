@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+    PowertoolsLayerIamRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+                - Effect: "Allow"
+                  Principal:
+                    Service:
+                      - "cloudformation.amazonaws.com"
+                  Action:
+                    - "sts:AssumeRole"
+            Path: "/"
+    PowertoolsLayerIamPolicy:
+      Type: "AWS::IAM::Policy"
+      Properties:
+          PolicyName: PowertoolsLambdaLayerPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+                - Sid: CloudFormationTransform
+                  Effect: Allow
+                  Action: cloudformation:CreateChangeSet
+                  Resource:
+                    - arn:aws:cloudformation:us-east-1:aws:transform/Serverless-2016-10-31
+                - Sid: GetCfnTemplate
+                  Effect: Allow
+                  Action:
+                    - serverlessrepo:CreateCloudFormationTemplate
+                    - serverlessrepo:GetCloudFormationTemplate
+                  Resource:
+                    # this is arn of the powertools SAR app
+                    - arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+                - Sid: S3AccessLayer
+                  Effect: Allow
+                  Action:
+                    - s3:GetObject
+                  Resource:
+                    # AWS publishes to an external S3 bucket locked down to your account ID
+                    # The below example is us publishing lambda powertools
+                    # Bucket: awsserverlessrepo-changesets-plntc6bfnfj
+                    # Key: *****/arn:aws:serverlessrepo:eu-west-1:057560766410:applications-aws-lambda-powertools-python-layer-versions-1.10.2/aeeccf50-****-****-****-*********
+                    - arn:aws:s3:::awsserverlessrepo-changesets-*/*
+                - Sid: GetLayerVersion
+                  Effect: Allow
+                  Action:
+                    - lambda:PublishLayerVersion
+                    - lambda:GetLayerVersion
+                  Resource:
+                    - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:aws-lambda-powertools-python-layer*
+          Roles:
+          - Ref: "PowertoolsLayerIamRole"
