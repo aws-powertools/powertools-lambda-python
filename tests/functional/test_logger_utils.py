@@ -6,7 +6,6 @@ import string
 from enum import Enum
 
 import pytest
-from pytest_mock import MockerFixture
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.logging import formatter, utils
@@ -45,6 +44,7 @@ def capture_multiple_logging_statements_output(stdout):
     return [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
 
 
+@pytest.fixture
 def service_name():
     chars = string.ascii_letters + string.digits
     return "".join(random.SystemRandom().choice(chars) for _ in range(15))
