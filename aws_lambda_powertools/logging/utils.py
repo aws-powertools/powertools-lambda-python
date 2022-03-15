@@ -38,7 +38,7 @@ def copy_config_to_registered_loggers(
     # Exclude source and powertools package logger by default
     # If source logger is a child ensure we exclude parent logger to not break child logger
     # from receiving/pushing updates to keys being added/removed
-    source_logger_name = source_logger.name.split(".")[0] if source_logger.child else source_logger.name
+    source_logger_name = source_logger.name.split(".")[0]
 
     if exclude:
         exclude.update(source_logger_name, PACKAGE_LOGGER)
