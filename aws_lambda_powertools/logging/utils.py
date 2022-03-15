@@ -3,6 +3,8 @@ from typing import Callable, List, Optional, Set, Union
 
 from .logger import Logger
 
+PACKAGE_LOGGER = "aws_lambda_powertools"
+
 
 def copy_config_to_registered_loggers(
     source_logger: Logger,
@@ -24,7 +26,6 @@ def copy_config_to_registered_loggers(
     exclude : Optional[Set[str]], optional
         List of logger names to exclude, by default None
     """
-    package_logger = logging.getLogger("aws_lambda_powertools")
     level = log_level or source_logger.level
 
     # Assumptions: Only take parent loggers not children (dot notation rule)
@@ -36,9 +37,9 @@ def copy_config_to_registered_loggers(
 
     # Exclude source and powertools package logger by default
     if exclude:
-        exclude.update(source_logger.name, package_logger.name)
+        exclude.update(source_logger.name, PACKAGE_LOGGER)
     else:
-        exclude = {source_logger.name, package_logger.name}
+        exclude = {source_logger.name, PACKAGE_LOGGER}
 
     # Prepare loggers set
     if include:
