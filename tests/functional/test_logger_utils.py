@@ -260,7 +260,7 @@ def test_copy_config_to_ext_loggers_no_duplicate_logs(stdout, logger, log_level)
     handler = logging.StreamHandler(stdout)
     formatter = logging.Formatter('{"message": "%(message)s"}')
     handler.setFormatter(formatter)
-    root_logger.handlers = [handler]
+    root_logger.addHandler(handler)
 
     logger = logger()
 
@@ -275,5 +275,5 @@ def test_copy_config_to_ext_loggers_no_duplicate_logs(stdout, logger, log_level)
 
     # THEN no root logger logs AND log is not duplicated
     logs = capture_multiple_logging_statements_output(stdout)
-    assert not {"message": msg} in logs
+    assert {"message": msg} not in logs
     assert sum(msg in log.values() for log in logs) == 1
