@@ -195,6 +195,37 @@ def test_copy_config_to_ext_loggers_should_not_break_append_keys(stdout, log_lev
     powertools_logger.append_keys(key="value")
 
 
+def test_copy_child_config_to_ext_loggers_should_not_break_append_keys(stdout):
+    # GIVEN powertools logger AND  child initialized AND
+
+    # GIVEN Loggers are initialized
+    # create child logger before parent to mimick
+    # importing logger from another module/file
+    # as loggers are created in global scope
+    service = service_name()
+    child = Logger(stream=stdout, service=service, child=True)
+    parent = Logger(stream=stdout, service=service)
+
+    # WHEN a child Logger adds an additional key AND child logger adds additional key
+    # AND configuration copied from powertools child logger
+    # AND powertools logger and child logger used
+    child.structure_logs(append=True, customer_id="value")
+    parent.structure_logs(append=True, user_id="value")
+    utils.copy_config_to_registered_loggers(source_logger=child)
+    parent.warning("Logger message")
+    child.warning("Child logger message")
+
+    # THEN both custom keys should be propagated bi-directionally in parent and child loggers
+    # as parent logger won't be touched when config is being copied
+    parent_log, child_log = capture_multiple_logging_statements_output(stdout)
+    assert "customer_id" in parent_log
+    assert "customer_id" in child_log
+    assert "user_id" in parent_log
+    assert "user_id" in child_log
+    assert "Child Logger message" not in parent_log
+    assert child.parent.name == service
+
+
 def test_copy_config_to_parent_loggers_only(stdout):
     # GIVEN Powertools Logger and Child Logger are initialized
     # and Powertools Logger config is copied over

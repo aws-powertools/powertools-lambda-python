@@ -36,10 +36,14 @@ def copy_config_to_registered_loggers(
     # 4. Only exclude set? Ignore Logger in the excluding list
 
     # Exclude source and powertools package logger by default
+    # If source logger is a child ensure we exclude parent logger to not break child logger
+    # from receiving/pushing updates to keys being added/removed
+    source_logger_name = source_logger.name.split(".")[0] if source_logger.child else source_logger.name
+
     if exclude:
-        exclude.update(source_logger.name, PACKAGE_LOGGER)
+        exclude.update(source_logger_name, PACKAGE_LOGGER)
     else:
-        exclude = {source_logger.name, PACKAGE_LOGGER}
+        exclude = {source_logger_name, PACKAGE_LOGGER}
 
     # Prepare loggers set
     if include:
