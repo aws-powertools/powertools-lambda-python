@@ -75,7 +75,7 @@ def _find_registered_loggers(
 def _configure_logger(source_logger: Logger, logger: logging.Logger, level: Union[int, str]) -> None:
     logger.handlers = []
     logger.setLevel(level)
-    logger.propagate = False
+    logger.propagate = False  # ensure we don't propagate logs to existing loggers, #1073
     source_logger.debug(f"Logger {logger} reconfigured to use logging level {level}")
     for source_handler in source_logger.handlers:
         logger.addHandler(source_handler)
