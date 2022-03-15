@@ -44,7 +44,6 @@ def capture_multiple_logging_statements_output(stdout):
     return [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
 
 
-@pytest.fixture
 def service_name():
     chars = string.ascii_letters + string.digits
     return "".join(random.SystemRandom().choice(chars) for _ in range(15))
