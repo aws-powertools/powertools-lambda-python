@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format for changes and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.25.5 - 2022-03-18
+
+### Bug Fixes
+
+* **logger-utils:** regression on exclude set leading to no formatter on append_keys ([#1080](https://github.com/awslabs/aws-lambda-powertools-python/issues/1080))
+
 ## 1.25.4 - 2022-03-17
 
 ### Bug Fixes
