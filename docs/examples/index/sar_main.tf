@@ -27,7 +27,7 @@ data "aws_serverlessapplicationrepository_application" "sar_app" {
 
 variable "aws_powertools_version" {
   type        = string
-  default     = "1.25.3"
+  default     = "1.25.5"
   description = "The AWS Powertools release version"
 }
 

@@ -4,7 +4,7 @@ from aws_cdk import core
 
 POWERTOOLS_BASE_NAME = "AWSLambdaPowertools"
 # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
-POWERTOOLS_VER = "1.25.3"
+POWERTOOLS_VER = "1.25.5"
 POWERTOOLS_ARN = "arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer"
 
 
