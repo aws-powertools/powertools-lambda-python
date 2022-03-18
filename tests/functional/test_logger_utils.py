@@ -217,6 +217,28 @@ def test_copy_config_to_parent_loggers_only(stdout):
     assert child.parent.name == service
 
 
+def test_copy_config_to_parent_loggers_only_with_exclude(stdout):
+    # GIVEN Powertools Logger and Child Logger are initialized
+    # and Powertools Logger config is copied over with exclude set
+    service = service_name()
+    child = Logger(stream=stdout, service=service, child=True)
+    parent = Logger(stream=stdout, service=service)
+    utils.copy_config_to_registered_loggers(source_logger=parent, exclude={"test"})
+
+    # WHEN either parent or child logger append keys
+    child.append_keys(customer_id="value")
+    parent.append_keys(user_id="value")
+    parent.info("Logger message")
+    child.info("Child logger message")
+
+    # THEN both custom keys should be propagated bi-directionally in parent and child loggers
+    # as child logger won't be touched when config is being copied
+    parent_log, child_log = capture_multiple_logging_statements_output(stdout)
+    assert "customer_id" in parent_log, child_log
+    assert "user_id" in parent_log, child_log
+    assert child.parent.name == service
+
+
 def test_copy_config_to_ext_loggers_no_duplicate_logs(stdout, logger, log_level):
     # GIVEN an root logger, external logger and powertools logger initialized
 
