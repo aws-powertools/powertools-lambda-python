@@ -183,7 +183,7 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
     }
 
     type Query {
-        listLocations: [Todo]
+        listLocations: [Location]
     }
 
     type Location {

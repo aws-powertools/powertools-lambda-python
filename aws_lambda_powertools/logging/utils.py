@@ -41,7 +41,7 @@ def copy_config_to_registered_loggers(
     source_logger_name = source_logger.name.split(".")[0]
 
     if exclude:
-        exclude.update(source_logger_name, PACKAGE_LOGGER)
+        exclude.update([source_logger_name, PACKAGE_LOGGER])
     else:
         exclude = {source_logger_name, PACKAGE_LOGGER}
 
