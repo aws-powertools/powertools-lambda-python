@@ -21,6 +21,23 @@ MAX_RETRIES = 2
 logger = logging.getLogger(__name__)
 
 
+def _prepare_data(data: Any) -> Any:
+    """Prepare data for json serialization.
+
+    We will convert Python dataclasses, pydantic models or event source data classes to a dict,
+    otherwise return data as-is.
+    """
+    if hasattr(data, "__dataclass_fields__"):
+        import dataclasses
+
+        return dataclasses.asdict(data)
+
+    if callable(getattr(data, "dict", None)):
+        return data.dict()
+
+    return getattr(data, "raw_event", data)
+
+
 class IdempotencyHandler:
     """
     Base class to orchestrate calls to persistence layer.
@@ -52,7 +69,7 @@ class IdempotencyHandler:
             Function keyword arguments
         """
         self.function = function
-        self.data = function_payload
+        self.data = _prepare_data(function_payload)
         self.fn_args = function_args
         self.fn_kwargs = function_kwargs
 

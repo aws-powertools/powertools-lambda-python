@@ -4,8 +4,199 @@ All notable changes to this project will be documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format for changes and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.25.5 - 2022-03-18
 
-## [Unreleased]
+### Bug Fixes
+
+* **logger-utils:** regression on exclude set leading to no formatter on append_keys ([#1080](https://github.com/awslabs/aws-lambda-powertools-python/issues/1080))
+
+## 1.25.4 - 2022-03-17
+
+### Bug Fixes
+
+* **logger-utils**: ensure external loggers doesn't propagate logs when copying config
+
+### Documentation
+
+* **appsync:** fix typo on `listLocations` return
+* **contributing:** pause new features/enhancements over operational excellence focus
+
+## 1.25.3 - 2022-03-09
+
+### Bug Fixes
+
+* **logger:** ensure state is cleared for custom formatters ([#1072](https://github.com/awslabs/aws-lambda-powertools-python/issues/1072))
+
+### Documentation
+
+* **plugin:** add mermaid to create diagram as code ([#1070](https://github.com/awslabs/aws-lambda-powertools-python/issues/1070))
+
+## 1.25.2 - 2022-03-07
+
+### Bug Fixes
+
+* **event_handler:** high-level import CorsConfig, docs snippets ([#1019](https://github.com/awslabs/aws-lambda-powertools-python/issues/1019))
+* **lambda-authorizer:** allow proxy resources path in arn ([#1051](https://github.com/awslabs/aws-lambda-powertools-python/issues/1051))
+* **metrics:** flush upon a single metric 100th data point ([#1046](https://github.com/awslabs/aws-lambda-powertools-python/issues/1046))
+
+### Documentation
+
+* **layer:** update to 1.25.1
+* **parser:** APIGatewayProxyEvent to APIGatewayProxyEventModel ([#1061](https://github.com/awslabs/aws-lambda-powertools-python/issues/1061))
+
+### Maintenance
+
+* **deps:** bump actions/setup-python from 2.3.1 to 3 ([#1048](https://github.com/awslabs/aws-lambda-powertools-python/issues/1048))
+* **deps:** bump actions/checkout from 2 to 3 ([#1052](https://github.com/awslabs/aws-lambda-powertools-python/issues/1052))
+* **deps:** bump actions/github-script from 5 to 6 ([#1023](https://github.com/awslabs/aws-lambda-powertools-python/issues/1023))
+* **deps:** bump fastjsonschema from 2.15.2 to 2.15.3 ([#949](https://github.com/awslabs/aws-lambda-powertools-python/issues/949))
+* **deps-dev:** bump mkdocs-material from 8.1.9 to 8.2.4 ([#1054](https://github.com/awslabs/aws-lambda-powertools-python/issues/1054))
+
+## 1.25.1 - 2022-02-14
+
+### Bug Fixes
+
+**batch:** bugfix to clear exceptions between executions ([#1022](https://github.com/awslabs/aws-lambda-powertools-python/issues/1022))
+
+## 1.25.0 - 2022-02-09
+
+### Bug Fixes
+
+* **apigateway:** remove indentation in debug_mode ([#987](https://github.com/awslabs/aws-lambda-powertools-python/issues/987))
+* **ci:** pr label regex for special chars in title
+* **logger:** exclude source_logger in copy_config_to_registered_loggers ([#1001](https://github.com/awslabs/aws-lambda-powertools-python/issues/1001))
+* **logger:** test generates logfile
+
+### Documentation
+
+* **event-handler:** improve testing section for graphql ([#996](https://github.com/awslabs/aws-lambda-powertools-python/issues/996))
+* **layer:** update to 1.24.2
+* **theme:** upgrade mkdocs-material to 8.x ([#1002](https://github.com/awslabs/aws-lambda-powertools-python/issues/1002))
+* **tutorial:** fix broken internal links ([#1000](https://github.com/awslabs/aws-lambda-powertools-python/issues/1000))
+* **general:** fix syntax errors and line highlights ([#1004](https://github.com/awslabs/aws-lambda-powertools-python/pull/1004))
+
+### Features
+
+* **event-handler:** new resolvers to fix current_event typing ([#978](https://github.com/awslabs/aws-lambda-powertools-python/issues/978))
+* **logger:** log_event support event data classes (e.g. S3Event) ([#984](https://github.com/awslabs/aws-lambda-powertools-python/issues/984))
+* **mypy:** complete mypy support for the entire codebase ([#943](https://github.com/awslabs/aws-lambda-powertools-python/issues/943))
+
+### Maintenance
+
+* **deps-dev:** bump flake8-bugbear from 21.11.29 to 22.1.11 ([#955](https://github.com/awslabs/aws-lambda-powertools-python/issues/955))
+* **metrics:** fix tests when warnings are disabled ([#994](https://github.com/awslabs/aws-lambda-powertools-python/issues/994))
+
+## 1.24.2 - 2022-01-21
+
+### Bug Fixes
+
+* **data-classes**: underscore support in api gateway authorizer resource name
+
+## 1.24.1 - 2022-01-20
+
+### Bug Fixes
+
+* **batch:** report multiple failures ([#967](https://github.com/awslabs/aws-lambda-powertools-python/issues/967))
+* **data-classes:** docstring typos and clean up ([#937](https://github.com/awslabs/aws-lambda-powertools-python/issues/937))
+* **parameters:** appconfig internal _get docstrings ([#934](https://github.com/awslabs/aws-lambda-powertools-python/issues/934))
+
+### Documentation
+
+* rename quickstart to tutorial in readme
+* **batch:** snippet typo on batch processed messages iteration ([#951](https://github.com/awslabs/aws-lambda-powertools-python/issues/951))
+* **batch:** fix typo in context manager keyword ([#938](https://github.com/awslabs/aws-lambda-powertools-python/issues/938))
+* **homepage:** link to typescript version ([#950](https://github.com/awslabs/aws-lambda-powertools-python/issues/950))
+* **install:** new lambda layer for 1.24.0 release
+* **metrics:** keep it consistent with other sections, update metric names
+* **nav:** make REST and GraphQL event handlers more explicit ([#959](https://github.com/awslabs/aws-lambda-powertools-python/issues/959))
+* **quickstart:** expand on intro line
+* **quickstart:** tidy requirements up
+* **quickstart:** same process for Logger
+* **quickstart:** add sub-sections, fix highlight & code
+* **quickstart:** sentence fragmentation, tidy up
+* **quickstart:** make section agnostic to json lib
+* **tenets:** make core, non-core more explicit
+* **tracer:** update ServiceLens image w/ API GW, copywriting
+* **tracer:** warning to note on local traces
+* **tracer:** add initial image, requirements
+* **tracer:** add annotation, metadata, and image
+
+## 1.24.0 - 2021-12-31
+
+### Bug Fixes
+
+* **apigateway:** support [@app](https://github.com/app).not_found() syntax & housekeeping ([#926](https://github.com/awslabs/aws-lambda-powertools-python/issues/926))
+* **event-sources:** handle dynamodb null type as none, not bool ([#929](https://github.com/awslabs/aws-lambda-powertools-python/issues/929))
+* **warning:** future distutils deprecation in 3.12 ([#921](https://github.com/awslabs/aws-lambda-powertools-python/issues/921))
+
+### Documentation
+
+* **general**: consistency round admonitions and snippets ([#919](https://github.com/awslabs/aws-lambda-powertools-python/issues/919))
+* **homepage**: Added GraphQL Sample API to Examples section of README.md ([#930](https://github.com/awslabs/aws-lambda-powertools-python/issues/930))
+* **batch:** remove leftover from legacy
+* **layer:** bump Lambda Layer to version 6
+* **tracer:** new ignore_endpoint feature ([#931](https://github.com/awslabs/aws-lambda-powertools-python/issues/931))
+
+### Features
+
+* **event-sources:** cache parsed json in data class ([#909](https://github.com/awslabs/aws-lambda-powertools-python/issues/909))
+* **feature_flags:** support beyond boolean values (JSON values) ([#804](https://github.com/awslabs/aws-lambda-powertools-python/issues/804))
+* **idempotency:** support dataclasses & pydantic models payloads ([#908](https://github.com/awslabs/aws-lambda-powertools-python/issues/908))
+* **logger:** support use_datetime_directive for timestamps ([#920](https://github.com/awslabs/aws-lambda-powertools-python/issues/920))
+* **tracer:** ignore tracing for certain hostname(s) or url(s) ([#910](https://github.com/awslabs/aws-lambda-powertools-python/issues/910))
+
+### Maintenance
+
+* **deps-dev:** bump mypy from 0.920 to 0.930 ([#925](https://github.com/awslabs/aws-lambda-powertools-python/issues/925))
+
+## 1.23.0 - 2021-12-20
+
+### Bug Fixes
+
+* **apigateway:** allow list of HTTP methods in route method ([#838](https://github.com/awslabs/aws-lambda-powertools-python/issues/838))
+* **event-sources:** pass authorizer data to APIGatewayEventAuthorizer ([#897](https://github.com/awslabs/aws-lambda-powertools-python/issues/897))
+* **event-sources:** handle claimsOverrideDetails set to null ([#878](https://github.com/awslabs/aws-lambda-powertools-python/issues/878))
+* **idempotency:** include decorated fn name in hash ([#869](https://github.com/awslabs/aws-lambda-powertools-python/issues/869))
+* **metrics:** explicit type to single_metric ctx manager ([#865](https://github.com/awslabs/aws-lambda-powertools-python/issues/865))
+* **parameters:** mypy appconfig transform and return types ([#877](https://github.com/awslabs/aws-lambda-powertools-python/issues/877))
+* **parser:** mypy overload parse when using envelope ([#885](https://github.com/awslabs/aws-lambda-powertools-python/issues/885))
+* **parser:** kinesis sequence number is str, not int ([#907](https://github.com/awslabs/aws-lambda-powertools-python/issues/907))
+* **parser:** mypy support for payload type override as models ([#883](https://github.com/awslabs/aws-lambda-powertools-python/issues/883))
+* **tracer:** add warm start annotation (ColdStart=False) ([#851](https://github.com/awslabs/aws-lambda-powertools-python/issues/851))
+
+### Documentation
+
+* **nav**: reference cloudformation custom resource helper (CRD) ([#914](https://github.com/awslabs/aws-lambda-powertools-python/issues/914))
+* add new public Slack invite
+* disable search blur in non-prod env
+* update Lambda Layers version
+* **apigateway:** add new not_found feature ([#915](https://github.com/awslabs/aws-lambda-powertools-python/issues/915))
+* **apigateway:** fix sample layout provided ([#864](https://github.com/awslabs/aws-lambda-powertools-python/issues/864))
+* **appsync:** fix users.py typo to locations [#830](https://github.com/awslabs/aws-lambda-powertools-python/issues/830)
+* **lambda_layer:** fix CDK layer syntax
+
+### Features
+
+* **apigateway:** add exception_handler support ([#898](https://github.com/awslabs/aws-lambda-powertools-python/issues/898))
+* **apigateway:** access parent api resolver from router ([#842](https://github.com/awslabs/aws-lambda-powertools-python/issues/842))
+* **batch:** new BatchProcessor for SQS, DynamoDB, Kinesis ([#886](https://github.com/awslabs/aws-lambda-powertools-python/issues/886))
+* **logger:** allow handler with custom kwargs signature ([#913](https://github.com/awslabs/aws-lambda-powertools-python/issues/913))
+* **tracer:** add service annotation when service is set ([#861](https://github.com/awslabs/aws-lambda-powertools-python/issues/861))
+
+### Maintenance
+
+* minor housekeeping before release ([#912](https://github.com/awslabs/aws-lambda-powertools-python/issues/912))
+* correct pr label order
+* **ci:** split latest docs workflow
+* **deps:** bump fastjsonschema from 2.15.1 to 2.15.2 ([#891](https://github.com/awslabs/aws-lambda-powertools-python/issues/891))
+* **deps:** bump actions/setup-python from 2.2.2 to 2.3.0 ([#831](https://github.com/awslabs/aws-lambda-powertools-python/issues/831))
+* **deps:** support arm64 when developing locally ([#862](https://github.com/awslabs/aws-lambda-powertools-python/issues/862))
+* **deps:** bump actions/setup-python from 2.3.0 to 2.3.1 ([#852](https://github.com/awslabs/aws-lambda-powertools-python/issues/852))
+* **deps:** bump aws-xray-sdk from 2.8.0 to 2.9.0 ([#876](https://github.com/awslabs/aws-lambda-powertools-python/issues/876))
+* **deps-dev:** bump mypy from 0.910 to 0.920 ([#903](https://github.com/awslabs/aws-lambda-powertools-python/issues/903))
+* **deps-dev:** bump flake8 from 3.9.2 to 4.0.1 ([#789](https://github.com/awslabs/aws-lambda-powertools-python/issues/789))
+* **deps-dev:** bump black from 21.10b0 to 21.11b1 ([#839](https://github.com/awslabs/aws-lambda-powertools-python/issues/839))
+* **deps-dev:** bump black from 21.11b1 to 21.12b0 ([#872](https://github.com/awslabs/aws-lambda-powertools-python/issues/872))
 
 ## 1.22.0 - 2021-11-17
 

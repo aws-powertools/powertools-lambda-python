@@ -29,7 +29,7 @@ coverage-html:
 pre-commit:
 	pre-commit run --show-diff-on-failure
 
-pr: lint pre-commit test security-baseline complexity-baseline
+pr: lint mypy pre-commit test security-baseline complexity-baseline
 
 build: pr
 	poetry build
@@ -84,6 +84,7 @@ release: pr
 	$(MAKE) release-prod
 
 changelog:
+	git fetch --tags
 	@echo "[+] Pre-generating CHANGELOG for tag: $$(git describe --abbrev=0 --tag)"
 	docker run -v "${PWD}":/workdir quay.io/git-chglog/git-chglog $$(git describe --abbrev=0 --tag).. > TMP_CHANGELOG.md
 

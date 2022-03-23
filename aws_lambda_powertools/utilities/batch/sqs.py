@@ -4,11 +4,15 @@
 Batch SQS utilities
 """
 import logging
+import math
 import sys
-from typing import Callable, Dict, List, Optional, Tuple
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 import boto3
 from botocore.config import Config
+
+from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 
 from ...middleware_factory import lambda_handler_decorator
 from .base import BasePartialProcessor
@@ -71,6 +75,7 @@ class PartialSQSProcessor(BasePartialProcessor):
         session = boto3_session or boto3.session.Session()
         self.client = session.client("sqs", config=config)
         self.suppress_exception = suppress_exception
+        self.max_message_batch = 10
 
         super().__init__()
 
@@ -84,11 +89,17 @@ class PartialSQSProcessor(BasePartialProcessor):
         *_, account_id, queue_name = self.records[0]["eventSourceARN"].split(":")
         return f"{self.client._endpoint.host}/{account_id}/{queue_name}"
 
-    def _get_entries_to_clean(self) -> List:
+    def _get_entries_to_clean(self) -> List[Dict[str, str]]:
         """
         Format messages to use in batch deletion
         """
-        return [{"Id": msg["messageId"], "ReceiptHandle": msg["receiptHandle"]} for msg in self.success_messages]
+        entries = []
+        # success_messages has generic type of union of SQS, Dynamodb and Kinesis Streams records or Pydantic models.
+        # Here we get SQS Record only
+        messages = cast(List[SQSRecord], self.success_messages)
+        for msg in messages:
+            entries.append({"Id": msg["messageId"], "ReceiptHandle": msg["receiptHandle"]})
+        return entries
 
     def _process_record(self, record) -> Tuple:
         """
@@ -112,23 +123,39 @@ class PartialSQSProcessor(BasePartialProcessor):
         self.success_messages.clear()
         self.fail_messages.clear()
 
-    def _clean(self):
+    def _clean(self) -> Optional[List]:
         """
         Delete messages from Queue in case of partial failure.
         """
+
         # If all messages were successful, fall back to the default SQS -
-        # Lambda behaviour which deletes messages if Lambda responds successfully
+        # Lambda behavior which deletes messages if Lambda responds successfully
         if not self.fail_messages:
             logger.debug(f"All {len(self.success_messages)} records successfully processed")
-            return
+            return None
 
         queue_url = self._get_queue_url()
         entries_to_remove = self._get_entries_to_clean()
+        # Batch delete up to 10 messages at a time (SQS limit)
+        max_workers = math.ceil(len(entries_to_remove) / self.max_message_batch)
 
-        delete_message_response = None
         if entries_to_remove:
-            delete_message_response = self.client.delete_message_batch(QueueUrl=queue_url, Entries=entries_to_remove)
-
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures, results = [], []
+                while entries_to_remove:
+                    futures.append(
+                        executor.submit(
+                            self._delete_messages, queue_url, entries_to_remove[: self.max_message_batch], self.client
+                        )
+                    )
+                    entries_to_remove = entries_to_remove[self.max_message_batch :]
+                for future in as_completed(futures):
+                    try:
+                        logger.debug("Deleted batch of processed messages from SQS")
+                        results.append(future.result())
+                    except Exception:
+                        logger.exception("Couldn't remove batch of processed messages from SQS")
+                        raise
         if self.suppress_exception:
             logger.debug(f"{len(self.fail_messages)} records failed processing, but exceptions are suppressed")
         else:
@@ -139,6 +166,13 @@ class PartialSQSProcessor(BasePartialProcessor):
                 child_exceptions=self.exceptions,
             )
 
+        return results
+
+    def _delete_messages(self, queue_url: str, entries_to_remove: List, sqs_client: Any):
+        delete_message_response = sqs_client.delete_message_batch(
+            QueueUrl=queue_url,
+            Entries=entries_to_remove,
+        )
         return delete_message_response
 
 

@@ -1,5 +1,5 @@
 ---
-title: Appsync
+title: GraphQL API
 description: Core utility
 ---
 
@@ -27,10 +27,10 @@ You must have an existing AppSync GraphQL API and IAM permissions to invoke your
 
 This is the sample infrastructure we are using for the initial examples with a AppSync Direct Lambda Resolver.
 
-=== "schema.graphql"
+???+ tip "Tip: Designing GraphQL Schemas for the first time?"
+    Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html){target="_blank"} for understanding how to define types, nesting, and pagination.
 
-    !!! tip "Designing GraphQL Schemas for the first time?"
-        Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html){target="_blank"} for understanding how to define types, nesting, and pagination.
+=== "schema.graphql"
 
     ```typescript
     --8<-- "docs/shared/getting_started_schema.graphql"
@@ -176,7 +176,8 @@ You can define your functions to match GraphQL types and fields with the `app.re
 
 Here's an example where we have two separate functions to resolve `getTodo` and `listTodos` fields within the `Query` type. For completion, we use Scalar type utilities to generate the right output based on our schema definition.
 
-!!! info "GraphQL arguments are passed as function arguments"
+???+ info
+    GraphQL arguments are passed as function arguments.
 
 === "app.py"
 
@@ -345,24 +346,24 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 === "nested_mappings.py"
 
     ```python hl_lines="4 8 10-12 18"
-      from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools import Logger, Tracer
 
-      from aws_lambda_powertools.logging import correlation_paths
-      from aws_lambda_powertools.event_handler import AppSyncResolver
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler import AppSyncResolver
 
-      tracer = Tracer(service="sample_resolver")
-      logger = Logger(service="sample_resolver")
-      app = AppSyncResolver()
+    tracer = Tracer(service="sample_resolver")
+    logger = Logger(service="sample_resolver")
+    app = AppSyncResolver()
 
-      @app.resolver(field_name="listLocations")
-      @app.resolver(field_name="locations")
-      def get_locations(name: str, description: str = ""):
-          return name + description
+    @app.resolver(field_name="listLocations")
+    @app.resolver(field_name="locations")
+    def get_locations(name: str, description: str = ""):
+        return name + description
 
-      @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-      @tracer.capture_lambda_handler
-      def lambda_handler(event, context):
-          return app.resolve(event, context)
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
     ```
 
 === "schema.graphql"
@@ -373,7 +374,7 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
     }
 
     type Query {
-        listLocations: [Todo]
+        listLocations: [Location]
     }
 
     type Location {
@@ -395,30 +396,29 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 
 For Lambda Python3.8+ runtime, this utility supports async functions when you use in conjunction with `asyncio.run`.
 
-=== "async_resolver.py"
+```python hl_lines="5 9 11-13 21" title="Resolving GraphQL resolvers async"
+import asyncio
+from aws_lambda_powertools import Logger, Tracer
 
-    ```python hl_lines="4 8 10-12 20"
-    from aws_lambda_powertools import Logger, Tracer
+from aws_lambda_powertools.logging import correlation_paths
+from aws_lambda_powertools.event_handler import AppSyncResolver
 
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import AppSyncResolver
+tracer = Tracer(service="sample_resolver")
+logger = Logger(service="sample_resolver")
+app = AppSyncResolver()
 
-    tracer = Tracer(service="sample_resolver")
-    logger = Logger(service="sample_resolver")
-    app = AppSyncResolver()
+@app.resolver(type_name="Query", field_name="listTodos")
+async def list_todos():
+	todos = await some_async_io_call()
+	return todos
 
-    @app.resolver(type_name="Query", field_name="listTodos")
-    async def list_todos():
-        todos = await some_async_io_call()
-        return todos
+@logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
+@tracer.capture_lambda_handler
+def lambda_handler(event, context):
+	result = app.resolve(event, context)
 
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        result = app.resolve(event, context)
-
-        return asyncio.run(result)
-    ```
+	return asyncio.run(result)
+```
 
 ### Amplify GraphQL Transformer
 
@@ -426,38 +426,36 @@ Assuming you have [Amplify CLI installed](https://docs.amplify.aws/cli/start/ins
 
 <!-- AppSync resolver decorator is a concise way to create lambda functions to handle AppSync resolvers for multiple `typeName` and `fieldName` declarations. -->
 
-=== "schema.graphql"
+```typescript hl_lines="7 15 20 22" title="Example GraphQL Schema"
+@model
+type Merchant {
+	id: String!
+	name: String!
+	description: String
+	# Resolves to `common_field`
+	commonField: String  @function(name: "merchantInfo-${env}")
+}
 
-    ```typescript hl_lines="7 15 20 22"
-    @model
-    type Merchant {
-        id: String!
-        name: String!
-        description: String
-        # Resolves to `common_field`
-        commonField: String  @function(name: "merchantInfo-${env}")
-    }
+type Location {
+	id: ID!
+	name: String!
+	address: String
+	# Resolves to `common_field`
+	commonField: String  @function(name: "merchantInfo-${env}")
+}
 
-    type Location {
-        id: ID!
-        name: String!
-        address: String
-        # Resolves to `common_field`
-        commonField: String  @function(name: "merchantInfo-${env}")
-    }
-
-    type Query {
-      # List of locations resolves to `list_locations`
-      listLocations(page: Int, size: Int): [Location] @function(name: "merchantInfo-${env}")
-      # List of locations resolves to `list_locations`
-      findMerchant(search: str): [Merchant] @function(name: "searchMerchant-${env}")
-    }
-    ```
+type Query {
+  # List of locations resolves to `list_locations`
+  listLocations(page: Int, size: Int): [Location] @function(name: "merchantInfo-${env}")
+  # List of locations resolves to `list_locations`
+  findMerchant(search: str): [Merchant] @function(name: "searchMerchant-${env}")
+}
+```
 
 [Create two new basic Python functions](https://docs.amplify.aws/cli/function#set-up-a-function){target="_blank"} via `amplify add function`.
 
-!!! note "Amplify CLI generated functions use `Pipenv` as a dependency manager"
-    Your function source code is located at **`amplify/backend/function/your-function-name`**.
+???+ note
+    Amplify CLI generated functions use `Pipenv` as a dependency manager. Your function source code is located at **`amplify/backend/function/your-function-name`**.
 
 Within your function's folder, add Lambda Powertools as a dependency with `pipenv install aws-lambda-powertools`.
 
@@ -606,33 +604,34 @@ You can subclass `AppSyncResolverEvent` to bring your own set of methods to hand
 
 === "custom_model.py"
 
-    ```python hl_lines="11-14 19 26"
-      from aws_lambda_powertools import Logger, Tracer
+    ```python hl_lines="12-15 20 27"
+    from aws_lambda_powertools import Logger, Tracer
 
-      from aws_lambda_powertools.logging import correlation_paths
-      from aws_lambda_powertools.event_handler import AppSyncResolver
+    from aws_lambda_powertools.logging import correlation_paths
+    from aws_lambda_powertools.event_handler import AppSyncResolver
+    from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import AppSyncResolverEvent
 
-      tracer = Tracer(service="sample_resolver")
-      logger = Logger(service="sample_resolver")
-      app = AppSyncResolver()
+    tracer = Tracer(service="sample_resolver")
+    logger = Logger(service="sample_resolver")
+    app = AppSyncResolver()
 
 
-      class MyCustomModel(AppSyncResolverEvent):
-          @property
-          def country_viewer(self) -> str:
-              return self.request_headers.get("cloudfront-viewer-country")
+    class MyCustomModel(AppSyncResolverEvent):
+        @property
+        def country_viewer(self) -> str:
+            return self.request_headers.get("cloudfront-viewer-country")
 
-      @app.resolver(field_name="listLocations")
-      @app.resolver(field_name="locations")
-      def get_locations(name: str, description: str = ""):
-          if app.current_event.country_viewer == "US":
-            ...
-          return name + description
+    @app.resolver(field_name="listLocations")
+    @app.resolver(field_name="locations")
+    def get_locations(name: str, description: str = ""):
+        if app.current_event.country_viewer == "US":
+          ...
+        return name + description
 
-      @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-      @tracer.capture_lambda_handler
-      def lambda_handler(event, context):
-          return app.resolve(event, context, data_model=MyCustomModel)
+    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context):
+        return app.resolve(event, context, data_model=MyCustomModel)
     ```
 
 === "schema.graphql"
@@ -713,7 +712,8 @@ You can subclass `AppSyncResolverEvent` to bring your own set of methods to hand
 
 ### Split operations with Router
 
-!!! tip "Read the **[considerations section for trade-offs between monolithic and micro functions](./api_gateway.md#considerations){target="_blank"}**, as it's also applicable here."
+???+ tip
+    Read the **[considerations section for trade-offs between monolithic and micro functions](./api_gateway.md#considerations){target="_blank"}**, as it's also applicable here.
 
 As you grow the number of related GraphQL operations a given Lambda function should handle, it is natural to split them into separate files to ease maintenance - That's where the `Router` feature is useful.
 
@@ -777,27 +777,87 @@ You can test your resolvers by passing a mocked or actual AppSync Lambda event t
 
 You can use either `app.resolve(event, context)` or simply `app(event, context)`.
 
-Here's an example from our internal functional test.
+Here's an example of how you can test your synchronous resolvers:
 
-=== "test_direct_resolver.py"
+=== "test_resolver.py"
 
     ```python
+    import json
+    import pytest
+    from pathlib import Path
+
+    from src.index import app  # import the instance of AppSyncResolver from your code
+
     def test_direct_resolver():
-      # Check whether we can handle an example appsync direct resolver
-      # load_event primarily deserialize the JSON event into a dict
-      mock_event = load_event("appSyncDirectResolver.json")
-
-      app = AppSyncResolver()
-
-      @app.resolver(field_name="createSomething")
-      def create_something(id: str):
-          assert app.lambda_context == {}
-          return id
+      # Load mock event from a file
+      json_file_path = Path("appSyncDirectResolver.json")
+      with open(json_file_path) as json_file:
+        mock_event = json.load(json_file)
 
       # Call the implicit handler
       result = app(mock_event, {})
 
-      assert result == "my identifier"
+      assert result == "created this value"
+    ```
+
+=== "src/index.py"
+
+    ```python
+
+    from aws_lambda_powertools.event_handler import AppSyncResolver
+
+    app = AppSyncResolver()
+
+    @app.resolver(field_name="createSomething")
+    def create_something():
+        return "created this value"
+
+    ```
+
+=== "appSyncDirectResolver.json"
+
+    ```json
+    --8<-- "tests/events/appSyncDirectResolver.json"
+    ```
+
+And an example for testing asynchronous resolvers. Note that this requires the `pytest-asyncio` package:
+
+=== "test_async_resolver.py"
+
+    ```python
+    import json
+    import pytest
+    from pathlib import Path
+
+    from src.index import app  # import the instance of AppSyncResolver from your code
+
+    @pytest.mark.asyncio
+    async def test_direct_resolver():
+      # Load mock event from a file
+      json_file_path = Path("appSyncDirectResolver.json")
+      with open(json_file_path) as json_file:
+        mock_event = json.load(json_file)
+
+      # Call the implicit handler
+      result = await app(mock_event, {})
+
+      assert result == "created this value"
+    ```
+
+=== "src/index.py"
+
+    ```python
+    import asyncio
+
+    from aws_lambda_powertools.event_handler import AppSyncResolver
+
+    app = AppSyncResolver()
+
+    @app.resolver(field_name="createSomething")
+    async def create_something_async():
+        await asyncio.sleep(1)  # Do async stuff
+        return "created this value"
+
     ```
 
 === "appSyncDirectResolver.json"

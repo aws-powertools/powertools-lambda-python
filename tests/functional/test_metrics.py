@@ -82,6 +82,11 @@ def a_hundred_metrics() -> List[Dict[str, str]]:
     return [{"name": f"metric_{i}", "unit": "Count", "value": 1} for i in range(100)]
 
 
+@pytest.fixture
+def a_hundred_metric_values() -> List[Dict[str, str]]:
+    return [{"name": "metric", "unit": "Count", "value": i} for i in range(100)]
+
+
 def serialize_metrics(
     metrics: List[Dict], dimensions: List[Dict], namespace: str, metadatas: List[Dict] = None
 ) -> Dict:
@@ -227,6 +232,37 @@ def test_metrics_spillover(monkeypatch, capsys, metric, dimension, namespace, a_
     expected_101th_metric = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
     remove_timestamp(metrics=[serialized_101th_metric, expected_101th_metric])
     assert serialized_101th_metric == expected_101th_metric
+
+
+def test_metric_values_spillover(monkeypatch, capsys, dimension, namespace, a_hundred_metric_values):
+    # GIVEN Metrics is initialized and we have over a hundred metric values to add
+    my_metrics = Metrics(namespace=namespace)
+    my_metrics.add_dimension(**dimension)
+    metric = a_hundred_metric_values[0]
+
+    # WHEN we add 100 metric values
+    for _metric in a_hundred_metric_values:
+        my_metrics.add_metric(**_metric)
+
+    # THEN it should serialize and flush the metric at the 100th value
+    # and clear all metrics and dimensions from memory
+    output = capture_metrics_output(capsys)
+    spillover_values = output[metric["name"]]
+    assert my_metrics.metric_set == {}
+    assert len(spillover_values) == 100
+
+    # GIVEN we add the 101st metric
+    # WHEN we already had a Metric class instance
+    # with an existing dimension set from the previous 100th metric batch
+    my_metrics.add_metric(**metric)
+
+    # THEN serializing the 101st value should
+    # create a new EMF object with a single value in it (101st)
+    # and contain the same dimension we previously added
+    serialized_101st_metric = my_metrics.serialize_metric_set()
+    expected_101st_metric = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
+    remove_timestamp(metrics=[serialized_101st_metric, expected_101st_metric])
+    assert serialized_101st_metric == expected_101st_metric
 
 
 def test_log_metrics_decorator_call_decorated_function(metric, namespace, service):
@@ -493,9 +529,30 @@ def test_log_metrics_capture_cold_start_metric(capsys, namespace, service):
 
     output = capture_metrics_output(capsys)
 
+    # THEN ColdStart metric and function_name and service dimension should be logged
+    assert output["ColdStart"] == [1.0]
+    assert output["function_name"] == "example_fn"
+    assert output["service"] == service
+
+
+def test_log_metrics_capture_cold_start_metric_no_service(capsys, namespace):
+    # GIVEN Metrics is initialized without service
+    my_metrics = Metrics(namespace=namespace)
+
+    # WHEN log_metrics is used with capture_cold_start_metric
+    @my_metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(evt, context):
+        pass
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+    lambda_handler({}, LambdaContext("example_fn"))
+
+    output = capture_metrics_output(capsys)
+
     # THEN ColdStart metric and function_name dimension should be logged
     assert output["ColdStart"] == [1.0]
     assert output["function_name"] == "example_fn"
+    assert output.get("service") is None
 
 
 def test_emit_cold_start_metric_only_once(capsys, namespace, service, metric):
@@ -531,6 +588,7 @@ def test_log_metrics_decorator_no_metrics_warning(dimensions, namespace, service
 
     # THEN it should raise a warning instead of throwing an exception
     with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
         lambda_handler({}, {})
         assert len(w) == 1
         assert str(w[-1].message) == "No metrics to publish, skipping"

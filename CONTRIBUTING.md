@@ -15,11 +15,13 @@ reported the issue. Please try to include as much information as you can.
 
 ## Contributing via Pull Requests
 
-Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
+We are temporarily de-prioritizing and pausing external contributions until end of July 2022. You can read more here: https://github.com/awslabs/aws-lambda-powertools-python/issues/1076
+
+<!-- Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
 
 1. You are working against the latest source on the **develop** branch.
 2. You check existing open, and recently merged pull requests to make sure someone else hasn't addressed the problem already.
-3. You open a [RFC issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2C+triage&template=rfc.md&title=RFC%3A+) to discuss any significant work - we would hate for your time to be wasted.
+3. You open a [RFC issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2C+triage&template=rfc.md&title=RFC%3A+) to discuss any significant work - we would hate for your time to be wasted. -->
 
 ### Dev setup
 
@@ -49,13 +51,14 @@ You might find useful to run both the documentation website and the API referenc
 
 Category | Convention
 ------------------------------------------------- | ---------------------------------------------------------------------------------
-**Docstring** |  We use a slight variation of numpy convention with markdown to help generate more readable API references.
-**Style guide** | We use black as well as flake8 extensions to enforce beyond good practices [PEP8](https://pep8.org/). We strive to make use of type annotation as much as possible, but don't overdo in creating custom types.
+**Docstring** |  We use a slight variation of Numpy convention with markdown to help generate more readable API references.
+**Style guide** | We use black as well as flake8 extensions to enforce beyond good practices [PEP8](https://pep8.org/). We use type annotations and enforce static type checking at CI (mypy).
 **Core utilities** | Core utilities use a Class, always accept `service` as a constructor parameter, can work in isolation, and are also available in other languages implementation.
 **Utilities** | Utilities are not as strict as core and focus on solving a developer experience problem while following the project [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/#tenets).
 **Exceptions** | Specific exceptions live within utilities themselves and use `Error` suffix e.g. `MetricUnitError`.
-**Git commits** | We follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/). These are not enforced as we squash and merge PRs, but PR titles are enforced during CI.
-**Documentation** | API reference docs are generated from docstrings which should have Examples section to allow developers to have what they need within their own IDE. Documentation website covers the wider usage, tips, and strive to be concise.
+**Git commits** | We follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/). We do not enforce conventional commits on contributors to lower the entry bar. Instead, we enforce a conventional PR title so our label automation and changelog are generated correctly.
+**API documentation** | API reference docs are generated from docstrings which should have Examples section to allow developers to have what they need within their own IDE. Documentation website covers the wider usage, tips, and strive to be concise.
+**Documentation** | We treat it like a product. We sub-divide content aimed at getting started (80% of customers) vs advanced usage (20%). We also ensure customers know how to unit test their code when using our features.
 
 ## Finding contributions to work on
 

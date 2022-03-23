@@ -1,7 +1,6 @@
 """
 Persistence layers supporting idempotency
 """
-
 import datetime
 import hashlib
 import json
@@ -93,16 +92,16 @@ class DataRecord:
         else:
             raise IdempotencyInvalidStatusError(self._status)
 
-    def response_json_as_dict(self) -> dict:
+    def response_json_as_dict(self) -> Optional[dict]:
         """
         Get response data deserialized to python dict
 
         Returns
         -------
-        dict
+        Optional[dict]
             previous response data deserialized
         """
-        return json.loads(self.response_data)
+        return json.loads(self.response_data) if self.response_data else None
 
 
 class BasePersistenceLayer(ABC):
@@ -122,7 +121,6 @@ class BasePersistenceLayer(ABC):
         self.raise_on_no_idempotency_key = False
         self.expires_after_seconds: int = 60 * 60  # 1 hour default
         self.use_local_cache = False
-        self._cache: Optional[LRUDict] = None
         self.hash_function = None
 
     def configure(self, config: IdempotencyConfig, function_name: Optional[str] = None) -> None:
@@ -226,7 +224,6 @@ class BasePersistenceLayer(ABC):
             Hashed representation of the provided data
 
         """
-        data = getattr(data, "raw_event", data)  # could be a data class depending on decorator order
         hashed_data = self.hash_function(json.dumps(data, cls=Encoder, sort_keys=True).encode())
         return hashed_data.hexdigest()
 

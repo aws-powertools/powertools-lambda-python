@@ -23,7 +23,9 @@ class CodePipelineConfiguration(DictWrapper):
     @property
     def decoded_user_parameters(self) -> Dict[str, Any]:
         """Json Decoded user parameters"""
-        return json.loads(self.user_parameters)
+        if self._json_data is None:
+            self._json_data = json.loads(self.user_parameters)
+        return self._json_data
 
 
 class CodePipelineActionConfiguration(DictWrapper):

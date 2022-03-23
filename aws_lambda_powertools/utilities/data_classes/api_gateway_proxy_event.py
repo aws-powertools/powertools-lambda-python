@@ -11,11 +11,22 @@ from aws_lambda_powertools.utilities.data_classes.common import (
 class APIGatewayEventAuthorizer(DictWrapper):
     @property
     def claims(self) -> Optional[Dict[str, Any]]:
-        return self["requestContext"]["authorizer"].get("claims")
+        return self.get("claims")
 
     @property
     def scopes(self) -> Optional[List[str]]:
-        return self["requestContext"]["authorizer"].get("scopes")
+        return self.get("scopes")
+
+    @property
+    def principal_id(self) -> Optional[str]:
+        """The principal user identification associated with the token sent by the client and returned from an
+        API Gateway Lambda authorizer (formerly known as a custom authorizer)"""
+        return self.get("principalId")
+
+    @property
+    def integration_latency(self) -> Optional[int]:
+        """The authorizer latency in ms."""
+        return self.get("integrationLatency")
 
 
 class APIGatewayEventRequestContext(BaseRequestContext):
@@ -56,7 +67,7 @@ class APIGatewayEventRequestContext(BaseRequestContext):
 
     @property
     def authorizer(self) -> APIGatewayEventAuthorizer:
-        return APIGatewayEventAuthorizer(self._data)
+        return APIGatewayEventAuthorizer(self._data["requestContext"]["authorizer"])
 
 
 class APIGatewayProxyEvent(BaseProxyEvent):

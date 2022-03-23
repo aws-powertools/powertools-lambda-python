@@ -128,12 +128,12 @@ def test_partial_sqs_clean(monkeypatch, mocker, partial_sqs_processor):
     entries_to_clean_mock = mocker.patch.object(PartialSQSProcessor, "_get_entries_to_clean")
 
     queue_url_mock.return_value = mocker.sentinel.queue_url
-    entries_to_clean_mock.return_value = mocker.sentinel.entries_to_clean
+    entries_to_clean_mock.return_value = [mocker.sentinel.entries_to_clean]
 
     client_mock = mocker.patch.object(partial_sqs_processor, "client", autospec=True)
     with pytest.raises(SQSBatchProcessingError):
         partial_sqs_processor._clean()
 
     client_mock.delete_message_batch.assert_called_once_with(
-        QueueUrl=mocker.sentinel.queue_url, Entries=mocker.sentinel.entries_to_clean
+        QueueUrl=mocker.sentinel.queue_url, Entries=[mocker.sentinel.entries_to_clean]
     )

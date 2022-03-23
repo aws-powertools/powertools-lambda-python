@@ -78,9 +78,16 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         custom logging handler e.g. logging.FileHandler("file.log")
 
     Parameters propagated to LambdaPowertoolsFormatter
-    ---------------------------------------------
+    --------------------------------------------------
     datefmt: str, optional
-        String directives (strftime) to format log timestamp, by default it uses RFC 3339.
+        String directives (strftime) to format log timestamp using `time`, by default it uses RFC
+        3339.
+    use_datetime_directive: str, optional
+        Interpret `datefmt` as a format string for `datetime.datetime.strftime`, rather than
+        `time.strftime`.
+
+        See https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior . This
+        also supports a custom %F directive for milliseconds.
     json_serializer : Callable, optional
         function to serialize `obj` to a JSON formatted `str`, by default json.dumps
     json_deserializer : Callable, optional
@@ -328,7 +335,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         )
 
         @functools.wraps(lambda_handler)
-        def decorate(event, context):
+        def decorate(event, context, **kwargs):
             lambda_context = build_lambda_context_model(context)
             cold_start = _is_cold_start()
 
@@ -342,7 +349,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
             if log_event:
                 logger.debug("Event received")
-                self.info(event)
+                self.info(getattr(event, "raw_event", event))
 
             return lambda_handler(event, context)
 
@@ -378,14 +385,26 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         append : bool, optional
             append keys provided to logger formatter, by default False
         """
+        # There are 3 operational modes for this method
+        ## 1. Register a Powertools Formatter for the first time
+        ## 2. Append new keys to the current logger formatter; deprecated in favour of append_keys
+        ## 3. Add new keys and discard existing to the registered formatter
 
-        if append:
-            # Maintenance: Add deprecation warning for major version. Refer to append_keys() when docs are updated
-            self.append_keys(**keys)
-        else:
-            log_keys = {**self._default_log_keys, **keys}
+        # Mode 1
+        log_keys = {**self._default_log_keys, **keys}
+        is_logger_preconfigured = getattr(self._logger, "init", False)
+        if not is_logger_preconfigured:
             formatter = self.logger_formatter or LambdaPowertoolsFormatter(**log_keys)  # type: ignore
-            self.registered_handler.setFormatter(formatter)
+            return self.registered_handler.setFormatter(formatter)
+
+        # Mode 2 (legacy)
+        if append:
+            # Maintenance: Add deprecation warning for major version
+            return self.append_keys(**keys)
+
+        # Mode 3
+        self.registered_formatter.clear_state()
+        self.registered_formatter.append_keys(**log_keys)
 
     def set_correlation_id(self, value: Optional[str]):
         """Sets the correlation_id in the logging json

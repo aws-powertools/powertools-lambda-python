@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel, Field
 
@@ -13,5 +13,5 @@ class EventBridgeModel(BaseModel):
     region: str
     resources: List[str]
     detail_type: str = Field(None, alias="detail-type")
-    detail: Dict[str, Any]
+    detail: Union[Dict[str, Any], Type[BaseModel]]
     replay_name: Optional[str] = Field(None, alias="replay-name")

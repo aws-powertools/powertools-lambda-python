@@ -4,11 +4,9 @@
 [![codecov.io](https://codecov.io/github/awslabs/aws-lambda-powertools-python/branch/develop/graphs/badge.svg)](https://app.codecov.io/gh/awslabs/aws-lambda-powertools-python)
 ![PythonSupport](https://img.shields.io/static/v1?label=python&message=3.6%20|%203.7|%203.8|%203.9&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools)
 
-A suite of Python utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, and more. ([AWS Lambda Powertools Java](https://github.com/awslabs/aws-lambda-powertools-java) is also available).
+A suite of Python utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, and more. (AWS Lambda Powertools [Java](https://github.com/awslabs/aws-lambda-powertools-java) and [Typescript](https://github.com/awslabs/aws-lambda-powertools-typescript) is also available).
 
-
-
-**[📜Documentation](https://awslabs.github.io/aws-lambda-powertools-python/)** | **[🐍PyPi](https://pypi.org/project/aws-lambda-powertools/)** | **[Roadmap](https://github.com/awslabs/aws-lambda-powertools-roadmap/projects/1)** | **[Quick hello world example](https://github.com/aws-samples/cookiecutter-aws-sam-python)** | **[Detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/)**
+**[📜Documentation](https://awslabs.github.io/aws-lambda-powertools-python/)** | **[🐍PyPi](https://pypi.org/project/aws-lambda-powertools/)** | **[Roadmap](https://github.com/awslabs/aws-lambda-powertools-roadmap/projects/1)** | **[Detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/)**
 
 > **An AWS Developer Acceleration (DevAx) initiative by Specialist Solution Architects | aws-devax-open-source@amazon.com**
 
@@ -29,25 +27,28 @@ A suite of Python utilities for AWS Lambda functions to ease adopting best pract
 * **[Idempotency](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/idempotency/)** - Convert your Lambda functions into idempotent operations which are safe to retry
 * **[Feature Flags](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/feature_flags/)** - A simple rule engine to evaluate when one or multiple features should be enabled depending on the input
 
+
 ### Installation
 
 With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip install aws-lambda-powertools``
 
-## Examples
 
+## Tutorial and Examples
+
+* [Tutorial](https://awslabs.github.io/aws-lambda-powertools-python/latest/tutorial)
 * [Serverless Shopping cart](https://github.com/aws-samples/aws-serverless-shopping-cart)
 * [Serverless Airline](https://github.com/aws-samples/aws-serverless-airline-booking)
 * [Serverless E-commerce platform](https://github.com/aws-samples/aws-serverless-ecommerce-platform)
+* [Serverless GraphQL Nanny Booking Api](https://github.com/trey-rosius/babysitter_api)
 
 ## Credits
 
 * Structured logging initial implementation from [aws-lambda-logging](https://gitlab.com/hadrien/aws_lambda_logging)
 * Powertools idea [DAZN Powertools](https://github.com/getndazn/dazn-lambda-powertools/)
 
-
 ## Connect
 
-* **AWS Developers Slack**: `#lambda-powertools`** - **[Invite, if you don't have an account](https://join.slack.com/t/awsdevelopers/shared_invite/zt-yryddays-C9fkWrmguDv0h2EEDzCqvw)**
+* **AWS Developers Slack**: `#lambda-powertools` - **[Invite, if you don't have an account](https://join.slack.com/t/awsdevelopers/shared_invite/zt-yryddays-C9fkWrmguDv0h2EEDzCqvw)**
 * **Email**: aws-lambda-powertools-feedback@amazon.com
 
 ## License

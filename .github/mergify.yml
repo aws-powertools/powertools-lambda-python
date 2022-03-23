@@ -1,28 +1,29 @@
+queue_rules:
+  - name: default
+    conditions:
+      # Conditions to get out of the queue (= merged)
+      - check-success=Semantic Pull Request
+      - "#approved-reviews-by>=1"
+      - -title~=(WIP|wip)
+      - -label~="do-not-merge"
+      - "#changes-requested-reviews-by=0"
+
 pull_request_rules:
   - name: automatic merge for Dependabot pull requests
     conditions:
       - author~=^dependabot(|-preview)\[bot\]$
-#       - check-success=build  # matrix jobs aren't working in mergify
-      - -label~="do-not-merge"
-      - "#approved-reviews-by>=1"  # until we exclude major versions in dependabot
     actions:
-      merge:
-        strict: false
+      queue:
+        name: default
         method: squash
         commit_message: title+body
 
   - name: Automatic merge ⬇️ on approval ✔
     conditions:
       - base!=master
-      - "#approved-reviews-by>=1"
-      - "#changes-requested-reviews-by=0"
-      - -title~=(WIP|wip)
-#       - check-success=build  # matrix jobs aren't working in mergify
-      - check-success=Semantic Pull Request
-      - body~=(?m)^\[X\] Meet tenets criteria
+      - "#approved-reviews-by>=2"
     actions:
-      merge:
-        strict: smart
+      queue:
+        name: default
         method: squash
-        strict_method: merge
         commit_message: title+body
