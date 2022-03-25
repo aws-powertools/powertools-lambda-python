@@ -15,7 +15,7 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 
 ???+ warning
 
-    This will increase the compressed package size by approximately 25MB due to the Pydantic dependency.
+    This will increase the compressed package size by >10MB due to the Pydantic dependency.
 
     To reduce the impact on the package size at the expense of 30%-50% of its performance [Pydantic can also be
     installed without binary files](https://pydantic-docs.helpmanual.io/install/#performance-vs-package-size-trade-off):
