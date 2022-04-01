@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format for changes and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.25.6 - 2022-04-01
+
+* **logger:** clear_state regression on absent standard keys like level, location, timestamp ([#1088](https://github.com/awslabs/aws-lambda-powertools-python/issues/1088))
+
 ## 1.25.5 - 2022-03-18
 
 ### Bug Fixes
