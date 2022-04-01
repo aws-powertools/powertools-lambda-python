@@ -663,6 +663,44 @@ def test_clear_state_on_inject_lambda_context(lambda_context, stdout, service_na
     assert "my_key" not in second_log
 
 
+def test_clear_state_keeps_standard_keys(lambda_context, stdout, service_name):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout)
+    standard_keys = ["level", "location", "message", "timestamp", "service"]
+
+    # WHEN clear_state is set
+    @logger.inject_lambda_context(clear_state=True)
+    def handler(event, context):
+        logger.info("Foo")
+
+    # THEN all standard keys should be available as usual
+    handler({}, lambda_context)
+    handler({}, lambda_context)
+
+    first_log, second_log = capture_multiple_logging_statements_output(stdout)
+    for key in standard_keys:
+        assert key in first_log
+        assert key in second_log
+
+
+def test_clear_state_keeps_exception_keys(lambda_context, stdout, service_name):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN clear_state is set and an exception was logged
+    @logger.inject_lambda_context(clear_state=True)
+    def handler(event, context):
+        try:
+            raise ValueError("something went wrong")
+        except Exception:
+            logger.exception("Received an exception")
+
+    # THEN we expect a "exception_name" to be "ValueError"
+    handler({}, lambda_context)
+    log = capture_logging_output(stdout)
+    assert "ValueError" == log["exception_name"]
+
+
 def test_inject_lambda_context_allows_handler_with_kwargs(lambda_context, stdout, service_name):
     # GIVEN
     logger = Logger(service=service_name, stream=stdout)
