@@ -675,10 +675,12 @@ def test_clear_state_keeps_standard_keys(lambda_context, stdout, service_name):
 
     # THEN all standard keys should be available as usual
     handler({}, lambda_context)
+    handler({}, lambda_context)
 
-    log = capture_logging_output(stdout)
+    first_log, second_log = capture_multiple_logging_statements_output(stdout)
     for key in standard_keys:
-        assert key in log
+        assert key in first_log
+        assert key in second_log
 
 
 def test_clear_state_keeps_exception_keys(lambda_context, stdout, service_name):
