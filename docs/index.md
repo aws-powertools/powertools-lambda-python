@@ -168,7 +168,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
                 Location:
                     ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
                     # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
-                    SemanticVersion: 1.25.5
+                    SemanticVersion: 1.25.6
     ```
 
 === "CDK"
