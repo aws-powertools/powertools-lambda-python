@@ -3,29 +3,25 @@ title: Homepage
 description: AWS Lambda Powertools Python
 ---
 
-A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, and more.
+A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, idempotency, batching, and more.
 
 ???+ tip "Tip: Looking for a quick read through how the core features are used?"
 
     Check out [this detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/) with a practical example.
 
-## Tenets
-
-Core utilities such as Tracing, Logging, Metrics, and Event Handler will be available across all Lambda Powertools runtimes. Additional utilities are subjective to each language ecosystem and customer demand.
-
-* **AWS Lambda only**. We optimise for AWS Lambda function environments and supported runtimes only. Utilities might work with web frameworks and non-Lambda environments, though they are not officially supported.
-* **Eases the adoption of best practices**. The main priority of the utilities is to facilitate best practices adoption, as defined in the AWS Well-Architected Serverless Lens; all other functionality is optional.
-* **Keep it lean**. Additional dependencies are carefully considered for security and ease of maintenance, and prevent negatively impacting startup time.
-* **We strive for backwards compatibility**. New features and changes should keep backwards compatibility. If a breaking change cannot be avoided, the deprecation and migration process should be clearly defined.
-* **We work backwards from the community**. We aim to strike a balance of what would work best for 80% of customers. Emerging practices are considered and discussed via Requests for Comment (RFCs)
-* **Progressive**. Utilities are designed to be incrementally adoptable for customers at any stage of their Serverless journey. They follow language idioms and their community’s common practices.
 
 ## Install
 
 Powertools is available in the following formats:
 
-* **Lambda Layer**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:**](#){: .copyMe}
+* **Lambda Layer**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:**](#){: .copyMe}
 * **PyPi**: **`pip install aws-lambda-powertools`**
+
+???+ hint "Support this project by using Lambda Layers :heart:"
+    Lambda Layers allow us to understand who uses this library in a non-intrusive way. This helps us justify and gain future investments for other Lambda Powertools languages.
+
+    When using Layers, you can add Lambda Powertools as a dev dependency (or as part of your virtual env) to not impact the development process.
+
 
 ### Lambda Layer
 
@@ -37,23 +33,28 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 
     | Region | Layer ARN
     |--------------------------- | ---------------------------
-    | `us-east-1` | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `us-east-2` | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `us-west-1` | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `us-west-2` | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `ap-south-1` | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `eu-central-1` | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `eu-west-1` | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `eu-west-2` | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `eu-west-3` | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `eu-north-1` | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `ca-central-1` | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
-    | `sa-east-1` | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:15 :clipboard:](#){: .copyMe}
+    | `us-east-1` | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `us-east-2` | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `us-west-1` | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `us-west-2` | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `ap-south-1` | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `eu-central-1` | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `eu-west-1` | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `eu-west-2` | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `eu-west-3` | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `eu-north-1` | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `ca-central-1` | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+    | `sa-east-1` | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:16 :clipboard:](#){: .copyMe}
+
+??? question "Can't find our Lambda Layer for your preferred AWS region?"
+    You can use [Serverless Application Repository (SAR)](#sar) method, our [CDK Layer Construct](https://github.com/aws-samples/cdk-lambda-powertools-python-layer){target="_blank"}, or PyPi like you normally would for any other library.
+
+    Please do file a feature request with the region you'd want us to prioritize making our Lambda Layer available.
 
 === "SAM"
 
@@ -68,7 +69,7 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 		hello:
 		  handler: lambda_function.lambda_handler
 		  layers:
-			- arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPython:15
+			- arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPython:16
     ```
 
 === "CDK"
@@ -94,7 +95,7 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
     ? Do you want to configure advanced settings? Yes
     ...
     ? Do you want to enable Lambda layers for this function? Yes
-    ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:15
+    ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:16
     ❯ amplify push -y
 
 
@@ -105,7 +106,7 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
     - Name: <NAME-OF-FUNCTION>
     ? Which setting do you want to update? Lambda layers configuration
     ? Do you want to enable Lambda layers for this function? Yes
-    ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:15
+    ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:16
     ? Do you want to edit the local lambda function now? No
     ```
 
@@ -113,7 +114,7 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 	Change {region} to your AWS region, e.g. `eu-west-1`
 
     ```bash title="AWS CLI"
-	aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:15 --region {region}
+	aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:16 --region {region}
     ```
 
     The pre-signed URL to download this Lambda Layer will be within `Location` key.
@@ -211,6 +212,8 @@ sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 
 ## Features
 
+Core utilities such as Tracing, Logging, Metrics, and Event Handler will be available across all Lambda Powertools languages. Additional utilities are subjective to each language ecosystem and customer demand.
+
 | Utility | Description
 | ------------------------------------------------- | ---------------------------------------------------------------------------------
 [Tracing](./core/tracer.md) | Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions
@@ -257,4 +260,15 @@ from aws_lambda_powertools.logging.logger import set_package_logger
 set_package_logger() # (1)
 ```
 
-1. :information_source: this will configure our `aws_lambda_powertools` logger with debug.
+1.  :information_source: this will configure our `aws_lambda_powertools` logger with debug.
+
+## Tenets
+
+These are our core principles to guide our decision making.
+
+* **AWS Lambda only**. We optimise for AWS Lambda function environments and supported runtimes only. Utilities might work with web frameworks and non-Lambda environments, though they are not officially supported.
+* **Eases the adoption of best practices**. The main priority of the utilities is to facilitate best practices adoption, as defined in the AWS Well-Architected Serverless Lens; all other functionality is optional.
+* **Keep it lean**. Additional dependencies are carefully considered for security and ease of maintenance, and prevent negatively impacting startup time.
+* **We strive for backwards compatibility**. New features and changes should keep backwards compatibility. If a breaking change cannot be avoided, the deprecation and migration process should be clearly defined.
+* **We work backwards from the community**. We aim to strike a balance of what would work best for 80% of customers. Emerging practices are considered and discussed via Requests for Comment (RFCs)
+* **Progressive**. Utilities are designed to be incrementally adoptable for customers at any stage of their Serverless journey. They follow language idioms and their community’s common practices.

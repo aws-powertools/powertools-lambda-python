@@ -187,6 +187,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
     def clear_state(self):
         self.log_format = dict.fromkeys(self.log_record_order)
+        self.log_format.update(**self._build_default_keys())
 
     @staticmethod
     def _build_default_keys():
