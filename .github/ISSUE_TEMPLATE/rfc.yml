@@ -7,8 +7,6 @@ body:
     attributes:
       value: |
         Thank you for submitting a RFC. Please add as many details as possible to help further enrich this design.
-
-        Please do not work on an implementation PR until this RFC is approved by maintainers.
   - type: input
     id: relation
     attributes:
@@ -101,6 +99,8 @@ body:
     attributes:
       value: |
         ---
+
+        **Disclaimer**: We value your time and bandwidth. As such, any pull requests created on non-triaged issues might not be successful.
 
         Metadata information for admin purposes, please leave them empty.
 

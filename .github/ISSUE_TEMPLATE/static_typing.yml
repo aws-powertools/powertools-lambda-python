@@ -61,3 +61,9 @@ body:
       description: If known, please suggest a potential resolution
     validations:
       required: false
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        **Disclaimer**: We value your time and bandwidth. As such, any pull requests created on non-triaged issues might not be successful.
