@@ -274,6 +274,40 @@ def test_idempotent_lambda_first_execution_cached(
     stubber.assert_no_pending_responses()
     stubber.deactivate()
 
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
+def test_idempotent_lambda_first_execution_event_mutation(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    expected_params_update_item,
+    expected_params_put_item,
+    lambda_response,
+    serialized_lambda_response,
+    deserialized_lambda_response,
+    hashed_idempotency_key,
+    lambda_context,
+):
+    """
+    Test idempotent decorator where lambda_handler mutates the event
+    """
+
+    stubber = stub.Stubber(persistence_store.table.meta.client)
+    ddb_response = {}
+
+    stubber.add_response("put_item", ddb_response, expected_params_put_item)
+    stubber.add_response("update_item", ddb_response, expected_params_update_item)
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        event.popitem()
+        return lambda_response
+
+    lambda_handler(lambda_apigw_event, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_expired(
