@@ -1,0 +1,63 @@
+name: Static typing mismatch report
+description: Report a static type mismatch caught by a static type checker
+title: "Static typing: TITLE"
+labels: ["static_typing", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for submitting a static typing report. Please add as much information as possible to help us reproduce.
+
+        Our preferred static type checker is [Mypy](https://mypy.readthedocs.io/en/stable/) using the following [configuration](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/mypy.ini).
+  - type: dropdown
+    id: tool
+    attributes:
+      label: Static type checker used
+      options:
+        - label: "mypy (project's standard)"
+        - label: "pyright/pylance"
+        - label: "pyre"
+        - label: "pytype"
+    validations:
+      required: true
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: AWS Lambda function runtime
+      options:
+        - label: "3.6"
+        - label: "3.7"
+        - label: "3.8"
+        - label: "3.9"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: AWS Lambda Powertools for Python version
+      placeholder: "latest, 1.25.6"
+      value: latest
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Static type checker info
+      description: Please share your static type checker's output, its configuration, and how you typically run it
+    validations:
+      required: true
+  - type: textarea
+    id: code_snippet
+    attributes:
+      label: Code snippet
+      description: Please share a code snippet to help us reproduce the issue
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Possible Solution
+      description: If known, please suggest a potential resolution
+    validations:
+      required: false
