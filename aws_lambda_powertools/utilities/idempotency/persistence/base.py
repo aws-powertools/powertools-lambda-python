@@ -157,7 +157,7 @@ class BasePersistenceLayer(ABC):
             self._cache = LRUDict(max_items=config.local_cache_max_items)
         self.hash_function = getattr(hashlib, config.hash_function)
 
-    def _get_hashed_idempotency_key(self, data: Dict[str, Any]) -> str:
+    def get_hashed_idempotency_key(self, data: Dict[str, Any]) -> str:
         """
         Extract idempotency key and return a hashed representation
 
@@ -189,7 +189,7 @@ class BasePersistenceLayer(ABC):
             return all(x is None for x in data)
         return not data
 
-    def _get_hashed_payload(self, data: Dict[str, Any]) -> str:
+    def get_hashed_payload(self, data: Dict[str, Any]) -> str:
         """
         Extract payload using validation key jmespath and return a hashed representation
 
@@ -245,7 +245,7 @@ class BasePersistenceLayer(ABC):
 
         """
         if self.payload_validation_enabled:
-            data_hash = self._get_hashed_payload(data=data)
+            data_hash = self.get_hashed_payload(data=data)
             if data_record.payload_hash != data_hash:
                 raise IdempotencyValidationError("Payload does not match stored record for this event key")
 
@@ -300,7 +300,7 @@ class BasePersistenceLayer(ABC):
         if idempotency_key in self._cache:
             del self._cache[idempotency_key]
 
-    def save_success(self, data: Dict[str, Any], result: dict) -> None:
+    def save_success(self, hashed_key: str, hashed_payload: str, result: dict) -> None:
         """
         Save record of function's execution completing successfully
 
@@ -314,11 +314,11 @@ class BasePersistenceLayer(ABC):
         response_data = json.dumps(result, cls=Encoder, sort_keys=True)
 
         data_record = DataRecord(
-            idempotency_key=self._get_hashed_idempotency_key(data=data),
+            idempotency_key=hashed_key,
             status=STATUS_CONSTANTS["COMPLETED"],
             expiry_timestamp=self._get_expiry_timestamp(),
             response_data=response_data,
-            payload_hash=self._get_hashed_payload(data=data),
+            payload_hash=hashed_payload,
         )
         logger.debug(
             f"Function successfully executed. Saving record to persistence store with "
@@ -328,20 +328,19 @@ class BasePersistenceLayer(ABC):
 
         self._save_to_cache(data_record=data_record)
 
-    def save_inprogress(self, data: Dict[str, Any]) -> None:
+    def save_inprogress(self, hashed_key=None, hashed_payload=None) -> None:
         """
         Save record of function's execution being in progress
 
         Parameters
         ----------
-        data: Dict[str, Any]
-            Payload
+        TODO: update
         """
         data_record = DataRecord(
-            idempotency_key=self._get_hashed_idempotency_key(data=data),
+            idempotency_key=hashed_key,
             status=STATUS_CONSTANTS["INPROGRESS"],
             expiry_timestamp=self._get_expiry_timestamp(),
-            payload_hash=self._get_hashed_payload(data=data),
+            payload_hash=hashed_payload,
         )
 
         logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")
@@ -351,7 +350,7 @@ class BasePersistenceLayer(ABC):
 
         self._put_record(data_record=data_record)
 
-    def delete_record(self, data: Dict[str, Any], exception: Exception):
+    def delete_record(self,  hashed_key: str, exception: Exception):
         """
         Delete record from the persistence store
 
@@ -362,7 +361,7 @@ class BasePersistenceLayer(ABC):
         exception
             The exception raised by the function
         """
-        data_record = DataRecord(idempotency_key=self._get_hashed_idempotency_key(data=data))
+        data_record = DataRecord(idempotency_key=hashed_key)
 
         logger.debug(
             f"Function raised an exception ({type(exception).__name__}). Clearing in progress record in persistence "
@@ -372,7 +371,7 @@ class BasePersistenceLayer(ABC):
 
         self._delete_from_cache(idempotency_key=data_record.idempotency_key)
 
-    def get_record(self, data: Dict[str, Any]) -> DataRecord:
+    def get_record(self, data: Dict[str, Any], hashed_key: str) -> DataRecord:
         """
         Retrieve idempotency key for data provided, fetch from persistence store, and convert to DataRecord.
 
@@ -394,7 +393,7 @@ class BasePersistenceLayer(ABC):
             Payload doesn't match the stored record for the given idempotency key
         """
 
-        idempotency_key = self._get_hashed_idempotency_key(data=data)
+        idempotency_key = hashed_key
 
         cached_record = self._retrieve_from_cache(idempotency_key=idempotency_key)
         if cached_record:
@@ -409,6 +408,7 @@ class BasePersistenceLayer(ABC):
         self._validate_payload(data=data, data_record=record)
         return record
 
+    # TODO these would all need to be updated too...
     @abstractmethod
     def _get_record(self, idempotency_key) -> DataRecord:
         """

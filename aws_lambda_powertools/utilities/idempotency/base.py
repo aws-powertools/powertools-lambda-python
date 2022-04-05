@@ -75,6 +75,8 @@ class IdempotencyHandler:
 
         persistence_store.configure(config, self.function.__name__)
         self.persistence_store = persistence_store
+        self.hashed_idempotency_key = persistence_store.get_hashed_idempotency_key(self.data)
+        self.hashed_payload = persistence_store.get_hashed_payload(self.data)
 
     def handle(self) -> Any:
         """
@@ -100,7 +102,7 @@ class IdempotencyHandler:
         try:
             # We call save_inprogress first as an optimization for the most common case where no idempotent record
             # already exists. If it succeeds, there's no need to call get_record.
-            self.persistence_store.save_inprogress(data=self.data)
+            self.persistence_store.save_inprogress(hashed_key=self.hashed_idempotency_key, hashed_payload=self.hashed_payload)
         except IdempotencyKeyError:
             raise
         except IdempotencyItemAlreadyExistsError:
@@ -122,7 +124,7 @@ class IdempotencyHandler:
 
         """
         try:
-            data_record = self.persistence_store.get_record(data=self.data)
+            data_record = self.persistence_store.get_record(data=self.data, hashed_key=self.hashed_idempotency_key)
         except IdempotencyItemNotFoundError:
             # This code path will only be triggered if the record is removed between save_inprogress and get_record.
             logger.debug(
@@ -180,7 +182,7 @@ class IdempotencyHandler:
             # We need these nested blocks to preserve function's exception in case the persistence store operation
             # also raises an exception
             try:
-                self.persistence_store.delete_record(data=self.data, exception=handler_exception)
+                self.persistence_store.delete_record(hashed_key=self.hashed_idempotency_key, exception=handler_exception)
             except Exception as delete_exception:
                 raise IdempotencyPersistenceLayerError(
                     "Failed to delete record from idempotency store"
@@ -189,7 +191,7 @@ class IdempotencyHandler:
 
         else:
             try:
-                self.persistence_store.save_success(data=self.data, result=response)
+                self.persistence_store.save_success(hashed_key=self.hashed_idempotency_key, hashed_payload=self.hashed_payload, result=response)
             except Exception as save_exception:
                 raise IdempotencyPersistenceLayerError(
                     "Failed to update record state to success in idempotency store"

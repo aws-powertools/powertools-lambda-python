@@ -274,6 +274,40 @@ def test_idempotent_lambda_first_execution_cached(
     stubber.assert_no_pending_responses()
     stubber.deactivate()
 
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
+def test_idempotent_lambda_first_execution_event_mutation(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    expected_params_update_item,
+    expected_params_put_item,
+    lambda_response,
+    serialized_lambda_response,
+    deserialized_lambda_response,
+    hashed_idempotency_key,
+    lambda_context,
+):
+    """
+    Test idempotent decorator where lambda_handler mutates the event
+    """
+
+    stubber = stub.Stubber(persistence_store.table.meta.client)
+    ddb_response = {}
+
+    stubber.add_response("put_item", ddb_response, expected_params_put_item)
+    stubber.add_response("update_item", ddb_response, expected_params_update_item)
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        event.popitem()
+        return lambda_response
+
+    lambda_handler(lambda_apigw_event, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_expired(
@@ -770,7 +804,7 @@ def test_default_no_raise_on_missing_idempotency_key(
     assert "body" in persistence_store.event_key_jmespath
 
     # WHEN getting the hashed idempotency key for an event with no `body` key
-    hashed_key = persistence_store._get_hashed_idempotency_key({})
+    hashed_key = persistence_store.get_hashed_idempotency_key({})
 
     # THEN return the hash of None
     expected_value = f"test-func.{function_name}#" + md5(json_serialize(None).encode()).hexdigest()
@@ -791,7 +825,7 @@ def test_raise_on_no_idempotency_key(
 
     # WHEN getting the hashed idempotency key for an event with no `body` key
     with pytest.raises(IdempotencyKeyError) as excinfo:
-        persistence_store._get_hashed_idempotency_key({})
+        persistence_store.get_hashed_idempotency_key({})
 
     # THEN raise IdempotencyKeyError error
     assert "No data found to create a hashed idempotency_key" in str(excinfo.value)
@@ -821,7 +855,7 @@ def test_jmespath_with_powertools_json(
     }
 
     # WHEN calling _get_hashed_idempotency_key
-    result = persistence_store._get_hashed_idempotency_key(api_gateway_proxy_event)
+    result = persistence_store.get_hashed_idempotency_key(api_gateway_proxy_event)
 
     # THEN the hashed idempotency key should match the extracted values generated hash
     assert result == "test-func.handler#" + persistence_store._generate_hash(expected_value)
@@ -838,7 +872,7 @@ def test_custom_jmespath_function_overrides_builtin_functions(
     with pytest.raises(jmespath.exceptions.UnknownFunctionError, match="Unknown function: powertools_json()"):
         # WHEN calling _get_hashed_idempotency_key
         # THEN raise unknown function
-        persistence_store._get_hashed_idempotency_key({})
+        persistence_store.get_hashed_idempotency_key({})
 
 
 def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPersistenceLayer, lambda_context):
