@@ -1,6 +1,6 @@
 name: Bug report
 description: Report a reproducible bug to help us improve
-title: "Bug: "
+title: "Bug: TITLE"
 labels: ["bug", "triage"]
 body:
   - type: markdown
@@ -27,7 +27,7 @@ body:
     id: code_snippet
     attributes:
       label: Code snippet
-      description: Please share a code snippet to help us reproduce the issue. .
+      description: Please share a code snippet to help us reproduce the issue.
       render: python
     validations:
       required: true
