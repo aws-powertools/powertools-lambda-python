@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question
+    url: https://github.com/awslabs/aws-lambda-powertools-python/discussions/new
+    about: Ask a general question about Lambda Powertools
