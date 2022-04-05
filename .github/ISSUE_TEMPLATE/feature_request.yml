@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for taking the time to suggest an idea to the Lambda Powertools project.
+        Thank you for taking the time to suggest an idea to the Lambda Powertools project. Please do not work on an implementation PR until this is approved by maintainers.
 
         *Future readers*: Please react with 👍 and your use case to help us understand customer demand.
   - type: textarea
@@ -38,5 +38,5 @@ body:
       options:
         - label: This feature request meets [Lambda Powertools Tenets](https://awslabs.github.io/aws-lambda-powertools-python/latest/#tenets)
           required: true
-        - label: Does this apply to other Lambda Powertools languages? i.e. [Java](https://github.com/awslabs/aws-lambda-powertools-java/), [TypeScript](https://github.com/awslabs/aws-lambda-powertools-typescript/)
+        - label: Should this be considered in other Lambda Powertools languages? i.e. [Java](https://github.com/awslabs/aws-lambda-powertools-java/), [TypeScript](https://github.com/awslabs/aws-lambda-powertools-typescript/)
           required: false
