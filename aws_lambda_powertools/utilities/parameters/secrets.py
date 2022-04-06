@@ -20,7 +20,9 @@ class SecretsProvider(BaseProvider):
     config: botocore.config.Config, optional
         Botocore configuration to pass during client initialization
     boto3_session : boto3.session.Session, optional
-            Boto3 session to use for AWS API communication
+            Boto3 session to use for AWS API communication, will not be used if boto3_client is not None
+    boto3_client: boto3.client, optional
+            Boto3 Client to use for AWS API communication, will be used instead of boto3_session if both provided
 
     Example
     -------
@@ -60,14 +62,22 @@ class SecretsProvider(BaseProvider):
 
     client: Any = None
 
-    def __init__(self, config: Optional[Config] = None, boto3_session: Optional[boto3.session.Session] = None):
+    def __init__(
+        self,
+        config: Optional[Config] = None,
+        boto3_session: Optional[boto3.session.Session] = None,
+        boto3_client: Optional[boto3.client] = None,
+    ):
         """
         Initialize the Secrets Manager client
         """
 
         config = config or Config()
-        session = boto3_session or boto3.session.Session()
-        self.client = session.client("secretsmanager", config=config)
+        if boto3_client is not None:
+            self.client = boto3_client
+        else:
+            session = boto3_session or boto3.session.Session()
+            self.client = session.client("secretsmanager", config=config)
 
         super().__init__()
 
