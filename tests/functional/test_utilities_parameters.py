@@ -445,12 +445,12 @@ def test_ssm_provider_get(mock_name, mock_value, mock_version, config):
         stubber.deactivate()
 
 
-def test_ssm_provider_get_custom_client(mock_name, mock_value, mock_version):
+def test_ssm_provider_get_with_custom_client(mock_name, mock_value, mock_version, config):
     """
     Test SSMProvider.get() with a non-cached value
     """
 
-    client = boto3.client("ssm")
+    client = boto3.client("ssm", config=config)
 
     # Create a new provider
     provider = parameters.SSMProvider(boto3_client=client)
@@ -890,11 +890,11 @@ def test_secrets_provider_get(mock_name, mock_value, config):
         stubber.deactivate()
 
 
-def test_secrets_provider_get_with_custom_client(mock_name, mock_value):
+def test_secrets_provider_get_with_custom_client(mock_name, mock_value, config):
     """
     Test SecretsProvider.get() with a non-cached value
     """
-    client = boto3.client("secretsmanager")
+    client = boto3.client("secretsmanager", config=config)
 
     # Create a new provider
     provider = parameters.SecretsProvider(boto3_client=client)
@@ -1551,12 +1551,12 @@ def test_appconf_provider_get_configuration_json_content_type(mock_name, config)
         stubber.deactivate()
 
 
-def test_appconf_provider_get_configuration_json_content_type_with_custom_client(mock_name):
+def test_appconf_provider_get_configuration_json_content_type_with_custom_client(mock_name, config):
     """
     Test get_configuration.get with default values
     """
 
-    client = boto3.client("appconfig")
+    client = boto3.client("appconfig", config=config)
 
     # Create a new provider
     environment = "dev"
