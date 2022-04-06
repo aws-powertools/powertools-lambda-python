@@ -685,9 +685,8 @@ def test_clear_state_keeps_standard_keys(lambda_context, stdout, service_name):
 
 def test_clear_state_keeps_custom_keys(lambda_context, stdout, service_name):
     # GIVEN
-    date_format = "%Y"
-    location_format = "%(module)s:%(funcName)s:%(lineno)d"
-    logger = Logger(service=service_name, stream=stdout, location=location_format, datefmt=date_format)
+    location_format = "%(module)s.%(funcName)s:clear_state"
+    logger = Logger(service=service_name, stream=stdout, location=location_format, custom_key="foo")
 
     # WHEN clear_state is set
     @logger.inject_lambda_context(clear_state=True)
@@ -699,11 +698,9 @@ def test_clear_state_keeps_custom_keys(lambda_context, stdout, service_name):
     handler({}, lambda_context)
 
     first_log, second_log = capture_multiple_logging_statements_output(stdout)
-
-    assert re.fullmatch("[0-9]{4}", first_log["timestamp"])
-    assert re.fullmatch("[0-9]{4}", second_log["timestamp"])
-    assert re.fullmatch(".+:.+:[0-9]+", first_log["location"])
-    assert re.fullmatch(".+:.+:[0-9]+", second_log["location"])
+    for log in (first_log, second_log):
+        assert "foo" == log["custom_key"]
+        assert "test_logger.handler:clear_state" == log["location"]
 
 
 def test_clear_state_keeps_exception_keys(lambda_context, stdout, service_name):
