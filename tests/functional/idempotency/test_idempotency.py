@@ -22,7 +22,12 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
 from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent, idempotent_function
 from aws_lambda_powertools.utilities.idempotency.persistence.base import BasePersistenceLayer, DataRecord
 from aws_lambda_powertools.utilities.validation import envelopes, validator
-from tests.functional.utils import hash_idempotency_key, json_serialize, load_event
+from tests.functional.idempotency.utils import (
+    build_idempotency_put_item_stub,
+    build_idempotency_update_item_stub,
+    hash_idempotency_key,
+)
+from tests.functional.utils import json_serialize, load_event
 
 TABLE_NAME = "TEST_TABLE"
 
@@ -274,36 +279,36 @@ def test_idempotent_lambda_first_execution_cached(
     stubber.assert_no_pending_responses()
     stubber.deactivate()
 
-@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True, "event_key_jmespath": "body"}], indirect=True)
 def test_idempotent_lambda_first_execution_event_mutation(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
-    expected_params_update_item,
-    expected_params_put_item,
     lambda_response,
-    serialized_lambda_response,
-    deserialized_lambda_response,
-    hashed_idempotency_key,
     lambda_context,
 ):
     """
-    Test idempotent decorator where lambda_handler mutates the event
+    Test idempotent decorator where lambda_handler mutates the event.
+    Ensures we're passing data by value, not reference.
     """
-
+    event = copy.deepcopy(lambda_apigw_event)
     stubber = stub.Stubber(persistence_store.table.meta.client)
     ddb_response = {}
-
-    stubber.add_response("put_item", ddb_response, expected_params_put_item)
-    stubber.add_response("update_item", ddb_response, expected_params_update_item)
+    stubber.add_response("put_item", ddb_response, build_idempotency_put_item_stub(data=event["body"]))
+    stubber.add_response(
+        "update_item",
+        ddb_response,
+        build_idempotency_update_item_stub(data=event["body"], handler_response=lambda_response),
+    )
     stubber.activate()
 
     @idempotent(config=idempotency_config, persistence_store=persistence_store)
     def lambda_handler(event, context):
-        event.popitem()
+        event.pop("body")  # remove exact key we're using for idempotency
         return lambda_response
 
-    lambda_handler(lambda_apigw_event, lambda_context)
+    lambda_handler(event, lambda_context)
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
