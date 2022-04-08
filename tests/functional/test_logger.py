@@ -683,6 +683,26 @@ def test_clear_state_keeps_standard_keys(lambda_context, stdout, service_name):
         assert key in second_log
 
 
+def test_clear_state_keeps_custom_keys(lambda_context, stdout, service_name):
+    # GIVEN
+    location_format = "%(module)s.%(funcName)s:clear_state"
+    logger = Logger(service=service_name, stream=stdout, location=location_format, custom_key="foo")
+
+    # WHEN clear_state is set
+    @logger.inject_lambda_context(clear_state=True)
+    def handler(event, context):
+        logger.info("Foo")
+
+    # THEN all standard keys should be available as usual
+    handler({}, lambda_context)
+    handler({}, lambda_context)
+
+    first_log, second_log = capture_multiple_logging_statements_output(stdout)
+    for log in (first_log, second_log):
+        assert "foo" == log["custom_key"]
+        assert "test_logger.handler:clear_state" == log["location"]
+
+
 def test_clear_state_keeps_exception_keys(lambda_context, stdout, service_name):
     # GIVEN
     logger = Logger(service=service_name, stream=stdout)
