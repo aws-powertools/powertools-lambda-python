@@ -740,15 +740,15 @@ def test_similar_dynamic_routes_with_whitespaces():
     # THEN
     event["resource"] = "/accounts/{account_id}"
     event["path"] = "/accounts/single account"
-    app.resolve(event, None)
+    assert app.resolve(event, {})["statusCode"] == 200
 
     event["resource"] = "/accounts/{account_id}/source_networks"
     event["path"] = "/accounts/nested account/source_networks"
-    app.resolve(event, None)
+    assert app.resolve(event, {})["statusCode"] == 200
 
     event["resource"] = "/accounts/{account_id}/source_networks/{network_id}"
     event["path"] = "/accounts/nested account/source_networks/network 123"
-    app.resolve(event, {})
+    assert app.resolve(event, {})["statusCode"] == 200
 
 
 @pytest.mark.parametrize(
