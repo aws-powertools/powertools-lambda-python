@@ -12,7 +12,7 @@ from .exceptions import MiddlewareInvalidArgumentError
 logger = logging.getLogger(__name__)
 
 
-# giving this an accurate return type is hard
+# Maintenance: we can't yet provide an accurate return type without ParamSpec etc. see #1066
 def lambda_handler_decorator(decorator: Optional[Callable] = None, trace_execution: Optional[bool] = None) -> Callable:
     """Decorator factory for decorating Lambda handlers.
 
