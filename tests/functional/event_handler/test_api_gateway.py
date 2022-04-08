@@ -688,12 +688,12 @@ def test_similar_dynamic_routes():
     # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: E800
     @app.get("/accounts/<account_id>")
     def get_account(account_id: str):
-        assert account_id == "single_account"
+        assert account_id in ("single_account", "single account")
 
     # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: E800
     @app.get("/accounts/<account_id>/source_networks")
     def get_account_networks(account_id: str):
-        assert account_id == "nested_account"
+        assert account_id in ("nested_account", "nested account")
 
     # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: E800
     @app.get("/accounts/<account_id>/source_networks/<network_id>")
@@ -706,8 +706,16 @@ def test_similar_dynamic_routes():
     event["path"] = "/accounts/single_account"
     app.resolve(event, None)
 
+    event["resource"] = "/accounts/{account_id}"
+    event["path"] = "/accounts/single account"
+    app.resolve(event, None)
+
     event["resource"] = "/accounts/{account_id}/source_networks"
     event["path"] = "/accounts/nested_account/source_networks"
+    app.resolve(event, None)
+
+    event["resource"] = "/accounts/{account_id}/source_networks"
+    event["path"] = "/accounts/nested account/source_networks"
     app.resolve(event, None)
 
     event["resource"] = "/accounts/{account_id}/source_networks/{network_id}"
