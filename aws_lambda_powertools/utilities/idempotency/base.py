@@ -1,6 +1,6 @@
 import logging
-from typing import Any, Callable, Dict, Optional, Tuple
 from copy import deepcopy
+from typing import Any, Callable, Dict, Optional, Tuple
 
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
