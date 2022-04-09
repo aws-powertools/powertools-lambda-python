@@ -8,4 +8,4 @@ Resources:
           Handler: app.lambda_handler
           Runtime: python3.9
           Layers:
-              - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:16
+              - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:17
