@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format for changes and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.25.7 - 2022-04-08
+
+### Bug Fixes
+
+* **idempotency:** pass by value on idem key to guard inadvertent mutations ([#1090](https://github.com/awslabs/aws-lambda-powertools-python/issues/1090))
+* **logger:** clear_state should keep custom key formats ([#1095](https://github.com/awslabs/aws-lambda-powertools-python/issues/1095))
+* **middleware_factory:** ret type annotation for handler dec ([#1066](https://github.com/awslabs/aws-lambda-powertools-python/issues/1066))
+
+### Documentation
+
+* **layer:** update to 1.25.6; cosmetic changes
+
+### Maintenance
+
+* **governance:** refresh pull request template sections
+* **governance:** update external non-triage effort disclaimer
+* **governance:** update static typing to a form
+* **governance:** update rfc to a form
+* **governance:** update feat request to a form
+* **governance:** bug report form typo
+* **governance:** update docs report to a form
+* **governance:** update bug report to a form
+* **governance:** new ask a question
+* **governance:** new static typing report
+
 ## 1.25.6 - 2022-04-01
 
 * **logger:** clear_state regression on absent standard keys like level, location, timestamp ([#1088](https://github.com/awslabs/aws-lambda-powertools-python/issues/1088))
