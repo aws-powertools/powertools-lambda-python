@@ -27,6 +27,7 @@ boto3 = "^1.18"
 jmespath = "^0.10.0"
 pydantic = {version = "^1.8.2", optional = true }
 email-validator = {version = "*", optional = true }
+boto3-stubs = {extras = ["appconfig", "ssm", "secretsmanager"], version = "^1.21.37"}
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^6.2"}

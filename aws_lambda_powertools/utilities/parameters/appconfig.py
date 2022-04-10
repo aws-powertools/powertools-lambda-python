@@ -9,6 +9,7 @@ from uuid import uuid4
 
 import boto3
 from botocore.config import Config
+from mypy_boto3_appconfig import AppConfigClient
 
 from ...shared import constants
 from ...shared.functions import resolve_env_var_choice
@@ -31,7 +32,7 @@ class AppConfigProvider(BaseProvider):
         Botocore configuration to pass during client initialization
     boto3_session : boto3.session.Session, optional
             Boto3 session to use for AWS API communication, will not be used if boto3_client is not None
-    boto3_client: boto3.client, optional
+    boto3_client: AppConfigClient, optional
             Boto3 Client to use for AWS API communication, will be used instead of boto3_session if both provided
 
     Example
@@ -70,7 +71,7 @@ class AppConfigProvider(BaseProvider):
         application: Optional[str] = None,
         config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
-        boto3_client: Optional[boto3.client] = None,
+        boto3_client: Optional[AppConfigClient] = None,
     ):
         """
         Initialize the App Config client
@@ -81,7 +82,7 @@ class AppConfigProvider(BaseProvider):
             self.client = boto3_client
         else:
             session = boto3_session or boto3.session.Session()
-            self.client = session.client("appconfig", config=config)
+            self.client: AppConfigClient = session.client("appconfig", config=config)
 
         self.application = resolve_env_var_choice(
             choice=application, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")

@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional, Union
 
 import boto3
 from botocore.config import Config
+from mypy_boto3_ssm import SSMClient
 
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 
@@ -21,7 +22,7 @@ class SSMProvider(BaseProvider):
         Botocore configuration to pass during client initialization
     boto3_session : boto3.session.Session, optional
             Boto3 session to use for AWS API communication, will not be used if boto3_client is not None
-    boto3_client: boto3.client, optional
+    boto3_client: SSMClient, optional
             Boto3 Client to use for AWS API communication, will be used instead of boto3_session if both provided
 
     Example
@@ -82,7 +83,7 @@ class SSMProvider(BaseProvider):
         self,
         config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
-        boto3_client: Optional[boto3.client] = None,
+        boto3_client: Optional[SSMClient] = None,
     ):
         """
         Initialize the SSM Parameter Store client
@@ -93,7 +94,7 @@ class SSMProvider(BaseProvider):
             self.client = boto3_client
         else:
             session = boto3_session or boto3.session.Session()
-            self.client = session.client("ssm", config=config)
+            self.client: SSMClient = session.client("ssm", config=config)
 
         super().__init__()
 
