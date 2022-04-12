@@ -56,10 +56,10 @@ body:
     attributes:
       label: AWS Lambda function runtime
       options:
-        - label: "3.6"
-        - label: "3.7"
-        - label: "3.8"
-        - label: "3.9"
+        - 3.6
+        - 3.7
+        - 3.8
+        - 3.9
     validations:
       required: true
   - type: dropdown
@@ -67,9 +67,9 @@ body:
     attributes:
       label: Packaging format used
       options:
-        - label: "Lambda Layers"
-        - label: "Serverless Application Repository (SAR) App"
-        - label: "PyPi"
+        - Lambda Layers
+        - Serverless Application Repository (SAR) App
+        - PyPi
       multiple: true
     validations:
       required: true

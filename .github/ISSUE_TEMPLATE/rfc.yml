@@ -17,22 +17,22 @@ body:
     attributes:
       label: Which AWS Lambda Powertools utility does this relate to?
       options:
-        - label: "Tracer"
-        - label: "Logger"
-        - label: "Metrics"
-        - label: "Event Handler - REST API"
-        - label: "Event Handler - GraphQL API"
-        - label: "Middleware factory"
-        - label: "Parameters"
-        - label: "Batch processing"
-        - label: "Typing"
-        - label: "Validation"
-        - label: "Event Source Data Classes"
-        - label: "Parser"
-        - label: "Idempotency"
-        - label: "Feature flags"
-        - label: "JMESPath functions"
-        - label: "Other"
+        - Tracer
+        - Logger
+        - Metrics
+        - Event Handler - REST API
+        - Event Handler - GraphQL API
+        - Middleware factory
+        - Parameters
+        - Batch processing
+        - Typing
+        - Validation
+        - Event Source Data Classes
+        - Parser
+        - Idempotency
+        - Feature flags
+        - JMESPath functions
+        - Other
     validations:
       required: true
   - type: textarea
