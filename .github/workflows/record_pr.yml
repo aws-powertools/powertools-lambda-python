@@ -15,7 +15,7 @@ jobs:
           mkdir -p ./pr
           echo ${{ github.event.number }} > ./pr/number
           echo "${{ github.event.pull_request.title }}" > ./pr/title
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: pr
           path: pr/
