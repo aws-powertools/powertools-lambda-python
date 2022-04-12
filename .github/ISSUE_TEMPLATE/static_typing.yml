@@ -25,10 +25,10 @@ body:
     attributes:
       label: AWS Lambda function runtime
       options:
-        - "3.6
-        - "3.7
-        - "3.8
-        - "3.9
+        - 3.6
+        - 3.7
+        - 3.8
+        - 3.9
     validations:
       required: true
   - type: input
