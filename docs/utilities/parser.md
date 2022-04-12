@@ -14,7 +14,13 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 **Extra dependency**
 
 ???+ warning
-    This will increase the overall package size by approximately 75MB due to Pydantic dependency.
+
+    This will increase the compressed package size by >10MB due to the Pydantic dependency.
+
+    To reduce the impact on the package size at the expense of 30%-50% of its performance [Pydantic can also be
+    installed without binary files](https://pydantic-docs.helpmanual.io/install/#performance-vs-package-size-trade-off):
+
+    `SKIP_CYTHON=1 pip install --no-binary pydantic aws-lambda-powertools[pydantic]`
 
 Install parser's extra dependencies using **`pip install aws-lambda-powertools[pydantic]`**.
 
