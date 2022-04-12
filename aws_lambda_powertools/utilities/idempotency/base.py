@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from typing import Any, Callable, Dict, Optional, Tuple
 
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
@@ -69,7 +70,7 @@ class IdempotencyHandler:
             Function keyword arguments
         """
         self.function = function
-        self.data = _prepare_data(function_payload)
+        self.data = deepcopy(_prepare_data(function_payload))
         self.fn_args = function_args
         self.fn_kwargs = function_kwargs
 
