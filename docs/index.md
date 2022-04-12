@@ -9,7 +9,6 @@ A suite of utilities for AWS Lambda functions to ease adopting best practices su
 
     Check out [this detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/) with a practical example.
 
-
 ## Install
 
 Powertools is available in the following formats:
