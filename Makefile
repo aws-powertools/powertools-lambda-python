@@ -92,6 +92,8 @@ mypy:
 	poetry run mypy --pretty aws_lambda_powertools
 
 format-examples:
+	poetry run isort docs/shared
+	poetry run black docs/shared/*.py
 	poetry run isort docs/examples
 	poetry run black docs/examples/*/*.py
 	poetry run black docs/examples/*/*/*.py
@@ -99,6 +101,7 @@ format-examples:
 	poetry run black docs/examples/*/*/*/*/*.py
 
 lint-examples:
+	poetry run python3 -m py_compile docs/shared/*.py
 	poetry run python3 -m py_compile docs/examples/*/*.py
 	poetry run python3 -m py_compile docs/examples/*/*/*.py
 	poetry run python3 -m py_compile docs/examples/*/*/*/*.py

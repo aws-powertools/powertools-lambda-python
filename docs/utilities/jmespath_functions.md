@@ -113,7 +113,7 @@ This sample will decode the value within the `data` key into a valid JSON before
 
 === "schemas.py"
 
-    ```python hl_lines="7 14 16 23 39 45 47 52"
+    ```python hl_lines="8 10 17 23 34 36 41"
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
@@ -139,7 +139,7 @@ This sample will decode the base64 value within the `data` key, and decode the J
 
 === "schemas.py"
 
-    ```python hl_lines="7 14 16 23 39 45 47 52"
+    ```python hl_lines="8 10 17 23 34 36 41"
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
@@ -157,7 +157,7 @@ This sample will decompress and decode base64 data, then use JMESPath pipeline e
 
 === "schemas.py"
 
-    ```python hl_lines="7 14 16 23 39 45 47 52"
+    ```python hl_lines="8 10 17 23 34 36 41"
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 

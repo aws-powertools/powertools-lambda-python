@@ -255,9 +255,7 @@ Core utilities such as Tracing, Logging, Metrics, and Event Handler will be avai
 As a best practice, AWS Lambda Powertools module logging statements are suppressed. If necessary, you can enable debugging using `set_package_logger` for additional information on every internal operation:
 
 ```python title="Powertools debug mode example"
-from aws_lambda_powertools.logging.logger import set_package_logger
-
-set_package_logger() # (1)
+--8<-- "docs/examples/index/debug_mode.py"
 ```
 
 1.  :information_source: this will configure our `aws_lambda_powertools` logger with debug.

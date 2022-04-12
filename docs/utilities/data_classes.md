@@ -505,7 +505,7 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
 
 === "app.py"
 
-    ```python  hl_lines="5-6 13 15"
+    ```python hl_lines="5-6 13 15"
     --8<-- "docs/examples/utilities/data_classes/app_s3_object_lambda.py"
     ```
 

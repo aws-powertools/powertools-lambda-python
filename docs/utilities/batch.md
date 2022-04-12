@@ -533,13 +533,13 @@ decorator or `PartialSQSProcessor` class.
 
 === "Decorator"
 
-    ```python  hl_lines="5 15"
+    ```python hl_lines="5 15"
     --8<-- "docs/examples/utilities/batch/custom_config_decorator.py"
     ```
 
 === "Context manager"
 
-    ```python  hl_lines="5 18"
+    ```python hl_lines="5 18"
     --8<-- "docs/examples/utilities/batch/custom_config_context_manager.py"
     ```
 
@@ -547,13 +547,13 @@ decorator or `PartialSQSProcessor` class.
 
 === "Decorator"
 
-    ```python  hl_lines="5 15"
+    ```python hl_lines="5 15"
     --8<-- "docs/examples/utilities/batch/custom_boto3_session_decorator.py"
     ```
 
 === "Context manager"
 
-    ```python  hl_lines="5 18"
+    ```python hl_lines="5 18"
     --8<-- "docs/examples/utilities/batch/custom_boto3_session_context_manager.py"
     ```
 

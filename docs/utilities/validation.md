@@ -48,7 +48,7 @@ It will fail fast with `SchemaValidationError` exception if event or response do
 
 === "schemas.py"
 
-    ```python hl_lines="7 14 16 23 39 45 47 52"
+    ```python hl_lines="8 10 17 23 34 36 41"
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
@@ -78,7 +78,7 @@ You can also gracefully handle schema validation errors by catching `SchemaValid
 
 === "schemas.py"
 
-    ```python hl_lines="7 14 16 23 39 45 47 52"
+    ```python hl_lines="8 10 17 23 34 36 41"
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
@@ -106,7 +106,7 @@ Here is a sample custom EventBridge event, where we only validate what's inside 
 
 === "schemas.py"
 
-    ```python hl_lines="7 14 16 23 39 45 47 52"
+    ```python hl_lines="8 10 17 23 34 36 41"
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
@@ -130,7 +130,7 @@ This utility comes with built-in envelopes to easily extract the payload from po
 
 === "schemas.py"
 
-    ```python hl_lines="7 14 16 23 39 45 47 52"
+    ```python hl_lines="8 10 17 23 34 36 41"
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
@@ -175,138 +175,8 @@ For each format defined in a dictionary key, you must use a regex, or a function
 
 === "schemas.py"
 
-    ```python hl_lines="68" 91  93"
-    INPUT = {
-        "$schema": "http://json-schema.org/draft-04/schema#",
-        "definitions": {
-            "AWSAPICallViaCloudTrail": {
-                "properties": {
-                    "additionalEventData": {"$ref": "#/definitions/AdditionalEventData"},
-                    "awsRegion": {"type": "string"},
-                    "errorCode": {"type": "string"},
-                    "errorMessage": {"type": "string"},
-                    "eventID": {"type": "string"},
-                    "eventName": {"type": "string"},
-                    "eventSource": {"type": "string"},
-                    "eventTime": {"format": "date-time", "type": "string"},
-                    "eventType": {"type": "string"},
-                    "eventVersion": {"type": "string"},
-                    "recipientAccountId": {"type": "string"},
-                    "requestID": {"type": "string"},
-                    "requestParameters": {"$ref": "#/definitions/RequestParameters"},
-                    "resources": {"items": {"type": "object"}, "type": "array"},
-                    "responseElements": {"type": ["object", "null"]},
-                    "sourceIPAddress": {"type": "string"},
-                    "userAgent": {"type": "string"},
-                    "userIdentity": {"$ref": "#/definitions/UserIdentity"},
-                    "vpcEndpointId": {"type": "string"},
-                    "x-amazon-open-api-schema-readOnly": {"type": "boolean"},
-                },
-                "required": [
-                    "eventID",
-                    "awsRegion",
-                    "eventVersion",
-                    "responseElements",
-                    "sourceIPAddress",
-                    "eventSource",
-                    "requestParameters",
-                    "resources",
-                    "userAgent",
-                    "readOnly",
-                    "userIdentity",
-                    "eventType",
-                    "additionalEventData",
-                    "vpcEndpointId",
-                    "requestID",
-                    "eventTime",
-                    "eventName",
-                    "recipientAccountId",
-                ],
-                "type": "object",
-            },
-            "AdditionalEventData": {
-                "properties": {
-                    "objectRetentionInfo": {"$ref": "#/definitions/ObjectRetentionInfo"},
-                    "x-amz-id-2": {"type": "string"},
-                },
-                "required": ["x-amz-id-2"],
-                "type": "object",
-            },
-            "Attributes": {
-                "properties": {
-                    "creationDate": {"format": "date-time", "type": "string"},
-                    "mfaAuthenticated": {"type": "string"},
-                },
-                "required": ["mfaAuthenticated", "creationDate"],
-                "type": "object",
-            },
-            "LegalHoldInfo": {
-                "properties": {
-                    "isUnderLegalHold": {"type": "boolean"},
-                    "lastModifiedTime": {"format": "int64", "type": "integer"},
-                },
-                "type": "object",
-            },
-            "ObjectRetentionInfo": {
-                "properties": {
-                    "legalHoldInfo": {"$ref": "#/definitions/LegalHoldInfo"},
-                    "retentionInfo": {"$ref": "#/definitions/RetentionInfo"},
-                },
-                "type": "object",
-            },
-            "RequestParameters": {
-                "properties": {
-                    "bucketName": {"type": "string"},
-                    "key": {"type": "string"},
-                    "legal-hold": {"type": "string"},
-                    "retention": {"type": "string"},
-                },
-                "required": ["bucketName", "key"],
-                "type": "object",
-            },
-            "RetentionInfo": {
-                "properties": {
-                    "lastModifiedTime": {"format": "int64", "type": "integer"},
-                    "retainUntilMode": {"type": "string"},
-                    "retainUntilTime": {"format": "int64", "type": "integer"},
-                },
-                "type": "object",
-            },
-            "SessionContext": {
-                "properties": {"attributes": {"$ref": "#/definitions/Attributes"}},
-                "required": ["attributes"],
-                "type": "object",
-            },
-            "UserIdentity": {
-                "properties": {
-                    "accessKeyId": {"type": "string"},
-                    "accountId": {"type": "string"},
-                    "arn": {"type": "string"},
-                    "principalId": {"type": "string"},
-                    "sessionContext": {"$ref": "#/definitions/SessionContext"},
-                    "type": {"type": "string"},
-                },
-                "required": ["accessKeyId", "sessionContext", "accountId", "principalId", "type", "arn"],
-                "type": "object",
-            },
-        },
-        "properties": {
-            "account": {"type": "string"},
-            "detail": {"$ref": "#/definitions/AWSAPICallViaCloudTrail"},
-            "detail-type": {"type": "string"},
-            "id": {"type": "string"},
-            "region": {"type": "string"},
-            "resources": {"items": {"type": "string"}, "type": "array"},
-            "source": {"type": "string"},
-            "time": {"format": "date-time", "type": "string"},
-            "version": {"type": "string"},
-        },
-        "required": ["detail-type", "resources", "id", "source", "time", "detail", "region", "version", "account"],
-        "title": "AWSAPICallViaCloudTrail",
-        "type": "object",
-        "x-amazon-events-detail-type": "AWS API Call via CloudTrail",
-        "x-amazon-events-source": "aws.s3",
-    }
+    ```python hl_lines="68 91  93"
+    --8<-- "docs/examples/utilities/validation/validate_jsonschema.py"
     ```
 
 === "event.json"

@@ -33,7 +33,15 @@ OUTPUT = {
     "examples": [{"statusCode": 200, "body": "response"}],
     "required": ["statusCode", "body"],
     "properties": {
-        "statusCode": {"$id": "#/properties/statusCode", "type": "integer", "title": "The statusCode"},
-        "body": {"$id": "#/properties/body", "type": "string", "title": "The response"},
+        "statusCode": {
+            "$id": "#/properties/statusCode",
+            "type": "integer",
+            "title": "The statusCode",
+        },
+        "body": {
+            "$id": "#/properties/body",
+            "type": "string",
+            "title": "The response",
+        },
     },
 }

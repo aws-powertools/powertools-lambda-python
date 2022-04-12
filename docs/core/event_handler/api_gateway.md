@@ -683,7 +683,7 @@ This sample project contains a Users function with two distinct set of routes, `
 
 === "tests/functional/test_users.py"
 
-    ```python  hl_lines="3"
+    ```python hl_lines="3"
     --8<-- "docs/examples/core/event_handler/api_gateway/layout/test_users.py"
     ```
 
