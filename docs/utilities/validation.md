@@ -48,7 +48,7 @@ It will fail fast with `SchemaValidationError` exception if event or response do
 
 === "schemas.py"
 
-    ```python hl_lines="8 10 17 23 34 36 41"
+    ```python hl_lines="8 10 17 34 36 41"
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
@@ -78,7 +78,7 @@ You can also gracefully handle schema validation errors by catching `SchemaValid
 
 === "schemas.py"
 
-    ```python hl_lines="8 10 17 23 34 36 41"
+    ```python hl_lines="8 10 17 34 36 41"
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
@@ -106,7 +106,7 @@ Here is a sample custom EventBridge event, where we only validate what's inside 
 
 === "schemas.py"
 
-    ```python hl_lines="8 10 17 23 34 36 41"
+    ```python hl_lines="8 10 17 34 36 41"
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
@@ -130,7 +130,7 @@ This utility comes with built-in envelopes to easily extract the payload from po
 
 === "schemas.py"
 
-    ```python hl_lines="8 10 17 23 34 36 41"
+    ```python hl_lines="8 10 17 34 36 41"
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
