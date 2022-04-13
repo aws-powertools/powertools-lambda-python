@@ -3,7 +3,7 @@ title: Tracer
 description: Core utility
 ---
 
-Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.com/aws/aws-xray-sdk-python/).
+Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.com/aws/aws-xray-sdk-python/){target="_blank"}.
 
 ![Tracer showcase](../media/tracer_utility_showcase.png)
 
@@ -18,35 +18,18 @@ Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.
 
 ### Permissions
 
-Before your use this utility, your AWS Lambda function [must have permissions](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray-permissions) to send traces to AWS X-Ray.
+Before your use this utility, your AWS Lambda function [must have permissions](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray-permissions){target="_blank"} to send traces to AWS X-Ray.
 
-```yaml hl_lines="6 9" title="AWS Serverless Application Model (SAM) example"
-Resources:
-  HelloWorldFunction:
-	Type: AWS::Serverless::Function
-	Properties:
-	  Runtime: python3.8
-	  Tracing: Active
-	  Environment:
-		Variables:
-		  POWERTOOLS_SERVICE_NAME: example
+```yaml hl_lines="10 13" title="AWS Serverless Application Model (SAM) example"
+--8<-- "docs/examples/core/tracer/template.yml"
 ```
 
 ### Lambda handler
 
 You can quickly start by initializing `Tracer` and use `capture_lambda_handler` decorator for your Lambda handler.
 
-```python hl_lines="1 3 6" title="Tracing Lambda handler with capture_lambda_handler"
-from aws_lambda_powertools import Tracer
-
-tracer = Tracer() # Sets service via env var
-# OR tracer = Tracer(service="example")
-
-@tracer.capture_lambda_handler
-def handler(event, context):
-	charge_id = event.get('charge_id')
-	payment = collect_payment(charge_id)
-	...
+```python hl_lines="1 3 7" title="Tracing Lambda handler with capture_lambda_handler"
+--8<-- "docs/examples/core/tracer/capture_lambda_handler.py"
 ```
 
 `capture_lambda_handler` performs these additional tasks to ease operations:
@@ -57,41 +40,24 @@ def handler(event, context):
 
 ### Annotations & Metadata
 
-**Annotations** are key-values associated with traces and indexed by AWS X-Ray. You can use them to filter traces and to create [Trace Groups](https://aws.amazon.com/about-aws/whats-new/2018/11/aws-xray-adds-the-ability-to-group-traces/) to slice and dice your transactions.
+**Annotations** are key-values associated with traces and indexed by AWS X-Ray. You can use them to filter traces and to create [Trace Groups](https://aws.amazon.com/about-aws/whats-new/2018/11/aws-xray-adds-the-ability-to-group-traces/){target="_blank"} to slice and dice your transactions.
 
-```python hl_lines="7" title="Adding annotations with put_annotation method"
-from aws_lambda_powertools import Tracer
-tracer = Tracer()
-
-@tracer.capture_lambda_handler
-def handler(event, context):
-	...
-	tracer.put_annotation(key="PaymentStatus", value="SUCCESS")
+```python hl_lines="9" title="Adding annotations with put_annotation method"
+--8<-- "docs/examples/core/tracer/put_annotation.py"
 ```
 
 **Metadata** are key-values also associated with traces but not indexed by AWS X-Ray. You can use them to add additional context for an operation using any native object.
 
-```python hl_lines="8" title="Adding arbitrary metadata with put_metadata method"
-from aws_lambda_powertools import Tracer
-tracer = Tracer()
-
-@tracer.capture_lambda_handler
-def handler(event, context):
-	...
-	ret = some_logic()
-	tracer.put_metadata(key="payment_response", value=ret)
+```python hl_lines="10" title="Adding arbitrary metadata with put_metadata method"
+--8<-- "docs/examples/core/tracer/put_metadata.py"
 ```
 
 ### Synchronous functions
 
 You can trace synchronous functions using the `capture_method` decorator.
 
-```python hl_lines="7 13" title="Tracing an arbitrary function with capture_method"
-@tracer.capture_method
-def collect_payment(charge_id):
-	ret = requests.post(PAYMENT_ENDPOINT) # logic
-	tracer.put_annotation("PAYMENT_STATUS", "SUCCESS") # custom annotation
-	return ret
+```python hl_lines="6 9" title="Tracing an arbitrary function with capture_method"
+--8<-- "docs/examples/core/tracer/capture_method_sync.py"
 ```
 
 ???+ note "Note: Function responses are auto-captured and stored as JSON, by default."
@@ -100,7 +66,6 @@ def collect_payment(charge_id):
 
     The serialization is performed by aws-xray-sdk via `jsonpickle` module. This can cause
     side effects for file-like objects like boto S3 <a href="https://botocore.amazonaws.com/v1/documentation/api/latest/reference/response.html#botocore.response.StreamingBody">`StreamingBody`</a>, where its response will be read only once during serialization.
-
 
 ### Asynchronous and generator functions
 
@@ -111,47 +76,20 @@ You can trace asynchronous functions and generator functions (including context 
 
 === "Async"
 
-    ```python hl_lines="7"
-    import asyncio
-    import contextlib
-    from aws_lambda_powertools import Tracer
-
-    tracer = Tracer()
-
-    @tracer.capture_method
-    async def collect_payment():
-        ...
+    ```python hl_lines="9"
+    --8<-- "docs/examples/core/tracer/capture_method_async.py"
     ```
 
 === "Context manager"
 
-    ```python hl_lines="7-8"
-    import asyncio
-    import contextlib
-    from aws_lambda_powertools import Tracer
-
-    tracer = Tracer()
-
-    @contextlib.contextmanager
-    @tracer.capture_method
-    def collect_payment_ctxman():
-        yield result
-        ...
+    ```python hl_lines="9-10"
+    --8<-- "docs/examples/core/tracer/capture_method_context_manager.py"
     ```
 
 === "Generators"
 
     ```python hl_lines="9"
-    import asyncio
-    import contextlib
-    from aws_lambda_powertools import Tracer
-
-    tracer = Tracer()
-
-    @tracer.capture_method
-    def collect_payment_gen():
-        yield result
-        ...
+    --8<-- "docs/examples/core/tracer/capture_method_generators.py"
     ```
 
 ## Advanced
@@ -163,13 +101,7 @@ Tracer automatically patches all [supported libraries by X-Ray](https://docs.aws
 If you're looking to shave a few microseconds, or milliseconds depending on your function memory configuration, you can patch specific modules using `patch_modules` param:
 
 ```python hl_lines="7" title="Example of explicitly patching boto3 and requests only"
-import boto3
-import requests
-
-from aws_lambda_powertools import Tracer
-
-modules_to_be_patched = ["boto3", "requests"]
-tracer = Tracer(patch_modules=modules_to_be_patched)
+--8<-- "docs/examples/core/tracer/patch_modules.py"
 ```
 
 ### Disabling response auto-capture
@@ -183,27 +115,13 @@ Use **`capture_response=False`** parameter in both `capture_lambda_handler` and 
 
 === "sensitive_data_scenario.py"
 
-    ```python hl_lines="3 7"
-    from aws_lambda_powertools import Tracer
-
-    @tracer.capture_method(capture_response=False)
-    def fetch_sensitive_information():
-        return "sensitive_information"
-
-    @tracer.capture_lambda_handler(capture_response=False)
-    def handler(event, context):
-        sensitive_information = fetch_sensitive_information()
+    ```python hl_lines="6 11"
+    --8<-- "docs/examples/core/tracer/sensitive_data_scenario.py"
     ```
 === "streaming_object_scenario.py"
 
-    ```python hl_lines="3"
-    from aws_lambda_powertools import Tracer
-
-    @tracer.capture_method(capture_response=False)
-    def get_s3_object(bucket_name, object_key):
-        s3 = boto3.client("s3")
-        s3_object = get_object(Bucket=bucket_name, Key=object_key)
-        return s3_object
+    ```python hl_lines="8"
+    --8<-- "docs/examples/core/tracer/streaming_object_scenario.py"
     ```
 
 ### Disabling exception auto-capture
@@ -213,12 +131,8 @@ Use **`capture_error=False`** parameter in both `capture_lambda_handler` and `ca
 ???+ info
 	Useful when returning sensitive information in exceptions/stack traces you don't control
 
-```python hl_lines="3 5" title="Disabling exception auto-capture for tracing metadata"
-from aws_lambda_powertools import Tracer
-
-@tracer.capture_lambda_handler(capture_error=False)
-def handler(event, context):
-	raise ValueError("some sensitive info in the stack trace...")
+```python hl_lines="6 8" title="Disabling exception auto-capture for tracing metadata"
+--8<-- "docs/examples/core/tracer/capture_error_disable.py"
 ```
 
 ### Ignoring certain HTTP endpoints
@@ -227,93 +141,40 @@ You might have endpoints you don't want requests to be traced, perhaps due to th
 
 You can use `ignore_endpoint` method with the hostname and/or URLs you'd like it to be ignored - globs (`*`) are allowed.
 
-```python title="Ignoring certain HTTP endpoints from being traced"
-from aws_lambda_powertools import Tracer
-
-tracer = Tracer()
-# ignore all calls to `ec2.amazon.com`
-tracer.ignore_endpoint(hostname="ec2.amazon.com")
-# ignore calls to `*.sensitive.com/password` and  `*.sensitive.com/credit-card`
-tracer.ignore_endpoint(hostname="*.sensitive.com", urls=["/password", "/credit-card"])
-
-
-def ec2_api_calls():
-    return "suppress_api_responses"
-
-@tracer.capture_lambda_handler
-def handler(event, context):
-    for x in long_list:
-        ec2_api_calls()
+```python hl_lines="5 7" title="Ignoring certain HTTP endpoints from being traced"
+--8<-- "docs/examples/core/tracer/ignore_endpoint.py"
 ```
-
 
 ### Tracing aiohttp requests
 
 ???+ info
 	This snippet assumes you have aiohttp as a dependency
 
-You can use `aiohttp_trace_config` function to create a valid [aiohttp trace_config object](https://docs.aiohttp.org/en/stable/tracing_reference.html). This is necessary since X-Ray utilizes aiohttp trace hooks to capture requests end-to-end.
+You can use `aiohttp_trace_config` function to create a valid [aiohttp trace_config object](https://docs.aiohttp.org/en/stable/tracing_reference.html){target="_blank"}. This is necessary since X-Ray utilizes aiohttp trace hooks to capture requests end-to-end.
 
-```python hl_lines="5 10" title="Tracing aiohttp requests"
-import asyncio
-import aiohttp
-
-from aws_lambda_powertools import Tracer
-from aws_lambda_powertools.tracing import aiohttp_trace_config
-
-tracer = Tracer()
-
-async def aiohttp_task():
-	async with aiohttp.ClientSession(trace_configs=[aiohttp_trace_config()]) as session:
-		async with session.get("https://httpbin.org/json") as resp:
-			resp = await resp.json()
-			return resp
+```python hl_lines="6 12" title="Tracing aiohttp requests"
+--8<-- "docs/examples/core/tracer/aiohttp_trace_config.py"
 ```
 
 ### Escape hatch mechanism
 
 You can use `tracer.provider` attribute to access all methods provided by AWS X-Ray `xray_recorder` object.
 
-This is useful when you need a feature available in X-Ray that is not available in the Tracer utility, for example [thread-safe](https://github.com/aws/aws-xray-sdk-python/#user-content-trace-threadpoolexecutor), or [context managers](https://github.com/aws/aws-xray-sdk-python/#user-content-start-a-custom-segmentsubsegment).
+This is useful when you need a feature available in X-Ray that is not available in the Tracer utility, for example [thread-safe](https://github.com/aws/aws-xray-sdk-python/#user-content-trace-threadpoolexecutor){target="_blank"}, or [context managers](https://github.com/aws/aws-xray-sdk-python/#user-content-start-a-custom-segmentsubsegment){target="_blank"}.
 
-```python hl_lines="7" title="Tracing a code block with in_subsegment escape hatch"
-from aws_lambda_powertools import Tracer
-
-tracer = Tracer()
-
-@tracer.capture_lambda_handler
-def handler(event, context):
-	with tracer.provider.in_subsegment('## custom subsegment') as subsegment:
-		ret = some_work()
-		subsegment.put_metadata('response', ret)
+```python hl_lines="8" title="Tracing a code block with in_subsegment escape hatch"
+--8<-- "docs/examples/core/tracer/tracer_provider_escape_hatches.py"
 ```
 
 ### Concurrent asynchronous functions
 
 ???+ warning
-	[X-Ray SDK will raise an exception](https://github.com/aws/aws-xray-sdk-python/issues/164) when async functions are run and traced concurrently
+	[X-Ray SDK will raise an exception](https://github.com/aws/aws-xray-sdk-python/issues/164){target="_blank"} when async functions are run and traced concurrently
 
 A safe workaround mechanism is to use `in_subsegment_async` available via Tracer escape hatch (`tracer.provider`).
 
-```python hl_lines="6 7 12 15 17" title="Workaround to safely trace async concurrent functions"
-import asyncio
-
-from aws_lambda_powertools import Tracer
-tracer = Tracer()
-
-async def another_async_task():
-	async with tracer.provider.in_subsegment_async("## another_async_task") as subsegment:
-		subsegment.put_annotation(key="key", value="value")
-		subsegment.put_metadata(key="key", value="value", namespace="namespace")
-		...
-
-async def another_async_task_2():
-	...
-
-@tracer.capture_method
-async def collect_payment(charge_id):
-	asyncio.gather(another_async_task(), another_async_task_2())
-	...
+```python hl_lines="8-9 15 19 21" title="Workaround to safely trace async concurrent functions"
+--8<-- "docs/examples/core/tracer/concurrent_asynchronous_functions.py"
 ```
 
 ### Reusing Tracer across your code
@@ -329,28 +190,14 @@ Tracer keeps a copy of its configuration after the first initialization. This is
 
 === "handler.py"
 
-    ```python hl_lines="2 4 9"
-    from aws_lambda_powertools import Tracer
-    from payment import collect_payment
-
-    tracer = Tracer(service="payment")
-
-    @tracer.capture_lambda_handler
-    def handler(event, context):
-        charge_id = event.get('charge_id')
-        payment = collect_payment(charge_id)
+    ```python hl_lines="1 5 11"
+    --8<-- "docs/examples/core/tracer/reuse_handler.py"
     ```
 === "payment.py"
     A new instance of Tracer will be created but will reuse the previous Tracer instance configuration, similar to a Singleton.
 
-    ```python hl_lines="3 5"
-    from aws_lambda_powertools import Tracer
-
-    tracer = Tracer(service="payment")
-
-    @tracer.capture_method
-    def collect_payment(charge_id: str):
-        ...
+    ```python hl_lines="3 6"
+    --8<-- "docs/examples/core/tracer/reuse_payment.py"
     ```
 
 ## Testing your code
@@ -361,4 +208,4 @@ Tracer is disabled by default when not running in the AWS Lambda environment - T
 
 * Use annotations on key operations to slice and dice traces, create unique views, and create metrics from it via Trace Groups
 * Use a namespace when adding metadata to group data more easily
-* Annotations and metadata are added to the current subsegment opened. If you want them in a specific subsegment, use a [context manager](https://github.com/aws/aws-xray-sdk-python/#start-a-custom-segmentsubsegment) via the escape hatch mechanism
+* Annotations and metadata are added to the current subsegment opened. If you want them in a specific subsegment, use a [context manager](https://github.com/aws/aws-xray-sdk-python/#start-a-custom-segmentsubsegment){target="_blank"} via the escape hatch mechanism
