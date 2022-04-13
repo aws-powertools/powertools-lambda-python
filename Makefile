@@ -90,3 +90,11 @@ changelog:
 
 mypy:
 	poetry run mypy --pretty aws_lambda_powertools
+
+format-examples:
+	poetry run isort docs/examples
+	poetry run black docs/examples/*/*/*/*.py
+
+lint-examples:
+	poetry run python3 -m py_compile docs/examples/*/*/*/*.py
+	cfn-lint docs/examples/*/*/*/*.yml

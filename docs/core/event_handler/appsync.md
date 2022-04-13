@@ -38,136 +38,8 @@ This is the sample infrastructure we are using for the initial examples with a A
 
 === "template.yml"
 
-    ```yaml hl_lines="37-42 50-55 61-62 78-91 96-120"
-    AWSTemplateFormatVersion: '2010-09-09'
-    Transform: AWS::Serverless-2016-10-31
-    Description: Hello world Direct Lambda Resolver
-
-    Globals:
-      Function:
-        Timeout: 5
-        Runtime: python3.8
-        Tracing: Active
-        Environment:
-            Variables:
-                # Powertools env vars: https://awslabs.github.io/aws-lambda-powertools-python/latest/#environment-variables
-                LOG_LEVEL: INFO
-                POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
-                POWERTOOLS_LOGGER_LOG_EVENT: true
-                POWERTOOLS_SERVICE_NAME: sample_resolver
-
-    Resources:
-      HelloWorldFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            Handler: app.lambda_handler
-            CodeUri: hello_world
-            Description: Sample Lambda Powertools Direct Lambda Resolver
-            Tags:
-                SOLUTION: LambdaPowertoolsPython
-
-      # IAM Permissions and Roles
-
-      AppSyncServiceRole:
-        Type: "AWS::IAM::Role"
-        Properties:
-          AssumeRolePolicyDocument:
-              Version: "2012-10-17"
-              Statement:
-                  -
-                    Effect: "Allow"
-                    Principal:
-                        Service:
-                            - "appsync.amazonaws.com"
-                    Action:
-                        - "sts:AssumeRole"
-
-      InvokeLambdaResolverPolicy:
-        Type: "AWS::IAM::Policy"
-        Properties:
-          PolicyName: "DirectAppSyncLambda"
-          PolicyDocument:
-              Version: "2012-10-17"
-              Statement:
-                  -
-                    Effect: "Allow"
-                    Action: "lambda:invokeFunction"
-                    Resource:
-                        - !GetAtt HelloWorldFunction.Arn
-          Roles:
-              - !Ref AppSyncServiceRole
-
-      # GraphQL API
-
-      HelloWorldApi:
-        Type: "AWS::AppSync::GraphQLApi"
-        Properties:
-            Name: HelloWorldApi
-            AuthenticationType: "API_KEY"
-            XrayEnabled: true
-
-      HelloWorldApiKey:
-        Type: AWS::AppSync::ApiKey
-        Properties:
-            ApiId: !GetAtt HelloWorldApi.ApiId
-
-      HelloWorldApiSchema:
-        Type: "AWS::AppSync::GraphQLSchema"
-        Properties:
-            ApiId: !GetAtt HelloWorldApi.ApiId
-            Definition: |
-                schema {
-                    query:Query
-                }
-
-                type Query {
-                    getTodo(id: ID!): Todo
-                    listTodos: [Todo]
-                }
-
-                type Todo {
-                    id: ID!
-                    title: String
-                    description: String
-                    done: Boolean
-                }
-
-      # Lambda Direct Data Source and Resolver
-
-      HelloWorldFunctionDataSource:
-        Type: "AWS::AppSync::DataSource"
-        Properties:
-            ApiId: !GetAtt HelloWorldApi.ApiId
-            Name: "HelloWorldLambdaDirectResolver"
-            Type: "AWS_LAMBDA"
-            ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
-            LambdaConfig:
-                LambdaFunctionArn: !GetAtt HelloWorldFunction.Arn
-
-      ListTodosResolver:
-        Type: "AWS::AppSync::Resolver"
-        Properties:
-            ApiId: !GetAtt HelloWorldApi.ApiId
-            TypeName: "Query"
-            FieldName: "listTodos"
-            DataSourceName: !GetAtt HelloWorldFunctionDataSource.Name
-
-      GetTodoResolver:
-        Type: "AWS::AppSync::Resolver"
-        Properties:
-            ApiId: !GetAtt HelloWorldApi.ApiId
-            TypeName: "Query"
-            FieldName: "getTodo"
-            DataSourceName: !GetAtt HelloWorldFunctionDataSource.Name
-
-
-    Outputs:
-      HelloWorldFunction:
-        Description: "Hello World Lambda Function ARN"
-        Value: !GetAtt HelloWorldFunction.Arn
-
-      HelloWorldAPI:
-        Value: !GetAtt HelloWorldApi.Arn
+    ```yaml hl_lines="37-42 50-55 61-62 78-92 96-120"
+    --8<-- "docs/examples/core/event_handler/appsync/template.yml"
     ```
 
 ### Resolver decorator
@@ -181,54 +53,8 @@ Here's an example where we have two separate functions to resolve `getTodo` and 
 
 === "app.py"
 
-    ```python hl_lines="3-5 9 31-32 39-40 47"
-    from aws_lambda_powertools import Logger, Tracer
-
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import AppSyncResolver
-    from aws_lambda_powertools.utilities.data_classes.appsync import scalar_types_utils
-
-    tracer = Tracer(service="sample_resolver")
-    logger = Logger(service="sample_resolver")
-    app = AppSyncResolver()
-
-    # Note that `creation_time` isn't available in the schema
-    # This utility also takes into account what info you make available at API level vs what's stored
-    TODOS = [
-        {
-            "id": scalar_types_utils.make_id(), # type ID or String
-            "title": "First task",
-            "description": "String",
-            "done": False,
-            "creation_time": scalar_types_utils.aws_datetime(),  # type AWSDateTime
-        },
-        {
-            "id": scalar_types_utils.make_id(),
-            "title": "Second task",
-            "description": "String",
-            "done": True,
-            "creation_time": scalar_types_utils.aws_datetime(),
-        },
-    ]
-
-
-    @app.resolver(type_name="Query", field_name="getTodo")
-    def get_todo(id: str = ""):
-        logger.info(f"Fetching Todo {id}")
-        todo = [todo for todo in TODOS if todo["id"] == id]
-
-        return todo
-
-
-    @app.resolver(type_name="Query", field_name="listTodos")
-    def list_todos():
-        return TODOS
-
-
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="2-4 8 30-31 38-39 46"
+    --8<-- "docs/examples/core/event_handler/appsync/app_resolver_decorator.py"
     ```
 
 === "schema.graphql"
@@ -345,25 +171,8 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 
 === "nested_mappings.py"
 
-    ```python hl_lines="4 8 10-12 18"
-    from aws_lambda_powertools import Logger, Tracer
-
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import AppSyncResolver
-
-    tracer = Tracer(service="sample_resolver")
-    logger = Logger(service="sample_resolver")
-    app = AppSyncResolver()
-
-    @app.resolver(field_name="listLocations")
-    @app.resolver(field_name="locations")
-    def get_locations(name: str, description: str = ""):
-        return name + description
-
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="2 7 10-12 19"
+    --8<-- "docs/examples/core/event_handler/appsync/app_nested_mappings.py"
     ```
 
 === "schema.graphql"
@@ -396,28 +205,8 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 
 For Lambda Python3.8+ runtime, this utility supports async functions when you use in conjunction with `asyncio.run`.
 
-```python hl_lines="5 9 11-13 21" title="Resolving GraphQL resolvers async"
-import asyncio
-from aws_lambda_powertools import Logger, Tracer
-
-from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.event_handler import AppSyncResolver
-
-tracer = Tracer(service="sample_resolver")
-logger = Logger(service="sample_resolver")
-app = AppSyncResolver()
-
-@app.resolver(type_name="Query", field_name="listTodos")
-async def list_todos():
-	todos = await some_async_io_call()
-	return todos
-
-@logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-@tracer.capture_lambda_handler
-def lambda_handler(event, context):
-	result = app.resolve(event, context)
-
-	return asyncio.run(result)
+```python hl_lines="4 9 12-14 23" title="Resolving GraphQL resolvers async"
+--8<-- "docs/examples/core/event_handler/appsync/app_async_functions.py"
 ```
 
 ### Amplify GraphQL Transformer
@@ -463,53 +252,13 @@ Use the following code for `merchantInfo` and `searchMerchant` functions respect
 
 === "merchantInfo/src/app.py"
 
-    ```python hl_lines="4-5 9 11-12 15-16 23"
-    from aws_lambda_powertools import Logger, Tracer
-
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import AppSyncResolver
-    from aws_lambda_powertools.utilities.data_classes.appsync import scalar_types_utils
-
-    tracer = Tracer(service="sample_graphql_transformer_resolver")
-    logger = Logger(service="sample_graphql_transformer_resolver")
-    app = AppSyncResolver()
-
-    @app.resolver(type_name="Query", field_name="listLocations")
-    def list_locations(page: int = 0, size: int = 10):
-        return [{"id": 100, "name": "Smooth Grooves"}]
-
-    @app.resolver(field_name="commonField")
-    def common_field():
-        # Would match all fieldNames matching 'commonField'
-        return scalar_types_utils.make_id()
-
-    @tracer.capture_lambda_handler
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-    def lambda_handler(event, context):
-        app.resolve(event, context)
+    ```python hl_lines="2 4 8 11-12 16-17 25"
+    --8<-- "docs/examples/core/event_handler/appsync/app_merchant_info.py"
     ```
 === "searchMerchant/src/app.py"
 
-    ```python hl_lines="1 4 6-7"
-    from aws_lambda_powertools.event_handler import AppSyncResolver
-    from aws_lambda_powertools.utilities.data_classes.appsync import scalar_types_utils
-
-    app = AppSyncResolver()
-
-    @app.resolver(type_name="Query", field_name="findMerchant")
-    def find_merchant(search: str):
-        return [
-          {
-            "id": scalar_types_utils.make_id(),
-            "name": "Brewer Brewing",
-            "description": "Mike Brewer's IPA brewing place"
-          },
-          {
-            "id": scalar_types_utils.make_id(),
-            "name": "Serverlessa's Bakery",
-            "description": "Lessa's sourdough place"
-          },
-        ]
+    ```python hl_lines="1 4 7-8"
+    --8<-- "docs/examples/core/event_handler/appsync/app_merchant_search.py"
     ```
 
 **Example AppSync GraphQL Transformer Function resolver events**
@@ -604,34 +353,8 @@ You can subclass `AppSyncResolverEvent` to bring your own set of methods to hand
 
 === "custom_model.py"
 
-    ```python hl_lines="12-15 20 27"
-    from aws_lambda_powertools import Logger, Tracer
-
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import AppSyncResolver
-    from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import AppSyncResolverEvent
-
-    tracer = Tracer(service="sample_resolver")
-    logger = Logger(service="sample_resolver")
-    app = AppSyncResolver()
-
-
-    class MyCustomModel(AppSyncResolverEvent):
-        @property
-        def country_viewer(self) -> str:
-            return self.request_headers.get("cloudfront-viewer-country")
-
-    @app.resolver(field_name="listLocations")
-    @app.resolver(field_name="locations")
-    def get_locations(name: str, description: str = ""):
-        if app.current_event.country_viewer == "US":
-          ...
-        return name + description
-
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context, data_model=MyCustomModel)
+    ```python hl_lines="11-14 20 28"
+    --8<-- "docs/examples/core/event_handler/appsync/app_custom_model.py"
     ```
 
 === "schema.graphql"
@@ -723,51 +446,16 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
 
     We import **Router** instead of **AppSyncResolver**; syntax wise is exactly the same.
 
-	```python hl_lines="4 7 10 15"
-    from typing import Any, Dict, List
-
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.event_handler.appsync import Router
-
-    logger = Logger(child=True)
-    router = Router()
-
-
-    @router.resolver(type_name="Query", field_name="listLocations")
-    def list_locations(merchant_id: str) -> List[Dict[str, Any]]:
-        return [{"name": "Location name", "merchant_id": merchant_id}]
-
-
-    @router.resolver(type_name="Location", field_name="status")
-    def resolve_status(merchant_id: str) -> str:
-        logger.debug(f"Resolve status for merchant_id: {merchant_id}")
-        return "FOO"
-	```
+    ```python hl_lines="4 7 10 15"
+    --8<-- "docs/examples/core/event_handler/appsync/resolvers_location.py"
+    ```
 
 === "app.py"
 
 	We use `include_router` method and include all `location` operations registered in the `router` global object.
 
-    ```python hl_lines="8 13"
-    from typing import Dict
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.event_handler import AppSyncResolver
-    from aws_lambda_powertools.logging.correlation_paths import APPSYNC_RESOLVER
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-    from resolvers import location
-
-    tracer = Tracer()
-    logger = Logger()
-    app = AppSyncResolver()
-    app.include_router(location.router)
-
-
-    @tracer.capture_lambda_handler
-    @logger.inject_lambda_context(correlation_id_path=APPSYNC_RESOLVER)
-    def lambda_handler(event: Dict, context: LambdaContext):
-        app.resolve(event, context)
+    ```python hl_lines="3 13"
+    --8<-- "docs/examples/core/event_handler/appsync/app_router.py"
     ```
 
 
@@ -782,36 +470,13 @@ Here's an example of how you can test your synchronous resolvers:
 === "test_resolver.py"
 
     ```python
-    import json
-    import pytest
-    from pathlib import Path
-
-    from src.index import app  # import the instance of AppSyncResolver from your code
-
-    def test_direct_resolver():
-      # Load mock event from a file
-      json_file_path = Path("appSyncDirectResolver.json")
-      with open(json_file_path) as json_file:
-        mock_event = json.load(json_file)
-
-      # Call the implicit handler
-      result = app(mock_event, {})
-
-      assert result == "created this value"
+    --8<-- "docs/examples/core/event_handler/appsync/test_resolver.py"
     ```
 
 === "src/index.py"
 
     ```python
-
-    from aws_lambda_powertools.event_handler import AppSyncResolver
-
-    app = AppSyncResolver()
-
-    @app.resolver(field_name="createSomething")
-    def create_something():
-        return "created this value"
-
+    --8<-- "docs/examples/core/event_handler/appsync/app_test.py"
     ```
 
 === "appSyncDirectResolver.json"
@@ -825,39 +490,13 @@ And an example for testing asynchronous resolvers. Note that this requires the `
 === "test_async_resolver.py"
 
     ```python
-    import json
-    import pytest
-    from pathlib import Path
-
-    from src.index import app  # import the instance of AppSyncResolver from your code
-
-    @pytest.mark.asyncio
-    async def test_direct_resolver():
-      # Load mock event from a file
-      json_file_path = Path("appSyncDirectResolver.json")
-      with open(json_file_path) as json_file:
-        mock_event = json.load(json_file)
-
-      # Call the implicit handler
-      result = await app(mock_event, {})
-
-      assert result == "created this value"
+    --8<-- "docs/examples/core/event_handler/appsync/test_async_resolver.py"
     ```
 
 === "src/index.py"
 
     ```python
-    import asyncio
-
-    from aws_lambda_powertools.event_handler import AppSyncResolver
-
-    app = AppSyncResolver()
-
-    @app.resolver(field_name="createSomething")
-    async def create_something_async():
-        await asyncio.sleep(1)  # Do async stuff
-        return "created this value"
-
+    --8<-- "docs/examples/core/event_handler/appsync/app_async_test.py"
     ```
 
 === "appSyncDirectResolver.json"

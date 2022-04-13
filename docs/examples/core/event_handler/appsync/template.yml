@@ -1,0 +1,129 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Hello world Direct Lambda Resolver
+
+Globals:
+  Function:
+    Timeout: 5
+    Runtime: python3.9
+    Tracing: Active
+    Environment:
+        Variables:
+            # Powertools env vars: https://awslabs.github.io/aws-lambda-powertools-python/latest/#environment-variables
+            LOG_LEVEL: INFO
+            POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
+            POWERTOOLS_LOGGER_LOG_EVENT: true
+            POWERTOOLS_SERVICE_NAME: sample_resolver
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+        Handler: app.lambda_handler
+        CodeUri: hello_world
+        Description: Sample Lambda Powertools Direct Lambda Resolver
+        Tags:
+            SOLUTION: LambdaPowertoolsPython
+
+  # IAM Permissions and Roles
+
+  AppSyncServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+              -
+                Effect: "Allow"
+                Principal:
+                    Service:
+                        - "appsync.amazonaws.com"
+                Action:
+                    - "sts:AssumeRole"
+
+  InvokeLambdaResolverPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: "DirectAppSyncLambda"
+      PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+              -
+                Effect: "Allow"
+                Action: "lambda:invokeFunction"
+                Resource:
+                    - !GetAtt HelloWorldFunction.Arn
+      Roles:
+          - !Ref AppSyncServiceRole
+
+  # GraphQL API
+
+  HelloWorldApi:
+    Type: "AWS::AppSync::GraphQLApi"
+    Properties:
+        Name: HelloWorldApi
+        AuthenticationType: "API_KEY"
+        XrayEnabled: true
+
+  HelloWorldApiKey:
+    Type: AWS::AppSync::ApiKey
+    Properties:
+        ApiId: !GetAtt HelloWorldApi.ApiId
+
+  HelloWorldApiSchema:
+    Type: "AWS::AppSync::GraphQLSchema"
+    Properties:
+        ApiId: !GetAtt HelloWorldApi.ApiId
+        Definition: |
+            schema {
+                query:Query
+            }
+
+            type Query {
+                getTodo(id: ID!): Todo
+                listTodos: [Todo]
+            }
+
+            type Todo {
+                id: ID!
+                title: String
+                description: String
+                done: Boolean
+            }
+
+  # Lambda Direct Data Source and Resolver
+
+  HelloWorldFunctionDataSource:
+    Type: "AWS::AppSync::DataSource"
+    Properties:
+        ApiId: !GetAtt HelloWorldApi.ApiId
+        Name: "HelloWorldLambdaDirectResolver"
+        Type: "AWS_LAMBDA"
+        ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
+        LambdaConfig:
+            LambdaFunctionArn: !GetAtt HelloWorldFunction.Arn
+
+  ListTodosResolver:
+    Type: "AWS::AppSync::Resolver"
+    Properties:
+        ApiId: !GetAtt HelloWorldApi.ApiId
+        TypeName: "Query"
+        FieldName: "listTodos"
+        DataSourceName: !GetAtt HelloWorldFunctionDataSource.Name
+
+  GetTodoResolver:
+    Type: "AWS::AppSync::Resolver"
+    Properties:
+        ApiId: !GetAtt HelloWorldApi.ApiId
+        TypeName: "Query"
+        FieldName: "getTodo"
+        DataSourceName: !GetAtt HelloWorldFunctionDataSource.Name
+
+
+Outputs:
+  HelloWorldFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt HelloWorldFunction.Arn
+
+  HelloWorldAPI:
+    Value: !GetAtt HelloWorldApi.Arn
