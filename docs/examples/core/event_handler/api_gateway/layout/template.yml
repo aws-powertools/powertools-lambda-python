@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Example service with multiple routes
+Globals:
+    Function:
+        Timeout: 10
+        MemorySize: 512
+        Runtime: python3.9
+        Tracing: Active
+        Architectures:
+            - x86_64
+        Environment:
+            Variables:
+                LOG_LEVEL: INFO
+                POWERTOOLS_LOGGER_LOG_EVENT: true
+                POWERTOOLS_METRICS_NAMESPACE: MyServerlessApplication
+                POWERTOOLS_SERVICE_NAME: users
+Resources:
+    UsersService:
+        Type: AWS::Serverless::Function
+        Properties:
+            Handler: users.main.lambda_handler
+            CodeUri: src
+            Layers:
+                # Latest version: https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer
+                - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:17
+            Events:
+                ByUser:
+                    Type: Api
+                    Properties:
+                        Path: /users/{name}
+                        Method: GET
+                AllUsers:
+                    Type: Api
+                    Properties:
+                        Path: /users
+                        Method: GET
+                HealthCheck:
+                    Type: Api
+                    Properties:
+                        Path: /status
+                        Method: GET
+Outputs:
+    UsersApiEndpoint:
+        Description: "API Gateway endpoint URL for Prod environment for Users Function"
+        Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+    AllUsersURL:
+        Description: "URL to fetch all registered users"
+        Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users"
+    ByUserURL:
+        Description: "URL to retrieve details by user"
+        Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users/test"
+    UsersServiceFunctionArn:
+        Description: "Users Lambda Function ARN"
+        Value: !GetAtt UsersService.Arn
