@@ -49,130 +49,13 @@ The following sample infrastructure will be used throughout this documentation:
 === "template.yaml"
 
     ```yaml hl_lines="5 11 18 25 31-50 54"
-    AWSTemplateFormatVersion: "2010-09-09"
-    Description: Lambda Powertools Feature flags sample template
-    Resources:
-      FeatureStoreApp:
-        Type: AWS::AppConfig::Application
-        Properties:
-          Description: "AppConfig Application for feature toggles"
-          Name: product-catalogue
-
-      FeatureStoreDevEnv:
-        Type: AWS::AppConfig::Environment
-        Properties:
-          ApplicationId: !Ref FeatureStoreApp
-          Description: "Development Environment for the App Config Store"
-          Name: dev
-
-      FeatureStoreConfigProfile:
-        Type: AWS::AppConfig::ConfigurationProfile
-        Properties:
-          ApplicationId: !Ref FeatureStoreApp
-          Name: features
-          LocationUri: "hosted"
-
-      HostedConfigVersion:
-        Type: AWS::AppConfig::HostedConfigurationVersion
-        Properties:
-          ApplicationId: !Ref FeatureStoreApp
-          ConfigurationProfileId: !Ref FeatureStoreConfigProfile
-          Description: 'A sample hosted configuration version'
-          Content: |
-            {
-                  "premium_features": {
-                    "default": false,
-                    "rules": {
-                      "customer tier equals premium": {
-                        "when_match": true,
-                        "conditions": [
-                          {
-                            "action": "EQUALS",
-                            "key": "tier",
-                            "value": "premium"
-                          }
-                        ]
-                      }
-                    }
-                  },
-                  "ten_percent_off_campaign": {
-                    "default": false
-                  }
-              }
-          ContentType: 'application/json'
-
-      ConfigDeployment:
-        Type: AWS::AppConfig::Deployment
-        Properties:
-          ApplicationId: !Ref FeatureStoreApp
-          ConfigurationProfileId: !Ref FeatureStoreConfigProfile
-          ConfigurationVersion: !Ref HostedConfigVersion
-          DeploymentStrategyId: "AppConfig.AllAtOnce"
-          EnvironmentId: !Ref FeatureStoreDevEnv
+    --8<-- "docs/examples/utilities/feature_flags/template.yml"
     ```
 
 === "CDK"
 
     ```python hl_lines="11-22 24 29 35 42 50"
-    import json
-
-    import aws_cdk.aws_appconfig as appconfig
-    from aws_cdk import core
-
-
-    class SampleFeatureFlagStore(core.Construct):
-        def __init__(self, scope: core.Construct, id_: str) -> None:
-            super().__init__(scope, id_)
-
-            features_config = {
-                "premium_features": {
-                    "default": False,
-                    "rules": {
-                        "customer tier equals premium": {
-                            "when_match": True,
-                            "conditions": [{"action": "EQUALS", "key": "tier", "value": "premium"}],
-                        }
-                    },
-                },
-                "ten_percent_off_campaign": {"default": True},
-            }
-
-            self.config_app = appconfig.CfnApplication(
-                self,
-                id="app",
-                name="product-catalogue",
-            )
-            self.config_env = appconfig.CfnEnvironment(
-                self,
-                id="env",
-                application_id=self.config_app.ref,
-                name="dev-env",
-            )
-            self.config_profile = appconfig.CfnConfigurationProfile(
-                self,
-                id="profile",
-                application_id=self.config_app.ref,
-                location_uri="hosted",
-                name="features",
-            )
-            self.hosted_cfg_version = appconfig.CfnHostedConfigurationVersion(
-                self,
-                "version",
-                application_id=self.config_app.ref,
-                configuration_profile_id=self.config_profile.ref,
-                content=json.dumps(features_config),
-                content_type="application/json",
-            )
-            self.app_config_deployment = appconfig.CfnDeployment(
-                self,
-                id="deploy",
-                application_id=self.config_app.ref,
-                configuration_profile_id=self.config_profile.ref,
-                configuration_version=self.hosted_cfg_version.ref,
-                deployment_strategy_id="AppConfig.AllAtOnce",
-                environment_id=self.config_env.ref,
-            )
-
+    --8<-- "docs/examples/utilities/feature_flags/cdk_app.py"
     ```
 
 ### Evaluating a single feature flag
@@ -186,28 +69,8 @@ The `evaluate` method supports two optional parameters:
 
 === "app.py"
 
-    ```python hl_lines="3 9 13 17-19"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="features"
-    )
-
-    feature_flags = FeatureFlags(store=app_config)
-
-    def lambda_handler(event, context):
-        # Get customer's tier from incoming request
-        ctx = { "tier": event.get("tier", "standard") }
-
-        # Evaluate whether customer's tier has access to premium features
-        # based on `has_premium_features` rules
-        has_premium_features: bool = feature_flags.evaluate(name="premium_features",
-                                                            context=ctx, default=False)
-        if has_premium_features:
-            # enable premium features
-            ...
+    ```python hl_lines="3 9 14 18-23"
+    --8<-- "docs/examples/utilities/feature_flags/single_feature_flag.py"
     ```
 
 === "event.json"
@@ -252,24 +115,8 @@ In this case, we could omit the `context` parameter and simply evaluate whether 
 
 === "app.py"
 
-    ```python hl_lines="12-13"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="features"
-    )
-
-    feature_flags = FeatureFlags(store=app_config)
-
-    def lambda_handler(event, context):
-        apply_discount: bool = feature_flags.evaluate(name="ten_percent_off_campaign",
-                                                                default=False)
-
-        if apply_discount:
-            # apply 10% discount to product
-            ...
+    ```python hl_lines="13-16"
+    --8<-- "docs/examples/utilities/feature_flags/static_flag.py"
     ```
 
 === "features.json"
@@ -290,40 +137,8 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 
 === "app.py"
 
-    ```python hl_lines="17-20 23"
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app = APIGatewayRestResolver()
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="features"
-    )
-
-    feature_flags = FeatureFlags(store=app_config)
-
-    @app.get("/products")
-    def list_products():
-        ctx = {
-            **app.current_event.headers,
-            **app.current_event.json_body
-        }
-
-        # all_features is evaluated to ["geo_customer_campaign", "ten_percent_off_campaign"]
-        all_features: list[str] = feature_flags.get_enabled_features(context=ctx)
-
-        if "geo_customer_campaign" in all_features:
-            # apply discounts based on geo
-            ...
-
-        if "ten_percent_off_campaign" in all_features:
-            # apply additional 10% for all customers
-            ...
-
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="16-19 22"
+    --8<-- "docs/examples/utilities/feature_flags/get_enabled_features.py"
     ```
 
 === "event.json"
@@ -387,30 +202,10 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 
 Feature flags can return any JSON values when `boolean_type` parameter is set to `false`. These can be dictionaries, list, string, integers, etc.
 
-
 === "app.py"
 
-    ```python hl_lines="3 9 13 16 18"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="features"
-    )
-
-    feature_flags = FeatureFlags(store=app_config)
-
-    def lambda_handler(event, context):
-        # Get customer's tier from incoming request
-        ctx = { "tier": event.get("tier", "standard") }
-
-        # Evaluate `has_premium_features` base don customer's tier
-        premium_features: list[str] = feature_flags.evaluate(name="premium_features",
-                                                            context=ctx, default=False)
-        for feature in premium_features:
-            # enable premium features
-            ...
+    ```python hl_lines="3 9 14 17 22"
+    --8<-- "docs/examples/utilities/feature_flags/non_boolean_flag.py"
     ```
 
 === "event.json"
@@ -456,14 +251,7 @@ You can override `max_age` parameter when instantiating the store.
 === "app.py"
 
     ```python hl_lines="7"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="features",
-        max_age=300
-    )
+    --8<-- "docs/examples/utilities/feature_flags/cache_config.py"
     ```
 
 ### Getting fetched configuration
@@ -478,18 +266,7 @@ You can access the configuration fetched from the store via `get_raw_configurati
 === "app.py"
 
     ```python hl_lines="12"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="configuration",
-        envelope = "feature_flags"
-    )
-
-	feature_flags = FeatureFlags(store=app_config)
-
-	config = app_config.get_raw_configuration
+    --8<-- "docs/examples/utilities/feature_flags/get_raw_configuration.py"
     ```
 
 ### Schema
@@ -614,14 +391,7 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
 === "app.py"
 
     ```python hl_lines="7"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="configuration",
-        envelope = "feature_flags"
-    )
+    --8<-- "docs/examples/utilities/feature_flags/envelope.py"
     ```
 
 === "configuration.json"
@@ -655,7 +425,6 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
     }
     ```
 
-
 ### Built-in store provider
 
 ???+ info
@@ -678,36 +447,8 @@ Parameter | Default | Description
 **jmespath_options** | `None` | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"}
 **logger** | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools Logger.
 
-
-```python hl_lines="21-27" title="AppConfigStore sample"
-from botocore.config import Config
-
-import jmespath
-
-from aws_lambda_powertools.utilities.feature_flags import AppConfigStore
-
-boto_config = Config(read_timeout=10, retries={"total_max_attempts": 2})
-
-# Custom JMESPath functions
-class CustomFunctions(jmespath.functions.Functions):
-
-	@jmespath.functions.signature({'types': ['string']})
-	def _func_special_decoder(self, s):
-		return my_custom_decoder_logic(s)
-
-
-custom_jmespath_options = {"custom_functions": CustomFunctions()}
-
-
-app_config = AppConfigStore(
-	environment="dev",
-	application="product-catalogue",
-	name="configuration",
-	max_age=120,
-	envelope = "features",
-	sdk_config=boto_config,
-	jmespath_options=custom_jmespath_options
-)
+```python hl_lines="18-24" title="AppConfigStore sample"
+--8<-- "docs/examples/utilities/feature_flags/app_config.py"
 ```
 
 ## Testing your code
@@ -720,54 +461,7 @@ You can unit test your feature flags locally and independently without setting u
     This excerpt relies on `pytest` and `pytest-mock` dependencies.
 
 ```python hl_lines="7-9" title="Unit testing feature flags"
-from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore, RuleAction
-
-
-def init_feature_flags(mocker, mock_schema, envelope="") -> FeatureFlags:
-	"""Mock AppConfig Store get_configuration method to use mock schema instead"""
-
-	method_to_mock = "aws_lambda_powertools.utilities.feature_flags.AppConfigStore.get_configuration"
-	mocked_get_conf = mocker.patch(method_to_mock)
-	mocked_get_conf.return_value = mock_schema
-
-	app_conf_store = AppConfigStore(
-		environment="test_env",
-		application="test_app",
-		name="test_conf_name",
-		envelope=envelope,
-	)
-
-	return FeatureFlags(store=app_conf_store)
-
-
-def test_flags_condition_match(mocker):
-	# GIVEN
-	expected_value = True
-	mocked_app_config_schema = {
-		"my_feature": {
-			"default": expected_value,
-			"rules": {
-				"tenant id equals 12345": {
-					"when_match": True,
-					"conditions": [
-						{
-							"action": RuleAction.EQUALS.value,
-							"key": "tenant_id",
-							"value": "12345",
-						}
-					],
-				}
-			},
-			}
-	}
-
-	# WHEN
-	ctx = {"tenant_id": "12345", "username": "a"}
-	feature_flags = init_feature_flags(mocker=mocker, mock_schema=mocked_app_config_schema)
-	flag = feature_flags.evaluate(name="my_feature", context=ctx, default=False)
-
-	# THEN
-	assert flag == expected_value
+--8<-- "docs/examples/utilities/feature_flags/unit_test.py"
 ```
 
 ## Feature flags vs Parameters vs env vars
@@ -777,7 +471,6 @@ Method | When to use | Requires new deployment on changes | Supported services
 **[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment. | Yes | Lambda
 **[Parameters utility](parameters.md)** | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No | Parameter Store, DynamoDB, Secrets Manager, AppConfig
 **Feature flags utility** | Rule engine to define when one or multiple features should be enabled depending on the input. | No | AppConfig
-
 
 ## Deprecation list when GA
 
