@@ -3,13 +3,15 @@ AWS SSM Parameter retrieval and caching utility
 """
 
 
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import boto3
 from botocore.config import Config
-from mypy_boto3_ssm import SSMClient
 
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
+
+if TYPE_CHECKING:
+    from mypy_boto3_ssm import SSMClient
 
 
 class SSMProvider(BaseProvider):
@@ -83,7 +85,7 @@ class SSMProvider(BaseProvider):
         self,
         config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
-        boto3_client: Optional[SSMClient] = None,
+        boto3_client: Optional["SSMClient"] = None,
     ):
         """
         Initialize the SSM Parameter Store client

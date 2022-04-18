@@ -4,12 +4,14 @@ AWS App Config configuration retrieval and caching utility
 
 
 import os
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 from uuid import uuid4
 
 import boto3
 from botocore.config import Config
-from mypy_boto3_appconfig import AppConfigClient
+
+if TYPE_CHECKING:
+    from mypy_boto3_appconfig import AppConfigClient
 
 from ...shared import constants
 from ...shared.functions import resolve_env_var_choice
@@ -71,7 +73,7 @@ class AppConfigProvider(BaseProvider):
         application: Optional[str] = None,
         config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
-        boto3_client: Optional[AppConfigClient] = None,
+        boto3_client: Optional["AppConfigClient"] = None,
     ):
         """
         Initialize the App Config client

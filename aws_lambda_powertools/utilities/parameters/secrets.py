@@ -3,11 +3,13 @@ AWS Secrets Manager parameter retrieval and caching utility
 """
 
 
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import boto3
 from botocore.config import Config
-from mypy_boto3_secretsmanager import SecretsManagerClient
+
+if TYPE_CHECKING:
+    from mypy_boto3_secretsmanager import SecretsManagerClient
 
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 
@@ -67,7 +69,7 @@ class SecretsProvider(BaseProvider):
         self,
         config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
-        boto3_client: Optional[SecretsManagerClient] = None,
+        boto3_client: Optional["SecretsManagerClient"] = None,
     ):
         """
         Initialize the Secrets Manager client

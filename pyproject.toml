@@ -27,7 +27,6 @@ boto3 = "^1.18"
 jmespath = "^0.10.0"
 pydantic = {version = "^1.8.2", optional = true }
 email-validator = {version = "*", optional = true }
-boto3-stubs = {extras = ["appconfig", "ssm", "secretsmanager"], version = "^1.21.37"}
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^6.2"}
@@ -55,6 +54,9 @@ mkdocs-git-revision-date-plugin = "^0.3.1"
 mike = "^0.6.0"
 mypy = "^0.931"
 mkdocs-material = "^8.2.4"
+mypy-boto3-appconfig = "^1.21.34"
+mypy-boto3-ssm = "^1.21.34"
+mypy-boto3-secretsmanager = "^1.21.34"
 
 
 [tool.poetry.extras]
