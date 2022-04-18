@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "1.25.6"
+version = "1.25.7"
 description = "A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, batching, idempotency, feature flags, and more."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -31,7 +31,7 @@ boto3-stubs = {extras = ["appconfig", "ssm", "secretsmanager"], version = "^1.21
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^6.2"}
-pytest = "^6.2.5"
+pytest = "^7.0.1"
 black = "^21.12b0"
 flake8 = "^4.0.1"
 flake8-black = "^0.2.3"
