@@ -80,7 +80,7 @@ class SecretsProvider(BaseProvider):
             self.client = boto3_client
         else:
             session = boto3_session or boto3.session.Session()
-            self.client: SecretsManagerClient = session.client("secretsmanager", config=config)
+            self.client: "SecretsManagerClient" = session.client("secretsmanager", config=config)
 
         super().__init__()
 
