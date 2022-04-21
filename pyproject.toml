@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "1.25.7"
+version = "1.25.9"
 description = "A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, batching, idempotency, feature flags, and more."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -24,7 +24,10 @@ python = "^3.6.2"
 aws-xray-sdk = "^2.8.0"
 fastjsonschema = "^2.14.5"
 boto3 = "^1.18"
-jmespath = "^0.10.0"
+jmespath = [
+  { version = "<=0.10.0", python = "3.6" },
+  { version = "^1.0.0", python = "^3.7" }
+]
 pydantic = {version = "^1.8.2", optional = true }
 email-validator = {version = "*", optional = true }
 
