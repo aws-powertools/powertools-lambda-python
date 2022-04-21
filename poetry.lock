@@ -77,14 +77,14 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.21.44"
+version = "1.21.45"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.6"
 
 [package.dependencies]
-botocore = ">=1.24.44,<1.25.0"
+botocore = ">=1.24.45,<1.25.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.5.0,<0.6.0"
 
@@ -93,7 +93,7 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.24.44"
+version = "1.24.45"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -452,14 +452,6 @@ description = "JSON Matching Expressions"
 category = "main"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
-
-[[package]]
-name = "jmespath"
-version = "1.0.0"
-description = "JSON Matching Expressions"
-category = "main"
-optional = false
-python-versions = ">=3.7"
 
 [[package]]
 name = "mako"
@@ -1064,7 +1056,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "3d40b3b49476872ab8c7a42aaf8b9b10ee8f62e42004b0a9ee0c08a493776394"
+content-hash = "24d3b518530d9823d67d7cb0cd30b48656023cb980fcce459205e0d64612c8e1"
 
 [metadata.files]
 atomicwrites = [
@@ -1088,12 +1080,12 @@ black = [
     {file = "black-21.12b0.tar.gz", hash = "sha256:77b80f693a569e2e527958459634f18df9b0ba2625ba4e0c2d5da5be42e6f2b3"},
 ]
 boto3 = [
-    {file = "boto3-1.21.44-py3-none-any.whl", hash = "sha256:0789842ca7d722723d7e9fae2158aea6f304c14df08929f9c62b6a277705ff39"},
-    {file = "boto3-1.21.44.tar.gz", hash = "sha256:1300661bd4defa42d7e019d515fbfd2984170cf3f5c0bf6bc275fbd9498faf5f"},
+    {file = "boto3-1.21.45-py3-none-any.whl", hash = "sha256:cffdd39e824a51ef7cec4e744d764ee14cccf6a7045126cf0c7990f399ccf809"},
+    {file = "boto3-1.21.45.tar.gz", hash = "sha256:2f2a8d9c44cacac32d258532c6b87d2e0a1549b38e0a559bfb786023f10733b3"},
 ]
 botocore = [
-    {file = "botocore-1.24.44-py3-none-any.whl", hash = "sha256:ed07772c924984e5b3c1005f7ba4600cebd4169c23307cf6e92cccadf0b5d2e7"},
-    {file = "botocore-1.24.44.tar.gz", hash = "sha256:0030a11eac972be46859263820885ba650503622c5acfe58966f482d42cc538d"},
+    {file = "botocore-1.24.45-py3-none-any.whl", hash = "sha256:b57a75dc4eadf33d299dabbe11c989fb4553b66331f4580a9aae4316dc6ff198"},
+    {file = "botocore-1.24.45.tar.gz", hash = "sha256:4bd7c6ca50cffbfb2386c7a43b4205e7a20e85083b0cd2b71fdc8a3d612deca0"},
 ]
 certifi = [
     {file = "certifi-2021.10.8-py2.py3-none-any.whl", hash = "sha256:d62a0163eb4c2344ac042ab2bdf75399a71a2d8c7d47eac2e2ee91b9d6339569"},
@@ -1256,8 +1248,6 @@ jinja2 = [
 jmespath = [
     {file = "jmespath-0.10.0-py2.py3-none-any.whl", hash = "sha256:cdf6525904cc597730141d61b36f2e4b8ecc257c420fa2f4549bac2c2d0cb72f"},
     {file = "jmespath-0.10.0.tar.gz", hash = "sha256:b85d0567b8666149a93172712e68920734333c0ce7e89b78b3e987f71e5ed4f9"},
-    {file = "jmespath-1.0.0-py3-none-any.whl", hash = "sha256:e8dcd576ed616f14ec02eed0005c85973b5890083313860136657e24784e4c04"},
-    {file = "jmespath-1.0.0.tar.gz", hash = "sha256:a490e280edd1f57d6de88636992d05b71e97d69a26a19f058ecf7d304474bf5e"},
 ]
 mako = [
     {file = "Mako-1.1.6-py2.py3-none-any.whl", hash = "sha256:afaf8e515d075b22fad7d7b8b30e4a1c90624ff2f3733a06ec125f5a5f043a57"},
