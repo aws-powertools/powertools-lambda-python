@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format for changes and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.25.9 - 2022-04-21
+
+### Bug Fixes
+
+* **deps**: correct py36 marker for jmespath
 ## 1.25.8 - 2022-04-21
 
 ### Bug Fixes
