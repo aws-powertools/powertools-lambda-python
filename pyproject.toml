@@ -28,6 +28,8 @@ pydantic = {version = "^1.8.2", optional = true }
 email-validator = {version = "*", optional = true }
 
 [tool.poetry.dev-dependencies]
+# 2022-04-21: jmespath was removed, to be re-added once we drop python 3.6.
+# issue #1148
 coverage = {extras = ["toml"], version = "^6.2"}
 pytest = "^7.0.1"
 black = "^21.12b0"
