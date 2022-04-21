@@ -1064,7 +1064,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "c2f3bcea14decf5e7a710cbe34e140db6878e37623750918e87735697e82e1d7"
+content-hash = "3d40b3b49476872ab8c7a42aaf8b9b10ee8f62e42004b0a9ee0c08a493776394"
 
 [metadata.files]
 atomicwrites = [
