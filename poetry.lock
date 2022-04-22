@@ -560,7 +560,7 @@ i18n = ["babel (>=2.9.0)"]
 
 [[package]]
 name = "mkdocs-git-revision-date-plugin"
-version = "0.3.1"
+version = "0.3.2"
 description = "MkDocs plugin for setting revision date from git per markdown file."
 category = "dev"
 optional = false
@@ -1057,7 +1057,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "b7d0237452cc3c7fbdbff8211c77f674716a87eb1279a8f28bbe935760249250"
+content-hash = "fe1359d83ad598a0b9103b6081869e9fc3cc5db0e98a508d1a13f43ba71bc0ec"
 
 [metadata.files]
 atomicwrites = [
@@ -1350,8 +1350,7 @@ mkdocs = [
     {file = "mkdocs-1.2.3.tar.gz", hash = "sha256:89f5a094764381cda656af4298727c9f53dc3e602983087e1fe96ea1df24f4c1"},
 ]
 mkdocs-git-revision-date-plugin = [
-    {file = "mkdocs-git-revision-date-plugin-0.3.1.tar.gz", hash = "sha256:4abaef720763a64c952bed6829dcc180f67c97c60dd73914e90715e05d1cfb23"},
-    {file = "mkdocs_git_revision_date_plugin-0.3.1-py3-none-any.whl", hash = "sha256:8ae50b45eb75d07b150a69726041860801615aae5f4adbd6b1cf4d51abaa03d5"},
+    {file = "mkdocs_git_revision_date_plugin-0.3.2-py3-none-any.whl", hash = "sha256:2e67956cb01823dd2418e2833f3623dee8604cdf223bddd005fe36226a56f6ef"},
 ]
 mkdocs-material = [
     {file = "mkdocs-material-8.2.7.tar.gz", hash = "sha256:3314d94ccc11481b1a3aa4f7babb4fb2bc47daa2fa8ace2463665952116f409b"},
