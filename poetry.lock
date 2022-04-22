@@ -1028,14 +1028,14 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 
 [[package]]
 name = "xenon"
-version = "0.8.0"
+version = "0.9.0"
 description = "Monitor code metrics for Python on your CI server"
 category = "dev"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-PyYAML = ">=4.2b1,<6.0"
+PyYAML = ">=4.2b1,<7.0"
 radon = ">=4,<6"
 requests = ">=2.0,<3.0"
 
@@ -1057,7 +1057,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "cc5db7165ea118a9f4f3999ddb380839d16d10765d869ec2565cff6d8c78e616"
+content-hash = "b7d0237452cc3c7fbdbff8211c77f674716a87eb1279a8f28bbe935760249250"
 
 [metadata.files]
 atomicwrites = [
@@ -1716,8 +1716,8 @@ wrapt = [
     {file = "wrapt-1.13.3.tar.gz", hash = "sha256:1fea9cd438686e6682271d36f3481a9f3636195578bab9ca3382e2f5f01fc185"},
 ]
 xenon = [
-    {file = "xenon-0.8.0-py2.py3-none-any.whl", hash = "sha256:4c3d7157d9ae058364e130c831702e4a65a1f729d4b4def912418ed09772c851"},
-    {file = "xenon-0.8.0.tar.gz", hash = "sha256:cd5cad0930673d0e52609712c63fe4721a8f4c4342dc338bd7ea5fa0666b8515"},
+    {file = "xenon-0.9.0-py2.py3-none-any.whl", hash = "sha256:994c80c7f1c6d40596b600b93734d85a5739208f31895ef99f1e4d362caf9e35"},
+    {file = "xenon-0.9.0.tar.gz", hash = "sha256:d2b9cb6c6260f771a432c1e588e51fddb17858f88f73ef641e7532f7a5f58fb8"},
 ]
 zipp = [
     {file = "zipp-3.6.0-py3-none-any.whl", hash = "sha256:9fe5ea21568a0a70e50f273397638d39b03353731e6cbbb3fd8502a33fec40bc"},
