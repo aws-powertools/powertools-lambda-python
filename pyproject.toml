@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "1.25.7"
+version = "1.25.9"
 description = "A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, batching, idempotency, feature flags, and more."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -24,11 +24,12 @@ python = "^3.6.2"
 aws-xray-sdk = "^2.8.0"
 fastjsonschema = "^2.14.5"
 boto3 = "^1.18"
-jmespath = "^0.10.0"
 pydantic = {version = "^1.8.2", optional = true }
 email-validator = {version = "*", optional = true }
 
 [tool.poetry.dev-dependencies]
+# 2022-04-21: jmespath was removed, to be re-added once we drop python 3.6.
+# issue #1148
 coverage = {extras = ["toml"], version = "^6.2"}
 pytest = "^7.0.1"
 black = "^21.12b0"
@@ -47,12 +48,12 @@ pdoc3 = "^0.10.0"
 pytest-asyncio = "^0.16.0"
 bandit = "^1.7.1"
 radon = "^5.1.0"
-xenon = "^0.8.0"
+xenon = "^0.9.0"
 flake8-eradicate = "^1.2.0"
 flake8-bugbear = "^22.1.11"
-mkdocs-git-revision-date-plugin = "^0.3.1"
+mkdocs-git-revision-date-plugin = "^0.3.2"
 mike = "^0.6.0"
-mypy = "^0.931"
+mypy = "^0.942"
 mkdocs-material = "^8.2.7"
 
 
