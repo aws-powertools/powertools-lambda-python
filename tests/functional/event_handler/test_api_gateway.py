@@ -1210,3 +1210,27 @@ def test_exception_handler_not_found_alt():
 
     # THEN call the @app.not_found() function
     assert result["statusCode"] == 404
+
+
+def test_exception_handler_raises_service_error(json_dump):
+    # SCENARIO: Support an exception_handler that raises a ServiceError
+    # GIVEN
+    app = ApiGatewayResolver()
+
+    @app.exception_handler(ValueError)
+    def client_error(ex: ValueError):
+        raise BadRequestError("Bad request")
+
+    @app.get("/my/path")
+    def get_lambda() -> Response:
+        raise ValueError("foo")
+
+    # WHEN calling the event handler
+    # AND a ValueError is raised
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN call the exception_handler
+    assert result["statusCode"] == 400
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    expected = {"statusCode": 400, "message": "Bad request"}
+    assert result["body"] == json_dump(expected)
