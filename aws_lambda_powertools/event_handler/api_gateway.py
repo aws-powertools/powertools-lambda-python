@@ -491,6 +491,8 @@ class ApiGatewayResolver(BaseRouter):
         dict
             Returns the dict response
         """
+        if isinstance(event, BaseProxyEvent):
+            event = event.raw_event
         if self._debug:
             print(self._json_dump(event), end="")
         BaseRouter.current_event = self._to_proxy_event(event)
