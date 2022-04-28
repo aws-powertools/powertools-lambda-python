@@ -492,6 +492,9 @@ class ApiGatewayResolver(BaseRouter):
             Returns the dict response
         """
         if isinstance(event, BaseProxyEvent):
+            warnings.warn(
+                "You don't need to serialize event to Event Source Data Class when using Event Handler; see issue #1152"
+            )
             event = event.raw_event
         if self._debug:
             print(self._json_dump(event), end="")
