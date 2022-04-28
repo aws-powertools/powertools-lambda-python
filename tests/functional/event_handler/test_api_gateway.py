@@ -31,7 +31,12 @@ from aws_lambda_powertools.event_handler.exceptions import (
 )
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.json_encoder import Encoder
-from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
+from aws_lambda_powertools.utilities.data_classes import (
+    ALBEvent,
+    APIGatewayProxyEvent,
+    APIGatewayProxyEventV2,
+    event_source,
+)
 from tests.functional.utils import load_event
 
 
@@ -1210,3 +1215,23 @@ def test_exception_handler_not_found_alt():
 
     # THEN call the @app.not_found() function
     assert result["statusCode"] == 404
+
+
+def test_event_source_compatibility():
+    # GIVEN
+    app = APIGatewayHttpResolver()
+
+    @app.post("/my/path")
+    def my_path():
+        assert isinstance(app.current_event, APIGatewayProxyEventV2)
+        return {}
+
+    # WHEN
+    @event_source(data_class=APIGatewayProxyEventV2)
+    def handler(event: APIGatewayProxyEventV2, context):
+        assert isinstance(event, APIGatewayProxyEventV2)
+        return app.resolve(event, context)
+
+    # THEN
+    result = handler(load_event("apiGatewayProxyV2Event.json"), None)
+    assert result["statusCode"] == 200
