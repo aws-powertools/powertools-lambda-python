@@ -31,7 +31,12 @@ from aws_lambda_powertools.event_handler.exceptions import (
 )
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.json_encoder import Encoder
-from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
+from aws_lambda_powertools.utilities.data_classes import (
+    ALBEvent,
+    APIGatewayProxyEvent,
+    APIGatewayProxyEventV2,
+    event_source,
+)
 from tests.functional.utils import load_event
 
 
@@ -1213,8 +1218,7 @@ def test_exception_handler_not_found_alt():
 
 
 def test_exception_handler_raises_service_error(json_dump):
-    # SCENARIO: Support an exception_handler that raises a ServiceError
-    # GIVEN
+    # GIVEN an exception handler raises a ServiceError (BadRequestError)
     app = ApiGatewayResolver()
 
     @app.exception_handler(ValueError)
@@ -1234,3 +1238,23 @@ def test_exception_handler_raises_service_error(json_dump):
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
     expected = {"statusCode": 400, "message": "Bad request"}
     assert result["body"] == json_dump(expected)
+
+
+def test_event_source_compatibility():
+    # GIVEN
+    app = APIGatewayHttpResolver()
+
+    @app.post("/my/path")
+    def my_path():
+        assert isinstance(app.current_event, APIGatewayProxyEventV2)
+        return {}
+
+    # WHEN
+    @event_source(data_class=APIGatewayProxyEventV2)
+    def handler(event: APIGatewayProxyEventV2, context):
+        assert isinstance(event, APIGatewayProxyEventV2)
+        return app.resolve(event, context)
+
+    # THEN
+    result = handler(load_event("apiGatewayProxyV2Event.json"), None)
+    assert result["statusCode"] == 200
