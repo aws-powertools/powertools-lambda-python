@@ -17,6 +17,10 @@ updates:
     commit-message:
       prefix: chore
       include: scope
+    ignore:
+      # 2022-04-23: Ignoring boto3 changes until we need to care about them.
+      - dependency-name: "boto3"
+        
 
 #   - package-ecosystem: "pip"
 #     directory: "/"
