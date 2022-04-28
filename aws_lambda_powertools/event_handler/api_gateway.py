@@ -491,6 +491,11 @@ class ApiGatewayResolver(BaseRouter):
         dict
             Returns the dict response
         """
+        if isinstance(event, BaseProxyEvent):
+            warnings.warn(
+                "You don't need to serialize event to Event Source Data Class when using Event Handler; see issue #1152"
+            )
+            event = event.raw_event
         if self._debug:
             print(self._json_dump(event), end="")
         BaseRouter.current_event = self._to_proxy_event(event)
@@ -651,7 +656,10 @@ class ApiGatewayResolver(BaseRouter):
     def _call_exception_handler(self, exp: Exception, route: Route) -> Optional[ResponseBuilder]:
         handler = self._lookup_exception_handler(type(exp))
         if handler:
-            return ResponseBuilder(handler(exp), route)
+            try:
+                return ResponseBuilder(handler(exp), route)
+            except ServiceError as service_error:
+                exp = service_error
 
         if isinstance(exp, ServiceError):
             return ResponseBuilder(
