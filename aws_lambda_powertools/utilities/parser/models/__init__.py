@@ -37,7 +37,11 @@ from .ses import (
     SesModel,
     SesReceipt,
     SesReceiptAction,
+    SesReceiptActionBase,
+    SesReceiptBounceAction,
+    SesReceiptS3Action,
     SesReceiptVerdict,
+    SesReceiptWorkmailAction,
     SesRecordModel,
 )
 from .sns import SnsModel, SnsNotificationModel, SnsRecordModel
@@ -84,6 +88,10 @@ __all__ = [
     "SesMailHeaders",
     "SesReceipt",
     "SesReceiptAction",
+    "SesReceiptActionBase",
+    "SesReceiptBounceAction",
+    "SesReceiptWorkmailAction",
+    "SesReceiptS3Action",
     "SesReceiptVerdict",
     "SnsModel",
     "SnsNotificationModel",
