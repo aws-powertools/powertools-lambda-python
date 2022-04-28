@@ -53,7 +53,7 @@ flake8-eradicate = "^1.2.1"
 flake8-bugbear = "^22.1.11"
 mkdocs-git-revision-date-plugin = "^0.3.2"
 mike = "^0.6.0"
-mypy = "^0.942"
+mypy = "^0.950"
 mkdocs-material = "^8.2.7"
 
 
