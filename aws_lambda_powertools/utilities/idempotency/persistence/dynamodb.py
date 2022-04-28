@@ -22,7 +22,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         self,
         table_name: str,
         key_attr: str = "id",
-        static_pk_value: str = f"idempotency#{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, '')}",
+        static_pk_value: Optional[str] = None,
         sort_key_attr: Optional[str] = None,
         expiry_attr: str = "expiration",
         status_attr: str = "status",
@@ -75,6 +75,9 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         self._boto3_session = boto3_session or boto3.session.Session()
         if sort_key_attr == key_attr:
             raise ValueError(f"key_attr [{key_attr}] and sort_key_attr [{sort_key_attr}] cannot be the same!")
+
+        if static_pk_value is None:
+            static_pk_value = f"idempotency#{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, '')}"
 
         self._table = None
         self.table_name = table_name

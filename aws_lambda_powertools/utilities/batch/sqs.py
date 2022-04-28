@@ -135,6 +135,10 @@ class PartialSQSProcessor(BasePartialProcessor):
             return None
 
         queue_url = self._get_queue_url()
+        if queue_url is None:
+            logger.debug("No queue url found")
+            return None
+
         entries_to_remove = self._get_entries_to_clean()
         # Batch delete up to 10 messages at a time (SQS limit)
         max_workers = math.ceil(len(entries_to_remove) / self.max_message_batch)
