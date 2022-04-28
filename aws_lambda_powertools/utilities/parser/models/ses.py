@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 from pydantic.networks import EmailStr
@@ -12,36 +12,10 @@ class SesReceiptVerdict(BaseModel):
     status: Literal["PASS", "FAIL", "GRAY", "PROCESSING_FAILED"]
 
 
-class SesReceiptActionBase(BaseModel):
-    topicArn: Optional[str]
-
-
-class SesReceiptAction(SesReceiptActionBase):
+class SesReceiptAction(BaseModel):
     type: Literal["Lambda"]  # noqa A003,VNE003
     invocationType: Literal["Event"]
     functionArn: str
-
-
-class SesReceiptS3Action(SesReceiptActionBase):
-    type: Literal["S3"]  # noqa A003,VNE003
-    topicArn: str
-    bucketName: str
-    objectKey: str
-
-
-class SesReceiptBounceAction(SesReceiptActionBase):
-    type: Literal["Bounce"]  # noqa A003,VNE003
-    topicArn: str
-    smtpReplyCode: str
-    message: str
-    sender: str
-    statusCode: str
-
-
-class SesReceiptWorkmailAction(SesReceiptActionBase):
-    type: Literal["WorkMail"]  # noqa A003,VNE003
-    topicArn: str
-    organizationArn: str
 
 
 class SesReceipt(BaseModel):
@@ -51,10 +25,8 @@ class SesReceipt(BaseModel):
     spamVerdict: SesReceiptVerdict
     virusVerdict: SesReceiptVerdict
     spfVerdict: SesReceiptVerdict
-    dkimVerdict: SesReceiptVerdict
     dmarcVerdict: SesReceiptVerdict
-    dmarcPolicy: Optional[Literal["quarantine", "reject", "none"]]
-    action: Union[SesReceiptAction, SesReceiptS3Action, SesReceiptBounceAction, SesReceiptWorkmailAction]
+    action: SesReceiptAction
 
 
 class SesMailHeaders(BaseModel):
