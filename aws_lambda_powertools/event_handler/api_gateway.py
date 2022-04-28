@@ -656,7 +656,10 @@ class ApiGatewayResolver(BaseRouter):
     def _call_exception_handler(self, exp: Exception, route: Route) -> Optional[ResponseBuilder]:
         handler = self._lookup_exception_handler(type(exp))
         if handler:
-            return ResponseBuilder(handler(exp), route)
+            try:
+                return ResponseBuilder(handler(exp), route)
+            except ServiceError as service_error:
+                exp = service_error
 
         if isinstance(exp, ServiceError):
             return ResponseBuilder(
