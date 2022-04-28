@@ -705,7 +705,7 @@ def test_ses_trigger_event():
     assert receipt.spf_verdict.status == "PASS"
     assert receipt.dmarc_verdict.status == "PASS"
     assert receipt.dkim_verdict.status == "PASS"
-    assert receipt.dmarc_policy is None
+    assert receipt.dmarc_policy == "reject"
     action = receipt.action
     assert action.get_type == action.raw_event["type"]
     assert action.function_arn == action.raw_event["functionArn"]

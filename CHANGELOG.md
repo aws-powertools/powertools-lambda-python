@@ -4,6 +4,108 @@ All notable changes to this project will be documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format for changes and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.25.9 - 2022-04-21
+
+### Bug Fixes
+
+* **deps**: correct py36 marker for jmespath
+## 1.25.8 - 2022-04-21
+
+### Bug Fixes
+
+* **governance:** removed ambiguous quotes from labels
+* **deps:** update jmespath marker to support 1.0 and py3.6 ([#1139](https://github.com/awslabs/aws-lambda-powertools-python/issues/1139))
+* **governance:** update label in names in issues
+
+### Documentation
+
+* **install:** instructions to reduce pydantic package size ([#1077](https://github.com/awslabs/aws-lambda-powertools-python/issues/1077))
+* **layer:** remove link from clipboard button ([#1135](https://github.com/awslabs/aws-lambda-powertools-python/issues/1135))
+* **layer:** update to 1.25.7
+
+### Maintenance
+
+* **deps:** bump codecov/codecov-action from 2.1.0 to 3.0.0 ([#1102](https://github.com/awslabs/aws-lambda-powertools-python/issues/1102))
+* **deps:** bump actions/upload-artifact from 2 to 3 ([#1103](https://github.com/awslabs/aws-lambda-powertools-python/issues/1103))
+* **deps-dev:** bump mkdocs-material from 8.2.4 to 8.2.7 ([#1131](https://github.com/awslabs/aws-lambda-powertools-python/issues/1131))
+* **deps-dev:** bump pytest from 6.2.5 to 7.0.1 ([#1063](https://github.com/awslabs/aws-lambda-powertools-python/issues/1063))
+
+## 1.25.7 - 2022-04-08
+
+### Bug Fixes
+
+* **idempotency:** pass by value on idem key to guard inadvertent mutations ([#1090](https://github.com/awslabs/aws-lambda-powertools-python/issues/1090))
+* **logger:** clear_state should keep custom key formats ([#1095](https://github.com/awslabs/aws-lambda-powertools-python/issues/1095))
+* **middleware_factory:** ret type annotation for handler dec ([#1066](https://github.com/awslabs/aws-lambda-powertools-python/issues/1066))
+
+### Documentation
+
+* **layer:** update to 1.25.6; cosmetic changes
+
+### Maintenance
+
+* **governance:** refresh pull request template sections
+* **governance:** update external non-triage effort disclaimer
+* **governance:** update static typing to a form
+* **governance:** update rfc to a form
+* **governance:** update feat request to a form
+* **governance:** bug report form typo
+* **governance:** update docs report to a form
+* **governance:** update bug report to a form
+* **governance:** new ask a question
+* **governance:** new static typing report
+
+## 1.25.6 - 2022-04-01
+
+* **logger:** clear_state regression on absent standard keys like level, location, timestamp ([#1088](https://github.com/awslabs/aws-lambda-powertools-python/issues/1088))
+
+## 1.25.5 - 2022-03-18
+
+### Bug Fixes
+
+* **logger-utils:** regression on exclude set leading to no formatter on append_keys ([#1080](https://github.com/awslabs/aws-lambda-powertools-python/issues/1080))
+
+## 1.25.4 - 2022-03-17
+
+### Bug Fixes
+
+* **logger-utils**: ensure external loggers doesn't propagate logs when copying config
+
+### Documentation
+
+* **appsync:** fix typo on `listLocations` return
+* **contributing:** pause new features/enhancements over operational excellence focus
+
+## 1.25.3 - 2022-03-09
+
+### Bug Fixes
+
+* **logger:** ensure state is cleared for custom formatters ([#1072](https://github.com/awslabs/aws-lambda-powertools-python/issues/1072))
+
+### Documentation
+
+* **plugin:** add mermaid to create diagram as code ([#1070](https://github.com/awslabs/aws-lambda-powertools-python/issues/1070))
+
+## 1.25.2 - 2022-03-07
+
+### Bug Fixes
+
+* **event_handler:** high-level import CorsConfig, docs snippets ([#1019](https://github.com/awslabs/aws-lambda-powertools-python/issues/1019))
+* **lambda-authorizer:** allow proxy resources path in arn ([#1051](https://github.com/awslabs/aws-lambda-powertools-python/issues/1051))
+* **metrics:** flush upon a single metric 100th data point ([#1046](https://github.com/awslabs/aws-lambda-powertools-python/issues/1046))
+
+### Documentation
+
+* **layer:** update to 1.25.1
+* **parser:** APIGatewayProxyEvent to APIGatewayProxyEventModel ([#1061](https://github.com/awslabs/aws-lambda-powertools-python/issues/1061))
+
+### Maintenance
+
+* **deps:** bump actions/setup-python from 2.3.1 to 3 ([#1048](https://github.com/awslabs/aws-lambda-powertools-python/issues/1048))
+* **deps:** bump actions/checkout from 2 to 3 ([#1052](https://github.com/awslabs/aws-lambda-powertools-python/issues/1052))
+* **deps:** bump actions/github-script from 5 to 6 ([#1023](https://github.com/awslabs/aws-lambda-powertools-python/issues/1023))
+* **deps:** bump fastjsonschema from 2.15.2 to 2.15.3 ([#949](https://github.com/awslabs/aws-lambda-powertools-python/issues/949))
+* **deps-dev:** bump mkdocs-material from 8.1.9 to 8.2.4 ([#1054](https://github.com/awslabs/aws-lambda-powertools-python/issues/1054))
 
 ## 1.25.1 - 2022-02-14
 

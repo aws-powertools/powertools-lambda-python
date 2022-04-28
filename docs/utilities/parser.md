@@ -14,7 +14,13 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 **Extra dependency**
 
 ???+ warning
-    This will increase the overall package size by approximately 75MB due to Pydantic dependency.
+
+    This will increase the compressed package size by >10MB due to the Pydantic dependency.
+
+    To reduce the impact on the package size at the expense of 30%-50% of its performance [Pydantic can also be
+    installed without binary files](https://pydantic-docs.helpmanual.io/install/#performance-vs-package-size-trade-off):
+
+    `SKIP_CYTHON=1 pip install --no-binary pydantic aws-lambda-powertools[pydantic]`
 
 Install parser's extra dependencies using **`pip install aws-lambda-powertools[pydantic]`**.
 
@@ -146,20 +152,20 @@ def my_function():
 
 Parser comes with the following built-in models:
 
-| Model name                 | Description                                                        |
-| -------------------------- | ------------------------------------------------------------------ |
-| **DynamoDBStreamModel**    | Lambda Event Source payload for Amazon DynamoDB Streams            |
-| **EventBridgeModel**       | Lambda Event Source payload for Amazon EventBridge                 |
-| **SqsModel**               | Lambda Event Source payload for Amazon SQS                         |
-| **AlbModel**               | Lambda Event Source payload for Amazon Application Load Balancer   |
-| **CloudwatchLogsModel**    | Lambda Event Source payload for Amazon CloudWatch Logs             |
-| **S3Model**                | Lambda Event Source payload for Amazon S3                          |
-| **S3ObjectLambdaEvent**    | Lambda Event Source payload for Amazon S3 Object Lambda            |
-| **KinesisDataStreamModel** | Lambda Event Source payload for Amazon Kinesis Data Streams        |
-| **SesModel**               | Lambda Event Source payload for Amazon Simple Email Service        |
-| **SnsModel**               | Lambda Event Source payload for Amazon Simple Notification Service |
-| **APIGatewayProxyEvent**   | Lambda Event Source payload for Amazon API Gateway                 |
-| **APIGatewayProxyEventV2Model**  | Lambda Event Source payload for Amazon API Gateway v2 payload |
+| Model name                        | Description                                                        |
+| --------------------------------- | ------------------------------------------------------------------ |
+| **DynamoDBStreamModel**           | Lambda Event Source payload for Amazon DynamoDB Streams            |
+| **EventBridgeModel**              | Lambda Event Source payload for Amazon EventBridge                 |
+| **SqsModel**                      | Lambda Event Source payload for Amazon SQS                         |
+| **AlbModel**                      | Lambda Event Source payload for Amazon Application Load Balancer   |
+| **CloudwatchLogsModel**           | Lambda Event Source payload for Amazon CloudWatch Logs             |
+| **S3Model**                       | Lambda Event Source payload for Amazon S3                          |
+| **S3ObjectLambdaEvent**           | Lambda Event Source payload for Amazon S3 Object Lambda            |
+| **KinesisDataStreamModel**        | Lambda Event Source payload for Amazon Kinesis Data Streams        |
+| **SesModel**                      | Lambda Event Source payload for Amazon Simple Email Service        |
+| **SnsModel**                      | Lambda Event Source payload for Amazon Simple Notification Service |
+| **APIGatewayProxyEventModel**     | Lambda Event Source payload for Amazon API Gateway                 |
+| **APIGatewayProxyEventV2Model**   | Lambda Event Source payload for Amazon API Gateway v2 payload      |
 
 ### extending built-in models
 

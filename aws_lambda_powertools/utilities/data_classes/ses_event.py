@@ -116,7 +116,6 @@ class SESReceiptStatus(DictWrapper):
     @property
     def status(self) -> str:
         """Receipt status
-
         Possible values: 'PASS', 'FAIL', 'GRAY', 'PROCESSING_FAILED', 'DISABLED'
         """
         return str(self["status"])
@@ -254,7 +253,6 @@ class SESReceipt(DictWrapper):
     def dmarc_policy(self) -> Optional[str]:
         """Indicates the Domain-based Message Authentication, Reporting & Conformance (DMARC) settings for
         the sending domain. This field only appears if the message fails DMARC authentication.
-
         Possible values for this field are: none, quarantine, reject"""
         return self.get("dmarcPolicy")
 

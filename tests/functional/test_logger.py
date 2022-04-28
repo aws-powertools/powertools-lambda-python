@@ -5,16 +5,17 @@ import logging
 import random
 import re
 import string
+from ast import Dict
 from collections import namedtuple
 from datetime import datetime, timezone
-from typing import Iterable
+from typing import Any, Callable, Iterable, List, Optional, Union
 
 import pytest
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
-from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter
+from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter, LambdaPowertoolsFormatter
 from aws_lambda_powertools.logging.logger import set_package_logger
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.data_classes import S3Event, event_source
@@ -524,6 +525,9 @@ def test_logger_custom_formatter(stdout, service_name, lambda_context):
             for key in keys:
                 self.custom_format.pop(key, None)
 
+        def clear_state(self):
+            self.custom_format.clear()
+
         def format(self, record: logging.LogRecord) -> str:  # noqa: A003
             return json.dumps(
                 {
@@ -564,6 +568,63 @@ def test_logger_custom_formatter(stdout, service_name, lambda_context):
     assert logger.get_correlation_id() is None
 
 
+def test_logger_custom_powertools_formatter_clear_state(stdout, service_name, lambda_context):
+    class CustomFormatter(LambdaPowertoolsFormatter):
+        def __init__(
+            self,
+            json_serializer: Optional[Callable[[Dict], str]] = None,
+            json_deserializer: Optional[Callable[[Union[Dict, str, bool, int, float]], str]] = None,
+            json_default: Optional[Callable[[Any], Any]] = None,
+            datefmt: Optional[str] = None,
+            use_datetime_directive: bool = False,
+            log_record_order: Optional[List[str]] = None,
+            utc: bool = False,
+            **kwargs,
+        ):
+            super().__init__(
+                json_serializer,
+                json_deserializer,
+                json_default,
+                datefmt,
+                use_datetime_directive,
+                log_record_order,
+                utc,
+                **kwargs,
+            )
+
+    custom_formatter = CustomFormatter()
+
+    # GIVEN a Logger is initialized with a custom formatter
+    logger = Logger(service=service_name, stream=stdout, logger_formatter=custom_formatter)
+
+    # WHEN a lambda function is decorated with logger
+    # and state is to be cleared in the next invocation
+    @logger.inject_lambda_context(clear_state=True)
+    def handler(event, context):
+        if event.get("add_key"):
+            logger.append_keys(my_key="value")
+        logger.info("Hello")
+
+    handler({"add_key": True}, lambda_context)
+    handler({}, lambda_context)
+
+    lambda_context_keys = (
+        "function_name",
+        "function_memory_size",
+        "function_arn",
+        "function_request_id",
+    )
+
+    first_log, second_log = capture_multiple_logging_statements_output(stdout)
+
+    # THEN my_key should only present once
+    # and lambda contextual info should also be in both logs
+    assert "my_key" in first_log
+    assert "my_key" not in second_log
+    assert all(k in first_log for k in lambda_context_keys)
+    assert all(k in second_log for k in lambda_context_keys)
+
+
 def test_logger_custom_handler(lambda_context, service_name, tmp_path):
     # GIVEN a Logger is initialized with a FileHandler
     log_file = tmp_path / "log.json"
@@ -600,6 +661,64 @@ def test_clear_state_on_inject_lambda_context(lambda_context, stdout, service_na
     first_log, second_log = capture_multiple_logging_statements_output(stdout)
     assert "my_key" in first_log
     assert "my_key" not in second_log
+
+
+def test_clear_state_keeps_standard_keys(lambda_context, stdout, service_name):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout)
+    standard_keys = ["level", "location", "message", "timestamp", "service"]
+
+    # WHEN clear_state is set
+    @logger.inject_lambda_context(clear_state=True)
+    def handler(event, context):
+        logger.info("Foo")
+
+    # THEN all standard keys should be available as usual
+    handler({}, lambda_context)
+    handler({}, lambda_context)
+
+    first_log, second_log = capture_multiple_logging_statements_output(stdout)
+    for key in standard_keys:
+        assert key in first_log
+        assert key in second_log
+
+
+def test_clear_state_keeps_custom_keys(lambda_context, stdout, service_name):
+    # GIVEN
+    location_format = "%(module)s.%(funcName)s:clear_state"
+    logger = Logger(service=service_name, stream=stdout, location=location_format, custom_key="foo")
+
+    # WHEN clear_state is set
+    @logger.inject_lambda_context(clear_state=True)
+    def handler(event, context):
+        logger.info("Foo")
+
+    # THEN all standard keys should be available as usual
+    handler({}, lambda_context)
+    handler({}, lambda_context)
+
+    first_log, second_log = capture_multiple_logging_statements_output(stdout)
+    for log in (first_log, second_log):
+        assert "foo" == log["custom_key"]
+        assert "test_logger.handler:clear_state" == log["location"]
+
+
+def test_clear_state_keeps_exception_keys(lambda_context, stdout, service_name):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN clear_state is set and an exception was logged
+    @logger.inject_lambda_context(clear_state=True)
+    def handler(event, context):
+        try:
+            raise ValueError("something went wrong")
+        except Exception:
+            logger.exception("Received an exception")
+
+    # THEN we expect a "exception_name" to be "ValueError"
+    handler({}, lambda_context)
+    log = capture_logging_output(stdout)
+    assert "ValueError" == log["exception_name"]
 
 
 def test_inject_lambda_context_allows_handler_with_kwargs(lambda_context, stdout, service_name):

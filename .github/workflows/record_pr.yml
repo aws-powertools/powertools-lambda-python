@@ -9,13 +9,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Save PR number
         run: |
           mkdir -p ./pr
           echo ${{ github.event.number }} > ./pr/number
           echo "${{ github.event.pull_request.title }}" > ./pr/title
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: pr
           path: pr/
