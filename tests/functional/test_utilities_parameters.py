@@ -505,6 +505,54 @@ def test_ssm_provider_get_cached(mock_name, mock_value, config):
         stubber.deactivate()
 
 
+def test_ssm_provider_clear_cache(mock_name, mock_value):
+    # GIVEN a provider is initialized with a cached value
+    provider = parameters.SSMProvider()
+    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+
+    # WHEN clear_cache is called from within the provider instance
+    provider.clear_cache()
+
+    # THEN store should be empty
+    assert provider.store == {}
+
+
+def test_dynamodb_provider_clear_cache(mock_name, mock_value):
+    # GIVEN a provider is initialized with a cached value
+    provider = parameters.DynamoDBProvider(table_name="test")
+    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+
+    # WHEN clear_cache is called from within the provider instance
+    provider.clear_cache()
+
+    # THEN store should be empty
+    assert provider.store == {}
+
+
+def test_secrets_provider_clear_cache(mock_name, mock_value):
+    # GIVEN a provider is initialized with a cached value
+    provider = parameters.SecretsProvider()
+    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+
+    # WHEN clear_cache is called from within the provider instance
+    provider.clear_cache()
+
+    # THEN store should be empty
+    assert provider.store == {}
+
+
+def test_appconf_provider_clear_cache(mock_name):
+    # GIVEN a provider is initialized with a cached value
+    provider = parameters.AppConfigProvider(environment="test", application="test")
+    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+
+    # WHEN clear_cache is called from within the provider instance
+    provider.clear_cache()
+
+    # THEN store should be empty
+    assert provider.store == {}
+
+
 def test_ssm_provider_get_expired(mock_name, mock_value, mock_version, config):
     """
     Test SSMProvider.get() with a cached but expired value

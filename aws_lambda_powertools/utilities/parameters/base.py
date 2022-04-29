@@ -177,6 +177,9 @@ class BaseProvider(ABC):
         """
         raise NotImplementedError()
 
+    def clear_cache(self):
+        self.store.clear()
+
 
 def get_transform_method(key: str, transform: Optional[str] = None) -> Optional[str]:
     """
