@@ -346,74 +346,23 @@ object named `get_parameter_mock`.
 	--8<-- "docs/examples/utilities/parameters/testing_parameters_mock.py"
 	```
 
-
 ### Clearing cache
 
 Parameters utility caches all parameter values for performance and cost reasons. However, this can have unintended interference in tests using the same parameter name.
 
 Within your tests, you can use `clear_cache` method available in [every provider](#built-in-provider-class). When using multiple providers or higher level functions like `get_parameter`, use `clear_caches` standalone function to clear cache globally.
 
-
 === "clear_cache method"
-	```python hl_lines="9"
-    import pytest
-
-    from src import app
-
-
-    @pytest.fixture(scope="function", autouse=True)
-	def clear_parameters_cache():
-		yield
-		app.ssm_provider.clear_cache() # This will clear SSMProvider cache
-
-	@pytest.fixture
-    def mock_parameter_response(monkeypatch):
-        def mockreturn(name):
-            return "mock_value"
-
-        monkeypatch.setattr(app.ssm_provider, "get", mockreturn)
-
-    # Pass our fixture as an argument to all tests where we want to mock the get_parameter response
-    def test_handler(mock_parameter_response):
-        return_val = app.handler({}, {})
-        assert return_val.get('message') == 'mock_value'
+	```python hl_lines="8"
+	--8<-- "docs/examples/utilities/parameters/testing_parameters_clear_cache.py"
 	```
 
 === "global clear_caches"
 	```python hl_lines="10"
-    import pytest
-
-	from aws_lambda_powertools.utilities import parameters
-    from src import app
-
-
-    @pytest.fixture(scope="function", autouse=True)
-	def clear_parameters_cache():
-		yield
-		parameters.clear_caches() # This will clear all providers cache
-
-	@pytest.fixture
-    def mock_parameter_response(monkeypatch):
-        def mockreturn(name):
-            return "mock_value"
-
-        monkeypatch.setattr(app.ssm_provider, "get", mockreturn)
-
-    # Pass our fixture as an argument to all tests where we want to mock the get_parameter response
-    def test_handler(mock_parameter_response):
-        return_val = app.handler({}, {})
-        assert return_val.get('message') == 'mock_value'
+	--8<-- "docs/examples/utilities/parameters/testing_parameters_global_clear_caches.py"
 	```
 
 === "app.py"
 	```python
-    from aws_lambda_powertools.utilities import parameters
-    from botocore.config import Config
-
-    ssm_provider = parameters.SSMProvider(config=Config(region_name="us-west-1"))
-
-
-    def handler(event, context):
-        value = ssm_provider.get("/my/parameter")
-		return {"message": value}
+	--8<-- "docs/examples/utilities/parameters/testing_parameters_app.py"
 	```
