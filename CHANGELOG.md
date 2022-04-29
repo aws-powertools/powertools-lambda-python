@@ -37,6 +37,10 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 * **deps-dev:** bump xenon from 0.8.0 to 0.9.0 ([#1145](https://github.com/awslabs/aws-lambda-powertools-python/issues/1145))
 * **deps-dev:** bump mypy from 0.931 to 0.942 ([#1133](https://github.com/awslabs/aws-lambda-powertools-python/issues/1133))
 
+### Regression
+
+* **parser:** Add missing fields for SESEvent ([#1027](https://github.com/awslabs/aws-lambda-powertools-python/issues/1027)) ([#1190](https://github.com/awslabs/aws-lambda-powertools-python/issues/1190))
+
 ## 1.25.9 - 2022-04-21
 
 ### Bug Fixes
