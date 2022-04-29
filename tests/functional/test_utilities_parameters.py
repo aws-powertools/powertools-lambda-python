@@ -505,6 +505,79 @@ def test_ssm_provider_get_cached(mock_name, mock_value, config):
         stubber.deactivate()
 
 
+def test_providers_global_clear_cache(mock_name, mock_value, monkeypatch):
+    # GIVEN all providers are previously initialized
+    # and parameters, secrets, and app config are fetched
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            return mock_value
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            ...
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "secrets", TestProvider())
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig", TestProvider())
+
+    parameters.get_parameter(mock_name)
+    parameters.get_secret(mock_name)
+    parameters.get_app_config(name=mock_name, environment="test", application="test")
+
+    # WHEN clear_caches is called
+    parameters.clear_caches()
+
+    # THEN all providers cache should be reset
+    assert parameters.base.DEFAULT_PROVIDERS == {}
+
+
+def test_ssm_provider_clear_cache(mock_name, mock_value, config):
+    # GIVEN a provider is initialized with a cached value
+    provider = parameters.SSMProvider(config=config)
+    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+
+    # WHEN clear_cache is called from within the provider instance
+    provider.clear_cache()
+
+    # THEN store should be empty
+    assert provider.store == {}
+
+
+def test_dynamodb_provider_clear_cache(mock_name, mock_value, config):
+    # GIVEN a provider is initialized with a cached value
+    provider = parameters.DynamoDBProvider(table_name="test", config=config)
+    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+
+    # WHEN clear_cache is called from within the provider instance
+    provider.clear_cache()
+
+    # THEN store should be empty
+    assert provider.store == {}
+
+
+def test_secrets_provider_clear_cache(mock_name, mock_value, config):
+    # GIVEN a provider is initialized with a cached value
+    provider = parameters.SecretsProvider(config=config)
+    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+
+    # WHEN clear_cache is called from within the provider instance
+    provider.clear_cache()
+
+    # THEN store should be empty
+    assert provider.store == {}
+
+
+def test_appconf_provider_clear_cache(mock_name, config):
+    # GIVEN a provider is initialized with a cached value
+    provider = parameters.AppConfigProvider(environment="test", application="test", config=config)
+    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+
+    # WHEN clear_cache is called from within the provider instance
+    provider.clear_cache()
+
+    # THEN store should be empty
+    assert provider.store == {}
+
+
 def test_ssm_provider_get_expired(mock_name, mock_value, mock_version, config):
     """
     Test SSMProvider.get() with a cached but expired value
