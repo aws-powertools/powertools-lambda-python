@@ -177,6 +177,9 @@ class BaseProvider(ABC):
         """
         raise NotImplementedError()
 
+    def clear_cache(self):
+        self.store.clear()
+
 
 def get_transform_method(key: str, transform: Optional[str] = None) -> Optional[str]:
     """
@@ -251,3 +254,8 @@ def transform_value(
         if raise_on_transform_error:
             raise TransformParameterError(str(exc))
         return None
+
+
+def clear_caches():
+    """Clear cached parameter values from all providers"""
+    DEFAULT_PROVIDERS.clear()
