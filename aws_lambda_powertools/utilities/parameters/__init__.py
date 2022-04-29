@@ -5,7 +5,7 @@ Parameter retrieval and caching utility
 """
 
 from .appconfig import AppConfigProvider, get_app_config
-from .base import BaseProvider
+from .base import BaseProvider, clear_caches
 from .dynamodb import DynamoDBProvider
 from .exceptions import GetParameterError, TransformParameterError
 from .secrets import SecretsProvider, get_secret
@@ -23,4 +23,5 @@ __all__ = [
     "get_parameter",
     "get_parameters",
     "get_secret",
+    "clear_caches",
 ]
