@@ -530,9 +530,9 @@ def test_providers_global_clear_cache(mock_name, mock_value, monkeypatch):
     assert parameters.base.DEFAULT_PROVIDERS == {}
 
 
-def test_ssm_provider_clear_cache(mock_name, mock_value):
+def test_ssm_provider_clear_cache(mock_name, mock_value, config):
     # GIVEN a provider is initialized with a cached value
-    provider = parameters.SSMProvider()
+    provider = parameters.SSMProvider(config=config)
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
 
     # WHEN clear_cache is called from within the provider instance
@@ -542,9 +542,9 @@ def test_ssm_provider_clear_cache(mock_name, mock_value):
     assert provider.store == {}
 
 
-def test_dynamodb_provider_clear_cache(mock_name, mock_value):
+def test_dynamodb_provider_clear_cache(mock_name, mock_value, config):
     # GIVEN a provider is initialized with a cached value
-    provider = parameters.DynamoDBProvider(table_name="test")
+    provider = parameters.DynamoDBProvider(table_name="test", config=config)
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
 
     # WHEN clear_cache is called from within the provider instance
@@ -554,9 +554,9 @@ def test_dynamodb_provider_clear_cache(mock_name, mock_value):
     assert provider.store == {}
 
 
-def test_secrets_provider_clear_cache(mock_name, mock_value):
+def test_secrets_provider_clear_cache(mock_name, mock_value, config):
     # GIVEN a provider is initialized with a cached value
-    provider = parameters.SecretsProvider()
+    provider = parameters.SecretsProvider(config=config)
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
 
     # WHEN clear_cache is called from within the provider instance
@@ -566,9 +566,9 @@ def test_secrets_provider_clear_cache(mock_name, mock_value):
     assert provider.store == {}
 
 
-def test_appconf_provider_clear_cache(mock_name):
+def test_appconf_provider_clear_cache(mock_name, config):
     # GIVEN a provider is initialized with a cached value
-    provider = parameters.AppConfigProvider(environment="test", application="test")
+    provider = parameters.AppConfigProvider(environment="test", application="test", config=config)
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
 
     # WHEN clear_cache is called from within the provider instance
