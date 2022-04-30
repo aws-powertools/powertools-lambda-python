@@ -1258,3 +1258,35 @@ def test_event_source_compatibility():
     # THEN
     result = handler(load_event("apiGatewayProxyV2Event.json"), None)
     assert result["statusCode"] == 200
+
+
+def test_api_gateway_http_cookie():
+    # GIVEN
+    app = APIGatewayHttpResolver()
+
+    @app.post("/my/path")
+    def my_path() -> Response:
+        return Response(200, content_types.TEXT_PLAIN, "Test", cookies=["key=value"])
+
+    # WHEN
+    result = app(load_event("apiGatewayProxyV2Event.json"), {})
+
+    # THEN
+    assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
+    assert result["cookies"] == ["key=value"]
+
+
+def test_api_gateway_rest_cookie():
+    # GIVEN
+    app = APIGatewayRestResolver()
+
+    @app.get("/my/path")
+    def get_lambda() -> Response:
+        return Response(200, content_types.TEXT_PLAIN, "Test", cookies=["foo=bar"])
+
+    # WHEN
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN
+    assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
+    assert result["multiValueHeaders"]["Set-Cookie"] == ["foo=bar"]

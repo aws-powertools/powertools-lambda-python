@@ -140,6 +140,7 @@ class Response:
         content_type: Optional[str],
         body: Union[str, bytes, None],
         headers: Optional[Dict] = None,
+        cookies: Optional[List[str]] = None,
     ):
         """
 
@@ -154,11 +155,14 @@ class Response:
             Optionally set the response body. Note: bytes body will be automatically base64 encoded
         headers: dict
             Optionally set specific http headers. Setting "Content-Type" hear would override the `content_type` value.
+        cookies: Optional[List[str]]
+            Optionally set cookies
         """
         self.status_code = status_code
         self.body = body
         self.base64_encoded = False
         self.headers: Dict = headers or {}
+        self.cookies = cookies
         if content_type:
             self.headers.setdefault("Content-Type", content_type)
 
@@ -220,12 +224,21 @@ class ResponseBuilder:
             logger.debug("Encoding bytes response with base64")
             self.response.base64_encoded = True
             self.response.body = base64.b64encode(self.response.body).decode()
-        return {
+
+        response = {
             "statusCode": self.response.status_code,
             "headers": self.response.headers,
             "body": self.response.body,
             "isBase64Encoded": self.response.base64_encoded,
         }
+
+        if self.response.cookies:
+            if isinstance(event, APIGatewayProxyEventV2):
+                response["cookies"] = self.response.cookies
+            else:
+                response["multiValueHeaders"] = {"Set-Cookie": self.response.cookies}
+
+        return response
 
 
 class BaseRouter(ABC):
