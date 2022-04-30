@@ -1276,17 +1276,24 @@ def test_api_gateway_http_cookie():
     assert result["cookies"] == ["key=value"]
 
 
-def test_api_gateway_rest_cookie():
-    # GIVEN
-    app = APIGatewayRestResolver()
+@pytest.mark.parametrize(
+    "app",
+    [
+        pytest.param(APIGatewayRestResolver(), id="rest handler"),
+        pytest.param(ALBResolver(), id="alb handler"),
+    ],
+)
+def test_api_gateway_rest_cookie(app: ApiGatewayResolver):
+    # GIVEN APIGatewayRestResolver or ALBResolver
 
     @app.get("/my/path")
     def get_lambda() -> Response:
         return Response(200, content_types.TEXT_PLAIN, "Test", cookies=["foo=bar"])
 
-    # WHEN
+    # WHEN calling handler
+    # AND setting Response 'cookies'
     result = app(LOAD_GW_EVENT, {})
 
-    # THEN
+    # THEN include 'Set-Cookie' in the result
     assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
     assert result["multiValueHeaders"]["Set-Cookie"] == ["foo=bar"]

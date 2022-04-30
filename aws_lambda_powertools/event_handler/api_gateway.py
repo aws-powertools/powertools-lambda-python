@@ -27,7 +27,7 @@ _DYNAMIC_ROUTE_PATTERN = r"(<\w+>)"
 _SAFE_URI = "-._~()'!*:@,;"  # https://www.ietf.org/rfc/rfc3986.txt
 # API GW/ALB decode non-safe URI chars; we must support them too
 _UNSAFE_URI = "%<> \[\]{}|^"  # noqa: W605
-_NAMED_GROUP_BOUNDARY_PATTERN = fr"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
+_NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 
 
 class ProxyEventType(Enum):
@@ -224,21 +224,18 @@ class ResponseBuilder:
             logger.debug("Encoding bytes response with base64")
             self.response.base64_encoded = True
             self.response.body = base64.b64encode(self.response.body).decode()
-
-        response = {
+        resp = {
             "statusCode": self.response.status_code,
             "headers": self.response.headers,
             "body": self.response.body,
             "isBase64Encoded": self.response.base64_encoded,
         }
-
         if self.response.cookies:
             if isinstance(event, APIGatewayProxyEventV2):
-                response["cookies"] = self.response.cookies
+                resp["cookies"] = self.response.cookies
             else:
-                response["multiValueHeaders"] = {"Set-Cookie": self.response.cookies}
-
-        return response
+                resp["multiValueHeaders"] = {"Set-Cookie": self.response.cookies}
+        return resp
 
 
 class BaseRouter(ABC):
