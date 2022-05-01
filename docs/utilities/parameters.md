@@ -482,7 +482,7 @@ Here is the mapping between this utility's functions and methods and the underly
 
 ### Customizing boto configuration
 
-The **`config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html) when constructing any of the built-in provider classes.
+The **`config`** , **`boto3_session`**, and **`boto3_client`**  parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) , [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html), or  a [boto3 client](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/boto3.html) when constructing any of the built-in provider classes.
 
 ???+ tip
 	You can use a custom session for retrieving parameters cross-account/region and for snapshot testing.
@@ -509,6 +509,20 @@ The **`config`** and **`boto3_session`** parameters enable you to pass in a cust
 
 	boto_config = Config()
 	ssm_provider = parameters.SSMProvider(config=boto_config)
+
+	def handler(event, context):
+		# Retrieve a single parameter
+		value = ssm_provider.get("/my/parameter")
+		...
+	```
+=== "Custom client"
+
+	```python hl_lines="2 4 5"
+	from aws_lambda_powertools.utilities import parameters
+	import boto3
+
+	boto3_client= session.client(service_name="ssm", endpoint_url='custom_endpoint')
+	ssm_provider = parameters.SSMProvider(boto3_client=boto3_client)
 
 	def handler(event, context):
 		# Retrieve a single parameter
