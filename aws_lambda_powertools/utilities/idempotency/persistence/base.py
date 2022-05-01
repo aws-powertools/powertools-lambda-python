@@ -40,6 +40,7 @@ class DataRecord:
         idempotency_key,
         status: str = "",
         expiry_timestamp: Optional[int] = None,
+        function_timeout: Optional[int] = None,
         response_data: Optional[str] = "",
         payload_hash: Optional[str] = None,
     ) -> None:
@@ -61,6 +62,7 @@ class DataRecord:
         self.idempotency_key = idempotency_key
         self.payload_hash = payload_hash
         self.expiry_timestamp = expiry_timestamp
+        self.function_timeout = function_timeout
         self._status = status
         self.response_data = response_data
 
@@ -120,6 +122,7 @@ class BasePersistenceLayer(ABC):
         self.validation_key_jmespath = None
         self.raise_on_no_idempotency_key = False
         self.expires_after_seconds: int = 60 * 60  # 1 hour default
+        self.function_timeout_clean_up = False
         self.use_local_cache = False
         self.hash_function = None
 
@@ -152,6 +155,7 @@ class BasePersistenceLayer(ABC):
             self.payload_validation_enabled = True
         self.raise_on_no_idempotency_key = config.raise_on_no_idempotency_key
         self.expires_after_seconds = config.expires_after_seconds
+        self.function_timeout_clean_up = config.function_timeout_clean_up
         self.use_local_cache = config.use_local_cache
         if self.use_local_cache:
             self._cache = LRUDict(max_items=config.local_cache_max_items)
@@ -258,8 +262,20 @@ class BasePersistenceLayer(ABC):
             unix timestamp of expiry date for idempotency record
 
         """
+        return self._get_timestamp_after_seconds(self.expires_after_seconds)
+
+    @staticmethod
+    def _get_timestamp_after_seconds(seconds: int) -> int:
+        """
+
+        Returns
+        -------
+        int
+            unix timestamp after the specified seconds
+
+        """
         now = datetime.datetime.now()
-        period = datetime.timedelta(seconds=self.expires_after_seconds)
+        period = datetime.timedelta(seconds=seconds)
         return int((now + period).timestamp())
 
     def _save_to_cache(self, data_record: DataRecord):
@@ -317,6 +333,7 @@ class BasePersistenceLayer(ABC):
             idempotency_key=self._get_hashed_idempotency_key(data=data),
             status=STATUS_CONSTANTS["COMPLETED"],
             expiry_timestamp=self._get_expiry_timestamp(),
+            function_timeout=None,
             response_data=response_data,
             payload_hash=self._get_hashed_payload(data=data),
         )
@@ -328,7 +345,7 @@ class BasePersistenceLayer(ABC):
 
         self._save_to_cache(data_record=data_record)
 
-    def save_inprogress(self, data: Dict[str, Any]) -> None:
+    def save_inprogress(self, data: Dict[str, Any], function_timeout: Optional[int] = None) -> None:
         """
         Save record of function's execution being in progress
 
@@ -336,11 +353,18 @@ class BasePersistenceLayer(ABC):
         ----------
         data: Dict[str, Any]
             Payload
+        function_timeout: int, optional
         """
+        function_timeout = (
+            self._get_timestamp_after_seconds(function_timeout)
+            if function_timeout and self.function_timeout_clean_up
+            else None
+        )
         data_record = DataRecord(
             idempotency_key=self._get_hashed_idempotency_key(data=data),
             status=STATUS_CONSTANTS["INPROGRESS"],
             expiry_timestamp=self._get_expiry_timestamp(),
+            function_timeout=function_timeout,
             payload_hash=self._get_hashed_payload(data=data),
         )
 

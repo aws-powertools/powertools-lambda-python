@@ -16,10 +16,15 @@ def build_idempotency_put_item_stub(
 ) -> Dict:
     idempotency_key_hash = f"{function_name}.{handler_name}#{hash_idempotency_key(data)}"
     return {
-        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now",
-        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration"},
+        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now OR #function_timeout < :now",
+        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration", "#function_timeout": "function_timeout"},
         "ExpressionAttributeValues": {":now": stub.ANY},
-        "Item": {"expiration": stub.ANY, "id": idempotency_key_hash, "status": "INPROGRESS"},
+        "Item": {
+            "expiration": stub.ANY,
+            "id": idempotency_key_hash,
+            "status": "INPROGRESS",
+            "function_timeout": None,
+        },
         "TableName": "TEST_TABLE",
     }
 

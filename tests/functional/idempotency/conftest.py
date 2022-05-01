@@ -1,6 +1,5 @@
 import datetime
 import json
-from collections import namedtuple
 from decimal import Decimal
 from unittest import mock
 
@@ -32,14 +31,19 @@ def lambda_apigw_event():
 
 @pytest.fixture
 def lambda_context():
-    lambda_context = {
-        "function_name": "test-func",
-        "memory_limit_in_mb": 128,
-        "invoked_function_arn": "arn:aws:lambda:eu-west-1:809313241234:function:test-func",
-        "aws_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
-    }
+    class LambdaContext:
+        def __init__(self):
+            self.function_name = "test-func"
+            self.memory_limit_in_mb = 128
+            self.invoked_function_arn = "arn:aws:lambda:eu-west-1:809313241234:function:test-func"
+            self.aws_request_id = "52fdfc07-2182-154f-163f-5f0f9a621d72"
 
-    return namedtuple("LambdaContext", lambda_context.keys())(*lambda_context.values())
+        @staticmethod
+        def get_remaining_time_in_millis() -> int:
+            """Returns the number of milliseconds left before the execution times out."""
+            return 0
+
+    return LambdaContext()
 
 
 @pytest.fixture
@@ -117,10 +121,15 @@ def expected_params_update_item_with_validation(
 @pytest.fixture
 def expected_params_put_item(hashed_idempotency_key):
     return {
-        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now",
-        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration"},
+        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now OR #function_timeout < :now",
+        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration", "#function_timeout": "function_timeout"},
         "ExpressionAttributeValues": {":now": stub.ANY},
-        "Item": {"expiration": stub.ANY, "id": hashed_idempotency_key, "status": "INPROGRESS"},
+        "Item": {
+            "expiration": stub.ANY,
+            "id": hashed_idempotency_key,
+            "status": "INPROGRESS",
+            "function_timeout": None,
+        },
         "TableName": "TEST_TABLE",
     }
 
@@ -128,14 +137,15 @@ def expected_params_put_item(hashed_idempotency_key):
 @pytest.fixture
 def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_validation_key):
     return {
-        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now",
-        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration"},
+        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now OR #function_timeout < :now",
+        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration", "#function_timeout": "function_timeout"},
         "ExpressionAttributeValues": {":now": stub.ANY},
         "Item": {
             "expiration": stub.ANY,
             "id": hashed_idempotency_key,
             "status": "INPROGRESS",
             "validation": hashed_validation_key,
+            "function_timeout": None,
         },
         "TableName": "TEST_TABLE",
     }

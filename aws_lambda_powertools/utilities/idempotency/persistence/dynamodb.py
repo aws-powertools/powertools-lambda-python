@@ -25,6 +25,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         static_pk_value: Optional[str] = None,
         sort_key_attr: Optional[str] = None,
         expiry_attr: str = "expiration",
+        function_timeout_attr: str = "function_timeout",
         status_attr: str = "status",
         data_attr: str = "data",
         validation_key_attr: str = "validation",
@@ -85,6 +86,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         self.static_pk_value = static_pk_value
         self.sort_key_attr = sort_key_attr
         self.expiry_attr = expiry_attr
+        self.function_timeout_attr = function_timeout_attr
         self.status_attr = status_attr
         self.data_attr = data_attr
         self.validation_key_attr = validation_key_attr
@@ -150,6 +152,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         item = {
             **self._get_key(data_record.idempotency_key),
             self.expiry_attr: data_record.expiry_timestamp,
+            self.function_timeout_attr: data_record.function_timeout,
             self.status_attr: data_record.status,
         }
 
@@ -161,8 +164,12 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             logger.debug(f"Putting record for idempotency key: {data_record.idempotency_key}")
             self.table.put_item(
                 Item=item,
-                ConditionExpression="attribute_not_exists(#id) OR #now < :now",
-                ExpressionAttributeNames={"#id": self.key_attr, "#now": self.expiry_attr},
+                ConditionExpression="attribute_not_exists(#id) OR #now < :now OR #function_timeout < :now",
+                ExpressionAttributeNames={
+                    "#id": self.key_attr,
+                    "#now": self.expiry_attr,
+                    "#function_timeout": self.function_timeout_attr,
+                },
                 ExpressionAttributeValues={":now": int(now.timestamp())},
             )
         except self.table.meta.client.exceptions.ConditionalCheckFailedException:

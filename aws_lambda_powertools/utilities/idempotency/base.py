@@ -101,7 +101,10 @@ class IdempotencyHandler:
         try:
             # We call save_inprogress first as an optimization for the most common case where no idempotent record
             # already exists. If it succeeds, there's no need to call get_record.
-            self.persistence_store.save_inprogress(data=self.data)
+            self.persistence_store.save_inprogress(
+                data=self.data,
+                function_timeout=self._get_remaining_time_in_seconds(),
+            )
         except IdempotencyKeyError:
             raise
         except IdempotencyItemAlreadyExistsError:
@@ -112,6 +115,11 @@ class IdempotencyHandler:
             raise IdempotencyPersistenceLayerError("Failed to save in progress record to idempotency store") from exc
 
         return self._get_function_response()
+
+    def _get_remaining_time_in_seconds(self) -> Optional[int]:
+        if self.fn_args and len(self.fn_args) == 2 and getattr(self.fn_args[1], "get_remaining_time_in_millis", None):
+            return self.fn_args[1].get_remaining_time_in_millis() / 1000
+        return None
 
     def _get_idempotency_record(self) -> DataRecord:
         """

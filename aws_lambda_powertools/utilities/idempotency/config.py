@@ -9,6 +9,7 @@ class IdempotencyConfig:
         jmespath_options: Optional[Dict] = None,
         raise_on_no_idempotency_key: bool = False,
         expires_after_seconds: int = 60 * 60,  # 1 hour default
+        function_timeout_clean_up: bool = False,
         use_local_cache: bool = False,
         local_cache_max_items: int = 256,
         hash_function: str = "md5",
@@ -26,6 +27,8 @@ class IdempotencyConfig:
             Raise exception if no idempotency key was found in the request, by default False
         expires_after_seconds: int
             The number of seconds to wait before a record is expired
+        function_timeout_clean_up: bool
+            Whether to clean up in progress record after a function timeouts
         use_local_cache: bool, optional
             Whether to locally cache idempotency results, by default False
         local_cache_max_items: int, optional
@@ -38,6 +41,7 @@ class IdempotencyConfig:
         self.jmespath_options = jmespath_options
         self.raise_on_no_idempotency_key = raise_on_no_idempotency_key
         self.expires_after_seconds = expires_after_seconds
+        self.function_timeout_clean_up = function_timeout_clean_up
         self.use_local_cache = use_local_cache
         self.local_cache_max_items = local_cache_max_items
         self.hash_function = hash_function
