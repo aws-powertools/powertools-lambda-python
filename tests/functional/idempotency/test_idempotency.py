@@ -1256,3 +1256,47 @@ def test_idempotent_lambda_compound_already_completed(
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
+
+
+def test_idempotent_lambda_cleanup(
+    persistence_store: DynamoDBPersistenceLayer,
+    hashed_idempotency_key,
+    lambda_apigw_event,
+    expected_params_update_item,
+    lambda_response,
+    lambda_context,
+):
+    # GIVEN
+    idempotency_config = IdempotencyConfig(
+        function_timeout_clean_up=True,
+        event_key_jmespath="[body, queryStringParameters]",
+    )
+
+    stubber = stub.Stubber(persistence_store.table.meta.client)
+    expected_params_put_item = {
+        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now OR #function_timeout < :now",
+        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration", "#function_timeout": "function_timeout"},
+        "ExpressionAttributeValues": {":now": stub.ANY},
+        "Item": {
+            "expiration": stub.ANY,
+            "id": hashed_idempotency_key,
+            "status": "INPROGRESS",
+            "function_timeout": stub.ANY,
+        },
+        "TableName": "TEST_TABLE",
+    }
+    ddb_response = {}
+    stubber.add_response("put_item", ddb_response, expected_params_put_item)
+    stubber.add_response("update_item", ddb_response, expected_params_update_item)
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    # WHEN
+    lambda_handler(lambda_apigw_event, lambda_context)
+
+    # THEN
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()

@@ -28,7 +28,7 @@ class IdempotencyConfig:
         expires_after_seconds: int
             The number of seconds to wait before a record is expired
         function_timeout_clean_up: bool
-            Whether to clean up in progress record after a function timeouts
+            Whether to clean up "INPROGRESS" record after a function has timed out
         use_local_cache: bool, optional
             Whether to locally cache idempotency results, by default False
         local_cache_max_items: int, optional

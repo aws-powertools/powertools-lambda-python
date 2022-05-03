@@ -41,7 +41,7 @@ def lambda_context():
         @staticmethod
         def get_remaining_time_in_millis() -> int:
             """Returns the number of milliseconds left before the execution times out."""
-            return 0
+            return 3000
 
     return LambdaContext()
 
