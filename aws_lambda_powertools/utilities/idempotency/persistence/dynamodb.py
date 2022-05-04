@@ -135,6 +135,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             idempotency_key=item[self.key_attr],
             status=item[self.status_attr],
             expiry_timestamp=item[self.expiry_attr],
+            function_timeout=item.get(self.function_timeout_attr),
             response_data=item.get(self.data_attr),
             payload_hash=item.get(self.validation_key_attr),
         )
@@ -178,15 +179,20 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
     def _update_record(self, data_record: DataRecord):
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
-        update_expression = "SET #response_data = :response_data, #expiry = :expiry, #status = :status"
+        update_expression = (
+            "SET #response_data = :response_data, #expiry = :expiry, "
+            "#function_timeout = :function_timeout, #status = :status"
+        )
         expression_attr_values = {
             ":expiry": data_record.expiry_timestamp,
+            ":function_timeout": data_record.function_timeout,
             ":response_data": data_record.response_data,
             ":status": data_record.status,
         }
         expression_attr_names = {
             "#response_data": self.data_attr,
             "#expiry": self.expiry_attr,
+            "#function_timeout": self.function_timeout_attr,
             "#status": self.status_attr,
         }
 

@@ -81,15 +81,22 @@ def default_jmespath():
 @pytest.fixture
 def expected_params_update_item(serialized_lambda_response, hashed_idempotency_key):
     return {
-        "ExpressionAttributeNames": {"#expiry": "expiration", "#response_data": "data", "#status": "status"},
+        "ExpressionAttributeNames": {
+            "#expiry": "expiration",
+            "#function_timeout": "function_timeout",
+            "#response_data": "data",
+            "#status": "status",
+        },
         "ExpressionAttributeValues": {
             ":expiry": stub.ANY,
+            ":function_timeout": None,
             ":response_data": serialized_lambda_response,
             ":status": "COMPLETED",
         },
         "Key": {"id": hashed_idempotency_key},
         "TableName": "TEST_TABLE",
-        "UpdateExpression": "SET #response_data = :response_data, " "#expiry = :expiry, #status = :status",
+        "UpdateExpression": "SET #response_data = :response_data, "
+        "#expiry = :expiry, #function_timeout = :function_timeout, #status = :status",
     }
 
 
@@ -100,12 +107,14 @@ def expected_params_update_item_with_validation(
     return {
         "ExpressionAttributeNames": {
             "#expiry": "expiration",
+            "#function_timeout": "function_timeout",
             "#response_data": "data",
             "#status": "status",
             "#validation_key": "validation",
         },
         "ExpressionAttributeValues": {
             ":expiry": stub.ANY,
+            ":function_timeout": None,
             ":response_data": serialized_lambda_response,
             ":status": "COMPLETED",
             ":validation_key": hashed_validation_key,
@@ -113,7 +122,7 @@ def expected_params_update_item_with_validation(
         "Key": {"id": hashed_idempotency_key},
         "TableName": "TEST_TABLE",
         "UpdateExpression": "SET #response_data = :response_data, "
-        "#expiry = :expiry, #status = :status, "
+        "#expiry = :expiry, #function_timeout = :function_timeout, #status = :status, "
         "#validation_key = :validation_key",
     }
 

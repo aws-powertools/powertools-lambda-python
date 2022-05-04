@@ -38,13 +38,20 @@ def build_idempotency_update_item_stub(
     idempotency_key_hash = f"{function_name}.{handler_name}#{hash_idempotency_key(data)}"
     serialized_lambda_response = json_serialize(handler_response)
     return {
-        "ExpressionAttributeNames": {"#expiry": "expiration", "#response_data": "data", "#status": "status"},
+        "ExpressionAttributeNames": {
+            "#expiry": "expiration",
+            "#function_timeout": "function_timeout",
+            "#response_data": "data",
+            "#status": "status",
+        },
         "ExpressionAttributeValues": {
             ":expiry": stub.ANY,
+            ":function_timeout": None,
             ":response_data": serialized_lambda_response,
             ":status": "COMPLETED",
         },
         "Key": {"id": idempotency_key_hash},
         "TableName": "TEST_TABLE",
-        "UpdateExpression": "SET #response_data = :response_data, " "#expiry = :expiry, #status = :status",
+        "UpdateExpression": "SET #response_data = :response_data, "
+        "#expiry = :expiry, #function_timeout = :function_timeout, #status = :status",
     }
