@@ -103,7 +103,7 @@ class IdempotencyHandler:
             # already exists. If it succeeds, there's no need to call get_record.
             self.persistence_store.save_inprogress(
                 data=self.data,
-                function_timeout=self._get_remaining_time_in_seconds(),
+                remaining_time_in_seconds=self._get_remaining_time_in_seconds(),
             )
         except IdempotencyKeyError:
             raise
@@ -117,6 +117,9 @@ class IdempotencyHandler:
         return self._get_function_response()
 
     def _get_remaining_time_in_seconds(self) -> Optional[int]:
+        """
+        Try to get the time remaining in seconds from the lambda context
+        """
         if self.fn_args and len(self.fn_args) == 2 and getattr(self.fn_args[1], "get_remaining_time_in_millis", None):
             return self.fn_args[1].get_remaining_time_in_millis() / 1000
         return None

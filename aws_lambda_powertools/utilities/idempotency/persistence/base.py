@@ -54,6 +54,8 @@ class DataRecord:
             status of the idempotent record
         expiry_timestamp: int, optional
             time before the record should expire, in seconds
+        function_timeout: int, optional
+            time before the function should time out, in seconds
         payload_hash: str, optional
             hashed representation of payload
         response_data: str, optional
@@ -345,7 +347,7 @@ class BasePersistenceLayer(ABC):
 
         self._save_to_cache(data_record=data_record)
 
-    def save_inprogress(self, data: Dict[str, Any], function_timeout: Optional[int] = None) -> None:
+    def save_inprogress(self, data: Dict[str, Any], remaining_time_in_seconds: Optional[int] = None) -> None:
         """
         Save record of function's execution being in progress
 
@@ -353,11 +355,12 @@ class BasePersistenceLayer(ABC):
         ----------
         data: Dict[str, Any]
             Payload
-        function_timeout: int, optional
+        remaining_time_in_seconds: int, optional
+            Function remaining time in seconds
         """
         function_timeout = (
-            self._get_timestamp_after_seconds(function_timeout)
-            if function_timeout and self.function_timeout_clean_up
+            self._get_timestamp_after_seconds(remaining_time_in_seconds)
+            if remaining_time_in_seconds and self.function_timeout_clean_up
             else None
         )
         data_record = DataRecord(
