@@ -8,6 +8,7 @@ dev:
 	pip install --upgrade pip pre-commit poetry
 	poetry install --extras "pydantic"
 	pre-commit install
+	npm install -g aws-cdk
 
 format:
 	poetry run isort aws_lambda_powertools tests
@@ -17,14 +18,17 @@ lint: format
 	poetry run flake8 aws_lambda_powertools/* tests/*
 
 test:
-	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=xml
+	poetry run pytest -m "not (perf or e2e)" --cov=aws_lambda_powertools --cov-report=xml
 	poetry run pytest --cache-clear tests/performance
 
 unit-test:
 	poetry run pytest tests/unit
 
+e2e-test:
+	poetry run pytest -n 3 --dist loadscope -rP --durations=0 --durations-min=1 tests/e2e
+
 coverage-html:
-	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=html
+	poetry run pytest -m "not (perf or e2e)" --cov=aws_lambda_powertools --cov-report=html
 
 pre-commit:
 	pre-commit run --show-diff-on-failure

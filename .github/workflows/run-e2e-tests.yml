@@ -1,0 +1,38 @@
+name: run-e2e-tests
+on:
+  workflow_dispatch: {}
+env:
+  AWS_DEFAULT_REGION: us-east-1
+  E2E_TESTS_PATH: tests/e2e/
+jobs:
+  run:
+    #########################
+    # Force Github action to run only a single job at a time (based on the group name)
+    # This is to prevent "race-condition" in building e2e tests infrastructure
+    #########################
+    concurrency:
+      group: e2e-tests
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # needed to interact with GitHub's OIDC Token endpoint.
+      contents: read
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      #########################
+      # Release new version
+      #########################
+      - name: "Use Python 3"
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.x" # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: "x64" # optional x64 or x86. Defaults to x64 if not specified
+      - name: Install dependencies
+        run: make dev
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.6.1
+        with:
+          role-to-assume: ${{ secrets.E2E_DEPLOYMENT_ROLE_ARN }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+      - name: Test
+        run: make e2e-test
