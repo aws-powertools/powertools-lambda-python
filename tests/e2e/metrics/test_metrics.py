@@ -20,9 +20,12 @@ def config():
 
 
 @pytest.fixture(scope="module")
-def deploy_basic_lambda(deploy_infrastructure, config):
-    lambda_arn = deploy_infrastructure(
-        handler_filename=f"{dirname}/handlers/basic_handler.py",
+def deploy_lambdas(deploy, config):
+    handlers_dir = f"{dirname}/handlers/"
+
+    lambda_arn = deploy(
+        handlers_name=utils.find_handlers(handlers_dir),
+        handlers_dir=handlers_dir,
         environment_variables=config,
     )
     start_date = datetime.datetime.now(datetime.timezone.utc)
@@ -32,8 +35,8 @@ def deploy_basic_lambda(deploy_infrastructure, config):
 
 
 @pytest.mark.e2e
-def test_basic_lambda_metric_visible(deploy_basic_lambda, config):
-    start_date = deploy_basic_lambda
+def test_basic_lambda_metric_visible(deploy_lambdas, config):
+    start_date = deploy_lambdas
     end_date = start_date + datetime.timedelta(minutes=5)
 
     metrics = utils.get_metrics(

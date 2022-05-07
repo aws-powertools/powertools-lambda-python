@@ -1,4 +1,8 @@
+import io
 import json
+import os
+import zipfile
+from pathlib import Path
 from typing import Any, Optional, Union
 
 import boto3
@@ -41,6 +45,17 @@ def trigger_lambda(lambda_arn):
     lambda_client = boto3.client("lambda")
     response = lambda_client.invoke(FunctionName=lambda_arn, InvocationType="RequestResponse")
     return response
+
+
+def find_handlers(directory):
+    handlers = []
+    for _, _, files in os.walk(directory):
+        for file in files:
+            if file.endswith(".py"):
+                filename = Path(file).stem
+                handlers.append(filename)
+    print("handlers", handlers)
+    return handlers
 
 
 @retry(ValueError, delay=1, jitter=1, tries=5)
@@ -92,3 +107,53 @@ def get_traces(lambda_function_name: str, xray_client, start_date, end_date):
     )
 
     return trace_details
+
+
+def get_all_file_paths(directory):
+    file_paths = []
+    for root, directories, files in os.walk(directory):
+        for filename in files:
+            file_paths.append(os.path.join(root, filename))
+    return file_paths
+
+
+def upload_assets(template, asset_root_dir):
+    s3_client = boto3.client("s3")
+    s3_resource = boto3.resource("s3")
+    account_id = boto3.client("sts").get_caller_identity()["Account"]
+    region = boto3.Session().region_name
+    assets = find_assets(template, account_id, region)
+
+    for s3_key, bucket in assets.items():
+        s3_bucket = s3_resource.Bucket(bucket)
+        if bool(list(s3_bucket.objects.filter(Prefix=s3_key))):
+            print("object exists, skipping")
+            continue
+
+        buf = io.BytesIO()
+        asset_dir = f"{asset_root_dir}/asset.{Path(s3_key).with_suffix('')}"
+        os.chdir(asset_dir)
+        files = get_all_file_paths(directory=".")
+        with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            for file in files:
+                zf.write(os.path.join(file))
+        buf.seek(0)
+        s3_client.upload_fileobj(Fileobj=buf, Bucket=bucket, Key=s3_key)
+
+
+def find_assets(template, account_id, region):
+    assets = {}
+    for name, resource in template["Resources"].items():
+        bucket = None
+        S3Key = None
+
+        if resource["Properties"].get("Code"):
+            bucket = resource["Properties"]["Code"]["S3Bucket"]
+            S3Key = resource["Properties"]["Code"]["S3Key"]
+        elif resource["Properties"].get("Content"):
+            bucket = resource["Properties"]["Content"]["S3Bucket"]
+            S3Key = resource["Properties"]["Content"]["S3Key"]
+        if S3Key and bucket:
+            assets[S3Key] = bucket["Fn::Sub"].replace("${AWS::AccountId}", account_id).replace("${AWS::Region}", region)
+
+        return assets

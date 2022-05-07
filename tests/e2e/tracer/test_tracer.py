@@ -17,9 +17,13 @@ def config():
 
 
 @pytest.fixture(scope="module")
-def deploy_basic_lambda(deploy_infrastructure, config):
-    lambda_arn = deploy_infrastructure(
-        handler_filename=f"{dirname}/handlers/basic_handler.py", environment_variables=config, tracing="ACTIVE"
+def deploy_lambdas(deploy, config):
+    handlers_dir = f"{dirname}/handlers/"
+
+    lambda_arn = deploy(
+        handlers_name=utils.find_handlers(handlers_dir),
+        handlers_dir=handlers_dir,
+        environment_variables=config,
     )
     start_date = datetime.datetime.utcnow()
     result = utils.trigger_lambda(lambda_arn=lambda_arn)
@@ -28,14 +32,14 @@ def deploy_basic_lambda(deploy_infrastructure, config):
 
 
 @pytest.mark.e2e
-def test_basic_lambda_trace_visible(deploy_basic_lambda, config):
-    start_date = deploy_basic_lambda[1]
+def test_basic_lambda_trace_visible(deploy_lambdas, config):
+    start_date = deploy_lambdas[1]
     end_date = start_date + datetime.timedelta(minutes=5)
 
     trace = utils.get_traces(
         start_date=start_date,
         end_date=end_date,
-        lambda_function_name=deploy_basic_lambda[0].split(":")[-1],
+        lambda_function_name=deploy_lambdas[0].split(":")[-1],
         xray_client=boto3.client("xray"),
     )
 
