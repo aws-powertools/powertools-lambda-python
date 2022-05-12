@@ -380,7 +380,7 @@ class BatchProcessor(BasePartialProcessor):
 
         if self._entire_batch_failed():
             raise BatchProcessingError(
-                msg=f"All records failed processing. {len(self.exceptions)} individual errors logged"
+                msg=f"All records failed processing. {len(self.exceptions)} individual errors logged "
                 f"separately below.",
                 child_exceptions=self.exceptions,
             )
