@@ -116,7 +116,7 @@ class BasePartialProcessor(ABC):
         Parameters
         ----------
         record: Any
-            record that failed processing
+            record that succeeded processing
         result: Any
             result from record handler
 
