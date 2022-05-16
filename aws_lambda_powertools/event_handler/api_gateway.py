@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 _DYNAMIC_ROUTE_PATTERN = r"(<\w+>)"
 _SAFE_URI = "-._~()'!*:@,;"  # https://www.ietf.org/rfc/rfc3986.txt
 # API GW/ALB decode non-safe URI chars; we must support them too
-_UNSAFE_URI = "%<>\[\]{}|^"  # noqa: W605
+_UNSAFE_URI = "%<> \[\]{}|^"  # noqa: W605
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 
 
@@ -509,6 +509,11 @@ class ApiGatewayResolver(BaseRouter):
         dict
             Returns the dict response
         """
+        if isinstance(event, BaseProxyEvent):
+            warnings.warn(
+                "You don't need to serialize event to Event Source Data Class when using Event Handler; see issue #1152"
+            )
+            event = event.raw_event
         if self._debug:
             print(self._json_dump(event), end="")
         BaseRouter.current_event = self._to_proxy_event(event)
@@ -674,17 +679,24 @@ class ApiGatewayResolver(BaseRouter):
     def _call_exception_handler(self, exp: Exception, route: Route) -> Optional[ResponseBuilder]:
         handler = self._lookup_exception_handler(type(exp))
         if handler:
-            return ResponseBuilder(handler(exp), route=route, current_event=self.current_event)
+            try:
+                return ResponseBuilder(
+                    handler(exp),
+                    route=route,
+                    current_event=self.current_event,
+                )
+            except ServiceError as service_error:
+                exp = service_error
 
         if isinstance(exp, ServiceError):
             return ResponseBuilder(
-                Response(
+                response=Response(
                     status_code=exp.status_code,
                     content_type=content_types.APPLICATION_JSON,
                     body=self._json_dump({"statusCode": exp.status_code, "message": exp.msg}),
                 ),
-                route,
-                self.current_event,
+                route=route,
+                current_event=self.current_event,
             )
 
         return None
