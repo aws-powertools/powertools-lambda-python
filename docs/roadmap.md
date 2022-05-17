@@ -50,6 +50,7 @@ Our end-to-end mechanism follows four major steps:
 * **Implementation**. For approved features, maintainers will build a prototype and invite customers for feedback in the original request. Alternatively, maintainers will proactively use the [help wanted](https://github.com/awslabs/aws-lambda-powertools-python/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22help+wanted%22){target="_blank"} tag to signal contributions are welcome to accelerate development.
 * **Implementation**. For approved features, maintainers will build a prototype for early feedback, or use [`help wanted`](https://github.com/awslabs/aws-lambda-powertools-python/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22help+wanted%22){target="_blank"} label welcoming contributions to accelerate development.
 
+???+ info "Bug reports, documentation improvements, etc. are not covered by this process. See Maintainers process instead (coming soon)."
 
 ## Themes
 
