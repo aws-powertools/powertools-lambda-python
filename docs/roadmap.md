@@ -6,6 +6,32 @@ This is our public roadmap that outlines the high level direction we are working
 
 [See our latest list of activities »](https://github.com/orgs/awslabs/projects/51/views/1?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}
 
+## Themes
+
+Themes are key activities maintainers are focusing on, besides bug reports. These are updated periodically and you can find the latest [under Epics in our public board](https://github.com/orgs/awslabs/projects/51/views/11?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}.
+
+### Lambda Layers migration
+
+We are migrating our Lambda Layers internal release pipeline towards an AWS CodePipeline based system. This will allow us to more rapidly adopt additional regions, custom builds, and decrease our rollout time to all commercial regions.
+
+### End-to-end testing
+
+We are working on a framework to selectively run end-to-end tests as part of Pull Requests and upon merge. This will increase our confidence in detecting regressions early, and also explore ideas for utilities that can make testing easier for customers.
+
+### Python 3.6 deprecation
+
+We will remove support for Python 3.6 after July 18th, following AWS Lambda [deprecation notice for Python 3.6 runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html#runtime-support-policy){target="_blank"}. We will monitor the deprecation notice in the event of any extension.
+
+### Reduce release operational overhead
+
+We are working on a consistent label and automation strategy across all Lambda Powertools projects ([Java](https://awslabs.github.io/aws-lambda-powertools-java/){target="_blank"}, [TypeScript](https://awslabs.github.io/aws-lambda-powertools-typescript/latest/){target="_blank"}). This will be our baseline to automate areas where we don't need human intervention, and reduce our manual effort to areas where clear communication is crucial.
+
+### Revamp roadmap
+
+We are beta testing the [new GitHub Projects Beta](https://github.com/orgs/awslabs/projects/51/views/1?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"} to provide more visibility on our current activities. This also includes new GitHub Issue Forms Beta to streamline feature requests, bug reports, RFCs, etc., including a new mechanism to add external links like `Ask a Question`.
+
+Once complete, we will repurpose our [central roadmap repository](https://github.com/awslabs/aws-lambda-powertools-roadmap){target="_blank"} to provide a landing page for all Powertools languages, including an experiment to better highlight feature parity across them.
+
 ## Roadmap status definition
 
 <center>
@@ -51,32 +77,6 @@ Our end-to-end mechanism follows four major steps:
 * **Implementation**. For approved features, maintainers will build a prototype for early feedback, or use [`help wanted`](https://github.com/awslabs/aws-lambda-powertools-python/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22help+wanted%22){target="_blank"} label welcoming contributions to accelerate development.
 
 ???+ info "Bug reports, documentation improvements, etc. are not covered by this process. See Maintainers process instead (coming soon)."
-
-## Themes
-
-Themes are key activities maintainers are focusing on, besides bug reports. These are updated periodically and you can find the latest [under Epics in our public board](https://github.com/orgs/awslabs/projects/51/views/11?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}.
-
-### Lambda Layers migration
-
-We are migrating our Lambda Layers internal release pipeline towards an AWS CodePipeline based system. This will allow us to more rapidly adopt additional regions, custom builds, and decrease our rollout time to all commercial regions.
-
-### End-to-end testing
-
-We are working on a framework to selectively run end-to-end tests as part of Pull Requests and upon merge. This will increase our confidence in detecting regressions early, and also explore ideas for utilities that can make testing easier for customers.
-
-### Python 3.6 deprecation
-
-We will remove support for Python 3.6 after July 18th, following AWS Lambda [deprecation notice for Python 3.6 runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html#runtime-support-policy){target="_blank"}. We will monitor the deprecation notice in the event of any extension.
-
-### Reduce release operational overhead
-
-We are working on a consistent label and automation strategy across all Lambda Powertools projects ([Java](https://awslabs.github.io/aws-lambda-powertools-java/){target="_blank"}, [TypeScript](https://awslabs.github.io/aws-lambda-powertools-typescript/latest/){target="_blank"}). This will be our baseline to automate areas where we don't need human intervention, and reduce our manual effort to areas where clear communication is crucial.
-
-### Revamp roadmap
-
-We are beta testing the [new GitHub Projects Beta](https://github.com/orgs/awslabs/projects/51/views/1?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"} to provide more visibility on our current activities. This also includes new GitHub Issue Forms Beta to streamline feature requests, bug reports, RFCs, etc., including a new mechanism to add external links like `Ask a Question`.
-
-Once complete, we will repurpose our [central roadmap repository](https://github.com/awslabs/aws-lambda-powertools-roadmap){target="_blank"} to provide a landing page for all Powertools languages, including an experiment to better highlight feature parity across them.
 
 
 ## Disclaimer
