@@ -47,9 +47,7 @@ With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip insta
 * Powertools idea [DAZN Powertools](https://github.com/getndazn/dazn-lambda-powertools/)
 
 ## Connect
-
-* **AWS Developers Slack**: `#lambda-powertools` - **[Invite, if you don't have an account](https://join.slack.com/t/awsdevelopers/shared_invite/zt-yryddays-C9fkWrmguDv0h2EEDzCqvw)**
-* **Email**: aws-lambda-powertools-feedback@amazon.com
+**Email**: aws-lambda-powertools-feedback@amazon.com
 
 ## Security disclosures
 
