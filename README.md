@@ -1,4 +1,4 @@
-# AWS Lambda Powertools (Python)
+# AWS Lambda Powertools for Python
 
 ![Build](https://github.com/awslabs/aws-lambda-powertools/workflows/Powertools%20Python/badge.svg?branch=master)
 [![codecov.io](https://codecov.io/github/awslabs/aws-lambda-powertools-python/branch/develop/graphs/badge.svg)](https://app.codecov.io/gh/awslabs/aws-lambda-powertools-python)
@@ -50,6 +50,10 @@ With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip insta
 
 * **AWS Developers Slack**: `#lambda-powertools` - **[Invite, if you don't have an account](https://join.slack.com/t/awsdevelopers/shared_invite/zt-yryddays-C9fkWrmguDv0h2EEDzCqvw)**
 * **Email**: aws-lambda-powertools-feedback@amazon.com
+
+## Security disclosures
+
+If you think you’ve found a potential security issue, please do not post it in the Issues.  Instead, please follow the instructions [here](https://aws.amazon.com/security/vulnerability-reporting/) or [email AWS security directly](mailto:aws-security@amazon.com).
 
 ## License
 
