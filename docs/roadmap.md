@@ -6,7 +6,15 @@ This is our public roadmap that outlines the high level direction we are working
 
 [See our latest list of activities »](https://github.com/orgs/awslabs/projects/51/views/1?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}
 
-## Roadmap status
+## Roadmap status definition
+
+<center>
+```mermaid
+graph LR
+    Ideas --> Backlog --> Work["Working on it"] --> Merged["Coming soon"] --> Shipped
+```
+<i>Visual representation</i>
+</center>
 
 Within our [public board](https://github.com/orgs/awslabs/projects/51/views/1?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}, you'll see the following values in the `Status` column:
 
@@ -19,6 +27,20 @@ Within our [public board](https://github.com/orgs/awslabs/projects/51/views/1?qu
 > Tasks or issues with empty `Status` will be categorized in upcoming review cycles.
 
 ## Process
+
+<center>
+```mermaid
+graph LR
+    PFR[Feature request] --> Triage{Need RFC?}
+    Triage --> |Complex/major change or new utility?| RFC[Ask or write RFC] --> Approval{Approved?}
+    Triage --> |Minor feature or enhancement?| NoRFC[No RFC required] --> Approval
+    Approval --> |Yes| Backlog
+    Approval --> |No | Reject["Inform next steps"]
+    Backlog --> |Prioritized| Implementation
+    Backlog --> |Defer| WelcomeContributions["help-wanted label"]
+```
+<i>Visual representation</i>
+</center>
 
 Our end-to-end mechanism follows four major steps:
 
