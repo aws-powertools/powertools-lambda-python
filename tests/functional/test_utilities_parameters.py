@@ -174,13 +174,13 @@ def test_dynamodb_provider_get_sdk_options(mock_name, mock_value, config):
         stubber.deactivate()
 
 
-def test_dynamodb_provider_get_with_custom_client(mock_name, mock_value):
+def test_dynamodb_provider_get_with_custom_client(mock_name, mock_value, config):
     """
     Test DynamoDBProvider.get() with SDK options
     """
 
     table_name = "TEST_TABLE"
-    client = boto3.resource("dynamodb")
+    client = boto3.resource("dynamodb", config=config)
     # Create a new provider
     provider = parameters.DynamoDBProvider(table_name, boto3_client=client)
 
