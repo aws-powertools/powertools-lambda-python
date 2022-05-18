@@ -174,6 +174,35 @@ def test_dynamodb_provider_get_sdk_options(mock_name, mock_value, config):
         stubber.deactivate()
 
 
+def test_dynamodb_provider_get_with_custom_client(mock_name, mock_value):
+    """
+    Test DynamoDBProvider.get() with SDK options
+    """
+
+    table_name = "TEST_TABLE"
+    client = boto3.resource("dynamodb")
+    # Create a new provider
+    provider = parameters.DynamoDBProvider(table_name, boto3_client=client)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.table.meta.client)
+    response = {"Item": {"id": {"S": mock_name}, "value": {"S": mock_value}}}
+    expected_params = {"TableName": table_name, "Key": {"id": mock_name}, "ConsistentRead": True}
+    stubber.add_response("get_item", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name, ConsistentRead=True)
+
+        assert value == mock_value
+        # table meta client will spun up from provider.client provided
+        # hence having a different hash
+        assert id(client) == id(provider.client)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
 def test_dynamodb_provider_get_sdk_options_overwrite(mock_name, mock_value, config):
     """
     Test DynamoDBProvider.get() with SDK options that should be overwritten
