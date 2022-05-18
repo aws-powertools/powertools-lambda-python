@@ -911,4 +911,4 @@ def test_batch_processor_error_when_entire_batch_fails(sqs_event_factory, record
 
 
 def test_child_exceptions_is_none():
-    assert SQSBatchProcessingError("").format_exceptions("example") == "example\n"
+    assert str(SQSBatchProcessingError()) == "\n"
