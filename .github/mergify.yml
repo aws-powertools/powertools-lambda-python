@@ -1,29 +1,31 @@
-queue_rules:
-  - name: default
-    conditions:
-      # Conditions to get out of the queue (= merged)
-      - check-success=Semantic Pull Request
-      - "#approved-reviews-by>=1"
-      - -title~=(WIP|wip)
-      - -label~="do-not-merge"
-      - "#changes-requested-reviews-by=0"
+## Temporarily disabled after Mergify breaking changes
+## might move to custom GitHub Actions altogether
+# queue_rules:
+#   - name: default
+#     conditions:
+#       # Conditions to get out of the queue (= merged)
+#       - check-success=Semantic Pull Request
+#       - "#approved-reviews-by>=1"
+#       - -title~=(WIP|wip)
+#       - -label~="do-not-merge"
+#       - "#changes-requested-reviews-by=0"
 
-pull_request_rules:
-  - name: automatic merge for Dependabot pull requests
-    conditions:
-      - author~=^dependabot(|-preview)\[bot\]$
-    actions:
-      queue:
-        name: default
-        method: squash
-        commit_message: title+body
+# pull_request_rules:
+#   - name: automatic merge for Dependabot pull requests
+#     conditions:
+#       - author~=^dependabot(|-preview)\[bot\]$
+#     actions:
+#       queue:
+#         name: default
+#         method: squash
+#         commit_message: title+body
 
-  - name: Automatic merge ⬇️ on approval ✔
-    conditions:
-      - base!=master
-      - "#approved-reviews-by>=2"
-    actions:
-      queue:
-        name: default
-        method: squash
-        commit_message: title+body
+#   - name: Automatic merge ⬇️ on approval ✔
+#     conditions:
+#       - base!=master
+#       - "#approved-reviews-by>=2"
+#     actions:
+#       queue:
+#         name: default
+#         method: squash
+#         commit_message: title+body

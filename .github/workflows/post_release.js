@@ -15,7 +15,7 @@ const fetchIssues = async ({
 	gh_client,
 	org,
 	repository,
-	state = "open",
+	state = "all",
 	label = STAGED_LABEL,
 }) => {
 

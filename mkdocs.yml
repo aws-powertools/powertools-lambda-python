@@ -8,7 +8,7 @@ nav:
   - Homepage: index.md
   - Changelog: changelog.md
   - Tutorial: tutorial/index.md
-  - Roadmap: https://github.com/awslabs/aws-lambda-powertools-roadmap/projects/1" target="_blank
+  - Roadmap: roadmap.md
   - API reference: api/" target="_blank
   - Core utilities:
       - core/tracer.md
@@ -99,4 +99,3 @@ extra:
   version:
     provider: mike
     default: latest
-
