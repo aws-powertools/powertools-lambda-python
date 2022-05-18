@@ -69,12 +69,7 @@ class SecretsProvider(BaseProvider):
         Initialize the Secrets Manager client
         """
 
-        config = config or Config()
-        if boto3_client is not None:
-            self.client = boto3_client
-        else:
-            session = boto3_session or boto3.session.Session()
-            self.client = session.client("secretsmanager", config=config)
+        self.client = self._build_boto3_client("secretsmanager", boto3_client, boto3_session, config)
 
         super().__init__()
 

@@ -9,6 +9,9 @@ from collections import namedtuple
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Tuple, Union
 
+import boto3
+from botocore.config import Config
+
 from .exceptions import GetParameterError, TransformParameterError
 
 DEFAULT_MAX_AGE_SECS = 5
@@ -179,6 +182,20 @@ class BaseProvider(ABC):
 
     def clear_cache(self):
         self.store.clear()
+
+    @staticmethod
+    def _build_boto3_client(
+        service_name: str,
+        client: Optional[Any],
+        session: Optional[boto3.Session],
+        config: Optional[Config],
+    ):
+        if client is not None:
+            return client
+
+        session = session or boto3.Session()
+        config = config or Config()
+        return session.client(service_name=service_name, config=config)
 
 
 def get_transform_method(key: str, transform: Optional[str] = None) -> Optional[str]:

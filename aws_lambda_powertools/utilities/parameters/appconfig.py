@@ -76,12 +76,7 @@ class AppConfigProvider(BaseProvider):
         Initialize the App Config client
         """
 
-        config = config or Config()
-        if boto3_client is not None:
-            self.client = boto3_client
-        else:
-            session = boto3_session or boto3.session.Session()
-            self.client = session.client("appconfig", config=config)
+        self.client = self._build_boto3_client("appconfig", boto3_client, boto3_session, config)
 
         self.application = resolve_env_var_choice(
             choice=application, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
