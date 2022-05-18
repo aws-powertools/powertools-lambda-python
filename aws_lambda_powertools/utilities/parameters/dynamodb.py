@@ -3,13 +3,17 @@ Amazon DynamoDB parameter retrieval and caching utility
 """
 
 
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.config import Config
 
 from .base import BaseProvider
+
+if TYPE_CHECKING:
+    from mypy_boto3_dynamodb import DynamoDBServiceResource
+    from mypy_boto3_dynamodb.service_resource import Table
 
 
 class DynamoDBProvider(BaseProvider):
@@ -32,6 +36,9 @@ class DynamoDBProvider(BaseProvider):
         Botocore configuration to pass during client initialization
     boto3_session : boto3.session.Session, optional
             Boto3 session to use for AWS API communication
+    boto3_client: DynamoDBServiceResource, optional
+            Boto3 DynamoDB Resource Client to use for AWS API communication,
+            will be used instead of boto3_session if both provided
 
     Example
     -------
@@ -152,15 +159,19 @@ class DynamoDBProvider(BaseProvider):
         endpoint_url: Optional[str] = None,
         config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
+        boto3_client: Optional["DynamoDBServiceResource"] = None,
     ):
         """
         Initialize the DynamoDB client
         """
-
-        config = config or Config()
-        session = boto3_session or boto3.session.Session()
-
-        self.table = session.resource("dynamodb", endpoint_url=endpoint_url, config=config).Table(table_name)
+        self.client: "DynamoDBServiceResource" = self._build_boto3_resource_client(
+            service_name="dynamodb",
+            client=boto3_client,
+            session=boto3_session,
+            config=config,
+            endpoint_url=endpoint_url,
+        )
+        self.table: "Table" = self.client.Table(table_name)
 
         self.key_attr = key_attr
         self.sort_attr = sort_attr

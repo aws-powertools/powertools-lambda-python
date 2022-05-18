@@ -16,6 +16,7 @@ from .exceptions import GetParameterError, TransformParameterError
 
 if TYPE_CHECKING:
     from mypy_boto3_appconfig import AppConfigClient
+    from mypy_boto3_dynamodb import DynamoDBServiceResource
     from mypy_boto3_secretsmanager import SecretsManagerClient
     from mypy_boto3_ssm import SSMClient
 
@@ -28,6 +29,7 @@ TRANSFORM_METHOD_JSON = "json"
 TRANSFORM_METHOD_BINARY = "binary"
 SUPPORTED_TRANSFORM_METHODS = [TRANSFORM_METHOD_JSON, TRANSFORM_METHOD_BINARY]
 ParameterClients = Union["AppConfigClient", "SecretsManagerClient", "SSMClient"]
+ParameterResourceClients = Union["DynamoDBServiceResource"]
 
 
 class BaseProvider(ABC):
@@ -221,6 +223,39 @@ class BaseProvider(ABC):
         session = session or boto3.Session()
         config = config or Config()
         return session.client(service_name=service_name, config=config)
+
+    @staticmethod
+    def _build_boto3_resource_client(
+        service_name: str,
+        client: Optional[ParameterResourceClients] = None,
+        session: Optional[Type[boto3.Session]] = None,
+        config: Optional[Type[Config]] = None,
+        endpoint_url: Optional[str] = None,
+    ) -> Type[ParameterResourceClients]:
+        """Builds a high level boto3 resource client with session, config and endpoint_url provided
+
+        Parameters
+        ----------
+        service_name : str
+            AWS service name to instantiate a boto3 client, e.g. ssm
+        client : Optional[ParameterResourceClients], optional
+            boto3 client instance, by default None
+        session : Optional[Type[boto3.Session]], optional
+            boto3 session instance, by default None
+        config : Optional[Type[Config]], optional
+            botocore config instance to configure client, by default None
+
+        Returns
+        -------
+        Type[ParameterResourceClients]
+            Instance of a boto3 client for Parameters feature (e.g., ssm, appconfig, secretsmanager, etc.)
+        """
+        if client is not None:
+            return client
+
+        session = session or boto3.Session()
+        config = config or Config()
+        return session.resource(service_name=service_name, config=config, endpoint_url=endpoint_url)
 
 
 def get_transform_method(key: str, transform: Optional[str] = None) -> Optional[str]:
