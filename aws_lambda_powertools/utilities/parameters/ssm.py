@@ -91,14 +91,11 @@ class SSMProvider(BaseProvider):
         Initialize the SSM Parameter Store client
         """
 
-        config = config or Config()
-        if boto3_client is not None:
-            self.client = boto3_client
-        else:
-            session = boto3_session or boto3.session.Session()
-            self.client: "SSMClient" = session.client("ssm", config=config)
-
         super().__init__()
+
+        self.client: "SSMClient" = self._build_boto3_client(
+            service_name="ssm", client=boto3_client, session=boto3_session, config=config
+        )
 
     # We break Liskov substitution principle due to differences in signatures of this method and superclass get method
     # We ignore mypy error, as changes to the signature here or in a superclass is a breaking change to users
