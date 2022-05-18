@@ -487,6 +487,8 @@ The **`config`** , **`boto3_session`**, and **`boto3_client`**  parameters enabl
 ???+ tip
 	You can use a custom session for retrieving parameters cross-account/region and for snapshot testing.
 
+	When using VPC private endpoints, you can pass a custom client altogether. It's also useful for testing when injecting fake instances.
+
 === "Custom session"
 
 	```python hl_lines="2 4 5"
