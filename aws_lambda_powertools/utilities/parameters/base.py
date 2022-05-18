@@ -29,7 +29,6 @@ TRANSFORM_METHOD_JSON = "json"
 TRANSFORM_METHOD_BINARY = "binary"
 SUPPORTED_TRANSFORM_METHODS = [TRANSFORM_METHOD_JSON, TRANSFORM_METHOD_BINARY]
 ParameterClients = Union["AppConfigClient", "SecretsManagerClient", "SSMClient"]
-ParameterResourceClients = Union["DynamoDBServiceResource"]
 
 
 class BaseProvider(ABC):
@@ -210,7 +209,7 @@ class BaseProvider(ABC):
         session : Optional[Type[boto3.Session]], optional
             boto3 session instance, by default None
         config : Optional[Type[Config]], optional
-            botocore config instance to configure client, by default None
+            botocore config instance to configure client with, by default None
 
         Returns
         -------
@@ -224,21 +223,22 @@ class BaseProvider(ABC):
         config = config or Config()
         return session.client(service_name=service_name, config=config)
 
+    # maintenance: change DynamoDBServiceResource type to ParameterResourceClients when we expand
     @staticmethod
     def _build_boto3_resource_client(
         service_name: str,
-        client: Optional[ParameterResourceClients] = None,
+        client: Optional["DynamoDBServiceResource"] = None,
         session: Optional[Type[boto3.Session]] = None,
         config: Optional[Type[Config]] = None,
         endpoint_url: Optional[str] = None,
-    ) -> Type[ParameterResourceClients]:
+    ) -> Type["DynamoDBServiceResource"]:
         """Builds a high level boto3 resource client with session, config and endpoint_url provided
 
         Parameters
         ----------
         service_name : str
             AWS service name to instantiate a boto3 client, e.g. ssm
-        client : Optional[ParameterResourceClients], optional
+        client : Optional[DynamoDBServiceResource], optional
             boto3 client instance, by default None
         session : Optional[Type[boto3.Session]], optional
             boto3 session instance, by default None
@@ -247,8 +247,8 @@ class BaseProvider(ABC):
 
         Returns
         -------
-        Type[ParameterResourceClients]
-            Instance of a boto3 client for Parameters feature (e.g., ssm, appconfig, secretsmanager, etc.)
+        Type[DynamoDBServiceResource]
+            Instance of a boto3 resource client for Parameters feature (e.g., dynamodb, etc.)
         """
         if client is not None:
             return client

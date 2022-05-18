@@ -23,9 +23,9 @@ class SecretsProvider(BaseProvider):
     config: botocore.config.Config, optional
         Botocore configuration to pass during client initialization
     boto3_session : boto3.session.Session, optional
-            Boto3 session to use for AWS API communication, will not be used if boto3_client is not None
+            Boto3 session to create a boto3_client from
     boto3_client: SecretsManagerClient, optional
-            Boto3 Client to use for AWS API communication, will be used instead of boto3_session if both provided
+            Boto3 SecretsManager Client to use, boto3_session will be ignored if both are provided
 
     Example
     -------
