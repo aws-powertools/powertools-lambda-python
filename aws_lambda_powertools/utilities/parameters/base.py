@@ -231,7 +231,7 @@ class BaseProvider(ABC):
         session: Optional[Type[boto3.Session]] = None,
         config: Optional[Type[Config]] = None,
         endpoint_url: Optional[str] = None,
-    ) -> Type["DynamoDBServiceResource"]:
+    ) -> "DynamoDBServiceResource":
         """Builds a high level boto3 resource client with session, config and endpoint_url provided
 
         Parameters

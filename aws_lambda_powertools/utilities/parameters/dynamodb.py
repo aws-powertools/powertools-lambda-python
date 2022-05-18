@@ -193,7 +193,9 @@ class DynamoDBProvider(BaseProvider):
         # Explicit arguments will take precedence over keyword arguments
         sdk_options["Key"] = {self.key_attr: name}
 
-        return self.table.get_item(**sdk_options)["Item"][self.value_attr]
+        # maintenance: look for better ways to correctly type DynamoDB multiple return types
+        # without a breaking change within ABC return type
+        return self.table.get_item(**sdk_options)["Item"][self.value_attr]  # type: ignore[return-value]
 
     def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
         """
@@ -219,4 +221,6 @@ class DynamoDBProvider(BaseProvider):
             response = self.table.query(**sdk_options)
             items.extend(response.get("Items", []))
 
-        return {item[self.sort_attr]: item[self.value_attr] for item in items}
+        # maintenance: look for better ways to correctly type DynamoDB multiple return types
+        # without a breaking change within ABC return type
+        return {item[self.sort_attr]: item[self.value_attr] for item in items}  # type: ignore[misc]
