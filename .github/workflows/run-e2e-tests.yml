@@ -16,17 +16,20 @@ jobs:
     permissions:
       id-token: write # needed to interact with GitHub's OIDC Token endpoint.
       contents: read
+    strategy:
+      matrix:
+        version: ["3.8", "3.9", "3.10"]
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
       #########################
       # Release new version
       #########################
-      - name: "Use Python 3"
+      - name: "Use Python"
         uses: actions/setup-python@v3
         with:
-          python-version: "3.x" # Version range or exact version of a Python version to use, using SemVer's version range syntax
-          architecture: "x64" # optional x64 or x86. Defaults to x64 if not specified
+          python-version: ${{ matrix.version }}
+          architecture: "x64"
       - name: Install dependencies
         run: make dev
       - name: Configure AWS credentials

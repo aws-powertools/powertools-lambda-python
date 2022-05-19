@@ -1,12 +1,22 @@
 import io
 import os
+import sys
 import zipfile
+from enum import Enum
 from pathlib import Path
 
 import boto3
 import yaml
 from aws_cdk import App, CfnOutput, RemovalPolicy, Stack, aws_lambda_python_alpha, aws_logs
 from aws_cdk.aws_lambda import Code, Function, Runtime, Tracing
+
+PYTHON_RUNTIME_VERSION = f"V{''.join(map(str, sys.version_info[:2]))}"
+
+
+class PythonVersion(Enum):
+    V37 = Runtime.PYTHON_3_7
+    V38 = Runtime.PYTHON_3_8
+    V39 = Runtime.PYTHON_3_9
 
 
 class Infrastructure:
@@ -63,7 +73,7 @@ class Infrastructure:
             "aws-lambda-powertools",
             layer_version_name="aws-lambda-powertools",
             entry=".",
-            compatible_runtimes=[Runtime.PYTHON_3_9],
+            compatible_runtimes=[PythonVersion[PYTHON_RUNTIME_VERSION].value],
         )
         code = Code.from_asset(handlers_dir)
 
@@ -72,7 +82,7 @@ class Infrastructure:
             function_python = Function(
                 stack,
                 f"{filename}-lambda",
-                runtime=Runtime.PYTHON_3_9,
+                runtime=PythonVersion[PYTHON_RUNTIME_VERSION].value,
                 code=code,
                 handler=f"{filename}.lambda_handler",
                 layers=[powertools_layer],
