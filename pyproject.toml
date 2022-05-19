@@ -55,6 +55,10 @@ mkdocs-git-revision-date-plugin = "^0.3.2"
 mike = "^0.6.0"
 mypy = "^0.950"
 mkdocs-material = "^8.2.7"
+mypy-boto3-secretsmanager = "^1.21.34"
+mypy-boto3-ssm = "^1.21.34"
+mypy-boto3-appconfig = "^1.21.34"
+mypy-boto3-dynamodb = "^1.23.0"
 
 
 [tool.poetry.extras]
@@ -87,8 +91,11 @@ exclude_lines = [
     "if 0:",
     "if __name__ == .__main__.:",
 
-	# Ignore type function overload
-	"@overload",
+    # Ignore runtime type checking
+    "if TYPE_CHECKING:",
+
+    # Ignore type function overload
+    "@overload",
 ]
 
 [tool.isort]
