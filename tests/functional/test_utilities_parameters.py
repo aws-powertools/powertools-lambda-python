@@ -181,6 +181,8 @@ def test_dynamodb_provider_get_with_custom_client(mock_name, mock_value, config)
 
     table_name = "TEST_TABLE"
     client = boto3.resource("dynamodb", config=config)
+    table_resource_client = client.Table(table_name)
+
     # Create a new provider
     provider = parameters.DynamoDBProvider(table_name, boto3_client=client)
 
@@ -195,9 +197,8 @@ def test_dynamodb_provider_get_with_custom_client(mock_name, mock_value, config)
         value = provider.get(mock_name, ConsistentRead=True)
 
         assert value == mock_value
-        # table meta client will spun up from provider.client provided
-        # hence having a different hash
-        assert id(client) == id(provider.client)
+        # confirm table resource client comes from the same custom client provided
+        assert id(table_resource_client.meta.client) == id(provider.table.meta.client)
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
