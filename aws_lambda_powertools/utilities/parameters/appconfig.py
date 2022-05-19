@@ -91,8 +91,6 @@ class AppConfigProvider(BaseProvider):
         self.environment = environment
         self.current_version = ""
 
-        super().__init__()
-
     def _get(self, name: str, **sdk_options) -> str:
         """
         Retrieve a parameter value from AWS App config.
