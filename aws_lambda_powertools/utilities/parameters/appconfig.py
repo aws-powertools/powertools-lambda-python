@@ -4,11 +4,14 @@ AWS App Config configuration retrieval and caching utility
 
 
 import os
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 from uuid import uuid4
 
 import boto3
 from botocore.config import Config
+
+if TYPE_CHECKING:
+    from mypy_boto3_appconfig import AppConfigClient
 
 from ...shared import constants
 from ...shared.functions import resolve_env_var_choice
@@ -30,7 +33,9 @@ class AppConfigProvider(BaseProvider):
     config: botocore.config.Config, optional
         Botocore configuration to pass during client initialization
     boto3_session : boto3.session.Session, optional
-            Boto3 session to use for AWS API communication
+            Boto3 session to create a boto3_client from
+    boto3_client: AppConfigClient, optional
+            Boto3 AppConfig Client to use, boto3_session will be ignored if both are provided
 
     Example
     -------
@@ -68,21 +73,23 @@ class AppConfigProvider(BaseProvider):
         application: Optional[str] = None,
         config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
+        boto3_client: Optional["AppConfigClient"] = None,
     ):
         """
         Initialize the App Config client
         """
 
-        config = config or Config()
-        session = boto3_session or boto3.session.Session()
-        self.client = session.client("appconfig", config=config)
+        super().__init__()
+
+        self.client: "AppConfigClient" = self._build_boto3_client(
+            service_name="appconfig", client=boto3_client, session=boto3_session, config=config
+        )
+
         self.application = resolve_env_var_choice(
             choice=application, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
         )
         self.environment = environment
         self.current_version = ""
-
-        super().__init__()
 
     def _get(self, name: str, **sdk_options) -> str:
         """
