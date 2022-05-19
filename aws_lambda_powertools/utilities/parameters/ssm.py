@@ -3,12 +3,15 @@ AWS SSM Parameter retrieval and caching utility
 """
 
 
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import boto3
 from botocore.config import Config
 
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
+
+if TYPE_CHECKING:
+    from mypy_boto3_ssm import SSMClient
 
 
 class SSMProvider(BaseProvider):
@@ -20,7 +23,9 @@ class SSMProvider(BaseProvider):
     config: botocore.config.Config, optional
         Botocore configuration to pass during client initialization
     boto3_session : boto3.session.Session, optional
-            Boto3 session to use for AWS API communication
+            Boto3 session to create a boto3_client from
+    boto3_client: SSMClient, optional
+            Boto3 SSM Client to use, boto3_session will be ignored if both are provided
 
     Example
     -------
@@ -76,16 +81,21 @@ class SSMProvider(BaseProvider):
 
     client: Any = None
 
-    def __init__(self, config: Optional[Config] = None, boto3_session: Optional[boto3.session.Session] = None):
+    def __init__(
+        self,
+        config: Optional[Config] = None,
+        boto3_session: Optional[boto3.session.Session] = None,
+        boto3_client: Optional["SSMClient"] = None,
+    ):
         """
         Initialize the SSM Parameter Store client
         """
 
-        config = config or Config()
-        session = boto3_session or boto3.session.Session()
-        self.client = session.client("ssm", config=config)
-
         super().__init__()
+
+        self.client: "SSMClient" = self._build_boto3_client(
+            service_name="ssm", client=boto3_client, session=boto3_session, config=config
+        )
 
     # We break Liskov substitution principle due to differences in signatures of this method and superclass get method
     # We ignore mypy error, as changes to the signature here or in a superclass is a breaking change to users
