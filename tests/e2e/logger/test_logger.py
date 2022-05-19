@@ -1,74 +1,72 @@
-import datetime
-import os
-from functools import lru_cache
-
 import boto3
 import pytest
 
-from .. import utils
-
-dirname = os.path.dirname(__file__)
+from ..utils import helpers
 
 
 @pytest.fixture(scope="module")
 def config():
-    return {"MESSAGE": "logger message test", "LOG_LEVEL": "INFO", "ADDITIONAL_KEY": "extra_info"}
+    return {
+        "parameters": {},
+        "environment_variables": {
+            "MESSAGE": "logger message test",
+            "LOG_LEVEL": "INFO",
+            "ADDITIONAL_KEY": "extra_info",
+        },
+    }
 
 
-@pytest.fixture(scope="module")
-def deploy_lambdas(deploy, config):
-    handlers_dir = f"{dirname}/handlers/"
+@pytest.mark.e2e
+def test_basic_lambda_logs_visible(execute_lambda, config):
+    # GIVEN
+    lambda_arn = execute_lambda["arns"]["basichandlerarn"]
+    timestamp = int(execute_lambda["execution_time"].timestamp() * 1000)
+    cw_client = boto3.client("logs")
 
-    lambda_arns = deploy(
-        handlers_name=utils.find_handlers(handlers_dir),
-        handlers_dir=handlers_dir,
-        environment_variables=config,
+    # WHEN
+    filtered_logs = helpers.get_logs(
+        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
     )
 
-    for name, arn in lambda_arns.items():
-        utils.trigger_lambda(lambda_arn=arn)
-        print(f"lambda {name} triggered")
-    return lambda_arns
-
-
-@pytest.fixture(scope="module")
-def trigger_lambdas(deploy_lambdas):
-    for name, arn in deploy_lambdas.items():
-        utils.trigger_lambda(lambda_arn=arn)
-        print(f"lambda {name} triggered")
-
-
-@lru_cache(maxsize=10, typed=False)
-def fetch_logs(lambda_arn):
-    start_time = int(datetime.datetime.now().timestamp() * 1000)
-    result = utils.trigger_lambda(lambda_arn=lambda_arn)
-
-    filtered_logs = utils.get_logs(
-        start_time=start_time,
-        lambda_function_name=lambda_arn.split(":")[-1],
-        log_client=boto3.client("logs"),
+    # THEN
+    assert any(
+        log.message == config["environment_variables"]["MESSAGE"]
+        and log.level == config["environment_variables"]["LOG_LEVEL"]
+        for log in filtered_logs
     )
-    return filtered_logs
 
 
 @pytest.mark.e2e
-def test_basic_lambda_logs_visible(deploy_lambdas, config):
+def test_basic_lambda_no_debug_logs_visible(execute_lambda, config):
+    # GIVEN
+    lambda_arn = execute_lambda["arns"]["basichandlerarn"]
+    timestamp = int(execute_lambda["execution_time"].timestamp() * 1000)
+    cw_client = boto3.client("logs")
 
-    filtered_logs = fetch_logs(lambda_arn=deploy_lambdas["basichandlerarn"])
+    # WHEN
+    filtered_logs = helpers.get_logs(
+        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
+    )
 
-    assert any(log.message == config["MESSAGE"] and log.level == config["LOG_LEVEL"] for log in filtered_logs)
+    # THEN
+    assert not any(
+        log.message == config["environment_variables"]["MESSAGE"] and log.level == "DEBUG" for log in filtered_logs
+    )
 
 
 @pytest.mark.e2e
-def test_basic_lambda_no_debug_logs_visible(deploy_lambdas, config):
-    filtered_logs = fetch_logs(lambda_arn=deploy_lambdas["basichandlerarn"])
+def test_basic_lambda_contextual_data_logged(execute_lambda):
+    # GIVEN
+    lambda_arn = execute_lambda["arns"]["basichandlerarn"]
+    timestamp = int(execute_lambda["execution_time"].timestamp() * 1000)
+    cw_client = boto3.client("logs")
 
-    assert not any(log.message == config["MESSAGE"] and log.level == "DEBUG" for log in filtered_logs)
+    # WHEN
+    filtered_logs = helpers.get_logs(
+        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
+    )
 
-
-@pytest.mark.e2e
-def test_basic_lambda_contextual_data_logged(deploy_lambdas):
-    filtered_logs = fetch_logs(lambda_arn=deploy_lambdas["basichandlerarn"])
+    # THEN
     for log in filtered_logs:
         assert (
             log.xray_trace_id
@@ -81,26 +79,58 @@ def test_basic_lambda_contextual_data_logged(deploy_lambdas):
 
 
 @pytest.mark.e2e
-def test_basic_lambda_additional_key_persistence_basic_lambda(deploy_lambdas, config):
-    filtered_logs = fetch_logs(lambda_arn=deploy_lambdas["basichandlerarn"])
+def test_basic_lambda_additional_key_persistence_basic_lambda(execute_lambda, config):
+    # GIVEN
 
+    lambda_arn = execute_lambda["arns"]["basichandlerarn"]
+    timestamp = int(execute_lambda["execution_time"].timestamp() * 1000)
+    cw_client = boto3.client("logs")
+
+    # WHEN
+    filtered_logs = helpers.get_logs(
+        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
+    )
+
+    # THEN
     assert any(
-        log.extra_info and log.message == config["MESSAGE"] and log.level == config["LOG_LEVEL"]
+        log.extra_info
+        and log.message == config["environment_variables"]["MESSAGE"]
+        and log.level == config["environment_variables"]["LOG_LEVEL"]
         for log in filtered_logs
     )
 
 
 @pytest.mark.e2e
-def test_basic_lambda_empty_event_logged(deploy_lambdas):
-    filtered_logs = fetch_logs(lambda_arn=deploy_lambdas["basichandlerarn"])
+def test_basic_lambda_empty_event_logged(execute_lambda):
 
+    # GIVEN
+    lambda_arn = execute_lambda["arns"]["basichandlerarn"]
+    timestamp = int(execute_lambda["execution_time"].timestamp() * 1000)
+    cw_client = boto3.client("logs")
+
+    # WHEN
+    filtered_logs = helpers.get_logs(
+        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
+    )
+
+    # THEN
     assert any(log.message == {} for log in filtered_logs)
 
 
 @pytest.mark.e2e
-def test_no_context_lambda_contextual_data_not_logged(deploy_lambdas):
-    filtered_logs = fetch_logs(lambda_arn=deploy_lambdas["nocontexthandlerarn"])
+def test_no_context_lambda_contextual_data_not_logged(execute_lambda):
 
+    # GIVEN
+    lambda_arn = execute_lambda["arns"]["nocontexthandlerarn"]
+    timestamp = int(execute_lambda["execution_time"].timestamp() * 1000)
+    cw_client = boto3.client("logs")
+
+    # WHEN
+    filtered_logs = helpers.get_logs(
+        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
+    )
+
+    # THEN
     assert not any(
         (
             log.xray_trace_id
@@ -115,9 +145,19 @@ def test_no_context_lambda_contextual_data_not_logged(deploy_lambdas):
 
 
 @pytest.mark.e2e
-def test_no_context_lambda_event_not_logged(deploy_lambdas):
-    filtered_logs = fetch_logs(lambda_arn=deploy_lambdas["nocontexthandlerarn"])
+def test_no_context_lambda_event_not_logged(execute_lambda):
 
+    # GIVEN
+    lambda_arn = execute_lambda["arns"]["nocontexthandlerarn"]
+    timestamp = int(execute_lambda["execution_time"].timestamp() * 1000)
+    cw_client = boto3.client("logs")
+
+    # WHEN
+    filtered_logs = helpers.get_logs(
+        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
+    )
+
+    # THEN
     assert not any(log.message == {} for log in filtered_logs)
 
 

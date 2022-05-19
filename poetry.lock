@@ -34,6 +34,20 @@ jsii = ">=1.57.0,<2.0.0"
 publication = ">=0.0.3"
 
 [[package]]
+name = "aws-cdk.aws-lambda-python-alpha"
+version = "2.23.0a0"
+description = "The CDK Construct Library for AWS Lambda in Python"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+aws-cdk-lib = ">=2.23.0,<3.0.0"
+constructs = ">=10.0.0,<11.0.0"
+jsii = ">=1.57.0,<2.0.0"
+publication = ">=0.0.3"
+
+[[package]]
 name = "aws-xray-sdk"
 version = "2.9.0"
 description = "The AWS X-Ray SDK for Python (the SDK) enables Python developers to record and emit information from within their applications to the AWS X-Ray service."
@@ -1222,7 +1236,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "2c4ec9fac23dea3893cf3c60d5ed5728d63c4c46252a14ffbee52d30ebaec74f"
+content-hash = "f0aa750ae44c234811d1c59860915845d1ac3c3c7474d5f7ee6e3fbe0d31bfb4"
 
 [metadata.files]
 atomicwrites = [
@@ -1236,6 +1250,10 @@ attrs = [
 aws-cdk-lib = [
     {file = "aws-cdk-lib-2.23.0.tar.gz", hash = "sha256:3e07d1c6b320795d38567be183e56c2125b4c4492589775257aabec3d3e2a384"},
     {file = "aws_cdk_lib-2.23.0-py3-none-any.whl", hash = "sha256:1ec04a146d3364cd0fc4da08e3f8ca25e28df68abaa90641936db17a415ca4bc"},
+]
+"aws-cdk.aws-lambda-python-alpha" = [
+    {file = "aws-cdk.aws-lambda-python-alpha-2.23.0a0.tar.gz", hash = "sha256:1b877ad6ced425e8b5aac1e6a54db8b3ca912f91738aa38b11d2127c1156f7dd"},
+    {file = "aws_cdk.aws_lambda_python_alpha-2.23.0a0-py3-none-any.whl", hash = "sha256:782e5fdbda8e1a7ff71bd22c1638ec7e9cdf019a2b1304b6a4a05687b2571e0d"},
 ]
 aws-xray-sdk = [
     {file = "aws-xray-sdk-2.9.0.tar.gz", hash = "sha256:b0cd972db218d4d8f7b53ad806fc6184626b924c4997ae58fc9f2a8cd1281568"},
