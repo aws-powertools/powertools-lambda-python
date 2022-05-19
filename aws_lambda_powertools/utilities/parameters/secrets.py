@@ -3,10 +3,13 @@ AWS Secrets Manager parameter retrieval and caching utility
 """
 
 
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import boto3
 from botocore.config import Config
+
+if TYPE_CHECKING:
+    from mypy_boto3_secretsmanager import SecretsManagerClient
 
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 
@@ -20,7 +23,9 @@ class SecretsProvider(BaseProvider):
     config: botocore.config.Config, optional
         Botocore configuration to pass during client initialization
     boto3_session : boto3.session.Session, optional
-            Boto3 session to use for AWS API communication
+            Boto3 session to create a boto3_client from
+    boto3_client: SecretsManagerClient, optional
+            Boto3 SecretsManager Client to use, boto3_session will be ignored if both are provided
 
     Example
     -------
@@ -60,16 +65,21 @@ class SecretsProvider(BaseProvider):
 
     client: Any = None
 
-    def __init__(self, config: Optional[Config] = None, boto3_session: Optional[boto3.session.Session] = None):
+    def __init__(
+        self,
+        config: Optional[Config] = None,
+        boto3_session: Optional[boto3.session.Session] = None,
+        boto3_client: Optional["SecretsManagerClient"] = None,
+    ):
         """
         Initialize the Secrets Manager client
         """
 
-        config = config or Config()
-        session = boto3_session or boto3.session.Session()
-        self.client = session.client("secretsmanager", config=config)
-
         super().__init__()
+
+        self.client: "SecretsManagerClient" = self._build_boto3_client(
+            service_name="secretsmanager", client=boto3_client, session=boto3_session, config=config
+        )
 
     def _get(self, name: str, **sdk_options) -> str:
         """
