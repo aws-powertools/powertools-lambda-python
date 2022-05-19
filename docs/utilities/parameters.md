@@ -480,6 +480,44 @@ Here is the mapping between this utility's functions and methods and the underly
 | App Config          | `get_app_config`                | `appconfig`      | [get_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfig.html#AppConfig.Client.get_configuration)         |
 
 
+### Bring your own boto client
+
+You can use `boto3_client` parameter via any of the available [Provider Classes](#built-in-provider-class). Some providers expect a low level boto3 client while others expect a high level boto3 client, here is the mapping for each of them:
+
+| Provider                                | Type       | Boto client construction     |
+| --------------------------------------- | ---------- | ---------------------------- |
+| [SSMProvider](#ssmprovider)             | low level  | `boto3.client("ssm")`        |
+| [SecretsProvider](#secretsprovider)     | low level  | `boto3.client("secrets")`    |
+| [AppConfigProvider](#appconfigprovider) | low level  | `boto3.client("appconfig")`  |
+| [DynamoDBProvider](#dynamodbprovider)   | high level | `boto3.resource("dynamodb")` |
+
+
+Bringing them together in a single code snippet would look like this:
+
+```python title="Example: passing a custom boto3 client for each provider"
+import boto3
+from botocore.config import Config
+
+from aws_lambda_powertools.utilities import parameters
+
+config = Config(region_name="us-west-1")
+
+# construct boto clients with any custom configuration
+ssm = boto3.client("ssm", config=config)
+secrets = boto3.client("secrets", config=config)
+appconfig = boto3.client("appconfig", config=config)
+dynamodb = boto3.resource("dynamodb", config=config)
+
+ssm_provider = parameters.SSMProvider(boto3_client=ssm)
+secrets_provider = parameters.SecretsProvider(boto3_client=secrets)
+appconf_provider = parameters.AppConfigProvider(boto3_client=appconfig, environment="my_env", application="my_app")
+dynamodb_provider = parameters.DynamoDBProvider(boto3_client=dynamodb, table_name="my-table")
+
+```
+
+???+ question "When is this useful?"
+	Injecting a custom boto3 client can make unit/snapshot testing easier, including SDK customizations.
+
 ### Customizing boto configuration
 
 The **`config`** , **`boto3_session`**, and **`boto3_client`**  parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) , [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html), or  a [boto3 client](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/boto3.html) when constructing any of the built-in provider classes.

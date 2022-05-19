@@ -163,14 +163,13 @@ class DynamoDBProvider(BaseProvider):
         """
         Initialize the DynamoDB client
         """
-        self.client: "DynamoDBServiceResource" = self._build_boto3_resource_client(
+        self.table: "Table" = self._build_boto3_resource_client(
             service_name="dynamodb",
             client=boto3_client,
             session=boto3_session,
             config=config,
             endpoint_url=endpoint_url,
-        )
-        self.table: "Table" = self.client.Table(table_name)
+        ).Table(table_name)
 
         self.key_attr = key_attr
         self.sort_attr = sort_attr
