@@ -3,13 +3,17 @@ Amazon DynamoDB parameter retrieval and caching utility
 """
 
 
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.config import Config
 
 from .base import BaseProvider
+
+if TYPE_CHECKING:
+    from mypy_boto3_dynamodb import DynamoDBServiceResource
+    from mypy_boto3_dynamodb.service_resource import Table
 
 
 class DynamoDBProvider(BaseProvider):
@@ -31,7 +35,9 @@ class DynamoDBProvider(BaseProvider):
     config: botocore.config.Config, optional
         Botocore configuration to pass during client initialization
     boto3_session : boto3.session.Session, optional
-            Boto3 session to use for AWS API communication
+            Boto3 session to create a boto3_client from
+    boto3_client: DynamoDBServiceResource, optional
+            Boto3 DynamoDB Resource Client to use; boto3_session will be ignored if both are provided
 
     Example
     -------
@@ -152,15 +158,18 @@ class DynamoDBProvider(BaseProvider):
         endpoint_url: Optional[str] = None,
         config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
+        boto3_client: Optional["DynamoDBServiceResource"] = None,
     ):
         """
         Initialize the DynamoDB client
         """
-
-        config = config or Config()
-        session = boto3_session or boto3.session.Session()
-
-        self.table = session.resource("dynamodb", endpoint_url=endpoint_url, config=config).Table(table_name)
+        self.table: "Table" = self._build_boto3_resource_client(
+            service_name="dynamodb",
+            client=boto3_client,
+            session=boto3_session,
+            config=config,
+            endpoint_url=endpoint_url,
+        ).Table(table_name)
 
         self.key_attr = key_attr
         self.sort_attr = sort_attr
@@ -183,7 +192,9 @@ class DynamoDBProvider(BaseProvider):
         # Explicit arguments will take precedence over keyword arguments
         sdk_options["Key"] = {self.key_attr: name}
 
-        return self.table.get_item(**sdk_options)["Item"][self.value_attr]
+        # maintenance: look for better ways to correctly type DynamoDB multiple return types
+        # without a breaking change within ABC return type
+        return self.table.get_item(**sdk_options)["Item"][self.value_attr]  # type: ignore[return-value]
 
     def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
         """
@@ -209,4 +220,6 @@ class DynamoDBProvider(BaseProvider):
             response = self.table.query(**sdk_options)
             items.extend(response.get("Items", []))
 
-        return {item[self.sort_attr]: item[self.value_attr] for item in items}
+        # maintenance: look for better ways to correctly type DynamoDB multiple return types
+        # without a breaking change within ABC return type
+        return {item[self.sort_attr]: item[self.value_attr] for item in items}  # type: ignore[misc]

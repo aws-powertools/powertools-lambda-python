@@ -24,14 +24,14 @@ This utility requires additional permissions to work as expected.
 ???+ note
     Different parameter providers require different permissions.
 
-Provider | Function/Method | IAM Permission
-------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
-SSM Parameter Store | `get_parameter`, `SSMProvider.get`  | `ssm:GetParameter`
-SSM Parameter Store | `get_parameters`, `SSMProvider.get_multiple` | `ssm:GetParametersByPath`
-Secrets Manager | `get_secret`, `SecretsManager.get` | `secretsmanager:GetSecretValue`
-DynamoDB | `DynamoDBProvider.get` | `dynamodb:GetItem`
-DynamoDB | `DynamoDBProvider.get_multiple` | `dynamodb:Query`
-App Config | `AppConfigProvider.get_app_config`, `get_app_config` | `appconfig:GetConfiguration`
+| Provider            | Function/Method                                      | IAM Permission                  |
+| ------------------- | ---------------------------------------------------- | ------------------------------- |
+| SSM Parameter Store | `get_parameter`, `SSMProvider.get`                   | `ssm:GetParameter`              |
+| SSM Parameter Store | `get_parameters`, `SSMProvider.get_multiple`         | `ssm:GetParametersByPath`       |
+| Secrets Manager     | `get_secret`, `SecretsManager.get`                   | `secretsmanager:GetSecretValue` |
+| DynamoDB            | `DynamoDBProvider.get`                               | `dynamodb:GetItem`              |
+| DynamoDB            | `DynamoDBProvider.get_multiple`                      | `dynamodb:Query`                |
+| App Config          | `AppConfigProvider.get_app_config`, `get_app_config` | `appconfig:GetConfiguration`    |
 
 ### Fetching parameters
 
@@ -99,10 +99,10 @@ For greater flexibility such as configuring the underlying SDK client used by bu
 
 The AWS Systems Manager Parameter Store provider supports two additional arguments for the `get()` and `get_multiple()` methods:
 
-| Parameter     | Default | Description |
-|---------------|---------|-------------|
-| **decrypt**   | `False` | Will automatically decrypt the parameter.
-| **recursive** | `True`  | For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix.
+| Parameter     | Default | Description                                                                                    |
+| ------------- | ------- | ---------------------------------------------------------------------------------------------- |
+| **decrypt**   | `False` | Will automatically decrypt the parameter.                                                      |
+| **recursive** | `True`  | For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix. |
 
 ```python hl_lines="7 9" title="Example with get() and get_multiple()"
 --8<-- "docs/examples/utilities/parameters/ssm_provider_get_options.py"
@@ -126,9 +126,9 @@ For single parameters, you must use `id` as the [partition key](https://docs.aws
 
 	DynamoDB table with `id` partition key and `value` as attribute
 
-	| id         | value  |
-	|--------------|----------|
-	| my-parameter | my-value |
+ | id           | value    |
+ | ------------ | -------- |
+ | my-parameter | my-value |
 
 With this table, `dynamodb_provider.get("my-param")` will return `my-value`.
 
@@ -153,11 +153,11 @@ You can retrieve multiple parameters sharing the same `id` by having a sort key 
 
 	DynamoDB table with `id` primary key, `sk` as sort key` and `value` as attribute
 
-	| id        | sk    |   value  |
-	|-------------|---------|------------|
-	| my-hash-key | param-a | my-value-a |
-	| my-hash-key | param-b | my-value-b |
-	| my-hash-key | param-c | my-value-c |
+ | id          | sk      | value      |
+ | ----------- | ------- | ---------- |
+ | my-hash-key | param-a | my-value-a |
+ | my-hash-key | param-b | my-value-b |
+ | my-hash-key | param-c | my-value-c |
 
 With this table, `dynamodb_provider.get_multiple("my-hash-key")` will return a dictionary response in the shape of `sk:value`.
 
@@ -181,12 +181,12 @@ With this table, `dynamodb_provider.get_multiple("my-hash-key")` will return a d
 
 DynamoDB provider can be customized at initialization to match your table structure:
 
-| Parameter      | Mandatory | Default | Description |
-|----------------|-----------|---------|-------------|
-| **table_name** | **Yes**   | *(N/A)* | Name of the DynamoDB table containing the parameter values.
-| **key_attr**   | No        | `id`    | Hash key for the DynamoDB table.
-| **sort_attr**  | No        | `sk`    | Range key for the DynamoDB table. You don't need to set this if you don't use the `get_multiple()` method.
-| **value_attr** | No        | `value` | Name of the attribute containing the parameter value.
+| Parameter      | Mandatory | Default | Description                                                                                                |
+| -------------- | --------- | ------- | ---------------------------------------------------------------------------------------------------------- |
+| **table_name** | **Yes**   | *(N/A)* | Name of the DynamoDB table containing the parameter values.                                                |
+| **key_attr**   | No        | `id`    | Hash key for the DynamoDB table.                                                                           |
+| **sort_attr**  | No        | `sk`    | Range key for the DynamoDB table. You don't need to set this if you don't use the `get_multiple()` method. |
+| **value_attr** | No        | `value` | Name of the attribute containing the parameter value.                                                      |
 
 ```python hl_lines="3-8" title="Customizing DynamoDBProvider to suit your table design"
 --8<-- "docs/examples/utilities/parameters/dynamodb_provider_customization.py"
@@ -280,24 +280,46 @@ You can use arbitrary keyword arguments to pass it directly to the underlying SD
 
 Here is the mapping between this utility's functions and methods and the underlying SDK:
 
-| Provider            | Function/Method                 | Client name      | Function name |
-|---------------------|---------------------------------|------------------|----------------|
-| SSM Parameter Store | `get_parameter`                 | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter) |
-| SSM Parameter Store | `get_parameters`                | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path) |
-| SSM Parameter Store | `SSMProvider.get`               | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter) |
-| SSM Parameter Store | `SSMProvider.get_multiple`      | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path) |
+| Provider            | Function/Method                 | Client name      | Function name                                                                                                                                             |
+| ------------------- | ------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SSM Parameter Store | `get_parameter`                 | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter)                             |
+| SSM Parameter Store | `get_parameters`                | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path)           |
+| SSM Parameter Store | `SSMProvider.get`               | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter)                             |
+| SSM Parameter Store | `SSMProvider.get_multiple`      | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path)           |
 | Secrets Manager     | `get_secret`                    | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value) |
 | Secrets Manager     | `SecretsManager.get`            | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value) |
-| DynamoDB            | `DynamoDBProvider.get`          | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table)) | [get_item](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.get_item)
-| DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table)) | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)
-| App Config          | `get_app_config`                | `appconfig`      | [get_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfig.html#AppConfig.Client.get_configuration) |
+| DynamoDB            | `DynamoDBProvider.get`          | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table))                                        | [get_item](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.get_item) |
+| DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table))                                        | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)       |
+| App Config          | `get_app_config`                | `appconfig`      | [get_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfig.html#AppConfig.Client.get_configuration)         |
+
+### Bring your own boto client
+
+You can use `boto3_client` parameter via any of the available [Provider Classes](#built-in-provider-class). Some providers expect a low level boto3 client while others expect a high level boto3 client, here is the mapping for each of them:
+
+| Provider                                | Type       | Boto client construction     |
+| --------------------------------------- | ---------- | ---------------------------- |
+| [SSMProvider](#ssmprovider)             | low level  | `boto3.client("ssm")`        |
+| [SecretsProvider](#secretsprovider)     | low level  | `boto3.client("secrets")`    |
+| [AppConfigProvider](#appconfigprovider) | low level  | `boto3.client("appconfig")`  |
+| [DynamoDBProvider](#dynamodbprovider)   | high level | `boto3.resource("dynamodb")` |
+
+Bringing them together in a single code snippet would look like this:
+
+```python title="Example: passing a custom boto3 client for each provider"
+--8<-- "docs/examples/utilities/parameters/parameters_boto3_client.py"
+```
+
+???+ question "When is this useful?"
+	Injecting a custom boto3 client can make unit/snapshot testing easier, including SDK customizations.
 
 ### Customizing boto configuration
 
-The **`config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html) when constructing any of the built-in provider classes.
+The **`config`** , **`boto3_session`**, and **`boto3_client`**  parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) , [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html), or  a [boto3 client](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/boto3.html) when constructing any of the built-in provider classes.
 
 ???+ tip
 	You can use a custom session for retrieving parameters cross-account/region and for snapshot testing.
+
+	When using VPC private endpoints, you can pass a custom client altogether. It's also useful for testing when injecting fake instances.
 
 === "Custom session"
 
@@ -308,6 +330,12 @@ The **`config`** and **`boto3_session`** parameters enable you to pass in a cust
 
 	```python hl_lines="1 5-6"
 	--8<-- "docs/examples/utilities/parameters/parameters_custom_config.py"
+	```
+
+=== "Custom client"
+
+	```python hl_lines="1 5-6"
+	--8<-- "docs/examples/utilities/parameters/parameters_custom_client.py"
 	```
 
 ## Testing your code
