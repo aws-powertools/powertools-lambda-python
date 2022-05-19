@@ -56,7 +56,7 @@ mike = "^0.6.0"
 mypy = "^0.950"
 mkdocs-material = "^8.2.7"
 mypy-boto3-secretsmanager = "^1.21.34"
-mypy-boto3-ssm = "^1.21.34"
+mypy-boto3-ssm = "^1.23.0"
 mypy-boto3-appconfig = "^1.21.34"
 mypy-boto3-dynamodb = "^1.23.0"
 
