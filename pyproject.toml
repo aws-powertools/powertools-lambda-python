@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "1.25.10"
+version = "1.26.0"
 description = "A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, batching, idempotency, feature flags, and more."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -55,6 +55,10 @@ mkdocs-git-revision-date-plugin = "^0.3.2"
 mike = "^0.6.0"
 mypy = "^0.950"
 mkdocs-material = "^8.2.7"
+mypy-boto3-secretsmanager = "^1.23.0"
+mypy-boto3-ssm = "^1.23.0"
+mypy-boto3-appconfig = "^1.23.0"
+mypy-boto3-dynamodb = "^1.23.0"
 
 
 [tool.poetry.extras]
@@ -87,8 +91,11 @@ exclude_lines = [
     "if 0:",
     "if __name__ == .__main__.:",
 
-	# Ignore type function overload
-	"@overload",
+    # Ignore runtime type checking
+    "if TYPE_CHECKING:",
+
+    # Ignore type function overload
+    "@overload",
 ]
 
 [tool.isort]
