@@ -8,8 +8,9 @@
   - [Uphold Code of Conduct](#uphold-code-of-conduct)
   - [Prioritize Security](#prioritize-security)
   - [Review Pull Requests](#review-pull-requests)
-  - [Triage Open Issues](#triage-open-issues)
+  - [Triage New Issues](#triage-new-issues)
   - [Triage Bug Reports](#triage-bug-reports)
+  - [Triage RFCs](#triage-rfcs)
   - [Releasing a new version](#releasing-a-new-version)
   - [Releasing a documentation hotfix](#releasing-a-documentation-hotfix)
   - [Maintain Overall Health of the Repo](#maintain-overall-health-of-the-repo)
@@ -19,6 +20,8 @@
   - [Becoming a maintainer](#becoming-a-maintainer)
 
 ## Overview
+
+> **This document is currently a WORK-IN-PROGRESS**
 
 This is document explains who the maintainers are (see below), what they do in this repo, and how they should be doing it. If you're interested in contributing, see [CONTRIBUTING](CONTRIBUTING.md).
 
@@ -46,7 +49,7 @@ Maintainers are active and visible members of the community, and have [maintain-
 
 ### Uphold Code of Conduct
 
-Model the behavior set forward by the [Code of Conduct](CODE_OF_CONDUCT.md) and raise any violations to other maintainers and admins. There could be unusual circumstances where inappropriate behavior does not immediately fall within the [Code of Conduct](CODE_OF_CONDUCT.md). These might be nuanced and should be handled with extra care - do not engage, whenever in doubt reach out to other maintainers and admins.
+Model the behavior set forward by the [Code of Conduct](CODE_OF_CONDUCT.md) and raise any violations to other maintainers and admins. There could be unusual circumstances where inappropriate behavior does not immediately fall within the [Code of Conduct](CODE_OF_CONDUCT.md). These might be nuanced and should be handled with extra care - when in doubt, do not engage and reach out to other maintainers and admins.
 
 ### Prioritize Security
 
@@ -61,17 +64,22 @@ Note that this repository is monitored and supported 24/7 by Amazon Security, se
 
 Review pull requests regularly, comment, suggest, reject, merge and close. Accept only high quality pull-requests. Provide code reviews and guidance on incoming pull requests.
 
-Use and enforce [semantic versioning](https://semver.org/) pull request titles, as these will be used for [CHANGELOG](CHANGELOG.md) and Release notes - make sure they communicate their intent at human level.
+Use and enforce [semantic versioning](https://semver.org/) pull request titles, as these will be used for [CHANGELOG](CHANGELOG.md) and [Release notes](https://github.com/awslabs/aws-lambda-powertools-python/releases) - make sure they communicate their intent at human level.
 
-### Triage Open Issues
+### Triage New Issues
 
 > WORK-IN-PROGRESS
-> TODO: cover labels, reference to Roadmap Project Status definition, sensitive labels to defer or prioritize work
+> TODO: cover labels, reference to Roadmap Project Status definition, sensitive labels to defer or prioritize work, and give first priority to original authors on implementation
 
 ### Triage Bug Reports
 
 > WORK-IN-PROGRESS
 > TODO: cover different types of bugs (internal, customer-facing, upstream), reference to releasing section
+
+### Triage RFCs
+
+> WORK-IN-PROGRESS
+> TODO: cover design proposal quality, mentoring sessions, etc.
 
 ### Releasing a new version
 
@@ -84,6 +92,8 @@ Use and enforce [semantic versioning](https://semver.org/) pull request titles, 
 > convert what's written in [publish.yml](.github/workflows/publish.yml)
 
 ### Maintain Overall Health of the Repo
+
+> TODO: Coordinate in removing `master` and renaming `develop` to `main`
 
 Keep the `develop` branch at production quality at all times. Backport features as needed. Cut release branches and tags to enable future patches.
 
@@ -99,7 +109,7 @@ Add integration checks that validate pull requests and pushes to ease the burden
 
 ### Negative Impact on the Project
 
-Actions that negatively impact the project will be handled by the admins, in coordination with other maintainers, in balance with the urgency of the issue. Examples would be [Code of Conduct](CODE_OF_CONDUCT.md) violations, deliberate harmful or malicious actions, and security risks.
+Actions that negatively impact the project will be handled by the admins, in coordination with other maintainers, in balance with the urgency of the issue. Examples would be [Code of Conduct](CODE_OF_CONDUCT.md) violations, deliberate harmful or malicious actions, spam, monopolization, and security risks.
 
 ### Becoming a maintainer
 
