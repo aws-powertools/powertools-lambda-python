@@ -649,8 +649,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-ssm"
-version = "1.21.34"
-description = "Type annotations for boto3.SSM 1.21.34 service generated with mypy-boto3-builder 7.5.8"
+version = "1.23.0.post1"
+description = "Type annotations for boto3.SSM 1.23.0 service generated with mypy-boto3-builder 7.5.14"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
@@ -1101,7 +1101,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "03b50d43366216805a13a1e258c0dcc5b82e543ada45264ea60ccb8c73cbfe62"
+content-hash = "a3afa5a31c6253466696c513345d179ffc6b280deb4b43682fd42caf42a833ef"
 
 [metadata.files]
 atomicwrites = [
@@ -1442,8 +1442,8 @@ mypy-boto3-secretsmanager = [
     {file = "mypy_boto3_secretsmanager-1.21.34-py3-none-any.whl", hash = "sha256:534fed05d1a5b5caf7032a88f295d58addf1135905d1559a87109a41e34b3b23"},
 ]
 mypy-boto3-ssm = [
-    {file = "mypy-boto3-ssm-1.21.34.tar.gz", hash = "sha256:cfc59e6c0513a3b72e3036a1785fcb57a1c4563db0e05515b0f082a34e0981c3"},
-    {file = "mypy_boto3_ssm-1.21.34-py3-none-any.whl", hash = "sha256:f799b77d611c4d84d2915957423d06de8ee0c270d385374387c7b022f5941b34"},
+    {file = "mypy-boto3-ssm-1.23.0.post1.tar.gz", hash = "sha256:78333811d184432ddfaa1d14bfb9586badc763d5ff8c876b7a224ebe629f9de8"},
+    {file = "mypy_boto3_ssm-1.23.0.post1-py3-none-any.whl", hash = "sha256:f6a21fdd2c8d34be3b621c9ec1b7fb981221a1125cc61945cfacd634f065c951"},
 ]
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
