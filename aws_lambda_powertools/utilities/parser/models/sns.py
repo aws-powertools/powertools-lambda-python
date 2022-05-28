@@ -30,9 +30,9 @@ class SnsNotificationModel(BaseModel):
     @root_validator(pre=True, allow_reuse=True)
     def check_sqs_protocol(cls, values):
         sqs_rewritten_keys = ("UnsubscribeURL", "SigningCertURL")
-        if any(key in sqs_rewritten_keys for key in values):
-            values["UnsubscribeUrl"] = values.pop("UnsubscribeURL")
-            values["SigningCertUrl"] = values.pop("SigningCertURL")
+        for k in sqs_rewritten_keys:
+            if k in values:
+                values[k] = values.pop(k)
         return values
 
 
