@@ -18,6 +18,10 @@
   - [Add Continuous Integration Checks](#add-continuous-integration-checks)
   - [Negative Impact on the Project](#negative-impact-on-the-project)
   - [Becoming a maintainer](#becoming-a-maintainer)
+- [Common scenarios](#common-scenarios)
+  - [Contribution is stuck](#contribution-is-stuck)
+  - [Insufficient feedback or information](#insufficient-feedback-or-information)
+  - [Crediting contributions](#crediting-contributions)
 
 ## Overview
 
@@ -78,19 +82,19 @@ Use and enforce [semantic versioning](https://semver.org/) pull request titles, 
 
 ### Triage RFCs
 
-RFCs are meant to be a collaborative process to help us get to the most optimal solution given the context. Their purpose is to ensure everyone understand what this context is, their trade-offs, and alternative solutions that were considered as part of the research before implementation begins.
+RFCs are meant to be a collaborative process to help us get to the most optimal solution given the context. Their purpose is to ensure everyone understands what this context is, their trade-offs, and alternative solutions that were part of the research before implementation begins.
 
-When reviewing newly submitted RFCs, make sure you have the following questions but not limited in mind:
+Make sure you ask these questions in mind when reviewing:
 
 * Does it use our [RFC template](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE)?
 * Does the match our [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/latest/#tenets)?
 * Does it focus on the mechanics to solve the use case over fine-grained implementation details?
-* Can anyone sufficiently familiar with the code base implement that RFC?
-* If approved, does the RFC author want to proceed in implementing with maintainer's guidance?
+* Can anyone familiar with the code base implement it?
+* If approved, are they interested in contributing? Do they need any guidance?
+* Does this significantly increase the overall project maintenance? e.g., lacks expertise in the team, fast moving target, etc.
+* If we can't take this use case, are there alternative projects we could recommend? Or does it call for a new project altogether?
 
-If necessary, be upfront that the time it takes to review, approve, and implement a RFC can vary. Some RFCs will likely be updated as soon as the implementation PR begins, as certain areas become clearer. If you find a RFC or its implementation would benefit from a call or mentoring, don't hesitate in offering it - this often can unblock language barriers.
-
-As a maintainer, make sure you set the authors to success while keeping maintenance in mind. When in doubt, use `need-more-information` or `need-customer-feedback` labels to signal more context and feedback are necessary before proceeding.
+When necessary, be upfront that the time it takes to review, approve, and implement a RFC can vary - see [Contribution is stuck](#contribution-is-stuck). Some RFCs may be further updated after implementation, as certain areas become clearer.
 
 Some examples using our initial and new RFC templates: #92, #94, #95, #991, #1226
 
@@ -128,3 +132,21 @@ Actions that negatively impact the project will be handled by the admins, in coo
 
 > WORK-IN-PROGRESS
 > TODO: cover ideas of what a future process might look like for when we're ready to do it fairly and securely.
+
+## Common scenarios
+
+### Contribution is stuck
+
+A contribution can get stuck often due to lack of bandwidth and language barrier. For bandwidth issues, check whether the author needs help. Make sure you get their permission before pushing code into their existing PR - do not create a new PR unless strictly necessary.
+
+For language barrier and others, don't hesitate to offer a 1:1 chat to get them unblocked. Often times, English might not be their primary language, and writing in public might put them off, or come across not the way they intended to be.
+
+In other cases, you may have constrained capacity. Use `help wanted` label when you want to signal additional maintainers and external contributors that you could use a hand to move it forward.
+
+### Insufficient feedback or information
+
+When in doubt, use `need-more-information` or `need-customer-feedback` labels to signal more context and feedback are necessary before proceeding. You can also use `revisit-in-3-months` label when you anticipate it might take a while to gather enough information before you can make a decision.
+
+### Crediting contributions
+
+> TODO: mention release notes and provide an example.
