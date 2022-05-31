@@ -105,8 +105,9 @@ Some examples using our initial and new RFC templates: #92, #94, #95, #991, #122
 
 ### Releasing a documentation hotfix
 
-> WORK-IN-PROGRESS
-> convert what's written in [publish.yml](.github/workflows/publish.yml)
+You can rebuild the latest documentation without a full release via this [GitHub Actions Workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/rebuild_latest_docs.yml). Choose `Run workflow`, keep `develop` as the branch, and input the latest Powertools version available.
+
+This workflow will update both user guide and API documentation.
 
 ### Maintain Overall Health of the Repo
 
