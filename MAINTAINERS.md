@@ -78,8 +78,21 @@ Use and enforce [semantic versioning](https://semver.org/) pull request titles, 
 
 ### Triage RFCs
 
-> WORK-IN-PROGRESS
-> TODO: cover design proposal quality, mentoring sessions, etc.
+RFCs are meant to be a collaborative process to help us get to the most optimal solution given the context. Their purpose is to ensure everyone understand what this context is, their trade-offs, and alternative solutions that were considered as part of the research before implementation begins.
+
+When reviewing newly submitted RFCs, make sure you have the following questions but not limited in mind:
+
+* Does it use our [RFC template](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE)?
+* Does the match our [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/latest/#tenets)?
+* Does it focus on the mechanics to solve the use case over fine-grained implementation details?
+* Can anyone sufficiently familiar with the code base implement that RFC?
+* If approved, does the RFC author want to proceed in implementing with maintainer's guidance?
+
+If necessary, be upfront that the time it takes to review, approve, and implement a RFC can vary. Some RFCs will likely be updated as soon as the implementation PR begins, as certain areas become clearer. If you find a RFC or its implementation would benefit from a call or mentoring, don't hesitate in offering it - this often can unblock language barriers.
+
+As a maintainer, make sure you set the authors to success while keeping maintenance in mind. When in doubt, use `need-more-information` or `need-customer-feedback` labels to signal more context and feedback are necessary before proceeding.
+
+Some examples using our initial and new RFC templates: #92, #94, #95, #991, #1226
 
 ### Releasing a new version
 
