@@ -266,4 +266,6 @@ Documentation snippets, use of internal components or unadvertised functionaliti
 
 ### Long running issues or PRs
 
-> TODO: Suggesting 1:1 or group calls, break XXL PRs in smaller chunks and different priorities, etc.
+Try offering a 1:1 call in the attempt to get to a mutual understanding, and clarify areas that maintainers could help.
+
+In the rare cases where both parties don't have the bandwidth or expertise to continue, it's best to use the `revisit-in-3-months` label. By then, see if it's possible to break the PR or issue in smaller chunks, and eventually close if there is no progress.
