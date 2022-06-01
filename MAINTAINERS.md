@@ -23,6 +23,7 @@
   - [Contribution is stuck](#contribution-is-stuck)
   - [Insufficient feedback or information](#insufficient-feedback-or-information)
   - [Crediting contributions](#crediting-contributions)
+  - [Is that a bug?](#is-that-a-bug)
   - [Inviting contributions](#inviting-contributions)
   - [Long running issues or PRs](#long-running-issues-or-prs)
 
@@ -131,8 +132,11 @@ See [Common scenarios](#common-scenarios) section for additional guidance.
 
 ### Triage Bug Reports
 
-> WORK-IN-PROGRESS
-> TODO: cover different types of bugs (internal, customer-facing, upstream), reference to releasing section
+Be familiar with [our definition of bug](#is-that-a-bug). If it's not a bug, you can close it or adjust its title and labels - always communicate the reason accordingly.
+
+For bugs caused by upstream dependencies, replace `bug` with `bug-upstream` label. Ask the author whether they'd like to raise the issue upstream or if they prefer us to do so.
+
+Assess the impact and make the call on whether we need an emergency release. Contact other [maintainers](#current-maintainers) when in doubt.
 
 See [Common scenarios](#common-scenarios) section for additional guidance.
 
@@ -147,7 +151,7 @@ Make sure you ask these questions in mind when reviewing:
 * Does it focus on the mechanics to solve the use case over fine-grained implementation details?
 * Can anyone familiar with the code base implement it?
 * If approved, are they interested in contributing? Do they need any guidance?
-* Does this significantly increase the overall project maintenance? e.g., lacks expertise in the team, fast moving target, etc.
+* Does this significantly increase the overall project maintenance? Do we have the necessary skills to maintain?
 * If we can't take this use case, are there alternative projects we could recommend? Or does it call for a new project altogether?
 
 When necessary, be upfront that the time it takes to review, approve, and implement a RFC can vary - see [Contribution is stuck](#contribution-is-stuck). Some RFCs may be further updated after implementation, as certain areas become clearer.
@@ -207,6 +211,12 @@ When in doubt, use `need-more-information` or `need-customer-feedback` labels to
 ### Crediting contributions
 
 > TODO: mention release notes and provide an example.
+
+### Is that a bug?
+
+A bug produces incorrect or unexpected results at runtime that differs from its intended behavior. Bugs must be reproducible. They directly affect customers experience at runtime despite following its recommended usage.
+
+Documentation snippets, use of internal components or unadvertised functionalities are not considered bugs.
 
 ### Inviting contributions
 
