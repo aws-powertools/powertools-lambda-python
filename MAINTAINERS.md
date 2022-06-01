@@ -62,6 +62,7 @@ These are the most common labels used by maintainers to triage issues, pull requ
 | ---------------------- | ---------------------------------------------------------------- | --------------------------------------------------------------- |
 | triage                 | New issues that require maintainers review                       | Issue template                                                  |
 | bug                    | Unexpected, reproducible and unintended software behavior        | PR/Release automation; Doc snippets are excluded;               |
+| not-a-bug              | New and existing bug reports incorrectly submitted as bug        | Analytics                                                       |
 | documentation          | Documentation improvements                                       | PR/Release automation; Doc additions, fixes, etc.;              |
 | feature-request        | New or enhancements to existing features                         | Issue template                                                  |
 | typing                 | New or enhancements to static typing                             | Issue template                                                  |
