@@ -39,6 +39,9 @@ labelPRBasedOnFilePath:
     - aws_lambda_powertools/feature_flags/**/*
   jmespath_util:
     - aws_lambda_powertools/utilities/jmespath_utils/*
+  typing:
+    - aws_lambda_powertools/utilities/typing/*
+    - mypy.ini
   utilities:
     - aws_lambda_powertools/utilities/*
     - aws_lambda_powertools/utilities/**/*
@@ -48,17 +51,34 @@ labelPRBasedOnFilePath:
     - docs/**/*
     - mkdocs.yml
 
+  github-actions:
+    - .github/workflows/*
+    - .github/workflows/**/*
+    - .github/dependabot.yml
+    - .github/boring-cyborg.yml
+    - .github/release-drafter.yml
+    - .github/semantic.yml
+    - .github/stale.yml
+    - .github/mergify.yml
+
+  github-templates:
+    - .github/ISSUE_TEMPLATE/*
+    - .github/PULL_REQUEST_TEMPLATE.md
+    - .github/.chglog/*
+    - .github/.chglog/**/*
+
   internal:
-    - .github/*
-    - .github/**/*
-    - .chglog/*
     - .flake8
+    - .bandit.baseline
     - .gitignore
     - .pre-commit-config.yaml
+    - MANIFEST.in
     - Makefile
     - CONTRIBUTING.md
+    - MAINTAINERS.md
     - CODE_OF_CONDUCT.md
     - LICENSE
+    - THIRD-PARTY-LICENSES
     - aws_lambda_powertools_python/shared/*
     - aws_lambda_powertools_python/shared/**
 

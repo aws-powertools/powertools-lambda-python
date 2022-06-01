@@ -82,6 +82,8 @@ These are the most common labels used by maintainers to triage issues, pull requ
 | feature                | New features or minor changes                                     | PR/Release automation                                           |
 | dependencies           | Changes that touch dependencies, e.g. Dependabot, etc.            | PR/ automation                                                  |
 | github-actions         | Changes in GitHub workflows                                       | PR automation                                                   |
+| github-templates       | Changes in GitHub issue/PR templates                              | PR automation                                                   |
+| internal               | Changes in governance and chores (linting setup, baseline, etc.)  | PR automation                                                   |
 
 ## Maintainer Responsibilities
 
