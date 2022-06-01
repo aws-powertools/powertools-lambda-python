@@ -23,6 +23,8 @@
   - [Contribution is stuck](#contribution-is-stuck)
   - [Insufficient feedback or information](#insufficient-feedback-or-information)
   - [Crediting contributions](#crediting-contributions)
+  - [Inviting contributions](#inviting-contributions)
+  - [Long running issues or PRs](#long-running-issues-or-prs)
 
 ## Overview
 
@@ -101,22 +103,38 @@ Note that this repository is monitored and supported 24/7 by Amazon Security, se
 
 ### Review Pull Requests
 
-> WORK-IN-PROGRESS
-> TODO: cover labels, CI automation, the right to close, and a reference to FAQ on common issues.
-
 Review pull requests regularly, comment, suggest, reject, merge and close. Accept only high quality pull-requests. Provide code reviews and guidance on incoming pull requests.
+
+PRs are automatically [labelled](#labels) based on file changes and semantic title. Pay attention to whether labels reflect the current state of the PR and correct accordingly.
 
 Use and enforce [semantic versioning](https://semver.org/) pull request titles, as these will be used for [CHANGELOG](CHANGELOG.md) and [Release notes](https://github.com/awslabs/aws-lambda-powertools-python/releases) - make sure they communicate their intent at human level.
 
+> TODO: This is an area we want to automate using the new GitHub GraphQL API.
+
+For issues linked to a PR, make sure `pending release` label is applied to them when merging. Upon release, all issues with that label will be notified which version contains that change.
+
+See [Common scenarios](#common-scenarios) section for additional guidance.
+
 ### Triage New Issues
 
-> WORK-IN-PROGRESS
-> TODO: cover labels, reference to Roadmap Project Status definition, sensitive labels to defer or prioritize work, and give first priority to original authors on implementation
+Manage [labels](#labels), review issues regularly, and create new labels as needed by the project. Remove `triage` label when you're able to confirm the validity of a request, a bug can be reproduced, etc. Give priority to the original author for implementation, unless it is a sensitive task that is best handled by maintainers.
+
+> TODO: This is an area we want to automate using the new GitHub GraphQL API.
+
+Make sure issues are assigned to our [board of activities](https://github.com/orgs/awslabs/projects/51/) and have the appropriate [status](https://awslabs.github.io/aws-lambda-powertools-python/latest/roadmap/#roadmap-status-definition).
+
+Use our [labels](#labels) to signal good first issues to new community members, and to set expectation that this might require additional feedback from the author, other customers, experienced community members and/or maintainers.
+
+Be aware of [casual contributors](https://opensource.com/article/17/10/managing-casual-contributors) and recurring contributors. Provide the experience and attention you wish you had if you were starting in open source.
+
+See [Common scenarios](#common-scenarios) section for additional guidance.
 
 ### Triage Bug Reports
 
 > WORK-IN-PROGRESS
 > TODO: cover different types of bugs (internal, customer-facing, upstream), reference to releasing section
+
+See [Common scenarios](#common-scenarios) section for additional guidance.
 
 ### Triage RFCs
 
@@ -189,3 +207,11 @@ When in doubt, use `need-more-information` or `need-customer-feedback` labels to
 ### Crediting contributions
 
 > TODO: mention release notes and provide an example.
+
+### Inviting contributions
+
+> TODO: sensitive labels to defer or prioritize work
+
+### Long running issues or PRs
+
+> TODO: Suggesting 1:1 or group calls, break XXL PRs in smaller chunks and different priorities, etc.
