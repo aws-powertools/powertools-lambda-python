@@ -13,6 +13,9 @@
   - [Triage Bug Reports](#triage-bug-reports)
   - [Triage RFCs](#triage-rfcs)
   - [Releasing a new version](#releasing-a-new-version)
+    - [Changelog generation](#changelog-generation)
+    - [Bumping the version](#bumping-the-version)
+    - [Drafting release notes](#drafting-release-notes)
   - [Releasing a documentation hotfix](#releasing-a-documentation-hotfix)
   - [Maintain Overall Health of the Repo](#maintain-overall-health-of-the-repo)
   - [Manage Roadmap](#manage-roadmap)
@@ -112,7 +115,7 @@ Use and enforce [semantic versioning](https://semver.org/) pull request titles, 
 
 > TODO: This is an area we want to automate using the new GitHub GraphQL API.
 
-For issues linked to a PR, make sure `pending release` label is applied to them when merging. Upon release, all issues with that label will be notified which version contains that change.
+For issues linked to a PR, make sure `pending release` label is applied to them when merging. [Upon release](#releasing-a-new-version), all issues with that label will be notified which version contains that change.
 
 See [Common scenarios](#common-scenarios) section for additional guidance.
 
@@ -160,8 +163,47 @@ Some examples using our initial and new RFC templates: #92, #94, #95, #991, #122
 
 ### Releasing a new version
 
-> WORK-IN-PROGRESS
-> convert what's written in [publish.yml](.github/workflows/publish.yml)
+> TODO: This is an area we want to increase automation while keeping communication at human level.
+
+Firstly, make sure you are using the `develop` branch and it is up to date with the origin.
+
+There are three main steps to release a new version: Changelog generation, version bumping, and drafting release notes.
+
+#### Changelog generation
+
+You can pre-generate a temporary CHANGELOG using `make changelog`. This will generate a `TMP_CHANGELOG.md` with all staged changes under the `unreleased` section.
+
+Each unreleased line item is a commit. You can adjust them if you find the commit titles are insufficient to describe their intent. Once you're comfortable, bring these changes to the `CHANGELOG.md` with a new version heading like in previous versions.
+
+#### Bumping the version
+
+Use `poetry version <major|minor|patch|specific version>` to bump the version. For example, you can use `poetry version minor` when releasing a minor version.
+
+NOTE. Make sure both `CHANGELOG` and `pyproject.toml` are committed and pushed to the remote `develop` branch before proceeding.
+
+#### Drafting release notes
+
+Visit the [Releases page](https://github.com/awslabs/aws-lambda-powertools-python/releases) and choose the edit pencil button.
+
+Make sure the `tag` field reflects the new version you're releasing, target branch field is set to `develop`, and `release title` matches your tag e.g., `v1.26.0`.
+
+You'll notice that all changes are grouped based on their [labels](#labels) like `feature`, `bug`, `documentation`, etc.
+
+> **Q: What if there's an incorrect title or grouping?**
+
+Edit the respective PR title and update their [labels](#labels). Then run the [Release Drafter workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/release-drafter.yml) to update the Draft release.
+
+The best part comes now. Replace the placeholder `[Human readable summary of changes]` with what you'd like to communicate to customers what this release is all about. Always put yourself in the customers shoes. For that, these are some questions to keep in mind when drafting your first or future release notes:
+
+* Can customers understand at a high level what changed in this release?
+* Is there a link to the documentation where they can read more about each main change?
+* Are there any graphics or code snippets that can enhance readability?
+* Are we calling out any key contributor(s) to this release?
+  - All contributors are automatically credited, use this as an exceptional case to feature them
+
+Once you're happy, hit `Publish release`. This will kick off the [Publishing workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/publish.yml) and within a few minutes you should see the latest version in PyPi, and all issues labelled as `pending-release` will be notified.
+
+> TODO: Wait for @am29d new Lambda Layers pipeline work to complete, then add how Lambda Layers are published
 
 ### Releasing a documentation hotfix
 
@@ -210,7 +252,7 @@ When in doubt, use `need-more-information` or `need-customer-feedback` labels to
 
 ### Crediting contributions
 
-> TODO: mention release notes and provide an example.
+We credit all contributions as part of each [release note](https://github.com/awslabs/aws-lambda-powertools-python/releases) as an automated process. If you find that contributors are missing from the release note you're producing, please add them manually.
 
 ### Is that a bug?
 
