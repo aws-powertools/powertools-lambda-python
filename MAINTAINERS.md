@@ -27,7 +27,7 @@
   - [Insufficient feedback or information](#insufficient-feedback-or-information)
   - [Crediting contributions](#crediting-contributions)
   - [Is that a bug?](#is-that-a-bug)
-  - [Inviting contributions](#inviting-contributions)
+  - [Mentoring contributions](#mentoring-contributions)
   - [Long running issues or PRs](#long-running-issues-or-prs)
 
 ## Overview
@@ -213,7 +213,7 @@ This workflow will update both user guide and API documentation.
 
 ### Maintain Overall Health of the Repo
 
-> TODO: Coordinate in removing `master` and renaming `develop` to `main`
+> TODO: Coordinate removing `master` and renaming `develop` to `main`
 
 Keep the `develop` branch at production quality at all times. Backport features as needed. Cut release branches and tags to enable future patches.
 
@@ -233,9 +233,9 @@ Actions that negatively impact the project will be handled by the admins, in coo
 
 ### Becoming a maintainer
 
-> WORK-IN-PROGRESS
-> TODO: cover ideas of what a future process might look like for when we're ready to do it fairly and securely.
+We will revisit this in 2023. We need to improve our understanding of how other projects are doing, their mechanisms to promote key contributors, and how they interact on a daily basis.
 
+We suspect this process might look similar to the [OpenSearch project](https://github.com/opensearch-project/.github/blob/main/MAINTAINERS.md#becoming-a-maintainer).
 ## Common scenarios
 
 ### Contribution is stuck
@@ -260,9 +260,11 @@ A bug produces incorrect or unexpected results at runtime that differs from its 
 
 Documentation snippets, use of internal components or unadvertised functionalities are not considered bugs.
 
-### Inviting contributions
+### Mentoring contributions
 
-> TODO: sensitive labels to defer or prioritize work
+Always favor mentoring issue authors to contribute, unless they're not interested or the implementation is sensitive (_e.g., complexity, time to release, etc._).
+
+Make use of `help wanted` and `good first issue` to signal additional contributions the community can help.
 
 ### Long running issues or PRs
 
