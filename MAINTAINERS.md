@@ -4,6 +4,7 @@
 - [Overview](#overview)
 - [Current Maintainers](#current-maintainers)
 - [Emeritus](#emeritus)
+- [Labels](#labels)
 - [Maintainer Responsibilities](#maintainer-responsibilities)
   - [Uphold Code of Conduct](#uphold-code-of-conduct)
   - [Prioritize Security](#prioritize-security)
@@ -46,6 +47,41 @@ Previous active maintainers who contributed to this project.
 | ----------------- | ----------------------------------------------- | ----------- |
 | Tom McCarthy      | [cakepietoast](https://github.com/cakepietoast) | MongoDB     |
 | Nicolas Moutschen | [nmoutschen](https://github.com/nmoutschen)     | Amazon      |
+
+## Labels
+
+These are the most common labels used by maintainers to triage issues, pull requests (PR), and for project management:
+
+| Label                  | Usage                                                             | Notes                                                           |
+| ---------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------- |
+| triage                 | New issues that require maintainers review                        | Issue template                                                  |
+| bug                    | Unexpected, reproducible and unintended software behavior         | PR/Release automation; Doc snippets are excluded;               |
+| documentation          | Documentation improvements                                        | PR/Release automation; Doc additions, fixes, etc.;              |
+| feature-request        | New or enhancements to existing features                          | Issue template                                                  |
+| typing                 | New or enhancements to static typing                              | Issue template                                                  |
+| RFC                    | Technical design documents related to a feature request           | Issue template                                                  |
+| bug-upstream           | Bug caused by upstream dependency                                 |                                                                 |
+| help wanted            | Tasks you want help from anyone to move forward                   | Bandwidth, complex topics, etc.                                 |
+| need-customer-feedback | Tasks that require additional feedback before proceeding          | 80/20% rule, uncertain, etc.                                    |
+| need-more-information  | Missing information before making any call                        |                                                                 |
+| need-documentation     | PR is missing or has incomplete documentation                     |                                                                 |
+| need-issue             | PR is missing a related issue for tracking change                 | Needs to be automated                                           |
+| need-rfc               | Feature request requires a RFC to improve discussion              |                                                                 |
+| pending-release        | Merged changes that will be available soon                        | Release automation auto-closes/notifies it                      |
+| revisit-in-3-months    | Blocked issues/PRs that needs to be revisited                     | Often related to `need-customer-feedback`, prioritization, etc. |
+| breaking-change        | Changes that will cause customer impact and needs careful triage  |                                                                 |
+| do-not-merge           | PRs that are blocked for varying reasons                          | Might not have a timeline in sight                              |
+| size/XS                | PRs between 0-9 LOC                                               | PR automation                                                   |
+| size/S                 | PRs between 10-29 LOC                                             | PR automation                                                   |
+| size/M                 | PRs between 30-99 LOC                                             | PR automation                                                   |
+| size/L                 | PRs between 100-499 LOC                                           | PR automation                                                   |
+| size/XL                | PRs between 500-999 LOC, typically PRs that evolved with feedback | PR automation                                                   |
+| size/XXL               | PRs with 1K+ LOC, largely documentation related                   | PR automation                                                   |
+| tests                  | PRs that add or change tests                                      | PR automation                                                   |
+| `<utility>`            | PRs related to a Powertools utility, e.g. `parameters`, `tracer`  | PR automation                                                   |
+| feature                | New features or minor changes                                     | PR/Release automation                                           |
+| dependencies           | Changes that touch dependencies, e.g. Dependabot, etc.            | PR/ automation                                                  |
+| github-actions         | Changes in GitHub workflows                                       | PR automation                                                   |
 
 ## Maintainer Responsibilities
 
