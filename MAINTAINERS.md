@@ -58,38 +58,38 @@ Previous active maintainers who contributed to this project.
 
 These are the most common labels used by maintainers to triage issues, pull requests (PR), and for project management:
 
-| Label                  | Usage                                                             | Notes                                                           |
-| ---------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------- |
-| triage                 | New issues that require maintainers review                        | Issue template                                                  |
-| bug                    | Unexpected, reproducible and unintended software behavior         | PR/Release automation; Doc snippets are excluded;               |
-| documentation          | Documentation improvements                                        | PR/Release automation; Doc additions, fixes, etc.;              |
-| feature-request        | New or enhancements to existing features                          | Issue template                                                  |
-| typing                 | New or enhancements to static typing                              | Issue template                                                  |
-| RFC                    | Technical design documents related to a feature request           | Issue template                                                  |
-| bug-upstream           | Bug caused by upstream dependency                                 |                                                                 |
-| help wanted            | Tasks you want help from anyone to move forward                   | Bandwidth, complex topics, etc.                                 |
-| need-customer-feedback | Tasks that require additional feedback before proceeding          | 80/20% rule, uncertain, etc.                                    |
-| need-more-information  | Missing information before making any call                        |                                                                 |
-| need-documentation     | PR is missing or has incomplete documentation                     |                                                                 |
-| need-issue             | PR is missing a related issue for tracking change                 | Needs to be automated                                           |
-| need-rfc               | Feature request requires a RFC to improve discussion              |                                                                 |
-| pending-release        | Merged changes that will be available soon                        | Release automation auto-closes/notifies it                      |
-| revisit-in-3-months    | Blocked issues/PRs that needs to be revisited                     | Often related to `need-customer-feedback`, prioritization, etc. |
-| breaking-change        | Changes that will cause customer impact and needs careful triage  |                                                                 |
-| do-not-merge           | PRs that are blocked for varying reasons                          | Might not have a timeline in sight                              |
-| size/XS                | PRs between 0-9 LOC                                               | PR automation                                                   |
-| size/S                 | PRs between 10-29 LOC                                             | PR automation                                                   |
-| size/M                 | PRs between 30-99 LOC                                             | PR automation                                                   |
-| size/L                 | PRs between 100-499 LOC                                           | PR automation                                                   |
-| size/XL                | PRs between 500-999 LOC, typically PRs that evolved with feedback | PR automation                                                   |
-| size/XXL               | PRs with 1K+ LOC, largely documentation related                   | PR automation                                                   |
-| tests                  | PRs that add or change tests                                      | PR automation                                                   |
-| `<utility>`            | PRs related to a Powertools utility, e.g. `parameters`, `tracer`  | PR automation                                                   |
-| feature                | New features or minor changes                                     | PR/Release automation                                           |
-| dependencies           | Changes that touch dependencies, e.g. Dependabot, etc.            | PR/ automation                                                  |
-| github-actions         | Changes in GitHub workflows                                       | PR automation                                                   |
-| github-templates       | Changes in GitHub issue/PR templates                              | PR automation                                                   |
-| internal               | Changes in governance and chores (linting setup, baseline, etc.)  | PR automation                                                   |
+| Label                  | Usage                                                            | Notes                                                           |
+| ---------------------- | ---------------------------------------------------------------- | --------------------------------------------------------------- |
+| triage                 | New issues that require maintainers review                       | Issue template                                                  |
+| bug                    | Unexpected, reproducible and unintended software behavior        | PR/Release automation; Doc snippets are excluded;               |
+| documentation          | Documentation improvements                                       | PR/Release automation; Doc additions, fixes, etc.;              |
+| feature-request        | New or enhancements to existing features                         | Issue template                                                  |
+| typing                 | New or enhancements to static typing                             | Issue template                                                  |
+| RFC                    | Technical design documents related to a feature request          | Issue template                                                  |
+| bug-upstream           | Bug caused by upstream dependency                                |                                                                 |
+| help wanted            | Tasks you want help from anyone to move forward                  | Bandwidth, complex topics, etc.                                 |
+| need-customer-feedback | Tasks that need more feedback before proceeding                  | 80/20% rule, uncertain, etc.                                    |
+| need-more-information  | Missing information before making any calls                      |                                                                 |
+| need-documentation     | PR is missing or has incomplete documentation                    |                                                                 |
+| need-issue             | PR is missing a related issue for tracking change                | Needs to be automated                                           |
+| need-rfc               | Feature request requires a RFC to improve discussion             |                                                                 |
+| pending-release        | Merged changes that will be available soon                       | Release automation auto-closes/notifies it                      |
+| revisit-in-3-months    | Blocked issues/PRs that need to be revisited                     | Often related to `need-customer-feedback`, prioritization, etc. |
+| breaking-change        | Changes that will cause customer impact and need careful triage  |                                                                 |
+| do-not-merge           | PRs that are blocked for varying reasons                         | Timeline is uncertain                                           |
+| size/XS                | PRs between 0-9 LOC                                              | PR automation                                                   |
+| size/S                 | PRs between 10-29 LOC                                            | PR automation                                                   |
+| size/M                 | PRs between 30-99 LOC                                            | PR automation                                                   |
+| size/L                 | PRs between 100-499 LOC                                          | PR automation                                                   |
+| size/XL                | PRs between 500-999 LOC, often PRs that grown with feedback      | PR automation                                                   |
+| size/XXL               | PRs with 1K+ LOC, largely documentation related                  | PR automation                                                   |
+| tests                  | PRs that add or change tests                                     | PR automation                                                   |
+| `<utility>`            | PRs related to a Powertools utility, e.g. `parameters`, `tracer` | PR automation                                                   |
+| feature                | New features or minor changes                                    | PR/Release automation                                           |
+| dependencies           | Changes that touch dependencies, e.g. Dependabot, etc.           | PR/ automation                                                  |
+| github-actions         | Changes in GitHub workflows                                      | PR automation                                                   |
+| github-templates       | Changes in GitHub issue/PR templates                             | PR automation                                                   |
+| internal               | Changes in governance and chores (linting setup, baseline, etc.) | PR automation                                                   |
 
 ## Maintainer Responsibilities
 
@@ -109,13 +109,13 @@ Note that this repository is monitored and supported 24/7 by Amazon Security, se
 
 Review pull requests regularly, comment, suggest, reject, merge and close. Accept only high quality pull-requests. Provide code reviews and guidance on incoming pull requests.
 
-PRs are automatically [labelled](#labels) based on file changes and semantic title. Pay attention to whether labels reflect the current state of the PR and correct accordingly.
+PRs are [labeled](#labels) based on file changes and semantic title. Pay attention to whether labels reflect the current state of the PR and correct accordingly.
 
-Use and enforce [semantic versioning](https://semver.org/) pull request titles, as these will be used for [CHANGELOG](CHANGELOG.md) and [Release notes](https://github.com/awslabs/aws-lambda-powertools-python/releases) - make sure they communicate their intent at human level.
+Use and enforce [semantic versioning](https://semver.org/) pull request titles, as these will be used for [CHANGELOG](CHANGELOG.md) and [Release notes](https://github.com/awslabs/aws-lambda-powertools-python/releases) - make sure they communicate their intent at the human level.
 
 > TODO: This is an area we want to automate using the new GitHub GraphQL API.
 
-For issues linked to a PR, make sure `pending release` label is applied to them when merging. [Upon release](#releasing-a-new-version), all issues with that label will be notified which version contains that change.
+For issues linked to a PR, make sure `pending release` label is applied to them when merging. [Upon release](#releasing-a-new-version), these issues will be notified which release version contains their change.
 
 See [Common scenarios](#common-scenarios) section for additional guidance.
 
@@ -125,9 +125,9 @@ Manage [labels](#labels), review issues regularly, and create new labels as need
 
 > TODO: This is an area we want to automate using the new GitHub GraphQL API.
 
-Make sure issues are assigned to our [board of activities](https://github.com/orgs/awslabs/projects/51/) and have the appropriate [status](https://awslabs.github.io/aws-lambda-powertools-python/latest/roadmap/#roadmap-status-definition).
+Make sure issues are assigned to our [board of activities](https://github.com/orgs/awslabs/projects/51/) and have the right [status](https://awslabs.github.io/aws-lambda-powertools-python/latest/roadmap/#roadmap-status-definition).
 
-Use our [labels](#labels) to signal good first issues to new community members, and to set expectation that this might require additional feedback from the author, other customers, experienced community members and/or maintainers.
+Use our [labels](#labels) to signal good first issues to new community members, and to set expectation that this might need additional feedback from the author, other customers, experienced community members and/or maintainers.
 
 Be aware of [casual contributors](https://opensource.com/article/17/10/managing-casual-contributors) and recurring contributors. Provide the experience and attention you wish you had if you were starting in open source.
 
@@ -145,7 +145,7 @@ See [Common scenarios](#common-scenarios) section for additional guidance.
 
 ### Triage RFCs
 
-RFCs are meant to be a collaborative process to help us get to the most optimal solution given the context. Their purpose is to ensure everyone understands what this context is, their trade-offs, and alternative solutions that were part of the research before implementation begins.
+RFC is a collaborative process to help us get to the most optimal solution given the context. Their purpose is to ensure everyone understands what this context is, their trade-offs, and alternative solutions that were part of the research before implementation begins.
 
 Make sure you ask these questions in mind when reviewing:
 
@@ -154,10 +154,10 @@ Make sure you ask these questions in mind when reviewing:
 * Does it focus on the mechanics to solve the use case over fine-grained implementation details?
 * Can anyone familiar with the code base implement it?
 * If approved, are they interested in contributing? Do they need any guidance?
-* Does this significantly increase the overall project maintenance? Do we have the necessary skills to maintain?
+* Does this significantly increase the overall project maintenance? Do we have the skills to maintain it?
 * If we can't take this use case, are there alternative projects we could recommend? Or does it call for a new project altogether?
 
-When necessary, be upfront that the time it takes to review, approve, and implement a RFC can vary - see [Contribution is stuck](#contribution-is-stuck). Some RFCs may be further updated after implementation, as certain areas become clearer.
+When necessary, be upfront that the time to review, approve, and implement a RFC can vary - see [Contribution is stuck](#contribution-is-stuck). Some RFCs may be further updated after implementation, as certain areas become clearer.
 
 Some examples using our initial and new RFC templates: #92, #94, #95, #991, #1226
 
@@ -185,9 +185,9 @@ NOTE. Make sure both `CHANGELOG` and `pyproject.toml` are committed and pushed t
 
 Visit the [Releases page](https://github.com/awslabs/aws-lambda-powertools-python/releases) and choose the edit pencil button.
 
-Make sure the `tag` field reflects the new version you're releasing, target branch field is set to `develop`, and `release title` matches your tag e.g., `v1.26.0`.
+Make sure the `tag` field reflects the new version you're releasing, the target branch field is set to `develop`, and `release title` matches your tag e.g., `v1.26.0`.
 
-You'll notice that all changes are grouped based on their [labels](#labels) like `feature`, `bug`, `documentation`, etc.
+You'll notice we group all changes based on their [labels](#labels) like `feature`, `bug`, `documentation`, etc.
 
 > **Q: What if there's an incorrect title or grouping?**
 
@@ -201,7 +201,7 @@ The best part comes now. Replace the placeholder `[Human readable summary of cha
 * Are we calling out any key contributor(s) to this release?
   - All contributors are automatically credited, use this as an exceptional case to feature them
 
-Once you're happy, hit `Publish release`. This will kick off the [Publishing workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/publish.yml) and within a few minutes you should see the latest version in PyPi, and all issues labelled as `pending-release` will be notified.
+Once you're happy, hit `Publish release`. This will kick off the [Publishing workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/publish.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be notified.
 
 > TODO: Wait for @am29d new Lambda Layers pipeline work to complete, then add how Lambda Layers are published
 
@@ -233,7 +233,7 @@ Actions that negatively impact the project will be handled by the admins, in coo
 
 ### Becoming a maintainer
 
-We will revisit this in 2023. We need to improve our understanding of how other projects are doing, their mechanisms to promote key contributors, and how they interact on a daily basis.
+In 2023, we will revisit this. We need to improve our understanding of how other projects are doing, their mechanisms to promote key contributors, and how they interact daily.
 
 We suspect this process might look similar to the [OpenSearch project](https://github.com/opensearch-project/.github/blob/main/MAINTAINERS.md#becoming-a-maintainer).
 ## Common scenarios
@@ -242,23 +242,23 @@ We suspect this process might look similar to the [OpenSearch project](https://g
 
 A contribution can get stuck often due to lack of bandwidth and language barrier. For bandwidth issues, check whether the author needs help. Make sure you get their permission before pushing code into their existing PR - do not create a new PR unless strictly necessary.
 
-For language barrier and others, don't hesitate to offer a 1:1 chat to get them unblocked. Often times, English might not be their primary language, and writing in public might put them off, or come across not the way they intended to be.
+For language barrier and others, offer a 1:1 chat to get them unblocked. Often times, English might not be their primary language, and writing in public might put them off, or come across not the way they intended to be.
 
-In other cases, you may have constrained capacity. Use `help wanted` label when you want to signal additional maintainers and external contributors that you could use a hand to move it forward.
+In other cases, you may have constrained capacity. Use `help wanted` label when you want to signal other maintainers and external contributors that you could use a hand to move it forward.
 
 ### Insufficient feedback or information
 
-When in doubt, use `need-more-information` or `need-customer-feedback` labels to signal more context and feedback are necessary before proceeding. You can also use `revisit-in-3-months` label when you anticipate it might take a while to gather enough information before you can make a decision.
+When in doubt, use `need-more-information` or `need-customer-feedback` labels to signal more context and feedback are necessary before proceeding. You can also use `revisit-in-3-months` label when you expect it might take a while to gather enough information before you can decide.
 
 ### Crediting contributions
 
-We credit all contributions as part of each [release note](https://github.com/awslabs/aws-lambda-powertools-python/releases) as an automated process. If you find that contributors are missing from the release note you're producing, please add them manually.
+We credit all contributions as part of each [release note](https://github.com/awslabs/aws-lambda-powertools-python/releases) as an automated process. If you find  contributors are missing from the release note you're producing, please add them manually.
 
 ### Is that a bug?
 
-A bug produces incorrect or unexpected results at runtime that differs from its intended behavior. Bugs must be reproducible. They directly affect customers experience at runtime despite following its recommended usage.
+A bug produces incorrect or unexpected results at runtime that differ from its intended behavior. Bugs must be reproducible. They directly affect customers experience at runtime despite following its recommended usage.
 
-Documentation snippets, use of internal components or unadvertised functionalities are not considered bugs.
+Documentation snippets, use of internal components, or unadvertised functionalities are not considered bugs.
 
 ### Mentoring contributions
 
@@ -268,6 +268,6 @@ Make use of `help wanted` and `good first issue` to signal additional contributi
 
 ### Long running issues or PRs
 
-Try offering a 1:1 call in the attempt to get to a mutual understanding, and clarify areas that maintainers could help.
+Try offering a 1:1 call in the attempt to get to a mutual understanding and clarify areas that maintainers could help.
 
 In the rare cases where both parties don't have the bandwidth or expertise to continue, it's best to use the `revisit-in-3-months` label. By then, see if it's possible to break the PR or issue in smaller chunks, and eventually close if there is no progress.
