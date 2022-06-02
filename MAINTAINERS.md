@@ -32,7 +32,7 @@
 
 ## Overview
 
-> **This document is currently a WORK-IN-PROGRESS**
+> **Please treat this content as a living document.**
 
 This is document explains who the maintainers are (see below), what they do in this repo, and how they should be doing it. If you're interested in contributing, see [CONTRIBUTING](CONTRIBUTING.md).
 
