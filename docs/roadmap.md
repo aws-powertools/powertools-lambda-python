@@ -1,6 +1,6 @@
 ## Overview
 
-???+ info "We are currently paused for new features [until end of July 2022](https://github.com/awslabs/aws-lambda-powertools-python/issues/1009){target="_blank"}."
+???+ info "We are currently paused for new features [until end of July 2022](https://github.com/awslabs/aws-lambda-powertools-python/issues/1076){target="_blank"}."
 
 This is our public roadmap that outlines the high level direction we are working towards, namely [Themes](#themes). We update this document when our priorities change: security and stability is our top priority.
 
