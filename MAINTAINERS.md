@@ -96,6 +96,8 @@ These are the most common labels used by maintainers to triage issues, pull requ
 
 Maintainers are active and visible members of the community, and have [maintain-level permissions on a repository](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-permission-levels-for-an-organization). Use those privileges to serve the community and evolve code as follows.
 
+Be aware of recurring ambiguous situations and [document them](#common-scenarios) to help your fellow maintainers.
+
 ### Uphold Code of Conduct
 
 Model the behavior set forward by the [Code of Conduct](CODE_OF_CONDUCT.md) and raise any violations to other maintainers and admins. There could be unusual circumstances where inappropriate behavior does not immediately fall within the [Code of Conduct](CODE_OF_CONDUCT.md). These might be nuanced and should be handled with extra care - when in doubt, do not engage and reach out to other maintainers and admins.
@@ -239,6 +241,8 @@ In 2023, we will revisit this. We need to improve our understanding of how other
 
 We suspect this process might look similar to the [OpenSearch project](https://github.com/opensearch-project/.github/blob/main/MAINTAINERS.md#becoming-a-maintainer).
 ## Common scenarios
+
+These are recurring ambiguous situations that new and existing maintainers may encounter. They serve as guidance. It is up to each maintainer to follow, adjust, or handle in a different manner as long as [our conduct is consistent](#uphold-code-of-conduct)
 
 ### Contribution is stuck
 
