@@ -152,6 +152,7 @@ Make sure you ask these questions in mind when reviewing:
 
 * Does it use our [RFC template](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE)?
 * Does the match our [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/latest/#tenets)?
+* Does the proposal address the use case? If so, is the recommended usage explicit?
 * Does it focus on the mechanics to solve the use case over fine-grained implementation details?
 * Can anyone familiar with the code base implement it?
 * If approved, are they interested in contributing? Do they need any guidance?
