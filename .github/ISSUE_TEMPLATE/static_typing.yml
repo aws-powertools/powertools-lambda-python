@@ -1,7 +1,7 @@
 name: Static typing mismatch report
 description: Report a static type mismatch caught by a static type checker
 title: "Static typing: TITLE"
-labels: ["static_typing", "triage"]
+labels: ["typing", "triage"]
 body:
   - type: markdown
     attributes:
