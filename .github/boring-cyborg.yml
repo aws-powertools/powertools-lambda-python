@@ -1,66 +1,84 @@
 ##### Labeler ##########################################################################################################
 labelPRBasedOnFilePath:
-  area/logger:
+  logger:
     - aws_lambda_powertools/logging/*
     - aws_lambda_powertools/logging/**/*
     - aws_lambda_powertools/package_logger.py
-  area/tracer:
+  tracer:
     - aws_lambda_powertools/tracing/*
     - aws_lambda_powertools/tracing/**/*
-  area/metrics:
+  metrics:
     - aws_lambda_powertools/metrics/*
     - aws_lambda_powertools/metrics/**/*
-  area/event_handlers:
+  event_handlers:
     - aws_lambda_powertools/event_handler/*
     - aws_lambda_powertools/event_handler/**/*
-  area/middleware_factory:
+  middleware_factory:
     - aws_lambda_powertools/middleware_factory/*
     - aws_lambda_powertools/middleware_factory/**/*
-  area/parameters:
+  parameters:
     - aws_lambda_powertools/parameters/*
     - aws_lambda_powertools/parameters/**/*
-  area/batch:
+  batch:
     - aws_lambda_powertools/batch/*
     - aws_lambda_powertools/batch/**/*
-  area/validator:
+  validator:
     - aws_lambda_powertools/validation/*
     - aws_lambda_powertools/validation/**/*
-  area/event_sources:
+  event_sources:
     - aws_lambda_powertools/data_classes/*
     - aws_lambda_powertools/data_classes/**/*
-  area/parser:
+  parser:
     - aws_lambda_powertools/parser/*
     - aws_lambda_powertools/parser/**/*
-  area/idempotency:
+  idempotency:
     - aws_lambda_powertools/idempotency/*
     - aws_lambda_powertools/idempotency/**/*
-  area/feature_flags:
+  feature_flags:
     - aws_lambda_powertools/feature_flags/*
     - aws_lambda_powertools/feature_flags/**/*
-  area/jmespath_util:
+  jmespath_util:
     - aws_lambda_powertools/utilities/jmespath_utils/*
-  area/utilities:
+  typing:
+    - aws_lambda_powertools/utilities/typing/*
+    - mypy.ini
+  utilities:
     - aws_lambda_powertools/utilities/*
     - aws_lambda_powertools/utilities/**/*
-    - aws_lambda_powertools/middleware_factory/*
-    - aws_lambda_powertools/middleware_factory/**/*
 
   documentation:
     - docs/*
     - docs/**/*
     - mkdocs.yml
 
+  github-actions:
+    - .github/workflows/*
+    - .github/workflows/**/*
+    - .github/dependabot.yml
+    - .github/boring-cyborg.yml
+    - .github/release-drafter.yml
+    - .github/semantic.yml
+    - .github/stale.yml
+    - .github/mergify.yml
+
+  github-templates:
+    - .github/ISSUE_TEMPLATE/*
+    - .github/PULL_REQUEST_TEMPLATE.md
+    - .github/.chglog/*
+    - .github/.chglog/**/*
+
   internal:
-    - .github/*
-    - .github/**/*
-    - .chglog/*
     - .flake8
+    - .bandit.baseline
     - .gitignore
     - .pre-commit-config.yaml
+    - MANIFEST.in
     - Makefile
     - CONTRIBUTING.md
+    - MAINTAINERS.md
     - CODE_OF_CONDUCT.md
     - LICENSE
+    - THIRD-PARTY-LICENSES
     - aws_lambda_powertools_python/shared/*
     - aws_lambda_powertools_python/shared/**
 
@@ -85,7 +103,6 @@ firstPRMergeComment: >
 # Comment to be posted to on first time issues
 firstIssueWelcomeComment: >
   Thanks for opening your first issue here! We'll come back to you as soon as we can.
-
 
 ###### IssueLink Adder #################################################################################################
 # Insert Issue (Jira/Github etc) link in PR description based on the Issue ID in PR title.

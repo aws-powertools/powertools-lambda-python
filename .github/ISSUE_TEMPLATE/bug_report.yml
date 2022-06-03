@@ -7,6 +7,8 @@ body:
     attributes:
       value: |
         Thank you for submitting a bug report. Please add as much information as possible to help us reproduce, and remove any potential sensitive data.
+
+        Please become familiar with [our definition of bug](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/MAINTAINERS.md#is-that-a-bug).
   - type: textarea
     id: expected_behaviour
     attributes:
