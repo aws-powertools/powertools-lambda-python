@@ -1,8 +1,9 @@
 ## Overview
 
-???+ info "We are currently paused for new features [until end of July 2022](https://github.com/awslabs/aws-lambda-powertools-python/issues/1009){target="_blank"}."
+???+ info "We are currently paused for new features [until end of July 2022](https://github.com/awslabs/aws-lambda-powertools-python/issues/1076){target="_blank"}."
 
-This is our public roadmap that outlines the high level direction we are working towards, namely [Themes](#themes). We update this document on a periodic basis to reflect any changing priorities - Security and stability is our top priority.
+This is our public roadmap that outlines the high level direction we are working towards, namely [Themes](#themes). We update this document when our priorities change: security and stability is our top priority.
+
 
 [See our latest list of activities »](https://github.com/orgs/awslabs/projects/51/views/1?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}
 
@@ -70,18 +71,18 @@ graph LR
 
 Our end-to-end mechanism follows four major steps:
 
-* **Feature Request**. Ideas start with a [feature request issue template](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2Ctriage&template=feature_request.yml&title=Feature+request%3A+TITLE){target="_blank"} to highlight their use case at a high level. Maintainers review each  request based on the **(1)** [project tenets](index.md#tenets){target="_blank"}, **(2)** customers reaction (👍) and use cases, and comment whether we'll need a RFC for further discussion before any work begins.
+* **Feature Request**. Ideas start with a [feature request issue template](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2Ctriage&template=feature_request.yml&title=Feature+request%3A+TITLE){target="_blank"} to highlight their use case at a high level. Maintainers review each  request based on **(1)** [project tenets](index.md#tenets){target="_blank"}, **(2)** customers reaction (👍) and use cases, and comment whether we'll need a RFC for further discussion before any work begins.
 * **Request-for-comments (RFC)**. Design proposals use our [RFC issue template](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE){target="_blank"} to describe its implementation, challenges, developer experience, dependencies, and alternative solutions. This helps refine the initial idea with community feedback before a decision is made.
 * **Decision**. After carefully reviewing and discussing them, maintainers make a final decision on whether to start implementation, defer or reject it, and update everyone with the next steps.
-* **Implementation**. For approved features, maintainers will build a prototype and invite customers for feedback in the original request. Alternatively, maintainers will proactively use the [help wanted](https://github.com/awslabs/aws-lambda-powertools-python/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22help+wanted%22){target="_blank"} tag to signal contributions are welcome to accelerate development.
-* **Implementation**. For approved features, maintainers will build a prototype for early feedback, or use [`help wanted`](https://github.com/awslabs/aws-lambda-powertools-python/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22help+wanted%22){target="_blank"} label welcoming contributions to accelerate development.
+* **Implementation**. For approved features, maintainers give priority to the original authors for implementation unless it is a sensitive task that is best handled by maintainers.
 
-???+ info "Bug reports, documentation improvements, etc. are not covered by this process. See Maintainers process instead (coming soon)."
-
+???+ info "See [Maintainers](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/MAINTAINERS.md) document to understand how we triage issues and pull requests, labels and governance."
 
 ## Disclaimer
 
-The AWS Lambda Powertools team values feedback and guidance from its community of users, although final decisions on inclusion into the project will be made by AWS. We determine the high-level direction for our open roadmap based on customer feedback and popularity (👍🏽 and comments), security and operational impacts, and business value. Where features don’t meet our goals and longer-term strategy, we will communicate that clearly and openly as quickly as possible with an explanation of why the decision was made.
+The AWS Lambda Powertools team values feedback and guidance from its community of users, although final decisions on inclusion into the project will be made by AWS.
+
+We determine the high-level direction for our open roadmap based on customer feedback and popularity (👍🏽 and comments), security and operational impacts, and business value. Where features don’t meet our goals and longer-term strategy, we will communicate that clearly and openly as quickly as possible with an explanation of why the decision was made.
 
 
 ## FAQs
