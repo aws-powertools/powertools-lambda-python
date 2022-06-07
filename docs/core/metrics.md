@@ -30,10 +30,10 @@ If you're new to Amazon CloudWatch, there are two terminologies you must be awar
 
 Metric has two global settings that will be used across all metrics emitted:
 
-Setting | Description | Environment variable | Constructor parameter
-------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------
-**Metric namespace** | Logical container where all metrics will be placed e.g. `ServerlessAirline` |  `POWERTOOLS_METRICS_NAMESPACE` | `namespace`
-**Service** | Optionally, sets **service** metric dimension across all metrics e.g. `payment` | `POWERTOOLS_SERVICE_NAME` | `service`
+| Setting              | Description                                                                     | Environment variable           | Constructor parameter |
+| -------------------- | ------------------------------------------------------------------------------- | ------------------------------ | --------------------- |
+| **Metric namespace** | Logical container where all metrics will be placed e.g. `ServerlessAirline`     | `POWERTOOLS_METRICS_NAMESPACE` | `namespace`           |
+| **Service**          | Optionally, sets **service** metric dimension across all metrics e.g. `payment` | `POWERTOOLS_SERVICE_NAME`      | `service`             |
 
 ???+ tip
     Use your application or main service as the metric namespace to easily group all metrics.
@@ -139,7 +139,7 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 ???+ tip "Tip: Metric validation"
     If metrics are provided, and any of the following criteria are not met, **`SchemaValidationError`** exception will be raised:
 
-    * Maximum of 9 dimensions
+    * Maximum of 8 user-defined dimensions
     * Namespace is set, and no more than one
     * Metric units must be [supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html)
 
