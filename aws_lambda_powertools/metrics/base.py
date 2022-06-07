@@ -178,7 +178,7 @@ class MetricManager:
             metadata = self.metadata_set
 
         if self.service and not self.dimension_set.get("service"):
-            self.dimension_set["service"] = self.service
+            self.add_dimension(name="service", value=self.service)
 
         if len(metrics) == 0:
             raise SchemaValidationError("Must contain at least one metric.")
