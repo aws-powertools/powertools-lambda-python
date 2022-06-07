@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from typing import Dict
 
+import boto3
 import pytest
 from boto3.dynamodb.conditions import Key
 from botocore import stub
@@ -168,6 +169,36 @@ def test_dynamodb_provider_get_sdk_options(mock_name, mock_value, config):
         value = provider.get(mock_name, ConsistentRead=True)
 
         assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_dynamodb_provider_get_with_custom_client(mock_name, mock_value, config):
+    """
+    Test DynamoDBProvider.get() with SDK options
+    """
+
+    table_name = "TEST_TABLE"
+    client = boto3.resource("dynamodb", config=config)
+    table_resource_client = client.Table(table_name)
+
+    # Create a new provider
+    provider = parameters.DynamoDBProvider(table_name, boto3_client=client)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.table.meta.client)
+    response = {"Item": {"id": {"S": mock_name}, "value": {"S": mock_value}}}
+    expected_params = {"TableName": table_name, "Key": {"id": mock_name}, "ConsistentRead": True}
+    stubber.add_response("get_item", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name, ConsistentRead=True)
+
+        assert value == mock_value
+        # confirm table resource client comes from the same custom client provided
+        assert id(table_resource_client.meta.client) == id(provider.table.meta.client)
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
@@ -444,6 +475,43 @@ def test_ssm_provider_get(mock_name, mock_value, mock_version, config):
         stubber.deactivate()
 
 
+def test_ssm_provider_get_with_custom_client(mock_name, mock_value, mock_version, config):
+    """
+    Test SSMProvider.get() with a non-cached value
+    """
+
+    client = boto3.client("ssm", config=config)
+
+    # Create a new provider
+    provider = parameters.SSMProvider(boto3_client=client)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "Parameter": {
+            "Name": mock_name,
+            "Type": "String",
+            "Value": mock_value,
+            "Version": mock_version,
+            "Selector": f"{mock_name}:{mock_version}",
+            "SourceResult": "string",
+            "LastModifiedDate": datetime(2015, 1, 1),
+            "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
+        }
+    }
+    expected_params = {"Name": mock_name, "WithDecryption": False}
+    stubber.add_response("get_parameter", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name)
+
+        assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
 def test_ssm_provider_get_default_config(monkeypatch, mock_name, mock_value, mock_version):
     """
     Test SSMProvider.get() without specifying the config
@@ -503,6 +571,79 @@ def test_ssm_provider_get_cached(mock_name, mock_value, config):
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
+
+
+def test_providers_global_clear_cache(mock_name, mock_value, monkeypatch):
+    # GIVEN all providers are previously initialized
+    # and parameters, secrets, and app config are fetched
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            return mock_value
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            ...
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "secrets", TestProvider())
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig", TestProvider())
+
+    parameters.get_parameter(mock_name)
+    parameters.get_secret(mock_name)
+    parameters.get_app_config(name=mock_name, environment="test", application="test")
+
+    # WHEN clear_caches is called
+    parameters.clear_caches()
+
+    # THEN all providers cache should be reset
+    assert parameters.base.DEFAULT_PROVIDERS == {}
+
+
+def test_ssm_provider_clear_cache(mock_name, mock_value, config):
+    # GIVEN a provider is initialized with a cached value
+    provider = parameters.SSMProvider(config=config)
+    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+
+    # WHEN clear_cache is called from within the provider instance
+    provider.clear_cache()
+
+    # THEN store should be empty
+    assert provider.store == {}
+
+
+def test_dynamodb_provider_clear_cache(mock_name, mock_value, config):
+    # GIVEN a provider is initialized with a cached value
+    provider = parameters.DynamoDBProvider(table_name="test", config=config)
+    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+
+    # WHEN clear_cache is called from within the provider instance
+    provider.clear_cache()
+
+    # THEN store should be empty
+    assert provider.store == {}
+
+
+def test_secrets_provider_clear_cache(mock_name, mock_value, config):
+    # GIVEN a provider is initialized with a cached value
+    provider = parameters.SecretsProvider(config=config)
+    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+
+    # WHEN clear_cache is called from within the provider instance
+    provider.clear_cache()
+
+    # THEN store should be empty
+    assert provider.store == {}
+
+
+def test_appconf_provider_clear_cache(mock_name, config):
+    # GIVEN a provider is initialized with a cached value
+    provider = parameters.AppConfigProvider(environment="test", application="test", config=config)
+    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+
+    # WHEN clear_cache is called from within the provider instance
+    provider.clear_cache()
+
+    # THEN store should be empty
+    assert provider.store == {}
 
 
 def test_ssm_provider_get_expired(mock_name, mock_value, mock_version, config):
@@ -829,6 +970,37 @@ def test_secrets_provider_get(mock_name, mock_value, config):
 
     # Create a new provider
     provider = parameters.SecretsProvider(config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "ARN": f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{mock_name}",
+        "Name": mock_name,
+        "VersionId": "7a9155b8-2dc9-466e-b4f6-5bc46516c84d",
+        "SecretString": mock_value,
+        "CreatedDate": datetime(2015, 1, 1),
+    }
+    expected_params = {"SecretId": mock_name}
+    stubber.add_response("get_secret_value", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name)
+
+        assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_secrets_provider_get_with_custom_client(mock_name, mock_value, config):
+    """
+    Test SecretsProvider.get() with a non-cached value
+    """
+    client = boto3.client("secretsmanager", config=config)
+
+    # Create a new provider
+    provider = parameters.SecretsProvider(boto3_client=client)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -1462,6 +1634,37 @@ def test_appconf_provider_get_configuration_json_content_type(mock_name, config)
     environment = "dev"
     application = "myapp"
     provider = parameters.AppConfigProvider(environment=environment, application=application, config=config)
+
+    mock_body_json = {"myenvvar1": "Black Panther", "myenvvar2": 3}
+    encoded_message = json.dumps(mock_body_json).encode("utf-8")
+    mock_value = StreamingBody(BytesIO(encoded_message), len(encoded_message))
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {"Content": mock_value, "ConfigurationVersion": "1", "ContentType": "application/json"}
+    stubber.add_response("get_configuration", response)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name, transform="json", ClientConfigurationVersion="2")
+
+        assert value == mock_body_json
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_appconf_provider_get_configuration_json_content_type_with_custom_client(mock_name, config):
+    """
+    Test get_configuration.get with default values
+    """
+
+    client = boto3.client("appconfig", config=config)
+
+    # Create a new provider
+    environment = "dev"
+    application = "myapp"
+    provider = parameters.AppConfigProvider(environment=environment, application=application, boto3_client=client)
 
     mock_body_json = {"myenvvar1": "Black Panther", "myenvvar2": 3}
     encoded_message = json.dumps(mock_body_json).encode("utf-8")

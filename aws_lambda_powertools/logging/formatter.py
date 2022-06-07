@@ -127,8 +127,8 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         super(LambdaPowertoolsFormatter, self).__init__(datefmt=self.datefmt)
 
-        keys_combined = {**self._build_default_keys(), **kwargs}
-        self.log_format.update(**keys_combined)
+        self.keys_combined = {**self._build_default_keys(), **kwargs}
+        self.log_format.update(**self.keys_combined)
 
     def serialize(self, log: Dict) -> str:
         """Serialize structured log dict to JSON str"""
@@ -187,6 +187,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
     def clear_state(self):
         self.log_format = dict.fromkeys(self.log_record_order)
+        self.log_format.update(**self.keys_combined)
 
     @staticmethod
     def _build_default_keys():

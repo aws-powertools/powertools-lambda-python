@@ -1,4 +1,4 @@
-const STAGED_LABEL = "status/staged-next-release";
+const STAGED_LABEL = "pending-release";
 
 /**
  * Fetch issues using GitHub REST API
@@ -15,7 +15,7 @@ const fetchIssues = async ({
 	gh_client,
 	org,
 	repository,
-	state = "open",
+	state = "all",
 	label = STAGED_LABEL,
 }) => {
 

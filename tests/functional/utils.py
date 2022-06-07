@@ -1,5 +1,4 @@
 import base64
-import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -22,8 +21,3 @@ def b64_to_str(data: str) -> str:
 
 def json_serialize(data):
     return json.dumps(data, sort_keys=True, cls=Encoder)
-
-
-def hash_idempotency_key(data: Any):
-    """Serialize data to JSON, encode, and hash it for idempotency key"""
-    return hashlib.md5(json_serialize(data).encode()).hexdigest()
