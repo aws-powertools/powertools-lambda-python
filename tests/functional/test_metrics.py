@@ -319,11 +319,9 @@ def test_schema_no_metrics(service, namespace):
         my_metrics.serialize_metric_set()
 
 
-def test_exceed_number_of_dimensions(metric, namespace, monkeypatch):
+def test_exceed_number_of_dimensions(metric, namespace):
     # GIVEN we we have more dimensions than CloudWatch supports
-    # and that service dimension is injected like a user-defined dimension (N+1)
-    monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", "test_service")
-    dimensions = [{"name": f"test_{i}", "value": "test"} for i in range(9)]
+    dimensions = [{"name": f"test_{i}", "value": "test"} for i in range(11)]
 
     # WHEN we attempt to serialize them into a valid EMF object
     # THEN it should fail validation and raise SchemaValidationError
