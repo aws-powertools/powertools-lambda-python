@@ -320,7 +320,7 @@ def test_schema_no_metrics(service, namespace):
 
 
 def test_exceed_number_of_dimensions(metric, namespace):
-    # GIVEN we we have more dimensions than CloudWatch supports
+    # GIVEN we have more dimensions than CloudWatch supports
     dimensions = [{"name": f"test_{i}", "value": "test"} for i in range(11)]
 
     # WHEN we attempt to serialize them into a valid EMF object
