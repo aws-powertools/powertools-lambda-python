@@ -1,0 +1,58 @@
+on:
+  workflow_run:
+    workflows: ["Record PR number"]
+    types:
+      - completed
+
+env:
+  BLOCK_LABEL: "do-not-merge"
+  BLOCK_REASON_LABEL: "need-issue"
+
+jobs:
+  get_pr_details:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    uses: ./.github/workflows/lib/export_pr_details.yml
+    with:
+      record_pr_workflow_id: ${{ github.event.workflow_run.id }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+  check_related_issue:
+    needs: get_pr_details
+    if: >
+      ${{ needs.get_pr_details.outputs.prAuthor != 'dependabot[bot]' &&
+          needs.get_pr_details.outputs.prAction == 'opened'
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Ensure related issue is present"
+        uses: actions/github-script@v6
+        with:
+          # Maintenance: convert into a standalone JS like post_release.js
+          script: |
+            const prBody = ${{ needs.get_pr_details.outputs.prBody }};
+            const prNumber = ${{ needs.get_pr_details.outputs.prNumber }};
+            const blockLabel = process.env.BLOCK_LABEL;
+            const blockReasonLabel = process.env.BLOCK_REASON_LABEL;
+
+            const RELATED_ISSUE_REGEX = /Issue number:.+(\d)/
+
+            const matcher = new RegExp(RELATED_ISSUE_REGEX)
+            const isMatch = matcher.exec(prBody)
+            if (isMatch == null) {
+                console.info(`No related issue found, maybe the author didn't use the template but there is one.`)
+
+                let msg = `⚠️ No related issues found. Please ensure there is an open issue related to this change to avoid significant delays or closure. ⚠️`;
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: msg,
+                  issue_number: prNumber,
+                });
+
+                await github.rest.issues.addLabels({
+                  issue_number: prNumber,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  labels: [blockLabel, blockReasonLabel]
+                })
+            }
