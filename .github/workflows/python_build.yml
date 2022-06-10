@@ -2,10 +2,22 @@ name: Code quality
 
 on:
   pull_request:
+    paths:
+      - "aws_lambda_powertools/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - "poetry.lock"
+      - "mypy.ini"
     branches:
       - develop
       - master
   push:
+    paths:
+      - "aws_lambda_powertools/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - "poetry.lock"
+      - "mypy.ini"
     branches:
       - develop
       - master
