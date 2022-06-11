@@ -2,10 +2,22 @@ name: Code quality
 
 on:
   pull_request:
+    paths:
+      - "aws_lambda_powertools/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - "poetry.lock"
+      - "mypy.ini"
     branches:
       - develop
       - master
   push:
+    paths:
+      - "aws_lambda_powertools/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - "poetry.lock"
+      - "mypy.ini"
     branches:
       - develop
       - master
@@ -23,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
