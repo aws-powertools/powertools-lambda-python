@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from functools import lru_cache
 from typing import Any, Optional, Union
 
@@ -22,14 +23,14 @@ class Log(BaseModel):
     extra_info: Optional[str]
 
 
-def trigger_lambda(lambda_arn, client):
+def trigger_lambda(lambda_arn: str, client: Any):
     response = client.invoke(FunctionName=lambda_arn, InvocationType="RequestResponse")
     return response
 
 
 @lru_cache(maxsize=10, typed=False)
 @retry(ValueError, delay=1, jitter=1, tries=10)
-def get_logs(lambda_function_name: str, log_client: Any, start_time: int, **kwargs):
+def get_logs(lambda_function_name: str, log_client: Any, start_time: int, **kwargs: dict):
     response = log_client.filter_log_events(logGroupName=f"/aws/lambda/{lambda_function_name}", startTime=start_time)
     if not response["events"]:
         raise ValueError("Empty response from Cloudwatch Logs. Repeating...")
@@ -46,7 +47,9 @@ def get_logs(lambda_function_name: str, log_client: Any, start_time: int, **kwar
 
 @lru_cache(maxsize=10, typed=False)
 @retry(ValueError, delay=1, jitter=1, tries=10)
-def get_metrics(namespace, cw_client, start_date, end_date, metric_name, service_name):
+def get_metrics(
+    namespace: str, cw_client: Any, start_date: datetime, end_date: datetime, metric_name: str, service_name: str
+):
     response = cw_client.get_metric_data(
         MetricDataQueries=[
             {
@@ -73,7 +76,7 @@ def get_metrics(namespace, cw_client, start_date, end_date, metric_name, service
 
 
 @retry(ValueError, delay=1, jitter=1, tries=10)
-def get_traces(lambda_function_name: str, xray_client, start_date, end_date):
+def get_traces(lambda_function_name: str, xray_client: Any, start_date: datetime, end_date: datetime):
     paginator = xray_client.get_paginator("get_trace_summaries")
     response_iterator = paginator.paginate(
         StartTime=start_date,

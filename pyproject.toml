@@ -31,7 +31,6 @@ python = "^3.6.2"
 # 2022-04-21: jmespath was removed, to be re-added once we drop python 3.6.
 # issue #1148
 aws-cdk-lib = "^2.23.0"
-"aws-cdk.aws-lambda-python-alpha" = "2.23.0-alpha.0"
 bandit = "^1.7.1"
 black = "^21.12b0"
 coverage = {extras = ["toml"], version = "^6.2"}

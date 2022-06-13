@@ -4,24 +4,26 @@ import sys
 import zipfile
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 import boto3
 import yaml
-from aws_cdk import App, CfnOutput, RemovalPolicy, Stack, aws_lambda_python_alpha, aws_logs
-from aws_cdk.aws_lambda import Code, Function, Runtime, Tracing
+from aws_cdk import App, AssetStaging, BundlingOptions, CfnOutput, DockerImage, RemovalPolicy, Stack, aws_logs
+from aws_cdk.aws_lambda import Code, Function, LayerVersion, Runtime, Tracing
 
 PYTHON_RUNTIME_VERSION = f"V{''.join(map(str, sys.version_info[:2]))}"
 
 
 class PythonVersion(Enum):
-    V37 = Runtime.PYTHON_3_7
-    V38 = Runtime.PYTHON_3_8
-    V39 = Runtime.PYTHON_3_9
+    V36 = {"runtime": Runtime.PYTHON_3_6, "image": Runtime.PYTHON_3_6.bundling_image.image}
+    V37 = {"runtime": Runtime.PYTHON_3_7, "image": Runtime.PYTHON_3_7.bundling_image.image}
+    V38 = {"runtime": Runtime.PYTHON_3_8, "image": Runtime.PYTHON_3_8.bundling_image.image}
+    V39 = {"runtime": Runtime.PYTHON_3_9, "image": Runtime.PYTHON_3_9.bundling_image.image}
 
 
 class Infrastructure:
     def __init__(self, stack_name: str, handlers_dir: str, config: dict, environment_variables: dict) -> None:
-        session = boto3.Session(profile_name="aws-mploski-root")
+        session = boto3.Session()
         self.s3_client = session.client("s3")
         self.lambda_client = session.client("lambda")
         self.cf_client = session.client("cloudformation")
@@ -33,11 +35,9 @@ class Infrastructure:
         self.config = config
         self.environment_variables = environment_variables
 
-    def deploy(self) -> dict:
-
+    def deploy(self) -> dict[str, str]:
         handlers = self._find_files(directory=self.handlers_dir, only_py=True)
-
-        template, asset_root_dir, artifact = self._prepare_stack(
+        template, asset_root_dir = self.prepare_stack(
             handlers=handlers,
             handlers_dir=self.handlers_dir,
             stack_name=self.stack_name,
@@ -53,28 +53,13 @@ class Infrastructure:
     def delete(self):
         self.cf_client.delete_stack(StackName=self.stack_name)
 
-    def _find_files(self, directory, only_py=False) -> list:
-        file_paths = []
-        for root, _, files in os.walk(directory):
-            for filename in files:
-                if only_py:
-                    if filename.endswith(".py"):
-                        file_paths.append(os.path.join(root, filename))
-                else:
-                    file_paths.append(os.path.join(root, filename))
-        return file_paths
-
     # Create CDK cloud assembly code
-    def _prepare_stack(self, handlers, handlers_dir, stack_name, environment_variables, **config):
+    def prepare_stack(
+        self, handlers: list[str], handlers_dir: str, stack_name: str, environment_variables: dict, **config: dict
+    ):
         integration_test_app = App()
         stack = Stack(integration_test_app, stack_name)
-        powertools_layer = aws_lambda_python_alpha.PythonLayerVersion(
-            stack,
-            "aws-lambda-powertools",
-            layer_version_name="aws-lambda-powertools",
-            entry=".",
-            compatible_runtimes=[PythonVersion[PYTHON_RUNTIME_VERSION].value],
-        )
+        powertools_layer = self._create_layer(stack)
         code = Code.from_asset(handlers_dir)
 
         for filename_path in handlers:
@@ -82,7 +67,7 @@ class Infrastructure:
             function_python = Function(
                 stack,
                 f"{filename}-lambda",
-                runtime=PythonVersion[PYTHON_RUNTIME_VERSION].value,
+                runtime=PythonVersion[PYTHON_RUNTIME_VERSION].value["runtime"],
                 code=code,
                 handler=f"{filename}.lambda_handler",
                 layers=[powertools_layer],
@@ -101,10 +86,47 @@ class Infrastructure:
         return (
             integration_test_app.synth().get_stack_by_name(stack_name).template,
             integration_test_app.synth().directory,
-            integration_test_app.synth().artifacts,
         )
 
-    def _upload_assets(self, template, asset_root_dir):
+    def _find_files(self, directory: str, only_py: bool = False) -> list:
+        file_paths = []
+        for root, _, files in os.walk(directory):
+            for filename in files:
+                if only_py:
+                    if filename.endswith(".py"):
+                        file_paths.append(os.path.join(root, filename))
+                else:
+                    file_paths.append(os.path.join(root, filename))
+        return file_paths
+
+    def _create_layer(self, stack):
+        output_dir = Path(AssetStaging.BUNDLING_OUTPUT_DIR, "python")
+        input_dir = Path(AssetStaging.BUNDLING_INPUT_DIR, "aws_lambda_powertools")
+        powertools_layer = LayerVersion(
+            stack,
+            "aws-lambda-powertools",
+            layer_version_name="aws-lambda-powertools",
+            compatible_runtimes=[PythonVersion[PYTHON_RUNTIME_VERSION].value["runtime"]],
+            code=Code.from_asset(
+                path=".",
+                exclude=["*.pyc"],
+                bundling=BundlingOptions(
+                    image=DockerImage.from_build(
+                        str(Path(__file__).parent),
+                        build_args={"IMAGE": PythonVersion[PYTHON_RUNTIME_VERSION].value["image"]},
+                    ),
+                    command=[
+                        "bash",
+                        "-c",
+                        f"poetry export --with-credentials --format requirements.txt --output requirements.txt && pip install -r requirements.txt -t {output_dir} && cp -R {input_dir} {output_dir}",
+                    ],
+                ),
+            ),
+        )
+
+        return powertools_layer
+
+    def _upload_assets(self, template: dict, asset_root_dir: str):
 
         assets = self._find_assets(template, self.account_id, self.region)
 
@@ -124,7 +146,7 @@ class Infrastructure:
             buf.seek(0)
             self.s3_client.upload_fileobj(Fileobj=buf, Bucket=bucket, Key=s3_key)
 
-    def _deploy_stack(self, stack_name, template):
+    def _deploy_stack(self, stack_name: str, template: Any):
         response = self.cf_client.create_stack(
             StackName=stack_name,
             TemplateBody=yaml.dump(template),
@@ -137,9 +159,9 @@ class Infrastructure:
         response = self.cf_client.describe_stacks(StackName=stack_name)
         return response
 
-    def _find_assets(self, template, account_id, region):
+    def _find_assets(self, template: dict, account_id: str, region: str):
         assets = {}
-        for name, resource in template["Resources"].items():
+        for _, resource in template["Resources"].items():
             bucket = None
             S3Key = None
 
@@ -153,7 +175,8 @@ class Infrastructure:
                 assets[S3Key] = (
                     bucket["Fn::Sub"].replace("${AWS::AccountId}", account_id).replace("${AWS::Region}", region)
                 )
+
         return assets
 
-    def _transform_output(self, outputs):
+    def _transform_output(self, outputs: dict):
         return {output["OutputKey"]: output["OutputValue"] for output in outputs if output["OutputKey"]}

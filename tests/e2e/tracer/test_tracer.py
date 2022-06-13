@@ -5,6 +5,7 @@ import uuid
 import boto3
 import pytest
 
+from .. import conftest
 from ..utils import helpers
 
 
@@ -17,7 +18,7 @@ def config():
 
 
 @pytest.mark.e2e
-def test_basic_lambda_trace_visible(execute_lambda, config):
+def test_basic_lambda_trace_visible(execute_lambda: conftest.LambdaExecution, config: conftest.LambdaConfig):
     lambda_arn = execute_lambda["arns"]["basichandlerarn"]
     start_date = execute_lambda["execution_time"]
     end_date = start_date + datetime.timedelta(minutes=5)
