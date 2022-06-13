@@ -8,7 +8,7 @@ class SampleApp(core.Construct):
         powertools_layer = aws_lambda.LayerVersion.from_layer_version_arn(
             self,
             id="lambda-powertools",
-            layer_version_arn=f"arn:aws:lambda:{env.region}:017000801446:layer:AWSLambdaPowertoolsPython:19",
+            layer_version_arn=f"arn:aws:lambda:{env.region}:017000801446:layer:AWSLambdaPowertoolsPython:20",
         )
         aws_lambda.Function(
             self,
