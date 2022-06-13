@@ -23,7 +23,7 @@ Resources:
             CodeUri: src
             Layers:
                 # Latest version: https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer
-                - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:19
+                - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:20
             Events:
                 ByUser:
                     Type: Api
