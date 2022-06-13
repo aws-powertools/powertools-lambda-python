@@ -8,7 +8,6 @@ dev:
 	pip install --upgrade pip pre-commit poetry
 	poetry install --extras "pydantic"
 	pre-commit install
-	npm install -g aws-cdk
 
 format:
 	poetry run isort aws_lambda_powertools tests
