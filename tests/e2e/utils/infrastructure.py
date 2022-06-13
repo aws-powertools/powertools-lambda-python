@@ -4,7 +4,7 @@ import sys
 import zipfile
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Dict, List
 
 import boto3
 import yaml
@@ -29,13 +29,13 @@ class Infrastructure:
         self.cf_client = session.client("cloudformation")
         self.s3_resource = session.resource("s3")
         self.account_id = session.client("sts").get_caller_identity()["Account"]
-        self.region = boto3.Session().region_name
+        self.region = session.region_name
         self.stack_name = stack_name
         self.handlers_dir = handlers_dir
         self.config = config
         self.environment_variables = environment_variables
 
-    def deploy(self) -> dict[str, str]:
+    def deploy(self) -> Dict[str, str]:
         handlers = self._find_files(directory=self.handlers_dir, only_py=True)
         template, asset_root_dir = self.prepare_stack(
             handlers=handlers,
@@ -55,7 +55,7 @@ class Infrastructure:
 
     # Create CDK cloud assembly code
     def prepare_stack(
-        self, handlers: list[str], handlers_dir: str, stack_name: str, environment_variables: dict, **config: dict
+        self, handlers: List[str], handlers_dir: str, stack_name: str, environment_variables: dict, **config: dict
     ):
         integration_test_app = App()
         stack = Stack(integration_test_app, stack_name)
@@ -99,9 +99,9 @@ class Infrastructure:
                     file_paths.append(os.path.join(root, filename))
         return file_paths
 
-    def _create_layer(self, stack):
-        output_dir = Path(AssetStaging.BUNDLING_OUTPUT_DIR, "python")
-        input_dir = Path(AssetStaging.BUNDLING_INPUT_DIR, "aws_lambda_powertools")
+    def _create_layer(self, stack: Stack):
+        output_dir = Path(str(AssetStaging.BUNDLING_OUTPUT_DIR), "python")
+        input_dir = Path(str(AssetStaging.BUNDLING_INPUT_DIR), "aws_lambda_powertools")
         powertools_layer = LayerVersion(
             stack,
             "aws-lambda-powertools",
@@ -109,7 +109,6 @@ class Infrastructure:
             compatible_runtimes=[PythonVersion[PYTHON_RUNTIME_VERSION].value["runtime"]],
             code=Code.from_asset(
                 path=".",
-                exclude=["*.pyc"],
                 bundling=BundlingOptions(
                     image=DockerImage.from_build(
                         str(Path(__file__).parent),
@@ -118,12 +117,14 @@ class Infrastructure:
                     command=[
                         "bash",
                         "-c",
-                        f"poetry export --with-credentials --format requirements.txt --output requirements.txt && pip install -r requirements.txt -t {output_dir} && cp -R {input_dir} {output_dir}",
+                        f"poetry export --with-credentials --format requirements.txt --output /tmp/requirements.txt &&\
+                            pip install -r /tmp/requirements.txt -t {output_dir} &&\
+                            cp -R {input_dir} {output_dir} &&\
+                            find {output_dir}/ -regex '^.*\\(__pycache__\\|\\.py[co]\\)$' -delete",
                     ],
                 ),
             ),
         )
-
         return powertools_layer
 
     def _upload_assets(self, template: dict, asset_root_dir: str):
@@ -146,16 +147,16 @@ class Infrastructure:
             buf.seek(0)
             self.s3_client.upload_fileobj(Fileobj=buf, Bucket=bucket, Key=s3_key)
 
-    def _deploy_stack(self, stack_name: str, template: Any):
+    def _deploy_stack(self, stack_name: str, template: dict):
         response = self.cf_client.create_stack(
             StackName=stack_name,
             TemplateBody=yaml.dump(template),
             TimeoutInMinutes=10,
-            OnFailure="DO_NOTHING",
+            OnFailure="ROLLBACK",
             Capabilities=["CAPABILITY_IAM"],
         )
         waiter = self.cf_client.get_waiter("stack_create_complete")
-        waiter.wait(StackName=stack_name, WaiterConfig={"Delay": 2, "MaxAttempts": 50})
+        waiter.wait(StackName=stack_name, WaiterConfig={"Delay": 10, "MaxAttempts": 50})
         response = self.cf_client.describe_stacks(StackName=stack_name)
         return response
 

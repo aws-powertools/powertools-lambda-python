@@ -1,6 +1,14 @@
 import datetime
+import sys
 import uuid
-from typing import Generator, TypedDict
+
+# We only need typing_extensions for python versions <3.8
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
+
+from typing import Dict, Generator
 
 import pytest
 from e2e.utils import helpers, infrastructure
@@ -8,11 +16,11 @@ from e2e.utils import helpers, infrastructure
 
 class LambdaConfig(TypedDict):
     parameters: dict
-    environment_variables: dict[str, str]
+    environment_variables: Dict[str, str]
 
 
 class LambdaExecution(TypedDict):
-    arns: dict[str, str]
+    arns: Dict[str, str]
     execution_time: datetime.datetime
 
 

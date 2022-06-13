@@ -6,19 +6,13 @@ env:
   E2E_TESTS_PATH: tests/e2e/
 jobs:
   run:
-    #########################
-    # Force Github action to run only a single job at a time (based on the group name)
-    # This is to prevent "race-condition" in building e2e tests infrastructure
-    #########################
-    concurrency:
-      group: e2e-tests
     runs-on: ubuntu-latest
     permissions:
       id-token: write # needed to interact with GitHub's OIDC Token endpoint.
       contents: read
     strategy:
       matrix:
-        version: ["3.8", "3.9", "3.10"]
+        version: ["3.6", "3.7", "3.8", "3.9"]
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
