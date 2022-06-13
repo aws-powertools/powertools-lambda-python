@@ -1,0 +1,75 @@
+on:
+  workflow_call:
+    inputs:
+      record_pr_workflow_id:
+        required: true
+        type: number
+    secrets:
+      token:
+        required: true
+    # Map the workflow outputs to job outputs
+    outputs:
+      prNumber:
+        description: "The first output string"
+        value: ${{ jobs.export_pr_details.outputs.prNumber }}
+      prTitle:
+        description: "The second output string"
+        value: ${{ jobs.export_pr_details.outputs.prTitle }}
+      prBody:
+        description: "The second output string"
+        value: ${{ jobs.export_pr_details.outputs.prBody }}
+      prAuthor:
+        description: "The second output string"
+        value: ${{ jobs.export_pr_details.outputs.prAuthor }}
+      prAction:
+        description: "The second output string"
+        value: ${{ jobs.export_pr_details.outputs.prAction }}
+
+name: Export Pull Request details from fork
+jobs:
+  export_pr_details:
+    runs-on: ubuntu-latest
+    # Map the job outputs to step outputs
+    outputs:
+      prNumber: ${{ steps.prNumber.outputs.prNumber }}
+      prTitle: ${{ steps.prTitle.outputs.prTitle }}
+      prBody: ${{ steps.prBody.outputs.prBody }}
+      prAuthor: ${{ steps.prAuthor.outputs.prAuthor }}
+      prAction: ${{ steps.prAction.outputs.prAction }}
+    steps:
+      - name: "Download artifact"
+        uses: actions/github-script@v6
+        # For security, we only download artifacts tied to the successful PR recording workflow
+        with:
+          github-token: ${{ inputs.token }}
+          script: |
+            const fs = require('fs');
+
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               run_id: ${{inputs.record_pr_workflow_id}},
+            });
+
+            const matchArtifact = artifacts.data.artifacts.filter(artifact => artifact.name == "pr")[0];
+
+            const artifact = await github.rest.actions.downloadArtifact({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               artifact_id: matchArtifact.id,
+               archive_format: 'zip',
+            });
+
+            fs.writeFileSync('${{github.workspace}}/pr.zip', Buffer.from(artifact.data));
+      # NodeJS standard library doesn't provide ZIP capabilities; use system `unzip` command instead
+      - run: unzip pr.zip
+      - id: prNumber
+        run: echo ::set-output name=prNumber::$(cat ./number)
+      - id: prTitle
+        run: echo ::set-output name=prTitle::$(cat ./title)
+      - id: prBody
+        run: echo ::set-output name=prBody::$(cat ./body)
+      - id: prAuthor
+        run: echo ::set-output name=prAuthor::$(cat ./author)
+      - id: prAction
+        run: echo ::set-output name=prAction::$(cat ./action)
