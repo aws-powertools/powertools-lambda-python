@@ -1,0 +1,46 @@
+on:
+  pull_request:
+    types:
+      - closed
+
+env:
+  RELEASE_LABEL: "pending-release"
+  MAINTAINERS_TEAM: "@awslabs/aws-lambda-powertools-python"
+
+jobs:
+  release_label_on_merge:
+    if: github.event.pull_request.merged == true && github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Label PR related issue for release"
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prBody = context.payload.body;
+            const prNumber = context.payload.number;
+            const releaseLabel = process.env.RELEASE_LABEL;
+
+            const RELATED_ISSUE_REGEX = /Issue number:.+(\d)/
+
+            const matcher = new RegExp(RELATED_ISSUE_REGEX)
+            const isMatch = matcher.exec(prBody)
+            if (isMatch != null) {
+                let relatedIssueNumber = isMatch[1]
+                console.info(`Auto-labeling related issue ${relatedIssueNumber} for release`)
+
+                await github.rest.issues.addLabels({
+                  issue_number: relatedIssueNumber,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  labels: [releaseLabel]
+                })
+            } else {
+              let msg = `${MAINTAINERS_TEAM} No related issues found. Please ensure '${RELEASE_LABEL}.' label is applied before releasing.`;
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: msg,
+                issue_number: prNumber,
+              });
+            }

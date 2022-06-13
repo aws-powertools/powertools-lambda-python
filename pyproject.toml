@@ -53,12 +53,12 @@ flake8-eradicate = "^1.2.1"
 flake8-bugbear = "^22.4.25"
 mkdocs-git-revision-date-plugin = "^0.3.2"
 mike = "^0.6.0"
-mypy = "^0.960"
+mypy = "^0.961"
 mkdocs-material = "^8.2.7"
-mypy-boto3-secretsmanager = "^1.23.8"
-mypy-boto3-ssm = "^1.23.0"
-mypy-boto3-appconfig = "^1.23.0"
-mypy-boto3-dynamodb = "^1.23.0"
+mypy-boto3-secretsmanager = "^1.24.0"
+mypy-boto3-ssm = "^1.24.0"
+mypy-boto3-appconfig = "^1.24.0"
+mypy-boto3-dynamodb = "^1.24.0"
 
 
 [tool.poetry.extras]
