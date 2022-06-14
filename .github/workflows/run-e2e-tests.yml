@@ -12,7 +12,7 @@ jobs:
       contents: read
     strategy:
       matrix:
-        version: ["3.6", "3.7", "3.8", "3.9"]
+        version: ["3.7", "3.8", "3.9"]
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
@@ -27,9 +27,9 @@ jobs:
       - name: Install dependencies
         run: make dev
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1.6.1
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ secrets.E2E_DEPLOYMENT_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_TEST_ROLE_ARN }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
       - name: Test
         run: make e2e-test

@@ -15,7 +15,6 @@ PYTHON_RUNTIME_VERSION = f"V{''.join(map(str, sys.version_info[:2]))}"
 
 
 class PythonVersion(Enum):
-    V36 = {"runtime": Runtime.PYTHON_3_6, "image": Runtime.PYTHON_3_6.bundling_image.image}
     V37 = {"runtime": Runtime.PYTHON_3_7, "image": Runtime.PYTHON_3_7.bundling_image.image}
     V38 = {"runtime": Runtime.PYTHON_3_8, "image": Runtime.PYTHON_3_8.bundling_image.image}
     V39 = {"runtime": Runtime.PYTHON_3_9, "image": Runtime.PYTHON_3_9.bundling_image.image}
