@@ -320,8 +320,21 @@ def test_schema_no_metrics(service, namespace):
 
 
 def test_exceed_number_of_dimensions(metric, namespace):
-    # GIVEN we we have more dimensions than CloudWatch supports
+    # GIVEN we have more dimensions than CloudWatch supports
     dimensions = [{"name": f"test_{i}", "value": "test"} for i in range(11)]
+
+    # WHEN we attempt to serialize them into a valid EMF object
+    # THEN it should fail validation and raise SchemaValidationError
+    with pytest.raises(SchemaValidationError, match="Maximum number of dimensions exceeded.*"):
+        with single_metric(**metric, namespace=namespace) as my_metric:
+            for dimension in dimensions:
+                my_metric.add_dimension(**dimension)
+
+
+def test_exceed_number_of_dimensions_with_service(metric, namespace, monkeypatch):
+    # GIVEN we have service set and add more dimensions than CloudWatch supports (N+1)
+    monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", "test_service")
+    dimensions = [{"name": f"test_{i}", "value": "test"} for i in range(9)]
 
     # WHEN we attempt to serialize them into a valid EMF object
     # THEN it should fail validation and raise SchemaValidationError

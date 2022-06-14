@@ -22,7 +22,7 @@ name: Publish to PyPi
 # 8. Builds a fresh version of docs including Changelog updates
 # 9. Push latest release source code to master using release title as the commit message
 # 10. Builds latest documentation for new release, and update latest alias pointing to the new release tag
-# 11. Close and notify all issues labeled "status/staged-next-release" about the release details
+# 11. Close and notify all issues labeled "pending-release" about the release details
 
 #
 # === Fallback mechanism due to external failures ===
@@ -36,7 +36,6 @@ name: Publish to PyPi
 #
 # Look for rebuild latest docs workflow
 
-
 on:
   release:
     types: [published]
@@ -45,84 +44,84 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.8"
-    - name: Set release notes tag
-      run: |
-        RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}
-        echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> $GITHUB_ENV
-    - name: Ensure new version is also set in pyproject and CHANGELOG
-      run: |
-        grep --regexp "${RELEASE_TAG_VERSION}" CHANGELOG.md
-        grep --regexp "version \= \"${RELEASE_TAG_VERSION}\"" pyproject.toml
-    - name: Install dependencies
-      run: make dev
-    - name: Run all tests, linting and baselines
-      run: make pr
-    - name: Build python package and wheel
-      run: poetry build
-    - name: Upload to PyPi test
-      run: make release-test
-      env:
-        PYPI_USERNAME: __token__
-        PYPI_TEST_TOKEN: ${{ secrets.PYPI_TEST_TOKEN }}
-    - name: Upload to PyPi prod
-      run: make release-prod
-      env:
-        PYPI_USERNAME: __token__
-        PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-    - name: publish lambda layer in SAR by triggering the internal codepipeline
-      run: |
-        aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_TAG_VERSION --overwrite
-        aws codepipeline start-pipeline-execution --name ${{ secrets.CODEPIPELINE_NAME }}
-      env:
-        # Maintenance: Migrate to new OAuth mechanism
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: eu-west-1
-        AWS_DEFAULT_OUTPUT: json
-    - name: Setup doc deploy
-      run: |
-        git config --global user.name Docs deploy
-        git config --global user.email aws-devax-open-source@amazon.com
-    - name: Build docs website and API reference
-      run: |
-        make release-docs VERSION=${RELEASE_TAG_VERSION} ALIAS="latest"
-        poetry run mike set-default --push latest
-    - name: Release API docs to release version
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./api
-        keep_files: true
-        destination_dir: ${{ env.RELEASE_TAG_VERSION }}/api
-    - name: Release API docs to latest
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./api
-        keep_files: true
-        destination_dir: latest/api
-    - name: Close issues related to this release
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const post_release = require('.github/workflows/post_release.js')
-          await post_release({github, context, core})
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+      - name: Set release notes tag
+        run: |
+          RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}
+          echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> $GITHUB_ENV
+      - name: Ensure new version is also set in pyproject and CHANGELOG
+        run: |
+          grep --regexp "${RELEASE_TAG_VERSION}" CHANGELOG.md
+          grep --regexp "version \= \"${RELEASE_TAG_VERSION}\"" pyproject.toml
+      - name: Install dependencies
+        run: make dev
+      - name: Run all tests, linting and baselines
+        run: make pr
+      - name: Build python package and wheel
+        run: poetry build
+      - name: Upload to PyPi test
+        run: make release-test
+        env:
+          PYPI_USERNAME: __token__
+          PYPI_TEST_TOKEN: ${{ secrets.PYPI_TEST_TOKEN }}
+      - name: Upload to PyPi prod
+        run: make release-prod
+        env:
+          PYPI_USERNAME: __token__
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+      - name: publish lambda layer in SAR by triggering the internal codepipeline
+        run: |
+          aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_TAG_VERSION --overwrite
+          aws codepipeline start-pipeline-execution --name ${{ secrets.CODEPIPELINE_NAME }}
+        env:
+          # Maintenance: Migrate to new OAuth mechanism
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-west-1
+          AWS_DEFAULT_OUTPUT: json
+      - name: Setup doc deploy
+        run: |
+          git config --global user.name Docs deploy
+          git config --global user.email aws-devax-open-source@amazon.com
+      - name: Build docs website and API reference
+        run: |
+          make release-docs VERSION=${RELEASE_TAG_VERSION} ALIAS="latest"
+          poetry run mike set-default --push latest
+      - name: Release API docs to release version
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./api
+          keep_files: true
+          destination_dir: ${{ env.RELEASE_TAG_VERSION }}/api
+      - name: Release API docs to latest
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./api
+          keep_files: true
+          destination_dir: latest/api
+      - name: Close issues related to this release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const post_release = require('.github/workflows/post_release.js')
+            await post_release({github, context, core})
 
   sync_master:
     needs: release
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Sync master from detached head
-      # If version matches CHANGELOG and pyproject.toml
-      # If it passes all checks, successfully releases to test and prod
-      # Then sync up master with latest source code release
-      # where commit message will be Release notes title
-      run: git push origin HEAD:refs/heads/master --force
+      - uses: actions/checkout@v3
+      - name: Sync master from detached head
+        # If version matches CHANGELOG and pyproject.toml
+        # If it passes all checks, successfully releases to test and prod
+        # Then sync up master with latest source code release
+        # where commit message will be Release notes title
+        run: git push origin HEAD:refs/heads/master --force
