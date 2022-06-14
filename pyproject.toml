@@ -133,7 +133,10 @@ exclude = '''
 minversion = "6.0"
 addopts = "-ra -vv"
 testpaths = "./tests"
-markers = "perf: marks perf tests to be deselected (deselect with '-m \"not perf\"')"
+markers = [
+    "perf: marks perf tests to be deselected (deselect with '-m \"not perf\"')",
+    "e2e: marks e2e tests to be deselected (deselect with '-m \"not e2e\"')",
+]
 
 [build-system]
 requires = ["poetry>=0.12"]

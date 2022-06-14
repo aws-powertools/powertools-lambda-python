@@ -139,10 +139,10 @@ class Infrastructure:
             buf = io.BytesIO()
             asset_dir = f"{asset_root_dir}/asset.{Path(s3_key).with_suffix('')}"
             os.chdir(asset_dir)
-            files = self._find_files(directory=".")
+            asset_files = self._find_files(directory=".")
             with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
-                for file in files:
-                    zf.write(os.path.join(file))
+                for asset_file in asset_files:
+                    zf.write(os.path.join(asset_file))
             buf.seek(0)
             self.s3_client.upload_fileobj(Fileobj=buf, Bucket=bucket, Key=s3_key)
 

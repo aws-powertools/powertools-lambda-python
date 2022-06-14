@@ -161,8 +161,3 @@ def test_no_context_lambda_event_not_logged(execute_lambda: conftest.LambdaExecu
 
     # THEN
     assert not any(log.message == {} for log in filtered_logs)
-
-
-### Add tests for cold start and non-cold start executions
-### Test errors
-### Test child loggers

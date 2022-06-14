@@ -40,7 +40,7 @@ def execute_lambda(config, request) -> Generator[LambdaExecution, None, None]:
     lambda_arns = infra.deploy()
     execution_time = datetime.datetime.utcnow()
 
-    for name, arn in lambda_arns.items():
+    for _, arn in lambda_arns.items():
         helpers.trigger_lambda(lambda_arn=arn, client=infra.lambda_client)
     yield {"arns": lambda_arns, "execution_time": execution_time}
     # Ensure stack deletion is triggered at the end of the test session
