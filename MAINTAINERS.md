@@ -13,6 +13,7 @@
   - [Triage Bug Reports](#triage-bug-reports)
   - [Triage RFCs](#triage-rfcs)
   - [Releasing a new version](#releasing-a-new-version)
+    - [Run end to end tests](#run-end-to-end-tests)
     - [Changelog generation](#changelog-generation)
     - [Bumping the version](#bumping-the-version)
     - [Drafting release notes](#drafting-release-notes)
@@ -171,7 +172,15 @@ Some examples using our initial and new RFC templates: #92, #94, #95, #991, #122
 
 Firstly, make sure you are using the `develop` branch and it is up to date with the origin.
 
-There are three main steps to release a new version: Changelog generation, version bumping, and drafting release notes.
+There are four main steps to release a new version: Run end to end tests, Changelog generation, version bumping, and drafting release notes.
+
+#### Run end to end tests
+
+You can run tests either from your local machine's shell by exporting `AWS_PROFILE` environment variable and running `make e2e tests`. 
+You may also do this directly from GitHub Console. Go to actions tab and choose `run-e2e-tests` workflow from workflow's list. Pick the branch and run tests.
+
+> **Q: What if there's an error?**
+To be agreed
 
 #### Changelog generation
 
