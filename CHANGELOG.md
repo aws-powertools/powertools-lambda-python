@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format for changes and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.26.2 - 2022-06-16
+
+### Bug Fixes
+
+* **event-handler:** body to empty string in CORS preflight (ALB non-compliant) ([#1249](https://github.com/awslabs/aws-lambda-powertools-python/issues/1249))
+
+### Maintenance
+
+* **deps:** bump actions/setup-python from 3 to 4 ([#1244](https://github.com/awslabs/aws-lambda-powertools-python/issues/1244))
+* **deps-dev:** bump mypy from 0.960 to 0.961 ([#1241](https://github.com/awslabs/aws-lambda-powertools-python/issues/1241))
+* **deps-dev:** bump mypy-boto3-ssm from 1.23.0.post1 to 1.24.0 ([#1231](https://github.com/awslabs/aws-lambda-powertools-python/issues/1231))
+* **deps-dev:** bump mypy-boto3-secretsmanager from 1.23.8 to 1.24.0 ([#1232](https://github.com/awslabs/aws-lambda-powertools-python/issues/1232))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.23.0.post1 to 1.24.0 ([#1234](https://github.com/awslabs/aws-lambda-powertools-python/issues/1234))
+* **deps-dev:** bump mypy-boto3-appconfig from 1.23.0.post1 to 1.24.0 ([#1233](https://github.com/awslabs/aws-lambda-powertools-python/issues/1233))
+* **governance:** fix workflow action requirements & syntax
+* **governance:** add release label on pr merge
+* **governance:** auto-merge on all PR events
+* **governance:** enforce safe scope on pr merge labelling
+* **governance:** auto-merge workflow_dispatch off
+* **governance:** auto-merge to use squash
+* **governance:** limit build workflow to code changes only
+* **governance:** auto-merge mypy-stub dependabot
+* **governance:** check for related issue in new PRs
+* **governance:** address gh reusable workflow limitation
+* **governance:** warn message on closed issues
+* **metrics:** revert dimensions test before splitting ([#1243](https://github.com/awslabs/aws-lambda-powertools-python/issues/1243))
+
 ## 1.26.1 - 2022-06-07
 ### Bug Fixes
 
