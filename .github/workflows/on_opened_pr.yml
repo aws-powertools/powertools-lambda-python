@@ -27,6 +27,7 @@ jobs:
       - name: "Ensure related issue is present"
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           # Maintenance: convert into a standalone JS like post_release.js
           script: |
             const prBody = ${{ needs.get_pr_details.outputs.prBody }};
