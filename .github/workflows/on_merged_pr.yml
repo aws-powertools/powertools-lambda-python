@@ -37,7 +37,7 @@ jobs:
                   labels: [releaseLabel]
                 })
             } else {
-              let msg = `${maintainersTeam} No related issues found. Please ensure '${RELEASE_LABEL}.' label is applied before releasing.`;
+              let msg = `${maintainersTeam} No related issues found. Please ensure '${releaseLabel}' label is applied before releasing.`;
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
