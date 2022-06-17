@@ -1,4 +1,5 @@
 import importlib
+import os
 import time
 from contextlib import contextmanager
 from types import ModuleType
@@ -10,6 +11,8 @@ LOGGER_INIT_SLA: float = 0.005
 METRICS_INIT_SLA: float = 0.005
 TRACER_INIT_SLA: float = 0.5
 IMPORT_INIT_SLA: float = 0.035
+
+IS_CI = os.getenv("CI", False)
 
 
 @contextmanager
@@ -37,6 +40,7 @@ def core_utilities() -> Tuple[ModuleType, ModuleType, ModuleType]:
 
 
 @pytest.mark.perf
+@pytest.mark.flaky(reruns=1, condition=IS_CI)
 def test_import_times_ceiling():
     # GIVEN Core utilities are imported
     # WHEN none are used
@@ -52,6 +56,7 @@ def test_import_times_ceiling():
 
 
 @pytest.mark.perf
+@pytest.mark.flaky(reruns=1, reruns_delay=1, condition=IS_CI)
 def test_tracer_init():
     # GIVEN Tracer is initialized
     # WHEN default options are used
@@ -68,6 +73,7 @@ def test_tracer_init():
 
 
 @pytest.mark.perf
+@pytest.mark.flaky(reruns=1, reruns_delay=1, condition=IS_CI)
 def test_metrics_init():
     # GIVEN Metrics is initialized
     # WHEN default options are used
@@ -82,6 +88,7 @@ def test_metrics_init():
 
 
 @pytest.mark.perf
+@pytest.mark.flaky(reruns=1, reruns_delay=1, condition=IS_CI)
 def test_logger_init():
     # GIVEN Logger is initialized
     # WHEN default options are used
