@@ -908,3 +908,7 @@ def test_batch_processor_error_when_entire_batch_fails(sqs_event_factory, record
 
     # THEN raise BatchProcessingError
     assert "All records failed processing. " in str(e.value)
+
+
+def test_batch_processor_error_when_child_exceptions_is_none():
+    assert str(BatchProcessingError()) == "\n"
