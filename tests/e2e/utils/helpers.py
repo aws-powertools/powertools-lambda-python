@@ -30,7 +30,7 @@ def trigger_lambda(lambda_arn: str, client: Any):
 
 @lru_cache(maxsize=10, typed=False)
 @retry(ValueError, delay=1, jitter=1, tries=10)
-def get_logs(lambda_function_name: str, log_client: Any, start_time: int, **kwargs: dict):
+def get_logs(lambda_function_name: str, log_client: Any, start_time: int, **kwargs: dict) -> List[Log]:
     response = log_client.filter_log_events(logGroupName=f"/aws/lambda/{lambda_function_name}", startTime=start_time)
     if not response["events"]:
         raise ValueError("Empty response from Cloudwatch Logs. Repeating...")
