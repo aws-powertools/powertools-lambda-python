@@ -177,7 +177,7 @@ There are four main steps to release a new version: Run end to end tests, Change
 #### Run end to end tests
 
 You can run tests either from your local machine's shell by exporting `AWS_PROFILE` environment variable and running `make e2e tests`. 
-You may also do this directly from GitHub Console. Go to actions tab and choose `run-e2e-tests` workflow from workflow's list. Pick the branch and run tests.
+You may also do this directly from GitHub Console. Run the [run-e2e-tests workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/run-e2e-tests.yml) and pick the branch you want to run tests against.
 
 > **Q: What if there's an error?**
 To be agreed
