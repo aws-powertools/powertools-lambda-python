@@ -8,7 +8,7 @@ jobs:
   run:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # needed to interact with GitHub's OIDC Token endpoint.
+      id-token: write # needed to request JWT with GitHub's OIDC Token endpoint. docs: https://bit.ly/3MNgQO9
       contents: read
     strategy:
       matrix:
