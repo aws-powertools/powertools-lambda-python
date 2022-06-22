@@ -17,10 +17,10 @@ lint: format
 	poetry run flake8 aws_lambda_powertools/* tests/*
 
 lint-docs:
-	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli:0.28.1-alpine "docs"
+	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli "docs"
 
 lint-docs-fix:
-	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli:0.28.1-alpine --fix "docs"
+	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli --fix "docs"
 
 test:
 	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=xml
