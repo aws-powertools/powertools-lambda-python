@@ -18,9 +18,11 @@ Event handler for Amazon API Gateway REST and HTTP APIs, and Application Loader 
 
 ### Required resources
 
-You must have an existing [API Gateway Proxy integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html){target="_blank"} or [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html){target="_blank"} configured to invoke your Lambda function. There is no additional permissions or dependencies required to use this utility.
+You must have an existing [API Gateway Proxy integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html){target="_blank"} or [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html){target="_blank"} configured to invoke your Lambda function.
 
 This is the sample infrastructure for API Gateway we are using for the examples in this documentation.
+
+???+ info "There is no additional permissions or dependencies required to use this utility."
 
 ```yaml title="AWS Serverless Application Model (SAM) example"
 AWSTemplateFormatVersion: '2010-09-09'
@@ -35,7 +37,7 @@ Globals:
 		AllowHeaders: "'Content-Type,Authorization,X-Amz-Date'"
 		MaxAge: "'300'"
 	BinaryMediaTypes:               # see Binary responses section
-		- '*~1*'  # converts to */* for any binary type
+		- '*~1*'                    # converts to */* for any binary type
 	Function:
 	Timeout: 5
 	Runtime: python3.8
@@ -59,8 +61,11 @@ Resources:
 			ApiEvent:
 				Type: Api
 				Properties:
-				Path: /{proxy+}  # Send requests on any path to the lambda function
-				Method: ANY  # Send requests using any http method to the lambda function
+                    # NOTE: this is a catch-all rule to simply the documentation.
+                    # explicit routes and methods are recommended for prod instead
+                    # for example, Path: /hello, Method: GET
+				    Path: /{proxy+}  # Send requests on any path to the lambda function
+				    Method: ANY  # Send requests using any http method to the lambda function
 ```
 
 ### Event Resolvers
@@ -355,7 +360,9 @@ You can also combine nested paths with greedy regex to catch in between routes.
         ...
     }
     ```
+
 ### HTTP Methods
+
 You can use named decorators to specify the HTTP method that should be handled in your functions. As well as the
 `get` method already shown above, you can use `post`, `put`, `patch`, `delete`, and `patch`.
 
@@ -487,7 +494,6 @@ def lambda_handler(event, context):
 	return app.resolve(event, context)
 ```
 
-
 ### Handling not found routes
 
 By default, we return `404` for any unmatched route.
@@ -527,7 +533,6 @@ def catch_me_if_you_can():
 def lambda_handler(event, context):
 	return app.resolve(event, context)
 ```
-
 
 ### Exception handling
 
@@ -754,13 +759,13 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 ???+ warning
     Always configure `allow_origin` when using in production.
 
-Key | Value | Note
-------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------
-**[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank"}**: `str` | `*` | Only use the default value for development. **Never use `*` for production** unless your use case requires it
-**[allow_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers){target="_blank"}**: `List[str]` | `[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]` | Additional headers will be appended to the default list for your convenience
-**[expose_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers){target="_blank"}**: `List[str]` | `[]` | Any additional header beyond the [safe listed by CORS specification](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header){target="_blank"}.
-**[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="_blank"}**: `int` | `` | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway
-**[allow_credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials){target="_blank"}**: `bool` | `False` | Only necessary when you need to expose cookies, authorization headers or TLS client certificates.
+| Key                                                                                                                                          | Value                                                                        | Note                                                                                                                                                                      |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank"}**: `str`            | `*`                                                                          | Only use the default value for development. **Never use `*` for production** unless your use case requires it                                                             |
+| **[allow_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers){target="_blank"}**: `List[str]`    | `[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]` | Additional headers will be appended to the default list for your convenience                                                                                              |
+| **[expose_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers){target="_blank"}**: `List[str]`  | `[]`                                                                         | Any additional header beyond the [safe listed by CORS specification](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header){target="_blank"}. |
+| **[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="_blank"}**: `int`                      | ``                                                                           | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway                                                                      |
+| **[allow_credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials){target="_blank"}**: `bool` | `False`                                                                      | Only necessary when you need to expose cookies, authorization headers or TLS client certificates.                                                                         |
 
 ### Fine grained responses
 
@@ -1132,7 +1137,6 @@ This sample project contains a Users function with two distinct set of routes, `
 
 === "Project layout"
 
-
     ```python hl_lines="1 8 10 12-15"
     .
     ├── Pipfile                    # project app & dev dependencies; poetry, pipenv, etc.
@@ -1308,7 +1312,7 @@ _**Downsides**_
 
 * **Cold starts**. Frequent deployments and/or high load can diminish the benefit of monolithic functions depending on your latency requirements, due to [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"}. Always load test to pragmatically balance between your customer experience and development cognitive load.
 * **Granular security permissions**. The micro function approach enables you to use fine-grained permissions & access controls, separate external dependencies & code signing at the function level. Conversely, you could have multiple functions while duplicating the final code artifact in a monolithic approach.
-    - Regardless, least privilege can be applied to either approaches.
+    * Regardless, least privilege can be applied to either approaches.
 * **Higher risk per deployment**. A misconfiguration or invalid import can cause disruption if not caught earlier in automated testing. Multiple functions can mitigate misconfigurations but they would still share the same code artifact. You can further minimize risks with multiple environments in your CI/CD pipeline.
 
 #### Micro function
@@ -1317,20 +1321,20 @@ _**Downsides**_
 
 A micro function means that your final code artifact will be different to each function deployed. This is generally the approach to start if you're looking for fine-grain control and/or high load on certain parts of your service.
 
-_**Benefits**_
+**Benefits**
 
 * **Granular scaling**. A micro function can benefit from the [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"} to scale differently depending on each part of your application. Concurrency controls and provisioned concurrency can also be used at a granular level for capacity management.
 * **Discoverability**. Micro functions are easier do visualize when using distributed tracing. Their high-level architectures can be self-explanatory, and complexity is highly visible — assuming each function is named to the business purpose it serves.
 * **Package size**. An independent function can be significant smaller (KB vs MB) depending on external dependencies it require to perform its purpose. Conversely, a monolithic approach can benefit from [Lambda Layers](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html){target="_blank"} to optimize builds for external dependencies.
 
-_**Downsides**_
+**Downsides**
 
-* **Upfront investment**. Python ecosystem doesn't use a bundler — you need a custom build tooling to ensure each function only has what it needs and account for [C bindings for runtime compatibility](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html){target="_blank"}. Operations become more elaborate — you need to standardize tracing labels/annotations, structured logging, and metrics to pinpoint root causes.
-    - Engineering discipline is necessary for both approaches. Micro-function approach however requires further attention in consistency as the number of functions grow, just like any distributed system.
+* **Upfront investment**. You need custom build tooling to bundle assets, including [C bindings for runtime compatibility](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html){target="_blank"}. `Operations become more elaborate — you need to standardize tracing labels/annotations, structured logging, and metrics to pinpoint root causes.
+    * Engineering discipline is necessary for both approaches. Micro-function approach however requires further attention in consistency as the number of functions grow, just like any distributed system.
 * **Harder to share code**. Shared code must be carefully evaluated to avoid unnecessary deployments when that changes. Equally, if shared code isn't a library,
 your development, building, deployment tooling need to accommodate the distinct layout.
 * **Slower safe deployments**. Safely deploying multiple functions require coordination — AWS CodeDeploy deploys and verifies each function sequentially. This increases lead time substantially (minutes to hours) depending on the deployment strategy you choose. You can mitigate it by selectively enabling it in prod-like environments only, and where the risk profile is applicable.
-    - Automated testing, operational and security reviews are essential to stability in either approaches.
+    * Automated testing, operational and security reviews are essential to stability in either approaches.
 
 ## Testing your code
 

@@ -101,7 +101,6 @@ def collect_payment(charge_id):
     The serialization is performed by aws-xray-sdk via `jsonpickle` module. This can cause
     side effects for file-like objects like boto S3 <a href="https://botocore.amazonaws.com/v1/documentation/api/latest/reference/response.html#botocore.response.StreamingBody">`StreamingBody`</a>, where its response will be read only once during serialization.
 
-
 ### Asynchronous and generator functions
 
 ???+ warning
@@ -245,7 +244,6 @@ def handler(event, context):
     for x in long_list:
         ec2_api_calls()
 ```
-
 
 ### Tracing aiohttp requests
 
