@@ -3,6 +3,8 @@ title: Homepage
 description: AWS Lambda Powertools Python
 ---
 
+<!-- markdownlint-disable MD043 -->
+
 A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, idempotency, batching, and more.
 
 ???+ tip "Tip: Looking for a quick read through how the core features are used?"
