@@ -163,16 +163,8 @@ You can use `tracer.provider` attribute to access all methods provided by AWS X-
 
 This is useful when you need a feature available in X-Ray that is not available in the Tracer utility, for example [thread-safe](https://github.com/aws/aws-xray-sdk-python/#user-content-trace-threadpoolexecutor), or [context managers](https://github.com/aws/aws-xray-sdk-python/#user-content-start-a-custom-segmentsubsegment).
 
-```python hl_lines="7" title="Tracing a code block with in_subsegment escape hatch"
-from aws_lambda_powertools import Tracer
-
-tracer = Tracer()
-
-@tracer.capture_lambda_handler
-def handler(event, context):
-	with tracer.provider.in_subsegment('## custom subsegment') as subsegment:
-		ret = some_work()
-		subsegment.put_metadata('response', ret)
+```python hl_lines="14" title="Tracing a code block with in_subsegment escape hatch"
+--8<-- "examples/tracer/src/sdk_escape_hatch.py"
 ```
 
 ### Concurrent asynchronous functions
