@@ -121,7 +121,7 @@ Use **`capture_response=False`** parameter in both `capture_lambda_handler` and 
 
 === "streaming_object_scenario.py"
 
-    ```python hl_lines="18"
+    ```python hl_lines="19"
     --8<-- "examples/tracer/src/disable_capture_response_streaming_body.py"
     ```
 
