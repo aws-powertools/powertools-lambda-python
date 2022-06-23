@@ -3,12 +3,13 @@ title: Homepage
 description: AWS Lambda Powertools Python
 ---
 
+<!-- markdownlint-disable MD043 -->
+
 A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, idempotency, batching, and more.
 
 ???+ tip "Tip: Looking for a quick read through how the core features are used?"
 
     Check out [this detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/) with a practical example.
-
 
 ## Install
 
@@ -21,7 +22,6 @@ Powertools is available in the following formats:
     Lambda Layers allow us to understand who uses this library in a non-intrusive way. This helps us justify and gain future investments for other Lambda Powertools languages.
 
     When using Layers, you can add Lambda Powertools as a dev dependency (or as part of your virtual env) to not impact the development process.
-
 
 ### Lambda Layer
 
@@ -187,7 +187,6 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 
 	Lambda Powertools Lambda Layer do not include `pydantic` library - required dependency for the `parser` utility. See [SAR](#sar) option instead.
 
-
 #### SAR
 
 Serverless Application Repository (SAR) App deploys a CloudFormation stack with a copy of our Lambda Layer in your AWS account and region.
@@ -204,7 +203,6 @@ Despite having more steps compared to the [public Layer ARN](#lambda-layer) opti
 
 ???+ tip
 	You can create a shared Lambda Layers stack and make this along with other account level layers stack.
-
 
 If using SAM, you can include this SAR App as part of your shared Layers stack, and lock to a specific semantic version. Once deployed, it'll be available across the account this is deployed to.
 
@@ -460,7 +458,7 @@ from aws_lambda_powertools.logging.logger import set_package_logger
 set_package_logger() # (1)
 ```
 
-1.  :information_source: this will configure our `aws_lambda_powertools` logger with debug.
+1. :information_source: this will configure our `aws_lambda_powertools` logger with debug.
 
 ## Tenets
 

@@ -107,6 +107,7 @@ Envelope | JMESPath expression
 ## Advanced
 
 ### Built-in JMESPath functions
+
 You can use our built-in JMESPath functions within your expressions to do exactly that to decode JSON Strings, base64, and uncompress gzip data.
 
 ???+ info

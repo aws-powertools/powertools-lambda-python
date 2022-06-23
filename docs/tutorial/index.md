@@ -82,6 +82,7 @@ When API Gateway receives a HTTP GET request on `/hello` route, Lambda will call
 
 ???+ warning
     For simplicity, we do not set up authentication and authorization! You can find more information on how to implement it on [AWS SAM documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-controlling-access-to-apis.html){target="_blank"}.
+
 ### Run your code
 
 At each point, you have two ways to run your code: locally and within your AWS account.
@@ -105,7 +106,6 @@ As a result, a local API endpoint will be exposed and you can invoke it using yo
 
 ???+ info
     To learn more about local testing, please visit the [AWS SAM CLI local testing](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-start-api.html) documentation.
-
 
 #### Live test
 
@@ -357,9 +357,9 @@ Lastly, we used `return app.resolve(event, context)` so Event Handler can resolv
 
 From here, we could handle [404 routes](../core/event_handler/api_gateway.md#handling-not-found-routes){target="_blank"}, [error handling](../core/event_handler/api_gateway.md#exception-handling){target="_blank"}, [access query strings, payload](../core/event_handler/api_gateway.md#accessing-request-details){target="_blank"}, etc.
 
-
 ???+ tip
     If you'd like to learn how python decorators work under the hood, you can follow [Real Python](https://realpython.com/primer-on-python-decorators/)'s article.
+
 ## Structured Logging
 
 Over time, you realize that searching logs as text results in poor observability, it's hard to create metrics from, enumerate common exceptions, etc.
@@ -443,7 +443,6 @@ So far, so good! We can take a step further now by adding additional context to 
 
 We could start by creating a dictionary with Lambda context information or something from the incoming event, which should always be logged. Additional attributes could be added on every `logger.info` using `extra` keyword like in any standard Python logger.
 
-
 ### Simplifying with Logger
 
 ???+ question "Surely this could be easier, right?"
@@ -484,7 +483,6 @@ Let's break this down:
 * **L22**: We use `logger.inject_lambda_context` decorator to inject key information from Lambda context into every log.
 * **L22**: We also instruct Logger to use the incoming API Gateway Request ID as a [correlation id](../core/logger.md##set_correlation_id-method) automatically.
 * **L22**: Since we're in dev, we also use `log_event=True` to automatically log each incoming request for debugging. This can be also set via [environment variables](./index.md#environment-variables){target="_blank"}.
-
 
 This is how the logs would look like now:
 
@@ -707,7 +705,9 @@ Let's break it down:
 ???+ info
     If you want to understand how the Lambda execution environment (sandbox) works and why cold starts can occur, see this [blog series on Lambda performance](https://aws.amazon.com/blogs/compute/operating-lambda-performance-optimization-part-1/).
 
-Repeat the process of building, deploying, and invoking your application via the API endpoint. Within the [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"}, you should now be able to group traces by the `User` and `ColdStart` annotation.
+Repeat the process of building, deploying, and invoking your application via the API endpoint.
+
+Within the [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"}, you should now be able to group traces by the `User` and `ColdStart` annotation.
 
 ![Filtering traces by annotations](../media/tracer_xray_sdk_enriched.png)
 
@@ -772,7 +772,6 @@ Lambda Powertools optimizes for Lambda compute environment. As such, we add thes
 
 Repeat the process of building, deploying, and invoking your application via the API endpoint. Within the [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"}, you should see a similar view:
 
-
 ![AWS X-Ray Console trace view using Lambda Powertools Tracer](../media/tracer_utility_showcase_2.png)
 
 ???+ tip
@@ -791,7 +790,7 @@ From here, you can browse to specific logs in CloudWatch Logs Insight, Metrics D
 
 Let's add custom metrics to better understand our application and business behavior (e.g. number of reservations, etc.).
 
-Out of the box, AWS Lambda adds [invocation, performance, and concurrency metrics](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-metrics.html#monitoring-metrics-types){target="_blank"}. Amazon API Gateway also adds [general metrics at the aggregate level](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-metrics-and-dimensions.html#api-gateway-metrics) such as latency, number of requests received, etc.
+By default, AWS Lambda adds [invocation and performance metrics](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-metrics.html#monitoring-metrics-types){target="_blank"}, and Amazon API Gateway adds [latency and some HTTP metrics](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-metrics-and-dimensions.html#api-gateway-metrics).
 
 ???+ tip
     You can [optionally enable detailed metrics](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-metrics-and-dimensions.html#api-gateway-metricdimensions){target="_blank"} per each API route, stage, and method in API Gateway.
@@ -915,7 +914,8 @@ There's a lot going on, let's break this down:
 
 * **L10**: We define a container where all of our application metrics will live `MyApp`, a.k.a [Metrics Namespace](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html){target="_blank"}.
 * **L14**: We initialize a CloudWatch client to send metrics later.
-* **L19-47**: We create a custom function to prepare and send `ColdStart` and `SuccessfulGreetings` metrics using CloudWatch expected data structure. We also set [dimensions](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Dimension){target="_blank"} of these metrics - Think of them as metadata to define to slice and dice them later; an unique metric is a combination of metric name + metric dimension(s).
+* **L19-47**: We create a custom function to prepare and send `ColdStart` and `SuccessfulGreetings` metrics using CloudWatch expected data structure. We also set [dimensions](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Dimension){target="_blank"} of these metrics.
+    * Think of them as metadata to define to slice and dice them later; an unique metric is a combination of metric name + metric dimension(s).
 * **L55,64**: We call our custom function to create metrics for every greeting received.
 
 ???+ question
@@ -988,7 +988,9 @@ That's a lot less boilerplate code! Let's break this down:
 * **L33**: We use `@metrics.log_metrics` decorator to ensure that our metrics are aligned with the EMF output and validated before-hand, like in case we forget to set namespace, or accidentally use a metric unit as a string that doesn't exist in CloudWatch.
 * **L33**: We also use `capture_cold_start_metric=True` so we don't have to handle that logic either. Note that [Metrics](../core/metrics.md){target="_blank"} does not publish a warm invocation metric (ColdStart=0) for cost reasons. As such, treat the absence (sparse metric) as a non-cold start invocation.
 
-Repeat the process of building, deploying, and invoking your application via the API endpoint a few times to generate metrics - [Artillery](https://www.artillery.io/){target="_blank"} and [K6.io](https://k6.io/open-source){target="_blank"} are quick ways to generate some load. Within [CloudWatch Metrics view](https://console.aws.amazon.com/cloudwatch/home#metricsV2:graph=~()){target="_blank}, you should see `MyApp` custom namespace with your custom metrics there and `SuccessfulGreetings` available to graph.
+Repeat the process of building, deploying, and invoking your application via the API endpoint a few times to generate metrics - [Artillery](https://www.artillery.io/){target="_blank"} and [K6.io](https://k6.io/open-source){target="_blank"} are quick ways to generate some load.
+
+Within [CloudWatch Metrics view](https://console.aws.amazon.com/cloudwatch/home#metricsV2:graph=~()){target="_blank}, you should see `MyApp` custom namespace with your custom metrics there and `SuccessfulGreetings` available to graph.
 
 ![Custom Metrics Example](../media/metrics_utility_showcase.png)
 
@@ -1024,7 +1026,7 @@ If you're curious about how the EMF portion of your function logs look like, you
 }
 ```
 
-# Final considerations
+## Final considerations
 
 We covered a lot of ground here and we only scratched the surface of the feature set available within Lambda Powertools.
 
@@ -1038,4 +1040,4 @@ This requires a change in mindset to ensure operational excellence is part of th
     Lambda Powertools is largely designed to make some of these practices easier to adopt from day 1.
 
 ???+ question "Have ideas for other tutorials?"
-    You can open up a [documentation issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=documentation&template=documentation-improvements.md&title=Tutorial%20Suggestion){target="_blank"}, or connect with us on the [AWS Developers Slack](https://github.com/awslabs/aws-lambda-powertools-python/#connect) at `lambda-powertools` channel, or via e-mail [aws-lambda-powertools-feedback@amazon.com](mailto:aws-lambda-powertools-feedback@amazon.com).
+    You can open up a [documentation issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=documentation&template=documentation-improvements.md&title=Tutorial%20Suggestion){target="_blank"}, or via e-mail [aws-lambda-powertools-feedback@amazon.com](mailto:aws-lambda-powertools-feedback@amazon.com).

@@ -66,7 +66,6 @@ Metric has two global settings that will be used across all metrics emitted:
 	metrics = Metrics(namespace="ServerlessAirline", service="orders") # Sets metric namespace, and service as a metric dimension
 	```
 
-
 ### Creating metrics
 
 You can create metrics using `add_metric`, and you can create dimensions for all your aggregate metrics using `add_dimension` method.

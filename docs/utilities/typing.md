@@ -3,6 +3,8 @@ title: Typing
 description: Utility
 ---
 
+<!-- markdownlint-disable MD043 -->
+
 This typing utility provides static typing classes that can be used to ease the development by providing the IDE type hints.
 
 ![Utilities Typing](../media/utilities_typing.png)

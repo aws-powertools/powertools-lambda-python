@@ -5,9 +5,9 @@ on:
     branches:
       - develop
     paths:
-      - 'docs/**'
-      - 'CHANGELOG.md'
-      - 'mkdocs.yml'
+      - "docs/**"
+      - "CHANGELOG.md"
+      - "mkdocs.yml"
 
 jobs:
   docs:
@@ -22,6 +22,8 @@ jobs:
           python-version: "3.8"
       - name: Install dependencies
         run: make dev
+      - name: Lint documentation
+        run: make lint-docs
       - name: Setup doc deploy
         run: |
           git config --global user.name Docs deploy

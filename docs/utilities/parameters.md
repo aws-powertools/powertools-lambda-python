@@ -3,7 +3,7 @@ title: Parameters
 description: Utility
 ---
 
-
+<!-- markdownlint-disable MD013 -->
 The parameters utility provides high-level functions to retrieve one or multiple parameter values from [AWS Systems Manager Parameter Store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html){target="_blank"}, [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/){target="_blank"}, [AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html){target="_blank"}, [Amazon DynamoDB](https://aws.amazon.com/dynamodb/){target="_blank"}, or bring your own.
 
 ## Key features
@@ -479,7 +479,6 @@ Here is the mapping between this utility's functions and methods and the underly
 | DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table))                                        | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)       |
 | App Config          | `get_app_config`                | `appconfig`      | [get_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfig.html#AppConfig.Client.get_configuration)         |
 
-
 ### Bring your own boto client
 
 You can use `boto3_client` parameter via any of the available [Provider Classes](#built-in-provider-class). Some providers expect a low level boto3 client while others expect a high level boto3 client, here is the mapping for each of them:
@@ -490,7 +489,6 @@ You can use `boto3_client` parameter via any of the available [Provider Classes]
 | [SecretsProvider](#secretsprovider)     | low level  | `boto3.client("secrets")`    |
 | [AppConfigProvider](#appconfigprovider) | low level  | `boto3.client("appconfig")`  |
 | [DynamoDBProvider](#dynamodbprovider)   | high level | `boto3.resource("dynamodb")` |
-
 
 Bringing them together in a single code snippet would look like this:
 
@@ -571,7 +569,6 @@ The **`config`** , **`boto3_session`**, and **`boto3_client`**  parameters enabl
 		...
 	```
 
-
 ## Testing your code
 
 ### Mocking parameter values
@@ -645,13 +642,11 @@ object named `get_parameter_mock`.
 
 	```
 
-
 ### Clearing cache
 
 Parameters utility caches all parameter values for performance and cost reasons. However, this can have unintended interference in tests using the same parameter name.
 
 Within your tests, you can use `clear_cache` method available in [every provider](#built-in-provider-class). When using multiple providers or higher level functions like `get_parameter`, use `clear_caches` standalone function to clear cache globally.
-
 
 === "clear_cache method"
 	```python hl_lines="9"

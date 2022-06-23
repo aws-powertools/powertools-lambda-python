@@ -736,7 +736,6 @@ You might want to continue to use the same date formatting style, or override `l
 
 Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, `xray_trace_id`.
 
-
 === "lambda_handler.py"
     ```python hl_lines="7 10"
     from aws_lambda_powertools import Logger
@@ -901,7 +900,6 @@ For exceptional cases where you want to completely replace our formatter logic, 
 
 ???+ warning
     You will need to implement `append_keys`, `clear_state`, override `format`, and optionally `remove_keys` to keep the same feature set Powertools Logger provides. This also means keeping state of logging keys added.
-
 
 === "collect.py"
 
@@ -1083,7 +1081,6 @@ def handler(event: Dict, context: LambdaContext) -> List:
 **How can I enable powertools logging for imported libraries?**
 
 You can copy the Logger setup to all or sub-sets of registered external loggers. Use the `copy_config_to_registered_logger` method to do this. By default all registered loggers will be modified. You can change this behaviour by providing `include` and `exclude` attributes. You can also provide optional `log_level` attribute external loggers will be configured with.
-
 
 ```python hl_lines="10" title="Cloning Logger config to all other registered standard loggers"
 import logging

@@ -387,7 +387,6 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 
 Feature flags can return any JSON values when `boolean_type` parameter is set to `false`. These can be dictionaries, list, string, integers, etc.
 
-
 === "app.py"
 
     ```python hl_lines="3 9 13 16 18"
@@ -593,7 +592,6 @@ Action | Equivalent expression
 **VALUE_IN_KEY** | `lambda a, b: b in a`
 **VALUE_NOT_IN_KEY** | `lambda a, b: b not in a`
 
-
 ???+ info
     The `**key**` and `**value**` will be compared to the input from the `**context**` parameter.
 
@@ -655,7 +653,6 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
     }
     ```
 
-
 ### Built-in store provider
 
 ???+ info
@@ -677,7 +674,6 @@ Parameter | Default | Description
 **sdk_config** | `None` | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}
 **jmespath_options** | `None` | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"}
 **logger** | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools Logger.
-
 
 ```python hl_lines="21-27" title="AppConfigStore sample"
 from botocore.config import Config
@@ -777,7 +773,6 @@ Method | When to use | Requires new deployment on changes | Supported services
 **[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment. | Yes | Lambda
 **[Parameters utility](parameters.md)** | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No | Parameter Store, DynamoDB, Secrets Manager, AppConfig
 **Feature flags utility** | Rule engine to define when one or multiple features should be enabled depending on the input. | No | AppConfig
-
 
 ## Deprecation list when GA
 
