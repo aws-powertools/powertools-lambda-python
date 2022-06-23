@@ -306,3 +306,4 @@ site/
 !docs/overrides/*.html
 
 !.github/workflows/lib
+.aws-sam/*
