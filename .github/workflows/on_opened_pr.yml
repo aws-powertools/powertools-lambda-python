@@ -42,7 +42,7 @@ jobs:
             if (isMatch == null) {
                 console.info(`No related issue found, maybe the author didn't use the template but there is one.`)
 
-                let msg = `⚠️ No related issues found. Please ensure there is an open issue related to this change to avoid significant delays or closure. ⚠️`;
+                let msg = "No related issues found. Please ensure there is an open issue related to this change to avoid significant delays or closure.";
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
