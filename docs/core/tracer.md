@@ -174,25 +174,8 @@ This is useful when you need a feature available in X-Ray that is not available 
 
 A safe workaround mechanism is to use `in_subsegment_async` available via Tracer escape hatch (`tracer.provider`).
 
-```python hl_lines="6 7 12 15 17" title="Workaround to safely trace async concurrent functions"
-import asyncio
-
-from aws_lambda_powertools import Tracer
-tracer = Tracer()
-
-async def another_async_task():
-	async with tracer.provider.in_subsegment_async("## another_async_task") as subsegment:
-		subsegment.put_annotation(key="key", value="value")
-		subsegment.put_metadata(key="key", value="value", namespace="namespace")
-		...
-
-async def another_async_task_2():
-	...
-
-@tracer.capture_method
-async def collect_payment(charge_id):
-	asyncio.gather(another_async_task(), another_async_task_2())
-	...
+```python hl_lines="10 17 24" title="Workaround to safely trace async concurrent functions"
+--8<-- "examples/tracer/src/capture_method_async_concurrency.py"
 ```
 
 ### Reusing Tracer across your code
@@ -219,6 +202,7 @@ Tracer keeps a copy of its configuration after the first initialization. This is
         charge_id = event.get('charge_id')
         payment = collect_payment(charge_id)
     ```
+
 === "payment.py"
     A new instance of Tracer will be created but will reuse the previous Tracer instance configuration, similar to a Singleton.
 
