@@ -132,12 +132,8 @@ Use **`capture_error=False`** parameter in both `capture_lambda_handler` and `ca
 ???+ info
 	Useful when returning sensitive information in exceptions/stack traces you don't control
 
-```python hl_lines="3 5" title="Disabling exception auto-capture for tracing metadata"
-from aws_lambda_powertools import Tracer
-
-@tracer.capture_lambda_handler(capture_error=False)
-def handler(event, context):
-	raise ValueError("some sensitive info in the stack trace...")
+```python hl_lines="16 26" title="Disabling exception auto-capture for tracing metadata"
+--8<-- "examples/tracer/src/disable_capture_error.py"
 ```
 
 ### Ignoring certain HTTP endpoints
