@@ -56,12 +56,8 @@ You can quickly start by initializing `Tracer` and use `capture_lambda_handler` 
 
 You can trace synchronous functions using the `capture_method` decorator.
 
-```python hl_lines="7 13" title="Tracing an arbitrary function with capture_method"
-@tracer.capture_method
-def collect_payment(charge_id):
-	ret = requests.post(PAYMENT_ENDPOINT) # logic
-	tracer.put_annotation("PAYMENT_STATUS", "SUCCESS") # custom annotation
-	return ret
+```python hl_lines="7" title="Tracing an arbitrary function with capture_method"
+--8<-- "examples/tracer/src/capture_method.py"
 ```
 
 ???+ note "Note: Function responses are auto-captured and stored as JSON, by default."
