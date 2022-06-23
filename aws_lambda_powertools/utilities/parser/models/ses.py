@@ -1,11 +1,20 @@
+import logging
+import sys
 from datetime import datetime
-from typing import List, Optional
+from typing import List, NewType, Optional
 
 from pydantic import BaseModel, Field
-from pydantic.networks import EmailStr
 from pydantic.types import PositiveInt
 
 from ..types import Literal
+
+has_email_validator = "email_validator" in sys.modules
+
+if has_email_validator:
+    from pydantic.networks import EmailStr
+else:
+    logging.warning("email_validator package is not installed")
+    EmailStr = NewType("EmailStr", str)  # type: ignore[no-redef, misc]
 
 
 class SesReceiptVerdict(BaseModel):
