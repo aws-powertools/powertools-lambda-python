@@ -191,29 +191,15 @@ Tracer keeps a copy of its configuration after the first initialization. This is
 
 === "handler.py"
 
-    ```python hl_lines="2 4 9"
-    from aws_lambda_powertools import Tracer
-    from payment import collect_payment
-
-    tracer = Tracer(service="payment")
-
-    @tracer.capture_lambda_handler
-    def handler(event, context):
-        charge_id = event.get('charge_id')
-        payment = collect_payment(charge_id)
+    ```python hl_lines="1 6"
+    --8<-- "examples/tracer/src/tracer_reuse.py"
     ```
 
-=== "payment.py"
+=== "tracer_reuse_payment.py"
     A new instance of Tracer will be created but will reuse the previous Tracer instance configuration, similar to a Singleton.
 
-    ```python hl_lines="3 5"
-    from aws_lambda_powertools import Tracer
-
-    tracer = Tracer(service="payment")
-
-    @tracer.capture_method
-    def collect_payment(charge_id: str):
-        ...
+    ```python hl_lines="3"
+    --8<-- "examples/tracer/src/tracer_reuse_payment.py"
     ```
 
 ## Testing your code
