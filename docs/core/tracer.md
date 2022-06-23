@@ -151,22 +151,10 @@ You can use `ignore_endpoint` method with the hostname and/or URLs you'd like it
 ???+ info
 	This snippet assumes you have aiohttp as a dependency
 
-You can use `aiohttp_trace_config` function to create a valid [aiohttp trace_config object](https://docs.aiohttp.org/en/stable/tracing_reference.html). This is necessary since X-Ray utilizes aiohttp trace hooks to capture requests end-to-end.
+You can use `aiohttp_trace_config` function to create a valid [aiohttp trace_config object](https://docs.aiohttp.org/en/stable/tracing_reference.html){target="_blank"}. This is necessary since X-Ray utilizes [aiohttp](https://docs.aiohttp.org/en/stable/){target="_blank"} trace hooks to capture requests end-to-end.
 
-```python hl_lines="5 10" title="Tracing aiohttp requests"
-import asyncio
-import aiohttp
-
-from aws_lambda_powertools import Tracer
-from aws_lambda_powertools.tracing import aiohttp_trace_config
-
-tracer = Tracer()
-
-async def aiohttp_task():
-	async with aiohttp.ClientSession(trace_configs=[aiohttp_trace_config()]) as session:
-		async with session.get("https://httpbin.org/json") as resp:
-			resp = await resp.json()
-			return resp
+```python hl_lines="7 17" title="Tracing aiohttp requests"
+--8<-- "examples/tracer/src/tracing_aiohttp.py"
 ```
 
 ### Escape hatch mechanism
