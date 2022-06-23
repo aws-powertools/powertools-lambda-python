@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Lambda Powertools Tracer doc examples
+
+Globals:
+  Function:
+    Timeout: 5
+    Runtime: python3.9
+    Tracing: Active
+    Environment:
+      Variables:
+        POWERTOOLS_SERVICE_NAME: example
+    Layers:
+      # Find the latest Layer version in the official documentation
+      # https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:21
+
+Resources:
+  CaptureLambdaHandlerExample:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src
+      Handler: capture_lambda_handler.handler

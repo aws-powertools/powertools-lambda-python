@@ -20,33 +20,16 @@ Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.
 
 Before your use this utility, your AWS Lambda function [must have permissions](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray-permissions) to send traces to AWS X-Ray.
 
-```yaml hl_lines="6 9" title="AWS Serverless Application Model (SAM) example"
-Resources:
-  HelloWorldFunction:
-	Type: AWS::Serverless::Function
-	Properties:
-	  Runtime: python3.8
-	  Tracing: Active
-	  Environment:
-		Variables:
-		  POWERTOOLS_SERVICE_NAME: example
+```yaml hl_lines="9 12" title="AWS Serverless Application Model (SAM) example"
+--8<-- "examples/tracer/template.yaml"
 ```
 
 ### Lambda handler
 
 You can quickly start by initializing `Tracer` and use `capture_lambda_handler` decorator for your Lambda handler.
 
-```python hl_lines="1 3 6" title="Tracing Lambda handler with capture_lambda_handler"
-from aws_lambda_powertools import Tracer
-
-tracer = Tracer() # Sets service via env var
-# OR tracer = Tracer(service="example")
-
-@tracer.capture_lambda_handler
-def handler(event, context):
-	charge_id = event.get('charge_id')
-	payment = collect_payment(charge_id)
-	...
+```python hl_lines="1 4 12" title="Tracing Lambda handler with capture_lambda_handler"
+--8<-- "examples/tracer/src/capture_lambda_handler.py"
 ```
 
 `capture_lambda_handler` performs these additional tasks to ease operations:
