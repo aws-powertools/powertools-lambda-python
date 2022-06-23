@@ -42,27 +42,14 @@ You can quickly start by initializing `Tracer` and use `capture_lambda_handler` 
 
 **Annotations** are key-values associated with traces and indexed by AWS X-Ray. You can use them to filter traces and to create [Trace Groups](https://aws.amazon.com/about-aws/whats-new/2018/11/aws-xray-adds-the-ability-to-group-traces/) to slice and dice your transactions.
 
-```python hl_lines="7" title="Adding annotations with put_annotation method"
-from aws_lambda_powertools import Tracer
-tracer = Tracer()
-
-@tracer.capture_lambda_handler
-def handler(event, context):
-	...
-	tracer.put_annotation(key="PaymentStatus", value="SUCCESS")
+```python hl_lines="8" title="Adding annotations with put_annotation method"
+--8<-- "examples/tracer/src/put_trace_annotations.py"
 ```
 
 **Metadata** are key-values also associated with traces but not indexed by AWS X-Ray. You can use them to add additional context for an operation using any native object.
 
-```python hl_lines="8" title="Adding arbitrary metadata with put_metadata method"
-from aws_lambda_powertools import Tracer
-tracer = Tracer()
-
-@tracer.capture_lambda_handler
-def handler(event, context):
-	...
-	ret = some_logic()
-	tracer.put_metadata(key="payment_response", value=ret)
+```python hl_lines="19" title="Adding arbitrary metadata with put_metadata method"
+--8<-- "examples/tracer/src/put_trace_metadata.py"
 ```
 
 ### Synchronous functions
