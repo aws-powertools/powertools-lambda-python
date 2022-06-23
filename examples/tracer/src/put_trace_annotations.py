@@ -1,11 +1,11 @@
 from aws_lambda_powertools import Tracer
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-tracer = Tracer()  # Sets service via POWERTOOLS_SERVICE_NAME env var
-# OR tracer = Tracer(service="example")
+tracer = Tracer()
 
 
 def collect_payment(charge_id: str) -> str:
+    tracer.put_annotation(key="PaymentId", value=charge_id)
     return f"dummy payment collected for charge: {charge_id}"
 
 
