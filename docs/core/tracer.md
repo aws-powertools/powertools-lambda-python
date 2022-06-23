@@ -115,27 +115,14 @@ Use **`capture_response=False`** parameter in both `capture_lambda_handler` and 
 
 === "sensitive_data_scenario.py"
 
-    ```python hl_lines="3 7"
-    from aws_lambda_powertools import Tracer
-
-    @tracer.capture_method(capture_response=False)
-    def fetch_sensitive_information():
-        return "sensitive_information"
-
-    @tracer.capture_lambda_handler(capture_response=False)
-    def handler(event, context):
-        sensitive_information = fetch_sensitive_information()
+    ```python hl_lines="8 15"
+    --8<-- "examples/tracer/src/disable_capture_response.py"
     ```
+
 === "streaming_object_scenario.py"
 
-    ```python hl_lines="3"
-    from aws_lambda_powertools import Tracer
-
-    @tracer.capture_method(capture_response=False)
-    def get_s3_object(bucket_name, object_key):
-        s3 = boto3.client("s3")
-        s3_object = get_object(Bucket=bucket_name, Key=object_key)
-        return s3_object
+    ```python hl_lines="18"
+    --8<-- "examples/tracer/src/disable_capture_response_streaming_body.py"
     ```
 
 ### Disabling exception auto-capture
