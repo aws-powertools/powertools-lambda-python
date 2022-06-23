@@ -30,7 +30,6 @@ repos:
         entry: poetry run flake8
         language: system
         types: [python]
-        exclude: example
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: "11c08644ce6df850480d98f628596446a526cbc6" # frozen: v0.31.1
     hooks:
