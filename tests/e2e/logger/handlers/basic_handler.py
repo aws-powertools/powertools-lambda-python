@@ -12,6 +12,6 @@ ADDITIONAL_KEY = os.environ["ADDITIONAL_KEY"]
 def lambda_handler(event, context):
     logger.debug(MESSAGE)
     logger.info(MESSAGE)
-    logger.append_keys(**{f"{ADDITIONAL_KEY}": "test"})
+    logger.append_keys(**{ADDITIONAL_KEY: "test"})
     logger.info(MESSAGE)
     return "success"
