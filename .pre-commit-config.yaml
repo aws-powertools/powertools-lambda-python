@@ -36,3 +36,8 @@ repos:
     hooks:
       - id: markdownlint
         args: ["--fix"]
+  - repo: https://github.com/aws-cloudformation/cfn-python-lint
+    rev: v0.61.1
+    hooks:
+      - id: cfn-python-lint
+        files: examples/.*\.(yaml|yml)$
