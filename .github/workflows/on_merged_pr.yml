@@ -1,49 +1,52 @@
-on:
-  pull_request:
-    types:
-      - closed
+# Maintenance: Verify why we're having permissions issues even with write scope, then re-enable it.
+# logs: https://github.com/awslabs/aws-lambda-powertools-python/runs/7030238348?check_suite_focus=true
 
-env:
-  RELEASE_LABEL: "pending-release"
-  MAINTAINERS_TEAM: "@awslabs/aws-lambda-powertools-python"
+# on:
+#   pull_request:
+#     types:
+#       - closed
 
-jobs:
-  release_label_on_merge:
-    if: github.event.pull_request.merged == true && github.event.pull_request.user.login != 'dependabot[bot]'
-    runs-on: ubuntu-latest
-    permissions:
-      issues: write  # required for new scoped token
-    steps:
-      - name: "Label PR related issue for release"
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const prBody = context.payload.body;
-            const prNumber = context.payload.number;
-            const releaseLabel = process.env.RELEASE_LABEL;
-            const maintainersTeam = process.env.MAINTAINERS_TEAM
+# env:
+#   RELEASE_LABEL: "pending-release"
+#   MAINTAINERS_TEAM: "@awslabs/aws-lambda-powertools-python"
 
-            const RELATED_ISSUE_REGEX = /Issue number:.+(\d)/
+# jobs:
+#   release_label_on_merge:
+#     if: github.event.pull_request.merged == true && github.event.pull_request.user.login != 'dependabot[bot]'
+#     runs-on: ubuntu-latest
+#     permissions:
+#       issues: write  # required for new scoped token
+#     steps:
+#       - name: "Label PR related issue for release"
+#         uses: actions/github-script@v6
+#         with:
+#           github-token: ${{ secrets.GITHUB_TOKEN }}
+#           script: |
+#             const prBody = context.payload.body;
+#             const prNumber = context.payload.number;
+#             const releaseLabel = process.env.RELEASE_LABEL;
+#             const maintainersTeam = process.env.MAINTAINERS_TEAM
 
-            const matcher = new RegExp(RELATED_ISSUE_REGEX)
-            const isMatch = matcher.exec(prBody)
-            if (isMatch != null) {
-                let relatedIssueNumber = isMatch[1]
-                console.info(`Auto-labeling related issue ${relatedIssueNumber} for release`)
+#             const RELATED_ISSUE_REGEX = /Issue number:.+(\d)/
 
-                await github.rest.issues.addLabels({
-                  issue_number: relatedIssueNumber,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  labels: [releaseLabel]
-                })
-            } else {
-              let msg = `${maintainersTeam} No related issues found. Please ensure '${releaseLabel}' label is applied before releasing.`;
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: msg,
-                issue_number: prNumber,
-              });
-            }
+#             const matcher = new RegExp(RELATED_ISSUE_REGEX)
+#             const isMatch = matcher.exec(prBody)
+#             if (isMatch != null) {
+#                 let relatedIssueNumber = isMatch[1]
+#                 console.info(`Auto-labeling related issue ${relatedIssueNumber} for release`)
+
+#                 await github.rest.issues.addLabels({
+#                   issue_number: relatedIssueNumber,
+#                   owner: context.repo.owner,
+#                   repo: context.repo.repo,
+#                   labels: [releaseLabel]
+#                 })
+#             } else {
+#               let msg = `${maintainersTeam} No related issues found. Please ensure '${releaseLabel}' label is applied before releasing.`;
+#               await github.rest.issues.createComment({
+#                 owner: context.repo.owner,
+#                 repo: context.repo.repo,
+#                 body: msg,
+#                 issue_number: prNumber,
+#               });
+#             }
