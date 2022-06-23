@@ -19,5 +19,5 @@ Resources:
   CaptureLambdaHandlerExample:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src
+      CodeUri: ../src
       Handler: capture_lambda_handler.handler
