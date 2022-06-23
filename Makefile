@@ -10,11 +10,11 @@ dev:
 	pre-commit install
 
 format:
-	poetry run isort aws_lambda_powertools tests
-	poetry run black aws_lambda_powertools tests
+	poetry run isort aws_lambda_powertools tests examples
+	poetry run black aws_lambda_powertools tests examples
 
 lint: format
-	poetry run flake8 aws_lambda_powertools/* tests/*
+	poetry run flake8 aws_lambda_powertools tests examples
 
 lint-docs:
 	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli "docs"
