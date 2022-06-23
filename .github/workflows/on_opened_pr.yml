@@ -30,7 +30,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           # Maintenance: convert into a standalone JS like post_release.js
           script: |
-            const prBody = ${{ needs.get_pr_details.outputs.prBody }};
+            const prBody = "${{ needs.get_pr_details.outputs.prBody }}";
             const prNumber = ${{ needs.get_pr_details.outputs.prNumber }};
             const blockLabel = process.env.BLOCK_LABEL;
             const blockReasonLabel = process.env.BLOCK_REASON_LABEL;
