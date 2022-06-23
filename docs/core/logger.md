@@ -16,50 +16,30 @@ Logger provides an opinionated logger with output structured as JSON.
 
 Logger requires two settings:
 
-Setting | Description | Environment variable | Constructor parameter
-------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------
-**Logging level** | Sets how verbose Logger should be (INFO, by default) |  `LOG_LEVEL` | `level`
-**Service** | Sets **service** key that will be present across all log statements | `POWERTOOLS_SERVICE_NAME` | `service`
+| Setting           | Description                                                         | Environment variable      | Constructor parameter |
+| ----------------- | ------------------------------------------------------------------- | ------------------------- | --------------------- |
+| **Logging level** | Sets how verbose Logger should be (INFO, by default)                | `LOG_LEVEL`               | `level`               |
+| **Service**       | Sets **service** key that will be present across all log statements | `POWERTOOLS_SERVICE_NAME` | `service`             |
 
-???+ example
-	**AWS Serverless Application Model (SAM)**
-
-=== "template.yaml"
-
-	```yaml hl_lines="9 10"
-	Resources:
-	  HelloWorldFunction:
-		Type: AWS::Serverless::Function
-		Properties:
-		  Runtime: python3.8
-		  Environment:
-			Variables:
-			  LOG_LEVEL: INFO
-			  POWERTOOLS_SERVICE_NAME: example
-	```
-=== "app.py"
-
-	```python hl_lines="2 4"
-	from aws_lambda_powertools import Logger
-	logger = Logger() # Sets service via env var
-	# OR logger = Logger(service="example")
-	```
+```yaml hl_lines="12-13" title="AWS Serverless Application Model (SAM) example"
+--8<-- "examples/logger/sam/template.yaml"
+```
 
 ### Standard structured keys
 
 Your Logger will include the following keys to your structured logging:
 
-Key | Example | Note
-------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
-**level**: `str` | `INFO` | Logging level
-**location**: `str` | `collect.handler:1` | Source code location where statement was executed
-**message**: `Any` | `Collecting payment` | Unserializable JSON values are casted as `str`
-**timestamp**: `str` | `2021-05-03 10:20:19,650+0200` | Timestamp with milliseconds, by default uses local timezone
-**service**: `str` | `payment` | Service name defined, by default `service_undefined`
-**xray_trace_id**: `str` | `1-5759e988-bd862e3fe1be46a994272793` | When [tracing is enabled](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html){target="_blank"}, it shows X-Ray Trace ID
-**sampling_rate**: `float` |  `0.1` | When enabled, it shows sampling rate in percentage e.g. 10%
-**exception_name**: `str` | `ValueError` | When `logger.exception` is used and there is an exception
-**exception**: `str` | `Traceback (most recent call last)..` | When `logger.exception` is used and there is an exception
+| Key                        | Example                               | Note                                                                                                                                 |
+| -------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **level**: `str`           | `INFO`                                | Logging level                                                                                                                        |
+| **location**: `str`        | `collect.handler:1`                   | Source code location where statement was executed                                                                                    |
+| **message**: `Any`         | `Collecting payment`                  | Unserializable JSON values are casted as `str`                                                                                       |
+| **timestamp**: `str`       | `2021-05-03 10:20:19,650+0200`        | Timestamp with milliseconds, by default uses local timezone                                                                          |
+| **service**: `str`         | `payment`                             | Service name defined, by default `service_undefined`                                                                                 |
+| **xray_trace_id**: `str`   | `1-5759e988-bd862e3fe1be46a994272793` | When [tracing is enabled](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html){target="_blank"}, it shows X-Ray Trace ID |
+| **sampling_rate**: `float` | `0.1`                                 | When enabled, it shows sampling rate in percentage e.g. 10%                                                                          |
+| **exception_name**: `str`  | `ValueError`                          | When `logger.exception` is used and there is an exception                                                                            |
+| **exception**: `str`       | `Traceback (most recent call last)..` | When `logger.exception` is used and there is an exception                                                                            |
 
 ### Capturing Lambda context info
 
@@ -67,64 +47,25 @@ You can enrich your structured logs with key Lambda context information via `inj
 
 === "collect.py"
 
-    ```python hl_lines="5"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    @logger.inject_lambda_context
-    def handler(event, context):
-        logger.info("Collecting payment")
-
-        # You can log entire objects too
-        logger.info({
-        "operation": "collect_payment",
-        "charge_id": event['charge_id']
-        })
-        ...
+    ```python hl_lines="7"
+    --8<-- "examples/logger/src/inject_lambda_context.py"
     ```
 
 === "Example CloudWatch Logs excerpt"
 
-    ```json hl_lines="7-11 16-19"
-    {
-        "level": "INFO",
-        "location": "collect.handler:7",
-        "message": "Collecting payment",
-        "timestamp": "2021-05-03 11:47:12,494+0200",
-        "service": "payment",
-        "cold_start": true,
-        "lambda_function_name": "test",
-        "lambda_function_memory_size": 128,
-        "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
-        "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72"
-    },
-    {
-        "level": "INFO",
-        "location": "collect.handler:10",
-        "message": {
-            "operation": "collect_payment",
-            "charge_id": "ch_AZFlk2345C0"
-        },
-        "timestamp": "2021-05-03 11:47:12,494+0200",
-        "service": "payment",
-        "cold_start": true,
-        "lambda_function_name": "test",
-        "lambda_function_memory_size": 128,
-        "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
-        "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72"
-    }
+    ```json hl_lines="8-12 17-20"
+    --8<-- "examples/logger/src/inject_lambda_context_output.json"
     ```
 
 When used, this will include the following keys:
 
-Key | Example
-------------------------------------------------- | ---------------------------------------------------------------------------------
-**cold_start**: `bool` | `false`
-**function_name** `str` | `example-powertools-HelloWorldFunction-1P1Z6B39FLU73`
-**function_memory_size**: `int` | `128`
-**function_arn**: `str` | `arn:aws:lambda:eu-west-1:012345678910:function:example-powertools-HelloWorldFunction-1P1Z6B39FLU73`
-**function_request_id**: `str` | `899856cb-83d1-40d7-8611-9e78f15f32f4`
+| Key                             | Example                                                                                              |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **cold_start**: `bool`          | `false`                                                                                              |
+| **function_name** `str`         | `example-powertools-HelloWorldFunction-1P1Z6B39FLU73`                                                |
+| **function_memory_size**: `int` | `128`                                                                                                |
+| **function_arn**: `str`         | `arn:aws:lambda:eu-west-1:012345678910:function:example-powertools-HelloWorldFunction-1P1Z6B39FLU73` |
+| **function_request_id**: `str`  | `899856cb-83d1-40d7-8611-9e78f15f32f4`                                                               |
 
 #### Logging incoming event
 
@@ -543,13 +484,13 @@ You can use any of the following built-in JMESPath expressions as part of [injec
 ???+ note "Note: Any object key named with `-` must be escaped"
     For example, **`request.headers."x-amzn-trace-id"`**.
 
-Name | Expression | Description
-------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
-**API_GATEWAY_REST** | `"requestContext.requestId"` | API Gateway REST API request ID
-**API_GATEWAY_HTTP** | `"requestContext.requestId"` | API Gateway HTTP API request ID
-**APPSYNC_RESOLVER** | `'request.headers."x-amzn-trace-id"'` | AppSync X-Ray Trace ID
-**APPLICATION_LOAD_BALANCER** | `'headers."x-amzn-trace-id"'` | ALB X-Ray Trace ID
-**EVENT_BRIDGE** | `"id"` | EventBridge Event ID
+| Name                          | Expression                            | Description                     |
+| ----------------------------- | ------------------------------------- | ------------------------------- |
+| **API_GATEWAY_REST**          | `"requestContext.requestId"`          | API Gateway REST API request ID |
+| **API_GATEWAY_HTTP**          | `"requestContext.requestId"`          | API Gateway HTTP API request ID |
+| **APPSYNC_RESOLVER**          | `'request.headers."x-amzn-trace-id"'` | AppSync X-Ray Trace ID          |
+| **APPLICATION_LOAD_BALANCER** | `'headers."x-amzn-trace-id"'`         | ALB X-Ray Trace ID              |
+| **EVENT_BRIDGE**              | `"id"`                                | EventBridge Event ID            |
 
 ### Reusing Logger across your code
 
@@ -650,16 +591,16 @@ Logger propagates a few formatting configurations to the built-in `LambdaPowerto
 
 If you prefer configuring it separately, or you'd want to bring this JSON Formatter to another application, these are the supported settings:
 
-Parameter | Description | Default
-------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------
-**`json_serializer`** | function to serialize `obj` to a JSON formatted `str` | `json.dumps`
-**`json_deserializer`** | function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python obj | `json.loads`
-**`json_default`** | function to coerce unserializable values, when no custom serializer/deserializer is set | `str`
-**`datefmt`** | string directives (strftime) to format log timestamp | `%Y-%m-%d %H:%M:%S,%F%z`, where `%F` is a custom ms directive
-**`use_datetime_directive`** | format the `datefmt` timestamps using `datetime`, not `time`  (also supports the custom `%F` directive for milliseconds) | `False`
-**`utc`** | set logging timestamp to UTC | `False`
-**`log_record_order`** | set order of log keys when logging | `["level", "location", "message", "timestamp"]`
-**`kwargs`** | key-value to be included in log messages | `None`
+| Parameter                    | Description                                                                                                              | Default                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
+| **`json_serializer`**        | function to serialize `obj` to a JSON formatted `str`                                                                    | `json.dumps`                                                  |
+| **`json_deserializer`**      | function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python obj                           | `json.loads`                                                  |
+| **`json_default`**           | function to coerce unserializable values, when no custom serializer/deserializer is set                                  | `str`                                                         |
+| **`datefmt`**                | string directives (strftime) to format log timestamp                                                                     | `%Y-%m-%d %H:%M:%S,%F%z`, where `%F` is a custom ms directive |
+| **`use_datetime_directive`** | format the `datefmt` timestamps using `datetime`, not `time`  (also supports the custom `%F` directive for milliseconds) | `False`                                                       |
+| **`utc`**                    | set logging timestamp to UTC                                                                                             | `False`                                                       |
+| **`log_record_order`**       | set order of log keys when logging                                                                                       | `["level", "location", "message", "timestamp"]`               |
+| **`kwargs`**                 | key-value to be included in log messages                                                                                 | `None`                                                        |
 
 ```python hl_lines="2 4-5" title="Pre-configuring Lambda Powertools Formatter"
 from aws_lambda_powertools import Logger
