@@ -142,23 +142,8 @@ You might have endpoints you don't want requests to be traced, perhaps due to th
 
 You can use `ignore_endpoint` method with the hostname and/or URLs you'd like it to be ignored - globs (`*`) are allowed.
 
-```python title="Ignoring certain HTTP endpoints from being traced"
-from aws_lambda_powertools import Tracer
-
-tracer = Tracer()
-# ignore all calls to `ec2.amazon.com`
-tracer.ignore_endpoint(hostname="ec2.amazon.com")
-# ignore calls to `*.sensitive.com/password` and  `*.sensitive.com/credit-card`
-tracer.ignore_endpoint(hostname="*.sensitive.com", urls=["/password", "/credit-card"])
-
-
-def ec2_api_calls():
-    return "suppress_api_responses"
-
-@tracer.capture_lambda_handler
-def handler(event, context):
-    for x in long_list:
-        ec2_api_calls()
+```python hl_lines="12-13" title="Ignoring certain HTTP endpoints from being traced"
+--8<-- "examples/tracer/src/ignore_endpoints.py"
 ```
 
 ### Tracing aiohttp requests
