@@ -100,14 +100,8 @@ Tracer automatically patches all [supported libraries by X-Ray](https://docs.aws
 
 If you're looking to shave a few microseconds, or milliseconds depending on your function memory configuration, you can patch specific modules using `patch_modules` param:
 
-```python hl_lines="7" title="Example of explicitly patching boto3 and requests only"
-import boto3
-import requests
-
-from aws_lambda_powertools import Tracer
-
-modules_to_be_patched = ["boto3", "requests"]
-tracer = Tracer(patch_modules=modules_to_be_patched)
+```python hl_lines="8" title="Example of explicitly patching requests only"
+--8<-- "examples/tracer/src/patch_modules.py"
 ```
 
 ### Disabling response auto-capture
