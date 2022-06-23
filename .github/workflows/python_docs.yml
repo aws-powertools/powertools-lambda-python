@@ -21,10 +21,15 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
+      # Maintenance: temporarily until we drop Python 3.6 and make cfn-lint a dev dependency
+      - name: Setup Cloud Formation Linter with Latest Version
+        uses: scottbrenner/cfn-lint-action@v2
       - name: Install dependencies
         run: make dev
       - name: Lint documentation
-        run: make lint-docs
+        run: |
+          make lint-docs
+          cfn-lint examples/**/*.yaml
       - name: Setup doc deploy
         run: |
           git config --global user.name Docs deploy
