@@ -596,7 +596,9 @@ for the given name and level to the logging module. By default, this logs all bo
 
 **How can I enable powertools logging for imported libraries?**
 
-You can copy the Logger setup to all or sub-sets of registered external loggers. Use the `copy_config_to_registered_logger` method to do this. By default all registered loggers will be modified. You can change this behaviour by providing `include` and `exclude` attributes. You can also provide optional `log_level` attribute external loggers will be configured with.
+You can copy the Logger setup to all or sub-sets of registered external loggers. Use the `copy_config_to_registered_logger` method to do this.
+
+By default all registered loggers will be modified. You can change this behavior by providing `include` and `exclude` attributes. You can also provide optional `log_level` attribute external loggers will be configured with.
 
 ```python hl_lines="10" title="Cloning Logger config to all other registered standard loggers"
 ---8<-- "examples/logger/src/cloning_logger_config.py"
