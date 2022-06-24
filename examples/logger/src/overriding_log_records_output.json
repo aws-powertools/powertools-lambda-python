@@ -1,0 +1,7 @@
+{
+    "level": "INFO",
+    "location": "[<module>] lambda_handler",
+    "message": "Collecting payment",
+    "timestamp": "02/09/2021 09:25:17 AM",
+    "service": "payment"
+}

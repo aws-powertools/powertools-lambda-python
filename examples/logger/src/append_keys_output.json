@@ -1,0 +1,8 @@
+{
+    "level": "INFO",
+    "location": "collect.handler:11",
+    "message": "Collecting payment",
+    "timestamp": "2021-05-03 11:47:12,494+0200",
+    "service": "payment",
+    "order_id": "order_id_value"
+}
