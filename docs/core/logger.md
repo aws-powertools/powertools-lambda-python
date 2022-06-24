@@ -542,23 +542,10 @@ For exceptional cases where you want to completely replace our formatter logic, 
 
 By default, Logger uses `json.dumps` and `json.loads` as serializer and deserializer respectively. There could be scenarios where you are making use of alternative JSON libraries like [orjson](https://github.com/ijl/orjson){target="_blank"}.
 
-As parameters don't always translate well between them, you can pass any callable that receives a `Dict` and return a `str`:
+As parameters don't always translate well between them, you can pass any callable that receives a `dict` and return a `str`:
 
-```python hl_lines="1 5-6 9-10" title="Using Rust orjson library as serializer"
-import orjson
-
-from aws_lambda_powertools import Logger
-
-custom_serializer = orjson.dumps
-custom_deserializer = orjson.loads
-
-logger = Logger(service="payment",
-			json_serializer=custom_serializer,
-			json_deserializer=custom_deserializer
-)
-
-# when using parameters, you can pass a partial
-# custom_serializer=functools.partial(orjson.dumps, option=orjson.OPT_SERIALIZE_NUMPY)
+```python hl_lines="1 3 7-8 13" title="Using Rust orjson library as serializer"
+--8<-- "examples/logger/src/bring_your_own_json_serializer.py"
 ```
 
 ## Testing your code
