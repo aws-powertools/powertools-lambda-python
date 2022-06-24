@@ -495,17 +495,8 @@ By default, Logger uses `str` to handle values non-serializable by JSON. You can
 
 By default, Logger uses StreamHandler and logs to standard output. You can override this behaviour via `logger_handler` parameter:
 
-```python hl_lines="3-4 9 12" title="Configure Logger to output to a file"
-import logging
-from pathlib import Path
-
-from aws_lambda_powertools import Logger
-
-log_file = Path("/tmp/log.json")
-log_file_handler = logging.FileHandler(filename=log_file)
-logger = Logger(service="payment", logger_handler=log_file_handler)
-
-logger.info("Collecting payment")
+```python hl_lines="7-8 10" title="Configure Logger to output to a file"
+--8<-- "examples/logger/src/bring_your_own_handler.py"
 ```
 
 #### Bring your own formatter
