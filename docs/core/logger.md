@@ -477,34 +477,18 @@ By default, this Logger and standard logging library emits records using local t
 
 #### Custom function for unserializable values
 
-By default, Logger uses `str` to handle values non-serializable by JSON. You can override this behaviour via `json_default` parameter by passing a Callable:
+By default, Logger uses `str` to handle values non-serializable by JSON. You can override this behavior via `json_default` parameter by passing a Callable:
 
-=== "collect.py"
+=== "app.py"
 
-    ```python hl_lines="3-4 9 12"
-    from aws_lambda_powertools import Logger
-
-    def custom_json_default(value):
-        return f"<non-serializable: {type(value).__name__}>"
-
-    class Unserializable:
-        pass
-
-    logger = Logger(service="payment", json_default=custom_json_default)
-
-    def handler(event, context):
-        logger.info(Unserializable())
+    ```python hl_lines="6 17"
+    --8<-- "examples/logger/src/unserializable_values.py"
     ```
+
 === "Example CloudWatch Logs excerpt"
 
-    ```json hl_lines="4"
-    {
-        "level": "INFO",
-        "location": "collect.handler:8",
-        "message": ""<non-serializable: Unserializable>"",
-        "timestamp": "2021-05-03 15:17:23,632+0200",
-        "service": "payment"
-    }
+    ```json hl_lines="4-6"
+    --8<-- "examples/logger/src/unserializable_values_output.json"
     ```
 
 #### Bring your own handler
