@@ -402,9 +402,14 @@ For child Loggers, we introspect the name of your module where `Logger(child=Tru
     --8<-- "examples/logger/src/logging_inheritance_module.py"
     ```
 
-Instead, do this:
+In this case, Logger will register a Logger named `payment`, and a Logger named `service_undefined`. The latter isn't inheriting from the parent, and will have no handler, resulting in no message being logged to standard output.
 
-=== "incorrect_logger_inheritance.py"
+???+ tip
+    This can be fixed by either ensuring both has the `service` value as `payment`, or simply use the environment variable `POWERTOOLS_SERVICE_NAME` to ensure service value will be the same across all Loggers when not explicitly set.
+
+Do this instead:
+
+=== "correct_logger_inheritance.py"
 
     ```python hl_lines="1 9"
     --8<-- "examples/logger/src/logging_inheritance_good.py"
@@ -415,11 +420,6 @@ Instead, do this:
     ```python hl_lines="1 9"
     --8<-- "examples/logger/src/logging_inheritance_module.py"
     ```
-
-In this case, Logger will register a Logger named `payment`, and a Logger named `service_undefined`. The latter isn't inheriting from the parent, and will have no handler, resulting in no message being logged to standard output.
-
-???+ tip
-    This can be fixed by either ensuring both has the `service` value as `payment`, or simply use the environment variable `POWERTOOLS_SERVICE_NAME` to ensure service value will be the same across all Loggers when not explicitly set.
 
 #### Overriding Log records
 
