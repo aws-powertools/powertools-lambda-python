@@ -493,7 +493,7 @@ By default, Logger uses `str` to handle values non-serializable by JSON. You can
 
 #### Bring your own handler
 
-By default, Logger uses StreamHandler and logs to standard output. You can override this behaviour via `logger_handler` parameter:
+By default, Logger uses StreamHandler and logs to standard output. You can override this behavior via `logger_handler` parameter:
 
 ```python hl_lines="7-8 10" title="Configure Logger to output to a file"
 --8<-- "examples/logger/src/bring_your_own_handler.py"
@@ -510,30 +510,13 @@ For these, you can override the `serialize` method from [LambdaPowertoolsFormatt
 
 === "custom_formatter.py"
 
-    ```python hl_lines="6-7 12"
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
-
-    from typing import Dict
-
-    class CustomFormatter(LambdaPowertoolsFormatter):
-        def serialize(self, log: Dict) -> str:
-            """Serialize final structured log dict to JSON str"""
-            log["event"] = log.pop("message")  # rename message key to event
-            return self.json_serializer(log)   # use configured json serializer
-
-    logger = Logger(service="example", logger_formatter=CustomFormatter())
-    logger.info("hello")
+    ```python hl_lines="2 5-6 12"
+    --8<-- "examples/logger/src/bring_your_own_formatter.py"
     ```
 
 === "Example CloudWatch Logs excerpt"
-	```json hl_lines="5"
-	{
-		"level": "INFO",
-		"location": "<module>:16",
-		"timestamp": "2021-12-30 13:41:53,413+0100",
-		"event": "hello"
-	}
+	```json hl_lines="6"
+    --8<-- "examples/logger/src/bring_your_own_formatter_output.json"
 	```
 
 The `log` argument is the final log record containing [our standard keys](#standard-structured-keys), optionally [Lambda context keys](#capturing-lambda-context-info), and any custom key you might have added via [append_keys](#append_keys-method) or the [extra parameter](#extra-parameter).
@@ -545,60 +528,14 @@ For exceptional cases where you want to completely replace our formatter logic, 
 
 === "collect.py"
 
-    ```python hl_lines="5 7 9-10 13 17 21 24 35"
-    import logging
-    from typing import Iterable, List, Optional
-
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter
-
-    class CustomFormatter(BasePowertoolsFormatter):
-        def __init__(self, log_record_order: Optional[List[str]], *args, **kwargs):
-            self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
-            self.log_format = dict.fromkeys(self.log_record_order)
-            super().__init__(*args, **kwargs)
-
-        def append_keys(self, **additional_keys):
-            # also used by `inject_lambda_context` decorator
-            self.log_format.update(additional_keys)
-
-        def remove_keys(self, keys: Iterable[str]):
-            for key in keys:
-                self.log_format.pop(key, None)
-
-        def clear_state(self):
-            self.log_format = dict.fromkeys(self.log_record_order)
-
-        def format(self, record: logging.LogRecord) -> str:  # noqa: A003
-            """Format logging record as structured JSON str"""
-            return json.dumps(
-                {
-                    "event": super().format(record),
-                    "timestamp": self.formatTime(record),
-                    "my_default_key": "test",
-                    **self.log_format,
-                }
-            )
-
-    logger = Logger(service="payment", logger_formatter=CustomFormatter())
-
-    @logger.inject_lambda_context
-    def handler(event, context):
-        logger.info("Collecting payment")
+    ```python hl_lines="6 9 11-12 15 19 23 26 38"
+    --8<-- "examples/logger/src/bring_your_own_formatter_from_scratch.py"
     ```
+
 === "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="2-4"
-    {
-        "event": "Collecting payment",
-        "timestamp": "2021-05-03 11:47:12,494",
-        "my_default_key": "test",
-        "cold_start": true,
-        "lambda_function_name": "test",
-        "lambda_function_memory_size": 128,
-        "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
-        "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72"
-    }
+    --8<-- "examples/logger/src/bring_your_own_formatter_from_scratch_output.json"
     ```
 
 #### Bring your own JSON serializer
