@@ -285,7 +285,7 @@ You can use any of the following built-in JMESPath expressions as part of [injec
 
 ### Reusing Logger across your code
 
-Similar to [Tracer](./tracer.md#reusing-tracer-across-your-code), a new instance that uses the same `service` name - env var or explicit parameter - will reuse a previous Logger instance. Just like `logging.getLogger("logger_name")` would in the standard library.
+Similar to [Tracer](./tracer.md#reusing-tracer-across-your-code), a new instance that uses the same `service` name - env var or explicit parameter - will reuse a previous Logger instance. Just like `logging.getLogger("logger_name")` would in the standard library if called with the same logger name.
 
 Notice in the CloudWatch Logs output how `payment_id` appeared as expected when logging in `collect.py`.
 
@@ -322,7 +322,7 @@ Notice in the CloudWatch Logs output how `payment_id` appeared as expected when 
 
 Use sampling when you want to dynamically change your log level to **DEBUG** based on a **percentage of your concurrent/cold start invocations**.
 
-You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOGGER_SAMPLE_RATE` env var or `sample_rate` parameter in Logger.
+You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOGGER_SAMPLE_RATE` env var, or `sample_rate` parameter in Logger.
 
 ???+ tip "Tip: When is this useful?"
     Let's imagine a sudden spike increase in concurrency triggered a transient issue downstream. When looking into the logs you might not have enough information, and while you can adjust log levels it might not happen again.
@@ -336,46 +336,14 @@ Sampling decision happens at the Logger initialization. This means sampling may 
 
 === "collect.py"
 
-    ```python hl_lines="4 7"
-    from aws_lambda_powertools import Logger
-
-    # Sample 10% of debug logs e.g. 0.1
-    logger = Logger(service="payment", sample_rate=0.1)
-
-    def handler(event, context):
-        logger.debug("Verifying whether order_id is present")
-        logger.info("Collecting payment")
+    ```python hl_lines="6 10"
+    --8<-- "examples/logger/src/logger_reuse.py"
     ```
 
 === "Example CloudWatch Logs excerpt"
 
-    ```json hl_lines="2 4 12 15 25"
-    {
-        "level": "DEBUG",
-        "location": "collect.handler:7",
-        "message": "Verifying whether order_id is present",
-        "timestamp": "2021-05-03 11:47:12,494+0200",
-        "service": "payment",
-        "cold_start": true,
-        "lambda_function_name": "test",
-        "lambda_function_memory_size": 128,
-        "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
-        "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
-        "sampling_rate": 0.1
-    },
-    {
-        "level": "INFO",
-        "location": "collect.handler:7",
-        "message": "Collecting payment",
-        "timestamp": "2021-05-03 11:47:12,494+0200",
-        "service": "payment",
-        "cold_start": true,
-        "lambda_function_name": "test",
-        "lambda_function_memory_size": 128,
-        "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
-        "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
-        "sampling_rate": 0.1
-    }
+    ```json hl_lines="3 5 13 16 25"
+    --8<-- "examples/logger/src/sampling_debug_logs_output.json"
     ```
 
 ### LambdaPowertoolsFormatter
