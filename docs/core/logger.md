@@ -433,30 +433,15 @@ You might want to continue to use the same date formatting style, or override `l
 Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, `xray_trace_id`.
 
 === "lambda_handler.py"
+
     ```python hl_lines="7 10"
-    from aws_lambda_powertools import Logger
-
-    date_format = "%m/%d/%Y %I:%M:%S %p"
-    location_format = "[%(funcName)s] %(module)s"
-
-    # override location and timestamp format
-    logger = Logger(service="payment", location=location_format, datefmt=date_format)
-
-    # suppress the location key with a None value
-    logger_two = Logger(service="payment", location=None)
-
-    logger.info("Collecting payment")
+    --8<-- "examples/logger/src/overriding_log_records.py"
     ```
+
 === "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="3 5"
-    {
-        "level": "INFO",
-        "location": "[<module>] lambda_handler",
-        "message": "Collecting payment",
-        "timestamp": "02/09/2021 09:25:17 AM",
-        "service": "payment"
-    }
+    --8<-- "examples/logger/src/overriding_log_records_output.json"
     ```
 
 #### Reordering log keys position
