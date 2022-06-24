@@ -67,24 +67,18 @@ When used, this will include the following keys:
 | **function_arn**: `str`         | `arn:aws:lambda:eu-west-1:012345678910:function:example-powertools-HelloWorldFunction-1P1Z6B39FLU73` |
 | **function_request_id**: `str`  | `899856cb-83d1-40d7-8611-9e78f15f32f4`                                                               |
 
-#### Logging incoming event
+### Logging incoming event
 
 When debugging in non-production environments, you can instruct Logger to log the incoming event with `log_event` param or via `POWERTOOLS_LOGGER_LOG_EVENT` env var.
 
 ???+ warning
 	This is disabled by default to prevent sensitive info being logged
 
-```python hl_lines="5" title="Logging incoming event"
-from aws_lambda_powertools import Logger
-
-logger = Logger(service="payment")
-
-@logger.inject_lambda_context(log_event=True)
-def handler(event, context):
-   ...
+```python hl_lines="7" title="Logging incoming event"
+--8<-- "examples/logger/src/log_incoming_event.py"
 ```
 
-#### Setting a Correlation ID
+### Setting a Correlation ID
 
 You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
 
@@ -93,87 +87,63 @@ You can set a Correlation ID using `correlation_id_path` param by passing a [JME
 
 === "collect.py"
 
-    ```python hl_lines="5"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    @logger.inject_lambda_context(correlation_id_path="headers.my_request_id_header")
-    def handler(event, context):
-        logger.debug(f"Correlation ID => {logger.get_correlation_id()}")
-        logger.info("Collecting payment")
+    ```python hl_lines="7"
+    --8<-- "examples/logger/src/set_correlation_id.py"
     ```
 
 === "Example Event"
 
     ```json hl_lines="3"
-    {
-        "headers": {
-        "my_request_id_header": "correlation_id_value"
-        }
-    }
+    --8<-- "examples/logger/src/set_correlation_id_event.json"
     ```
 
 === "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="12"
-    {
-        "level": "INFO",
-        "location": "collect.handler:7",
-        "message": "Collecting payment",
-        "timestamp": "2021-05-03 11:47:12,494+0200",
-        "service": "payment",
-        "cold_start": true,
-        "lambda_function_name": "test",
-        "lambda_function_memory_size": 128,
-        "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
-        "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
-        "correlation_id": "correlation_id_value"
-    }
+    --8<-- "examples/logger/src/set_correlation_id_output.json"
     ```
 
-We provide [built-in JMESPath expressions](#built-in-correlation-id-expressions) for known event sources, where either a request ID or X-Ray Trace ID are present.
+#### set_correlation_id method
+
+You can also use `set_correlation_id` method to inject it anywhere else in your code. Example below uses [Event Source Data Classes utility](../utilities/data_classes.md) to easily access events properties.
 
 === "collect.py"
 
-    ```python hl_lines="2 6"
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.logging import correlation_paths
+    ```python hl_lines="11"
+    --8<-- "examples/logger/src/set_correlation_id_method.py"
+    ```
+=== "Example Event"
 
-    logger = Logger(service="payment")
+    ```json hl_lines="3"
+    --8<-- "examples/logger/src/set_correlation_id_method_event.json"
+    ```
 
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    def handler(event, context):
-        logger.debug(f"Correlation ID => {logger.get_correlation_id()}")
-        logger.info("Collecting payment")
+=== "Example CloudWatch Logs excerpt"
+
+    ```json hl_lines="7"
+    --8<-- "examples/logger/src/set_correlation_id_method_output.json"
+    ```
+
+#### Known correlation IDs
+
+To ease routine tasks like extracting correlation ID from popular event sources, we provide [built-in JMESPath expressions](#built-in-correlation-id-expressions).
+
+=== "collect.py"
+
+    ```python hl_lines="2 8"
+    --8<-- "examples/logger/src/set_correlation_id_jmespath.py"
     ```
 
 === "Example Event"
 
     ```json hl_lines="3"
-    {
-        "requestContext": {
-        "requestId": "correlation_id_value"
-        }
-    }
+    --8<-- "examples/logger/src/set_correlation_id_jmespath_event.json"
     ```
 
 === "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="12"
-    {
-        "level": "INFO",
-        "location": "collect.handler:8",
-        "message": "Collecting payment",
-        "timestamp": "2021-05-03 11:47:12,494+0200",
-        "service": "payment",
-        "cold_start": true,
-        "lambda_function_name": "test",
-        "lambda_function_memory_size": 128,
-        "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
-        "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
-        "correlation_id": "correlation_id_value"
-    }
+    --8<-- "examples/logger/src/set_correlation_id_jmespath_output.json"
     ```
 
 ### Appending additional keys
@@ -195,30 +165,13 @@ You can append your own keys to your existing Logger via `append_keys(**addition
 
 === "collect.py"
 
-    ```python hl_lines="9"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    def handler(event, context):
-        order_id = event.get("order_id")
-
-        # this will ensure order_id key always has the latest value before logging
-        logger.append_keys(order_id=order_id)
-
-        logger.info("Collecting payment")
+    ```python hl_lines="12"
+    --8<-- "examples/logger/src/append_keys.py"
     ```
 === "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="7"
-    {
-        "level": "INFO",
-        "location": "collect.handler:11",
-        "message": "Collecting payment",
-        "timestamp": "2021-05-03 11:47:12,494+0200",
-        "service": "payment",
-        "order_id": "order_id_value"
-    }
+    --8<-- "examples/logger/src/append_keys_output.json"
     ```
 
 ???+ tip "Tip: Logger will automatically reject any key with a None value"
@@ -237,103 +190,13 @@ It accepts any dictionary, and all keyword arguments will be added as part of th
 
 === "extra_parameter.py"
 
-    ```python hl_lines="6"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    fields = { "request_id": "1123" }
-    logger.info("Collecting payment", extra=fields)
+    ```python hl_lines="9"
+    --8<-- "examples/logger/src/append_keys_extra.py"
     ```
 === "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="7"
-    {
-        "level": "INFO",
-        "location": "collect.handler:6",
-        "message": "Collecting payment",
-        "timestamp": "2021-05-03 11:47:12,494+0200",
-        "service": "payment",
-        "request_id": "1123"
-    }
-    ```
-
-#### set_correlation_id method
-
-You can set a correlation_id to your existing Logger via `set_correlation_id(value)` method by passing any string value.
-
-=== "collect.py"
-
-    ```python hl_lines="6"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    def handler(event, context):
-        logger.set_correlation_id(event["requestContext"]["requestId"])
-        logger.info("Collecting payment")
-    ```
-
-=== "Example Event"
-
-    ```json hl_lines="3"
-    {
-        "requestContext": {
-        "requestId": "correlation_id_value"
-        }
-    }
-    ```
-
-=== "Example CloudWatch Logs excerpt"
-
-    ```json hl_lines="7"
-    {
-        "level": "INFO",
-        "location": "collect.handler:7",
-        "message": "Collecting payment",
-        "timestamp": "2021-05-03 11:47:12,494+0200",
-        "service": "payment",
-        "correlation_id": "correlation_id_value"
-    }
-    ```
-
-Alternatively, you can combine [Data Classes utility](../utilities/data_classes.md) with Logger to use dot notation object:
-
-=== "collect.py"
-
-    ```python hl_lines="2 7-8"
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
-
-    logger = Logger(service="payment")
-
-    def handler(event, context):
-        event = APIGatewayProxyEvent(event)
-        logger.set_correlation_id(event.request_context.request_id)
-        logger.info("Collecting payment")
-    ```
-=== "Example Event"
-
-    ```json hl_lines="3"
-    {
-        "requestContext": {
-        "requestId": "correlation_id_value"
-        }
-    }
-    ```
-
-=== "Example CloudWatch Logs excerpt"
-
-    ```json hl_lines="7"
-    {
-        "timestamp": "2020-05-24 18:17:33,774",
-        "level": "INFO",
-        "location": "collect.handler:9",
-        "service": "payment",
-        "sampling_rate": 0.0,
-        "correlation_id": "correlation_id_value",
-        "message": "Collecting payment"
-    }
+    --8<-- "examples/logger/src/append_keys_extra_output.json"
     ```
 
 ### Removing additional keys
@@ -342,37 +205,14 @@ You can remove any additional key from Logger state using `remove_keys`.
 
 === "collect.py"
 
-    ```python hl_lines="9"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    def handler(event, context):
-        logger.append_keys(sample_key="value")
-        logger.info("Collecting payment")
-
-        logger.remove_keys(["sample_key"])
-        logger.info("Collecting payment without sample key")
+    ```python hl_lines="11"
+    --8<-- "examples/logger/src/remove_keys.py"
     ```
 
 === "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="7"
-    {
-        "level": "INFO",
-        "location": "collect.handler:7",
-        "message": "Collecting payment",
-        "timestamp": "2021-05-03 11:47:12,494+0200",
-        "service": "payment",
-        "sample_key": "value"
-    },
-    {
-        "level": "INFO",
-        "location": "collect.handler:10",
-        "message": "Collecting payment without sample key",
-        "timestamp": "2021-05-03 11:47:12,494+0200",
-        "service": "payment"
-    }
+    --8<-- "examples/logger/src/remove_keys_output.json"
     ```
 
 #### Clearing all state
@@ -391,54 +231,20 @@ Logger is commonly initialized in the global scope. Due to [Lambda Execution Con
 
 === "collect.py"
 
-    ```python hl_lines="5 8"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    @logger.inject_lambda_context(clear_state=True)
-    def handler(event, context):
-        if event.get("special_key"):
-            # Should only be available in the first request log
-            # as the second request doesn't contain `special_key`
-            logger.append_keys(debugging_key="value")
-
-        logger.info("Collecting payment")
+    ```python hl_lines="7 10"
+    --8<-- "examples/logger/src/clear_state.py"
     ```
 
 === "#1 request"
 
     ```json hl_lines="7"
-    {
-        "level": "INFO",
-        "location": "collect.handler:10",
-        "message": "Collecting payment",
-        "timestamp": "2021-05-03 11:47:12,494+0200",
-        "service": "payment",
-        "special_key": "debug_key",
-        "cold_start": true,
-        "lambda_function_name": "test",
-        "lambda_function_memory_size": 128,
-        "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
-        "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72"
-    }
+    --8<-- "examples/logger/src/clear_state_event_one.json"
     ```
 
 === "#2 request"
 
     ```json hl_lines="7"
-    {
-        "level": "INFO",
-        "location": "collect.handler:10",
-        "message": "Collecting payment",
-        "timestamp": "2021-05-03 11:47:12,494+0200",
-        "service": "payment",
-        "cold_start": false,
-        "lambda_function_name": "test",
-        "lambda_function_memory_size": 128,
-        "lambda_function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
-        "lambda_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72"
-    }
+    --8<-- "examples/logger/src/clear_state_event_two.json"
     ```
 
 ### Logging exceptions
@@ -450,29 +256,14 @@ Use `logger.exception` method to log contextual information about exceptions. Lo
 
 === "collect.py"
 
-    ```python hl_lines="8"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    try:
-        raise ValueError("something went wrong")
-    except Exception:
-        logger.exception("Received an exception")
+    ```python hl_lines="15"
+    --8<-- "examples/logger/src/logging_exceptions.py"
     ```
 
 === "Example CloudWatch Logs excerpt"
 
     ```json hl_lines="7-8"
-    {
-        "level": "ERROR",
-        "location": "collect.handler:5",
-        "message": "Received an exception",
-        "timestamp": "2021-05-03 11:47:12,494+0200",
-        "service": "payment",
-        "exception_name": "ValueError",
-        "exception": "Traceback (most recent call last):\n  File \"<input>\", line 2, in <module>\nValueError: something went wrong"
-    }
+    --8<-- "examples/logger/src/logging_exceptions_output.json"
     ```
 
 ## Advanced
@@ -494,36 +285,38 @@ You can use any of the following built-in JMESPath expressions as part of [injec
 
 ### Reusing Logger across your code
 
-Logger supports inheritance via `child` parameter. This allows you to create multiple Loggers across your code base, and propagate changes such as new keys to all Loggers.
+Similar to [Tracer](./tracer.md#reusing-tracer-across-your-code), a new instance that uses the same `service` name - env var or explicit parameter - will reuse a previous Logger instance. Just like `logging.getLogger("logger_name")` would in the standard library.
+
+Notice in the CloudWatch Logs output how `payment_id` appeared as expected when logging in `collect.py`.
 
 === "collect.py"
 
-    ```python hl_lines="1 7"
-    import shared # Creates a child logger named "payment.shared"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger() # POWERTOOLS_SERVICE_NAME: "payment"
-
-    def handler(event, context):
-        shared.inject_payment_id(event)
-        ...
+    ```python hl_lines="1 9 11 12"
+    --8<-- "examples/logger/src/logger_reuse.py"
     ```
 
-=== "shared.py"
+=== "payment.py"
 
-    ```python hl_lines="6"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(child=True) # POWERTOOLS_SERVICE_NAME: "payment"
-
-    def inject_payment_id(event):
-        logger.structure_logs(append=True, payment_id=event.get("payment_id"))
+    ```python hl_lines="3 7"
+    --8<-- "examples/logger/src/logger_reuse_payment.py"
     ```
 
-In this example, `Logger` will create a parent logger named `payment` and a child logger named `payment.shared`. Changes in either parent or child logger will be propagated bi-directionally.
+=== "Example CloudWatch Logs excerpt"
 
-???+ info "Info: Child loggers will be named after the following convention `{service}.{filename}`"
-    If you forget to use `child` param but the `service` name is the same of the parent, we will return the existing parent `Logger` instead.
+    ```json hl_lines="12"
+    --8<-- "examples/logger/src/logger_reuse_output.json"
+    ```
+
+???+ note "Note: About Child Loggers"
+    Coming from standard library, you might be used to use `logging.getLogger(__name__)`. This will create a new instance of a Logger with a different name.
+
+    In Powertools, you can have the same effect by using `child=True` parameter: `Logger(child=True)`. This creates a new Logger instance named after `service.<module>`. All state changes will be propagated bi-directonally between Child and Parent.
+
+    For that reason, there could be side effects depending on the order the Child Logger is instantiated, because Child Loggers don't have a handler.
+
+    For example, if you instantiated a Child Logger and immediately used `logger.append_keys/remove_keys/set_correlation_id` to update logging state, this might fail if the Parent Logger wasn't instantiated.
+
+    In this scenario, you can either ensure any calls manipulating state are only called when a Parent Logger is instantiated (example above), or refrain from using `child=True` parameter altogether.
 
 ### Sampling debug logs
 
