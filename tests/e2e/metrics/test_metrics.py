@@ -21,8 +21,8 @@ def config() -> conftest.LambdaConfig:
 
 
 @pytest.mark.e2e
-def test_basic_lambda_metric_visible(execute_lambda: conftest.LambdaExecution, config: conftest.LambdaConfig):
-    start_date = execute_lambda["execution_time"]
+def test_basic_lambda_metric_visible(execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig):
+    start_date = execute_lambda.get_lambda_execution_time()
     end_date = start_date + datetime.timedelta(minutes=5)
 
     metrics = helpers.get_metrics(

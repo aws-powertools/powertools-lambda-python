@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from functools import lru_cache
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Union
 
 from pydantic import BaseModel
 from retry import retry

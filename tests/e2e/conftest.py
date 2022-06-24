@@ -1,6 +1,9 @@
 import datetime
 import sys
 import uuid
+from dataclasses import dataclass
+
+import boto3
 
 # We only need typing_extensions for python versions <3.8
 if sys.version_info >= (3, 8):
@@ -8,7 +11,7 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import TypedDict
 
-from typing import Dict, Generator
+from typing import Dict, Generator, Optional
 
 import pytest
 from e2e.utils import helpers, infrastructure
@@ -19,13 +22,26 @@ class LambdaConfig(TypedDict):
     environment_variables: Dict[str, str]
 
 
-class LambdaExecution(TypedDict):
+@dataclass
+class InfrastructureOutput:
     arns: Dict[str, str]
     execution_time: datetime.datetime
 
+    def get_lambda_arns(self) -> Dict[str, str]:
+        return self.arns
+
+    def get_lambda_arn(self, name: str) -> Optional[str]:
+        return self.arns.get(name)
+
+    def get_lambda_execution_time(self) -> datetime.datetime:
+        return self.execution_time
+
+    def get_lambda_execution_time_timestamp(self) -> int:
+        return int(self.execution_time.timestamp() * 1000)
+
 
 @pytest.fixture(scope="module")
-def execute_lambda(config, request) -> Generator[LambdaExecution, None, None]:
+def create_infrastructure(config, request) -> Generator[Dict[str, str], None, None]:
     stack_name = f"test-lambda-{uuid.uuid4()}"
     test_dir = request.fspath.dirname
     handlers_dir = f"{test_dir}/handlers/"
@@ -36,12 +52,15 @@ def execute_lambda(config, request) -> Generator[LambdaExecution, None, None]:
         config=config["parameters"],
         environment_variables=config["environment_variables"],
     )
-
-    lambda_arns = infra.deploy()
-    execution_time = datetime.datetime.utcnow()
-
-    for _, arn in lambda_arns.items():
-        helpers.trigger_lambda(lambda_arn=arn, client=infra.lambda_client)
-    yield {"arns": lambda_arns, "execution_time": execution_time}
-    # Ensure stack deletion is triggered at the end of the test session
+    yield infra.deploy()
     infra.delete()
+
+
+@pytest.fixture(scope="module")
+def execute_lambda(create_infrastructure) -> InfrastructureOutput:
+    execution_time = datetime.datetime.utcnow()
+    session = boto3.Session()
+    client = session.client("lambda")
+    for _, arn in create_infrastructure.items():
+        helpers.trigger_lambda(lambda_arn=arn, client=client)
+    return InfrastructureOutput(arns=create_infrastructure, execution_time=execution_time)

@@ -18,15 +18,15 @@ def config() -> conftest.LambdaConfig:
 
 
 @pytest.mark.e2e
-def test_basic_lambda_logs_visible(execute_lambda: conftest.LambdaExecution, config: conftest.LambdaConfig):
+def test_basic_lambda_logs_visible(execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig):
     # GIVEN
-    lambda_arn = execute_lambda["arns"]["basichandlerarn"]
-    timestamp = int(execute_lambda["execution_time"].timestamp() * 1000)
+    lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
+    timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
 
     # WHEN
     filtered_logs = helpers.get_logs(
-        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client, run="first"
+        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
     )
 
     # THEN
@@ -38,10 +38,12 @@ def test_basic_lambda_logs_visible(execute_lambda: conftest.LambdaExecution, con
 
 
 @pytest.mark.e2e
-def test_basic_lambda_no_debug_logs_visible(execute_lambda: conftest.LambdaExecution, config: conftest.LambdaConfig):
+def test_basic_lambda_no_debug_logs_visible(
+    execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig
+):
     # GIVEN
-    lambda_arn = execute_lambda["arns"]["basichandlerarn"]
-    timestamp = int(execute_lambda["execution_time"].timestamp() * 1000)
+    lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
+    timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
 
     # WHEN
@@ -56,10 +58,10 @@ def test_basic_lambda_no_debug_logs_visible(execute_lambda: conftest.LambdaExecu
 
 
 @pytest.mark.e2e
-def test_basic_lambda_contextual_data_logged(execute_lambda: conftest.LambdaExecution):
+def test_basic_lambda_contextual_data_logged(execute_lambda: conftest.InfrastructureOutput):
     # GIVEN
-    lambda_arn = execute_lambda["arns"]["basichandlerarn"]
-    timestamp = int(execute_lambda["execution_time"].timestamp() * 1000)
+    lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
+    timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
 
     # WHEN
@@ -81,11 +83,11 @@ def test_basic_lambda_contextual_data_logged(execute_lambda: conftest.LambdaExec
 
 @pytest.mark.e2e
 def test_basic_lambda_additional_key_persistence_basic_lambda(
-    execute_lambda: conftest.LambdaExecution, config: conftest.LambdaConfig
+    execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig
 ):
     # GIVEN
-    lambda_arn = execute_lambda["arns"]["basichandlerarn"]
-    timestamp = int(execute_lambda["execution_time"].timestamp() * 1000)
+    lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
+    timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
 
     # WHEN
@@ -103,11 +105,11 @@ def test_basic_lambda_additional_key_persistence_basic_lambda(
 
 
 @pytest.mark.e2e
-def test_basic_lambda_empty_event_logged(execute_lambda: conftest.LambdaExecution):
+def test_basic_lambda_empty_event_logged(execute_lambda: conftest.InfrastructureOutput):
 
     # GIVEN
-    lambda_arn = execute_lambda["arns"]["basichandlerarn"]
-    timestamp = int(execute_lambda["execution_time"].timestamp() * 1000)
+    lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
+    timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
 
     # WHEN
@@ -120,11 +122,11 @@ def test_basic_lambda_empty_event_logged(execute_lambda: conftest.LambdaExecutio
 
 
 @pytest.mark.e2e
-def test_no_context_lambda_contextual_data_not_logged(execute_lambda: conftest.LambdaExecution):
+def test_no_context_lambda_contextual_data_not_logged(execute_lambda: conftest.InfrastructureOutput):
 
     # GIVEN
-    lambda_arn = execute_lambda["arns"]["nocontexthandlerarn"]
-    timestamp = int(execute_lambda["execution_time"].timestamp() * 1000)
+    lambda_arn = execute_lambda.get_lambda_arn(name="nocontexthandlerarn")
+    timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
 
     # WHEN
@@ -147,11 +149,11 @@ def test_no_context_lambda_contextual_data_not_logged(execute_lambda: conftest.L
 
 
 @pytest.mark.e2e
-def test_no_context_lambda_event_not_logged(execute_lambda: conftest.LambdaExecution):
+def test_no_context_lambda_event_not_logged(execute_lambda: conftest.InfrastructureOutput):
 
     # GIVEN
-    lambda_arn = execute_lambda["arns"]["nocontexthandlerarn"]
-    timestamp = int(execute_lambda["execution_time"].timestamp() * 1000)
+    lambda_arn = execute_lambda.get_lambda_arn(name="nocontexthandlerarn")
+    timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
 
     # WHEN
