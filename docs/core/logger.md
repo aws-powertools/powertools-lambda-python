@@ -560,48 +560,13 @@ This is a Pytest sample that provides the minimum information necessary for Logg
     Note that dataclasses are available in Python 3.7+ only.
 
     ```python
-    from dataclasses import dataclass
-
-    import pytest
-
-    @pytest.fixture
-    def lambda_context():
-        @dataclass
-        class LambdaContext:
-            function_name: str = "test"
-            memory_limit_in_mb: int = 128
-            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
-            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
-
-        return LambdaContext()
-
-    def test_lambda_handler(lambda_context):
-        test_event = {'test': 'event'}
-        your_lambda_handler(test_event, lambda_context) # this will now have a Context object populated
+    --8<-- "examples/logger/src/fake_lambda_context_for_logger.py"
     ```
-=== "fake_lambda_context_for_logger_py36.py"
+
+=== "fake_lambda_context_for_logger_module.py"
 
     ```python
-    from collections import namedtuple
-
-    import pytest
-
-    @pytest.fixture
-    def lambda_context():
-        lambda_context = {
-            "function_name": "test",
-            "memory_limit_in_mb": 128,
-            "invoked_function_arn": "arn:aws:lambda:eu-west-1:809313241:function:test",
-            "aws_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
-        }
-
-        return namedtuple("LambdaContext", lambda_context.keys())(*lambda_context.values())
-
-    def test_lambda_handler(lambda_context):
-        test_event = {'test': 'event'}
-
-        # this will now have a Context object populated
-        your_lambda_handler(test_event, lambda_context)
+    --8<-- "examples/logger/src/fake_lambda_context_for_logger_module.py"
     ```
 
 ???+ tip
@@ -625,23 +590,8 @@ POWERTOOLS_LOG_DEDUPLICATION_DISABLED="1" pytest -o log_cli=1
 You can enable the `botocore` and `boto3` logs by using the `set_stream_logger` method, this method will add a stream handler
 for the given name and level to the logging module. By default, this logs all boto3 messages to stdout.
 
-```python hl_lines="6-7" title="Enabling AWS SDK logging"
-from typing import Dict, List
-from aws_lambda_powertools.utilities.typing import LambdaContext
-from aws_lambda_powertools import Logger
-
-import boto3
-boto3.set_stream_logger()
-boto3.set_stream_logger('botocore')
-
-logger = Logger()
-client = boto3.client('s3')
-
-
-def handler(event: Dict, context: LambdaContext) -> List:
-	response = client.list_buckets()
-
-	return response.get("Buckets", [])
+```python hl_lines="8-9" title="Enabling AWS SDK logging"
+---8<-- "examples/logger/src/enabling_boto_logging.py"
 ```
 
 **How can I enable powertools logging for imported libraries?**
@@ -649,17 +599,7 @@ def handler(event: Dict, context: LambdaContext) -> List:
 You can copy the Logger setup to all or sub-sets of registered external loggers. Use the `copy_config_to_registered_logger` method to do this. By default all registered loggers will be modified. You can change this behaviour by providing `include` and `exclude` attributes. You can also provide optional `log_level` attribute external loggers will be configured with.
 
 ```python hl_lines="10" title="Cloning Logger config to all other registered standard loggers"
-import logging
-
-from aws_lambda_powertools import Logger
-from aws_lambda_powertools.logging import utils
-
-logger = Logger()
-
-external_logger = logging.logger()
-
-utils.copy_config_to_registered_loggers(source_logger=logger)
-external_logger.info("test message")
+---8<-- "examples/logger/src/cloning_logger_config.py"
 ```
 
 **What's the difference between `append_keys` and `extra`?**
@@ -668,46 +608,16 @@ Keys added with `append_keys` will persist across multiple log messages while ke
 
 Here's an example where we persist `payment_id` not `request_id`. Note that `payment_id` remains in both log messages while `booking_id` is only available in the first message.
 
-=== "lambda_handler.py"
+=== "collect.py"
 
-    ```python hl_lines="6 10"
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-
-    def handler(event, context):
-        logger.append_keys(payment_id="123456789")
-
-        try:
-            booking_id = book_flight()
-            logger.info("Flight booked successfully", extra={ "booking_id": booking_id})
-        except BookingReservationError:
-            ...
-
-        logger.info("goodbye")
+    ```python hl_lines="16 23"
+    ---8<-- "examples/logger/src/append_keys_vs_extra.py"
     ```
+
 === "Example CloudWatch Logs excerpt"
 
-    ```json hl_lines="8-9 18"
-    {
-        "level": "INFO",
-        "location": "<module>:10",
-        "message": "Flight booked successfully",
-        "timestamp": "2021-01-12 14:09:10,859",
-        "service": "payment",
-        "sampling_rate": 0.0,
-        "payment_id": "123456789",
-        "booking_id": "75edbad0-0857-4fc9-b547-6180e2f7959b"
-    },
-    {
-        "level": "INFO",
-        "location": "<module>:14",
-        "message": "goodbye",
-        "timestamp": "2021-01-12 14:09:10,860",
-        "service": "payment",
-        "sampling_rate": 0.0,
-        "payment_id": "123456789"
-    }
+    ```json hl_lines="9-10 19"
+    ---8<-- "examples/logger/src/append_keys_vs_extra_output.json"
     ```
 
 **How do I aggregate and search Powertools logs across accounts?**
