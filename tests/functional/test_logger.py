@@ -625,6 +625,40 @@ def test_logger_custom_powertools_formatter_clear_state(stdout, service_name, la
     assert all(k in second_log for k in lambda_context_keys)
 
 
+def test_logger_custom_formatter_has_standard_and_custom_keys(stdout, service_name, lambda_context):
+    class CustomFormatter(LambdaPowertoolsFormatter):
+        ...
+
+    # GIVEN a Logger is initialized with a custom formatter
+    logger = Logger(service=service_name, stream=stdout, logger_formatter=CustomFormatter(), my_key="value")
+
+    # WHEN a lambda function is decorated with logger
+    @logger.inject_lambda_context
+    def handler(event, context):
+        logger.info("Hello")
+
+    handler({}, lambda_context)
+
+    standard_keys = (
+        "level",
+        "location",
+        "message",
+        "timestamp",
+        "service",
+        "cold_start",
+        "function_name",
+        "function_memory_size",
+        "function_arn",
+        "function_request_id",
+    )
+
+    log = capture_logging_output(stdout)
+
+    # THEN all standard keys should be available
+    assert all(k in log for k in standard_keys)
+    assert "my_key" in log
+
+
 def test_logger_custom_handler(lambda_context, service_name, tmp_path):
     # GIVEN a Logger is initialized with a FileHandler
     log_file = tmp_path / "log.json"
