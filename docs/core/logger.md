@@ -448,7 +448,7 @@ Logger allows you to either change the format or suppress the following keys alt
 
 You can change the order of [standard Logger keys](#standard-structured-keys) or any keys that will be appended later at runtime via the `log_record_order` parameter.
 
-=== "lambda_handler.py"
+=== "app.py"
 
     ```python hl_lines="5 8"
     --8<-- "examples/logger/src/reordering_log_keys.py"
@@ -461,17 +461,19 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 
 #### Setting timestamp to UTC
 
-By default, this Logger and standard logging library emits records using local time timestamp. You can override this behaviour via `utc` parameter:
+By default, this Logger and standard logging library emits records using local time timestamp. You can override this behavior via `utc` parameter:
 
-```python hl_lines="6" title="Setting UTC timestamp by default"
-from aws_lambda_powertools import Logger
+=== "app.py"
 
-logger = Logger(service="payment")
-logger.info("Local time")
+    ```python hl_lines="6"
+    --8<-- "examples/logger/src/setting_utc_timestamp.py"
+    ```
 
-logger_in_utc = Logger(service="payment", utc=True)
-logger_in_utc.info("GMT time zone")
-```
+=== "Example CloudWatch Logs excerpt"
+
+    ```json hl_lines="6 13"
+    --8<-- "examples/logger/src/setting_utc_timestamp_output.json"
+    ```
 
 #### Custom function for unserializable values
 
