@@ -1,0 +1,5 @@
+{
+    "headers": {
+        "my_request_id_header": "correlation_id_value"
+    }
+}

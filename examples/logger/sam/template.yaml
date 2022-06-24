@@ -9,15 +9,16 @@ Globals:
     Tracing: Active
     Environment:
       Variables:
-        POWERTOOLS_SERVICE_NAME: example
+        POWERTOOLS_SERVICE_NAME: payment
+        LOG_LEVEL: INFO
     Layers:
       # Find the latest Layer version in the official documentation
       # https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer
       - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:21
 
 Resources:
-  CaptureLambdaHandlerExample:
+  LoggerLambdaHandlerExample:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src
-      Handler: capture_lambda_handler.handler
+      CodeUri: ../src
+      Handler: inject_lambda_context.handler

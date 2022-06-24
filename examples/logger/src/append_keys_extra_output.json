@@ -1,0 +1,8 @@
+{
+    "level": "INFO",
+    "location": "collect.handler:9",
+    "message": "Collecting payment",
+    "timestamp": "2021-05-03 11:47:12,494+0200",
+    "service": "payment",
+    "request_id": "1123"
+}
