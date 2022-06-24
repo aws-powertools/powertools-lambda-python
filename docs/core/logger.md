@@ -363,12 +363,8 @@ If you prefer configuring it separately, or you'd want to bring this JSON Format
 | **`log_record_order`**       | set order of log keys when logging                                                                                       | `["level", "location", "message", "timestamp"]`               |
 | **`kwargs`**                 | key-value to be included in log messages                                                                                 | `None`                                                        |
 
-```python hl_lines="2 4-5" title="Pre-configuring Lambda Powertools Formatter"
-from aws_lambda_powertools import Logger
-from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
-
-formatter = LambdaPowertoolsFormatter(utc=True, log_record_order=["message"])
-logger = Logger(service="example", logger_formatter=formatter)
+```python hl_lines="2 7-8" title="Pre-configuring Lambda Powertools Formatter"
+--8<-- "examples/logger/src/powertools_formatter_setup.py"
 ```
 
 ### Migrating from other Loggers
