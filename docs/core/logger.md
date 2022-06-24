@@ -379,6 +379,8 @@ For Logger, the `service` is the logging key customers can use to search log ope
 
 #### Inheriting Loggers
 
+??? tip "Tip: Prefer [Logger Reuse feature](#reusing-logger-across-your-code) over inheritance unless strictly necessary, [see caveats.](#reusing-logger-across-your-code)"
+
 > Python Logging hierarchy happens via the dot notation: `service`, `service.child`, `service.child_2`
 
 For inheritance, Logger uses a `child=True` parameter along with `service` being the same value across Loggers.
@@ -390,32 +392,28 @@ For child Loggers, we introspect the name of your module where `Logger(child=Tru
 
 === "incorrect_logger_inheritance.py"
 
-    ```python hl_lines="4 10"
-    import my_module
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(service="payment")
-    ...
-
-    # my_module.py
-    from aws_lambda_powertools import Logger
-
-    logger = Logger(child=True)
+    ```python hl_lines="1 9"
+    --8<-- "examples/logger/src/logging_inheritance_bad.py"
     ```
 
-=== "correct_logger_inheritance.py"
+=== "my_other_module.py"
 
-    ```python hl_lines="4 10"
-    import my_module
-    from aws_lambda_powertools import Logger
+    ```python hl_lines="1 9"
+    --8<-- "examples/logger/src/logging_inheritance_module.py"
+    ```
 
-    logger = Logger(service="payment")
-    ...
+Instead, do this:
 
-    # my_module.py
-    from aws_lambda_powertools import Logger
+=== "incorrect_logger_inheritance.py"
 
-    logger = Logger(service="payment", child=True)
+    ```python hl_lines="1 9"
+    --8<-- "examples/logger/src/logging_inheritance_good.py"
+    ```
+
+=== "my_other_module.py"
+
+    ```python hl_lines="1 9"
+    --8<-- "examples/logger/src/logging_inheritance_module.py"
     ```
 
 In this case, Logger will register a Logger named `payment`, and a Logger named `service_undefined`. The latter isn't inheriting from the parent, and will have no handler, resulting in no message being logged to standard output.
