@@ -450,29 +450,13 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 
 === "lambda_handler.py"
 
-    ```python hl_lines="4 7"
-    from aws_lambda_powertools import Logger
-
-    # make message as the first key
-    logger = Logger(service="payment", log_record_order=["message"])
-
-    # make request_id that will be added later as the first key
-    # Logger(service="payment", log_record_order=["request_id"])
-
-    # Default key sorting order when omit
-    # Logger(service="payment", log_record_order=["level","location","message","timestamp"])
+    ```python hl_lines="5 8"
+    --8<-- "examples/logger/src/reordering_log_keys.py"
     ```
 === "Example CloudWatch Logs excerpt"
 
-    ```json hl_lines="3 5"
-    {
-        "message": "hello world",
-        "level": "INFO",
-        "location": "[<module>]:6",
-        "timestamp": "2021-02-09 09:36:12,280",
-        "service": "service_undefined",
-        "sampling_rate": 0.0
-    }
+    ```json hl_lines="3 10"
+    --8<-- "examples/logger/src/reordering_log_keys_output.json"
     ```
 
 #### Setting timestamp to UTC
