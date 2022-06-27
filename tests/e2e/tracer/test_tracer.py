@@ -19,7 +19,7 @@ def config():
 
 @pytest.mark.e2e
 def test_basic_lambda_trace_visible(execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig):
-    lambda_arn = execute_lambda.get_lambda_arns()["basichandlerarn"]
+    lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
     start_date = execute_lambda.get_lambda_execution_time()
     end_date = start_date + datetime.timedelta(minutes=5)
 

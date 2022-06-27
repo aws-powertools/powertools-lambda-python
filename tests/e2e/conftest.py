@@ -46,13 +46,8 @@ def create_infrastructure(config, request) -> Generator[Dict[str, str], None, No
     test_dir = request.fspath.dirname
     handlers_dir = f"{test_dir}/handlers/"
 
-    infra = infrastructure.Infrastructure(
-        stack_name=stack_name,
-        handlers_dir=handlers_dir,
-        config=config["parameters"],
-        environment_variables=config["environment_variables"],
-    )
-    yield infra.deploy()
+    infra = infrastructure.Infrastructure(stack_name=stack_name, handlers_dir=handlers_dir, config=config)
+    yield infra.deploy(Stack=infrastructure.InfrastructureStack)
     infra.delete()
 
 

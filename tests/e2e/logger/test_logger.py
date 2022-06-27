@@ -60,6 +60,16 @@ def test_basic_lambda_no_debug_logs_visible(
 @pytest.mark.e2e
 def test_basic_lambda_contextual_data_logged(execute_lambda: conftest.InfrastructureOutput):
     # GIVEN
+
+    required_keys = (
+        "xray_trace_id",
+        "function_request_id",
+        "function_arn",
+        "function_memory_size",
+        "function_name",
+        "cold_start",
+    )
+
     lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
     timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
@@ -70,15 +80,7 @@ def test_basic_lambda_contextual_data_logged(execute_lambda: conftest.Infrastruc
     )
 
     # THEN
-    for log in filtered_logs:
-        assert (
-            log.xray_trace_id
-            and log.function_request_id
-            and log.function_arn
-            and log.function_memory_size
-            and log.function_name
-            and str(log.cold_start)
-        )
+    assert all(keys in logs.dict(exclude_unset=True) for logs in filtered_logs for keys in required_keys)
 
 
 @pytest.mark.e2e
@@ -125,6 +127,15 @@ def test_basic_lambda_empty_event_logged(execute_lambda: conftest.Infrastructure
 def test_no_context_lambda_contextual_data_not_logged(execute_lambda: conftest.InfrastructureOutput):
 
     # GIVEN
+
+    required_missing_keys = (
+        "function_request_id",
+        "function_arn",
+        "function_memory_size",
+        "function_name",
+        "cold_start",
+    )
+
     lambda_arn = execute_lambda.get_lambda_arn(name="nocontexthandlerarn")
     timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
@@ -135,17 +146,7 @@ def test_no_context_lambda_contextual_data_not_logged(execute_lambda: conftest.I
     )
 
     # THEN
-    assert not any(
-        (
-            log.xray_trace_id
-            and log.function_request_id
-            and log.function_arn
-            and log.function_memory_size
-            and log.function_name
-            and str(log.cold_start)
-        )
-        for log in filtered_logs
-    )
+    assert not any(keys in logs.dict(exclude_unset=True) for logs in filtered_logs for keys in required_missing_keys)
 
 
 @pytest.mark.e2e

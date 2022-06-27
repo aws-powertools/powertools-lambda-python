@@ -2,9 +2,10 @@ import io
 import os
 import sys
 import zipfile
+from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple, Type
 
 import boto3
 import yaml
@@ -20,83 +21,21 @@ class PythonVersion(Enum):
     V39 = {"runtime": Runtime.PYTHON_3_9, "image": Runtime.PYTHON_3_9.bundling_image.image}
 
 
-class Infrastructure:
-    def __init__(self, stack_name: str, handlers_dir: str, config: dict, environment_variables: dict) -> None:
-        session = boto3.Session()
-        self.s3_client = session.client("s3")
-        self.lambda_client = session.client("lambda")
-        self.cf_client = session.client("cloudformation")
-        self.s3_resource = session.resource("s3")
-        self.account_id = session.client("sts").get_caller_identity()["Account"]
-        self.region = session.region_name
+class InfrastructureStackInterface(ABC):
+    @abstractmethod
+    def synthesize() -> Tuple[dict, str]:
+        ...
+
+    @abstractmethod
+    def __call__() -> Tuple[dict, str]:
+        ...
+
+
+class InfrastructureStack(InfrastructureStackInterface):
+    def __init__(self, handlers_dir: str, stack_name: str, config: dict) -> None:
         self.stack_name = stack_name
         self.handlers_dir = handlers_dir
         self.config = config
-        self.environment_variables = environment_variables
-
-    def deploy(self) -> Dict[str, str]:
-        handlers = self._find_files(directory=self.handlers_dir, only_py=True)
-        template, asset_root_dir = self.prepare_stack(
-            handlers=handlers,
-            handlers_dir=self.handlers_dir,
-            stack_name=self.stack_name,
-            environment_variables=self.environment_variables,
-            **self.config,
-        )
-        self._upload_assets(template, asset_root_dir)
-
-        response = self._deploy_stack(self.stack_name, template)
-
-        return self._transform_output(response["Stacks"][0]["Outputs"])
-
-    def delete(self):
-        self.cf_client.delete_stack(StackName=self.stack_name)
-
-    # Create CDK cloud assembly code
-    def prepare_stack(
-        self, handlers: List[str], handlers_dir: str, stack_name: str, environment_variables: dict, **config: dict
-    ):
-        integration_test_app = App()
-        stack = Stack(integration_test_app, stack_name)
-        powertools_layer = self._create_layer(stack)
-        code = Code.from_asset(handlers_dir)
-
-        for filename_path in handlers:
-            filename = Path(filename_path).stem
-            function_python = Function(
-                stack,
-                f"{filename}-lambda",
-                runtime=PythonVersion[PYTHON_RUNTIME_VERSION].value["runtime"],
-                code=code,
-                handler=f"{filename}.lambda_handler",
-                layers=[powertools_layer],
-                environment=environment_variables,
-                tracing=Tracing.ACTIVE if config.get("tracing") == "ACTIVE" else Tracing.DISABLED,
-            )
-
-            aws_logs.LogGroup(
-                stack,
-                f"{filename}-lg",
-                log_group_name=f"/aws/lambda/{function_python.function_name}",
-                retention=aws_logs.RetentionDays.ONE_DAY,
-                removal_policy=RemovalPolicy.DESTROY,
-            )
-            CfnOutput(stack, f"{filename}_arn", value=function_python.function_arn)
-        return (
-            integration_test_app.synth().get_stack_by_name(stack_name).template,
-            integration_test_app.synth().directory,
-        )
-
-    def _find_files(self, directory: str, only_py: bool = False) -> list:
-        file_paths = []
-        for root, _, files in os.walk(directory):
-            for filename in files:
-                if only_py:
-                    if filename.endswith(".py"):
-                        file_paths.append(os.path.join(root, filename))
-                else:
-                    file_paths.append(os.path.join(root, filename))
-        return file_paths
 
     def _create_layer(self, stack: Stack):
         output_dir = Path(str(AssetStaging.BUNDLING_OUTPUT_DIR), "python")
@@ -116,7 +55,8 @@ class Infrastructure:
                     command=[
                         "bash",
                         "-c",
-                        f"poetry export --with-credentials --format requirements.txt --output /tmp/requirements.txt &&\
+                        f"export PYTHONPYCACHEPREFIX='/tmp/.cache/pycache/';\
+                            poetry export --with-credentials --format requirements.txt --output /tmp/requirements.txt &&\
                             pip install -r /tmp/requirements.txt -t {output_dir} &&\
                             cp -R {input_dir} {output_dir} &&\
                             find {output_dir}/ -regex '^.*\\(__pycache__\\|\\.py[co]\\)$' -delete",
@@ -125,6 +65,75 @@ class Infrastructure:
             ),
         )
         return powertools_layer
+
+    def _find_handlers(self, directory: str) -> list:
+        for root, _, files in os.walk(directory):
+            return [os.path.join(root, filename) for filename in files if filename.endswith(".py")]
+
+    def synthesize(self, handlers: List[str]) -> Tuple[dict, str]:
+        integration_test_app = App()
+        stack = Stack(integration_test_app, self.stack_name)
+        powertools_layer = self._create_layer(stack)
+        code = Code.from_asset(self.handlers_dir)
+
+        for filename_path in handlers:
+            filename = Path(filename_path).stem
+            function_python = Function(
+                stack,
+                f"{filename}-lambda",
+                runtime=PythonVersion[PYTHON_RUNTIME_VERSION].value["runtime"],
+                code=code,
+                handler=f"{filename}.lambda_handler",
+                layers=[powertools_layer],
+                environment=self.config.get("environment_variables"),
+                tracing=Tracing.ACTIVE
+                if self.config.get("parameters", {}).get("tracing") == "ACTIVE"
+                else Tracing.DISABLED,
+            )
+
+            aws_logs.LogGroup(
+                stack,
+                f"{filename}-lg",
+                log_group_name=f"/aws/lambda/{function_python.function_name}",
+                retention=aws_logs.RetentionDays.ONE_DAY,
+                removal_policy=RemovalPolicy.DESTROY,
+            )
+            CfnOutput(stack, f"{filename}_arn", value=function_python.function_arn)
+        return (
+            integration_test_app.synth().get_stack_by_name(self.stack_name).template,
+            integration_test_app.synth().directory,
+        )
+
+    def __call__(self) -> Tuple[dict, str]:
+        handlers = self._find_handlers(directory=self.handlers_dir)
+        return self.synthesize(handlers=handlers)
+
+
+class Infrastructure:
+    def __init__(self, stack_name: str, handlers_dir: str, config: dict) -> None:
+        session = boto3.Session()
+        self.s3_client = session.client("s3")
+        self.lambda_client = session.client("lambda")
+        self.cf_client = session.client("cloudformation")
+        self.s3_resource = session.resource("s3")
+        self.account_id = session.client("sts").get_caller_identity()["Account"]
+        self.region = session.region_name
+        self.stack_name = stack_name
+        self.handlers_dir = handlers_dir
+        self.config = config
+
+    def deploy(self, Stack: Type[InfrastructureStackInterface]) -> Dict[str, str]:
+
+        stack = Stack(handlers_dir=self.handlers_dir, stack_name=self.stack_name, config=self.config)
+        template, asset_root_dir = stack()
+        self._upload_assets(template, asset_root_dir)
+
+        response = self._deploy_stack(self.stack_name, template)
+
+        return self._transform_output(response["Stacks"][0]["Outputs"])
+
+    def delete(self):
+        self.cf_client.delete_stack(StackName=self.stack_name)
 
     def _upload_assets(self, template: dict, asset_root_dir: str):
 
@@ -145,6 +154,17 @@ class Infrastructure:
                     zf.write(os.path.join(asset_file))
             buf.seek(0)
             self.s3_client.upload_fileobj(Fileobj=buf, Bucket=bucket, Key=s3_key)
+
+    def _find_files(self, directory: str, only_py: bool = False) -> list:
+        file_paths = []
+        for root, _, files in os.walk(directory):
+            for filename in files:
+                if only_py:
+                    if filename.endswith(".py"):
+                        file_paths.append(os.path.join(root, filename))
+                else:
+                    file_paths.append(os.path.join(root, filename))
+        return file_paths
 
     def _deploy_stack(self, stack_name: str, template: dict):
         response = self.cf_client.create_stack(
