@@ -9,7 +9,7 @@ Globals:
     Tracing: Active
     Environment:
       Variables:
-        POWERTOOLS_SERVICE_NAME: example
+        POWERTOOLS_SERVICE_NAME: payment
     Layers:
       # Find the latest Layer version in the official documentation
       # https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer
