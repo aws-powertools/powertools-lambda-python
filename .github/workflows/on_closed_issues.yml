@@ -9,4 +9,4 @@ jobs:
             - uses: aws-actions/closed-issue-message@v1
               with:
                   repo-token: "${{ secrets.GITHUB_TOKEN }}"
-                  message: "Comments on closed issues are hard for our team to see."
+                  message: "This issue is now closed. Please be mindful that future comments are hard for our team to see."
