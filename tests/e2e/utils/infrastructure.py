@@ -55,11 +55,10 @@ class InfrastructureStack(InfrastructureStackInterface):
                     command=[
                         "bash",
                         "-c",
-                        f"export PYTHONPYCACHEPREFIX='/tmp/.cache/pycache/';\
-                            poetry export --with-credentials --format requirements.txt --output /tmp/requirements.txt &&\
+                        f"poetry export --with-credentials --format requirements.txt --output /tmp/requirements.txt &&\
                             pip install -r /tmp/requirements.txt -t {output_dir} &&\
                             cp -R {input_dir} {output_dir} &&\
-                            find {output_dir}/ -regex '^.*\\(__pycache__\\|\\.py[co]\\)$' -delete",
+                            find {output_dir}/ -regex '^.*__pycache__.*' -delete",
                     ],
                 ),
             ),
@@ -155,15 +154,11 @@ class Infrastructure:
             buf.seek(0)
             self.s3_client.upload_fileobj(Fileobj=buf, Bucket=bucket, Key=s3_key)
 
-    def _find_files(self, directory: str, only_py: bool = False) -> list:
+    def _find_files(self, directory: str) -> list:
         file_paths = []
         for root, _, files in os.walk(directory):
             for filename in files:
-                if only_py:
-                    if filename.endswith(".py"):
-                        file_paths.append(os.path.join(root, filename))
-                else:
-                    file_paths.append(os.path.join(root, filename))
+                file_paths.append(os.path.join(root, filename))
         return file_paths
 
     def _deploy_stack(self, stack_name: str, template: dict):

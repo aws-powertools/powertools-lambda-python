@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from functools import lru_cache
-from typing import Any, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel
 from retry import retry
@@ -21,6 +21,12 @@ class Log(BaseModel):
     function_request_id: Optional[str]
     xray_trace_id: Optional[str]
     extra_info: Optional[str]
+
+
+class TraceSegment(BaseModel):
+    name: str
+    metadata: Dict = {}
+    annotations: Dict = {}
 
 
 def trigger_lambda(lambda_arn: str, client: Any):
@@ -76,7 +82,7 @@ def get_metrics(
 
 
 @retry(ValueError, delay=1, jitter=1, tries=10)
-def get_traces(lambda_function_name: str, xray_client: Any, start_date: datetime, end_date: datetime):
+def get_traces(lambda_function_name: str, xray_client: Any, start_date: datetime, end_date: datetime) -> Dict:
     paginator = xray_client.get_paginator("get_trace_summaries")
     response_iterator = paginator.paginate(
         StartTime=start_date,
@@ -95,3 +101,27 @@ def get_traces(lambda_function_name: str, xray_client: Any, start_date: datetime
     )
 
     return trace_details
+
+
+def find_trace_additional_info(trace: Dict) -> List[TraceSegment]:
+    info = []
+    for segment in trace["Traces"][0]["Segments"]:
+        document = json.loads(segment["Document"])
+        if document["origin"] == "AWS::Lambda::Function":
+            for subsegment in document["subsegments"]:
+                if subsegment["name"] == "Invocation":
+                    find_meta(segment=subsegment, result=info)
+    return info
+
+
+def find_meta(segment: dict, result: List):
+    for x_subsegment in segment["subsegments"]:
+        result.append(
+            TraceSegment(
+                name=x_subsegment["name"],
+                metadata=x_subsegment.get("metadata", {}),
+                annotations=x_subsegment.get("annotations", {}),
+            )
+        )
+        if x_subsegment.get("subsegments"):
+            find_meta(segment=x_subsegment, result=result)
