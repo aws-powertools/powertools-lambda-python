@@ -60,7 +60,6 @@ def test_basic_lambda_no_debug_logs_visible(
 @pytest.mark.e2e
 def test_basic_lambda_contextual_data_logged(execute_lambda: conftest.InfrastructureOutput):
     # GIVEN
-
     required_keys = (
         "xray_trace_id",
         "function_request_id",
@@ -127,7 +126,6 @@ def test_basic_lambda_empty_event_logged(execute_lambda: conftest.Infrastructure
 def test_no_context_lambda_contextual_data_not_logged(execute_lambda: conftest.InfrastructureOutput):
 
     # GIVEN
-
     required_missing_keys = (
         "function_request_id",
         "function_arn",
