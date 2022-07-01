@@ -623,7 +623,7 @@ You can also add them later anywhere in your code with `append_keys`, or remove 
     ---8<-- "examples/logger/src/append_and_remove_keys.json"
     ```
 
-For log records originating from Powertools `Logger`, the `name` attribute will be the same as `service`, for log records coming from standard library logger, it will be the name of the logger (i.e. what was used as name argument to `logging.getLogger`).
+For log records originating from Powertools Logger, the `name` attribute will be the same as `service`, for log records coming from standard library logger, it will be the name of the logger (i.e. what was used as name argument to `logging.getLogger`).
 
 ### What's the difference between `append_keys` and `extra`?
 
