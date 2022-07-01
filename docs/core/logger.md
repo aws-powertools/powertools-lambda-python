@@ -608,7 +608,9 @@ By default all registered loggers will be modified. You can change this behavior
 
 The Python standard library log records contains a [large set of atttributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank"}, however only a few are included in Powertools Logger log record by default.
 
-If you need to add additional records, these can be included as `kwargs` to `Logger`, or to `LambdaPowertoolsFormatter` when they are being instantiated, or to managed later with the `append_keys` or `remove_keys` methods.
+You can include any of these logging attributes as key value arguments (`kwargs`) when instantiating `Logger` or `LambdaPowertoolsFormatter`.
+
+You can also add them later anywhere in your code with `append_keys`, or remove them with `remove_keys` methods.
 
 === "collect.py"
 
