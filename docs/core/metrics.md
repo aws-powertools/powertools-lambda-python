@@ -42,6 +42,11 @@ Metric has two global settings that will be used across all metrics emitted:
 --8<-- "examples/metrics/sam/template.yaml"
 ```
 
+???+ note
+    For brevity, all code snippets in this page will rely on environment variables above being set.
+
+    This ensures we instantiate `metrics = Metrics()` over `metrics = Metrics(service="booking", namespace="ServerlessAirline")`, etc.
+
 ### Creating metrics
 
 You can create metrics using `add_metric`, and you can create dimensions for all your aggregate metrics using `add_dimension` method.
