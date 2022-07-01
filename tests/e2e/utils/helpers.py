@@ -1,8 +1,11 @@
 import json
 from datetime import datetime
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
+from mypy_boto3_cloudwatch.client import CloudWatchClient
+from mypy_boto3_lambda.client import LambdaClient
+from mypy_boto3_xray.client import XRayClient
 from pydantic import BaseModel
 from retry import retry
 
@@ -29,14 +32,14 @@ class TraceSegment(BaseModel):
     annotations: Dict = {}
 
 
-def trigger_lambda(lambda_arn: str, client: Any):
+def trigger_lambda(lambda_arn: str, client: LambdaClient):
     response = client.invoke(FunctionName=lambda_arn, InvocationType="RequestResponse")
     return response
 
 
 @lru_cache(maxsize=10, typed=False)
 @retry(ValueError, delay=1, jitter=1, tries=10)
-def get_logs(lambda_function_name: str, log_client: Any, start_time: int, **kwargs: dict) -> List[Log]:
+def get_logs(lambda_function_name: str, log_client: CloudWatchClient, start_time: int, **kwargs: dict) -> List[Log]:
     response = log_client.filter_log_events(logGroupName=f"/aws/lambda/{lambda_function_name}", startTime=start_time)
     if not response["events"]:
         raise ValueError("Empty response from Cloudwatch Logs. Repeating...")
@@ -54,7 +57,12 @@ def get_logs(lambda_function_name: str, log_client: Any, start_time: int, **kwar
 @lru_cache(maxsize=10, typed=False)
 @retry(ValueError, delay=1, jitter=1, tries=10)
 def get_metrics(
-    namespace: str, cw_client: Any, start_date: datetime, end_date: datetime, metric_name: str, service_name: str
+    namespace: str,
+    cw_client: CloudWatchClient,
+    start_date: datetime,
+    end_date: datetime,
+    metric_name: str,
+    service_name: str,
 ):
     response = cw_client.get_metric_data(
         MetricDataQueries=[
@@ -82,7 +90,7 @@ def get_metrics(
 
 
 @retry(ValueError, delay=1, jitter=1, tries=10)
-def get_traces(lambda_function_name: str, xray_client: Any, start_date: datetime, end_date: datetime) -> Dict:
+def get_traces(lambda_function_name: str, xray_client: XRayClient, start_date: datetime, end_date: datetime) -> Dict:
     paginator = xray_client.get_paginator("get_trace_summaries")
     response_iterator = paginator.paginate(
         StartTime=start_date,

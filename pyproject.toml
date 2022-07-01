@@ -26,6 +26,9 @@ fastjsonschema = "^2.14.5"
 boto3 = "^1.18"
 pydantic = {version = "^1.8.2", optional = true }
 email-validator = {version = "*", optional = true }
+mypy-boto3-cloudwatch = "^1.24.0"
+mypy-boto3-lambda = "^1.24.0"
+mypy-boto3-xray = "^1.24.0"
 
 [tool.poetry.dev-dependencies]
 # 2022-04-21: jmespath was removed, to be re-added once we drop python 3.6.
