@@ -65,7 +65,7 @@ class InfrastructureStack(InfrastructureStackInterface):
         )
         return powertools_layer
 
-    def _find_handlers(self, directory: str) -> list:
+    def _find_handlers(self, directory: str) -> List:
         for root, _, files in os.walk(directory):
             return [os.path.join(root, filename) for filename in files if filename.endswith(".py")]
 
@@ -154,7 +154,7 @@ class Infrastructure:
             buf.seek(0)
             self.s3_client.upload_fileobj(Fileobj=buf, Bucket=bucket, Key=s3_key)
 
-    def _find_files(self, directory: str) -> list:
+    def _find_files(self, directory: str) -> List:
         file_paths = []
         for root, _, files in os.walk(directory):
             for filename in files:
