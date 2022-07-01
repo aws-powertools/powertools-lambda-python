@@ -585,7 +585,7 @@ POWERTOOLS_LOG_DEDUPLICATION_DISABLED="1" pytest -o log_cli=1
 
 ## FAQ
 
-**How can I enable boto3 and botocore library logging?**
+### How can I enable boto3 and botocore library logging?
 
 You can enable the `botocore` and `boto3` logs by using the `set_stream_logger` method, this method will add a stream handler
 for the given name and level to the logging module. By default, this logs all boto3 messages to stdout.
@@ -594,7 +594,7 @@ for the given name and level to the logging module. By default, this logs all bo
 ---8<-- "examples/logger/src/enabling_boto_logging.py"
 ```
 
-**How can I enable powertools logging for imported libraries?**
+### How can I enable Powertools logging for imported libraries?
 
 You can copy the Logger setup to all or sub-sets of registered external loggers. Use the `copy_config_to_registered_logger` method to do this.
 
@@ -604,7 +604,28 @@ By default all registered loggers will be modified. You can change this behavior
 ---8<-- "examples/logger/src/cloning_logger_config.py"
 ```
 
-**What's the difference between `append_keys` and `extra`?**
+### How can I add standard library logging attributes to a log record?
+
+The Python standard library log records contains a [large set of atttributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank"}, however only a few are included in Powertools Logger log record by default.
+
+You can include any of these logging attributes as key value arguments (`kwargs`) when instantiating `Logger` or `LambdaPowertoolsFormatter`.
+
+You can also add them later anywhere in your code with `append_keys`, or remove them with `remove_keys` methods.
+
+=== "collect.py"
+
+    ```python hl_lines="3 8 10"
+    ---8<-- "examples/logger/src/append_and_remove_keys.py"
+    ```
+=== "Example CloudWatch Logs excerpt"
+
+    ```json hl_lines="6 15-16"
+    ---8<-- "examples/logger/src/append_and_remove_keys.json"
+    ```
+
+For log records originating from Powertools Logger, the `name` attribute will be the same as `service`, for log records coming from standard library logger, it will be the name of the logger (i.e. what was used as name argument to `logging.getLogger`).
+
+### What's the difference between `append_keys` and `extra`?
 
 Keys added with `append_keys` will persist across multiple log messages while keys added via `extra` will only be available in a given log message operation.
 
@@ -622,6 +643,6 @@ Here's an example where we persist `payment_id` not `request_id`. Note that `pay
     ---8<-- "examples/logger/src/append_keys_vs_extra_output.json"
     ```
 
-**How do I aggregate and search Powertools logs across accounts?**
+### How do I aggregate and search Powertools logs across accounts?
 
 As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task. Please refer to this [discussion for more details](https://github.com/awslabs/aws-lambda-powertools-python/issues/460)
