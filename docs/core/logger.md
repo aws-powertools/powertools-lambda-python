@@ -594,7 +594,7 @@ for the given name and level to the logging module. By default, this logs all bo
 ---8<-- "examples/logger/src/enabling_boto_logging.py"
 ```
 
-**How can I enable powertools logging for imported libraries?**
+**How can I enable Powertools logging for imported libraries?**
 
 You can copy the Logger setup to all or sub-sets of registered external loggers. Use the `copy_config_to_registered_logger` method to do this.
 
@@ -606,7 +606,7 @@ By default all registered loggers will be modified. You can change this behavior
 
 **How can I add standard library logging attributes to a log record?**
 
-The Python standard library log records contains a [large set of atttributes](https://docs.python.org/3/library/logging.html#logrecord-attributes), however only a few are included in the powertools log record by default.
+The Python standard library log records contains a [large set of atttributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank"}, however only a few are included in Powertools Logger log record by default.
 
 If you need to add additional records, these can be included as `kwargs` to `Logger`, or to `LambdaPowertoolsFormatter` when they are being instantiated, or to managed later with the `append_keys` or `remove_keys` methods.
 
@@ -621,7 +621,7 @@ If you need to add additional records, these can be included as `kwargs` to `Log
     ---8<-- "examples/logger/src/append_and_remove_keys.json"
     ```
 
-For log records originating from powertools `Logger`, the `name` attribute will be the same as `service`, for log records coming from standard library logger, it will be the name of the logger (i.e. what was used as name argument to `logging.getLogger`).
+For log records originating from Powertools `Logger`, the `name` attribute will be the same as `service`, for log records coming from standard library logger, it will be the name of the logger (i.e. what was used as name argument to `logging.getLogger`).
 
 **What's the difference between `append_keys` and `extra`?**
 
