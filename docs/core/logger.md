@@ -604,6 +604,25 @@ By default all registered loggers will be modified. You can change this behavior
 ---8<-- "examples/logger/src/cloning_logger_config.py"
 ```
 
+**How can I add standard library logging attributes to a log record?**
+
+The Python standard library log records contains a [large set of atttributes](https://docs.python.org/3/library/logging.html#logrecord-attributes), however only a few are included in the powertools log record by default.
+
+If you need to add additional records, these can be included as `kwargs` to `Logger`, or to `LambdaPowertoolsFormatter` when they are being instantiated, or to managed later with the `append_keys` or `remove_keys` methods.
+
+=== "collect.py"
+
+    ```python hl_lines="3 8 10"
+    ---8<-- "examples/logger/src/append_and_remove_keys.py"
+    ```
+=== "Example CloudWatch Logs excerpt"
+
+    ```json hl_lines="6 15-16"
+    ---8<-- "examples/logger/src/append_and_remove_keys.json"
+    ```
+
+For log records originating from powertools `Logger`, the `name` attribute will be the same as `service`, for log records coming from standard library logger, it will be the name of the logger (i.e. what was used as name argument to `logging.getLogger`).
+
 **What's the difference between `append_keys` and `extra`?**
 
 Keys added with `append_keys` will persist across multiple log messages while keys added via `extra` will only be available in a given log message operation.
