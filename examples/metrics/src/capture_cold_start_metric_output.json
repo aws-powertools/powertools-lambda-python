@@ -1,0 +1,27 @@
+{
+    "_aws": {
+        "Timestamp": 1656687493142,
+        "CloudWatchMetrics": [
+            {
+                "Namespace": "ServerlessAirline",
+                "Dimensions": [
+                    [
+                        "function_name",
+                        "service"
+                    ]
+                ],
+                "Metrics": [
+                    {
+                        "Name": "ColdStart",
+                        "Unit": "Count"
+                    }
+                ]
+            }
+        ]
+    },
+    "function_name": "test",
+    "service": "booking",
+    "ColdStart": [
+        1.0
+    ]
+}
