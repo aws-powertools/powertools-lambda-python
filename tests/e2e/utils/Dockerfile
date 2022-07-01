@@ -1,3 +1,5 @@
+# Image used by CDK's LayerVersion construct to create Lambda Layer with Powertools 
+# library code. 
 # The correct AWS SAM build image based on the runtime of the function will be
 # passed as build arg. The default allows to do `docker build .` when testing.
 ARG IMAGE=public.ecr.aws/sam/build-python3.7
