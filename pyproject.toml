@@ -138,7 +138,6 @@ addopts = "-ra -vv"
 testpaths = "./tests"
 markers = [
     "perf: marks perf tests to be deselected (deselect with '-m \"not perf\"')",
-    "e2e: marks e2e tests to be deselected (deselect with '-m \"not e2e\"')",
 ]
 
 [build-system]

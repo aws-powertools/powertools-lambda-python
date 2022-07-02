@@ -14,13 +14,12 @@ def config() -> conftest.LambdaConfig:
         "parameters": {},
         "environment_variables": {
             "POWERTOOLS_METRICS_NAMESPACE": "powertools-e2e-metric",
-            "POWERTOOLS_SERVICE_NAME": f"test-powertools-service",
+            "POWERTOOLS_SERVICE_NAME": "test-powertools-service",
             "METRIC_NAME": f"business-metric-{uuid.uuid4()}",
         },
     }
 
 
-@pytest.mark.e2e
 def test_basic_lambda_metric_visible(execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig):
     # GIVEN
     start_date = execute_lambda.get_lambda_execution_time()

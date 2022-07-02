@@ -55,10 +55,10 @@ class InfrastructureStack(InfrastructureStackInterface):
                     command=[
                         "bash",
                         "-c",
-                        f"poetry export --with-credentials --format requirements.txt --output /tmp/requirements.txt &&\
+                        rf"poetry export --with-credentials --format requirements.txt --output /tmp/requirements.txt &&\
                             pip install -r /tmp/requirements.txt -t {output_dir} &&\
                             cp -R {input_dir} {output_dir} &&\
-                            find {output_dir}/ -regex '^.*__pycache__.*' -delete",
+                            find {output_dir}/ -type d -name __pycache__ -prune -exec rm -rf {{}} \;",
                     ],
                 ),
             ),

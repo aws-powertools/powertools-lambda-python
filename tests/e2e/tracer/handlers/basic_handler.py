@@ -13,13 +13,11 @@ ANNOTATION_ASYNC_VALUE = os.environ["ANNOTATION_ASYNC_VALUE"]
 
 @tracer.capture_lambda_handler
 def lambda_handler(event: dict, context: LambdaContext):
-    # tracer.put_annotation(key=ANNOTATION_KEY, value=ANNOTATION_VALUE)
     tracer.put_metadata(key=ANNOTATION_KEY, value=ANNOTATION_VALUE)
     return asyncio.run(collect_payment())
 
 
 @tracer.capture_method
 async def collect_payment() -> str:
-    # tracer.put_annotation(key=ANNOTATION_KEY, value=ANNOTATION_ASYNC_VALUE)
     tracer.put_metadata(key=ANNOTATION_KEY, value=ANNOTATION_ASYNC_VALUE)
     return "success"

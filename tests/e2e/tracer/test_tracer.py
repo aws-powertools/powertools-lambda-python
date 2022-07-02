@@ -1,5 +1,4 @@
 import datetime
-import json
 import uuid
 
 import boto3
@@ -21,18 +20,18 @@ def config():
     }
 
 
-@pytest.mark.e2e
 def test_basic_lambda_async_trace_visible(execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig):
     # GIVEN
     lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
     start_date = execute_lambda.get_lambda_execution_time()
     end_date = start_date + datetime.timedelta(minutes=5)
+    trace_filter_exporession = f'service("{lambda_arn.split(":")[-1]}")'
 
     # WHEN
     trace = helpers.get_traces(
         start_date=start_date,
         end_date=end_date,
-        lambda_function_name=lambda_arn.split(":")[-1],
+        filter_expression=trace_filter_exporession,
         xray_client=boto3.client("xray"),
     )
 

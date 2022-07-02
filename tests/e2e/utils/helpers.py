@@ -55,33 +55,27 @@ def get_logs(lambda_function_name: str, log_client: CloudWatchClient, start_time
 
 
 @lru_cache(maxsize=10, typed=False)
-@retry(ValueError, delay=1, jitter=1, tries=10)
+@retry(ValueError, delay=1, jitter=1, tries=20)
 def get_metrics(
     namespace: str,
     cw_client: CloudWatchClient,
     start_date: datetime,
-    end_date: datetime,
     metric_name: str,
     service_name: str,
+    end_date: Optional[datetime] = None,
 ):
     response = cw_client.get_metric_data(
         MetricDataQueries=[
             {
                 "Id": "m1",
-                "MetricStat": {
-                    "Metric": {
-                        "Namespace": namespace,
-                        "MetricName": metric_name,
-                        "Dimensions": [{"Name": "service", "Value": service_name}],
-                    },
-                    "Period": 600,
-                    "Stat": "Maximum",
-                },
+                "Expression": f'SELECT MAX("{metric_name}") from SCHEMA("{namespace}",service) \
+                    where service=\'{service_name}\'',
                 "ReturnData": True,
+                "Period": 600,
             },
         ],
         StartTime=start_date,
-        EndTime=end_date,
+        EndTime=end_date if end_date else datetime.utcnow(),
     )
     result = response["MetricDataResults"][0]
     if not result["Values"]:
@@ -90,14 +84,14 @@ def get_metrics(
 
 
 @retry(ValueError, delay=1, jitter=1, tries=10)
-def get_traces(lambda_function_name: str, xray_client: XRayClient, start_date: datetime, end_date: datetime) -> Dict:
+def get_traces(filter_expression: str, xray_client: XRayClient, start_date: datetime, end_date: datetime) -> Dict:
     paginator = xray_client.get_paginator("get_trace_summaries")
     response_iterator = paginator.paginate(
         StartTime=start_date,
         EndTime=end_date,
         TimeRangeType="Event",
         Sampling=False,
-        FilterExpression=f'service("{lambda_function_name}")',
+        FilterExpression=filter_expression,
     )
 
     traces = [trace["TraceSummaries"][0]["Id"] for trace in response_iterator if trace["TraceSummaries"]]

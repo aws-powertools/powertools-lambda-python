@@ -17,7 +17,6 @@ def config() -> conftest.LambdaConfig:
     }
 
 
-@pytest.mark.e2e
 def test_basic_lambda_logs_visible(execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig):
     # GIVEN
     lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
@@ -37,7 +36,6 @@ def test_basic_lambda_logs_visible(execute_lambda: conftest.InfrastructureOutput
     )
 
 
-@pytest.mark.e2e
 def test_basic_lambda_no_debug_logs_visible(
     execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig
 ):
@@ -57,7 +55,6 @@ def test_basic_lambda_no_debug_logs_visible(
     )
 
 
-@pytest.mark.e2e
 def test_basic_lambda_contextual_data_logged(execute_lambda: conftest.InfrastructureOutput):
     # GIVEN
     required_keys = (
@@ -82,7 +79,6 @@ def test_basic_lambda_contextual_data_logged(execute_lambda: conftest.Infrastruc
     assert all(keys in logs.dict(exclude_unset=True) for logs in filtered_logs for keys in required_keys)
 
 
-@pytest.mark.e2e
 def test_basic_lambda_additional_key_persistence_basic_lambda(
     execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig
 ):
@@ -105,7 +101,6 @@ def test_basic_lambda_additional_key_persistence_basic_lambda(
     )
 
 
-@pytest.mark.e2e
 def test_basic_lambda_empty_event_logged(execute_lambda: conftest.InfrastructureOutput):
 
     # GIVEN
@@ -122,7 +117,6 @@ def test_basic_lambda_empty_event_logged(execute_lambda: conftest.Infrastructure
     assert any(log.message == {} for log in filtered_logs)
 
 
-@pytest.mark.e2e
 def test_no_context_lambda_contextual_data_not_logged(execute_lambda: conftest.InfrastructureOutput):
 
     # GIVEN
@@ -147,7 +141,6 @@ def test_no_context_lambda_contextual_data_not_logged(execute_lambda: conftest.I
     assert not any(keys in logs.dict(exclude_unset=True) for logs in filtered_logs for keys in required_missing_keys)
 
 
-@pytest.mark.e2e
 def test_no_context_lambda_event_not_logged(execute_lambda: conftest.InfrastructureOutput):
 
     # GIVEN
