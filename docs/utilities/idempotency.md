@@ -350,7 +350,6 @@ Imagine the function executes successfully, but the client never receives the re
     }
     ```
 
-
 ### Idempotency request flow
 
 This sequence diagram shows an example flow of what happens in the payment scenario:
@@ -366,7 +365,6 @@ The client was successful in receiving the result after the retry. Since the Lam
 
 If you are using the `idempotent` decorator on your Lambda handler, any unhandled exceptions that are raised during the code execution will cause **the record in the persistence layer to be deleted**.
 This means that new invocations will execute your code again despite having the same payload. If you don't want the record to be deleted, you need to catch exceptions within the idempotent function and return a successful response.
-
 
 ![Idempotent sequence exception](../media/idempotent_sequence_exception.png)
 
@@ -886,12 +884,12 @@ def lambda_handler(event, context):
 ???+ tip "Tip: JMESPath Powertools functions are also available"
     Built-in functions known in the validation utility like `powertools_json`, `powertools_base64`, `powertools_base64_gzip` are also available to use in this utility.
 
-
 ## Testing your code
 
 The idempotency utility provides several routes to test your code.
 
 ### Disabling the idempotency utility
+
 When testing your code, you may wish to disable the idempotency logic altogether and focus on testing your business logic. To do this, you can set the environment variable `POWERTOOLS_IDEMPOTENCY_DISABLED`
 with a truthy value. If you prefer setting this for specific tests, and are using Pytest, you can use [monkeypatch](https://docs.pytest.org/en/latest/monkeypatch.html) fixture:
 

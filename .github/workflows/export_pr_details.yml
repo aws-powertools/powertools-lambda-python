@@ -41,7 +41,7 @@ jobs:
         uses: actions/github-script@v6
         # For security, we only download artifacts tied to the successful PR recording workflow
         with:
-          github-token: ${{ inputs.token }}
+          github-token: ${{ secrets.token }}
           script: |
             const fs = require('fs');
 

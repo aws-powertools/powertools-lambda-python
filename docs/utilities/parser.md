@@ -152,20 +152,20 @@ def my_function():
 
 Parser comes with the following built-in models:
 
-| Model name                        | Description                                                        |
-| --------------------------------- | ------------------------------------------------------------------ |
-| **DynamoDBStreamModel**           | Lambda Event Source payload for Amazon DynamoDB Streams            |
-| **EventBridgeModel**              | Lambda Event Source payload for Amazon EventBridge                 |
-| **SqsModel**                      | Lambda Event Source payload for Amazon SQS                         |
-| **AlbModel**                      | Lambda Event Source payload for Amazon Application Load Balancer   |
-| **CloudwatchLogsModel**           | Lambda Event Source payload for Amazon CloudWatch Logs             |
-| **S3Model**                       | Lambda Event Source payload for Amazon S3                          |
-| **S3ObjectLambdaEvent**           | Lambda Event Source payload for Amazon S3 Object Lambda            |
-| **KinesisDataStreamModel**        | Lambda Event Source payload for Amazon Kinesis Data Streams        |
-| **SesModel**                      | Lambda Event Source payload for Amazon Simple Email Service        |
-| **SnsModel**                      | Lambda Event Source payload for Amazon Simple Notification Service |
-| **APIGatewayProxyEventModel**     | Lambda Event Source payload for Amazon API Gateway                 |
-| **APIGatewayProxyEventV2Model**   | Lambda Event Source payload for Amazon API Gateway v2 payload      |
+| Model name                      | Description                                                        |
+| ------------------------------- | ------------------------------------------------------------------ |
+| **DynamoDBStreamModel**         | Lambda Event Source payload for Amazon DynamoDB Streams            |
+| **EventBridgeModel**            | Lambda Event Source payload for Amazon EventBridge                 |
+| **SqsModel**                    | Lambda Event Source payload for Amazon SQS                         |
+| **AlbModel**                    | Lambda Event Source payload for Amazon Application Load Balancer   |
+| **CloudwatchLogsModel**         | Lambda Event Source payload for Amazon CloudWatch Logs             |
+| **S3Model**                     | Lambda Event Source payload for Amazon S3                          |
+| **S3ObjectLambdaEvent**         | Lambda Event Source payload for Amazon S3 Object Lambda            |
+| **KinesisDataStreamModel**      | Lambda Event Source payload for Amazon Kinesis Data Streams        |
+| **SesModel**                    | Lambda Event Source payload for Amazon Simple Email Service        |
+| **SnsModel**                    | Lambda Event Source payload for Amazon Simple Notification Service |
+| **APIGatewayProxyEventModel**   | Lambda Event Source payload for Amazon API Gateway                 |
+| **APIGatewayProxyEventV2Model** | Lambda Event Source payload for Amazon API Gateway v2 payload      |
 
 ### extending built-in models
 
@@ -173,7 +173,6 @@ You can extend them to include your own models, and yet have all other known fie
 
 ???+ tip
     For Mypy users, we only allow type override for fields where payload is injected e.g. `detail`, `body`, etc.
-
 
 ```python hl_lines="16-17 28 41" title="Extending EventBridge model as an example"
 from aws_lambda_powertools.utilities.parser import parse, BaseModel
@@ -470,7 +469,10 @@ parse(model=UserModel, event=payload)
 ???+ tip "Tip: Looking to auto-generate models from JSON, YAML, JSON Schemas, OpenApi, etc?"
     Use Koudai Aono's [data model code generation tool for Pydantic](https://github.com/koxudaxi/datamodel-code-generator)
 
-There are number of advanced use cases well documented in Pydantic's doc such as creating [immutable models](https://pydantic-docs.helpmanual.io/usage/models/#faux-immutability), [declaring fields with dynamic values](https://pydantic-docs.helpmanual.io/usage/models/#field-with-dynamic-default-value)) e.g. UUID, and [helper functions to parse models from files, str](https://pydantic-docs.helpmanual.io/usage/models/#helper-functions), etc.
+There are number of advanced use cases well documented in Pydantic's doc such as creating [immutable models](https://pydantic-docs.helpmanual.io/usage/models/#faux-immutability), [declaring fields with dynamic values](https://pydantic-docs.helpmanual.io/usage/models/#field-with-dynamic-default-value).
+
+???+ tip "Pydantic helper functions"
+	Pydantic also offers [functions](https://pydantic-docs.helpmanual.io/usage/models/#helper-functions) to parse models from files, dicts, string, etc.
 
 Two possible unknown use cases are Models and exception' serialization. Models have methods to [export them](https://pydantic-docs.helpmanual.io/usage/exporting_models/) as `dict`, `JSON`, `JSON Schema`, and Validation exceptions can be exported as JSON.
 
@@ -539,7 +541,7 @@ Artillery load test sample against a [hello world sample](https://github.com/aws
 ???+ info
     **Uncompressed package size**: 55M, **p99**: 180.3ms
 
-```
+```javascript
 Summary report @ 14:36:07(+0200) 2020-10-23
 Scenarios launched:  10
 Scenarios completed: 10
@@ -562,7 +564,7 @@ Codes:
 ???+ info
     **Uncompressed package size**: 128M, **p99**: 193.1ms
 
-```
+```javascript
 Summary report @ 14:29:23(+0200) 2020-10-23
 Scenarios launched:  10
 Scenarios completed: 10

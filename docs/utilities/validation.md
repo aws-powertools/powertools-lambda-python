@@ -134,7 +134,9 @@ Here is a sample custom EventBridge event, where we only validate what's inside 
     --8<-- "docs/shared/validation_basic_jsonschema.py"
     ```
 
-This is quite powerful because you can use JMESPath Query language to extract records from [arrays, slice and dice](https://jmespath.org/tutorial.html#list-and-slice-projections), to [pipe expressions](https://jmespath.org/tutorial.html#pipe-expressions) and [function expressions](https://jmespath.org/tutorial.html#functions), where you'd extract what you need before validating the actual payload.
+This is quite powerful because you can use JMESPath Query language to extract records from [arrays](https://jmespath.org/tutorial.html#list-and-slice-projections), combine [pipe](https://jmespath.org/tutorial.html#pipe-expressions) and [function expressions](https://jmespath.org/tutorial.html#functions).
+
+When combined, these features allow you to extract what you need before validating the actual payload.
 
 ### Built-in envelopes
 
@@ -166,16 +168,16 @@ This utility comes with built-in envelopes to easily extract the payload from po
 
 Here is a handy table with built-in envelopes along with their JMESPath expressions in case you want to build your own.
 
-Envelope name | JMESPath expression
-------------------------------------------------- | ---------------------------------------------------------------------------------
-**API_GATEWAY_REST** | "powertools_json(body)"
-**API_GATEWAY_HTTP** | "powertools_json(body)"
-**SQS** | "Records[*].powertools_json(body)"
-**SNS** | "Records[0].Sns.Message | powertools_json(@)"
-**EVENTBRIDGE** | "detail"
-**CLOUDWATCH_EVENTS_SCHEDULED** | "detail"
-**KINESIS_DATA_STREAM** | "Records[*].kinesis.powertools_json(powertools_base64(data))"
-**CLOUDWATCH_LOGS** | "awslogs.powertools_base64_gzip(data) | powertools_json(@).logEvents[*]"
+| Envelope name                   | JMESPath expression                                           |
+| ------------------------------- | ------------------------------------------------------------- |
+| **API_GATEWAY_REST**            | "powertools_json(body)"                                       |
+| **API_GATEWAY_HTTP**            | "powertools_json(body)"                                       |
+| **SQS**                         | "Records[*].powertools_json(body)"                            |
+| **SNS**                         | "Records[0].Sns.Message                                       | powertools_json(@)"              |
+| **EVENTBRIDGE**                 | "detail"                                                      |
+| **CLOUDWATCH_EVENTS_SCHEDULED** | "detail"                                                      |
+| **KINESIS_DATA_STREAM**         | "Records[*].kinesis.powertools_json(powertools_base64(data))" |
+| **CLOUDWATCH_LOGS**             | "awslogs.powertools_base64_gzip(data)                         | powertools_json(@).logEvents[*]" |
 
 ## Advanced
 

@@ -770,7 +770,6 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
         app.resolve(event, context)
     ```
 
-
 ## Testing your code
 
 You can test your resolvers by passing a mocked or actual AppSync Lambda event that you're expecting.

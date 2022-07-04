@@ -22,7 +22,7 @@ tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>
 
 [[package]]
 name = "aws-xray-sdk"
-version = "2.9.0"
+version = "2.10.0"
 description = "The AWS X-Ray SDK for Python (the SDK) enables Python developers to record and emit information from within their applications to the AWS X-Ray service."
 category = "main"
 optional = false
@@ -30,7 +30,6 @@ python-versions = "*"
 
 [package.dependencies]
 botocore = ">=1.11.3"
-future = "*"
 wrapt = "*"
 
 [[package]]
@@ -243,7 +242,7 @@ toml = "*"
 
 [[package]]
 name = "flake8-bugbear"
-version = "22.4.25"
+version = "22.7.1"
 description = "A plugin for flake8 finding likely bugs and design problems in your program. Contains warnings that don't belong in pyflakes and pycodestyle."
 category = "dev"
 optional = false
@@ -344,7 +343,7 @@ python-versions = "*"
 name = "future"
 version = "0.18.2"
 description = "Clean single-source support for Python 3 and 2"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -627,8 +626,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-dynamodb"
-version = "1.24.0"
-description = "Type annotations for boto3.DynamoDB 1.24.0 service generated with mypy-boto3-builder 7.6.1"
+version = "1.24.12"
+description = "Type annotations for boto3.DynamoDB 1.24.12 service generated with mypy-boto3-builder 7.7.1"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
@@ -1126,7 +1125,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "08794b1c8c45b03b179cde28a8102eb10221bc556f12a76ae1fbf8ce5ce81c7f"
+content-hash = "3f3f95ab1a8cf1351639687362e20bd26b784330d309f49a2f5a307682fe5879"
 
 [metadata.files]
 atomicwrites = [
@@ -1138,8 +1137,8 @@ attrs = [
     {file = "attrs-21.2.0.tar.gz", hash = "sha256:ef6aaac3ca6cd92904cdd0d83f629a15f18053ec84e6432106f7a4d04ae4f5fb"},
 ]
 aws-xray-sdk = [
-    {file = "aws-xray-sdk-2.9.0.tar.gz", hash = "sha256:b0cd972db218d4d8f7b53ad806fc6184626b924c4997ae58fc9f2a8cd1281568"},
-    {file = "aws_xray_sdk-2.9.0-py2.py3-none-any.whl", hash = "sha256:98216b3ac8281b51b59a8703f8ec561c460807d9d0679838f5c0179d381d7e58"},
+    {file = "aws-xray-sdk-2.10.0.tar.gz", hash = "sha256:9b14924fd0628cf92936055864655354003f0b1acc3e1c3ffde6403d0799dd7a"},
+    {file = "aws_xray_sdk-2.10.0-py2.py3-none-any.whl", hash = "sha256:7551e81a796e1a5471ebe84844c40e8edf7c218db33506d046fec61f7495eda4"},
 ]
 bandit = [
     {file = "bandit-1.7.1-py3-none-any.whl", hash = "sha256:f5acd838e59c038a159b5c621cf0f8270b279e884eadd7b782d7491c02add0d4"},
@@ -1250,8 +1249,8 @@ flake8-black = [
     {file = "flake8_black-0.2.3-py3-none-any.whl", hash = "sha256:cc080ba5b3773b69ba102b6617a00cc4ecbad8914109690cfda4d565ea435d96"},
 ]
 flake8-bugbear = [
-    {file = "flake8-bugbear-22.4.25.tar.gz", hash = "sha256:f7c080563fca75ee6b205d06b181ecba22b802babb96b0b084cc7743d6908a55"},
-    {file = "flake8_bugbear-22.4.25-py3-none-any.whl", hash = "sha256:ec374101cddf65bd7a96d393847d74e58d3b98669dbf9768344c39b6290e8bd6"},
+    {file = "flake8-bugbear-22.7.1.tar.gz", hash = "sha256:e450976a07e4f9d6c043d4f72b17ec1baf717fe37f7997009c8ae58064f88305"},
+    {file = "flake8_bugbear-22.7.1-py3-none-any.whl", hash = "sha256:db5d7a831ef4412a224b26c708967ff816818cabae415e76b8c58df156c4b8e5"},
 ]
 flake8-builtins = [
     {file = "flake8-builtins-1.5.3.tar.gz", hash = "sha256:09998853b2405e98e61d2ff3027c47033adbdc17f9fe44ca58443d876eb00f3b"},
@@ -1459,8 +1458,8 @@ mypy-boto3-appconfig = [
     {file = "mypy_boto3_appconfig-1.24.0-py3-none-any.whl", hash = "sha256:ca53b0b9606f13257dd0feb800d36531f2eba54f46bd9db7765f69baf9583485"},
 ]
 mypy-boto3-dynamodb = [
-    {file = "mypy-boto3-dynamodb-1.24.0.tar.gz", hash = "sha256:a7de204a173dffbee972357a69bf5e59fda169a587017e0d3c5446676342aa2e"},
-    {file = "mypy_boto3_dynamodb-1.24.0-py3-none-any.whl", hash = "sha256:866f0f8ae44e266ea051f57179bf40132d8e89e6fa23abab6e71421b3c0cd794"},
+    {file = "mypy-boto3-dynamodb-1.24.12.tar.gz", hash = "sha256:4fc6f0f84988ae3d307a43ec31930483828b199f1179cb801238c16cd8be5901"},
+    {file = "mypy_boto3_dynamodb-1.24.12-py3-none-any.whl", hash = "sha256:7ad9aa9c23a9f90d0aa0018df3a975e6c1da32f76c11aef60bf1a49cfca840cc"},
 ]
 mypy-boto3-secretsmanager = [
     {file = "mypy-boto3-secretsmanager-1.24.11.post3.tar.gz", hash = "sha256:f153b3f5ff2c65664a906fb2c97a6598a57da9f1da77679dbaf541051dcff36e"},

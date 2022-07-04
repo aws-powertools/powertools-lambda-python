@@ -10,11 +10,17 @@ dev:
 	pre-commit install
 
 format:
-	poetry run isort aws_lambda_powertools tests
-	poetry run black aws_lambda_powertools tests
+	poetry run isort aws_lambda_powertools tests examples
+	poetry run black aws_lambda_powertools tests examples
 
 lint: format
-	poetry run flake8 aws_lambda_powertools/* tests/*
+	poetry run flake8 aws_lambda_powertools tests examples
+
+lint-docs:
+	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli "docs"
+
+lint-docs-fix:
+	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli --fix "docs"
 
 test:
 	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=xml
@@ -29,7 +35,7 @@ coverage-html:
 pre-commit:
 	pre-commit run --show-diff-on-failure
 
-pr: lint mypy pre-commit test security-baseline complexity-baseline
+pr: lint lint-docs mypy pre-commit test security-baseline complexity-baseline
 
 build: pr
 	poetry build
