@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # CDK Powertools layer
 
 This is a CDK project to build and deploy AWS Lambda Powertools layer to multiple commercial regions.
