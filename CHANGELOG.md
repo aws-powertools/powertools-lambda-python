@@ -1,8 +1,50 @@
+<!-- markdownlint-disable -->
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format for changes and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## 1.26.3 - 2022-07-04
+
+### Bug Fixes
+
+* **ci:** improve msg visibility on closed issues
+* **ci:** disable merged_pr workflow
+* **ci:** merged_pr add issues write access
+* **ci:** quote prBody GH expr on_opened_pr
+* **ci:** remove utf-8 body in octokit body req
+* **ci:** reusable workflow secrets param
+* **logger:** support additional args for handlers when injecting lambda context decorator ([#1276](https://github.com/awslabs/aws-lambda-powertools-python/issues/1276))
+
+### Documentation
+
+* **lint:** add markdownlint rules and automation ([#1256](https://github.com/awslabs/aws-lambda-powertools-python/issues/1256))
+* **logger:** document enriching logs with logrecord attributes ([#1271](https://github.com/awslabs/aws-lambda-powertools-python/issues/1271))
+* **logger:** snippets split, improved, and lint ([#1262](https://github.com/awslabs/aws-lambda-powertools-python/issues/1262))
+* **metrics:** snippets split, improved, and lint ([#1272](https://github.com/awslabs/aws-lambda-powertools-python/issues/1272))
+* **tracer:** snippets split, improved, and lint ([#1261](https://github.com/awslabs/aws-lambda-powertools-python/issues/1261))
+* **tracer:** split and lint code snippets ([#1260](https://github.com/awslabs/aws-lambda-powertools-python/issues/1260))
+
+### Maintenance
+
+* add sam build gitignore
+* **documentation**: move to approach B for multiple IaC
+* **ci:** improve wording on closed issues action
+* **ci:** deactivate on_merged_pr workflow
+* **ci:** reactivate on_merged_pr workflow
+* **deps:** bump dependabot/fetch-metadata from 1.1.1 to 1.3.2 ([#1269](https://github.com/awslabs/aws-lambda-powertools-python/issues/1269))
+* **deps:** bump aws-xray-sdk from 2.9.0 to 2.10.0 ([#1270](https://github.com/awslabs/aws-lambda-powertools-python/issues/1270))
+* **deps:** bump dependabot/fetch-metadata from 1.3.2 to 1.3.3 ([#1273](https://github.com/awslabs/aws-lambda-powertools-python/issues/1273))
+* **deps-dev:** bump flake8-bugbear from 22.6.22 to 22.7.1 ([#1274](https://github.com/awslabs/aws-lambda-powertools-python/issues/1274))
+* **deps-dev:** bump flake8-bugbear from 22.4.25 to 22.6.22 ([#1258](https://github.com/awslabs/aws-lambda-powertools-python/issues/1258))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.24.0 to 1.24.12 ([#1255](https://github.com/awslabs/aws-lambda-powertools-python/issues/1255))
+* **deps-dev:** bump mypy-boto3-secretsmanager ([#1252](https://github.com/awslabs/aws-lambda-powertools-python/issues/1252))
+* **governance:** fix on_merged_pr workflow syntax
+* **governance:** warn message on closed issues
+* **layers:** bump to 21 for 1.26.2
+* **test-perf:** use pytest-benchmark to improve reliability ([#1250](https://github.com/awslabs/aws-lambda-powertools-python/issues/1250))
 
 ## 1.26.2 - 2022-06-16
 
@@ -32,6 +74,7 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 * **metrics:** revert dimensions test before splitting ([#1243](https://github.com/awslabs/aws-lambda-powertools-python/issues/1243))
 
 ## 1.26.1 - 2022-06-07
+
 ### Bug Fixes
 
 * **metrics:** raise SchemaValidationError for >8 metric dimensions ([#1240](https://github.com/awslabs/aws-lambda-powertools-python/issues/1240))
@@ -46,7 +89,6 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 
 * **deps-dev:** bump mypy from 0.950 to 0.960 ([#1224](https://github.com/awslabs/aws-lambda-powertools-python/issues/1224))
 * **deps-dev:** bump mypy-boto3-secretsmanager from 1.23.0.post1 to 1.23.8 ([#1225](https://github.com/awslabs/aws-lambda-powertools-python/issues/1225))
-
 
 ## 1.26.0 - 2022-05-20
 
@@ -115,6 +157,7 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) fo
 ### Bug Fixes
 
 * **deps**: correct py36 marker for jmespath
+
 ## 1.25.8 - 2022-04-21
 
 ### Bug Fixes
@@ -365,6 +408,7 @@ Tenet update! We've updated **Idiomatic** tenet to **Progressive** to reflect th
 
 * BEFORE: **Idiomatic**. Utilities follow programming language idioms and language-specific best practices.
 * AFTER: **Progressive**. Utilities are designed to be incrementally adoptable for customers at any stage of their Serverless journey. They follow language idioms and their community’s common practices.
+
 ### Bug Fixes
 
 * **ci:** change supported python version from 3.6.1 to 3.6.2, bump black ([#807](https://github.com/awslabs/aws-lambda-powertools-python/issues/807))
@@ -389,6 +433,7 @@ Tenet update! We've updated **Idiomatic** tenet to **Progressive** to reflect th
 * **idempotency:** add support for DynamoDB composite keys ([#808](https://github.com/awslabs/aws-lambda-powertools-python/issues/808))
 * **tenets:** update Idiomatic tenet to Progressive ([#823](https://github.com/awslabs/aws-lambda-powertools-python/issues/823))
 * **docs:** remove Lambda Layer version tag
+
 ### Features
 
 * **apigateway:** add Router to allow large routing composition ([#645](https://github.com/awslabs/aws-lambda-powertools-python/issues/645))
@@ -424,6 +469,7 @@ Tenet update! We've updated **Idiomatic** tenet to **Progressive** to reflect th
 ### Documentation
 
 * add new public layer ARNs ([#746](https://github.com/awslabs/aws-lambda-powertools-python/issues/746))
+
 ### Maintenance
 
 * ignore constants in test cov ([#745](https://github.com/awslabs/aws-lambda-powertools-python/issues/745))
@@ -495,6 +541,7 @@ Tenet update! We've updated **Idiomatic** tenet to **Progressive** to reflect th
 * **deps-dev:** bump pytest from 6.2.4 to 6.2.5 ([#662](https://github.com/awslabs/aws-lambda-powertools-python/issues/662))
 * **deps-dev:** bump mike from 0.6.0 to 1.0.1 ([#453](https://github.com/awslabs/aws-lambda-powertools-python/issues/453))
 * **license:** add third party license to pyproject.toml ([#641](https://github.com/awslabs/aws-lambda-powertools-python/issues/641))
+
 ## 1.20.2 - 2021-09-02
 
 ### Bug Fixes
@@ -587,6 +634,7 @@ Tenet update! We've updated **Idiomatic** tenet to **Progressive** to reflect th
 * **feature-flags:** fix SAM infra, convert CDK to Python
 * **feature-flags:** fix sample feature name in evaluate method
 * **feature-flags:** add guidance when to use vs env vars vs parameters
+
 ### Features
 
 * **api-gateway:** add support for custom serializer ([#568](https://github.com/awslabs/aws-lambda-powertools-python/issues/568))
@@ -607,6 +655,7 @@ Tenet update! We've updated **Idiomatic** tenet to **Progressive** to reflect th
 * **deps-dev:** bump mkdocs-material from 7.2.0 to 7.2.1 ([#566](https://github.com/awslabs/aws-lambda-powertools-python/issues/566))
 * **deps-dev:** bump mkdocs-material from 7.1.11 to 7.2.0 ([#551](https://github.com/awslabs/aws-lambda-powertools-python/issues/551))
 * **deps-dev:** bump flake8-black from 0.2.1 to 0.2.3 ([#541](https://github.com/awslabs/aws-lambda-powertools-python/issues/541))
+
 ## 1.18.1 - 2021-07-23
 
 ### Bug Fixes
@@ -713,9 +762,10 @@ Tenet update! We've updated **Idiomatic** tenet to **Progressive** to reflect th
 * **Parser**: Upgrade Pydantic to 1.8.2 due to CVE-2021-29510
 
 ## 1.16.0 - 2021-05-17
+
 ### Features
-- **data-classes(API Gateway, ALB):** New method to decode base64 encoded body ([#425](https://github.com/awslabs/aws-lambda-powertools-python/issues/425))
-- **data-classes(CodePipeline):** Support for CodePipeline job event and methods to handle artifacts more easily ([#416](https://github.com/awslabs/aws-lambda-powertools-python/issues/416))
+* **data-classes(API Gateway, ALB):** New method to decode base64 encoded body ([#425](https://github.com/awslabs/aws-lambda-powertools-python/issues/425))
+* **data-classes(CodePipeline):** Support for CodePipeline job event and methods to handle artifacts more easily ([#416](https://github.com/awslabs/aws-lambda-powertools-python/issues/416))
 
 ## 1.15.1 - 2021-05-13
 
@@ -789,6 +839,7 @@ Tenet update! We've updated **Idiomatic** tenet to **Progressive** to reflect th
 * **Idempotency**: Error handling for missing idempotency key and `save_in_progress` errors
 
 ## 1.11.0 - 2021-03-05
+
 ### Fixed
 
 * **Tracer**: Lazy loads X-Ray SDK to increase perf by 75% for those not instantiating Tracer
@@ -841,241 +892,266 @@ No changes. Bumped version to trigger new pipeline build for layer publishing.
 ## 1.10.0 - 2021-01-18
 
 ### Added
-- **Utilities**: Added support for AppConfig in Parameters utility
-- **Logger**: Added support for `extra` parameter to add additional root fields when logging messages
-- **Logger**: Added support to Pytest Live Log feat. via feature toggle `POWERTOOLS_LOG_DEDUPLICATION_DISABLED`
-- **Tracer**: Added support to disable auto-capturing response and exception as metadata
-- **Utilities**: Added support to handle custom string/integer formats in JSON Schema in Validator utility
-- **Install**: Added new Lambda Layer with all extra dependencies installed, available in Serverless Application Repository (SAR)
+* **Utilities**: Added support for AppConfig in Parameters utility
+* **Logger**: Added support for `extra` parameter to add additional root fields when logging messages
+* **Logger**: Added support to Pytest Live Log feat. via feature toggle `POWERTOOLS_LOG_DEDUPLICATION_DISABLED`
+* **Tracer**: Added support to disable auto-capturing response and exception as metadata
+* **Utilities**: Added support to handle custom string/integer formats in JSON Schema in Validator utility
+* **Install**: Added new Lambda Layer with all extra dependencies installed, available in Serverless Application Repository (SAR)
 
 ### Fixed
 
-- **Docs**: Added missing SNS parser model
-- **Docs**: Added new environment variables for toggling features in Logger and Tracer: `POWERTOOLS_LOG_DEDUPLICATION_DISABLED`, `POWERTOOLS_TRACER_CAPTURE_RESPONSE`, `POWERTOOLS_TRACER_CAPTURE_ERROR`
-- **Docs**: Fixed incorrect import for Cognito data classes in Event Sources utility
+* **Docs**: Added missing SNS parser model
+* **Docs**: Added new environment variables for toggling features in Logger and Tracer: `POWERTOOLS_LOG_DEDUPLICATION_DISABLED`, `POWERTOOLS_TRACER_CAPTURE_RESPONSE`, `POWERTOOLS_TRACER_CAPTURE_ERROR`
+* **Docs**: Fixed incorrect import for Cognito data classes in Event Sources utility
 
 ## 1.9.1 - 2020-12-21
 
 ### Fixed
-- **Logger**: Bugfix to prevent parent loggers with the same name being configured more than once
+* **Logger**: Bugfix to prevent parent loggers with the same name being configured more than once
 
 ### Added
-- **Docs**: Add clarification to Tracer docs for how `capture_method` decorator can cause function responses to be read and serialized.
-- **Utilities**: Added equality to ease testing Event source data classes
-- **Package**: Added `py.typed` for initial work needed for PEP 561 compliance
+* **Docs**: Add clarification to Tracer docs for how `capture_method` decorator can cause function responses to be read and serialized.
+* **Utilities**: Added equality to ease testing Event source data classes
+* **Package**: Added `py.typed` for initial work needed for PEP 561 compliance
 
 ## 1.9.0 - 2020-12-04
 
 ### Added
-- **Utilities**: Added Kinesis, S3, CloudWatch Logs, Application Load Balancer, and SES support in `Parser`
-- **Docs**: Sidebar menu are now always expanded
+* **Utilities**: Added Kinesis, S3, CloudWatch Logs, Application Load Balancer, and SES support in `Parser`
+* **Docs**: Sidebar menu are now always expanded
 
 ### Fixed
-- **Docs**: Broken link to GitHub to homepage
+* **Docs**: Broken link to GitHub to homepage
 
 ## 1.8.0 - 2020-11-20
 
 ### Added
-- **Utilities**: Added support for new EventBridge Replay field in `Parser` and `Event source data classes`
-- **Utilities**: Added SNS support in `Parser`
-- **Utilities**: Added API Gateway HTTP API data class support for new IAM and Lambda authorizer in `Event source data classes`
-- **Docs**: Add new FAQ section for Logger on how to enable debug logging for boto3
-- **Docs**: Add explicit minimal set of permissions required to use Layers provided by Serverless Application Repository (SAR)
+* **Utilities**: Added support for new EventBridge Replay field in `Parser` and `Event source data classes`
+* **Utilities**: Added SNS support in `Parser`
+* **Utilities**: Added API Gateway HTTP API data class support for new IAM and Lambda authorizer in `Event source data classes`
+* **Docs**: Add new FAQ section for Logger on how to enable debug logging for boto3
+* **Docs**: Add explicit minimal set of permissions required to use Layers provided by Serverless Application Repository (SAR)
 
 ### Fixed
-- **Docs**: Fix typo in Dataclasses example for SES when fetching common email headers
+* **Docs**: Fix typo in Dataclasses example for SES when fetching common email headers
 
 ## 1.7.0 - 2020-10-26
 
 ### Added
-- **Utilities**: Add new `Parser` utility to provide parsing and deep data validation using Pydantic Models
-- **Utilities**: Add case insensitive header lookup, and Cognito custom auth triggers to `Event source data classes`
+* **Utilities**: Add new `Parser` utility to provide parsing and deep data validation using Pydantic Models
+* **Utilities**: Add case insensitive header lookup, and Cognito custom auth triggers to `Event source data classes`
 
 ### Fixed
-- **Logger**: keeps Lambda root logger handler, and add log filter instead to prevent child log records duplication
-- **Docs**: Improve wording on adding log keys conditionally
+* **Logger**: keeps Lambda root logger handler, and add log filter instead to prevent child log records duplication
+* **Docs**: Improve wording on adding log keys conditionally
 
 ## 1.6.1 - 2020-09-23
 
 ### Fixed
-- **Utilities**: Fix issue with boolean values in DynamoDB stream event data class.
+* **Utilities**: Fix issue with boolean values in DynamoDB stream event data class.
 
 ## 1.6.0 - 2020-09-22
 
 ### Added
-- **Metrics**: Support adding multiple metric values to a single metric name
-- **Utilities**: Add new `Validator` utility to validate inbound events and responses using JSON Schema
-- **Utilities**: Add new `Event source data classes` utility to easily describe event schema of popular event sources
-- **Docs**: Add new `Testing your code` section to both Logger and Metrics page, and content width is now wider
-- **Tracer**: Support for automatically disable Tracer when running a Chalice app
+* **Metrics**: Support adding multiple metric values to a single metric name
+* **Utilities**: Add new `Validator` utility to validate inbound events and responses using JSON Schema
+* **Utilities**: Add new `Event source data classes` utility to easily describe event schema of popular event sources
+* **Docs**: Add new `Testing your code` section to both Logger and Metrics page, and content width is now wider
+* **Tracer**: Support for automatically disable Tracer when running a Chalice app
 
 ### Fixed
-- **Docs**: Improve wording on log sampling feature in Logger, and removed duplicate content on main page
-- **Utilities**: Remove DeleteMessageBatch API call when there are no messages to delete
+* **Docs**: Improve wording on log sampling feature in Logger, and removed duplicate content on main page
+* **Utilities**: Remove DeleteMessageBatch API call when there are no messages to delete
 
 ## 1.5.0 - 2020-09-04
 
 ### Added
-- **Logger**: Add `xray_trace_id` to log output to improve integration with CloudWatch Service Lens
-- **Logger**: Allow reordering of logged output
-- **Utilities**: Add new `SQS batch processing` utility to handle partial failures in processing message batches
-- **Utilities**: Add typing utility providing static type for lambda context object
-- **Utilities**: Add `transform=auto` in parameters utility to deserialize parameter values based on the key name
+* **Logger**: Add `xray_trace_id` to log output to improve integration with CloudWatch Service Lens
+* **Logger**: Allow reordering of logged output
+* **Utilities**: Add new `SQS batch processing` utility to handle partial failures in processing message batches
+* **Utilities**: Add typing utility providing static type for lambda context object
+* **Utilities**: Add `transform=auto` in parameters utility to deserialize parameter values based on the key name
 
 ### Fixed
-- **Logger**: The value of `json_default` formatter is no longer written to logs
+* **Logger**: The value of `json_default` formatter is no longer written to logs
 
 ## 1.4.0 - 2020-08-25
 
 ### Added
-- **All**: Official Lambda Layer via [Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer)
-- **Tracer**: `capture_method` and `capture_lambda_handler` now support **capture_response=False** parameter to prevent Tracer to capture response as metadata to allow customers running Tracer with sensitive workloads
+* **All**: Official Lambda Layer via [Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer)
+* **Tracer**: `capture_method` and `capture_lambda_handler` now support **capture_response=False** parameter to prevent Tracer to capture response as metadata to allow customers running Tracer with sensitive workloads
 
 ### Fixed
-- **Metrics**: Cold start metric is now completely separate from application metrics dimensions, making it easier and cheaper to visualize.
-    - This is a breaking change if you were graphing/alerting on both application metrics with the same name to compensate this previous malfunctioning
-    - Marked as bugfix as this is the intended behaviour since the beginning, as you shouldn't have the same application metric with different dimensions
-- **Utilities**: SSMProvider within Parameters utility now have decrypt and recursive parameters correctly defined to support autocompletion
+* **Metrics**: Cold start metric is now completely separate from application metrics dimensions, making it easier and cheaper to visualize.
+    * This is a breaking change if you were graphing/alerting on both application metrics with the same name to compensate this previous malfunctioning
+    * Marked as bugfix as this is the intended behaviour since the beginning, as you shouldn't have the same application metric with different dimensions
+* **Utilities**: SSMProvider within Parameters utility now have decrypt and recursive parameters correctly defined to support autocompletion
 
 ### Added
-- **Tracer**: capture_lambda_handler and capture_method decorators now support `capture_response` parameter to not include function's response as part of tracing metadata
+* **Tracer**: capture_lambda_handler and capture_method decorators now support `capture_response` parameter to not include function's response as part of tracing metadata
 
 ## 1.3.1 - 2020-08-22
+
 ### Fixed
-- **Tracer**: capture_method decorator did not properly handle nested context managers
+* **Tracer**: capture_method decorator did not properly handle nested context managers
 
 ## 1.3.0 - 2020-08-21
+
 ### Added
-- **Utilities**: Add new `parameters` utility to retrieve a single or multiple parameters from SSM Parameter Store, Secrets Manager, DynamoDB, or your very own
+* **Utilities**: Add new `parameters` utility to retrieve a single or multiple parameters from SSM Parameter Store, Secrets Manager, DynamoDB, or your very own
 
 ## 1.2.0 - 2020-08-20
+
 ### Added
-- **Tracer**: capture_method decorator now supports generator functions (including context managers)
+* **Tracer**: capture_method decorator now supports generator functions (including context managers)
 
 ## 1.1.3 - 2020-08-18
+
 ### Fixed
-- **Logger**: Logs emitted twice, structured and unstructured, due to Lambda configuring the root handler
+* **Logger**: Logs emitted twice, structured and unstructured, due to Lambda configuring the root handler
 
 ## 1.1.2 - 2020-08-16
+
 ### Fixed
-- **Docs**: Clarify confusion on Tracer reuse and `auto_patch=False` statement
-- **Logger**: Autocomplete for log statements in PyCharm
+* **Docs**: Clarify confusion on Tracer reuse and `auto_patch=False` statement
+* **Logger**: Autocomplete for log statements in PyCharm
 
 ## 1.1.1 - 2020-08-14
+
 ### Fixed
-- **Logger**: Regression on `Logger` level not accepting `int` i.e. `Logger(level=logging.INFO)`
+* **Logger**: Regression on `Logger` level not accepting `int` i.e. `Logger(level=logging.INFO)`
 
 ## 1.1.0 - 2020-08-14
+
 ### Added
-- **Logger**: Support for logger inheritance with `child` parameter
+* **Logger**: Support for logger inheritance with `child` parameter
 
 ### Fixed
-- **Logger**: Log level is now case insensitive via params and env var
+* **Logger**: Log level is now case insensitive via params and env var
 
 ## 1.0.2 - 2020-07-16
+
 ### Fixed
-- **Tracer**: Correct AWS X-Ray SDK dependency to support 2.5.0 and higher
+* **Tracer**: Correct AWS X-Ray SDK dependency to support 2.5.0 and higher
 
 ## 1.0.1 - 2020-07-06
+
 ### Fixed
-- **Logger**: Fix a bug with `inject_lambda_context` causing existing Logger keys to be overridden if `structure_logs` was called before
+* **Logger**: Fix a bug with `inject_lambda_context` causing existing Logger keys to be overridden if `structure_logs` was called before
 
 ## 1.0.0 - 2020-06-18
+
 ### Added
-- **Metrics**: `add_metadata` method to add any metric metadata you'd like to ease finding metric related data via CloudWatch Logs
-- Set status as General Availability
+* **Metrics**: `add_metadata` method to add any metric metadata you'd like to ease finding metric related data via CloudWatch Logs
+* Set status as General Availability
 
 ## 0.11.0 - 2020-06-08
+
 ### Added
-- Imports can now be made from top level of module, e.g.: `from aws_lambda_powertools import Logger, Metrics, Tracer`
+* Imports can now be made from top level of module, e.g.: `from aws_lambda_powertools import Logger, Metrics, Tracer`
 
 ### Fixed
-- **Metrics**: Fix a bug with Metrics causing an exception to be thrown when logging metrics if dimensions were not explicitly added.
+* **Metrics**: Fix a bug with Metrics causing an exception to be thrown when logging metrics if dimensions were not explicitly added.
 
 ### Changed
-- **Metrics**: No longer throws exception by default in case no metrics are emitted when using the log_metrics decorator.
+* **Metrics**: No longer throws exception by default in case no metrics are emitted when using the log_metrics decorator.
 
 ## 0.10.0 - 2020-06-08
+
 ### Added
-- **Metrics**: `capture_cold_start_metric` parameter added to `log_metrics` decorator
-- **Metrics**: Optional `namespace` and `service` parameters added to Metrics constructor to more closely resemble other core utils
+* **Metrics**: `capture_cold_start_metric` parameter added to `log_metrics` decorator
+* **Metrics**: Optional `namespace` and `service` parameters added to Metrics constructor to more closely resemble other core utils
 
 ### Changed
-- **Metrics**: Default dimension is now created based on `service` parameter or `POWERTOOLS_SERVICE_NAME` env var
+* **Metrics**: Default dimension is now created based on `service` parameter or `POWERTOOLS_SERVICE_NAME` env var
 
 ### Deprecated
-- **Metrics**: `add_namespace` method deprecated in favor of using `namespace` parameter to Metrics constructor or `POWERTOOLS_METRICS_NAMESPACE` env var
+* **Metrics**: `add_namespace` method deprecated in favor of using `namespace` parameter to Metrics constructor or `POWERTOOLS_METRICS_NAMESPACE` env var
 
 ## 0.9.5 - 2020-06-02
+
 ### Fixed
-- **Metrics**: Coerce non-string dimension values to string
-- **Logger**: Correct `cold_start`, `function_memory_size` values from string to bool and int respectively
+* **Metrics**: Coerce non-string dimension values to string
+* **Logger**: Correct `cold_start`, `function_memory_size` values from string to bool and int respectively
 
 ## 0.9.4 - 2020-05-29
+
 ### Fixed
-- **Metrics**: Fix issue where metrics were not correctly flushed, and cleared on every invocation
+* **Metrics**: Fix issue where metrics were not correctly flushed, and cleared on every invocation
 
 ## 0.9.3 - 2020-05-16
+
 ### Fixed
-- **Tracer**: Fix Runtime Error for nested sync due to incorrect loop usage
+* **Tracer**: Fix Runtime Error for nested sync due to incorrect loop usage
 
 ## 0.9.2 - 2020-05-14
+
 ### Fixed
-- **Tracer**: Import aiohttp lazily so it's not a hard dependency
+* **Tracer**: Import aiohttp lazily so it's not a hard dependency
 
 ## 0.9.0 - 2020-05-12
+
 ### Added
-- **Tracer**: Support for async functions in `Tracer` via `capture_method` decorator
-- **Tracer**: Support for `aiohttp` via `aiohttp_trace_config` trace config
-- **Tracer**: Support for patching specific modules via `patch_modules` param
-- **Tracer**: Document escape hatch mechanisms via `tracer.provider`
+* **Tracer**: Support for async functions in `Tracer` via `capture_method` decorator
+* **Tracer**: Support for `aiohttp` via `aiohttp_trace_config` trace config
+* **Tracer**: Support for patching specific modules via `patch_modules` param
+* **Tracer**: Document escape hatch mechanisms via `tracer.provider`
 
 ## 0.8.1 - 2020-05-1
+
 ### Fixed
+
 * **Metrics**: Fix metric unit casting logic if one passes plain string (value or key)
 * **Metrics:**: Fix `MetricUnit` enum values for
-    - `BytesPerSecond`
-    - `KilobytesPerSecond`
-    - `MegabytesPerSecond`
-    - `GigabytesPerSecond`
-    - `TerabytesPerSecond`
-    - `BitsPerSecond`
-    - `KilobitsPerSecond`
-    - `MegabitsPerSecond`
-    - `GigabitsPerSecond`
-    - `TerabitsPerSecond`
-    - `CountPerSecond`
+    * `BytesPerSecond`
+    * `KilobytesPerSecond`
+    * `MegabytesPerSecond`
+    * `GigabytesPerSecond`
+    * `TerabytesPerSecond`
+    * `BitsPerSecond`
+    * `KilobitsPerSecond`
+    * `MegabitsPerSecond`
+    * `GigabitsPerSecond`
+    * `TerabitsPerSecond`
+    * `CountPerSecond`
 
 ## 0.8.0 - 2020-04-24
+
 ### Added
-- **Logger**: Introduced `Logger` class for structured logging as a replacement for `logger_setup`
-- **Logger**: Introduced `Logger.inject_lambda_context` decorator as a replacement for `logger_inject_lambda_context`
+* **Logger**: Introduced `Logger` class for structured logging as a replacement for `logger_setup`
+* **Logger**: Introduced `Logger.inject_lambda_context` decorator as a replacement for `logger_inject_lambda_context`
 
 ### Removed
-- **Logger**: Raise `DeprecationWarning` exception for both `logger_setup`, `logger_inject_lambda_context`
+* **Logger**: Raise `DeprecationWarning` exception for both `logger_setup`, `logger_inject_lambda_context`
 
 ## 0.7.0 - 2020-04-20
+
 ### Added
-- **Middleware factory**: Introduced Middleware Factory to build your own middleware via `lambda_handler_decorator`
+* **Middleware factory**: Introduced Middleware Factory to build your own middleware via `lambda_handler_decorator`
 
 ### Fixed
-- **Metrics**: Fixed metrics dimensions not being included correctly in EMF
+* **Metrics**: Fixed metrics dimensions not being included correctly in EMF
 
 ## 0.6.3 - 2020-04-09
+
 ### Fixed
-- **Logger**: Fix `log_metrics` decorator logic not calling the decorated function, and exception handling
+* **Logger**: Fix `log_metrics` decorator logic not calling the decorated function, and exception handling
 
 ## 0.6.1 - 2020-04-08
+
 ### Added
-- **Metrics**: Introduces Metrics middleware to utilise CloudWatch Embedded Metric Format
+* **Metrics**: Introduces Metrics middleware to utilise CloudWatch Embedded Metric Format
 
 ### Deprecated
-- **Metrics**: Added deprecation warning for `log_metrics`
+* **Metrics**: Added deprecation warning for `log_metrics`
 
 ## 0.5.0 - 2020-02-20
+
 ### Added
-- **Logger**: Introduced log sampling for debug - Thanks to [Danilo's contribution](https://github.com/awslabs/aws-lambda-powertools/pull/7)
+* **Logger**: Introduced log sampling for debug - Thanks to [Danilo's contribution](https://github.com/awslabs/aws-lambda-powertools/pull/7)
 
 ## 0.1.0 - 2019-11-15
+
 ### Added
-- Public beta release
+* Public beta release
