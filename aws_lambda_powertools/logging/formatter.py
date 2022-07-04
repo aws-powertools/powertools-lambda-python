@@ -1,3 +1,4 @@
+import inspect
 import json
 import logging
 import os
@@ -286,3 +287,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
 
 JsonFormatter = LambdaPowertoolsFormatter  # alias to previous formatter
+
+
+# Fetch current and future parameters from PowertoolsFormatter that should be reserved
+RESERVED_FORMATTER_CUSTOM_KEYS: List[str] = inspect.getfullargspec(LambdaPowertoolsFormatter).args[1:]
