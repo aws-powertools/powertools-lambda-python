@@ -335,7 +335,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         )
 
         @functools.wraps(lambda_handler)
-        def decorate(event, context, **kwargs):
+        def decorate(event, context, *args, **kwargs):
             lambda_context = build_lambda_context_model(context)
             cold_start = _is_cold_start()
 
@@ -351,7 +351,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
                 logger.debug("Event received")
                 self.info(getattr(event, "raw_event", event))
 
-            return lambda_handler(event, context)
+            return lambda_handler(event, context, *args, **kwargs)
 
         return decorate
 

@@ -773,3 +773,20 @@ def test_inject_lambda_context_log_event_request_data_classes(lambda_context, st
     # THEN logger should log event received from Lambda
     logged_event, _ = capture_multiple_logging_statements_output(stdout)
     assert logged_event["message"] == lambda_event
+
+
+def test_inject_lambda_context_with_additional_args(lambda_context, stdout, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # AND a handler that use additional parameters
+    @logger.inject_lambda_context
+    def handler(event, context, planet, str_end="."):
+        logger.info(f"Hello {planet}{str_end}")
+
+    handler({}, lambda_context, "World", str_end="!")
+
+    # THEN the decorator should included them
+    log = capture_logging_output(stdout)
+
+    assert log["message"] == "Hello World!"
