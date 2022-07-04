@@ -1,4 +1,4 @@
-<!-- markdownlint-disable -->
+<!-- markdownlint-disable MD041 MD043-->
 # CDK Powertools layer
 
 This is a CDK project to build and deploy AWS Lambda Powertools layer to multiple commercial regions.
