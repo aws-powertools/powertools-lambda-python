@@ -1,4 +1,4 @@
-name: Build and release layer to all regions
+name: Deploy layer to all regions
 
 permissions:
   id-token: write
