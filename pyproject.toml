@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "1.26.2"
+version = "1.26.3"
 description = "A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, batching, idempotency, feature flags, and more."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -50,7 +50,7 @@ bandit = "^1.7.1"
 radon = "^5.1.0"
 xenon = "^0.9.0"
 flake8-eradicate = "^1.2.1"
-flake8-bugbear = "^22.6.22"
+flake8-bugbear = "^22.7.1"
 mkdocs-git-revision-date-plugin = "^0.3.2"
 mike = "^0.6.0"
 mypy = "^0.961"

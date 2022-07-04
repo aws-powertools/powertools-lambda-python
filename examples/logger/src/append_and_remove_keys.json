@@ -1,0 +1,20 @@
+[
+    {
+        "level": "INFO",
+        "location": "<module>:16",
+        "message": "Name should be equal service value",
+        "name": "payment",
+        "service": "payment",
+        "timestamp": "2022-07-01 07:09:46,330+0000"
+    },
+    {
+        "level": "INFO",
+        "location": "<module>:23",
+        "message": "This will include process ID and name",
+        "name": "payment",
+        "process": "9",
+        "processName": "MainProcess",
+        "service": "payment",
+        "timestamp": "2022-07-01 07:09:46,330+0000"
+    }
+]

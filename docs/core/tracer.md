@@ -76,7 +76,7 @@ You can trace asynchronous functions and generator functions (including context 
 
 === "Async"
 
-    ```python hl_lines="8"
+    ```python hl_lines="9"
     --8<-- "examples/tracer/src/capture_method_async.py"
     ```
 
