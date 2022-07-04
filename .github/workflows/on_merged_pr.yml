@@ -18,6 +18,7 @@ jobs:
       issues: write # required for new scoped token
       pull-requests: write # required for new scoped token
     steps:
+      - uses: actions/checkout@v3
       - name: "Label PR related issue for release"
         uses: actions/github-script@v6
         with:
