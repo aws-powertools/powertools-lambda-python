@@ -12,7 +12,7 @@ from ..shared import constants
 from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
 from .exceptions import InvalidLoggerSamplingRateError
 from .filters import SuppressFilter
-from .formatter import BasePowertoolsFormatter, LambdaPowertoolsFormatter
+from .formatter import RESERVED_FORMATTER_CUSTOM_KEYS, BasePowertoolsFormatter, LambdaPowertoolsFormatter
 from .lambda_context import build_lambda_context_model
 
 logger = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     datefmt: str, optional
         String directives (strftime) to format log timestamp using `time`, by default it uses RFC
         3339.
-    use_datetime_directive: str, optional
+    use_datetime_directive: bool, optional
         Interpret `datefmt` as a format string for `datetime.datetime.strftime`, rather than
         `time.strftime`.
 
@@ -368,7 +368,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         return handlers[0]
 
     @property
-    def registered_formatter(self) -> PowertoolsFormatter:
+    def registered_formatter(self) -> BasePowertoolsFormatter:
         """Convenience property to access logger formatter"""
         return self.registered_handler.formatter  # type: ignore
 
@@ -395,7 +395,15 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         is_logger_preconfigured = getattr(self._logger, "init", False)
         if not is_logger_preconfigured:
             formatter = self.logger_formatter or LambdaPowertoolsFormatter(**log_keys)  # type: ignore
-            return self.registered_handler.setFormatter(formatter)
+            self.registered_handler.setFormatter(formatter)
+
+            # when using a custom Lambda Powertools Formatter
+            # standard and custom keys that are not Powertools Formatter parameters should be appended
+            # and custom keys that might happen to be Powertools Formatter parameters should be discarded
+            # this prevents adding them as custom keys, for example, `json_default=<callable>`
+            # see https://github.com/awslabs/aws-lambda-powertools-python/issues/1263
+            custom_keys = {k: v for k, v in log_keys.items() if k not in RESERVED_FORMATTER_CUSTOM_KEYS}
+            return self.registered_formatter.append_keys(**custom_keys)
 
         # Mode 2 (legacy)
         if append:
