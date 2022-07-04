@@ -1,0 +1,31 @@
+{
+  "name": "layer",
+  "version": "0.1.0",
+  "bin": {
+    "layer": "bin/layer.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.5.2",
+    "@types/node": "10.17.27",
+    "@types/prettier": "2.6.0",
+     "@types/uuid": "8.3.4",
+    "uuid": "8.3.2",
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.4",
+    "aws-cdk": "2.29.0",
+    "ts-node": "^10.8.1",
+    "typescript": "~3.9.7"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.29.0",
+    "cdk-lambda-powertools-python-layer": "2.0.38",
+    "constructs": "^10.0.0",
+    "source-map-support": "^0.5.21"
+  }
+}
