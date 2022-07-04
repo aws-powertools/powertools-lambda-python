@@ -9,4 +9,10 @@ jobs:
             - uses: aws-actions/closed-issue-message@v1
               with:
                   repo-token: "${{ secrets.GITHUB_TOKEN }}"
-                  message: "This issue is now closed. Please be mindful that future comments are hard for our team to see."
+                  message: |
+                      ### ⚠️COMMENT VISIBILITY WARNING⚠️
+                      This issue is now closed. Please be mindful that future comments are hard for our team to see.
+
+                      If you need more assistance, please either tag a [team member](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/MAINTAINERS.md#current-maintainers) or open a new issue that references this one.
+
+                      If you wish to keep having a conversation with other community members under this issue feel free to do so.
