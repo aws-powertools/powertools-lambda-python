@@ -16,10 +16,13 @@ class CanaryStack(Stack):
         construct_id: str,
         powertools_version: str,
         ssm_paramter_layer_arn: str,
-        version_tracking_event_bus_arn: str,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        VERSION_TRACKING_EVENT_BUS_ARN: str = (
+            "arn:aws:events:eu-central-1:027876851704:event-bus/VersionTrackingEventBus"
+        )
 
         layer_arn = StringParameter.from_string_parameter_attributes(
             self, "LayerVersionArnParam", parameter_name=ssm_paramter_layer_arn
@@ -53,14 +56,14 @@ class CanaryStack(Stack):
             environment={
                 "POWERTOOLS_VERSION": powertools_version,
                 "POWERTOOLS_LAYER_ARN": layer_arn,
-                "VERSION_TRACKING_EVENT_BUS_ARN": version_tracking_event_bus_arn,
+                "VERSION_TRACKING_EVENT_BUS_ARN": VERSION_TRACKING_EVENT_BUS_ARN,
                 "LAYER_PIPELINE_STAGE": deploy_stage,
             },
         )
 
         canary_lambda.add_to_role_policy(
             PolicyStatement(
-                effect=Effect.ALLOW, actions=["events:PutEvents"], resources=[version_tracking_event_bus_arn]
+                effect=Effect.ALLOW, actions=["events:PutEvents"], resources=[VERSION_TRACKING_EVENT_BUS_ARN]
             )
         )
 

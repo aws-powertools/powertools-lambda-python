@@ -10,8 +10,6 @@ app = cdk.App()
 POWERTOOLS_VERSION: str = app.node.try_get_context("version")
 SSM_PARAM_LAYER_ARN: str = "/layers/powertools-layer-arn"
 
-VERSION_TRACKING_EVENT_BUS_ARN: str = "arn:aws:events:eu-central-1:027876851704:event-bus/VersionTrackingEventBus"
-
 if not POWERTOOLS_VERSION:
     raise ValueError(
         "Please set the version for Powertools by passing the '--context=version:<version>' parameter to the CDK "
@@ -20,12 +18,6 @@ if not POWERTOOLS_VERSION:
 
 LayerStack(app, "LayerStack", powertools_version=POWERTOOLS_VERSION, ssm_paramter_layer_arn=SSM_PARAM_LAYER_ARN)
 
-CanaryStack(
-    app,
-    "CanaryStack",
-    powertools_version=POWERTOOLS_VERSION,
-    ssm_paramter_layer_arn=SSM_PARAM_LAYER_ARN,
-    version_tracking_event_bus_arn=VERSION_TRACKING_EVENT_BUS_ARN,
-)
+CanaryStack(app, "CanaryStack", powertools_version=POWERTOOLS_VERSION, ssm_paramter_layer_arn=SSM_PARAM_LAYER_ARN)
 
 app.synth()
