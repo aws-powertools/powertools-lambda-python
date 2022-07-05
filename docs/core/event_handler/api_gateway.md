@@ -8,11 +8,8 @@ Event handler for Amazon API Gateway REST and HTTP APIs, and Application Loader 
 ## Key Features
 
 * Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API and ALB
-* Seamless support for CORS, binary and Gzip compression
-* Integrates with [Data classes utilities](../../utilities/data_classes.md){target="_blank"} to easily access event and identity information
-* Built-in support for Decimals JSON encoding
-* Support for dynamic path expressions
-* Router to allow for splitting up the handler across multiple files
+* Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer
+* Built-in integration with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"} for self-documented event schema
 
 ## Getting started
 
