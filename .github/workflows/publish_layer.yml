@@ -6,7 +6,12 @@ permissions:
 
 on:
   # TODO: remove after setup is finished
-  workflow_dispatch: { }
+  workflow_dispatch:
+    inputs:
+      latest_published_version:
+        description: "Latest PyPi published version to rebuild latest docs for, e.g. v1.22.0"
+        default: "v1.22.0"
+        required: true
   workflow_run:
     workflows: [ "Publish to PyPi" ]
     types:
@@ -19,9 +24,6 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
@@ -39,7 +41,7 @@ jobs:
           restore-keys: npm-
       - name: Set release notes tag
         run: |
-          RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}
+          RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}  | ${{ inputs.latest_published_version }}
           echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> $GITHUB_ENV
       - name: install cdk and deps
         run: |

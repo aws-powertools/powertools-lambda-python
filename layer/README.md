@@ -16,7 +16,8 @@ cdk synth --context version=1.25.1
 
 We use a canary stack to verify that the deployment is successful and we can use the layer by adding it to a newly created Lambda function.
 The canary is deployed after the layer construct. Because the layer ARN is created during the deploy we need to pass this information async via SSM parameter.
-To achieve that, we establish a naming convention for the SSM key. The layer construct knows where to write the layer ARN after the deployment and the Canary stacks know where to read this information.
+To achieve that we use SSM parameter store to pass the layer ARN to the canary.
+The layer stack writes the layer ARN after the deployment as SSM parameter and the canary stacks reads this information and adds the layer to the function.
 
 ## Version tracking
 

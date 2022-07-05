@@ -32,11 +32,12 @@ def on_event(event, context):
     if request_type == "Create":
         return on_create(event)
 
-     return "Nothing to be processed"
+    return "Nothing to be processed"
+
 
 def on_create(event):
     props = event["ResourceProperties"]
-    print("create new resource with properties %s" % props)
+    logger.info("create new resource with properties %s" % props)
     handler(event)
 
 
