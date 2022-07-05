@@ -4,27 +4,26 @@ module.exports = async ({github, context}) => {
     const releaseLabel = process.env.RELEASE_LABEL;
     const maintainersTeam = process.env.MAINTAINERS_TEAM
 
-    const RELATED_ISSUE_REGEX = /Issue number:.+(\d)/
+    const RELATED_ISSUE_REGEX = /Issue number:[^\d\r\n]+(?<issue>\d+)/;
 
-    const matcher = new RegExp(RELATED_ISSUE_REGEX)
-    const isMatch = matcher.exec(prBody)
-    if (isMatch != null) {
-        let relatedIssueNumber = isMatch[1]
-        console.info(`Auto-labeling related issue ${relatedIssueNumber} for release`)
-
-        return await github.rest.issues.addLabels({
-          issue_number: relatedIssueNumber,
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          labels: [releaseLabel]
-        })
-    } else {
-      let msg = `${maintainersTeam} No related issues found. Please ensure '${releaseLabel}' label is applied before releasing.`;
+    const isMatch = RELATED_ISSUE_REGEX.exec(body);
+    if (!isMatch) {
+      core.setFailed(`Unable to find related issue for PR number ${prNumber}.\n\n Body details: ${prBody}`);
       return await github.rest.issues.createComment({
         owner: context.repo.owner,
         repo: context.repo.repo,
-        body: msg,
+        body: `${maintainersTeam} No related issues found. Please ensure '${releaseLabel}' label is applied before releasing.`,
         issue_number: prNumber,
       });
     }
+
+    const { groups: {relatedIssueNumber} } = isMatch
+
+    core.info(`Auto-labeling related issue ${relatedIssueNumber} for release`)
+    return await github.rest.issues.addLabels({
+      issue_number: relatedIssueNumber,
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      labels: [releaseLabel]
+    })
 }
