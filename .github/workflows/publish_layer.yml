@@ -28,6 +28,9 @@ jobs:
           node-version: '16.12'
       - name: Setup python
         uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
@@ -57,151 +60,19 @@ jobs:
           path: cdk.out.zip
 
   deploy-beta:
-    runs-on: ubuntu-latest
     needs:
       - build-layer
-    strategy:
-      fail-fast: false
-      matrix:
-        region: [
-          "af-south-1",
-#          "eu-central-1",
-#          "us-east-1",
-#          "us-east-2",
-#          "us-west-1",
-#          "us-west-2",
-#          "ap-east-1",
-#          "ap-south-1",
-#          "ap-northeast-1",
-#          "ap-northeast-2",
-#          "ap-southeast-1",
-#          "ap-southeast-2",
-#          "ca-central-1",
-#          "eu-west-1",
-#          "eu-west-2",
-#          "eu-west-3",
-#          "eu-south-1",
-#          "eu-north-1",
-#          "sa-east-1",
-#          "ap-southeast-3",
-#          "ap-northeast-3",
-#          "me-south-1"
-        ]
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - name: aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: ${{ matrix.region }}
-          role-to-assume: arn:aws:iam::${{ secrets.LAYERS_BETA_ACCOUNT }}:role/${{ secrets.AWS_GITHUB_OIDC_ROLE }}
-      - name: Print assumed role
-        run: aws sts get-caller-identity
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16.12'
-      - name: Setup python
-        uses: actions/setup-python@v4
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
-      - name: install cdk and deps
-        run: |
-          npm install -g aws-cdk@2.29.0
-          cdk --version
-      - name: install deps
-        run: |
-          cd layer
-          pip install -r requirements.txt
-      - name: Download a single artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: cdk.out
-      - name: unzip cdk.out.zip
-        run: unzip cdk.out.zip
-      - name: CDK Deploy Layer
-        run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'PowertoolsLayerStack' --require-approval never --verbose
-      - name: CDK Deploy Canary
-        run: cdk deploy --app cdk.out --context region=${{ matrix.region}} --parameters DeployStage="BETA" 'CanaryStack' --require-approval never --verbose
+    uses: ./.github/workflows/deploy_cdk_stack.yml
+    with:
+      stage: "BETA"
+    secrets:
+      target-account: ${{ secrets.LAYERS_BETA_ACCOUNT }}
 
   deploy-prod:
-    runs-on: ubuntu-latest
     needs:
       - deploy-beta
-    strategy:
-      fail-fast: false
-      matrix:
-        region: [
-          "af-south-1",
-#          "eu-central-1",
-#          "us-east-1",
-#          "us-east-2",
-#          "us-west-1",
-#          "us-west-2",
-#          "ap-east-1",
-#          "ap-south-1",
-#          "ap-northeast-1",
-#          "ap-northeast-2",
-#          "ap-southeast-1",
-#          "ap-southeast-2",
-#          "ca-central-1",
-#          "eu-west-1",
-#          "eu-west-2",
-#          "eu-west-3",
-#          "eu-south-1",
-#          "eu-north-1",
-#          "sa-east-1",
-#          "ap-southeast-3",
-#          "ap-northeast-3",
-#          "me-south-1"
-        ]
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - name: aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: ${{ matrix.region }}
-          role-to-assume: arn:aws:iam::${{ secrets.LAYERS_PROD_ACCOUNT }}:role/${{ secrets.AWS_GITHUB_OIDC_ROLE }}
-      - name: Print assumed role
-        run: aws sts get-caller-identity
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16.12'
-      - name: Setup python
-        uses: actions/setup-python@v4
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
-      - name: install cdk and deps
-        run: |
-          npm install -g aws-cdk@2.29.0
-          cdk --version
-      - name: install deps
-        run: |
-          cd layer
-          pip install -r requirements.txt
-      - name: Download a single artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: cdk.out
-      - name: unzip cdk.out.zip
-        run: unzip cdk.out.zip
-      - name: CDK Deploy Layer
-        run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'PowertoolsLayerStack' --require-approval never --verbose
-      - name: CDK Deploy Canary
-        run: cdk deploy --app cdk.out --context region=${{ matrix.region}} --parameters DeployStage="PROD" 'CanaryStack' --require-approval never --verbose
+    uses: ./.github/workflows/deploy_cdk_stack.yml
+    with:
+      stage: "PROD"
+    secrets:
+      target-account: ${{ secrets.LAYERS_PROD_ACCOUNT }}
