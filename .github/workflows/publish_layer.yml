@@ -41,7 +41,7 @@ jobs:
           restore-keys: npm-
       - name: Set release notes tag
         run: |
-          RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}  | ${{ inputs.latest_published_version }}
+          RELEASE_TAG_VERSION="${${{ github.event.release.tag_name }}:-${{ inputs.latest_published_version }}}"
           echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> $GITHUB_ENV
       - name: install cdk and deps
         run: |
