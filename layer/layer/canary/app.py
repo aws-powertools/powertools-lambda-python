@@ -25,8 +25,8 @@ def handler(event):
     return True
 
 
+@logger.inject_lambda_context(log_event=True)
 def on_event(event, context):
-    print(event)
     request_type = event["RequestType"]
     # we handle only create events, because we recreate the canary on each run
     if request_type == "Create":
