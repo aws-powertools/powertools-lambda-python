@@ -1,11 +1,11 @@
 <!-- markdownlint-disable MD041 MD043-->
 # CDK Powertools layer
 
-This is a CDK project to build and deploy AWS Lambda Powertools layer to multiple commercial regions.
+This is a CDK project to build and deploy AWS Lambda Powertools Lambda Layer to multiple commercial regions.
 
 ## Build the layer
 
-To build the layer construct you need to provide the powertools version.
+To build the layer construct you need to provide the Powertools version that is [available in PyPi](https://pypi.org/project/aws-lambda-powertools/).
 You can pass it as a context variable when running `synth` or `deploy`,
 
 ```shell
@@ -23,4 +23,4 @@ To achieve that, we establish a naming convention for the SSM key. The layer con
 AWS Lambda versions the layers by incrementing a number at the end of the arn.
 This means it's hard to tell which powertools version is inside the layer.
 For better tracking of the ARNs and the corresponding version we need to keep track which powertools version was deployed to which layer.
-To achieve that we created two components. First, we created a version tracking app which receives evnets via Event Bridge. Second, after a successful canary deployment we send the layer ARN, powertools version, and the region to this Event Bridge.
+To achieve that we created two components. First, we created a version tracking app which receives events via EventBridge. Second, after a successful canary deployment we send the layer ARN, Powertools version, and the region to this EventBridge.
