@@ -21,7 +21,7 @@ The layer stack writes the layer ARN after the deployment as SSM parameter and t
 
 ## Version tracking
 
-AWS Lambda versions the layers by incrementing a number at the end of the arn.
-This means it's hard to tell which powertools version is inside the layer.
+AWS Lambda versions Lambda layers by incrementing a number at the end of the ARN.
+This makes it challenging to know which Powertools version a layer contains.
 For better tracking of the ARNs and the corresponding version we need to keep track which powertools version was deployed to which layer.
 To achieve that we created two components. First, we created a version tracking app which receives events via EventBridge. Second, after a successful canary deployment we send the layer ARN, Powertools version, and the region to this EventBridge.
