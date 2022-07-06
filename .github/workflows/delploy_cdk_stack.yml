@@ -17,8 +17,6 @@ on:
 jobs:
   deploy-cdk-stack:
     runs-on: ubuntu-latest
-    needs:
-      - build-layer
     strategy:
       fail-fast: false
       matrix:
@@ -81,6 +79,6 @@ jobs:
       - name: unzip cdk.out.zip
         run: unzip cdk.out.zip
       - name: CDK Deploy Layer
-        run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'PowertoolsLayerStack' --require-approval never --verbose
+        run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'LayerStack ' --require-approval never --verbose
       - name: CDK Deploy Canary
         run: cdk deploy --app cdk.out --context region=${{ matrix.region}} --parameters DeployStage="${{ input.stage }}" 'CanaryStack' --require-approval never --verbose
