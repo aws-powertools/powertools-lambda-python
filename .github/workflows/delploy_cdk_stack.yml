@@ -17,6 +17,9 @@ on:
 jobs:
   deploy-cdk-stack:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./layer
     strategy:
       fail-fast: false
       matrix:
@@ -52,8 +55,6 @@ jobs:
         with:
           aws-region: ${{ matrix.region }}
           role-to-assume: arn:aws:iam::${{ secrets.target-account }}:role/${{ secrets.AWS_GITHUB_OIDC_ROLE }}
-      - name: Print assumed role
-        run: aws sts get-caller-identity
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
@@ -70,7 +71,6 @@ jobs:
           cdk --version
       - name: install deps
         run: |
-          cd layer
           pip install -r requirements.txt
       - name: Download a single artifact
         uses: actions/download-artifact@v3

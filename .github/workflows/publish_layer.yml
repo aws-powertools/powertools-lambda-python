@@ -21,6 +21,9 @@ on:
 jobs:
   build-layer:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./layer
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -46,7 +49,6 @@ jobs:
           cdk --version
       - name: install deps
         run: |
-          cd layer
           pip install -r requirements.txt
       - name: CDK build
         run: cdk synth --context version=$RELEASE_TAG_VERSION -o cdk.out
