@@ -29,7 +29,7 @@ This is the sample infrastructure for API Gateway we are using for the examples 
 
 Before you decorate your functions to handle a given path and HTTP method(s), you need to initialize a resolver.
 
-A resolver will handle request resolution, include [one or more routers](#split-routes-with-router), and give you access to the current event via typed properties.
+A resolver will handle request resolution, including [one or more routers](#split-routes-with-router), and give you access to the current event via typed properties.
 
 For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, and `ALBResolver`.
 
@@ -40,113 +40,29 @@ For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, a
 
 When using Amazon API Gateway REST API to front your Lambda functions, you can use `APIGatewayRestResolver`.
 
-Here's an example on how we can handle the `/hello` path.
+Here's an example on how we can handle the `/todos` path.
 
 ???+ info
     We automatically serialize `Dict` responses as JSON, trim whitespace for compact responses, and set content-type to `application/json`.
 
 === "app.py"
 
-    ```python hl_lines="3 7 9 12 18"
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    tracer = Tracer()
-    logger = Logger()
-    app = APIGatewayRestResolver()
-
-    @app.get("/hello")
-    @tracer.capture_method
-    def get_hello_universe():
-        return {"message": "hello universe"}
-
-    # You can continue to use other utilities just as before
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="5 11 14 28"
+    --8<-- "examples/event_handler_rest/src/getting_started_rest_api_resolver.py"
     ```
-=== "hello_event.json"
+
+=== "Request"
 
     This utility uses `path` and `httpMethod` to route to the right function. This helps make unit tests and local invocation easier too.
 
     ```json hl_lines="4-5"
-    {
-        "body": "hello",
-        "resource": "/hello",
-        "path": "/hello",
-        "httpMethod": "GET",
-        "isBase64Encoded": false,
-        "queryStringParameters": {
-            "foo": "bar"
-        },
-        "multiValueQueryStringParameters": {},
-        "pathParameters": {
-            "hello": "/hello"
-        },
-        "stageVariables": {},
-        "headers": {
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-            "Accept-Encoding": "gzip, deflate, sdch",
-            "Accept-Language": "en-US,en;q=0.8",
-            "Cache-Control": "max-age=0",
-            "CloudFront-Forwarded-Proto": "https",
-            "CloudFront-Is-Desktop-Viewer": "true",
-            "CloudFront-Is-Mobile-Viewer": "false",
-            "CloudFront-Is-SmartTV-Viewer": "false",
-            "CloudFront-Is-Tablet-Viewer": "false",
-            "CloudFront-Viewer-Country": "US",
-            "Host": "1234567890.execute-api.us-east-1.amazonaws.com",
-            "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Custom User Agent String",
-            "Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",
-            "X-Amz-Cf-Id": "cDehVQoZnx43VYQb9j2-nvCh-9z396Uhbp027Y2JvkCPNLmGJHqlaA==",
-            "X-Forwarded-For": "127.0.0.1, 127.0.0.2",
-            "X-Forwarded-Port": "443",
-            "X-Forwarded-Proto": "https"
-        },
-        "multiValueHeaders": {},
-        "requestContext": {
-        "accountId": "123456789012",
-        "resourceId": "123456",
-        "stage": "Prod",
-        "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
-        "requestTime": "25/Jul/2020:12:34:56 +0000",
-        "requestTimeEpoch": 1428582896000,
-        "identity": {
-            "cognitoIdentityPoolId": null,
-            "accountId": null,
-            "cognitoIdentityId": null,
-            "caller": null,
-            "accessKey": null,
-            "sourceIp": "127.0.0.1",
-            "cognitoAuthenticationType": null,
-            "cognitoAuthenticationProvider": null,
-            "userArn": null,
-            "userAgent": "Custom User Agent String",
-            "user": null
-        },
-        "path": "/Prod/hello",
-        "resourcePath": "/hello",
-        "httpMethod": "POST",
-        "apiId": "1234567890",
-        "protocol": "HTTP/1.1"
-        }
-    }
+    --8<-- "examples/event_handler_rest/src/getting_started_rest_api_resolver.json"
     ```
 
-=== "response.json"
+=== "Response"
 
     ```json
-    {
-        "statusCode": 200,
-        "headers": {
-            "Content-Type": "application/json"
-        },
-        "body": "{\"message\":\"hello universe\"}",
-        "isBase64Encoded": false
-    }
+    --8<-- "examples/event_handler_rest/src/getting_started_rest_api_resolver_output.json"
     ```
 
 #### API Gateway HTTP API
@@ -156,250 +72,90 @@ When using Amazon API Gateway HTTP API to front your Lambda functions, you can u
 ???+ note
     Using HTTP API v1 payload? Use `APIGatewayRestResolver` instead. `APIGatewayHttpResolver` defaults to v2 payload.
 
-Here's an example on how we can handle the `/hello` path.
-
-```python hl_lines="3 7" title="Using HTTP API resolver"
-from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
-
-tracer = Tracer()
-logger = Logger()
-app = APIGatewayHttpResolver()
-
-@app.get("/hello")
-@tracer.capture_method
-def get_hello_universe():
-	return {"message": "hello universe"}
-
-# You can continue to use other utilities just as before
-@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_HTTP)
-@tracer.capture_lambda_handler
-def lambda_handler(event, context):
-	return app.resolve(event, context)
+```python hl_lines="5 11" title="Using HTTP API resolver"
+--8<-- "examples/event_handler_rest/src/getting_started_http_api_resolver.py"
 ```
 
 #### Application Load Balancer
 
-When using Amazon Application Load Balancer to front your Lambda functions, you can use `ALBResolver`.
+When using Amazon Application Load Balancer (ALB) to front your Lambda functions, you can use `ALBResolver`.
 
-```python hl_lines="3 7" title="Using ALB resolver"
-from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.event_handler import ALBResolver
-
-tracer = Tracer()
-logger = Logger()
-app = ALBResolver()
-
-@app.get("/hello")
-@tracer.capture_method
-def get_hello_universe():
-	return {"message": "hello universe"}
-
-# You can continue to use other utilities just as before
-@logger.inject_lambda_context(correlation_id_path=correlation_paths.APPLICATION_LOAD_BALANCER)
-@tracer.capture_lambda_handler
-def lambda_handler(event, context):
-	return app.resolve(event, context)
+```python hl_lines="5 11" title="Using ALB resolver"
+--8<-- "examples/event_handler_rest/src/getting_started_alb_api_resolver.py"
 ```
 
 ### Dynamic routes
 
-You can use `/path/{dynamic_value}` when configuring dynamic URL paths. This allows you to define such dynamic value as part of your function signature.
+You can use `/todos/<todo_id>` to configure dynamic URL paths, where `<todo_id>` will be resolved at runtime.
+
+Each dynamic route you set must be part of your function signature. This allows us to call your function using keyword arguments when matching your dynamic route.
+
+???+ note
+    For brevity, we will only include the necessary keys for each sample request for the example to work.
 
 === "app.py"
 
-    ```python hl_lines="9 11"
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    tracer = Tracer()
-    logger = Logger()
-    app = APIGatewayRestResolver()
-
-    @app.get("/hello/<name>")
-    @tracer.capture_method
-    def get_hello_you(name):
-        return {"message": f"hello {name}"}
-
-    # You can continue to use other utilities just as before
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="14 16"
+    --8<-- "examples/event_handler_rest/src/dynamic_routes.py"
     ```
 
-=== "sample_request.json"
+=== "Request"
 
     ```json
-    {
-        "resource": "/hello/{name}",
-        "path": "/hello/lessa",
-        "httpMethod": "GET",
-        ...
-    }
+    --8<-- "examples/event_handler_rest/src/dynamic_routes.json"
     ```
 
-#### Nested routes
-
-You can also nest paths as configured earlier in [our sample infrastructure](#required-resources): `/{message}/{name}`.
-
-=== "app.py"
-
-    ```python hl_lines="9 11"
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    tracer = Tracer()
-    logger = Logger()
-    app = APIGatewayRestResolver()
-
-    @app.get("/<message>/<name>")
-    @tracer.capture_method
-    def get_message(message, name):
-        return {"message": f"{message}, {name}"}
-
-    # You can continue to use other utilities just as before
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
-    ```
-
-=== "sample_request.json"
-
-    ```json
-    {
-        "resource": "/{message}/{name}",
-        "path": "/hi/michael",
-        "httpMethod": "GET",
-        ...
-    }
-    ```
+???+ tip
+    You can also nest dynamic paths, for example `/todos/<todo_id>/<todo_status>`.
 
 #### Catch-all routes
 
 ???+ note
     We recommend having explicit routes whenever possible; use catch-all routes sparingly.
 
-You can use a regex string to handle an arbitrary number of paths within a request, for example `.+`.
+You can use a [regex](https://docs.python.org/3/library/re.html#regular-expression-syntax){target="_blank"} string to handle an arbitrary number of paths within a request, for example `.+`.
 
 You can also combine nested paths with greedy regex to catch in between routes.
 
 ???+ warning
-    We will choose the more explicit registered route that match incoming event.
+    We choose the most explicit registered route that matches an incoming event.
 
 === "app.py"
 
-    ```python hl_lines="5"
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    app = APIGatewayRestResolver()
-
-    @app.get(".+")
-    def catch_any_route_after_any():
-        return {"path_received": app.current_event.path}
-
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="11"
+    --8<-- "examples/event_handler_rest/src/dynamic_routes_catch_all.py"
     ```
 
-=== "sample_request.json"
+=== "Request"
 
     ```json
-    {
-        "resource": "/any/route/should/work",
-        "path": "/any/route/should/work",
-        "httpMethod": "GET",
-        ...
-    }
+    --8<-- "examples/event_handler_rest/src/dynamic_routes_catch_all.json"
     ```
 
 ### HTTP Methods
 
-You can use named decorators to specify the HTTP method that should be handled in your functions. As well as the
-`get` method already shown above, you can use `post`, `put`, `patch`, `delete`, and `patch`.
+You can use named decorators to specify the HTTP method that should be handled in your functions. That is, `app.<http_method>`, where the HTTP method could be `get`, `post`, `put`, `patch`, `delete`, and `options`.
 
 === "app.py"
 
-    ```python hl_lines="9-10"
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    tracer = Tracer()
-    logger = Logger()
-    app = APIGatewayRestResolver()
-
-    # Only POST HTTP requests to the path /hello will route to this function
-    @app.post("/hello")
-    @tracer.capture_method
-    def get_hello_you():
-        name = app.current_event.json_body.get("name")
-        return {"message": f"hello {name}"}
-
-    # You can continue to use other utilities just as before
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="14 17"
+    --8<-- "examples/event_handler_rest/src/http_methods.py"
     ```
 
-=== "sample_request.json"
+=== "Request"
 
     ```json
-    {
-        "resource": "/hello/{name}",
-        "path": "/hello/lessa",
-        "httpMethod": "GET",
-        ...
-    }
+    --8<-- "examples/event_handler_rest/src/http_methods.json"
     ```
 
-If you need to accept multiple HTTP methods in a single function, you can use the `route` method and pass a list of
-HTTP methods.
+If you need to accept multiple HTTP methods in a single function, you can use the `route` method and pass a list of HTTP methods.
 
-=== "app.py"
-
-    ```python hl_lines="9-10"
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    tracer = Tracer()
-    logger = Logger()
-    app = APIGatewayRestResolver()
-
-    # PUT and POST HTTP requests to the path /hello will route to this function
-    @app.route("/hello", method=["PUT", "POST"])
-    @tracer.capture_method
-    def get_hello_you():
-        name = app.current_event.json_body.get("name")
-        return {"message": f"hello {name}"}
-
-    # You can continue to use other utilities just as before
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
-    ```
-
-=== "sample_request.json"
-
-    ```json
-    {
-        "resource": "/hello/{name}",
-        "path": "/hello/lessa",
-        "httpMethod": "GET",
-        ...
-    }
-    ```
+```python hl_lines="15" title="Handling multiple HTTP Methods"
+--8<-- "examples/event_handler_rest/src/http_methods_multiple.py"
+```
 
 ???+ note
-    It is usually better to have separate functions for each HTTP method, as the functionality tends to differ depending on which method is used.
+    It is generally better to have separate functions for each HTTP method, as the functionality tends to differ depending on which method is used.
 
 ### Accessing request details
 
