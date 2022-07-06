@@ -214,43 +214,24 @@ We provide pre-defined errors for the most popular ones such as HTTP 400, 401, 4
 
 ### Custom Domain API Mappings
 
-When using Custom Domain API Mappings feature, you must use **`strip_prefixes`** param in the `APIGatewayRestResolver` constructor.
+When using [Custom Domain API Mappings feature](https://docs.aws.amazon.com/apigateway/latest/developerguide/rest-api-mappings.html){target="_blank"}, you must use **`strip_prefixes`** param in the `APIGatewayRestResolver` constructor.
 
-Scenario: You have a custom domain `api.mydomain.dev` and set an API Mapping `payment` to forward requests to your Payments API, the path argument will be `/payment/<your_actual_path>`.
+**Scenario**: You have a custom domain `api.mydomain.dev`. Then you set `/payment` API Mapping to forward any payment requests to your Payments API.
 
-This will lead to a HTTP 404 despite having your Lambda configured correctly. See the example below on how to account for this change.
+**Challenge**: This means your `path` value for any API requests will always contain `/payment/<actual_request>`, leading to HTTP 404 as Event Handler is trying to match what's after `payment/`. This gets further complicated with an [arbitrary level of nesting](https://github.com/awslabs/aws-lambda-powertools-roadmap/issues/34).
+
+To address this API Gateway behavior, we use `strip_prefixes` parameter to account for these prefixes that are now injected into the path regardless of which type of API Gateway you're using.
 
 === "app.py"
 
-    ```python hl_lines="7"
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    tracer = Tracer()
-    logger = Logger()
-    app = APIGatewayRestResolver(strip_prefixes=["/payment"])
-
-    @app.get("/subscriptions/<subscription>")
-    @tracer.capture_method
-    def get_subscription(subscription):
-        return {"subscription_id": subscription}
-
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="8"
+    --8<-- "examples/event_handler_rest/src/custom_api_mapping.py"
     ```
 
-=== "sample_request.json"
+=== "Request"
 
     ```json
-    {
-        "resource": "/subscriptions/{subscription}",
-        "path": "/payment/subscriptions/123",
-        "httpMethod": "GET",
-        ...
-    }
+    --8<-- "examples/event_handler_rest/src/custom_api_mapping.json"
     ```
 
 ???+ note
