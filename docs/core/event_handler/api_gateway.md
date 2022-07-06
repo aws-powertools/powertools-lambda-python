@@ -201,59 +201,15 @@ You can use **`exception_handler`** decorator with any Python exception. This al
 
 ### Raising HTTP errors
 
-You can easily raise any HTTP Error back to the client using `ServiceError` exception.
+You can easily raise any HTTP Error back to the client using `ServiceError` exception. This ensures your Lambda function doesn't fail but return the correct HTTP response signalling the error.
 
 ???+ info
     If you need to send custom headers, use [Response](#fine-grained-responses) class instead.
 
-Additionally, we provide pre-defined errors for the most popular ones such as HTTP 400, 401, 404, 500.
+We provide pre-defined errors for the most popular ones such as HTTP 400, 401, 404, 500.
 
-```python hl_lines="4-10 20 25 30 35 39" title="Raising common HTTP Status errors (4xx, 5xx)"
-from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.event_handler.exceptions import (
-	BadRequestError,
-	InternalServerError,
-	NotFoundError,
-	ServiceError,
-	UnauthorizedError,
-)
-
-tracer = Tracer()
-logger = Logger()
-
-app = APIGatewayRestResolver()
-
-@app.get(rule="/bad-request-error")
-def bad_request_error():
-	# HTTP  400
-	raise BadRequestError("Missing required parameter")
-
-@app.get(rule="/unauthorized-error")
-def unauthorized_error():
-	# HTTP 401
-	raise UnauthorizedError("Unauthorized")
-
-@app.get(rule="/not-found-error")
-def not_found_error():
-	# HTTP 404
-	raise NotFoundError
-
-@app.get(rule="/internal-server-error")
-def internal_server_error():
-	# HTTP 500
-	raise InternalServerError("Internal server error")
-
-@app.get(rule="/service-error", cors=True)
-def service_error():
-	raise ServiceError(502, "Something went wrong!")
-	# alternatively
-	# from http import HTTPStatus
-	# raise ServiceError(HTTPStatus.BAD_GATEWAY.value, "Something went wrong)
-
-def handler(event, context):
-	return app.resolve(event, context)
+```python hl_lines="6-11 23 28 33 38 43" title="Raising common HTTP Status errors (4xx, 5xx)"
+--8<-- "examples/event_handler_rest/src/raising_http_errors.py"
 ```
 
 ### Custom Domain API Mappings
