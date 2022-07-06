@@ -177,20 +177,8 @@ You can access the raw payload via `body` property, or if it's a JSON string you
 
 Similarly to [Query strings](#query-strings-and-payload), you can access headers as dictionary via `app.current_event.headers`, or by name via `get_header_value`.
 
-```python hl_lines="7-8" title="Accessing HTTP Headers"
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-app = APIGatewayRestResolver()
-
-@app.get("/hello")
-def get_hello_you():
-	headers_as_dict = app.current_event.headers
-	name = app.current_event.get_header_value(name="X-Name", default_value="")
-
-	return {"message": f"hello {name}"}
-
-def lambda_handler(event, context):
-	return app.resolve(event, context)
+```python hl_lines="19" title="Accessing HTTP Headers"
+--8<-- "examples/event_handler_rest/src/accessing_request_details_headers.py"
 ```
 
 ### Handling not found routes
