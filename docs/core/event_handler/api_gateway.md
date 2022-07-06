@@ -159,32 +159,18 @@ If you need to accept multiple HTTP methods in a single function, you can use th
 
 ### Accessing request details
 
-By integrating with [Data classes utilities](../../utilities/data_classes.md){target="_blank"}, you have access to request details, Lambda context and also some convenient methods.
+Event Handler integrates with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
 
-These are made available in the response returned when instantiating `APIGatewayRestResolver`, for example `app.current_event` and `app.lambda_context`.
+That is why you see `app.resolve(event, context)` in every example. This allows Event Handler to resolve requests, and expose data like `app.lambda_context` and  `app.current_event`.
 
 #### Query strings and payload
 
-Within `app.current_event` property, you can access query strings as dictionary via `query_string_parameters`, or by name via `get_query_string_value` method.
+Within `app.current_event` property, you can access all available query strings as a dictionary via `query_string_parameters`, or a specific one via  `get_query_string_value` method.
 
-You can access the raw payload via `body` property, or if it's a JSON string you can quickly deserialize it via `json_body` property.
+You can access the raw payload via `body` property, or if it's a JSON string you can quickly deserialize it via `json_body` property - like the earlier example in the [HTTP Methods](#http-methods) section.
 
-```python hl_lines="7-9 11" title="Accessing query strings, JSON payload, and raw payload"
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-app = APIGatewayRestResolver()
-
-@app.get("/hello")
-def get_hello_you():
-	query_strings_as_dict = app.current_event.query_string_parameters
-	json_payload = app.current_event.json_body
-	payload = app.current_event.body
-
-	name = app.current_event.get_query_string_value(name="name", default_value="")
-	return {"message": f"hello {name}"}
-
-def lambda_handler(event, context):
-	return app.resolve(event, context)
+```python hl_lines="19 24" title="Accessing query strings and raw payload"
+--8<-- "examples/event_handler_rest/src/accessing_request_details.py"
 ```
 
 #### Headers
