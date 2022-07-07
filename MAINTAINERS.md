@@ -170,8 +170,9 @@ Some examples using our initial and new RFC templates: #92, #94, #95, #991, #122
 
 In order to run end to end tests you need to install CDK CLI first and bootstrap your account with `cdk bootstrap` command. For additional details follow [documentation](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html).
 
-You can run tests either from your local machine's shell by exporting `AWS_PROFILE` environment variable and running `make e2e tests`. 
-You may also do this directly from GitHub Console. Run the [run-e2e-tests workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/run-e2e-tests.yml) and pick the branch you want to run tests against.
+To run locally, export `AWS_PROFILE` environment variable and run `make e2e tests`. To run from GitHub Actions, use [run-e2e-tests workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/run-e2e-tests.yml) and pick the branch you want to run tests against.
+
+**NOTE**: E2E tests are run as part of each merge to `develop` branch.
 
 > **Q: What if there's an error?**
 To be agreed
