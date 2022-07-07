@@ -166,7 +166,7 @@ When necessary, be upfront that the time to review, approve, and implement a RFC
 
 Some examples using our initial and new RFC templates: #92, #94, #95, #991, #1226
 
-### Run end to end tests on merges to Develop branch
+### Run end to end tests
 
 In order to run end to end tests you need to install CDK CLI first and bootstrap your account with `cdk bootstrap` command. For additional details follow [documentation](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html).
 
