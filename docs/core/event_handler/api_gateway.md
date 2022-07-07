@@ -247,66 +247,20 @@ You can configure CORS at the `APIGatewayRestResolver` constructor via `cors` pa
 
 This will ensure that CORS headers are always returned as part of the response when your functions match the path invoked.
 
+???+ tip
+    Optionally disable CORS on a per path basis with `cors=False` parameter.
+
 === "app.py"
 
-    ```python hl_lines="9 11"
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, CORSConfig
-
-    tracer = Tracer()
-    logger = Logger()
-
-    cors_config = CORSConfig(allow_origin="https://example.com", max_age=300)
-    app = APIGatewayRestResolver(cors=cors_config)
-
-    @app.get("/hello/<name>")
-    @tracer.capture_method
-    def get_hello_you(name):
-        return {"message": f"hello {name}"}
-
-    @app.get("/hello", cors=False)  # optionally exclude CORS from response, if needed
-    @tracer.capture_method
-    def get_hello_no_cors_needed():
-        return {"message": "hello, no CORS needed for this path ;)"}
-
-    # You can continue to use other utilities just as before
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="5 11-12 34"
+    --8<-- "examples/event_handler_rest/src/setting_cors.py"
     ```
 
 === "response.json"
 
     ```json
-    {
-        "statusCode": 200,
-        "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "https://www.example.com",
-            "Access-Control-Allow-Headers": "Authorization,Content-Type,X-Amz-Date,X-Amz-Security-Token,X-Api-Key"
-        },
-        "body": "{\"message\":\"hello lessa\"}",
-        "isBase64Encoded": false
-    }
+    --8<-- "examples/event_handler_rest/src/setting_cors_output.json"
     ```
-
-=== "response_no_cors.json"
-
-    ```json
-    {
-        "statusCode": 200,
-        "headers": {
-            "Content-Type": "application/json"
-        },
-        "body": "{\"message\":\"hello lessa\"}",
-        "isBase64Encoded": false
-    }
-    ```
-
-???+ tip
-    Optionally disable CORS on a per path basis with `cors=False` parameter.
 
 #### Pre-flight
 
