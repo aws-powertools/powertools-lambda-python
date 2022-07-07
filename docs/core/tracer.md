@@ -16,6 +16,9 @@ Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.
 
 ## Getting started
 
+???+ tip
+    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+
 ### Permissions
 
 Before your use this utility, your AWS Lambda function [must have permissions](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray-permissions) to send traces to AWS X-Ray.

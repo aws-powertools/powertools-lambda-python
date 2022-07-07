@@ -14,6 +14,9 @@ Logger provides an opinionated logger with output structured as JSON.
 
 ## Getting started
 
+???+ tip
+    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+
 Logger requires two settings:
 
 | Setting           | Description                                                         | Environment variable      | Constructor parameter |
