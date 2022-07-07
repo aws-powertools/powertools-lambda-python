@@ -56,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: cdk-layer-artefact
-          path: cdk.out.zip
+          path: layer/cdk.out.zip
 
   deploy-beta:
     needs:
