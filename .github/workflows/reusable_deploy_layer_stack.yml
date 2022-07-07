@@ -10,6 +10,9 @@ on:
       stage:
         required: true
         type: string
+      artefact-name:
+        required: true
+        type: string
     secrets:
       target-account:
         required: true
@@ -72,11 +75,11 @@ jobs:
       - name: install deps
         run: |
           pip install -r requirements.txt
-      - name: Download a single artifact
+      - name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: cdk.out
-      - name: unzip cdk.out.zip
+          name: ${{ inputs.artefact-name }}
+      - name: unzip artefact
         run: unzip cdk.out.zip
       - name: CDK Deploy Layer
         run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'LayerStack ' --require-approval never --verbose

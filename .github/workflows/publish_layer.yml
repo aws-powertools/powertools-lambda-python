@@ -5,7 +5,6 @@ permissions:
   contents: read
 
 on:
-  # TODO: remove after setup is finished
   workflow_dispatch:
     inputs:
       latest_published_version:
@@ -57,7 +56,7 @@ jobs:
       - name: Archive CDK artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: cdk.out
+          name: cdk-layer-artefact
           path: cdk.out.zip
 
   deploy-beta:
@@ -66,6 +65,7 @@ jobs:
     uses: ./.github/workflows/reusable_deploy_layer_stack.yml
     with:
       stage: "BETA"
+      artifact-name: "cdk-layer-artefact"
     secrets:
       target-account: ${{ secrets.LAYERS_BETA_ACCOUNT }}
 
@@ -75,5 +75,6 @@ jobs:
     uses: ./.github/workflows/reusable_deploy_layer_stack.yml
     with:
       stage: "PROD"
+      artifact-name: "cdk-layer-artefact"
     secrets:
       target-account: ${{ secrets.LAYERS_PROD_ACCOUNT }}
