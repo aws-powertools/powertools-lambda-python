@@ -256,7 +256,7 @@ This will ensure that CORS headers are always returned as part of the response w
     --8<-- "examples/event_handler_rest/src/setting_cors.py"
     ```
 
-=== "response.json"
+=== "Response"
 
     ```json
     --8<-- "examples/event_handler_rest/src/setting_cors_output.json"
@@ -289,40 +289,15 @@ You can use the `Response` class to have full control over the response, for exa
 
 === "app.py"
 
-    ```python hl_lines="11-16"
-    import json
-    from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response
-
-    app = APIGatewayRestResolver()
-
-    @app.get("/hello")
-    def get_hello_you():
-        payload = json.dumps({"message": "I'm a teapot"})
-        custom_headers = {"X-Custom": "X-Value"}
-
-        return Response(
-            status_code=418,
-            content_type="application/json",
-            body=payload,
-            headers=custom_headers,
-        )
-
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="7 24-28"
+    --8<-- "examples/event_handler_rest/src/fine_grained_responses.py"
     ```
 
-=== "response.json"
+=== "Response"
 
     ```json
-    {
-        "body": "{\"message\":\"I\'m a teapot\"}",
-        "headers": {
-            "Content-Type": "application/json",
-            "X-Custom": "X-Value"
-        },
-        "isBase64Encoded": false,
-        "statusCode": 418
-    }
+    --8<-- "examples/event_handler_rest/src/fine_grained_responses_output.json"
+    ```
 
 ### Compress
 
