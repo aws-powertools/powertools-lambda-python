@@ -6,7 +6,7 @@ module.exports = async ({github, context}) => {
 
     const RELATED_ISSUE_REGEX = /Issue number:[^\d\r\n]+(?<issue>\d+)/;
 
-    const isMatch = RELATED_ISSUE_REGEX.exec(body);
+    const isMatch = RELATED_ISSUE_REGEX.exec(prBody);
     if (!isMatch) {
       core.setFailed(`Unable to find related issue for PR number ${prNumber}.\n\n Body details: ${prBody}`);
       return await github.rest.issues.createComment({
