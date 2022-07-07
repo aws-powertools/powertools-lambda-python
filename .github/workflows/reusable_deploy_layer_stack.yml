@@ -79,7 +79,7 @@ jobs:
         with:
           name: ${{ inputs.artefact-name }}
       - name: unzip artefact
-        run: unzip cdk.out.zip
+        run: unzip ${{ inputs.artefact-name }}
       - name: CDK Deploy Layer
         run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'LayerStack ' --require-approval never --verbose
       - name: CDK Deploy Canary
