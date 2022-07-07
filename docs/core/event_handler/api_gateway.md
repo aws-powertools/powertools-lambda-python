@@ -384,61 +384,22 @@ You can instruct API Gateway handler to use a custom serializer to best suit you
 
 As you grow the number of routes a given Lambda function should handle, it is natural to split routes into separate files to ease maintenance - That's where the `Router` feature is useful.
 
-Let's assume you have `app.py` as your Lambda function entrypoint and routes in `users.py`, this is how you'd use the `Router` feature.
+Let's assume you have `app.py` as your Lambda function entrypoint and routes in `todos.py`, this is how you'd use the `Router` feature.
 
-=== "users.py"
+=== "todos.py"
 
 	We import **Router** instead of **APIGatewayRestResolver**; syntax wise is exactly the same.
 
-    ```python hl_lines="5 8 12 15 21"
-    import itertools
-	from typing import Dict
-
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.event_handler.api_gateway import Router
-
-    logger = Logger(child=True)
-    router = Router()
-    USERS = {"user1": "details_here", "user2": "details_here", "user3": "details_here"}
-
-
-    @router.get("/users")
-    def get_users() -> Dict:
-		# /users?limit=1
-		pagination_limit = router.current_event.get_query_string_value(name="limit", default_value=10)
-
-		logger.info(f"Fetching the first {pagination_limit} users...")
-		ret = dict(itertools.islice(USERS.items(), int(pagination_limit)))
-		return {"items": [ret]}
-
-    @router.get("/users/<username>")
-    def get_user(username: str) -> Dict:
-        logger.info(f"Fetching username {username}")
-        return {"details": USERS.get(username, {})}
-
-	# many other related /users routing
+    ```python hl_lines="5 13 16 25 28"
+    --8<-- "examples/event_handler_rest/src/split_route_module.py"
     ```
 
 === "app.py"
 
 	We use `include_router` method and include all user routers registered in the `router` global object.
 
-	```python hl_lines="7 10-11"
-	from typing import Dict
-
-    from aws_lambda_powertools import Logger
-	from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-	from aws_lambda_powertools.utilities.typing import LambdaContext
-
-	import users
-
-    logger = Logger()
-	app = APIGatewayRestResolver()
-	app.include_router(users.router)
-
-
-	def lambda_handler(event: Dict, context: LambdaContext):
-		return app.resolve(event, context)
+	```python hl_lines="11"
+    --8<-- "examples/event_handler_rest/src/split_route.py"
 	```
 
 #### Route prefix
