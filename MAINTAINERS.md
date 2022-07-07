@@ -182,7 +182,7 @@ To be agreed
 
 Firstly, make sure you are using the `develop` branch and it is up to date with the origin.
 
-There are four main steps to release a new version: Changelog generation, version bumping, and drafting release notes.
+There are three main steps to release a new version: Changelog generation, version bumping, and drafting release notes.
 
 #### Changelog generation
 
