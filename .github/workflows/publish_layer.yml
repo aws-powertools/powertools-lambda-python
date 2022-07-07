@@ -63,7 +63,7 @@ jobs:
   deploy-beta:
     needs:
       - build-layer
-    uses: ./.github/workflows/deploy_cdk_stack.yml
+    uses: ./.github/workflows/reusable_deploy_layer_stack.yml
     with:
       stage: "BETA"
     secrets:
@@ -72,7 +72,7 @@ jobs:
   deploy-prod:
     needs:
       - deploy-beta
-    uses: ./.github/workflows/deploy_cdk_stack.yml
+    uses: ./.github/workflows/reusable_deploy_layer_stack.yml
     with:
       stage: "PROD"
     secrets:
