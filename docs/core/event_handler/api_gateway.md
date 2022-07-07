@@ -508,53 +508,14 @@ You can test your routes by passing a proxy event request where `path` and `http
 
 === "test_app.py"
 
-    ```python hl_lines="18-24"
-    from dataclasses import dataclass
-
-    import pytest
-    import app
-
-    @pytest.fixture
-    def lambda_context():
-        @dataclass
-        class LambdaContext:
-            function_name: str = "test"
-            memory_limit_in_mb: int = 128
-            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
-            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
-
-        return LambdaContext()
-
-    def test_lambda_handler(lambda_context):
-        minimal_event = {
-            "path": "/hello",
-            "httpMethod": "GET",
-            "requestContext": {  # correlation ID
-                "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef"
-            }
-        }
-
-        app.lambda_handler(minimal_event, lambda_context)
+    ```python hl_lines="21-24"
+    --8<-- "examples/event_handler_rest/src/assert_http_response.py"
     ```
 
 === "app.py"
 
     ```python
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    logger = Logger()
-    app = APIGatewayRestResolver()  # API Gateway REST API (v1)
-
-    @app.get("/hello")
-    def get_hello_universe():
-        return {"message": "hello universe"}
-
-    # You can continue to use other utilities just as before
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    --8<-- "examples/event_handler_rest/src/assert_http_response_module.py"
     ```
 
 ## FAQ
