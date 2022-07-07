@@ -21,7 +21,7 @@ class PythonVersion(Enum):
     V39 = {"runtime": Runtime.PYTHON_3_9, "image": Runtime.PYTHON_3_9.bundling_image.image}
 
 
-class InfrastructureStackInterface(ABC):
+class BaseInfrastructureStack(ABC):
     @abstractmethod
     def synthesize() -> Tuple[dict, str]:
         ...
