@@ -308,44 +308,20 @@ You can compress with gzip and base64 encode your responses via `compress` param
 
 === "app.py"
 
-    ```python hl_lines="5 7"
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    app = APIGatewayRestResolver()
-
-    @app.get("/hello", compress=True)
-    def get_hello_you():
-        return {"message": "hello universe"}
-
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="14"
+     --8<-- "examples/event_handler_rest/src/compressing_responses.py"
     ```
 
-=== "sample_request.json"
+=== "Request"
 
     ```json
-    {
-        "headers": {
-            "Accept-Encoding": "gzip"
-        },
-        "httpMethod": "GET",
-        "path": "/hello",
-        ...
-    }
+    --8<-- "examples/event_handler_rest/src/compressing_responses.json"
     ```
 
-=== "response.json"
+=== "Response"
 
     ```json
-    {
-        "body": "H4sIAAAAAAACE6tWyk0tLk5MT1WyUspIzcnJVyjNyyxLLSpOVaoFANha8kEcAAAA",
-        "headers": {
-            "Content-Encoding": "gzip",
-            "Content-Type": "application/json"
-        },
-        "isBase64Encoded": true,
-        "statusCode": 200
-    }
+    --8<-- "examples/event_handler_rest/src/compressing_responses_output.json"
     ```
 
 ### Binary responses

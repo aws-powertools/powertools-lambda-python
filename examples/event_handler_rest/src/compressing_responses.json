@@ -1,0 +1,8 @@
+{
+    "headers": {
+        "Accept-Encoding": "gzip"
+    },
+    "resource": "/todos",
+    "path": "/todos",
+    "httpMethod": "GET"
+}
