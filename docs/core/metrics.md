@@ -28,6 +28,9 @@ If you're new to Amazon CloudWatch, there are two terminologies you must be awar
 
 ## Getting started
 
+???+ tip
+    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+
 Metric has two global settings that will be used across all metrics emitted:
 
 | Setting              | Description                                                                     | Environment variable           | Constructor parameter |
