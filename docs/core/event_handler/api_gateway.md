@@ -404,205 +404,52 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
 
 #### Route prefix
 
-In the previous example, `users.py` routes had a `/users` prefix. This might grow over time and become repetitive.
+In the previous example, `todos.py` routes had a `/todos` prefix. This might grow over time and become repetitive.
 
-When necessary, you can set a prefix when including a router object. This means you could remove `/users` prefix in `users.py` altogether.
+When necessary, you can set a prefix when including a router object. This means you could remove `/todos` prefix in `todos.py` altogether.
 
 === "app.py"
 
-	```python hl_lines="9"
-	from typing import Dict
-
-	from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-	from aws_lambda_powertools.utilities.typing import LambdaContext
-
-	import users
-
-	app = APIGatewayRestResolver()
-	app.include_router(users.router, prefix="/users") # prefix '/users' to any route in `users.router`
-
-
-	def lambda_handler(event: Dict, context: LambdaContext):
-		return app.resolve(event, context)
+	```python hl_lines="12"
+    --8<-- "examples/event_handler_rest/src/split_route_prefix.py"
 	```
 
-=== "users.py"
+=== "todos.py"
 
-    ```python hl_lines="11 15"
-	from typing import Dict
-
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.event_handler.api_gateway import Router
-
-    logger = Logger(child=True)
-    router = Router()
-    USERS = {"user1": "details", "user2": "details", "user3": "details"}
-
-
-    @router.get("/")  # /users, when we set the prefix in app.py
-    def get_users() -> Dict:
-		...
-
-    @router.get("/<username>")
-    def get_user(username: str) -> Dict:
-		...
-
-	# many other related /users routing
+    ```python hl_lines="13 25"
+    --8<-- "examples/event_handler_rest/src/split_route_prefix_module.py"
     ```
 
 #### Sample layout
 
-This sample project contains a Users function with two distinct set of routes, `/users` and `/health`. The layout optimizes for code sharing, no custom build tooling, and it uses [Lambda Layers](../../index.md#lambda-layer) to install Lambda Powertools.
+This is a sample project layout for a monolithic function with routes split in different files (`/todos`, `/health`).
 
-=== "Project layout"
-
-    ```python hl_lines="1 8 10 12-15"
-    .
-    ├── Pipfile                    # project app & dev dependencies; poetry, pipenv, etc.
-    ├── Pipfile.lock
-    ├── README.md
-    ├── src
-    │       ├── __init__.py
-    │       ├── requirements.txt   # sam build detect it automatically due to CodeUri: src, e.g. pipenv lock -r > src/requirements.txt
-    │       └── users
-    │           ├── __init__.py
-    │           ├── main.py       # this will be our users Lambda fn; it could be split in folders if we want separate fns same code base
-    │           └── routers       # routers module
-    │               ├── __init__.py
-    │               ├── health.py # /users routes, e.g. from routers import users; users.router
-    │               └── users.py  # /users routes, e.g. from .routers import users; users.router
-    ├── template.yml              # SAM template.yml, CodeUri: src, Handler: users.main.lambda_handler
-    └── tests
+```shell hl_lines="1 8 10 12-15" title="Sample project layout"
+.
+├── pyproject.toml            # project app & dev dependencies; poetry, pipenv, etc.
+├── poetry.lock
+├── src
+│       ├── __init__.py
+│       ├── requirements.txt  # sam build detect it automatically due to CodeUri: src. poetry export --format src/requirements.txt
+│       └── todos
+│           ├── __init__.py
+│           ├── main.py       # this will be our todos Lambda fn; it could be split in folders if we want separate fns same code base
+│           └── routers       # routers module
+│               ├── __init__.py
+│               ├── health.py # /health routes. from routers import todos; health.router
+│               └── todos.py  # /todos routes. from .routers import todos; todos.router
+├── template.yml              # SAM. CodeUri: src, Handler: todos.main.lambda_handler
+└── tests
+    ├── __init__.py
+    ├── unit
+    │   ├── __init__.py
+    │   └── test_todos.py     # unit tests for the todos router
+    │   └── test_health.py    # unit tests for the health router
+    └── functional
         ├── __init__.py
-        ├── unit
-        │   ├── __init__.py
-        │   └── test_users.py     # unit tests for the users router
-        │   └── test_health.py    # unit tests for the health router
-        └── functional
-            ├── __init__.py
-            ├── conftest.py       # pytest fixtures for the functional tests
-            └── test_main.py      # functional tests for the main lambda handler
-    ```
-
-=== "template.yml"
-
-    ```yaml  hl_lines="22-23"
-    AWSTemplateFormatVersion: '2010-09-09'
-    Transform: AWS::Serverless-2016-10-31
-    Description: Example service with multiple routes
-    Globals:
-        Function:
-            Timeout: 10
-            MemorySize: 512
-            Runtime: python3.9
-            Tracing: Active
-            Architectures:
-                - x86_64
-            Environment:
-                Variables:
-                    LOG_LEVEL: INFO
-                    POWERTOOLS_LOGGER_LOG_EVENT: true
-                    POWERTOOLS_METRICS_NAMESPACE: MyServerlessApplication
-                    POWERTOOLS_SERVICE_NAME: users
-    Resources:
-        UsersService:
-            Type: AWS::Serverless::Function
-            Properties:
-                Handler: users.main.lambda_handler
-                CodeUri: src
-                Layers:
-                    # Latest version: https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer
-                    - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:4
-                Events:
-                    ByUser:
-                        Type: Api
-                        Properties:
-                            Path: /users/{name}
-                            Method: GET
-                    AllUsers:
-                        Type: Api
-                        Properties:
-                            Path: /users
-                            Method: GET
-                    HealthCheck:
-                        Type: Api
-                        Properties:
-                            Path: /status
-                            Method: GET
-    Outputs:
-        UsersApiEndpoint:
-            Description: "API Gateway endpoint URL for Prod environment for Users Function"
-            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
-        AllUsersURL:
-            Description: "URL to fetch all registered users"
-            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users"
-        ByUserURL:
-            Description: "URL to retrieve details by user"
-            Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users/test"
-        UsersServiceFunctionArn:
-            Description: "Users Lambda Function ARN"
-            Value: !GetAtt UsersService.Arn
-    ```
-
-=== "src/users/main.py"
-
-    ```python hl_lines="8 14-15"
-    from typing import Dict
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-    from aws_lambda_powertools.logging.correlation_paths import APPLICATION_LOAD_BALANCER
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-    from .routers import health, users
-
-    tracer = Tracer()
-    logger = Logger()
-    app = APIGatewayRestResolver()
-
-    app.include_router(health.router)
-    app.include_router(users.router)
-
-
-    @logger.inject_lambda_context(correlation_id_path=API_GATEWAY_REST)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event: Dict, context: LambdaContext):
-        return app.resolve(event, context)
-    ```
-
-=== "src/users/routers/health.py"
-
-    ```python hl_lines="4 6-7 10"
-    from typing import Dict
-
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.event_handler.api_gateway import Router
-
-    router = Router()
-    logger = Logger(child=True)
-
-
-    @router.get("/status")
-    def health() -> Dict:
-        logger.debug("Health check called")
-        return {"status": "OK"}
-    ```
-
-=== "tests/functional/test_users.py"
-
-    ```python  hl_lines="3"
-    import json
-
-    from src.users import main  # follows namespace package from root
-
-
-    def test_lambda_handler(apigw_event, lambda_context):
-        ret = main.lambda_handler(apigw_event, lambda_context)
-        expected = json.dumps({"message": "hello universe"}, separators=(",", ":"))
-
-        assert ret["statusCode"] == 200
-        assert ret["body"] == expected
-    ```
+        ├── conftest.py       # pytest fixtures for the functional tests
+        └── test_main.py      # functional tests for the main lambda handler
+```
 
 ### Considerations
 
