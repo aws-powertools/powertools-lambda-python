@@ -379,7 +379,7 @@ This will enable full tracebacks errors in the response, print request and respo
 
 You can instruct API Gateway handler to use a custom serializer to best suit your needs, for example take into account Enums when serializing.
 
-```python hl_lines="36 41" title="Using a custom JSON serializer for responses"
+```python hl_lines="35 40" title="Using a custom JSON serializer for responses"
 --8<-- "examples/event_handler_rest/src/custom_serializer.py"
 ```
 
@@ -427,7 +427,7 @@ When necessary, you can set a prefix when including a router object. This means 
 
 This is a sample project layout for a monolithic function with routes split in different files (`/todos`, `/health`).
 
-```shell hl_lines="1 8 10 12-15" title="Sample project layout"
+```shell hl_lines="4 7 10 12-13" title="Sample project layout"
 .
 ├── pyproject.toml            # project app & dev dependencies; poetry, pipenv, etc.
 ├── poetry.lock

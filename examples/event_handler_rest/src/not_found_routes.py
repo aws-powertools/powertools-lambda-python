@@ -1,8 +1,7 @@
 import requests
-from requests import Response
 
 from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver, content_types
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response, content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -22,7 +21,7 @@ def handle_not_found_errors(exc: NotFoundError) -> Response:
 @app.get("/todos")
 @tracer.capture_method
 def get_todos():
-    todos: Response = requests.get("https://jsonplaceholder.typicode.com/todos")
+    todos: requests.Response = requests.get("https://jsonplaceholder.typicode.com/todos")
     todos.raise_for_status()
 
     # for brevity, we'll limit to the first 10 only
