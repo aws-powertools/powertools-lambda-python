@@ -66,7 +66,7 @@ jobs:
       stage: "BETA"
       artefact-name: "cdk-layer-artefact"
     secrets:
-      target-account: ${{ secrets.LAYERS_BETA_ACCOUNT }}
+      target-account-role: arn:aws:iam::${{ secrets.LAYERS_BETA_ACCOUNT }}:role/${{ secrets.AWS_GITHUB_OIDC_ROLE }}
 
   deploy-prod:
     needs:
@@ -76,4 +76,4 @@ jobs:
       stage: "PROD"
       artefact-name: "cdk-layer-artefact"
     secrets:
-      target-account: ${{ secrets.LAYERS_PROD_ACCOUNT }}
+      target-account-role: arn:aws:iam::${{ secrets.LAYERS_PROD_ACCOUNT }}:role/${{ secrets.AWS_GITHUB_OIDC_ROLE }}

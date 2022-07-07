@@ -14,7 +14,7 @@ on:
         required: true
         type: string
     secrets:
-      target-account:
+      target-account-role:
         required: true
 
 jobs:
@@ -57,7 +57,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: ${{ matrix.region }}
-          role-to-assume: arn:aws:iam::${{ secrets.target-account }}:role/${{ secrets.AWS_GITHUB_OIDC_ROLE }}
+          role-to-assume: ${{ secrets.target-account-role }}
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
