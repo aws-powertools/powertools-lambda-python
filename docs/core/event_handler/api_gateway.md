@@ -368,17 +368,8 @@ This will enable full tracebacks errors in the response, print request and respo
 
     It's best to use for local development only!
 
-```python hl_lines="3" title="Enabling debug mode"
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-app = APIGatewayRestResolver(debug=True)
-
-@app.get("/hello")
-def get_hello_universe():
-	return {"message": "hello universe"}
-
-def lambda_handler(event, context):
-	return app.resolve(event, context)
+```python hl_lines="11" title="Enabling debug mode"
+--8<-- "examples/event_handler_rest/src/debug_mode.py"
 ```
 
 ### Custom serializer
