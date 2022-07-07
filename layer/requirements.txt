@@ -11,9 +11,9 @@ attrs==21.4.0 \
     #   -r requirements.txt
     #   cattrs
     #   jsii
-aws-cdk-lib==2.29.0 \
-    --hash=sha256:4f852105cafd28a2bbd9bd2c6d24a2e1ab503bba923fd49a1782390b235af999 \
-    --hash=sha256:53a78788219d9bf3a998211223225b34a10f066124e2812adcd40fd0a2058572
+aws-cdk-lib==2.31.0 \
+    --hash=sha256:81bf9b6c66b751673ad7051fdbf8a58ef1337239fb6f0379e401e76378219740 \
+    --hash=sha256:878f38ca4eced8e9ee44641c48bf053bff38b01a03fb5eb677114a4e8764ee98
     # via
     #   -r requirements.txt
     #   cdk-lambda-powertools-python-layer
