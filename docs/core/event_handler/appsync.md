@@ -80,6 +80,26 @@ Here's an example where we have two separate functions to resolve `getTodo` and 
     --8<-- "examples/event_handler_graphql/src/getting_started_list_todos.json"
     ```
 
+### Scalar functions
+
+When working with [AWS AppSync Scalar types](https://docs.aws.amazon.com/appsync/latest/devguide/scalars.html){target="_blank"}, you might want to generate the same values for data validation purposes.
+
+For convenience, the most commonly used values are available as functions within `scalar_types_utils` module.
+
+```python hl_lines="1-6" title="Creating key scalar values with scalar_types_utils"
+--8<-- "examples/event_handler_graphql/src/scalar_functions.py"
+```
+
+Here's a table with their related scalar as a quick reference:
+
+| Scalar type      | Scalar function                    | Sample value                           |
+| ---------------- | ---------------------------------- | -------------------------------------- |
+| **ID**           | `scalar_types_utils.make_id`       | `e916c84d-48b6-484c-bef3-cee3e4d86ebf` |
+| **AWSDate**      | `scalar_types_utils.aws_date`      | `2022-07-08Z`                          |
+| **AWSTime**      | `scalar_types_utils.aws_time`      | `15:11:00.189Z`                        |
+| **AWSDateTime**  | `scalar_types_utils.aws_datetime`  | `2022-07-08T15:11:00.189Z`             |
+| **AWSTimestamp** | `scalar_types_utils.aws_timestamp` | `1657293060`                           |
+
 ## Advanced
 
 ### Nested mappings
