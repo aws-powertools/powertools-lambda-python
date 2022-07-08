@@ -1,0 +1,37 @@
+import requests
+from requests import Response
+
+from aws_lambda_powertools import Logger, Tracer
+from aws_lambda_powertools.event_handler import AppSyncResolver
+from aws_lambda_powertools.logging import correlation_paths
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
+tracer = Tracer()
+logger = Logger()
+app = AppSyncResolver()
+
+
+@app.resolver(type_name="Query", field_name="getTodo")
+def get_todo(
+    id: str = "",  # noqa AA03 VNE003 shadows built-in id to match query argument, e.g., getTodo(id: "some_id")
+):
+    logger.info(f"Fetching Todo {id}")
+    todos: Response = requests.get(f"https://jsonplaceholder.typicode.com/todos/{id}")
+    todos.raise_for_status()
+
+    return todos.json()
+
+
+@app.resolver(type_name="Query", field_name="listTodos")
+def list_todos():
+    todos: Response = requests.get("https://jsonplaceholder.typicode.com/todos")
+    todos.raise_for_status()
+
+    # for brevity, we'll limit to the first 10 only
+    return todos.json()[:10]
+
+
+@logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
+@tracer.capture_lambda_handler
+def lambda_handler(event: dict, context: LambdaContext) -> dict:
+    return app.resolve(event, context)

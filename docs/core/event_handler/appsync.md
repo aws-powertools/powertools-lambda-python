@@ -5,7 +5,7 @@ description: Core utility
 
 Event handler for AWS AppSync Direct Lambda Resolver and Amplify GraphQL Transformer.
 
-### Key Features
+## Key Features
 
 * Automatically parse API arguments to function arguments
 * Choose between strictly match a GraphQL field name or all of them to a function
@@ -30,144 +30,16 @@ This is the sample infrastructure we are using for the initial examples with a A
 ???+ tip "Tip: Designing GraphQL Schemas for the first time?"
     Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html){target="_blank"} for understanding how to define types, nesting, and pagination.
 
-=== "schema.graphql"
+=== "getting_started_schema.graphql"
 
     ```typescript
-    --8<-- "docs/shared/getting_started_schema.graphql"
+    --8<-- "examples/event_handler_graphql/src/getting_started_schema.graphql"
     ```
 
 === "template.yml"
 
-    ```yaml hl_lines="37-42 50-55 61-62 78-91 96-120"
-    AWSTemplateFormatVersion: '2010-09-09'
-    Transform: AWS::Serverless-2016-10-31
-    Description: Hello world Direct Lambda Resolver
-
-    Globals:
-      Function:
-        Timeout: 5
-        Runtime: python3.8
-        Tracing: Active
-        Environment:
-            Variables:
-                # Powertools env vars: https://awslabs.github.io/aws-lambda-powertools-python/latest/#environment-variables
-                LOG_LEVEL: INFO
-                POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
-                POWERTOOLS_LOGGER_LOG_EVENT: true
-                POWERTOOLS_SERVICE_NAME: sample_resolver
-
-    Resources:
-      HelloWorldFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            Handler: app.lambda_handler
-            CodeUri: hello_world
-            Description: Sample Lambda Powertools Direct Lambda Resolver
-            Tags:
-                SOLUTION: LambdaPowertoolsPython
-
-      # IAM Permissions and Roles
-
-      AppSyncServiceRole:
-        Type: "AWS::IAM::Role"
-        Properties:
-          AssumeRolePolicyDocument:
-              Version: "2012-10-17"
-              Statement:
-                  -
-                    Effect: "Allow"
-                    Principal:
-                        Service:
-                            - "appsync.amazonaws.com"
-                    Action:
-                        - "sts:AssumeRole"
-
-      InvokeLambdaResolverPolicy:
-        Type: "AWS::IAM::Policy"
-        Properties:
-          PolicyName: "DirectAppSyncLambda"
-          PolicyDocument:
-              Version: "2012-10-17"
-              Statement:
-                  -
-                    Effect: "Allow"
-                    Action: "lambda:invokeFunction"
-                    Resource:
-                        - !GetAtt HelloWorldFunction.Arn
-          Roles:
-              - !Ref AppSyncServiceRole
-
-      # GraphQL API
-
-      HelloWorldApi:
-        Type: "AWS::AppSync::GraphQLApi"
-        Properties:
-            Name: HelloWorldApi
-            AuthenticationType: "API_KEY"
-            XrayEnabled: true
-
-      HelloWorldApiKey:
-        Type: AWS::AppSync::ApiKey
-        Properties:
-            ApiId: !GetAtt HelloWorldApi.ApiId
-
-      HelloWorldApiSchema:
-        Type: "AWS::AppSync::GraphQLSchema"
-        Properties:
-            ApiId: !GetAtt HelloWorldApi.ApiId
-            Definition: |
-                schema {
-                    query:Query
-                }
-
-                type Query {
-                    getTodo(id: ID!): Todo
-                    listTodos: [Todo]
-                }
-
-                type Todo {
-                    id: ID!
-                    title: String
-                    description: String
-                    done: Boolean
-                }
-
-      # Lambda Direct Data Source and Resolver
-
-      HelloWorldFunctionDataSource:
-        Type: "AWS::AppSync::DataSource"
-        Properties:
-            ApiId: !GetAtt HelloWorldApi.ApiId
-            Name: "HelloWorldLambdaDirectResolver"
-            Type: "AWS_LAMBDA"
-            ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
-            LambdaConfig:
-                LambdaFunctionArn: !GetAtt HelloWorldFunction.Arn
-
-      ListTodosResolver:
-        Type: "AWS::AppSync::Resolver"
-        Properties:
-            ApiId: !GetAtt HelloWorldApi.ApiId
-            TypeName: "Query"
-            FieldName: "listTodos"
-            DataSourceName: !GetAtt HelloWorldFunctionDataSource.Name
-
-      GetTodoResolver:
-        Type: "AWS::AppSync::Resolver"
-        Properties:
-            ApiId: !GetAtt HelloWorldApi.ApiId
-            TypeName: "Query"
-            FieldName: "getTodo"
-            DataSourceName: !GetAtt HelloWorldFunctionDataSource.Name
-
-
-    Outputs:
-      HelloWorldFunction:
-        Description: "Hello World Lambda Function ARN"
-        Value: !GetAtt HelloWorldFunction.Arn
-
-      HelloWorldAPI:
-        Value: !GetAtt HelloWorldApi.Arn
+    ```yaml hl_lines="59-60 71-72 94-95 104-105 112-113"
+    --8<-- "examples/event_handler_graphql/sam/template.yaml"
     ```
 
 ### Resolver decorator
@@ -176,165 +48,36 @@ You can define your functions to match GraphQL types and fields with the `app.re
 
 Here's an example where we have two separate functions to resolve `getTodo` and `listTodos` fields within the `Query` type. For completion, we use Scalar type utilities to generate the right output based on our schema definition.
 
-???+ info
-    GraphQL arguments are passed as function arguments.
+???+ important
+    GraphQL arguments are passed as function keyword arguments.
+
+    **Example**
+
+    The GraphQL Query `getTodo(id: "todo_id_value")` will
+    call `get_todo` as `get_todo(id="todo_id_value")`.
 
 === "app.py"
 
-    ```python hl_lines="3-5 9 31-32 39-40 47"
-    from aws_lambda_powertools import Logger, Tracer
-
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import AppSyncResolver
-    from aws_lambda_powertools.utilities.data_classes.appsync import scalar_types_utils
-
-    tracer = Tracer(service="sample_resolver")
-    logger = Logger(service="sample_resolver")
-    app = AppSyncResolver()
-
-    # Note that `creation_time` isn't available in the schema
-    # This utility also takes into account what info you make available at API level vs what's stored
-    TODOS = [
-        {
-            "id": scalar_types_utils.make_id(), # type ID or String
-            "title": "First task",
-            "description": "String",
-            "done": False,
-            "creation_time": scalar_types_utils.aws_datetime(),  # type AWSDateTime
-        },
-        {
-            "id": scalar_types_utils.make_id(),
-            "title": "Second task",
-            "description": "String",
-            "done": True,
-            "creation_time": scalar_types_utils.aws_datetime(),
-        },
-    ]
-
-
-    @app.resolver(type_name="Query", field_name="getTodo")
-    def get_todo(id: str = ""):
-        logger.info(f"Fetching Todo {id}")
-        todo = [todo for todo in TODOS if todo["id"] == id]
-
-        return todo
-
-
-    @app.resolver(type_name="Query", field_name="listTodos")
-    def list_todos():
-        return TODOS
-
-
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="5 11 14-15 25-26 34 37"
+    --8<-- "examples/event_handler_graphql/src/getting_started_graphql_api_resolver.py"
     ```
 
-=== "schema.graphql"
+=== "getting_started_schema.graphql"
 
-    ```typescript
-    --8<-- "docs/shared/getting_started_schema.graphql"
+    ```typescript hl_lines="6-7"
+    --8<-- "examples/event_handler_graphql/src/getting_started_schema.graphql"
     ```
 
 === "getTodo_event.json"
 
-    ```json
-    {
-        "arguments": {
-          "id": "7e362732-c8cd-4405-b090-144ac9b38960"
-        },
-        "identity": null,
-        "source": null,
-        "request": {
-          "headers": {
-            "x-forwarded-for": "1.2.3.4, 5.6.7.8",
-            "accept-encoding": "gzip, deflate, br",
-            "cloudfront-viewer-country": "NL",
-            "cloudfront-is-tablet-viewer": "false",
-            "referer": "https://eu-west-1.console.aws.amazon.com/appsync/home?region=eu-west-1",
-            "via": "2.0 9fce949f3749407c8e6a75087e168b47.cloudfront.net (CloudFront)",
-            "cloudfront-forwarded-proto": "https",
-            "origin": "https://eu-west-1.console.aws.amazon.com",
-            "x-api-key": "da1-c33ullkbkze3jg5hf5ddgcs4fq",
-            "content-type": "application/json",
-            "x-amzn-trace-id": "Root=1-606eb2f2-1babc433453a332c43fb4494",
-            "x-amz-cf-id": "SJw16ZOPuMZMINx5Xcxa9pB84oMPSGCzNOfrbJLvd80sPa0waCXzYQ==",
-            "content-length": "114",
-            "x-amz-user-agent": "AWS-Console-AppSync/",
-            "x-forwarded-proto": "https",
-            "host": "ldcvmkdnd5az3lm3gnf5ixvcyy.appsync-api.eu-west-1.amazonaws.com",
-            "accept-language": "en-US,en;q=0.5",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0",
-            "cloudfront-is-desktop-viewer": "true",
-            "cloudfront-is-mobile-viewer": "false",
-            "accept": "*/*",
-            "x-forwarded-port": "443",
-            "cloudfront-is-smarttv-viewer": "false"
-          }
-        },
-        "prev": null,
-        "info": {
-          "parentTypeName": "Query",
-          "selectionSetList": [
-            "title",
-            "id"
-          ],
-          "selectionSetGraphQL": "{\n  title\n  id\n}",
-          "fieldName": "getTodo",
-          "variables": {}
-        },
-        "stash": {}
-    }
+    ```json hl_lines="2-3"
+    --8<-- "examples/event_handler_graphql/src/getting_started_get_todo.json"
     ```
 
 === "listTodos_event.json"
 
-    ```json
-    {
-        "arguments": {},
-        "identity": null,
-        "source": null,
-        "request": {
-          "headers": {
-            "x-forwarded-for": "1.2.3.4, 5.6.7.8",
-            "accept-encoding": "gzip, deflate, br",
-            "cloudfront-viewer-country": "NL",
-            "cloudfront-is-tablet-viewer": "false",
-            "referer": "https://eu-west-1.console.aws.amazon.com/appsync/home?region=eu-west-1",
-            "via": "2.0 9fce949f3749407c8e6a75087e168b47.cloudfront.net (CloudFront)",
-            "cloudfront-forwarded-proto": "https",
-            "origin": "https://eu-west-1.console.aws.amazon.com",
-            "x-api-key": "da1-c33ullkbkze3jg5hf5ddgcs4fq",
-            "content-type": "application/json",
-            "x-amzn-trace-id": "Root=1-606eb2f2-1babc433453a332c43fb4494",
-            "x-amz-cf-id": "SJw16ZOPuMZMINx5Xcxa9pB84oMPSGCzNOfrbJLvd80sPa0waCXzYQ==",
-            "content-length": "114",
-            "x-amz-user-agent": "AWS-Console-AppSync/",
-            "x-forwarded-proto": "https",
-            "host": "ldcvmkdnd5az3lm3gnf5ixvcyy.appsync-api.eu-west-1.amazonaws.com",
-            "accept-language": "en-US,en;q=0.5",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0",
-            "cloudfront-is-desktop-viewer": "true",
-            "cloudfront-is-mobile-viewer": "false",
-            "accept": "*/*",
-            "x-forwarded-port": "443",
-            "cloudfront-is-smarttv-viewer": "false"
-          }
-        },
-        "prev": null,
-        "info": {
-          "parentTypeName": "Query",
-          "selectionSetList": [
-            "id",
-            "title"
-          ],
-          "selectionSetGraphQL": "{\n  id\n  title\n}",
-          "fieldName": "listTodos",
-          "variables": {}
-        },
-        "stash": {}
-    }
+    ```json hl_lines="2 40 42"
+    --8<-- "examples/event_handler_graphql/src/getting_started_list_todos.json"
     ```
 
 ## Advanced
