@@ -104,55 +104,18 @@ Here's a table with their related scalar as a quick reference:
 
 ### Nested mappings
 
-You can nest `app.resolver()` decorator multiple times when resolving fields with the same return.
+You can nest `app.resolver()` decorator multiple times when resolving fields with the same return value.
 
 === "nested_mappings.py"
 
-    ```python hl_lines="4 8 10-12 18"
-    from aws_lambda_powertools import Logger, Tracer
-
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import AppSyncResolver
-
-    tracer = Tracer(service="sample_resolver")
-    logger = Logger(service="sample_resolver")
-    app = AppSyncResolver()
-
-    @app.resolver(field_name="listLocations")
-    @app.resolver(field_name="locations")
-    def get_locations(name: str, description: str = ""):
-        return name + description
-
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="2 8 11-12 14 21"
+    --8<-- "examples/event_handler_graphql/src/nested_mappings.py"
     ```
 
-=== "schema.graphql"
+=== "nested_mappings_schema.graphql"
 
     ```typescript hl_lines="6 20"
-    schema {
-        query: Query
-    }
-
-    type Query {
-        listLocations: [Location]
-    }
-
-    type Location {
-        id: ID!
-        name: String!
-        description: String
-        address: String
-    }
-
-    type Merchant {
-        id: String!
-        name: String!
-        description: String
-        locations: [Location]
-    }
+    --8<-- "examples/event_handler_graphql/src/nested_mappings_schema.graphql"
     ```
 
 ### Async functions
