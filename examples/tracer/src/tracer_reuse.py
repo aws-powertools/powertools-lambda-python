@@ -1,4 +1,4 @@
-from tracer_reuse_payment import collect_payment
+from tracer_reuse_module import collect_payment
 
 from aws_lambda_powertools import Tracer
 from aws_lambda_powertools.utilities.typing import LambdaContext
