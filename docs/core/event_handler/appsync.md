@@ -137,29 +137,7 @@ Assuming you have [Amplify CLI installed](https://docs.amplify.aws/cli/start/ins
 <!-- AppSync resolver decorator is a concise way to create lambda functions to handle AppSync resolvers for multiple `typeName` and `fieldName` declarations. -->
 
 ```typescript hl_lines="7 15 20 22" title="Example GraphQL Schema"
-@model
-type Merchant {
-	id: String!
-	name: String!
-	description: String
-	# Resolves to `common_field`
-	commonField: String  @function(name: "merchantInfo-${env}")
-}
-
-type Location {
-	id: ID!
-	name: String!
-	address: String
-	# Resolves to `common_field`
-	commonField: String  @function(name: "merchantInfo-${env}")
-}
-
-type Query {
-  # List of locations resolves to `list_locations`
-  listLocations(page: Int, size: Int): [Location] @function(name: "merchantInfo-${env}")
-  # List of locations resolves to `list_locations`
-  findMerchant(search: str): [Merchant] @function(name: "searchMerchant-${env}")
-}
+--8<-- "examples/event_handler_graphql/src/amplify_graphql_transformer_schema.graphql"
 ```
 
 [Create two new basic Python functions](https://docs.amplify.aws/cli/function#set-up-a-function){target="_blank"} via `amplify add function`.
@@ -167,145 +145,38 @@ type Query {
 ???+ note
     Amplify CLI generated functions use `Pipenv` as a dependency manager. Your function source code is located at **`amplify/backend/function/your-function-name`**.
 
-Within your function's folder, add Lambda Powertools as a dependency with `pipenv install aws-lambda-powertools`.
+Within your function's folder, add Powertools as a dependency with `pipenv install aws-lambda-powertools`.
 
 Use the following code for `merchantInfo` and `searchMerchant` functions respectively.
 
-=== "merchantInfo/src/app.py"
+=== "graphql_transformer_merchant_info.py"
 
-    ```python hl_lines="4-5 9 11-12 15-16 23"
-    from aws_lambda_powertools import Logger, Tracer
-
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.event_handler import AppSyncResolver
-    from aws_lambda_powertools.utilities.data_classes.appsync import scalar_types_utils
-
-    tracer = Tracer(service="sample_graphql_transformer_resolver")
-    logger = Logger(service="sample_graphql_transformer_resolver")
-    app = AppSyncResolver()
-
-    @app.resolver(type_name="Query", field_name="listLocations")
-    def list_locations(page: int = 0, size: int = 10):
-        return [{"id": 100, "name": "Smooth Grooves"}]
-
-    @app.resolver(field_name="commonField")
-    def common_field():
-        # Would match all fieldNames matching 'commonField'
-        return scalar_types_utils.make_id()
-
-    @tracer.capture_lambda_handler
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-    def lambda_handler(event, context):
-        app.resolve(event, context)
-    ```
-=== "searchMerchant/src/app.py"
-
-    ```python hl_lines="1 4 6-7"
-    from aws_lambda_powertools.event_handler import AppSyncResolver
-    from aws_lambda_powertools.utilities.data_classes.appsync import scalar_types_utils
-
-    app = AppSyncResolver()
-
-    @app.resolver(type_name="Query", field_name="findMerchant")
-    def find_merchant(search: str):
-        return [
-          {
-            "id": scalar_types_utils.make_id(),
-            "name": "Brewer Brewing",
-            "description": "Mike Brewer's IPA brewing place"
-          },
-          {
-            "id": scalar_types_utils.make_id(),
-            "name": "Serverlessa's Bakery",
-            "description": "Lessa's sourdough place"
-          },
-        ]
+    ```python hl_lines="4 6 22-23 27-28 36"
+    --8<-- "examples/event_handler_graphql/src/graphql_transformer_merchant_info.py"
     ```
 
-**Example AppSync GraphQL Transformer Function resolver events**
+=== "graphql_transformer_search_merchant.py"
 
-=== "Query.listLocations event"
+    ```python hl_lines="4 6 21-22 36 42"
+    --8<-- "examples/event_handler_graphql/src/graphql_transformer_search_merchant.py"
+    ```
+
+=== "graphql_transformer_list_locations.json"
 
     ```json hl_lines="2-7"
-    {
-      "typeName": "Query",
-      "fieldName": "listLocations",
-      "arguments": {
-        "page": 2,
-        "size": 1
-      },
-      "identity": {
-        "claims": {
-          "iat": 1615366261
-          ...
-        },
-        "username": "mike",
-        ...
-      },
-      "request": {
-        "headers": {
-          "x-amzn-trace-id": "Root=1-60488877-0b0c4e6727ab2a1c545babd0",
-          "x-forwarded-for": "127.0.0.1"
-          ...
-        }
-      },
-      ...
-    }
+    --8<-- "examples/event_handler_graphql/src/graphql_transformer_list_locations.json"
     ```
 
-=== "*.commonField event"
+=== "graphql_transformer_common_field.json"
 
     ```json hl_lines="2 3"
-    {
-      "typeName": "Merchant",
-      "fieldName": "commonField",
-      "arguments": {
-      },
-      "identity": {
-        "claims": {
-          "iat": 1615366261
-          ...
-        },
-        "username": "mike",
-        ...
-      },
-      "request": {
-        "headers": {
-          "x-amzn-trace-id": "Root=1-60488877-0b0c4e6727ab2a1c545babd0",
-          "x-forwarded-for": "127.0.0.1"
-          ...
-        }
-      },
-      ...
-    }
+    --8<-- "examples/event_handler_graphql/src/graphql_transformer_common_field.json"
     ```
 
-=== "Query.findMerchant event"
+=== "graphql_transformer_find_merchant.json"
 
     ```json hl_lines="2-6"
-    {
-      "typeName": "Query",
-      "fieldName": "findMerchant",
-      "arguments": {
-        "search": "Brewers Coffee"
-      },
-      "identity": {
-        "claims": {
-          "iat": 1615366261
-          ...
-        },
-        "username": "mike",
-        ...
-      },
-      "request": {
-        "headers": {
-          "x-amzn-trace-id": "Root=1-60488877-0b0c4e6727ab2a1c545babd0",
-          "x-forwarded-for": "127.0.0.1"
-          ...
-        }
-      },
-      ...
-    }
+    --8<-- "examples/event_handler_graphql/src/graphql_transformer_find_merchant.json"
     ```
 
 ### Custom data models

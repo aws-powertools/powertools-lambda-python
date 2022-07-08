@@ -14,7 +14,7 @@ logger = Logger()
 app = AppSyncResolver()
 
 
-class Todo(TypedDict):
+class Todo(TypedDict, total=False):
     id: str  # noqa AA03 VNE003, required due to GraphQL Schema
     userId: str
     title: str

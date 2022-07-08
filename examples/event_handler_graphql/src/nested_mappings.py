@@ -10,7 +10,7 @@ logger = Logger()
 app = AppSyncResolver()
 
 
-class Location(TypedDict):
+class Location(TypedDict, total=False):
     id: str  # noqa AA03 VNE003, required due to GraphQL Schema
     name: str
     description: str
