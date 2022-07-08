@@ -48,13 +48,13 @@ Your Logger will include the following keys to your structured logging:
 
 You can enrich your structured logs with key Lambda context information via `inject_lambda_context`.
 
-=== "collect.py"
+=== "inject_lambda_context.py"
 
     ```python hl_lines="7"
     --8<-- "examples/logger/src/inject_lambda_context.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "inject_lambda_context_output.json"
 
     ```json hl_lines="8-12 17-20"
     --8<-- "examples/logger/src/inject_lambda_context_output.json"
@@ -88,19 +88,19 @@ You can set a Correlation ID using `correlation_id_path` param by passing a [JME
 ???+ tip
 	You can retrieve correlation IDs via `get_correlation_id` method
 
-=== "collect.py"
+=== "set_correlation_id.py"
 
     ```python hl_lines="7"
     --8<-- "examples/logger/src/set_correlation_id.py"
     ```
 
-=== "Example Event"
+=== "set_correlation_id_event.json"
 
     ```json hl_lines="3"
     --8<-- "examples/logger/src/set_correlation_id_event.json"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "set_correlation_id_output.json"
 
     ```json hl_lines="12"
     --8<-- "examples/logger/src/set_correlation_id_output.json"
@@ -110,18 +110,19 @@ You can set a Correlation ID using `correlation_id_path` param by passing a [JME
 
 You can also use `set_correlation_id` method to inject it anywhere else in your code. Example below uses [Event Source Data Classes utility](../utilities/data_classes.md) to easily access events properties.
 
-=== "collect.py"
+=== "set_correlation_id_method.py"
 
     ```python hl_lines="11"
     --8<-- "examples/logger/src/set_correlation_id_method.py"
     ```
-=== "Example Event"
+
+=== "set_correlation_id_method.json"
 
     ```json hl_lines="3"
-    --8<-- "examples/logger/src/set_correlation_id_method_event.json"
+    --8<-- "examples/logger/src/set_correlation_id_method.json"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "set_correlation_id_method_output.json"
 
     ```json hl_lines="7"
     --8<-- "examples/logger/src/set_correlation_id_method_output.json"
@@ -131,19 +132,19 @@ You can also use `set_correlation_id` method to inject it anywhere else in your 
 
 To ease routine tasks like extracting correlation ID from popular event sources, we provide [built-in JMESPath expressions](#built-in-correlation-id-expressions).
 
-=== "collect.py"
+=== "set_correlation_id_jmespath.py"
 
     ```python hl_lines="2 8"
     --8<-- "examples/logger/src/set_correlation_id_jmespath.py"
     ```
 
-=== "Example Event"
+=== "set_correlation_id_jmespath.json"
 
     ```json hl_lines="3"
-    --8<-- "examples/logger/src/set_correlation_id_jmespath_event.json"
+    --8<-- "examples/logger/src/set_correlation_id_jmespath.json"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "set_correlation_id_jmespath_output.json"
 
     ```json hl_lines="12"
     --8<-- "examples/logger/src/set_correlation_id_jmespath_output.json"
@@ -166,12 +167,13 @@ You can append additional keys using either mechanism:
 
 You can append your own keys to your existing Logger via `append_keys(**additional_key_values)` method.
 
-=== "collect.py"
+=== "append_keys.py"
 
     ```python hl_lines="12"
     --8<-- "examples/logger/src/append_keys.py"
     ```
-=== "Example CloudWatch Logs excerpt"
+
+=== "append_keys_output.json"
 
     ```json hl_lines="7"
     --8<-- "examples/logger/src/append_keys_output.json"
@@ -191,12 +193,13 @@ It accepts any dictionary, and all keyword arguments will be added as part of th
 ???+ info
     Any keyword argument added using `extra` will not be persisted for subsequent messages.
 
-=== "extra_parameter.py"
+=== "append_keys_extra.py"
 
     ```python hl_lines="9"
     --8<-- "examples/logger/src/append_keys_extra.py"
     ```
-=== "Example CloudWatch Logs excerpt"
+
+=== "append_keys_extra_output.json"
 
     ```json hl_lines="7"
     --8<-- "examples/logger/src/append_keys_extra_output.json"
@@ -206,13 +209,13 @@ It accepts any dictionary, and all keyword arguments will be added as part of th
 
 You can remove any additional key from Logger state using `remove_keys`.
 
-=== "collect.py"
+=== "remove_keys.py"
 
     ```python hl_lines="11"
     --8<-- "examples/logger/src/remove_keys.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "remove_keys_output.json"
 
     ```json hl_lines="7"
     --8<-- "examples/logger/src/remove_keys_output.json"
@@ -232,19 +235,19 @@ Logger is commonly initialized in the global scope. Due to [Lambda Execution Con
 
     You can either avoid running any code as part of Lambda Layers global scope, or override keys with their latest value as part of handler's execution.
 
-=== "collect.py"
+=== "clear_state.py"
 
     ```python hl_lines="7 10"
     --8<-- "examples/logger/src/clear_state.py"
     ```
 
-=== "#1 request"
+=== "clear_state_event_one.json"
 
     ```json hl_lines="7"
     --8<-- "examples/logger/src/clear_state_event_one.json"
     ```
 
-=== "#2 request"
+=== "clear_state_event_two.json"
 
     ```json hl_lines="7"
     --8<-- "examples/logger/src/clear_state_event_two.json"
@@ -257,13 +260,13 @@ Use `logger.exception` method to log contextual information about exceptions. Lo
 ???+ tip
     You can use your preferred Log Analytics tool to enumerate and visualize exceptions across all your services using `exception_name` key.
 
-=== "collect.py"
+=== "logging_exceptions.py"
 
     ```python hl_lines="15"
     --8<-- "examples/logger/src/logging_exceptions.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "logging_exceptions_output.json"
 
     ```json hl_lines="7-8"
     --8<-- "examples/logger/src/logging_exceptions_output.json"
@@ -292,19 +295,19 @@ Similar to [Tracer](./tracer.md#reusing-tracer-across-your-code), a new instance
 
 Notice in the CloudWatch Logs output how `payment_id` appeared as expected when logging in `collect.py`.
 
-=== "collect.py"
+=== "logger_reuse.py"
 
     ```python hl_lines="1 9 11 12"
     --8<-- "examples/logger/src/logger_reuse.py"
     ```
 
-=== "payment.py"
+=== "logger_reuse_payment.py"
 
     ```python hl_lines="3 7"
     --8<-- "examples/logger/src/logger_reuse_payment.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "logger_reuse_output.json"
 
     ```json hl_lines="12"
     --8<-- "examples/logger/src/logger_reuse_output.json"
@@ -313,7 +316,7 @@ Notice in the CloudWatch Logs output how `payment_id` appeared as expected when 
 ???+ note "Note: About Child Loggers"
     Coming from standard library, you might be used to use `logging.getLogger(__name__)`. This will create a new instance of a Logger with a different name.
 
-    In Powertools, you can have the same effect by using `child=True` parameter: `Logger(child=True)`. This creates a new Logger instance named after `service.<module>`. All state changes will be propagated bi-directonally between Child and Parent.
+    In Powertools, you can have the same effect by using `child=True` parameter: `Logger(child=True)`. This creates a new Logger instance named after `service.<module>`. All state changes will be propagated bi-directionally between Child and Parent.
 
     For that reason, there could be side effects depending on the order the Child Logger is instantiated, because Child Loggers don't have a handler.
 
@@ -337,15 +340,15 @@ Sampling decision happens at the Logger initialization. This means sampling may 
 ???+ note
 	Open a [feature request](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=) if you want Logger to calculate sampling for every invocation
 
-=== "collect.py"
+=== "sampling_debug_logs.py"
 
     ```python hl_lines="6 10"
-    --8<-- "examples/logger/src/logger_reuse.py"
+    --8<-- "examples/logger/src/sampling_debug_logs.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "sampling_debug_logs_output.json"
 
-    ```json hl_lines="3 5 13 16 25"
+    ```json hl_lines="3 5 13 16 26"
     --8<-- "examples/logger/src/sampling_debug_logs_output.json"
     ```
 
@@ -393,13 +396,13 @@ For child Loggers, we introspect the name of your module where `Logger(child=Tru
 ???+ danger
     A common issue when migrating from other Loggers is that `service` might be defined in the parent Logger (no child param), and not defined in the child Logger:
 
-=== "incorrect_logger_inheritance.py"
+=== "logging_inheritance_bad.py"
 
     ```python hl_lines="1 9"
     --8<-- "examples/logger/src/logging_inheritance_bad.py"
     ```
 
-=== "my_other_module.py"
+=== "logging_inheritance_module.py"
 
     ```python hl_lines="1 9"
     --8<-- "examples/logger/src/logging_inheritance_module.py"
@@ -412,13 +415,13 @@ In this case, Logger will register a Logger named `payment`, and a Logger named 
 
 Do this instead:
 
-=== "correct_logger_inheritance.py"
+=== "logging_inheritance_good.py"
 
     ```python hl_lines="1 9"
     --8<-- "examples/logger/src/logging_inheritance_good.py"
     ```
 
-=== "my_other_module.py"
+=== "logging_inheritance_module.py"
 
     ```python hl_lines="1 9"
     --8<-- "examples/logger/src/logging_inheritance_module.py"
@@ -435,13 +438,13 @@ You might want to continue to use the same date formatting style, or override `l
 
 Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, `xray_trace_id`.
 
-=== "lambda_handler.py"
+=== "overriding_log_records.py"
 
     ```python hl_lines="7 10"
     --8<-- "examples/logger/src/overriding_log_records.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "overriding_log_records_output.json"
 
     ```json hl_lines="3 5"
     --8<-- "examples/logger/src/overriding_log_records_output.json"
@@ -451,12 +454,13 @@ Logger allows you to either change the format or suppress the following keys alt
 
 You can change the order of [standard Logger keys](#standard-structured-keys) or any keys that will be appended later at runtime via the `log_record_order` parameter.
 
-=== "app.py"
+=== "reordering_log_keys.py"
 
     ```python hl_lines="5 8"
     --8<-- "examples/logger/src/reordering_log_keys.py"
     ```
-=== "Example CloudWatch Logs excerpt"
+
+=== "reordering_log_keys_output.json"
 
     ```json hl_lines="3 10"
     --8<-- "examples/logger/src/reordering_log_keys_output.json"
@@ -466,13 +470,13 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 
 By default, this Logger and standard logging library emits records using local time timestamp. You can override this behavior via `utc` parameter:
 
-=== "app.py"
+=== "setting_utc_timestamp.py"
 
     ```python hl_lines="6"
     --8<-- "examples/logger/src/setting_utc_timestamp.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "setting_utc_timestamp_output.json"
 
     ```json hl_lines="6 13"
     --8<-- "examples/logger/src/setting_utc_timestamp_output.json"
@@ -482,13 +486,13 @@ By default, this Logger and standard logging library emits records using local t
 
 By default, Logger uses `str` to handle values non-serializable by JSON. You can override this behavior via `json_default` parameter by passing a Callable:
 
-=== "app.py"
+=== "unserializable_values.py"
 
     ```python hl_lines="6 17"
     --8<-- "examples/logger/src/unserializable_values.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "unserializable_values_output.json"
 
     ```json hl_lines="4-6"
     --8<-- "examples/logger/src/unserializable_values_output.json"
@@ -511,13 +515,13 @@ By default, Logger uses [LambdaPowertoolsFormatter](#lambdapowertoolsformatter) 
 
 For these, you can override the `serialize` method from [LambdaPowertoolsFormatter](#lambdapowertoolsformatter).
 
-=== "custom_formatter.py"
+=== "bring_your_own_formatter.py"
 
     ```python hl_lines="2 5-6 12"
     --8<-- "examples/logger/src/bring_your_own_formatter.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "bring_your_own_formatter_output.json"
 	```json hl_lines="6"
     --8<-- "examples/logger/src/bring_your_own_formatter_output.json"
 	```
@@ -529,13 +533,13 @@ For exceptional cases where you want to completely replace our formatter logic, 
 ???+ warning
     You will need to implement `append_keys`, `clear_state`, override `format`, and optionally `remove_keys` to keep the same feature set Powertools Logger provides. This also means keeping state of logging keys added.
 
-=== "collect.py"
+=== "bring_your_own_formatter_from_scratch.py"
 
     ```python hl_lines="6 9 11-12 15 19 23 26 38"
     --8<-- "examples/logger/src/bring_your_own_formatter_from_scratch.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "bring_your_own_formatter_from_scratch_output.json"
 
     ```json hl_lines="2-4"
     --8<-- "examples/logger/src/bring_your_own_formatter_from_scratch_output.json"
@@ -615,15 +619,16 @@ You can include any of these logging attributes as key value arguments (`kwargs`
 
 You can also add them later anywhere in your code with `append_keys`, or remove them with `remove_keys` methods.
 
-=== "collect.py"
+=== "append_and_remove_keys.py"
 
     ```python hl_lines="3 8 10"
     ---8<-- "examples/logger/src/append_and_remove_keys.py"
     ```
-=== "Example CloudWatch Logs excerpt"
+
+=== "append_and_remove_keys_output.json"
 
     ```json hl_lines="6 15-16"
-    ---8<-- "examples/logger/src/append_and_remove_keys.json"
+    ---8<-- "examples/logger/src/append_and_remove_keys_output.json"
     ```
 
 For log records originating from Powertools Logger, the `name` attribute will be the same as `service`, for log records coming from standard library logger, it will be the name of the logger (i.e. what was used as name argument to `logging.getLogger`).
@@ -634,13 +639,13 @@ Keys added with `append_keys` will persist across multiple log messages while ke
 
 Here's an example where we persist `payment_id` not `request_id`. Note that `payment_id` remains in both log messages while `booking_id` is only available in the first message.
 
-=== "collect.py"
+=== "append_keys_vs_extra.py"
 
     ```python hl_lines="16 23"
     ---8<-- "examples/logger/src/append_keys_vs_extra.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "append_keys_vs_extra_output.json"
 
     ```json hl_lines="9-10 19"
     ---8<-- "examples/logger/src/append_keys_vs_extra_output.json"
