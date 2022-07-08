@@ -58,7 +58,7 @@ Here's an example where we have two separate functions to resolve `getTodo` and 
 
 === "getting_started_graphql_api_resolver.py"
 
-    ```python hl_lines="5 11 14-15 25-26 34 37"
+    ```python hl_lines="7 13 23 25-26 35 37 48"
     --8<-- "examples/event_handler_graphql/src/getting_started_graphql_api_resolver.py"
     ```
 

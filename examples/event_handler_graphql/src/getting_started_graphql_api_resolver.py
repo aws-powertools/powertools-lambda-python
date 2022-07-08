@@ -1,3 +1,5 @@
+from typing import TypedDict
+
 import requests
 from requests import Response
 
@@ -11,10 +13,18 @@ logger = Logger()
 app = AppSyncResolver()
 
 
+class Todo(TypedDict):
+    id: str  # noqa AA03 VNE003, required due to GraphQL Schema
+    userId: str
+    title: str
+    completed: bool
+
+
 @app.resolver(type_name="Query", field_name="getTodo")
+@tracer.capture_method
 def get_todo(
     id: str = "",  # noqa AA03 VNE003 shadows built-in id to match query argument, e.g., getTodo(id: "some_id")
-):
+) -> Todo:
     logger.info(f"Fetching Todo {id}")
     todos: Response = requests.get(f"https://jsonplaceholder.typicode.com/todos/{id}")
     todos.raise_for_status()
@@ -23,7 +33,8 @@ def get_todo(
 
 
 @app.resolver(type_name="Query", field_name="listTodos")
-def list_todos():
+@tracer.capture_method
+def list_todos() -> list[Todo]:
     todos: Response = requests.get("https://jsonplaceholder.typicode.com/todos")
     todos.raise_for_status()
 
