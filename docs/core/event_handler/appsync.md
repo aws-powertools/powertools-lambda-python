@@ -108,7 +108,7 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 
 === "nested_mappings.py"
 
-    ```python hl_lines="2 8 11-12 14 21"
+    ```python hl_lines="2 8 18-19 21 28"
     --8<-- "examples/event_handler_graphql/src/nested_mappings.py"
     ```
 
