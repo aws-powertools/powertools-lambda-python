@@ -57,13 +57,13 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 ???+ tip
 	You can initialize Metrics in any other module too. It'll keep track of your aggregate metrics in memory to optimize costs (one blob instead of multiples).
 
-=== "Metrics"
+=== "add_metrics"
 
     ```python hl_lines="10"
     --8<-- "examples/metrics/src/add_metrics.py"
     ```
 
-=== "Metrics with custom dimensions"
+=== "add_dimension"
 
     ```python hl_lines="13"
     --8<-- "examples/metrics/src/add_dimension.py"
@@ -82,13 +82,13 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 
 You can call `add_metric()` with the same metric name multiple times. The values will be grouped together in a list.
 
-=== "Metrics"
+=== "add_multi_value_metrics"
 
     ```python hl_lines="14-15"
     --8<-- "examples/metrics/src/add_multi_value_metrics.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "add_multi_value_metrics_output.json"
 
     ```python hl_lines="15 24-26"
     --8<-- "examples/metrics/src/add_multi_value_metrics_output.json"
@@ -100,13 +100,13 @@ You can use `set_default_dimensions` method, or `default_dimensions` parameter i
 
 If you'd like to remove them at some point, you can use `clear_default_dimensions` method.
 
-=== "set_default_dimensions method"
+=== "set_default_dimensions.py"
 
     ```python hl_lines="9"
     --8<-- "examples/metrics/src/set_default_dimensions.py"
     ```
 
-=== "with log_metrics decorator"
+=== "set_default_dimensions_log_metrics.py"
 
     ```python hl_lines="9 13"
     --8<-- "examples/metrics/src/set_default_dimensions_log_metrics.py"
@@ -118,13 +118,13 @@ As you finish adding all your metrics, you need to serialize and flush them to s
 
 This decorator also **validates**, **serializes**, and **flushes** all your metrics. During metrics validation, if no metrics are provided then a warning will be logged, but no exception will be raised.
 
-=== "app.py"
+=== "add_metrics.py"
 
     ```python hl_lines="8"
     --8<-- "examples/metrics/src/add_metrics.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "log_metrics_output.json"
 
     ```json hl_lines="6 9 14 21-23"
     --8<-- "examples/metrics/src/log_metrics_output.json"
@@ -152,13 +152,13 @@ If you want to ensure at least one metric is always emitted, you can pass `raise
 
 You can optionally capture cold start metrics with `log_metrics` decorator via `capture_cold_start_metric` param.
 
-=== "app.py"
+=== "capture_cold_start_metric.py"
 
     ```python hl_lines="7"
     --8<-- "examples/metrics/src/capture_cold_start_metric.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "capture_cold_start_metric_output.json"
 
     ```json hl_lines="9 15 22 24-25"
     --8<-- "examples/metrics/src/capture_cold_start_metric_output.json"
@@ -183,13 +183,13 @@ You can add high-cardinality data as part of your Metrics log with `add_metadata
 ???+ info
     **This will not be available during metrics visualization** - Use **dimensions** for this purpose
 
-=== "app.py"
+=== "add_metadata.py"
 
     ```python hl_lines="14"
     --8<-- "examples/metrics/src/add_metadata.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "add_metadata_output.json"
 
     ```json hl_lines="22"
     --8<-- "examples/metrics/src/add_metadata_output.json"
@@ -204,13 +204,13 @@ CloudWatch EMF uses the same dimensions across all your metrics. Use `single_met
 
     **unique metric = (metric_name + dimension_name + dimension_value)**
 
-=== "app.py"
+=== "single_metric.py"
 
     ```python hl_lines="11"
     --8<-- "examples/metrics/src/single_metric.py"
     ```
 
-=== "Example CloudWatch Logs excerpt"
+=== "single_metric_output.json"
 
     ```json hl_lines="15"
     --8<-- "examples/metrics/src/single_metric_output.json"
@@ -257,7 +257,7 @@ Make sure to set `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` be
 
 You can read standard output and assert whether metrics have been flushed. Here's an example using `pytest` with `capsys` built-in fixture:
 
-=== "Asserting single EMF blob"
+=== "assert_single_emf_blob.py"
 
     ```python hl_lines="6 9-10 23-34"
     --8<-- "examples/metrics/src/assert_single_emf_blob.py"
@@ -269,7 +269,7 @@ You can read standard output and assert whether metrics have been flushed. Here'
     --8<-- "examples/metrics/src/add_metrics.py"
     ```
 
-=== "Asserting multiple EMF blobs"
+=== "assert_multiple_emf_blobs.py"
 
     This will be needed when using `capture_cold_start_metric=True`, or when both `Metrics` and `single_metric` are used.
 
@@ -277,7 +277,7 @@ You can read standard output and assert whether metrics have been flushed. Here'
     --8<-- "examples/metrics/src/assert_multiple_emf_blobs.py"
     ```
 
-=== "my_other_module.py"
+=== "assert_multiple_emf_blobs_module.py"
 
     ```python
     --8<-- "examples/metrics/src/assert_multiple_emf_blobs_module.py"
