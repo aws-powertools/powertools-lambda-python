@@ -104,6 +104,10 @@ Here's a table with their related scalar as a quick reference:
 
 ### Nested mappings
 
+???+ note
+
+    The following examples use a more advanced schema. These schemas differ from [initial sample infrastructure we used earlier](#required-resources).
+
 You can nest `app.resolver()` decorator multiple times when resolving fields with the same return value.
 
 === "nested_mappings.py"
