@@ -56,7 +56,7 @@ Here's an example where we have two separate functions to resolve `getTodo` and 
     The GraphQL Query `getTodo(id: "todo_id_value")` will
     call `get_todo` as `get_todo(id="todo_id_value")`.
 
-=== "app.py"
+=== "getting_started_graphql_api_resolver.py"
 
     ```python hl_lines="5 11 14-15 25-26 34 37"
     --8<-- "examples/event_handler_graphql/src/getting_started_graphql_api_resolver.py"
@@ -68,13 +68,13 @@ Here's an example where we have two separate functions to resolve `getTodo` and 
     --8<-- "examples/event_handler_graphql/src/getting_started_schema.graphql"
     ```
 
-=== "getTodo_event.json"
+=== "getting_started_get_todo.json"
 
     ```json hl_lines="2-3"
     --8<-- "examples/event_handler_graphql/src/getting_started_get_todo.json"
     ```
 
-=== "listTodos_event.json"
+=== "getting_started_list_todos.json"
 
     ```json hl_lines="2 40 42"
     --8<-- "examples/event_handler_graphql/src/getting_started_list_todos.json"
