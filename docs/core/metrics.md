@@ -57,13 +57,13 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 ???+ tip
 	You can initialize Metrics in any other module too. It'll keep track of your aggregate metrics in memory to optimize costs (one blob instead of multiples).
 
-=== "add_metrics"
+=== "add_metrics.py"
 
     ```python hl_lines="10"
     --8<-- "examples/metrics/src/add_metrics.py"
     ```
 
-=== "add_dimension"
+=== "add_dimension.py"
 
     ```python hl_lines="13"
     --8<-- "examples/metrics/src/add_dimension.py"
@@ -82,7 +82,7 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 
 You can call `add_metric()` with the same metric name multiple times. The values will be grouped together in a list.
 
-=== "add_multi_value_metrics"
+=== "add_multi_value_metrics.py"
 
     ```python hl_lines="14-15"
     --8<-- "examples/metrics/src/add_multi_value_metrics.py"
