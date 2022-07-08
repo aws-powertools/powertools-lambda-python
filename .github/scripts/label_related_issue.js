@@ -1,4 +1,4 @@
-module.exports = async ({github, context}) => {
+module.exports = async ({github, context, core}) => {
     const prBody = context.payload.body;
     const prNumber = context.payload.number;
     const releaseLabel = process.env.RELEASE_LABEL;

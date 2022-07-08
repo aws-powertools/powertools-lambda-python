@@ -77,19 +77,19 @@ You can trace synchronous functions using the `capture_method` decorator.
 
 You can trace asynchronous functions and generator functions (including context managers) using `capture_method`.
 
-=== "Async"
+=== "capture_method_async.py"
 
     ```python hl_lines="9"
     --8<-- "examples/tracer/src/capture_method_async.py"
     ```
 
-=== "Context manager"
+=== "capture_method_context_manager.py"
 
     ```python hl_lines="12-13"
     --8<-- "examples/tracer/src/capture_method_context_manager.py"
     ```
 
-=== "Generators"
+=== "capture_method_generators.py"
 
     ```python hl_lines="9"
     --8<-- "examples/tracer/src/capture_method_generators.py"
@@ -116,13 +116,13 @@ Use **`capture_response=False`** parameter in both `capture_lambda_handler` and 
     2. You might manipulate **streaming objects that can be read only once**; this prevents subsequent calls from being empty
     3. You might return **more than 64K** of data _e.g., `message too long` error_
 
-=== "sensitive_data_scenario.py"
+=== "disable_capture_response.py"
 
     ```python hl_lines="8 15"
     --8<-- "examples/tracer/src/disable_capture_response.py"
     ```
 
-=== "streaming_object_scenario.py"
+=== "disable_capture_response_streaming_body.py"
 
     ```python hl_lines="19"
     --8<-- "examples/tracer/src/disable_capture_response_streaming_body.py"
@@ -192,17 +192,17 @@ Tracer keeps a copy of its configuration after the first initialization. This is
 
 	Tracer will automatically ignore imported modules that have been patched.
 
-=== "handler.py"
+=== "tracer_reuse.py"
 
     ```python hl_lines="1 6"
     --8<-- "examples/tracer/src/tracer_reuse.py"
     ```
 
-=== "tracer_reuse_payment.py"
+=== "tracer_reuse_module.py"
     A new instance of Tracer will be created but will reuse the previous Tracer instance configuration, similar to a Singleton.
 
     ```python hl_lines="3"
-    --8<-- "examples/tracer/src/tracer_reuse_payment.py"
+    --8<-- "examples/tracer/src/tracer_reuse_module.py"
     ```
 
 ## Testing your code
