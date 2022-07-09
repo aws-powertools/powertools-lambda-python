@@ -234,45 +234,22 @@ You can use either `app.resolve(event, context)` or simply `app(event, context)`
 
 Here's an example of how you can test your synchronous resolvers:
 
-=== "test_resolver.py"
+=== "assert_graphql_response.py"
 
-    ```python
-    import json
-    import pytest
-    from pathlib import Path
-
-    from src.index import app  # import the instance of AppSyncResolver from your code
-
-    def test_direct_resolver():
-      # Load mock event from a file
-      json_file_path = Path("appSyncDirectResolver.json")
-      with open(json_file_path) as json_file:
-        mock_event = json.load(json_file)
-
-      # Call the implicit handler
-      result = app(mock_event, {})
-
-      assert result == "created this value"
+    ```python hl_lines="6 26 29"
+    --8<-- "examples/event_handler_graphql/src/assert_graphql_response.py"
     ```
 
-=== "src/index.py"
+=== "assert_graphql_response_module.py"
 
-    ```python
-
-    from aws_lambda_powertools.event_handler import AppSyncResolver
-
-    app = AppSyncResolver()
-
-    @app.resolver(field_name="createSomething")
-    def create_something():
-        return "created this value"
-
+    ```python hl_lines="10"
+    --8<-- "examples/event_handler_graphql/src/assert_graphql_response_module.py"
     ```
 
-=== "appSyncDirectResolver.json"
+=== "assert_graphql_response.json"
 
-    ```json
-    --8<-- "tests/events/appSyncDirectResolver.json"
+    ```json hl_lines="5"
+    --8<-- "examples/event_handler_graphql/src/assert_graphql_response.json"
     ```
 
 And an example for testing asynchronous resolvers. Note that this requires the `pytest-asyncio` package:
