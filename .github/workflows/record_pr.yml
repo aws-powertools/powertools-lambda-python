@@ -1,11 +1,11 @@
-name: Record PR number
+name: Record PR details
 
 on:
   pull_request:
     types: [opened, edited, closed]
 
 jobs:
-  build:
+  record_pr:
     runs-on: ubuntu-latest
 
     steps:
