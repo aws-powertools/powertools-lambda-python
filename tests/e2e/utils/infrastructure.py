@@ -22,7 +22,7 @@ class PythonVersion(Enum):
     V39 = {"runtime": Runtime.PYTHON_3_9, "image": Runtime.PYTHON_3_9.bundling_image.image}
 
 
-class InfrastructureStackInterface(ABC):
+class BaseInfrastructureStack(ABC):
     @abstractmethod
     def synthesize() -> Tuple[dict, str]:
         ...
@@ -32,7 +32,7 @@ class InfrastructureStackInterface(ABC):
         ...
 
 
-class InfrastructureStack(InfrastructureStackInterface):
+class InfrastructureStack(BaseInfrastructureStack):
     def __init__(self, handlers_dir: str, stack_name: str, config: dict) -> None:
         self.stack_name = stack_name
         self.handlers_dir = handlers_dir
@@ -123,7 +123,7 @@ class Infrastructure:
         self.handlers_dir = handlers_dir
         self.config = config
 
-    def deploy(self, Stack: Type[InfrastructureStackInterface]) -> Dict[str, str]:
+    def deploy(self, Stack: Type[BaseInfrastructureStack]) -> Dict[str, str]:
 
         stack = Stack(handlers_dir=self.handlers_dir, stack_name=self.stack_name, config=self.config)
         template, asset_root_dir, asset_manifest_file = stack()
