@@ -5,7 +5,7 @@ on:
     types: [opened, edited, closed]
 
 jobs:
-  build:
+  record_pr:
     runs-on: ubuntu-latest
 
     steps:

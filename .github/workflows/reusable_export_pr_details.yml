@@ -41,13 +41,15 @@ jobs:
       prAction: ${{ steps.prAction.outputs.prAction }}
       prIsMerged: ${{ steps.prIsMerged.outputs.prIsMerged }}
     steps:
+      - name: Checkout repository # in case caller workflow doesn't checkout thus failing with file not found
+        uses: actions/checkout@v3
       - name: "Download previously saved PR"
         uses: actions/github-script@v6
         # For security, we only download artifacts tied to the successful PR recording workflow
         with:
           github-token: ${{ secrets.token }}
           script: |
-            const script = require('.github/scripts/download_pr_details.js')
+            const script = require('.github/scripts/download_pr_artifact.js')
             await script({github, context, core})
       # NodeJS standard library doesn't provide ZIP capabilities; use system `unzip` command instead
       - name: "Unzip PR artifact"
