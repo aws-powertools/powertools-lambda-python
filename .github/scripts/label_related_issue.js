@@ -1,8 +1,14 @@
 module.exports = async ({github, context, core}) => {
-    const prBody = context.payload.body;
-    const prNumber = context.payload.number;
+    core.info(process.env);
+    const fs = require('fs');
+
+    const pr = JSON.parse(fs.readFileSync('./pr.txt', 'utf-8').trim());
+    const prBody = pr.body;
+    const prNumber = pr.number;
     const releaseLabel = process.env.RELEASE_LABEL;
     const maintainersTeam = process.env.MAINTAINERS_TEAM
+
+    return "Temporarily..."
 
     const RELATED_ISSUE_REGEX = /Issue number:[^\d\r\n]+(?<issue>\d+)/;
 

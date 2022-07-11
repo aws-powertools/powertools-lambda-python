@@ -1,26 +1,45 @@
-# Maintenance: Verify why we're having permissions issues even with write scope, then re-enable it.
-# logs: https://github.com/awslabs/aws-lambda-powertools-python/runs/7030238348?check_suite_focus=true
+# Maintenance:
 
 on:
-  pull_request:
+  workflow_run:
+    workflows: ["Record PR number"]
     types:
-      - closed
+      - completed
 
 env:
   RELEASE_LABEL: "pending-release"
   MAINTAINERS_TEAM: "@awslabs/aws-lambda-powertools-python"
 
 jobs:
-  release_label_on_merge:
-    if: github.event.pull_request.merged == true && github.event.pull_request.user.login != 'dependabot[bot]'
+  get_pr_details:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    uses: ./.github/workflows/reusable_export_pr_details.yml
+    with:
+      record_pr_workflow_id: ${{ github.event.workflow_run.id }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+  skip_dependabot_prs:
+    needs: get_pr_details
+    if: >
+      ${{ needs.get_pr_details.outputs.prAuthor != 'dependabot[bot]' &&
+          needs.get_pr_details.outputs.prAction == 'opened'
+      }}
     runs-on: ubuntu-latest
-    permissions:
-      issues: write # required for new scoped token
-      pull-requests: write # required for new scoped token
+  release_label_on_merge:
+    needs: get_pr_details
+    # if: ${{ needs.get_pr_details.outputs.prIsMerged == true }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: "Label PR related issue for release"
         uses: actions/github-script@v6
+        env:
+          PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
+          PR_TITLE: ${{ needs.get_pr_details.outputs.prTitle }}
+          PR_BODY: ${{ needs.get_pr_details.outputs.prBody }}
+          PR_AUTHOR: ${{ needs.get_pr_details.outputs.prAuthor }}
+          PR_ACTION: ${{ needs.get_pr_details.outputs.prAction }}
+          PR_MERGE: ${{ needs.get_pr_details.outputs.prIsMerged }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
