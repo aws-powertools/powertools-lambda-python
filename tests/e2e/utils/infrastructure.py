@@ -1,4 +1,5 @@
 import io
+import json
 import os
 import sys
 import zipfile
@@ -57,8 +58,7 @@ class InfrastructureStack(InfrastructureStackInterface):
                         "-c",
                         rf"poetry export --with-credentials --format requirements.txt --output /tmp/requirements.txt &&\
                             pip install -r /tmp/requirements.txt -t {output_dir} &&\
-                            cp -R {input_dir} {output_dir} &&\
-                            find {output_dir}/ -type d -name __pycache__ -prune -exec rm -rf {{}} \;",
+                            cp -R {input_dir} {output_dir}",
                     ],
                 ),
             ),
@@ -69,7 +69,7 @@ class InfrastructureStack(InfrastructureStackInterface):
         for root, _, files in os.walk(directory):
             return [os.path.join(root, filename) for filename in files if filename.endswith(".py")]
 
-    def synthesize(self, handlers: List[str]) -> Tuple[dict, str]:
+    def synthesize(self, handlers: List[str]) -> Tuple[dict, str, str]:
         integration_test_app = App()
         stack = Stack(integration_test_app, self.stack_name)
         powertools_layer = self._create_layer(stack)
@@ -98,10 +98,12 @@ class InfrastructureStack(InfrastructureStackInterface):
                 removal_policy=RemovalPolicy.DESTROY,
             )
             CfnOutput(stack, f"{filename}_arn", value=function_python.function_arn)
-        return (
-            integration_test_app.synth().get_stack_by_name(self.stack_name).template,
-            integration_test_app.synth().directory,
-        )
+        cloud_assembly = integration_test_app.synth()
+        cf_template = cloud_assembly.get_stack_by_name(self.stack_name).template
+        cloud_assembly_directory = cloud_assembly.directory
+        cloud_assembly_assets_manifest_path = cloud_assembly.get_stack_by_name(self.stack_name).dependencies[0].file
+
+        return (cf_template, cloud_assembly_directory, cloud_assembly_assets_manifest_path)
 
     def __call__(self) -> Tuple[dict, str]:
         handlers = self._find_handlers(directory=self.handlers_dir)
@@ -124,8 +126,8 @@ class Infrastructure:
     def deploy(self, Stack: Type[InfrastructureStackInterface]) -> Dict[str, str]:
 
         stack = Stack(handlers_dir=self.handlers_dir, stack_name=self.stack_name, config=self.config)
-        template, asset_root_dir = stack()
-        self._upload_assets(template, asset_root_dir)
+        template, asset_root_dir, asset_manifest_file = stack()
+        self._upload_assets(asset_root_dir, asset_manifest_file)
 
         response = self._deploy_stack(self.stack_name, template)
 
@@ -134,25 +136,31 @@ class Infrastructure:
     def delete(self):
         self.cf_client.delete_stack(StackName=self.stack_name)
 
-    def _upload_assets(self, template: dict, asset_root_dir: str):
+    def _upload_assets(self, asset_root_dir: str, asset_manifest_file: str):
 
-        assets = self._find_assets(template, self.account_id, self.region)
+        assets = self._find_assets(asset_manifest_file, self.account_id, self.region)
 
-        for s3_key, bucket in assets.items():
-            s3_bucket = self.s3_resource.Bucket(bucket)
+        for s3_key, config in assets.items():
+            print(config)
+            s3_bucket = self.s3_resource.Bucket(config["bucket_name"])
+
+            if config["asset_packaging"] != "zip":
+                print("Asset is not a zip file. Skipping upload")
+                continue
+
             if bool(list(s3_bucket.objects.filter(Prefix=s3_key))):
                 print("object exists, skipping")
                 continue
 
             buf = io.BytesIO()
-            asset_dir = f"{asset_root_dir}/asset.{Path(s3_key).with_suffix('')}"
+            asset_dir = f"{asset_root_dir}/{config['asset_path']}"
             os.chdir(asset_dir)
             asset_files = self._find_files(directory=".")
             with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
                 for asset_file in asset_files:
                     zf.write(os.path.join(asset_file))
             buf.seek(0)
-            self.s3_client.upload_fileobj(Fileobj=buf, Bucket=bucket, Key=s3_key)
+            self.s3_client.upload_fileobj(Fileobj=buf, Bucket=config["bucket_name"], Key=s3_key)
 
     def _find_files(self, directory: str) -> List:
         file_paths = []
@@ -174,22 +182,22 @@ class Infrastructure:
         response = self.cf_client.describe_stacks(StackName=stack_name)
         return response
 
-    def _find_assets(self, template: dict, account_id: str, region: str):
+    def _find_assets(self, asset_template: str, account_id: str, region: str):
         assets = {}
-        for _, resource in template["Resources"].items():
-            bucket = None
-            S3Key = None
+        with open(asset_template, mode="r") as template:
+            for _, config in json.loads(template.read())["files"].items():
+                asset_path = config["source"]["path"]
+                asset_packaging = config["source"]["packaging"]
+                bucket_name = config["destinations"]["current_account-current_region"]["bucketName"]
+                object_key = config["destinations"]["current_account-current_region"]["objectKey"]
 
-            if resource["Properties"].get("Code"):
-                bucket = resource["Properties"]["Code"]["S3Bucket"]
-                S3Key = resource["Properties"]["Code"]["S3Key"]
-            elif resource["Properties"].get("Content"):
-                bucket = resource["Properties"]["Content"]["S3Bucket"]
-                S3Key = resource["Properties"]["Content"]["S3Key"]
-            if S3Key and bucket:
-                assets[S3Key] = (
-                    bucket["Fn::Sub"].replace("${AWS::AccountId}", account_id).replace("${AWS::Region}", region)
-                )
+                assets[object_key] = {
+                    "bucket_name": bucket_name.replace("${AWS::AccountId}", account_id).replace(
+                        "${AWS::Region}", region
+                    ),
+                    "asset_path": asset_path,
+                    "asset_packaging": asset_packaging,
+                }
 
         return assets
 
