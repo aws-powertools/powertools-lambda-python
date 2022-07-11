@@ -9,7 +9,7 @@ type Query {
 
 type Todo {
     id: ID!
+    userId: String
     title: String
-    description: String
-    done: Boolean
+    completed: Boolean
 }
