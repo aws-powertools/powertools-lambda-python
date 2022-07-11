@@ -8,9 +8,10 @@ env:
   BLOCK_LABEL: "do-not-merge"
   BLOCK_REASON_LABEL: "need-issue"
 
+# TODO: include markdownify author too
 jobs:
   get_pr_details:
-    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     uses: ./.github/workflows/reusable_export_pr_details.yml
     with:
       record_pr_workflow_id: ${{ github.event.workflow_run.id }}

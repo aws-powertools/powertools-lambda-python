@@ -8,7 +8,9 @@ on:
 
 jobs:
   get_pr_details:
-    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    # Guardrails to only ever run if PR recording workflow was indeed
+    # run in a PR event and ran successfully
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     uses: ./.github/workflows/reusable_export_pr_details.yml
     with:
       record_pr_workflow_id: ${{ github.event.workflow_run.id }}
@@ -17,11 +19,6 @@ jobs:
   label_pr:
     needs: get_pr_details
     runs-on: ubuntu-latest
-    # Guardrails to only ever run if PR recording workflow was indeed
-    # run in a PR event and ran successfully
-    if: >
-      ${{ github.event.workflow_run.event == 'pull_request' &&
-      github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: "Label PR based on title"
         uses: actions/github-script@v6
