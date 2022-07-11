@@ -1,0 +1,61 @@
+on:
+  workflow_call:
+    inputs:
+      record_pr_workflow_id:
+        required: true
+        type: number
+    secrets:
+      token:
+        required: true
+    # Map the workflow outputs to job outputs
+    outputs:
+      prNumber:
+        description: "PR Number"
+        value: ${{ jobs.export_pr_details.outputs.prNumber }}
+      prTitle:
+        description: "PR Title"
+        value: ${{ jobs.export_pr_details.outputs.prTitle }}
+      prBody:
+        description: "PR Body as string"
+        value: ${{ jobs.export_pr_details.outputs.prBody }}
+      prAuthor:
+        description: "PR author username"
+        value: ${{ jobs.export_pr_details.outputs.prAuthor }}
+      prAction:
+        description: "PR event action"
+        value: ${{ jobs.export_pr_details.outputs.prAction }}
+      prIsMerged:
+        description: "Whether PR is merged"
+        value: ${{ jobs.export_pr_details.outputs.prIsMerged }}
+
+name: Export Pull Request details from fork
+jobs:
+  export_pr_details:
+    runs-on: ubuntu-latest
+    # Map the job outputs to step outputs
+    outputs:
+      prNumber: ${{ steps.prNumber.outputs.prNumber }}
+      prTitle: ${{ steps.prTitle.outputs.prTitle }}
+      prBody: ${{ steps.prBody.outputs.prBody }}
+      prAuthor: ${{ steps.prAuthor.outputs.prAuthor }}
+      prAction: ${{ steps.prAction.outputs.prAction }}
+      prIsMerged: ${{ steps.prIsMerged.outputs.prIsMerged }}
+    steps:
+      - name: "Download previously saved PR"
+        uses: actions/github-script@v6
+        # For security, we only download artifacts tied to the successful PR recording workflow
+        with:
+          github-token: ${{ secrets.token }}
+          script: |
+            const script = require('.github/scripts/download_pr_details.js')
+            await script({github, context, core})
+      # NodeJS standard library doesn't provide ZIP capabilities; use system `unzip` command instead
+      - name: "Unzip PR artifact"
+        run: unzip pr.zip
+      - name: "Export PR details"
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.token }}
+          script: |
+            const script = require('.github/scripts/export_pr_details.js')
+            await script({github, context, core})

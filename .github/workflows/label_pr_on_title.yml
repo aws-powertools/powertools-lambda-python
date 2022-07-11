@@ -7,7 +7,15 @@ on:
       - completed
 
 jobs:
-  upload:
+  get_pr_details:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    uses: ./.github/workflows/reusable_export_pr_details.yml
+    with:
+      record_pr_workflow_id: ${{ github.event.workflow_run.id }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+  label_pr:
+    needs: get_pr_details
     runs-on: ubuntu-latest
     # Guardrails to only ever run if PR recording workflow was indeed
     # run in a PR event and ran successfully
@@ -15,33 +23,7 @@ jobs:
       ${{ github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - name: 'Download artifact'
-        uses: actions/github-script@v6
-        # For security, we only download artifacts tied to the successful PR recording workflow
-        with:
-          script: |
-            const fs = require('fs');
-
-            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               run_id: ${{github.event.workflow_run.id }},
-            });
-
-            const matchArtifact = artifacts.data.artifacts.filter(artifact => artifact.name == "pr")[0];
-
-            const artifact = await github.rest.actions.downloadArtifact({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               artifact_id: matchArtifact.id,
-               archive_format: 'zip',
-            });
-
-            fs.writeFileSync('${{github.workspace}}/pr.zip', Buffer.from(artifact.data));
-      # NodeJS standard library doesn't provide ZIP capabilities; use system `unzip` command instead
-      - run: unzip pr.zip
-
-      - name: 'Label PR based on title'
+      - name: "Label PR based on title"
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -49,9 +31,8 @@ jobs:
           # thus allowing us to provide a write access token to label based on PR title
           # and label PR based on semantic title accordingly
           script: |
-            const fs = require('fs');
-            const pr_number = Number(fs.readFileSync('./number'));
-            const pr_title = fs.readFileSync('./title', 'utf-8').trim();
+            const pr_number = ${{ needs.get_pr_details.outputs.prNumber }};
+            const pr_title = "${{ needs.get_pr_details.outputs.prTitle }}";
 
             const FEAT_REGEX = /feat(\((.+)\))?(\:.+)/
             const BUG_REGEX = /(fix|bug)(\((.+)\))?(\:.+)/
