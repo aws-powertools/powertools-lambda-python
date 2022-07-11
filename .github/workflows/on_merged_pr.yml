@@ -1,8 +1,8 @@
-# Maintenance:
+name: On PR merge
 
 on:
   workflow_run:
-    workflows: ["Record PR number"]
+    workflows: ["Record PR details"]
     types:
       - completed
 
@@ -18,16 +18,12 @@ jobs:
       record_pr_workflow_id: ${{ github.event.workflow_run.id }}
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
-  skip_dependabot_prs:
-    needs: get_pr_details
-    if: >
-      ${{ needs.get_pr_details.outputs.prAuthor != 'dependabot[bot]' &&
-          needs.get_pr_details.outputs.prAction == 'opened'
-      }}
-    runs-on: ubuntu-latest
   release_label_on_merge:
     needs: get_pr_details
-    # if: ${{ needs.get_pr_details.outputs.prIsMerged == true }}
+    # Maintenance: Conditional isn't working as expected
+    if: |
+      needs.get_pr_details.outputs.prAuthor != 'dependabot[bot]'
+      && needs.get_pr_details.outputs.prIsMerged == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -35,11 +31,7 @@ jobs:
         uses: actions/github-script@v6
         env:
           PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
-          PR_TITLE: ${{ needs.get_pr_details.outputs.prTitle }}
           PR_BODY: ${{ needs.get_pr_details.outputs.prBody }}
-          PR_AUTHOR: ${{ needs.get_pr_details.outputs.prAuthor }}
-          PR_ACTION: ${{ needs.get_pr_details.outputs.prAction }}
-          PR_MERGE: ${{ needs.get_pr_details.outputs.prIsMerged }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

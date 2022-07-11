@@ -1,4 +1,4 @@
-name: Record PR number
+name: Record PR details
 
 on:
   pull_request:

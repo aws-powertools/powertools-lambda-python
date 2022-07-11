@@ -2,7 +2,7 @@ name: Label PR based on title
 
 on:
   workflow_run:
-    workflows: ["Record PR number"]
+    workflows: ["Record PR details"]
     types:
       - completed
 
@@ -20,46 +20,18 @@ jobs:
     needs: get_pr_details
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - name: "Label PR based on title"
         uses: actions/github-script@v6
+        env:
+          PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
+          PR_TITLE: ${{ needs.get_pr_details.outputs.prTitle }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           # This safely runs in our base repo, not on fork
           # thus allowing us to provide a write access token to label based on PR title
           # and label PR based on semantic title accordingly
           script: |
-            const pr_number = ${{ needs.get_pr_details.outputs.prNumber }};
-            const pr_title = "${{ needs.get_pr_details.outputs.prTitle }}";
-
-            const FEAT_REGEX = /feat(\((.+)\))?(\:.+)/
-            const BUG_REGEX = /(fix|bug)(\((.+)\))?(\:.+)/
-            const DOCS_REGEX = /(docs|doc)(\((.+)\))?(\:.+)/
-            const CHORE_REGEX = /(chore)(\((.+)\))?(\:.+)/
-            const DEPRECATED_REGEX = /(deprecated)(\((.+)\))?(\:.+)/
-            const REFACTOR_REGEX = /(refactor)(\((.+)\))?(\:.+)/
-
-            const labels = {
-                "feature": FEAT_REGEX,
-                "bug": BUG_REGEX,
-                "documentation": DOCS_REGEX,
-                "internal": CHORE_REGEX,
-                "enhancement": REFACTOR_REGEX,
-                "deprecated": DEPRECATED_REGEX,
-            }
-
-            for (const label in labels) {
-                const matcher = new RegExp(labels[label])
-                const isMatch = matcher.exec(pr_title)
-                if (isMatch != null) {
-                    console.info(`Auto-labeling PR ${pr_number} with ${label}`)
-
-                    await github.rest.issues.addLabels({
-                      issue_number: pr_number,
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      labels: [label]
-                    })
-
-                    break
-                }
-            }
+            const script = require('.github/scripts/label_pr_based_on_title.js')
+            await script({github, context, core})

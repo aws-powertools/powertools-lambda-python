@@ -1,17 +1,11 @@
 module.exports = async ({github, context, core}) => {
-    core.info(process.env);
-    const fs = require('fs');
-
-    const pr = JSON.parse(fs.readFileSync('./pr.txt', 'utf-8').trim());
-    const prBody = pr.body;
-    const prNumber = pr.number;
+    const prBody = process.env.PR_BODY;
+    const prNumber = process.env.PR_NUMBER;
     const releaseLabel = process.env.RELEASE_LABEL;
-    const maintainersTeam = process.env.MAINTAINERS_TEAM
-
-    return "Temporarily..."
-
+    const maintainersTeam = process.env.MAINTAINERS_TEAM;
     const RELATED_ISSUE_REGEX = /Issue number:[^\d\r\n]+(?<issue>\d+)/;
 
+    core.info(prBody);
     const isMatch = RELATED_ISSUE_REGEX.exec(prBody);
     if (!isMatch) {
       core.setFailed(`Unable to find related issue for PR number ${prNumber}.\n\n Body details: ${prBody}`);

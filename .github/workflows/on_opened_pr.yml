@@ -1,12 +1,15 @@
+name: On PR open
+
 on:
   workflow_run:
-    workflows: ["Record PR number"]
+    workflows: ["Record PR details"]
     types:
       - completed
 
 env:
   BLOCK_LABEL: "do-not-merge"
   BLOCK_REASON_LABEL: "need-issue"
+  IGNORE_AUTHORS: '["dependabot[bot]", "markdownify[bot]"]'
 
 # TODO: include markdownify author too
 jobs:
@@ -19,42 +22,20 @@ jobs:
       token: ${{ secrets.GITHUB_TOKEN }}
   check_related_issue:
     needs: get_pr_details
-    if: >
-      ${{ needs.get_pr_details.outputs.prAuthor != 'dependabot[bot]' &&
-          needs.get_pr_details.outputs.prAction == 'opened'
-      }}
+    # Maintenance: Refactor condition to the correct env syntax later
+    if: |
+      needs.get_pr_details.outputs.prAction == 'opened'
+      && contains(fromJson('["dependabot[bot]", "markdownify[bot]"]'), needs.get_pr_details.outputs.prAuthor) != true
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: "Ensure related issue is present"
         uses: actions/github-script@v6
+        env:
+          PR_BODY: ${{ needs.get_pr_details.outputs.prBody }}
+          PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          # Maintenance: convert into a standalone JS like post_release.js
           script: |
-            const prBody = "${{ needs.get_pr_details.outputs.prBody }}";
-            const prNumber = ${{ needs.get_pr_details.outputs.prNumber }};
-            const blockLabel = process.env.BLOCK_LABEL;
-            const blockReasonLabel = process.env.BLOCK_REASON_LABEL;
-
-            const RELATED_ISSUE_REGEX = /Issue number:.+(\d)/
-
-            const matcher = new RegExp(RELATED_ISSUE_REGEX)
-            const isMatch = matcher.exec(prBody)
-            if (isMatch == null) {
-                console.info(`No related issue found, maybe the author didn't use the template but there is one.`)
-
-                let msg = "No related issues found. Please ensure there is an open issue related to this change to avoid significant delays or closure.";
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: msg,
-                  issue_number: prNumber,
-                });
-
-                await github.rest.issues.addLabels({
-                  issue_number: prNumber,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  labels: [blockLabel, blockReasonLabel]
-                })
-            }
+            const script = require('.github/scripts/label_missing_related_issue.js')
+            await script({github, context, core})
