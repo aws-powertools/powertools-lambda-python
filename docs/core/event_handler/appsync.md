@@ -252,48 +252,25 @@ Here's an example of how you can test your synchronous resolvers:
     --8<-- "examples/event_handler_graphql/src/assert_graphql_response.json"
     ```
 
-And an example for testing asynchronous resolvers. Note that this requires the `pytest-asyncio` package:
+And an example for testing asynchronous resolvers. Note that this requires the `pytest-asyncio` package. This tests a specific async GraphQL operation.
 
-=== "test_async_resolver.py"
+???+ note
+    Alternatively, you can continue call `lambda_handler` function synchronously as it'd run `asyncio.run` to await for the coroutine to complete.
 
-    ```python
-    import json
-    import pytest
-    from pathlib import Path
+=== "assert_async_graphql_response.py"
 
-    from src.index import app  # import the instance of AppSyncResolver from your code
-
-    @pytest.mark.asyncio
-    async def test_direct_resolver():
-      # Load mock event from a file
-      json_file_path = Path("appSyncDirectResolver.json")
-      with open(json_file_path) as json_file:
-        mock_event = json.load(json_file)
-
-      # Call the implicit handler
-      result = await app(mock_event, {})
-
-      assert result == "created this value"
+    ```python hl_lines="27"
+    --8<-- "examples/event_handler_graphql/src/assert_async_graphql_response.py"
     ```
 
-=== "src/index.py"
+=== "assert_async_graphql_response_module.py"
 
-    ```python
-    import asyncio
-
-    from aws_lambda_powertools.event_handler import AppSyncResolver
-
-    app = AppSyncResolver()
-
-    @app.resolver(field_name="createSomething")
-    async def create_something_async():
-        await asyncio.sleep(1)  # Do async stuff
-        return "created this value"
-
+    ```python hl_lines="14"
+    --8<-- "examples/event_handler_graphql/src/assert_async_graphql_response_module.py"
     ```
 
-=== "appSyncDirectResolver.json"
+=== "assert_async_graphql_response.json"
 
-    ```json
-    --8<-- "tests/events/appSyncDirectResolver.json"
+    ```json hl_lines="3 4"
+    --8<-- "examples/event_handler_graphql/src/assert_async_graphql_response.json"
     ```
