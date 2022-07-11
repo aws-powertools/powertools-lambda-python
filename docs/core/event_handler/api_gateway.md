@@ -387,7 +387,7 @@ You can instruct API Gateway handler to use a custom serializer to best suit you
 
 As you grow the number of routes a given Lambda function should handle, it is natural to split routes into separate files to ease maintenance - That's where the `Router` feature is useful.
 
-Let's assume you have `app.py` as your Lambda function entrypoint and routes in `split_route_module.py`, this is how you'd use the `Router` feature.
+Let's assume you have `split_route.py` as your Lambda function entrypoint and routes in `split_route_module.py`. This is how you'd use the `Router` feature.
 
 === "split_route_module.py"
 
