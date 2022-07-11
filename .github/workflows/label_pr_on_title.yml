@@ -2,86 +2,36 @@ name: Label PR based on title
 
 on:
   workflow_run:
-    workflows: ["Record PR number"]
+    workflows: ["Record PR details"]
     types:
       - completed
 
 jobs:
-  upload:
-    runs-on: ubuntu-latest
+  get_pr_details:
     # Guardrails to only ever run if PR recording workflow was indeed
     # run in a PR event and ran successfully
-    if: >
-      ${{ github.event.workflow_run.event == 'pull_request' &&
-      github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    uses: ./.github/workflows/reusable_export_pr_details.yml
+    with:
+      record_pr_workflow_id: ${{ github.event.workflow_run.id }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+  label_pr:
+    needs: get_pr_details
+    runs-on: ubuntu-latest
     steps:
-      - name: 'Download artifact'
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: "Label PR based on title"
         uses: actions/github-script@v6
-        # For security, we only download artifacts tied to the successful PR recording workflow
-        with:
-          script: |
-            const fs = require('fs');
-
-            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               run_id: ${{github.event.workflow_run.id }},
-            });
-
-            const matchArtifact = artifacts.data.artifacts.filter(artifact => artifact.name == "pr")[0];
-
-            const artifact = await github.rest.actions.downloadArtifact({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               artifact_id: matchArtifact.id,
-               archive_format: 'zip',
-            });
-
-            fs.writeFileSync('${{github.workspace}}/pr.zip', Buffer.from(artifact.data));
-      # NodeJS standard library doesn't provide ZIP capabilities; use system `unzip` command instead
-      - run: unzip pr.zip
-
-      - name: 'Label PR based on title'
-        uses: actions/github-script@v6
+        env:
+          PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
+          PR_TITLE: ${{ needs.get_pr_details.outputs.prTitle }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           # This safely runs in our base repo, not on fork
           # thus allowing us to provide a write access token to label based on PR title
           # and label PR based on semantic title accordingly
           script: |
-            const fs = require('fs');
-            const pr_number = Number(fs.readFileSync('./number'));
-            const pr_title = fs.readFileSync('./title', 'utf-8').trim();
-
-            const FEAT_REGEX = /feat(\((.+)\))?(\:.+)/
-            const BUG_REGEX = /(fix|bug)(\((.+)\))?(\:.+)/
-            const DOCS_REGEX = /(docs|doc)(\((.+)\))?(\:.+)/
-            const CHORE_REGEX = /(chore)(\((.+)\))?(\:.+)/
-            const DEPRECATED_REGEX = /(deprecated)(\((.+)\))?(\:.+)/
-            const REFACTOR_REGEX = /(refactor)(\((.+)\))?(\:.+)/
-
-            const labels = {
-                "feature": FEAT_REGEX,
-                "bug": BUG_REGEX,
-                "documentation": DOCS_REGEX,
-                "internal": CHORE_REGEX,
-                "enhancement": REFACTOR_REGEX,
-                "deprecated": DEPRECATED_REGEX,
-            }
-
-            for (const label in labels) {
-                const matcher = new RegExp(labels[label])
-                const isMatch = matcher.exec(pr_title)
-                if (isMatch != null) {
-                    console.info(`Auto-labeling PR ${pr_number} with ${label}`)
-
-                    await github.rest.issues.addLabels({
-                      issue_number: pr_number,
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      labels: [label]
-                    })
-
-                    break
-                }
-            }
+            const script = require('.github/scripts/label_pr_based_on_title.js')
+            await script({github, context, core})

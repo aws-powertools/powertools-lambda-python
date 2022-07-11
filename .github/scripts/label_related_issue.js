@@ -1,11 +1,11 @@
 module.exports = async ({github, context, core}) => {
-    const prBody = context.payload.body;
-    const prNumber = context.payload.number;
+    const prBody = process.env.PR_BODY;
+    const prNumber = process.env.PR_NUMBER;
     const releaseLabel = process.env.RELEASE_LABEL;
-    const maintainersTeam = process.env.MAINTAINERS_TEAM
-
+    const maintainersTeam = process.env.MAINTAINERS_TEAM;
     const RELATED_ISSUE_REGEX = /Issue number:[^\d\r\n]+(?<issue>\d+)/;
 
+    core.info(prBody);
     const isMatch = RELATED_ISSUE_REGEX.exec(prBody);
     if (!isMatch) {
       core.setFailed(`Unable to find related issue for PR number ${prNumber}.\n\n Body details: ${prBody}`);
