@@ -18,14 +18,12 @@ def config() -> conftest.LambdaConfig:
 
 def test_basic_lambda_logs_visible(execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig):
     # GIVEN
-    lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
+    lambda_name = execute_lambda.get_lambda_function_name(cf_output_name="basichandlerarn")
     timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
 
     # WHEN
-    filtered_logs = helpers.get_logs(
-        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
-    )
+    filtered_logs = helpers.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
 
     # THEN
     assert any(
@@ -39,14 +37,12 @@ def test_basic_lambda_no_debug_logs_visible(
     execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig
 ):
     # GIVEN
-    lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
+    lambda_name = execute_lambda.get_lambda_function_name(cf_output_name="basichandlerarn")
     timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
 
     # WHEN
-    filtered_logs = helpers.get_logs(
-        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
-    )
+    filtered_logs = helpers.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
 
     # THEN
     assert not any(
@@ -65,14 +61,12 @@ def test_basic_lambda_contextual_data_logged(execute_lambda: conftest.Infrastruc
         "cold_start",
     )
 
-    lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
+    lambda_name = execute_lambda.get_lambda_function_name(cf_output_name="basichandlerarn")
     timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
 
     # WHEN
-    filtered_logs = helpers.get_logs(
-        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
-    )
+    filtered_logs = helpers.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
 
     # THEN
     assert all(keys in logs.dict(exclude_unset=True) for logs in filtered_logs for keys in required_keys)
@@ -82,14 +76,12 @@ def test_basic_lambda_additional_key_persistence_basic_lambda(
     execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig
 ):
     # GIVEN
-    lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
+    lambda_name = execute_lambda.get_lambda_function_name(cf_output_name="basichandlerarn")
     timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
 
     # WHEN
-    filtered_logs = helpers.get_logs(
-        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
-    )
+    filtered_logs = helpers.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
 
     # THEN
     assert any(
@@ -103,14 +95,12 @@ def test_basic_lambda_additional_key_persistence_basic_lambda(
 def test_basic_lambda_empty_event_logged(execute_lambda: conftest.InfrastructureOutput):
 
     # GIVEN
-    lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
+    lambda_name = execute_lambda.get_lambda_function_name(cf_output_name="basichandlerarn")
     timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
 
     # WHEN
-    filtered_logs = helpers.get_logs(
-        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
-    )
+    filtered_logs = helpers.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
 
     # THEN
     assert any(log.message == {} for log in filtered_logs)
@@ -127,14 +117,12 @@ def test_no_context_lambda_contextual_data_not_logged(execute_lambda: conftest.I
         "cold_start",
     )
 
-    lambda_arn = execute_lambda.get_lambda_arn(name="nocontexthandlerarn")
+    lambda_name = execute_lambda.get_lambda_function_name(cf_output_name="nocontexthandlerarn")
     timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
 
     # WHEN
-    filtered_logs = helpers.get_logs(
-        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
-    )
+    filtered_logs = helpers.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
 
     # THEN
     assert not any(keys in logs.dict(exclude_unset=True) for logs in filtered_logs for keys in required_missing_keys)
@@ -143,14 +131,12 @@ def test_no_context_lambda_contextual_data_not_logged(execute_lambda: conftest.I
 def test_no_context_lambda_event_not_logged(execute_lambda: conftest.InfrastructureOutput):
 
     # GIVEN
-    lambda_arn = execute_lambda.get_lambda_arn(name="nocontexthandlerarn")
+    lambda_name = execute_lambda.get_lambda_function_name(cf_output_name="nocontexthandlerarn")
     timestamp = execute_lambda.get_lambda_execution_time_timestamp()
     cw_client = boto3.client("logs")
 
     # WHEN
-    filtered_logs = helpers.get_logs(
-        lambda_function_name=lambda_arn.split(":")[-1], start_time=timestamp, log_client=cw_client
-    )
+    filtered_logs = helpers.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
 
     # THEN
     assert not any(log.message == {} for log in filtered_logs)

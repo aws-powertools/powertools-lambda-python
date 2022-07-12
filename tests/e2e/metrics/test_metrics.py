@@ -3,9 +3,8 @@ import uuid
 
 import boto3
 import pytest
-
-from .. import conftest
-from ..utils import helpers
+from e2e import conftest
+from e2e.utils import helpers
 
 
 @pytest.fixture(scope="module")
@@ -15,7 +14,7 @@ def config() -> conftest.LambdaConfig:
         "environment_variables": {
             "POWERTOOLS_METRICS_NAMESPACE": "powertools-e2e-metric",
             "POWERTOOLS_SERVICE_NAME": "test-powertools-service",
-            "METRIC_NAME": f"business-metric-{uuid.uuid4()}",
+            "METRIC_NAME": f"business-metric-{str(uuid.uuid4()).replace('-','_')}",
         },
     }
 

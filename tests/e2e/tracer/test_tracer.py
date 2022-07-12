@@ -8,11 +8,11 @@ from e2e.utils import helpers
 
 
 @pytest.fixture(scope="module")
-def config():
+def config() -> conftest.LambdaConfig:
     return {
         "parameters": {"tracing": "ACTIVE"},
         "environment_variables": {
-            "ANNOTATION_KEY": f"e2e-tracer-{uuid.uuid4()}",
+            "ANNOTATION_KEY": f"e2e-tracer-{str(uuid.uuid4()).replace('-','_')}",
             "ANNOTATION_VALUE": "stored",
             "ANNOTATION_ASYNC_VALUE": "payments",
         },
@@ -21,10 +21,10 @@ def config():
 
 def test_basic_lambda_async_trace_visible(execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig):
     # GIVEN
-    lambda_arn = execute_lambda.get_lambda_arn(name="basichandlerarn")
+    lambda_name = execute_lambda.get_lambda_function_name(cf_output_name="basichandlerarn")
     start_date = execute_lambda.get_lambda_execution_time()
     end_date = start_date + datetime.timedelta(minutes=5)
-    trace_filter_exporession = f'service("{lambda_arn.split(":")[-1]}")'
+    trace_filter_exporession = f'service("{lambda_name}")'
 
     # WHEN
     trace = helpers.get_traces(

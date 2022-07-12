@@ -30,8 +30,12 @@ class InfrastructureOutput:
     def get_lambda_arns(self) -> Dict[str, str]:
         return self.arns
 
-    def get_lambda_arn(self, name: str) -> Optional[str]:
-        return self.arns.get(name)
+    def get_lambda_function_arn(self, cf_output_name: str) -> Optional[str]:
+        return self.arns.get(cf_output_name)
+
+    def get_lambda_function_name(self, cf_output_name: str) -> Optional[str]:
+        lambda_arn = self.get_lambda_function_arn(cf_output_name=cf_output_name)
+        return lambda_arn.split(":")[-1] if lambda_arn else None
 
     def get_lambda_execution_time(self) -> datetime.datetime:
         return self.execution_time

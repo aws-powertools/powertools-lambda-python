@@ -107,6 +107,7 @@ def get_traces(filter_expression: str, xray_client: XRayClient, start_date: date
 
 
 def find_trace_additional_info(trace: Dict) -> List[TraceSegment]:
+    """Find all trace annotations and metadata and return them to the caller"""
     info = []
     for segment in trace["Traces"][0]["Segments"]:
         document = json.loads(segment["Document"])
