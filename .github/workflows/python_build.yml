@@ -10,7 +10,6 @@ on:
       - "mypy.ini"
     branches:
       - develop
-      - master
   push:
     paths:
       - "aws_lambda_powertools/**"
@@ -20,7 +19,6 @@ on:
       - "mypy.ini"
     branches:
       - develop
-      - master
 
 jobs:
   build:
