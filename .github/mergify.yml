@@ -22,7 +22,6 @@
 
 #   - name: Automatic merge ⬇️ on approval ✔
 #     conditions:
-#       - base!=master
 #       - "#approved-reviews-by>=2"
 #     actions:
 #       queue:
