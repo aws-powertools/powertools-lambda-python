@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Debug outputs
-        run: echo "Outputs ${{ toJSON(needs.get_pr_details.outputs) }}"
+        run: echo 'Outputs ${{ toJSON(needs.get_pr_details.outputs) }}'
       - uses: actions/checkout@v3
       - name: "Ensure related issue is present"
         uses: actions/github-script@v6
