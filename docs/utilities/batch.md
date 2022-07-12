@@ -20,9 +20,11 @@ If your function fails to process any message from the batch, the entire batch r
 
 With this utility, batch records are processed individually – only messages that failed to be processed return to the queue or stream for a further retry. This works when two mechanisms are in place:
 
-1.  `ReportBatchItemFailures` is set in your SQS, Kinesis, or DynamoDB event source properties
-2.  [A specific response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-batchfailurereporting-syntax){target="_blank"} is returned so Lambda knows which records should not be deleted during partial responses
+1. `ReportBatchItemFailures` is set in your SQS, Kinesis, or DynamoDB event source properties
+2. [A specific response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-batchfailurereporting-syntax){target="_blank"} is returned so Lambda knows which records should not be deleted during partial responses
 
+<!-- HTML tags are required in admonition content thus increasing line length beyond our limits -->
+<!-- markdownlint-disable MD013 -->
 ???+ warning "Warning: This utility lowers the chance of processing records more than once; it does not guarantee it"
     We recommend implementing processing logic in an [idempotent manner](idempotency.md){target="_blank"} wherever possible.
 
@@ -37,7 +39,6 @@ You do not need any additional IAM permissions to use this utility, except for w
 ### Required resources
 
 The remaining sections of the documentation will rely on these samples. For completeness, this demonstrates IAM permissions and Dead Letter Queue where batch records will be sent after 2 retries were attempted.
-
 
 === "SQS"
 
@@ -220,10 +221,10 @@ The remaining sections of the documentation will rely on these samples. For comp
 
 Processing batches from SQS works in four stages:
 
-1.  Instantiate **`BatchProcessor`** and choose **`EventType.SQS`** for the event type
-2.  Define your function to handle each batch record, and use [`SQSRecord`](data_classes.md#sqs){target="_blank"} type annotation for autocompletion
-3.  Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
-4.  Return the appropriate response contract to Lambda via **`.response()`** processor method
+1. Instantiate **`BatchProcessor`** and choose **`EventType.SQS`** for the event type
+2. Define your function to handle each batch record, and use [`SQSRecord`](data_classes.md#sqs){target="_blank"} type annotation for autocompletion
+3. Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
+4. Return the appropriate response contract to Lambda via **`.response()`** processor method
 
 ???+ info
     This code example optionally uses Tracer and Logger for completion.
@@ -350,10 +351,10 @@ Processing batches from SQS works in four stages:
 
 Processing batches from Kinesis works in four stages:
 
-1.  Instantiate **`BatchProcessor`** and choose **`EventType.KinesisDataStreams`** for the event type
-2.  Define your function to handle each batch record, and use [`KinesisStreamRecord`](data_classes.md#kinesis-streams){target="_blank"} type annotation for autocompletion
-3.  Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
-4.  Return the appropriate response contract to Lambda via **`.response()`** processor method
+1. Instantiate **`BatchProcessor`** and choose **`EventType.KinesisDataStreams`** for the event type
+2. Define your function to handle each batch record, and use [`KinesisStreamRecord`](data_classes.md#kinesis-streams){target="_blank"} type annotation for autocompletion
+3. Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
+4. Return the appropriate response contract to Lambda via **`.response()`** processor method
 
 ???+ info
     This code example optionally uses Tracer and Logger for completion.
@@ -433,7 +434,6 @@ Processing batches from Kinesis works in four stages:
     }
     ```
 
-
 === "Sample event"
 
     ```json
@@ -475,15 +475,14 @@ Processing batches from Kinesis works in four stages:
     }
     ```
 
-
 ### Processing messages from DynamoDB
 
 Processing batches from Kinesis works in four stages:
 
-1.  Instantiate **`BatchProcessor`** and choose **`EventType.DynamoDBStreams`** for the event type
-2.  Define your function to handle each batch record, and use [`DynamoDBRecord`](data_classes.md#dynamodb-streams){target="_blank"} type annotation for autocompletion
-3.  Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
-4.  Return the appropriate response contract to Lambda via **`.response()`** processor method
+1. Instantiate **`BatchProcessor`** and choose **`EventType.DynamoDBStreams`** for the event type
+2. Define your function to handle each batch record, and use [`DynamoDBRecord`](data_classes.md#dynamodb-streams){target="_blank"} type annotation for autocompletion
+3. Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
+4. Return the appropriate response contract to Lambda via **`.response()`** processor method
 
 ???+ info
     This code example optionally uses Tracer and Logger for completion.
@@ -569,7 +568,6 @@ Processing batches from Kinesis works in four stages:
     }
     ```
 
-
 === "Sample event"
 
     ```json
@@ -638,7 +636,6 @@ All records in the batch will be passed to this handler for processing, even if 
 
     All processing logic will and should be performed by the `record_handler` function.
 
-
 ## Advanced
 
 ### Pydantic integration
@@ -646,7 +643,6 @@ All records in the batch will be passed to this handler for processing, even if 
 You can bring your own Pydantic models via **`model`** parameter when inheriting from **`SqsRecordModel`**, **`KinesisDataStreamRecord`**, or **`DynamoDBStreamRecordModel`**
 
 Inheritance is importance because we need to access message IDs and sequence numbers from these records in the event of failure. Mypy is fully integrated with this utility, so it should identify whether you're passing the incorrect Model.
-
 
 === "SQS"
 
@@ -789,7 +785,6 @@ Use the context manager to access a list of all returned values from your `recor
 * **When successful**. We will include a tuple with `success`, the result of `record_handler`, and the batch record
 * **When failed**. We will include a tuple with `fail`, exception as a string, and the batch record
 
-
 ```python hl_lines="31-38" title="Accessing processed messages via context manager"
 import json
 
@@ -832,7 +827,6 @@ def lambda_handler(event, context: LambdaContext):
 
 	return processor.response()
 ```
-
 
 ### Extending BatchProcessor
 
@@ -957,7 +951,6 @@ def lambda_handler(event, context):
 When using Tracer to capture responses for each batch record processing, you might exceed 64K of tracing data depending on what you return from your `record_handler` function, or how big is your batch size.
 
 If that's the case, you can configure [Tracer to disable response auto-capturing](../core/tracer.md#disabling-response-auto-capture){target="_blank"}.
-
 
 ```python hl_lines="14" title="Disabling Tracer response auto-capturing"
 import json
@@ -1123,8 +1116,6 @@ Given a SQS batch where the first batch record succeeds and the second fails pro
     }
     ```
 
-
-
 ## FAQ
 
 ### Choosing between decorator and context manager
@@ -1150,12 +1141,10 @@ class MyProcessor(BatchProcessor):
 		return super().failure_handler(record, exception)
 ```
 
-
 ## Legacy
 
 ???+ tip
     This is kept for historical purposes. Use the new [BatchProcessor](#processing-messages-from-sqs) instead.
-
 
 ### Migration guide
 
@@ -1174,7 +1163,6 @@ You can migrate in three steps:
 1. If you are using **`sqs_batch_decorator`** you can now use **`batch_processor`** decorator
 2. If you were using **`PartialSQSProcessor`** you can now use **`BatchProcessor`**
 3. Change your Lambda Handler to return the new response format
-
 
 === "Decorator: Before"
 
@@ -1206,7 +1194,6 @@ You can migrate in three steps:
     def lambda_handler(event, context):
         return processor.response()
     ```
-
 
 === "Context manager: Before"
 

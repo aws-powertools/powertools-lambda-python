@@ -1,4 +1,4 @@
-
+<!--  markdownlint-disable MD043 -->
 ## Table of contents <!-- omit in toc -->
 
 - [Overview](#overview)
@@ -6,30 +6,30 @@
 - [Emeritus](#emeritus)
 - [Labels](#labels)
 - [Maintainer Responsibilities](#maintainer-responsibilities)
-  - [Uphold Code of Conduct](#uphold-code-of-conduct)
-  - [Prioritize Security](#prioritize-security)
-  - [Review Pull Requests](#review-pull-requests)
-  - [Triage New Issues](#triage-new-issues)
-  - [Triage Bug Reports](#triage-bug-reports)
-  - [Triage RFCs](#triage-rfcs)
-  - [Releasing a new version](#releasing-a-new-version)
-    - [Changelog generation](#changelog-generation)
-    - [Bumping the version](#bumping-the-version)
-    - [Drafting release notes](#drafting-release-notes)
-  - [Run end to end tests](#run-end-to-end-tests)    
-  - [Releasing a documentation hotfix](#releasing-a-documentation-hotfix)
-  - [Maintain Overall Health of the Repo](#maintain-overall-health-of-the-repo)
-  - [Manage Roadmap](#manage-roadmap)
-  - [Add Continuous Integration Checks](#add-continuous-integration-checks)
-  - [Negative Impact on the Project](#negative-impact-on-the-project)
-  - [Becoming a maintainer](#becoming-a-maintainer)
+    - [Uphold Code of Conduct](#uphold-code-of-conduct)
+    - [Prioritize Security](#prioritize-security)
+    - [Review Pull Requests](#review-pull-requests)
+    - [Triage New Issues](#triage-new-issues)
+    - [Triage Bug Reports](#triage-bug-reports)
+    - [Triage RFCs](#triage-rfcs)
+    - [Releasing a new version](#releasing-a-new-version)
+        - [Changelog generation](#changelog-generation)
+        - [Bumping the version](#bumping-the-version)
+        - [Drafting release notes](#drafting-release-notes)
+    - [Run end to end tests](#run-end-to-end-tests)
+    - [Releasing a documentation hotfix](#releasing-a-documentation-hotfix)
+    - [Maintain Overall Health of the Repo](#maintain-overall-health-of-the-repo)
+    - [Manage Roadmap](#manage-roadmap)
+    - [Add Continuous Integration Checks](#add-continuous-integration-checks)
+    - [Negative Impact on the Project](#negative-impact-on-the-project)
+    - [Becoming a maintainer](#becoming-a-maintainer)
 - [Common scenarios](#common-scenarios)
-  - [Contribution is stuck](#contribution-is-stuck)
-  - [Insufficient feedback or information](#insufficient-feedback-or-information)
-  - [Crediting contributions](#crediting-contributions)
-  - [Is that a bug?](#is-that-a-bug)
-  - [Mentoring contributions](#mentoring-contributions)
-  - [Long running issues or PRs](#long-running-issues-or-prs)
+    - [Contribution is stuck](#contribution-is-stuck)
+    - [Insufficient feedback or information](#insufficient-feedback-or-information)
+    - [Crediting contributions](#crediting-contributions)
+    - [Is that a bug?](#is-that-a-bug)
+    - [Mentoring contributions](#mentoring-contributions)
+    - [Long running issues or PRs](#long-running-issues-or-prs)
 
 ## Overview
 
@@ -53,7 +53,7 @@ Previous active maintainers who contributed to this project.
 | Maintainer        | GitHub ID                                       | Affiliation |
 | ----------------- | ----------------------------------------------- | ----------- |
 | Tom McCarthy      | [cakepietoast](https://github.com/cakepietoast) | MongoDB     |
-| Nicolas Moutschen | [nmoutschen](https://github.com/nmoutschen)     | Amazon      |
+| Nicolas Moutschen | [nmoutschen](https://github.com/nmoutschen)     | Apollo      |
 
 ## Labels
 
@@ -101,7 +101,9 @@ Be aware of recurring ambiguous situations and [document them](#common-scenarios
 
 ### Uphold Code of Conduct
 
-Model the behavior set forward by the [Code of Conduct](CODE_OF_CONDUCT.md) and raise any violations to other maintainers and admins. There could be unusual circumstances where inappropriate behavior does not immediately fall within the [Code of Conduct](CODE_OF_CONDUCT.md). These might be nuanced and should be handled with extra care - when in doubt, do not engage and reach out to other maintainers and admins.
+Model the behavior set forward by the [Code of Conduct](CODE_OF_CONDUCT.md) and raise any violations to other maintainers and admins. There could be unusual circumstances where inappropriate behavior does not immediately fall within the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+These might be nuanced and should be handled with extra care - when in doubt, do not engage and reach out to other maintainers and admins.
 
 ### Prioritize Security
 
@@ -153,14 +155,14 @@ RFC is a collaborative process to help us get to the most optimal solution given
 
 Make sure you ask these questions in mind when reviewing:
 
-* Does it use our [RFC template](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE)?
-* Does the match our [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/latest/#tenets)?
-* Does the proposal address the use case? If so, is the recommended usage explicit?
-* Does it focus on the mechanics to solve the use case over fine-grained implementation details?
-* Can anyone familiar with the code base implement it?
-* If approved, are they interested in contributing? Do they need any guidance?
-* Does this significantly increase the overall project maintenance? Do we have the skills to maintain it?
-* If we can't take this use case, are there alternative projects we could recommend? Or does it call for a new project altogether?
+- Does it use our [RFC template](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE)?
+- Does the match our [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/latest/#tenets)?
+- Does the proposal address the use case? If so, is the recommended usage explicit?
+- Does it focus on the mechanics to solve the use case over fine-grained implementation details?
+- Can anyone familiar with the code base implement it?
+- If approved, are they interested in contributing? Do they need any guidance?
+- Does this significantly increase the overall project maintenance? Do we have the skills to maintain it?
+- If we can't take this use case, are there alternative projects we could recommend? Or does it call for a new project altogether?
 
 When necessary, be upfront that the time to review, approve, and implement a RFC can vary - see [Contribution is stuck](#contribution-is-stuck). Some RFCs may be further updated after implementation, as certain areas become clearer.
 
@@ -200,11 +202,11 @@ Edit the respective PR title and update their [labels](#labels). Then run the [R
 
 The best part comes now. Replace the placeholder `[Human readable summary of changes]` with what you'd like to communicate to customers what this release is all about. Always put yourself in the customers shoes. For that, these are some questions to keep in mind when drafting your first or future release notes:
 
-* Can customers understand at a high level what changed in this release?
-* Is there a link to the documentation where they can read more about each main change?
-* Are there any graphics or code snippets that can enhance readability?
-* Are we calling out any key contributor(s) to this release?
-  - All contributors are automatically credited, use this as an exceptional case to feature them
+- Can customers understand at a high level what changed in this release?
+- Is there a link to the documentation where they can read more about each main change?
+- Are there any graphics or code snippets that can enhance readability?
+- Are we calling out any key contributor(s) to this release?
+    - All contributors are automatically credited, use this as an exceptional case to feature them
 
 Once you're happy, hit `Publish release`. This will kick off the [Publishing workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/publish.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be notified.
 
@@ -224,7 +226,7 @@ This workflow will update both user guide and API documentation.
 
 ### Maintain Overall Health of the Repo
 
-> TODO: Coordinate removing `master` and renaming `develop` to `main`
+> TODO: Coordinate renaming `develop` to `main`
 
 Keep the `develop` branch at production quality at all times. Backport features as needed. Cut release branches and tags to enable future patches.
 
@@ -247,6 +249,7 @@ Actions that negatively impact the project will be handled by the admins, in coo
 In 2023, we will revisit this. We need to improve our understanding of how other projects are doing, their mechanisms to promote key contributors, and how they interact daily.
 
 We suspect this process might look similar to the [OpenSearch project](https://github.com/opensearch-project/.github/blob/main/MAINTAINERS.md#becoming-a-maintainer).
+
 ## Common scenarios
 
 These are recurring ambiguous situations that new and existing maintainers may encounter. They serve as guidance. It is up to each maintainer to follow, adjust, or handle in a different manner as long as [our conduct is consistent](#uphold-code-of-conduct)

@@ -14,11 +14,25 @@ jobs:
     steps:
       - name: Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@v1.1.1
+        uses: dependabot/fetch-metadata@v1.3.3
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
       - name: Enable auto-merge for mypy-boto3 stubs Dependabot PRs
-        if: ${{contains(steps.metadata.outputs.dependency-names, 'mypy-boto3')}} # && steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        if: ${{ contains(steps.metadata.outputs.dependency-names, 'mypy-boto3') && steps.metadata.outputs.update-type != 'version-update:semver-major' }}
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      # Maintenance: Experiment with literal array (toJSON('["dep1", "dep2"]')) to ease extending it
+      - name: Enable auto-merge for CDK Construct Lambda Layer Dependabot PRs
+        if: ${{ contains(steps.metadata.outputs.dependency-names, 'cdk-lambda-powertools-python-layer') && steps.metadata.outputs.update-type != 'version-update:semver-major' }}
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      # Maintenance: Revisit if CDK Constructs make breaking changes like CDK v1
+      - name: Enable auto-merge for CDK Lib Construct
+        if: ${{ contains(steps.metadata.outputs.dependency-names, 'aws-cdk-lib') && steps.metadata.outputs.update-type != 'version-update:semver-major' }}
         run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}

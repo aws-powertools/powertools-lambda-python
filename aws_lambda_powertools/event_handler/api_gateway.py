@@ -595,7 +595,7 @@ class ApiGatewayResolver(BaseRouter):
             if method == "OPTIONS":
                 logger.debug("Pre-flight request detected. Returning CORS with null response")
                 headers["Access-Control-Allow-Methods"] = ",".join(sorted(self._cors_methods))
-                return ResponseBuilder(Response(status_code=204, content_type=None, headers=headers, body=None))
+                return ResponseBuilder(Response(status_code=204, content_type=None, headers=headers, body=""))
 
         handler = self._lookup_exception_handler(NotFoundError)
         if handler:

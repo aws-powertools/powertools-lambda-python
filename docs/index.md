@@ -3,25 +3,24 @@ title: Homepage
 description: AWS Lambda Powertools Python
 ---
 
+<!-- markdownlint-disable MD043 -->
+
 A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, idempotency, batching, and more.
 
-???+ tip "Tip: Looking for a quick read through how the core features are used?"
-
-    Check out [this detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/) with a practical example.
-
+???+ note
+    Lambda Powertools is also available for [Java](https://awslabs.github.io/aws-lambda-powertools-java/){target="_blank"} and [TypeScript](https://awslabs.github.io/aws-lambda-powertools-typescript/latest/){target="_blank"}.
 
 ## Install
 
 Powertools is available in the following formats:
 
-* **Lambda Layer**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:20**](#){: .copyMe}:clipboard:
+* **Lambda Layer**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:22**](#){: .copyMe}:clipboard:
 * **PyPi**: **`pip install aws-lambda-powertools`**
 
 ???+ hint "Support this project by using Lambda Layers :heart:"
     Lambda Layers allow us to understand who uses this library in a non-intrusive way. This helps us justify and gain future investments for other Lambda Powertools languages.
 
     When using Layers, you can add Lambda Powertools as a dev dependency (or as part of your virtual env) to not impact the development process.
-
 
 ### Lambda Layer
 
@@ -31,25 +30,25 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 
 ??? note "Note: Expand to copy any regional Lambda Layer ARN"
 
-    | Region | Layer ARN
-    |--------------------------- | ---------------------------
-    | `us-east-1` | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `us-east-2` | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `us-west-1` | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `us-west-2` | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `ap-south-1` | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `eu-central-1` | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `eu-west-1` | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `eu-west-2` | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `eu-west-3` | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `eu-north-1` | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `ca-central-1` | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
-    | `sa-east-1` | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:20](#){: .copyMe}:clipboard:
+    | Region           | Layer ARN                                                                                                |
+    | ---------------- | -------------------------------------------------------------------------------------------------------- |
+    | `us-east-1`      | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard:      |
+    | `us-east-2`      | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard:      |
+    | `us-west-1`      | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard:      |
+    | `us-west-2`      | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard:      |
+    | `ap-south-1`     | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard:     |
+    | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard: |
+    | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard: |
+    | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard: |
+    | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard: |
+    | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard: |
+    | `eu-central-1`   | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard:   |
+    | `eu-west-1`      | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard:      |
+    | `eu-west-2`      | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard:      |
+    | `eu-west-3`      | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard:      |
+    | `eu-north-1`     | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard:     |
+    | `ca-central-1`   | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard:   |
+    | `sa-east-1`      | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:22](#){: .copyMe}:clipboard:      |
 
 ??? question "Can't find our Lambda Layer for your preferred AWS region?"
     You can use [Serverless Application Repository (SAR)](#sar) method, our [CDK Layer Construct](https://github.com/aws-samples/cdk-lambda-powertools-python-layer){target="_blank"}, or PyPi like you normally would for any other library.
@@ -63,7 +62,7 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
         Type: AWS::Serverless::Function
         Properties:
             Layers:
-                - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:20
+                - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:22
     ```
 
 === "Serverless framework"
@@ -73,7 +72,7 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 		hello:
 		  handler: lambda_function.lambda_handler
 		  layers:
-			- arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPython:20
+			- arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPython:22
     ```
 
 === "CDK"
@@ -89,7 +88,7 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
             powertools_layer = aws_lambda.LayerVersion.from_layer_version_arn(
                 self,
                 id="lambda-powertools",
-                layer_version_arn=f"arn:aws:lambda:{env.region}:017000801446:layer:AWSLambdaPowertoolsPython:20"
+                layer_version_arn=f"arn:aws:lambda:{env.region}:017000801446:layer:AWSLambdaPowertoolsPython:22"
             )
             aws_lambda.Function(self,
                 'sample-app-lambda',
@@ -138,7 +137,7 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
       role          = aws_iam_role.iam_for_lambda.arn
       handler       = "index.test"
       runtime 		= "python3.9"
-      layers 		= ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:20"]
+      layers 		= ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:22"]
 
       source_code_hash = filebase64sha256("lambda_function_payload.zip")
     }
@@ -157,7 +156,7 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
     ? Do you want to configure advanced settings? Yes
     ...
     ? Do you want to enable Lambda layers for this function? Yes
-    ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:20
+    ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:22
     ❯ amplify push -y
 
 
@@ -168,7 +167,7 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
     - Name: <NAME-OF-FUNCTION>
     ? Which setting do you want to update? Lambda layers configuration
     ? Do you want to enable Lambda layers for this function? Yes
-    ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:20
+    ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:22
     ? Do you want to edit the local lambda function now? No
     ```
 
@@ -176,7 +175,7 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 	Change {region} to your AWS region, e.g. `eu-west-1`
 
     ```bash title="AWS CLI"
-	aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:20 --region {region}
+	aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:22 --region {region}
     ```
 
     The pre-signed URL to download this Lambda Layer will be within `Location` key.
@@ -187,24 +186,22 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 
 	Lambda Powertools Lambda Layer do not include `pydantic` library - required dependency for the `parser` utility. See [SAR](#sar) option instead.
 
-
 #### SAR
 
 Serverless Application Repository (SAR) App deploys a CloudFormation stack with a copy of our Lambda Layer in your AWS account and region.
 
 Despite having more steps compared to the [public Layer ARN](#lambda-layer) option, the benefit is that you can specify a semantic version you want to use.
 
-| App | ARN | Description
-|----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------
-| [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer) | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer](#){: .copyMe}:clipboard: | Core dependencies only; sufficient for nearly all utilities.
-| [aws-lambda-powertools-python-layer-extras](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-extras) | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-extras](#){: .copyMe}:clipboard: | Core plus extra dependencies such as `pydantic` that is required by `parser` utility.
+| App                                                                                                                                                              | ARN                                                                                                                             | Description                                                                           |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer)               | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer](#){: .copyMe}:clipboard:        | Core dependencies only; sufficient for nearly all utilities.                          |
+| [aws-lambda-powertools-python-layer-extras](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-extras) | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-extras](#){: .copyMe}:clipboard: | Core plus extra dependencies such as `pydantic` that is required by `parser` utility. |
 
 ???+ warning
     **Layer-extras** does not support Python 3.6 runtime. This layer also includes all extra dependencies: `22.4MB zipped`, `~155MB unzipped`.
 
 ???+ tip
 	You can create a shared Lambda Layers stack and make this along with other account level layers stack.
-
 
 If using SAM, you can include this SAR App as part of your shared Layers stack, and lock to a specific semantic version. Once deployed, it'll be available across the account this is deployed to.
 
@@ -216,7 +213,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
         Properties:
             Location:
                 ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-                SemanticVersion: 1.25.10 # change to latest semantic version available in SAR
+                SemanticVersion: 1.26.3 # change to latest semantic version available in SAR
 
     MyLambdaFunction:
         Type: AWS::Serverless::Function
@@ -244,7 +241,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
                 Location:
                     ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
                     # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
-                    SemanticVersion: 1.25.10
+                    SemanticVersion: 1.26.3
     ```
 
 === "CDK"
@@ -254,7 +251,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 
     POWERTOOLS_BASE_NAME = 'AWSLambdaPowertools'
     # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
-    POWERTOOLS_VER = '1.23.0'
+    POWERTOOLS_VER = '1.26.3'
     POWERTOOLS_ARN = 'arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer'
 
     class SampleApp(core.Construct):
@@ -318,7 +315,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
 
     variable "aws_powertools_version" {
       type        = string
-      default     = "1.20.2"
+      default     = "1.26.3"
       description = "The AWS Powertools release version"
     }
 
@@ -414,41 +411,41 @@ sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 
 Core utilities such as Tracing, Logging, Metrics, and Event Handler will be available across all Lambda Powertools languages. Additional utilities are subjective to each language ecosystem and customer demand.
 
-| Utility | Description
-| ------------------------------------------------- | ---------------------------------------------------------------------------------
-[Tracing](./core/tracer.md) | Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions
-[Logger](./core/logger.md) | Structured logging made easier, and decorator to enrich structured logging with key Lambda context details
-[Metrics](./core/metrics.md) | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
-[Event handler: AppSync](./core/event_handler/appsync.md) | AppSync event handler for Lambda Direct Resolver and Amplify GraphQL Transformer function
-[Event handler: API Gateway and ALB](https://awslabs.github.io/aws-lambda-powertools-python/latest/core/event_handler/api_gateway/) | Amazon API Gateway REST/HTTP API and ALB event handler for Lambda functions invoked using Proxy integration
-[Middleware factory](./utilities/middleware_factory.md) | Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
-[Parameters](./utilities/parameters.md) | Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time
-[Batch processing](./utilities/batch.md) | Handle partial failures for AWS SQS batch processing
-[Typing](./utilities/typing.md) | Static typing classes to speedup development in your IDE
-[Validation](./utilities/validation.md) | JSON Schema validator for inbound events and responses
-[Event source data classes](./utilities/data_classes.md) | Data classes describing the schema of common Lambda event triggers
-[Parser](./utilities/parser.md) | Data parsing and deep validation using Pydantic
-[Idempotency](./utilities/idempotency.md) | Idempotent Lambda handler
-[Feature Flags](./utilities/feature_flags.md) | A simple rule engine to evaluate when one or multiple features should be enabled depending on the input
+| Utility                                                                                                                             | Description                                                                                                                                               |
+| ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Tracing](./core/tracer.md)                                                                                                         | Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions                                               |
+| [Logger](./core/logger.md)                                                                                                          | Structured logging made easier, and decorator to enrich structured logging with key Lambda context details                                                |
+| [Metrics](./core/metrics.md)                                                                                                        | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)                                                                         |
+| [Event handler: AppSync](./core/event_handler/appsync.md)                                                                           | AppSync event handler for Lambda Direct Resolver and Amplify GraphQL Transformer function                                                                 |
+| [Event handler: API Gateway and ALB](https://awslabs.github.io/aws-lambda-powertools-python/latest/core/event_handler/api_gateway/) | Amazon API Gateway REST/HTTP API and ALB event handler for Lambda functions invoked using Proxy integration                                               |
+| [Middleware factory](./utilities/middleware_factory.md)                                                                             | Decorator factory to create your own middleware to run logic before, and after each Lambda invocation                                                     |
+| [Parameters](./utilities/parameters.md)                                                                                             | Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time |
+| [Batch processing](./utilities/batch.md)                                                                                            | Handle partial failures for AWS SQS batch processing                                                                                                      |
+| [Typing](./utilities/typing.md)                                                                                                     | Static typing classes to speedup development in your IDE                                                                                                  |
+| [Validation](./utilities/validation.md)                                                                                             | JSON Schema validator for inbound events and responses                                                                                                    |
+| [Event source data classes](./utilities/data_classes.md)                                                                            | Data classes describing the schema of common Lambda event triggers                                                                                        |
+| [Parser](./utilities/parser.md)                                                                                                     | Data parsing and deep validation using Pydantic                                                                                                           |
+| [Idempotency](./utilities/idempotency.md)                                                                                           | Idempotent Lambda handler                                                                                                                                 |
+| [Feature Flags](./utilities/feature_flags.md)                                                                                       | A simple rule engine to evaluate when one or multiple features should be enabled depending on the input                                                   |
 
 ## Environment variables
 
 ???+ info
 	Explicit parameters take precedence over environment variables
 
-| Environment variable | Description | Utility | Default |
-| ------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------- |
-| **POWERTOOLS_SERVICE_NAME** | Sets service name used for tracing namespace, metrics dimension and structured logging | All | `"service_undefined"` |
-| **POWERTOOLS_METRICS_NAMESPACE** | Sets namespace used for metrics | [Metrics](./core/metrics) | `None` |
-| **POWERTOOLS_TRACE_DISABLED** | Explicitly disables tracing | [Tracing](./core/tracer) | `false` |
-| **POWERTOOLS_TRACER_CAPTURE_RESPONSE** | Captures Lambda or method return as metadata. | [Tracing](./core/tracer) | `true` |
-| **POWERTOOLS_TRACER_CAPTURE_ERROR** | Captures Lambda or method exception as metadata. | [Tracing](./core/tracer) | `true` |
-| **POWERTOOLS_TRACE_MIDDLEWARES** | Creates sub-segment for each custom middleware | [Middleware factory](./utilities/middleware_factory) | `false` |
-| **POWERTOOLS_LOGGER_LOG_EVENT** | Logs incoming event | [Logging](./core/logger) | `false` |
-| **POWERTOOLS_LOGGER_SAMPLE_RATE** | Debug log sampling | [Logging](./core/logger) | `0` |
-| **POWERTOOLS_LOG_DEDUPLICATION_DISABLED** | Disables log deduplication filter protection to use Pytest Live Log feature | [Logging](./core/logger) | `false` |
-| **POWERTOOLS_EVENT_HANDLER_DEBUG** | Enables debugging mode for event handler  | [Event Handler](./core/event_handler/api_gateway.md#debug-mode) | `false` |
-| **LOG_LEVEL** | Sets logging level | [Logging](./core/logger) | `INFO` |
+| Environment variable                      | Description                                                                            | Utility                                                         | Default               |
+| ----------------------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------- | --------------------- |
+| **POWERTOOLS_SERVICE_NAME**               | Sets service name used for tracing namespace, metrics dimension and structured logging | All                                                             | `"service_undefined"` |
+| **POWERTOOLS_METRICS_NAMESPACE**          | Sets namespace used for metrics                                                        | [Metrics](./core/metrics)                                       | `None`                |
+| **POWERTOOLS_TRACE_DISABLED**             | Explicitly disables tracing                                                            | [Tracing](./core/tracer)                                        | `false`               |
+| **POWERTOOLS_TRACER_CAPTURE_RESPONSE**    | Captures Lambda or method return as metadata.                                          | [Tracing](./core/tracer)                                        | `true`                |
+| **POWERTOOLS_TRACER_CAPTURE_ERROR**       | Captures Lambda or method exception as metadata.                                       | [Tracing](./core/tracer)                                        | `true`                |
+| **POWERTOOLS_TRACE_MIDDLEWARES**          | Creates sub-segment for each custom middleware                                         | [Middleware factory](./utilities/middleware_factory)            | `false`               |
+| **POWERTOOLS_LOGGER_LOG_EVENT**           | Logs incoming event                                                                    | [Logging](./core/logger)                                        | `false`               |
+| **POWERTOOLS_LOGGER_SAMPLE_RATE**         | Debug log sampling                                                                     | [Logging](./core/logger)                                        | `0`                   |
+| **POWERTOOLS_LOG_DEDUPLICATION_DISABLED** | Disables log deduplication filter protection to use Pytest Live Log feature            | [Logging](./core/logger)                                        | `false`               |
+| **POWERTOOLS_EVENT_HANDLER_DEBUG**        | Enables debugging mode for event handler                                               | [Event Handler](./core/event_handler/api_gateway.md#debug-mode) | `false`               |
+| **LOG_LEVEL**                             | Sets logging level                                                                     | [Logging](./core/logger)                                        | `INFO`                |
 
 ## Debug mode
 
@@ -460,7 +457,7 @@ from aws_lambda_powertools.logging.logger import set_package_logger
 set_package_logger() # (1)
 ```
 
-1.  :information_source: this will configure our `aws_lambda_powertools` logger with debug.
+1. :information_source: this will configure our `aws_lambda_powertools` logger with debug.
 
 ## Tenets
 

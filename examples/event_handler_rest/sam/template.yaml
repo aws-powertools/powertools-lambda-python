@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Hello world event handler API Gateway
+
+Globals:
+  Api:
+    TracingEnabled: true
+    Cors: # see CORS section
+      AllowOrigin: "'https://example.com'"
+      AllowHeaders: "'Content-Type,Authorization,X-Amz-Date'"
+      MaxAge: "'300'"
+    BinaryMediaTypes: # see Binary responses section
+      - "*~1*" # converts to */* for any binary type
+  Function:
+    Timeout: 5
+    Runtime: python3.9
+    Tracing: Active
+    Environment:
+      Variables:
+        LOG_LEVEL: INFO
+        POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
+        POWERTOOLS_LOGGER_LOG_EVENT: true
+        POWERTOOLS_SERVICE_NAME: example
+
+Resources:
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: getting_started_rest_api_resolver.lambda_handler
+      CodeUri: ../src
+      Description: API handler function
+      Events:
+        AnyApiEvent:
+          Type: Api
+          Properties:
+            # NOTE: this is a catch-all rule to simplify the documentation.
+            # explicit routes and methods are recommended for prod instead (see below)
+            Path: /{proxy+} # Send requests on any path to the lambda function
+            Method: ANY # Send requests using any http method to the lambda function
+
+
+        # GetAllTodos:
+        #   Type: Api
+        #   Properties:
+        #     Path: /todos
+        #     Method: GET
+        # GetTodoById:
+        #   Type: Api
+        #   Properties:
+        #     Path: /todos/{todo_id}
+        #     Method: GET
+        # CreateTodo:
+        #   Type: Api
+        #   Properties:
+        #     Path: /todos
+        #     Method: POST

@@ -1,46 +1,33 @@
-on:
-  pull_request:
-    types:
-      - closed
+name: On PR merge
 
-env:
-  RELEASE_LABEL: "pending-release"
-  MAINTAINERS_TEAM: "@awslabs/aws-lambda-powertools-python"
+on:
+  workflow_run:
+    workflows: ["Record PR details"]
+    types:
+      - completed
 
 jobs:
+  get_pr_details:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    uses: ./.github/workflows/reusable_export_pr_details.yml
+    with:
+      record_pr_workflow_id: ${{ github.event.workflow_run.id }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
   release_label_on_merge:
-    if: github.event.pull_request.merged == true && github.event.pull_request.user.login != 'dependabot[bot]'
+    needs: get_pr_details
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: "Label PR related issue for release"
         uses: actions/github-script@v6
+        env:
+          PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
+          PR_BODY: ${{ needs.get_pr_details.outputs.prBody }}
+          PR_IS_MERGED: ${{ needs.get_pr_details.outputs.prIsMerged }}
+          PR_AUTHOR: ${{ needs.get_pr_details.outputs.prAuthor }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const prBody = context.payload.body;
-            const prNumber = context.payload.number;
-            const releaseLabel = process.env.RELEASE_LABEL;
-
-            const RELATED_ISSUE_REGEX = /Issue number:.+(\d)/
-
-            const matcher = new RegExp(RELATED_ISSUE_REGEX)
-            const isMatch = matcher.exec(prBody)
-            if (isMatch != null) {
-                let relatedIssueNumber = isMatch[1]
-                console.info(`Auto-labeling related issue ${relatedIssueNumber} for release`)
-
-                await github.rest.issues.addLabels({
-                  issue_number: relatedIssueNumber,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  labels: [releaseLabel]
-                })
-            } else {
-              let msg = `${MAINTAINERS_TEAM} No related issues found. Please ensure '${RELEASE_LABEL}.' label is applied before releasing.`;
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: msg,
-                issue_number: prNumber,
-              });
-            }
+            const script = require('.github/scripts/label_related_issue.js')
+            await script({github, context, core})

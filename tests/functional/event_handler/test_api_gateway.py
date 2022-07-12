@@ -236,6 +236,19 @@ def test_cors():
     assert "Access-Control-Allow-Origin" not in result["headers"]
 
 
+def test_cors_preflight_body_is_empty_not_null():
+    # GIVEN CORS is configured
+    app = ALBResolver(cors=CORSConfig())
+
+    event = {"path": "/my/request", "httpMethod": "OPTIONS"}
+
+    # WHEN calling the event handler
+    result = app(event, {})
+
+    # THEN there body should be empty strings
+    assert result["body"] == ""
+
+
 def test_compress():
     # GIVEN a function that has compress=True
     # AND an event with a "Accept-Encoding" that include gzip
@@ -485,7 +498,7 @@ def test_cors_preflight():
     # THEN return no content
     # AND include Access-Control-Allow-Methods of the cors methods used
     assert result["statusCode"] == 204
-    assert result["body"] is None
+    assert result["body"] == ""
     headers = result["headers"]
     assert "Content-Type" not in headers
     assert "Access-Control-Allow-Origin" in result["headers"]

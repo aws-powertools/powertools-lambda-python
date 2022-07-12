@@ -1,0 +1,87 @@
+name: Deploy cdk stack
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  workflow_call:
+    inputs:
+      stage:
+        required: true
+        type: string
+      artefact-name:
+        required: true
+        type: string
+    secrets:
+      target-account-role:
+        required: true
+
+jobs:
+  deploy-cdk-stack:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./layer
+    strategy:
+      fail-fast: false
+      matrix:
+        region: [
+          "af-south-1",
+          #          "eu-central-1",
+          #          "us-east-1",
+          #          "us-east-2",
+          #          "us-west-1",
+          #          "us-west-2",
+          #          "ap-east-1",
+          #          "ap-south-1",
+          #          "ap-northeast-1",
+          #          "ap-northeast-2",
+          #          "ap-southeast-1",
+          #          "ap-southeast-2",
+          #          "ca-central-1",
+          #          "eu-west-1",
+          #          "eu-west-2",
+          #          "eu-west-3",
+          #          "eu-south-1",
+          #          "eu-north-1",
+          #          "sa-east-1",
+          #          "ap-southeast-3",
+          #          "ap-northeast-3",
+          #          "me-south-1"
+        ]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ matrix.region }}
+          role-to-assume: ${{ secrets.target-account-role }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.12'
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+      - name: install cdk and deps
+        run: |
+          npm install -g aws-cdk@2.29.0
+          cdk --version
+      - name: install deps
+        run: |
+          pip install -r requirements.txt
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.artefact-name }}
+          path: layer
+      - name: unzip artefact
+        run: unzip cdk.out.zip
+      - name: CDK Deploy Layer
+        run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'LayerStack' --require-approval never --verbose
+      - name: CDK Deploy Canary
+        run: cdk deploy --app cdk.out --context region=${{ matrix.region}} --parameters DeployStage="${{ inputs.stage }}" 'CanaryStack' --require-approval never --verbose
