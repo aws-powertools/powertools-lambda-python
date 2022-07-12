@@ -6,10 +6,6 @@ on:
     types:
       - completed
 
-env:
-  BLOCK_LABEL: "do-not-merge"
-  BLOCK_REASON_LABEL: "need-issue"
-  IGNORE_AUTHORS: '["dependabot[bot]", "markdownify[bot]"]'
 
 jobs:
   get_pr_details:
@@ -21,18 +17,20 @@ jobs:
       token: ${{ secrets.GITHUB_TOKEN }}
   check_related_issue:
     needs: get_pr_details
-    # Maintenance: Refactor condition to the correct env syntax later
-    if: |
-      needs.get_pr_details.outputs.prAction == 'opened'
-      && contains(fromJson('["dependabot[bot]", "markdownify[bot]"]'), needs.get_pr_details.outputs.prAuthor) != true
     runs-on: ubuntu-latest
     steps:
+      - name: Debug outputs
+        run: echo "Outputs ${{ toJSON(needs.get_pr_details.outputs) }}"
       - uses: actions/checkout@v3
       - name: "Ensure related issue is present"
+        if: contains('["opened", "edited"]', needs.get_pr_details.outputs.prAction)
+        if: needs.get_pr_details.outputs.prAction == 'opened' || needs.get_pr_details.outputs.prAction == 'edited'
         uses: actions/github-script@v6
         env:
           PR_BODY: ${{ needs.get_pr_details.outputs.prBody }}
           PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
+          PR_ACTION: ${{ needs.get_pr_details.outputs.prAction }}
+          PR_AUTHOR: ${{ needs.get_pr_details.outputs.prAuthor }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
