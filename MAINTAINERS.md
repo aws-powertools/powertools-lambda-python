@@ -220,7 +220,7 @@ This workflow will update both user guide and API documentation.
 
 ### Maintain Overall Health of the Repo
 
-> TODO: Coordinate removing `master` and renaming `develop` to `main`
+> TODO: Coordinate renaming `develop` to `main`
 
 Keep the `develop` branch at production quality at all times. Backport features as needed. Cut release branches and tags to enable future patches.
 
