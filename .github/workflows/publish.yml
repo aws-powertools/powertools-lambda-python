@@ -20,9 +20,8 @@ name: Publish to PyPi
 # 6. Kick off Lambda Layer pipeline to publish latest version with minimal dependencies as a SAR App
 # 7. Kick off Lambda Layer pipeline to publish latest version with extra dependencies as a SAR App
 # 8. Builds a fresh version of docs including Changelog updates
-# 9. Push latest release source code to master using release title as the commit message
-# 10. Builds latest documentation for new release, and update latest alias pointing to the new release tag
-# 11. Close and notify all issues labeled "pending-release" about the release details
+# 9. Builds latest documentation for new release, and update latest alias pointing to the new release tag
+# 10. Close and notify all issues labeled "pending-release" about the release details
 
 #
 # === Fallback mechanism due to external failures ===
@@ -111,17 +110,5 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const post_release = require('.github/workflows/post_release.js')
+            const post_release = require('.github/scripts/post_release.js')
             await post_release({github, context, core})
-
-  sync_master:
-    needs: release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Sync master from detached head
-        # If version matches CHANGELOG and pyproject.toml
-        # If it passes all checks, successfully releases to test and prod
-        # Then sync up master with latest source code release
-        # where commit message will be Release notes title
-        run: git push origin HEAD:refs/heads/master --force
