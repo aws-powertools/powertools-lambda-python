@@ -58,7 +58,7 @@ mkdocs-material = "^8.2.7"
 mypy-boto3-secretsmanager = "^1.24.11"
 mypy-boto3-ssm = "^1.24.0"
 mypy-boto3-appconfig = "^1.24.0"
-mypy-boto3-dynamodb = "^1.24.12"
+mypy-boto3-dynamodb = "^1.24.27"
 pytest-benchmark = "^3.4.1"
 
 
