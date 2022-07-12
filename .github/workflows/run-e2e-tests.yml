@@ -16,9 +16,6 @@ jobs:
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
-      #########################
-      # Release new version
-      #########################
       - name: "Use Python"
         uses: actions/setup-python@v3
         with:

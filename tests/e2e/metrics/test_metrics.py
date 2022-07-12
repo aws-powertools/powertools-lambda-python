@@ -36,6 +36,6 @@ def test_basic_lambda_metric_visible(execute_lambda: conftest.InfrastructureOutp
     )
 
     # THEN
-    assert metrics["Timestamps"] and len(metrics["Timestamps"]) == 1
-    assert metrics["Values"] and len(metrics["Values"]) == 1
-    assert metrics["Values"][0] == 1
+    assert metrics.get("Timestamps") and len(metrics.get("Timestamps")) == 1
+    assert metrics.get("Values") and len(metrics.get("Values")) == 1
+    assert metrics.get("Values") and metrics.get("Values")[0] == 1

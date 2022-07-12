@@ -1,8 +1,7 @@
 import boto3
 import pytest
-
-from .. import conftest
-from ..utils import helpers
+from e2e import conftest
+from e2e.utils import helpers
 
 
 @pytest.fixture(scope="module")

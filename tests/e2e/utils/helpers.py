@@ -3,6 +3,7 @@ from datetime import datetime
 from functools import lru_cache
 from typing import Dict, List, Optional, Union
 
+from mypy_boto3_cloudwatch import type_defs
 from mypy_boto3_cloudwatch.client import CloudWatchClient
 from mypy_boto3_lambda.client import LambdaClient
 from mypy_boto3_xray.client import XRayClient
@@ -63,7 +64,7 @@ def get_metrics(
     metric_name: str,
     service_name: str,
     end_date: Optional[datetime] = None,
-):
+) -> type_defs.MetricDataResultTypeDef:
     response = cw_client.get_metric_data(
         MetricDataQueries=[
             {
