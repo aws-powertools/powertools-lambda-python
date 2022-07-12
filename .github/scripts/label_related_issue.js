@@ -34,11 +34,11 @@ module.exports = async ({github, context, core}) => {
       });
     }
 
-    const { groups: {relatedIssueNumber} } = isMatch
+    const { groups: {issue} } = isMatch
 
-    core.info(`Auto-labeling related issue ${relatedIssueNumber} for release`)
+    core.info(`Auto-labeling related issue ${issue} for release`)
     return await github.rest.issues.addLabels({
-      issue_number: relatedIssueNumber,
+      issue_number: issue,
       owner: context.repo.owner,
       repo: context.repo.repo,
       labels: [LABEL_PENDING_RELEASE]
