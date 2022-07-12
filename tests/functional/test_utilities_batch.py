@@ -51,6 +51,34 @@ def sqs_event_factory() -> Callable:
 
 
 @pytest.fixture(scope="module")
+def sns_event_factory() -> Callable:
+    def factory(body: str):
+        return {
+            "EventVersion": "1.0",
+            "EventSubscriptionArn": "arn:aws:sns:us-east-2:123456789012:sns-la ...",
+            "EventSource": "aws:sns",
+            "Sns": {
+                "SignatureVersion": "1",
+                "Timestamp": "2019-01-02T12:45:07.000Z",
+                "Signature": "tcc6faL2yUC6dgZdmrwh1Y4cGa/ebXEkAi6RibDsvpi+tE/1+82j...65r==",
+                "SigningCertUrl": "https://sns.us-east-2.amazonaws.com/SimpleNotification",
+                "MessageId": "95df01b4-ee98-5cb9-9903-4c221d41eb5e",
+                "Message": "Hello from SNS!",
+                "MessageAttributes": {
+                    "Test": {"Type": "String", "Value": "TestString"},
+                    "TestBinary": {"Type": "Binary", "Value": "TestBinary"},
+                },
+                "Type": "Notification",
+                "UnsubscribeUrl": "https://sns.us-east-2.amazonaws.com/?Action=Unsubscribe",
+                "TopicArn": "arn:aws:sns:us-east-2:123456789012:sns-lambda",
+                "Subject": "TestInvoke",
+            },
+        }
+
+    return factory
+
+
+@pytest.fixture(scope="module")
 def kinesis_event_factory() -> Callable:
     def factory(body: str):
         seq = "".join(str(randint(0, 9)) for _ in range(52))

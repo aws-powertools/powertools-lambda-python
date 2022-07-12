@@ -15,12 +15,14 @@ from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingErro
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
 from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+from aws_lambda_powertools.utilities.data_classes.sns_event import SNSEventRecord
 
 logger = logging.getLogger(__name__)
 
 
 class EventType(Enum):
     SQS = "SQS"
+    SNS = "SNS"
     KinesisDataStreams = "KinesisDataStreams"
     DynamoDBStreams = "DynamoDBStreams"
 
@@ -330,11 +332,13 @@ class BatchProcessor(BasePartialProcessor):
         self.batch_response = copy.deepcopy(self.DEFAULT_RESPONSE)
         self._COLLECTOR_MAPPING = {
             EventType.SQS: self._collect_sqs_failures,
+            EventType.SNS: self._collect_sns_failures,
             EventType.KinesisDataStreams: self._collect_kinesis_failures,
             EventType.DynamoDBStreams: self._collect_dynamodb_failures,
         }
         self._DATA_CLASS_MAPPING = {
             EventType.SQS: SQSRecord,
+            EventType.SNS: SNSEventRecord,
             EventType.KinesisDataStreams: KinesisStreamRecord,
             EventType.DynamoDBStreams: DynamoDBRecord,
         }
@@ -410,6 +414,13 @@ class BatchProcessor(BasePartialProcessor):
         failures = []
         for msg in self.fail_messages:
             msg_id = msg.messageId if self.model else msg.message_id
+            failures.append({"itemIdentifier": msg_id})
+        return failures
+
+    def _collect_sns_failures(self):
+        failures = []
+        for msg in self.fail_messages:
+            msg_id = msg.sns.MessageId if self.model else msg.sns.message_id
             failures.append({"itemIdentifier": msg_id})
         return failures
 
