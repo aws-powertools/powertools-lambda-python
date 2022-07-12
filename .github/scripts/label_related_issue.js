@@ -1,19 +1,35 @@
-module.exports = async ({github, context, core}) => {
-    const prBody = process.env.PR_BODY;
-    const prNumber = process.env.PR_NUMBER;
-    const releaseLabel = process.env.RELEASE_LABEL;
-    const maintainersTeam = process.env.MAINTAINERS_TEAM;
-    const RELATED_ISSUE_REGEX = /Issue number:[^\d\r\n]+(?<issue>\d+)/;
+const {
+  PR_AUTHOR,
+  PR_BODY,
+  PR_NUMBER,
+  IGNORE_AUTHORS,
+  LABEL_PENDING_RELEASE,
+  HANDLE_MAINTAINERS_TEAM,
+  PR_IS_MERGED,
+} = require("./constants")
 
-    core.info(prBody);
-    const isMatch = RELATED_ISSUE_REGEX.exec(prBody);
+module.exports = async ({github, context, core}) => {
+    core.debug(PR_BODY);
+    core.debug(PR_IS_MERGED);
+
+    if (IGNORE_AUTHORS.includes(PR_AUTHOR)) {
+      return core.notice("Author in IGNORE_AUTHORS list; skipping...")
+    }
+
+    if (!PR_IS_MERGED) {
+      return core.notice("Only merged PRs to avoid spam; skipping")
+    }
+
+
+    const RELATED_ISSUE_REGEX = /Issue number:[^\d\r\n]+(?<issue>\d+)/;
+    const isMatch = RELATED_ISSUE_REGEX.exec(PR_BODY);
     if (!isMatch) {
-      core.setFailed(`Unable to find related issue for PR number ${prNumber}.\n\n Body details: ${prBody}`);
+      core.setFailed(`Unable to find related issue for PR number ${PR_NUMBER}.\n\n Body details: ${PR_BODY}`);
       return await github.rest.issues.createComment({
         owner: context.repo.owner,
         repo: context.repo.repo,
-        body: `${maintainersTeam} No related issues found. Please ensure '${releaseLabel}' label is applied before releasing.`,
-        issue_number: prNumber,
+        body: `${HANDLE_MAINTAINERS_TEAM} No related issues found. Please ensure '${LABEL_PENDING_RELEASE}' label is applied before releasing.`,
+        issue_number: PR_NUMBER,
       });
     }
 
@@ -24,6 +40,6 @@ module.exports = async ({github, context, core}) => {
       issue_number: relatedIssueNumber,
       owner: context.repo.owner,
       repo: context.repo.repo,
-      labels: [releaseLabel]
+      labels: [LABEL_PENDING_RELEASE]
     })
 }
