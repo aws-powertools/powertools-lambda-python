@@ -16,10 +16,6 @@ jobs:
       token: ${{ secrets.GITHUB_TOKEN }}
   release_label_on_merge:
     needs: get_pr_details
-    # Maintenance: Conditional isn't working as expected
-    if: |
-      needs.get_pr_details.outputs.prAuthor != 'dependabot[bot]'
-      && needs.get_pr_details.outputs.prIsMerged == true
     runs-on: ubuntu-latest
     steps:
       - name: Debug outputs
