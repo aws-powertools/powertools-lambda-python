@@ -1,4 +1,4 @@
-name: On PR open
+name: On new PR
 
 on:
   workflow_run:

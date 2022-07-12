@@ -1,8 +1,8 @@
-module.exports = async ({github, context, core}) => {
-    const pr_number = process.env.PR_NUMBER
-    const pr_title = process.env.PR_TITLE
+const { PR_NUMBER, PR_TITLE } = require("./constants")
 
-    console.log(pr_title)
+module.exports = async ({github, context, core}) => {
+    core.debug(PR_NUMBER);
+    core.debug(PR_TITLE);
 
     const FEAT_REGEX = /feat(\((.+)\))?(\:.+)/
     const BUG_REGEX = /(fix|bug)(\((.+)\))?(\:.+)/
@@ -20,14 +20,15 @@ module.exports = async ({github, context, core}) => {
         "deprecated": DEPRECATED_REGEX,
     }
 
+    // Maintenance: We should keep track of modified PRs in case their titles change
     for (const label in labels) {
         const matcher = new RegExp(labels[label])
-        const isMatch = matcher.exec(pr_title)
+        const isMatch = matcher.exec(PR_TITLE)
         if (isMatch != null) {
-            console.info(`Auto-labeling PR ${pr_number} with ${label}`)
+            core.info(`Auto-labeling PR ${PR_NUMBER} with ${label}`)
 
             await github.rest.issues.addLabels({
-            issue_number: pr_number,
+            issue_number: PR_NUMBER,
             owner: context.repo.owner,
             repo: context.repo.repo,
             labels: [label]
@@ -36,4 +37,6 @@ module.exports = async ({github, context, core}) => {
             break
         }
     }
+
+    return core.notice(`PR ${PR_NUMBER} title '${PR_TITLE}' doesn't follow semantic titles; skipping...`)
 }
