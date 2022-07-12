@@ -16,14 +16,10 @@ jobs:
       token: ${{ secrets.GITHUB_TOKEN }}
   release_label_on_merge:
     needs: get_pr_details
-    # Maintenance: Conditional isn't working as expected
-    if: |
-      needs.get_pr_details.outputs.prAuthor != 'dependabot[bot]'
-      && needs.get_pr_details.outputs.prIsMerged == true
     runs-on: ubuntu-latest
     steps:
       - name: Debug outputs
-        run: echo "Outputs ${{ toJSON(needs.get_pr_details.outputs) }}"
+        run: echo 'Outputs ${{ toJSON(needs.get_pr_details.outputs) }}'
       - uses: actions/checkout@v3
       - name: "Label PR related issue for release"
         uses: actions/github-script@v6

@@ -6,7 +6,6 @@ on:
     types:
       - completed
 
-
 jobs:
   get_pr_details:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -20,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Debug outputs
-        run: echo "Outputs ${{ toJSON(needs.get_pr_details.outputs) }}"
+        run: echo 'Outputs ${{ toJSON(needs.get_pr_details.outputs) }}'
       - uses: actions/checkout@v3
       - name: "Ensure related issue is present"
         if: contains('["opened", "edited"]', needs.get_pr_details.outputs.prAction)
