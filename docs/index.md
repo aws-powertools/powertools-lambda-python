@@ -7,9 +7,8 @@ description: AWS Lambda Powertools Python
 
 A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, idempotency, batching, and more.
 
-???+ tip "Tip: Looking for a quick read through how the core features are used?"
-
-    Check out [this detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/) with a practical example.
+???+ note
+    Lambda Powertools is also available for [Java](https://awslabs.github.io/aws-lambda-powertools-java/){target="_blank"} and [TypeScript](https://awslabs.github.io/aws-lambda-powertools-typescript/latest/){target="_blank"}.
 
 ## Install
 
