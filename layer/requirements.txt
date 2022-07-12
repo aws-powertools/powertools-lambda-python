@@ -23,9 +23,9 @@ cattrs==22.1.0 \
     # via
     #   -r requirements.txt
     #   jsii
-cdk-lambda-powertools-python-layer==2.0.48 \
-    --hash=sha256:7bdd5a196e74b48d403223722f2838d1d10064d02e960a5565482cc0b7aad18d \
-    --hash=sha256:9afeacea31eba14d67360db71af385c654c9e0af9b29a0d4e0922b52f862ae03
+cdk-lambda-powertools-python-layer==2.0.49 \
+    --hash=sha256:8055fc691539f16e22a40e3d3df9c3f59fb28012437b08c47c639aefb001f1b2 \
+    --hash=sha256:9b0a7b7344f9ccb486564af728cefeac743687bfb131631e6d9171a55800dbac
     # via -r requirements.txt
 constructs==10.1.43 \
     --hash=sha256:69fd6da574c9506f44ca61e112af7d5db08ebb29b4bedc67b6d200b616f4abce \
