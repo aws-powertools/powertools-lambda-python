@@ -4,8 +4,8 @@ const {
   PR_BODY,
   PR_NUMBER,
   IGNORE_AUTHORS,
-  BLOCK_LABEL,
-  BLOCK_REASON_LABEL
+  LABEL_BLOCK,
+  LABEL_BLOCK_REASON
 } = require("./constants")
 
 module.exports = async ({github, context, core}) => {
@@ -39,7 +39,7 @@ module.exports = async ({github, context, core}) => {
           issue_number: PR_NUMBER,
           owner: context.repo.owner,
           repo: context.repo.repo,
-          labels: [BLOCK_LABEL, BLOCK_REASON_LABEL]
+          labels: [LABEL_BLOCK, LABEL_BLOCK_REASON]
         })
     }
 }
