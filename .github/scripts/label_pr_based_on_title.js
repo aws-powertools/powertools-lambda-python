@@ -18,22 +18,28 @@ module.exports = async ({github, context, core}) => {
     }
 
     // Maintenance: We should keep track of modified PRs in case their titles change
-    for (const label in labels) {
-        const matcher = new RegExp(labels[label])
-        const isMatch = matcher.exec(PR_TITLE)
-        if (isMatch != null) {
-            core.info(`Auto-labeling PR ${PR_NUMBER} with ${label}`)
+    let miss = 0;
+    try {
+        for (const label in labels) {
+            const matcher = new RegExp(labels[label])
+            const isMatch = matcher.exec(PR_TITLE)
+            if (isMatch != null) {
+                core.info(`Auto-labeling PR ${PR_NUMBER} with ${label}`)
 
-            await github.rest.issues.addLabels({
-            issue_number: PR_NUMBER,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            labels: [label]
-            })
-
-            break
+                return await github.rest.issues.addLabels({
+                issue_number: PR_NUMBER,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: [label]
+                })
+            } else {
+                core.debug(`'${PR_TITLE}' didn't match '${label}' semantic.`)
+                miss += 1
+            }
+        }
+    } finally {
+        if (miss == Object.keys(labels).length) {
+            return core.notice(`PR ${PR_NUMBER} title '${PR_TITLE}' doesn't follow semantic titles; skipping...`)
         }
     }
-
-    return core.notice(`PR ${PR_NUMBER} title '${PR_TITLE}' doesn't follow semantic titles; skipping...`)
 }
