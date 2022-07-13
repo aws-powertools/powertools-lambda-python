@@ -1,9 +1,6 @@
 const { PR_NUMBER, PR_TITLE } = require("./constants")
 
 module.exports = async ({github, context, core}) => {
-    core.debug(PR_NUMBER);
-    core.debug(PR_TITLE);
-
     const FEAT_REGEX = /feat(\((.+)\))?(\:.+)/
     const BUG_REGEX = /(fix|bug)(\((.+)\))?(\:.+)/
     const DOCS_REGEX = /(docs|doc)(\((.+)\))?(\:.+)/

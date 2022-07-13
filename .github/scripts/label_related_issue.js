@@ -9,10 +9,6 @@ const {
 } = require("./constants")
 
 module.exports = async ({github, context, core}) => {
-    core.debug(PR_BODY);
-    core.debug(PR_IS_MERGED);
-    core.debug(PR_AUTHOR);
-
     if (IGNORE_AUTHORS.includes(PR_AUTHOR)) {
       return core.notice("Author in IGNORE_AUTHORS list; skipping...")
     }
