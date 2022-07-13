@@ -32,3 +32,6 @@ options:
   notes:
     keywords:
       - BREAKING CHANGE
+  # issues:
+  #   prefix:
+  #     - #
