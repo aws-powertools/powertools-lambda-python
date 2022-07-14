@@ -17,7 +17,6 @@ module.exports = async ({github, context, core}) => {
       return core.notice("Only merged PRs to avoid spam; skipping")
     }
 
-
     const RELATED_ISSUE_REGEX = /Issue number:[^\d\r\n]+(?<issue>\d+)/;
     const isMatch = RELATED_ISSUE_REGEX.exec(PR_BODY);
     if (!isMatch) {
