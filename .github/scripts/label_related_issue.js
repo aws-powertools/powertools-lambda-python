@@ -13,7 +13,7 @@ module.exports = async ({github, context, core}) => {
       return core.notice("Author in IGNORE_AUTHORS list; skipping...")
     }
 
-    if (!PR_IS_MERGED) {
+    if (PR_IS_MERGED == "false") {
       return core.notice("Only merged PRs to avoid spam; skipping")
     }
 
