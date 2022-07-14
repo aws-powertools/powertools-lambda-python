@@ -51,7 +51,7 @@ module.exports = async ({github, context, core}) => {
                     labels: [label]
                 })
 
-				        const area = matches[2]; // second capture group contains the area
+                const area = matches[2]; // second capture group contains the area
                 if (areas.indexOf(area) > -1) {
                     core.info(`Auto-labeling PR ${PR_NUMBER} with area ${area}`);
                     await github.rest.issues.addLabels({
