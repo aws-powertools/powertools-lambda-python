@@ -22,12 +22,20 @@ name: Publish to PyPi
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version_to_publish:
+        description: "Version to be released in PyPi, Docs, and Lambda Layer, e.g. v1.26.4"
+        default: v1.26.4
+        required: true
 
 jobs:
   release:
     runs-on: ubuntu-latest
     outputs:
-      RELEASE_TAG_VERSION: ${{ steps.release_version.outputs.RELEASE_TAG_VERSION }}
+      RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
+    env:
+      RELEASE_TAG_VERSION: ${{ github.event.release.tag_name || inputs.version_to_publish }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -38,16 +46,17 @@ jobs:
           python-version: "3.8"
       - name: Set release notes tag
         id: release_version
+        # transform tag format `v<version` to `<version`
         run: |
-          RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}
-          echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> $GITHUB_ENV
-          echo "::set-output name=RELEASE_TAG_VERSION::${RELEASE_TAG_VERSION}"
+          RELEASE_VERSION=${RELEASE_TAG_VERSION:1}
+          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> $GITHUB_ENV
+          echo "::set-output name=RELEASE_VERSION::${RELEASE_VERSION}"
       - name: Install dependencies
         run: make dev
       - name: Run all tests, linting and baselines
         run: make pr
       - name: Bump package version
-        run: poetry version ${RELEASE_TAG_VERSION}
+        run: poetry version ${RELEASE_VERSION}
       - name: Generate latest CHANGELOG
         run: make changelog
       - name: Setup git client
@@ -58,7 +67,7 @@ jobs:
         run: |
           git add CHANGELOG.md
           git add pyproject.toml
-          git commit -m "chore(ci): update project with version ${RELEASE_TAG_VERSION}"
+          git commit -m "chore(ci): update project with version ${RELEASE_VERSION}"
           git push origin HEAD:refs/heads/develop
       - name: Build python package and wheel
         run: poetry build
@@ -74,7 +83,7 @@ jobs:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       - name: publish lambda layer in SAR by triggering the internal codepipeline
         run: |
-          aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_TAG_VERSION --overwrite
+          aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_VERSION --overwrite
           aws codepipeline start-pipeline-execution --name ${{ secrets.CODEPIPELINE_NAME }}
         env:
           # Maintenance: Migrate to new OAuth mechanism
@@ -87,14 +96,14 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     env:
-      RELEASE_TAG_VERSION: ${{ needs.release.outputs.RELEASE_TAG_VERSION }}
+      RELEASE_VERSION: ${{ needs.release.outputs.RELEASE_VERSION }}
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Build docs website and API reference
         run: |
-          make release-docs VERSION=${RELEASE_TAG_VERSION} ALIAS="latest"
+          make release-docs VERSION=${RELEASE_VERSION} ALIAS="latest"
           poetry run mike set-default --push latest
       - name: Release API docs to release version
         uses: peaceiris/actions-gh-pages@v3
@@ -102,7 +111,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./api
           keep_files: true
-          destination_dir: ${{ env.RELEASE_TAG_VERSION }}/api
+          destination_dir: ${{ env.RELEASE_VERSION }}/api
       - name: Release API docs to latest
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -115,7 +124,7 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     env:
-      RELEASE_TAG_VERSION: ${{ needs.release.outputs.RELEASE_TAG_VERSION }}
+      RELEASE_VERSION: ${{ needs.release.outputs.RELEASE_VERSION }}
     steps:
       - uses: actions/checkout@v3
       - name: Close issues related to this release
