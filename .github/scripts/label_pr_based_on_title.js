@@ -19,7 +19,7 @@ module.exports = async ({github, context, core}) => {
 
     const areas = [
         "tracer",
-        "metric",
+        "metrics",
         "utilities",
         "logger",
         "event_handlers",
