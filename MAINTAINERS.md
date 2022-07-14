@@ -13,9 +13,8 @@
     - [Triage Bug Reports](#triage-bug-reports)
     - [Triage RFCs](#triage-rfcs)
     - [Releasing a new version](#releasing-a-new-version)
-        - [Changelog generation](#changelog-generation)
-        - [Bumping the version](#bumping-the-version)
         - [Drafting release notes](#drafting-release-notes)
+    - [Run end to end tests](#run-end-to-end-tests)
     - [Releasing a documentation hotfix](#releasing-a-documentation-hotfix)
     - [Maintain Overall Health of the Repo](#maintain-overall-health-of-the-repo)
     - [Manage Roadmap](#manage-roadmap)
@@ -208,6 +207,14 @@ Once you're happy, hit `Publish release` 🎉🎉🎉.
 This will kick off the [Publishing workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/publish.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be closed and notified.
 
 > TODO: Include information to verify SAR and Lambda Layers deployment; we're still finalizing Lambda Layer automated deployment in GitHub Actions - ping @am29d when in doubt.
+
+### Run end to end tests
+
+In order to run end to end tests you need to install CDK CLI first and bootstrap your account with `cdk bootstrap` command. For additional details follow [documentation](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html).
+
+To run locally, export `AWS_PROFILE` environment variable and run `make e2e tests`. To run from GitHub Actions, use [run-e2e-tests workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/run-e2e-tests.yml) and pick the branch you want to run tests against.
+
+**NOTE**: E2E tests are run as part of each merge to `develop` branch.
 
 ### Releasing a documentation hotfix
 

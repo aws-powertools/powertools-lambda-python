@@ -26,6 +26,9 @@ fastjsonschema = "^2.14.5"
 boto3 = "^1.18"
 pydantic = {version = "^1.8.2", optional = true }
 email-validator = {version = "*", optional = true }
+mypy-boto3-cloudwatch = "^1.24.0"
+mypy-boto3-lambda = "^1.24.0"
+mypy-boto3-xray = "^1.24.0"
 
 [tool.poetry.dev-dependencies]
 # 2022-04-21: jmespath was removed, to be re-added once we drop python 3.6.
@@ -57,8 +60,11 @@ mypy = "^0.961"
 mkdocs-material = "^8.2.7"
 mypy-boto3-secretsmanager = "^1.24.11"
 mypy-boto3-ssm = "^1.24.0"
-mypy-boto3-appconfig = "^1.24.0"
+mypy-boto3-appconfig = "^1.24.29"
 mypy-boto3-dynamodb = "^1.24.27"
+retry = "^0.9.2"
+pytest-xdist = "^2.5.0"
+aws-cdk-lib = "^2.23.0"
 pytest-benchmark = "^3.4.1"
 
 
@@ -132,7 +138,9 @@ exclude = '''
 minversion = "6.0"
 addopts = "-ra -vv"
 testpaths = "./tests"
-markers = "perf: marks perf tests to be deselected (deselect with '-m \"not perf\"')"
+markers = [
+    "perf: marks perf tests to be deselected (deselect with '-m \"not perf\"')",
+]
 
 [build-system]
 requires = ["poetry>=0.12"]
