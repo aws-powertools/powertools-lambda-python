@@ -17,23 +17,23 @@ module.exports = async ({github, context, core}) => {
         "deprecated": DEPRECATED_REGEX,
     }
 
-	  const areas = [
-	  	"tracer",
-	  	"metric",
-	  	"utilities",
-	  	"logger",
-	  	"event_handlers",
-	  	"middleware_factory",
-	  	"idempotency",
-	  	"event_sources",
-	  	"feature_flags",
-	  	"parameters",
-	  	"batch",
-	  	"parser",
-	  	"validator",
-	  	"jmespath_util",
-	  	"lambda-layers",
-	  ];
+    const areas = [
+        "tracer",
+        "metric",
+        "utilities",
+        "logger",
+        "event_handlers",
+        "middleware_factory",
+        "idempotency",
+        "event_sources",
+        "feature_flags",
+        "parameters",
+        "batch",
+        "parser",
+        "validator",
+        "jmespath_util",
+        "lambda-layers",
+    ];
 
     // Maintenance: We should keep track of modified PRs in case their titles change
     let miss = 0;
