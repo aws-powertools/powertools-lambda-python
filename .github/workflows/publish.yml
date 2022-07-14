@@ -42,6 +42,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    outputs:
+      RELEASE_TAG_VERSION: ${{ steps.release_version.outputs.RELEASE_TAG_VERSION }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -51,9 +53,11 @@ jobs:
         with:
           python-version: "3.8"
       - name: Set release notes tag
+        id: release_version
         run: |
           RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}
           echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> $GITHUB_ENV
+          echo "::set-output name=RELEASE_TAG_VERSION::${RELEASE_TAG_VERSION}"
       - name: Install dependencies
         run: make dev
       - name: Run all tests, linting and baselines
@@ -94,6 +98,16 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-west-1
           AWS_DEFAULT_OUTPUT: json
+
+  docs:
+    needs: release
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG_VERSION: ${{ needs.release.outputs.RELEASE_TAG_VERSION }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Build docs website and API reference
         run: |
           make release-docs VERSION=${RELEASE_TAG_VERSION} ALIAS="latest"
@@ -112,9 +126,18 @@ jobs:
           publish_dir: ./api
           keep_files: true
           destination_dir: latest/api
+
+  post_release:
+    needs: release
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG_VERSION: ${{ needs.release.outputs.RELEASE_TAG_VERSION }}
+    steps:
+      - uses: actions/checkout@v3
       - name: Close issues related to this release
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const post_release = require('.github/scripts/post_release.js')
             await post_release({github, context, core})
