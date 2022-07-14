@@ -19,24 +19,30 @@ module.exports = async ({github, context, core}) => {
 
 
     const RELATED_ISSUE_REGEX = /Issue number:[^\d\r\n]+(?<issue>\d+)/;
-    const isMatch = RELATED_ISSUE_REGEX.exec(PR_BODY);
-    if (!isMatch) {
-      core.setFailed(`Unable to find related issue for PR number ${PR_NUMBER}.\n\n Body details: ${PR_BODY}`);
-      return await github.rest.issues.createComment({
+
+    try {
+      const isMatch = RELATED_ISSUE_REGEX.exec(PR_BODY);
+      if (!isMatch) {
+        core.setFailed(`Unable to find related issue for PR number ${PR_NUMBER}.\n\n Body details: ${PR_BODY}`);
+        return await github.rest.issues.createComment({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          body: `${HANDLE_MAINTAINERS_TEAM} No related issues found. Please ensure '${LABEL_PENDING_RELEASE}' label is applied before releasing.`,
+          issue_number: PR_NUMBER,
+        });
+      }
+
+      const { groups: {issue} } = isMatch
+
+      core.info(`Auto-labeling related issue ${issue} for release`)
+      return await github.rest.issues.addLabels({
+        issue_number: issue,
         owner: context.repo.owner,
         repo: context.repo.repo,
-        body: `${HANDLE_MAINTAINERS_TEAM} No related issues found. Please ensure '${LABEL_PENDING_RELEASE}' label is applied before releasing.`,
-        issue_number: PR_NUMBER,
-      });
+        labels: [LABEL_PENDING_RELEASE]
+      })
+    } catch (error) {
+      core.setFailed(`Is this issue number (${issue}) valid? Perhaps a discussion?`);
+      throw new Error(error);
     }
-
-    const { groups: {issue} } = isMatch
-
-    core.info(`Auto-labeling related issue ${issue} for release`)
-    return await github.rest.issues.addLabels({
-      issue_number: issue,
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      labels: [LABEL_PENDING_RELEASE]
-    })
 }
