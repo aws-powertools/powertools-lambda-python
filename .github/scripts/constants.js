@@ -4,7 +4,7 @@ module.exports = Object.freeze({
     "PR_ACTION": process.env.PR_ACTION || "",
 
     /** @type {string} */
-    "PR_AUTHOR": process.env.PR_AUTHOR || "",
+    "PR_AUTHOR": process.env.PR_AUTHOR?.replace(/"/g, '') || "",
 
     /** @type {string} */
     "PR_BODY": process.env.PR_BODY || "",

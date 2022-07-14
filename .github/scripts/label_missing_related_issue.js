@@ -9,11 +9,6 @@ const {
 } = require("./constants")
 
 module.exports = async ({github, context, core}) => {
-    core.debug(`Number: ${PR_BODY}`);
-    core.debug(`Action: ${PR_ACTION}`);
-    core.debug(`Author: ${PR_AUTHOR}`);
-    core.debug(`Body: ${PR_BODY}`);
-
     if (IGNORE_AUTHORS.includes(PR_AUTHOR)) {
       return core.notice("Author in IGNORE_AUTHORS list; skipping...")
     }

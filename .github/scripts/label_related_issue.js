@@ -9,10 +9,6 @@ const {
 } = require("./constants")
 
 module.exports = async ({github, context, core}) => {
-    core.debug(PR_BODY);
-    core.debug(PR_IS_MERGED);
-    core.debug(PR_AUTHOR);
-
     if (IGNORE_AUTHORS.includes(PR_AUTHOR)) {
       return core.notice("Author in IGNORE_AUTHORS list; skipping...")
     }
@@ -20,7 +16,6 @@ module.exports = async ({github, context, core}) => {
     if (!PR_IS_MERGED) {
       return core.notice("Only merged PRs to avoid spam; skipping")
     }
-
 
     const RELATED_ISSUE_REGEX = /Issue number:[^\d\r\n]+(?<issue>\d+)/;
     const isMatch = RELATED_ISSUE_REGEX.exec(PR_BODY);
