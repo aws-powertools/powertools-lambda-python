@@ -16,6 +16,7 @@
         - [Changelog generation](#changelog-generation)
         - [Bumping the version](#bumping-the-version)
         - [Drafting release notes](#drafting-release-notes)
+    - [Run end to end tests](#run-end-to-end-tests)
     - [Releasing a documentation hotfix](#releasing-a-documentation-hotfix)
     - [Maintain Overall Health of the Repo](#maintain-overall-health-of-the-repo)
     - [Manage Roadmap](#manage-roadmap)
@@ -210,7 +211,13 @@ The best part comes now. Replace the placeholder `[Human readable summary of cha
 Once you're happy, hit `Publish release`. This will kick off the [Publishing workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/publish.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be notified.
 
 > TODO: Wait for @am29d new Lambda Layers pipeline work to complete, then add how Lambda Layers are published
+### Run end to end tests
 
+In order to run end to end tests you need to install CDK CLI first and bootstrap your account with `cdk bootstrap` command. For additional details follow [documentation](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html).
+
+To run locally, export `AWS_PROFILE` environment variable and run `make e2e tests`. To run from GitHub Actions, use [run-e2e-tests workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/run-e2e-tests.yml) and pick the branch you want to run tests against.
+
+**NOTE**: E2E tests are run as part of each merge to `develop` branch.
 ### Releasing a documentation hotfix
 
 You can rebuild the latest documentation without a full release via this [GitHub Actions Workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/rebuild_latest_docs.yml). Choose `Run workflow`, keep `develop` as the branch, and input the latest Powertools version available.
