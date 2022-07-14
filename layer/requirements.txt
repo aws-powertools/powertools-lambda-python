@@ -40,9 +40,9 @@ exceptiongroup==1.0.0rc8 \
     # via
     #   -r requirements.txt
     #   cattrs
-jsii==1.61.0 \
-    --hash=sha256:542a72cd1a144d36fa530dc359b5295b82d9e7ecdd76d5c7b4b61195f132a746 \
-    --hash=sha256:b2899f24bcc95ce009bc256558c81cde8cff9f830eddbe9b0d581c40558a1ff0
+jsii==1.62.0 \
+    --hash=sha256:c22ac7373260fbabdb012faba717a8a4dbd933120cee373905030fd66956a65a \
+    --hash=sha256:d124b0f350fd206e0488d3bb83dc58832f11e64fc728fd3a10096872d8a3a938
     # via
     #   -r requirements.txt
     #   aws-cdk-lib
