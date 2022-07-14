@@ -64,7 +64,7 @@ module.exports = async ({github, context, core}) => {
                     core.debug(`'${PR_TITLE}' didn't match any known area.`);
                 }
 
-				        return;
+                return;
             } else {
                 core.debug(`'${PR_TITLE}' didn't match '${label}' semantic.`)
                 miss += 1
