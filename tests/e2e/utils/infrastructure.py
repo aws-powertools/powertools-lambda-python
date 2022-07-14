@@ -141,7 +141,7 @@ class Infrastructure:
         This method is drop-in replacement for cdk-assets package s3 upload part.
         https://www.npmjs.com/package/cdk-assets.
         We use custom solution to avoid dependencies from nodejs ecosystem.
-        We follow the same design cdk-assets follows:
+        We follow the same design cdk-assets:
         https://github.com/aws/aws-cdk-rfcs/blob/master/text/0092-asset-publishing.md.
         """
 
