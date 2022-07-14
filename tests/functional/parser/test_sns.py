@@ -107,10 +107,10 @@ def test_handle_sns_sqs_trigger_event_json_body():  # noqa: F811
 
 
 def test_handle_sns_sqs_trigger_event_json_body_missing_signing_cert_url():
-    # GIVEN an event with a missing SigningCertURL
+    # GIVEN an event is tampered with a missing SigningCertURL
     event_dict = load_event("snsSqsEvent.json")
     payload = json.loads(event_dict["Records"][0]["body"])
-    assert payload.pop("SigningCertURL") is not None
+    payload.pop("SigningCertURL")
     event_dict["Records"][0]["body"] = json.dumps(payload)
 
     # WHEN parsing the payload
@@ -120,10 +120,10 @@ def test_handle_sns_sqs_trigger_event_json_body_missing_signing_cert_url():
 
 
 def test_handle_sns_sqs_trigger_event_json_body_missing_unsubscribe_url():
-    # GIVEN an event with a missing UnsubscribeURL
+    # GIVEN an event is tampered with a missing UnsubscribeURL
     event_dict = load_event("snsSqsEvent.json")
     payload = json.loads(event_dict["Records"][0]["body"])
-    assert payload.pop("UnsubscribeURL") is not None
+    payload.pop("UnsubscribeURL")
     event_dict["Records"][0]["body"] = json.dumps(payload)
 
     # WHEN parsing the payload
