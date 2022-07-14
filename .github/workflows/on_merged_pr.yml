@@ -17,6 +17,7 @@ jobs:
   release_label_on_merge:
     needs: get_pr_details
     runs-on: ubuntu-latest
+    if: needs.get_pr_details.outputs.prIsMerged == 'true'
     steps:
       - uses: actions/checkout@v3
       - name: "Label PR related issue for release"
