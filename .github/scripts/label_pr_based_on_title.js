@@ -1,4 +1,4 @@
-const { PR_NUMBER, PR_TITLE } = require("./constants")
+const { PR_NUMBER, PR_TITLE, AREAS } = require("./constants")
 
 module.exports = async ({github, context, core}) => {
     const FEAT_REGEX = /feat(\((.+)\))?(\:.+)/
@@ -26,12 +26,27 @@ module.exports = async ({github, context, core}) => {
             if (isMatch != null) {
                 core.info(`Auto-labeling PR ${PR_NUMBER} with ${label}`)
 
-                return await github.rest.issues.addLabels({
-                issue_number: PR_NUMBER,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                labels: [label]
+                await github.rest.issues.addLabels({
+                    issue_number: PR_NUMBER,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    labels: [label]
                 })
+
+                const area = matches[2]; // second capture group contains the area
+                if (AREAS.indexOf(area) > -1) {
+                    core.info(`Auto-labeling PR ${PR_NUMBER} with area ${area}`);
+                    await github.rest.issues.addLabels({
+                        issue_number: PR_NUMBER,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        labels: [`area/${area}`],
+                    });
+                } else {
+                    core.debug(`'${PR_TITLE}' didn't match any known area.`);
+                }
+
+                return;
             } else {
                 core.debug(`'${PR_TITLE}' didn't match '${label}' semantic.`)
                 miss += 1
