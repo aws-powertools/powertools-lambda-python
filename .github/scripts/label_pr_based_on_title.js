@@ -1,4 +1,4 @@
-const { PR_NUMBER, PR_TITLE } = require("./constants")
+const { PR_NUMBER, PR_TITLE, AREAS } = require("./constants")
 
 module.exports = async ({github, context, core}) => {
     const FEAT_REGEX = /feat(\((.+)\))?(\:.+)/
@@ -17,24 +17,6 @@ module.exports = async ({github, context, core}) => {
         "deprecated": DEPRECATED_REGEX,
     }
 
-    const areas = [
-        "tracer",
-        "metrics",
-        "utilities",
-        "logger",
-        "event_handlers",
-        "middleware_factory",
-        "idempotency",
-        "event_sources",
-        "feature_flags",
-        "parameters",
-        "batch",
-        "parser",
-        "validator",
-        "jmespath_util",
-        "lambda-layers",
-    ];
-
     // Maintenance: We should keep track of modified PRs in case their titles change
     let miss = 0;
     try {
@@ -52,7 +34,7 @@ module.exports = async ({github, context, core}) => {
                 })
 
                 const area = matches[2]; // second capture group contains the area
-                if (areas.indexOf(area) > -1) {
+                if (AREAS.indexOf(area) > -1) {
                     core.info(`Auto-labeling PR ${PR_NUMBER} with area ${area}`);
                     await github.rest.issues.addLabels({
                         issue_number: PR_NUMBER,
