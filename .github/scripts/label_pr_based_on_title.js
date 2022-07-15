@@ -22,8 +22,8 @@ module.exports = async ({github, context, core}) => {
     try {
         for (const label in labels) {
             const matcher = new RegExp(labels[label])
-            const isMatch = matcher.exec(PR_TITLE)
-            if (isMatch != null) {
+            const matches = matcher.exec(PR_TITLE)
+            if (matches != null) {
                 core.info(`Auto-labeling PR ${PR_NUMBER} with ${label}`)
 
                 await github.rest.issues.addLabels({
