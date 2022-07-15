@@ -1,4 +1,4 @@
-module.exports = async ({github, context, core}) => {
+module.exports = async ({context, core}) => {
     const fs = require('fs');
     const filename = "pr.txt";
 
