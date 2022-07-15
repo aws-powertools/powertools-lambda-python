@@ -54,7 +54,7 @@ module.exports = async ({github, context, core}) => {
         }
     } finally {
         if (miss == Object.keys(labels).length) {
-            return core.notice(`PR ${PR_NUMBER} title '${PR_TITLE}' doesn't follow semantic titles; skipping...`)
+            core.notice(`PR ${PR_NUMBER} title '${PR_TITLE}' doesn't follow semantic titles; skipping...`)
         }
     }
 }
