@@ -1,12 +1,12 @@
 const { PR_NUMBER, PR_TITLE, AREAS } = require("./constants")
 
 module.exports = async ({github, context, core}) => {
-    const FEAT_REGEX = /feat(\((.+)\))?(\:.+)/
-    const BUG_REGEX = /(fix|bug)(\((.+)\))?(\:.+)/
-    const DOCS_REGEX = /(docs|doc)(\((.+)\))?(\:.+)/
-    const CHORE_REGEX = /(chore)(\((.+)\))?(\:.+)/
-    const DEPRECATED_REGEX = /(deprecated)(\((.+)\))?(\:.+)/
-    const REFACTOR_REGEX = /(refactor)(\((.+)\))?(\:.+)/
+    const FEAT_REGEX = /feat(\((.+)\))?(:.+)/
+    const BUG_REGEX = /(fix|bug)(\((.+)\))?(:.+)/
+    const DOCS_REGEX = /(docs|doc)(\((.+)\))?(:.+)/
+    const CHORE_REGEX = /(chore)(\((.+)\))?(:.+)/
+    const DEPRECATED_REGEX = /(deprecated)(\((.+)\))?(:.+)/
+    const REFACTOR_REGEX = /(refactor)(\((.+)\))?(:.+)/
 
     const labels = {
         "feature": FEAT_REGEX,
