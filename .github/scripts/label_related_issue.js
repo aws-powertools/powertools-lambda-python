@@ -19,8 +19,9 @@ module.exports = async ({github, context, core}) => {
 
     const RELATED_ISSUE_REGEX = /Issue number:[^\d\r\n]+(?<issue>\d+)/;
 
+    const isMatch = RELATED_ISSUE_REGEX.exec(PR_BODY);
+
     try {
-      const isMatch = RELATED_ISSUE_REGEX.exec(PR_BODY);
       if (!isMatch) {
         core.setFailed(`Unable to find related issue for PR number ${PR_NUMBER}.\n\n Body details: ${PR_BODY}`);
         return await github.rest.issues.createComment({
@@ -30,11 +31,16 @@ module.exports = async ({github, context, core}) => {
           issue_number: PR_NUMBER,
         });
       }
+    } catch (error) {
+      core.setFailed(`Unable to create comment on PR number ${PR_NUMBER}.\n\n Error details: ${error}`);
+      throw new Error(error);
+    }
 
-      const { groups: {issue} } = isMatch
+    const { groups: {issue} } = isMatch
 
+    try {
       core.info(`Auto-labeling related issue ${issue} for release`)
-      return await github.rest.issues.addLabels({
+      await github.rest.issues.addLabels({
         issue_number: issue,
         owner: context.repo.owner,
         repo: context.repo.repo,
