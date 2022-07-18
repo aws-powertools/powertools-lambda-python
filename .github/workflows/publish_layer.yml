@@ -12,10 +12,9 @@ on:
         default: "v1.22.0"
         required: true
   workflow_run:
-    workflows: [ "Publish to PyPi" ]
+    workflows: ["Publish to PyPi"]
     types:
       - completed
-
 
 jobs:
   build-layer:
@@ -25,16 +24,16 @@ jobs:
         working-directory: ./layer
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16.12'
+          node-version: "16.12"
       - name: Setup python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-          cache: 'pip'
+          python-version: "3.9"
+          cache: "pip"
       - name: Set release notes tag
         run: |
           RELEASE_INPUT=${{ inputs.latest_published_version }}
