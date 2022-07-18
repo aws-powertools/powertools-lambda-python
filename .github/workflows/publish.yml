@@ -105,6 +105,13 @@ jobs:
         run: |
           git config user.name "Release bot"
           git config user.email aws-devax-open-source@amazon.com
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "poetry"
+      - name: Install dependencies
+        run: make dev
       - name: Build docs website and API reference
         run: |
           make release-docs VERSION=${RELEASE_VERSION} ALIAS="latest"
