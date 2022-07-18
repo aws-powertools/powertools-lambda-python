@@ -1,3 +1,4 @@
+import contextlib
 import inspect
 import json
 import logging
@@ -224,11 +225,8 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             return log_record.getMessage()
 
         if isinstance(message, str):  # could be a JSON string
-            try:
+            with contextlib.suppress(json.decoder.JSONDecodeError, TypeError, ValueError):
                 message = self.json_deserializer(message)
-            except (json.decoder.JSONDecodeError, TypeError, ValueError):
-                pass
-
         return message
 
     def _extract_log_exception(self, log_record: logging.LogRecord) -> Union[Tuple[str, str], Tuple[None, None]]:
@@ -266,19 +264,18 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         record_dict["asctime"] = self.formatTime(record=log_record)
         extras = {k: v for k, v in record_dict.items() if k not in RESERVED_LOG_ATTRS}
 
-        formatted_log = {}
-
         # Iterate over a default or existing log structure
-        # then replace any std log attribute e.g. '%(level)s' to 'INFO', '%(process)d to '4773'
+        # then replace any std log attribute e.g. '%(level)s' to 'INFO', '%(process)d' to '4773'
         # lastly add or replace incoming keys (those added within the constructor or .structure_logs method)
-        for key, value in self.log_format.items():
-            if value and key in RESERVED_LOG_ATTRS:
-                formatted_log[key] = value % record_dict
-            else:
-                formatted_log[key] = value
+        formatted_log = {
+            key: value % record_dict if value and key in RESERVED_LOG_ATTRS else value
+            for key, value in self.log_format.items()
+        }
 
-        formatted_log.update(**extras)
-        return formatted_log
+        return {
+            **formatted_log,
+            **extras
+        }
 
     @staticmethod
     def _strip_none_records(records: Dict[str, Any]) -> Dict[str, Any]:

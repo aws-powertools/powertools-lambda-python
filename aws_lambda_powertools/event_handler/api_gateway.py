@@ -459,11 +459,7 @@ class ApiGatewayResolver(BaseRouter):
         def register_resolver(func: Callable):
             methods = (method,) if isinstance(method, str) else method
             logger.debug(f"Adding route using rule {rule} and methods: {','.join((m.upper() for m in methods))}")
-            if cors is None:
-                cors_enabled = self._cors_enabled
-            else:
-                cors_enabled = cors
-
+            cors_enabled = cors or self._cors_enabled
             for item in methods:
                 self._routes.append(Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control))
                 route_key = item + rule
@@ -536,7 +532,7 @@ class ApiGatewayResolver(BaseRouter):
         NOTE: See #520 for context
         """
         rule_regex: str = re.sub(_DYNAMIC_ROUTE_PATTERN, _NAMED_GROUP_BOUNDARY_PATTERN, rule)
-        return re.compile("^{}$".format(rule_regex))
+        return re.compile(f"^{rule_regex}$")
 
     def _to_proxy_event(self, event: Dict) -> BaseProxyEvent:
         """Convert the event dict to the corresponding data class"""
@@ -580,10 +576,10 @@ class ApiGatewayResolver(BaseRouter):
     @staticmethod
     def _path_starts_with(path: str, prefix: str):
         """Returns true if the `path` starts with a prefix plus a `/`"""
-        if not isinstance(prefix, str) or prefix == "":
+        if not isinstance(prefix, str) or not prefix:
             return False
 
-        return path.startswith(prefix + "/")
+        return path.startswith(f"{prefix}/")
 
     def _not_found(self, method: str) -> ResponseBuilder:
         """Called when no matching route was found and includes support for the cors preflight response"""
@@ -648,10 +644,7 @@ class ApiGatewayResolver(BaseRouter):
     def _lookup_exception_handler(self, exp_type: Type) -> Optional[Callable]:
         # Use "Method Resolution Order" to allow for matching against a base class
         # of an exception
-        for cls in exp_type.__mro__:
-            if cls in self._exception_handlers:
-                return self._exception_handlers[cls]
-        return None
+        return next((self._exception_handlers.get(cls, None) for cls in exp_type.__mro__), None)
 
     def _call_exception_handler(self, exp: Exception, route: Route) -> Optional[ResponseBuilder]:
         handler = self._lookup_exception_handler(type(exp))

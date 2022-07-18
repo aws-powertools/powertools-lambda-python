@@ -386,9 +386,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             append keys provided to logger formatter, by default False
         """
         # There are 3 operational modes for this method
-        ## 1. Register a Powertools Formatter for the first time
-        ## 2. Append new keys to the current logger formatter; deprecated in favour of append_keys
-        ## 3. Add new keys and discard existing to the registered formatter
+        # 1. Register a Powertools Formatter for the first time
+        # 2. Append new keys to the current logger formatter; deprecated in favour of append_keys
+        # 3. Add new keys and discard existing to the registered formatter
 
         # Mode 1
         log_keys = {**self._default_log_keys, **keys}
@@ -443,10 +443,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             return level
 
         log_level: Optional[str] = level or os.getenv("LOG_LEVEL")
-        if log_level is None:
-            return logging.INFO
-
-        return log_level.upper()
+        return log_level.upper() if log_level else logging.INFO
 
     @staticmethod
     def _get_caller_filename():
@@ -485,11 +482,8 @@ def set_package_logger(
     formatter: logging.Formatter
         log formatter, "%(asctime)s %(name)s [%(levelname)s] %(message)s" by default
     """
-    if formatter is None:
-        formatter = logging.Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s")
-
-    if stream is None:
-        stream = sys.stdout
+    formatter = formatter or logging.Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s")
+    stream = stream or sys.stdout
 
     logger = logging.getLogger("aws_lambda_powertools")
     logger.setLevel(level)

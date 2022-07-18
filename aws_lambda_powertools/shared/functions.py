@@ -11,9 +11,9 @@ def strtobool(value: str) -> bool:
     > note:: Copied from distutils.util.
     """
     value = value.lower()
-    if value in ("y", "yes", "t", "true", "on", "1"):
+    if value in {"y", "yes", "t", "true", "on", "1"}:
         return True
-    if value in ("n", "no", "f", "false", "off", "0"):
+    if value in {"n", "no", "f", "false", "off", "0"}:
         return False
     raise ValueError(f"invalid truth value {value!r}")
 
@@ -35,7 +35,7 @@ def resolve_truthy_env_var_choice(env: str, choice: Optional[bool] = None) -> bo
     choice : str
         resolved choice as either bool or environment value
     """
-    return choice if choice is not None else strtobool(env)
+    return choice or strtobool(env)
 
 
 def resolve_env_var_choice(
@@ -57,4 +57,4 @@ def resolve_env_var_choice(
     choice : str, Optional
         resolved choice as either bool or environment value
     """
-    return choice if choice is not None else env
+    return choice or env
