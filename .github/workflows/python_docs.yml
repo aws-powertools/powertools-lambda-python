@@ -1,12 +1,14 @@
 name: Docs
 
+# Maintenance: Create a reusable workflow to be more easily reused across release, push, and doc hot fixes
+# this should include inputs on whether to release API docs, what version to release, and whether to rebuild /latest
+
 on:
   push:
     branches:
       - develop
     paths:
       - "docs/**"
-      - "CHANGELOG.md"
       - "mkdocs.yml"
       - "examples/**"
 

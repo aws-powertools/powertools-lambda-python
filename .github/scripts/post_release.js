@@ -100,13 +100,13 @@ const notifyRelease = async ({
 
 // context: https://github.com/actions/toolkit/blob/main/packages/github/src/context.ts
 module.exports = async ({ github, context }) => {
-	const { RELEASE_TAG_VERSION } = process.env;
-	console.log(`Running post-release script for ${RELEASE_TAG_VERSION} version`);
+	const { RELEASE_VERSION } = process.env;
+	console.log(`Running post-release script for ${RELEASE_VERSION} version`);
 
 	await notifyRelease({
 		gh_client: github,
 		owner: context.repo.owner,
 		repository: context.repo.repo,
-		release_version: RELEASE_TAG_VERSION,
+		release_version: RELEASE_VERSION,
 	});
 };

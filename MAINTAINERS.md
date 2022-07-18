@@ -13,8 +13,6 @@
     - [Triage Bug Reports](#triage-bug-reports)
     - [Triage RFCs](#triage-rfcs)
     - [Releasing a new version](#releasing-a-new-version)
-        - [Changelog generation](#changelog-generation)
-        - [Bumping the version](#bumping-the-version)
         - [Drafting release notes](#drafting-release-notes)
     - [Run end to end tests](#run-end-to-end-tests)
     - [Releasing a documentation hotfix](#releasing-a-documentation-hotfix)
@@ -170,23 +168,15 @@ Some examples using our initial and new RFC templates: #92, #94, #95, #991, #122
 
 ### Releasing a new version
 
-> TODO: This is an area we want to increase automation while keeping communication at human level.
+Firstly, make sure the commit history in the `develop` branch **(1)** it's up to date, **(2)** commit messages are semantic, and **(3)** commit messages have their respective area, for example `feat(logger): <change>`, `chore(ci): ...`).
 
-Firstly, make sure you are using the `develop` branch and it is up to date with the origin.
+**Found typos or unclear commit messages?**
 
-There are three main steps to release a new version: Changelog generation, version bumping, and drafting release notes.
+Reword through rebase and push with `--force-with-lease` once you're confident. This will ensure [CHANGELOG](./CHANGELOG.md) is always clear for customers looking to understand what changed in between releases - was that a bug? what new features and for which utility?
 
-#### Changelog generation
+**Looks good, what's next?**
 
-You can pre-generate a temporary CHANGELOG using `make changelog`. This will generate a `TMP_CHANGELOG.md` with all staged changes under the `unreleased` section.
-
-Each unreleased line item is a commit. You can adjust them if you find the commit titles are insufficient to describe their intent. Once you're comfortable, bring these changes to the `CHANGELOG.md` with a new version heading like in previous versions.
-
-#### Bumping the version
-
-Use `poetry version <major|minor|patch|specific version>` to bump the version. For example, you can use `poetry version minor` when releasing a minor version.
-
-NOTE. Make sure both `CHANGELOG` and `pyproject.toml` are committed and pushed to the remote `develop` branch before proceeding.
+The only step is to draft and publish a good release notes, everything else is automated.
 
 #### Drafting release notes
 
@@ -196,21 +186,28 @@ Make sure the `tag` field reflects the new version you're releasing, the target 
 
 You'll notice we group all changes based on their [labels](#labels) like `feature`, `bug`, `documentation`, etc.
 
-> **Q: What if there's an incorrect title or grouping?**
+**I spotted a typo or incorrect grouping - how do I fix it?**
 
 Edit the respective PR title and update their [labels](#labels). Then run the [Release Drafter workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/release-drafter.yml) to update the Draft release.
 
-The best part comes now. Replace the placeholder `[Human readable summary of changes]` with what you'd like to communicate to customers what this release is all about. Always put yourself in the customers shoes. For that, these are some questions to keep in mind when drafting your first or future release notes:
+**All looking good, what's next?**
+
+The best part comes now. Replace the placeholder `[Human readable summary of changes]` with what you'd like to communicate to customers what this release is all about. Rule of thumb: always put yourself in the customers shoes.
+
+These are some questions to keep in mind when drafting your first or future release notes:
 
 - Can customers understand at a high level what changed in this release?
 - Is there a link to the documentation where they can read more about each main change?
-- Are there any graphics or code snippets that can enhance readability?
+- Are there any graphics or [code snippets](carbon.now.sh/) that can enhance readability?
 - Are we calling out any key contributor(s) to this release?
     - All contributors are automatically credited, use this as an exceptional case to feature them
 
-Once you're happy, hit `Publish release`. This will kick off the [Publishing workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/publish.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be notified.
+Once you're happy, hit `Publish release` 🎉🎉🎉.
 
-> TODO: Wait for @am29d new Lambda Layers pipeline work to complete, then add how Lambda Layers are published
+This will kick off the [Publishing workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/publish.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be closed and notified.
+
+> TODO: Include information to verify SAR and Lambda Layers deployment; we're still finalizing Lambda Layer automated deployment in GitHub Actions - ping @am29d when in doubt.
+
 ### Run end to end tests
 
 In order to run end to end tests you need to install CDK CLI first and bootstrap your account with `cdk bootstrap` command. For additional details follow [documentation](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html).
@@ -218,6 +215,7 @@ In order to run end to end tests you need to install CDK CLI first and bootstrap
 To run locally, export `AWS_PROFILE` environment variable and run `make e2e tests`. To run from GitHub Actions, use [run-e2e-tests workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/run-e2e-tests.yml) and pick the branch you want to run tests against.
 
 **NOTE**: E2E tests are run as part of each merge to `develop` branch.
+
 ### Releasing a documentation hotfix
 
 You can rebuild the latest documentation without a full release via this [GitHub Actions Workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/rebuild_latest_docs.yml). Choose `Run workflow`, keep `develop` as the branch, and input the latest Powertools version available.
