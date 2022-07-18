@@ -1,12 +1,12 @@
 const { PR_NUMBER, PR_TITLE, AREAS } = require("./constants")
 
 module.exports = async ({github, context, core}) => {
-    const FEAT_REGEX = /feat(\((.+)\))?(\:.+)/
-    const BUG_REGEX = /(fix|bug)(\((.+)\))?(\:.+)/
-    const DOCS_REGEX = /(docs|doc)(\((.+)\))?(\:.+)/
-    const CHORE_REGEX = /(chore)(\((.+)\))?(\:.+)/
-    const DEPRECATED_REGEX = /(deprecated)(\((.+)\))?(\:.+)/
-    const REFACTOR_REGEX = /(refactor)(\((.+)\))?(\:.+)/
+    const FEAT_REGEX = /feat(\((.+)\))?(:.+)/
+    const BUG_REGEX = /(fix|bug)(\((.+)\))?(:.+)/
+    const DOCS_REGEX = /(docs|doc)(\((.+)\))?(:.+)/
+    const CHORE_REGEX = /(chore)(\((.+)\))?(:.+)/
+    const DEPRECATED_REGEX = /(deprecated)(\((.+)\))?(:.+)/
+    const REFACTOR_REGEX = /(refactor)(\((.+)\))?(:.+)/
 
     const labels = {
         "feature": FEAT_REGEX,
@@ -22,8 +22,8 @@ module.exports = async ({github, context, core}) => {
     try {
         for (const label in labels) {
             const matcher = new RegExp(labels[label])
-            const isMatch = matcher.exec(PR_TITLE)
-            if (isMatch != null) {
+            const matches = matcher.exec(PR_TITLE)
+            if (matches != null) {
                 core.info(`Auto-labeling PR ${PR_NUMBER} with ${label}`)
 
                 await github.rest.issues.addLabels({
@@ -54,7 +54,7 @@ module.exports = async ({github, context, core}) => {
         }
     } finally {
         if (miss == Object.keys(labels).length) {
-            return core.notice(`PR ${PR_NUMBER} title '${PR_TITLE}' doesn't follow semantic titles; skipping...`)
+            core.notice(`PR ${PR_NUMBER} title '${PR_TITLE}' doesn't follow semantic titles; skipping...`)
         }
     }
 }
