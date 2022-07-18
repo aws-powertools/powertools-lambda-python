@@ -21,6 +21,7 @@ jobs:
         with:
           python-version: ${{ matrix.version }}
           architecture: "x64"
+          cache: "poetry"
       - name: Install dependencies
         run: make dev
       - name: Configure AWS credentials

@@ -27,6 +27,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
+          cache: "poetry"
       # Maintenance: temporarily until we drop Python 3.6 and make cfn-lint a dev dependency
       - name: Setup Cloud Formation Linter with Latest Version
         uses: scottbrenner/cfn-lint-action@ee9ee62016ef62c5fd366e6be920df4b310ed353 # v2.2.4
