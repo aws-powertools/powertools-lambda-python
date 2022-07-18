@@ -29,7 +29,7 @@ jobs:
           python-version: "3.8"
       # Maintenance: temporarily until we drop Python 3.6 and make cfn-lint a dev dependency
       - name: Setup Cloud Formation Linter with Latest Version
-        uses: scottbrenner/cfn-lint-action@v2
+        uses: scottbrenner/cfn-lint-action@ee9ee62016ef62c5fd366e6be920df4b310ed353 # v2.2.4
       - name: Install dependencies
         run: make dev
       - name: Lint documentation
@@ -43,7 +43,7 @@ jobs:
       - name: Build docs website and API reference
         run: make release-docs VERSION="develop" ALIAS="stage"
       - name: Deploy all docs
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@068dc23d9710f1ba62e86896f84735d869951305 # v3.8.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./api

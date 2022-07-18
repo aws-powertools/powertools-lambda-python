@@ -1,12 +1,12 @@
-const { PR_NUMBER, PR_TITLE } = require("./constants")
+const { PR_NUMBER, PR_TITLE, AREAS } = require("./constants")
 
 module.exports = async ({github, context, core}) => {
-    const FEAT_REGEX = /feat(\((.+)\))?(\:.+)/
-    const BUG_REGEX = /(fix|bug)(\((.+)\))?(\:.+)/
-    const DOCS_REGEX = /(docs|doc)(\((.+)\))?(\:.+)/
-    const CHORE_REGEX = /(chore)(\((.+)\))?(\:.+)/
-    const DEPRECATED_REGEX = /(deprecated)(\((.+)\))?(\:.+)/
-    const REFACTOR_REGEX = /(refactor)(\((.+)\))?(\:.+)/
+    const FEAT_REGEX = /feat(\((.+)\))?(:.+)/
+    const BUG_REGEX = /(fix|bug)(\((.+)\))?(:.+)/
+    const DOCS_REGEX = /(docs|doc)(\((.+)\))?(:.+)/
+    const CHORE_REGEX = /(chore)(\((.+)\))?(:.+)/
+    const DEPRECATED_REGEX = /(deprecated)(\((.+)\))?(:.+)/
+    const REFACTOR_REGEX = /(refactor)(\((.+)\))?(:.+)/
 
     const labels = {
         "feature": FEAT_REGEX,
@@ -22,16 +22,31 @@ module.exports = async ({github, context, core}) => {
     try {
         for (const label in labels) {
             const matcher = new RegExp(labels[label])
-            const isMatch = matcher.exec(PR_TITLE)
-            if (isMatch != null) {
+            const matches = matcher.exec(PR_TITLE)
+            if (matches != null) {
                 core.info(`Auto-labeling PR ${PR_NUMBER} with ${label}`)
 
-                return await github.rest.issues.addLabels({
-                issue_number: PR_NUMBER,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                labels: [label]
+                await github.rest.issues.addLabels({
+                    issue_number: PR_NUMBER,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    labels: [label]
                 })
+
+                const area = matches[2]; // second capture group contains the area
+                if (AREAS.indexOf(area) > -1) {
+                    core.info(`Auto-labeling PR ${PR_NUMBER} with area ${area}`);
+                    await github.rest.issues.addLabels({
+                        issue_number: PR_NUMBER,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        labels: [`area/${area}`],
+                    });
+                } else {
+                    core.debug(`'${PR_TITLE}' didn't match any known area.`);
+                }
+
+                return;
             } else {
                 core.debug(`'${PR_TITLE}' didn't match '${label}' semantic.`)
                 miss += 1
@@ -39,7 +54,7 @@ module.exports = async ({github, context, core}) => {
         }
     } finally {
         if (miss == Object.keys(labels).length) {
-            return core.notice(`PR ${PR_NUMBER} title '${PR_TITLE}' doesn't follow semantic titles; skipping...`)
+            core.notice(`PR ${PR_NUMBER} title '${PR_TITLE}' doesn't follow semantic titles; skipping...`)
         }
     }
 }
