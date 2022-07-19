@@ -1,0 +1,35 @@
+name: run-e2e-tests
+on:
+  workflow_dispatch:
+env:
+  AWS_DEFAULT_REGION: us-east-1
+  E2E_TESTS_PATH: tests/e2e/
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # needed to request JWT with GitHub's OIDC Token endpoint. docs: https://bit.ly/3MNgQO9
+      contents: read
+    strategy:
+      matrix:
+        version: ["3.7", "3.8", "3.9"]
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry
+      - name: "Use Python"
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.version }}
+          architecture: "x64"
+          cache: "poetry"
+      - name: Install dependencies
+        run: make dev
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_TEST_ROLE_ARN }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+      - name: Test
+        run: make e2e-test

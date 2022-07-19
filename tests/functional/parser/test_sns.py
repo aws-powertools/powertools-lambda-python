@@ -1,3 +1,4 @@
+import json
 from typing import Any, List
 
 import pytest
@@ -103,3 +104,29 @@ def handle_sns_sqs_json_body(event: List[MySnsBusiness], _: LambdaContext):
 def test_handle_sns_sqs_trigger_event_json_body():  # noqa: F811
     event_dict = load_event("snsSqsEvent.json")
     handle_sns_sqs_json_body(event_dict, LambdaContext())
+
+
+def test_handle_sns_sqs_trigger_event_json_body_missing_signing_cert_url():
+    # GIVEN an event is tampered with a missing SigningCertURL
+    event_dict = load_event("snsSqsEvent.json")
+    payload = json.loads(event_dict["Records"][0]["body"])
+    payload.pop("SigningCertURL")
+    event_dict["Records"][0]["body"] = json.dumps(payload)
+
+    # WHEN parsing the payload
+    # THEN raise a ValidationError error
+    with pytest.raises(ValidationError):
+        handle_sns_sqs_json_body(event_dict, LambdaContext())
+
+
+def test_handle_sns_sqs_trigger_event_json_body_missing_unsubscribe_url():
+    # GIVEN an event is tampered with a missing UnsubscribeURL
+    event_dict = load_event("snsSqsEvent.json")
+    payload = json.loads(event_dict["Records"][0]["body"])
+    payload.pop("UnsubscribeURL")
+    event_dict["Records"][0]["body"] = json.dumps(payload)
+
+    # WHEN parsing the payload
+    # THEN raise a ValidationError error
+    with pytest.raises(ValidationError):
+        handle_sns_sqs_json_body(event_dict, LambdaContext())

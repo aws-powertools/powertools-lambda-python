@@ -1,0 +1,124 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Hello world Direct Lambda Resolver
+
+Globals:
+  Function:
+    Timeout: 5
+    Runtime: python3.9
+    Tracing: Active
+    Environment:
+      Variables:
+        # Powertools env vars: https://awslabs.github.io/aws-lambda-powertools-python/latest/#environment-variables
+        LOG_LEVEL: INFO
+        POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
+        POWERTOOLS_LOGGER_LOG_EVENT: true
+        POWERTOOLS_SERVICE_NAME: example
+
+Resources:
+  TodosFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: getting_started_graphql_api_resolver.lambda_handler
+      CodeUri: ../src
+      Description: Sample Direct Lambda Resolver
+
+  # IAM Permissions and Roles
+
+  AppSyncServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "appsync.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+
+  InvokeLambdaResolverPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: "DirectAppSyncLambda"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "lambda:invokeFunction"
+            Resource:
+              - !GetAtt TodosFunction.Arn
+      Roles:
+        - !Ref AppSyncServiceRole
+
+  # GraphQL API
+
+  TodosApi:
+    Type: "AWS::AppSync::GraphQLApi"
+    Properties:
+      Name: TodosApi
+      AuthenticationType: "API_KEY"
+      XrayEnabled: true
+
+  TodosApiKey:
+    Type: AWS::AppSync::ApiKey
+    Properties:
+      ApiId: !GetAtt TodosApi.ApiId
+
+  TodosApiSchema:
+    Type: "AWS::AppSync::GraphQLSchema"
+    Properties:
+      ApiId: !GetAtt TodosApi.ApiId
+      Definition: |
+        schema {
+            query:Query
+        }
+
+        type Query {
+            getTodo(id: ID!): Todo
+            listTodos: [Todo]
+        }
+
+        type Todo {
+            id: ID!
+            userId: String
+            title: String
+            completed: Boolean
+        }
+
+  # Lambda Direct Data Source and Resolver
+
+  TodosFunctionDataSource:
+    Type: "AWS::AppSync::DataSource"
+    Properties:
+      ApiId: !GetAtt TodosApi.ApiId
+      Name: "HelloWorldLambdaDirectResolver"
+      Type: "AWS_LAMBDA"
+      ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
+      LambdaConfig:
+        LambdaFunctionArn: !GetAtt TodosFunction.Arn
+
+  ListTodosResolver:
+    Type: "AWS::AppSync::Resolver"
+    Properties:
+      ApiId: !GetAtt TodosApi.ApiId
+      TypeName: "Query"
+      FieldName: "listTodos"
+      DataSourceName: !GetAtt TodosFunctionDataSource.Name
+
+  GetTodoResolver:
+    Type: "AWS::AppSync::Resolver"
+    Properties:
+      ApiId: !GetAtt TodosApi.ApiId
+      TypeName: "Query"
+      FieldName: "getTodo"
+      DataSourceName: !GetAtt TodosFunctionDataSource.Name
+
+Outputs:
+  TodosFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt TodosFunction.Arn
+
+  TodosApi:
+    Value: !GetAtt TodosApi.Arn

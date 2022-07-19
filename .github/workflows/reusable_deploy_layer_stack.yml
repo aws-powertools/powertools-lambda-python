@@ -52,21 +52,21 @@ jobs:
         ]
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: aws credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.target-account-role }}
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '16.12'
+          node-version: "16.12"
       - name: Setup python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-          cache: 'pip'
+          python-version: "3.9"
+          cache: "pip"
       - name: install cdk and deps
         run: |
           npm install -g aws-cdk@2.29.0

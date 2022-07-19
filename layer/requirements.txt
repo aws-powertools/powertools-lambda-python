@@ -11,9 +11,9 @@ attrs==21.4.0 \
     #   -r requirements.txt
     #   cattrs
     #   jsii
-aws-cdk-lib==2.29.0 \
-    --hash=sha256:4f852105cafd28a2bbd9bd2c6d24a2e1ab503bba923fd49a1782390b235af999 \
-    --hash=sha256:53a78788219d9bf3a998211223225b34a10f066124e2812adcd40fd0a2058572
+aws-cdk-lib==2.31.1 \
+    --hash=sha256:a07f6a247be110e874af374fa683d6c7eba86dfc9781cb555428b534c75bd4c0 \
+    --hash=sha256:a3868c367cab3cf09e6bb68405e31f4342fc4a4905ccc3e3fdde133d520206c0
     # via
     #   -r requirements.txt
     #   cdk-lambda-powertools-python-layer
@@ -23,13 +23,13 @@ cattrs==22.1.0 \
     # via
     #   -r requirements.txt
     #   jsii
-cdk-lambda-powertools-python-layer==2.0.48 \
-    --hash=sha256:7bdd5a196e74b48d403223722f2838d1d10064d02e960a5565482cc0b7aad18d \
-    --hash=sha256:9afeacea31eba14d67360db71af385c654c9e0af9b29a0d4e0922b52f862ae03
+cdk-lambda-powertools-python-layer==2.0.49 \
+    --hash=sha256:8055fc691539f16e22a40e3d3df9c3f59fb28012437b08c47c639aefb001f1b2 \
+    --hash=sha256:9b0a7b7344f9ccb486564af728cefeac743687bfb131631e6d9171a55800dbac
     # via -r requirements.txt
-constructs==10.1.43 \
-    --hash=sha256:69fd6da574c9506f44ca61e112af7d5db08ebb29b4bedc67b6d200b616f4abce \
-    --hash=sha256:f37e8c3432f94f403b50bf69476bea55719bcc3fa0d3a0e60bf0975dfe492867
+constructs==10.1.49 \
+    --hash=sha256:3abba3e9e06f35f0a5e15c10e2e080f4f1fd449fe008fd650f2a5fcc6f729cc3 \
+    --hash=sha256:89f0984b64bb987b428c3bfec51e2d5524b8605c9e2c2043491de9e3b007a3cf
     # via
     #   -r requirements.txt
     #   aws-cdk-lib
@@ -40,9 +40,9 @@ exceptiongroup==1.0.0rc8 \
     # via
     #   -r requirements.txt
     #   cattrs
-jsii==1.61.0 \
-    --hash=sha256:542a72cd1a144d36fa530dc359b5295b82d9e7ecdd76d5c7b4b61195f132a746 \
-    --hash=sha256:b2899f24bcc95ce009bc256558c81cde8cff9f830eddbe9b0d581c40558a1ff0
+jsii==1.62.0 \
+    --hash=sha256:c22ac7373260fbabdb012faba717a8a4dbd933120cee373905030fd66956a65a \
+    --hash=sha256:d124b0f350fd206e0488d3bb83dc58832f11e64fc728fd3a10096872d8a3a938
     # via
     #   -r requirements.txt
     #   aws-cdk-lib

@@ -12,7 +12,7 @@ on:
         default: "v1.22.0"
         required: true
   workflow_run:
-    workflows: [ "Publish to PyPi" ]
+    workflows: ["Publish to PyPi"]
     types:
       - completed
 
@@ -20,26 +20,27 @@ on:
 jobs:
   build-layer:
     runs-on: ubuntu-latest
+    if: ${{ (github.event.workflow_run.conclusion == 'success') || (github.event_name == 'workflow_dispatch') }}
     defaults:
       run:
         working-directory: ./layer
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '16.12'
+          node-version: "16.12"
       - name: Setup python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-          cache: 'pip'
+          python-version: "3.9"
+          cache: "pip"
       - name: Set release notes tag
         run: |
           RELEASE_INPUT=${{ inputs.latest_published_version }}
-          GITHUB_EVENT_RELEASE_TAG=${{ github.event.release.tag_name }}
-          RELEASE_TAG_VERSION=${GITHUB_EVENT_RELEASE_TAG:-$RELEASE_INPUT}
+          LATEST_TAG=$(git describe --tag --abbrev=0)
+          RELEASE_TAG_VERSION=${RELEASE_INPUT:-$LATEST_TAG}
           echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> $GITHUB_ENV
       - name: install cdk and deps
         run: |

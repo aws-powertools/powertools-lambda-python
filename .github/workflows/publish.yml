@@ -4,65 +4,74 @@ name: Publish to PyPi
 #
 # === Manual activities ===
 #
-# 1. Document human readable changes in CHANGELOG (pre-generate unreleased changes with `make changelog`)
-# 2. Bump package version using poetry version <major|minor|patch|specific version>
-# 3. Merge version changes to develop branch
-# 4. Edit the current draft release notes
-# 5. If not already set, use `v<new version>` as a tag, and select develop as target branch
+# 1. Edit the current draft release notes
+# 2. If not already set, use `v<new version>` as a tag, e.g., v1.26.4, and select develop as target branch
 #
 # === Automated activities ===
 #
 # 1. Extract release notes tag that was published
-# 2. Ensure release notes tag match what's in CHANGELOG and pyproject
-# 3. Run tests, linting, security and complexity base line
-# 4. Publish package to PyPi test repository
-# 5. Publish package to PyPi prod repository
-# 6. Kick off Lambda Layer pipeline to publish latest version with minimal dependencies as a SAR App
-# 7. Kick off Lambda Layer pipeline to publish latest version with extra dependencies as a SAR App
-# 8. Builds a fresh version of docs including Changelog updates
-# 9. Push latest release source code to master using release title as the commit message
-# 10. Builds latest documentation for new release, and update latest alias pointing to the new release tag
-# 11. Close and notify all issues labeled "pending-release" about the release details
+# 2. Run tests, linting, security and complexity base line
+# 3. Bump package version and generate latest Changelog
+# 4. Publish package to PyPi test and prod repository
+# 5. Kick off SAR App pipeline to publish latest version with minimal and extra dependencies
+# 6. Builds a new user guide and API docs with release version; update /latest pointing to newly released version
+# 7. Close all issues labeled "pending-release" and notify customers about the release
 
-#
-# === Fallback mechanism due to external failures ===
-#
-# 1. Trigger "Publish to PyPi" workflow manually: https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow
-# 2. Use the version released under Releases e.g. v1.13.0
-#
-
-#
-# === Documentation hotfix ===
-#
-# Look for rebuild latest docs workflow
+# See MAINTAINERS.md "Releasing a new version" for release mechanisms
 
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version_to_publish:
+        description: "Version to be released in PyPi, Docs, and Lambda Layer, e.g. v1.26.4"
+        default: v1.26.4
+        required: true
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    outputs:
+      RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
+    env:
+      RELEASE_TAG_VERSION: ${{ github.event.release.tag_name || inputs.version_to_publish }}
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Install poetry
+        run: pipx install poetry
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
+          cache: "poetry"
       - name: Set release notes tag
+        id: release_version
+        # transform tag format `v<version` to `<version`
         run: |
-          RELEASE_TAG_VERSION=${{ github.event.release.tag_name }}
-          echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> $GITHUB_ENV
-      - name: Ensure new version is also set in pyproject and CHANGELOG
-        run: |
-          grep --regexp "${RELEASE_TAG_VERSION}" CHANGELOG.md
-          grep --regexp "version \= \"${RELEASE_TAG_VERSION}\"" pyproject.toml
+          RELEASE_VERSION=${RELEASE_TAG_VERSION:1}
+          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> $GITHUB_ENV
+          echo "::set-output name=RELEASE_VERSION::${RELEASE_VERSION}"
       - name: Install dependencies
         run: make dev
       - name: Run all tests, linting and baselines
         run: make pr
+      - name: Bump package version
+        run: poetry version ${RELEASE_VERSION}
+      - name: Generate latest CHANGELOG
+        run: make changelog
+      - name: Setup git client
+        run: |
+          git config user.name "Release bot"
+          git config user.email aws-devax-open-source@amazon.com
+      - name: Push project metadata and changelog to trunk
+        run: |
+          git add CHANGELOG.md
+          git add pyproject.toml
+          git commit -m "chore(ci): update project with version ${RELEASE_VERSION}"
+          git push origin HEAD:refs/heads/develop
       - name: Build python package and wheel
         run: poetry build
       - name: Upload to PyPi test
@@ -77,7 +86,7 @@ jobs:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       - name: publish lambda layer in SAR by triggering the internal codepipeline
         run: |
-          aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_TAG_VERSION --overwrite
+          aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_VERSION --overwrite
           aws codepipeline start-pipeline-execution --name ${{ secrets.CODEPIPELINE_NAME }}
         env:
           # Maintenance: Migrate to new OAuth mechanism
@@ -85,43 +94,59 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-west-1
           AWS_DEFAULT_OUTPUT: json
-      - name: Setup doc deploy
+
+  docs:
+    needs: release
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: ${{ needs.release.outputs.RELEASE_VERSION }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup git client
         run: |
-          git config --global user.name Docs deploy
-          git config --global user.email aws-devax-open-source@amazon.com
+          git config user.name "Release bot"
+          git config user.email aws-devax-open-source@amazon.com
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "poetry"
+      - name: Install dependencies
+        run: make dev
       - name: Build docs website and API reference
         run: |
-          make release-docs VERSION=${RELEASE_TAG_VERSION} ALIAS="latest"
+          make release-docs VERSION=${RELEASE_VERSION} ALIAS="latest"
           poetry run mike set-default --push latest
       - name: Release API docs to release version
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@068dc23d9710f1ba62e86896f84735d869951305 # v3.8.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./api
           keep_files: true
-          destination_dir: ${{ env.RELEASE_TAG_VERSION }}/api
+          destination_dir: ${{ env.RELEASE_VERSION }}/api
       - name: Release API docs to latest
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@068dc23d9710f1ba62e86896f84735d869951305 # v3.8.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./api
           keep_files: true
           destination_dir: latest/api
+
+  post_release:
+    needs: release
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: ${{ needs.release.outputs.RELEASE_VERSION }}
+    steps:
+      - uses: actions/checkout@v3
       - name: Close issues related to this release
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const post_release = require('.github/workflows/post_release.js')
+            const post_release = require('.github/scripts/post_release.js')
             await post_release({github, context, core})
-
-  sync_master:
-    needs: release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Sync master from detached head
-        # If version matches CHANGELOG and pyproject.toml
-        # If it passes all checks, successfully releases to test and prod
-        # Then sync up master with latest source code release
-        # where commit message will be Release notes title
-        run: git push origin HEAD:refs/heads/master --force
