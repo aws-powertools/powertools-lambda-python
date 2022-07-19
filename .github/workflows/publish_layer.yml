@@ -33,7 +33,7 @@ jobs:
 
   build-layer:
     runs-on: ubuntu-latest
-    needs: on-success
+    if: ${{ (github.event.workflow_run.conclusion == 'success') || (github.event_name == 'workflow_dispatch') }}
     defaults:
       run:
         working-directory: ./layer
