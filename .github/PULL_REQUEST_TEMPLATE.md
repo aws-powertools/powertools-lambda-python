@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD041 MD043 -->
 **Issue number:**
 
 ## Summary
@@ -15,11 +16,10 @@
 If your change doesn't seem to apply, please leave them unchecked.
 
 * [ ] [Meet tenets criteria](https://awslabs.github.io/aws-lambda-powertools-python/#tenets)
-* [ ] I have performed a self-review of my this change
-* [ ] Changes are tested
+* [ ] I have performed a self-review of this change
+* [ ] Changes have been tested
 * [ ] Changes are documented
-* [ ] PR title follows [conventional commit semantics](https://github.com/awslabs/aws-lambda-powertools-python/blob/376ec0a2ac0d2a40e0af5717bef42ff84ca0d1b9/.github/semantic.yml#L2)
-
+* [ ] PR title follows [conventional commit semantics](https://github.com/awslabs/aws-lambda-powertools-dotnet/blob/develop/.github/semantic.yml)
 
 <details>
 <summary>Is this a breaking change?</summary>
