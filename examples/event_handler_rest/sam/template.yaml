@@ -13,7 +13,7 @@ Globals:
       - "*~1*" # converts to */* for any binary type
   Function:
     Timeout: 5
-    Runtime: python3.8
+    Runtime: python3.9
     Tracing: Active
     Environment:
       Variables:
@@ -26,8 +26,8 @@ Resources:
   ApiFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: app.lambda_handler
-      CodeUri: api_handler/
+      Handler: getting_started_rest_api_resolver.lambda_handler
+      CodeUri: ../src
       Description: API handler function
       Events:
         AnyApiEvent:

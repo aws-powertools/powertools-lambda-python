@@ -10,7 +10,6 @@ on:
       - "mypy.ini"
     branches:
       - develop
-      - master
   push:
     paths:
       - "aws_lambda_powertools/**"
@@ -20,7 +19,6 @@ on:
       - "mypy.ini"
     branches:
       - develop
-      - master
 
 jobs:
   build:
@@ -34,10 +32,13 @@ jobs:
       PYTHON: ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: "poetry"
       - name: Install dependencies
         run: make dev
       - name: Formatting and Linting
@@ -51,11 +52,10 @@ jobs:
       - name: Complexity baseline
         run: make complexity-baseline
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3.1.0
+        uses: codecov/codecov-action@81cd2dc8148241f03f5839d295e000b8f761e378 # 3.1.0
         with:
           file: ./coverage.xml
           # flags: unittests
           env_vars: OS,PYTHON
           name: aws-lambda-powertools-python-codecov
           # fail_ci_if_error: true  # failing more consistently making CI unreliable despite all tests above passing
-          token: ${{ secrets.CODECOV_TOKEN }}

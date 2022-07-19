@@ -1,4 +1,4 @@
-
+<!--  markdownlint-disable MD043 -->
 ## Table of contents <!-- omit in toc -->
 
 - [Overview](#overview)
@@ -6,29 +6,28 @@
 - [Emeritus](#emeritus)
 - [Labels](#labels)
 - [Maintainer Responsibilities](#maintainer-responsibilities)
-  - [Uphold Code of Conduct](#uphold-code-of-conduct)
-  - [Prioritize Security](#prioritize-security)
-  - [Review Pull Requests](#review-pull-requests)
-  - [Triage New Issues](#triage-new-issues)
-  - [Triage Bug Reports](#triage-bug-reports)
-  - [Triage RFCs](#triage-rfcs)
-  - [Releasing a new version](#releasing-a-new-version)
-    - [Changelog generation](#changelog-generation)
-    - [Bumping the version](#bumping-the-version)
-    - [Drafting release notes](#drafting-release-notes)
-  - [Releasing a documentation hotfix](#releasing-a-documentation-hotfix)
-  - [Maintain Overall Health of the Repo](#maintain-overall-health-of-the-repo)
-  - [Manage Roadmap](#manage-roadmap)
-  - [Add Continuous Integration Checks](#add-continuous-integration-checks)
-  - [Negative Impact on the Project](#negative-impact-on-the-project)
-  - [Becoming a maintainer](#becoming-a-maintainer)
+    - [Uphold Code of Conduct](#uphold-code-of-conduct)
+    - [Prioritize Security](#prioritize-security)
+    - [Review Pull Requests](#review-pull-requests)
+    - [Triage New Issues](#triage-new-issues)
+    - [Triage Bug Reports](#triage-bug-reports)
+    - [Triage RFCs](#triage-rfcs)
+    - [Releasing a new version](#releasing-a-new-version)
+        - [Drafting release notes](#drafting-release-notes)
+    - [Run end to end tests](#run-end-to-end-tests)
+    - [Releasing a documentation hotfix](#releasing-a-documentation-hotfix)
+    - [Maintain Overall Health of the Repo](#maintain-overall-health-of-the-repo)
+    - [Manage Roadmap](#manage-roadmap)
+    - [Add Continuous Integration Checks](#add-continuous-integration-checks)
+    - [Negative Impact on the Project](#negative-impact-on-the-project)
+    - [Becoming a maintainer](#becoming-a-maintainer)
 - [Common scenarios](#common-scenarios)
-  - [Contribution is stuck](#contribution-is-stuck)
-  - [Insufficient feedback or information](#insufficient-feedback-or-information)
-  - [Crediting contributions](#crediting-contributions)
-  - [Is that a bug?](#is-that-a-bug)
-  - [Mentoring contributions](#mentoring-contributions)
-  - [Long running issues or PRs](#long-running-issues-or-prs)
+    - [Contribution is stuck](#contribution-is-stuck)
+    - [Insufficient feedback or information](#insufficient-feedback-or-information)
+    - [Crediting contributions](#crediting-contributions)
+    - [Is that a bug?](#is-that-a-bug)
+    - [Mentoring contributions](#mentoring-contributions)
+    - [Long running issues or PRs](#long-running-issues-or-prs)
 
 ## Overview
 
@@ -52,7 +51,7 @@ Previous active maintainers who contributed to this project.
 | Maintainer        | GitHub ID                                       | Affiliation |
 | ----------------- | ----------------------------------------------- | ----------- |
 | Tom McCarthy      | [cakepietoast](https://github.com/cakepietoast) | MongoDB     |
-| Nicolas Moutschen | [nmoutschen](https://github.com/nmoutschen)     | Amazon      |
+| Nicolas Moutschen | [nmoutschen](https://github.com/nmoutschen)     | Apollo      |
 
 ## Labels
 
@@ -100,7 +99,9 @@ Be aware of recurring ambiguous situations and [document them](#common-scenarios
 
 ### Uphold Code of Conduct
 
-Model the behavior set forward by the [Code of Conduct](CODE_OF_CONDUCT.md) and raise any violations to other maintainers and admins. There could be unusual circumstances where inappropriate behavior does not immediately fall within the [Code of Conduct](CODE_OF_CONDUCT.md). These might be nuanced and should be handled with extra care - when in doubt, do not engage and reach out to other maintainers and admins.
+Model the behavior set forward by the [Code of Conduct](CODE_OF_CONDUCT.md) and raise any violations to other maintainers and admins. There could be unusual circumstances where inappropriate behavior does not immediately fall within the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+These might be nuanced and should be handled with extra care - when in doubt, do not engage and reach out to other maintainers and admins.
 
 ### Prioritize Security
 
@@ -152,14 +153,14 @@ RFC is a collaborative process to help us get to the most optimal solution given
 
 Make sure you ask these questions in mind when reviewing:
 
-* Does it use our [RFC template](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE)?
-* Does the match our [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/latest/#tenets)?
-* Does the proposal address the use case? If so, is the recommended usage explicit?
-* Does it focus on the mechanics to solve the use case over fine-grained implementation details?
-* Can anyone familiar with the code base implement it?
-* If approved, are they interested in contributing? Do they need any guidance?
-* Does this significantly increase the overall project maintenance? Do we have the skills to maintain it?
-* If we can't take this use case, are there alternative projects we could recommend? Or does it call for a new project altogether?
+- Does it use our [RFC template](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE)?
+- Does the match our [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/latest/#tenets)?
+- Does the proposal address the use case? If so, is the recommended usage explicit?
+- Does it focus on the mechanics to solve the use case over fine-grained implementation details?
+- Can anyone familiar with the code base implement it?
+- If approved, are they interested in contributing? Do they need any guidance?
+- Does this significantly increase the overall project maintenance? Do we have the skills to maintain it?
+- If we can't take this use case, are there alternative projects we could recommend? Or does it call for a new project altogether?
 
 When necessary, be upfront that the time to review, approve, and implement a RFC can vary - see [Contribution is stuck](#contribution-is-stuck). Some RFCs may be further updated after implementation, as certain areas become clearer.
 
@@ -167,23 +168,15 @@ Some examples using our initial and new RFC templates: #92, #94, #95, #991, #122
 
 ### Releasing a new version
 
-> TODO: This is an area we want to increase automation while keeping communication at human level.
+Firstly, make sure the commit history in the `develop` branch **(1)** it's up to date, **(2)** commit messages are semantic, and **(3)** commit messages have their respective area, for example `feat(logger): <change>`, `chore(ci): ...`).
 
-Firstly, make sure you are using the `develop` branch and it is up to date with the origin.
+**Found typos or unclear commit messages?**
 
-There are three main steps to release a new version: Changelog generation, version bumping, and drafting release notes.
+Reword through rebase and push with `--force-with-lease` once you're confident. This will ensure [CHANGELOG](./CHANGELOG.md) is always clear for customers looking to understand what changed in between releases - was that a bug? what new features and for which utility?
 
-#### Changelog generation
+**Looks good, what's next?**
 
-You can pre-generate a temporary CHANGELOG using `make changelog`. This will generate a `TMP_CHANGELOG.md` with all staged changes under the `unreleased` section.
-
-Each unreleased line item is a commit. You can adjust them if you find the commit titles are insufficient to describe their intent. Once you're comfortable, bring these changes to the `CHANGELOG.md` with a new version heading like in previous versions.
-
-#### Bumping the version
-
-Use `poetry version <major|minor|patch|specific version>` to bump the version. For example, you can use `poetry version minor` when releasing a minor version.
-
-NOTE. Make sure both `CHANGELOG` and `pyproject.toml` are committed and pushed to the remote `develop` branch before proceeding.
+The only step is to draft and publish a good release notes, everything else is automated.
 
 #### Drafting release notes
 
@@ -193,21 +186,35 @@ Make sure the `tag` field reflects the new version you're releasing, the target 
 
 You'll notice we group all changes based on their [labels](#labels) like `feature`, `bug`, `documentation`, etc.
 
-> **Q: What if there's an incorrect title or grouping?**
+**I spotted a typo or incorrect grouping - how do I fix it?**
 
 Edit the respective PR title and update their [labels](#labels). Then run the [Release Drafter workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/release-drafter.yml) to update the Draft release.
 
-The best part comes now. Replace the placeholder `[Human readable summary of changes]` with what you'd like to communicate to customers what this release is all about. Always put yourself in the customers shoes. For that, these are some questions to keep in mind when drafting your first or future release notes:
+**All looking good, what's next?**
 
-* Can customers understand at a high level what changed in this release?
-* Is there a link to the documentation where they can read more about each main change?
-* Are there any graphics or code snippets that can enhance readability?
-* Are we calling out any key contributor(s) to this release?
-  - All contributors are automatically credited, use this as an exceptional case to feature them
+The best part comes now. Replace the placeholder `[Human readable summary of changes]` with what you'd like to communicate to customers what this release is all about. Rule of thumb: always put yourself in the customers shoes.
 
-Once you're happy, hit `Publish release`. This will kick off the [Publishing workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/publish.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be notified.
+These are some questions to keep in mind when drafting your first or future release notes:
 
-> TODO: Wait for @am29d new Lambda Layers pipeline work to complete, then add how Lambda Layers are published
+- Can customers understand at a high level what changed in this release?
+- Is there a link to the documentation where they can read more about each main change?
+- Are there any graphics or [code snippets](carbon.now.sh/) that can enhance readability?
+- Are we calling out any key contributor(s) to this release?
+    - All contributors are automatically credited, use this as an exceptional case to feature them
+
+Once you're happy, hit `Publish release` 🎉🎉🎉.
+
+This will kick off the [Publishing workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/publish.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be closed and notified.
+
+> TODO: Include information to verify SAR and Lambda Layers deployment; we're still finalizing Lambda Layer automated deployment in GitHub Actions - ping @am29d when in doubt.
+
+### Run end to end tests
+
+In order to run end to end tests you need to install CDK CLI first and bootstrap your account with `cdk bootstrap` command. For additional details follow [documentation](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html).
+
+To run locally, export `AWS_PROFILE` environment variable and run `make e2e tests`. To run from GitHub Actions, use [run-e2e-tests workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/run-e2e-tests.yml) and pick the branch you want to run tests against.
+
+**NOTE**: E2E tests are run as part of each merge to `develop` branch.
 
 ### Releasing a documentation hotfix
 
@@ -217,7 +224,7 @@ This workflow will update both user guide and API documentation.
 
 ### Maintain Overall Health of the Repo
 
-> TODO: Coordinate removing `master` and renaming `develop` to `main`
+> TODO: Coordinate renaming `develop` to `main`
 
 Keep the `develop` branch at production quality at all times. Backport features as needed. Cut release branches and tags to enable future patches.
 
@@ -240,6 +247,7 @@ Actions that negatively impact the project will be handled by the admins, in coo
 In 2023, we will revisit this. We need to improve our understanding of how other projects are doing, their mechanisms to promote key contributors, and how they interact daily.
 
 We suspect this process might look similar to the [OpenSearch project](https://github.com/opensearch-project/.github/blob/main/MAINTAINERS.md#becoming-a-maintainer).
+
 ## Common scenarios
 
 These are recurring ambiguous situations that new and existing maintainers may encounter. They serve as guidance. It is up to each maintainer to follow, adjust, or handle in a different manner as long as [our conduct is consistent](#uphold-code-of-conduct)

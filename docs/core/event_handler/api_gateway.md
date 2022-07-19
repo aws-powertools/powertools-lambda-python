@@ -48,13 +48,13 @@ Here's an example on how we can handle the `/todos` path.
 ???+ info
     We automatically serialize `Dict` responses as JSON, trim whitespace for compact responses, and set content-type to `application/json`.
 
-=== "app.py"
+=== "getting_started_rest_api_resolver.py"
 
     ```python hl_lines="5 11 14 28"
     --8<-- "examples/event_handler_rest/src/getting_started_rest_api_resolver.py"
     ```
 
-=== "Request"
+=== "getting_started_rest_api_resolver.json"
 
     This utility uses `path` and `httpMethod` to route to the right function. This helps make unit tests and local invocation easier too.
 
@@ -62,7 +62,7 @@ Here's an example on how we can handle the `/todos` path.
     --8<-- "examples/event_handler_rest/src/getting_started_rest_api_resolver.json"
     ```
 
-=== "Response"
+=== "getting_started_rest_api_resolver_output.json"
 
     ```json
     --8<-- "examples/event_handler_rest/src/getting_started_rest_api_resolver_output.json"
@@ -96,13 +96,13 @@ Each dynamic route you set must be part of your function signature. This allows 
 ???+ note
     For brevity, we will only include the necessary keys for each sample request for the example to work.
 
-=== "app.py"
+=== "dynamic_routes.py"
 
     ```python hl_lines="14 16"
     --8<-- "examples/event_handler_rest/src/dynamic_routes.py"
     ```
 
-=== "Request"
+=== "dynamic_routes.json"
 
     ```json
     --8<-- "examples/event_handler_rest/src/dynamic_routes.json"
@@ -123,13 +123,13 @@ You can also combine nested paths with greedy regex to catch in between routes.
 ???+ warning
     We choose the most explicit registered route that matches an incoming event.
 
-=== "app.py"
+=== "dynamic_routes_catch_all.py"
 
     ```python hl_lines="11"
     --8<-- "examples/event_handler_rest/src/dynamic_routes_catch_all.py"
     ```
 
-=== "Request"
+=== "dynamic_routes_catch_all.json"
 
     ```json
     --8<-- "examples/event_handler_rest/src/dynamic_routes_catch_all.json"
@@ -139,13 +139,13 @@ You can also combine nested paths with greedy regex to catch in between routes.
 
 You can use named decorators to specify the HTTP method that should be handled in your functions. That is, `app.<http_method>`, where the HTTP method could be `get`, `post`, `put`, `patch`, `delete`, and `options`.
 
-=== "app.py"
+=== "http_methods.py"
 
     ```python hl_lines="14 17"
     --8<-- "examples/event_handler_rest/src/http_methods.py"
     ```
 
-=== "Request"
+=== "http_methods.json"
 
     ```json
     --8<-- "examples/event_handler_rest/src/http_methods.json"
@@ -225,13 +225,13 @@ When using [Custom Domain API Mappings feature](https://docs.aws.amazon.com/apig
 
 To address this API Gateway behavior, we use `strip_prefixes` parameter to account for these prefixes that are now injected into the path regardless of which type of API Gateway you're using.
 
-=== "app.py"
+=== "custom_api_mapping.py"
 
     ```python hl_lines="8"
     --8<-- "examples/event_handler_rest/src/custom_api_mapping.py"
     ```
 
-=== "Request"
+=== "custom_api_mapping.json"
 
     ```json
     --8<-- "examples/event_handler_rest/src/custom_api_mapping.json"
@@ -253,13 +253,13 @@ This will ensure that CORS headers are always returned as part of the response w
 ???+ tip
     Optionally disable CORS on a per path basis with `cors=False` parameter.
 
-=== "app.py"
+=== "setting_cors.py"
 
     ```python hl_lines="5 11-12 34"
     --8<-- "examples/event_handler_rest/src/setting_cors.py"
     ```
 
-=== "Response"
+=== "setting_cors_output.json"
 
     ```json
     --8<-- "examples/event_handler_rest/src/setting_cors_output.json"
@@ -290,13 +290,13 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 
 You can use the `Response` class to have full control over the response, for example you might want to add additional headers or set a custom Content-type.
 
-=== "app.py"
+=== "fine_grained_responses.py"
 
     ```python hl_lines="7 24-28"
     --8<-- "examples/event_handler_rest/src/fine_grained_responses.py"
     ```
 
-=== "Response"
+=== "fine_grained_responses_output.json"
 
     ```json
     --8<-- "examples/event_handler_rest/src/fine_grained_responses_output.json"
@@ -309,19 +309,19 @@ You can compress with gzip and base64 encode your responses via `compress` param
 ???+ warning
     The client must send the `Accept-Encoding` header, otherwise a normal response will be sent.
 
-=== "app.py"
+=== "compressing_responses.py"
 
     ```python hl_lines="14"
      --8<-- "examples/event_handler_rest/src/compressing_responses.py"
     ```
 
-=== "Request"
+=== "compressing_responses.json"
 
     ```json
     --8<-- "examples/event_handler_rest/src/compressing_responses.json"
     ```
 
-=== "Response"
+=== "compressing_responses_output.json"
 
     ```json
     --8<-- "examples/event_handler_rest/src/compressing_responses_output.json"
@@ -336,25 +336,25 @@ Like `compress` feature, the client must send the `Accept` header with the corre
 ???+ warning
     This feature requires API Gateway to configure binary media types, see [our sample infrastructure](#required-resources) for reference.
 
-=== "app.py"
+=== "binary_responses.py"
 
     ```python hl_lines="14 20"
     --8<-- "examples/event_handler_rest/src/binary_responses.py"
     ```
 
-=== "logo.svg"
+=== "binary_responses_logo.svg"
 
     ```xml
     --8<-- "examples/event_handler_rest/src/binary_responses_logo.svg"
     ```
 
-=== "Request"
+=== "binary_responses.json"
 
     ```json
     --8<-- "examples/event_handler_rest/src/binary_responses.json"
     ```
 
-=== "Response"
+=== "binary_responses_output.json"
 
     ```json
     --8<-- "examples/event_handler_rest/src/binary_responses_output.json"
@@ -387,9 +387,9 @@ You can instruct API Gateway handler to use a custom serializer to best suit you
 
 As you grow the number of routes a given Lambda function should handle, it is natural to split routes into separate files to ease maintenance - That's where the `Router` feature is useful.
 
-Let's assume you have `app.py` as your Lambda function entrypoint and routes in `todos.py`, this is how you'd use the `Router` feature.
+Let's assume you have `split_route.py` as your Lambda function entrypoint and routes in `split_route_module.py`. This is how you'd use the `Router` feature.
 
-=== "todos.py"
+=== "split_route_module.py"
 
 	We import **Router** instead of **APIGatewayRestResolver**; syntax wise is exactly the same.
 
@@ -397,7 +397,7 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
     --8<-- "examples/event_handler_rest/src/split_route_module.py"
     ```
 
-=== "app.py"
+=== "split_route.py"
 
 	We use `include_router` method and include all user routers registered in the `router` global object.
 
@@ -407,17 +407,17 @@ Let's assume you have `app.py` as your Lambda function entrypoint and routes in 
 
 #### Route prefix
 
-In the previous example, `todos.py` routes had a `/todos` prefix. This might grow over time and become repetitive.
+In the previous example, `split_route_module.py` routes had a `/todos` prefix. This might grow over time and become repetitive.
 
-When necessary, you can set a prefix when including a router object. This means you could remove `/todos` prefix in `todos.py` altogether.
+When necessary, you can set a prefix when including a router object. This means you could remove `/todos` prefix altogether.
 
-=== "app.py"
+=== "split_route_prefix.py"
 
 	```python hl_lines="12"
     --8<-- "examples/event_handler_rest/src/split_route_prefix.py"
 	```
 
-=== "todos.py"
+=== "split_route_prefix_module.py"
 
     ```python hl_lines="13 25"
     --8<-- "examples/event_handler_rest/src/split_route_prefix_module.py"
@@ -509,13 +509,13 @@ your development, building, deployment tooling need to accommodate the distinct 
 
 You can test your routes by passing a proxy event request where `path` and `httpMethod`.
 
-=== "test_app.py"
+=== "assert_http_response.py"
 
     ```python hl_lines="21-24"
     --8<-- "examples/event_handler_rest/src/assert_http_response.py"
     ```
 
-=== "app.py"
+=== "assert_http_response_module.py"
 
     ```python
     --8<-- "examples/event_handler_rest/src/assert_http_response_module.py"
