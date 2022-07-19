@@ -1,4 +1,4 @@
-from aws_cdk import Stack
+from aws_cdk import RemovalPolicy, Stack
 from aws_cdk.aws_ssm import StringParameter
 from cdk_lambda_powertools_python_layer import LambdaPowertoolsLayer
 from constructs import Construct
@@ -15,5 +15,6 @@ class LayerStack(Stack):
         )
 
         layer.add_permission("PublicLayerAccess", account_id="*")
+        layer.apply_removal_policy(RemovalPolicy.RETAIN)
 
         StringParameter(self, "VersionArn", parameter_name=ssm_paramter_layer_arn, string_value=layer.layer_version_arn)
