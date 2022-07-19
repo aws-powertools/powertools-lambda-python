@@ -29,6 +29,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "16.12"
+      - name: Install poetry
+        run: pipx install poetry
       - name: Setup python
         uses: actions/setup-python@v4
         with:
