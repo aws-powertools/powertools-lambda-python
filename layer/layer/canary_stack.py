@@ -44,7 +44,6 @@ class CanaryStack(Stack):
         canary_lambda = Function(
             self,
             "CanaryLambdaFunction",
-            function_name="CanaryLambdaFunction",
             code=Code.from_asset("layer/canary"),
             handler="app.on_event",
             layers=[layer],
