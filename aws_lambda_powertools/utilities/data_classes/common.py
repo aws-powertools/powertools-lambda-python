@@ -32,13 +32,12 @@ def get_header_value(
     headers: Dict[str, str], name: str, default_value: Optional[str], case_sensitive: Optional[bool]
 ) -> Optional[str]:
     """Get header value by name"""
-    if case_sensitive:
-        return headers.get(name, default_value)
-
     # If headers is NoneType, return default value
     if not headers:
         return default_value
 
+    if case_sensitive:
+        return headers.get(name, default_value)
     name_lower = name.lower()
 
     return next(
