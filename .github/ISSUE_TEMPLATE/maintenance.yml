@@ -12,7 +12,7 @@ body:
   - type: textarea
     id: activity
     attributes:
-      label: Technical debt
+      label: Summary
       description: Please provide an overview in one or two paragraphs
     validations:
       required: true
