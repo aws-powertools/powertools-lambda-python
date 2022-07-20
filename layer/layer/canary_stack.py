@@ -1,6 +1,6 @@
 import uuid
 
-from aws_cdk import CfnParameter, CustomResource, Duration, Stack
+from aws_cdk import CfnOutput, CfnParameter, CustomResource, Duration, Stack
 from aws_cdk.aws_iam import Effect, ManagedPolicy, PolicyStatement, Role, ServicePrincipal
 from aws_cdk.aws_lambda import Code, Function, LayerVersion, Runtime
 from aws_cdk.aws_logs import RetentionDays
@@ -73,3 +73,5 @@ class CanaryStack(Stack):
         )
         # force to recreate resource on each deployment with randomized name
         CustomResource(self, f"CanaryTrigger-{str(uuid.uuid4())[0:7]}", service_token=provider.service_token)
+
+        CfnOutput(self, "LatestLayerArn", value=layer_arn)
