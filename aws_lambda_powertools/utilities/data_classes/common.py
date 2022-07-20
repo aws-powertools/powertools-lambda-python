@@ -35,6 +35,10 @@ def get_header_value(
     if case_sensitive:
         return headers.get(name, default_value)
 
+    # If headers is NoneType, return default value
+    if not headers:
+        return default_value
+
     name_lower = name.lower()
 
     return next(
