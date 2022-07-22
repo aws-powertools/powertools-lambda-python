@@ -64,6 +64,7 @@ jobs:
     needs:
       - build-layer
     uses: ./.github/workflows/reusable_deploy_layer_stack.yml
+    secrets: inherit
     with:
       stage: "BETA"
       artefact-name: "cdk-layer-artefact"
@@ -73,6 +74,7 @@ jobs:
     needs:
       - deploy-beta
     uses: ./.github/workflows/reusable_deploy_layer_stack.yml
+    secrets: inherit
     with:
       stage: "PROD"
       artefact-name: "cdk-layer-artefact"
