@@ -37,7 +37,7 @@ on:
 
 jobs:
   export_pr_details:
-    if: inputs.workflow_origin == "bla/bla"
+    if: inputs.workflow_origin == "dummy_org/dummy_repo"
     runs-on: ubuntu-latest
     env:
       FILENAME: pr.txt
