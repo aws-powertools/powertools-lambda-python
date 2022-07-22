@@ -58,6 +58,6 @@ module.exports = async ({github, context, core}) => {
       issue_number: relatedIssueNumber,
       owner: context.repo.owner,
       repo: context.repo.repo,
-      labels: [releaseLabel]
+      labels: [relatedIssueNumber]
     })
 }
