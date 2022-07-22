@@ -20,7 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: "Debug workflow_run event"
-        run: echo "${{ toJSON(github.event) }}"
+        env:
+          event_payload: ${{ toJSON(github.event) }}
+        run: echo $event_payload
       - name: "Ensure related issue is present"
         uses: actions/github-script@v6
         env:
