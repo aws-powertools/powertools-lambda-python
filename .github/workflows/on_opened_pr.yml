@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: "Debug workflow_run event"
+        run: echo ${{ toJSON(github.event) }}
       - name: "Ensure related issue is present"
         uses: actions/github-script@v6
         env:
