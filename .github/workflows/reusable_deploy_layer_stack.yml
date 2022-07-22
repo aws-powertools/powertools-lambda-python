@@ -13,6 +13,9 @@ on:
       artefact-name:
         required: true
         type: string
+      environment:
+        required: true
+        type: string
     secrets:
       target-account-role:
         required: true
@@ -20,6 +23,7 @@ on:
 jobs:
   deploy-cdk-stack:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     defaults:
       run:
         working-directory: ./layer
@@ -58,7 +62,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: ${{ matrix.region }}
-          role-to-assume: ${{ secrets.target-account-role }}
+          role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:

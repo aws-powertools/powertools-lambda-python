@@ -67,8 +67,7 @@ jobs:
     with:
       stage: "BETA"
       artefact-name: "cdk-layer-artefact"
-    secrets:
-      target-account-role: ${{ secrets.AWS_LAYERS_BETA_ROLE_ARN }}
+      environment: "layer-beta"
 
   deploy-prod:
     needs:
@@ -77,5 +76,4 @@ jobs:
     with:
       stage: "PROD"
       artefact-name: "cdk-layer-artefact"
-    secrets:
-      target-account-role: ${{ secrets.AWS_LAYERS_PROD_ROLE_ARN }}
+      environment: "layer-prod"
