@@ -1,8 +1,5 @@
 name: Export previously recorded PR
 
-env:
-  TRUSTED_ORIGIN: "heitorlessa/aws-lambda-powertools-python"
-
 on:
   workflow_call:
     inputs:
@@ -40,7 +37,7 @@ on:
 
 jobs:
   export_pr_details:
-    if: inputs.workflow_origin == ${{ env.TRUSTED_ORIGIN }}
+    if: inputs.workflow_origin == 'heitorlessa/aws-lambda-powertools-python'
     runs-on: ubuntu-latest
     env:
       FILENAME: pr.txt
