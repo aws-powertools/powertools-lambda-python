@@ -16,9 +16,6 @@ on:
       environment:
         required: true
         type: string
-    secrets:
-      target-account-role:
-        required: true
 
 jobs:
   deploy-cdk-stack:
