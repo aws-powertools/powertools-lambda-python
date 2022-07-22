@@ -37,7 +37,7 @@ on:
 
 jobs:
   export_pr_details:
-    if: inputs.workflow_origin == 'heitorlessa/aws-lambda-powertools-python'
+    if: inputs.workflow_origin == 'awslabs/aws-lambda-powertools-python'
     runs-on: ubuntu-latest
     env:
       FILENAME: pr.txt
