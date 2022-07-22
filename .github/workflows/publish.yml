@@ -31,6 +31,7 @@ on:
 
 jobs:
   release:
+    environment: release
     runs-on: ubuntu-latest
     outputs:
       RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
@@ -84,16 +85,15 @@ jobs:
         env:
           PYPI_USERNAME: __token__
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+      - name: aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.AWS_SAR_ROLE_ARN }}
       - name: publish lambda layer in SAR by triggering the internal codepipeline
         run: |
           aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_VERSION --overwrite
-          aws codepipeline start-pipeline-execution --name ${{ secrets.CODEPIPELINE_NAME }}
-        env:
-          # Maintenance: Migrate to new OAuth mechanism
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-west-1
-          AWS_DEFAULT_OUTPUT: json
+          aws codepipeline start-pipeline-execution --name ${{ secrets.AWS_SAR_PIPELINE_NAME }}
 
   docs:
     needs: release
