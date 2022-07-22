@@ -6,6 +6,9 @@ on:
       record_pr_workflow_id:
         required: true
         type: number
+      workflow_origin: # see https://github.com/awslabs/aws-lambda-powertools-python/issues/1349
+        required: true
+        type: string
     secrets:
       token:
         required: true
@@ -32,6 +35,8 @@ on:
 
 jobs:
   export_pr_details:
+    # see https://github.com/awslabs/aws-lambda-powertools-python/issues/1349
+    if: inputs.workflow_origin == 'awslabs/aws-lambda-powertools-python'
     runs-on: ubuntu-latest
     env:
       FILENAME: pr.txt
