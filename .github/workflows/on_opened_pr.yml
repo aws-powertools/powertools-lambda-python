@@ -10,7 +10,6 @@ jobs:
   get_pr_details:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     uses: ./.github/workflows/reusable_export_pr_details.yml
-    env:
     with:
       record_pr_workflow_id: ${{ github.event.workflow_run.id }}
       workflow_origin: ${{ github.event.repository.full_name }}
