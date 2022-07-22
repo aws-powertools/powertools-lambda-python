@@ -14,6 +14,7 @@ jobs:
     uses: ./.github/workflows/reusable_export_pr_details.yml
     with:
       record_pr_workflow_id: ${{ github.event.workflow_run.id }}
+      workflow_origin: ${{ github.event.repository.full_name }}
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
   label_pr:
