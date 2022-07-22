@@ -6,6 +6,11 @@ on:
       record_pr_workflow_id:
         required: true
         type: number
+      # this protects from anyone mimicking "Record PR details" dependency
+      # regardless of our untrusted input validation
+      workflow_origin:
+        required: true
+        type: string
     secrets:
       token:
         required: true
@@ -32,6 +37,7 @@ on:
 
 jobs:
   export_pr_details:
+    if: inputs.workflow_origin == "bla/bla"
     runs-on: ubuntu-latest
     env:
       FILENAME: pr.txt
