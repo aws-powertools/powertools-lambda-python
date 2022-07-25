@@ -5,6 +5,53 @@
 # Unreleased
 
 
+<a name="v1.26.6"></a>
+## [v1.26.6] - 2022-07-25
+## Bug Fixes
+
+* **ci:** remove unsupported env in workflow_call
+* **ci:** allow inherit secrets for reusable workflow
+* **ci:** remove unused secret
+* **ci:** label_related_issue unresolved var from history mixup
+* **ci:** cond doesnt support two expr w/ env
+* **ci:** only event is resolved in cond
+* **ci:** unexpected symbol due to double quotes...
+* **event_handlers:** handle lack of headers when using auto-compression feature ([#1325](https://github.com/awslabs/aws-lambda-powertools-python/issues/1325))
+
+## Maintenance
+
+* dummy for PR test
+* print full event depth
+* print full workflow event depth
+* debug full event
+* remove leftover from fork one more time
+* **ci:** test env expr
+* **ci:** test upstream job skip
+* **ci:** lockdown workflow_run by origin ([#1350](https://github.com/awslabs/aws-lambda-powertools-python/issues/1350))
+* **ci:** test default env
+* **ci:** experiment hardening origin
+* **ci:** experiment hardening origin
+* **ci:** introduce codeowners ([#1352](https://github.com/awslabs/aws-lambda-powertools-python/issues/1352))
+* **ci:** use OIDC and encrypt release secrets ([#1355](https://github.com/awslabs/aws-lambda-powertools-python/issues/1355))
+* **ci:** remove core group from codeowners ([#1358](https://github.com/awslabs/aws-lambda-powertools-python/issues/1358))
+* **ci:** confirm workflow_run event
+* **ci:** use gh environment for beta and prod layer deploy ([#1356](https://github.com/awslabs/aws-lambda-powertools-python/issues/1356))
+* **ci:** update project with version 1.26.5
+* **deps:** bump constructs from 10.1.1 to 10.1.52 ([#1343](https://github.com/awslabs/aws-lambda-powertools-python/issues/1343))
+* **deps-dev:** bump mypy-boto3-cloudwatch from 1.24.0 to 1.24.35 ([#1342](https://github.com/awslabs/aws-lambda-powertools-python/issues/1342))
+* **governance:** update wording tech debt to summary in maintenance template
+* **governance:** add new maintenance issue template for tech debt ([#1326](https://github.com/awslabs/aws-lambda-powertools-python/issues/1326))
+* **layers:** layer canary stack should not hardcode resource name
+* **layers:** replace layers account secret ([#1329](https://github.com/awslabs/aws-lambda-powertools-python/issues/1329))
+* **layers:** expand to all aws commercial regions ([#1324](https://github.com/awslabs/aws-lambda-powertools-python/issues/1324))
+* **layers:** bump to 1.26.5
+
+## Pull Requests
+
+* Merge pull request [#285](https://github.com/awslabs/aws-lambda-powertools-python/issues/285) from heitorlessa/chore/skip-dep-workflow
+* Merge pull request [#284](https://github.com/awslabs/aws-lambda-powertools-python/issues/284) from heitorlessa/chore/dummy
+
+
 <a name="v1.26.5"></a>
 ## [v1.26.5] - 2022-07-20
 ## Bug Fixes
@@ -2067,7 +2114,8 @@
 * Merge pull request [#5](https://github.com/awslabs/aws-lambda-powertools-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.26.5...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.26.6...HEAD
+[v1.26.6]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.26.5...v1.26.6
 [v1.26.5]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.26.4...v1.26.5
 [v1.26.4]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.26.3...v1.26.4
 [v1.26.3]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.26.2...v1.26.3
