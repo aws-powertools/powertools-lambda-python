@@ -28,6 +28,11 @@ on:
         description: "Version to be released in PyPi, Docs, and Lambda Layer, e.g. v1.26.4"
         default: v1.26.4
         required: true
+      skip_pypi:
+        description: "Skip publishing to PyPi as it can't publish more than once. Useful for semi-failed releases"
+        default: false
+        type: boolean
+        required: false
 
 jobs:
   release:
@@ -74,13 +79,16 @@ jobs:
           git commit -m "chore(ci): update project with version ${RELEASE_VERSION}"
           git push origin HEAD:refs/heads/develop
       - name: Build python package and wheel
+        if: ${{ !inputs.skip_pypi }}
         run: poetry build
       - name: Upload to PyPi test
+        if: ${{ !inputs.skip_pypi }}
         run: make release-test
         env:
           PYPI_USERNAME: __token__
           PYPI_TEST_TOKEN: ${{ secrets.PYPI_TEST_TOKEN }}
       - name: Upload to PyPi prod
+        if: ${{ !inputs.skip_pypi }}
         run: make release-prod
         env:
           PYPI_USERNAME: __token__
