@@ -314,6 +314,24 @@ def test_compress_no_accept_encoding():
     assert result["body"] == expected_value
 
 
+def test_compress_no_accept_encoding_null_headers():
+    # GIVEN a function with compress=True
+    # AND the request has no headers
+    app = ApiGatewayResolver()
+    expected_value = "Foo"
+
+    @app.get("/my/path", compress=True)
+    def return_text() -> Response:
+        return Response(200, content_types.TEXT_PLAIN, expected_value)
+
+    # WHEN calling the event handler
+    result = app({"path": "/my/path", "httpMethod": "GET", "headers": None}, None)
+
+    # THEN don't perform any gzip compression
+    assert result["isBase64Encoded"] is False
+    assert result["body"] == expected_value
+
+
 def test_cache_control_200():
     # GIVEN a function with cache_control set
     app = ApiGatewayResolver()
