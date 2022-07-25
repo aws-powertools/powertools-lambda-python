@@ -63,16 +63,19 @@ jobs:
       - name: Install dependencies
         run: make dev
       - name: Run all tests, linting and baselines
+        if: ${{ !inputs.skip_pypi }}
         run: make pr
       - name: Bump package version
         run: poetry version ${RELEASE_VERSION}
       - name: Generate latest CHANGELOG
+        if: ${{ !inputs.skip_pypi }}
         run: make changelog
       - name: Setup git client
         run: |
           git config user.name "Release bot"
           git config user.email aws-devax-open-source@amazon.com
       - name: Push project metadata and changelog to trunk
+        if: ${{ !inputs.skip_pypi }}
         run: |
           git add CHANGELOG.md
           git add pyproject.toml
