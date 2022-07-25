@@ -8,6 +8,7 @@ import logging
 import os
 import warnings
 from abc import ABC, abstractmethod
+from math import ceil
 from types import MappingProxyType
 from typing import Any, Dict, Optional
 
@@ -40,6 +41,7 @@ class DataRecord:
         idempotency_key,
         status: str = "",
         expiry_timestamp: Optional[int] = None,
+        in_progress_expiry_timestamp: Optional[int] = None,
         response_data: Optional[str] = "",
         payload_hash: Optional[str] = None,
     ) -> None:
@@ -53,6 +55,8 @@ class DataRecord:
             status of the idempotent record
         expiry_timestamp: int, optional
             time before the record should expire, in seconds
+        in_progress_expiry_timestamp: int, optional
+            time before the record should expire while in the INPROGRESS state, in seconds
         payload_hash: str, optional
             hashed representation of payload
         response_data: str, optional
@@ -61,6 +65,7 @@ class DataRecord:
         self.idempotency_key = idempotency_key
         self.payload_hash = payload_hash
         self.expiry_timestamp = expiry_timestamp
+        self.in_progress_expiry_timestamp = in_progress_expiry_timestamp
         self._status = status
         self.response_data = response_data
 
@@ -120,6 +125,7 @@ class BasePersistenceLayer(ABC):
         self.validation_key_jmespath = None
         self.raise_on_no_idempotency_key = False
         self.expires_after_seconds: int = 60 * 60  # 1 hour default
+        self.expires_in_progress: bool = False
         self.use_local_cache = False
         self.hash_function = None
 
@@ -152,6 +158,7 @@ class BasePersistenceLayer(ABC):
             self.payload_validation_enabled = True
         self.raise_on_no_idempotency_key = config.raise_on_no_idempotency_key
         self.expires_after_seconds = config.expires_after_seconds
+        self.expires_in_progress = config.expires_in_progress
         self.use_local_cache = config.use_local_cache
         if self.use_local_cache:
             self._cache = LRUDict(max_items=config.local_cache_max_items)
@@ -328,7 +335,7 @@ class BasePersistenceLayer(ABC):
 
         self._save_to_cache(data_record=data_record)
 
-    def save_inprogress(self, data: Dict[str, Any]) -> None:
+    def save_inprogress(self, data: Dict[str, Any], remaining_time_in_millis: Optional[int] = None) -> None:
         """
         Save record of function's execution being in progress
 
@@ -336,6 +343,8 @@ class BasePersistenceLayer(ABC):
         ----------
         data: Dict[str, Any]
             Payload
+        remaining_time_in_millis: Optional[int]
+            If expiry of in-progress invocations is enabled, this will contain the remaining time available in millis
         """
         data_record = DataRecord(
             idempotency_key=self._get_hashed_idempotency_key(data=data),
@@ -343,6 +352,20 @@ class BasePersistenceLayer(ABC):
             expiry_timestamp=self._get_expiry_timestamp(),
             payload_hash=self._get_hashed_payload(data=data),
         )
+
+        if self.expires_in_progress:
+            if remaining_time_in_millis:
+                now = datetime.datetime.now()
+                period = datetime.timedelta(milliseconds=remaining_time_in_millis)
+
+                # It's very important to use math.ceil here. Otherwise, we might return an integer that will be smaller
+                # than the current time in milliseconds, due to rounding. This will create a scenario where the record
+                # looks already expired in the store, but the invocation is still running.
+                timestamp = ceil((now + period).timestamp())
+
+                data_record.in_progress_expiry_timestamp = timestamp
+            else:
+                logger.debug("Expires in progress is enabled but we couldn't determine the remaining time left")
 
         logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")
 

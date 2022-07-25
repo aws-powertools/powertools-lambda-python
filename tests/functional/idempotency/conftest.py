@@ -108,18 +108,28 @@ def expected_params_update_item_with_validation(
         },
         "Key": {"id": hashed_idempotency_key},
         "TableName": "TEST_TABLE",
-        "UpdateExpression": "SET #response_data = :response_data, "
-        "#expiry = :expiry, #status = :status, "
-        "#validation_key = :validation_key",
+        "UpdateExpression": (
+            "SET #response_data = :response_data, "
+            "#expiry = :expiry, #status = :status, "
+            "#validation_key = :validation_key"
+        ),
     }
 
 
 @pytest.fixture
 def expected_params_put_item(hashed_idempotency_key):
     return {
-        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now",
-        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration"},
-        "ExpressionAttributeValues": {":now": stub.ANY},
+        "ConditionExpression": (
+            "attribute_not_exists(#id) OR #now < :now OR "
+            "(attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now AND #status = :inprogress)"
+        ),
+        "ExpressionAttributeNames": {
+            "#id": "id",
+            "#now": "expiration",
+            "#in_progress_expiry": "in_progress_expiration",
+            "#status": "status",
+        },
+        "ExpressionAttributeValues": {":now": stub.ANY, ":status": "INPROGRESS"},
         "Item": {"expiration": stub.ANY, "id": hashed_idempotency_key, "status": "INPROGRESS"},
         "TableName": "TEST_TABLE",
     }
@@ -128,9 +138,18 @@ def expected_params_put_item(hashed_idempotency_key):
 @pytest.fixture
 def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_validation_key):
     return {
-        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now",
-        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration"},
-        "ExpressionAttributeValues": {":now": stub.ANY},
+        "ConditionExpression": (
+            "attribute_not_exists(#id) OR #now < :now OR "
+            "(attribute_exists(#in_progress_expiry) AND "
+            "#in_progress_expiry < :now AND #status = :inprogress)"
+        ),
+        "ExpressionAttributeNames": {
+            "#id": "id",
+            "#in_progress_expiry": stub.ANY,
+            "#now": stub.ANY,
+            "#status": "status",
+        },
+        "ExpressionAttributeValues": {":now": stub.ANY, ":status": "INPROGRESS"},
         "Item": {
             "expiration": stub.ANY,
             "id": hashed_idempotency_key,

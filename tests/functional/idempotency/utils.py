@@ -16,9 +16,17 @@ def build_idempotency_put_item_stub(
 ) -> Dict:
     idempotency_key_hash = f"{function_name}.{handler_name}#{hash_idempotency_key(data)}"
     return {
-        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now",
-        "ExpressionAttributeNames": {"#id": "id", "#now": "expiration"},
-        "ExpressionAttributeValues": {":now": stub.ANY},
+        "ConditionExpression": (
+            "attribute_not_exists(#id) OR #now < :now OR "
+            "(attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now AND #status = :inprogress)"
+        ),
+        "ExpressionAttributeNames": {
+            "#id": "id",
+            "#now": "expiration",
+            "#in_progress_expiry": "in_progress_expiration",
+            "#status": "status",
+        },
+        "ExpressionAttributeValues": {":now": stub.ANY, ":status": "INPROGRESS"},
         "Item": {"expiration": stub.ANY, "id": idempotency_key_hash, "status": "INPROGRESS"},
         "TableName": "TEST_TABLE",
     }
@@ -33,7 +41,11 @@ def build_idempotency_update_item_stub(
     idempotency_key_hash = f"{function_name}.{handler_name}#{hash_idempotency_key(data)}"
     serialized_lambda_response = json_serialize(handler_response)
     return {
-        "ExpressionAttributeNames": {"#expiry": "expiration", "#response_data": "data", "#status": "status"},
+        "ExpressionAttributeNames": {
+            "#expiry": "expiration",
+            "#response_data": "data",
+            "#status": "status",
+        },
         "ExpressionAttributeValues": {
             ":expiry": stub.ANY,
             ":response_data": serialized_lambda_response,
@@ -41,5 +53,5 @@ def build_idempotency_update_item_stub(
         },
         "Key": {"id": idempotency_key_hash},
         "TableName": "TEST_TABLE",
-        "UpdateExpression": "SET #response_data = :response_data, " "#expiry = :expiry, #status = :status",
+        "UpdateExpression": ("SET #response_data = :response_data, " "#expiry = :expiry, #status = :status"),
     }
