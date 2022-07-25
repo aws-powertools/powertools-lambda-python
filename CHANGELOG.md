@@ -6,6 +6,7 @@
 
 ## Maintenance
 
+* **ci:** update project with version 1.26.6
 * **ci:** add conditional to skip pypi release ([#1366](https://github.com/awslabs/aws-lambda-powertools-python/issues/1366))
 * **ci:** update project with version 1.26.6
 
