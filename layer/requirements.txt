@@ -27,9 +27,9 @@ cdk-lambda-powertools-python-layer==2.0.49 \
     --hash=sha256:8055fc691539f16e22a40e3d3df9c3f59fb28012437b08c47c639aefb001f1b2 \
     --hash=sha256:9b0a7b7344f9ccb486564af728cefeac743687bfb131631e6d9171a55800dbac
     # via -r requirements.txt
-constructs==10.1.52 \
-    --hash=sha256:a1887a0ee28336d38cc61830eae9dd774b4b3628c33498645f93bcfa4b54ed99 \
-    --hash=sha256:beabd1895cbe52a8b44dafe8b822e69585179e5e421ceb7e262a7ab327604fc8
+constructs==10.1.56 \
+    --hash=sha256:e2c4995ff81f9780886739de59ba7e55163fdf550a78e35b128456d373df8b04 \
+    --hash=sha256:ee65b5724d162d50f662dde5724ae2723c5690f21709924f6c885f07e68c4230
     # via
     #   -r requirements.txt
     #   aws-cdk-lib
