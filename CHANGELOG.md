@@ -4,6 +4,11 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+* **ci:** add conditional to skip pypi release ([#1366](https://github.com/awslabs/aws-lambda-powertools-python/issues/1366))
+* **ci:** update project with version 1.26.6
+
 
 <a name="v1.26.6"></a>
 ## [v1.26.6] - 2022-07-25
