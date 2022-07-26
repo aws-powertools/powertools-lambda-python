@@ -75,8 +75,8 @@ def default_jmespath():
 
 
 @pytest.fixture
-def expected_params_update_item(serialized_lambda_response, hashed_idempotency_key):
-    return {
+def expected_params_update_item(serialized_lambda_response, hashed_idempotency_key, idempotency_config):
+    params = {
         "ExpressionAttributeNames": {"#expiry": "expiration", "#response_data": "data", "#status": "status"},
         "ExpressionAttributeValues": {
             ":expiry": stub.ANY,
@@ -87,6 +87,13 @@ def expected_params_update_item(serialized_lambda_response, hashed_idempotency_k
         "TableName": "TEST_TABLE",
         "UpdateExpression": "SET #response_data = :response_data, " "#expiry = :expiry, #status = :status",
     }
+
+    if idempotency_config.expires_in_progress:
+        params["ExpressionAttributeNames"]["#in_progress_expiry"] = "in_progress_expiration"
+        params["ExpressionAttributeValues"][":in_progress_expiry"] = stub.ANY
+        params["UpdateExpression"] += ", #in_progress_expiry = :in_progress_expiry"
+
+    return params
 
 
 @pytest.fixture
@@ -195,6 +202,7 @@ def idempotency_config(config, request, default_jmespath):
     return IdempotencyConfig(
         event_key_jmespath=request.param.get("event_key_jmespath") or default_jmespath,
         use_local_cache=request.param["use_local_cache"],
+        expires_in_progress=request.param.get("expires_in_progress") or False,
     )
 
 
@@ -209,6 +217,14 @@ def config_with_validation(config, request, default_jmespath):
         event_key_jmespath=default_jmespath,
         use_local_cache=request.param,
         payload_validation_jmespath="requestContext",
+    )
+
+
+@pytest.fixture
+def config_with_expires_in_progress(config, request, default_jmespath):
+    return IdempotencyConfig(
+        event_key_jmespath=default_jmespath,
+        expires_in_progress=True,
     )
 
 

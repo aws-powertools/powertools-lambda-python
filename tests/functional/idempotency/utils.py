@@ -3,6 +3,7 @@ from typing import Any, Dict
 
 from botocore import stub
 
+from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from tests.functional.utils import json_serialize
 
 
@@ -35,12 +36,13 @@ def build_idempotency_put_item_stub(
 def build_idempotency_update_item_stub(
     data: Dict,
     handler_response: Dict,
+    config: IdempotencyConfig,
     function_name: str = "test-func",
     handler_name: str = "lambda_handler",
 ) -> Dict:
     idempotency_key_hash = f"{function_name}.{handler_name}#{hash_idempotency_key(data)}"
     serialized_lambda_response = json_serialize(handler_response)
-    return {
+    params = {
         "ExpressionAttributeNames": {
             "#expiry": "expiration",
             "#response_data": "data",
@@ -55,3 +57,10 @@ def build_idempotency_update_item_stub(
         "TableName": "TEST_TABLE",
         "UpdateExpression": ("SET #response_data = :response_data, " "#expiry = :expiry, #status = :status"),
     }
+
+    if config.expires_in_progress:
+        params["ExpressionAttributeNames"]["#in_progress_expiry"] = "in_progress_expiration"
+        params["ExpressionAttributeValues"][":in_progress_expiry"] = stub.ANY
+        params["UpdateExpression"] += ", #in_progress_expiry = :in_progress_expiry"
+
+    return params
