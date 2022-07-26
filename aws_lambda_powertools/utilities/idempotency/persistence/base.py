@@ -365,7 +365,7 @@ class BasePersistenceLayer(ABC):
 
                 data_record.in_progress_expiry_timestamp = timestamp
             else:
-                logger.debug("Expires in progress is enabled but we couldn't determine the remaining time left")
+                warnings.warn("Expires in progress is enabled but we couldn't determine the remaining time left")
 
         logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")
 

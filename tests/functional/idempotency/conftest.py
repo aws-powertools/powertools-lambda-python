@@ -136,7 +136,7 @@ def expected_params_put_item(hashed_idempotency_key):
             "#in_progress_expiry": "in_progress_expiration",
             "#status": "status",
         },
-        "ExpressionAttributeValues": {":now": stub.ANY, ":status": "INPROGRESS"},
+        "ExpressionAttributeValues": {":now": stub.ANY, ":inprogress": "INPROGRESS"},
         "Item": {"expiration": stub.ANY, "id": hashed_idempotency_key, "status": "INPROGRESS"},
         "TableName": "TEST_TABLE",
     }
@@ -156,7 +156,7 @@ def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_vali
             "#now": stub.ANY,
             "#status": "status",
         },
-        "ExpressionAttributeValues": {":now": stub.ANY, ":status": "INPROGRESS"},
+        "ExpressionAttributeValues": {":now": stub.ANY, ":inprogress": "INPROGRESS"},
         "Item": {
             "expiration": stub.ANY,
             "id": hashed_idempotency_key,

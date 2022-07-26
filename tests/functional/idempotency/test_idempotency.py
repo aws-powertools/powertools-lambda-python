@@ -1,5 +1,7 @@
 import copy
+import datetime
 import sys
+import warnings
 from hashlib import md5
 from unittest.mock import MagicMock
 
@@ -10,7 +12,7 @@ from pydantic import BaseModel
 
 from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2, event_source
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, IdempotencyConfig
-from aws_lambda_powertools.utilities.idempotency.base import _prepare_data
+from aws_lambda_powertools.utilities.idempotency.base import MAX_RETRIES, _prepare_data
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
@@ -386,7 +388,7 @@ def test_idempotent_lambda_expired(
     lambda_context,
 ):
     """
-    Test idempotent decorator when lambda is called with an event it succesfully handled already, but outside of the
+    Test idempotent decorator when lambda is called with an event it successfully handled already, but outside of the
     expiry window
     """
 
@@ -529,7 +531,7 @@ def test_idempotent_lambda_expired_during_request(
     lambda_context,
 ):
     """
-    Test idempotent decorator when lambda is called with an event it succesfully handled already. Persistence store
+    Test idempotent decorator when lambda is called with an event it successfully handled already. Persistence store
     returns inconsistent/rapidly changing result between put_item and get_item calls.
     """
 
@@ -799,6 +801,156 @@ def test_idempotent_lambda_with_validator_util(
     mock_function.assert_not_called()
     lambda_resp = lambda_handler(lambda_apigw_event, lambda_context)
     assert lambda_resp == deserialized_lambda_response
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+@pytest.mark.parametrize(
+    "idempotency_config",
+    [
+        {"use_local_cache": False, "expires_in_progress": True},
+        {"use_local_cache": True, "expires_in_progress": True},
+    ],
+    indirect=True,
+)
+def test_idempotent_lambda_expires_in_progress_before_expire(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    timestamp_future,
+    lambda_response,
+    hashed_idempotency_key,
+    lambda_context,
+):
+    """
+    Test idempotent decorator when expires_in_progress is on and the event is still in progress, before the
+    lambda expiration window.
+    """
+
+    stubber = stub.Stubber(persistence_store.table.meta.client)
+
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
+
+    now = datetime.datetime.now()
+    period = datetime.timedelta(seconds=5)
+    timestamp_expires_in_progress = str(int((now + period).timestamp()))
+
+    expected_params_get_item = {
+        "TableName": TABLE_NAME,
+        "Key": {"id": hashed_idempotency_key},
+        "ConsistentRead": True,
+    }
+    ddb_response_get_item = {
+        "Item": {
+            "id": {"S": hashed_idempotency_key},
+            "expiration": {"N": timestamp_future},
+            "in_progress_expiration": {"N": timestamp_expires_in_progress},
+            "data": {"S": '{"message": "test", "statusCode": 200'},
+            "status": {"S": "INPROGRESS"},
+        }
+    }
+    stubber.add_response("get_item", ddb_response_get_item, expected_params_get_item)
+
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    with pytest.raises(IdempotencyAlreadyInProgressError):
+        lambda_handler(lambda_apigw_event, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+@pytest.mark.parametrize(
+    "idempotency_config",
+    [
+        {"use_local_cache": False, "expires_in_progress": True},
+        {"use_local_cache": True, "expires_in_progress": True},
+    ],
+    indirect=True,
+)
+def test_idempotent_lambda_expires_in_progress_after_expire(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    timestamp_future,
+    lambda_response,
+    hashed_idempotency_key,
+    lambda_context,
+):
+    stubber = stub.Stubber(persistence_store.table.meta.client)
+
+    for _ in range(MAX_RETRIES + 1):
+        stubber.add_client_error("put_item", "ConditionalCheckFailedException")
+
+        one_second_ago = datetime.datetime.now() - datetime.timedelta(seconds=1)
+        expected_params_get_item = {
+            "TableName": TABLE_NAME,
+            "Key": {"id": hashed_idempotency_key},
+            "ConsistentRead": True,
+        }
+        ddb_response_get_item = {
+            "Item": {
+                "id": {"S": hashed_idempotency_key},
+                "expiration": {"N": timestamp_future},
+                "in_progress_expiration": {"N": str(int(one_second_ago.timestamp()))},
+                "data": {"S": '{"message": "test", "statusCode": 200'},
+                "status": {"S": "INPROGRESS"},
+            }
+        }
+        stubber.add_response("get_item", ddb_response_get_item, expected_params_get_item)
+
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    with pytest.raises(IdempotencyInconsistentStateError):
+        lambda_handler(lambda_apigw_event, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+@pytest.mark.parametrize(
+    "idempotency_config",
+    [
+        {"use_local_cache": False, "expires_in_progress": True},
+        {"use_local_cache": True, "expires_in_progress": True},
+    ],
+    indirect=True,
+)
+def test_idempotent_lambda_expires_in_progress_unavailable_remaining_time(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    lambda_response,
+    lambda_context,
+    expected_params_put_item,
+    expected_params_update_item,
+):
+    stubber = stub.Stubber(persistence_store.table.meta.client)
+
+    ddb_response = {}
+    stubber.add_response("put_item", ddb_response, expected_params_put_item)
+    stubber.add_response("update_item", ddb_response, expected_params_update_item)
+
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
+        lambda_handler(lambda_apigw_event, lambda_context)
+        assert len(w) == 1
+        assert str(w[-1].message) == "Expires in progress is enabled but we couldn't determine the remaining time left"
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()

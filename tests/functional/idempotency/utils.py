@@ -27,7 +27,7 @@ def build_idempotency_put_item_stub(
             "#in_progress_expiry": "in_progress_expiration",
             "#status": "status",
         },
-        "ExpressionAttributeValues": {":now": stub.ANY, ":status": "INPROGRESS"},
+        "ExpressionAttributeValues": {":now": stub.ANY, ":inprogress": "INPROGRESS"},
         "Item": {"expiration": stub.ANY, "id": idempotency_key_hash, "status": "INPROGRESS"},
         "TableName": "TEST_TABLE",
     }

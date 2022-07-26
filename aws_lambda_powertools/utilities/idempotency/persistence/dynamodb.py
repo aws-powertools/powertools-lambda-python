@@ -180,7 +180,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
                     "#in_progress_expiry": self.in_progress_expiry_attr,
                     "#status": self.status_attr,
                 },
-                ExpressionAttributeValues={":now": int(now.timestamp()), ":status": STATUS_CONSTANTS["INPROGRESS"]},
+                ExpressionAttributeValues={":now": int(now.timestamp()), ":inprogress": STATUS_CONSTANTS["INPROGRESS"]},
             )
         except self.table.meta.client.exceptions.ConditionalCheckFailedException:
             logger.debug(f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}")
