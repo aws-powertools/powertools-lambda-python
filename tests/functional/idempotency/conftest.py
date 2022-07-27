@@ -76,7 +76,7 @@ def default_jmespath():
 
 @pytest.fixture
 def expected_params_update_item(serialized_lambda_response, hashed_idempotency_key):
-    params = {
+    return {
         "ExpressionAttributeNames": {
             "#expiry": "expiration",
             "#response_data": "data",
@@ -97,14 +97,12 @@ def expected_params_update_item(serialized_lambda_response, hashed_idempotency_k
         ),
     }
 
-    return params
-
 
 @pytest.fixture
 def expected_params_update_item_with_validation(
-    serialized_lambda_response, hashed_idempotency_key, hashed_validation_key, idempotency_config
+    serialized_lambda_response, hashed_idempotency_key, hashed_validation_key
 ):
-    params = {
+    return {
         "ExpressionAttributeNames": {
             "#expiry": "expiration",
             "#response_data": "data",
@@ -128,8 +126,6 @@ def expected_params_update_item_with_validation(
             "#validation_key = :validation_key"
         ),
     }
-
-    return params
 
 
 @pytest.fixture

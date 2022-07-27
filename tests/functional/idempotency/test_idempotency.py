@@ -43,14 +43,7 @@ def get_dataclasses_lib():
 
 # Using parametrize to run test twice, with two separate instances of persistence store. One instance with caching
 # enabled, and one without.
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False},
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_already_completed(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -95,14 +88,7 @@ def test_idempotent_lambda_already_completed(
     stubber.deactivate()
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False},
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_in_progress(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -151,13 +137,7 @@ def test_idempotent_lambda_in_progress(
 
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="issue with pytest mock lib for < 3.8")
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_in_progress_with_cache(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -222,14 +202,7 @@ def test_idempotent_lambda_in_progress_with_cache(
     stubber.deactivate()
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False},
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_first_execution(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -260,13 +233,7 @@ def test_idempotent_lambda_first_execution(
     stubber.deactivate()
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_first_execution_cached(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -312,13 +279,7 @@ def test_idempotent_lambda_first_execution_cached(
     stubber.deactivate()
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": True, "event_key_jmespath": "body"},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True, "event_key_jmespath": "body"}], indirect=True)
 def test_idempotent_lambda_first_execution_event_mutation(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -356,14 +317,7 @@ def test_idempotent_lambda_first_execution_event_mutation(
     stubber.deactivate()
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False},
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_expired(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -396,14 +350,7 @@ def test_idempotent_lambda_expired(
     stubber.deactivate()
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False},
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_exception(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -491,14 +438,7 @@ def test_idempotent_lambda_already_completed_with_validation_bad_payload(
     stubber.deactivate()
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False},
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_expired_during_request(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -554,14 +494,7 @@ def test_idempotent_lambda_expired_during_request(
     stubber.deactivate()
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False},
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_persistence_exception_deleting(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -593,14 +526,7 @@ def test_idempotent_persistence_exception_deleting(
     stubber.deactivate()
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False},
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_persistence_exception_updating(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -632,14 +558,7 @@ def test_idempotent_persistence_exception_updating(
     stubber.deactivate()
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False},
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_persistence_exception_getting(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -706,12 +625,7 @@ def test_idempotent_lambda_first_execution_with_validation(
 
 
 @pytest.mark.parametrize(
-    "config_without_jmespath",
-    [
-        {"use_local_cache": False},
-        {"use_local_cache": True},
-    ],
-    indirect=True,
+    "config_without_jmespath", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True
 )
 def test_idempotent_lambda_with_validator_util(
     config_without_jmespath: IdempotencyConfig,
@@ -762,14 +676,7 @@ def test_idempotent_lambda_with_validator_util(
     stubber.deactivate()
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False},
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_expires_in_progress_before_expire(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -821,14 +728,7 @@ def test_idempotent_lambda_expires_in_progress_before_expire(
     stubber.deactivate()
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False},
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_expires_in_progress_after_expire(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -873,14 +773,7 @@ def test_idempotent_lambda_expires_in_progress_after_expire(
     stubber.deactivate()
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False},
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_expires_in_progress_unavailable_remaining_time(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -943,13 +836,7 @@ def test_data_record_json_to_dict_mapping_when_response_data_none():
     assert response_data is None
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_in_progress_never_saved_to_cache(
     idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
 ):
@@ -965,13 +852,7 @@ def test_in_progress_never_saved_to_cache(
     assert persistence_store._cache.get("key") is None
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}], indirect=True)
 def test_user_local_disabled(idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer):
     # GIVEN a persistence_store with use_local_cache = False
     persistence_store.configure(idempotency_config)
@@ -991,13 +872,7 @@ def test_user_local_disabled(idempotency_config: IdempotencyConfig, persistence_
     assert not hasattr("persistence_store", "_cache")
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_delete_from_cache_when_empty(
     idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
 ):
@@ -1048,11 +923,7 @@ def test_is_missing_idempotency_key():
 
 
 @pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False, "event_key_jmespath": "body"},
-    ],
-    indirect=True,
+    "idempotency_config", [{"use_local_cache": False, "event_key_jmespath": "body"}], indirect=True
 )
 def test_default_no_raise_on_missing_idempotency_key(
     idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
@@ -1354,13 +1225,7 @@ def test_idempotency_disabled_envvar(monkeypatch, lambda_context, persistence_st
     assert len(persistence_store.table.method_calls) == 0
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": True},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_idempotent_function_duplicates(
     idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
 ):
@@ -1477,13 +1342,7 @@ def test_idempotent_function_pydantic_with_jmespath():
     assert result == payment.transaction_id
 
 
-@pytest.mark.parametrize(
-    "idempotency_config",
-    [
-        {"use_local_cache": False},
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}], indirect=True)
 def test_idempotent_lambda_compound_already_completed(
     idempotency_config: IdempotencyConfig,
     persistence_store_compound: DynamoDBPersistenceLayer,

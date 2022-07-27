@@ -74,7 +74,6 @@ class IdempotencyHandler:
         self.data = deepcopy(_prepare_data(function_payload))
         self.fn_args = function_args
         self.fn_kwargs = function_kwargs
-        self.config = config
 
         persistence_store.configure(config, self.function.__name__)
         self.persistence_store = persistence_store
