@@ -168,35 +168,19 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         try:
             logger.debug(f"Putting record for idempotency key: {data_record.idempotency_key}")
 
-            condition_expression = "attribute_not_exists(#id) OR #now < :now"
-            expression_attribute_names = {
-                "#id": self.key_attr,
-                "#now": self.expiry_attr,
-                "#status": self.status_attr,
-            }
-            expression_attribute_values: Dict[str, Any] = {":now": int(now.timestamp())}
-
-            # When we want to expire_in_progress invocations, we check if the in_progress timestamp exists
-            # and we are past that timestamp. We also make sure the status is INPROGRESS because we don't
-            # want to repeat COMPLETE invocations.
-            #
-            # We put this in an if block because customers might want to disable the feature,
-            # reverting to the old behavior that relies just on the idempotency key.
-            if self.expires_in_progress:
-                condition_expression += (
-                    " OR ("
-                    "attribute_exists(#in_progress_expiry) AND "
-                    "#in_progress_expiry < :now AND #status = :inprogress"
-                    ")"
-                )
-                expression_attribute_names["#in_progress_expiry"] = self.in_progress_expiry_attr
-                expression_attribute_values[":inprogress"] = STATUS_CONSTANTS["INPROGRESS"]
-
             self.table.put_item(
                 Item=item,
-                ConditionExpression=condition_expression,
-                ExpressionAttributeNames=expression_attribute_names,
-                ExpressionAttributeValues=expression_attribute_values,
+                ConditionExpression=(
+                    "attribute_not_exists(#id) OR #now < :now OR "
+                    "(attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now AND #status = :inprogress)"
+                ),
+                ExpressionAttributeNames={
+                    "#id": self.key_attr,
+                    "#now": self.expiry_attr,
+                    "#in_progress_expiry": self.in_progress_expiry_attr,
+                    "#status": self.status_attr,
+                },
+                ExpressionAttributeValues={":now": int(now.timestamp()), ":inprogress": STATUS_CONSTANTS["INPROGRESS"]},
             )
         except self.table.meta.client.exceptions.ConditionalCheckFailedException:
             logger.debug(f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}")
@@ -204,27 +188,27 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
     def _update_record(self, data_record: DataRecord):
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
-        update_expression = "SET #response_data = :response_data, #expiry = :expiry, #status = :status"
+        update_expression = (
+            "SET #response_data = :response_data, #expiry = :expiry, "
+            "#status = :status, #in_progress_expiry = :in_progress_expiry"
+        )
         expression_attr_values = {
             ":expiry": data_record.expiry_timestamp,
             ":response_data": data_record.response_data,
             ":status": data_record.status,
+            ":in_progress_expiry": data_record.in_progress_expiry_timestamp,
         }
         expression_attr_names = {
             "#response_data": self.data_attr,
             "#expiry": self.expiry_attr,
             "#status": self.status_attr,
+            "#in_progress_expiry": self.in_progress_expiry_attr,
         }
 
         if self.payload_validation_enabled:
             update_expression += ", #validation_key = :validation_key"
             expression_attr_values[":validation_key"] = data_record.payload_hash
             expression_attr_names["#validation_key"] = self.validation_key_attr
-
-        if self.expires_in_progress:
-            update_expression += ", #in_progress_expiry = :in_progress_expiry"
-            expression_attr_values[":in_progress_expiry"] = data_record.in_progress_expiry_timestamp
-            expression_attr_names["#in_progress_expiry"] = self.in_progress_expiry_attr
 
         kwargs = {
             "Key": self._get_key(data_record.idempotency_key),

@@ -190,12 +190,8 @@ class IdempotencyHandler:
             raise IdempotencyInconsistentStateError("save_inprogress and get_record return inconsistent results.")
 
         if data_record.status == STATUS_CONSTANTS["INPROGRESS"]:
-            # This code path will only be triggered if the expires_in_progress option is enabled, and the item
-            # became expored between the save_inprogress call an dhere
-            if (
-                self.config.expires_in_progress
-                and data_record.in_progress_expiry_timestamp is not None
-                and data_record.in_progress_expiry_timestamp < int(datetime.datetime.now().timestamp())
+            if data_record.in_progress_expiry_timestamp is not None and data_record.in_progress_expiry_timestamp < int(
+                datetime.datetime.now().timestamp()
             ):
                 raise IdempotencyInconsistentStateError(
                     "item should have been expired in-progress because it already time-outed."

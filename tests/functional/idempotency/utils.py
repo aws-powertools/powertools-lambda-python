@@ -3,7 +3,6 @@ from typing import Any, Dict
 
 from botocore import stub
 
-from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from tests.functional.utils import json_serialize
 
 
@@ -14,61 +13,53 @@ def hash_idempotency_key(data: Any):
 
 def build_idempotency_put_item_stub(
     data: Dict,
-    config: IdempotencyConfig,
     function_name: str = "test-func",
     handler_name: str = "lambda_handler",
 ) -> Dict:
     idempotency_key_hash = f"{function_name}.{handler_name}#{hash_idempotency_key(data)}"
-    params = {
-        "ConditionExpression": ("attribute_not_exists(#id) OR #now < :now"),
+    return {
+        "ConditionExpression": (
+            "attribute_not_exists(#id) OR #now < :now OR "
+            "(attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now AND #status = :inprogress)"
+        ),
         "ExpressionAttributeNames": {
             "#id": "id",
             "#now": "expiration",
             "#status": "status",
+            "#in_progress_expiry": "in_progress_expiration",
         },
-        "ExpressionAttributeValues": {":now": stub.ANY},
+        "ExpressionAttributeValues": {":now": stub.ANY, ":inprogress": "INPROGRESS"},
         "Item": {"expiration": stub.ANY, "id": idempotency_key_hash, "status": "INPROGRESS"},
         "TableName": "TEST_TABLE",
     }
-
-    if config.expires_in_progress:
-        params[
-            "ConditionExpression"
-        ] += " OR (attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now AND #status = :inprogress)"
-        params["ExpressionAttributeNames"]["#in_progress_expiry"] = "in_progress_expiration"
-        params["ExpressionAttributeValues"][":inprogress"] = "INPROGRESS"
-
-    return params
 
 
 def build_idempotency_update_item_stub(
     data: Dict,
     handler_response: Dict,
-    config: IdempotencyConfig,
     function_name: str = "test-func",
     handler_name: str = "lambda_handler",
 ) -> Dict:
     idempotency_key_hash = f"{function_name}.{handler_name}#{hash_idempotency_key(data)}"
     serialized_lambda_response = json_serialize(handler_response)
-    params = {
+    return {
         "ExpressionAttributeNames": {
             "#expiry": "expiration",
             "#response_data": "data",
             "#status": "status",
+            "#in_progress_expiry": "in_progress_expiration",
         },
         "ExpressionAttributeValues": {
             ":expiry": stub.ANY,
             ":response_data": serialized_lambda_response,
             ":status": "COMPLETED",
+            ":in_progress_expiry": stub.ANY,
         },
         "Key": {"id": idempotency_key_hash},
         "TableName": "TEST_TABLE",
-        "UpdateExpression": ("SET #response_data = :response_data, " "#expiry = :expiry, #status = :status"),
+        "UpdateExpression": (
+            "SET #response_data = :response_data, "
+            "#expiry = :expiry, #status = :status, "
+            "#in_progress_expiry = :in_progress_expiry"
+        ),
     }
-
-    if config.expires_in_progress:
-        params["ExpressionAttributeNames"]["#in_progress_expiry"] = "in_progress_expiration"
-        params["ExpressionAttributeValues"][":in_progress_expiry"] = stub.ANY
-        params["UpdateExpression"] += ", #in_progress_expiry = :in_progress_expiry"
-
-    return params

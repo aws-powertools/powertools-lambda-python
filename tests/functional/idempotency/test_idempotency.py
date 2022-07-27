@@ -46,10 +46,8 @@ def get_dataclasses_lib():
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": False, "expires_in_progress": False},
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -100,10 +98,8 @@ def test_idempotent_lambda_already_completed(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": False, "expires_in_progress": False},
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -158,8 +154,7 @@ def test_idempotent_lambda_in_progress(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -230,10 +225,8 @@ def test_idempotent_lambda_in_progress_with_cache(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": False, "expires_in_progress": False},
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -270,8 +263,7 @@ def test_idempotent_lambda_first_execution(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -323,8 +315,7 @@ def test_idempotent_lambda_first_execution_cached(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": True, "event_key_jmespath": "body", "expires_in_progress": True},
-        {"use_local_cache": True, "event_key_jmespath": "body", "expires_in_progress": False},
+        {"use_local_cache": True, "event_key_jmespath": "body"},
     ],
     indirect=True,
 )
@@ -345,14 +336,12 @@ def test_idempotent_lambda_first_execution_event_mutation(
     stubber.add_response(
         "put_item",
         ddb_response,
-        build_idempotency_put_item_stub(data=event["body"], config=idempotency_config),
+        build_idempotency_put_item_stub(data=event["body"]),
     )
     stubber.add_response(
         "update_item",
         ddb_response,
-        build_idempotency_update_item_stub(
-            data=event["body"], config=idempotency_config, handler_response=lambda_response
-        ),
+        build_idempotency_update_item_stub(data=event["body"], handler_response=lambda_response),
     )
     stubber.activate()
 
@@ -370,10 +359,8 @@ def test_idempotent_lambda_first_execution_event_mutation(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": False, "expires_in_progress": False},
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -412,10 +399,8 @@ def test_idempotent_lambda_expired(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": False, "expires_in_progress": False},
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -458,10 +443,8 @@ def test_idempotent_lambda_exception(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "payload_validation_jmespath": "requestContext", "expires_in_progress": True},
-        {"use_local_cache": False, "payload_validation_jmespath": "requestContext", "expires_in_progress": False},
-        {"use_local_cache": True, "payload_validation_jmespath": "requestContext", "expires_in_progress": True},
-        {"use_local_cache": True, "payload_validation_jmespath": "requestContext", "expires_in_progress": False},
+        {"use_local_cache": False, "payload_validation_jmespath": "requestContext"},
+        {"use_local_cache": True, "payload_validation_jmespath": "requestContext"},
     ],
     indirect=True,
 )
@@ -511,10 +494,8 @@ def test_idempotent_lambda_already_completed_with_validation_bad_payload(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": False, "expires_in_progress": False},
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -576,10 +557,8 @@ def test_idempotent_lambda_expired_during_request(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": False, "expires_in_progress": False},
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -617,10 +596,8 @@ def test_idempotent_persistence_exception_deleting(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": False, "expires_in_progress": False},
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -658,10 +635,8 @@ def test_idempotent_persistence_exception_updating(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": False, "expires_in_progress": False},
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -696,10 +671,8 @@ def test_idempotent_persistence_exception_getting(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "payload_validation_jmespath": "requestContext", "expires_in_progress": True},
-        {"use_local_cache": False, "payload_validation_jmespath": "requestContext", "expires_in_progress": False},
-        {"use_local_cache": True, "payload_validation_jmespath": "requestContext", "expires_in_progress": True},
-        {"use_local_cache": True, "payload_validation_jmespath": "requestContext", "expires_in_progress": False},
+        {"use_local_cache": False, "payload_validation_jmespath": "requestContext"},
+        {"use_local_cache": True, "payload_validation_jmespath": "requestContext"},
     ],
     indirect=True,
 )
@@ -735,10 +708,8 @@ def test_idempotent_lambda_first_execution_with_validation(
 @pytest.mark.parametrize(
     "config_without_jmespath",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": False, "expires_in_progress": False},
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -794,8 +765,8 @@ def test_idempotent_lambda_with_validator_util(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": True},
+        {"use_local_cache": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -853,8 +824,8 @@ def test_idempotent_lambda_expires_in_progress_before_expire(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": True},
+        {"use_local_cache": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -905,8 +876,8 @@ def test_idempotent_lambda_expires_in_progress_after_expire(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": True},
+        {"use_local_cache": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -975,8 +946,7 @@ def test_data_record_json_to_dict_mapping_when_response_data_none():
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -998,8 +968,7 @@ def test_in_progress_never_saved_to_cache(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": False, "expires_in_progress": False},
+        {"use_local_cache": False},
     ],
     indirect=True,
 )
@@ -1025,8 +994,7 @@ def test_user_local_disabled(idempotency_config: IdempotencyConfig, persistence_
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -1082,8 +1050,7 @@ def test_is_missing_idempotency_key():
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "event_key_jmespath": "body", "expires_in_progress": True},
-        {"use_local_cache": False, "event_key_jmespath": "body", "expires_in_progress": False},
+        {"use_local_cache": False, "event_key_jmespath": "body"},
     ],
     indirect=True,
 )
@@ -1107,8 +1074,7 @@ def test_default_no_raise_on_missing_idempotency_key(
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "event_key_jmespath": "[body, x]", "expires_in_progress": True},
-        {"use_local_cache": False, "event_key_jmespath": "[body, x]", "expires_in_progress": False},
+        {"use_local_cache": False, "event_key_jmespath": "[body, x]"},
     ],
     indirect=True,
 )
@@ -1135,12 +1101,6 @@ def test_raise_on_no_idempotency_key(
         {
             "use_local_cache": False,
             "event_key_jmespath": "[requestContext.authorizer.claims.sub, powertools_json(body).id]",
-            "expires_in_progress": False,
-        },
-        {
-            "use_local_cache": False,
-            "event_key_jmespath": "[requestContext.authorizer.claims.sub, powertools_json(body).id]",
-            "expires_in_progress": True,
         },
     ],
     indirect=True,
@@ -1397,8 +1357,7 @@ def test_idempotency_disabled_envvar(monkeypatch, lambda_context, persistence_st
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": True},
     ],
     indirect=True,
 )
@@ -1521,8 +1480,7 @@ def test_idempotent_function_pydantic_with_jmespath():
 @pytest.mark.parametrize(
     "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": False, "expires_in_progress": False},
+        {"use_local_cache": False},
     ],
     indirect=True,
 )

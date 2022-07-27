@@ -370,12 +370,12 @@ sequenceDiagram
         Lambda->>Persistence Layer: Update record with Lambda handler results
         deactivate Persistence Layer
         Persistence Layer-->>Persistence Layer: Update record with result
-        Lambda--xClient: Response not received by client
+        Lambda-->>Client: Response sent to client
     else retried request:
         Client->>Lambda: Invoke (event)
         Lambda->>Persistence Layer: Get or set (id=event.search(payload))
         Persistence Layer-->>Lambda: Already exists in persistence layer. Return result
-        Lambda-->>Client: Response  sent to client
+        Lambda-->>Client: Response sent to client
     end
 ```
 <i>Idempotent sequence</i>
@@ -385,6 +385,59 @@ The client was successful in receiving the result after the retry. Since the Lam
 
 ???+ note
     Bear in mind that the entire Lambda handler is treated as a single idempotent operation. If your Lambda handler can cause multiple side effects, consider splitting it into separate functions.
+
+#### Lambda timeouts
+
+In cases where the [Lambda invocation
+expires](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/),
+Powertools doesn't have the chance to set the idempotency record to `EXPIRED`.
+This means that the record would normally have been locked until `expire_seconds` have
+passsed.
+
+However, when Powertools has access to the Lambda invocation context, we are able to calculate the remaining
+available time for the invocation, and save it on the idempotency record. This way, if a second invocation happens
+after this timestamp, and the record is still marked `INPROGRESS`, we execute the inovcation again as if it was
+already expired. This means that if an invocation expired during execution, it will be quickly executed again on the
+next retry.
+
+???+ info "Info: Calculating the remaining available time"
+    For now this only works with the `idempotent` decorator. At the moment we
+    don't have access to the Lambda context when using the
+    `idempotent_function` so enabling this option is a no-op in that scenario.
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    alt initial request:
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
+        activate Persistence Layer
+        Note right of Persistence Layer: Locked during this time. Prevents multiple<br/>Lambda invocations with the same<br/>payload running concurrently.
+        Lambda--xLambda: Run Lambda handler (event).<br/>Time out
+        Lambda-->>Client: Return error response
+        deactivate Persistence Layer
+    else retried before the Lambda timeout:
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
+        Persistence Layer-->>Lambda: Already exists in persistence layer. Still in-progress
+        Lambda--xClient: Return Invocation Already In Progress error
+    else retried after the Lambda timeout:
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
+        activate Persistence Layer
+        Note right of Persistence Layer: Locked during this time. Prevents multiple<br/>Lambda invocations with the same<br/>payload running concurrently.
+        Lambda-->>Lambda: Run Lambda handler (event)
+        Lambda->>Persistence Layer: Update record with Lambda handler results
+        deactivate Persistence Layer
+        Persistence Layer-->>Persistence Layer: Update record with result
+        Lambda-->>Client: Response sent to client
+    end
+```
+<i>Idempotent sequence for Lambda timeouts</i>
+</center>
 
 ### Handling exceptions
 
@@ -483,7 +536,6 @@ Parameter | Default | Description
 **payload_validation_jmespath** | `""` | JMESPath expression to validate whether certain parameters have changed in the event while the event payload
 **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request
 **expires_after_seconds** | 3600 | The number of seconds to wait before a record is expired
-**expires_in_progress** | `False`| Enables expiry of invocations that time out during execution
 **use_local_cache** | `False` | Whether to locally cache idempotency results
 **local_cache_max_items** | 256 | Max number of items to store in local cache
 **hash_function** | `md5` | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html) in the standard library.
@@ -896,58 +948,6 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
     Pay attention to the documentation for each - you may need to perform additional checks inside these methods to ensure the idempotency guarantees remain intact.
 
     For example, the `_put_record` method needs to raise an exception if a non-expired record already exists in the data store with a matching key.
-
-### Expiring in-progress invocations
-
-The default behavior when a Lambda invocation times out is for the event to stay locked until `expire_seconds` have passed. Powertools
-has no way of knowing if it's safe to retry the operation in this scenario, so we assume the safest approach: to not
-retry the operation.
-
-However, certain types of invocation have less strict requirements, and can benefit from faster expiry of invocations. Ideally, we
-can make an in-progress invocation expire as soon as the [Lambda invocation expires](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/).
-
-When using this option, powertools will calculate the remaining available time for the invocation, and save it on the idempotency record.
-This way, if a second invocation happens after this timestamp, and the record is stil marked `INPROGRESS`, we execute the invocation again
-as if it was already expired. This means that if an invocation expired during execution, it will be quickly executed again on the next try.
-
-This setting introduces no change on the regular behavior where if an invocation succeeds, the results are cached for `expire_seconds` seconds.
-
-???+ warning "Warning"
-    Consider whenever you really want this behavior. Powertools can't make any garantee on which state your application was
-    when it time outed. Ensure that your business logic can be retried at any stage.
-
-???+ info "Info: Calculating the remaining available time"
-    For now this only works with the `idempotent` decorator. At the moment we don't have access to the Lambda context when using
-    the `idempotent_function` so enabling this option is a no-op in that scenario.
-
-To activate this behaviour, enable the `expires_in_progress` option on the configuration:
-
-=== "app.py"
-
-    ```python hl_lines="8"
-    from aws_lambda_powertools.utilities.idempotency import (
-        DynamoDBPersistenceLayer, IdempotencyConfig, idempotent
-    )
-
-    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-
-    config = IdempotencyConfig(
-        expires_in_progress=True,
-    )
-
-    @idempotent(persistence_store=persistence_layer, config=config)
-    def handler(event, context):
-        payment = create_subscription_payment(
-            user=event['user'],
-            product=event['product_id']
-        )
-        ...
-        return {
-            "payment_id": payment.id,
-            "message": "success",
-            "statusCode": 200,
-        }
-    ```
 
 ## Compatibility with other utilities
 

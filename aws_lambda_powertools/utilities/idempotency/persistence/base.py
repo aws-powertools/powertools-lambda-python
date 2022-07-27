@@ -125,7 +125,6 @@ class BasePersistenceLayer(ABC):
         self.validation_key_jmespath = None
         self.raise_on_no_idempotency_key = False
         self.expires_after_seconds: int = 60 * 60  # 1 hour default
-        self.expires_in_progress: bool = False
         self.use_local_cache = False
         self.hash_function = None
 
@@ -158,7 +157,6 @@ class BasePersistenceLayer(ABC):
             self.payload_validation_enabled = True
         self.raise_on_no_idempotency_key = config.raise_on_no_idempotency_key
         self.expires_after_seconds = config.expires_after_seconds
-        self.expires_in_progress = config.expires_in_progress
         self.use_local_cache = config.use_local_cache
         if self.use_local_cache:
             self._cache = LRUDict(max_items=config.local_cache_max_items)
@@ -353,19 +351,18 @@ class BasePersistenceLayer(ABC):
             payload_hash=self._get_hashed_payload(data=data),
         )
 
-        if self.expires_in_progress:
-            if remaining_time_in_millis:
-                now = datetime.datetime.now()
-                period = datetime.timedelta(milliseconds=remaining_time_in_millis)
+        if remaining_time_in_millis:
+            now = datetime.datetime.now()
+            period = datetime.timedelta(milliseconds=remaining_time_in_millis)
 
-                # It's very important to use math.ceil here. Otherwise, we might return an integer that will be smaller
-                # than the current time in milliseconds, due to rounding. This will create a scenario where the record
-                # looks already expired in the store, but the invocation is still running.
-                timestamp = ceil((now + period).timestamp())
+            # It's very important to use math.ceil here. Otherwise, we might return an integer that will be smaller
+            # than the current time in milliseconds, due to rounding. This will create a scenario where the record
+            # looks already expired in the store, but the invocation is still running.
+            timestamp = ceil((now + period).timestamp())
 
-                data_record.in_progress_expiry_timestamp = timestamp
-            else:
-                warnings.warn("Expires in progress is enabled but we couldn't determine the remaining time left")
+            data_record.in_progress_expiry_timestamp = timestamp
+        else:
+            warnings.warn("Expires in progress is enabled but we couldn't determine the remaining time left")
 
         logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")
 
