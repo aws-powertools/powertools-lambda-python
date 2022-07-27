@@ -132,7 +132,7 @@ class IdempotencyHandler:
 
         # Look to see if we have stored a Lambda Context
         if self.config.lambda_context is not None:
-            self.config.lambda_context.get_remainig_time_in_millis()
+            self.config.lambda_context.get_remaining_time_in_millis()
 
         # Look into fn_args to see if we have a lambda context
         if self.fn_args and len(self.fn_args) == 2 and getattr(self.fn_args[1], "get_remaining_time_in_millis", None):

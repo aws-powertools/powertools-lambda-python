@@ -43,7 +43,7 @@ class IdempotencyConfig:
         self.use_local_cache = use_local_cache
         self.local_cache_max_items = local_cache_max_items
         self.hash_function = hash_function
-        self.lambda_context = None
+        self.lambda_context: Optional[LambdaContext] = None
 
     def register_lambda_context(self, lambda_context: LambdaContext):
         self.lambda_context = lambda_context
