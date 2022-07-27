@@ -12,5 +12,5 @@ __all__ = [
     "ALBResolver",
     "ApiGatewayResolver",
     "CORSConfig",
-    "Response"
+    "Response",
 ]
