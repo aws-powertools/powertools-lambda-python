@@ -244,9 +244,6 @@ def test_idempotent_lambda_first_execution(
     expected_params_update_item,
     expected_params_put_item,
     lambda_response,
-    serialized_lambda_response,
-    deserialized_lambda_response,
-    hashed_idempotency_key,
     lambda_context,
 ):
     """
@@ -384,11 +381,9 @@ def test_idempotent_lambda_expired(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
-    timestamp_expired,
     lambda_response,
     expected_params_update_item,
     expected_params_put_item,
-    hashed_idempotency_key,
     lambda_context,
 ):
     """
@@ -428,8 +423,6 @@ def test_idempotent_lambda_exception(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
-    timestamp_future,
-    lambda_response,
     hashed_idempotency_key,
     expected_params_put_item,
     lambda_context,
@@ -594,9 +587,6 @@ def test_idempotent_persistence_exception_deleting(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
-    timestamp_future,
-    lambda_response,
-    hashed_idempotency_key,
     expected_params_put_item,
     lambda_context,
 ):
@@ -638,9 +628,6 @@ def test_idempotent_persistence_exception_updating(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
-    timestamp_future,
-    lambda_response,
-    hashed_idempotency_key,
     expected_params_put_item,
     lambda_context,
 ):
@@ -682,10 +669,6 @@ def test_idempotent_persistence_exception_getting(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
-    timestamp_future,
-    lambda_response,
-    hashed_idempotency_key,
-    expected_params_put_item,
     lambda_context,
 ):
     """
@@ -727,8 +710,6 @@ def test_idempotent_lambda_first_execution_with_validation(
     expected_params_update_item_with_validation,
     expected_params_put_item_with_validation,
     lambda_response,
-    hashed_idempotency_key,
-    hashed_validation_key,
     lambda_context,
 ):
     """
@@ -1107,7 +1088,7 @@ def test_is_missing_idempotency_key():
     indirect=True,
 )
 def test_default_no_raise_on_missing_idempotency_key(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
+    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
 ):
     # GIVEN a persistence_store with use_local_cache = False and event_key_jmespath = "body"
     function_name = "foo"
@@ -1132,7 +1113,7 @@ def test_default_no_raise_on_missing_idempotency_key(
     indirect=True,
 )
 def test_raise_on_no_idempotency_key(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
+    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
 ):
     # GIVEN a persistence_store with raise_on_no_idempotency_key and no idempotency key in the request
     persistence_store.configure(idempotency_config)
@@ -1165,7 +1146,7 @@ def test_raise_on_no_idempotency_key(
     indirect=True,
 )
 def test_jmespath_with_powertools_json(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
+    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
 ):
     # GIVEN an event_key_jmespath with powertools_json custom function
     persistence_store.configure(idempotency_config, "handler")
@@ -1186,7 +1167,7 @@ def test_jmespath_with_powertools_json(
 
 @pytest.mark.parametrize("config_with_jmespath_options", ["powertools_json(data).payload"], indirect=True)
 def test_custom_jmespath_function_overrides_builtin_functions(
-    config_with_jmespath_options: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
+    config_with_jmespath_options: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
 ):
     # GIVEN a persistence store with a custom jmespath_options
     # AND use a builtin powertools custom function
