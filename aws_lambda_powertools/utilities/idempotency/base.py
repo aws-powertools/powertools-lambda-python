@@ -74,6 +74,7 @@ class IdempotencyHandler:
         self.data = deepcopy(_prepare_data(function_payload))
         self.fn_args = function_args
         self.fn_kwargs = function_kwargs
+        self.config = config
 
         persistence_store.configure(config, self.function.__name__)
         self.persistence_store = persistence_store
@@ -128,6 +129,10 @@ class IdempotencyHandler:
         Optional[int]
             Remaining time in millis, or None if the remaining time cannot be determined.
         """
+
+        # Look to see if we have stored a Lambda Context
+        if self.config.lambda_context is not None:
+            self.config.lambda_context.get_remainig_time_in_millis()
 
         # Look into fn_args to see if we have a lambda context
         if self.fn_args and len(self.fn_args) == 2 and getattr(self.fn_args[1], "get_remaining_time_in_millis", None):

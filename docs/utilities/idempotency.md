@@ -400,11 +400,6 @@ after this timestamp, and the record is still marked `INPROGRESS`, we execute th
 already expired. This means that if an invocation expired during execution, it will be quickly executed again on the
 next retry.
 
-???+ info "Info: Calculating the remaining available time"
-    For now this only works with the `idempotent` decorator. At the moment we
-    don't have access to the Lambda context when using the
-    `idempotent_function` so enabling this option is a no-op in that scenario.
-
 <center>
 ```mermaid
 sequenceDiagram
@@ -438,6 +433,32 @@ sequenceDiagram
 ```
 <i>Idempotent sequence for Lambda timeouts</i>
 </center>
+
+???+ info "Info: Calculating the remaining available time"
+    When using the `idempotent` decorator, we captura and calculate the remaining available time for you.
+    However, when using the `idempotent_function`, the functionality doesn't work out of the box. You'll
+    need to register the Lambda context on your handler:
+
+```python hl_lines="8 16" title="Registering the Lambda context"
+from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+from aws_lambda_powertools.utilities.idempotency import (
+    IdempotencyConfig, idempotent_function
+)
+
+persistence_layer = DynamoDBPersistenceLayer(table_name="...")
+
+config = IdempotencyConfig()
+
+@idempotent_function(data_keyword_argument="record", persistence_store=persistence_layer, config=config)
+def record_handler(record: SQSRecord):
+    return {"message": record["body"]}
+
+
+def lambda_handler(event, context):
+    config.register_lambda_context(context)
+
+    return record_handler(event)
+```
 
 ### Handling exceptions
 
