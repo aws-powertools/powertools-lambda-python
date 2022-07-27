@@ -884,14 +884,18 @@ To activate this behaviour, enable the `expires_in_progress` option on the confi
 
 === "app.py"
 
-    ```python hl_lines="7"
+    ```python hl_lines="8"
     from aws_lambda_powertools.utilities.idempotency import (
-        DynamoDBPersistenceLayer, idempotent
+        DynamoDBPersistenceLayer, IdempotencyConfig, idempotent
     )
 
     persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 
-    @idempotent(persistence_store=persistence_layer, expires_in_progress=True)
+    config = IdempotencyConfig(
+        expires_in_progress=True,
+    )
+
+    @idempotent(persistence_store=persistence_layer, config=config)
     def handler(event, context):
         payment = create_subscription_payment(
             user=event['user'],
