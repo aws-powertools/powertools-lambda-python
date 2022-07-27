@@ -174,7 +174,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
                 "#now": self.expiry_attr,
                 "#status": self.status_attr,
             }
-            expression_attribute_values = {":now": int(now.timestamp())}
+            expression_attribute_values: Dict[str, Any] = {":now": int(now.timestamp())}
 
             # When we want to expire_in_progress invocations, we check if the in_progress timestamp exists
             # and we are past that timestamp. We also make sure the status is INPROGRESS because we don't
