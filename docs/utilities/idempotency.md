@@ -355,7 +355,31 @@ Imagine the function executes successfully, but the client never receives the re
 
 This sequence diagram shows an example flow of what happens in the payment scenario:
 
-![Idempotent sequence](../media/idempotent_sequence.png)
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    alt initial request:
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
+        activate Persistence Layer
+        Note right of Persistence Layer: Locked during this time. Prevents multiple<br/>Lambda invocations with the same<br/>payload running concurrently.
+        Lambda-->>Lambda: Run Lambda handler (event)
+        Lambda->>Persistence Layer: Update record with Lambda handler results
+        deactivate Persistence Layer
+        Persistence Layer-->>Persistence Layer: Update record with result
+        Lambda--xClient: Response not received by client
+    else retried request:
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
+        Persistence Layer-->>Lambda: Already exists in persistence layer. Return result
+        Lambda-->>Client: Response  sent to client
+    end
+```
+<i>Idempotent sequence</i>
+</center>
 
 The client was successful in receiving the result after the retry. Since the Lambda handler was only executed once, our customer hasn't been charged twice.
 
@@ -367,7 +391,23 @@ The client was successful in receiving the result after the retry. Since the Lam
 If you are using the `idempotent` decorator on your Lambda handler, any unhandled exceptions that are raised during the code execution will cause **the record in the persistence layer to be deleted**.
 This means that new invocations will execute your code again despite having the same payload. If you don't want the record to be deleted, you need to catch exceptions within the idempotent function and return a successful response.
 
-![Idempotent sequence exception](../media/idempotent_sequence_exception.png)
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    Client->>Lambda: Invoke (event)
+    Lambda->>Persistence Layer: Get or set (id=event.search(payload))
+    activate Persistence Layer
+    Note right of Persistence Layer: Locked during this time. Prevents multiple<br/>Lambda invocations with the same<br/>payload running concurrently.
+    Lambda--xLambda: Run Lambda handler (event).<br/>Raises exception
+    Lambda->>Persistence Layer: Delete record (id=event.search(payload))
+    deactivate Persistence Layer
+    Lambda-->>Client: Return error response
+```
+<i>Idempotent sequence exception</i>
+</center>
 
 If you are using `idempotent_function`, any unhandled exceptions that are raised _inside_ the decorated function will cause the record in the persistence layer to be deleted, and allow the function to be executed again if retried.
 
