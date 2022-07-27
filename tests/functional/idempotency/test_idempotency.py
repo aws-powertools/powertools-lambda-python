@@ -686,11 +686,6 @@ def test_idempotent_lambda_expires_in_progress_before_expire(
     hashed_idempotency_key,
     lambda_context,
 ):
-    """
-    Test idempotent decorator when expires_in_progress is on and the event is still in progress, before the
-    lambda expiration window.
-    """
-
     stubber = stub.Stubber(persistence_store.table.meta.client)
 
     stubber.add_client_error("put_item", "ConditionalCheckFailedException")
