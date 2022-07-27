@@ -2,7 +2,7 @@
 Event handler decorators for common Lambda events
 """
 
-from .api_gateway import ALBResolver, APIGatewayHttpResolver, ApiGatewayResolver, APIGatewayRestResolver, CORSConfig
+from .api_gateway import ALBResolver, APIGatewayHttpResolver, ApiGatewayResolver, APIGatewayRestResolver, CORSConfig, Response
 from .appsync import AppSyncResolver
 
 __all__ = [
@@ -12,4 +12,5 @@ __all__ = [
     "ALBResolver",
     "ApiGatewayResolver",
     "CORSConfig",
+    "Response"
 ]
