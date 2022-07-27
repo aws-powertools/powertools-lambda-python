@@ -345,7 +345,11 @@ def test_idempotent_lambda_first_execution_event_mutation(
     event = copy.deepcopy(lambda_apigw_event)
     stubber = stub.Stubber(persistence_store.table.meta.client)
     ddb_response = {}
-    stubber.add_response("put_item", ddb_response, build_idempotency_put_item_stub(data=event["body"]))
+    stubber.add_response(
+        "put_item",
+        ddb_response,
+        build_idempotency_put_item_stub(data=event["body"], config=idempotency_config),
+    )
     stubber.add_response(
         "update_item",
         ddb_response,
@@ -459,17 +463,17 @@ def test_idempotent_lambda_exception(
 
 
 @pytest.mark.parametrize(
-    "config_with_validation",
+    "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": False, "expires_in_progress": False},
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": False, "payload_validation_jmespath": "requestContext", "expires_in_progress": True},
+        {"use_local_cache": False, "payload_validation_jmespath": "requestContext", "expires_in_progress": False},
+        {"use_local_cache": True, "payload_validation_jmespath": "requestContext", "expires_in_progress": True},
+        {"use_local_cache": True, "payload_validation_jmespath": "requestContext", "expires_in_progress": False},
     ],
     indirect=True,
 )
 def test_idempotent_lambda_already_completed_with_validation_bad_payload(
-    config_with_validation: IdempotencyConfig,
+    idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
     timestamp_future,
@@ -499,7 +503,7 @@ def test_idempotent_lambda_already_completed_with_validation_bad_payload(
     stubber.add_response("get_item", ddb_response, expected_params)
     stubber.activate()
 
-    @idempotent(config=config_with_validation, persistence_store=persistence_store)
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
     def lambda_handler(event, context):
         return lambda_response
 
@@ -707,17 +711,17 @@ def test_idempotent_persistence_exception_getting(
 
 
 @pytest.mark.parametrize(
-    "config_with_validation",
+    "idempotency_config",
     [
-        {"use_local_cache": False, "expires_in_progress": True},
-        {"use_local_cache": False, "expires_in_progress": False},
-        {"use_local_cache": True, "expires_in_progress": True},
-        {"use_local_cache": True, "expires_in_progress": False},
+        {"use_local_cache": False, "payload_validation_jmespath": "requestContext", "expires_in_progress": True},
+        {"use_local_cache": False, "payload_validation_jmespath": "requestContext", "expires_in_progress": False},
+        {"use_local_cache": True, "payload_validation_jmespath": "requestContext", "expires_in_progress": True},
+        {"use_local_cache": True, "payload_validation_jmespath": "requestContext", "expires_in_progress": False},
     ],
     indirect=True,
 )
 def test_idempotent_lambda_first_execution_with_validation(
-    config_with_validation: IdempotencyConfig,
+    idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
     expected_params_update_item_with_validation,
@@ -737,7 +741,7 @@ def test_idempotent_lambda_first_execution_with_validation(
     stubber.add_response("update_item", ddb_response, expected_params_update_item_with_validation)
     stubber.activate()
 
-    @idempotent(config=config_with_validation, persistence_store=persistence_store)
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
     def lambda_handler(event, context):
         return lambda_response
 

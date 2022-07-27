@@ -98,9 +98,9 @@ def expected_params_update_item(serialized_lambda_response, hashed_idempotency_k
 
 @pytest.fixture
 def expected_params_update_item_with_validation(
-    serialized_lambda_response, hashed_idempotency_key, hashed_validation_key
+    serialized_lambda_response, hashed_idempotency_key, hashed_validation_key, idempotency_config
 ):
-    return {
+    params = {
         "ExpressionAttributeNames": {
             "#expiry": "expiration",
             "#response_data": "data",
@@ -122,41 +122,48 @@ def expected_params_update_item_with_validation(
         ),
     }
 
+    if idempotency_config.expires_in_progress:
+        params["ExpressionAttributeNames"]["#in_progress_expiry"] = "in_progress_expiration"
+        params["ExpressionAttributeValues"][":in_progress_expiry"] = stub.ANY
+        params["UpdateExpression"] += ", #in_progress_expiry = :in_progress_expiry"
+
+    return params
+
 
 @pytest.fixture
-def expected_params_put_item(hashed_idempotency_key):
-    return {
-        "ConditionExpression": (
-            "attribute_not_exists(#id) OR #now < :now OR "
-            "(attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now AND #status = :inprogress)"
-        ),
+def expected_params_put_item(hashed_idempotency_key, idempotency_config):
+    params = {
+        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now",
         "ExpressionAttributeNames": {
             "#id": "id",
             "#now": "expiration",
-            "#in_progress_expiry": "in_progress_expiration",
             "#status": "status",
         },
-        "ExpressionAttributeValues": {":now": stub.ANY, ":inprogress": "INPROGRESS"},
+        "ExpressionAttributeValues": {":now": stub.ANY},
         "Item": {"expiration": stub.ANY, "id": hashed_idempotency_key, "status": "INPROGRESS"},
         "TableName": "TEST_TABLE",
     }
 
+    if idempotency_config.expires_in_progress:
+        params[
+            "ConditionExpression"
+        ] += " OR (attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now AND #status = :inprogress)"
+        params["ExpressionAttributeNames"]["#in_progress_expiry"] = "in_progress_expiration"
+        params["ExpressionAttributeValues"][":inprogress"] = "INPROGRESS"
+
+    return params
+
 
 @pytest.fixture
-def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_validation_key):
-    return {
-        "ConditionExpression": (
-            "attribute_not_exists(#id) OR #now < :now OR "
-            "(attribute_exists(#in_progress_expiry) AND "
-            "#in_progress_expiry < :now AND #status = :inprogress)"
-        ),
+def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_validation_key, idempotency_config):
+    params = {
+        "ConditionExpression": "attribute_not_exists(#id) OR #now < :now",
         "ExpressionAttributeNames": {
             "#id": "id",
-            "#in_progress_expiry": stub.ANY,
-            "#now": stub.ANY,
+            "#now": "expiration",
             "#status": "status",
         },
-        "ExpressionAttributeValues": {":now": stub.ANY, ":inprogress": "INPROGRESS"},
+        "ExpressionAttributeValues": {":now": stub.ANY},
         "Item": {
             "expiration": stub.ANY,
             "id": hashed_idempotency_key,
@@ -165,6 +172,15 @@ def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_vali
         },
         "TableName": "TEST_TABLE",
     }
+
+    if idempotency_config.expires_in_progress:
+        params[
+            "ConditionExpression"
+        ] += " OR (attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now AND #status = :inprogress)"
+        params["ExpressionAttributeNames"]["#in_progress_expiry"] = "in_progress_expiration"
+        params["ExpressionAttributeValues"][":inprogress"] = "INPROGRESS"
+
+    return params
 
 
 @pytest.fixture
@@ -203,21 +219,13 @@ def idempotency_config(config, request, default_jmespath):
         event_key_jmespath=request.param.get("event_key_jmespath") or default_jmespath,
         use_local_cache=request.param["use_local_cache"],
         expires_in_progress=request.param.get("expires_in_progress") or False,
+        payload_validation_jmespath=request.param.get("payload_validation_jmespath") or "",
     )
 
 
 @pytest.fixture
 def config_without_jmespath(config, request):
     return IdempotencyConfig(use_local_cache=request.param["use_local_cache"])
-
-
-@pytest.fixture
-def config_with_validation(config, request, default_jmespath):
-    return IdempotencyConfig(
-        event_key_jmespath=default_jmespath,
-        use_local_cache=request.param,
-        payload_validation_jmespath="requestContext",
-    )
 
 
 @pytest.fixture

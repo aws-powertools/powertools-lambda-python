@@ -13,24 +13,32 @@ def hash_idempotency_key(data: Any):
 
 
 def build_idempotency_put_item_stub(
-    data: Dict, function_name: str = "test-func", handler_name: str = "lambda_handler"
+    data: Dict,
+    config: IdempotencyConfig,
+    function_name: str = "test-func",
+    handler_name: str = "lambda_handler",
 ) -> Dict:
     idempotency_key_hash = f"{function_name}.{handler_name}#{hash_idempotency_key(data)}"
-    return {
-        "ConditionExpression": (
-            "attribute_not_exists(#id) OR #now < :now OR "
-            "(attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now AND #status = :inprogress)"
-        ),
+    params = {
+        "ConditionExpression": ("attribute_not_exists(#id) OR #now < :now"),
         "ExpressionAttributeNames": {
             "#id": "id",
             "#now": "expiration",
-            "#in_progress_expiry": "in_progress_expiration",
             "#status": "status",
         },
-        "ExpressionAttributeValues": {":now": stub.ANY, ":inprogress": "INPROGRESS"},
+        "ExpressionAttributeValues": {":now": stub.ANY},
         "Item": {"expiration": stub.ANY, "id": idempotency_key_hash, "status": "INPROGRESS"},
         "TableName": "TEST_TABLE",
     }
+
+    if config.expires_in_progress:
+        params[
+            "ConditionExpression"
+        ] += " OR (attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now AND #status = :inprogress)"
+        params["ExpressionAttributeNames"]["#in_progress_expiry"] = "in_progress_expiration"
+        params["ExpressionAttributeValues"][":inprogress"] = "INPROGRESS"
+
+    return params
 
 
 def build_idempotency_update_item_stub(
