@@ -23,11 +23,11 @@ class Location(TypedDict, total=False):
 class MyCustomModel(AppSyncResolverEvent):
     @property
     def country_viewer(self) -> str:
-        return self.get_header_value(name="cloudfront-viewer-country", default_value="", case_sensitive=False)
+        return self.get_header_value(name="cloudfront-viewer-country", default_value="", case_sensitive=False)  # type: ignore[return-value] sentinel typing # noqa: E501
 
     @property
     def api_key(self) -> str:
-        return self.get_header_value(name="x-api-key", default_value="", case_sensitive=False)
+        return self.get_header_value(name="x-api-key", default_value="", case_sensitive=False)  # type: ignore[return-value] sentinel typing # noqa: E501
 
 
 @app.resolver(type_name="Query", field_name="listLocations")
@@ -40,4 +40,4 @@ def list_locations(page: int = 0, size: int = 10) -> list[Location]:
 @tracer.capture_lambda_handler
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
-    app.resolve(event, context, data_model=MyCustomModel)
+    return app.resolve(event, context, data_model=MyCustomModel)

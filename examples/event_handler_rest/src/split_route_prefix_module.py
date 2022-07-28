@@ -25,7 +25,7 @@ def get_todos():
 @router.get("/<todo_id>")
 @tracer.capture_method
 def get_todo_by_id(todo_id: str):  # value come as str
-    api_key: str = router.current_event.get_header_value(name="X-Api-Key", case_sensitive=True, default_value="")  # type: ignore[assignment] # noqa: E501
+    api_key: str = router.current_event.get_header_value(name="X-Api-Key", case_sensitive=True, default_value="")  # type: ignore[assignment] # sentinel typing # noqa: E501
 
     todos: Response = requests.get(f"{endpoint}/{todo_id}", headers={"X-Api-Key": api_key})
     todos.raise_for_status()
