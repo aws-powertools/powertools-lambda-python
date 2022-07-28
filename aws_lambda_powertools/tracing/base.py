@@ -2,79 +2,7 @@ import abc
 import numbers
 import traceback
 from contextlib import contextmanager
-from typing import Any, AsyncContextManager, ContextManager, List, NoReturn, Optional, Set, Union
-
-
-class BaseProvider(abc.ABC):
-    @abc.abstractmethod  # type: ignore
-    @contextmanager
-    def in_subsegment(self, name=None, **kwargs) -> ContextManager:
-        """Return a subsegment context manger.
-
-        Parameters
-        ----------
-        name: str
-            Subsegment name
-        kwargs: Optional[dict]
-            Optional parameters to be propagated to segment
-        """
-
-    @abc.abstractmethod  # type: ignore
-    @contextmanager
-    def in_subsegment_async(self, name=None, **kwargs) -> AsyncContextManager:
-        """Return a subsegment async context manger.
-
-        Parameters
-        ----------
-        name: str
-            Subsegment name
-        kwargs: Optional[dict]
-            Optional parameters to be propagated to segment
-        """
-
-    @abc.abstractmethod
-    def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]) -> NoReturn:
-        """Annotate current active trace entity with a key-value pair.
-
-        Note: Annotations will be indexed for later search query.
-
-        Parameters
-        ----------
-        key: str
-            Metadata key
-        value: Union[str, numbers.Number, bool]
-            Annotation value
-        """
-
-    @abc.abstractmethod
-    def put_metadata(self, key: str, value: Any, namespace: str = "default") -> NoReturn:
-        """Add metadata to the current active trace entity.
-
-        Note: Metadata is not indexed but can be later retrieved by BatchGetTraces API.
-
-        Parameters
-        ----------
-        key: str
-            Metadata key
-        value: Any
-            Any object that can be serialized into a JSON string
-        namespace: Set[str]
-            Metadata namespace, by default 'default'
-        """
-
-    @abc.abstractmethod
-    def patch(self, modules: Set[str]) -> NoReturn:
-        """Instrument a set of supported libraries
-
-        Parameters
-        ----------
-        modules: Set[str]
-            Set of modules to be patched
-        """
-
-    @abc.abstractmethod
-    def patch_all(self) -> NoReturn:
-        """Instrument all supported libraries"""
+from typing import Any, Generator, List, NoReturn, Optional, Set, Union
 
 
 class BaseSegment(abc.ABC):
@@ -143,3 +71,75 @@ class BaseSegment(abc.ABC):
         remote: bool
             Whether it's a client error (False) or downstream service error (True), by default False
         """
+
+
+class BaseProvider(abc.ABC):
+    @abc.abstractmethod  # type: ignore
+    @contextmanager
+    def in_subsegment(self, name=None, **kwargs) -> Generator[BaseSegment, None, None]:
+        """Return a subsegment context manger.
+
+        Parameters
+        ----------
+        name: str
+            Subsegment name
+        kwargs: Optional[dict]
+            Optional parameters to be propagated to segment
+        """
+
+    @abc.abstractmethod  # type: ignore
+    @contextmanager
+    def in_subsegment_async(self, name=None, **kwargs) -> Generator[BaseSegment, None, None]:
+        """Return a subsegment async context manger.
+
+        Parameters
+        ----------
+        name: str
+            Subsegment name
+        kwargs: Optional[dict]
+            Optional parameters to be propagated to segment
+        """
+
+    @abc.abstractmethod
+    def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]) -> NoReturn:
+        """Annotate current active trace entity with a key-value pair.
+
+        Note: Annotations will be indexed for later search query.
+
+        Parameters
+        ----------
+        key: str
+            Metadata key
+        value: Union[str, numbers.Number, bool]
+            Annotation value
+        """
+
+    @abc.abstractmethod
+    def put_metadata(self, key: str, value: Any, namespace: str = "default") -> NoReturn:
+        """Add metadata to the current active trace entity.
+
+        Note: Metadata is not indexed but can be later retrieved by BatchGetTraces API.
+
+        Parameters
+        ----------
+        key: str
+            Metadata key
+        value: Any
+            Any object that can be serialized into a JSON string
+        namespace: Set[str]
+            Metadata namespace, by default 'default'
+        """
+
+    @abc.abstractmethod
+    def patch(self, modules: Set[str]) -> NoReturn:
+        """Instrument a set of supported libraries
+
+        Parameters
+        ----------
+        modules: Set[str]
+            Set of modules to be patched
+        """
+
+    @abc.abstractmethod
+    def patch_all(self) -> NoReturn:
+        """Instrument all supported libraries"""
