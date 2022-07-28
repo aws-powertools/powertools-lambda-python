@@ -29,7 +29,12 @@ def build_idempotency_put_item_stub(
             "#in_progress_expiry": "in_progress_expiration",
         },
         "ExpressionAttributeValues": {":now": stub.ANY, ":inprogress": "INPROGRESS"},
-        "Item": {"expiration": stub.ANY, "id": idempotency_key_hash, "status": "INPROGRESS"},
+        "Item": {
+            "expiration": stub.ANY,
+            "id": idempotency_key_hash,
+            "status": "INPROGRESS",
+            "in_progress_expiration": stub.ANY,
+        },
         "TableName": "TEST_TABLE",
     }
 

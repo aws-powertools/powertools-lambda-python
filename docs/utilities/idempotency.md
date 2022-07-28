@@ -392,11 +392,11 @@ In cases where the [Lambda invocation
 expires](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/),
 Powertools doesn't have the chance to set the idempotency record to `EXPIRED`.
 This means that the record would normally have been locked until `expire_seconds` have
-passsed.
+passed.
 
 However, when Powertools has access to the Lambda invocation context, we are able to calculate the remaining
 available time for the invocation, and save it on the idempotency record. This way, if a second invocation happens
-after this timestamp, and the record is still marked `INPROGRESS`, we execute the inovcation again as if it was
+after this timestamp, and the record is still marked `INPROGRESS`, we execute the invocation again as if it was
 already expired. This means that if an invocation expired during execution, it will be quickly executed again on the
 next retry.
 
@@ -435,9 +435,9 @@ sequenceDiagram
 </center>
 
 ???+ info "Info: Calculating the remaining available time"
-    When using the `idempotent` decorator, we captura and calculate the remaining available time for you.
+    When using the `idempotent` decorator, we capture and calculate the remaining available time for you.
     However, when using the `idempotent_function`, the functionality doesn't work out of the box. You'll
-    need to register the Lambda context on your handler:
+    need to register the Lambda context in your handler:
 
 ```python hl_lines="8 16" title="Registering the Lambda context"
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord

@@ -768,36 +768,21 @@ def test_idempotent_lambda_expires_in_progress_after_expire(
     stubber.deactivate()
 
 
-@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
-def test_idempotent_lambda_expires_in_progress_unavailable_remaining_time(
-    idempotency_config: IdempotencyConfig,
-    persistence_store: DynamoDBPersistenceLayer,
-    lambda_apigw_event,
-    lambda_response,
-    lambda_context,
-    expected_params_put_item,
-    expected_params_update_item,
-):
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+def test_idempotent_lambda_expires_in_progress_unavailable_remaining_time():
+    mock_event = {"data": "value"}
+    idempotency_key = "test-func.function#" + hash_idempotency_key(mock_event)
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+    expected_result = {"message": "Foo"}
 
-    ddb_response = {}
-    stubber.add_response("put_item", ddb_response, expected_params_put_item)
-    stubber.add_response("update_item", ddb_response, expected_params_update_item)
-
-    stubber.activate()
-
-    @idempotent(config=idempotency_config, persistence_store=persistence_store)
-    def lambda_handler(event, context):
-        return lambda_response
+    @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
+    def function(record):
+        return expected_result
 
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("default")
-        lambda_handler(lambda_apigw_event, lambda_context)
+        function(record=mock_event)
         assert len(w) == 1
         assert str(w[-1].message) == "Expires in progress is enabled but we couldn't determine the remaining time left"
-
-    stubber.assert_no_pending_responses()
-    stubber.deactivate()
 
 
 def test_data_record_invalid_status_value():

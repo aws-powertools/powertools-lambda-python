@@ -1,6 +1,5 @@
 import datetime
 import json
-from collections import namedtuple
 from decimal import Decimal
 from unittest import mock
 
@@ -32,14 +31,17 @@ def lambda_apigw_event():
 
 @pytest.fixture
 def lambda_context():
-    lambda_context = {
-        "function_name": "test-func",
-        "memory_limit_in_mb": 128,
-        "invoked_function_arn": "arn:aws:lambda:eu-west-1:809313241234:function:test-func",
-        "aws_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
-    }
+    class LambdaContext:
+        def __init__(self):
+            self.function_name = "test-func"
+            self.memory_limit_in_mb = 128
+            self.invoked_function_arn = "arn:aws:lambda:eu-west-1:809313241234:function:test-func"
+            self.aws_request_id = "52fdfc07-2182-154f-163f-5f0f9a621d72"
 
-    return namedtuple("LambdaContext", lambda_context.keys())(*lambda_context.values())
+        def get_remaining_time_in_millis(self) -> int:
+            return 1000
+
+    return LambdaContext()
 
 
 @pytest.fixture
@@ -142,7 +144,12 @@ def expected_params_put_item(hashed_idempotency_key):
             "#in_progress_expiry": "in_progress_expiration",
         },
         "ExpressionAttributeValues": {":now": stub.ANY, ":inprogress": "INPROGRESS"},
-        "Item": {"expiration": stub.ANY, "id": hashed_idempotency_key, "status": "INPROGRESS"},
+        "Item": {
+            "expiration": stub.ANY,
+            "id": hashed_idempotency_key,
+            "status": "INPROGRESS",
+            "in_progress_expiration": stub.ANY,
+        },
         "TableName": "TEST_TABLE",
     }
 
@@ -163,6 +170,7 @@ def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_vali
         "ExpressionAttributeValues": {":now": stub.ANY, ":inprogress": "INPROGRESS"},
         "Item": {
             "expiration": stub.ANY,
+            "in_progress_expiration": stub.ANY,
             "id": hashed_idempotency_key,
             "status": "INPROGRESS",
             "validation": hashed_validation_key,
