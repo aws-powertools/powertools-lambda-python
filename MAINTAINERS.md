@@ -37,12 +37,13 @@ This is document explains who the maintainers are (see below), what they do in t
 
 ## Current Maintainers
 
-| Maintainer       | GitHub ID                                     | Affiliation |
-| ---------------- | --------------------------------------------- | ----------- |
-| Heitor Lessa     | [heitorlessa](https://github.com/heitorlessa) | Amazon      |
-| Alexander Melnyk | [am29d](https://github.com/am29d)             | Amazon      |
-| Michal Ploski    | [mploski](https://github.com/mploski)         | Amazon      |
-| Simon Thulbourn  | [sthulb](https://github.com/sthulb)           | Amazon      |
+| Maintainer       | GitHub ID                                       | Affiliation |
+| ---------------- | ----------------------------------------------- | ----------- |
+| Heitor Lessa     | [heitorlessa](https://github.com/heitorlessa)   | Amazon      |
+| Alexander Melnyk | [am29d](https://github.com/am29d)               | Amazon      |
+| Michal Ploski    | [mploski](https://github.com/mploski)           | Amazon      |
+| Simon Thulbourn  | [sthulb](https://github.com/sthulb)             | Amazon      |
+| Ruben Fonseca    | [rubenfonseca](https://github.com/rubenfonseca) | Amazon      |
 
 ## Emeritus
 
