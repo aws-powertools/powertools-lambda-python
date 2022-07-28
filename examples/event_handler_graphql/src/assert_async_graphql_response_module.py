@@ -25,8 +25,8 @@ class Todo(TypedDict, total=False):
 async def list_todos() -> list[Todo]:
     async with aiohttp.ClientSession(trace_configs=[aiohttp_trace_config()]) as session:
         async with session.get("https://jsonplaceholder.typicode.com/todos") as resp:
-            # first two results to demo assertion
-            return await resp.json()[:2]
+            result: list[Todo] = await resp.json()
+            return result[:2]  # first two results to demo assertion
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
