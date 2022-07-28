@@ -99,4 +99,4 @@ changelog:
 	docker run -v "${PWD}":/workdir quay.io/git-chglog/git-chglog > CHANGELOG.md
 
 mypy:
-	poetry run mypy --pretty aws_lambda_powertools
+	poetry run mypy --pretty aws_lambda_powertools examples
