@@ -23,17 +23,17 @@ class Location(TypedDict, total=False):
 class MyCustomModel(AppSyncResolverEvent):
     @property
     def country_viewer(self) -> str:
-        return self.get_header_value(name="cloudfront-viewer-country", default_value="", case_sensitive=False)  # type: ignore[return-value] sentinel typing # noqa: E501
+        return self.get_header_value(name="cloudfront-viewer-country", default_value="", case_sensitive=False)  # type: ignore[return-value] # sentinel typing # noqa: E501
 
     @property
     def api_key(self) -> str:
-        return self.get_header_value(name="x-api-key", default_value="", case_sensitive=False)  # type: ignore[return-value] sentinel typing # noqa: E501
+        return self.get_header_value(name="x-api-key", default_value="", case_sensitive=False)  # type: ignore[return-value] # sentinel typing # noqa: E501
 
 
 @app.resolver(type_name="Query", field_name="listLocations")
 def list_locations(page: int = 0, size: int = 10) -> list[Location]:
     # additional properties/methods will now be available under current_event
-    logger.debug(f"Request country origin: {app.current_event.country_viewer}")
+    logger.debug(f"Request country origin: {app.current_event.country_viewer}")  # type: ignore[attr-defined]
     return [{"id": scalar_types_utils.make_id(), "name": "Perry, James and Carroll"}]
 
 

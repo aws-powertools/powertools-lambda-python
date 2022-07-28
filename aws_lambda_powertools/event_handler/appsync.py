@@ -142,6 +142,7 @@ class AppSyncResolver(BaseRouter):
         ValueError
             If we could not find a field resolver
         """
+        # Maintenance: revisit generics/overload to fix [attr-defined] in mypy usage
         BaseRouter.current_event = data_model(event)
         BaseRouter.lambda_context = context
         resolver = self._get_resolver(BaseRouter.current_event.type_name, BaseRouter.current_event.field_name)
