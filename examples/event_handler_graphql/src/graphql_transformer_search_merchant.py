@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import List, TypedDict
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import AppSyncResolver
@@ -19,8 +19,8 @@ class Merchant(TypedDict, total=False):
 
 
 @app.resolver(type_name="Query", field_name="findMerchant")
-def find_merchant(search: str) -> list[Merchant]:
-    merchants: list[Merchant] = [
+def find_merchant(search: str) -> List[Merchant]:
+    merchants: List[Merchant] = [
         {
             "id": scalar_types_utils.make_id(),
             "name": "Parry-Wood",

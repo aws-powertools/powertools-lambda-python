@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import List, TypedDict
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import AppSyncResolver
@@ -31,7 +31,7 @@ class MyCustomModel(AppSyncResolverEvent):
 
 
 @app.resolver(type_name="Query", field_name="listLocations")
-def list_locations(page: int = 0, size: int = 10) -> list[Location]:
+def list_locations(page: int = 0, size: int = 10) -> List[Location]:
     # additional properties/methods will now be available under current_event
     logger.debug(f"Request country origin: {app.current_event.country_viewer}")  # type: ignore[attr-defined]
     return [{"id": scalar_types_utils.make_id(), "name": "Perry, James and Carroll"}]

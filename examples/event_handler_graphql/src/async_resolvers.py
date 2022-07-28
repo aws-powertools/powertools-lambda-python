@@ -1,5 +1,5 @@
 import asyncio
-from typing import TypedDict
+from typing import List, TypedDict
 
 import aiohttp
 
@@ -22,7 +22,7 @@ class Todo(TypedDict, total=False):
 
 
 @app.resolver(type_name="Query", field_name="listTodos")
-async def list_todos() -> list[Todo]:
+async def list_todos() -> List[Todo]:
     async with aiohttp.ClientSession(trace_configs=[aiohttp_trace_config()]) as session:
         async with session.get("https://jsonplaceholder.typicode.com/todos") as resp:
             return await resp.json()
