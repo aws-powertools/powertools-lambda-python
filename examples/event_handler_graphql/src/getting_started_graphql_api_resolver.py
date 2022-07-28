@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import List, TypedDict
 
 import requests
 from requests import Response
@@ -34,7 +34,7 @@ def get_todo(
 
 @app.resolver(type_name="Query", field_name="listTodos")
 @tracer.capture_method
-def list_todos() -> list[Todo]:
+def list_todos() -> List[Todo]:
     todos: Response = requests.get("https://jsonplaceholder.typicode.com/todos")
     todos.raise_for_status()
 

@@ -259,7 +259,7 @@ And an example for testing asynchronous resolvers. Note that this requires the `
 
 === "assert_async_graphql_response.py"
 
-    ```python hl_lines="27"
+    ```python hl_lines="28"
     --8<-- "examples/event_handler_graphql/src/assert_async_graphql_response.py"
     ```
 
