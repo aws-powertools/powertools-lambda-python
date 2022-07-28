@@ -2,7 +2,7 @@ import abc
 import numbers
 import traceback
 from contextlib import contextmanager
-from typing import Any, Generator, List, NoReturn, Optional, Set, Union
+from typing import Any, Generator, List, NoReturn, Optional, Sequence, Union
 
 
 class BaseSegment(abc.ABC):
@@ -74,7 +74,7 @@ class BaseSegment(abc.ABC):
 
 
 class BaseProvider(abc.ABC):
-    @abc.abstractmethod  # type: ignore
+    @abc.abstractmethod
     @contextmanager
     def in_subsegment(self, name=None, **kwargs) -> Generator[BaseSegment, None, None]:
         """Return a subsegment context manger.
@@ -87,7 +87,7 @@ class BaseProvider(abc.ABC):
             Optional parameters to be propagated to segment
         """
 
-    @abc.abstractmethod  # type: ignore
+    @abc.abstractmethod
     @contextmanager
     def in_subsegment_async(self, name=None, **kwargs) -> Generator[BaseSegment, None, None]:
         """Return a subsegment async context manger.
@@ -131,7 +131,7 @@ class BaseProvider(abc.ABC):
         """
 
     @abc.abstractmethod
-    def patch(self, modules: Set[str]) -> NoReturn:
+    def patch(self, modules: Sequence[str]) -> NoReturn:
         """Instrument a set of supported libraries
 
         Parameters
