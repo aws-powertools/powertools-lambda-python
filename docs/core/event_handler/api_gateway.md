@@ -201,7 +201,7 @@ You can use **`not_found`** decorator to override this behavior, and return a cu
 
 You can use **`exception_handler`** decorator with any Python exception. This allows you to handle a common exception outside your route, for example validation errors.
 
-```python hl_lines="14 15" title="Exception handling"
+```python hl_lines="13-14" title="Exception handling"
 --8<-- "examples/event_handler_rest/src/exception_handling.py"
 ```
 

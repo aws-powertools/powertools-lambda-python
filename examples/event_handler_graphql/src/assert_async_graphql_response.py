@@ -1,9 +1,10 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import List
 
 import pytest
-from assert_async_graphql_response_module import Location, app  # instance of AppSyncResolver
+from assert_async_graphql_response_module import Todo, app  # instance of AppSyncResolver
 
 
 @pytest.fixture
@@ -24,7 +25,7 @@ async def test_async_direct_resolver(lambda_context):
     fake_event = json.loads(Path("assert_async_graphql_response.json").read_text())
 
     # WHEN
-    result: list[Location] = await app(fake_event, lambda_context)
+    result: List[Todo] = await app(fake_event, lambda_context)
     # alternatively, you can also run a sync test against `lambda_handler`
     # since `lambda_handler` awaits the coroutine to complete
 

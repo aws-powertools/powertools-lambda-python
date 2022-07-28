@@ -1,4 +1,11 @@
-from typing import TypedDict
+import sys
+
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
+
+from typing import List
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
@@ -18,5 +25,5 @@ class Location(TypedDict, total=False):
 @router.resolver(field_name="listLocations")
 @router.resolver(field_name="locations")
 @tracer.capture_method
-def get_locations(name: str, description: str = "") -> list[Location]:  # match GraphQL Query arguments
+def get_locations(name: str, description: str = "") -> List[Location]:  # match GraphQL Query arguments
     return [{"name": name, "description": description}]

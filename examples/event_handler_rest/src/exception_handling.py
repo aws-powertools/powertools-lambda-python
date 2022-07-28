@@ -1,8 +1,7 @@
 import requests
-from requests import Response
 
 from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver, content_types
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response, content_types
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -30,7 +29,7 @@ def get_todos():
     # if a query string value for `limit` cannot be coerced to int
     max_results: int = int(app.current_event.get_query_string_value(name="limit", default_value=0))
 
-    todos: Response = requests.get(f"https://jsonplaceholder.typicode.com/todos?limit={max_results}")
+    todos: requests.Response = requests.get(f"https://jsonplaceholder.typicode.com/todos?limit={max_results}")
     todos.raise_for_status()
 
     return {"todos": todos.json()}
