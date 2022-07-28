@@ -7,7 +7,7 @@ from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter
 
 
 class CustomFormatter(BasePowertoolsFormatter):
-    def __init__(self, log_record_order: Optional[List[str]], *args, **kwargs):
+    def __init__(self, log_record_order: Optional[List[str]] = None, *args, **kwargs):
         self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
         self.log_format = dict.fromkeys(self.log_record_order)
         super().__init__(*args, **kwargs)
