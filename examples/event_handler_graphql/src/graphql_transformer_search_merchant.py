@@ -33,10 +33,10 @@ def find_merchant(search: str) -> list[Merchant]:
         },
     ]
 
-    return next((merchant for merchant in merchants if search == merchant["name"]), [{}])
+    return [merchant for merchant in merchants if search == merchant["name"]]
 
 
 @tracer.capture_lambda_handler
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
-    app.resolve(event, context)
+    return app.resolve(event, context)
