@@ -11,8 +11,8 @@ on:
   workflow_dispatch:
     inputs:
       latest_published_version:
-        description: "Latest PyPi published version to rebuild latest docs for, e.g. v1.22.0"
-        default: "v1.22.0"
+        description: "Latest PyPi published version to rebuild latest docs for, e.g. v1.26.7"
+        default: "v1.26.7"
         required: true
 
 jobs:
@@ -37,16 +37,20 @@ jobs:
         run: |
           RELEASE_TAG_VERSION=${{ github.event.inputs.latest_published_version }}
           echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> $GITHUB_ENV
-      - name: Ensure new version is also set in pyproject and CHANGELOG
-        run: |
-          grep --regexp "${RELEASE_TAG_VERSION}" CHANGELOG.md
-          grep --regexp "version \= \"${RELEASE_TAG_VERSION}\"" pyproject.toml
       - name: Install dependencies
         run: make dev
       - name: Setup doc deploy
         run: |
           git config --global user.name Docs deploy
           git config --global user.email aws-devax-open-source@amazon.com
+      - name: Generate latest CHANGELOG
+        run: make changelog
+      - name: Push project metadata and changelog to trunk
+        run: |
+          git add CHANGELOG.md
+          git add pyproject.toml
+          git commit -m "chore(ci): update project with version ${RELEASE_VERSION}"
+          git push origin HEAD:refs/heads/develop
       - name: Build docs website and API reference
         run: |
           make release-docs VERSION=${RELEASE_TAG_VERSION} ALIAS="latest"
