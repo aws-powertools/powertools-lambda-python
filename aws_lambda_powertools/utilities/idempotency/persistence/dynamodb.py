@@ -192,10 +192,9 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
                     "#in_progress_expiry < :now_in_millis",
                 ]
             )
-            inprogress_expiry_expired = f"({inprogress_expiry_expired})"
 
-            condition_expression = " OR ".join(
-                [idempotency_key_not_exist, idempotency_expiry_expired, inprogress_expiry_expired]
+            condition_expression = (
+                f"{idempotency_key_not_exist} OR {idempotency_expiry_expired} OR ({inprogress_expiry_expired})"
             )
 
             self.table.put_item(
