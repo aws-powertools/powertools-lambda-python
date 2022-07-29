@@ -36,10 +36,10 @@ As of now, Amazon DynamoDB is the only supported persistent storage layer, so yo
 
 If you're not [changing the default configuration for the DynamoDB persistence layer](#dynamodbpersistencelayer), this is the expected default configuration:
 
-Configuration | Value | Notes
-------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------
-Partition key | `id` |
-TTL attribute name | `expiration` | This can only be configured after your table is created if you're using AWS Console
+| Configuration      | Value        | Notes                                                                               |
+| ------------------ | ------------ | ----------------------------------------------------------------------------------- |
+| Partition key      | `id`         |
+| TTL attribute name | `expiration` | This can only be configured after your table is created if you're using AWS Console |
 
 ???+ tip "Tip: You can share a single state table for all functions"
     You can reuse the same DynamoDB table to store idempotency state. We add your `function_name` in addition to the idempotency key as a hash key.
@@ -391,17 +391,45 @@ The client was successful in receiving the result after the retry. Since the Lam
 
 #### Lambda timeouts
 
-In cases where the [Lambda invocation
-expires](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/),
-Powertools doesn't have the chance to set the idempotency record to `EXPIRED`.
-This means that the record would normally have been locked until `expire_seconds` have
-passed.
+???+ note
+    This is automatically done when you decorate your Lambda handler with [@idempotent decorator](#idempotent-decorator).
 
-However, when Powertools has access to the Lambda invocation context, we are able to calculate the remaining
-available time for the invocation, and save it on the idempotency record. This way, if a second invocation happens
-after this timestamp, and the record is still marked `INPROGRESS`, we execute the invocation again as if it was
-already expired. This means that if an invocation expired during execution, it will be quickly executed again on the
-next retry.
+To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/), Powertools calculates and includes the remaining invocation available time as part of the idempotency record.
+
+???+ example
+    If a second invocation happens **after** this timestamp, and the record is marked as `INPROGRESS`, we will execute the invocation again as if it was in the `EXPIRED` state (e.g, `expire_seconds` field elapsed).
+
+    This means that if an invocation expired during execution, it will be quickly executed again on the next retry.
+
+???+ important
+    If you are only using the [@idempotent_function decorator](#idempotentfunction-decorator) to guard isolated parts of your code, you must use `register_lambda_context` available in the [idempotency config object](#customizing-the-default-behavior) to benefit from this protection.
+
+Here is an example on how you register the Lambda context in your handler:
+
+```python hl_lines="8 16" title="Registering the Lambda context"
+from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+from aws_lambda_powertools.utilities.idempotency import (
+    IdempotencyConfig, idempotent_function
+)
+
+persistence_layer = DynamoDBPersistenceLayer(table_name="...")
+
+config = IdempotencyConfig()
+
+@idempotent_function(data_keyword_argument="record", persistence_store=persistence_layer, config=config)
+def record_handler(record: SQSRecord):
+    return {"message": record["body"]}
+
+
+def lambda_handler(event, context):
+    config.register_lambda_context(context)
+
+    return record_handler(event)
+```
+
+#### Lambda timeout sequence diagram
+
+This sequence diagram shows an example flow of what happens if a Lambda function times out:
 
 <center>
 ```mermaid
@@ -436,32 +464,6 @@ sequenceDiagram
 ```
 <i>Idempotent sequence for Lambda timeouts</i>
 </center>
-
-???+ info "Info: Calculating the remaining available time"
-    When using the `idempotent` decorator, we capture and calculate the remaining available time for you.
-    However, when using the `idempotent_function`, the functionality doesn't work out of the box. You'll
-    need to register the Lambda context in your handler:
-
-```python hl_lines="8 16" title="Registering the Lambda context"
-from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-from aws_lambda_powertools.utilities.idempotency import (
-    IdempotencyConfig, idempotent_function
-)
-
-persistence_layer = DynamoDBPersistenceLayer(table_name="...")
-
-config = IdempotencyConfig()
-
-@idempotent_function(data_keyword_argument="record", persistence_store=persistence_layer, config=config)
-def record_handler(record: SQSRecord):
-    return {"message": record["body"]}
-
-
-def lambda_handler(event, context):
-    config.register_lambda_context(context)
-
-    return record_handler(event)
-```
 
 ### Handling exceptions
 
@@ -536,17 +538,17 @@ persistence_layer = DynamoDBPersistenceLayer(
 
 When using DynamoDB as a persistence layer, you can alter the attribute names by passing these parameters when initializing the persistence layer:
 
-Parameter | Required | Default | Description
-------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
-**table_name** | :heavy_check_mark: | | Table name to store state
-**key_attr** |  | `id` | Partition key of the table. Hashed representation of the payload (unless **sort_key_attr** is specified)
-**expiry_attr** |  | `expiration` | Unix timestamp of when record expires
-**in_progress_expiry_attr** |  | `in_progress_expiration` | Unix timestamp of when record expires while in progress (in case of the invocation times out)
-**status_attr** |  | `status` | Stores status of the lambda execution during and after invocation
-**data_attr** |  | `data`  | Stores results of successfully executed Lambda handlers
-**validation_key_attr** |  | `validation` | Hashed representation of the parts of the event used for validation
-**sort_key_attr** | | | Sort key of the table (if table is configured with a sort key).
-**static_pk_value** | | `idempotency#{LAMBDA_FUNCTION_NAME}` | Static value to use as the partition key. Only used when **sort_key_attr** is set.
+| Parameter                   | Required           | Default                              | Description                                                                                              |
+| --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| **table_name**              | :heavy_check_mark: |                                      | Table name to store state                                                                                |
+| **key_attr**                |                    | `id`                                 | Partition key of the table. Hashed representation of the payload (unless **sort_key_attr** is specified) |
+| **expiry_attr**             |                    | `expiration`                         | Unix timestamp of when record expires                                                                    |
+| **in_progress_expiry_attr** |                    | `in_progress_expiration`             | Unix timestamp of when record expires while in progress (in case of the invocation times out)            |
+| **status_attr**             |                    | `status`                             | Stores status of the lambda execution during and after invocation                                        |
+| **data_attr**               |                    | `data`                               | Stores results of successfully executed Lambda handlers                                                  |
+| **validation_key_attr**     |                    | `validation`                         | Hashed representation of the parts of the event used for validation                                      |
+| **sort_key_attr**           |                    |                                      | Sort key of the table (if table is configured with a sort key).                                          |
+| **static_pk_value**         |                    | `idempotency#{LAMBDA_FUNCTION_NAME}` | Static value to use as the partition key. Only used when **sort_key_attr** is set.                       |
 
 ## Advanced
 
@@ -554,15 +556,15 @@ Parameter | Required | Default | Description
 
 Idempotent decorator can be further configured with **`IdempotencyConfig`** as seen in the previous example. These are the available options for further configuration
 
-Parameter | Default | Description
-------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
-**event_key_jmespath** | `""` | JMESPath expression to extract the idempotency key from the event record using [built-in functions](/utilities/jmespath_functions)
-**payload_validation_jmespath** | `""` | JMESPath expression to validate whether certain parameters have changed in the event while the event payload
-**raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request
-**expires_after_seconds** | 3600 | The number of seconds to wait before a record is expired
-**use_local_cache** | `False` | Whether to locally cache idempotency results
-**local_cache_max_items** | 256 | Max number of items to store in local cache
-**hash_function** | `md5` | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html) in the standard library.
+| Parameter                       | Default | Description                                                                                                                               |
+| ------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](/utilities/jmespath_functions)        |
+| **payload_validation_jmespath** | `""`    | JMESPath expression to validate whether certain parameters have changed in the event while the event payload                              |
+| **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request                                                                            |
+| **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired                                                                                  |
+| **use_local_cache**             | `False` | Whether to locally cache idempotency results                                                                                              |
+| **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                               |
+| **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html) in the standard library. |
 
 ### Handling concurrent executions with the same payload
 
@@ -826,11 +828,11 @@ def handler(event, context):
 
 The example function above would cause data to be stored in DynamoDB like this:
 
-| id                           | sort_key                         | expiration | status      | data                                |
-|------------------------------|----------------------------------|------------|-------------|-------------------------------------|
-| idempotency#MyLambdaFunction | 1e956ef7da78d0cb890be999aecc0c9e | 1636549553 | COMPLETED   | {"id": 12391, "message": "success"} |
-| idempotency#MyLambdaFunction | 2b2cdb5f86361e97b4383087c1ffdf27 | 1636549571 | COMPLETED   | {"id": 527212, "message": "success"}|
-| idempotency#MyLambdaFunction | f091d2527ad1c78f05d54cc3f363be80 | 1636549585 | IN_PROGRESS |                                     |
+| id                           | sort_key                         | expiration | status      | data                                 |
+| ---------------------------- | -------------------------------- | ---------- | ----------- | ------------------------------------ |
+| idempotency#MyLambdaFunction | 1e956ef7da78d0cb890be999aecc0c9e | 1636549553 | COMPLETED   | {"id": 12391, "message": "success"}  |
+| idempotency#MyLambdaFunction | 2b2cdb5f86361e97b4383087c1ffdf27 | 1636549571 | COMPLETED   | {"id": 527212, "message": "success"} |
+| idempotency#MyLambdaFunction | f091d2527ad1c78f05d54cc3f363be80 | 1636549585 | IN_PROGRESS |                                      |
 
 ### Bring your own persistent store
 
