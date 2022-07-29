@@ -40,6 +40,7 @@ class DataRecord:
         idempotency_key,
         status: str = "",
         expiry_timestamp: Optional[int] = None,
+        in_progress_expiry_timestamp: Optional[int] = None,
         response_data: Optional[str] = "",
         payload_hash: Optional[str] = None,
     ) -> None:
@@ -53,6 +54,8 @@ class DataRecord:
             status of the idempotent record
         expiry_timestamp: int, optional
             time before the record should expire, in seconds
+        in_progress_expiry_timestamp: int, optional
+            time before the record should expire while in the INPROGRESS state, in seconds
         payload_hash: str, optional
             hashed representation of payload
         response_data: str, optional
@@ -61,6 +64,7 @@ class DataRecord:
         self.idempotency_key = idempotency_key
         self.payload_hash = payload_hash
         self.expiry_timestamp = expiry_timestamp
+        self.in_progress_expiry_timestamp = in_progress_expiry_timestamp
         self._status = status
         self.response_data = response_data
 
@@ -328,7 +332,7 @@ class BasePersistenceLayer(ABC):
 
         self._save_to_cache(data_record=data_record)
 
-    def save_inprogress(self, data: Dict[str, Any]) -> None:
+    def save_inprogress(self, data: Dict[str, Any], remaining_time_in_millis: Optional[int] = None) -> None:
         """
         Save record of function's execution being in progress
 
@@ -336,6 +340,8 @@ class BasePersistenceLayer(ABC):
         ----------
         data: Dict[str, Any]
             Payload
+        remaining_time_in_millis: Optional[int]
+            If expiry of in-progress invocations is enabled, this will contain the remaining time available in millis
         """
         data_record = DataRecord(
             idempotency_key=self._get_hashed_idempotency_key(data=data),
@@ -343,6 +349,18 @@ class BasePersistenceLayer(ABC):
             expiry_timestamp=self._get_expiry_timestamp(),
             payload_hash=self._get_hashed_payload(data=data),
         )
+
+        if remaining_time_in_millis:
+            now = datetime.datetime.now()
+            period = datetime.timedelta(milliseconds=remaining_time_in_millis)
+            timestamp = (now + period).timestamp()
+
+            data_record.in_progress_expiry_timestamp = int(timestamp * 1000)
+        else:
+            warnings.warn(
+                "Couldn't determine the remaining time left. "
+                "Did you call register_lambda_context on IdempotencyConfig?"
+            )
 
         logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")
 

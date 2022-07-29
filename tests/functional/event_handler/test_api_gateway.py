@@ -283,7 +283,7 @@ def test_base64_encode():
 
     @app.get("/my/path", compress=True)
     def read_image() -> Response:
-        return Response(200, "image/png", read_media("idempotent_sequence_exception.png"))
+        return Response(200, "image/png", read_media("tracer_utility_showcase.png"))
 
     # WHEN calling the event handler
     result = app(mock_event, None)

@@ -1,3 +1,4 @@
+import datetime
 import logging
 from copy import deepcopy
 from typing import Any, Callable, Dict, Optional, Tuple
@@ -73,6 +74,7 @@ class IdempotencyHandler:
         self.data = deepcopy(_prepare_data(function_payload))
         self.fn_args = function_args
         self.fn_kwargs = function_kwargs
+        self.config = config
 
         persistence_store.configure(config, self.function.__name__)
         self.persistence_store = persistence_store
@@ -101,7 +103,9 @@ class IdempotencyHandler:
         try:
             # We call save_inprogress first as an optimization for the most common case where no idempotent record
             # already exists. If it succeeds, there's no need to call get_record.
-            self.persistence_store.save_inprogress(data=self.data)
+            self.persistence_store.save_inprogress(
+                data=self.data, remaining_time_in_millis=self._get_remaining_time_in_millis()
+            )
         except IdempotencyKeyError:
             raise
         except IdempotencyItemAlreadyExistsError:
@@ -112,6 +116,25 @@ class IdempotencyHandler:
             raise IdempotencyPersistenceLayerError("Failed to save in progress record to idempotency store") from exc
 
         return self._get_function_response()
+
+    def _get_remaining_time_in_millis(self) -> Optional[int]:
+        """
+        Tries to determine the remaining time available for the current lambda invocation.
+
+        This only works if the idempotent handler decorator is used, since we need to access the lambda context.
+        However, this could be improved if we start storing the lambda context globally during the invocation. One
+        way to do this is to register the lambda context when configuring the IdempotencyConfig object.
+
+        Returns
+        -------
+        Optional[int]
+            Remaining time in millis, or None if the remaining time cannot be determined.
+        """
+
+        if self.config.lambda_context is not None:
+            return self.config.lambda_context.get_remaining_time_in_millis()
+
+        return None
 
     def _get_idempotency_record(self) -> DataRecord:
         """
@@ -167,6 +190,13 @@ class IdempotencyHandler:
             raise IdempotencyInconsistentStateError("save_inprogress and get_record return inconsistent results.")
 
         if data_record.status == STATUS_CONSTANTS["INPROGRESS"]:
+            if data_record.in_progress_expiry_timestamp is not None and data_record.in_progress_expiry_timestamp < int(
+                datetime.datetime.now().timestamp() * 1000
+            ):
+                raise IdempotencyInconsistentStateError(
+                    "item should have been expired in-progress because it already time-outed."
+                )
+
             raise IdempotencyAlreadyInProgressError(
                 f"Execution already in progress with idempotency key: "
                 f"{self.persistence_store.event_key_jmespath}={data_record.idempotency_key}"
