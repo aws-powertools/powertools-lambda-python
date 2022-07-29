@@ -782,7 +782,10 @@ def test_idempotent_lambda_expires_in_progress_unavailable_remaining_time():
         warnings.simplefilter("default")
         function(record=mock_event)
         assert len(w) == 1
-        assert str(w[-1].message) == "Expires in progress is enabled but we couldn't determine the remaining time left"
+        assert (
+            str(w[-1].message)
+            == "Couldn't determine the remaining time left. Did you call register_lambda_context on IdempotencyConfig?"
+        )
 
 
 def test_data_record_invalid_status_value():
