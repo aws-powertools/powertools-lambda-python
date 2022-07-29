@@ -22,7 +22,7 @@ times with the same parameters**. This makes idempotent operations safe to retry
 * Ensure Lambda handler returns the same result when called with the same payload
 * Select a subset of the event as the idempotency key using JMESPath expressions
 * Set a time window in which records with the same payload should be considered duplicates
-* Expires in-progress executions when the Lambda handler times out
+* Expires in-progress executions if the Lambda function times out halfway through
 
 ## Getting started
 
