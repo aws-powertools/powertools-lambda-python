@@ -162,6 +162,7 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
     def lambda_handler(event, context):
         # `data` parameter must be called as a keyword argument to work
         dummy("hello", "universe", data="test")
+		config.register_lambda_context(context) # see Lambda timeouts section
         return processor.response()
     ```
 
@@ -198,7 +199,7 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
 === "dataclass_sample.py"
 
-    ```python hl_lines="3-4 23 32"
+    ```python hl_lines="3-4 23 33"
     from dataclasses import dataclass
 
     from aws_lambda_powertools.utilities.idempotency import (
@@ -225,17 +226,18 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
     def process_order(order: Order):
         return f"processed order {order.order_id}"
 
+	def lambda_handler(event, context):
+		config.register_lambda_context(context) # see Lambda timeouts section
+		order_item = OrderItem(sku="fake", description="sample")
+		order = Order(item=order_item, order_id="fake-id")
 
-    order_item = OrderItem(sku="fake", description="sample")
-    order = Order(item=order_item, order_id="fake-id")
-
-    # `order` parameter must be called as a keyword argument to work
-    process_order(order=order)
+		# `order` parameter must be called as a keyword argument to work
+		process_order(order=order)
     ```
 
 === "parser_pydantic_sample.py"
 
-    ```python hl_lines="1-2 22 31"
+    ```python hl_lines="1-2 22 32"
     from aws_lambda_powertools.utilities.idempotency import (
         DynamoDBPersistenceLayer, IdempotencyConfig, idempotent_function)
     from aws_lambda_powertools.utilities.parser import BaseModel
@@ -261,12 +263,13 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
     def process_order(order: Order):
         return f"processed order {order.order_id}"
 
+	def lambda_handler(event, context):
+		config.register_lambda_context(context) # see Lambda timeouts section
+		order_item = OrderItem(sku="fake", description="sample")
+		order = Order(item=order_item, order_id="fake-id")
 
-    order_item = OrderItem(sku="fake", description="sample")
-    order = Order(item=order_item, order_id="fake-id")
-
-    # `order` parameter must be called as a keyword argument to work
-    process_order(order=order)
+		# `order` parameter must be called as a keyword argument to work
+		process_order(order=order)
     ```
 
 ### Choosing a payload subset for idempotency
