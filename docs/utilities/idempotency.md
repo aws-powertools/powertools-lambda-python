@@ -364,17 +364,17 @@ sequenceDiagram
     participant Client
     participant Lambda
     participant Persistence Layer
-    alt initial request:
+    alt initial request
         Client->>Lambda: Invoke (event)
         Lambda->>Persistence Layer: Get or set (id=event.search(payload))
         activate Persistence Layer
-        Note right of Persistence Layer: Locked during this time. Prevents multiple<br/>Lambda invocations with the same<br/>payload running concurrently.
-        Lambda-->>Lambda: Run Lambda handler (event)
-        Lambda->>Persistence Layer: Update record with Lambda handler results
+        Note right of Persistence Layer: Locked to prevent concurrent<br/>invocations with <br/> the same payload.
+        Lambda-->>Lambda: Call handler (event)
+        Lambda->>Persistence Layer: Update record with result
         deactivate Persistence Layer
         Persistence Layer-->>Persistence Layer: Update record with result
         Lambda-->>Client: Response sent to client
-    else retried request:
+    else retried request
         Client->>Lambda: Invoke (event)
         Lambda->>Persistence Layer: Get or set (id=event.search(payload))
         Persistence Layer-->>Lambda: Already exists in persistence layer. Return result
@@ -437,26 +437,27 @@ sequenceDiagram
     participant Client
     participant Lambda
     participant Persistence Layer
-    alt initial request:
+    alt initial request
         Client->>Lambda: Invoke (event)
         Lambda->>Persistence Layer: Get or set (id=event.search(payload))
         activate Persistence Layer
-        Note right of Persistence Layer: Locked during this time. Prevents multiple<br/>Lambda invocations with the same<br/>payload running concurrently.
-        Lambda--xLambda: Run Lambda handler (event).<br/>Time out
+        Note right of Persistence Layer: Locked to prevent concurrent<br/>invocations with <br/> the same payload.
+        Note over Lambda: Time out
+        Lambda--xLambda: Call handler (event)
         Lambda-->>Client: Return error response
         deactivate Persistence Layer
-    else retried before the Lambda timeout:
+    else concurrent request before timeout
         Client->>Lambda: Invoke (event)
         Lambda->>Persistence Layer: Get or set (id=event.search(payload))
-        Persistence Layer-->>Lambda: Already exists in persistence layer. Still in-progress
-        Lambda--xClient: Return Invocation Already In Progress error
-    else retried after the Lambda timeout:
+        Persistence Layer-->>Lambda: Request already INPROGRESS
+        Lambda--xClient: Return IdempotencyAlreadyInProgressError
+    else retry after Lambda timeout
         Client->>Lambda: Invoke (event)
         Lambda->>Persistence Layer: Get or set (id=event.search(payload))
         activate Persistence Layer
-        Note right of Persistence Layer: Locked during this time. Prevents multiple<br/>Lambda invocations with the same<br/>payload running concurrently.
-        Lambda-->>Lambda: Run Lambda handler (event)
-        Lambda->>Persistence Layer: Update record with Lambda handler results
+        Note right of Persistence Layer: Locked to prevent concurrent<br/>invocations with <br/> the same payload.
+        Lambda-->>Lambda: Call handler (event)
+        Lambda->>Persistence Layer: Update record with result
         deactivate Persistence Layer
         Persistence Layer-->>Persistence Layer: Update record with result
         Lambda-->>Client: Response sent to client
@@ -480,7 +481,7 @@ sequenceDiagram
     Lambda->>Persistence Layer: Get or set (id=event.search(payload))
     activate Persistence Layer
     Note right of Persistence Layer: Locked during this time. Prevents multiple<br/>Lambda invocations with the same<br/>payload running concurrently.
-    Lambda--xLambda: Run Lambda handler (event).<br/>Raises exception
+    Lambda--xLambda: Call handler (event).<br/>Raises exception
     Lambda->>Persistence Layer: Delete record (id=event.search(payload))
     deactivate Persistence Layer
     Lambda-->>Client: Return error response
