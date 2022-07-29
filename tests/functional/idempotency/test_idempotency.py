@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2, event_source
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, IdempotencyConfig
-from aws_lambda_powertools.utilities.idempotency.base import MAX_RETRIES, _prepare_data
+from aws_lambda_powertools.utilities.idempotency.base import MAX_RETRIES, IdempotencyHandler, _prepare_data
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
@@ -692,7 +692,7 @@ def test_idempotent_lambda_expires_in_progress_before_expire(
 
     now = datetime.datetime.now()
     period = datetime.timedelta(seconds=5)
-    timestamp_expires_in_progress = str(int((now + period).timestamp()))
+    timestamp_expires_in_progress = int((now + period).timestamp() * 1000)
 
     expected_params_get_item = {
         "TableName": TABLE_NAME,
@@ -703,7 +703,7 @@ def test_idempotent_lambda_expires_in_progress_before_expire(
         "Item": {
             "id": {"S": hashed_idempotency_key},
             "expiration": {"N": timestamp_future},
-            "in_progress_expiration": {"N": timestamp_expires_in_progress},
+            "in_progress_expiration": {"N": str(timestamp_expires_in_progress)},
             "data": {"S": '{"message": "test", "statusCode": 200'},
             "status": {"S": "INPROGRESS"},
         }
@@ -748,7 +748,7 @@ def test_idempotent_lambda_expires_in_progress_after_expire(
             "Item": {
                 "id": {"S": hashed_idempotency_key},
                 "expiration": {"N": timestamp_future},
-                "in_progress_expiration": {"N": str(int(one_second_ago.timestamp()))},
+                "in_progress_expiration": {"N": str(int(one_second_ago.timestamp() * 1000))},
                 "data": {"S": '{"message": "test", "statusCode": 200'},
                 "status": {"S": "INPROGRESS"},
             }
@@ -782,7 +782,10 @@ def test_idempotent_lambda_expires_in_progress_unavailable_remaining_time():
         warnings.simplefilter("default")
         function(record=mock_event)
         assert len(w) == 1
-        assert str(w[-1].message) == "Expires in progress is enabled but we couldn't determine the remaining time left"
+        assert (
+            str(w[-1].message)
+            == "Couldn't determine the remaining time left. Did you call register_lambda_context on IdempotencyConfig?"
+        )
 
 
 def test_data_record_invalid_status_value():
@@ -814,6 +817,62 @@ def test_data_record_json_to_dict_mapping_when_response_data_none():
 
     # THEN return null value
     assert response_data is None
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
+def test_handler_for_status_expired_data_record(
+    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+):
+    idempotency_handler = IdempotencyHandler(
+        function=lambda a: a,
+        function_payload={},
+        config=idempotency_config,
+        persistence_store=persistence_store,
+    )
+    data_record = DataRecord("key", status="EXPIRED", response_data=None)
+
+    with pytest.raises(IdempotencyInconsistentStateError):
+        idempotency_handler._handle_for_status(data_record)
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
+def test_handler_for_status_inprogress_data_record_inconsistent(
+    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+):
+    idempotency_handler = IdempotencyHandler(
+        function=lambda a: a,
+        function_payload={},
+        config=idempotency_config,
+        persistence_store=persistence_store,
+    )
+
+    now = datetime.datetime.now()
+    period = datetime.timedelta(milliseconds=100)
+    timestamp = int((now - period).timestamp() * 1000)
+    data_record = DataRecord("key", in_progress_expiry_timestamp=timestamp, status="INPROGRESS", response_data=None)
+
+    with pytest.raises(IdempotencyInconsistentStateError):
+        idempotency_handler._handle_for_status(data_record)
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
+def test_handler_for_status_inprogress_data_record_consistent(
+    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+):
+    idempotency_handler = IdempotencyHandler(
+        function=lambda a: a,
+        function_payload={},
+        config=idempotency_config,
+        persistence_store=persistence_store,
+    )
+
+    now = datetime.datetime.now()
+    period = datetime.timedelta(milliseconds=100)
+    timestamp = int((now + period).timestamp() * 1000)
+    data_record = DataRecord("key", in_progress_expiry_timestamp=timestamp, status="INPROGRESS", response_data=None)
+
+    with pytest.raises(IdempotencyAlreadyInProgressError):
+        idempotency_handler._handle_for_status(data_record)
 
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)

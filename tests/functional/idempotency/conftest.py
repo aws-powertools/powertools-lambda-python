@@ -83,20 +83,15 @@ def expected_params_update_item(serialized_lambda_response, hashed_idempotency_k
             "#expiry": "expiration",
             "#response_data": "data",
             "#status": "status",
-            "#in_progress_expiry": "in_progress_expiration",
         },
         "ExpressionAttributeValues": {
             ":expiry": stub.ANY,
             ":response_data": serialized_lambda_response,
             ":status": "COMPLETED",
-            ":in_progress_expiry": stub.ANY,
         },
         "Key": {"id": hashed_idempotency_key},
         "TableName": "TEST_TABLE",
-        "UpdateExpression": (
-            "SET #response_data = :response_data, "
-            "#expiry = :expiry, #status = :status, #in_progress_expiry = :in_progress_expiry"
-        ),
+        "UpdateExpression": "SET #response_data = :response_data, " "#expiry = :expiry, #status = :status",
     }
 
 
@@ -110,21 +105,18 @@ def expected_params_update_item_with_validation(
             "#response_data": "data",
             "#status": "status",
             "#validation_key": "validation",
-            "#in_progress_expiry": "in_progress_expiration",
         },
         "ExpressionAttributeValues": {
             ":expiry": stub.ANY,
             ":response_data": serialized_lambda_response,
             ":status": "COMPLETED",
             ":validation_key": hashed_validation_key,
-            ":in_progress_expiry": stub.ANY,
         },
         "Key": {"id": hashed_idempotency_key},
         "TableName": "TEST_TABLE",
         "UpdateExpression": (
             "SET #response_data = :response_data, "
             "#expiry = :expiry, #status = :status, "
-            "#in_progress_expiry = :in_progress_expiry, "
             "#validation_key = :validation_key"
         ),
     }

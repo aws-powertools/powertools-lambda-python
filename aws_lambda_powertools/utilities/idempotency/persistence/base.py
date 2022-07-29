@@ -353,10 +353,14 @@ class BasePersistenceLayer(ABC):
         if remaining_time_in_millis:
             now = datetime.datetime.now()
             period = datetime.timedelta(milliseconds=remaining_time_in_millis)
+            timestamp = (now + period).timestamp()
 
-            data_record.in_progress_expiry_timestamp = int((now + period).timestamp() * 1000)
+            data_record.in_progress_expiry_timestamp = int(timestamp * 1000)
         else:
-            warnings.warn("Expires in progress is enabled but we couldn't determine the remaining time left")
+            warnings.warn(
+                "Couldn't determine the remaining time left. "
+                "Did you call register_lambda_context on IdempotencyConfig?"
+            )
 
         logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")
 
