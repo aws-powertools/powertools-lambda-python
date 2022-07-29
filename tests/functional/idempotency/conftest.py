@@ -134,16 +134,16 @@ def expected_params_update_item_with_validation(
 def expected_params_put_item(hashed_idempotency_key):
     return {
         "ConditionExpression": (
-            "attribute_not_exists(#id) OR #now < :now OR "
-            "(attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now AND #status = :inprogress)"
+            "attribute_not_exists(#id) OR #expiry < :now OR "
+            "(#status = :inprogress AND attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now_in_millis)"
         ),
         "ExpressionAttributeNames": {
             "#id": "id",
-            "#now": "expiration",
+            "#expiry": "expiration",
             "#status": "status",
             "#in_progress_expiry": "in_progress_expiration",
         },
-        "ExpressionAttributeValues": {":now": stub.ANY, ":inprogress": "INPROGRESS"},
+        "ExpressionAttributeValues": {":now": stub.ANY, ":now_in_millis": stub.ANY, ":inprogress": "INPROGRESS"},
         "Item": {
             "expiration": stub.ANY,
             "id": hashed_idempotency_key,
@@ -158,16 +158,16 @@ def expected_params_put_item(hashed_idempotency_key):
 def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_validation_key):
     return {
         "ConditionExpression": (
-            "attribute_not_exists(#id) OR #now < :now OR "
-            "(attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now AND #status = :inprogress)"
+            "attribute_not_exists(#id) OR #expiry < :now OR "
+            "(#status = :inprogress AND attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now_in_millis)"
         ),
         "ExpressionAttributeNames": {
             "#id": "id",
-            "#now": "expiration",
+            "#expiry": "expiration",
             "#status": "status",
             "#in_progress_expiry": "in_progress_expiration",
         },
-        "ExpressionAttributeValues": {":now": stub.ANY, ":inprogress": "INPROGRESS"},
+        "ExpressionAttributeValues": {":now": stub.ANY, ":now_in_millis": stub.ANY, ":inprogress": "INPROGRESS"},
         "Item": {
             "expiration": stub.ANY,
             "in_progress_expiration": stub.ANY,

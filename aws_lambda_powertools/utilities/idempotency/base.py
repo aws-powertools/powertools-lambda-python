@@ -121,8 +121,9 @@ class IdempotencyHandler:
         """
         Tries to determine the remaining time available for the current lambda invocation.
 
-        Currently, it only works if the idempotent handler decorator is used, since we need to acess the lambda context.
-        However, this could be improved if we start storing the lambda context globally during the invocation.
+        This only works if the idempotent handler decorator is used, since we need to access the lambda context.
+        However, this could be improved if we start storing the lambda context globally during the invocation. One
+        way to do this is to register the lambda context when configuring the IdempotencyConfig object.
 
         Returns
         -------

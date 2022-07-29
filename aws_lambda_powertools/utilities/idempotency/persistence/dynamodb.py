@@ -168,19 +168,50 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         try:
             logger.debug(f"Putting record for idempotency key: {data_record.idempotency_key}")
 
+            # |     LOCKED     |         RETRY if status = "INPROGRESS"                |     RETRY
+            # |----------------|-------------------------------------------------------|-------------> .... (time)
+            # |             Lambda                                              Idempotency Record
+            # |             Timeout                                                 Timeout
+            # |       (in_progress_expiry)                                          (expiry)
+
+            # Conditions to successfully save a record:
+
+            # The idempotency key does not exist:
+            #    - first time that this invocation key is used
+            #    - previous invocation with the same key was deleted due to TTL
+            idempotency_key_not_exist = "attribute_not_exists(#id)"
+
+            # The idempotency record exists but it's expired:
+            idempotency_expiry_expired = "#expiry < :now"
+
+            # The status of the record is "INPROGRESS", there is an in-progress expiry timestamp, but it's expired
+            inprogress_expiry_expired = " AND ".join(
+                [
+                    "#status = :inprogress",
+                    "attribute_exists(#in_progress_expiry)",
+                    "#in_progress_expiry < :now_in_millis",
+                ]
+            )
+            inprogress_expiry_expired = f"({inprogress_expiry_expired})"
+
+            condition_expression = " OR ".join(
+                [idempotency_key_not_exist, idempotency_expiry_expired, inprogress_expiry_expired]
+            )
+
             self.table.put_item(
                 Item=item,
-                ConditionExpression=(
-                    "attribute_not_exists(#id) OR #now < :now OR "
-                    "(attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now AND #status = :inprogress)"
-                ),
+                ConditionExpression=condition_expression,
                 ExpressionAttributeNames={
                     "#id": self.key_attr,
-                    "#now": self.expiry_attr,
+                    "#expiry": self.expiry_attr,
                     "#in_progress_expiry": self.in_progress_expiry_attr,
                     "#status": self.status_attr,
                 },
-                ExpressionAttributeValues={":now": int(now.timestamp()), ":inprogress": STATUS_CONSTANTS["INPROGRESS"]},
+                ExpressionAttributeValues={
+                    ":now": int(now.timestamp()),
+                    ":now_in_millis": int(now.timestamp() * 1000),
+                    ":inprogress": STATUS_CONSTANTS["INPROGRESS"],
+                },
             )
         except self.table.meta.client.exceptions.ConditionalCheckFailedException:
             logger.debug(f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}")

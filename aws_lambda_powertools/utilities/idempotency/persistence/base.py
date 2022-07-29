@@ -8,7 +8,6 @@ import logging
 import os
 import warnings
 from abc import ABC, abstractmethod
-from math import ceil
 from types import MappingProxyType
 from typing import Any, Dict, Optional
 
@@ -355,12 +354,7 @@ class BasePersistenceLayer(ABC):
             now = datetime.datetime.now()
             period = datetime.timedelta(milliseconds=remaining_time_in_millis)
 
-            # It's very important to use math.ceil here. Otherwise, we might return an integer that will be smaller
-            # than the current time in milliseconds, due to rounding. This will create a scenario where the record
-            # looks already expired in the store, but the invocation is still running.
-            timestamp = ceil((now + period).timestamp())
-
-            data_record.in_progress_expiry_timestamp = timestamp
+            data_record.in_progress_expiry_timestamp = int((now + period).timestamp() * 1000)
         else:
             warnings.warn("Expires in progress is enabled but we couldn't determine the remaining time left")
 

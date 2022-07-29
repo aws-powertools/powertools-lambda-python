@@ -14,6 +14,7 @@ class IdempotencyConfig:
         use_local_cache: bool = False,
         local_cache_max_items: int = 256,
         hash_function: str = "md5",
+        lambda_context: Optional[LambdaContext] = None,
     ):
         """
         Initialize the base persistence layer
@@ -34,6 +35,8 @@ class IdempotencyConfig:
             Max number of items to store in local cache, by default 1024
         hash_function: str, optional
             Function to use for calculating hashes, by default md5.
+        lambda_context: LambdaContext, optional
+            Lambda Context containing information about the invocation, function and execution environment.
         """
         self.event_key_jmespath = event_key_jmespath
         self.payload_validation_jmespath = payload_validation_jmespath
@@ -43,7 +46,7 @@ class IdempotencyConfig:
         self.use_local_cache = use_local_cache
         self.local_cache_max_items = local_cache_max_items
         self.hash_function = hash_function
-        self.lambda_context: Optional[LambdaContext] = None
+        self.lambda_context: Optional[LambdaContext] = lambda_context
 
     def register_lambda_context(self, lambda_context: LambdaContext):
         self.lambda_context = lambda_context

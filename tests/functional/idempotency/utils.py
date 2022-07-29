@@ -19,16 +19,16 @@ def build_idempotency_put_item_stub(
     idempotency_key_hash = f"{function_name}.{handler_name}#{hash_idempotency_key(data)}"
     return {
         "ConditionExpression": (
-            "attribute_not_exists(#id) OR #now < :now OR "
-            "(attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now AND #status = :inprogress)"
+            "attribute_not_exists(#id) OR #expiry < :now OR "
+            "(#status = :inprogress AND attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now_in_millis)"
         ),
         "ExpressionAttributeNames": {
             "#id": "id",
-            "#now": "expiration",
+            "#expiry": "expiration",
             "#status": "status",
             "#in_progress_expiry": "in_progress_expiration",
         },
-        "ExpressionAttributeValues": {":now": stub.ANY, ":inprogress": "INPROGRESS"},
+        "ExpressionAttributeValues": {":now": stub.ANY, ":now_in_millis": stub.ANY, ":inprogress": "INPROGRESS"},
         "Item": {
             "expiration": stub.ANY,
             "id": idempotency_key_hash,
