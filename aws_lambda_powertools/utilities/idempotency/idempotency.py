@@ -62,6 +62,8 @@ def idempotent(
         return handler(event, context)
 
     config = config or IdempotencyConfig()
+    config.register_lambda_context(context)
+
     args = event, context
     idempotency_handler = IdempotencyHandler(
         function=handler,

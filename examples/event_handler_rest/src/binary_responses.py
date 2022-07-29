@@ -11,7 +11,7 @@ logger = Logger()
 
 
 app = APIGatewayRestResolver()
-logo_file: bytes = Path(os.getenv("LAMBDA_TASK_ROOT") + "/logo.svg").read_bytes()
+logo_file: bytes = Path(f"{os.getenv('LAMBDA_TASK_ROOT')}/logo.svg").read_bytes()
 
 
 @app.get("/logo")

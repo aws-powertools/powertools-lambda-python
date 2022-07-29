@@ -155,7 +155,7 @@ class Tracer:
         self.__build_config(
             service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
         )
-        self.provider = self._config["provider"]
+        self.provider: BaseProvider = self._config["provider"]
         self.disabled = self._config["disabled"]
         self.service = self._config["service"]
         self.auto_patch = self._config["auto_patch"]

@@ -131,7 +131,7 @@ python-versions = "*"
 attrs = ">=17.3"
 
 [package.extras]
-dev = ["bumpversion", "wheel", "watchdog", "flake8", "tox", "coverage", "sphinx", "pytest", "hypothesis", "pendulum"]
+dev = ["pendulum", "hypothesis", "pytest", "sphinx", "coverage", "tox", "flake8", "watchdog", "wheel", "bumpversion"]
 
 [[package]]
 name = "cattrs"
@@ -236,11 +236,11 @@ optional = true
 python-versions = ">=3.6"
 
 [package.extras]
-dnssec = ["cryptography (>=2.6)"]
-doh = ["requests", "requests-toolbelt"]
+trio = ["sniffio (>=1.1)", "trio (>=0.14.0)"]
+curio = ["sniffio (>=1.1)", "curio (>=1.2)"]
 idna = ["idna (>=2.1)"]
-curio = ["curio (>=1.2)", "sniffio (>=1.1)"]
-trio = ["trio (>=0.14.0)", "sniffio (>=1.1)"]
+doh = ["requests-toolbelt", "requests"]
+dnssec = ["cryptography (>=2.6)"]
 
 [[package]]
 name = "email-validator"
@@ -399,7 +399,7 @@ python-versions = "*"
 
 [[package]]
 name = "flake8-isort"
-version = "4.1.1"
+version = "4.1.2.post0"
 description = "flake8 plugin that integrates isort ."
 category = "dev"
 optional = false
@@ -408,7 +408,6 @@ python-versions = "*"
 [package.dependencies]
 flake8 = ">=3.2.1,<5"
 isort = ">=4.3.5,<6"
-testfixtures = ">=6.8.0,<7"
 
 [package.extras]
 test = ["pytest-cov"]
@@ -441,7 +440,7 @@ python-versions = "*"
 python-dateutil = ">=2.8.1"
 
 [package.extras]
-dev = ["twine", "markdown", "flake8", "wheel"]
+dev = ["wheel", "flake8", "markdown", "twine"]
 
 [[package]]
 name = "gitdb"
@@ -646,8 +645,8 @@ packaging = "*"
 "ruamel.yaml" = "*"
 
 [package.extras]
-dev = ["coverage", "flake8 (>=3.0)", "pypandoc (>=1.4)"]
-test = ["coverage", "flake8 (>=3.0)"]
+test = ["flake8 (>=3.0)", "coverage"]
+dev = ["pypandoc (>=1.4)", "flake8 (>=3.0)", "coverage"]
 
 [[package]]
 name = "mkdocs"
@@ -861,8 +860,8 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-docs = ["Sphinx (>=4)", "furo (>=2021.7.5b38)", "proselint (>=0.10.2)", "sphinx-autodoc-typehints (>=1.12)"]
-test = ["appdirs (==1.4.4)", "pytest (>=6)", "pytest-cov (>=2.7)", "pytest-mock (>=3.6)"]
+test = ["pytest-mock (>=3.6)", "pytest-cov (>=2.7)", "pytest (>=6)", "appdirs (==1.4.4)"]
+docs = ["sphinx-autodoc-typehints (>=1.12)", "proselint (>=0.10.2)", "furo (>=2021.7.5b38)", "Sphinx (>=4)"]
 
 [[package]]
 name = "pluggy"
@@ -876,8 +875,8 @@ python-versions = ">=3.6"
 importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
 
 [package.extras]
-dev = ["pre-commit", "tox"]
-testing = ["pytest", "pytest-benchmark"]
+testing = ["pytest-benchmark", "pytest"]
+dev = ["tox", "pre-commit"]
 
 [[package]]
 name = "publication"
@@ -1031,7 +1030,7 @@ coverage = {version = ">=5.2.1", extras = ["toml"]}
 pytest = ">=4.6"
 
 [package.extras]
-testing = ["fields", "hunter", "process-tests", "six", "pytest-xdist", "virtualenv"]
+testing = ["virtualenv", "pytest-xdist", "six", "process-tests", "hunter", "fields"]
 
 [[package]]
 name = "pytest-forked"
@@ -1216,19 +1215,6 @@ importlib-metadata = {version = ">=1.7.0", markers = "python_version < \"3.8\""}
 pbr = ">=2.0.0,<2.1.0 || >2.1.0"
 
 [[package]]
-name = "testfixtures"
-version = "6.18.3"
-description = "A collection of helpers and mock objects for unit tests and doc tests."
-category = "dev"
-optional = false
-python-versions = "*"
-
-[package.extras]
-build = ["setuptools-git", "wheel", "twine"]
-docs = ["sphinx", "zope.component", "sybil", "twisted", "mock", "django (<2)", "django"]
-test = ["pytest (>=3.6)", "pytest-cov", "pytest-django", "zope.component", "sybil", "twisted", "mock", "django (<2)", "django"]
-
-[[package]]
 name = "toml"
 version = "0.10.2"
 description = "Python Library for Tom's Obvious, Minimal Language"
@@ -1253,12 +1239,31 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "types-requests"
+version = "2.28.5"
+description = "Typing stubs for requests"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+types-urllib3 = "<1.27"
+
+[[package]]
+name = "types-urllib3"
+version = "1.26.17"
+description = "Typing stubs for urllib3"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
-version = "4.1.1"
-description = "Backported and Experimental Type Hints for Python 3.6+"
+version = "4.3.0"
+description = "Backported and Experimental Type Hints for Python 3.7+"
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [[package]]
 name = "urllib3"
@@ -1323,7 +1328,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "242d708424414a3e52bf02ccbb2b6f49d88724c1d4583a133ebc703548b28e88"
+content-hash = "f728d2bb00dfcca0cacf38bb7a7f95cf15a2dc1a11efc79ae4dc5e214efa91da"
 
 [metadata.files]
 atomicwrites = [
@@ -1497,8 +1502,8 @@ flake8-fixme = [
     {file = "flake8_fixme-1.1.1-py2.py3-none-any.whl", hash = "sha256:226a6f2ef916730899f29ac140bed5d4a17e5aba79f00a0e3ae1eff1997cb1ac"},
 ]
 flake8-isort = [
-    {file = "flake8-isort-4.1.1.tar.gz", hash = "sha256:d814304ab70e6e58859bc5c3e221e2e6e71c958e7005239202fee19c24f82717"},
-    {file = "flake8_isort-4.1.1-py3-none-any.whl", hash = "sha256:c4e8b6dcb7be9b71a02e6e5d4196cefcef0f3447be51e82730fb336fff164949"},
+    {file = "flake8-isort-4.1.2.post0.tar.gz", hash = "sha256:dee69bc3c09f0832df88acf795845db8a6673b79237371a05fa927ce095248e5"},
+    {file = "flake8_isort-4.1.2.post0-py3-none-any.whl", hash = "sha256:4f95b40706dbb507cff872b34683283662e945d6028d3c8257e69de5fc6b7446"},
 ]
 flake8-variables-names = [
     {file = "flake8_variables_names-0.0.4.tar.gz", hash = "sha256:d6fa0571a807c72940b5773827c5760421ea6f8206595ff0a8ecfa01e42bf2cf"},
@@ -1935,10 +1940,6 @@ stevedore = [
     {file = "stevedore-3.5.0-py3-none-any.whl", hash = "sha256:a547de73308fd7e90075bb4d301405bebf705292fa90a90fc3bcf9133f58616c"},
     {file = "stevedore-3.5.0.tar.gz", hash = "sha256:f40253887d8712eaa2bb0ea3830374416736dc8ec0e22f5a65092c1174c44335"},
 ]
-testfixtures = [
-    {file = "testfixtures-6.18.3-py2.py3-none-any.whl", hash = "sha256:6ddb7f56a123e1a9339f130a200359092bd0a6455e31838d6c477e8729bb7763"},
-    {file = "testfixtures-6.18.3.tar.gz", hash = "sha256:2600100ae96ffd082334b378e355550fef8b4a529a6fa4c34f47130905c7426d"},
-]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
@@ -1979,9 +1980,17 @@ typed-ast = [
     {file = "typed_ast-1.4.3-cp39-cp39-win_amd64.whl", hash = "sha256:9c6d1a54552b5330bc657b7ef0eae25d00ba7ffe85d9ea8ae6540d2197a3788c"},
     {file = "typed_ast-1.4.3.tar.gz", hash = "sha256:fb1bbeac803adea29cedd70781399c99138358c26d05fcbd23c13016b7f5ec65"},
 ]
+types-requests = [
+    {file = "types-requests-2.28.5.tar.gz", hash = "sha256:ac618bfefcb3742eaf97c961e13e9e5a226e545eda4a3dbe293b898d40933ad1"},
+    {file = "types_requests-2.28.5-py3-none-any.whl", hash = "sha256:98ab647ae88b5e2c41d6d20cfcb5117da1bea561110000b6fdeeea07b3e89877"},
+]
+types-urllib3 = [
+    {file = "types-urllib3-1.26.17.tar.gz", hash = "sha256:73fd274524c3fc7cd8cd9ceb0cb67ed99b45f9cb2831013e46d50c1451044800"},
+    {file = "types_urllib3-1.26.17-py3-none-any.whl", hash = "sha256:0d027fcd27dbb3cb532453b4d977e05bc1e13aefd70519866af211b3003d895d"},
+]
 typing-extensions = [
-    {file = "typing_extensions-4.1.1-py3-none-any.whl", hash = "sha256:21c85e0fe4b9a155d0799430b0ad741cdce7e359660ccbd8b530613e8df88ce2"},
-    {file = "typing_extensions-4.1.1.tar.gz", hash = "sha256:1a9462dcc3347a79b1f1c0271fbe79e844580bb598bafa1ed208b94da3cdcd42"},
+    {file = "typing_extensions-4.3.0-py3-none-any.whl", hash = "sha256:25642c956049920a5aa49edcdd6ab1e06d7e5d467fc00e0506c44ac86fbfca02"},
+    {file = "typing_extensions-4.3.0.tar.gz", hash = "sha256:e6d2677a32f47fc7eb2795db1dd15c1f34eff616bcaf2cfb5e997f854fa1c4a6"},
 ]
 urllib3 = [
     {file = "urllib3-1.26.7-py2.py3-none-any.whl", hash = "sha256:c4fdf4019605b6e5423637e01bc9fe4daef873709a7973e195ceba0a62bbc844"},

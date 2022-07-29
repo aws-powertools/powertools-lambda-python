@@ -1,5 +1,12 @@
+import sys
+
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
+
 import asyncio
-from typing import TypedDict
+from typing import List
 
 import aiohttp
 
@@ -22,11 +29,11 @@ class Todo(TypedDict, total=False):
 
 
 @app.resolver(type_name="Query", field_name="listTodos")
-async def list_todos() -> list[Todo]:
+async def list_todos() -> List[Todo]:
     async with aiohttp.ClientSession(trace_configs=[aiohttp_trace_config()]) as session:
         async with session.get("https://jsonplaceholder.typicode.com/todos") as resp:
-            # first two results to demo assertion
-            return await resp.json()[:2]
+            result: List[Todo] = await resp.json()
+            return result[:2]  # first two results to demo assertion
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
