@@ -191,7 +191,7 @@ class IdempotencyHandler:
 
         if data_record.status == STATUS_CONSTANTS["INPROGRESS"]:
             if data_record.in_progress_expiry_timestamp is not None and data_record.in_progress_expiry_timestamp < int(
-                datetime.datetime.now().timestamp()
+                datetime.datetime.now().timestamp() * 1000
             ):
                 raise IdempotencyInconsistentStateError(
                     "item should have been expired in-progress because it already time-outed."
