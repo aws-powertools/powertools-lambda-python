@@ -218,21 +218,16 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
     def _update_record(self, data_record: DataRecord):
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
-        update_expression = (
-            "SET #response_data = :response_data, #expiry = :expiry, "
-            "#status = :status, #in_progress_expiry = :in_progress_expiry"
-        )
+        update_expression = "SET #response_data = :response_data, #expiry = :expiry, " "#status = :status"
         expression_attr_values = {
             ":expiry": data_record.expiry_timestamp,
             ":response_data": data_record.response_data,
             ":status": data_record.status,
-            ":in_progress_expiry": data_record.in_progress_expiry_timestamp,
         }
         expression_attr_names = {
-            "#response_data": self.data_attr,
             "#expiry": self.expiry_attr,
+            "#response_data": self.data_attr,
             "#status": self.status_attr,
-            "#in_progress_expiry": self.in_progress_expiry_attr,
         }
 
         if self.payload_validation_enabled:
