@@ -49,4 +49,5 @@ class IdempotencyConfig:
         self.lambda_context: Optional[LambdaContext] = lambda_context
 
     def register_lambda_context(self, lambda_context: LambdaContext):
+        """Captures the Lambda context, to calculate the remaining time before the invocation times out"""
         self.lambda_context = lambda_context
