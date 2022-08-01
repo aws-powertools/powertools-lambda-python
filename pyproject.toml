@@ -66,7 +66,7 @@ pytest-benchmark = "^3.4.1"
 mypy-boto3-cloudwatch = "^1.24.35"
 mypy-boto3-lambda = "^1.24.0"
 mypy-boto3-xray = "^1.24.0"
-types-requests = "^2.28.5"
+types-requests = "^2.28.6"
 typing-extensions = { version = "^4.3.0", python = ">=3.7" }
 
 [tool.poetry.extras]
