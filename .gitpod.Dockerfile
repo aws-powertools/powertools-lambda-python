@@ -1,5 +1,5 @@
 # See here all gitpod images available: https://hub.docker.com/r/gitpod/workspace-python-3.10/tags
-# Current python version: 3.10.5
+# Current python version: 3.9.13
 FROM gitpod/workspace-python-3.9@sha256:de87d4ebffe8daab2e8fef96ec20497ae4f39e8dcb9dec1483d0be61ea78e8cd
 
 WORKDIR /app
