@@ -36,6 +36,8 @@ To send us a pull request, please follow these steps:
 5. Send us a pull request with a [conventional semantic title](https://github.com/awslabs/aws-lambda-powertools-python/pull/67), and answering any default questions in the pull request interface.
 6. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
 
+Optionally you can use [Gitpod](https://gitpod.io/) to have a pre-configured dev environment. If you choose to use Gitpod, there is no need to install anything on your machine, as the environment will be pre-configured with all necessary dependencies.  
+
 GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
 [creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
 
