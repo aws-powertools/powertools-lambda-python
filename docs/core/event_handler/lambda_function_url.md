@@ -1,13 +1,13 @@
 ---
-title: REST API
+title: Lambda Function URL
 description: Core utility
 ---
 
-Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Balancer (ALB), and Lambda Function URLs.
+Event handler for AWS Lambda Function URLs.
 
 ## Key Features
 
-* Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API, ALB and Lambda Function URLs.
+* Lightweight routing to reduce boilerplate for Lambda Function URLs
 * Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer
 * Built-in integration with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"} for self-documented event schema
 
@@ -18,23 +18,15 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 
 ### Required resources
 
-If you're using any API Gateway integration, you must have an existing [API Gateway Proxy integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html){target="_blank"} or [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html){target="_blank"} configured to invoke your Lambda function.
+You must have an existing AWS Lambda Function with a [configured Function URL](https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html).
 
-This is the sample infrastructure for API Gateway and Lambda Function URLs we are using for the examples in this documentation.
+This is the sample infrastructure for AWS Lambda we are using for the examples in this documentation.
 
 ???+ info "There is no additional permissions or dependencies required to use this utility."
 
-=== "API Gateway SAM Template"
-
-    ```yaml title="AWS Serverless Application Model (SAM) example"
-    --8<-- "examples/event_handler_rest/sam/template.yaml"
-    ```
-
-=== "Lambda Function URL SAM Template"
-
-    ```yaml title="AWS Serverless Application Model (SAM) example"
-    --8<-- "examples/event_handler_lambda_function_url/sam/template.yaml"
-    ```
+```yaml title="AWS Serverless Application Model (SAM) example"
+--8<-- "examples/event_handler_lambda_function_url/sam/template.yaml"
+```
 
 ### Event Resolvers
 
@@ -42,7 +34,7 @@ Before you decorate your functions to handle a given path and HTTP method(s), yo
 
 A resolver will handle request resolution, including [one or more routers](#split-routes-with-router), and give you access to the current event via typed properties.
 
-For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, `ALBResolver`, and `LambdaFunctionUrlResolver` .
+For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, and `ALBResolver`.
 
 ???+ info
     We will use `APIGatewayRestResolver` as the default across examples.
@@ -94,22 +86,6 @@ When using Amazon Application Load Balancer (ALB) to front your Lambda functions
 ```python hl_lines="5 11" title="Using ALB resolver"
 --8<-- "examples/event_handler_rest/src/getting_started_alb_api_resolver.py"
 ```
-
-#### Lambda Function URL
-
-When using an [AWS Lambda Function URL](https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html), you can use `LambdaFunctionUrlResolver`.
-
-=== "getting_started_lambda_function_url_resolver.py"
-
-    ```python hl_lines="5 11" title="Using Lambda Function URL resolver"
-    --8<-- "examples/event_handler_lambda_function_url/src/getting_started_lambda_function_url_resolver.py"
-    ```
-
-=== "getting_started_lambda_function_url_resolver.json"
-
-    ```json hl_lines="4-5" title="Example payload delivered to the handler"
-    --8<-- "examples/event_handler_lambda_function_url/src/getting_started_lambda_function_url_resolver.json"
-    ```
 
 ### Dynamic routes
 
@@ -294,7 +270,7 @@ This will ensure that CORS headers are always returned as part of the response w
 
 #### Pre-flight
 
-Pre-flight (OPTIONS) calls are typically handled at the API Gateway or Lambda Function URL level as per [our sample infrastructure](#required-resources), no Lambda integration necessary. However, ALB expects you to handle pre-flight requests.
+Pre-flight (OPTIONS) calls are typically handled at the API Gateway level as per [our sample infrastructure](#required-resources), no Lambda integration necessary. However, ALB expects you to handle pre-flight requests.
 
 For convenience, we automatically handle that for you as long as you [setup CORS in the constructor level](#cors).
 
@@ -362,7 +338,6 @@ Like `compress` feature, the client must send the `Accept` header with the corre
 
 ???+ warning
     This feature requires API Gateway to configure binary media types, see [our sample infrastructure](#required-resources) for reference.
-    For Lambda Function URLs, no additional configuration is necessary.
 
 === "binary_responses.py"
 
@@ -405,7 +380,7 @@ This will enable full tracebacks errors in the response, print request and respo
 
 ### Custom serializer
 
-You can instruct an event handler to use a custom serializer to best suit your needs, for example take into account Enums when serializing.
+You can instruct API Gateway handler to use a custom serializer to best suit your needs, for example take into account Enums when serializing.
 
 ```python hl_lines="35 40" title="Using a custom JSON serializer for responses"
 --8<-- "examples/event_handler_rest/src/custom_serializer.py"
@@ -526,7 +501,7 @@ A micro function means that your final code artifact will be different to each f
 
 **Downsides**
 
-* **Upfront investment**. You need custom build tooling to bundle assets, including [C bindings for runtime compatibility](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html){target="_blank"}. Operations become more elaborate — you need to standardize tracing labels/annotations, structured logging, and metrics to pinpoint root causes.
+* **Upfront investment**. You need custom build tooling to bundle assets, including [C bindings for runtime compatibility](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html){target="_blank"}. `Operations become more elaborate — you need to standardize tracing labels/annotations, structured logging, and metrics to pinpoint root causes.
     * Engineering discipline is necessary for both approaches. Micro-function approach however requires further attention in consistency as the number of functions grow, just like any distributed system.
 * **Harder to share code**. Shared code must be carefully evaluated to avoid unnecessary deployments when that changes. Equally, if shared code isn't a library,
 your development, building, deployment tooling need to accommodate the distinct layout.
