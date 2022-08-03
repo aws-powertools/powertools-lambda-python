@@ -9,6 +9,11 @@ dev:
 	poetry install --extras "pydantic"
 	pre-commit install
 
+dev-gitpod:
+	pip install --upgrade pip poetry
+	poetry install --extras "pydantic"
+	pre-commit install
+
 format:
 	poetry run isort aws_lambda_powertools tests examples
 	poetry run black aws_lambda_powertools tests examples

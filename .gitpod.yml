@@ -1,0 +1,19 @@
+image:
+  file: .gitpod.Dockerfile
+tasks:
+  - init: make dev-gitpod
+vscode:
+  extensions:
+    - ms-python.python # IntelliSense (Pylance), Linting, Debugging (multi-threaded, remote), Jupyter Notebooks, code formatting, refactoring, unit tests, and more.
+    - littlefoxteam.vscode-python-test-adapter # Run your Python tests in the Sidebar of Visual Studio Code
+    - ms-azuretools.vscode-docker # Makes it easy to create, manage, and debug containerized applications.
+    - davidanson.vscode-markdownlint # Markdown linting and style checking for Visual Studio Code
+    - bungcip.better-toml # Better TOML Language support
+    - oderwat.indent-rainbow # Makes indentation easier to read
+    - yzhang.markdown-all-in-one # Autoformat, better visualization, snippets, and markdown export to multiple fmts
+    - bierner.markdown-mermaid # Previews mermaid diagrams when previewing markdown
+    - matangover.mypy # Highlight mypy issues
+    - njpwerner.autodocstring # Auto-generate docsstrings in numpy format that we use
+    - netcorext.uuid-generator # For those helping create code snippets for docs
+    - streetsidesoftware.code-spell-checker # Spell checker that works with camel case too
+    - bungcip.better-toml # In case GitPod doesn't have support for TOML pyproject.toml
