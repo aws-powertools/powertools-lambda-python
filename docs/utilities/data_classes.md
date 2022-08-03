@@ -3,6 +3,8 @@ title: Event Source Data Classes
 description: Utility
 ---
 
+<!-- markdownlint-disable MD043 -->
+
 Event Source Data Classes utility provides classes self-describing Lambda event sources.
 
 ## Key Features
@@ -73,6 +75,7 @@ Event Source | Data_class
 [DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName`
 [EventBridge](#eventbridge) | `EventBridgeEvent`
 [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent`
+[Lambda Function URL](#lambda-function-url) | `LambdaFunctionUrlEvent`
 [Rabbit MQ](#rabbit-mq) | `RabbitMQEvent`
 [S3](#s3) | `S3Event`
 [S3 Object Lambda](#s3-object-lambda) | `S3ObjectLambdaEvent`
@@ -835,6 +838,18 @@ or plain text, depending on the original payload.
         data = kinesis_record.data_as_json()
 
         do_something_with(data)
+    ```
+
+### Lambda Function URL
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import event_source, LambdaFunctoinUrlEvent
+
+    @event_source(data_class=LambdaFunctionUrlEvent)
+    def lambda_handler(event: LambdaFunctionUrlEvent, context):
+        do_something_with(event.body)
     ```
 
 ### Rabbit MQ
