@@ -845,7 +845,7 @@ or plain text, depending on the original payload.
 === "app.py"
 
     ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, LambdaFunctoinUrlEvent
+    from aws_lambda_powertools.utilities.data_classes import event_source, LambdaFunctionUrlEvent
 
     @event_source(data_class=LambdaFunctionUrlEvent)
     def lambda_handler(event: LambdaFunctionUrlEvent, context):
