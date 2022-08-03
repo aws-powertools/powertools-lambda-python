@@ -22,10 +22,10 @@ class LambdaFunctionUrlResolver(ApiGatewayResolver):
 
     ```python
     from aws_lambda_powertools import Tracer
-    from aws_lambda_powertools.event_handler import LambdaFunctoinUrlResolver
+    from aws_lambda_powertools.event_handler import LambdaFunctionUrlResolver
 
     tracer = Tracer()
-    app = LambdaFunctoinUrlResolver()
+    app = LambdaFunctionUrlResolver()
 
     @app.get("/get-call")
     def simple_get():
