@@ -6,4 +6,5 @@ APPSYNC_AUTHORIZER = "requestContext.requestId"
 APPSYNC_RESOLVER = 'request.headers."x-amzn-trace-id"'
 APPLICATION_LOAD_BALANCER = 'headers."x-amzn-trace-id"'
 EVENT_BRIDGE = "id"
+LAMBDA_FUNCTION_URL = "requestContext.requestId"
 S3_OBJECT_LAMBDA = "xAmzRequestId"

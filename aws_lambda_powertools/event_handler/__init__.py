@@ -11,6 +11,7 @@ from .api_gateway import (
     Response,
 )
 from .appsync import AppSyncResolver
+from .lambda_function_url import LambdaFunctionUrlResolver
 
 __all__ = [
     "AppSyncResolver",
@@ -19,5 +20,6 @@ __all__ = [
     "ALBResolver",
     "ApiGatewayResolver",
     "CORSConfig",
+    "LambdaFunctionUrlResolver",
     "Response",
 ]
