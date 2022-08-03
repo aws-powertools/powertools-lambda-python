@@ -20,7 +20,7 @@ keywords = ["aws_lambda_powertools", "aws", "tracing", "logging", "lambda", "pow
 license = "MIT-0"
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
+python = "^3.6.2, < 3.10"
 aws-xray-sdk = "^2.8.0"
 fastjsonschema = "^2.14.5"
 boto3 = "^1.18"
