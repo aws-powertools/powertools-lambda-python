@@ -21,7 +21,7 @@ Contributions via pull requests are much appreciated. Before sending us a pull r
 
 1. You are working against the latest source on the **develop** branch.
 2. You check existing open, and recently merged pull requests to make sure someone else hasn't addressed the problem already.
-3. You open a [RFC issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE) to discuss any significant work - we would hate for your time to be wasted.
+3. You open an [issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new/choose) before you begin any implementation. We value your time and bandwidth. As such, any pull requests created on non-triaged issues might not be successful.
 
 ### Dev setup
 
