@@ -17,33 +17,33 @@ reported the issue. Please try to include as much information as you can.
 
 ## Contributing via Pull Requests
 
-We are temporarily de-prioritizing and pausing external contributions until end of July 2022. You can read more here: https://github.com/awslabs/aws-lambda-powertools-python/issues/1076
-
-<!-- Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
+Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
 
 1. You are working against the latest source on the **develop** branch.
 2. You check existing open, and recently merged pull requests to make sure someone else hasn't addressed the problem already.
-3. You open a [RFC issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2C+triage&template=rfc.md&title=RFC%3A+) to discuss any significant work - we would hate for your time to be wasted. -->
+3. You open a [RFC issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE) to discuss any significant work - we would hate for your time to be wasted.
 
 ### Dev setup
 
+Firstly, [fork the repository](https://github.com/awslabs/aws-lambda-powertools-python/fork).
+
+To setup your development environment, we recommend using our pre-configured Cloud environment: https://gitpod.io/#https://github.com/YOUR_USERNAME/aws-lambda-powertools-python. Replace YOUR_USERNAME with your GitHub username or organization so the Cloud environment can target your fork accordingly.
+
+Alternatively, you can use `make dev` within your local virtual environment.
+
 To send us a pull request, please follow these steps:
 
-1. Fork the repository.
-2. Install dependencies in a virtual env with poetry, and pre-commit hooks: `make dev`
-3. Create a new branch to focus on the specific change you are contributing e.g. `improv/logger-debug-sampling`
-4. Run all tests, and code baseline checks: `make pr`
+1. Create a new branch to focus on the specific change you are contributing e.g. `improv/logger-debug-sampling`
+2. Run all tests, and code baseline checks: `make pr`
     - Git hooks will run linting and formatting while `make pr` run deep checks that also run in the CI process
-4. Commit to your fork using clear commit messages.
-5. Send us a pull request with a [conventional semantic title](https://github.com/awslabs/aws-lambda-powertools-python/pull/67), and answering any default questions in the pull request interface.
-6. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
-
-Optionally you can use [Gitpod](https://gitpod.io/) to have a pre-configured dev environment. If you choose to use Gitpod, there is no need to install anything on your machine, as the environment will be pre-configured with all necessary dependencies.  
+3. Commit to your fork using clear commit messages.
+4. Send us a pull request with a [conventional semantic title](https://github.com/awslabs/aws-lambda-powertools-python/pull/67), and answering any default questions in the pull request interface.
+5. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
 
 GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
 [creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
 
-#### Local documentation
+### Local documentation
 
 You might find useful to run both the documentation website and the API reference locally while contributing:
 
