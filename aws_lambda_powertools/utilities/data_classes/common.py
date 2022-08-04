@@ -395,6 +395,7 @@ class BaseRequestContextV2(DictWrapper):
     @property
     def authentication(self) -> Optional[RequestContextClientCert]:
         """Optional when using mutual TLS authentication"""
+        # FunctionURL might have NONE as AuthZ
         authentication = self["requestContext"].get("authentication") or {}
         client_cert = authentication.get("clientCert")
         return None if client_cert is None else RequestContextClientCert(client_cert)

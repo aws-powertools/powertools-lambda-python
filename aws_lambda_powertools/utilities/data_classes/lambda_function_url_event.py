@@ -6,9 +6,9 @@ class LambdaFunctionUrlEvent(APIGatewayProxyEventV2):
 
     Notes:
     -----
-    For now, this seems to follow the exact same payload as HTTP APIs Payload Format Version 2.0.
-    Certain keys in this payload format don't make sense for function urls (e.g: `routeKey`, `stage`).
-    These keys will have default values that come on the payload, but they are not useful since they can't be changed.
+    Lambda Function URL follows the API Gateway HTTP APIs Payload Format Version 2.0.
+    
+    Keys related to API Gateway features not available in Function URL use a sentinel value (e.g.`routeKey`, `stage`).
 
     Documentation:
     - https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html

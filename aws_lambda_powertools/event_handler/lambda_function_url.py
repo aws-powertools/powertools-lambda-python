@@ -10,7 +10,7 @@ class LambdaFunctionUrlResolver(ApiGatewayResolver):
 
     Notes:
     -----
-    For now, this seems to work the same way as API Gateway HTTP APIs Payload Format Version 2.0.
+    Lambda Function URL follows the API Gateway HTTP APIs Payload Format Version 2.0.
 
     Documentation:
     - https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html
@@ -18,7 +18,7 @@ class LambdaFunctionUrlResolver(ApiGatewayResolver):
 
     Examples
     --------
-    Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
+    Simple example integrating with Tracer
 
     ```python
     from aws_lambda_powertools import Tracer
@@ -34,7 +34,7 @@ class LambdaFunctionUrlResolver(ApiGatewayResolver):
     @app.post("/post-call")
     def simple_post():
         post_data: dict = app.current_event.json_body
-        return {"message": post_data["value"]}
+        return {"message": post_data}
 
     @tracer.capture_lambda_handler
     def lambda_handler(event, context):

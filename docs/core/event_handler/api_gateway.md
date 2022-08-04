@@ -97,7 +97,7 @@ When using Amazon Application Load Balancer (ALB) to front your Lambda functions
 
 #### Lambda Function URL
 
-When using an [AWS Lambda Function URL](https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html), you can use `LambdaFunctionUrlResolver`.
+When using [AWS Lambda Function URL](https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html), you can use `LambdaFunctionUrlResolver`.
 
 === "getting_started_lambda_function_url_resolver.py"
 
@@ -294,7 +294,7 @@ This will ensure that CORS headers are always returned as part of the response w
 
 #### Pre-flight
 
-Pre-flight (OPTIONS) calls are typically handled at the API Gateway or Lambda Function URL level as per [our sample infrastructure](#required-resources), no Lambda integration necessary. However, ALB expects you to handle pre-flight requests.
+Pre-flight (OPTIONS) calls are typically handled at the API Gateway or Lambda Function URL level as per [our sample infrastructure](#required-resources), no Lambda integration is necessary. However, ALB expects you to handle pre-flight requests.
 
 For convenience, we automatically handle that for you as long as you [setup CORS in the constructor level](#cors).
 
@@ -362,8 +362,9 @@ Like `compress` feature, the client must send the `Accept` header with the corre
 
 ???+ warning
     This feature requires API Gateway to configure binary media types, see [our sample infrastructure](#required-resources) for reference.
-    For Lambda Function URLs, no additional configuration is necessary.
 
+???+ note
+    Lambda Function URLs handle binary media types automatically.
 === "binary_responses.py"
 
     ```python hl_lines="14 20"
@@ -405,7 +406,7 @@ This will enable full tracebacks errors in the response, print request and respo
 
 ### Custom serializer
 
-You can instruct an event handler to use a custom serializer to best suit your needs, for example take into account Enums when serializing.
+You can instruct event handler to use a custom serializer to best suit your needs, for example take into account Enums when serializing.
 
 ```python hl_lines="35 40" title="Using a custom JSON serializer for responses"
 --8<-- "examples/event_handler_rest/src/custom_serializer.py"

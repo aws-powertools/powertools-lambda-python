@@ -28,4 +28,4 @@ Resources:
       CodeUri: ../src
       Description: API handler function
       FunctionUrlConfig:
-        AuthType: NONE
+        AuthType: NONE  # AWS_IAM for added security beyond sample documentation
