@@ -48,5 +48,5 @@
   "body": "Hello from client!",
   "pathParameters": null,
   "isBase64Encoded": false,
-  "stageVariables": null,
+  "stageVariables": null
 }
