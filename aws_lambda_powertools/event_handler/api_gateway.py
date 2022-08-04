@@ -17,7 +17,12 @@ from aws_lambda_powertools.event_handler.exceptions import NotFoundError, Servic
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
 from aws_lambda_powertools.shared.json_encoder import Encoder
-from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
+from aws_lambda_powertools.utilities.data_classes import (
+    ALBEvent,
+    APIGatewayProxyEvent,
+    APIGatewayProxyEventV2,
+    LambdaFunctionUrlEvent,
+)
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -36,6 +41,7 @@ class ProxyEventType(Enum):
     APIGatewayProxyEvent = "APIGatewayProxyEvent"
     APIGatewayProxyEventV2 = "APIGatewayProxyEventV2"
     ALBEvent = "ALBEvent"
+    LambdaFunctionUrlEvent = "LambdaFunctionUrlEvent"
 
 
 class CORSConfig:
@@ -546,6 +552,9 @@ class ApiGatewayResolver(BaseRouter):
         if self._proxy_type == ProxyEventType.APIGatewayProxyEventV2:
             logger.debug("Converting event to API Gateway HTTP API contract")
             return APIGatewayProxyEventV2(event)
+        if self._proxy_type == ProxyEventType.LambdaFunctionUrlEvent:
+            logger.debug("Converting event to Lambda Function URL contract")
+            return LambdaFunctionUrlEvent(event)
         logger.debug("Converting event to ALB contract")
         return ALBEvent(event)
 

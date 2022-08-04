@@ -1,0 +1,51 @@
+{
+  "version": "2.0",
+  "routeKey": "$default",
+  "rawPath": "/todos",
+  "rawQueryString": "",
+  "headers": {
+    "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "x-amzn-tls-version": "TLSv1.2",
+    "x-amz-date": "20220803T092917Z",
+    "x-forwarded-proto": "https",
+    "x-forwarded-port": "443",
+    "x-forwarded-for": "123.123.123.123",
+    "accept": "application/xml",
+    "x-amzn-tls-cipher-suite": "ECDHE-RSA-AES128-GCM-SHA256",
+    "x-amzn-trace-id": "Root=1-63ea3fee-51ba94542feafa3928745ba3",
+    "host": "xxxxxxxxxxxxx.lambda-url.eu-central-1.on.aws",
+    "content-type": "application/json",
+    "accept-encoding": "gzip, deflate",
+    "user-agent": "Custom User Agent"
+  },
+  "requestContext": {
+    "accountId": "123457890",
+    "apiId": "xxxxxxxxxxxxxxxxxxxx",
+    "authorizer": {
+      "iam": {
+        "accessKey": "AAAAAAAAAAAAAAAAAA",
+        "accountId": "123457890",
+        "callerId": "AAAAAAAAAAAAAAAAAA",
+        "cognitoIdentity": null,
+        "principalOrgId": "o-xxxxxxxxxxxx",
+        "userArn": "arn:aws:iam::AAAAAAAAAAAAAAAAAA:user/user",
+        "userId": "AAAAAAAAAAAAAAAAAA"
+      }
+    },
+    "domainName": "xxxxxxxxxxxxx.lambda-url.eu-central-1.on.aws",
+    "domainPrefix": "xxxxxxxxxxxxx",
+    "http": {
+      "method": "GET",
+      "path": "/todos",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "123.123.123.123",
+      "userAgent": "Custom User Agent"
+    },
+    "requestId": "24f9ef37-8eb7-45fe-9dbc-a504169fd2f8",
+    "routeKey": "$default",
+    "stage": "$default",
+    "time": "03/Aug/2022:09:29:18 +0000",
+    "timeEpoch": 1659518958068
+  },
+  "isBase64Encoded": false
+}
