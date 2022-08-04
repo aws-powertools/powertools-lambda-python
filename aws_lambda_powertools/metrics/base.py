@@ -14,7 +14,7 @@ from .exceptions import MetricUnitError, MetricValueError, SchemaValidationError
 logger = logging.getLogger(__name__)
 
 MAX_METRICS = 100
-MAX_DIMENSIONS = 9
+MAX_DIMENSIONS = 29
 
 
 class MetricUnit(Enum):
@@ -233,7 +233,7 @@ class MetricManager:
             Dimension value
         """
         logger.debug(f"Adding dimension: {name}:{value}")
-        if len(self.dimension_set) == 9:
+        if len(self.dimension_set) == MAX_DIMENSIONS:
             raise SchemaValidationError(
                 f"Maximum number of dimensions exceeded ({MAX_DIMENSIONS}): Unable to add dimension {name}."
             )
