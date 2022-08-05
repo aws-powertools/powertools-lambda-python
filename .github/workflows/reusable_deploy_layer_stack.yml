@@ -56,11 +56,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
       - name: Install poetry
-        # CDK spawns system python when compiling stack
-        # therefore it ignores activated virtual env, thus missing deps
-        run: |
-          pipx install poetry
-          poetry config virtualenvs.create false
+        run: pipx install poetry
       - name: aws credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -75,6 +71,12 @@ jobs:
         with:
           python-version: "3.9"
           cache: "pip"
+      - name: Install project dependencies
+        # CDK spawns system python when compiling stack
+        # therefore it ignores both activated virtual env and cached interpreter by GH
+        run: |
+          poetry export --format requirements.txt --output requirements.txt
+          pip install requirements.txt
       - name: install cdk and deps
         run: |
           npm install -g aws-cdk@2.29.0

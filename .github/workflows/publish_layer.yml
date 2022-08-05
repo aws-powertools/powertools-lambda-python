@@ -29,11 +29,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install poetry
-        # CDK spawns system python when compiling stack
-        # therefore it ignores activated virtual env, thus missing deps
-        run: |
-          pipx install poetry
-          poetry config virtualenvs.create false
+        run: pipx install poetry
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -42,7 +38,13 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.9"
-          cache: "poetry"
+          cache: "pip"
+      - name: Install project dependencies
+        # CDK spawns system python when compiling stack
+        # therefore it ignores both activated virtual env and cached interpreter by GH
+        run: |
+          poetry export --format requirements.txt --output requirements.txt
+          pip install requirements.txt
       - name: Set release notes tag
         run: |
           RELEASE_INPUT=${{ inputs.latest_published_version }}
@@ -53,8 +55,6 @@ jobs:
         run: |
           npm install -g aws-cdk@2.29.0
           cdk --version
-      - name: install deps
-        run: poetry install
       - name: CDK build
         run: cdk synth --context version=$RELEASE_TAG_VERSION -o cdk.out
       - name: zip output
