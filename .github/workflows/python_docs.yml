@@ -11,6 +11,7 @@ on:
       - "docs/**"
       - "mkdocs.yml"
       - "examples/**"
+  workflow_dispatch:
 
 jobs:
   changelog:
@@ -49,6 +50,8 @@ jobs:
         run: |
           git config --global user.name Docs deploy
           git config --global user.email docs@dummy.bot.com
+          git config pull.rebase true
+          git pull --rebase
       - name: Build docs website and API reference
         run: make release-docs VERSION="develop" ALIAS="stage"
       - name: Deploy all docs
