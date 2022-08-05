@@ -8,7 +8,7 @@ import pytest
 from aws_lambda_powertools import Metrics, single_metric
 from aws_lambda_powertools.metrics import MetricUnit, MetricUnitError, MetricValueError, SchemaValidationError
 from aws_lambda_powertools.metrics import metrics as metrics_global
-from aws_lambda_powertools.metrics.base import MetricManager
+from aws_lambda_powertools.metrics.base import MAX_DIMENSIONS, MetricManager
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -321,7 +321,7 @@ def test_schema_no_metrics(service, namespace):
 
 def test_exceed_number_of_dimensions(metric, namespace):
     # GIVEN we have more dimensions than CloudWatch supports (N+1)
-    dimensions = [{"name": f"test_{i}", "value": "test"} for i in range(31)]
+    dimensions = [{"name": f"test_{i}", "value": "test"} for i in range(MAX_DIMENSIONS + 2)]
 
     # WHEN we attempt to serialize them into a valid EMF object
     # THEN it should fail validation and raise SchemaValidationError
@@ -334,7 +334,7 @@ def test_exceed_number_of_dimensions(metric, namespace):
 def test_exceed_number_of_dimensions_with_service(metric, namespace, monkeypatch):
     # GIVEN we have service set and add more dimensions than CloudWatch supports (N-1)
     monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", "test_service")
-    dimensions = [{"name": f"test_{i}", "value": "test"} for i in range(29)]
+    dimensions = [{"name": f"test_{i}", "value": "test"} for i in range(MAX_DIMENSIONS)]
 
     # WHEN we attempt to serialize them into a valid EMF object
     # THEN it should fail validation and raise SchemaValidationError
