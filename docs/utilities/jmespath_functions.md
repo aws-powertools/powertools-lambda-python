@@ -90,7 +90,7 @@ This sample will decode the value within the `data` key into a valid JSON before
 
 === "powertools_json_jmespath_function.py"
 
-    ```python hl_lines="9"
+    ```python hl_lines="7"
     --8<-- "examples/jmespath_functions/src/powertools_json_jmespath_function.py"
     ```
 
@@ -106,7 +106,7 @@ This sample will decode the value within the `body` key of an API Gateway event 
 
 === "powertools_json_idempotency_jmespath.py"
 
-    ```python hl_lines="7"
+    ```python hl_lines="9"
     --8<-- "examples/jmespath_functions/src/powertools_json_idempotency_jmespath.py"
     ```
 
@@ -124,7 +124,7 @@ This sample will decode the base64 value within the `data` key, and decode the J
 
 === "powertools_base64_jmespath_function.py"
 
-    ```python hl_lines="12"
+    ```python hl_lines="7"
     --8<-- "examples/jmespath_functions/src/powertools_base64_jmespath_function.py"
     ```
 
@@ -142,7 +142,7 @@ This sample will decompress and decode base64 data, then use JMESPath pipeline e
 
 === "powertools_base64_gzip_jmespath_function.py"
 
-    ```python hl_lines="12"
+    ```python hl_lines="9"
     --8<-- "examples/jmespath_functions/src/powertools_base64_gzip_jmespath_function.py"
     ```
 
@@ -163,7 +163,7 @@ In order to keep the built-in functions from Powertools, you can subclass from `
 
 === "powertools_custom_jmespath_function.py"
 
-    ```python hl_lines="2-3 6-9 11 17"
+    ```python hl_lines="3 5 8-12 15 20"
 	--8<-- "examples/jmespath_functions/src/powertools_custom_jmespath_function.py"
     ```
 
