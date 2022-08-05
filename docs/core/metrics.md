@@ -133,7 +133,7 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 ???+ tip "Tip: Metric validation"
     If metrics are provided, and any of the following criteria are not met, **`SchemaValidationError`** exception will be raised:
 
-    * Maximum of 8 user-defined dimensions
+    * Maximum of 29 user-defined dimensions
     * Namespace is set, and no more than one
     * Metric units must be [supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html)
 
