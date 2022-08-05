@@ -14,8 +14,9 @@ name: Publish to PyPi
 # 3. Bump package version and generate latest Changelog
 # 4. Publish package to PyPi test and prod repository
 # 5. Kick off SAR App pipeline to publish latest version with minimal and extra dependencies
-# 6. Builds a new user guide and API docs with release version; update /latest pointing to newly released version
-# 7. Close all issues labeled "pending-release" and notify customers about the release
+# 6. Builds and publish latest changelog from tip of the branch
+# 7. Builds a new user guide and API docs with release version; update /latest pointing to newly released version
+# 8. Close all issues labeled "pending-release" and notify customers about the release
 
 # See MAINTAINERS.md "Releasing a new version" for release mechanisms
 
