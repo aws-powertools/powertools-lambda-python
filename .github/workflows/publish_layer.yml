@@ -39,12 +39,12 @@ jobs:
         with:
           python-version: "3.9"
           cache: "pip"
-      - name: Install project dependencies
+      - name: Resolve and install project dependencies
         # CDK spawns system python when compiling stack
         # therefore it ignores both activated virtual env and cached interpreter by GH
         run: |
           poetry export --format requirements.txt --output requirements.txt
-          pip install requirements.txt
+          pip install -r requirements.txt
       - name: Set release notes tag
         run: |
           RELEASE_INPUT=${{ inputs.latest_published_version }}
