@@ -1,0 +1,31 @@
+name: Build and publish latest changelog
+
+on:
+  workflow_call:
+
+permissions:
+  contents: write
+
+jobs:
+  publish_changelog:
+    # Force Github action to run only a single job at a time (based on the group name)
+    # This is to prevent race-condition and inconsistencies with changelog push
+    concurrency:
+      group: changelog-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository # reusable workflows start clean, so we need to checkout again
+        uses: actions/checkout@v3
+      - name: Git client setup and refresh tip
+        run: |
+          git config user.name "Release bot"
+          git config user.email "aws-devax-open-source@amazon.com"
+          git config pull.rebase true
+          git pull --rebase
+      - name: "Generate latest changelog"
+        run: make changelog
+      - name: Update Changelog in trunk
+        run: |
+          git add CHANGELOG.md
+          git commit -m "chore(ci): update changelog with latest changes"
+          git push origin HEAD:refs/heads/develop
