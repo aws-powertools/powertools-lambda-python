@@ -123,26 +123,26 @@ class RequestContextV2AuthorizerIam(DictWrapper):
         """The principal identifier of the caller making the request."""
         return self.get("callerId")
 
+    def _cognito_identity(self) -> Dict:
+        return self.get("cognitoIdentity", {}) or {}  # not available in FunctionURL
+
     @property
     def cognito_amr(self) -> Optional[List[str]]:
         """This represents how the user was authenticated.
         AMR stands for  Authentication Methods References as per the openid spec"""
-        cognito_identity = self["cognitoIdentity"] or {}  # not available in FunctionURL
-        return cognito_identity.get("amr")
+        return self._cognito_identity().get("amr")
 
     @property
     def cognito_identity_id(self) -> Optional[str]:
         """The Amazon Cognito identity ID of the caller making the request.
         Available only if the request was signed with Amazon Cognito credentials."""
-        cognito_identity = self.get("cognitoIdentity") or {}  # not available in FunctionURL
-        return cognito_identity.get("identityId")
+        return self._cognito_identity().get("identityId")
 
     @property
     def cognito_identity_pool_id(self) -> Optional[str]:
         """The Amazon Cognito identity pool ID of the caller making the request.
         Available only if the request was signed with Amazon Cognito credentials."""
-        cognito_identity = self.get("cognitoIdentity") or {}  # not available in FunctionURL
-        return cognito_identity.get("identityPoolId")
+        return self._cognito_identity().get("identityPoolId")
 
     @property
     def principal_org_id(self) -> Optional[str]:

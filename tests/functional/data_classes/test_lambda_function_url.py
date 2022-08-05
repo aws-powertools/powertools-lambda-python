@@ -8,6 +8,51 @@ def test_lambda_function_url_event():
     assert event.version == "2.0"
     assert event.route_key == "$default"
 
+    assert event.path == "/"
+    assert event.raw_query_string == ""
+
+    assert event.cookies is None
+
+    headers = event.headers
+    assert len(headers) == 20
+
+    assert event.query_string_parameters is None
+
+    assert event.is_base64_encoded is False
+    assert event.body is None
+    assert event.path_parameters is None
+    assert event.stage_variables is None
+    assert event.http_method == "GET"
+
+    request_context = event.request_context
+
+    assert request_context.account_id == "anonymous"
+    assert request_context.api_id is not None
+    assert request_context.domain_name == "<url-id>.lambda-url.us-east-1.on.aws"
+    assert request_context.domain_prefix == "<url-id>"
+    assert request_context.request_id == "id"
+    assert request_context.route_key == "$default"
+    assert request_context.stage == "$default"
+    assert request_context.time is not None
+    assert request_context.time_epoch == 1659687279885
+    assert request_context.authentication is None
+
+    http = request_context.http
+    assert http.method == "GET"
+    assert http.path == "/"
+    assert http.protocol == "HTTP/1.1"
+    assert http.source_ip == "123.123.123.123"
+    assert http.user_agent == "agent"
+
+    assert request_context.authorizer is None
+
+
+def test_lambda_function_url_event_iam():
+    event = LambdaFunctionUrlEvent(load_event("lambdaFunctionUrlIAMEvent.json"))
+
+    assert event.version == "2.0"
+    assert event.route_key == "$default"
+
     assert event.path == "/my/path"
     assert event.raw_query_string == "parameter1=value1&parameter1=value2&parameter2=value"
 
@@ -60,6 +105,7 @@ def test_lambda_function_url_event():
     assert iam.access_key is not None
     assert iam.account_id == "111122223333"
     assert iam.caller_id is not None
+    assert iam.cognito_amr is None
     assert iam.cognito_identity_id is None
     assert iam.cognito_identity_pool_id is None
     assert iam.principal_org_id is None
