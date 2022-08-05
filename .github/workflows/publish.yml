@@ -101,14 +101,17 @@ jobs:
           aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_VERSION --overwrite
           aws codepipeline start-pipeline-execution --name ${{ secrets.AWS_SAR_PIPELINE_NAME }}
 
-  changelog:
-    needs: release
-    permissions:
-      contents: write
-    uses: ./.github/workflows/reusable_publish_changelog.yml
+  # NOTE: `event` type brings a detached head failing git setup
+  # and reusable workflows only work as a standalone job
+  # meaning we need to research for a solution that works for non-detached and detached mode
+  # changelog:
+  #   needs: release
+  #   permissions:
+  #     contents: write
+  #   uses: ./.github/workflows/reusable_publish_changelog.yml
 
   docs:
-    needs: [release, changelog]
+    needs: release
     permissions:
       contents: write
       pages: write
