@@ -4,18 +4,6 @@
 <a name="unreleased"></a>
 # Unreleased
 
-## Documentation
-
-* **layer:** upgrade to 1.26.7
-
-## Maintenance
-
-* **ci:** move changelog generation to rebuild_latest_doc workflow
-* **ci:** temporarily disable changelog push on release
-* **ci:** drop 3.6 from workflows
-* **docs:** update CHANGELOG for v1.26.7
-* **layers:** upgrade cdk dep hashes to prevent ci fail
-
 
 <a name="v1.26.7"></a>
 ## [v1.26.7] - 2022-07-29
