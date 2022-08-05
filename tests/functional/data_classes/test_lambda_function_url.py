@@ -105,6 +105,7 @@ def test_lambda_function_url_event_iam():
     assert iam.access_key is not None
     assert iam.account_id == "111122223333"
     assert iam.caller_id is not None
+    assert iam.cognito_amr is None
     assert iam.cognito_identity_id is None
     assert iam.cognito_identity_pool_id is None
     assert iam.principal_org_id is None
