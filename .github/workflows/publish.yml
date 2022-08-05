@@ -97,10 +97,15 @@ jobs:
 
   changelog:
     needs: release
+    permissions:
+      contents: write
     uses: ./.github/workflows/reusable_publish_changelog.yml
 
   docs:
     needs: [release, changelog]
+    permissions:
+      contents: write
+      pages: write
     runs-on: ubuntu-latest
     env:
       RELEASE_VERSION: ${{ needs.release.outputs.RELEASE_VERSION }}
@@ -142,6 +147,11 @@ jobs:
 
   post_release:
     needs: release
+    permissions:
+      contents: read
+      issues: write
+      discussions: write
+      pull-requests: write
     runs-on: ubuntu-latest
     env:
       RELEASE_VERSION: ${{ needs.release.outputs.RELEASE_VERSION }}
