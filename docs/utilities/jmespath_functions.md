@@ -32,7 +32,7 @@ Lambda Powertools also have utilities like [validation](validation.md), [idempot
 You can use the `extract_data_from_envelope` function along with any [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
 
 === "extract_data_from_envelope.py"
-    ```python hl_lines="1 7"
+    ```python hl_lines="1 6"
     --8<-- "examples/jmespath_functions/src/extract_data_from_envelope.py"
     ```
 
@@ -48,7 +48,7 @@ We provide built-in envelopes for popular JMESPath expressions used when looking
 
 === "extract_data_from_builtin_envelope.py"
 
-	```python hl_lines="1 7"
+	```python hl_lines="1 6"
     --8<-- "examples/jmespath_functions/src/extract_data_from_builtin_envelope.py"
 	```
 
