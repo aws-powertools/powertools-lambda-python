@@ -29,7 +29,11 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install poetry
-        run: pipx install poetry
+        # CDK spawns system python when compiling stack
+        # therefore it ignores activated virtual env, thus missing deps
+        run: |
+          pipx install poetry
+          poetry config virtualenvs.create false
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:

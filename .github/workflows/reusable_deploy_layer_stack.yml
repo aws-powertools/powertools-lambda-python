@@ -56,7 +56,11 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
       - name: Install poetry
-        run: pipx install poetry
+        # CDK spawns system python when compiling stack
+        # therefore it ignores activated virtual env, thus missing deps
+        run: |
+          pipx install poetry
+          poetry config virtualenvs.create false
       - name: aws credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
