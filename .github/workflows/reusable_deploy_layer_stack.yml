@@ -55,6 +55,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry
       - name: aws credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -74,8 +76,7 @@ jobs:
           npm install -g aws-cdk@2.29.0
           cdk --version
       - name: install deps
-        run: |
-          pip install -r requirements.txt
+        run: poetry install
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
