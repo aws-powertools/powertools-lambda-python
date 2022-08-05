@@ -13,7 +13,13 @@ on:
       - "examples/**"
 
 jobs:
+  changelog:
+    permissions:
+      contents: write
+    uses: ./.github/workflows/reusable_publish_changelog.yml
+
   docs:
+    needs: changelog
     # Force Github action to run only a single job at a time (based on the group name)
     # This is to prevent "race-condition" in publishing a new version of doc to `gh-pages`
     concurrency:
