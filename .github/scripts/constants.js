@@ -33,22 +33,4 @@ module.exports = Object.freeze({
     /** @type {string[]} */
     "IGNORE_AUTHORS": ["dependabot[bot]", "markdownify[bot]"],
 
-    /** @type {string[]} */
-    "AREAS": [
-        "tracer",
-        "metrics",
-        "utilities",
-        "logger",
-        "event_handlers",
-        "middleware_factory",
-        "idempotency",
-        "event_sources",
-        "feature_flags",
-        "parameters",
-        "batch",
-        "parser",
-        "validator",
-        "jmespath_util",
-        "lambda-layers",
-    ],
 });
