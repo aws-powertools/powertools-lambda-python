@@ -22,6 +22,7 @@
 ## Maintenance
 
 * **ci:** update changelog with latest changes
+* **ci:** update changelog with latest changes
 
 
 <a name="v1.27.0"></a>
