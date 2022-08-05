@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout repository # reusable workflows start clean, so we need to checkout again
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Git client setup and refresh tip
         run: |
           git config user.name "Release bot"
