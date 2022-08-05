@@ -31,8 +31,11 @@ Lambda Powertools also have utilities like [validation](validation.md), [idempot
 
 You can use the `extract_data_from_envelope` function along with any [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
 
+???+ tip
+	Another common use case is to fetch deeply nested data, filter, flatten, and more.
+
 === "extract_data_from_envelope.py"
-    ```python hl_lines="1 6"
+    ```python hl_lines="1 6 10"
     --8<-- "examples/jmespath_functions/src/extract_data_from_envelope.py"
     ```
 
