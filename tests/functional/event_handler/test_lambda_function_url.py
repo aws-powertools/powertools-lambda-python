@@ -15,7 +15,7 @@ def test_lambda_function_url_event():
         return Response(200, content_types.TEXT_HTML, "foo")
 
     # WHEN calling the event handler
-    result = app(load_event("lambdaFunctionUrlEvent.json"), {})
+    result = app(load_event("lambdaFunctionUrlIAMEvent.json"), {})
 
     # THEN process event correctly
     # AND set the current_event type as LambdaFunctionUrlEvent
@@ -33,7 +33,7 @@ def test_lambda_function_url_no_matches():
         raise RuntimeError()
 
     # WHEN calling the event handler
-    result = app(load_event("lambdaFunctionUrlEvent.json"), {})
+    result = app(load_event("lambdaFunctionUrlIAMEvent.json"), {})
 
     # THEN process event correctly
     # AND return 404 because the event doesn't match any known route
