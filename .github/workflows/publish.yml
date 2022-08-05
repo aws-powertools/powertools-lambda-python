@@ -95,8 +95,12 @@ jobs:
           aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_VERSION --overwrite
           aws codepipeline start-pipeline-execution --name ${{ secrets.AWS_SAR_PIPELINE_NAME }}
 
-  docs:
+  changelog:
     needs: release
+    uses: ./.github/workflows/reusable_publish_changelog.yml
+
+  docs:
+    needs: [release, changelog]
     runs-on: ubuntu-latest
     env:
       RELEASE_VERSION: ${{ needs.release.outputs.RELEASE_VERSION }}
