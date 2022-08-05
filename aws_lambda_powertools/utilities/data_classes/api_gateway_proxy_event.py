@@ -124,7 +124,7 @@ class RequestContextV2AuthorizerIam(DictWrapper):
         return self.get("callerId")
 
     def _cognito_identity(self) -> Dict:
-        return self.get("cognitoIdentity", {}) or {}
+        return self.get("cognitoIdentity", {}) or {}  # not available in FunctionURL
 
     @property
     def cognito_amr(self) -> Optional[List[str]]:
