@@ -146,6 +146,7 @@ class Response:
         content_type: Optional[str],
         body: Union[str, bytes, None],
         headers: Optional[Dict] = None,
+        cookies: Optional[List[str]] = None,
     ):
         """
 
@@ -159,12 +160,15 @@ class Response:
         body: Union[str, bytes, None]
             Optionally set the response body. Note: bytes body will be automatically base64 encoded
         headers: dict
-            Optionally set specific http headers. Setting "Content-Type" hear would override the `content_type` value.
+            Optionally set specific http headers. Setting "Content-Type" here would override the `content_type` value.
+        cookies: list[str]
+            Optionally set cookies.
         """
         self.status_code = status_code
         self.body = body
         self.base64_encoded = False
         self.headers: Dict = headers or {}
+        self.cookies = cookies or []
         if content_type:
             self.headers.setdefault("Content-Type", content_type)
 
@@ -218,6 +222,19 @@ class ResponseBuilder:
         if self.route.compress and "gzip" in (event.get_header_value("accept-encoding", "") or ""):
             self._compress()
 
+    def _format_cookies(self, event: BaseProxyEvent, payload: Dict[str, Any]) -> Dict[str, Any]:
+        if self.response.cookies:
+            if isinstance(event, APIGatewayProxyEventV2) or isinstance(event, LambdaFunctionUrlEvent):
+                payload["cookies"] = self.response.cookies
+
+            if isinstance(event, APIGatewayProxyEvent) or isinstance(event, ALBEvent):
+                if len(self.response.cookies) == 1:
+                    payload["headers"]["Set-Cookie"] = self.response.cookies[0]
+                else:
+                    payload["multiValueHeaders"] = {"Set-Cookie": self.response.cookies}
+
+        return payload
+
     def build(self, event: BaseProxyEvent, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
         """Build the full response dict to be returned by the lambda"""
         self._route(event, cors)
@@ -226,12 +243,14 @@ class ResponseBuilder:
             logger.debug("Encoding bytes response with base64")
             self.response.base64_encoded = True
             self.response.body = base64.b64encode(self.response.body).decode()
-        return {
+
+        payload = {
             "statusCode": self.response.status_code,
             "headers": self.response.headers,
             "body": self.response.body,
             "isBase64Encoded": self.response.base64_encoded,
         }
+        return self._format_cookies(event, payload)
 
 
 class BaseRouter(ABC):

@@ -93,6 +93,25 @@ def test_api_gateway_v1():
     # AND set the current_event type as APIGatewayProxyEvent
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert "multiValueHeaders" not in result["headers"]
+
+
+def test_api_gateway_v1_cookies():
+    # GIVEN a Http API V1 proxy type event
+    app = APIGatewayRestResolver()
+
+    @app.get("/my/path")
+    def get_lambda() -> Response:
+        assert isinstance(app.current_event, APIGatewayProxyEvent)
+        return Response(200, content_types.TEXT_PLAIN, "Hello world", cookies=["CookieMonster"])
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEvent
+    assert result["statusCode"] == 200
+    assert result["headers"]["multiValueHeaders"]["Set-Cookie"] == ["CookieMonster"]
 
 
 def test_api_gateway():
@@ -132,7 +151,27 @@ def test_api_gateway_v2():
     # AND set the current_event type as APIGatewayProxyEventV2
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
+    assert "Cookies" not in result["headers"]
     assert result["body"] == "tom"
+
+
+def test_api_gateway_v2_cookies():
+    # GIVEN a Http API V2 proxy type event
+    app = APIGatewayHttpResolver()
+
+    @app.post("/my/path")
+    def my_path() -> Response:
+        assert isinstance(app.current_event, APIGatewayProxyEventV2)
+        return Response(200, content_types.TEXT_PLAIN, "Hello world", cookies=["CookieMonster"])
+
+    # WHEN calling the event handler
+    result = app(load_event("apiGatewayProxyV2Event.json"), {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEventV2
+    assert result["statusCode"] == 200
+    assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
+    assert result["headers"]["Cookies"] == ["CookieMonster"]
 
 
 def test_include_rule_matching():

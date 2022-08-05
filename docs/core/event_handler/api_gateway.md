@@ -312,7 +312,7 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 
 ### Fine grained responses
 
-You can use the `Response` class to have full control over the response, for example you might want to add additional headers or set a custom Content-type.
+You can use the `Response` class to have full control over the response, for example you might want to add additional headers, cookies, or set a custom Content-type.
 
 === "fine_grained_responses.py"
 
