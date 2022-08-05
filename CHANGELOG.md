@@ -4,6 +4,25 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **ci:** typo and bust gh actions cache
+* **ci:** use poetry to resolve layer deps; pip for CDK
+* **ci:** disable poetry venv for layer workflow as cdk ignores venv
+* **ci:** add cdk v2 dep for layers workflow
+* **ci:** move from pip-tools to poetry on layers reusable workflow
+* **ci:** move from pip-tools to poetry on layers
+* **ci:** temporarily disable changelog upon release
+* **ci:** add explicit origin to fix release detached head
+
+## Documentation
+
+* **layer:** upgrade to 1.27.0
+
+## Maintenance
+
+* **ci:** update changelog with latest changes
+
 
 <a name="v1.27.0"></a>
 ## [v1.27.0] - 2022-08-05
