@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "aws-lambda-powertools-python-layer"
+version = "0.1.0"
+description = "AWS Lambda Powertools for Python Lambda Layers"
+authors = ["DevAx <aws-devax-open-source@amazon.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+cdk-lambda-powertools-python-layer = "^2.0.49"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.2"
+boto3 = "^1.24.46"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
