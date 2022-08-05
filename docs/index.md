@@ -1,6 +1,6 @@
 ---
 title: Homepage
-description: AWS Lambda Powertools Python
+description: AWS Lambda Powertools for Python
 ---
 
 <!-- markdownlint-disable MD043 -->
@@ -412,12 +412,12 @@ sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 Core utilities such as Tracing, Logging, Metrics, and Event Handler will be available across all Lambda Powertools languages. Additional utilities are subjective to each language ecosystem and customer demand.
 
 | Utility                                                                                                                                                  | Description                                                                                                                                               |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Tracing](./core/tracer.md)                                                                                                                              | Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions                                               |
 | [Logger](./core/logger.md)                                                                                                                               | Structured logging made easier, and decorator to enrich structured logging with key Lambda context details                                                |
 | [Metrics](./core/metrics.md)                                                                                                                             | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)                                                                         |
 | [Event handler: AppSync](./core/event_handler/appsync.md)                                                                                                | AppSync event handler for Lambda Direct Resolver and Amplify GraphQL Transformer function                                                                 |
-| [Event handler: API Gateway, ALB and Lambda Function URL](https://awslabs.github.io/aws-lambda-powertools-python/latest/core/event_handler/api_gateway/) | Amazon API Gateway REST/HTTP API and ALB event handler for Lambda functions invoked using Proxy integration, and Lambda Function URL                                               |
+| [Event handler: API Gateway, ALB and Lambda Function URL](https://awslabs.github.io/aws-lambda-powertools-python/latest/core/event_handler/api_gateway/) | Amazon API Gateway REST/HTTP API and ALB event handler for Lambda functions invoked using Proxy integration, and Lambda Function URL                      |
 | [Middleware factory](./utilities/middleware_factory.md)                                                                                                  | Decorator factory to create your own middleware to run logic before, and after each Lambda invocation                                                     |
 | [Parameters](./utilities/parameters.md)                                                                                                                  | Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time |
 | [Batch processing](./utilities/batch.md)                                                                                                                 | Handle partial failures for AWS SQS batch processing                                                                                                      |
