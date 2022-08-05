@@ -33,6 +33,11 @@ on:
         default: false
         type: boolean
         required: false
+      skip_code_quality:
+        description: "Skip tests, linting, and baseline. Only use if release fail for reasons beyond our control and you need a quick release."
+        default: false
+        type: boolean
+        required: false
 
 jobs:
   release:
@@ -66,7 +71,7 @@ jobs:
       - name: Install dependencies
         run: make dev
       - name: Run all tests, linting and baselines
-        if: ${{ !inputs.skip_pypi }}
+        if: ${{ !inputs.skip_code_quality }}
         run: make pr
       - name: Bump package version
         run: poetry version ${RELEASE_VERSION}
