@@ -17,7 +17,7 @@ def lambda_handler(event, context: LambdaContext) -> dict:
     except SchemaValidationError as exception:
 
         # if validation fails, a SchemaValidationError will be raised with the wrong fields
-        return {"order_id": None, "statusCode": 400, "message": str(exception)}
+        return {"order_id": None, "message": str(exception), "statusCode": 400}
 
 
 def create_order(event: dict) -> dict:
