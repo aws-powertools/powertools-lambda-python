@@ -93,7 +93,7 @@ This sample will decode the value within the `data` key into a valid JSON before
 
 === "powertools_json_jmespath_function.py"
 
-    ```python hl_lines="2 7 14 18 20 22"
+    ```python hl_lines="5 8 34 42 44 46"
     --8<-- "examples/jmespath_functions/src/powertools_json_jmespath_function.py"
     ```
 
