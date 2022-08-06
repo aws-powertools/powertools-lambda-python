@@ -93,14 +93,20 @@ This sample will decode the value within the `data` key into a valid JSON before
 
 === "powertools_json_jmespath_function.py"
 
-    ```python hl_lines="7"
+    ```python hl_lines="6 13 17 19"
     --8<-- "examples/jmespath_functions/src/powertools_json_jmespath_function.py"
     ```
 
 === "powertools_json_jmespath_schema.py"
 
-    ```python hl_lines="7 14 16 23 39 45 47 52"
+    ```python hl_lines="7 8 10 12 17 19 24 26 31 33 38 40"
     --8<-- "examples/jmespath_functions/src/powertools_json_jmespath_schema.py"
+    ```
+
+=== "powertools_json_jmespath_payload.json"
+
+    ```python hl_lines="2"
+    --8<-- "examples/jmespath_functions/src/powertools_json_jmespath_payload.json"
     ```
 
 > **Idempotency scenario**
