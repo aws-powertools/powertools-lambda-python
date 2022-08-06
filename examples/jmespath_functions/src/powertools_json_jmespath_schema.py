@@ -30,7 +30,7 @@ INPUT = {
         },
         "price": {
             "$id": "#/properties/price",
-            "type": "integer",
+            "type": "number",
             "title": "The individual price of the product",
             "examples": [10.40],
             "maxLength": 10,
