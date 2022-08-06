@@ -524,7 +524,7 @@ Parser is best suited for those looking for a trade-off between defining their m
 
 We export most common classes, exceptions, and utilities from Pydantic as part of parser e.g. `from aws_lambda_powertools.utilities.parser import BaseModel`.
 
-If what's your trying to use isn't available as part of the high level import system, use the following escape hatch mechanism:
+If what you're trying to use isn't available as part of the high level import system, use the following escape hatch mechanism:
 
 ```python title="Pydantic import escape hatch"
 from aws_lambda_powertools.utilities.parser.pydantic import <what you'd like to import'>
