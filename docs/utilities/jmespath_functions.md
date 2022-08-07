@@ -105,7 +105,7 @@ This sample will decode the value within the `data` key into a valid JSON before
 
 === "powertools_json_jmespath_payload.json"
 
-    ```python hl_lines="2"
+    ```json
     --8<-- "examples/jmespath_functions/src/powertools_json_jmespath_payload.json"
     ```
 
@@ -145,7 +145,7 @@ This sample will decode the base64 value within the `data` key, and decode the J
 
 === "powertools_base64_jmespath_payload.json"
 
-    ```python hl_lines="2"
+    ```json
     --8<-- "examples/jmespath_functions/src/powertools_base64_jmespath_payload.json"
     ```
 
@@ -153,18 +153,24 @@ This sample will decode the base64 value within the `data` key, and decode the J
 
 Use `powertools_base64_gzip` function to decompress and decode base64 data.
 
-This sample will decompress and decode base64 data, then use JMESPath pipeline expression to pass the result for decoding its JSON string.
+This sample will decompress and decode base64 data from Cloudwatch Logs, then use JMESPath pipeline expression to pass the result for decoding its JSON string.
 
 === "powertools_base64_gzip_jmespath_function.py"
 
-    ```python hl_lines="9"
+    ```python hl_lines="6 10 17 28 30 32 34 35"
     --8<-- "examples/jmespath_functions/src/powertools_base64_gzip_jmespath_function.py"
     ```
 
 === "powertools_base64_gzip_jmespath_schema.py"
 
-    ```python hl_lines="7 14 16 23 39 45 47 52"
+    ```python hl_lines="7-15 17 19 24 26 31 33 38 40"
     --8<-- "examples/jmespath_functions/src/powertools_base64_gzip_jmespath_schema.py"
+    ```
+
+=== "powertools_base64_gzip_jmespath_payload.json"
+
+    ```json
+    --8<-- "examples/jmespath_functions/src/powertools_base64_gzip_jmespath_payload.json"
     ```
 
 ### Bring your own JMESPath function
