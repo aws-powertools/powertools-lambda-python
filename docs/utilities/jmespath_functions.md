@@ -133,14 +133,20 @@ This sample will decode the base64 value within the `data` key, and decode the J
 
 === "powertools_base64_jmespath_function.py"
 
-    ```python hl_lines="7"
+    ```python hl_lines="7 10 36 46 48 50 51"
     --8<-- "examples/jmespath_functions/src/powertools_base64_jmespath_function.py"
     ```
 
 === "powertools_base64_jmespath_schema.py"
 
-    ```python hl_lines="7 14 16 23 39 45 47 52"
+    ```python hl_lines="7 8 10 12 17 19 24 26 31 33 38 40"
     --8<-- "examples/jmespath_functions/src/powertools_base64_jmespath_schema.py"
+    ```
+
+=== "powertools_base64_jmespath_payload.json"
+
+    ```python hl_lines="2"
+    --8<-- "examples/jmespath_functions/src/powertools_base64_jmespath_payload.json"
     ```
 
 #### powertools_base64_gzip function
