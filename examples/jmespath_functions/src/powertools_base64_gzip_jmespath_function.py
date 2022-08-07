@@ -26,7 +26,7 @@ def lambda_handler(event, context: LambdaContext) -> dict:
         }
 
     except JMESPathTypeError:
-        return return_error_message("Envelope powertools_base64_gzip function must receive a valid base64-gzip field")
+        return return_error_message("The powertools_base64_gzip() envelope function must match a valid path.")
     except binascii.Error:
         return return_error_message("Payload must be valid base64 encoded string")
     except json.JSONDecodeError:

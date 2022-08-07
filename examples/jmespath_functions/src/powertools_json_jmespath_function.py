@@ -3,6 +3,7 @@ from dataclasses import asdict, dataclass, is_dataclass
 from uuid import uuid4
 
 import powertools_json_jmespath_schema as schemas
+from jmespath.exceptions import JMESPathTypeError
 
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import SchemaValidationError, validate
@@ -39,6 +40,8 @@ def lambda_handler(event, context: LambdaContext) -> dict:
             "message": order.get("message"),
             "success": True,
         }
+    except JMESPathTypeError:
+        return return_error_message("The powertools_json() envelope function must match a valid path.")
     except json.JSONDecodeError:
         return return_error_message("Payload must be valid JSON (base64 encoded).")
     except SchemaValidationError as exception:
