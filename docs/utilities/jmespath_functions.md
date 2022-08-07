@@ -180,11 +180,11 @@ This sample will decompress and decode base64 data from Cloudwatch Logs, then us
 
 For special binary formats that you want to decode before applying JSON Schema validation, you can bring your own [JMESPath function](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"} and any additional option via `jmespath_options` param.
 
-In order to keep the built-in functions from Powertools, you can subclass from `PowertoolsFunctions`:
+In order to keep the built-in functions from Powertools, you can subclass from `PowertoolsFunctions`. Here is an example of how to unzip compressed messages using snappy:
 
 === "powertools_custom_jmespath_function.py"
 
-    ```python hl_lines="3 5 8-12 15 20"
+    ```python hl_lines="4 5 8 11 15 18 22 31-35 38 40 42"
 	--8<-- "examples/jmespath_functions/src/powertools_custom_jmespath_function.py"
     ```
 
