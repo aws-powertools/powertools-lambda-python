@@ -4,9 +4,11 @@ from tests.e2e.metrics.infrastructure import MetricsStack
 
 
 @pytest.fixture(autouse=True)
-def setup_infra():
+def infrastructure() -> MetricsStack:
+    # Use request fixture to remove hardcode handler dir
     try:
         stack = MetricsStack()
-        yield stack.deploy()
+        stack.deploy()
+        yield stack
     finally:
         stack.delete()

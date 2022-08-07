@@ -1,10 +1,13 @@
 import datetime
+import json
 import uuid
+from typing import Dict, Type
 
-import boto3
 import pytest
 from e2e import conftest
 from e2e.utils import helpers
+
+from tests.e2e.metrics.infrastructure import MetricsStack
 
 
 @pytest.fixture(scope="module")
@@ -19,22 +22,37 @@ def config() -> conftest.LambdaConfig:
     }
 
 
-def test_basic_lambda_metric_visible(execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig):
-    # GIVEN
-    start_date = execute_lambda.get_lambda_execution_time()
-    end_date = start_date + datetime.timedelta(minutes=5)
+@pytest.fixture
+def infra_outputs(infrastructure: Type[MetricsStack]):
+    return infrastructure.get_stack_outputs()
 
-    # WHEN
+
+def test_basic_lambda_metric_is_visible(infra_outputs: Dict[str, str]):
+    # sourcery skip: aware-datetime-for-utc
+    execution_time = datetime.datetime.utcnow()
+    metric_name = "test"
+    service = "test-metric-is-visible"
+    namespace = "powertools-e2e-metric"
+    event = json.dumps({"metric_name": metric_name, "service": service, "namespace": namespace})
+    ret = helpers.trigger_lambda(lambda_arn=infra_outputs.get("basichandlerarn"), payload=event)
+
+    assert ret is None  # we could test in the actual response now
+
+    # NOTE: find out why we're getting empty metrics
     metrics = helpers.get_metrics(
-        start_date=start_date,
-        end_date=end_date,
-        namespace=config["environment_variables"]["POWERTOOLS_METRICS_NAMESPACE"],
-        metric_name=config["environment_variables"]["METRIC_NAME"],
-        service_name=config["environment_variables"]["POWERTOOLS_SERVICE_NAME"],
-        cw_client=boto3.client(service_name="cloudwatch"),
+        start_date=execution_time,
+        end_date=execution_time + datetime.timedelta(minutes=2),
+        namespace=namespace,
+        service_name=service,
+        metric_name=metric_name,
     )
+    assert metrics is not None
 
-    # THEN
-    assert metrics.get("Timestamps") and len(metrics.get("Timestamps")) == 1
-    assert metrics.get("Values") and len(metrics.get("Values")) == 1
-    assert metrics.get("Values") and metrics.get("Values")[0] == 1
+
+# helpers: create client on the fly if not passed
+#          accept payload to be sent as part of invocation
+# helpers: adjust retries and wait to be much smaller
+# Infra: Create dynamic Enum/DataClass to reduce guessing on outputs
+# Infra: Fix outputs
+# Infra: Add temporary Powertools Layer
+# Powertools: should have a method to set namespace at runtime

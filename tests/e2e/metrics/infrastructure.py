@@ -5,7 +5,7 @@ from uuid import uuid4
 import boto3
 import yaml
 from aws_cdk import App, CfnOutput, RemovalPolicy, Stack, aws_logs
-from aws_cdk.aws_lambda import Code, Function, Runtime, Tracing
+from aws_cdk.aws_lambda import Code, Function, LayerVersion, Runtime, Tracing
 
 from tests.e2e.utils.asset import Assets
 
@@ -24,6 +24,7 @@ class MetricsStack:
         # NOTE: CDK stack account and region are tokens, we need to resolve earlier
         self.account_id = self.session.client("sts").get_caller_identity()["Account"]
         self.region = self.session.region_name
+        self.stack_outputs: Dict[str, str] = {}
 
     def create_functions(self):
         handlers = list(Path(self.handlers_dir).rglob("*.py"))
@@ -37,6 +38,13 @@ class MetricsStack:
                 code=source,
                 handler=f"{fn_name}.lambda_handler",
                 tracing=Tracing.ACTIVE,
+                layers=[
+                    LayerVersion.from_layer_version_arn(
+                        self.stack,
+                        "lambda-powertools",
+                        f"arn:aws:lambda:{self.region}:017000801446:layer:AWSLambdaPowertoolsPython:29",
+                    )
+                ],
             )
 
             aws_logs.LogGroup(
@@ -86,4 +94,11 @@ class MetricsStack:
 
         stack_details = self.cf_client.describe_stacks(StackName=stack_name)
         stack_outputs = stack_details["Stacks"][0]["Outputs"]
-        return {output["OutputKey"]: output["OutputValue"] for output in stack_outputs if output["OutputKey"]}
+        self.stack_outputs = {
+            output["OutputKey"]: output["OutputValue"] for output in stack_outputs if output["OutputKey"]
+        }
+
+        return self.stack_outputs
+
+    def get_stack_outputs(self) -> Dict[str, str]:
+        return self.stack_outputs

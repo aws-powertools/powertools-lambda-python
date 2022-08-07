@@ -1,12 +1,15 @@
 import json
 from datetime import datetime
 from functools import lru_cache
-from typing import Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
-from mypy_boto3_cloudwatch import type_defs
-from mypy_boto3_cloudwatch.client import CloudWatchClient
-from mypy_boto3_lambda.client import LambdaClient
-from mypy_boto3_xray.client import XRayClient
+if TYPE_CHECKING:
+    from mypy_boto3_cloudwatch import MetricDataResultTypeDef
+    from mypy_boto3_cloudwatch.client import CloudWatchClient
+    from mypy_boto3_lambda.client import LambdaClient
+    from mypy_boto3_xray.client import XRayClient
+
+import boto3
 from pydantic import BaseModel
 from retry import retry
 
@@ -33,14 +36,14 @@ class TraceSegment(BaseModel):
     annotations: Dict = {}
 
 
-def trigger_lambda(lambda_arn: str, client: LambdaClient):
-    response = client.invoke(FunctionName=lambda_arn, InvocationType="RequestResponse")
-    return response
+def trigger_lambda(lambda_arn: str, payload: str, client: Optional["LambdaClient"] = None):
+    client = client or boto3.client("lambda")
+    return client.invoke(FunctionName=lambda_arn, InvocationType="RequestResponse", Payload=payload)
 
 
 @lru_cache(maxsize=10, typed=False)
 @retry(ValueError, delay=1, jitter=1, tries=20)
-def get_logs(lambda_function_name: str, log_client: CloudWatchClient, start_time: int, **kwargs: dict) -> List[Log]:
+def get_logs(lambda_function_name: str, log_client: "CloudWatchClient", start_time: int, **kwargs: dict) -> List[Log]:
     response = log_client.filter_log_events(logGroupName=f"/aws/lambda/{lambda_function_name}", startTime=start_time)
     if not response["events"]:
         raise ValueError("Empty response from Cloudwatch Logs. Repeating...")
@@ -56,27 +59,27 @@ def get_logs(lambda_function_name: str, log_client: CloudWatchClient, start_time
 
 
 @lru_cache(maxsize=10, typed=False)
-@retry(ValueError, delay=1, jitter=1, tries=20)
+@retry(ValueError, delay=1, jitter=1, tries=5)
 def get_metrics(
     namespace: str,
-    cw_client: CloudWatchClient,
     start_date: datetime,
     metric_name: str,
     service_name: str,
+    cw_client: Optional["CloudWatchClient"] = None,
     end_date: Optional[datetime] = None,
-) -> type_defs.MetricDataResultTypeDef:
-    response = cw_client.get_metric_data(
-        MetricDataQueries=[
-            {
-                "Id": "m1",
-                "Expression": f'SELECT MAX("{metric_name}") from SCHEMA("{namespace}",service) \
+) -> "MetricDataResultTypeDef":
+    cw_client = cw_client or boto3.client("cloudwatch")
+    metric_query = {
+        "Id": "m1",
+        "Expression": f'SELECT MAX("{metric_name}") from SCHEMA("{namespace}",service) \
                     where service=\'{service_name}\'',
-                "ReturnData": True,
-                "Period": 600,
-            },
-        ],
+        "ReturnData": True,
+        "Period": 600,
+    }
+    response = cw_client.get_metric_data(
+        MetricDataQueries=[metric_query],
         StartTime=start_date,
-        EndTime=end_date if end_date else datetime.utcnow(),
+        EndTime=end_date or datetime.utcnow(),
     )
     result = response["MetricDataResults"][0]
     if not result["Values"]:
@@ -85,7 +88,7 @@ def get_metrics(
 
 
 @retry(ValueError, delay=1, jitter=1, tries=10)
-def get_traces(filter_expression: str, xray_client: XRayClient, start_date: datetime, end_date: datetime) -> Dict:
+def get_traces(filter_expression: str, xray_client: "XRayClient", start_date: datetime, end_date: datetime) -> Dict:
     paginator = xray_client.get_paginator("get_trace_summaries")
     response_iterator = paginator.paginate(
         StartTime=start_date,
