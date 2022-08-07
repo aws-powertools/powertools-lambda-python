@@ -61,6 +61,9 @@ class MetricsStack:
         assets.upload()
         return self._deploy_stack(self.stack_name, template)
 
+    def delete(self):
+        self.cf_client.delete_stack(StackName=self.stack_name)
+
     def _synthesize(self) -> Tuple[Dict, Path]:
         self.create_functions()
         cloud_assembly = self.app.synth()
@@ -84,7 +87,3 @@ class MetricsStack:
         stack_details = self.cf_client.describe_stacks(StackName=stack_name)
         stack_outputs = stack_details["Stacks"][0]["Outputs"]
         return {output["OutputKey"]: output["OutputValue"] for output in stack_outputs if output["OutputKey"]}
-
-
-metrics = MetricsStack()
-metrics.deploy()
