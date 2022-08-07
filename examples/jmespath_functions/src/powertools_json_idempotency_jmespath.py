@@ -10,7 +10,7 @@ config = IdempotencyConfig(event_key_jmespath="powertools_json(body)")
 
 
 @idempotent(config=config, persistence_store=persistence_layer)
-def handler(event, context):
+def handler(event, context) -> dict:
     body = json.loads(event["body"])
     payment = create_subscription_payment(user=body["user"], product_id=body["product_id"])
     ...
