@@ -45,11 +45,11 @@ def lambda_handler(event, context: LambdaContext) -> dict:
     except JMESPathTypeError:
         # The powertools_json() envelope function must match a valid path
         return return_error_message("Invalid request.")
-    except json.JSONDecodeError:
-        return return_error_message("Payload must be valid JSON (base64 encoded).")
     except SchemaValidationError as exception:
         # SchemaValidationError indicates where a data mismatch is
         return return_error_message(str(exception))
+    except json.JSONDecodeError:
+        return return_error_message("Payload must be valid JSON (base64 encoded).")
 
 
 def return_error_message(message: str) -> dict:
