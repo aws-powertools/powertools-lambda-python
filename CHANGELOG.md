@@ -28,6 +28,7 @@
 
 * **ci:** update changelog with latest changes
 * **ci:** update changelog with latest changes
+* **ci:** update changelog with latest changes
 * **ci:** reduce payload and only send prod notification
 * **ci:** update changelog with latest changes
 * **ci:** update changelog with latest changes
