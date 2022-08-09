@@ -42,7 +42,9 @@ def on_create(event):
 
 
 def check_envs():
-    logger.info('Checking required envs ["POWERTOOLS_LAYER_ARN", "AWS_REGION", "STAGE"]')
+    logger.info(
+        'Checking required envs ["POWERTOOLS_LAYER_ARN", "AWS_REGION", "STAGE"]'
+    )
     if not layer_arn:
         raise ValueError("POWERTOOLS_LAYER_ARN is not set. Aborting...")
     if not powertools_version:
@@ -73,6 +75,11 @@ def send_notification():
     """
     sends an event to version tracking event bridge
     """
+    if stage != "PROD":
+        logger.info(
+            "Not sending notification to event bus, because this is not the PROD stage"
+        )
+        return
     event = {
         "Time": datetime.datetime.now(),
         "Source": "powertools.layer.canary",
@@ -80,10 +87,8 @@ def send_notification():
         "DetailType": "deployment",
         "Detail": json.dumps(
             {
-                "id": "powertools-python",
-                "stage": stage,
-                "region": os.environ["AWS_REGION"],
                 "version": powertools_version,
+                "region": os.environ["AWS_REGION"],
                 "layerArn": layer_arn,
             }
         ),

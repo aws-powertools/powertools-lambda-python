@@ -12,12 +12,22 @@ SSM_PARAM_LAYER_ARN: str = "/layers/powertools-layer-arn"
 
 if not POWERTOOLS_VERSION:
     raise ValueError(
-        "Please set the version for Powertools by passing the '--context=version:<version>' parameter to the CDK "
+        "Please set the version for Powertools by passing the '--context version=<version>' parameter to the CDK "
         "synth step."
     )
 
-LayerStack(app, "LayerStack", powertools_version=POWERTOOLS_VERSION, ssm_paramter_layer_arn=SSM_PARAM_LAYER_ARN)
+LayerStack(
+    app,
+    "LayerStack",
+    powertools_version=POWERTOOLS_VERSION,
+    ssm_paramter_layer_arn=SSM_PARAM_LAYER_ARN,
+)
 
-CanaryStack(app, "CanaryStack", powertools_version=POWERTOOLS_VERSION, ssm_paramter_layer_arn=SSM_PARAM_LAYER_ARN)
+CanaryStack(
+    app,
+    "CanaryStack",
+    powertools_version=POWERTOOLS_VERSION,
+    ssm_paramter_layer_arn=SSM_PARAM_LAYER_ARN,
+)
 
 app.synth()
