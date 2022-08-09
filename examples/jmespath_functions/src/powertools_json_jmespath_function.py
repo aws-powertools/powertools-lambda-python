@@ -24,7 +24,7 @@ class DataclassCustomEncoder(json.JSONEncoder):
 
     def default(self, obj):
         # Only called for values that aren't JSON serializable
-        # where `obj` will be an instance of Todo in this example
+        # where `obj` will be an instance of Order in this example
         return asdict(obj) if is_dataclass(obj) else super().default(obj)
 
 
