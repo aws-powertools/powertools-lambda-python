@@ -135,9 +135,6 @@ Each dynamic route you set must be part of your function signature. This allows 
 ???+ tip
     You can also nest dynamic paths, for example `/todos/<todo_id>/<todo_status>`.
 
-???+ tip
-    You can also nest dynamic paths, for example `/todos/<todo_id>/<todo_status>`.
-
 #### Catch-all routes
 
 ???+ note
