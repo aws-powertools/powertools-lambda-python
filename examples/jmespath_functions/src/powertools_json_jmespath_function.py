@@ -1,5 +1,5 @@
 import json
-from dataclasses import asdict, dataclass, is_dataclass
+from dataclasses import asdict, dataclass, field, is_dataclass
 from uuid import uuid4
 
 import powertools_json_jmespath_schema as schemas
@@ -11,12 +11,12 @@ from aws_lambda_powertools.utilities.validation import SchemaValidationError, va
 
 @dataclass
 class Order:
-    order_id: str
     user_id: int
     product_id: int
     quantity: int
     price: float
     currency: str
+    order_id: str = field(default_factory=lambda: f"{uuid4()}")
 
 
 class DataclassCustomEncoder(json.JSONEncoder):
@@ -29,15 +29,17 @@ class DataclassCustomEncoder(json.JSONEncoder):
 
 
 def lambda_handler(event, context: LambdaContext) -> dict:
-
-    # Let's validate the schema
     try:
+        # Validate order against our schema
         validate(event=event, schema=schemas.INPUT, envelope="powertools_json(payload)")
 
-        order = create_order(json.loads(event["payload"]))
+        # Deserialize JSON string order as dict
+        # alternatively, extract_data_from_envelope works here too
+        order_payload: dict = json.loads(event.get("payload"))
+
         return {
-            "order": json.dumps(order.get("order"), cls=DataclassCustomEncoder),
-            "message": order.get("message"),
+            "order": json.dumps(Order(**order_payload), cls=DataclassCustomEncoder),
+            "message": "order created",
             "success": True,
         }
     except JMESPathTypeError:
@@ -48,20 +50,6 @@ def lambda_handler(event, context: LambdaContext) -> dict:
 
         # if validation fails, a SchemaValidationError will be raised with the wrong fields
         return return_error_message(str(exception))
-
-
-def create_order(event: dict) -> dict:
-    # This return an Order dataclass
-    order_id = str(uuid4())
-    order = Order(
-        order_id=order_id,
-        user_id=event.get("user_id"),
-        product_id=event.get("product_id"),
-        quantity=event.get("quantity"),
-        price=event.get("price"),
-        currency=event.get("currency"),
-    )
-    return {"order": order, "message": "order created"}
 
 
 def return_error_message(message: str) -> dict:
