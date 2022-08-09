@@ -157,7 +157,7 @@ This sample will decompress and decode base64 data from Cloudwatch Logs, then us
 
 === "powertools_base64_gzip_jmespath_function.py"
 
-    ```python hl_lines="6 10 17 28 30 32 34 35"
+    ```python hl_lines="6 10 15 29 31 33 35"
     --8<-- "examples/jmespath_functions/src/powertools_base64_gzip_jmespath_function.py"
     ```
 

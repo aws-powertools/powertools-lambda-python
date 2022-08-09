@@ -55,7 +55,7 @@ def lambda_handler(event, context: LambdaContext) -> dict:
     except json.JSONDecodeError:
         return return_error_message("Payload must be valid JSON (base64 encoded).")
     except SchemaValidationError as exception:
-        # if validation fails, a SchemaValidationError will be raised with the wrong fields
+        # SchemaValidationError indicates where a data mismatch is
         return return_error_message(str(exception))
 
 
