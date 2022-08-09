@@ -14,6 +14,7 @@ Built-in [JMESPath](https://jmespath.org/){target="_blank"} Functions to easily 
 
 * Deserialize JSON from JSON strings, base64, and compressed data
 * Use JMESPath to extract and combine data recursively
+* Provides commonly used JMESPath expression with popular event sources
 
 ## Getting started
 
@@ -22,14 +23,14 @@ Built-in [JMESPath](https://jmespath.org/){target="_blank"} Functions to easily 
 
 You might have events that contains encoded JSON payloads as string, base64, or even in compressed format. It is a common use case to decode and extract them partially or fully as part of your Lambda function invocation.
 
-Lambda Powertools also have utilities like [validation](validation.md), [idempotency](idempotency.md), or [feature flags](feature_flags.md) where you might need to extract a portion of your data before using them.
+Powertools also have utilities like [validation](validation.md), [idempotency](idempotency.md), or [feature flags](feature_flags.md) where you might need to extract a portion of your data before using them.
 
-???+ info
-    **Envelope** is the terminology we use for the JMESPath expression to extract your JSON object from your data input.
+???+ info "Terminology"
+    **Envelope** is the terminology we use for the **JMESPath expression** to extract your JSON object from your data input. We might use those two terms interchangeably.
 
 ### Extracting data
 
-You can use the `extract_data_from_envelope` function along with any [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
+You can use the `extract_data_from_envelope` function with any [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
 
 ???+ tip
 	Another common use case is to fetch deeply nested data, filter, flatten, and more.
@@ -47,7 +48,7 @@ You can use the `extract_data_from_envelope` function along with any [JMESPath e
 
 ### Built-in envelopes
 
-We provide built-in envelopes for popular JMESPath expressions used when looking to decode/deserialize JSON objects within AWS Lambda Event Sources.
+We provide built-in envelopes for popular AWS Lambda event sources to easily decode and/or deserialize JSON objects.
 
 === "extract_data_from_builtin_envelope.py"
 
@@ -78,18 +79,18 @@ These are all built-in envelopes you can use along with their expression as a re
 
 ### Built-in JMESPath functions
 
-You can use our built-in JMESPath functions within your expressions to do exactly that to decode JSON Strings, base64, and uncompress gzip data.
+You can use our built-in JMESPath functions within your envelope expression. They handle deserialization for common data formats found in AWS Lambda event sources such as JSON strings, base64, and uncompress gzip data.
 
 ???+ info
-    We use these for built-in envelopes to easily decode and unwrap events from sources like API Gateway, Kinesis, CloudWatch Logs, etc.
+    We use these everywhere in Powertools to easily decode and unwrap events from Amazon API Gateway, Amazon Kinesis, AWS CloudWatch Logs, etc.
 
 #### powertools_json function
 
-Use `powertools_json` function to decode any JSON String anywhere a JMESPath expression is allowed.
+Use `powertools_json` function to decode any JSON string anywhere a JMESPath expression is allowed.
 
 > **Validation scenario**
 
-This sample will decode the value within the `data` key into a valid JSON before we can validate it.
+This sample will deserialize the JSON string within the `data` key before validation.
 
 === "powertools_json_jmespath_function.py"
 
@@ -111,7 +112,7 @@ This sample will decode the value within the `data` key into a valid JSON before
 
 > **Idempotency scenario**
 
-This sample will decode the value within the `body` key of an API Gateway event into a valid JSON object to ensure the Idempotency utility processes a JSON object instead of a string.
+This sample will deserialize the JSON string within the `body` key before [Idempotency](./idempotency.md){target="_blank"} processes it.
 
 === "powertools_json_idempotency_jmespath.py"
 
@@ -129,7 +130,7 @@ This sample will decode the value within the `body` key of an API Gateway event 
 
 Use `powertools_base64` function to decode any base64 data.
 
-This sample will decode the base64 value within the `data` key, and decode the JSON string into a valid JSON before we can validate it.
+This sample will decode the base64 value within the `data` key, and deserialize the JSON string before validation.
 
 === "powertools_base64_jmespath_function.py"
 
