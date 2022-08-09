@@ -1,7 +1,7 @@
 import base64
 import binascii
 import json
-from dataclasses import asdict, dataclass, is_dataclass
+from dataclasses import asdict, dataclass, field, is_dataclass
 from uuid import uuid4
 
 import powertools_base64_jmespath_schema as schemas
@@ -13,12 +13,12 @@ from aws_lambda_powertools.utilities.validation import SchemaValidationError, va
 
 @dataclass
 class Order:
-    order_id: str
     user_id: int
     product_id: int
     quantity: int
     price: float
     currency: str
+    order_id: str = field(default_factory=lambda: f"{uuid4()}")
 
 
 class DataclassCustomEncoder(json.JSONEncoder):
@@ -36,12 +36,14 @@ def lambda_handler(event, context: LambdaContext) -> dict:
     try:
         validate(event=event, schema=schemas.INPUT, envelope="powertools_json(powertools_base64(payload))")
 
+        # alternatively, extract_data_from_envelope works here too
         payload_decoded = base64.b64decode(event["payload"]).decode()
 
-        order = create_order(json.loads(payload_decoded))
+        order_payload: dict = json.loads(payload_decoded)
+
         return {
-            "order": json.dumps(order.get("order"), cls=DataclassCustomEncoder),
-            "message": order.get("message"),
+            "order": json.dumps(Order(**order_payload), cls=DataclassCustomEncoder),
+            "message": "order created",
             "success": True,
         }
     except JMESPathTypeError:
@@ -49,26 +51,12 @@ def lambda_handler(event, context: LambdaContext) -> dict:
             "The powertools_json(powertools_base64()) envelope function must match a valid path."
         )
     except binascii.Error:
-        return return_error_message("Payload must be valid base64 encoded string")
+        return return_error_message("Payload must be a valid base64 encoded string")
     except json.JSONDecodeError:
         return return_error_message("Payload must be valid JSON (base64 encoded).")
     except SchemaValidationError as exception:
         # if validation fails, a SchemaValidationError will be raised with the wrong fields
         return return_error_message(str(exception))
-
-
-def create_order(event: dict) -> dict:
-    # This return an Order dataclass
-    order_id = str(uuid4())
-    order = Order(
-        order_id=order_id,
-        user_id=event.get("user_id"),
-        product_id=event.get("product_id"),
-        quantity=event.get("quantity"),
-        price=event.get("price"),
-        currency=event.get("currency"),
-    )
-    return {"order": order, "message": "order created"}
 
 
 def return_error_message(message: str) -> dict:
