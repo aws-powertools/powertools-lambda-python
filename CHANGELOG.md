@@ -18,12 +18,14 @@
 
 ## Documentation
 
+* **apigateway:** removes duplicate admonition ([#1426](https://github.com/awslabs/aws-lambda-powertools-python/issues/1426))
 * **jmespath_util:** snippets split, improved, and lint ([#1419](https://github.com/awslabs/aws-lambda-powertools-python/issues/1419))
 * **layer:** upgrade to 1.27.0
 * **layer:** upgrade to 1.27.0
 
 ## Maintenance
 
+* **ci:** update changelog with latest changes
 * **ci:** reduce payload and only send prod notification
 * **ci:** update changelog with latest changes
 * **ci:** update changelog with latest changes
