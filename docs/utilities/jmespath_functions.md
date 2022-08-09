@@ -115,7 +115,7 @@ This sample will decode the value within the `body` key of an API Gateway event 
 
 === "powertools_json_idempotency_jmespath.py"
 
-    ```python hl_lines="9"
+    ```python hl_lines="12"
     --8<-- "examples/jmespath_functions/src/powertools_json_idempotency_jmespath.py"
     ```
 
