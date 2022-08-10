@@ -68,21 +68,50 @@ def get_metrics(
     namespace: str,
     start_date: datetime,
     metric_name: str,
-    service_name: str = "",
     dimensions: Optional[List[DimensionTypeDef]] = None,
     cw_client: Optional[CloudWatchClient] = None,
     end_date: Optional[datetime] = None,
     period: int = 60,
     stat: str = "Sum",
 ) -> MetricDataResultTypeDef:
+    """Fetch CloudWatch Metrics
+
+    It takes into account eventual consistency with up to 10 retries and 1s jitter.
+
+    Parameters
+    ----------
+    namespace : str
+        Metric Namespace
+    start_date : datetime
+        Start window to fetch metrics
+    metric_name : str
+        Metric name
+    dimensions : Optional[List[DimensionTypeDef]], optional
+        List of Metric Dimension, by default None
+    cw_client : Optional[CloudWatchClient], optional
+        Boto3 CloudWatch low-level client (boto3.client("cloudwatch"), by default None
+    end_date : Optional[datetime], optional
+        End window to fetch metrics, by default start_date + 2 minutes window
+    period : int, optional
+        Time period to fetch metrics for, by default 60
+    stat : str, optional
+        Aggregation function to use when fetching metrics, by default "Sum"
+
+    Returns
+    -------
+    MetricDataResultTypeDef
+        _description_
+
+    Raises
+    ------
+    ValueError
+        When no metric is found within retry window
+    """
     cw_client = cw_client or boto3.client("cloudwatch")
+    end_date = end_date or start_date + datetime.timedelta(minutes=2)
+
     metric_query = build_metric_query_data(
-        namespace=namespace,
-        metric_name=metric_name,
-        service_name=service_name,
-        period=period,
-        stat=stat,
-        dimensions=dimensions,
+        namespace=namespace, metric_name=metric_name, period=period, stat=stat, dimensions=dimensions
     )
 
     response = cw_client.get_metric_data(
@@ -162,17 +191,11 @@ def build_random_value(nbytes: int = 10) -> str:
 def build_metric_query_data(
     namespace: str,
     metric_name: str,
-    service_name: str = "",
     period: int = 60,
     stat: str = "Sum",
     dimensions: Optional[List[DimensionTypeDef]] = None,
 ) -> List[MetricDataQueryTypeDef]:
     dimensions = dimensions or []
-
-    # Maintenance: get rid of service_name param to avoid future mistakes
-    if service_name:
-        dimensions.append({"Name": "service", "Value": service_name})
-
     data_query: List[MetricDataQueryTypeDef] = [
         {
             "Id": metric_name.lower(),
@@ -233,24 +256,6 @@ def build_multiple_add_metric_input(
         List of metrics
     """
     return [{"name": metric_name, "unit": unit, "value": value} for _ in range(quantity)]
-
-
-def build_add_dimension_input(name: str, value: str) -> DimensionTypeDef:
-    """Create a dimension input to be used with either Metrics.add_dimension()
-
-    Parameters
-    ----------
-    name : str
-        dimension name
-    value : float
-        dimension value
-
-    Returns
-    -------
-    Dict
-        Metric dimension input
-    """
-    return {"Name": name, "Value": value}
 
 
 def build_add_dimensions_input(**dimensions) -> List[DimensionTypeDef]:
