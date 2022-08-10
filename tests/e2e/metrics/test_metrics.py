@@ -6,8 +6,6 @@ import pytest
 from tests.e2e.metrics.infrastructure import MetricsStack
 from tests.e2e.utils import helpers
 
-METRIC_NAMESPACE = "powertools-e2e-metric"
-
 
 @pytest.fixture
 def infra_outputs(infrastructure: MetricsStack):
@@ -17,6 +15,19 @@ def infra_outputs(infrastructure: MetricsStack):
 @pytest.fixture
 def basic_handler_fn(infra_outputs: dict) -> str:
     return infra_outputs.get("BasicHandlerArn", "")
+
+
+@pytest.fixture
+def cold_start_fn(infra_outputs: dict) -> str:
+    return infra_outputs.get("ColdStart", "")
+
+
+@pytest.fixture
+def cold_start_fn_arn(infra_outputs: dict) -> str:
+    return infra_outputs.get("ColdStartArn", "")
+
+
+METRIC_NAMESPACE = "powertools-e2e-metric"
 
 
 def test_basic_lambda_metric_is_visible(basic_handler_fn):
@@ -40,6 +51,29 @@ def test_basic_lambda_metric_is_visible(basic_handler_fn):
     # THEN
     metric_data = metrics.get("Values", [])
     assert metric_data and metric_data[0] == 3.0
+
+
+def test_cold_start_metric(cold_start_fn_arn: str, cold_start_fn: str):
+    # GIVEN
+    metric_name = "ColdStart"
+    service = helpers.build_service_name()
+    dimensions = helpers.build_add_dimensions_input(function_name=cold_start_fn, service=service)
+
+    # WHEN
+    event = json.dumps({"service": service, "namespace": METRIC_NAMESPACE})
+    _, execution_time = helpers.trigger_lambda(lambda_arn=cold_start_fn_arn, payload=event)
+
+    metrics = helpers.get_metrics(
+        start_date=execution_time,
+        end_date=execution_time + datetime.timedelta(minutes=2),
+        namespace=METRIC_NAMESPACE,
+        metric_name=metric_name,
+        dimensions=dimensions,
+    )
+
+    # THEN
+    metric_data = metrics.get("Values", [])
+    assert metric_data and metric_data[0] == 1.0
 
 
 # helpers: adjust retries and wait to be much smaller

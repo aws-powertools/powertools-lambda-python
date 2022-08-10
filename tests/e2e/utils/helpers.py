@@ -68,7 +68,8 @@ def get_metrics(
     namespace: str,
     start_date: datetime,
     metric_name: str,
-    service_name: str,
+    service_name: str = "",
+    dimensions: Optional[List[DimensionTypeDef]] = None,
     cw_client: Optional[CloudWatchClient] = None,
     end_date: Optional[datetime] = None,
     period: int = 60,
@@ -76,7 +77,12 @@ def get_metrics(
 ) -> MetricDataResultTypeDef:
     cw_client = cw_client or boto3.client("cloudwatch")
     metric_query = build_metric_query_data(
-        namespace=namespace, metric_name=metric_name, service_name=service_name, period=period, stat=stat
+        namespace=namespace,
+        metric_name=metric_name,
+        service_name=service_name,
+        period=period,
+        stat=stat,
+        dimensions=dimensions,
     )
 
     response = cw_client.get_metric_data(
@@ -156,26 +162,33 @@ def build_random_value(nbytes: int = 10) -> str:
 def build_metric_query_data(
     namespace: str,
     metric_name: str,
-    service_name: str,
+    service_name: str = "",
     period: int = 60,
     stat: str = "Sum",
-    dimensions: Optional[DimensionTypeDef] = None,
+    dimensions: Optional[List[DimensionTypeDef]] = None,
 ) -> List[MetricDataQueryTypeDef]:
-    metric_dimensions: List[DimensionTypeDef] = [{"Name": "service", "Value": service_name}]
-    if dimensions is not None:
-        metric_dimensions.append(dimensions)
+    dimensions = dimensions or []
 
-    return [
+    # Maintenance: get rid of service_name param to avoid future mistakes
+    if service_name:
+        dimensions.append({"Name": "service", "Value": service_name})
+
+    data_query: List[MetricDataQueryTypeDef] = [
         {
-            "Id": metric_name,
+            "Id": metric_name.lower(),
             "MetricStat": {
-                "Metric": {"Namespace": namespace, "MetricName": metric_name, "Dimensions": metric_dimensions},
+                "Metric": {"Namespace": namespace, "MetricName": metric_name},
                 "Period": period,
                 "Stat": stat,
             },
             "ReturnData": True,
         }
     ]
+
+    if dimensions:
+        data_query[0]["MetricStat"]["Metric"]["Dimensions"] = dimensions
+
+    return data_query
 
 
 def build_add_metric_input(metric_name: str, value: float, unit: str = MetricUnit.Count.value) -> Dict:
@@ -220,3 +233,39 @@ def build_multiple_add_metric_input(
         List of metrics
     """
     return [{"name": metric_name, "unit": unit, "value": value} for _ in range(quantity)]
+
+
+def build_add_dimension_input(name: str, value: str) -> DimensionTypeDef:
+    """Create a dimension input to be used with either Metrics.add_dimension()
+
+    Parameters
+    ----------
+    name : str
+        dimension name
+    value : float
+        dimension value
+
+    Returns
+    -------
+    Dict
+        Metric dimension input
+    """
+    return {"Name": name, "Value": value}
+
+
+def build_add_dimensions_input(**dimensions) -> List[DimensionTypeDef]:
+    """Create dimensions input to be used with either get_metrics or Metrics.add_dimension()
+
+    Parameters
+    ----------
+    name : str
+        dimension name
+    value : float
+        dimension value
+
+    Returns
+    -------
+    Dict
+        Metric dimension input
+    """
+    return [{"Name": name, "Value": value} for name, value in dimensions.items()]

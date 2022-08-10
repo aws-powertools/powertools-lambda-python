@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class MetricsStack:
     def __init__(self, handlers_dir: Path) -> None:
         self.stack_name = f"test-metrics-{uuid4()}"
-        self.handlers_dir = handlers_dir  # hardcoded as we're not using a fixture yet
+        self.handlers_dir = handlers_dir
         self.app = App()
         self.stack = Stack(self.app, self.stack_name)
         self.session = boto3.Session()
@@ -41,7 +41,7 @@ class MetricsStack:
                 layers=[
                     LayerVersion.from_layer_version_arn(
                         self.stack,
-                        "lambda-powertools",
+                        f"{fn_name}-lambda-powertools",
                         f"arn:aws:lambda:{self.region}:017000801446:layer:AWSLambdaPowertoolsPython:29",
                     )
                 ],
@@ -57,7 +57,9 @@ class MetricsStack:
 
             # CFN Outputs only support hyphen
             fn_name_camel_case = fn_name.title().replace("_", "")  # basic_handler -> BasicHandler
-            CfnOutput(self.stack, f"{fn_name_camel_case}Arn", value=function_python.function_arn)
+            self._add_resource_output(
+                name=fn_name_camel_case, value=function_python.function_name, arn_value=function_python.function_arn
+            )
 
     def deploy(self) -> Dict[str, str]:
         """Creates CloudFormation Stack and return stack outputs as dict
@@ -74,6 +76,9 @@ class MetricsStack:
 
     def delete(self):
         self.cf_client.delete_stack(StackName=self.stack_name)
+
+    def get_stack_outputs(self) -> Dict[str, str]:
+        return self.stack_outputs
 
     def _synthesize(self) -> Tuple[Dict, Path]:
         self.create_functions()
@@ -103,5 +108,19 @@ class MetricsStack:
 
         return self.stack_outputs
 
-    def get_stack_outputs(self) -> Dict[str, str]:
-        return self.stack_outputs
+    def _add_resource_output(self, name: str, value: str, arn_value: str):
+        """Add both resource value and ARN as Outputs to facilitate tests.
+
+        This will create two outputs: {Name} and {Name}Arn
+
+        Parameters
+        ----------
+        name : str
+            CloudFormation Output Key
+        value : str
+            CloudFormation Output Value
+        arn_value : str
+            CloudFormation Output Value for ARN
+        """
+        CfnOutput(self.stack, f"{name}", value=value)
+        CfnOutput(self.stack, f"{name}Arn", value=arn_value)
