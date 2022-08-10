@@ -13,8 +13,10 @@ from mypy_boto3_xray.client import XRayClient
 from pydantic import BaseModel
 from retry import retry
 
-
 # Helper methods && Class
+from aws_lambda_powertools.metrics import MetricUnit
+
+
 class Log(BaseModel):
     level: str
     location: str
@@ -174,3 +176,47 @@ def build_metric_query_data(
             "ReturnData": True,
         }
     ]
+
+
+def build_add_metric_input(metric_name: str, value: float, unit: str = MetricUnit.Count.value) -> Dict:
+    """Create a metric input to be used with Metrics.add_metric()
+
+    Parameters
+    ----------
+    metric_name : str
+        metric name
+    value : float
+        metric value
+    unit : str, optional
+        metric unit, by default Count
+
+    Returns
+    -------
+    Dict
+        Metric input
+    """
+    return {"name": metric_name, "unit": unit, "value": value}
+
+
+def build_multiple_add_metric_input(
+    metric_name: str, value: float, unit: str = MetricUnit.Count.value, quantity: int = 1
+) -> Dict:
+    """Create list of metrics input to be used with Metrics.add_metric()
+
+    Parameters
+    ----------
+    metric_name : str
+        metric name
+    value : float
+        metric value
+    unit : str, optional
+        metric unit, by default Count
+    quantity : int, optional
+        number of metrics to be created, by default 1
+
+    Returns
+    -------
+    List[Dict]
+        List of metrics
+    """
+    return [{"name": metric_name, "unit": unit, "value": value} for _ in range(quantity)]

@@ -23,10 +23,11 @@ def test_basic_lambda_metric_is_visible(basic_handler_fn):
     # GIVEN
     metric_name = helpers.build_metric_name()
     service = helpers.build_service_name()
-    event = json.dumps({"metric_name": metric_name, "service": service, "namespace": METRIC_NAMESPACE})
+    metrics = helpers.build_multiple_add_metric_input(metric_name=metric_name, value=1, quantity=3)
 
     # WHEN
-    ret, execution_time = helpers.trigger_lambda(lambda_arn=basic_handler_fn, payload=event)
+    event = json.dumps({"metrics": metrics, "service": service, "namespace": METRIC_NAMESPACE})
+    _, execution_time = helpers.trigger_lambda(lambda_arn=basic_handler_fn, payload=event)
 
     metrics = helpers.get_metrics(
         start_date=execution_time,
@@ -37,18 +38,11 @@ def test_basic_lambda_metric_is_visible(basic_handler_fn):
     )
 
     # THEN
-    assert len(metrics.get("Timestamps", [])) == 1
     metric_data = metrics.get("Values", [])
-    assert metric_data and metric_data[0] == 1
-
-    # for later... we could break the test early if the function failed
-    # we could extend `trigger_lambda` with a default param to check on that
-    # making the test less verbose. For explicit invoke failure, we could override
-    assert ret is not None
+    assert metric_data and metric_data[0] == 3.0
 
 
 # helpers: adjust retries and wait to be much smaller
 # helpers: make retry config adjustable
 # Infra: Add temporary Powertools Layer
-# Powertools: should have a method to set namespace at runtime
 # Create separate Infra class so they can live side by side
