@@ -3,28 +3,22 @@ import json
 
 import pytest
 
-from tests.e2e.metrics.infrastructure import MetricsStack
 from tests.e2e.utils import helpers
 
 
 @pytest.fixture
-def infra_outputs(infrastructure: MetricsStack):
-    return infrastructure.get_stack_outputs()
+def basic_handler_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("BasicHandlerArn", "")
 
 
 @pytest.fixture
-def basic_handler_fn(infra_outputs: dict) -> str:
-    return infra_outputs.get("BasicHandlerArn", "")
+def cold_start_fn(infrastructure: dict) -> str:
+    return infrastructure.get("ColdStart", "")
 
 
 @pytest.fixture
-def cold_start_fn(infra_outputs: dict) -> str:
-    return infra_outputs.get("ColdStart", "")
-
-
-@pytest.fixture
-def cold_start_fn_arn(infra_outputs: dict) -> str:
-    return infra_outputs.get("ColdStartArn", "")
+def cold_start_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("ColdStartArn", "")
 
 
 METRIC_NAMESPACE = "powertools-e2e-metric"
