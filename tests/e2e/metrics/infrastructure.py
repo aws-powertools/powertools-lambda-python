@@ -14,9 +14,9 @@ if TYPE_CHECKING:
 
 
 class MetricsStack:
-    def __init__(self) -> None:
+    def __init__(self, handlers_dir: Path) -> None:
         self.stack_name = f"test-metrics-{uuid4()}"
-        self.handlers_dir = "tests/e2e/metrics/handlers"  # hardcoded as we're not using a fixture yet
+        self.handlers_dir = handlers_dir  # hardcoded as we're not using a fixture yet
         self.app = App()
         self.stack = Stack(self.app, self.stack_name)
         self.session = boto3.Session()
@@ -27,8 +27,8 @@ class MetricsStack:
         self.stack_outputs: Dict[str, str] = {}
 
     def create_functions(self):
-        handlers = list(Path(self.handlers_dir).rglob("*.py"))
-        source = Code.from_asset(self.handlers_dir)
+        handlers = list(self.handlers_dir.rglob("*.py"))
+        source = Code.from_asset(f"{self.handlers_dir}")
         for fn in handlers:
             fn_name = fn.stem
             function_python = Function(
@@ -54,7 +54,10 @@ class MetricsStack:
                 retention=aws_logs.RetentionDays.ONE_DAY,
                 removal_policy=RemovalPolicy.DESTROY,
             )
-            CfnOutput(self.stack, f"{fn_name}_arn", value=function_python.function_arn)
+
+            # CFN Outputs only support hyphen
+            fn_name_camel_case = fn_name.title().replace("_", "")  # basic_handler -> BasicHandler
+            CfnOutput(self.stack, f"{fn_name_camel_case}Arn", value=function_python.function_arn)
 
     def deploy(self) -> Dict[str, str]:
         """Creates CloudFormation Stack and return stack outputs as dict

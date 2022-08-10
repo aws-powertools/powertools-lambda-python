@@ -1,36 +1,37 @@
 import datetime
 import json
-from typing import Dict, Type
 
 import pytest
-from e2e.utils import helpers
 
 from tests.e2e.metrics.infrastructure import MetricsStack
+from tests.e2e.utils import helpers
+
+METRIC_NAMESPACE = "powertools-e2e-metric"
 
 
 @pytest.fixture
-def infra_outputs(infrastructure: Type[MetricsStack]):
+def infra_outputs(infrastructure: MetricsStack):
     return infrastructure.get_stack_outputs()
 
 
-def test_basic_lambda_metric_is_visible(infra_outputs: Dict[str, str]):
-    # GIVEN
-    metric_name = "test-two"
-    service = "test-metric-is-visible"
-    namespace = "powertools-e2e-metric"
-    event = json.dumps({"metric_name": metric_name, "service": service, "namespace": namespace})
+@pytest.fixture
+def basic_handler_fn(infra_outputs: dict) -> str:
+    return infra_outputs.get("BasicHandlerArn", "")
 
-    # NOTE: Need to try creating a dynamic enum/dataclass w/ Literal types to make discovery easier
-    # it might not be possible
+
+def test_basic_lambda_metric_is_visible(basic_handler_fn):
+    # GIVEN
+    metric_name = helpers.build_metric_name()
+    service = helpers.build_service_name()
+    event = json.dumps({"metric_name": metric_name, "service": service, "namespace": METRIC_NAMESPACE})
 
     # WHEN
-    execution_time = datetime.datetime.utcnow()
-    ret = helpers.trigger_lambda(lambda_arn=infra_outputs.get("basichandlerarn"), payload=event)
+    ret, execution_time = helpers.trigger_lambda(lambda_arn=basic_handler_fn, payload=event)
 
     metrics = helpers.get_metrics(
         start_date=execution_time,
         end_date=execution_time + datetime.timedelta(minutes=2),
-        namespace=namespace,
+        namespace=METRIC_NAMESPACE,
         service_name=service,
         metric_name=metric_name,
     )
@@ -48,8 +49,6 @@ def test_basic_lambda_metric_is_visible(infra_outputs: Dict[str, str]):
 
 # helpers: adjust retries and wait to be much smaller
 # helpers: make retry config adjustable
-# Infra: Create dynamic Enum/DataClass to reduce guessing on outputs
-# Infra: Fix outputs
 # Infra: Add temporary Powertools Layer
 # Powertools: should have a method to set namespace at runtime
 # Create separate Infra class so they can live side by side

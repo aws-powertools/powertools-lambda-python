@@ -1,15 +1,15 @@
 import json
+import secrets
 from datetime import datetime
 from functools import lru_cache
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
-
-if TYPE_CHECKING:
-    from mypy_boto3_cloudwatch import MetricDataResultTypeDef
-    from mypy_boto3_cloudwatch.client import CloudWatchClient
-    from mypy_boto3_lambda.client import LambdaClient
-    from mypy_boto3_xray.client import XRayClient
+from typing import Dict, List, Optional, Tuple, Union
 
 import boto3
+from mypy_boto3_cloudwatch.client import CloudWatchClient
+from mypy_boto3_cloudwatch.type_defs import DimensionTypeDef, MetricDataQueryTypeDef, MetricDataResultTypeDef
+from mypy_boto3_lambda.client import LambdaClient
+from mypy_boto3_lambda.type_defs import InvocationResponseTypeDef
+from mypy_boto3_xray.client import XRayClient
 from pydantic import BaseModel
 from retry import retry
 
@@ -36,14 +36,17 @@ class TraceSegment(BaseModel):
     annotations: Dict = {}
 
 
-def trigger_lambda(lambda_arn: str, payload: str, client: Optional["LambdaClient"] = None):
+def trigger_lambda(
+    lambda_arn: str, payload: str, client: Optional[LambdaClient] = None
+) -> Tuple[InvocationResponseTypeDef, datetime]:
     client = client or boto3.client("lambda")
-    return client.invoke(FunctionName=lambda_arn, InvocationType="RequestResponse", Payload=payload)
+    execution_time = datetime.utcnow()
+    return client.invoke(FunctionName=lambda_arn, InvocationType="RequestResponse", Payload=payload), execution_time
 
 
 @lru_cache(maxsize=10, typed=False)
 @retry(ValueError, delay=1, jitter=1, tries=20)
-def get_logs(lambda_function_name: str, log_client: "CloudWatchClient", start_time: int, **kwargs: dict) -> List[Log]:
+def get_logs(lambda_function_name: str, log_client: CloudWatchClient, start_time: int, **kwargs: dict) -> List[Log]:
     response = log_client.filter_log_events(logGroupName=f"/aws/lambda/{lambda_function_name}", startTime=start_time)
     if not response["events"]:
         raise ValueError("Empty response from Cloudwatch Logs. Repeating...")
@@ -58,26 +61,24 @@ def get_logs(lambda_function_name: str, log_client: "CloudWatchClient", start_ti
     return filtered_logs
 
 
-@lru_cache(maxsize=10, typed=False)
-@retry(ValueError, delay=1, jitter=1, tries=5)
+@retry(ValueError, delay=1, jitter=1, tries=10)
 def get_metrics(
     namespace: str,
     start_date: datetime,
     metric_name: str,
     service_name: str,
-    cw_client: Optional["CloudWatchClient"] = None,
+    cw_client: Optional[CloudWatchClient] = None,
     end_date: Optional[datetime] = None,
-) -> "MetricDataResultTypeDef":
+    period: int = 60,
+    stat: str = "Sum",
+) -> MetricDataResultTypeDef:
     cw_client = cw_client or boto3.client("cloudwatch")
-    metric_query = {
-        "Id": "m1",
-        "Expression": f'SELECT MAX("{metric_name}") from SCHEMA("{namespace}",service) \
-                    where service=\'{service_name}\'',
-        "ReturnData": True,
-        "Period": 600,
-    }
+    metric_query = build_metric_query_data(
+        namespace=namespace, metric_name=metric_name, service_name=service_name, period=period, stat=stat
+    )
+
     response = cw_client.get_metric_data(
-        MetricDataQueries=[metric_query],
+        MetricDataQueries=metric_query,
         StartTime=start_date,
         EndTime=end_date or datetime.utcnow(),
     )
@@ -88,7 +89,10 @@ def get_metrics(
 
 
 @retry(ValueError, delay=1, jitter=1, tries=10)
-def get_traces(filter_expression: str, xray_client: "XRayClient", start_date: datetime, end_date: datetime) -> Dict:
+def get_traces(
+    filter_expression: str, start_date: datetime, end_date: datetime, xray_client: Optional[XRayClient] = None
+) -> Dict:
+    xray_client = xray_client or boto3.client("xray")
     paginator = xray_client.get_paginator("get_trace_summaries")
     response_iterator = paginator.paginate(
         StartTime=start_date,
@@ -132,3 +136,41 @@ def find_meta(segment: dict, result: List):
         )
         if x_subsegment.get("subsegments"):
             find_meta(segment=x_subsegment, result=result)
+
+
+# Maintenance: Build a separate module for builders
+def build_metric_name() -> str:
+    return f"test_metric{build_random_value()}"
+
+
+def build_service_name() -> str:
+    return f"test_service{build_random_value()}"
+
+
+def build_random_value(nbytes: int = 10) -> str:
+    return secrets.token_urlsafe(nbytes).replace("-", "")
+
+
+def build_metric_query_data(
+    namespace: str,
+    metric_name: str,
+    service_name: str,
+    period: int = 60,
+    stat: str = "Sum",
+    dimensions: Optional[DimensionTypeDef] = None,
+) -> List[MetricDataQueryTypeDef]:
+    metric_dimensions: List[DimensionTypeDef] = [{"Name": "service", "Value": service_name}]
+    if dimensions is not None:
+        metric_dimensions.append(dimensions)
+
+    return [
+        {
+            "Id": metric_name,
+            "MetricStat": {
+                "Metric": {"Namespace": namespace, "MetricName": metric_name, "Dimensions": metric_dimensions},
+                "Period": period,
+                "Stat": stat,
+            },
+            "ReturnData": True,
+        }
+    ]
