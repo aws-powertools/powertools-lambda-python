@@ -63,37 +63,22 @@ It will fail fast with `SchemaValidationError` exception if event or response do
 
 You can also gracefully handle schema validation errors by catching `SchemaValidationError` exception.
 
-=== "validator_decorator.py"
+=== "getting_started_validator_standalone_function.py"
 
-    ```python hl_lines="8"
-    from aws_lambda_powertools.utilities.validation import validate
-    from aws_lambda_powertools.utilities.validation.exceptions import SchemaValidationError
+	```python hl_lines="4 7 18"
+    --8<-- "examples/validation/src/getting_started_validator_standalone_function.py"
+	```
 
-    import schemas
+=== "getting_started_validator_standalone_schema.py"
 
-    def handler(event, context):
-        try:
-            validate(event=event, schema=schemas.INPUT)
-        except SchemaValidationError as e:
-            # do something before re-raising
-            raise
+	```python hl_lines="7 8 10 12 17 19 24 26 28 41 42 44 46 51 53"
+    --8<-- "examples/validation/src/getting_started_validator_standalone_schema.py"
+	```
 
-        return event
-    ```
-
-=== "event.json"
+=== "getting_started_validator_standalone_payload.json"
 
     ```json
-    {
-        "data": "hello world",
-        "username": "lessa"
-    }
-    ```
-
-=== "schemas.py"
-
-    ```python hl_lines="7 14 16 23 39 45 47 52"
-    --8<-- "docs/shared/validation_basic_jsonschema.py"
+    --8<-- "examples/validation/src/getting_started_validator_standalone_payload.json"
     ```
 
 ### Unwrapping events prior to validation

@@ -15,6 +15,7 @@ class User:
     name: str = field(default_factory=lambda: f"{Faker().name()}")
 
 
+# using a decorator to validate input and output data
 @validator(inbound_schema=schemas.INPUT, outbound_schema=schemas.OUTPUT)
 def lambda_handler(event, context) -> dict:
 
@@ -23,4 +24,5 @@ def lambda_handler(event, context) -> dict:
     if event.get("username") == "lambda" and event.get("password") == "powertools":
         user_details = User(ip=event.get("ip"), permissions=["read", "write"]).__dict__
 
+    # the body must be a object because must match OUTPUT schema, otherwise it fails
     return {"body": user_details or None, "statusCode": 200 if user_details else 204}
