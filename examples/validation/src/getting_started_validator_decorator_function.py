@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from uuid import uuid4
 
 import getting_start_validator_schema as schemas
-from faker import Faker
 
 from aws_lambda_powertools.utilities.validation import validator
 
@@ -12,7 +11,7 @@ class User:
     ip: str
     permissions: list
     user_id: str = field(default_factory=lambda: f"{uuid4()}")
-    name: str = field(default_factory=lambda: f"{Faker().name()}")
+    name: str = "Project Lambda Powertools"
 
 
 # using a decorator to validate input and output data
