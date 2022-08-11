@@ -6,15 +6,16 @@
 
 ## Bug Fixes
 
+* **ci:** move from pip-tools to poetry on layers reusable workflow
 * **ci:** move from pip-tools to poetry on layers to fix conflicts
 * **ci:** typo and bust gh actions cache
 * **ci:** use poetry to resolve layer deps; pip for CDK
 * **ci:** disable poetry venv for layer workflow as cdk ignores venv
 * **ci:** add cdk v2 dep for layers workflow
-* **ci:** move from pip-tools to poetry on layers reusable workflow
 * **ci:** move from pip-tools to poetry on layers
 * **ci:** temporarily disable changelog upon release
 * **ci:** add explicit origin to fix release detached head
+* **jmespath_util:** snappy as dev dep and typing example ([#1446](https://github.com/awslabs/aws-lambda-powertools-python/issues/1446))
 
 ## Documentation
 
@@ -26,6 +27,7 @@
 
 ## Maintenance
 
+* **ci:** update changelog with latest changes
 * **ci:** update changelog with latest changes
 * **ci:** update changelog with latest changes
 * **ci:** update changelog with latest changes
