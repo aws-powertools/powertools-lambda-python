@@ -5,9 +5,7 @@ from aws_lambda_powertools.utilities.validation.exceptions import SchemaValidati
 
 
 def lambda_handler(event, context) -> dict:
-
     try:
-
         user_authenticated: str = ""
 
         # using standalone function to validate input data only

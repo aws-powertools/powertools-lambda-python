@@ -38,7 +38,7 @@ It will fail fast with `SchemaValidationError` exception if event or response do
 
 === "getting_started_validator_decorator_function.py"
 
-	```python hl_lines="4 7 18"
+	```python hl_lines="4 7 19 27"
     --8<-- "examples/validation/src/getting_started_validator_decorator_function.py"
 	```
 
@@ -65,13 +65,13 @@ You can also gracefully handle schema validation errors by catching `SchemaValid
 
 === "getting_started_validator_standalone_function.py"
 
-	```python hl_lines="4 7 18"
+	```python hl_lines="3 4 12 17"
     --8<-- "examples/validation/src/getting_started_validator_standalone_function.py"
 	```
 
 === "getting_started_validator_standalone_schema.py"
 
-	```python hl_lines="7 8 10 12 17 19 24 26 28 41 42 44 46 51 53"
+	```python hl_lines="7 8 10 12 17 19 24 26 28"
     --8<-- "examples/validation/src/getting_started_validator_standalone_schema.py"
 	```
 
