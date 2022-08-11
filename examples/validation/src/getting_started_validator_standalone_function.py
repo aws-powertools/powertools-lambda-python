@@ -1,7 +1,6 @@
 import getting_started_validator_standalone_schema as schemas
 
-from aws_lambda_powertools.utilities.validation import validate
-from aws_lambda_powertools.utilities.validation.exceptions import SchemaValidationError
+from aws_lambda_powertools.utilities.validation import SchemaValidationError, validate
 
 
 def lambda_handler(event, context) -> dict:
