@@ -67,6 +67,6 @@ def test_cold_start_metric(cold_start_fn_arn: str, cold_start_fn: str):
     assert metric_data and metric_data[0] == 1.0
 
 
+# Abstract Infrastructure fixture parallelization work
 # helpers: adjust retries and wait to be much smaller
 # helpers: make retry config adjustable
-# Create separate Infra class so they can live side by side

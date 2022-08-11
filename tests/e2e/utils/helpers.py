@@ -1,6 +1,6 @@
 import json
 import secrets
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import lru_cache
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -108,7 +108,7 @@ def get_metrics(
         When no metric is found within retry window
     """
     cw_client = cw_client or boto3.client("cloudwatch")
-    end_date = end_date or start_date + datetime.timedelta(minutes=2)
+    end_date = end_date or start_date + timedelta(minutes=2)
 
     metric_query = build_metric_query_data(
         namespace=namespace, metric_name=metric_name, period=period, stat=stat, dimensions=dimensions
