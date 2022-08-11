@@ -86,3 +86,8 @@ class MyCloudWatchBusiness(BaseModel):
 class MyApiGatewayBusiness(BaseModel):
     message: str
     username: str
+
+
+class MyALambdaFuncUrlBusiness(BaseModel):
+    message: str
+    username: str
