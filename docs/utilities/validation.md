@@ -97,13 +97,13 @@ Here is a sample custom EventBridge event, where we only validate what's inside 
 
 === "getting_started_validator_unwraping_schema.py"
 
-	```python hl_lines="8 10 12 24 26 "
+	```python hl_lines="9-14 23 25 28 33 36 41 44 48 51"
     --8<-- "examples/validation/src/getting_started_validator_unwraping_schema.py"
 	```
 
 === "getting_started_validator_unwraping_payload.json"
 
-    ```json hl_lines="11-18"
+    ```json
     --8<-- "examples/validation/src/getting_started_validator_unwraping_payload.json"
     ```
 
@@ -115,28 +115,22 @@ When combined, these features allow you to extract what you need before validati
 
 This utility comes with built-in envelopes to easily extract the payload from popular event sources.
 
-=== "unwrapping_popular_event_sources.py"
+=== "unwrapping_popular_event_source_function.py"
 
-    ```python hl_lines="5 7"
-    from aws_lambda_powertools.utilities.validation import envelopes, validator
+	```python hl_lines="2 5 8 9 19"
+    --8<-- "examples/validation/src/unwrapping_popular_event_source_function.py"
+	```
 
-    import schemas
+=== "unwrapping_popular_event_source_schema.py"
 
-    @validator(inbound_schema=schemas.INPUT, envelope=envelopes.EVENTBRIDGE)
-    def handler(event, context):
-        return event
-    ```
+	```python hl_lines="7 9 12 17 20"
+    --8<-- "examples/validation/src/unwrapping_popular_event_source_schema.py"
+	```
 
-=== "sample_wrapped_event.json"
+=== "unwrapping_popular_event_source_payload.json"
 
-    ```python hl_lines="11-14"
-    --8<-- "docs/shared/validation_basic_eventbridge_event.json"
-    ```
-
-=== "schemas.py"
-
-    ```python hl_lines="7 14 16 23 39 45 47 52"
-    --8<-- "docs/shared/validation_basic_jsonschema.py"
+    ```json hl_lines="12 13"
+    --8<-- "examples/validation/src/unwrapping_popular_event_source_payload.json"
     ```
 
 Here is a handy table with built-in envelopes along with their JMESPath expressions in case you want to build your own.
