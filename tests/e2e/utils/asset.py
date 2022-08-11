@@ -2,25 +2,35 @@ import io
 import json
 import zipfile
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
 import boto3
 import botocore.exceptions
+from mypy_boto3_s3 import S3Client
 
 from aws_lambda_powertools import Logger
 from tests.e2e.utils.models import AssetTemplateConfig, TemplateAssembly
-
-if TYPE_CHECKING:
-    from mypy_boto3_s3 import S3Client
-
 
 logger = Logger(service="e2e-utils")
 
 
 class Asset:
     def __init__(
-        self, config: AssetTemplateConfig, account_id: str, region: str, boto3_client: Optional["S3Client"] = None
+        self, config: AssetTemplateConfig, account_id: str, region: str, boto3_client: Optional[S3Client] = None
     ) -> None:
+        """CDK Asset logic to verify existence and resolve deeply nested configuration
+
+        Parameters
+        ----------
+        config : AssetTemplateConfig
+            CDK Asset configuration found in synthesized template
+        account_id : str
+            AWS Account ID
+        region : str
+            AWS Region
+        boto3_client : Optional[&quot;S3Client&quot;], optional
+            S3 client instance for asset operations, by default None
+        """
         self.config = config
         self.s3 = boto3_client or boto3.client("s3")
         self.account_id = account_id
@@ -47,8 +57,21 @@ class Asset:
 
 class Assets:
     def __init__(
-        self, cfn_template: Path, account_id: str, region: str, boto3_client: Optional["S3Client"] = None
+        self, cfn_template: Path, account_id: str, region: str, boto3_client: Optional[S3Client] = None
     ) -> None:
+        """CDK Assets logic to find each asset, compress, and upload
+
+        Parameters
+        ----------
+        cfn_template : Path
+            CloudFormation template synthesized (self.__synthesize)
+        account_id : str
+            AWS Account ID
+        region : str
+            AWS Region
+        boto3_client : Optional[S3Client], optional
+            S3 client instance for asset operations, by default None
+        """
         self.template = cfn_template
         self.account_id = account_id
         self.region = region
@@ -57,8 +80,7 @@ class Assets:
         self.assets_location = str(self.template.parent)
 
     def upload(self):
-        """
-        This method is drop-in replacement for cdk-assets package s3 upload part.
+        """Drop-in replacement for cdk-assets package s3 upload part.
         https://www.npmjs.com/package/cdk-assets.
         We use custom solution to avoid dependencies from nodejs ecosystem.
         We follow the same design cdk-assets:
@@ -96,6 +118,3 @@ class Assets:
                 archive.write(asset_file, arcname=asset_file.relative_to(asset_dir))
         buf.seek(0)
         return buf
-
-    def __iter__(self) -> Asset:
-        yield from self.assets

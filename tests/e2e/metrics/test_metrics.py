@@ -65,8 +65,3 @@ def test_cold_start_metric(cold_start_fn_arn: str, cold_start_fn: str):
     # THEN
     metric_data = metrics.get("Values", [])
     assert metric_data and metric_data[0] == 1.0
-
-
-# Abstract Infrastructure fixture parallelization work
-# helpers: adjust retries and wait to be much smaller
-# helpers: make retry config adjustable

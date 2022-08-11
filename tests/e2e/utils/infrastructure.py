@@ -119,7 +119,7 @@ class Infrastructure:
         session = boto3.Session()
         self.s3_client = session.client("s3")
         self.lambda_client = session.client("lambda")
-        self.cf_client = session.client("cloudformation")
+        self.cfn = session.client("cloudformation")
         self.s3_resource = session.resource("s3")
         self.account_id = session.client("sts").get_caller_identity()["Account"]
         self.region = session.region_name
@@ -138,7 +138,7 @@ class Infrastructure:
         return self._transform_output(response["Stacks"][0]["Outputs"])
 
     def delete(self):
-        self.cf_client.delete_stack(StackName=self.stack_name)
+        self.cfn.delete_stack(StackName=self.stack_name)
 
     def _upload_assets(self, asset_root_dir: str, asset_manifest_file: str):
         """
@@ -181,16 +181,16 @@ class Infrastructure:
         return file_paths
 
     def _deploy_stack(self, stack_name: str, template: dict):
-        response = self.cf_client.create_stack(
+        response = self.cfn.create_stack(
             StackName=stack_name,
             TemplateBody=yaml.dump(template),
             TimeoutInMinutes=10,
             OnFailure="ROLLBACK",
             Capabilities=["CAPABILITY_IAM"],
         )
-        waiter = self.cf_client.get_waiter("stack_create_complete")
+        waiter = self.cfn.get_waiter("stack_create_complete")
         waiter.wait(StackName=stack_name, WaiterConfig={"Delay": 10, "MaxAttempts": 50})
-        response = self.cf_client.describe_stacks(StackName=stack_name)
+        response = self.cfn.describe_stacks(StackName=stack_name)
         return response
 
     def _find_assets(self, asset_template: str, account_id: str, region: str):
@@ -220,14 +220,15 @@ class BaseInfrastructureV2(ABC):
     def __init__(self, feature_name: str, handlers_dir: Path) -> None:
         self.stack_name = f"test-{feature_name}-{uuid4()}"
         self.handlers_dir = handlers_dir
+        self.stack_outputs: Dict[str, str] = {}
         self.app = App()
         self.stack = Stack(self.app, self.stack_name)
         self.session = boto3.Session()
-        self.cf_client: CloudFormationClient = self.session.client("cloudformation")
+        self.cfn: CloudFormationClient = self.session.client("cloudformation")
+
         # NOTE: CDK stack account and region are tokens, we need to resolve earlier
         self.account_id = self.session.client("sts").get_caller_identity()["Account"]
         self.region = self.session.region_name
-        self.stack_outputs: Dict[str, str] = {}
 
     def create_lambda_functions(self, function_props: Optional[Dict] = None):
         """Create Lambda functions available under handlers_dir
@@ -242,7 +243,7 @@ class BaseInfrastructureV2(ABC):
             CDK Lambda FunctionProps as dictionary to override defaults
 
         Examples
-        -------
+        --------
 
         Creating Lambda functions available in the handlers directory
 
@@ -310,10 +311,8 @@ class BaseInfrastructureV2(ABC):
         return self._deploy_stack(self.stack_name, template)
 
     def delete(self):
-        self.cf_client.delete_stack(StackName=self.stack_name)
-
-    def get_stack_outputs(self) -> Dict[str, str]:
-        return self.stack_outputs
+        """Delete CloudFormation Stack"""
+        self.cfn.delete_stack(StackName=self.stack_name)
 
     @abstractmethod
     def create_resources(self):
@@ -351,17 +350,17 @@ class BaseInfrastructureV2(ABC):
         return cf_template, Path(cloud_assembly_assets_manifest_path)
 
     def _deploy_stack(self, stack_name: str, template: Dict) -> Dict[str, str]:
-        self.cf_client.create_stack(
+        self.cfn.create_stack(
             StackName=stack_name,
             TemplateBody=yaml.dump(template),
             TimeoutInMinutes=10,
             OnFailure="ROLLBACK",
             Capabilities=["CAPABILITY_IAM"],
         )
-        waiter = self.cf_client.get_waiter("stack_create_complete")
+        waiter = self.cfn.get_waiter("stack_create_complete")
         waiter.wait(StackName=stack_name, WaiterConfig={"Delay": 10, "MaxAttempts": 50})
 
-        stack_details = self.cf_client.describe_stacks(StackName=stack_name)
+        stack_details = self.cfn.describe_stacks(StackName=stack_name)
         stack_outputs = stack_details["Stacks"][0]["Outputs"]
         self.stack_outputs = {
             output["OutputKey"]: output["OutputValue"] for output in stack_outputs if output["OutputKey"]
