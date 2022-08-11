@@ -65,7 +65,7 @@ You can also gracefully handle schema validation errors by catching `SchemaValid
 
 === "getting_started_validator_standalone_function.py"
 
-	```python hl_lines="3 4 12 17"
+	```python hl_lines="3 10 16 18"
     --8<-- "examples/validation/src/getting_started_validator_standalone_function.py"
 	```
 
@@ -89,30 +89,22 @@ Envelopes are [JMESPath expressions](https://jmespath.org/tutorial.html) to extr
 
 Here is a sample custom EventBridge event, where we only validate what's inside the `detail` key:
 
-=== "unwrapping_events.py"
+=== "getting_started_validator_unwraping_function.py"
 
-    We use the `envelope` parameter to extract the payload inside the `detail` key before validating.
+	```python hl_lines="8 10 12 13 24 26"
+    --8<-- "examples/validation/src/getting_started_validator_unwraping_function.py"
+	```
 
-    ```python hl_lines="5"
-    from aws_lambda_powertools.utilities.validation import validator
+=== "getting_started_validator_unwraping_schema.py"
 
-    import schemas
+	```python hl_lines="8 10 12 24 26 "
+    --8<-- "examples/validation/src/getting_started_validator_unwraping_schema.py"
+	```
 
-    @validator(inbound_schema=schemas.INPUT, envelope="detail")
-    def handler(event, context):
-        return event
-    ```
+=== "getting_started_validator_unwraping_payload.json"
 
-=== "sample_wrapped_event.json"
-
-    ```python hl_lines="11-14"
-    --8<-- "docs/shared/validation_basic_eventbridge_event.json"
-    ```
-
-=== "schemas.py"
-
-    ```python hl_lines="7 14 16 23 39 45 47 52"
-    --8<-- "docs/shared/validation_basic_jsonschema.py"
+    ```json hl_lines="11-18"
+    --8<-- "examples/validation/src/getting_started_validator_unwraping_payload.json"
     ```
 
 This is quite powerful because you can use JMESPath Query language to extract records from [arrays](https://jmespath.org/tutorial.html#list-and-slice-projections), combine [pipe](https://jmespath.org/tutorial.html#pipe-expressions) and [function expressions](https://jmespath.org/tutorial.html#functions).
