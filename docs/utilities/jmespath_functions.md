@@ -134,7 +134,7 @@ This sample will decode the base64 value within the `data` key, and deserialize 
 
 === "powertools_base64_jmespath_function.py"
 
-    ```python hl_lines="7 10 37 48 52 54 56"
+    ```python hl_lines="7 10 37 49 53 55 57"
     --8<-- "examples/jmespath_functions/src/powertools_base64_jmespath_function.py"
     ```
 
