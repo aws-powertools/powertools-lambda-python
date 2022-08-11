@@ -3,6 +3,8 @@ title: Validation
 description: Utility
 ---
 
+<!-- markdownlint-disable MD043 -->
+
 This utility provides JSON Schema validation for events and responses, including JMESPath support to unwrap events before validation.
 
 ## Key features
@@ -18,6 +20,9 @@ This utility provides JSON Schema validation for events and responses, including
 
 You can validate inbound and outbound events using [`validator` decorator](#validator-decorator).
 
+???+ tip
+    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+
 You can also use the standalone `validate` function, if you want more control over the validation process such as handling a validation error.
 
 We support any JSONSchema draft supported by [fastjsonschema](https://horejsek.github.io/python-fastjsonschema/){target="_blank"} library.
@@ -31,31 +36,22 @@ We support any JSONSchema draft supported by [fastjsonschema](https://horejsek.g
 
 It will fail fast with `SchemaValidationError` exception if event or response doesn't conform with given JSON Schema.
 
-=== "validator_decorator.py"
+=== "getting_started_validator_decorator_function.py"
 
-    ```python hl_lines="3 5"
-    from aws_lambda_powertools.utilities.validation import validator
+	```python hl_lines="1 6"
+    --8<-- "examples/validation/src/getting_started_validator_decorator_function.py"
+	```
 
-    import schemas
+=== "getting_started_validator_decorator_schema.py"
 
-    @validator(inbound_schema=schemas.INPUT, outbound_schema=schemas.OUTPUT)
-    def handler(event, context):
-        return event
-    ```
+	```python hl_lines="1 6"
+    --8<-- "examples/validation/src/getting_started_validator_decorator_schema.py"
+	```
 
-=== "event.json"
+=== "getting_started_validator_decorator_payload.json"
 
-    ```json
-    {
-        "message": "hello world",
-        "username": "lessa"
-    }
-    ```
-
-=== "schemas.py"
-
-    ```python hl_lines="7 14 16 23 39 45 47 52"
-    --8<-- "docs/shared/validation_basic_jsonschema.py"
+    ```json hl_lines="6 15"
+    --8<-- "examples/validation/src/getting_started_validator_decorator_payload.json"
     ```
 
 ???+ note
