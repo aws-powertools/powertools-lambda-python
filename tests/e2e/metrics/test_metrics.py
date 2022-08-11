@@ -54,9 +54,11 @@ def test_cold_start_metric(cold_start_fn_arn: str, cold_start_fn: str):
     service = helpers.build_service_name()
     dimensions = helpers.build_add_dimensions_input(function_name=cold_start_fn, service=service)
 
-    # WHEN
+    # WHEN we invoke twice
     event = json.dumps({"service": service, "namespace": METRIC_NAMESPACE})
+
     _, execution_time = helpers.trigger_lambda(lambda_arn=cold_start_fn_arn, payload=event)
+    _, _ = helpers.trigger_lambda(lambda_arn=cold_start_fn_arn, payload=event)
 
     metrics = helpers.get_metrics(
         namespace=METRIC_NAMESPACE, start_date=execution_time, metric_name=metric_name, dimensions=dimensions
