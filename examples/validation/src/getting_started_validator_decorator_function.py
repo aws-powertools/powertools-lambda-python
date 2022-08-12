@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from uuid import uuid4
 
-import getting_start_validator_schema as schemas
+import getting_started_validator_decorator_schema as schemas
 
 from aws_lambda_powertools.utilities.validation import validator
 
