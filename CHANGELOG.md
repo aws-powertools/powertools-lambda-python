@@ -6,6 +6,7 @@
 
 ## Bug Fixes
 
+* **ci:** del flake8 direct dep over py3.6 conflicts and docs failure
 * **ci:** move from pip-tools to poetry on layers reusable workflow
 * **ci:** move from pip-tools to poetry on layers to fix conflicts
 * **ci:** typo and bust gh actions cache
