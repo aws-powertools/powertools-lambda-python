@@ -1,14 +1,17 @@
-import os
-
 from aws_lambda_powertools import Metrics
-from aws_lambda_powertools.metrics import MetricUnit
 
-METRIC_NAME = os.environ["METRIC_NAME"]
-
-metrics = Metrics()
+my_metrics = Metrics()
 
 
-@metrics.log_metrics
+@my_metrics.log_metrics
 def lambda_handler(event, context):
-    metrics.add_metric(name=METRIC_NAME, unit=MetricUnit.Count, value=1)
+    metrics, namespace, service = event.get("metrics"), event.get("namespace"), event.get("service")
+
+    # Maintenance: create a public method to set these explicitly
+    my_metrics.namespace = namespace
+    my_metrics.service = service
+
+    for metric in metrics:
+        my_metrics.add_metric(**metric)
+
     return "success"

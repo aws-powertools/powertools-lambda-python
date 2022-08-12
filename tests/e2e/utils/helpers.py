@@ -1,17 +1,22 @@
 import json
-from datetime import datetime
+import secrets
+from datetime import datetime, timedelta
 from functools import lru_cache
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
-from mypy_boto3_cloudwatch import type_defs
+import boto3
 from mypy_boto3_cloudwatch.client import CloudWatchClient
+from mypy_boto3_cloudwatch.type_defs import DimensionTypeDef, MetricDataQueryTypeDef, MetricDataResultTypeDef
 from mypy_boto3_lambda.client import LambdaClient
+from mypy_boto3_lambda.type_defs import InvocationResponseTypeDef
 from mypy_boto3_xray.client import XRayClient
 from pydantic import BaseModel
 from retry import retry
 
-
 # Helper methods && Class
+from aws_lambda_powertools.metrics import MetricUnit
+
+
 class Log(BaseModel):
     level: str
     location: str
@@ -33,9 +38,12 @@ class TraceSegment(BaseModel):
     annotations: Dict = {}
 
 
-def trigger_lambda(lambda_arn: str, client: LambdaClient):
-    response = client.invoke(FunctionName=lambda_arn, InvocationType="RequestResponse")
-    return response
+def trigger_lambda(
+    lambda_arn: str, payload: str, client: Optional[LambdaClient] = None
+) -> Tuple[InvocationResponseTypeDef, datetime]:
+    client = client or boto3.client("lambda")
+    execution_time = datetime.utcnow()
+    return client.invoke(FunctionName=lambda_arn, InvocationType="RequestResponse", Payload=payload), execution_time
 
 
 @lru_cache(maxsize=10, typed=False)
@@ -55,28 +63,61 @@ def get_logs(lambda_function_name: str, log_client: CloudWatchClient, start_time
     return filtered_logs
 
 
-@lru_cache(maxsize=10, typed=False)
-@retry(ValueError, delay=1, jitter=1, tries=20)
+@retry(ValueError, delay=2, jitter=1.5, tries=10)
 def get_metrics(
     namespace: str,
-    cw_client: CloudWatchClient,
     start_date: datetime,
     metric_name: str,
-    service_name: str,
+    dimensions: Optional[List[DimensionTypeDef]] = None,
+    cw_client: Optional[CloudWatchClient] = None,
     end_date: Optional[datetime] = None,
-) -> type_defs.MetricDataResultTypeDef:
+    period: int = 60,
+    stat: str = "Sum",
+) -> MetricDataResultTypeDef:
+    """Fetch CloudWatch Metrics
+
+    It takes into account eventual consistency with up to 10 retries and 1s jitter.
+
+    Parameters
+    ----------
+    namespace : str
+        Metric Namespace
+    start_date : datetime
+        Start window to fetch metrics
+    metric_name : str
+        Metric name
+    dimensions : Optional[List[DimensionTypeDef]], optional
+        List of Metric Dimension, by default None
+    cw_client : Optional[CloudWatchClient], optional
+        Boto3 CloudWatch low-level client (boto3.client("cloudwatch"), by default None
+    end_date : Optional[datetime], optional
+        End window to fetch metrics, by default start_date + 2 minutes window
+    period : int, optional
+        Time period to fetch metrics for, by default 60
+    stat : str, optional
+        Aggregation function to use when fetching metrics, by default "Sum"
+
+    Returns
+    -------
+    MetricDataResultTypeDef
+        _description_
+
+    Raises
+    ------
+    ValueError
+        When no metric is found within retry window
+    """
+    cw_client = cw_client or boto3.client("cloudwatch")
+    end_date = end_date or start_date + timedelta(minutes=2)
+
+    metric_query = build_metric_query_data(
+        namespace=namespace, metric_name=metric_name, period=period, stat=stat, dimensions=dimensions
+    )
+
     response = cw_client.get_metric_data(
-        MetricDataQueries=[
-            {
-                "Id": "m1",
-                "Expression": f'SELECT MAX("{metric_name}") from SCHEMA("{namespace}",service) \
-                    where service=\'{service_name}\'',
-                "ReturnData": True,
-                "Period": 600,
-            },
-        ],
+        MetricDataQueries=metric_query,
         StartTime=start_date,
-        EndTime=end_date if end_date else datetime.utcnow(),
+        EndTime=end_date or datetime.utcnow(),
     )
     result = response["MetricDataResults"][0]
     if not result["Values"]:
@@ -85,7 +126,10 @@ def get_metrics(
 
 
 @retry(ValueError, delay=1, jitter=1, tries=10)
-def get_traces(filter_expression: str, xray_client: XRayClient, start_date: datetime, end_date: datetime) -> Dict:
+def get_traces(
+    filter_expression: str, start_date: datetime, end_date: datetime, xray_client: Optional[XRayClient] = None
+) -> Dict:
+    xray_client = xray_client or boto3.client("xray")
     paginator = xray_client.get_paginator("get_trace_summaries")
     response_iterator = paginator.paginate(
         StartTime=start_date,
@@ -129,3 +173,104 @@ def find_meta(segment: dict, result: List):
         )
         if x_subsegment.get("subsegments"):
             find_meta(segment=x_subsegment, result=result)
+
+
+# Maintenance: Build a separate module for builders
+def build_metric_name() -> str:
+    return f"test_metric{build_random_value()}"
+
+
+def build_service_name() -> str:
+    return f"test_service{build_random_value()}"
+
+
+def build_random_value(nbytes: int = 10) -> str:
+    return secrets.token_urlsafe(nbytes).replace("-", "")
+
+
+def build_metric_query_data(
+    namespace: str,
+    metric_name: str,
+    period: int = 60,
+    stat: str = "Sum",
+    dimensions: Optional[List[DimensionTypeDef]] = None,
+) -> List[MetricDataQueryTypeDef]:
+    dimensions = dimensions or []
+    data_query: List[MetricDataQueryTypeDef] = [
+        {
+            "Id": metric_name.lower(),
+            "MetricStat": {
+                "Metric": {"Namespace": namespace, "MetricName": metric_name},
+                "Period": period,
+                "Stat": stat,
+            },
+            "ReturnData": True,
+        }
+    ]
+
+    if dimensions:
+        data_query[0]["MetricStat"]["Metric"]["Dimensions"] = dimensions
+
+    return data_query
+
+
+def build_add_metric_input(metric_name: str, value: float, unit: str = MetricUnit.Count.value) -> Dict:
+    """Create a metric input to be used with Metrics.add_metric()
+
+    Parameters
+    ----------
+    metric_name : str
+        metric name
+    value : float
+        metric value
+    unit : str, optional
+        metric unit, by default Count
+
+    Returns
+    -------
+    Dict
+        Metric input
+    """
+    return {"name": metric_name, "unit": unit, "value": value}
+
+
+def build_multiple_add_metric_input(
+    metric_name: str, value: float, unit: str = MetricUnit.Count.value, quantity: int = 1
+) -> Dict:
+    """Create list of metrics input to be used with Metrics.add_metric()
+
+    Parameters
+    ----------
+    metric_name : str
+        metric name
+    value : float
+        metric value
+    unit : str, optional
+        metric unit, by default Count
+    quantity : int, optional
+        number of metrics to be created, by default 1
+
+    Returns
+    -------
+    List[Dict]
+        List of metrics
+    """
+    return [{"name": metric_name, "unit": unit, "value": value} for _ in range(quantity)]
+
+
+def build_add_dimensions_input(**dimensions) -> List[DimensionTypeDef]:
+    """Create dimensions input to be used with either get_metrics or Metrics.add_dimension()
+
+    Parameters
+    ----------
+    name : str
+        dimension name
+    value : float
+        dimension value
+
+    Returns
+    -------
+    Dict
+        Metric dimension input
+    """
+    return [{"Name": name, "Value": value} for name, value in dimensions.items()]
