@@ -6,13 +6,15 @@ import zipfile
 from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Type
+from typing import Dict, Generator, List, Optional, Tuple, Type
 from uuid import uuid4
 
 import boto3
+import pytest
 import yaml
 from aws_cdk import App, AssetStaging, BundlingOptions, CfnOutput, DockerImage, RemovalPolicy, Stack, aws_logs
 from aws_cdk.aws_lambda import Code, Function, LayerVersion, Runtime, Tracing
+from filelock import FileLock
 from mypy_boto3_cloudformation import CloudFormationClient
 
 from tests.e2e.utils.asset import Assets
@@ -384,3 +386,54 @@ class BaseInfrastructureV2(ABC):
         """
         CfnOutput(self.stack, f"{name}", value=value)
         CfnOutput(self.stack, f"{name}Arn", value=arn)
+
+
+def deploy_once(
+    stack: Type[BaseInfrastructureV2],
+    request: pytest.FixtureRequest,
+    tmp_path_factory: pytest.TempPathFactory,
+    worker_id: str,
+) -> Generator[Dict[str, str], None, None]:
+    """Deploys provided stack once whether CPU parallelization is enabled or not
+
+    Parameters
+    ----------
+    stack : Type[BaseInfrastructureV2]
+        stack class to instantiate and deploy, for example MetricStack.
+        Not to be confused with class instance (MetricStack()).
+    request : pytest.FixtureRequest
+        pytest request fixture to introspect absolute path to test being executed
+    tmp_path_factory : pytest.TempPathFactory
+        pytest temporary path factory to discover shared tmp when multiple CPU processes are spun up
+    worker_id : str
+        pytest-xdist worker identification to detect whether parallelization is enabled
+
+    Yields
+    ------
+    Generator[Dict[str, str], None, None]
+        stack CloudFormation outputs
+    """
+    handlers_dir = f"{request.path.parent}/handlers"
+    stack = stack(handlers_dir=Path(handlers_dir))
+
+    try:
+        if worker_id == "master":
+            # no parallelization, deploy stack and let fixture be cached
+            yield stack.deploy()
+        else:
+            # tmp dir shared by all workers
+            root_tmp_dir = tmp_path_factory.getbasetemp().parent
+
+            cache = root_tmp_dir / "cache.json"
+            with FileLock(f"{cache}.lock"):
+                # If cache exists, return stack outputs back
+                # otherwise it's the first run by the main worker
+                # deploy and return stack outputs so subsequent workers can reuse
+                if cache.is_file():
+                    stack_outputs = json.loads(cache.read_text())
+                else:
+                    stack_outputs: Dict = stack.deploy()
+                    cache.write_text(json.dumps(stack_outputs))
+            yield stack_outputs
+    finally:
+        stack.delete()
