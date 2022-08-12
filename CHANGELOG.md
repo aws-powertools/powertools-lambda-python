@@ -28,13 +28,14 @@
 ## Maintenance
 
 * **ci:** update changelog with latest changes
-* **ci:** update changelog with latest changes
-* **ci:** update changelog with latest changes
-* **ci:** update changelog with latest changes
+* **ci:** remove conventional changelog commit to reduce noise
+* **ci:** remove area/utilities conflicting label
 * **ci:** reduce payload and only send prod notification
 * **ci:** update changelog with latest changes
 * **ci:** update changelog with latest changes
-* **ci:** update changelog with latest changes
+* **deps:** bump pydantic from 1.9.1 to 1.9.2 ([#1448](https://github.com/awslabs/aws-lambda-powertools-python/issues/1448))
+* **deps-dev:** bump types-requests from 2.28.7 to 2.28.8 ([#1423](https://github.com/awslabs/aws-lambda-powertools-python/issues/1423))
+* **tests:** refactor E2E test mechanics to ease maintenance, writing tests and parallelization ([#1444](https://github.com/awslabs/aws-lambda-powertools-python/issues/1444))
 
 
 <a name="v1.27.0"></a>

@@ -37,14 +37,13 @@ labelPRBasedOnFilePath:
   area/feature_flags:
     - aws_lambda_powertools/feature_flags/*
     - aws_lambda_powertools/feature_flags/**/*
-  area/jmespath_util:
+  area/jmespath:
     - aws_lambda_powertools/utilities/jmespath_utils/*
   area/typing:
     - aws_lambda_powertools/utilities/typing/*
     - mypy.ini
-  area/utilities:
-    - aws_lambda_powertools/utilities/*
-    - aws_lambda_powertools/utilities/**/*
+  area/commons:
+    - aws_lambda_powertools/shared/*
 
   documentation:
     - docs/*
