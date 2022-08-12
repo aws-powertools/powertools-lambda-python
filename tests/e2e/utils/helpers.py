@@ -63,7 +63,7 @@ def get_logs(lambda_function_name: str, log_client: CloudWatchClient, start_time
     return filtered_logs
 
 
-@retry(ValueError, delay=1, jitter=1, tries=10)
+@retry(ValueError, delay=2, jitter=1.5, tries=10)
 def get_metrics(
     namespace: str,
     start_date: datetime,
