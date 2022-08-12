@@ -2,7 +2,6 @@ import json
 import re
 
 import boto3
-import botocore
 import getting_started_custom_format_schema as schemas
 
 from aws_lambda_powertools.utilities.validation import SchemaValidationError, validate
@@ -25,9 +24,9 @@ def lambda_handler(event, context) -> dict:
             "statusCode": 200,
         }
 
-    except botocore.exceptions.ClientError as exception:
-        return return_error_message(str(exception))
     except SchemaValidationError as exception:
+        return return_error_message(str(exception))
+    except Exception as exception:
         return return_error_message(str(exception))
 
 
