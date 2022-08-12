@@ -306,7 +306,7 @@ class BaseInfrastructureV2(ABC):
             CloudFormation Stack Outputs with output key and value
         """
         template, asset_manifest_file = self._synthesize()
-        assets = Assets(cfn_template=asset_manifest_file, account_id=self.account_id, region=self.region)
+        assets = Assets(asset_manifest=asset_manifest_file, account_id=self.account_id, region=self.region)
         assets.upload()
         return self._deploy_stack(self.stack_name, template)
 

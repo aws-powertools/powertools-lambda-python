@@ -57,14 +57,14 @@ class Asset:
 
 class Assets:
     def __init__(
-        self, cfn_template: Path, account_id: str, region: str, boto3_client: Optional[S3Client] = None
+        self, asset_manifest: Path, account_id: str, region: str, boto3_client: Optional[S3Client] = None
     ) -> None:
         """CDK Assets logic to find each asset, compress, and upload
 
         Parameters
         ----------
-        cfn_template : Path
-            CloudFormation template synthesized (self.__synthesize)
+        asset_manifest : Path
+            Asset manifest JSON file (self.__synthesize)
         account_id : str
             AWS Account ID
         region : str
@@ -72,12 +72,12 @@ class Assets:
         boto3_client : Optional[S3Client], optional
             S3 client instance for asset operations, by default None
         """
-        self.template = cfn_template
+        self.asset_manifest = asset_manifest
         self.account_id = account_id
         self.region = region
         self.s3 = boto3_client or boto3.client("s3")
         self.assets = self._find_assets_from_template()
-        self.assets_location = str(self.template.parent)
+        self.assets_location = str(self.asset_manifest.parent)
 
     def upload(self):
         """Drop-in replacement for cdk-assets package s3 upload part.
@@ -101,7 +101,7 @@ class Assets:
             logger.debug("Successfully uploaded")
 
     def _find_assets_from_template(self) -> List[Asset]:
-        data = json.loads(self.template.read_text())
+        data = json.loads(self.asset_manifest.read_text())
         template = TemplateAssembly(**data)
         return [
             Asset(config=asset_config, account_id=self.account_id, region=self.region)
