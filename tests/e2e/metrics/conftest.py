@@ -10,7 +10,9 @@ from tests.e2e.metrics.infrastructure import MetricsStack
 
 
 @pytest.fixture(autouse=True, scope="module")
-def infrastructure(request: fixtures.SubRequest, tmp_path_factory: pytest.TempPathFactory, worker_id) -> MetricsStack:
+def infrastructure(
+    request: fixtures.SubRequest, tmp_path_factory: pytest.TempPathFactory, worker_id: str
+) -> MetricsStack:
     """Setup and teardown logic for E2E test infrastructure
 
     Parameters
