@@ -3,6 +3,7 @@ from uuid import uuid4
 
 import getting_started_validator_decorator_schema as schemas
 
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import validator
 
 
@@ -16,7 +17,7 @@ class User:
 
 # using a decorator to validate input and output data
 @validator(inbound_schema=schemas.INPUT, outbound_schema=schemas.OUTPUT)
-def lambda_handler(event, context) -> dict:
+def lambda_handler(event, context: LambdaContext) -> dict:
 
     user_details: dict = {}
 

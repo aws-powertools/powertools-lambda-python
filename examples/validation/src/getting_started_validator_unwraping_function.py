@@ -1,6 +1,7 @@
 import boto3
 import getting_started_validator_unwraping_schema as schemas
 
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import validator
 
 s3_client = boto3.resource("s3")
@@ -8,7 +9,7 @@ s3_client = boto3.resource("s3")
 
 # using a decorator to validate input data
 @validator(inbound_schema=schemas.INPUT, envelope="data")
-def lambda_handler(event, context):
+def lambda_handler(event, context: LambdaContext) -> dict:
 
     try:
         data_detail: dict = event.get("detail", {})

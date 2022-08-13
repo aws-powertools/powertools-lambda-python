@@ -4,13 +4,14 @@ import re
 import boto3
 import getting_started_custom_format_schema as schemas
 
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import SchemaValidationError, validate
 
 # awsaccountid must have 12 digits
 custom_format = {"awsaccountid": lambda value: re.match(r"^(\d{12})$", value)}
 
 
-def lambda_handler(event, context) -> dict:
+def lambda_handler(event, context: LambdaContext) -> dict:
     try:
         # validate input using custom json format
         validate(event=event, schema=schemas.INPUT, formats=custom_format)
