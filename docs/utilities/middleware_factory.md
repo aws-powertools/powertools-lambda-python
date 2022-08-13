@@ -3,12 +3,21 @@ title: Middleware factory
 description: Utility
 ---
 
+<!-- markdownlint-disable MD043 -->
+
 Middleware factory provides a decorator factory to create your own middleware to run logic before, and after each Lambda invocation synchronously.
 
 ## Key features
 
 * Run logic before, after, and handle exceptions
 * Trace each middleware when requested
+
+## Getting started
+
+???+ tip
+    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+
+You might need a middleware factory to abstract non-functional code and focus on business logic or even validate the payload before the lambda run, among other cases.
 
 ## Middleware with no params
 
@@ -18,20 +27,18 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
 * **event** - Lambda function invocation event
 * **context** - Lambda function context object
 
-```python hl_lines="3-4 10" title="Creating your own middleware for before/after logic"
-from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+### Creating your own middleware for before logic
 
-@lambda_handler_decorator
-def middleware_before_after(handler, event, context):
-	# logic_before_handler_execution()
-	response = handler(event, context)
-	# logic_after_handler_execution()
-	return response
+=== "getting_started_middleware_before_logic_function.py"
+    ```python hl_lines="5 23 24 29 30 32 37 38"
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_before_logic_function.py"
+    ```
 
-@middleware_before_after
-def lambda_handler(event, context):
-	...
-```
+=== "getting_started_middleware_before_logic_payload.json"
+
+    ```json hl_lines="9-13"
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_before_logic_payload.json"
+    ```
 
 ## Middleware with params
 
@@ -72,6 +79,8 @@ def lambda_handler(event, context):
 ```
 
 When executed, your middleware name will [appear in AWS X-Ray Trace details as](../core/tracer.md) `## middleware_name`.
+
+## Advanced
 
 For advanced use cases, you can instantiate [Tracer](../core/tracer.md) inside your middleware, and add annotations as well as metadata for additional operational insights.
 
