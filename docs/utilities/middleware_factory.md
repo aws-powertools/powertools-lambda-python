@@ -40,6 +40,19 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
     --8<-- "examples/middleware_factory/src/getting_started_middleware_before_logic_payload.json"
     ```
 
+### Creating your own middleware for after logic
+
+=== "getting_started_middleware_after_logic_function.py"
+    ```python hl_lines="7 14 15 21-23 37"
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_after_logic_function.py"
+    ```
+
+=== "getting_started_middleware_after_logic_payload.json"
+
+    ```json
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_after_logic_payload.json"
+    ```
+
 ## Middleware with params
 
 You can also have your own keyword arguments after the mandatory arguments.
