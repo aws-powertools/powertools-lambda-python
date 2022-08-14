@@ -22,7 +22,7 @@ def middleware_with_advanced_tracing(handler, event, context) -> Callable:
     response = handler(event, context)
     execution_time = time.time() - start_time
 
-    tracer.put_annotation(key="TotalExecutionTime", value=execution_time)
+    tracer.put_annotation(key="TotalExecutionTime", value=str(execution_time))
 
     # adding custom headers in response object after lambda executing
     response["headers"]["execution_time"] = execution_time

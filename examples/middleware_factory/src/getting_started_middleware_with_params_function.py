@@ -1,6 +1,6 @@
 import base64
 from dataclasses import dataclass, field
-from typing import Callable, List
+from typing import Any, Callable, List
 from uuid import uuid4
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
@@ -25,23 +25,23 @@ class BookingError(Exception):
 
 
 @lambda_handler_decorator
-def obfuscate_sensitive_data(handler, event, context, fields: List = None) -> Callable:
+def obfuscate_sensitive_data(handler, event, context, fields: List) -> Callable:
     # extracting payload from a EventBridge event
     detail: dict = extract_data_from_envelope(data=event, envelope=envelopes.EVENTBRIDGE)
-    guest_data = detail.get("guest")
+    guest_data: Any = detail.get("guest")
 
     # Obfuscate fields (email, vat, passport) before calling Lambda handler
     if fields:
         for guest_field in fields:
-            if guest_field in guest_data:
-                event["detail"]["guest"][guest_field] = obfuscate_data(guest_data.get(guest_field))
+            if guest_data.get(guest_field):
+                event["detail"]["guest"][guest_field] = obfuscate_data(str(guest_data.get(guest_field)))
 
     response = handler(event, context)
 
     return response
 
 
-def obfuscate_data(value: str) -> str:
+def obfuscate_data(value: str) -> bytes:
     # base64 is not effective for obfuscation, this is an example
     return base64.b64encode(value.encode("ascii"))
 
