@@ -57,21 +57,16 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
 
 You can also have your own keyword arguments after the mandatory arguments.
 
-```python hl_lines="2 12" title="Accepting arbitrary keyword arguments"
-@lambda_handler_decorator
-def obfuscate_sensitive_data(handler, event, context, fields: List = None):
-	# Obfuscate email before calling Lambda handler
-	if fields:
-		for field in fields:
-			if field in event:
-				event[field] = obfuscate(event[field])
+=== "getting_started_middleware_with_params_function.py"
+    ```python hl_lines="6 27 28 29 33 49"
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_with_params_function.py"
+    ```
 
-	return handler(event, context)
+=== "getting_started_middleware_with_params_payload.json"
 
-@obfuscate_sensitive_data(fields=["email"])
-def lambda_handler(event, context):
-	...
-```
+    ```json hl_lines="18 19 20"
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_with_params_payload.json"
+    ```
 
 ## Tracing middleware execution
 
