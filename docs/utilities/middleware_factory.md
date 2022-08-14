@@ -74,35 +74,40 @@ If you are making use of [Tracer](../core/tracer.md), you can trace the executio
 
 This makes use of an existing Tracer instance that you may have initialized anywhere in your code.
 
-```python hl_lines="3" title="Tracing custom middlewares with Tracer"
-from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+???+ warning
+    You must enable Active Tracing in your Lambda function when using this feature, otherwise Lambda will not be able to send traces to XRay..
 
-@lambda_handler_decorator(trace_execution=True)
-def my_middleware(handler, event, context):
-	return handler(event, context)
+=== "getting_started_middleware_tracer_function.py"
+    ```python hl_lines="8 14 15 36"
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_tracer_function.py"
+    ```
 
-@my_middleware
-def lambda_handler(event, context):
-	...
-```
+=== "getting_started_middleware_tracer_payload.json"
 
-When executed, your middleware name will [appear in AWS X-Ray Trace details as](../core/tracer.md) `## middleware_name`.
+    ```json hl_lines="18 19 20"
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_tracer_payload.json"
+    ```
+
+When executed, your middleware name will [appear in AWS X-Ray Trace details as](../core/tracer.md) `## middleware_name`, in this example the middleware name is `## middleware_with_tracing`.
+
+![Middleware simple Tracer](../media/middleware_factory_tracer_1.png)
 
 ## Advanced
 
 For advanced use cases, you can instantiate [Tracer](../core/tracer.md) inside your middleware, and add annotations as well as metadata for additional operational insights.
 
-```python hl_lines="6-8" title="Add custom tracing insights before/after in your middlware"
-from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools import Tracer
+=== "advanced_middleware_tracer_function.py"
+    ```python hl_lines="7 9 12 16 17 19 25 42"
+    --8<-- "examples/middleware_factory/src/advanced_middleware_tracer_function.py"
+    ```
 
-@lambda_handler_decorator(trace_execution=True)
-def middleware_name(handler, event, context):
-	# tracer = Tracer() # Takes a copy of an existing tracer instance
-	# tracer.add_annotation...
-	# tracer.add_metadata...
-	return handler(event, context)
-```
+=== "advanced_middleware_tracer_payload.json"
+
+    ```json
+    --8<-- "examples/middleware_factory/src/advanced_middleware_tracer_payload.json"
+    ```
+
+![Middleware avanced Tracer](../media/middleware_factory_tracer_2.png)
 
 ## Tips
 
