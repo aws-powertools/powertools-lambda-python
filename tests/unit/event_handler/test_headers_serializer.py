@@ -11,7 +11,7 @@ from tests.utils import load_event
 
 
 def test_headers_serializer_apigatewayv2():
-    event = APIGatewayProxyEventV2(load_event("apigatewayproxyv2event.json"))
+    event = APIGatewayProxyEventV2(load_event("apiGatewayProxyV2Event.json"))
 
     builder = HeadersSerializer(event=event, cookies=[], headers={})
     assert builder.serialize() == {"cookies": [], "headers": {}}
