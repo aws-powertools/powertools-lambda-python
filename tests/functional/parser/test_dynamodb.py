@@ -5,7 +5,7 @@ import pytest
 from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, event_parser
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedDynamoBusiness, MyDynamoBusiness
-from tests.functional.utils import load_event
+from tests.utils import load_event
 
 
 @event_parser(model=MyDynamoBusiness, envelope=envelopes.DynamoDBStreamEnvelope)

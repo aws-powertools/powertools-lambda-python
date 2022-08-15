@@ -6,7 +6,7 @@ from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, e
 from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamModel, KinesisDataStreamRecordPayload
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyKinesisBusiness
-from tests.functional.utils import load_event
+from tests.utils import load_event
 
 
 @event_parser(model=MyKinesisBusiness, envelope=envelopes.KinesisDataStreamEnvelope)

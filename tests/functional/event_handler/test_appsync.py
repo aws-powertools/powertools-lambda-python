@@ -7,7 +7,7 @@ from aws_lambda_powertools.event_handler import AppSyncResolver
 from aws_lambda_powertools.event_handler.appsync import Router
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from tests.functional.utils import load_event
+from tests.utils import load_event
 
 
 def test_direct_resolver():

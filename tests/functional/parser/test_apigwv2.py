@@ -6,7 +6,7 @@ from aws_lambda_powertools.utilities.parser.models import (
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyApiGatewayBusiness
-from tests.functional.utils import load_event
+from tests.utils import load_event
 
 
 @event_parser(model=MyApiGatewayBusiness, envelope=envelopes.ApiGatewayV2Envelope)

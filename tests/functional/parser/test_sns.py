@@ -6,8 +6,8 @@ import pytest
 from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, event_parser
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedSnsBusiness, MySnsBusiness
-from tests.functional.utils import load_event
 from tests.functional.validator.conftest import sns_event  # noqa: F401
+from tests.utils import load_event
 
 
 @event_parser(model=MySnsBusiness, envelope=envelopes.SnsEnvelope)

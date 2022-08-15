@@ -1,7 +1,7 @@
 from aws_lambda_powertools.utilities.parser import event_parser, parse
 from aws_lambda_powertools.utilities.parser.models import S3Model, S3RecordModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from tests.functional.utils import load_event
+from tests.utils import load_event
 
 
 @event_parser(model=S3Model)
