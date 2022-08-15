@@ -14,6 +14,7 @@ from typing import Any, Callable, Dict, List, Match, Optional, Pattern, Set, Tup
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
+from aws_lambda_powertools.event_handler.headers_serializer import HeadersSerializer
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -145,7 +146,7 @@ class Response:
         status_code: int,
         content_type: Optional[str],
         body: Union[str, bytes, None],
-        headers: Optional[Dict] = None,
+        headers: Optional[Dict[str, str]] = None,
         cookies: Optional[List[str]] = None,
     ):
         """
@@ -159,7 +160,7 @@ class Response:
             provided http headers
         body: Union[str, bytes, None]
             Optionally set the response body. Note: bytes body will be automatically base64 encoded
-        headers: dict
+        headers: dict[str, str]
             Optionally set specific http headers. Setting "Content-Type" here would override the `content_type` value.
         cookies: list[str]
             Optionally set cookies.
@@ -167,7 +168,7 @@ class Response:
         self.status_code = status_code
         self.body = body
         self.base64_encoded = False
-        self.headers: Dict = headers or {}
+        self.headers: Dict[str, str] = headers or {}
         self.cookies = cookies or []
         if content_type:
             self.headers.setdefault("Content-Type", content_type)
@@ -222,19 +223,6 @@ class ResponseBuilder:
         if self.route.compress and "gzip" in (event.get_header_value("accept-encoding", "") or ""):
             self._compress()
 
-    def _format_cookies(self, event: BaseProxyEvent, payload: Dict[str, Any]) -> Dict[str, Any]:
-        if self.response.cookies:
-            if isinstance(event, APIGatewayProxyEventV2) or isinstance(event, LambdaFunctionUrlEvent):
-                payload["cookies"] = self.response.cookies
-
-            if isinstance(event, APIGatewayProxyEvent) or isinstance(event, ALBEvent):
-                if len(self.response.cookies) == 1:
-                    payload["headers"]["Set-Cookie"] = self.response.cookies[0]
-                else:
-                    payload["multiValueHeaders"] = {"Set-Cookie": self.response.cookies}
-
-        return payload
-
     def build(self, event: BaseProxyEvent, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
         """Build the full response dict to be returned by the lambda"""
         self._route(event, cors)
@@ -246,11 +234,13 @@ class ResponseBuilder:
 
         payload = {
             "statusCode": self.response.status_code,
-            "headers": self.response.headers,
             "body": self.response.body,
             "isBase64Encoded": self.response.base64_encoded,
         }
-        return self._format_cookies(event, payload)
+        payload.update(
+            HeadersSerializer(event=event, cookies=self.response.cookies, headers=self.response.headers).serialize()
+        )
+        return payload
 
 
 class BaseRouter(ABC):
