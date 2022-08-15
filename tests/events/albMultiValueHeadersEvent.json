@@ -1,0 +1,35 @@
+{
+  "requestContext": {
+    "elb": {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:eu-central-1:1234567890:targetgroup/alb-c-Targe-11GDXTPQ7663S/804a67588bfdc10f"
+    }
+  },
+  "httpMethod": "GET",
+  "path": "/todos",
+  "multiValueQueryStringParameters": {},
+  "multiValueHeaders": {
+    "accept": [
+      "*/*"
+    ],
+    "host": [
+      "alb-c-LoadB-14POFKYCLBNSF-1815800096.eu-central-1.elb.amazonaws.com"
+    ],
+    "user-agent": [
+      "curl/7.79.1"
+    ],
+    "x-amzn-trace-id": [
+      "Root=1-62fa9327-21cdd4da4c6db451490a5fb7"
+    ],
+    "x-forwarded-for": [
+      "123.123.123.123"
+    ],
+    "x-forwarded-port": [
+      "80"
+    ],
+    "x-forwarded-proto": [
+      "http"
+    ]
+  },
+  "body": "",
+  "isBase64Encoded": false
+}
