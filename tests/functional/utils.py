@@ -1,14 +1,7 @@
 import base64
 import json
-from pathlib import Path
-from typing import Any
 
 from aws_lambda_powertools.shared.json_encoder import Encoder
-
-
-def load_event(file_name: str) -> Any:
-    path = Path(str(Path(__file__).parent.parent) + "/events/" + file_name)
-    return json.loads(path.read_text())
 
 
 def str_to_b64(data: str) -> str:

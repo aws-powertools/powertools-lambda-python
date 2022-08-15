@@ -76,7 +76,7 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
 )
 from aws_lambda_powertools.utilities.data_classes.event_source import event_source
 from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
-from tests.functional.utils import load_event
+from tests.utils import load_event
 
 
 def test_dict_wrapper_equals():
