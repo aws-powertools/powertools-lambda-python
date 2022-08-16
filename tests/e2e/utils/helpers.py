@@ -31,12 +31,6 @@ class Log(BaseModel):
     extra_info: Optional[str]
 
 
-class TraceSegment(BaseModel):
-    name: str
-    metadata: Dict[str, Any]
-    annotations: Dict[str, Any]
-
-
 def trigger_lambda(
     lambda_arn: str, payload: Optional[str] = None, client: Optional[LambdaClient] = None
 ) -> Tuple[InvocationResponseTypeDef, datetime]:
