@@ -2,13 +2,11 @@ from datetime import datetime
 from typing import Optional, Tuple
 
 import boto3
-from mypy_boto3_lambda.client import LambdaClient
+from mypy_boto3_lambda import LambdaClient
 from mypy_boto3_lambda.type_defs import InvocationResponseTypeDef
 
-# Helper methods && Class
 
-
-def trigger_lambda(
+def get_lambda_response(
     lambda_arn: str, payload: Optional[str] = None, client: Optional[LambdaClient] = None
 ) -> Tuple[InvocationResponseTypeDef, datetime]:
     client = client or boto3.client("lambda")

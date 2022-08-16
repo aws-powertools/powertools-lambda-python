@@ -2,7 +2,7 @@ import pytest
 
 from tests.e2e.tracer.handlers import basic_handler, sync_async_capture
 from tests.e2e.tracer.infrastructure import TracerStack
-from tests.e2e.utils import data_builder, data_fetcher, helpers
+from tests.e2e.utils import data_builder, data_fetcher
 
 
 @pytest.fixture
@@ -33,8 +33,8 @@ def test_lambda_handler_trace_is_visible(basic_handler_fn_arn: str, basic_handle
     trace_query = data_builder.build_trace_default_query(function_name=basic_handler_fn)
 
     # WHEN
-    _, execution_time = helpers.trigger_lambda(lambda_arn=basic_handler_fn_arn)
-    helpers.trigger_lambda(lambda_arn=basic_handler_fn_arn)
+    _, execution_time = data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn)
+    data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn)
 
     # THEN
     trace = data_fetcher.get_traces(start_date=execution_time, filter_expression=trace_query, minimum_traces=2)
@@ -57,7 +57,7 @@ def test_sync_async_capture_are_visible(sync_async_fn_arn: str, sync_async_fn: s
     trace_query = data_builder.build_trace_default_query(function_name=sync_async_fn)
 
     # WHEN
-    _, execution_time = helpers.trigger_lambda(lambda_arn=sync_async_fn_arn)
+    _, execution_time = data_fetcher.get_lambda_response(lambda_arn=sync_async_fn_arn)
 
     # THEN
     trace = data_fetcher.get_traces(start_date=execution_time, filter_expression=trace_query)

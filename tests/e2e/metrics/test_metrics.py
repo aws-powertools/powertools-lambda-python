@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from tests.e2e.utils import data_builder, data_fetcher, helpers
+from tests.e2e.utils import data_builder, data_fetcher
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ def test_basic_lambda_metric_is_visible(basic_handler_fn: str, basic_handler_fn_
 
     # WHEN
     event = json.dumps({"metrics": metrics, "service": service, "namespace": METRIC_NAMESPACE})
-    _, execution_time = helpers.trigger_lambda(lambda_arn=basic_handler_fn_arn, payload=event)
+    _, execution_time = data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn, payload=event)
 
     my_metrics = data_fetcher.get_metrics(
         namespace=METRIC_NAMESPACE, start_date=execution_time, metric_name=metric_name, dimensions=dimensions
@@ -57,8 +57,8 @@ def test_cold_start_metric(cold_start_fn_arn: str, cold_start_fn: str):
     # WHEN we invoke twice
     event = json.dumps({"service": service, "namespace": METRIC_NAMESPACE})
 
-    _, execution_time = helpers.trigger_lambda(lambda_arn=cold_start_fn_arn, payload=event)
-    _, _ = helpers.trigger_lambda(lambda_arn=cold_start_fn_arn, payload=event)
+    _, execution_time = data_fetcher.get_lambda_response(lambda_arn=cold_start_fn_arn, payload=event)
+    _, _ = data_fetcher.get_lambda_response(lambda_arn=cold_start_fn_arn, payload=event)
 
     my_metrics = data_fetcher.get_metrics(
         namespace=METRIC_NAMESPACE, start_date=execution_time, metric_name=metric_name, dimensions=dimensions
