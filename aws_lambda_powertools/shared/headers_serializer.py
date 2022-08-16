@@ -57,7 +57,7 @@ class MultiValueHeadersSerializer(BaseHeadersSerializer):
             for cookie in cookies:
                 payload["Set-Cookie"].append(cookie)
 
-        return payload
+        return {"multiValueHeaders": payload}
 
 
 class SingleValueHeadersSerializer(BaseHeadersSerializer):
