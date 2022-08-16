@@ -29,8 +29,7 @@ from tests.functional.idempotency.utils import (
     build_idempotency_update_item_stub,
     hash_idempotency_key,
 )
-from tests.functional.utils import json_serialize
-from tests.utils import load_event
+from tests.functional.utils import json_serialize, load_event
 
 TABLE_NAME = "TEST_TABLE"
 

@@ -1,5 +1,5 @@
 from aws_lambda_powertools.utilities.data_classes import LambdaFunctionUrlEvent
-from tests.utils import load_event
+from tests.functional.utils import load_event
 
 
 def test_lambda_function_url_event():

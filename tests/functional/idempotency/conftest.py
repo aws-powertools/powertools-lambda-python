@@ -14,8 +14,7 @@ from aws_lambda_powertools.utilities.idempotency.idempotency import IdempotencyC
 from aws_lambda_powertools.utilities.jmespath_utils import extract_data_from_envelope
 from aws_lambda_powertools.utilities.validation import envelopes
 from tests.functional.idempotency.utils import hash_idempotency_key
-from tests.functional.utils import json_serialize
-from tests.utils import load_event
+from tests.functional.utils import json_serialize, load_event
 
 TABLE_NAME = "TEST_TABLE"
 
