@@ -1,7 +1,8 @@
 import boto3
 import pytest
 from e2e import conftest
-from e2e.utils import helpers
+
+from tests.e2e.utils import data_fetcher
 
 
 @pytest.fixture(scope="module")
@@ -23,7 +24,7 @@ def test_basic_lambda_logs_visible(execute_lambda: conftest.InfrastructureOutput
     cw_client = boto3.client("logs")
 
     # WHEN
-    filtered_logs = helpers.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
+    filtered_logs = data_fetcher.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
 
     # THEN
     assert any(
@@ -42,7 +43,7 @@ def test_basic_lambda_no_debug_logs_visible(
     cw_client = boto3.client("logs")
 
     # WHEN
-    filtered_logs = helpers.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
+    filtered_logs = data_fetcher.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
 
     # THEN
     assert not any(
@@ -66,7 +67,7 @@ def test_basic_lambda_contextual_data_logged(execute_lambda: conftest.Infrastruc
     cw_client = boto3.client("logs")
 
     # WHEN
-    filtered_logs = helpers.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
+    filtered_logs = data_fetcher.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
 
     # THEN
     assert all(keys in logs.dict(exclude_unset=True) for logs in filtered_logs for keys in required_keys)
@@ -81,7 +82,7 @@ def test_basic_lambda_additional_key_persistence_basic_lambda(
     cw_client = boto3.client("logs")
 
     # WHEN
-    filtered_logs = helpers.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
+    filtered_logs = data_fetcher.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
 
     # THEN
     assert any(
@@ -100,7 +101,7 @@ def test_basic_lambda_empty_event_logged(execute_lambda: conftest.Infrastructure
     cw_client = boto3.client("logs")
 
     # WHEN
-    filtered_logs = helpers.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
+    filtered_logs = data_fetcher.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
 
     # THEN
     assert any(log.message == {} for log in filtered_logs)
@@ -122,7 +123,7 @@ def test_no_context_lambda_contextual_data_not_logged(execute_lambda: conftest.I
     cw_client = boto3.client("logs")
 
     # WHEN
-    filtered_logs = helpers.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
+    filtered_logs = data_fetcher.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
 
     # THEN
     assert not any(keys in logs.dict(exclude_unset=True) for logs in filtered_logs for keys in required_missing_keys)
@@ -136,7 +137,7 @@ def test_no_context_lambda_event_not_logged(execute_lambda: conftest.Infrastruct
     cw_client = boto3.client("logs")
 
     # WHEN
-    filtered_logs = helpers.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
+    filtered_logs = data_fetcher.get_logs(lambda_function_name=lambda_name, start_time=timestamp, log_client=cw_client)
 
     # THEN
     assert not any(log.message == {} for log in filtered_logs)

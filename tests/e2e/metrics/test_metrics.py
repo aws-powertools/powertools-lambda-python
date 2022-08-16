@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from tests.e2e.utils import helpers
+from tests.e2e.utils import data_builder, data_fetcher, helpers
 
 
 @pytest.fixture
@@ -30,29 +30,29 @@ METRIC_NAMESPACE = "powertools-e2e-metric"
 
 def test_basic_lambda_metric_is_visible(basic_handler_fn: str, basic_handler_fn_arn: str):
     # GIVEN
-    metric_name = helpers.build_metric_name()
-    service = helpers.build_service_name()
-    dimensions = helpers.build_add_dimensions_input(service=service)
-    metrics = helpers.build_multiple_add_metric_input(metric_name=metric_name, value=1, quantity=3)
+    metric_name = data_builder.build_metric_name()
+    service = data_builder.build_service_name()
+    dimensions = data_builder.build_add_dimensions_input(service=service)
+    metrics = data_builder.build_multiple_add_metric_input(metric_name=metric_name, value=1, quantity=3)
 
     # WHEN
     event = json.dumps({"metrics": metrics, "service": service, "namespace": METRIC_NAMESPACE})
     _, execution_time = helpers.trigger_lambda(lambda_arn=basic_handler_fn_arn, payload=event)
 
-    metrics = helpers.get_metrics(
+    my_metrics = data_fetcher.get_metrics(
         namespace=METRIC_NAMESPACE, start_date=execution_time, metric_name=metric_name, dimensions=dimensions
     )
 
     # THEN
-    metric_data = metrics.get("Values", [])
+    metric_data = my_metrics.get("Values", [])
     assert metric_data and metric_data[0] == 3.0
 
 
 def test_cold_start_metric(cold_start_fn_arn: str, cold_start_fn: str):
     # GIVEN
     metric_name = "ColdStart"
-    service = helpers.build_service_name()
-    dimensions = helpers.build_add_dimensions_input(function_name=cold_start_fn, service=service)
+    service = data_builder.build_service_name()
+    dimensions = data_builder.build_add_dimensions_input(function_name=cold_start_fn, service=service)
 
     # WHEN we invoke twice
     event = json.dumps({"service": service, "namespace": METRIC_NAMESPACE})
@@ -60,10 +60,10 @@ def test_cold_start_metric(cold_start_fn_arn: str, cold_start_fn: str):
     _, execution_time = helpers.trigger_lambda(lambda_arn=cold_start_fn_arn, payload=event)
     _, _ = helpers.trigger_lambda(lambda_arn=cold_start_fn_arn, payload=event)
 
-    metrics = helpers.get_metrics(
+    my_metrics = data_fetcher.get_metrics(
         namespace=METRIC_NAMESPACE, start_date=execution_time, metric_name=metric_name, dimensions=dimensions
     )
 
     # THEN
-    metric_data = metrics.get("Values", [])
+    metric_data = my_metrics.get("Values", [])
     assert metric_data and metric_data[0] == 1.0
