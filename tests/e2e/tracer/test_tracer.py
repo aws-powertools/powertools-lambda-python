@@ -1,51 +1,44 @@
-import datetime
-import uuid
+import json
 
-import boto3
 import pytest
-from e2e import conftest
 from e2e.utils import helpers
 
 
-@pytest.fixture(scope="module")
-def config() -> conftest.LambdaConfig:
-    return {
-        "parameters": {"tracing": "ACTIVE"},
-        "environment_variables": {
-            "ANNOTATION_KEY": f"e2e-tracer-{str(uuid.uuid4()).replace('-','_')}",
-            "ANNOTATION_VALUE": "stored",
-            "ANNOTATION_ASYNC_VALUE": "payments",
-        },
-    }
+@pytest.fixture
+def basic_handler_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("BasicHandlerArn", "")
 
 
-def test_basic_lambda_async_trace_visible(execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig):
+@pytest.fixture
+def basic_handler_fn(infrastructure: dict) -> str:
+    return infrastructure.get("BasicHandler", "")
+
+
+def test_basic_lambda_trace_is_visible(basic_handler_fn_arn: str, basic_handler_fn: str):
     # GIVEN
-    lambda_name = execute_lambda.get_lambda_function_name(cf_output_name="basichandlerarn")
-    start_date = execute_lambda.get_lambda_execution_time()
-    end_date = start_date + datetime.timedelta(minutes=5)
-    trace_filter_exporession = f'service("{lambda_name}")'
+    service = helpers.build_service_name()
+    annotations = helpers.build_put_annotations_input(sample=helpers.build_random_value())
+    metadata = helpers.build_put_metadata_input(sample=helpers.build_random_value())
+    trace_query = helpers.build_trace_default_query(function_name=basic_handler_fn, service_name=service)
 
     # WHEN
-    trace = helpers.get_traces(
-        start_date=start_date,
-        end_date=end_date,
-        filter_expression=trace_filter_exporession,
-        xray_client=boto3.client("xray"),
-    )
+    event = json.dumps({"annotations": annotations, "metadata": metadata})
+    _, execution_time = helpers.trigger_lambda(lambda_arn=basic_handler_fn_arn, payload=event)
 
     # THEN
+    trace = helpers.get_traces(start_date=execution_time, filter_expression=trace_query)
     info = helpers.find_trace_additional_info(trace=trace)
-    print(info)
-    handler_trace_segment = [trace_segment for trace_segment in info if trace_segment.name == "## lambda_handler"][0]
-    collect_payment_trace_segment = [
-        trace_segment for trace_segment in info if trace_segment.name == "## collect_payment"
-    ][0]
+    assert info is not None
 
-    annotation_key = config["environment_variables"]["ANNOTATION_KEY"]
-    expected_value = config["environment_variables"]["ANNOTATION_VALUE"]
-    expected_async_value = config["environment_variables"]["ANNOTATION_ASYNC_VALUE"]
+    # # handler_trace_segment = [trace_segment for trace_segment in info if trace_segment.name == "## lambda_handler"][0]
+    # # collect_payment_trace_segment = [
+    # #     trace_segment for trace_segment in info if trace_segment.name == "## collect_payment"
+    # # ][0]
 
-    assert handler_trace_segment.annotations["Service"] == "e2e-tests-app"
-    assert handler_trace_segment.metadata["e2e-tests-app"][annotation_key] == expected_value
-    assert collect_payment_trace_segment.metadata["e2e-tests-app"][annotation_key] == expected_async_value
+    # # annotation_key = config["environment_variables"]["ANNOTATION_KEY"]
+    # # expected_value = config["environment_variables"]["ANNOTATION_VALUE"]
+    # # expected_async_value = config["environment_variables"]["ANNOTATION_ASYNC_VALUE"]
+
+    # # assert handler_trace_segment.annotations["Service"] == "e2e-tests-app"
+    # # assert handler_trace_segment.metadata["e2e-tests-app"][annotation_key] == expected_value
+    # # assert collect_payment_trace_segment.metadata["e2e-tests-app"][annotation_key] == expected_async_value

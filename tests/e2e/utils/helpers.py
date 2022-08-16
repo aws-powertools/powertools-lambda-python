@@ -2,7 +2,7 @@ import json
 import secrets
 from datetime import datetime, timedelta
 from functools import lru_cache
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import boto3
 from mypy_boto3_cloudwatch.client import CloudWatchClient
@@ -10,6 +10,7 @@ from mypy_boto3_cloudwatch.type_defs import DimensionTypeDef, MetricDataQueryTyp
 from mypy_boto3_lambda.client import LambdaClient
 from mypy_boto3_lambda.type_defs import InvocationResponseTypeDef
 from mypy_boto3_xray.client import XRayClient
+from mypy_boto3_xray.type_defs import BatchGetTracesResultTypeDef
 from pydantic import BaseModel
 from retry import retry
 
@@ -34,8 +35,8 @@ class Log(BaseModel):
 
 class TraceSegment(BaseModel):
     name: str
-    metadata: Dict = {}
-    annotations: Dict = {}
+    metadata: Dict[str, Any]
+    annotations: Dict[str, Any]
 
 
 def trigger_lambda(
@@ -125,11 +126,16 @@ def get_metrics(
     return result
 
 
-@retry(ValueError, delay=1, jitter=1, tries=10)
+@retry(ValueError, delay=10, jitter=1.5, tries=5)
 def get_traces(
-    filter_expression: str, start_date: datetime, end_date: datetime, xray_client: Optional[XRayClient] = None
-) -> Dict:
-    xray_client = xray_client or boto3.client("xray")
+    filter_expression: str,
+    start_date: datetime,
+    end_date: Optional[datetime] = None,
+    xray_client: Optional[XRayClient] = None,
+) -> BatchGetTracesResultTypeDef:
+    xray_client: XRayClient = xray_client or boto3.client("xray")
+    end_date = end_date or start_date + timedelta(minutes=5)
+
     paginator = xray_client.get_paginator("get_trace_summaries")
     response_iterator = paginator.paginate(
         StartTime=start_date,
@@ -234,6 +240,7 @@ def build_add_metric_input(metric_name: str, value: float, unit: str = MetricUni
     return {"name": metric_name, "unit": unit, "value": value}
 
 
+# TODO: Fix type annotation to be List
 def build_multiple_add_metric_input(
     metric_name: str, value: float, unit: str = MetricUnit.Count.value, quantity: int = 1
 ) -> Dict:
@@ -258,6 +265,7 @@ def build_multiple_add_metric_input(
     return [{"name": metric_name, "unit": unit, "value": value} for _ in range(quantity)]
 
 
+# TODO: Fix docstring parameters
 def build_add_dimensions_input(**dimensions) -> List[DimensionTypeDef]:
     """Create dimensions input to be used with either get_metrics or Metrics.add_dimension()
 
@@ -274,3 +282,42 @@ def build_add_dimensions_input(**dimensions) -> List[DimensionTypeDef]:
         Metric dimension input
     """
     return [{"Name": name, "Value": value} for name, value in dimensions.items()]
+
+
+def build_put_annotations_input(**annotations: str) -> List[Dict]:
+    """Create trace annotations input to be used with Tracer.put_annotation()
+
+    Parameters
+    ----------
+    annotations : str
+        annotations in key=value form
+
+    Returns
+    -------
+    List[Dict]
+        List of put annotations input
+    """
+    return [{"key": key, "value": value} for key, value in annotations.items()]
+
+
+def build_put_metadata_input(namespace: str = "", **metadata: Any) -> List[Dict]:
+    """Create trace metadata input to be used with Tracer.put_metadata()
+
+    All metadata will be under `test` namespace
+
+    Parameters
+    ----------
+    metadata : Any
+        metadata in key=value form
+
+    Returns
+    -------
+    List[Dict]
+        List of put metadata input
+    """
+    return [{"key": key, "value": value, "namespace": namespace} for key, value in metadata.items()]
+
+
+def build_trace_default_query(function_name: str, service_name: str) -> str:
+    return f'service("{function_name}")'
+    ### return f'service("{function_name}") AND annotation.service = "{service_name}"'
