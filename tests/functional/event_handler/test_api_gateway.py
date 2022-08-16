@@ -37,7 +37,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEventV2,
     event_source,
 )
-from tests.utils import load_event
+from tests.functional.utils import load_event
 
 
 @pytest.fixture
