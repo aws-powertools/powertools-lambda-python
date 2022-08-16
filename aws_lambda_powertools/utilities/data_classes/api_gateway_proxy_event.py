@@ -1,5 +1,10 @@
 from typing import Any, Dict, List, Optional
 
+from aws_lambda_powertools.event_handler.headers_serializer import (
+    BaseHeadersSerializer,
+    HttpApiSerializer,
+    MultiValueHeadersSerializer,
+)
 from aws_lambda_powertools.utilities.data_classes.common import (
     BaseProxyEvent,
     BaseRequestContext,
@@ -105,6 +110,9 @@ class APIGatewayProxyEvent(BaseProxyEvent):
     @property
     def stage_variables(self) -> Optional[Dict[str, str]]:
         return self.get("stageVariables")
+
+    def header_serializer(self) -> BaseHeadersSerializer:
+        return MultiValueHeadersSerializer()
 
 
 class RequestContextV2AuthorizerIam(DictWrapper):
@@ -250,3 +258,6 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
     def http_method(self) -> str:
         """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
         return self.request_context.http.method
+
+    def header_serializer(self):
+        return HttpApiSerializer()

@@ -14,7 +14,6 @@ from typing import Any, Callable, Dict, List, Match, Optional, Pattern, Set, Tup
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
-from aws_lambda_powertools.event_handler.headers_serializer import HeadersSerializer
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -236,10 +235,8 @@ class ResponseBuilder:
             "statusCode": self.response.status_code,
             "body": self.response.body,
             "isBase64Encoded": self.response.base64_encoded,
+            **event.header_serializer().serialize(headers=self.response.headers, cookies=self.response.cookies),
         }
-        payload.update(
-            HeadersSerializer(event=event, cookies=self.response.cookies, headers=self.response.headers).serialize()
-        )
         return payload
 
 

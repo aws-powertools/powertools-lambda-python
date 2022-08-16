@@ -2,6 +2,8 @@ import base64
 import json
 from typing import Any, Dict, Optional
 
+from aws_lambda_powertools.event_handler.headers_serializer import BaseHeadersSerializer
+
 
 class DictWrapper:
     """Provides a single read only access to a wrapper dict"""
@@ -126,6 +128,9 @@ class BaseProxyEvent(DictWrapper):
             Header value
         """
         return get_header_value(self.headers, name, default_value, case_sensitive)
+
+    def header_serializer(self) -> BaseHeadersSerializer:
+        raise NotImplementedError()
 
 
 class RequestContextClientCert(DictWrapper):
