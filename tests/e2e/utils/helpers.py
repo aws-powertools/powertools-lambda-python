@@ -9,8 +9,6 @@ from mypy_boto3_cloudwatch.client import CloudWatchClient
 from mypy_boto3_cloudwatch.type_defs import DimensionTypeDef, MetricDataQueryTypeDef, MetricDataResultTypeDef
 from mypy_boto3_lambda.client import LambdaClient
 from mypy_boto3_lambda.type_defs import InvocationResponseTypeDef
-from mypy_boto3_xray.client import XRayClient
-from mypy_boto3_xray.type_defs import BatchGetTracesResultTypeDef
 from pydantic import BaseModel
 from retry import retry
 
@@ -40,9 +38,10 @@ class TraceSegment(BaseModel):
 
 
 def trigger_lambda(
-    lambda_arn: str, payload: str, client: Optional[LambdaClient] = None
+    lambda_arn: str, payload: Optional[str] = None, client: Optional[LambdaClient] = None
 ) -> Tuple[InvocationResponseTypeDef, datetime]:
     client = client or boto3.client("lambda")
+    payload = payload or ""
     execution_time = datetime.utcnow()
     return client.invoke(FunctionName=lambda_arn, InvocationType="RequestResponse", Payload=payload), execution_time
 
@@ -124,61 +123,6 @@ def get_metrics(
     if not result["Values"]:
         raise ValueError("Empty response from Cloudwatch. Repeating...")
     return result
-
-
-@retry(ValueError, delay=10, jitter=1.5, tries=5)
-def get_traces(
-    filter_expression: str,
-    start_date: datetime,
-    end_date: Optional[datetime] = None,
-    xray_client: Optional[XRayClient] = None,
-) -> BatchGetTracesResultTypeDef:
-    xray_client: XRayClient = xray_client or boto3.client("xray")
-    end_date = end_date or start_date + timedelta(minutes=5)
-
-    paginator = xray_client.get_paginator("get_trace_summaries")
-    response_iterator = paginator.paginate(
-        StartTime=start_date,
-        EndTime=end_date,
-        TimeRangeType="Event",
-        Sampling=False,
-        FilterExpression=filter_expression,
-    )
-
-    traces = [trace["TraceSummaries"][0]["Id"] for trace in response_iterator if trace["TraceSummaries"]]
-    if not traces:
-        raise ValueError("Empty response from X-RAY. Repeating...")
-
-    trace_details = xray_client.batch_get_traces(
-        TraceIds=traces,
-    )
-
-    return trace_details
-
-
-def find_trace_additional_info(trace: Dict) -> List[TraceSegment]:
-    """Find all trace annotations and metadata and return them to the caller"""
-    info = []
-    for segment in trace["Traces"][0]["Segments"]:
-        document = json.loads(segment["Document"])
-        if document["origin"] == "AWS::Lambda::Function":
-            for subsegment in document["subsegments"]:
-                if subsegment["name"] == "Invocation":
-                    find_meta(segment=subsegment, result=info)
-    return info
-
-
-def find_meta(segment: dict, result: List):
-    for x_subsegment in segment["subsegments"]:
-        result.append(
-            TraceSegment(
-                name=x_subsegment["name"],
-                metadata=x_subsegment.get("metadata", {}),
-                annotations=x_subsegment.get("annotations", {}),
-            )
-        )
-        if x_subsegment.get("subsegments"):
-            find_meta(segment=x_subsegment, result=result)
 
 
 # Maintenance: Build a separate module for builders
@@ -300,7 +244,7 @@ def build_put_annotations_input(**annotations: str) -> List[Dict]:
     return [{"key": key, "value": value} for key, value in annotations.items()]
 
 
-def build_put_metadata_input(namespace: str = "", **metadata: Any) -> List[Dict]:
+def build_put_metadata_input(namespace: Optional[str] = None, **metadata: Any) -> List[Dict]:
     """Create trace metadata input to be used with Tracer.put_metadata()
 
     All metadata will be under `test` namespace
@@ -318,6 +262,5 @@ def build_put_metadata_input(namespace: str = "", **metadata: Any) -> List[Dict]
     return [{"key": key, "value": value, "namespace": namespace} for key, value in metadata.items()]
 
 
-def build_trace_default_query(function_name: str, service_name: str) -> str:
+def build_trace_default_query(function_name: str) -> str:
     return f'service("{function_name}")'
-    ### return f'service("{function_name}") AND annotation.service = "{service_name}"'
