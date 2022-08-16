@@ -184,10 +184,9 @@ def build_add_metric_input(metric_name: str, value: float, unit: str = MetricUni
     return {"name": metric_name, "unit": unit, "value": value}
 
 
-# TODO: Fix type annotation to be List
 def build_multiple_add_metric_input(
     metric_name: str, value: float, unit: str = MetricUnit.Count.value, quantity: int = 1
-) -> Dict:
+) -> List[Dict]:
     """Create list of metrics input to be used with Metrics.add_metric()
 
     Parameters
@@ -209,20 +208,17 @@ def build_multiple_add_metric_input(
     return [{"name": metric_name, "unit": unit, "value": value} for _ in range(quantity)]
 
 
-# TODO: Fix docstring parameters
 def build_add_dimensions_input(**dimensions) -> List[DimensionTypeDef]:
     """Create dimensions input to be used with either get_metrics or Metrics.add_dimension()
 
     Parameters
     ----------
-    name : str
-        dimension name
-    value : float
-        dimension value
+    dimensions : str
+        key=value pair as dimension
 
     Returns
     -------
-    Dict
+    List[DimensionTypeDef]
         Metric dimension input
     """
     return [{"Name": name, "Value": value} for name, value in dimensions.items()]
