@@ -37,7 +37,7 @@ def test_lambda_handler_trace_is_visible(basic_handler_fn_arn: str, basic_handle
     helpers.trigger_lambda(lambda_arn=basic_handler_fn_arn)
 
     # THEN
-    trace = data_fetcher.get_traces(start_date=execution_time, filter_expression=trace_query)
+    trace = data_fetcher.get_traces(start_date=execution_time, filter_expression=trace_query, minimum_traces=2)
 
     assert len(trace.get_annotation(key="ColdStart", value=True)) == 1
     assert len(trace.get_metadata(key=handler_metadata_key, namespace=TracerStack.SERVICE_NAME)) == 2

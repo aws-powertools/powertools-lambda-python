@@ -45,6 +45,7 @@ class TraceFetcher:
         exclude_segment_name: Optional[List[str]] = None,
         resource_name: Optional[List[str]] = None,
         origin: Optional[List[str]] = None,
+        minimum_traces: int = 1,
     ):
         """Fetch and expose traces from X-Ray based on parameters
 
@@ -74,6 +75,8 @@ class TraceFetcher:
             Name of resource to filter traces (e.g., function name), by default None
         origin : Optional[List[str]], optional
             Trace origin name to filter traces, by default ["AWS::Lambda::Function"]
+        minimum_traces : int
+            Minimum number of traces to be retrieved before exhausting retry attempts
         """
         self.filter_expression = filter_expression
         self.start_date = start_date
@@ -87,6 +90,7 @@ class TraceFetcher:
         self.origin = origin or ["AWS::Lambda::Function"]
         self.annotations: List[Dict[str, Any]] = []
         self.metadata: List[Dict[str, Dict[str, Any]]] = []
+        self.minimum_traces = minimum_traces
 
         paginator = self.xray_client.get_paginator("get_trace_summaries")
         pages = paginator.paginate(
@@ -164,8 +168,7 @@ class TraceFetcher:
 
         return seen
 
-    @staticmethod
-    def _get_trace_ids(pages: PageIterator) -> List[str]:
+    def _get_trace_ids(self, pages: PageIterator) -> List[str]:
         """Get list of trace IDs found
 
         Parameters
@@ -187,7 +190,13 @@ class TraceFetcher:
         if not summaries:
             raise ValueError("Empty response from X-Ray. Repeating...")
 
-        return [trace["Id"] for trace in summaries[0]]  # type: ignore[index] # TypedDict not being recognized
+        trace_ids = [trace["Id"] for trace in summaries[0]]  # type: ignore[index] # TypedDict not being recognized
+        if len(trace_ids) < self.minimum_traces:
+            raise ValueError(
+                f"Number of traces found doesn't meet minimum required ({self.minimum_traces}). Repeating..."
+            )
+
+        return trace_ids
 
     def _get_trace_documents(self) -> Dict[str, TraceDocument]:
         """Find trace documents available in each trace segment
@@ -207,7 +216,7 @@ class TraceFetcher:
         return documents
 
 
-@retry(ValueError, delay=20, jitter=1.5, tries=10)
+@retry(ValueError, delay=10, jitter=1.5, tries=10)
 def get_traces(
     filter_expression: str,
     start_date: datetime,
@@ -216,6 +225,7 @@ def get_traces(
     exclude_segment_name: Optional[List[str]] = None,
     resource_name: Optional[List[str]] = None,
     origin: Optional[List[str]] = None,
+    minimum_traces: int = 1,
 ) -> TraceFetcher:
     """Fetch traces from AWS X-Ray
 
@@ -236,6 +246,8 @@ def get_traces(
         Name of resource to filter traces (e.g., function name), by default None
     origin : Optional[List[str]], optional
         Trace origin name to filter traces, by default ["AWS::Lambda::Function"]
+    minimum_traces : int
+        Minimum number of traces to be retrieved before exhausting retry attempts
 
     Returns
     -------
@@ -250,4 +262,5 @@ def get_traces(
         exclude_segment_name=exclude_segment_name,
         resource_name=resource_name,
         origin=origin,
+        minimum_traces=minimum_traces,
     )
