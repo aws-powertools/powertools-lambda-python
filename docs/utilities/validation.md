@@ -89,22 +89,22 @@ Envelopes are [JMESPath expressions](https://jmespath.org/tutorial.html) to extr
 
 Here is a sample custom EventBridge event, where we only validate what's inside the `detail` key:
 
-=== "getting_started_validator_unwraping_function.py"
+=== "getting_started_validator_unwrapping_function.py"
 
-	```python hl_lines="2 4 9 10 21 23"
-    --8<-- "examples/validation/src/getting_started_validator_unwraping_function.py"
+	```python hl_lines="2 6-7 13"
+    --8<-- "examples/validation/src/getting_started_validator_unwrapping_function.py"
 	```
 
-=== "getting_started_validator_unwraping_schema.py"
+=== "getting_started_validator_unwrapping_schema.py"
 
 	```python hl_lines="9-14 23 25 28 33 36 41 44 48 51"
-    --8<-- "examples/validation/src/getting_started_validator_unwraping_schema.py"
+    --8<-- "examples/validation/src/getting_started_validator_unwrapping_schema.py"
 	```
 
-=== "getting_started_validator_unwraping_payload.json"
+=== "getting_started_validator_unwrapping_payload.json"
 
     ```json
-    --8<-- "examples/validation/src/getting_started_validator_unwraping_payload.json"
+    --8<-- "examples/validation/src/getting_started_validator_unwrapping_payload.json"
     ```
 
 This is quite powerful because you can use JMESPath Query language to extract records from [arrays](https://jmespath.org/tutorial.html#list-and-slice-projections), combine [pipe](https://jmespath.org/tutorial.html#pipe-expressions) and [function expressions](https://jmespath.org/tutorial.html#functions).
