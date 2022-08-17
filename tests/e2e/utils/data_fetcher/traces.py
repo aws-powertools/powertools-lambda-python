@@ -82,7 +82,6 @@ class TraceFetcher:
         self.start_date = start_date
         self.end_date = end_date or self.start_date + timedelta(minutes=5)
         self.xray_client: XRayClient = xray_client or boto3.client("xray")
-        self.trace_ids: List[str] = []
         self.trace_documents: Dict[str, TraceDocument] = {}
         self.subsegments: List[TraceSubsegment] = []
         self.exclude_segment_name = exclude_segment_name or self.default_exclude_seg_name
@@ -101,8 +100,8 @@ class TraceFetcher:
             FilterExpression=self.filter_expression,
         )
 
-        self.trace_ids = self._get_trace_ids(pages)
-        self.trace_documents = self._get_trace_documents()
+        trace_ids = self._get_trace_ids(pages)
+        self.trace_documents = self._get_trace_documents(trace_ids)
         self.subsegments = self._get_subsegments()
 
     def get_annotation(self, key: str, value: Optional[any] = None) -> List:
@@ -198,7 +197,7 @@ class TraceFetcher:
 
         return trace_ids
 
-    def _get_trace_documents(self) -> Dict[str, TraceDocument]:
+    def _get_trace_documents(self, trace_ids: List[str]) -> Dict[str, TraceDocument]:
         """Find trace documents available in each trace segment
 
         Returns

@@ -22,7 +22,7 @@ def get_metrics(
 ) -> MetricDataResultTypeDef:
     """Fetch CloudWatch Metrics
 
-    It takes into account eventual consistency with up to 10 retries and 1s jitter.
+    It takes into account eventual consistency with up to 10 retries and 1.5s jitter.
 
     Parameters
     ----------

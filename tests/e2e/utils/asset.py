@@ -14,7 +14,7 @@ from aws_lambda_powertools import Logger
 logger = Logger(service="e2e-utils")
 
 
-class AssetTemplateConfigSource(BaseModel):
+class AssetManifest(BaseModel):
     path: str
     packaging: str
 
@@ -32,14 +32,13 @@ class AssetTemplateConfigDestinations(BaseModel):
 
 
 class AssetTemplateConfig(BaseModel):
-    source: AssetTemplateConfigSource
+    source: AssetManifest
     destinations: AssetTemplateConfigDestinations
 
 
 class TemplateAssembly(BaseModel):
     version: str
     files: Dict[str, AssetTemplateConfig]
-    docker_images: Dict = Field(Dict, alias="dockerImages")
 
 
 class Asset:

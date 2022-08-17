@@ -5,9 +5,9 @@ from dataclasses import dataclass
 
 import boto3
 
-# We only need typing_extensions for python versions <3.8
-from tests.e2e.utils import data_fetcher
+from tests.e2e.utils import data_fetcher, infrastructure
 
+# We only need typing_extensions for python versions <3.8
 if sys.version_info >= (3, 8):
     from typing import TypedDict
 else:
@@ -16,7 +16,6 @@ else:
 from typing import Dict, Generator, Optional
 
 import pytest
-from e2e.utils import infrastructure
 
 
 class LambdaConfig(TypedDict):
