@@ -10,16 +10,16 @@ Middleware factory provides a decorator factory to create your own middleware to
 ## Key features
 
 * Run logic before, after, and handle exceptions
-* Trace each middleware when requested
+* Built-in tracing opt-in capability
 
 ## Getting started
 
 ???+ tip
     All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
 
-You might need a middleware factory to abstract non-functional code and focus on business logic or even validate the payload before the lambda run, among other cases.
+You might need a custom middleware to abstract non-functional code. These are often custom authorization or any reusable logic you might need to run before/after a Lambda function invocation.
 
-## Middleware with no params
+### Middleware with no params
 
 You can create your own middleware using `lambda_handler_decorator`. The decorator factory expects 3 arguments in your function signature:
 
@@ -27,7 +27,7 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
 * **event** - Lambda function invocation event
 * **context** - Lambda function context object
 
-### Creating your own middleware for before logic
+### Middleware with before logic
 
 === "getting_started_middleware_before_logic_function.py"
     ```python hl_lines="5 23 24 29 30 32 37 38"
@@ -40,7 +40,7 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
     --8<-- "examples/middleware_factory/src/getting_started_middleware_before_logic_payload.json"
     ```
 
-### Creating your own middleware for after logic
+### Middleware with after logic
 
 === "getting_started_middleware_after_logic_function.py"
     ```python hl_lines="7 14 15 21-23 37"
@@ -53,7 +53,7 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
     --8<-- "examples/middleware_factory/src/getting_started_middleware_after_logic_payload.json"
     ```
 
-## Middleware with params
+### Middleware with params
 
 You can also have your own keyword arguments after the mandatory arguments.
 
@@ -68,7 +68,24 @@ You can also have your own keyword arguments after the mandatory arguments.
     --8<-- "examples/middleware_factory/src/getting_started_middleware_with_params_payload.json"
     ```
 
-## Tracing middleware execution
+## Advanced
+
+For advanced use cases, you can instantiate [Tracer](../core/tracer.md) inside your middleware, and add annotations as well as metadata for additional operational insights.
+
+=== "advanced_middleware_tracer_function.py"
+    ```python hl_lines="7 9 12 16 17 19 25 42"
+    --8<-- "examples/middleware_factory/src/advanced_middleware_tracer_function.py"
+    ```
+
+=== "advanced_middleware_tracer_payload.json"
+
+    ```json
+    --8<-- "examples/middleware_factory/src/advanced_middleware_tracer_payload.json"
+    ```
+
+![Middleware avanced Tracer](../media/middleware_factory_tracer_2.png)
+
+### Tracing middleware **execution**
 
 If you are making use of [Tracer](../core/tracer.md), you can trace the execution of your middleware to ease operations.
 
@@ -91,23 +108,6 @@ This makes use of an existing Tracer instance that you may have initialized anyw
 When executed, your middleware name will [appear in AWS X-Ray Trace details as](../core/tracer.md) `## middleware_name`, in this example the middleware name is `## middleware_with_tracing`.
 
 ![Middleware simple Tracer](../media/middleware_factory_tracer_1.png)
-
-## Advanced
-
-For advanced use cases, you can instantiate [Tracer](../core/tracer.md) inside your middleware, and add annotations as well as metadata for additional operational insights.
-
-=== "advanced_middleware_tracer_function.py"
-    ```python hl_lines="7 9 12 16 17 19 25 42"
-    --8<-- "examples/middleware_factory/src/advanced_middleware_tracer_function.py"
-    ```
-
-=== "advanced_middleware_tracer_payload.json"
-
-    ```json
-    --8<-- "examples/middleware_factory/src/advanced_middleware_tracer_payload.json"
-    ```
-
-![Middleware avanced Tracer](../media/middleware_factory_tracer_2.png)
 
 ## Tips
 
