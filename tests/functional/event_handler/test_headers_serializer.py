@@ -36,7 +36,7 @@ def test_headers_serializer_multi_value_headers():
     assert payload == {"multiValueHeaders": {"Set-Cookie": ["UUID=12345"]}}
 
     payload = serializer.serialize(cookies=["UUID=12345", "SSID=0xdeadbeef"], headers={"Foo": "bar,zbr"})
-    assert payload == {"multiValueHeaders": {"Set-Cookie": ["UUID=12345", "SSID=0xdeadbeef"], "Foo": ["bar", "zbr"]}}
+    assert payload == {"multiValueHeaders": {"Set-Cookie": ["UUID=12345", "SSID=0xdeadbeef"], "Foo": ["bar,zbr"]}}
 
 
 def test_headers_serializer_single_value_headers():
@@ -55,14 +55,10 @@ def test_headers_serializer_single_value_headers():
         warnings.simplefilter("default")
 
         payload = serializer.serialize(cookies=["UUID=12345", "SSID=0xdeadbeef"], headers={"Foo": "bar,zbr"})
-        assert payload == {"headers": {"Set-Cookie": "SSID=0xdeadbeef", "Foo": "zbr"}}
+        assert payload == {"headers": {"Set-Cookie": "SSID=0xdeadbeef", "Foo": "bar,zbr"}}
 
-        assert len(w) == 2
-        assert str(w[-2].message) == (
-            "Can't encode more than one cookie in the response. "
-            "Did you enable multiValueHeaders on the ALB Target Group?"
-        )
+        assert len(w) == 1
         assert str(w[-1].message) == (
-            "Can't encode more than on header with the same key in the response. "
+            "Can't encode more than one cookie in the response. "
             "Did you enable multiValueHeaders on the ALB Target Group?"
         )

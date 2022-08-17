@@ -49,8 +49,7 @@ class MultiValueHeadersSerializer(BaseHeadersSerializer):
         payload: Dict[str, List[str]] = {}
 
         for key, value in headers.items():
-            values = value.split(",")
-            payload[key] = [value.strip() for value in values]
+            payload[key] = [value]
 
         if cookies:
             payload.setdefault("Set-Cookie", [])
@@ -82,14 +81,6 @@ class SingleValueHeadersSerializer(BaseHeadersSerializer):
             payload["headers"]["Set-Cookie"] = cookies[-1]
 
         for key, value in headers.items():
-            values = value.split(",")
-            if len(values) > 1:
-                warnings.warn(
-                    "Can't encode more than on header with the same key in the response. "
-                    "Did you enable multiValueHeaders on the ALB Target Group?"
-                )
-
-            # We can only send on header for this key, send the last value
-            payload["headers"][key] = values[-1].strip()
+            payload["headers"][key] = value
 
         return payload

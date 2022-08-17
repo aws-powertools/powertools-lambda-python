@@ -266,7 +266,7 @@ def test_cors():
     assert headers["Content-Type"] == [content_types.TEXT_HTML]
     assert headers["Access-Control-Allow-Origin"] == ["*"]
     assert "Access-Control-Allow-Credentials" not in headers
-    assert headers["Access-Control-Allow-Headers"] == sorted(CORSConfig._REQUIRED_HEADERS)
+    assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
 
     # THEN for routes without cors flag return no cors headers
     mock_event = {"path": "/my/request", "httpMethod": "GET"}
@@ -483,9 +483,9 @@ def test_custom_cors_config():
     headers = result["multiValueHeaders"]
     assert headers["Content-Type"] == [content_types.APPLICATION_JSON]
     assert headers["Access-Control-Allow-Origin"] == [cors_config.allow_origin]
-    expected_allows_headers = sorted(set(allow_header + cors_config._REQUIRED_HEADERS))
+    expected_allows_headers = [",".join(sorted(set(allow_header + cors_config._REQUIRED_HEADERS)))]
     assert headers["Access-Control-Allow-Headers"] == expected_allows_headers
-    assert headers["Access-Control-Expose-Headers"] == cors_config.expose_headers
+    assert headers["Access-Control-Expose-Headers"] == [",".join(cors_config.expose_headers)]
     assert headers["Access-Control-Max-Age"] == [str(cors_config.max_age)]
     assert "Access-Control-Allow-Credentials" in headers
     assert headers["Access-Control-Allow-Credentials"] == ["true"]
@@ -558,7 +558,7 @@ def test_cors_preflight():
     headers = result["multiValueHeaders"]
     assert "Content-Type" not in headers
     assert "Access-Control-Allow-Origin" in result["multiValueHeaders"]
-    assert headers["Access-Control-Allow-Methods"] == ["DELETE", "GET", "OPTIONS"]
+    assert headers["Access-Control-Allow-Methods"] == ["DELETE,GET,OPTIONS"]
 
 
 def test_custom_preflight_response():
