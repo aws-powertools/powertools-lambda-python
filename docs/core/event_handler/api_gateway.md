@@ -316,7 +316,7 @@ You can use the `Response` class to have full control over the response, for exa
 
 ???+ info
     Powertools serializes the headers and cookies according to the type of input event.
-    For some integrations this requires headers and cookies to be encoded as `multiValueHeaders`.
+    Some integrations require headers and cookies to be encoded as `multiValueHeaders`.
 
 ???+ warning
     If you use the ALB integration, make sure you [enable the multi value headers feature](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers) in order to fully support this feature.
