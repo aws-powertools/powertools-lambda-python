@@ -15,17 +15,17 @@ This utility provides JSON Schema validation for events and responses, including
 
 ## Getting started
 
-???+ tip "Tip: Using JSON Schemas for the first time?"
-    Check this [step-by-step tour in the official JSON Schema website](https://json-schema.org/learn/getting-started-step-by-step.html){target="_blank"}.
-
-You can validate inbound and outbound events using [`validator` decorator](#validator-decorator).
-
 ???+ tip
     All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
 
+You can validate inbound and outbound events using [`validator` decorator](#validator-decorator).
+
 You can also use the standalone `validate` function, if you want more control over the validation process such as handling a validation error.
 
-We support any JSONSchema draft supported by [fastjsonschema](https://horejsek.github.io/python-fastjsonschema/){target="_blank"} library.
+???+ tip "Tip: Using JSON Schemas for the first time?"
+    Check this [step-by-step tour in the official JSON Schema website](https://json-schema.org/learn/getting-started-step-by-step.html){target="_blank"}.
+
+    We support any JSONSchema draft supported by [fastjsonschema](https://horejsek.github.io/python-fastjsonschema/){target="_blank"} library.
 
 ???+ warning
     Both `validator` decorator and `validate` standalone function expects your JSON Schema to be a **dictionary**, not a filename.
