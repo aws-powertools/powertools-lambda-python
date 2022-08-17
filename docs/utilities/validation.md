@@ -168,7 +168,7 @@ For each format defined in a dictionary key, you must use a regex, or a function
 
 === "custom_format_function.py"
 
-	```python hl_lines="5 8 10 11 17 28"
+	```python hl_lines="5 8 10 11 17 27"
     --8<-- "examples/validation/src/custom_format_function.py"
 	```
 
