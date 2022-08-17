@@ -166,22 +166,22 @@ JSON Schemas with custom formats like `awsaccountid` will fail validation. If yo
 
 For each format defined in a dictionary key, you must use a regex, or a function that returns a boolean to instruct the validator on how to proceed when encountering that type.
 
-=== "getting_started_custom_format_function.py"
+=== "custom_format_function.py"
 
-	```python hl_lines="6 8 10 11 16 17 28 30"
-    --8<-- "examples/validation/src/getting_started_custom_format_function.py"
+	```python hl_lines="5 8 10 11 17 28"
+    --8<-- "examples/validation/src/custom_format_function.py"
 	```
 
-=== "getting_started_custom_format_schema.py"
+=== "custom_format_schema.py"
 
 	```python hl_lines="7 9 12 13 17 20"
-    --8<-- "examples/validation/src/getting_started_custom_format_schema.py"
+    --8<-- "examples/validation/src/custom_format_schema.py"
 	```
 
-=== "getting_started_custom_format_payload.json"
+=== "custom_format_payload.json"
 
     ```json hl_lines="12 13"
-    --8<-- "examples/validation/src/getting_started_custom_format_payload.json"
+    --8<-- "examples/validation/src/custom_format_payload.json"
     ```
 
 ### Built-in JMESPath functions

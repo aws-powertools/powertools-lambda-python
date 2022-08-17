@@ -2,7 +2,7 @@ import json
 import re
 
 import boto3
-import getting_started_custom_format_schema as schemas
+import custom_format_schema as schemas
 
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import SchemaValidationError, validate
@@ -24,7 +24,6 @@ def lambda_handler(event, context: LambdaContext) -> dict:
             "message": "Success",
             "statusCode": 200,
         }
-
     except SchemaValidationError as exception:
         return return_error_message(str(exception))
     except Exception as exception:
