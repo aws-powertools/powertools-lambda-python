@@ -205,7 +205,7 @@ class TraceFetcher:
         Dict[str, TraceDocument]
             Trace documents grouped by their ID
         """
-        traces = self.xray_client.batch_get_traces(TraceIds=self.trace_ids)
+        traces = self.xray_client.batch_get_traces(TraceIds=trace_ids)
         documents: Dict = {}
         segments = [seg for trace in traces["Traces"] for seg in trace["Segments"]]
         for seg in segments:
