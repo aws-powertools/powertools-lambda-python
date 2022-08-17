@@ -113,7 +113,7 @@ When combined, these features allow you to extract what you need before validati
 
 ### Built-in envelopes
 
-This utility comes with built-in envelopes to easily extract the payload from popular event sources.
+We provide built-in envelopes to easily extract the payload from popular event sources.
 
 === "unwrapping_popular_event_source_function.py"
 
