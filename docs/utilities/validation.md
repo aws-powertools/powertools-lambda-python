@@ -83,7 +83,7 @@ You can also gracefully handle schema validation errors by catching `SchemaValid
 
 ### Unwrapping events prior to validation
 
-You might want to validate only a portion of your event - This is where the `envelope` parameter is for.
+You might want to validate only a portion of your event - This is what the `envelope` parameter is for.
 
 Envelopes are [JMESPath expressions](https://jmespath.org/tutorial.html) to extract a portion of JSON you want before applying JSON Schema validation.
 
