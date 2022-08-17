@@ -65,7 +65,7 @@ You can also gracefully handle schema validation errors by catching `SchemaValid
 
 === "getting_started_validator_standalone_function.py"
 
-	```python hl_lines="3 10 16 18"
+	```python hl_lines="5 16 17 26"
     --8<-- "examples/validation/src/getting_started_validator_standalone_function.py"
 	```
 
