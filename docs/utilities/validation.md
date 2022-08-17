@@ -91,7 +91,7 @@ Here is a sample custom EventBridge event, where we only validate what's inside 
 
 === "getting_started_validator_unwrapping_function.py"
 
-	```python hl_lines="2 6-7 13"
+	```python hl_lines="2 6 8 12"
     --8<-- "examples/validation/src/getting_started_validator_unwrapping_function.py"
 	```
 

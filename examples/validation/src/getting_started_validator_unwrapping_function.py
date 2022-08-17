@@ -1,16 +1,15 @@
 import boto3
-import getting_started_validator_unwraping_schema as schemas
+import getting_started_validator_unwrapping_schema as schemas
 
 from aws_lambda_powertools.utilities.data_classes.event_bridge_event import EventBridgeEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import validator
-from aws_lambda_powertools.utilities.validation.envelopes import EVENTBRIDGE
 
 s3_client = boto3.resource("s3")
 
 
 # using a decorator to validate input data
-@validator(inbound_schema=schemas.INPUT, envelope=EVENTBRIDGE)
+@validator(inbound_schema=schemas.INPUT, envelope="detail")
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
     my_event = EventBridgeEvent(event)
     data = my_event.detail.get("data", {})
