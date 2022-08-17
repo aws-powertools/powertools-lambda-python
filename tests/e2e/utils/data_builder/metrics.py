@@ -13,6 +13,26 @@ def build_metric_query_data(
     stat: str = "Sum",
     dimensions: Optional[List[DimensionTypeDef]] = None,
 ) -> List[MetricDataQueryTypeDef]:
+    """Create input for CloudWatch GetMetricData API call
+
+    Parameters
+    ----------
+    namespace : str
+        Metric namespace to search for
+    metric_name : str
+        Metric name to search for
+    period : int, optional
+        Time period in seconds to search metrics, by default 60
+    stat : str, optional
+        Aggregate function to use for results, by default "Sum"
+    dimensions : Optional[List[DimensionTypeDef]], optional
+        Metric dimensions to search for, by default None
+
+    Returns
+    -------
+    List[MetricDataQueryTypeDef]
+        _description_
+    """
     dimensions = dimensions or []
     data_query: List[MetricDataQueryTypeDef] = [
         {

@@ -46,7 +46,7 @@ def get_metrics(
     Returns
     -------
     MetricDataResultTypeDef
-        _description_
+        Dict with metric values found
 
     Raises
     ------

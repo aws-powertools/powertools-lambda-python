@@ -10,8 +10,12 @@ def infrastructure(request: pytest.FixtureRequest, tmp_path_factory: pytest.Temp
 
     Parameters
     ----------
-    request : fixtures.SubRequest
-        test fixture containing metadata about test execution
+    request : pytest.FixtureRequest
+        pytest request fixture to introspect absolute path to test being executed
+    tmp_path_factory : pytest.TempPathFactory
+        pytest temporary path factory to discover shared tmp when multiple CPU processes are spun up
+    worker_id : str
+        pytest-xdist worker identification to detect whether parallelization is enabled
 
     Yields
     ------

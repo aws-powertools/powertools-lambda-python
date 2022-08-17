@@ -312,12 +312,12 @@ class BaseInfrastructureV2(ABC):
         assets.upload()
         return self._deploy_stack(self.stack_name, template)
 
-    def delete(self):
+    def delete(self) -> None:
         """Delete CloudFormation Stack"""
         self.cfn.delete_stack(StackName=self.stack_name)
 
     @abstractmethod
-    def create_resources(self):
+    def create_resources(self) -> None:
         """Create any necessary CDK resources. It'll be called before deploy
 
         Examples

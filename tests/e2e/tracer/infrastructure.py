@@ -12,6 +12,6 @@ class TracerStack(BaseInfrastructureV2):
     def __init__(self, handlers_dir: Path, feature_name: str = "tracer") -> None:
         super().__init__(feature_name, handlers_dir)
 
-    def create_resources(self):
+    def create_resources(self) -> None:
         env_vars = {"POWERTOOLS_SERVICE_NAME": self.SERVICE_NAME}
         self.create_lambda_functions(function_props={"environment": env_vars})

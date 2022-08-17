@@ -14,6 +14,8 @@ def get_todos():
 
 @tracer.capture_method
 async def async_get_users():
+    # dummy block to prevent basic failures where
+    # we weren't priming coroutines correctly in the past but returning unresolved
     await asyncio.sleep(1)
     return [{"id": f"{uuid4()}"} for _ in range(5)]
 
