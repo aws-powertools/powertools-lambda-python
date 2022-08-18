@@ -7,6 +7,7 @@ import traceback
 import warnings
 import zlib
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from enum import Enum
 from functools import partial
 from http import HTTPStatus
@@ -122,18 +123,18 @@ class CORSConfig:
         self.max_age = max_age
         self.allow_credentials = allow_credentials
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> Dict[str, List[str]]:
         """Builds the configured Access-Control http headers"""
-        headers = {
-            "Access-Control-Allow-Origin": self.allow_origin,
-            "Access-Control-Allow-Headers": ",".join(sorted(self.allow_headers)),
-        }
+        headers: Dict[str, List[str]] = defaultdict(list)
+        headers["Access-Control-Allow-Origin"].append(self.allow_origin)
+        headers["Access-Control-Allow-Headers"].append(",".join(sorted(self.allow_headers)))
+
         if self.expose_headers:
-            headers["Access-Control-Expose-Headers"] = ",".join(self.expose_headers)
+            headers["Access-Control-Expose-Headers"].append(",".join(self.expose_headers))
         if self.max_age is not None:
-            headers["Access-Control-Max-Age"] = str(self.max_age)
+            headers["Access-Control-Max-Age"].append(str(self.max_age))
         if self.allow_credentials is True:
-            headers["Access-Control-Allow-Credentials"] = "true"
+            headers["Access-Control-Allow-Credentials"].append("true")
         return headers
 
 
@@ -145,7 +146,7 @@ class Response:
         status_code: int,
         content_type: Optional[str],
         body: Union[str, bytes, None],
-        headers: Optional[Dict[str, str]] = None,
+        headers: Optional[Dict[str, List[str]]] = None,
         cookies: Optional[List[str]] = None,
     ):
         """
@@ -159,7 +160,7 @@ class Response:
             provided http headers
         body: Union[str, bytes, None]
             Optionally set the response body. Note: bytes body will be automatically base64 encoded
-        headers: dict[str, str]
+        headers: dict[str, List[str]]
             Optionally set specific http headers. Setting "Content-Type" here would override the `content_type` value.
         cookies: list[str]
             Optionally set cookies.
@@ -167,10 +168,10 @@ class Response:
         self.status_code = status_code
         self.body = body
         self.base64_encoded = False
-        self.headers: Dict[str, str] = headers or {}
+        self.headers: Dict[str, List[str]] = defaultdict(list, **headers) if headers else defaultdict(list)
         self.cookies = cookies or []
         if content_type:
-            self.headers.setdefault("Content-Type", content_type)
+            self.headers.setdefault("Content-Type", [content_type])
 
 
 class Route:
@@ -200,11 +201,11 @@ class ResponseBuilder:
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
-        self.response.headers["Cache-Control"] = cache_control if self.response.status_code == 200 else "no-cache"
+        self.response.headers["Cache-Control"].append(cache_control if self.response.status_code == 200 else "no-cache")
 
     def _compress(self):
         """Compress the response body, but only if `Accept-Encoding` headers includes gzip."""
-        self.response.headers["Content-Encoding"] = "gzip"
+        self.response.headers["Content-Encoding"].append("gzip")
         if isinstance(self.response.body, str):
             logger.debug("Converting string response to bytes before compressing it")
             self.response.body = bytes(self.response.body, "utf-8")
@@ -602,14 +603,14 @@ class ApiGatewayResolver(BaseRouter):
 
     def _not_found(self, method: str) -> ResponseBuilder:
         """Called when no matching route was found and includes support for the cors preflight response"""
-        headers = {}
+        headers: Dict[str, List[str]] = defaultdict(list)
         if self._cors:
             logger.debug("CORS is enabled, updating headers.")
             headers.update(self._cors.to_dict())
 
             if method == "OPTIONS":
                 logger.debug("Pre-flight request detected. Returning CORS with null response")
-                headers["Access-Control-Allow-Methods"] = ",".join(sorted(self._cors_methods))
+                headers["Access-Control-Allow-Methods"].append(",".join(sorted(self._cors_methods)))
                 return ResponseBuilder(Response(status_code=204, content_type=None, headers=headers, body=""))
 
         handler = self._lookup_exception_handler(NotFoundError)

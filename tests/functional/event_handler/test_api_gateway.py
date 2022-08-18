@@ -441,7 +441,7 @@ def test_handling_response_type():
             status_code=404,
             content_type="used-if-not-set-in-header",
             body="Not found",
-            headers={"Content-Type": "header-content-type-wins", "custom": "value"},
+            headers={"Content-Type": ["header-content-type-wins"], "custom": ["value"]},
         )
 
     # WHEN calling the event handler
@@ -573,7 +573,7 @@ def test_custom_preflight_response():
             status_code=200,
             content_type=content_types.TEXT_HTML,
             body="Foo",
-            headers={"Access-Control-Allow-Methods": "CUSTOM"},
+            headers={"Access-Control-Allow-Methods": ["CUSTOM"]},
         )
 
     @app.route(method="CUSTOM", rule="/some-call", cors=True)

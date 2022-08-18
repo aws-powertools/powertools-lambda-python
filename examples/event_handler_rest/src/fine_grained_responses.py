@@ -19,7 +19,7 @@ def get_todos():
     todos: requests.Response = requests.get("https://jsonplaceholder.typicode.com/todos")
     todos.raise_for_status()
 
-    custom_headers = {"X-Transaction-Id": f"{uuid4()}"}
+    custom_headers = {"X-Transaction-Id": [f"{uuid4()}"]}
 
     return Response(
         status_code=HTTPStatus.OK.value,  # 200

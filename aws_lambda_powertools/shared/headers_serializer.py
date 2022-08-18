@@ -1,5 +1,6 @@
 import warnings
 from abc import ABC
+from collections import defaultdict
 from typing import Any, Dict, List
 
 
@@ -8,14 +9,14 @@ class BaseHeadersSerializer(ABC):
     Helper class to correctly serialize headers and cookies on the response payload.
     """
 
-    def serialize(self, headers: Dict[str, str], cookies: List[str]) -> Dict[str, Any]:
+    def serialize(self, headers: Dict[str, List[str]], cookies: List[str]) -> Dict[str, Any]:
         """
         Serializes headers and cookies according to the request type.
         Returns a dict that can be merged with the response payload.
 
         Parameters
         ----------
-        headers: Dict[str, str]
+        headers: Dict[str, List[str]]
             A dictionary of headers to set in the response
         cookies: List[str]
             A list of cookies to set in the response
@@ -24,7 +25,7 @@ class BaseHeadersSerializer(ABC):
 
 
 class HttpApiSerializer(BaseHeadersSerializer):
-    def serialize(self, headers: Dict[str, str], cookies: List[str]) -> Dict[str, Any]:
+    def serialize(self, headers: Dict[str, List[str]], cookies: List[str]) -> Dict[str, Any]:
         """
         When using HTTP APIs or LambdaFunctionURLs, everything is taken care automatically for us.
         We can directly assign a list of cookies and a dict of headers to the response payload, and the
@@ -33,11 +34,18 @@ class HttpApiSerializer(BaseHeadersSerializer):
         https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html#http-api-develop-integrations-lambda.proxy-format
         https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html#http-api-develop-integrations-lambda.response
         """
-        return {"headers": headers, "cookies": cookies}
+
+        # Format 2.0 doesn't have multiValueHeaders or multiValueQueryStringParameters fields.
+        # Duplicate headers are combined with commas and included in the headers field.
+        combined_headers: Dict[str, str] = {}
+        for key, values in headers.items():
+            combined_headers[key] = ",".join(values)
+
+        return {"headers": combined_headers, "cookies": cookies}
 
 
 class MultiValueHeadersSerializer(BaseHeadersSerializer):
-    def serialize(self, headers: Dict[str, str], cookies: List[str]) -> Dict[str, Any]:
+    def serialize(self, headers: Dict[str, List[str]], cookies: List[str]) -> Dict[str, Any]:
         """
         When using REST APIs, headers can be encoded using the `multiValueHeaders` key on the response.
         This is also the case when using an ALB integration with the `multiValueHeaders` option enabled.
@@ -46,10 +54,11 @@ class MultiValueHeadersSerializer(BaseHeadersSerializer):
         https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-output-format
         https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers-response
         """
-        payload: Dict[str, List[str]] = {}
+        payload: Dict[str, List[str]] = defaultdict(list)
 
-        for key, value in headers.items():
-            payload[key] = [value]
+        for key, values in headers.items():
+            for value in values:
+                payload[key].append(value)
 
         if cookies:
             payload.setdefault("Set-Cookie", [])
@@ -60,7 +69,7 @@ class MultiValueHeadersSerializer(BaseHeadersSerializer):
 
 
 class SingleValueHeadersSerializer(BaseHeadersSerializer):
-    def serialize(self, headers: Dict[str, str], cookies: List[str]) -> Dict[str, Any]:
+    def serialize(self, headers: Dict[str, List[str]], cookies: List[str]) -> Dict[str, Any]:
         """
         The ALB integration has `multiValueHeaders` disabled by default.
         If we try to set multiple headers with the same key, or more than one cookie, print a warning.
@@ -80,7 +89,14 @@ class SingleValueHeadersSerializer(BaseHeadersSerializer):
             # We can only send one cookie, send the last one
             payload["headers"]["Set-Cookie"] = cookies[-1]
 
-        for key, value in headers.items():
-            payload["headers"][key] = value
+        for key, values in headers.items():
+            if len(values) > 1:
+                warnings.warn(
+                    "Can't encode more than one header value for the same key in the response. "
+                    "Did you enable multiValueHeaders on the ALB Target Group?"
+                )
+
+            # We can only set one header per key, send the last one
+            payload["headers"][key] = values[-1]
 
         return payload
