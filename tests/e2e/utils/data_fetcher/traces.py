@@ -1,6 +1,6 @@
 import json
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Generator, List, Optional
 
 import boto3
 from botocore.paginate import PageIterator
@@ -122,11 +122,13 @@ class TraceFetcher:
     def get_subsegment(self, name: str) -> List:
         return [seg for seg in self.subsegments if seg.name == name]
 
-    def _find_nested_subsegments(self, subsegment: TraceSubsegment, seen: List):
-        """Recursively add any subsegment that we might be interested.
+    def _find_nested_subsegments(self, subsegments: List[TraceSubsegment]) -> Generator[TraceSubsegment, None, None]:
+        """Recursively yield any subsegment that we might be interested.
 
         It excludes any subsegments contained in exclude_segment_name.
         Since these are nested, subsegment name might be '## lambda_handler'.
+
+        It also populates annotations and metadata nested in subsegments.
 
         Parameters
         ----------
@@ -135,16 +137,19 @@ class TraceFetcher:
         seen : List
             list of subsegments to be updated
         """
-        if subsegment.subsegments is not None:
-            for seg in subsegment.subsegments:
-                if seg.name not in self.exclude_segment_name:
-                    seen.append(seg)
+        for seg in subsegments:
+            if seg.name not in self.exclude_segment_name:
                 if seg.annotations:
                     self.annotations.append(seg.annotations)
+
                 if seg.metadata:
                     self.metadata.append(seg.metadata)
 
-        return seen
+                yield seg
+
+            if seg.subsegments:
+                # recursively iterate over any arbitrary number of subsegments
+                yield from self._find_nested_subsegments(seg.subsegments)
 
     def _get_subsegments(self) -> List[TraceSubsegment]:
         """Find subsegments and potentially any nested subsegments
@@ -160,10 +165,7 @@ class TraceFetcher:
         seen = []
         for document in self.trace_documents.values():
             if document.subsegments:
-                for subsegment in document.subsegments:
-                    if subsegment.name not in self.exclude_segment_name:
-                        seen.append(subsegment)
-                    self._find_nested_subsegments(subsegment, seen)
+                seen.extend(self._find_nested_subsegments(document.subsegments))
 
         return seen
 
@@ -215,7 +217,7 @@ class TraceFetcher:
         return documents
 
 
-@retry(ValueError, delay=10, jitter=1.5, tries=10)
+@retry(ValueError, delay=5, jitter=1.5, tries=10)
 def get_traces(
     filter_expression: str,
     start_date: datetime,
