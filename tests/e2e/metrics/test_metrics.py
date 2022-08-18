@@ -39,13 +39,12 @@ def test_basic_lambda_metric_is_visible(basic_handler_fn: str, basic_handler_fn_
     event = json.dumps({"metrics": metrics, "service": service, "namespace": METRIC_NAMESPACE})
     _, execution_time = data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn, payload=event)
 
-    my_metrics = data_fetcher.get_metrics(
+    metric_values = data_fetcher.get_metrics(
         namespace=METRIC_NAMESPACE, start_date=execution_time, metric_name=metric_name, dimensions=dimensions
     )
 
     # THEN
-    metric_data = my_metrics.get("Values", [])
-    assert metric_data and metric_data[0] == 3.0
+    assert metric_values == [3.0]
 
 
 def test_cold_start_metric(cold_start_fn_arn: str, cold_start_fn: str):
@@ -58,12 +57,11 @@ def test_cold_start_metric(cold_start_fn_arn: str, cold_start_fn: str):
     event = json.dumps({"service": service, "namespace": METRIC_NAMESPACE})
 
     _, execution_time = data_fetcher.get_lambda_response(lambda_arn=cold_start_fn_arn, payload=event)
-    _, _ = data_fetcher.get_lambda_response(lambda_arn=cold_start_fn_arn, payload=event)
+    data_fetcher.get_lambda_response(lambda_arn=cold_start_fn_arn, payload=event)
 
-    my_metrics = data_fetcher.get_metrics(
+    metric_values = data_fetcher.get_metrics(
         namespace=METRIC_NAMESPACE, start_date=execution_time, metric_name=metric_name, dimensions=dimensions
     )
 
     # THEN
-    metric_data = my_metrics.get("Values", [])
-    assert metric_data and metric_data[0] == 1.0
+    assert metric_values == [1.0]
