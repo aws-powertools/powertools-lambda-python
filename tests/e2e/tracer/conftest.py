@@ -1,6 +1,6 @@
 import pytest
 
-from tests.e2e.metrics.infrastructure import MetricsStack
+from tests.e2e.tracer.infrastructure import TracerStack
 from tests.e2e.utils.infrastructure import deploy_once
 
 
@@ -22,4 +22,4 @@ def infrastructure(request: pytest.FixtureRequest, tmp_path_factory: pytest.Temp
     Dict[str, str]
         CloudFormation Outputs from deployed infrastructure
     """
-    yield from deploy_once(stack=MetricsStack, request=request, tmp_path_factory=tmp_path_factory, worker_id=worker_id)
+    yield from deploy_once(stack=TracerStack, request=request, tmp_path_factory=tmp_path_factory, worker_id=worker_id)

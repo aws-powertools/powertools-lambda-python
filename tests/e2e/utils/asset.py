@@ -2,16 +2,43 @@ import io
 import json
 import zipfile
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import boto3
 import botocore.exceptions
 from mypy_boto3_s3 import S3Client
+from pydantic import BaseModel, Field
 
 from aws_lambda_powertools import Logger
-from tests.e2e.utils.models import AssetTemplateConfig, TemplateAssembly
 
 logger = Logger(service="e2e-utils")
+
+
+class AssetManifest(BaseModel):
+    path: str
+    packaging: str
+
+
+class AssetTemplateConfigDestinationsAccount(BaseModel):
+    bucket_name: str = Field(str, alias="bucketName")
+    object_key: str = Field(str, alias="objectKey")
+    assume_role_arn: str = Field(str, alias="assumeRoleArn")
+
+
+class AssetTemplateConfigDestinations(BaseModel):
+    current_account_current_region: AssetTemplateConfigDestinationsAccount = Field(
+        AssetTemplateConfigDestinationsAccount, alias="current_account-current_region"
+    )
+
+
+class AssetTemplateConfig(BaseModel):
+    source: AssetManifest
+    destinations: AssetTemplateConfigDestinations
+
+
+class TemplateAssembly(BaseModel):
+    version: str
+    files: Dict[str, AssetTemplateConfig]
 
 
 class Asset:

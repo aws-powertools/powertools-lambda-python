@@ -1,51 +1,69 @@
-import datetime
-import uuid
-
-import boto3
 import pytest
-from e2e import conftest
-from e2e.utils import helpers
+
+from tests.e2e.tracer.handlers import async_capture, basic_handler
+from tests.e2e.tracer.infrastructure import TracerStack
+from tests.e2e.utils import data_builder, data_fetcher
 
 
-@pytest.fixture(scope="module")
-def config() -> conftest.LambdaConfig:
-    return {
-        "parameters": {"tracing": "ACTIVE"},
-        "environment_variables": {
-            "ANNOTATION_KEY": f"e2e-tracer-{str(uuid.uuid4()).replace('-','_')}",
-            "ANNOTATION_VALUE": "stored",
-            "ANNOTATION_ASYNC_VALUE": "payments",
-        },
-    }
+@pytest.fixture
+def basic_handler_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("BasicHandlerArn", "")
 
 
-def test_basic_lambda_async_trace_visible(execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig):
+@pytest.fixture
+def basic_handler_fn(infrastructure: dict) -> str:
+    return infrastructure.get("BasicHandler", "")
+
+
+@pytest.fixture
+def async_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("AsyncCaptureArn", "")
+
+
+@pytest.fixture
+def async_fn(infrastructure: dict) -> str:
+    return infrastructure.get("AsyncCapture", "")
+
+
+def test_lambda_handler_trace_is_visible(basic_handler_fn_arn: str, basic_handler_fn: str):
     # GIVEN
-    lambda_name = execute_lambda.get_lambda_function_name(cf_output_name="basichandlerarn")
-    start_date = execute_lambda.get_lambda_execution_time()
-    end_date = start_date + datetime.timedelta(minutes=5)
-    trace_filter_exporession = f'service("{lambda_name}")'
+    handler_name = basic_handler.lambda_handler.__name__
+    handler_subsegment = f"## {handler_name}"
+    handler_metadata_key = f"{handler_name} response"
+
+    method_name = basic_handler.get_todos.__name__
+    method_subsegment = f"## {method_name}"
+    handler_metadata_key = f"{method_name} response"
+
+    trace_query = data_builder.build_trace_default_query(function_name=basic_handler_fn)
 
     # WHEN
-    trace = helpers.get_traces(
-        start_date=start_date,
-        end_date=end_date,
-        filter_expression=trace_filter_exporession,
-        xray_client=boto3.client("xray"),
-    )
+    _, execution_time = data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn)
+    data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn)
 
     # THEN
-    info = helpers.find_trace_additional_info(trace=trace)
-    print(info)
-    handler_trace_segment = [trace_segment for trace_segment in info if trace_segment.name == "## lambda_handler"][0]
-    collect_payment_trace_segment = [
-        trace_segment for trace_segment in info if trace_segment.name == "## collect_payment"
-    ][0]
+    trace = data_fetcher.get_traces(start_date=execution_time, filter_expression=trace_query, minimum_traces=2)
 
-    annotation_key = config["environment_variables"]["ANNOTATION_KEY"]
-    expected_value = config["environment_variables"]["ANNOTATION_VALUE"]
-    expected_async_value = config["environment_variables"]["ANNOTATION_ASYNC_VALUE"]
+    assert len(trace.get_annotation(key="ColdStart", value=True)) == 1
+    assert len(trace.get_metadata(key=handler_metadata_key, namespace=TracerStack.SERVICE_NAME)) == 2
+    assert len(trace.get_metadata(key=handler_metadata_key, namespace=TracerStack.SERVICE_NAME)) == 2
+    assert len(trace.get_subsegment(name=handler_subsegment)) == 2
+    assert len(trace.get_subsegment(name=method_subsegment)) == 2
 
-    assert handler_trace_segment.annotations["Service"] == "e2e-tests-app"
-    assert handler_trace_segment.metadata["e2e-tests-app"][annotation_key] == expected_value
-    assert collect_payment_trace_segment.metadata["e2e-tests-app"][annotation_key] == expected_async_value
+
+def test_async_trace_is_visible(async_fn_arn: str, async_fn: str):
+    # GIVEN
+    async_fn_name = async_capture.async_get_users.__name__
+    async_fn_name_subsegment = f"## {async_fn_name}"
+    async_fn_name_metadata_key = f"{async_fn_name} response"
+
+    trace_query = data_builder.build_trace_default_query(function_name=async_fn)
+
+    # WHEN
+    _, execution_time = data_fetcher.get_lambda_response(lambda_arn=async_fn_arn)
+
+    # THEN
+    trace = data_fetcher.get_traces(start_date=execution_time, filter_expression=trace_query)
+
+    assert len(trace.get_subsegment(name=async_fn_name_subsegment)) == 1
+    assert len(trace.get_metadata(key=async_fn_name_metadata_key, namespace=TracerStack.SERVICE_NAME)) == 1

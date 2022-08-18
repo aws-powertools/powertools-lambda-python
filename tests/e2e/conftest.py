@@ -5,6 +5,8 @@ from dataclasses import dataclass
 
 import boto3
 
+from tests.e2e.utils import data_fetcher, infrastructure
+
 # We only need typing_extensions for python versions <3.8
 if sys.version_info >= (3, 8):
     from typing import TypedDict
@@ -14,7 +16,6 @@ else:
 from typing import Dict, Generator, Optional
 
 import pytest
-from e2e.utils import helpers, infrastructure
 
 
 class LambdaConfig(TypedDict):
@@ -61,5 +62,5 @@ def execute_lambda(create_infrastructure) -> InfrastructureOutput:
     session = boto3.Session()
     client = session.client("lambda")
     for _, arn in create_infrastructure.items():
-        helpers.trigger_lambda(lambda_arn=arn, client=client)
+        data_fetcher.get_lambda_response(lambda_arn=arn, client=client)
     return InfrastructureOutput(arns=create_infrastructure, execution_time=execution_time)
