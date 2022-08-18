@@ -8,7 +8,7 @@ from aws_lambda_powertools.utilities.validation import validator
 s3_client = boto3.resource("s3")
 
 
-# using a decorator to validate input data
+# we use the 'envelope' parameter to extract the payload inside the 'detail' key before validating
 @validator(inbound_schema=schemas.INPUT, envelope="detail")
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
     my_event = EventBridgeEvent(event)

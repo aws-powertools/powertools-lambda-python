@@ -44,7 +44,7 @@ It will fail fast with `SchemaValidationError` exception if event or response do
 
 === "getting_started_validator_decorator_schema.py"
 
-	```python hl_lines="7 8 10 12 17 19 24 26 28 41 42 44 46 51 53"
+	```python hl_lines="10 12 17 19 24 26 28 44 46 51 53"
     --8<-- "examples/validation/src/getting_started_validator_decorator_schema.py"
 	```
 
