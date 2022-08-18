@@ -26,14 +26,19 @@
 * **layer:** upgrade to 1.27.0
 * **parser:** minor grammar fix ([#1427](https://github.com/awslabs/aws-lambda-powertools-python/issues/1427))
 
+## Features
+
+* **parser:** add support for Lambda Function URL ([#1442](https://github.com/awslabs/aws-lambda-powertools-python/issues/1442))
+
 ## Maintenance
 
+* **ci:** reduce payload and only send prod notification
 * **ci:** update changelog with latest changes
 * **ci:** remove conventional changelog commit to reduce noise
 * **ci:** remove area/utilities conflicting label
-* **ci:** reduce payload and only send prod notification
 * **ci:** update changelog with latest changes
 * **ci:** update changelog with latest changes
+* **deps:** bump release-drafter/release-drafter from 5.20.0 to 5.20.1 ([#1458](https://github.com/awslabs/aws-lambda-powertools-python/issues/1458))
 * **deps:** bump pydantic from 1.9.1 to 1.9.2 ([#1448](https://github.com/awslabs/aws-lambda-powertools-python/issues/1448))
 * **deps-dev:** bump types-requests from 2.28.7 to 2.28.8 ([#1423](https://github.com/awslabs/aws-lambda-powertools-python/issues/1423))
 * **tests:** refactor E2E test mechanics to ease maintenance, writing tests and parallelization ([#1444](https://github.com/awslabs/aws-lambda-powertools-python/issues/1444))
