@@ -18,6 +18,7 @@ from .cloudwatch import CloudWatchLogsData, CloudWatchLogsDecode, CloudWatchLogs
 from .dynamodb import DynamoDBStreamChangedRecordModel, DynamoDBStreamModel, DynamoDBStreamRecordModel
 from .event_bridge import EventBridgeModel
 from .kinesis import KinesisDataStreamModel, KinesisDataStreamRecord, KinesisDataStreamRecordPayload
+from .lambda_function_url import LambdaFunctionUrlModel
 from .s3 import S3Model, S3RecordModel
 from .s3_object_event import (
     S3ObjectConfiguration,
@@ -66,6 +67,7 @@ __all__ = [
     "KinesisDataStreamModel",
     "KinesisDataStreamRecord",
     "KinesisDataStreamRecordPayload",
+    "LambdaFunctionUrlModel",
     "S3Model",
     "S3RecordModel",
     "S3ObjectLambdaEvent",
