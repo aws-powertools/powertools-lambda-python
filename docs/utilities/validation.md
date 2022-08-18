@@ -117,7 +117,7 @@ We provide built-in envelopes to easily extract the payload from popular event s
 
 === "unwrapping_popular_event_source_function.py"
 
-	```python hl_lines="2 7 11"
+	```python hl_lines="2 7 12"
     --8<-- "examples/validation/src/unwrapping_popular_event_source_function.py"
 	```
 
