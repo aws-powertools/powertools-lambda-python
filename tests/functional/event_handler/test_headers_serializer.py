@@ -19,7 +19,7 @@ def test_headers_serializer_http_api():
     payload = serializer.serialize(cookies=["UUID=12345"], headers={})
     assert payload == {"cookies": ["UUID=12345"], "headers": {}}
 
-    payload = serializer.serialize(cookies=["UUID=12345", "SSID=0xdeadbeef"], headers={"Foo": ["bar,zbr"]})
+    payload = serializer.serialize(cookies=["UUID=12345", "SSID=0xdeadbeef"], headers={"Foo": ["bar", "zbr"]})
     assert payload == {"cookies": ["UUID=12345", "SSID=0xdeadbeef"], "headers": {"Foo": "bar,zbr"}}
 
 
@@ -35,8 +35,8 @@ def test_headers_serializer_multi_value_headers():
     payload = serializer.serialize(cookies=["UUID=12345"], headers={})
     assert payload == {"multiValueHeaders": {"Set-Cookie": ["UUID=12345"]}}
 
-    payload = serializer.serialize(cookies=["UUID=12345", "SSID=0xdeadbeef"], headers={"Foo": ["bar,zbr"]})
-    assert payload == {"multiValueHeaders": {"Set-Cookie": ["UUID=12345", "SSID=0xdeadbeef"], "Foo": ["bar,zbr"]}}
+    payload = serializer.serialize(cookies=["UUID=12345", "SSID=0xdeadbeef"], headers={"Foo": ["bar", "zbr"]})
+    assert payload == {"multiValueHeaders": {"Set-Cookie": ["UUID=12345", "SSID=0xdeadbeef"], "Foo": ["bar", "zbr"]}}
 
 
 def test_headers_serializer_single_value_headers():
@@ -54,11 +54,15 @@ def test_headers_serializer_single_value_headers():
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("default")
 
-        payload = serializer.serialize(cookies=["UUID=12345", "SSID=0xdeadbeef"], headers={"Foo": ["bar,zbr"]})
-        assert payload == {"headers": {"Set-Cookie": "SSID=0xdeadbeef", "Foo": "bar,zbr"}}
+        payload = serializer.serialize(cookies=["UUID=12345", "SSID=0xdeadbeef"], headers={"Foo": ["bar", "zbr"]})
+        assert payload == {"headers": {"Set-Cookie": "SSID=0xdeadbeef", "Foo": "zbr"}}
 
-        assert len(w) == 1
-        assert str(w[-1].message) == (
+        assert len(w) == 2
+        assert str(w[-2].message) == (
             "Can't encode more than one cookie in the response. "
+            "Did you enable multiValueHeaders on the ALB Target Group?"
+        )
+        assert str(w[-1].message) == (
+            "Can't encode more than one header value for the same key in the response. "
             "Did you enable multiValueHeaders on the ALB Target Group?"
         )
