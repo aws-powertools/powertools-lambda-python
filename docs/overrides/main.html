@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block announce %}
+  The legacy <code>sqs_batch_processor</code> decorator and <code>PartialSQSProcessor</code> class are deprecated and are going to be removed soon.
+  Please check the <a href="/utilities/batch/#migration-guide">migration guide</a> for more information.
+{% endblock %}
+
 {% block outdated %}
   You're not viewing the latest version.
   <a href="{{ '../' ~ base_url }}">
