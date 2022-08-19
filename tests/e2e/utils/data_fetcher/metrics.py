@@ -3,7 +3,7 @@ from typing import List, Optional
 
 import boto3
 from mypy_boto3_cloudwatch import CloudWatchClient
-from mypy_boto3_cloudwatch.type_defs import DimensionTypeDef, MetricDataResultTypeDef
+from mypy_boto3_cloudwatch.type_defs import DimensionTypeDef
 from retry import retry
 
 from tests.e2e.utils.data_builder import build_metric_query_data
@@ -19,7 +19,7 @@ def get_metrics(
     end_date: Optional[datetime] = None,
     period: int = 60,
     stat: str = "Sum",
-) -> MetricDataResultTypeDef:
+) -> List[float]:
     """Fetch CloudWatch Metrics
 
     It takes into account eventual consistency with up to 10 retries and 1.5s jitter.
@@ -45,8 +45,8 @@ def get_metrics(
 
     Returns
     -------
-    MetricDataResultTypeDef
-        Dict with metric values found
+    List[float]
+        List with metric values found
 
     Raises
     ------
@@ -65,7 +65,7 @@ def get_metrics(
         StartTime=start_date,
         EndTime=end_date or datetime.utcnow(),
     )
-    result = response["MetricDataResults"][0]
-    if not result["Values"]:
+    result = response["MetricDataResults"][0]["Values"]
+    if not result:
         raise ValueError("Empty response from Cloudwatch. Repeating...")
     return result
