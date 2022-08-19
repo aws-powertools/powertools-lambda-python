@@ -7,8 +7,6 @@ from mypy_boto3_logs import CloudWatchLogsClient
 from pydantic import BaseModel, Extra
 from retry import retry
 
-from aws_lambda_powertools.shared.constants import LOGGER_LAMBDA_CONTEXT_KEYS
-
 
 class Log(BaseModel, extra=Extra.allow):
     level: str
@@ -65,15 +63,15 @@ class LogFetcher:
             log_value = getattr(log, key, None)
             if value is not None and log_value == value:
                 logs.append(log)
-            if value is None and getattr(log, key, False):
+            elif value is None and hasattr(log, key):
                 logs.append(log)
         return logs
 
     def get_cold_start_log(self) -> List[Log]:
         return [log for log in self.logs if log.cold_start]
 
-    def have_logger_context_keys(self) -> bool:
-        return all(getattr(log, key, False) for log in self.logs for key in LOGGER_LAMBDA_CONTEXT_KEYS)
+    def have_keys(self, *keys) -> bool:
+        return all(hasattr(log, key) for log in self.logs for key in keys)
 
     def __len__(self) -> int:
         return len(self.logs)
