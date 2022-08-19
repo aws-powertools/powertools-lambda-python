@@ -4,11 +4,11 @@ from typing import List, Optional, Union
 
 import boto3
 from mypy_boto3_logs import CloudWatchLogsClient
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 from retry import retry
 
 
-class Log(BaseModel):
+class Log(BaseModel, extra=Extra.allow):
     level: str
     location: str
     message: Union[dict, str]
@@ -20,7 +20,6 @@ class Log(BaseModel):
     function_arn: Optional[str]
     function_request_id: Optional[str]
     xray_trace_id: Optional[str]
-    extra_info: Optional[str]
 
 
 @retry(ValueError, delay=2, jitter=1.5, tries=10)
