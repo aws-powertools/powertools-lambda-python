@@ -39,7 +39,7 @@ def lambda_handler(event, context: LambdaContext) -> dict:
         ):
             user_details = User(ip=event.get("ip"), permissions=["read", "write"]).__dict__
 
-        # the body must be a object because must match OUTPUT schema, otherwise it fails
+        # the body must be an object because must match OUTPUT schema, otherwise it fails
         return {"body": user_details or None, "statusCode": 200 if user_details else 204}
     except Exception as e:
         raise UserPermissionsError(str(e))
