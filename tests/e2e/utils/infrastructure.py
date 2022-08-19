@@ -81,8 +81,6 @@ class BaseInfrastructureV2(ABC):
         handlers = list(self.handlers_dir.rglob("*.py"))
         source = Code.from_asset(f"{self.handlers_dir}")
         props_override = function_props or {}
-        layer = LambdaLayerStack()
-        layer.deploy()
 
         for fn in handlers:
             fn_name = fn.stem
@@ -92,7 +90,7 @@ class BaseInfrastructureV2(ABC):
                 "handler": f"{fn_name}.lambda_handler",
                 "tracing": Tracing.ACTIVE,
                 "runtime": Runtime.PYTHON_3_9,
-                "layers": [layer.LAYER_ARN],
+                "layers": [LambdaLayerStack.LAYER_ARN],
                 **props_override,
             }
 
