@@ -90,6 +90,7 @@ class BaseInfrastructureV2(ABC):
                 "handler": f"{fn_name}.lambda_handler",
                 "tracing": Tracing.ACTIVE,
                 "runtime": Runtime.PYTHON_3_9,
+                # Maintenance: Inject in SSM or check way to resolve at synth for output
                 "layers": [LambdaLayerStack.LAYER_ARN],
                 **props_override,
             }
@@ -265,11 +266,13 @@ class LambdaLayerStack(BaseInfrastructureV2):
     def create_resources(self) -> str:
         if not self.LAYER_ARN:
             self.LAYER_ARN = self._create_layer().layer_version_arn
-        # Maintenance: Create list of commands, join them, to extend them easily
+
+        CfnOutput(self.stack, "LayerArn", value=self.LAYER_ARN)
 
     def _create_layer(self):
         output_dir = Path(str(AssetStaging.BUNDLING_OUTPUT_DIR), "python")
         input_dir = Path(str(AssetStaging.BUNDLING_INPUT_DIR), "aws_lambda_powertools")
+        build_commands = [f"pip install . -t {output_dir}", f"cp -R {input_dir} {output_dir}"]
         return LayerVersion(
             self.stack,
             "aws-lambda-powertools",
@@ -282,13 +285,7 @@ class LambdaLayerStack(BaseInfrastructureV2):
                         str(Path(__file__).parent),
                         build_args={"IMAGE": PythonVersion[PYTHON_RUNTIME_VERSION].value["image"]},
                     ),
-                    command=[
-                        "bash",
-                        "-c",
-                        rf"poetry export --format requirements.txt --output /tmp/requirements.txt &&\
-                            pip install -r /tmp/requirements.txt -t {output_dir} &&\
-                            cp -R {input_dir} {output_dir}",
-                    ],
+                    command=["bash", "-c", " && ".join(build_commands)],
                 ),
             ),
         )

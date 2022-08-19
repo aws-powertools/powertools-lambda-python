@@ -138,7 +138,7 @@ class Assets:
     def _compress_assets(self, asset: Asset) -> io.BytesIO:
         buf = io.BytesIO()
         asset_dir = f"{self.assets_location}/{asset.asset_path}"
-        asset_files = list(Path(asset_dir).iterdir())
+        asset_files = list(Path(asset_dir).rglob("*"))
         with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as archive:
             for asset_file in asset_files:
                 logger.debug(f"Adding file '{asset_file}' to the archive.")
