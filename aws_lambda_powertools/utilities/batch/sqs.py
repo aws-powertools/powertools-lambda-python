@@ -6,6 +6,7 @@ Batch SQS utilities
 import logging
 import math
 import sys
+import warnings
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
@@ -76,6 +77,14 @@ class PartialSQSProcessor(BasePartialProcessor):
         self.client = session.client("sqs", config=config)
         self.suppress_exception = suppress_exception
         self.max_message_batch = 10
+
+        warnings.warn(
+            "The sqs_batch_processor decorator and PartialSQSProcessor class are now deprecated, "
+            "and will be removed in the next major version. "
+            "Please follow the upgrade guide at "
+            "https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/batch/#legacy "
+            "to use the native batch_processor decorator or BatchProcessor class."
+        )
 
         super().__init__()
 

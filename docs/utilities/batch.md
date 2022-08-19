@@ -5,6 +5,11 @@ description: Utility
 
 The batch processing utility handles partial failures when processing batches from Amazon SQS, Amazon Kinesis Data Streams, and Amazon DynamoDB Streams.
 
+???+ warning
+    The legacy `sqs_batch_processor` decorator and `PartialSQSProcessor` class are deprecated and are going to be removed soon.
+
+    Please check the [migration guide](#migration-guide) for more information.
+
 ## Key Features
 
 * Reports batch item failures to reduce number of retries for a record upon errors
