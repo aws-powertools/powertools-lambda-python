@@ -1,0 +1,17 @@
+{
+    "id": "cdc73f9d-aea9-11e3-9d5a-835b769c0d9c",
+    "detail-type": "CustomEvent",
+    "source": "mycompany.service",
+    "account": "123456789012",
+    "time": "1970-01-01T00:00:00Z",
+    "region": "us-east-1",
+    "resources": [],
+    "detail": {
+        "data": {
+            "s3_bucket": "aws-lambda-powertools",
+            "s3_key": "folder/event.txt",
+            "file_size": 200,
+            "file_type": "text/plain"
+        }
+    }
+}
