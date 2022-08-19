@@ -80,7 +80,7 @@ class PartialSQSProcessor(BasePartialProcessor):
 
         warnings.warn(
             "The sqs_batch_processor decorator and PartialSQSProcessor class are now deprecated, "
-            "and will be removed in the next major version of Powertools. "
+            "and will be removed in the next major version. "
             "Please follow the upgrade guide at "
             "https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/batch/#legacy "
             "to use the native batch_processor decorator or BatchProcessor class."
