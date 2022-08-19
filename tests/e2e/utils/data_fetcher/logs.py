@@ -1,6 +1,5 @@
 import json
 from datetime import datetime
-from functools import lru_cache
 from typing import List, Optional, Union
 
 import boto3
@@ -24,8 +23,7 @@ class Log(BaseModel):
     extra_info: Optional[str]
 
 
-@lru_cache(maxsize=10, typed=False)
-@retry(ValueError, delay=1, jitter=1, tries=20)
+@retry(ValueError, delay=2, jitter=1.5, tries=10)
 def get_logs(
     lambda_function_name: str, start_time: datetime, log_client: Optional[CloudWatchLogsClient] = None
 ) -> List[Log]:
