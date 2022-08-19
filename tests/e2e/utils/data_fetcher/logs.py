@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from functools import lru_cache
 from typing import List, Optional, Union
 
@@ -24,10 +25,13 @@ class Log(BaseModel):
 
 @lru_cache(maxsize=10, typed=False)
 @retry(ValueError, delay=1, jitter=1, tries=20)
-def get_logs(lambda_function_name: str, log_client: CloudWatchClient, start_time: int, **kwargs: dict) -> List[Log]:
-    response = log_client.filter_log_events(logGroupName=f"/aws/lambda/{lambda_function_name}", startTime=start_time)
+def get_logs(lambda_function_name: str, log_client: CloudWatchClient, start_time: datetime) -> List[Log]:
+    response = log_client.filter_log_events(
+        logGroupName=f"/aws/lambda/{lambda_function_name}", startTime=int(start_time.timestamp())
+    )
     if not response["events"]:
         raise ValueError("Empty response from Cloudwatch Logs. Repeating...")
+
     filtered_logs = []
     for event in response["events"]:
         try:

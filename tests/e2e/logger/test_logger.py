@@ -29,7 +29,7 @@ def test_basic_lambda_logs_visible(basic_handler_fn, basic_handler_fn_arn):
     # WHEN
     _, execution_time = data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn)
     filtered_logs = data_fetcher.get_logs(
-        lambda_function_name=basic_handler_fn, start_time=int(execution_time.timestamp()), log_client=cw_client
+        lambda_function_name=basic_handler_fn, start_time=execution_time, log_client=cw_client
     )
 
     # THEN
