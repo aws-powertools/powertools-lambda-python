@@ -23,3 +23,12 @@ XRAY_SDK_MODULE: str = "aws_xray_sdk"
 XRAY_SDK_CORE_MODULE: str = "aws_xray_sdk.core"
 
 IDEMPOTENCY_DISABLED_ENV: str = "POWERTOOLS_IDEMPOTENCY_DISABLED"
+
+LOGGER_LAMBDA_CONTEXT_KEYS = [
+    "function_arn",
+    "function_memory_size",
+    "function_name",
+    "function_request_id",
+    "cold_start",
+    "xray_trace_id",
+]
