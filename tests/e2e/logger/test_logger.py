@@ -1,4 +1,3 @@
-import boto3
 import pytest
 
 from tests.e2e.utils import data_fetcher
@@ -16,7 +15,6 @@ def basic_handler_fn_arn(infrastructure: dict) -> str:
 
 def test_basic_lambda_logs_visible(basic_handler_fn, basic_handler_fn_arn):
     # GIVEN
-    cw_client = boto3.client("logs")
     required_keys = (
         "xray_trace_id",
         "function_request_id",
@@ -28,9 +26,7 @@ def test_basic_lambda_logs_visible(basic_handler_fn, basic_handler_fn_arn):
 
     # WHEN
     _, execution_time = data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn)
-    filtered_logs = data_fetcher.get_logs(
-        lambda_function_name=basic_handler_fn, start_time=execution_time, log_client=cw_client
-    )
+    filtered_logs = data_fetcher.get_logs(lambda_function_name=basic_handler_fn, start_time=execution_time)
 
     # THEN
     assert all(keys in logs.dict(exclude_unset=True) for logs in filtered_logs for keys in required_keys)

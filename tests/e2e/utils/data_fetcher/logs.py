@@ -3,7 +3,8 @@ from datetime import datetime
 from functools import lru_cache
 from typing import List, Optional, Union
 
-from mypy_boto3_cloudwatch import CloudWatchClient
+import boto3
+from mypy_boto3_logs import CloudWatchLogsClient
 from pydantic import BaseModel
 from retry import retry
 
@@ -25,10 +26,15 @@ class Log(BaseModel):
 
 @lru_cache(maxsize=10, typed=False)
 @retry(ValueError, delay=1, jitter=1, tries=20)
-def get_logs(lambda_function_name: str, log_client: CloudWatchClient, start_time: datetime) -> List[Log]:
+def get_logs(
+    lambda_function_name: str, start_time: datetime, log_client: Optional[CloudWatchLogsClient] = None
+) -> List[Log]:
+    log_client = log_client or boto3.client("logs")
+
     response = log_client.filter_log_events(
         logGroupName=f"/aws/lambda/{lambda_function_name}", startTime=int(start_time.timestamp())
     )
+
     if not response["events"]:
         raise ValueError("Empty response from Cloudwatch Logs. Repeating...")
 
