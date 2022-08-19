@@ -26,7 +26,7 @@ def test_basic_lambda_logs_visible(basic_handler_fn, basic_handler_fn_arn):
 
     # WHEN
     _, execution_time = data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn)
-    filtered_logs = data_fetcher.get_logs(lambda_function_name=basic_handler_fn, start_time=execution_time)
+    filtered_logs = data_fetcher.get_logs(function_name=basic_handler_fn, start_time=execution_time)
 
     # THEN
     assert all(keys in logs.dict(exclude_unset=True) for logs in filtered_logs for keys in required_keys)
