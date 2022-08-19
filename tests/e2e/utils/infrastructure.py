@@ -57,7 +57,7 @@ class BaseInfrastructure(ABC):
         self.account_id = self.session.client("sts").get_caller_identity()["Account"]
         self.region = self.session.region_name
 
-    def create_lambda_functions(self, function_props: Optional[Dict] = None):
+    def create_lambda_functions(self, function_props: Optional[Dict] = None) -> Dict[str, Function]:
         """Create Lambda functions available under handlers_dir
 
         It creates CloudFormation Outputs for every function found in PascalCase. For example,
@@ -68,6 +68,11 @@ class BaseInfrastructure(ABC):
         ----------
         function_props: Optional[Dict]
             Dictionary representing CDK Lambda FunctionProps to override defaults
+
+        Returns
+        -------
+        output: Dict[str, Function]
+            A dict with PascalCased function names and the corresponding CDK Function object
 
         Examples
         --------
@@ -97,6 +102,8 @@ class BaseInfrastructure(ABC):
 
         layer = LayerVersion.from_layer_version_arn(self.stack, "layer-arn", layer_version_arn=self.layer_arn)
         function_settings_override = function_props or {}
+        output: Dict[str, Function] = {}
+
         for fn in handlers:
             fn_name = fn.stem
             fn_name_pascal_case = fn_name.title().replace("_", "")  # basic_handler -> BasicHandler
@@ -123,6 +130,10 @@ class BaseInfrastructure(ABC):
 
             # CFN Outputs only support hyphen hence pascal case
             self.add_cfn_output(name=fn_name_pascal_case, value=function.function_name, arn=function.function_arn)
+
+            output[fn_name_pascal_case] = function
+
+        return output
 
     def deploy(self) -> Dict[str, str]:
         """Creates CloudFormation Stack and return stack outputs as dict
