@@ -38,7 +38,7 @@ class PythonVersion(Enum):
 class BaseInfrastructureV2(ABC):
     STACKS_OUTPUT: dict = {}
 
-    def __init__(self, feature_name: str, handlers_dir: Path) -> None:
+    def __init__(self, feature_name: str, handlers_dir: Path, layer_arn: str = "") -> None:
         self.feature_name = feature_name
         self.stack_name = f"test-{feature_name}-{uuid4()}"
         self.handlers_dir = handlers_dir
@@ -48,6 +48,7 @@ class BaseInfrastructureV2(ABC):
         self.stack = Stack(self.app, self.stack_name)
         self.session = boto3.Session()
         self.cfn: CloudFormationClient = self.session.client("cloudformation")
+        self.layer_arn = layer_arn
 
         # NOTE: CDK stack account and region are tokens, we need to resolve earlier
         self.account_id = self.session.client("sts").get_caller_identity()["Account"]
@@ -85,9 +86,10 @@ class BaseInfrastructureV2(ABC):
         handlers = list(self.handlers_dir.rglob("*.py"))
         source = Code.from_asset(f"{self.handlers_dir}")
         props_override = function_props or {}
-        layer = LayerVersion.from_layer_version_arn(
-            self.stack, "layer-arn", layer_version_arn=LambdaLayerStack.get_lambda_layer_arn()
-        )
+        if not self.layer_arn:
+            self.layer_arn = LambdaLayerStack.get_lambda_layer_arn()
+
+        layer = LayerVersion.from_layer_version_arn(self.stack, "layer-arn", layer_version_arn=self.layer_arn)
 
         for fn in handlers:
             fn_name = fn.stem
@@ -215,6 +217,7 @@ def deploy_once(
     request: pytest.FixtureRequest,
     tmp_path_factory: pytest.TempPathFactory,
     worker_id: str,
+    layer_arn: str,
 ) -> Generator[Dict[str, str], None, None]:
     """Deploys provided stack once whether CPU parallelization is enabled or not
 
@@ -240,9 +243,9 @@ def deploy_once(
     except AttributeError:
         # session fixture has a slightly different object
         # luckily it only runs Lambda Layer Stack which doesn't deploy Lambda fns
-        handlers_dir = ""
+        handlers_dir = f"{request.node.path.parent}/handlers"
 
-    stack = stack(handlers_dir=Path(handlers_dir))
+    stack = stack(handlers_dir=Path(handlers_dir), layer_arn=layer_arn)
 
     try:
         if worker_id == "master":
@@ -255,7 +258,7 @@ def deploy_once(
             # cache and lock must be unique per stack
             # otherwise separate processes deploy the first stack collected only
             # since the original lock was based on parallel workers cache tmp dir
-            cache = root_tmp_dir / f"{id(stack)}_cache.json"
+            cache = root_tmp_dir / "cache.json"
 
             with FileLock(f"{cache}.lock"):
                 # If cache exists, return stack outputs back
@@ -274,8 +277,8 @@ def deploy_once(
 class LambdaLayerStack(BaseInfrastructureV2):
     FEATURE_NAME = "lambda-layer"
 
-    def __init__(self, handlers_dir: Path = "", feature_name: str = FEATURE_NAME) -> None:
-        super().__init__(feature_name, handlers_dir)
+    def __init__(self, handlers_dir: Path, feature_name: str = FEATURE_NAME, layer_arn: str = "") -> None:
+        super().__init__(feature_name, handlers_dir, layer_arn)
 
     def create_resources(self):
         layer = self._create_layer()

@@ -1,11 +1,17 @@
+from pathlib import Path
+
 import pytest
 
 from tests.e2e.tracer.infrastructure import TracerStack
-from tests.e2e.utils.infrastructure import deploy_once
 
 
 @pytest.fixture(autouse=True, scope="module")
-def infrastructure(request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory, worker_id: str):
+def infrastructure(
+    request: pytest.FixtureRequest,
+    tmp_path_factory: pytest.TempPathFactory,
+    worker_id: str,
+    lambda_layer_deployment: dict,
+):
     """Setup and teardown logic for E2E test infrastructure
 
     Parameters
@@ -22,4 +28,9 @@ def infrastructure(request: pytest.FixtureRequest, tmp_path_factory: pytest.Temp
     Dict[str, str]
         CloudFormation Outputs from deployed infrastructure
     """
-    yield from deploy_once(stack=TracerStack, request=request, tmp_path_factory=tmp_path_factory, worker_id=worker_id)
+    layer_arn = lambda_layer_deployment.get("LayerArn")
+    stack = TracerStack(handlers_dir=Path(f"{request.path.parent}/handlers"), layer_arn=layer_arn)
+    try:
+        yield stack.deploy()
+    finally:
+        stack.delete()

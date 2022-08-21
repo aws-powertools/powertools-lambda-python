@@ -3,7 +3,7 @@ import pytest
 from tests.e2e.utils.infrastructure import LambdaLayerStack, deploy_once
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(scope="session")
 def lambda_layer_deployment(request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory, worker_id: str):
     """Setup and teardown logic for E2E test infrastructure
 
@@ -22,5 +22,9 @@ def lambda_layer_deployment(request: pytest.FixtureRequest, tmp_path_factory: py
         CloudFormation Outputs from deployed infrastructure
     """
     yield from deploy_once(
-        stack=LambdaLayerStack, request=request, tmp_path_factory=tmp_path_factory, worker_id=worker_id
+        stack=LambdaLayerStack,
+        request=request,
+        tmp_path_factory=tmp_path_factory,
+        worker_id=worker_id,
+        layer_arn="",
     )

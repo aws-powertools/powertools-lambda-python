@@ -9,8 +9,8 @@ class TracerStack(BaseInfrastructureV2):
     # we could move after handler response or adopt env vars usage in e2e tests
     SERVICE_NAME: str = build_service_name()
 
-    def __init__(self, handlers_dir: Path, feature_name: str = "tracer") -> None:
-        super().__init__(feature_name, handlers_dir)
+    def __init__(self, handlers_dir: Path, feature_name: str = "tracer", layer_arn: str = "") -> None:
+        super().__init__(feature_name, handlers_dir, layer_arn)
 
     def create_resources(self) -> None:
         env_vars = {"POWERTOOLS_SERVICE_NAME": self.SERVICE_NAME}
