@@ -111,19 +111,19 @@ When executed, your middleware name will [appear in AWS X-Ray Trace details as](
 
 ### Combining Powertools utilities
 
-You create your own middleware and combine many features of Lambda Powertools such as [trace](../core/logger.md), [logs](../core/logger.md), [feature flags](feature_flags.md), [validation](validation.md), [jmespath_functions](jmespath_functions.md) and others to abstract non-functional code.
+You can create your own middleware and combine many features of Lambda Powertools such as [trace](../core/logger.md), [logs](../core/logger.md), [feature flags](feature_flags.md), [validation](validation.md), [jmespath_functions](jmespath_functions.md) and others to abstract non-functional code.
 
 In the example below, we create a Middleware with the following features:
 
 * Logs and traces
-* Validate if payload contain a specific header
+* Validate if the payload contains a specific header
 * Extract specific keys from event
-* Add automatically security headers in response of all executions
-* Validate if a feature flag is enabled
-* Generate execution history and save to a DynamoDB table
+* Automatically add security headers on every execution
+* Validate if a specific feature flag is enabled
+* Save execution history to a DynamoDB table
 
 === "combining_powertools_utilities_function.py"
-    ```python hl_lines="8 14 15 36"
+    ```python hl_lines="11 28 29 119 52 61 73"
     --8<-- "examples/middleware_factory/src/combining_powertools_utilities_function.py"
     ```
 
