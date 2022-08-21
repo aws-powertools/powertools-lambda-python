@@ -36,11 +36,15 @@ class PythonVersion(Enum):
 
 
 class BaseInfrastructureV2(ABC):
+    STACKS_OUTPUT: dict = {}
+
     def __init__(self, feature_name: str, handlers_dir: Path) -> None:
+        self.feature_name = feature_name
         self.stack_name = f"test-{feature_name}-{uuid4()}"
         self.handlers_dir = handlers_dir
         self.stack_outputs: Dict[str, str] = {}
         self.app = App()
+        # NOTE: Investigate why env changes synthesized asset (no object_key in asset manifest)
         self.stack = Stack(self.app, self.stack_name)
         self.session = boto3.Session()
         self.cfn: CloudFormationClient = self.session.client("cloudformation")
@@ -81,6 +85,9 @@ class BaseInfrastructureV2(ABC):
         handlers = list(self.handlers_dir.rglob("*.py"))
         source = Code.from_asset(f"{self.handlers_dir}")
         props_override = function_props or {}
+        layer = LayerVersion.from_layer_version_arn(
+            self.stack, "layer-arn", layer_version_arn=LambdaLayerStack.get_lambda_layer_arn()
+        )
 
         for fn in handlers:
             fn_name = fn.stem
@@ -90,8 +97,7 @@ class BaseInfrastructureV2(ABC):
                 "handler": f"{fn_name}.lambda_handler",
                 "tracing": Tracing.ACTIVE,
                 "runtime": Runtime.PYTHON_3_9,
-                # Maintenance: Inject in SSM or check way to resolve at synth for output
-                "layers": [LambdaLayerStack.LAYER_ARN],
+                "layers": [layer],
                 **props_override,
             }
 
@@ -122,7 +128,11 @@ class BaseInfrastructureV2(ABC):
         template, asset_manifest_file = self._synthesize()
         assets = Assets(asset_manifest=asset_manifest_file, account_id=self.account_id, region=self.region)
         assets.upload()
-        return self._deploy_stack(self.stack_name, template)
+        outputs = self._deploy_stack(self.stack_name, template)
+        # NOTE: hydrate map of stack resolved outputs for future access
+        self.STACKS_OUTPUT[self.feature_name] = outputs
+
+        return outputs
 
     def delete(self) -> None:
         """Delete CloudFormation Stack"""
@@ -252,28 +262,20 @@ def deploy_once(
 
 
 class LambdaLayerStack(BaseInfrastructureV2):
-    LAYER_ARN: str = ""
+    FEATURE_NAME = "lambda-layer"
 
-    def __init__(self, handlers_dir: Path = "", feature_name: str = "lambda-layer") -> None:
+    def __init__(self, handlers_dir: Path = "", feature_name: str = FEATURE_NAME) -> None:
         super().__init__(feature_name, handlers_dir)
 
-    def deploy(self) -> Dict[str, str]:
-        if self.LAYER_ARN:
-            return
+    def create_resources(self):
+        layer = self._create_layer()
+        CfnOutput(self.stack, "LayerArn", value=layer)
 
-        return super().deploy()
-
-    def create_resources(self) -> str:
-        if not self.LAYER_ARN:
-            self.LAYER_ARN = self._create_layer().layer_version_arn
-
-        CfnOutput(self.stack, "LayerArn", value=self.LAYER_ARN)
-
-    def _create_layer(self):
+    def _create_layer(self) -> str:
         output_dir = Path(str(AssetStaging.BUNDLING_OUTPUT_DIR), "python")
         input_dir = Path(str(AssetStaging.BUNDLING_INPUT_DIR), "aws_lambda_powertools")
         build_commands = [f"pip install . -t {output_dir}", f"cp -R {input_dir} {output_dir}"]
-        return LayerVersion(
+        layer = LayerVersion(
             self.stack,
             "aws-lambda-powertools",
             layer_version_name="aws-lambda-powertools",
@@ -289,3 +291,15 @@ class LambdaLayerStack(BaseInfrastructureV2):
                 ),
             ),
         )
+        return layer.layer_version_arn
+
+    @classmethod
+    def get_lambda_layer_arn(cls: "LambdaLayerStack") -> str:
+        """Lambda Layer deployed by LambdaLayer Stack
+
+        Returns
+        -------
+        str
+            Lambda Layer ARN
+        """
+        return cls.STACKS_OUTPUT.get(cls.FEATURE_NAME, {}).get("LayerArn")
