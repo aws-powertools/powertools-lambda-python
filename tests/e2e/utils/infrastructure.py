@@ -235,7 +235,13 @@ def deploy_once(
     Generator[Dict[str, str], None, None]
         stack CloudFormation outputs
     """
-    handlers_dir = f"{request.path.parent}/handlers"
+    try:
+        handlers_dir = f"{request.path.parent}/handlers"
+    except AttributeError:
+        # session fixture has a slightly different object
+        # luckily it only runs Lambda Layer Stack which doesn't deploy Lambda fns
+        handlers_dir = ""
+
     stack = stack(handlers_dir=Path(handlers_dir))
 
     try:
@@ -246,7 +252,11 @@ def deploy_once(
             # tmp dir shared by all workers
             root_tmp_dir = tmp_path_factory.getbasetemp().parent
 
-            cache = root_tmp_dir / "cache.json"
+            # cache and lock must be unique per stack
+            # otherwise separate processes deploy the first stack collected only
+            # since the original lock was based on parallel workers cache tmp dir
+            cache = root_tmp_dir / f"{id(stack)}_cache.json"
+
             with FileLock(f"{cache}.lock"):
                 # If cache exists, return stack outputs back
                 # otherwise it's the first run by the main worker
