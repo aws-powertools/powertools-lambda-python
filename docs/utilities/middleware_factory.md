@@ -138,7 +138,7 @@ In the example below, we create a Middleware with the following features:
     ```
 
 === "SAM TEMPLATE"
-    ```python hl_lines="8 14 15 36"
+    ```python hl_lines="66 83 89 96 103 108-113 119 130"
     --8<-- "examples/middleware_factory/sam/combining_powertools_utilities_template.yaml"
     ```
 
