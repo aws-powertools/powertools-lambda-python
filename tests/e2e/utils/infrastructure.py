@@ -280,11 +280,12 @@ class LambdaLayerStack(BaseInfrastructureV2):
         logger.debug("Creating Lambda Layer with latest source code available")
         output_dir = Path(str(AssetStaging.BUNDLING_OUTPUT_DIR), "python")
         input_dir = Path(str(AssetStaging.BUNDLING_INPUT_DIR), "aws_lambda_powertools")
-        build_commands = [f"pip install . -t {output_dir}", f"cp -R {input_dir} {output_dir}"]
+
+        build_commands = [f"pip install .[pydantic] -t {output_dir}", f"cp -R {input_dir} {output_dir}"]
         layer = LayerVersion(
             self.stack,
-            "aws-lambda-powertools",
-            layer_version_name="aws-lambda-powertools",
+            "aws-lambda-powertools-e2e-test",
+            layer_version_name="aws-lambda-powertools-e2e-test",
             compatible_runtimes=[PythonVersion[PYTHON_RUNTIME_VERSION].value["runtime"]],
             code=Code.from_asset(
                 path=".",
