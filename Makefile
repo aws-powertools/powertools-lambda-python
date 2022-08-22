@@ -35,7 +35,7 @@ unit-test:
 	poetry run pytest tests/unit
 
 e2e-test:
-	poetry run pytest -rP -n 3 --dist loadscope --durations=0 --durations-min=1 tests/e2e
+	poetry run pytest -rP -n auto --dist loadfile -o log_cli=true tests/e2e
 
 coverage-html:
 	poetry run pytest -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=html
