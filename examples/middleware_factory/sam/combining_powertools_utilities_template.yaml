@@ -61,7 +61,7 @@ Resources:
             Path: /comments/{comment_id}
             Method: GET
 
-  # DYNAMODB TABLE FOR HISTORIC
+  # DynamoDB table to store historical data
   HistoryTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -78,7 +78,7 @@ Resources:
           KeyType: "RANGE"
       BillingMode: PAY_PER_REQUEST
 
-  # APPCONFIG FOR FEATURE FLAGS
+  # Feature flags using AppConfig
   FeatureCommentApp:
     Type: AWS::AppConfig::Application
     Properties:

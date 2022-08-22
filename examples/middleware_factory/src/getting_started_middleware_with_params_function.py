@@ -31,10 +31,9 @@ def obfuscate_sensitive_data(handler, event, context, fields: List) -> Callable:
     guest_data: Any = detail.get("guest")
 
     # Obfuscate fields (email, vat, passport) before calling Lambda handler
-    if fields:
-        for guest_field in fields:
-            if guest_data.get(guest_field):
-                event["detail"]["guest"][guest_field] = obfuscate_data(str(guest_data.get(guest_field)))
+    for guest_field in fields:
+        if guest_data.get(guest_field):
+            event["detail"]["guest"][guest_field] = obfuscate_data(str(guest_data.get(guest_field)))
 
     response = handler(event, context)
 

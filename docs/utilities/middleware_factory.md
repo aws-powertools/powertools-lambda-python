@@ -92,7 +92,7 @@ If you are making use of [Tracer](../core/tracer.md), you can trace the executio
 This makes use of an existing Tracer instance that you may have initialized anywhere in your code.
 
 ???+ warning
-    You must enable Active Tracing in your Lambda function when using this feature, otherwise Lambda will not be able to send traces to XRay..
+    You must [enable Active Tracing](../core/tracer/#permissions) in your Lambda function when using this feature, otherwise Lambda cannot send traces to XRay.
 
 === "getting_started_middleware_tracer_function.py"
     ```python hl_lines="8 14 15 36"

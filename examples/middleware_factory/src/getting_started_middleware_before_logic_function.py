@@ -26,7 +26,7 @@ def middleware_before(handler, event, context) -> Callable:
     detail: dict = extract_data_from_envelope(data=event, envelope=envelopes.EVENTBRIDGE)
 
     # check if status_id exists in payload, otherwise add default state before processing payment
-    if not detail.get("status_id"):
+    if "status_id" not in detail:
         event["detail"]["status_id"] = "pending"
 
     response = handler(event, context)
