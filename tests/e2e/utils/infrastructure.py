@@ -38,7 +38,7 @@ class PythonVersion(Enum):
     V39 = {"runtime": Runtime.PYTHON_3_9, "image": Runtime.PYTHON_3_9.bundling_image.image}
 
 
-class BaseInfrastructureV2(ABC):
+class BaseInfrastructure(ABC):
     def __init__(self, feature_name: str, handlers_dir: Path, layer_arn: str = "") -> None:
         self.feature_name = feature_name
         self.stack_name = f"test-{feature_name}-{uuid4()}"
@@ -214,7 +214,7 @@ class BaseInfrastructureV2(ABC):
 
 
 def deploy_once(
-    stack: Type[BaseInfrastructureV2],
+    stack: Type[BaseInfrastructure],
     request: pytest.FixtureRequest,
     tmp_path_factory: pytest.TempPathFactory,
     worker_id: str,
@@ -224,7 +224,7 @@ def deploy_once(
 
     Parameters
     ----------
-    stack : Type[BaseInfrastructureV2]
+    stack : Type[BaseInfrastructure]
         stack class to instantiate and deploy, for example MetricStack.
         Not to be confused with class instance (MetricStack()).
     request : pytest.FixtureRequest
@@ -265,7 +265,7 @@ def deploy_once(
         stack.delete()
 
 
-class LambdaLayerStack(BaseInfrastructureV2):
+class LambdaLayerStack(BaseInfrastructure):
     FEATURE_NAME = "lambda-layer"
 
     def __init__(self, handlers_dir: Path, feature_name: str = FEATURE_NAME, layer_arn: str = "") -> None:

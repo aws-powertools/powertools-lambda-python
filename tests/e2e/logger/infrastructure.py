@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from tests.e2e.utils.infrastructure import BaseInfrastructureV2
+from tests.e2e.utils.infrastructure import BaseInfrastructure
 
 
-class LoggerStack(BaseInfrastructureV2):
+class LoggerStack(BaseInfrastructure):
     FEATURE_NAME = "logger"
 
     def __init__(self, handlers_dir: Path, feature_name: str = FEATURE_NAME, layer_arn: str = "") -> None:
