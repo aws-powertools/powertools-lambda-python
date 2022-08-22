@@ -1,66 +1,35 @@
-import datetime
-import sys
-import uuid
-from dataclasses import dataclass
-
-import boto3
-
-from tests.e2e.utils import data_fetcher, infrastructure
-
-# We only need typing_extensions for python versions <3.8
-if sys.version_info >= (3, 8):
-    from typing import TypedDict
-else:
-    from typing_extensions import TypedDict
-
-from typing import Dict, Generator, Optional
-
 import pytest
 
-
-class LambdaConfig(TypedDict):
-    parameters: dict
-    environment_variables: Dict[str, str]
+from tests.e2e.utils.infrastructure import LambdaLayerStack, deploy_once
 
 
-@dataclass
-class InfrastructureOutput:
-    arns: Dict[str, str]
-    execution_time: datetime.datetime
-
-    def get_lambda_arns(self) -> Dict[str, str]:
-        return self.arns
-
-    def get_lambda_function_arn(self, cf_output_name: str) -> Optional[str]:
-        return self.arns.get(cf_output_name)
-
-    def get_lambda_function_name(self, cf_output_name: str) -> Optional[str]:
-        lambda_arn = self.get_lambda_function_arn(cf_output_name=cf_output_name)
-        return lambda_arn.split(":")[-1] if lambda_arn else None
-
-    def get_lambda_execution_time(self) -> datetime.datetime:
-        return self.execution_time
-
-    def get_lambda_execution_time_timestamp(self) -> int:
-        return int(self.execution_time.timestamp() * 1000)
+@pytest.fixture(scope="session")
+def lambda_layer_arn(lambda_layer_deployment):
+    yield lambda_layer_deployment.get("LayerArn")
 
 
-@pytest.fixture(scope="module")
-def create_infrastructure(config, request) -> Generator[Dict[str, str], None, None]:
-    stack_name = f"test-lambda-{uuid.uuid4()}"
-    test_dir = request.fspath.dirname
-    handlers_dir = f"{test_dir}/handlers/"
+@pytest.fixture(scope="session")
+def lambda_layer_deployment(request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory, worker_id: str):
+    """Setup and teardown logic for E2E test infrastructure
 
-    infra = infrastructure.Infrastructure(stack_name=stack_name, handlers_dir=handlers_dir, config=config)
-    yield infra.deploy(Stack=infrastructure.InfrastructureStack)
-    infra.delete()
+    Parameters
+    ----------
+    request : pytest.FixtureRequest
+        pytest request fixture to introspect absolute path to test being executed
+    tmp_path_factory : pytest.TempPathFactory
+        pytest temporary path factory to discover shared tmp when multiple CPU processes are spun up
+    worker_id : str
+        pytest-xdist worker identification to detect whether parallelization is enabled
 
-
-@pytest.fixture(scope="module")
-def execute_lambda(create_infrastructure) -> InfrastructureOutput:
-    execution_time = datetime.datetime.utcnow()
-    session = boto3.Session()
-    client = session.client("lambda")
-    for _, arn in create_infrastructure.items():
-        data_fetcher.get_lambda_response(lambda_arn=arn, client=client)
-    return InfrastructureOutput(arns=create_infrastructure, execution_time=execution_time)
+    Yields
+    ------
+    Dict[str, str]
+        CloudFormation Outputs from deployed infrastructure
+    """
+    yield from deploy_once(
+        stack=LambdaLayerStack,
+        request=request,
+        tmp_path_factory=tmp_path_factory,
+        worker_id=worker_id,
+        layer_arn="",
+    )
