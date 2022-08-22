@@ -8,8 +8,9 @@ class TracerStack(BaseInfrastructureV2):
     # Maintenance: Tracer doesn't support dynamic service injection (tracer.py L310)
     # we could move after handler response or adopt env vars usage in e2e tests
     SERVICE_NAME: str = build_service_name()
+    FEATURE_NAME = "tracer"
 
-    def __init__(self, handlers_dir: Path, feature_name: str = "tracer", layer_arn: str = "") -> None:
+    def __init__(self, handlers_dir: Path, feature_name: str = FEATURE_NAME, layer_arn: str = "") -> None:
         super().__init__(feature_name, handlers_dir, layer_arn)
 
     def create_resources(self) -> None:

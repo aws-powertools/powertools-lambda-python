@@ -4,7 +4,9 @@ from tests.e2e.utils.infrastructure import BaseInfrastructureV2
 
 
 class LoggerStack(BaseInfrastructureV2):
-    def __init__(self, handlers_dir: Path, feature_name: str = "logger", layer_arn: str = "") -> None:
+    FEATURE_NAME = "logger"
+
+    def __init__(self, handlers_dir: Path, feature_name: str = FEATURE_NAME, layer_arn: str = "") -> None:
         super().__init__(feature_name, handlers_dir, layer_arn)
 
     def create_resources(self):

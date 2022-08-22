@@ -1,5 +1,6 @@
 import io
 import json
+import logging
 import zipfile
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -9,9 +10,7 @@ import botocore.exceptions
 from mypy_boto3_s3 import S3Client
 from pydantic import BaseModel, Field
 
-from aws_lambda_powertools import Logger
-
-logger = Logger(service="e2e-utils")
+logger = logging.getLogger(__name__)
 
 
 class AssetManifest(BaseModel):
@@ -113,6 +112,7 @@ class Assets:
         We follow the same design cdk-assets:
         https://github.com/aws/aws-cdk-rfcs/blob/master/text/0092-asset-publishing.md.
         """
+        logger.debug(f"Upload {len(self.assets)} assets")
         for asset in self.assets:
             if not asset.is_zip:
                 logger.debug(f"Asset '{asset.object_key}' is not zip. Skipping upload.")

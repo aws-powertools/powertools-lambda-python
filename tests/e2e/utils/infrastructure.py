@@ -1,4 +1,5 @@
 import json
+import logging
 import sys
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -18,6 +19,8 @@ from tests.e2e.utils.asset import Assets
 
 PYTHON_RUNTIME_VERSION = f"V{''.join(map(str, sys.version_info[:2]))}"
 
+logger = logging.getLogger(__name__)
+
 
 class BaseInfrastructureStack(ABC):
     @abstractmethod
@@ -36,19 +39,19 @@ class PythonVersion(Enum):
 
 
 class BaseInfrastructureV2(ABC):
-    STACKS_OUTPUT: dict = {}
-
     def __init__(self, feature_name: str, handlers_dir: Path, layer_arn: str = "") -> None:
         self.feature_name = feature_name
         self.stack_name = f"test-{feature_name}-{uuid4()}"
         self.handlers_dir = handlers_dir
+        self.layer_arn = layer_arn
         self.stack_outputs: Dict[str, str] = {}
+
+        # NOTE: Investigate why cdk.Environment in Stack
+        # changes synthesized asset (no object_key in asset manifest)
         self.app = App()
-        # NOTE: Investigate why env changes synthesized asset (no object_key in asset manifest)
         self.stack = Stack(self.app, self.stack_name)
         self.session = boto3.Session()
         self.cfn: CloudFormationClient = self.session.client("cloudformation")
-        self.layer_arn = layer_arn
 
         # NOTE: CDK stack account and region are tokens, we need to resolve earlier
         self.account_id = self.session.client("sts").get_caller_identity()["Account"]
@@ -86,6 +89,7 @@ class BaseInfrastructureV2(ABC):
         handlers = list(self.handlers_dir.rglob("*.py"))
         source = Code.from_asset(f"{self.handlers_dir}")
         props_override = function_props or {}
+        logger.debug(f"Creating functions for handlers: {handlers}")
         if not self.layer_arn:
             raise ValueError(
                 """Lambda Layer ARN cannot be empty when creating Lambda functions.
@@ -96,6 +100,8 @@ class BaseInfrastructureV2(ABC):
 
         for fn in handlers:
             fn_name = fn.stem
+            fn_name_pascal_case = fn_name.title().replace("_", "")  # basic_handler -> BasicHandler
+            logger.debug(f"Creating function: {fn_name_pascal_case}")
             function_settings = {
                 "id": f"{fn_name}-lambda",
                 "code": source,
@@ -116,9 +122,8 @@ class BaseInfrastructureV2(ABC):
                 removal_policy=RemovalPolicy.DESTROY,
             )
 
-            # CFN Outputs only support hyphen
-            fn_name_pascal_case = fn_name.title().replace("_", "")  # basic_handler -> BasicHandler
-            self._add_resource_output(
+            # CFN Outputs only support hyphen hence pascal case
+            self.add_cfn_output(
                 name=fn_name_pascal_case, value=function_python.function_name, arn=function_python.function_arn
             )
 
@@ -133,14 +138,12 @@ class BaseInfrastructureV2(ABC):
         template, asset_manifest_file = self._synthesize()
         assets = Assets(asset_manifest=asset_manifest_file, account_id=self.account_id, region=self.region)
         assets.upload()
-        outputs = self._deploy_stack(self.stack_name, template)
-        # NOTE: hydrate map of stack resolved outputs for future access
-        self.STACKS_OUTPUT[self.feature_name] = outputs
-
-        return outputs
+        self.stack_outputs = self._deploy_stack(self.stack_name, template)
+        return self.stack_outputs
 
     def delete(self) -> None:
         """Delete CloudFormation Stack"""
+        logger.debug(f"Deleting stack: {self.stack_name}")
         self.cfn.delete_stack(StackName=self.stack_name)
 
     @abstractmethod
@@ -157,7 +160,7 @@ class BaseInfrastructureV2(ABC):
             s3 = s3.Bucket(self.stack, "MyBucket")
 
             # This will create MyBucket and MyBucketArn CloudFormation Output
-            self._add_resource_output(name="MyBucket", value=s3.bucket_name, arn_value=bucket.bucket_arn)
+            self.add_cfn_output(name="MyBucket", value=s3.bucket_name, arn_value=bucket.bucket_arn)
         ```
 
         Creating Lambda functions available in the handlers directory
@@ -170,7 +173,9 @@ class BaseInfrastructureV2(ABC):
         ...
 
     def _synthesize(self) -> Tuple[Dict, Path]:
+        logger.debug("Creating CDK Stack resources")
         self.create_resources()
+        logger.debug("Synthesizing CDK Stack into raw CloudFormation template")
         cloud_assembly = self.app.synth()
         cf_template: Dict = cloud_assembly.get_stack_by_name(self.stack_name).template
         cloud_assembly_assets_manifest_path: str = (
@@ -179,6 +184,7 @@ class BaseInfrastructureV2(ABC):
         return cf_template, Path(cloud_assembly_assets_manifest_path)
 
     def _deploy_stack(self, stack_name: str, template: Dict) -> Dict[str, str]:
+        logger.debug(f"Creating CloudFormation Stack: {stack_name}")
         self.cfn.create_stack(
             StackName=stack_name,
             TemplateBody=yaml.dump(template),
@@ -191,16 +197,10 @@ class BaseInfrastructureV2(ABC):
 
         stack_details = self.cfn.describe_stacks(StackName=stack_name)
         stack_outputs = stack_details["Stacks"][0]["Outputs"]
-        self.stack_outputs = {
-            output["OutputKey"]: output["OutputValue"] for output in stack_outputs if output["OutputKey"]
-        }
+        return {output["OutputKey"]: output["OutputValue"] for output in stack_outputs if output["OutputKey"]}
 
-        return self.stack_outputs
-
-    def _add_resource_output(self, name: str, value: str, arn: str):
-        """Add both resource value and ARN as Outputs to facilitate tests.
-
-        This will create two outputs: {Name} and {Name}Arn
+    def add_cfn_output(self, name: str, value: str, arn: str = ""):
+        """Create {Name} and optionally {Name}Arn CloudFormation Outputs.
 
         Parameters
         ----------
@@ -212,7 +212,8 @@ class BaseInfrastructureV2(ABC):
             CloudFormation Output Value for ARN
         """
         CfnOutput(self.stack, f"{name}", value=value)
-        CfnOutput(self.stack, f"{name}Arn", value=arn)
+        if arn:
+            CfnOutput(self.stack, f"{name}Arn", value=arn)
 
 
 def deploy_once(
@@ -241,13 +242,7 @@ def deploy_once(
     Generator[Dict[str, str], None, None]
         stack CloudFormation outputs
     """
-    try:
-        handlers_dir = f"{request.path.parent}/handlers"
-    except AttributeError:
-        # session fixture has a slightly different object
-        # luckily it only runs Lambda Layer Stack which doesn't deploy Lambda fns
-        handlers_dir = f"{request.node.path.parent}/handlers"
-
+    handlers_dir = f"{request.node.path.parent}/handlers"
     stack = stack(handlers_dir=Path(handlers_dir), layer_arn=layer_arn)
 
     try:
@@ -257,10 +252,6 @@ def deploy_once(
         else:
             # tmp dir shared by all workers
             root_tmp_dir = tmp_path_factory.getbasetemp().parent
-
-            # cache and lock must be unique per stack
-            # otherwise separate processes deploy the first stack collected only
-            # since the original lock was based on parallel workers cache tmp dir
             cache = root_tmp_dir / "cache.json"
 
             with FileLock(f"{cache}.lock"):
@@ -288,6 +279,7 @@ class LambdaLayerStack(BaseInfrastructureV2):
         CfnOutput(self.stack, "LayerArn", value=layer)
 
     def _create_layer(self) -> str:
+        logger.debug("Creating Lambda Layer with latest source code available")
         output_dir = Path(str(AssetStaging.BUNDLING_OUTPUT_DIR), "python")
         input_dir = Path(str(AssetStaging.BUNDLING_INPUT_DIR), "aws_lambda_powertools")
         build_commands = [f"pip install . -t {output_dir}", f"cp -R {input_dir} {output_dir}"]
