@@ -67,7 +67,7 @@ class BaseInfrastructureV2(ABC):
         Parameters
         ----------
         function_props: Optional[Dict]
-            CDK Lambda FunctionProps as dictionary to override defaults
+            Dictionary representing CDK Lambda FunctionProps to override defaults
 
         Examples
         --------
@@ -88,7 +88,6 @@ class BaseInfrastructureV2(ABC):
         """
         handlers = list(self.handlers_dir.rglob("*.py"))
         source = Code.from_asset(f"{self.handlers_dir}")
-        props_override = function_props or {}
         logger.debug(f"Creating functions for handlers: {handlers}")
         if not self.layer_arn:
             raise ValueError(
@@ -96,8 +95,7 @@ class BaseInfrastructureV2(ABC):
                 Make sure to inject `lambda_layer_arn` fixture and pass at the constructor level"""
             )
 
-        layer = LayerVersion.from_layer_version_arn(self.stack, "layer-arn", layer_version_arn=self.layer_arn)
-
+        function_settings_override = function_props or {}
         for fn in handlers:
             fn_name = fn.stem
             fn_name_pascal_case = fn_name.title().replace("_", "")  # basic_handler -> BasicHandler
@@ -108,24 +106,24 @@ class BaseInfrastructureV2(ABC):
                 "handler": f"{fn_name}.lambda_handler",
                 "tracing": Tracing.ACTIVE,
                 "runtime": Runtime.PYTHON_3_9,
-                "layers": [layer],
-                **props_override,
+                "layers": [
+                    LayerVersion.from_layer_version_arn(self.stack, "layer-arn", layer_version_arn=self.layer_arn)
+                ],
+                **function_settings_override,
             }
 
-            function_python = Function(self.stack, **function_settings)
+            function = Function(self.stack, **function_settings)
 
             aws_logs.LogGroup(
                 self.stack,
                 id=f"{fn_name}-lg",
-                log_group_name=f"/aws/lambda/{function_python.function_name}",
+                log_group_name=f"/aws/lambda/{function.function_name}",
                 retention=aws_logs.RetentionDays.ONE_DAY,
                 removal_policy=RemovalPolicy.DESTROY,
             )
 
             # CFN Outputs only support hyphen hence pascal case
-            self.add_cfn_output(
-                name=fn_name_pascal_case, value=function_python.function_name, arn=function_python.function_arn
-            )
+            self.add_cfn_output(name=fn_name_pascal_case, value=function.function_name, arn=function.function_arn)
 
     def deploy(self) -> Dict[str, str]:
         """Creates CloudFormation Stack and return stack outputs as dict
