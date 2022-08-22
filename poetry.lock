@@ -678,7 +678,7 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-material"
-version = "8.4.0"
+version = "8.4.1"
 description = "Documentation that simply works"
 category = "dev"
 optional = false
@@ -721,11 +721,11 @@ reports = ["lxml"]
 
 [[package]]
 name = "mypy-boto3-appconfig"
-version = "1.24.29"
-description = "Type annotations for boto3.AppConfig 1.24.29 service generated with mypy-boto3-builder 7.7.3"
+version = "1.24.36.post1"
+description = "Type annotations for boto3.AppConfig 1.24.36 service generated with mypy-boto3-builder 7.10.0"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
 typing-extensions = ">=4.1.0"
@@ -743,33 +743,33 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-cloudwatch"
-version = "1.24.35"
-description = "Type annotations for boto3.CloudWatch 1.24.35 service generated with mypy-boto3-builder 7.9.2"
+version = "1.24.55"
+description = "Type annotations for boto3.CloudWatch 1.24.55 service generated with mypy-boto3-builder 7.11.6"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
 typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-dynamodb"
-version = "1.24.27"
-description = "Type annotations for boto3.DynamoDB 1.24.27 service generated with mypy-boto3-builder 7.6.0"
+version = "1.24.55.post1"
+description = "Type annotations for boto3.DynamoDB 1.24.55 service generated with mypy-boto3-builder 7.11.7"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
 typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-lambda"
-version = "1.24.0"
-description = "Type annotations for boto3.Lambda 1.24.0 service generated with mypy-boto3-builder 7.6.1"
+version = "1.24.54"
+description = "Type annotations for boto3.Lambda 1.24.54 service generated with mypy-boto3-builder 7.11.6"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
 typing-extensions = ">=4.1.0"
@@ -798,33 +798,33 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-secretsmanager"
-version = "1.24.11.post3"
-description = "Type annotations for boto3.SecretsManager 1.24.11 service generated with mypy-boto3-builder 7.7.1"
+version = "1.24.54"
+description = "Type annotations for boto3.SecretsManager 1.24.54 service generated with mypy-boto3-builder 7.11.6"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
 typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-ssm"
-version = "1.24.0"
-description = "Type annotations for boto3.SSM 1.24.0 service generated with mypy-boto3-builder 7.6.1"
+version = "1.24.39.post2"
+description = "Type annotations for boto3.SSM 1.24.39 service generated with mypy-boto3-builder 7.10.1"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
 typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-xray"
-version = "1.24.0"
-description = "Type annotations for boto3.XRay 1.24.0 service generated with mypy-boto3-builder 7.6.1"
+version = "1.24.36.post1"
+description = "Type annotations for boto3.XRay 1.24.36 service generated with mypy-boto3-builder 7.10.0"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
 typing-extensions = ">=4.1.0"
@@ -1356,7 +1356,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "77b3593db443d2972a854cf7eaf6643e33315d5da218933f360b33a2e3bb945d"
+content-hash = "0a9e21c2f15825934ad6c786121da020c4a964c5a0dd138e0e8ae09c0865a055"
 
 [metadata.files]
 atomicwrites = [
@@ -1647,8 +1647,8 @@ mkdocs-git-revision-date-plugin = [
     {file = "mkdocs_git_revision_date_plugin-0.3.2-py3-none-any.whl", hash = "sha256:2e67956cb01823dd2418e2833f3623dee8604cdf223bddd005fe36226a56f6ef"},
 ]
 mkdocs-material = [
-    {file = "mkdocs-material-8.4.0.tar.gz", hash = "sha256:6c0a6e6cda8b43956e0c562374588160af8110584a1444f422b1cfd91930f9c7"},
-    {file = "mkdocs_material-8.4.0-py2.py3-none-any.whl", hash = "sha256:ef6641e1910d4f217873ac376b4594f3157dca3949901b88b4991ba8e5477577"},
+    {file = "mkdocs-material-8.4.1.tar.gz", hash = "sha256:92c70f94b2e1f8a05d9e05eec1c7af9dffc516802d69222329db89503c97b4f3"},
+    {file = "mkdocs_material-8.4.1-py2.py3-none-any.whl", hash = "sha256:319a6254819ce9d864ff79de48c43842fccfdebb43e4e6820eef75216f8cfb0a"},
 ]
 mkdocs-material-extensions = [
     {file = "mkdocs-material-extensions-1.0.3.tar.gz", hash = "sha256:bfd24dfdef7b41c312ede42648f9eb83476ea168ec163b613f9abd12bbfddba2"},
@@ -1680,24 +1680,24 @@ mypy = [
     {file = "mypy-0.971.tar.gz", hash = "sha256:40b0f21484238269ae6a57200c807d80debc6459d444c0489a102d7c6a75fa56"},
 ]
 mypy-boto3-appconfig = [
-    {file = "mypy-boto3-appconfig-1.24.29.tar.gz", hash = "sha256:10583d309a9db99babfbe85d3b6467b49b3509a57e4f8771da239f6d5cb3731b"},
-    {file = "mypy_boto3_appconfig-1.24.29-py3-none-any.whl", hash = "sha256:e9d9e2e25fdd82bffc6262dc184edf5d0d3d9fbb0ab35e597a1ea57ba13d4d80"},
+    {file = "mypy-boto3-appconfig-1.24.36.post1.tar.gz", hash = "sha256:e1916b3754915cb411ef977083500e1f30f81f7b3aea6ff5eed1cec91944dea6"},
+    {file = "mypy_boto3_appconfig-1.24.36.post1-py3-none-any.whl", hash = "sha256:a5dbe549dbebf4bc7a6cfcbfa9dff89ceb4983c042b785763ee656504bdb49f6"},
 ]
 mypy-boto3-cloudformation = [
     {file = "mypy-boto3-cloudformation-1.24.36.post1.tar.gz", hash = "sha256:ed7df9ae3a8390a145229122a1489d0a58bbf9986cb54f0d7a65ed54f12c8e63"},
     {file = "mypy_boto3_cloudformation-1.24.36.post1-py3-none-any.whl", hash = "sha256:b39020c13a876bb18908aad22326478d0ac3faec0bdac0d2c11dc318c9dcf149"},
 ]
 mypy-boto3-cloudwatch = [
-    {file = "mypy-boto3-cloudwatch-1.24.35.tar.gz", hash = "sha256:92a818e2ea330f9afb5f8f9c15df47934736041e3ccfd696ffc0774bad14e0aa"},
-    {file = "mypy_boto3_cloudwatch-1.24.35-py3-none-any.whl", hash = "sha256:28947763d70cdac24aca25779cd5b00cd995636f5815fac3d95009430ce02b72"},
+    {file = "mypy-boto3-cloudwatch-1.24.55.tar.gz", hash = "sha256:f8950de7a93b3db890cd8524514a2245d9b5fd83ce2dd60a37047a2cd42d5dd6"},
+    {file = "mypy_boto3_cloudwatch-1.24.55-py3-none-any.whl", hash = "sha256:23faf8fdfe928f9dcce453a60b03bda69177554eb88c2d7e5240ff91b5b14388"},
 ]
 mypy-boto3-dynamodb = [
-    {file = "mypy-boto3-dynamodb-1.24.27.tar.gz", hash = "sha256:c982d24f9b2525a70f408ad40eff69660d56928217597d88860b60436b25efbf"},
-    {file = "mypy_boto3_dynamodb-1.24.27-py3-none-any.whl", hash = "sha256:63f7d9755fc5cf2e637edf8d33024050152a53013d1a102716ae0d534563ef07"},
+    {file = "mypy-boto3-dynamodb-1.24.55.post1.tar.gz", hash = "sha256:c469223c15556d93d247d38c0c31ce3c08d8073ca4597158a27abc70b8d7fbee"},
+    {file = "mypy_boto3_dynamodb-1.24.55.post1-py3-none-any.whl", hash = "sha256:c762975d023b356c573d58105c7bfc1b9e7ee62c1299f09784e9dede533179e1"},
 ]
 mypy-boto3-lambda = [
-    {file = "mypy-boto3-lambda-1.24.0.tar.gz", hash = "sha256:ab425f941d0d50a2b8a20cc13cebe03c3097b122259bf00e7b295d284814bd6f"},
-    {file = "mypy_boto3_lambda-1.24.0-py3-none-any.whl", hash = "sha256:a286a464513adf50847bda8573f2dc7adc348234827d1ac0200e610ee9a09b80"},
+    {file = "mypy-boto3-lambda-1.24.54.tar.gz", hash = "sha256:c76d28d84bdf94c8980acd85bc07f2747559ca11a990fd6785c9c2389e13aff1"},
+    {file = "mypy_boto3_lambda-1.24.54-py3-none-any.whl", hash = "sha256:231b6aac22b107ebb7afa2ec6dc1311b769dbdd5bfae957cf60db3e8bc3133d7"},
 ]
 mypy-boto3-logs = [
     {file = "mypy-boto3-logs-1.24.36.post1.tar.gz", hash = "sha256:8b00c2d5328e72023b1d1acd65e7cea7854f07827d23ce21c78391ca74271290"},
@@ -1708,16 +1708,16 @@ mypy-boto3-s3 = [
     {file = "mypy_boto3_s3-1.24.36.post1-py3-none-any.whl", hash = "sha256:30ae59b33c55f8b7b693170f9519ea5b91a2fbf31a73de79cdef57a27d784e5a"},
 ]
 mypy-boto3-secretsmanager = [
-    {file = "mypy-boto3-secretsmanager-1.24.11.post3.tar.gz", hash = "sha256:f153b3f5ff2c65664a906fb2c97a6598a57da9f1da77679dbaf541051dcff36e"},
-    {file = "mypy_boto3_secretsmanager-1.24.11.post3-py3-none-any.whl", hash = "sha256:d9655d568f7fd8fe05265613b85fba55ab6e4dcd078989af1ef9f0ffe4b45019"},
+    {file = "mypy-boto3-secretsmanager-1.24.54.tar.gz", hash = "sha256:a846b79f86e218a794dbc858c08290bb6aebffa180c80cf0a463c32a04621ff1"},
+    {file = "mypy_boto3_secretsmanager-1.24.54-py3-none-any.whl", hash = "sha256:b89c9a0ff65a8ab2c4e4d3f6e721a0477b7d0fec246ffc08e4378420eb50b4d0"},
 ]
 mypy-boto3-ssm = [
-    {file = "mypy-boto3-ssm-1.24.0.tar.gz", hash = "sha256:bab58398947c3627a4e7610cd0f57b525c12fd1d0a6bb862400b6af0a4e684fc"},
-    {file = "mypy_boto3_ssm-1.24.0-py3-none-any.whl", hash = "sha256:1f17055abb8d70f25e6ece2ef4c0dc74d585744c25a3a833c2985d74165ac0c6"},
+    {file = "mypy-boto3-ssm-1.24.39.post2.tar.gz", hash = "sha256:2859bdcef110d9cc53007a7adba9c765e804b886f98d742a496bb8f7dac07308"},
+    {file = "mypy_boto3_ssm-1.24.39.post2-py3-none-any.whl", hash = "sha256:bfdb434c513fbb1f3bc4b5c158ed4e7a46cb578e5eb01e818d45f4f38296ef2c"},
 ]
 mypy-boto3-xray = [
-    {file = "mypy-boto3-xray-1.24.0.tar.gz", hash = "sha256:fbe211b7601684a2d4defa2f959286f1441027c15044c0c0013257e22307778a"},
-    {file = "mypy_boto3_xray-1.24.0-py3-none-any.whl", hash = "sha256:6b9bc96e7924215fe833fe0d732d5e3ce98f7739b373432b9735a9905f867171"},
+    {file = "mypy-boto3-xray-1.24.36.post1.tar.gz", hash = "sha256:104f1ecf7f1f6278c582201e71a7ab64843d3a3fdc8f23295cf68788cc77e9bb"},
+    {file = "mypy_boto3_xray-1.24.36.post1-py3-none-any.whl", hash = "sha256:97b9f0686c717c8be99ac06cb52febaf71712b4e4cd0b61ed2eb5ed012a9b5fd"},
 ]
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
