@@ -95,6 +95,7 @@ class BaseInfrastructureV2(ABC):
                 Make sure to inject `lambda_layer_arn` fixture and pass at the constructor level"""
             )
 
+        layer = LayerVersion.from_layer_version_arn(self.stack, "layer-arn", layer_version_arn=self.layer_arn)
         function_settings_override = function_props or {}
         for fn in handlers:
             fn_name = fn.stem
@@ -106,9 +107,7 @@ class BaseInfrastructureV2(ABC):
                 "handler": f"{fn_name}.lambda_handler",
                 "tracing": Tracing.ACTIVE,
                 "runtime": Runtime.PYTHON_3_9,
-                "layers": [
-                    LayerVersion.from_layer_version_arn(self.stack, "layer-arn", layer_version_arn=self.layer_arn)
-                ],
+                "layers": [layer],
                 **function_settings_override,
             }
 
