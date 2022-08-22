@@ -10,7 +10,7 @@ This typing utility provides static typing classes that can be used to ease the 
 ## Key features
 
 * Add static typing classes
-* Ease the development by providing the IDE type hint
+* Ease the development by leveraging your IDE's type hints
 * Avoid common typing mistakes in Python
 
 ![Utilities Typing](../media/utilities_typing_1.png)
@@ -34,7 +34,7 @@ The `LambdaContext` typing is typically used in the handler method for the Lambd
 
 ## Working with context methods and properties
 
-Using `LambdaContext` typing it is possible to access information and hints of all properties and methods implemented by Lambda context object.
+Using `LambdaContext` typing make it possible to access information and hints of all properties and methods implemented by Lambda context object.
 
 === "working_with_context_function.py"
 
