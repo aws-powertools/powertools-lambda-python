@@ -87,7 +87,10 @@ class BaseInfrastructureV2(ABC):
         source = Code.from_asset(f"{self.handlers_dir}")
         props_override = function_props or {}
         if not self.layer_arn:
-            self.layer_arn = LambdaLayerStack.get_lambda_layer_arn()
+            raise ValueError(
+                """Lambda Layer ARN cannot be empty when creating Lambda functions.
+                Make sure to inject `lambda_layer_arn` fixture and pass at the constructor level"""
+            )
 
         layer = LayerVersion.from_layer_version_arn(self.stack, "layer-arn", layer_version_arn=self.layer_arn)
 
@@ -305,14 +308,3 @@ class LambdaLayerStack(BaseInfrastructureV2):
             ),
         )
         return layer.layer_version_arn
-
-    @classmethod
-    def get_lambda_layer_arn(cls: "LambdaLayerStack") -> str:
-        """Lambda Layer deployed by LambdaLayer Stack
-
-        Returns
-        -------
-        str
-            Lambda Layer ARN
-        """
-        return cls.STACKS_OUTPUT.get(cls.FEATURE_NAME, {}).get("LayerArn")

@@ -4,6 +4,11 @@ from tests.e2e.utils.infrastructure import LambdaLayerStack, deploy_once
 
 
 @pytest.fixture(scope="session")
+def lambda_layer_arn(lambda_layer_deployment):
+    yield lambda_layer_deployment.get("LayerArn")
+
+
+@pytest.fixture(scope="session")
 def lambda_layer_deployment(request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory, worker_id: str):
     """Setup and teardown logic for E2E test infrastructure
 
