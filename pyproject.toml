@@ -54,7 +54,9 @@ mike = "^0.6.0"
 mypy = "^0.971"
 retry = "^0.9.2"
 pytest-xdist = "^2.5.0"
-aws-cdk-lib = "^2.23.0"
+aws-cdk-lib = { version = "^2.38.1", python = ">=3.7" }
+"aws-cdk.aws-apigatewayv2-alpha" = {version = "^2.38.1-alpha.0", python = ">=3.7"}
+"aws-cdk.aws-apigatewayv2-integrations-alpha" = {version = "^2.38.1-alpha.0", python = ">=3.7"}
 pytest-benchmark = "^3.4.1"
 mypy-boto3-appconfig = { version = "^1.24.29", python = ">=3.7" }
 mypy-boto3-cloudformation = { version = "^1.24.0", python = ">=3.7" }
