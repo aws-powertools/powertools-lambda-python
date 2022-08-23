@@ -1,5 +1,4 @@
 import logging
-from abc import ABC
 from typing import Any, Callable, Optional, Type, TypeVar
 
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
@@ -10,7 +9,7 @@ logger = logging.getLogger(__name__)
 AppSyncResolverEventT = TypeVar("AppSyncResolverEventT", bound=AppSyncResolverEvent)
 
 
-class BaseRouter(ABC):
+class BaseRouter:
     current_event: AppSyncResolverEventT  # type: ignore[valid-type]
     lambda_context: LambdaContext
 
