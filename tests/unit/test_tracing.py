@@ -8,6 +8,8 @@ import pytest
 
 from aws_lambda_powertools import Tracer
 
+# Maintenance: This should move to Functional tests and use Fake over mocks.
+
 
 @pytest.fixture
 def dummy_response():
