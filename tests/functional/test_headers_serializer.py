@@ -20,7 +20,7 @@ def test_headers_serializer_http_api():
     assert payload == {"cookies": ["UUID=12345"], "headers": {}}
 
     payload = serializer.serialize(cookies=["UUID=12345", "SSID=0xdeadbeef"], headers={"Foo": ["bar", "zbr"]})
-    assert payload == {"cookies": ["UUID=12345", "SSID=0xdeadbeef"], "headers": {"Foo": "bar,zbr"}}
+    assert payload == {"cookies": ["UUID=12345", "SSID=0xdeadbeef"], "headers": {"Foo": "bar, zbr"}}
 
 
 def test_headers_serializer_multi_value_headers():

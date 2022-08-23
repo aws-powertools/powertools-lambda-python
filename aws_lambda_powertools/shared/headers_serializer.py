@@ -1,10 +1,9 @@
 import warnings
-from abc import ABC
 from collections import defaultdict
 from typing import Any, Dict, List
 
 
-class BaseHeadersSerializer(ABC):
+class BaseHeadersSerializer:
     """
     Helper class to correctly serialize headers and cookies on the response payload.
     """
@@ -39,7 +38,7 @@ class HttpApiSerializer(BaseHeadersSerializer):
         # Duplicate headers are combined with commas and included in the headers field.
         combined_headers: Dict[str, str] = {}
         for key, values in headers.items():
-            combined_headers[key] = ",".join(values)
+            combined_headers[key] = ", ".join(values)
 
         return {"headers": combined_headers, "cookies": cookies}
 
