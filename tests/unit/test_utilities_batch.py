@@ -4,6 +4,8 @@ from botocore.config import Config
 from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
 from aws_lambda_powertools.utilities.batch.exceptions import SQSBatchProcessingError
 
+# Maintenance: This will be deleted as part of legacy Batch deprecation
+
 
 @pytest.fixture(scope="function")
 def sqs_event():

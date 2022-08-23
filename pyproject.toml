@@ -70,6 +70,7 @@ types-requests = "^2.28.8"
 typing-extensions = { version = "^4.3.0", python = ">=3.7" }
 python-snappy = "^0.6.1"
 mkdocs-material = { version = "^8.3.9", python = ">=3.7" }
+filelock = { version = "^3.8.0", python = ">=3.7" }
 
 [tool.poetry.extras]
 pydantic = ["pydantic", "email-validator"]
