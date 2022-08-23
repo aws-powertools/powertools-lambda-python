@@ -1,9 +1,17 @@
-name: run-e2e-tests
+name: Run end-to-end tests
+
 on:
   workflow_dispatch:
+
+  push:
+    branches: [develop]
+
+# Maintenance: Add support for triggering on `run-e2e` label
+# and enforce repo origin to prevent abuse
+
 env:
   AWS_DEFAULT_REGION: us-east-1
-  E2E_TESTS_PATH: tests/e2e/
+
 jobs:
   run:
     runs-on: ubuntu-latest
