@@ -46,7 +46,7 @@ With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip insta
 
 ## Connect
 
-* **AWS Lambda Powertools on Discord**: `#python` - **[Invite, if you don't have an account](https://discord.gg/B8zZKbbyET)**
+* **AWS Lambda Powertools on Discord**: `#python` - **[Invite link(https://discord.gg/B8zZKbbyET)**
 * **Email**: aws-lambda-powertools-feedback@amazon.com
 
 ## Security disclosures
