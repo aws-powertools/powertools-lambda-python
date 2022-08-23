@@ -1,4 +1,20 @@
-[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/from-referrer/)
+<!-- markdownlint-disable MD043 MD041 -->
+# Table of contents <!-- omit in toc -->
+
+- [Contributing Guidelines](#contributing-guidelines)
+    - [Reporting Bugs/Feature Requests](#reporting-bugsfeature-requests)
+    - [Contributing via Pull Requests](#contributing-via-pull-requests)
+        - [Dev setup](#dev-setup)
+        - [Local documentation](#local-documentation)
+    - [Conventions](#conventions)
+        - [General terminology and practices](#general-terminology-and-practices)
+        - [Testing definition](#testing-definition)
+    - [Finding contributions to work on](#finding-contributions-to-work-on)
+    - [Code of Conduct](#code-of-conduct)
+    - [Security issue notifications](#security-issue-notifications)
+    - [Troubleshooting](#troubleshooting)
+        - [API reference documentation](#api-reference-documentation)
+    - [Licensing](#licensing)
 
 # Contributing Guidelines
 
@@ -25,9 +41,11 @@ Contributions via pull requests are much appreciated. Before sending us a pull r
 
 ### Dev setup
 
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/from-referrer/)
+
 Firstly, [fork the repository](https://github.com/awslabs/aws-lambda-powertools-python/fork).
 
-To setup your development environment, we recommend using our pre-configured Cloud environment: https://gitpod.io/#https://github.com/YOUR_USERNAME/aws-lambda-powertools-python. Replace YOUR_USERNAME with your GitHub username or organization so the Cloud environment can target your fork accordingly.
+To setup your development environment, we recommend using our pre-configured Cloud environment: <https://gitpod.io/#https://github.com/YOUR_USERNAME/aws-lambda-powertools-python>. Replace YOUR_USERNAME with your GitHub username or organization so the Cloud environment can target your fork accordingly.
 
 Alternatively, you can use `make dev` within your local virtual environment.
 
@@ -47,22 +65,38 @@ GitHub provides additional document on [forking a repository](https://help.githu
 
 You might find useful to run both the documentation website and the API reference locally while contributing:
 
-* **API reference**: `make docs-api-local`
-* **Docs website**: `make docs-local`
-	- If you prefer using Docker: `make docs-local-docker`
+- **API reference**: `make docs-api-local`
+- **Docs website**: `make docs-local`
+    - If you prefer using Docker: `make docs-local-docker`
 
-### Conventions
+## Conventions
 
-Category | Convention
-------------------------------------------------- | ---------------------------------------------------------------------------------
-**Docstring** |  We use a slight variation of Numpy convention with markdown to help generate more readable API references.
-**Style guide** | We use black as well as flake8 extensions to enforce beyond good practices [PEP8](https://pep8.org/). We use type annotations and enforce static type checking at CI (mypy).
-**Core utilities** | Core utilities use a Class, always accept `service` as a constructor parameter, can work in isolation, and are also available in other languages implementation.
-**Utilities** | Utilities are not as strict as core and focus on solving a developer experience problem while following the project [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/#tenets).
-**Exceptions** | Specific exceptions live within utilities themselves and use `Error` suffix e.g. `MetricUnitError`.
-**Git commits** | We follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/). We do not enforce conventional commits on contributors to lower the entry bar. Instead, we enforce a conventional PR title so our label automation and changelog are generated correctly.
-**API documentation** | API reference docs are generated from docstrings which should have Examples section to allow developers to have what they need within their own IDE. Documentation website covers the wider usage, tips, and strive to be concise.
-**Documentation** | We treat it like a product. We sub-divide content aimed at getting started (80% of customers) vs advanced usage (20%). We also ensure customers know how to unit test their code when using our features.
+### General terminology and practices
+
+| Category              | Convention                                                                                                                                                                                                                                                                  |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Docstring**         | We use a slight variation of Numpy convention with markdown to help generate more readable API references.                                                                                                                                                                  |
+| **Style guide**       | We use black as well as flake8 extensions to enforce beyond good practices [PEP8](https://pep8.org/). We use type annotations and enforce static type checking at CI (mypy).                                                                                                |
+| **Core utilities**    | Core utilities use a Class, always accept `service` as a constructor parameter, can work in isolation, and are also available in other languages implementation.                                                                                                            |
+| **Utilities**         | Utilities are not as strict as core and focus on solving a developer experience problem while following the project [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/#tenets).                                                                               |
+| **Exceptions**        | Specific exceptions live within utilities themselves and use `Error` suffix e.g. `MetricUnitError`.                                                                                                                                                                         |
+| **Git commits**       | We follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/). We do not enforce conventional commits on contributors to lower the entry bar. Instead, we enforce a conventional PR title so our label automation and changelog are generated correctly. |
+| **API documentation** | API reference docs are generated from docstrings which should have Examples section to allow developers to have what they need within their own IDE. Documentation website covers the wider usage, tips, and strive to be concise.                                          |
+| **Documentation**     | We treat it like a product. We sub-divide content aimed at getting started (80% of customers) vs advanced usage (20%). We also ensure customers know how to unit test their code when using our features.                                                                   |
+
+### Testing definition
+
+We group tests in different categories
+
+| Test              | When to write                                                                                         | Notes                                                                                                                           | Speed                                             |
+| ----------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Unit tests        | Verify the smallest possible unit works.                                                              | Networking access is prohibited. Prefer Functional tests given our complexity.                                                  | Lightning fast (nsec to ms)                       |
+| Functional tests  | Guarantee functionality works as expected. It's a subset of integration test covering multiple units. | No external dependency. Prefer Fake implementations (in-memory) over Mocks and Stubs.                                           | Fast (ms to few seconds at worst)                 |
+| Integration tests | Gain confidence that code works with one or more external dependencies.                               | No need for a Lambda function. Use our code base against an external dependency _e.g., fetch an existing SSM parameter_.        | Moderate to slow (a few minutes)                  |
+| End-to-end tests  | Gain confidence that a Lambda function with our code operates as expected.                            | It simulates how customers configure, deploy, and run their Lambda function - Event Source configuration, IAM permissions, etc. | Slow (minutes)                                    |
+| Performance tests | Ensure critical operations won't increase latency and costs to customers.                             | CI arbitrary hardware can make it flaky. We'll resume writing perf test after our new Integ/End have significant coverage.      | Fast to moderate (a few seconds to a few minutes) |
+
+Functional tests is mandatory. Maintainers will help indicate whether additional tests are necessary and provide assistance as required.
 
 ## Finding contributions to work on
 
@@ -75,6 +109,7 @@ For more information see the [Code of Conduct FAQ](https://aws.github.io/code-of
 opensource-codeofconduct@amazon.com with any additional questions or comments.
 
 ## Security issue notifications
+
 If you discover a potential security issue in this project we ask that you notify AWS/Amazon Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public github issue.
 
 ## Troubleshooting
@@ -85,9 +120,9 @@ When you are working on the codebase and you use the local API reference documen
 
 This happens when:
 
-* You did not install the local dev environment yet
+- You did not install the local dev environment yet
     - You can install dev deps with `make dev` command
-* The code in the repository is raising an exception while the `pdoc` is scanning the codebase
+- The code in the repository is raising an exception while the `pdoc` is scanning the codebase
     - Unfortunately, this exception is not shown to you, but if you run, `poetry run pdoc --pdf aws_lambda_powertools`, the exception is shown and you can prevent the exception from being raised
     - Once resolved the documentation should load correctly again
 
