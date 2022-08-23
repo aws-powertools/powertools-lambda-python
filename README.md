@@ -27,11 +27,9 @@ A suite of Python utilities for AWS Lambda functions to ease adopting best pract
 * **[Idempotency](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/idempotency/)** - Convert your Lambda functions into idempotent operations which are safe to retry
 * **[Feature Flags](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/feature_flags/)** - A simple rule engine to evaluate when one or multiple features should be enabled depending on the input
 
-
 ### Installation
 
 With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip install aws-lambda-powertools``
-
 
 ## Tutorial and Examples
 
@@ -47,7 +45,9 @@ With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip insta
 * Powertools idea [DAZN Powertools](https://github.com/getndazn/dazn-lambda-powertools/)
 
 ## Connect
-**Email**: aws-lambda-powertools-feedback@amazon.com
+
+* **AWS Lambda Powertools on Discord**: `#python` - **[Invite link(https://discord.gg/B8zZKbbyET)**
+* **Email**: aws-lambda-powertools-feedback@amazon.com
 
 ## Security disclosures
 
