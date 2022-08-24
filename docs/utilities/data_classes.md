@@ -471,10 +471,10 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
         if event.describe:
             return DOCS
 
-        # alternatively you can also do
-        # event.widget_context.params["echo"]
-        # event.raw_event["echo"]
-        return event["echo"]
+        # You can directly return HTML or JSON content
+        # Alternatively, you can return markdown that will be rendered by CloudWatch
+        echo = event.widget_context.params["echo"]
+        return { "markdown": f"# {echo}" }
     ```
 
 ### CloudWatch Logs
