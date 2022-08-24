@@ -37,7 +37,7 @@ class EventHandlerStack(BaseInfrastructure):
         self._create_alb_listener(
             alb=alb,
             name="MultiValueHeader",
-            port=81,
+            port=8080,
             function=function,
             attributes={"lambda.multi_value_headers.enabled": "true"},
         )
@@ -52,7 +52,7 @@ class EventHandlerStack(BaseInfrastructure):
     ):
         listener = alb.add_listener(name, port=port, protocol=elbv2.ApplicationProtocol.HTTP)
         target = listener.add_targets(f"ALB{name}Target", targets=[targets.LambdaTarget(function)])
-        if attributes:
+        if attributes is not None:
             for key, value in attributes.items():
                 target.set_attribute(key, value)
         CfnOutput(self.stack, f"ALB{name}ListenerPort", value=str(port))
@@ -76,5 +76,6 @@ class EventHandlerStack(BaseInfrastructure):
         CfnOutput(self.stack, "APIGatewayRestUrl", value=apigw.url)
 
     def _create_lambda_function_url(self, function: Function):
+        # Maintenance: move auth to IAM when we create sigv4 builders
         function_url = function.add_function_url(auth_type=FunctionUrlAuthType.NONE)
         CfnOutput(self.stack, "LambdaFunctionUrl", value=function_url.url)

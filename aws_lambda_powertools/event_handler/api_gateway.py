@@ -201,7 +201,8 @@ class ResponseBuilder:
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
-        self.response.headers["Cache-Control"].append(cache_control if self.response.status_code == 200 else "no-cache")
+        cache_control = cache_control if self.response.status_code == 200 else "no-cache"
+        self.response.headers["Cache-Control"].append(cache_control)
 
     def _compress(self):
         """Compress the response body, but only if `Accept-Encoding` headers includes gzip."""
