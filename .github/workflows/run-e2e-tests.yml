@@ -20,7 +20,9 @@ jobs:
       contents: read
     strategy:
       matrix:
-        version: ["3.7", "3.8", "3.9"]
+        # Maintenance: disabled until we discover concurrency lock issue with multiple versions and tmp
+        # version: ["3.7", "3.8", "3.9"]
+        version: ["3.7"]
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
