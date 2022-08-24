@@ -1,14 +1,14 @@
 import warnings
 
 from aws_lambda_powertools.shared.headers_serializer import (
-    HttpApiSerializer,
+    HttpApiHeadersSerializer,
     MultiValueHeadersSerializer,
     SingleValueHeadersSerializer,
 )
 
 
 def test_headers_serializer_http_api():
-    serializer = HttpApiSerializer()
+    serializer = HttpApiHeadersSerializer()
 
     payload = serializer.serialize(cookies=[], headers={})
     assert payload == {"cookies": [], "headers": {}}
@@ -59,10 +59,10 @@ def test_headers_serializer_single_value_headers():
 
         assert len(w) == 2
         assert str(w[-2].message) == (
-            "Can't encode more than one cookie in the response. "
+            "Can't encode more than one cookie in the response. Sending the last cookie only. "
             "Did you enable multiValueHeaders on the ALB Target Group?"
         )
         assert str(w[-1].message) == (
-            "Can't encode more than one header value for the same key in the response. "
+            "Can't encode more than one header value for the same key ('Foo') in the response. "
             "Did you enable multiValueHeaders on the ALB Target Group?"
         )

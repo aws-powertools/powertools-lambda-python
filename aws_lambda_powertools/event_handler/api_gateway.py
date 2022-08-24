@@ -232,13 +232,12 @@ class ResponseBuilder:
             self.response.base64_encoded = True
             self.response.body = base64.b64encode(self.response.body).decode()
 
-        payload = {
+        return {
             "statusCode": self.response.status_code,
             "body": self.response.body,
             "isBase64Encoded": self.response.base64_encoded,
             **event.header_serializer().serialize(headers=self.response.headers, cookies=self.response.cookies),
         }
-        return payload
 
 
 class BaseRouter(ABC):
@@ -610,7 +609,7 @@ class ApiGatewayResolver(BaseRouter):
 
             if method == "OPTIONS":
                 logger.debug("Pre-flight request detected. Returning CORS with null response")
-                headers["Access-Control-Allow-Methods"].append(",".join(sorted(self._cors_methods)))
+                headers["Access-Control-Allow-Methods"].append(",".join(self._cors_methods))
                 return ResponseBuilder(Response(status_code=204, content_type=None, headers=headers, body=""))
 
         handler = self._lookup_exception_handler(NotFoundError)

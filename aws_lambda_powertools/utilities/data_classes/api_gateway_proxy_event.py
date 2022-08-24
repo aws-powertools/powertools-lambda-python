@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional
 
 from aws_lambda_powertools.shared.headers_serializer import (
     BaseHeadersSerializer,
-    HttpApiSerializer,
+    HttpApiHeadersSerializer,
     MultiValueHeadersSerializer,
 )
 from aws_lambda_powertools.utilities.data_classes.common import (
@@ -260,4 +260,4 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
         return self.request_context.http.method
 
     def header_serializer(self):
-        return HttpApiSerializer()
+        return HttpApiHeadersSerializer()

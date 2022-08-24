@@ -5,7 +5,8 @@ from typing import Any, Dict, List
 
 class BaseHeadersSerializer:
     """
-    Helper class to correctly serialize headers and cookies on the response payload.
+    Helper class to correctly serialize headers and cookies for Amazon API Gateway,
+    ALB and Lambda Function URL response payload.
     """
 
     def serialize(self, headers: Dict[str, List[str]], cookies: List[str]) -> Dict[str, Any]:
@@ -23,7 +24,7 @@ class BaseHeadersSerializer:
         raise NotImplementedError()
 
 
-class HttpApiSerializer(BaseHeadersSerializer):
+class HttpApiHeadersSerializer(BaseHeadersSerializer):
     def serialize(self, headers: Dict[str, List[str]], cookies: List[str]) -> Dict[str, Any]:
         """
         When using HTTP APIs or LambdaFunctionURLs, everything is taken care automatically for us.
@@ -81,7 +82,7 @@ class SingleValueHeadersSerializer(BaseHeadersSerializer):
         if cookies:
             if len(cookies) > 1:
                 warnings.warn(
-                    "Can't encode more than one cookie in the response. "
+                    "Can't encode more than one cookie in the response. Sending the last cookie only. "
                     "Did you enable multiValueHeaders on the ALB Target Group?"
                 )
 
@@ -91,7 +92,7 @@ class SingleValueHeadersSerializer(BaseHeadersSerializer):
         for key, values in headers.items():
             if len(values) > 1:
                 warnings.warn(
-                    "Can't encode more than one header value for the same key in the response. "
+                    f"Can't encode more than one header value for the same key ('{key}') in the response. "
                     "Did you enable multiValueHeaders on the ALB Target Group?"
                 )
 

@@ -41,5 +41,5 @@ class ALBEvent(BaseProxyEvent):
         # We can determine if the feature is enabled by looking if the event has a `multiValueHeaders` key.
         if self.multi_value_headers:
             return MultiValueHeadersSerializer()
-        else:
-            return SingleValueHeadersSerializer()
+
+        return SingleValueHeadersSerializer()
