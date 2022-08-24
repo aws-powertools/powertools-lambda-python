@@ -20,8 +20,7 @@ jobs:
       contents: read
     strategy:
       matrix:
-#         version: ["3.7", "3.8", "3.9"]
-        version: ["3.7"]
+        version: ["3.7", "3.8", "3.9"]
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
