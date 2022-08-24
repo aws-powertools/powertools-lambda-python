@@ -41,7 +41,7 @@ class PythonVersion(Enum):
 class BaseInfrastructure(ABC):
     def __init__(self, feature_name: str, handlers_dir: Path, layer_arn: str = "") -> None:
         self.feature_name = feature_name
-        self.stack_name = f"test-{feature_name}-{uuid4()}"
+        self.stack_name = f"test{PYTHON_RUNTIME_VERSION}-{feature_name}-{uuid4()}"
         self.handlers_dir = handlers_dir
         self.layer_arn = layer_arn
         self.stack_outputs: Dict[str, str] = {}
@@ -249,7 +249,7 @@ def deploy_once(
         else:
             # tmp dir shared by all workers
             root_tmp_dir = tmp_path_factory.getbasetemp().parent
-            cache = root_tmp_dir / "cache.json"
+            cache = root_tmp_dir / f"{PYTHON_RUNTIME_VERSION}_cache.json"
 
             with FileLock(f"{cache}.lock"):
                 # If cache exists, return stack outputs back
