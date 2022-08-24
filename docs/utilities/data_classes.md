@@ -68,6 +68,7 @@ Event Source | Data_class
 [Application Load Balancer](#application-load-balancer) | `ALBEvent`
 [AppSync Authorizer](#appsync-authorizer) | `AppSyncAuthorizerEvent`
 [AppSync Resolver](#appsync-resolver) | `AppSyncResolverEvent`
+[CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget) | `CloudWatchDashboardCustomWidgetEvent`
 [CloudWatch Logs](#cloudwatch-logs) | `CloudWatchLogsEvent`
 [CodePipeline Job Event](#codepipeline-job) | `CodePipelineJobEvent`
 [Cognito User Pool](#cognito-user-pool) | Multiple available under `cognito_user_pool_event`
@@ -439,6 +440,41 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
         "function_request_id":"6735a29c-c000-4ae3-94e6-1f1c934f7f94",
         "correlation_id":"Root=1-60488877-0b0c4e6727ab2a1c545babd0"
     }
+    ```
+
+### CloudWatch Dashboard Custom Widget
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import event_source, CloudWatchDashboardCustomWidgetEvent
+    from aws_lambda_powertools.utilities.data_classes.cloud_watch_logs_event import CloudWatchLogsDecodedData
+
+    const DOCS = `
+    ## Echo
+    A simple echo script. Anything passed in \`\`\`echo\`\`\` parameter is returned as the content of custom widget.
+
+    ### Widget parameters
+    Param | Description
+    ---|---
+    **echo** | The content to echo back
+
+    ### Example parameters
+    \`\`\` yaml
+    echo: <h1>Hello world</h1>
+    \`\`\`
+    `
+
+    @event_source(data_class=CloudWatchDashboardCustomWidgetEvent)
+    def lambda_handler(event: CloudWatchDashboardCustomWidgetEvent, context):
+
+        if event.describe:
+            return DOCS
+
+        # alternatively you can also do
+        # event.widget_context.params["echo"]
+        # event.raw_event["echo"]
+        return event["echo"]
     ```
 
 ### CloudWatch Logs
