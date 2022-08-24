@@ -34,7 +34,7 @@ The `LambdaContext` typing is typically used in the handler method for the Lambd
 
 ## Working with context methods and properties
 
-Using `LambdaContext` typing make it possible to access information and hints of all properties and methods implemented by Lambda context object.
+Using `LambdaContext` typing makes it possible to access information and hints of all properties and methods implemented by Lambda context object.
 
 === "working_with_context_function.py"
 
