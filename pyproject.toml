@@ -19,7 +19,7 @@ keywords = ["aws_lambda_powertools", "aws", "tracing", "logging", "lambda", "pow
 license = "MIT-0"
 
 [tool.poetry.dependencies]
-python = "^3.7.10"
+python = "^3.7.4"
 aws-xray-sdk = "^2.8.0"
 fastjsonschema = "^2.14.5"
 boto3 = "^1.18"
@@ -53,24 +53,24 @@ mike = "^0.6.0"
 mypy = "^0.971"
 retry = "^0.9.2"
 pytest-xdist = "^2.5.0"
-aws-cdk-lib = { version = "^2.38.1", python = ">=3.7" }
-"aws-cdk.aws-apigatewayv2-alpha" = {version = "^2.38.1-alpha.0", python = ">=3.7"}
-"aws-cdk.aws-apigatewayv2-integrations-alpha" = {version = "^2.38.1-alpha.0", python = ">=3.7"}
+aws-cdk-lib = "^2.38.1"
+"aws-cdk.aws-apigatewayv2-alpha" = "^2.38.1-alpha.0"
+"aws-cdk.aws-apigatewayv2-integrations-alpha" = "^2.38.1-alpha.0"
 pytest-benchmark = "^3.4.1"
-mypy-boto3-appconfig = { version = "^1.24.29", python = ">=3.7" }
-mypy-boto3-cloudformation = { version = "^1.24.0", python = ">=3.7" }
-mypy-boto3-cloudwatch = { version = "^1.24.35", python = ">=3.7" }
-mypy-boto3-dynamodb = { version = "^1.24.27", python = ">=3.7" }
-mypy-boto3-lambda = { version = "^1.24.0", python = ">=3.7" }
-mypy-boto3-logs = { version = "^1.24.0", python = ">=3.7" }
-mypy-boto3-secretsmanager = { version = "^1.24.11", python = ">=3.7" }
-mypy-boto3-ssm = { version = "^1.24.0", python = ">=3.7" }
-mypy-boto3-s3 = { version = "^1.24.0", python = ">=3.7" }
-mypy-boto3-xray = { version = "^1.24.0", python = ">=3.7" }
+mypy-boto3-appconfig = "^1.24.29"
+mypy-boto3-cloudformation = "^1.24.0"
+mypy-boto3-cloudwatch = "^1.24.35"
+mypy-boto3-dynamodb = "^1.24.27"
+mypy-boto3-lambda = "^1.24.0"
+mypy-boto3-logs = "^1.24.0"
+mypy-boto3-secretsmanager = "^1.24.11"
+mypy-boto3-ssm = "^1.24.0"
+mypy-boto3-s3 = "^1.24.0"
+mypy-boto3-xray = "^1.24.0"
 types-requests = "^2.28.8"
-typing-extensions = { version = "^4.3.0", python = ">=3.7" }
+typing-extensions = "^4.3.0"
 python-snappy = "^0.6.1"
-mkdocs-material = { version = "^8.3.9", python = ">=3.7" }
+mkdocs-material = "^8.3.9"
 
 [tool.poetry.extras]
 pydantic = ["pydantic", "email-validator"]
