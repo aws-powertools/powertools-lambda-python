@@ -22,4 +22,6 @@ def get_lambda_response(
 @retry(RequestException, delay=2, jitter=1.5, tries=5)
 def get_http_response(request: Request) -> Response:
     session = requests.Session()
-    return session.send(request.prepare())
+    result = session.send(request.prepare())
+    result.raise_for_status()
+    return result
