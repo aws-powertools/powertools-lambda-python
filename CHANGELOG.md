@@ -4,6 +4,9 @@
 <a name="unreleased"></a>
 # Unreleased
 
+
+<a name="v1.28.0"></a>
+## [v1.28.0] - 2022-08-25
 ## Bug Fixes
 
 * **ci:** calculate parallel jobs based on infrastructure needs ([#1475](https://github.com/awslabs/aws-lambda-powertools-python/issues/1475))
@@ -60,6 +63,9 @@
 * **tests:** enable end-to-end test workflow ([#1470](https://github.com/awslabs/aws-lambda-powertools-python/issues/1470))
 * **tests:** refactor E2E logger to ease maintenance, writing tests and parallelization ([#1460](https://github.com/awslabs/aws-lambda-powertools-python/issues/1460))
 * **tests:** refactor E2E tracer to ease maintenance, writing tests and parallelization ([#1457](https://github.com/awslabs/aws-lambda-powertools-python/issues/1457))
+
+## Reverts
+* fix(ci): add explicit origin to fix release detached head
 
 
 <a name="v1.27.0"></a>
@@ -2256,7 +2262,8 @@
 * Merge pull request [#5](https://github.com/awslabs/aws-lambda-powertools-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.27.0...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.28.0...HEAD
+[v1.28.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.27.0...v1.28.0
 [v1.27.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.26.7...v1.27.0
 [v1.26.7]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.26.6...v1.26.7
 [v1.26.6]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.26.5...v1.26.6
