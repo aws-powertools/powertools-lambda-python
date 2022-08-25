@@ -39,3 +39,8 @@ repos:
     hooks:
       - id: cfn-python-lint
         files: examples/.*\.(yaml|yml)$
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.6.16
+    hooks:
+      - id: actionlint
+        args: [-pyflakes=]
