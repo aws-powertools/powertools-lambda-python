@@ -17,7 +17,6 @@ def lambda_handler(event, context: LambdaContext) -> dict:
 
         comments: requests.Response = requests.get("https://jsonplaceholder.typicode.com/comments")
         # add logic here and save the results of the request to an S3 bucket, for example.
-        ...
 
         logger.info(
             {
