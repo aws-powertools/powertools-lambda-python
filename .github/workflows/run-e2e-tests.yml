@@ -5,6 +5,13 @@ on:
 
   push:
     branches: [develop]
+    paths:
+      - "aws_lambda_powertools/**"
+      - "tests/e2e/**"
+      - "pyproject.toml"
+      - "poetry.lock"
+      - "mypy.ini"
+      - "parallel_run_e2e.py"
 
 # Maintenance: Add support for triggering on `run-e2e` label
 # and enforce repo origin to prevent abuse
