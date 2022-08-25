@@ -6,5 +6,4 @@ on:
 
 jobs:
   changelog:
-    needs: release
     uses: ./.github/workflows/reusable_publish_changelog.yml
