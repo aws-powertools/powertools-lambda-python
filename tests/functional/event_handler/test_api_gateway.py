@@ -268,7 +268,7 @@ def test_cors():
     assert headers["Content-Type"] == [content_types.TEXT_HTML]
     assert headers["Access-Control-Allow-Origin"] == ["*"]
     assert "Access-Control-Allow-Credentials" not in headers
-    assert sorted(headers["Access-Control-Allow-Headers"][0].split(",")) == sorted(CORSConfig._REQUIRED_HEADERS)
+    assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
 
     # THEN for routes without cors flag return no cors headers
     mock_event = {"path": "/my/request", "httpMethod": "GET"}
@@ -560,7 +560,7 @@ def test_cors_preflight():
     headers = result["multiValueHeaders"]
     assert "Content-Type" not in headers
     assert "Access-Control-Allow-Origin" in result["multiValueHeaders"]
-    assert sorted(headers["Access-Control-Allow-Methods"][0].split(",")) == ["DELETE", "GET", "OPTIONS"]
+    assert headers["Access-Control-Allow-Methods"] == [",".join(sorted(["DELETE", "GET", "OPTIONS"]))]
 
 
 def test_custom_preflight_response():
