@@ -20,6 +20,9 @@ name: Publish to PyPi
 
 # See MAINTAINERS.md "Releasing a new version" for release mechanisms
 
+env:
+  BRANCH: develop
+
 on:
   release:
     types: [published]
@@ -101,17 +104,14 @@ jobs:
           aws ssm put-parameter --name "powertools-python-release-version" --value $RELEASE_VERSION --overwrite
           aws codepipeline start-pipeline-execution --name ${{ secrets.AWS_SAR_PIPELINE_NAME }}
 
-  # NOTE: `event` type brings a detached head failing git setup
-  # and reusable workflows only work as a standalone job
-  # meaning we need to research for a solution that works for non-detached and detached mode
-  # changelog:
-  #   needs: release
-  #   permissions:
-  #     contents: write
-  #   uses: ./.github/workflows/reusable_publish_changelog.yml
+  changelog:
+    needs: release
+    permissions:
+      contents: write
+    uses: ./.github/workflows/reusable_publish_changelog.yml
 
   docs:
-    needs: release
+    needs: [release, changelog]
     permissions:
       contents: write
       pages: write
@@ -122,10 +122,13 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Setup git client
+      - name: Git client setup and refresh tip
         run: |
           git config user.name "Release bot"
-          git config user.email aws-devax-open-source@amazon.com
+          git config user.email "aws-devax-open-source@amazon.com"
+          git config pull.rebase true
+          git config remote.origin.url >&- || git remote add origin https://github.com/$origin # Git Detached mode (release notes) doesn't have origin
+          git pull origin $BRANCH
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python
