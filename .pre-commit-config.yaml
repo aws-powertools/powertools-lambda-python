@@ -42,5 +42,5 @@ repos:
   - repo: https://github.com/rhysd/actionlint
     rev: v1.6.16
     hooks:
-      - id: actionlint
+      - id: actionlint-docker
         args: [-pyflakes=]
