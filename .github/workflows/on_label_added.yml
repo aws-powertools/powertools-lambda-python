@@ -1,0 +1,25 @@
+name: On Label added
+
+on:
+  pull_request:
+    types:
+      - labeled
+
+jobs:
+  split-large-pr:
+    if: github.event.label.name == 'size/XXL'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: "Suggest split large Pull Request"
+        uses: actions/github-script@v6
+        env:
+          PR_NUMBER: ${{ github.event.issue.number }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const script = require('.github/scripts/comment_on_large_pr.js')
+            await script({github, context, core})
