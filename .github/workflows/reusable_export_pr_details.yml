@@ -4,13 +4,16 @@ on:
   workflow_call:
     inputs:
       record_pr_workflow_id:
+        description: "Record PR workflow execution ID to download PR details"
         required: true
         type: number
       workflow_origin: # see https://github.com/awslabs/aws-lambda-powertools-python/issues/1349
+        description: "Repository full name for runner integrity"
         required: true
         type: string
     secrets:
       token:
+        description: "GitHub Actions temporary and scoped token"
         required: true
     # Map the workflow outputs to job outputs
     outputs:
