@@ -1,0 +1,136 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Middleware-powertools-utilities example
+
+Globals:
+  Function:
+    Timeout: 5
+    Runtime: python3.9
+    Tracing: Active
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        LOG_LEVEL: DEBUG
+        POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
+        POWERTOOLS_LOGGER_LOG_EVENT: true
+        POWERTOOLS_SERVICE_NAME: middleware
+
+Resources:
+  MiddlewareFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: middleware/
+      Handler: app.lambda_handler
+      Description: Middleware function
+      Policies:
+      - AWSLambdaBasicExecutionRole # Managed Policy
+      - Version: '2012-10-17' # Policy Document
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:PutItem
+            Resource: !GetAtt HistoryTable.Arn
+          - Effect: Allow
+            Action: # https://docs.aws.amazon.com/appconfig/latest/userguide/getting-started-with-appconfig-permissions.html
+              - ssm:GetDocument
+              - ssm:ListDocuments
+              - appconfig:GetLatestConfiguration
+              - appconfig:StartConfigurationSession
+              - appconfig:ListApplications
+              - appconfig:GetApplication
+              - appconfig:ListEnvironments
+              - appconfig:GetEnvironment
+              - appconfig:ListConfigurationProfiles
+              - appconfig:GetConfigurationProfile
+              - appconfig:ListDeploymentStrategies
+              - appconfig:GetDeploymentStrategy
+              - appconfig:GetConfiguration
+              - appconfig:ListDeployments
+              - appconfig:GetDeployment
+            Resource: "*"
+      Events:
+        GetComments:
+          Type: Api
+          Properties:
+            Path: /comments
+            Method: GET
+        GetCommentsById:
+          Type: Api
+          Properties:
+            Path: /comments/{comment_id}
+            Method: GET
+
+  # DynamoDB table to store historical data
+  HistoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "HistoryTable"
+      AttributeDefinitions:
+        - AttributeName: customer_id
+          AttributeType: S
+        - AttributeName: request_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: customer_id
+          KeyType: HASH
+        - AttributeName: request_id
+          KeyType: "RANGE"
+      BillingMode: PAY_PER_REQUEST
+
+  # Feature flags using AppConfig
+  FeatureCommentApp:
+    Type: AWS::AppConfig::Application
+    Properties:
+      Description: "Comments Application for feature toggles"
+      Name: comments
+
+  FeatureCommentDevEnv:
+    Type: AWS::AppConfig::Environment
+    Properties:
+      ApplicationId: !Ref FeatureCommentApp
+      Description: "Development Environment for the App Config Comments"
+      Name: dev
+
+  FeatureCommentConfigProfile:
+    Type: AWS::AppConfig::ConfigurationProfile
+    Properties:
+      ApplicationId: !Ref FeatureCommentApp
+      Name: features
+      LocationUri: "hosted"
+
+  HostedConfigVersion:
+    Type: AWS::AppConfig::HostedConfigurationVersion
+    Properties:
+      ApplicationId: !Ref FeatureCommentApp
+      ConfigurationProfileId: !Ref FeatureCommentConfigProfile
+      Description: 'A sample hosted configuration version'
+      Content: |
+        {
+              "save_history": {
+                "default": true
+              }
+        }
+      ContentType: 'application/json'
+
+  # this is just an example
+  # change this values according your deployment strategy
+  BasicDeploymentStrategy:
+    Type: AWS::AppConfig::DeploymentStrategy
+    Properties:
+      Name: "Deployment"
+      Description: "Deployment strategy for comments app."
+      DeploymentDurationInMinutes: 1
+      FinalBakeTimeInMinutes: 1
+      GrowthFactor: 100
+      GrowthType: LINEAR
+      ReplicateTo: NONE
+
+  ConfigDeployment:
+    Type: AWS::AppConfig::Deployment
+    Properties:
+      ApplicationId: !Ref FeatureCommentApp
+      ConfigurationProfileId: !Ref FeatureCommentConfigProfile
+      ConfigurationVersion: !Ref HostedConfigVersion
+      DeploymentStrategyId: !Ref BasicDeploymentStrategy
+      EnvironmentId: !Ref FeatureCommentDevEnv

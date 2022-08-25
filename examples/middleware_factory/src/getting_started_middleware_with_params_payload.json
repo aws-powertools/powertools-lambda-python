@@ -1,0 +1,23 @@
+{
+    "version": "0",
+    "id": "9c95e8e4-96a4-ef3f-b739-b6aa5b193afb",
+    "detail-type": "BookingCreated",
+    "source": "app.booking",
+    "account": "0123456789012",
+    "time": "2022-08-08T20:41:53Z",
+    "region": "eu-east-1",
+    "detail": {
+      "days": 5,
+      "date_from": "2020-08-08",
+      "date_to": "2020-08-13",
+      "hotel_id": "1",
+      "country": "Portugal",
+      "city": "Lisbon",
+      "guest": {
+        "name": "Lambda",
+        "email": "lambda@powertool.tools",
+        "passport": "AA123456",
+        "vat": "123456789"
+      }
+    }
+}

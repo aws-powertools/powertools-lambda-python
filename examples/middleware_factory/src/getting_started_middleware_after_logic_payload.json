@@ -1,0 +1,6 @@
+{
+    "resource": "/todos",
+    "path": "/todos",
+    "httpMethod": "POST",
+    "body": "{\"title\": \"foo\", \"userId\": 1, \"completed\": false}"
+}
