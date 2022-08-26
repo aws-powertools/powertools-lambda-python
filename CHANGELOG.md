@@ -4,6 +4,11 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **ci:** gracefully and successful exit changelog upon no changes
+* **ci:** event resolution for on_label_added workflow
+
 ## Documentation
 
 * **layer:** upgrade to 1.28.0 (v33)
