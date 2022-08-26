@@ -26,13 +26,15 @@ jobs:
           git config user.name "Release bot"
           git config user.email "aws-devax-open-source@amazon.com"
           git config pull.rebase true
-          git config remote.origin.url >&- || git remote add origin https://github.com/$origin # Git Detached mode (release notes) doesn't have origin
-          git pull origin $BRANCH
+          git config remote.origin.url >&- || git remote add origin https://github.com/"${origin}" # Git Detached mode (release notes) doesn't have origin
+          git pull origin "${BRANCH}"
       - name: "Generate latest changelog"
         run: make changelog
       - name: Update Changelog in trunk
         run: |
+          HAS_CHANGE=$(git status --porcelain)
+          test -z "${HAS_CHANGE}" && echo "Nothing to update" && exit 0
           git add CHANGELOG.md
           git commit -m "update changelog with latest changes"
-          git pull origin $BRANCH # prevents concurrent branch update failing push
-          git push origin HEAD:refs/heads/$BRANCH
+          git pull origin "${BRANCH}" # prevents concurrent branch update failing push
+          git push origin HEAD:refs/heads/"${BRANCH}"
