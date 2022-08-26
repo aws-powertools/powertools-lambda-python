@@ -59,7 +59,7 @@ pytest-benchmark = "^3.4.1"
 mypy-boto3-appconfig = { version = "^1.24.29", python = ">=3.7" }
 mypy-boto3-cloudformation = { version = "^1.24.0", python = ">=3.7" }
 mypy-boto3-cloudwatch = { version = "^1.24.35", python = ">=3.7" }
-mypy-boto3-dynamodb = { version = "^1.24.27", python = ">=3.7" }
+mypy-boto3-dynamodb = { version = "^1.24.60", python = ">=3.7" }
 mypy-boto3-lambda = { version = "^1.24.0", python = ">=3.7" }
 mypy-boto3-logs = { version = "^1.24.0", python = ">=3.7" }
 mypy-boto3-secretsmanager = { version = "^1.24.11", python = ">=3.7" }
