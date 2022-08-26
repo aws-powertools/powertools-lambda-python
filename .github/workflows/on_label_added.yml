@@ -7,7 +7,7 @@ on:
 
 jobs:
   split-large-pr:
-    if: github.event.label.name == 'size/XXL'
+    if: ${{ github.event.label.name == 'size/XXL' }}
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -17,9 +17,9 @@ jobs:
       - name: "Suggest split large Pull Request"
         uses: actions/github-script@v6
         env:
-          PR_NUMBER: ${{ github.event.issue.number }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const script = require('.github/scripts/comment_on_large_pr.js')
-            await script({github, context, core})
+            const script = require('.github/scripts/comment_on_large_pr.js');
+            await script({github, context, core});
