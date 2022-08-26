@@ -4,6 +4,25 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **layer:** upgrade to 1.28.0 (v33)
+
+## Features
+
+* **ci:** add actionlint in pre-commit hook
+
+## Maintenance
+
+* **ci:** add workflow to suggest splitting large PRs ([#1480](https://github.com/awslabs/aws-lambda-powertools-python/issues/1480))
+* **ci:** add linter for GitHub Actions as pre-commit hook ([#1479](https://github.com/awslabs/aws-lambda-powertools-python/issues/1479))
+* **ci:** remove dangling debug step
+* **ci:** fix invalid dependency leftover
+* **ci:** add missing description fields
+* **ci:** remove unused and undeclared OS matrix env
+* **ci:** limit E2E workflow run for source code change
+* **maintainers:** update release workflow link
+
 
 <a name="v1.28.0"></a>
 ## [v1.28.0] - 2022-08-25
