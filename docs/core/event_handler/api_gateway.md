@@ -312,11 +312,18 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 
 ### Fine grained responses
 
-You can use the `Response` class to have full control over the response, for example you might want to add additional headers or set a custom Content-type.
+You can use the `Response` class to have full control over the response. For example, you might want to add additional headers, cookies, or set a custom Content-type.
+
+???+ info
+    Powertools serializes headers and cookies according to the type of input event.
+    Some event sources require headers and cookies to be encoded as `multiValueHeaders`.
+
+???+ warning "Using multiple values for HTTP headers in ALB?"
+    Make sure you [enable the multi value headers feature](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers) to serialize response headers correctly.
 
 === "fine_grained_responses.py"
 
-    ```python hl_lines="7 24-28"
+    ```python hl_lines="7 24-29"
     --8<-- "examples/event_handler_rest/src/fine_grained_responses.py"
     ```
 

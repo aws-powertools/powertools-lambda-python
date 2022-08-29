@@ -10,6 +10,7 @@ nav:
   - Tutorial: tutorial/index.md
   - Roadmap: roadmap.md
   - API reference: api/" target="_blank
+  - Upgrade guide: upgrade.md
   - Core utilities:
       - core/tracer.md
       - core/logger.md
