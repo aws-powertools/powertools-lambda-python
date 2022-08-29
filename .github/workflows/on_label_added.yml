@@ -1,4 +1,4 @@
-name: On new PR
+name: On Label added
 
 on:
   workflow_run:
@@ -15,20 +15,24 @@ jobs:
       workflow_origin: ${{ github.event.repository.full_name }}
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
-  check_related_issue:
+
+  split-large-pr:
     needs: get_pr_details
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v3
-      - name: "Ensure related issue is present"
+      # Maintenance: Persist state per PR as an artifact to avoid spam on label add
+      - name: "Suggest split large Pull Request"
         uses: actions/github-script@v6
         env:
-          PR_BODY: ${{ needs.get_pr_details.outputs.prBody }}
           PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
           PR_ACTION: ${{ needs.get_pr_details.outputs.prAction }}
           PR_AUTHOR: ${{ needs.get_pr_details.outputs.prAuthor }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const script = require('.github/scripts/label_missing_related_issue.js')
-            await script({github, context, core})
+            const script = require('.github/scripts/comment_on_large_pr.js');
+            await script({github, context, core});
