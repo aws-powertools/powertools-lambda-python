@@ -1,13 +1,23 @@
 name: On Label added
 
 on:
-  pull_request:
+  workflow_run:
+    workflows: ["Record PR details"]
     types:
-      - labeled
+      - completed
 
 jobs:
+  get_pr_details:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    uses: ./.github/workflows/reusable_export_pr_details.yml
+    with:
+      record_pr_workflow_id: ${{ github.event.workflow_run.id }}
+      workflow_origin: ${{ github.event.repository.full_name }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+
   split-large-pr:
-    if: ${{ github.event.label.name == 'size/XXL' }}
+    needs: get_pr_details
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -17,8 +27,9 @@ jobs:
       - name: "Suggest split large Pull Request"
         uses: actions/github-script@v6
         env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
+          PR_ACTION: ${{ needs.get_pr_details.outputs.prAction }}
+          PR_AUTHOR: ${{ needs.get_pr_details.outputs.prAuthor }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
