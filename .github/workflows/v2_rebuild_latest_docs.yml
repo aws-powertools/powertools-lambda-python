@@ -1,0 +1,14 @@
+name: V2 Rebuild latest docs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release-docs:
+    permissions:
+      contents: write
+      pages: write
+    uses: ./.github/workflows/reusable_publish_docs.yml
+    with:
+      version: v2
+      alias: alpha
