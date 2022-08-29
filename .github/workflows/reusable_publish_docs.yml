@@ -1,5 +1,9 @@
 name: Reusable publish documentation
 
+env:
+  BRANCH: develop
+  ORIGIN: awslabs/aws-lambda-powertools-python
+
 on:
   workflow_call:
     inputs:
@@ -11,6 +15,11 @@ on:
         description: "Alias to associate version (latest, stage)"
         required: true
         type: string
+      detached_mode:
+        description: "Whether it's running in git detached mode to ensure git is sync'd"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -40,6 +49,13 @@ jobs:
         run: |
           git config --global user.name Docs deploy
           git config --global user.email aws-devax-open-source@amazon.com
+      - name: Git refresh tip (detached mode)
+        # Git Detached mode (release notes) doesn't have origin
+        if: ${{ inputs.detached_mode }}
+        run: |
+          git config pull.rebase true
+          git config remote.origin.url >&- || git remote add origin https://github.com/"$ORIGIN"
+          git pull origin "$BRANCH"
       - name: Build docs website and API reference
         env:
           VERSION: ${{ inputs.version }}
