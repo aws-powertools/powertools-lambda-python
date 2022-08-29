@@ -18,6 +18,7 @@ jobs:
         uses: actions/github-script@v6
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

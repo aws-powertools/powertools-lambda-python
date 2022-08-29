@@ -1,5 +1,6 @@
 const {
   PR_NUMBER,
+  PR_AUTHOR,
   IGNORE_AUTHORS,
 } = require("./constants")
 
