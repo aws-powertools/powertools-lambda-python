@@ -3,6 +3,7 @@
   "widgetContext": {
     "dashboardName": "Name-of-current-dashboard",
     "widgetId": "widget-16",
+    "domain": "https://us-east-1.console.aws.amazon.com",
     "accountId": "123456789123",
     "locale": "en",
     "timezone": {

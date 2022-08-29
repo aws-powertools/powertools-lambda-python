@@ -104,6 +104,7 @@ def test_cloud_watch_dashboard_event():
     event = CloudWatchDashboardCustomWidgetEvent(load_event("cloudWatchDashboardEvent.json"))
     assert event.describe is False
     assert event.widget_context.account_id == "123456789123"
+    assert event.widget_context.domain == "https://us-east-1.console.aws.amazon.com"
     assert event.widget_context.dashboard_name == "Name-of-current-dashboard"
     assert event.widget_context.widget_id == "widget-16"
     assert event.widget_context.locale == "en"

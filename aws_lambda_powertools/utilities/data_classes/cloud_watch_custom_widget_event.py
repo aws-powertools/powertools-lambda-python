@@ -64,6 +64,11 @@ class CloudWatchWidgetContext(DictWrapper):
         return self["widgetId"]
 
     @property
+    def domain(self) -> str:
+        """AWS domain name"""
+        return self["domain"]
+
+    @property
     def account_id(self) -> str:
         """Get AWS Account ID"""
         return self["accountId"]
