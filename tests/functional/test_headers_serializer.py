@@ -1,6 +1,4 @@
-import warnings
 from collections import defaultdict
-from typing import Dict, List
 
 import pytest
 
@@ -11,89 +9,118 @@ from aws_lambda_powertools.shared.headers_serializer import (
 )
 
 
-@pytest.mark.parametrize(
-    "cookies,headers,result",
-    [
-        ([], {}, {"cookies": [], "headers": {}}),
-        ([], {"Content-Type": ["text/html"]}, {"cookies": [], "headers": {"Content-Type": "text/html"}}),
-        (["UUID=12345"], {}, {"cookies": ["UUID=12345"], "headers": {}}),
-        (
-            ["UUID=12345", "SSID=0xdeadbeef"],
-            {"Foo": ["bar", "zbr"]},
-            {"cookies": ["UUID=12345", "SSID=0xdeadbeef"], "headers": {"Foo": "bar, zbr"}},
-        ),
-    ],
-    ids=["no_cookies", "just_headers", "just_cookies", "multiple_headers_and_cookies"],
-)
-def test_headers_serializer_http_api(cookies: List[str], headers: Dict[str, List[str]], result: Dict):
+def test_http_api_headers_serializer():
+    cookies = ["UUID=12345", "SSID=0xdeadbeef"]
+    header_values = ["bar", "zbr"]
+    headers = {"Foo": header_values}
+
     serializer = HttpApiHeadersSerializer()
     payload = serializer.serialize(headers=headers, cookies=cookies)
-    assert payload == result
+
+    assert payload["cookies"] == cookies
+    assert payload["headers"]["Foo"] == ", ".join(header_values)
 
 
-@pytest.mark.parametrize(
-    "cookies,headers,result",
-    [
-        ([], {}, {"multiValueHeaders": defaultdict(list, **{})}),
-        (
-            [],
-            {"Content-Type": ["text/html"]},
-            {"multiValueHeaders": defaultdict(list, **{"Content-Type": ["text/html"]})},
-        ),
-        (["UUID=12345"], {}, {"multiValueHeaders": defaultdict(list, **{"Set-Cookie": ["UUID=12345"]})}),
-        (
-            ["UUID=12345", "SSID=0xdeadbeef"],
-            {"Foo": ["bar", "zbr"]},
-            {
-                "multiValueHeaders": defaultdict(
-                    list, **{"Set-Cookie": ["UUID=12345", "SSID=0xdeadbeef"], "Foo": ["bar", "zbr"]}
-                )
-            },
-        ),
-    ],
-    ids=["no_cookies", "just_headers", "just_cookies", "multiple_headers_and_cookies"],
-)
-def test_headers_serializer_multi_value_headers(cookies: List[str], headers: Dict[str, List[str]], result: Dict):
+def test_http_api_headers_serializer_with_empty_values():
+    serializer = HttpApiHeadersSerializer()
+    payload = serializer.serialize(headers={}, cookies=[])
+    assert payload == {"headers": {}, "cookies": []}
+
+
+def test_http_api_headers_serializer_with_headers_only():
+    content_type = "text/html"
+    serializer = HttpApiHeadersSerializer()
+    payload = serializer.serialize(headers={"Content-Type": [content_type]}, cookies=[])
+    assert payload["headers"]["Content-Type"] == content_type
+
+
+def test_http_api_headers_serializer_with_cookies_only():
+    cookies = ["UUID=12345", "SSID=0xdeadbeef"]
+    serializer = HttpApiHeadersSerializer()
+    payload = serializer.serialize(headers={}, cookies=cookies)
+    assert payload["cookies"] == cookies
+
+
+def test_multi_value_headers_serializer():
+    cookies = ["UUID=12345", "SSID=0xdeadbeef"]
+    header_values = ["bar", "zbr"]
+    headers = {"Foo": header_values}
+
     serializer = MultiValueHeadersSerializer()
     payload = serializer.serialize(headers=headers, cookies=cookies)
-    assert payload == result
+
+    assert payload["multiValueHeaders"]["Set-Cookie"] == cookies
+    assert payload["multiValueHeaders"]["Foo"] == header_values
 
 
-def single_value_headers_serializer_with_cookies_only():
+def test_multi_value_headers_serializer_with_headers_only():
+    content_type = "text/html"
+    serializer = MultiValueHeadersSerializer()
+    payload = serializer.serialize(headers={"Content-Type": [content_type]}, cookies=[])
+    assert payload["multiValueHeaders"]["Content-Type"] == [content_type]
+
+
+def test_multi_value_headers_serializer_with_cookies_only():
+    cookie = "UUID=12345"
+    serializer = MultiValueHeadersSerializer()
+    payload = serializer.serialize(headers={}, cookies=[cookie])
+    assert payload["multiValueHeaders"]["Set-Cookie"] == [cookie]
+
+
+def test_multi_value_headers_serializer_with_empty_values():
+    serializer = MultiValueHeadersSerializer()
+    payload = serializer.serialize(headers={}, cookies=[])
+    assert payload["multiValueHeaders"] == defaultdict(list)
+
+
+def test_single_value_headers_serializer():
+    cookie = "UUID=12345"
+    content_type = "text/html"
+    headers = {"Content-Type": [content_type]}
+
+    serializer = SingleValueHeadersSerializer()
+    payload = serializer.serialize(headers=headers, cookies=[cookie])
+    assert payload["headers"]["Content-Type"] == content_type
+    assert payload["headers"]["Set-Cookie"] == cookie
+
+
+def test_single_value_headers_serializer_with_headers_only():
     content_type = "text/html"
     serializer = SingleValueHeadersSerializer()
     payload = serializer.serialize(headers={"Content-Type": [content_type]}, cookies=[])
     assert payload["headers"]["Content-Type"] == content_type
 
 
-def single_value_headers_serializer_with_headers_only():
+def test_single_value_headers_serializer_with_cookies_only():
     cookie = "UUID=12345"
     serializer = SingleValueHeadersSerializer()
     payload = serializer.serialize(headers={}, cookies=[cookie])
     assert payload["headers"] == {"Set-Cookie": cookie}
 
 
-def single_value_headers_serializer_with_empty_values():
+def test_single_value_headers_serializer_with_empty_values():
     serializer = SingleValueHeadersSerializer()
     payload = serializer.serialize(headers={}, cookies=[])
-    assert payload == {"headers": {}}
+    assert payload["headers"] == {}
 
 
-def test_multiple_cookies_with_single_value_headers_serializer():
+def test_single_value_headers_with_multiple_cookies_warning():
+    cookies = ["UUID=12345", "SSID=0xdeadbeef"]
+    warning_message = "Can't encode more than one cookie in the response. Sending the last cookie only."
     serializer = SingleValueHeadersSerializer()
 
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("default")
+    with pytest.warns(match=warning_message):
+        payload = serializer.serialize(cookies=cookies, headers={})
 
-        payload = serializer.serialize(cookies=["UUID=12345", "SSID=0xdeadbeef"], headers={"Foo": ["bar", "zbr"]})
-        assert payload == {"headers": {"Set-Cookie": "SSID=0xdeadbeef", "Foo": "zbr"}}
+    assert payload["headers"]["Set-Cookie"] == cookies[-1]
 
-        assert len(w) == 2
-        assert str(w[-2].message) == (
-            "Can't encode more than one cookie in the response. Sending the last cookie only. "
-            "Did you enable multiValueHeaders on the ALB Target Group?"
-        )
-        assert str(w[-1].message) == (
-            "Can't encode more than one header value for the same key ('Foo') in the response. "
-            "Did you enable multiValueHeaders on the ALB Target Group?"
-        )
+
+def test_single_value_headers_with_multiple_header_values_warning():
+    headers = {"Foo": ["bar", "zbr"]}
+    warning_message = "Can't encode more than one header value for the same key."
+    serializer = SingleValueHeadersSerializer()
+
+    with pytest.warns(match=warning_message):
+        payload = serializer.serialize(cookies=[], headers=headers)
+
+    assert payload["headers"]["Foo"] == headers["Foo"][-1]
