@@ -448,7 +448,6 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
 
     ```python
     from aws_lambda_powertools.utilities.data_classes import event_source, CloudWatchDashboardCustomWidgetEvent
-    from aws_lambda_powertools.utilities.data_classes.cloud_watch_logs_event import CloudWatchLogsDecodedData
 
     const DOCS = `
     ## Echo
