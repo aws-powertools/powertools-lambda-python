@@ -59,19 +59,24 @@ def test_headers_serializer_multi_value_headers(cookies: List[str], headers: Dic
     assert payload == result
 
 
-@pytest.mark.parametrize(
-    "cookies,headers,result",
-    [
-        ([], {}, {"headers": {}}),
-        ([], {"Content-Type": ["text/html"]}, {"headers": {"Content-Type": "text/html"}}),
-        (["UUID=12345"], {}, {"headers": {"Set-Cookie": "UUID=12345"}}),
-    ],
-    ids=["no_cookies", "just_headers", "just_cookies"],
-)
-def test_headers_serializer_single_value_headers(cookies: List[str], headers: Dict[str, List[str]], result: Dict):
+def single_value_headers_serializer_with_cookies_only():
+    content_type = "text/html"
     serializer = SingleValueHeadersSerializer()
-    payload = serializer.serialize(headers=headers, cookies=cookies)
-    assert payload == result
+    payload = serializer.serialize(headers={"Content-Type": [content_type]}, cookies=[])
+    assert payload["headers"]["Content-Type"] == content_type
+
+
+def single_value_headers_serializer_with_headers_only():
+    cookie = "UUID=12345"
+    serializer = SingleValueHeadersSerializer()
+    payload = serializer.serialize(headers={}, cookies=[cookie])
+    assert payload["headers"] == {"Set-Cookie": cookie}
+
+
+def single_value_headers_serializer_with_empty_values():
+    serializer = SingleValueHeadersSerializer()
+    payload = serializer.serialize(headers={}, cookies=[])
+    assert payload == {"headers": {}}
 
 
 def test_multiple_cookies_with_single_value_headers_serializer():
