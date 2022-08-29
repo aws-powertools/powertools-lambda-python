@@ -305,5 +305,8 @@ site/
 !404.html
 !docs/overrides/*.html
 
+# CDK
+.cdk
+
 !.github/workflows/lib
 examples/**/sam/.aws-sam
