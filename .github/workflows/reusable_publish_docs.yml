@@ -4,11 +4,11 @@ on:
   workflow_call:
     inputs:
       version:
-        description: "Version to build and publish docs (v1.28.0)"
+        description: "Version to build and publish docs (v1.28.0, develop)"
         required: true
         type: string
       alias:
-        description: "Alias to associate version (stage, latest)"
+        description: "Alias to associate version (latest, stage)"
         required: true
         type: string
 

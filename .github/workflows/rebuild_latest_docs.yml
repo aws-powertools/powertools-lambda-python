@@ -20,7 +20,7 @@ jobs:
       contents: write
     uses: ./.github/workflows/reusable_publish_changelog.yml
 
-  release:
+  release-docs:
     needs: changelog
     permissions:
       contents: write
