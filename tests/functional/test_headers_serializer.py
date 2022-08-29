@@ -74,7 +74,7 @@ def test_headers_serializer_single_value_headers(cookies: List[str], headers: Di
     assert payload == result
 
 
-def test_headers_serializer_single_value_headers_multiple_cookies():
+def test_multiple_cookies_with_single_value_headers_serializer():
     serializer = SingleValueHeadersSerializer()
 
     with warnings.catch_warnings(record=True) as w:
