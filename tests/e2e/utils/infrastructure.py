@@ -15,9 +15,11 @@ from aws_cdk.aws_lambda import Code, Function, LayerVersion, Runtime, Tracing
 from filelock import FileLock
 from mypy_boto3_cloudformation import CloudFormationClient
 
+from aws_lambda_powertools import PACKAGE_PATH
 from tests.e2e.utils.asset import Assets
 
 PYTHON_RUNTIME_VERSION = f"V{''.join(map(str, sys.version_info[:2]))}"
+SOURCE_CODE_ROOT_PATH = PACKAGE_PATH.parent
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +50,7 @@ class BaseInfrastructure(ABC):
 
         # NOTE: Investigate why cdk.Environment in Stack
         # changes synthesized asset (no object_key in asset manifest)
-        self.app = App()
+        self.app = App(outdir=str(SOURCE_CODE_ROOT_PATH / ".cdk"))
         self.stack = Stack(self.app, self.stack_name)
         self.session = boto3.Session()
         self.cfn: CloudFormationClient = self.session.client("cloudformation")
@@ -57,7 +59,7 @@ class BaseInfrastructure(ABC):
         self.account_id = self.session.client("sts").get_caller_identity()["Account"]
         self.region = self.session.region_name
 
-    def create_lambda_functions(self, function_props: Optional[Dict] = None):
+    def create_lambda_functions(self, function_props: Optional[Dict] = None) -> Dict[str, Function]:
         """Create Lambda functions available under handlers_dir
 
         It creates CloudFormation Outputs for every function found in PascalCase. For example,
@@ -68,6 +70,11 @@ class BaseInfrastructure(ABC):
         ----------
         function_props: Optional[Dict]
             Dictionary representing CDK Lambda FunctionProps to override defaults
+
+        Returns
+        -------
+        output: Dict[str, Function]
+            A dict with PascalCased function names and the corresponding CDK Function object
 
         Examples
         --------
@@ -97,6 +104,8 @@ class BaseInfrastructure(ABC):
 
         layer = LayerVersion.from_layer_version_arn(self.stack, "layer-arn", layer_version_arn=self.layer_arn)
         function_settings_override = function_props or {}
+        output: Dict[str, Function] = {}
+
         for fn in handlers:
             fn_name = fn.stem
             fn_name_pascal_case = fn_name.title().replace("_", "")  # basic_handler -> BasicHandler
@@ -123,6 +132,10 @@ class BaseInfrastructure(ABC):
 
             # CFN Outputs only support hyphen hence pascal case
             self.add_cfn_output(name=fn_name_pascal_case, value=function.function_name, arn=function.function_arn)
+
+            output[fn_name_pascal_case] = function
+
+        return output
 
     def deploy(self) -> Dict[str, str]:
         """Creates CloudFormation Stack and return stack outputs as dict
@@ -287,7 +300,7 @@ class LambdaLayerStack(BaseInfrastructure):
             layer_version_name="aws-lambda-powertools-e2e-test",
             compatible_runtimes=[PythonVersion[PYTHON_RUNTIME_VERSION].value["runtime"]],
             code=Code.from_asset(
-                path=".",
+                path=str(SOURCE_CODE_ROOT_PATH),
                 bundling=BundlingOptions(
                     image=DockerImage.from_build(
                         str(Path(__file__).parent),

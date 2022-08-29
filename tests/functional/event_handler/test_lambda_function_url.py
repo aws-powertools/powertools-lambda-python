@@ -21,7 +21,28 @@ def test_lambda_function_url_event():
     # AND set the current_event type as LambdaFunctionUrlEvent
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.TEXT_HTML
+    assert "Cookies" not in result["headers"]
     assert result["body"] == "foo"
+
+
+def test_lambda_function_url_event_with_cookies():
+    # GIVEN a Lambda Function Url type event
+    app = LambdaFunctionUrlResolver()
+    cookie = "CookieMonster"
+
+    @app.get("/")
+    def foo():
+        assert isinstance(app.current_event, LambdaFunctionUrlEvent)
+        assert app.lambda_context == {}
+        return Response(200, content_types.TEXT_PLAIN, "foo", cookies=[cookie])
+
+    # WHEN calling the event handler
+    result = app(load_event("lambdaFunctionUrlEvent.json"), {})
+
+    # THEN process event correctly
+    # AND set the current_event type as LambdaFunctionUrlEvent
+    assert result["statusCode"] == 200
+    assert result["cookies"] == [cookie]
 
 
 def test_lambda_function_url_no_matches():
