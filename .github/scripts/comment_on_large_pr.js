@@ -24,7 +24,7 @@ const notifyAuthor = async ({
 
     let msg = `### ⚠️Large PR detected⚠️
 
-    Please consider breaking into smaller PRs to avoid significant review delays. Ignore if this PR has naturally grown to this size after reviews.
+Please consider breaking into smaller PRs to avoid significant review delays. Ignore if this PR has naturally grown to this size after reviews.
     `;
 
     try {
