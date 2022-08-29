@@ -22,8 +22,7 @@ const notifyAuthor = async ({
 }) => {
     core.info(`Commenting on PR ${PR_NUMBER}`)
 
-    let msg = `
-    ### ⚠️Large PR detected⚠️.
+    let msg = `### ⚠️Large PR detected⚠️
 
     Please consider breaking into smaller PRs to avoid significant review delays. Ignore if this PR has naturally grown to this size after reviews.
     `;

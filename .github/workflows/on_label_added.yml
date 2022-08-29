@@ -24,6 +24,7 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v3
+      # Maintenance: Persist state per PR as an artifact to avoid spam on label add
       - name: "Suggest split large Pull Request"
         uses: actions/github-script@v6
         env:
