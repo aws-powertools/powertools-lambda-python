@@ -2,7 +2,7 @@ name: Record PR details
 
 on:
   pull_request:
-    types: [opened, edited, closed]
+    types: [opened, edited, closed, labeled]
 
 jobs:
   record_pr:
