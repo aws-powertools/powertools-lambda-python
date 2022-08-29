@@ -19,6 +19,7 @@ jobs:
     needs: changelog
     permissions:
       contents: write
+      pages: write
     uses: ./.github/workflows/reusable_publish_docs.yml
     with:
       version: develop
