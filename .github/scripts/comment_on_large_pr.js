@@ -6,7 +6,16 @@ const {
 } = require("./constants")
 
 
+/**
+ * Notify PR author to split XXL PR in smaller chunks
+ *
+ * @param {object} core - core functions instance from @actions/core
+ * @param {object} gh_client - Pre-authenticated REST client (Octokit)
+ * @param {string} owner - GitHub Organization
+ * @param {string} repository - GitHub repository
+ */
 const notifyAuthor = async ({
+  core,
   gh_client,
   owner,
   repository,
@@ -54,6 +63,7 @@ module.exports = async ({github, context, core}) => {
       core.info(`Label: ${label}`)
       if (label.name == "size/XXL") {
         await notifyAuthor({
+          core: core,
           gh_client: github,
           owner: context.repo.owner,
           repository: context.repo.repo,
