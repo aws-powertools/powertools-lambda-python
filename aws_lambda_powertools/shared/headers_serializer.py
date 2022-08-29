@@ -1,6 +1,6 @@
 import warnings
 from collections import defaultdict
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 
 class BaseHeadersSerializer:
@@ -9,7 +9,7 @@ class BaseHeadersSerializer:
     ALB and Lambda Function URL response payload.
     """
 
-    def serialize(self, headers: Dict[str, List[str]], cookies: List[str]) -> Dict[str, Any]:
+    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[str]) -> Dict[str, Any]:
         """
         Serializes headers and cookies according to the request type.
         Returns a dict that can be merged with the response payload.
@@ -25,7 +25,7 @@ class BaseHeadersSerializer:
 
 
 class HttpApiHeadersSerializer(BaseHeadersSerializer):
-    def serialize(self, headers: Dict[str, List[str]], cookies: List[str]) -> Dict[str, Any]:
+    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[str]) -> Dict[str, Any]:
         """
         When using HTTP APIs or LambdaFunctionURLs, everything is taken care automatically for us.
         We can directly assign a list of cookies and a dict of headers to the response payload, and the
@@ -39,13 +39,16 @@ class HttpApiHeadersSerializer(BaseHeadersSerializer):
         # Duplicate headers are combined with commas and included in the headers field.
         combined_headers: Dict[str, str] = {}
         for key, values in headers.items():
-            combined_headers[key] = ", ".join(values)
+            if isinstance(values, str):
+                combined_headers[key] = values
+            else:
+                combined_headers[key] = ", ".join(values)
 
         return {"headers": combined_headers, "cookies": cookies}
 
 
 class MultiValueHeadersSerializer(BaseHeadersSerializer):
-    def serialize(self, headers: Dict[str, List[str]], cookies: List[str]) -> Dict[str, Any]:
+    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[str]) -> Dict[str, Any]:
         """
         When using REST APIs, headers can be encoded using the `multiValueHeaders` key on the response.
         This is also the case when using an ALB integration with the `multiValueHeaders` option enabled.
@@ -57,8 +60,11 @@ class MultiValueHeadersSerializer(BaseHeadersSerializer):
         payload: Dict[str, List[str]] = defaultdict(list)
 
         for key, values in headers.items():
-            for value in values:
-                payload[key].append(value)
+            if isinstance(values, str):
+                payload[key].append(values)
+            else:
+                for value in values:
+                    payload[key].append(value)
 
         if cookies:
             payload.setdefault("Set-Cookie", [])
@@ -69,7 +75,7 @@ class MultiValueHeadersSerializer(BaseHeadersSerializer):
 
 
 class SingleValueHeadersSerializer(BaseHeadersSerializer):
-    def serialize(self, headers: Dict[str, List[str]], cookies: List[str]) -> Dict[str, Any]:
+    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[str]) -> Dict[str, Any]:
         """
         The ALB integration has `multiValueHeaders` disabled by default.
         If we try to set multiple headers with the same key, or more than one cookie, print a warning.
@@ -90,13 +96,16 @@ class SingleValueHeadersSerializer(BaseHeadersSerializer):
             payload["headers"]["Set-Cookie"] = cookies[-1]
 
         for key, values in headers.items():
-            if len(values) > 1:
-                warnings.warn(
-                    f"Can't encode more than one header value for the same key ('{key}') in the response. "
-                    "Did you enable multiValueHeaders on the ALB Target Group?"
-                )
+            if isinstance(values, str):
+                payload["headers"][key] = values
+            else:
+                if len(values) > 1:
+                    warnings.warn(
+                        f"Can't encode more than one header value for the same key ('{key}') in the response. "
+                        "Did you enable multiValueHeaders on the ALB Target Group?"
+                    )
 
-            # We can only set one header per key, send the last one
-            payload["headers"][key] = values[-1]
+                # We can only set one header per key, send the last one
+                payload["headers"][key] = values[-1]
 
         return payload

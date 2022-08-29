@@ -33,8 +33,11 @@ Before you start, we suggest making a copy of your current working project or cr
 
 The `Response` class of the event handler utility changed slightly:
 
-1. The `headers` parameter now expects a list of values per header (type `Dict[str, List[str]]`)
+1. The `headers` parameter now expects either a value or list of values per header (type `Union[str, Dict[str, List[str]]]`)
 2. We introduced a new `cookies` parameter (type `List[str]`)
+
+???+ note
+    Code that set headers as `Dict[str, str]` will still work unchanged.
 
 ```python hl_lines="6 12 13"
 @app.get("/todos")
@@ -52,4 +55,3 @@ def get_todos():
         cookies=["CookieName=CookieValue"]
     )
 ```
-

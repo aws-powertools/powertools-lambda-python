@@ -34,6 +34,13 @@ def test_http_api_headers_serializer_with_headers_only():
     assert payload["headers"]["Content-Type"] == content_type
 
 
+def test_http_api_headers_serializer_with_single_headers_only():
+    content_type = "text/html"
+    serializer = HttpApiHeadersSerializer()
+    payload = serializer.serialize(headers={"Content-Type": content_type}, cookies=[])
+    assert payload["headers"]["Content-Type"] == content_type
+
+
 def test_http_api_headers_serializer_with_cookies_only():
     cookies = ["UUID=12345", "SSID=0xdeadbeef"]
     serializer = HttpApiHeadersSerializer()
@@ -57,6 +64,13 @@ def test_multi_value_headers_serializer_with_headers_only():
     content_type = "text/html"
     serializer = MultiValueHeadersSerializer()
     payload = serializer.serialize(headers={"Content-Type": [content_type]}, cookies=[])
+    assert payload["multiValueHeaders"]["Content-Type"] == [content_type]
+
+
+def test_multi_value_headers_serializer_with_single_headers_only():
+    content_type = "text/html"
+    serializer = MultiValueHeadersSerializer()
+    payload = serializer.serialize(headers={"Content-Type": content_type}, cookies=[])
     assert payload["multiValueHeaders"]["Content-Type"] == [content_type]
 
 
@@ -88,6 +102,13 @@ def test_single_value_headers_serializer_with_headers_only():
     content_type = "text/html"
     serializer = SingleValueHeadersSerializer()
     payload = serializer.serialize(headers={"Content-Type": [content_type]}, cookies=[])
+    assert payload["headers"]["Content-Type"] == content_type
+
+
+def test_single_value_headers_serializer_with_single_headers_only():
+    content_type = "text/html"
+    serializer = SingleValueHeadersSerializer()
+    payload = serializer.serialize(headers={"Content-Type": content_type}, cookies=[])
     assert payload["headers"]["Content-Type"] == content_type
 
 
