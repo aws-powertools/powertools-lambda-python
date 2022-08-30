@@ -1,7 +1,8 @@
-from base64 import b64decode
-from typing import Dict, Iterator
+import json
+import base64
+from typing import Any, Dict, Iterator
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, get_header_value
 
 
 class KafkaEventRecord(DictWrapper):
@@ -31,23 +32,58 @@ class KafkaEventRecord(DictWrapper):
         return self["timestamp_type"]
 
     @property
-    def key(self) -> bytes:
-        """The base64 decoded Kafka record key."""
-        return b64decode(self.key)
+    def key(self) -> str:
+        """The raw (base64 encoded) Kafka record key."""
+        return self["key"]
 
     @property
-    def value(self) -> bytes:
-        """The base64 decoded Kafka record value."""
-        return b64decode(self.value)
+    def decoded_key(self) -> bytes:
+        """Decode the base64 encoded key as bytes."""
+        return base64.b64decode(self.key)
 
     @property
-    def headers(self) -> Dict[str, bytes]:
-        """The decoded Kafka record headers."""
-        headers = {}
-        for chunk in self["headers"]:
-            for key, val in chunk.items():
-                headers[key] = bytes(val)
-        return headers
+    def value(self) -> str:
+        """The raw (base64 encoded) Kafka record value."""
+        return self["value"]
+
+    @property
+    def decoded_value(self) -> bytes:
+        """Decodes the base64 encoded value as bytes."""
+        return base64.b64decode(self.value)
+
+    @property
+    def json_value(self) -> Any:
+        """Decodes the text encoded data as JSON."""
+        if self._json_data is None:
+            self._json_data = json.loads(self.decoded_value.decode("utf-8"))
+        return self._json_data
+
+    @property
+    def headers(self) -> List[Dict[str, List[int]]]:
+        """The raw Kafka record headers."""
+        return self["headers"]
+
+    @property
+    def decoded_headers(self) -> Dict[str, bytes]:
+        """Decodes the headers as a single dictionary."""
+        if self._headers is None:
+            self._headers = {k: bytes(v) for k, v in chunk.items() for chunk in self.headers}
+        return self._headers
+
+    def get_header_value(
+        self, name: str, default_value: Optional[Any] = None, case_sensitive: bool = True
+    ) -> Optional[bytes]:
+        """Get a decoded header value by name."""
+        if case_sensitive:
+            return self.decoded_headers.get(name, default_value)
+        name_lower = name.lower()
+
+        return next(
+            # Iterate over the dict and do a case-insensitive key comparison
+            (value for key, value in self.decoded_headers.items() if key.lower() == name_lower),
+            # Default value is returned if no matches was found
+            default_value,
+        )
 
 
 class KafkaEvent(DictWrapper):
