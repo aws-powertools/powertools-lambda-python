@@ -12,8 +12,8 @@ from .connect_contact_flow_event import ConnectContactFlowEvent
 from .dynamo_db_stream_event import DynamoDBStreamEvent
 from .event_bridge_event import EventBridgeEvent
 from .event_source import event_source
+from .kafka_event import KafkaEvent
 from .kinesis_stream_event import KinesisStreamEvent
-from .kafka import KafkaEvent
 from .lambda_function_url_event import LambdaFunctionUrlEvent
 from .s3_event import S3Event
 from .ses_event import SESEvent

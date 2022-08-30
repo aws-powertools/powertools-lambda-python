@@ -17,6 +17,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     CloudWatchLogsEvent,
     CodePipelineJobEvent,
     EventBridgeEvent,
+    KafkaEvent,
     KinesisStreamEvent,
     S3Event,
     SESEvent,
@@ -1136,6 +1137,30 @@ def test_base_proxy_event_json_body_with_base64_encoded_data():
     # WHEN calling json_body
     # THEN base64 decode and json load
     assert event.json_body == data
+
+
+def test_kafka_event():
+    event = KafkaEvent(load_event("kafkaEvent.json"))
+    assert event.event_source == "aws:SelfManagedKafka"
+    bootstrap_servers = [
+        "b-2.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
+        "b-1.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
+    ]
+    assert event.bootstrap_servers == bootstrap_servers
+
+    records = list(event.records)
+    assert len(records) == 1
+    record = records[0]
+    assert record.topic == "mytopic"
+    assert record.partition == 0
+    assert record.offset == 15
+    assert record.timestamp == 1545084650987
+    assert record.timestamp_type == "CREATE_TIME"
+    assert record.decoded_key == b"recordKey"
+    assert record.value == "eyJrZXkiOiJ2YWx1ZSJ9"
+    assert record.json_value == {"key": "value"}
+    assert record.decoded_headers == {"headerKey": b"headerValue"}
+    assert record.get_header_value("HeaderKey", case_sensitive=False) == b"headerValue"
 
 
 def test_kinesis_stream_event():

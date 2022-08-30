@@ -1,8 +1,8 @@
-import json
 import base64
-from typing import Any, Dict, Iterator
+import json
+from typing import Any, Dict, Iterator, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, get_header_value
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
 class KafkaEventRecord(DictWrapper):
@@ -29,7 +29,7 @@ class KafkaEventRecord(DictWrapper):
     @property
     def timestamp_type(self) -> str:
         """The Kafka record timestamp type."""
-        return self["timestamp_type"]
+        return self["timestampType"]
 
     @property
     def key(self) -> str:
@@ -66,9 +66,7 @@ class KafkaEventRecord(DictWrapper):
     @property
     def decoded_headers(self) -> Dict[str, bytes]:
         """Decodes the headers as a single dictionary."""
-        if self._headers is None:
-            self._headers = {k: bytes(v) for k, v in chunk.items() for chunk in self.headers}
-        return self._headers
+        return {k: bytes(v) for chunk in self.headers for k, v in chunk.items()}
 
     def get_header_value(
         self, name: str, default_value: Optional[Any] = None, case_sensitive: bool = True
@@ -104,9 +102,11 @@ class KafkaEvent(DictWrapper):
         return self["eventSourceArn"]
 
     @property
-    def bootstrap_servers(self) -> str:
+    def bootstrap_servers(self) -> List[str]:
         """The Kafka bootstrap URL."""
-        return self["bootstrapServers"]
+        if "bootstrapServers" not in self:
+            return None
+        return self["bootstrapServers"].split(",")
 
     @property
     def records(self) -> Iterator[KafkaEventRecord]:
