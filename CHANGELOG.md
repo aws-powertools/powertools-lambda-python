@@ -6,30 +6,47 @@
 
 ## Bug Fixes
 
+* **ci:** pass core fns to large pr workflow script
+* **ci:** on_label permissioning model & workflow execution
 * **ci:** ensure PR_AUTHOR is present for large_pr_split workflow
 * **ci:** gracefully and successful exit changelog upon no changes
 * **ci:** event resolution for on_label_added workflow
+* **event_handler:** fix bug with previous array implementation
 
 ## Documentation
 
+* **homepage:** note about v2 version
 * **layer:** upgrade to 1.28.0 (v33)
 
 ## Features
 
 * **ci:** add actionlint in pre-commit hook
+* **event_handler:** improved support for headers and cookies in v2 ([#1455](https://github.com/awslabs/aws-lambda-powertools-python/issues/1455))
 * **event_sources:** add CloudWatch dashboard custom widget event ([#1474](https://github.com/awslabs/aws-lambda-powertools-python/issues/1474))
 
 ## Maintenance
 
+* **bandit:** update baseline
 * **ci:** add missing description fields
+* **ci:** limit E2E workflow run for source code change
+* **ci:** create adhoc docs workflow for v2
+* **ci:** create adhoc docs workflow for v2
+* **ci:** create docs workflow for v2
+* **ci:** create reusable docs publishing workflow ([#1482](https://github.com/awslabs/aws-lambda-powertools-python/issues/1482))
+* **ci:** format comment  on comment_large_pr script
+* **ci:** add note for state persistence on comment_large_pr
+* **ci:** destructure assignment on comment_large_pr
+* **ci:** record pr details upon labeling
+* **ci:** sync package version with pypi
+* **ci:** remove unused and undeclared OS matrix env
 * **ci:** enable ci checks for v2
 * **ci:** add workflow to suggest splitting large PRs ([#1480](https://github.com/awslabs/aws-lambda-powertools-python/issues/1480))
 * **ci:** add linter for GitHub Actions as pre-commit hook ([#1479](https://github.com/awslabs/aws-lambda-powertools-python/issues/1479))
 * **ci:** remove dangling debug step
 * **ci:** fix invalid dependency leftover
-* **ci:** remove unused and undeclared OS matrix env
-* **ci:** limit E2E workflow run for source code change
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.24.55.post1 to 1.24.60 ([#306](https://github.com/awslabs/aws-lambda-powertools-python/issues/306))
 * **deps-dev:** bump mypy-boto3-dynamodb from 1.24.55.post1 to 1.24.60 ([#1481](https://github.com/awslabs/aws-lambda-powertools-python/issues/1481))
+* **deps-dev:** bump mkdocs-material from 8.4.1 to 8.4.2 ([#1483](https://github.com/awslabs/aws-lambda-powertools-python/issues/1483))
 * **maintainers:** update release workflow link
 
 
