@@ -13,6 +13,7 @@ from http import HTTPStatus
 from typing import Any, Callable, Dict, List, Match, Optional, Pattern, Set, Tuple, Type, Union
 
 from aws_lambda_powertools.event_handler import content_types
+from aws_lambda_powertools.event_handler.cookies import Cookie
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
@@ -147,7 +148,7 @@ class Response:
         content_type: Optional[str],
         body: Union[str, bytes, None],
         headers: Optional[Dict[str, Union[str, List[str]]]] = None,
-        cookies: Optional[List[str]] = None,
+        cookies: Optional[List[Cookie]] = None,
     ):
         """
 
@@ -162,7 +163,7 @@ class Response:
             Optionally set the response body. Note: bytes body will be automatically base64 encoded
         headers: dict[str, Union[str, List[str]]]
             Optionally set specific http headers. Setting "Content-Type" here would override the `content_type` value.
-        cookies: list[str]
+        cookies: list[Cookie]
             Optionally set cookies.
         """
         self.status_code = status_code
