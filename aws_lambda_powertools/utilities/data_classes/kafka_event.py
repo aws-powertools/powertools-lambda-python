@@ -102,7 +102,7 @@ class KafkaEvent(DictWrapper):
         return self["eventSourceArn"]
 
     @property
-    def bootstrap_servers(self) -> List[str]:
+    def bootstrap_servers(self) -> Optional[List[str]]:
         """The Kafka bootstrap URL."""
         if "bootstrapServers" not in self:
             return None
