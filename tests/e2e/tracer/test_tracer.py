@@ -35,6 +35,11 @@ def async_fn(infrastructure: dict) -> str:
     return infrastructure.get("AsyncCapture", "")
 
 
+# NOTE: Quick test to confirm VPC can be resolved
+def test_vpc():
+    pass
+
+
 def test_lambda_handler_trace_is_visible(basic_handler_fn_arn: str, basic_handler_fn: str):
     # GIVEN
     handler_name = basic_handler.lambda_handler.__name__

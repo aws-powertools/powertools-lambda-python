@@ -24,15 +24,9 @@ class AssetTemplateConfigDestinationsAccount(BaseModel):
     assume_role_arn: str = Field(str, alias="assumeRoleArn")
 
 
-class AssetTemplateConfigDestinations(BaseModel):
-    current_account_current_region: AssetTemplateConfigDestinationsAccount = Field(
-        AssetTemplateConfigDestinationsAccount, alias="current_account-current_region"
-    )
-
-
 class AssetTemplateConfig(BaseModel):
     source: AssetManifest
-    destinations: AssetTemplateConfigDestinations
+    destinations: Dict[str, AssetTemplateConfigDestinationsAccount]
 
 
 class TemplateAssembly(BaseModel):
@@ -63,8 +57,12 @@ class Asset:
         self.region = region
         self.asset_path = config.source.path
         self.asset_packaging = config.source.packaging
-        self.object_key = config.destinations.current_account_current_region.object_key
-        self._bucket = config.destinations.current_account_current_region.bucket_name
+
+        # NOTE: When using cdk.Environment in a Stack instance
+        # CDK changes its destination asset to a dynamic key using <account>-<region>
+        self.asset_env_mapping = f"{self.account_id}-{self.region}"
+        self.object_key = config.destinations.get(self.asset_env_mapping).object_key  # type: ignore[union-attr]
+        self._bucket = config.destinations.get(self.asset_env_mapping).bucket_name  # type: ignore[union-attr]
         self.bucket_name = self._resolve_bucket_name()
 
     @property
