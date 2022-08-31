@@ -1,0 +1,142 @@
+name: Publish to PyPi
+
+# RELEASE PROCESS
+#
+# === Manual activities ===
+#
+# 1. Edit the current draft release notes
+# 2. If not already set, use `v<new version>` as a tag, e.g., v1.26.4, and select develop as target branch
+#
+# === Automated activities ===
+#
+# 1. Extract release notes tag that was published
+# 2. Run tests, linting, security and complexity base line
+# 3. Bump package version and generate latest Changelog
+# 4. Publish package to PyPi test and prod repository
+# 5. Kick off SAR App pipeline to publish latest version with minimal and extra dependencies
+# 6. Builds and publish latest changelog from tip of the branch
+# 7. Builds a new user guide and API docs with release version; update /latest pointing to newly released version
+# 8. Close all issues labeled "pending-release" and notify customers about the release
+
+# See MAINTAINERS.md "Releasing a new version" for release mechanisms
+
+env:
+  BRANCH: develop
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version_to_publish:
+        description: "Version to be released in PyPi, Docs, and Lambda Layer, e.g. v1.26.4"
+        default: v1.26.4
+        required: true
+      skip_pypi:
+        description: "Skip publishing to PyPi as it can't publish more than once. Useful for semi-failed releases"
+        default: false
+        type: boolean
+        required: false
+      skip_code_quality:
+        description: "Skip tests, linting, and baseline. Only use if release fail for reasons beyond our control and you need a quick release."
+        default: false
+        type: boolean
+        required: false
+
+jobs:
+  release:
+    environment: release
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
+    env:
+      RELEASE_TAG_VERSION: ${{ github.event.release.tag_name || inputs.version_to_publish }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "poetry"
+      - name: Set release notes tag
+        id: release_version
+        # transform tag format `v<version` to `<version`
+        run: |
+          RELEASE_VERSION="${RELEASE_TAG_VERSION:1}"
+          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_ENV"
+          echo "::set-output name=RELEASE_VERSION::${RELEASE_VERSION}"
+      - name: Install dependencies
+        run: make dev
+      - name: Run all tests, linting and baselines
+        if: ${{ !inputs.skip_code_quality }}
+        run: make pr
+      - name: Bump package version
+        run: poetry version "${RELEASE_VERSION}"
+      - name: Build python package and wheel
+        if: ${{ !inputs.skip_pypi }}
+        run: poetry build
+      - name: Upload to PyPi test
+        if: ${{ !inputs.skip_pypi }}
+        run: make release-test
+        env:
+          PYPI_USERNAME: __token__
+          PYPI_TEST_TOKEN: ${{ secrets.PYPI_TEST_TOKEN }}
+      - name: Upload to PyPi prod
+        if: ${{ !inputs.skip_pypi }}
+        run: make release-prod
+        env:
+          PYPI_USERNAME: __token__
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+      - name: aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.AWS_SAR_ROLE_ARN }}
+      - name: publish lambda layer in SAR by triggering the internal codepipeline
+        run: |
+          aws ssm put-parameter --name "powertools-python-release-version" --value "$RELEASE_VERSION" --overwrite
+          aws codepipeline start-pipeline-execution --name ${{ secrets.AWS_SAR_PIPELINE_NAME }}
+
+  changelog:
+    needs: release
+    permissions:
+      contents: write
+    uses: ./.github/workflows/reusable_publish_changelog.yml
+
+  docs:
+    needs: [release, changelog]
+    permissions:
+      contents: write
+      pages: write
+    uses: ./.github/workflows/reusable_publish_docs.yml
+    with:
+      version: ${{ needs.release.outputs.RELEASE_VERSION }}
+      alias: latest
+      detached_mode: true
+
+  post_release:
+    needs: release
+    permissions:
+      contents: read
+      issues: write
+      discussions: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: ${{ needs.release.outputs.RELEASE_VERSION }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Close issues related to this release
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const post_release = require('.github/scripts/post_release.js')
+            await post_release({github, context, core})

@@ -32,7 +32,7 @@ _DYNAMIC_ROUTE_PATTERN = r"(<\w+>)"
 _SAFE_URI = "-._~()'!*:@,;"  # https://www.ietf.org/rfc/rfc3986.txt
 # API GW/ALB decode non-safe URI chars; we must support them too
 _UNSAFE_URI = "%<> \[\]{}|^"  # noqa: W605
-_NAMED_GROUP_BOUNDARY_PATTERN = fr"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
+_NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 
 
 class ProxyEventType(Enum):
@@ -124,10 +124,11 @@ class CORSConfig:
 
     def to_dict(self) -> Dict[str, str]:
         """Builds the configured Access-Control http headers"""
-        headers = {
+        headers: Dict[str, str] = {
             "Access-Control-Allow-Origin": self.allow_origin,
             "Access-Control-Allow-Headers": ",".join(sorted(self.allow_headers)),
         }
+
         if self.expose_headers:
             headers["Access-Control-Expose-Headers"] = ",".join(self.expose_headers)
         if self.max_age is not None:
@@ -145,7 +146,8 @@ class Response:
         status_code: int,
         content_type: Optional[str],
         body: Union[str, bytes, None],
-        headers: Optional[Dict] = None,
+        headers: Optional[Dict[str, Union[str, List[str]]]] = None,
+        cookies: Optional[List[str]] = None,
     ):
         """
 
@@ -158,13 +160,16 @@ class Response:
             provided http headers
         body: Union[str, bytes, None]
             Optionally set the response body. Note: bytes body will be automatically base64 encoded
-        headers: dict
-            Optionally set specific http headers. Setting "Content-Type" hear would override the `content_type` value.
+        headers: dict[str, Union[str, List[str]]]
+            Optionally set specific http headers. Setting "Content-Type" here would override the `content_type` value.
+        cookies: list[str]
+            Optionally set cookies.
         """
         self.status_code = status_code
         self.body = body
         self.base64_encoded = False
-        self.headers: Dict = headers or {}
+        self.headers: Dict[str, Union[str, List[str]]] = headers if headers else {}
+        self.cookies = cookies or []
         if content_type:
             self.headers.setdefault("Content-Type", content_type)
 
@@ -196,11 +201,12 @@ class ResponseBuilder:
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
-        self.response.headers["Cache-Control"] = cache_control if self.response.status_code == 200 else "no-cache"
+        cache_control = cache_control if self.response.status_code == 200 else "no-cache"
+        self.response.headers["Cache-Control"] = cache_control
 
     def _compress(self):
         """Compress the response body, but only if `Accept-Encoding` headers includes gzip."""
-        self.response.headers["Content-Encoding"] = "gzip"
+        self.response.headers["Content-Encoding"].append("gzip")
         if isinstance(self.response.body, str):
             logger.debug("Converting string response to bytes before compressing it")
             self.response.body = bytes(self.response.body, "utf-8")
@@ -226,11 +232,12 @@ class ResponseBuilder:
             logger.debug("Encoding bytes response with base64")
             self.response.base64_encoded = True
             self.response.body = base64.b64encode(self.response.body).decode()
+
         return {
             "statusCode": self.response.status_code,
-            "headers": self.response.headers,
             "body": self.response.body,
             "isBase64Encoded": self.response.base64_encoded,
+            **event.header_serializer().serialize(headers=self.response.headers, cookies=self.response.cookies),
         }
 
 
@@ -596,7 +603,7 @@ class ApiGatewayResolver(BaseRouter):
 
     def _not_found(self, method: str) -> ResponseBuilder:
         """Called when no matching route was found and includes support for the cors preflight response"""
-        headers = {}
+        headers: Dict[str, Union[str, List[str]]] = {}
         if self._cors:
             logger.debug("CORS is enabled, updating headers.")
             headers.update(self._cors.to_dict())

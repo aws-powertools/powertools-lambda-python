@@ -1,9 +1,24 @@
-name: run-e2e-tests
+name: Run end-to-end tests
+
 on:
   workflow_dispatch:
+
+  push:
+    branches: [develop, v2]
+    paths:
+      - "aws_lambda_powertools/**"
+      - "tests/e2e/**"
+      - "pyproject.toml"
+      - "poetry.lock"
+      - "mypy.ini"
+      - "parallel_run_e2e.py"
+
+# Maintenance: Add support for triggering on `run-e2e` label
+# and enforce repo origin to prevent abuse
+
 env:
   AWS_DEFAULT_REGION: us-east-1
-  E2E_TESTS_PATH: tests/e2e/
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -12,7 +27,9 @@ jobs:
       contents: read
     strategy:
       matrix:
+        # Maintenance: disabled until we discover concurrency lock issue with multiple versions and tmp
         version: ["3.7", "3.8", "3.9"]
+        # version: ["3.7"]
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3

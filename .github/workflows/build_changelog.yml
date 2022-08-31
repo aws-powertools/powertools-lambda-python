@@ -1,0 +1,9 @@
+# Standalone workflow to update changelog if necessary
+name: Build changelog
+
+on:
+  workflow_dispatch:
+
+jobs:
+  changelog:
+    uses: ./.github/workflows/reusable_publish_changelog.yml
