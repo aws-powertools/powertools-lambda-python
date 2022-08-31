@@ -206,7 +206,7 @@ class ResponseBuilder:
 
     def _compress(self):
         """Compress the response body, but only if `Accept-Encoding` headers includes gzip."""
-        self.response.headers["Content-Encoding"].append("gzip")
+        self.response.headers["Content-Encoding"] = "gzip"
         if isinstance(self.response.body, str):
             logger.debug("Converting string response to bytes before compressing it")
             self.response.body = bytes(self.response.body, "utf-8")
