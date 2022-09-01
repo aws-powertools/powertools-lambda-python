@@ -310,3 +310,5 @@ site/
 
 !.github/workflows/lib
 examples/**/sam/.aws-sam
+
+cdk.out
