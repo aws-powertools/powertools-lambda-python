@@ -1,13 +1,15 @@
+import json
+import os
 from pathlib import Path
 
 import pytest
 
 from tests.e2e.tracer.infrastructure import TracerStack
 
+PWD = Path(__file__).parent
 
-@pytest.fixture(autouse=True, scope="module")
-# NOTE: Commented out for faster debug as we don't need a Layer yet
 # def infrastructure(request: pytest.FixtureRequest, lambda_layer_arn: str):
+@pytest.fixture(autouse=True, scope="module")
 def infrastructure(request: pytest.FixtureRequest):
     """Setup and teardown logic for E2E test infrastructure
 

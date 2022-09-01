@@ -1,10 +1,13 @@
 from pathlib import Path
 
-from aws_cdk import aws_ec2, aws_ssm
+from aws_cdk import aws_ec2
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
+from aws_cdk import aws_ssm
 
 from tests.e2e.utils.data_builder import build_service_name
 from tests.e2e.utils.infrastructure import BaseInfrastructure
+
+PWD = Path(__file__).parent
 
 
 class TracerStack(BaseInfrastructure):
@@ -26,14 +29,15 @@ class TracerStack(BaseInfrastructure):
             self.stack,
             "VPC",
             is_default=True,
-            region="eu-west-1"
-            # vpc_id="vpc-4d79432b",  # NOTE: hardcode didn't work either
+            region=self.region,
         )
 
-        # NOTE: Same issue with any other lookup.
-        # # string_value = aws_ssm.StringParameter.from_string_parameter_attributes(
-        # #     self.stack, "MyValue", parameter_name="/db/proxy_arn"
-        # # ).string_value
+        aws_ssm.StringParameter(self.stack, "MyParam", string_value="blah", parameter_name="/dummy/cdk/param")
 
-        alb = elbv2.ApplicationLoadBalancer(self.stack, "pqp", vpc=vpc, internet_facing=True)
-        self.add_cfn_output(name="ALB", value=alb.load_balancer_dns_name, arn=alb.load_balancer_arn)
+        # NOTE: Tokens work, but `lookup` doesn't due to context being populated by the CLI
+        latest_string_token = aws_ssm.StringParameter.value_for_string_parameter(self.stack, "/db/proxy_arn")
+
+        # alb = elbv2.ApplicationLoadBalancer(self.stack, "pqp", vpc=vpc, internet_facing=True)
+        # self.add_cfn_output(name="ALB", value=alb.load_balancer_dns_name, arn=alb.load_balancer_arn)
+        self.add_cfn_output(name="ProxyArn", value=latest_string_token)
+        self.add_cfn_output(name="LookupVPC", value=vpc.vpc_arn)

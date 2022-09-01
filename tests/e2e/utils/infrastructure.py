@@ -1,6 +1,9 @@
 import json
 import logging
+import os
+import subprocess
 import sys
+import textwrap
 from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
@@ -9,7 +12,6 @@ from uuid import uuid4
 
 import boto3
 import pytest
-import yaml
 from aws_cdk import (
     App,
     AssetStaging,
@@ -26,10 +28,10 @@ from filelock import FileLock
 from mypy_boto3_cloudformation import CloudFormationClient
 
 from aws_lambda_powertools import PACKAGE_PATH
-from tests.e2e.utils.asset import Assets
 
 PYTHON_RUNTIME_VERSION = f"V{''.join(map(str, sys.version_info[:2]))}"
 SOURCE_CODE_ROOT_PATH = PACKAGE_PATH.parent
+CDK_OUT_PATH = SOURCE_CODE_ROOT_PATH / "cdk.out"
 
 logger = logging.getLogger(__name__)
 
@@ -51,12 +53,15 @@ class PythonVersion(Enum):
 
 
 class BaseInfrastructure(ABC):
+    RANDOM_STACK_VALUE: str = f"{uuid4()}"
+
     def __init__(self, feature_name: str, handlers_dir: Path, layer_arn: str = "") -> None:
         self.feature_name = feature_name
-        self.stack_name = f"test{PYTHON_RUNTIME_VERSION}-{feature_name}-{uuid4()}"
+        self.stack_name = f"test{PYTHON_RUNTIME_VERSION}-{feature_name}-{self.RANDOM_STACK_VALUE}"
         self.handlers_dir = handlers_dir
         self.layer_arn = layer_arn
         self.stack_outputs: Dict[str, str] = {}
+        self.stack_outputs_file = f"{CDK_OUT_PATH / self.feature_name}_stack_outputs.json"  # tracer_stack_outputs.json
 
         # NOTE: CDK stack account and region are tokens, we need to resolve earlier
         self.session = boto3.Session()
@@ -64,7 +69,7 @@ class BaseInfrastructure(ABC):
         self.account_id = self.session.client("sts").get_caller_identity()["Account"]
         self.region = self.session.region_name
 
-        self.app = App(outdir=str(SOURCE_CODE_ROOT_PATH / ".cdk"))
+        self.app = App()
         self.stack = Stack(self.app, self.stack_name, env=Environment(account=self.account_id, region=self.region))
 
     def create_lambda_functions(self, function_props: Optional[Dict] = None) -> Dict[str, Function]:
@@ -146,23 +151,92 @@ class BaseInfrastructure(ABC):
         return output
 
     def deploy(self) -> Dict[str, str]:
-        """Creates CloudFormation Stack and return stack outputs as dict
+        """Synthesize and deploy a CDK app, and return its stack outputs
+
+        NOTE: It auto-generates a temporary CDK app to benefit from CDK CLI lookup features
 
         Returns
         -------
         Dict[str, str]
             CloudFormation Stack Outputs with output key and value
         """
-        template, asset_manifest_file = self._synthesize()
-        assets = Assets(asset_manifest=asset_manifest_file, account_id=self.account_id, region=self.region)
-        assets.upload()
-        self.stack_outputs = self._deploy_stack(self.stack_name, template)
+        cdk_app_file = self._create_temp_cdk_app()
+        self.stack_outputs = self._deploy_stack(cdk_app_file)
         return self.stack_outputs
 
     def delete(self) -> None:
         """Delete CloudFormation Stack"""
         logger.debug(f"Deleting stack: {self.stack_name}")
         self.cfn.delete_stack(StackName=self.stack_name)
+
+    def _deploy_stack(self, cdk_app_file: str) -> Dict:
+        """Deploys CDK App auto-generated using CDK CLI
+
+        Parameters
+        ----------
+        cdk_app_file : str
+            Path to temporary CDK App
+
+        Returns
+        -------
+        Dict
+            Stack Output values as dict
+        """
+        stack_file = self._create_temp_cdk_app()
+        command = f"cdk deploy --app 'python {stack_file}' -O {self.stack_outputs_file}"
+
+        # CDK launches a background task, so we must wait
+        subprocess.check_output(command, shell=True)
+        return self._read_stack_output()
+
+    def _sync_stack_name(self, stack_output: Dict):
+        """Synchronize initial stack name with CDK's final stack name
+
+        Parameters
+        ----------
+        stack_output : Dict
+            CDK CloudFormation Outputs, where the key is the stack name
+        """
+        self.stack_name = list(stack_output.keys())[0]
+
+    def _read_stack_output(self):
+        content = Path(self.stack_outputs_file).read_text()
+        outputs: Dict = json.loads(content)
+
+        self._sync_stack_name(stack_output=outputs)
+        return dict(outputs.values())
+
+    def _create_temp_cdk_app(self):
+        """Autogenerate a CDK App with our Stack so that CDK CLI can deploy it
+
+        This allows us to keep our BaseInfrastructure while supporting context lookups.
+        """
+        # tests/e2e/tracer
+        stack_module_path = self.handlers_dir.relative_to(SOURCE_CODE_ROOT_PATH).parent
+
+        # tests.e2e.tracer.infrastructure
+        stack_infrastructure_module = str(stack_module_path / "infrastructure").replace(os.sep, ".")
+
+        # TracerStack
+        stack_infrastructure_name = self.__class__.__name__
+
+        code = f"""
+        from {stack_infrastructure_module} import {stack_infrastructure_name}
+        stack = {stack_infrastructure_name}(handlers_dir="{self.handlers_dir}")
+        stack.create_resources()
+        stack.app.synth()
+        """
+
+        if not CDK_OUT_PATH.is_dir():
+            CDK_OUT_PATH.mkdir()
+
+        temp_file = CDK_OUT_PATH / f"{self.stack_name}_cdk_app.py"
+        with temp_file.open("w") as fd:
+            fd.write(textwrap.dedent(code))
+
+        # allow CDK to read/execute file for stack deployment
+        temp_file.chmod(0o755)
+        return temp_file
 
     @abstractmethod
     def create_resources(self) -> None:
@@ -189,33 +263,6 @@ class BaseInfrastructure(ABC):
         ```
         """
         ...
-
-    def _synthesize(self) -> Tuple[Dict, Path]:
-        logger.debug("Creating CDK Stack resources")
-        self.create_resources()
-        logger.debug("Synthesizing CDK Stack into raw CloudFormation template")
-        cloud_assembly = self.app.synth()
-        cf_template: Dict = cloud_assembly.get_stack_by_name(self.stack_name).template
-        cloud_assembly_assets_manifest_path: str = (
-            cloud_assembly.get_stack_by_name(self.stack_name).dependencies[0].file  # type: ignore[attr-defined]
-        )
-        return cf_template, Path(cloud_assembly_assets_manifest_path)
-
-    def _deploy_stack(self, stack_name: str, template: Dict) -> Dict[str, str]:
-        logger.debug(f"Creating CloudFormation Stack: {stack_name}")
-        self.cfn.create_stack(
-            StackName=stack_name,
-            TemplateBody=yaml.dump(template),
-            TimeoutInMinutes=10,
-            OnFailure="ROLLBACK",
-            Capabilities=["CAPABILITY_IAM"],
-        )
-        waiter = self.cfn.get_waiter("stack_create_complete")
-        waiter.wait(StackName=stack_name, WaiterConfig={"Delay": 10, "MaxAttempts": 50})
-
-        stack_details = self.cfn.describe_stacks(StackName=stack_name)
-        stack_outputs = stack_details["Stacks"][0]["Outputs"]
-        return {output["OutputKey"]: output["OutputValue"] for output in stack_outputs if output["OutputKey"]}
 
     def add_cfn_output(self, name: str, value: str, arn: str = ""):
         """Create {Name} and optionally {Name}Arn CloudFormation Outputs.
@@ -319,3 +366,11 @@ class LambdaLayerStack(BaseInfrastructure):
             ),
         )
         return layer.layer_version_arn
+
+
+if __name__ == "__main__":
+    layer = LambdaLayerStack(handlers_dir="")
+    layer.create_resources()
+
+    # Required for CDK CLI deploy
+    layer.app.synth()

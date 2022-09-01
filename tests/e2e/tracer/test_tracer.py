@@ -36,7 +36,8 @@ def async_fn(infrastructure: dict) -> str:
 
 
 # NOTE: Quick test to confirm VPC can be resolved
-def test_vpc():
+# def test_vpc(layer_cdk_cli):
+def test_vpc(infrastructure):
     pass
 
 
