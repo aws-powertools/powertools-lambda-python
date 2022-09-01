@@ -11,6 +11,7 @@ The transition from Powertools for Python v1 to v2 is as painless as possible, a
 Changes at a glance:
 
 * The API for **event handler's `Response`** has minor changes to support multi value headers and cookies.
+* The **legacy SQS batch processor** was removed.
 
 ???+ important
     Powertools for Python v2 drops suport for Python 3.6, following the Python 3.6 End-Of-Life (EOL) reached on December 23, 2021.
@@ -55,3 +56,89 @@ def get_todos():
         cookies=["CookieName=CookieValue"]
     )
 ```
+
+## Legacy SQS Batch Processor
+
+The deprecated `PartialSQSProcessor` and `sqs_batch_processor` were removed.
+You can migrate to the [native batch processing](https://aws.amazon.com/about-aws/whats-new/2021/11/aws-lambda-partial-batch-response-sqs-event-source/) capability by:
+
+1. If you use **`sqs_batch_decorator`** you can now use **`batch_processor`** decorator
+2. If you use **`PartialSQSProcessor`** you can now use **`BatchProcessor`**
+3. [Enable the functionality](../utilities/batch#required-resources) on SQS
+4. Change your Lambda Handler to return the new response format
+
+=== "Decorator: Before"
+
+     ```python hl_lines="1 6"
+     from aws_lambda_powertools.utilities.batch import sqs_batch_processor
+
+     def record_handler(record):
+         return do_something_with(record["body"])
+
+     @sqs_batch_processor(record_handler=record_handler)
+     def lambda_handler(event, context):
+         return {"statusCode": 200}
+     ```
+
+=== "Decorator: After"
+
+     ```python hl_lines="3 5 11"
+     import json
+
+     from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+
+     processor = BatchProcessor(event_type=EventType.SQS)
+
+
+     def record_handler(record):
+         return do_something_with(record["body"])
+
+     @batch_processor(record_handler=record_handler, processor=processor)
+     def lambda_handler(event, context):
+         return processor.response()
+     ```
+
+=== "Context manager: Before"
+
+     ```python hl_lines="1-2 4 14 19"
+     from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
+     from botocore.config import Config
+
+     config = Config(region_name="us-east-1")
+
+     def record_handler(record):
+         return_value = do_something_with(record["body"])
+         return return_value
+
+
+     def lambda_handler(event, context):
+         records = event["Records"]
+
+         processor = PartialSQSProcessor(config=config)
+
+         with processor(records, record_handler):
+             result = processor.process()
+
+         return result
+     ```
+
+=== "Context manager: After"
+
+    ```python hl_lines="1 11"
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+
+
+    def record_handler(record):
+        return_value = do_something_with(record["body"])
+        return return_value
+
+    def lambda_handler(event, context):
+        records = event["Records"]
+
+        processor = BatchProcessor(event_type=EventType.SQS)
+
+        with processor(records, record_handler):
+            result = processor.process()
+
+        return processor.response()
+    ```
