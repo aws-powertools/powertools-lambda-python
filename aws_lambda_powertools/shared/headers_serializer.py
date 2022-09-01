@@ -2,7 +2,7 @@ import warnings
 from collections import defaultdict
 from typing import Any, Dict, List, Union
 
-from aws_lambda_powertools.event_handler.cookies import Cookie
+from aws_lambda_powertools.shared.cookies import Cookie
 
 
 class BaseHeadersSerializer:

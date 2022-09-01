@@ -3,7 +3,7 @@ from uuid import uuid4
 import pytest
 from requests import Request
 
-from aws_lambda_powertools.event_handler.cookies import Cookie
+from aws_lambda_powertools.shared.cookies import Cookie
 from tests.e2e.utils import data_fetcher
 
 

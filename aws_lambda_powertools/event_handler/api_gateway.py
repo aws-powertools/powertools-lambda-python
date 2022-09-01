@@ -13,9 +13,9 @@ from http import HTTPStatus
 from typing import Any, Callable, Dict, List, Match, Optional, Pattern, Set, Tuple, Type, Union
 
 from aws_lambda_powertools.event_handler import content_types
-from aws_lambda_powertools.event_handler.cookies import Cookie
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import (
@@ -207,7 +207,7 @@ class ResponseBuilder:
 
     def _compress(self):
         """Compress the response body, but only if `Accept-Encoding` headers includes gzip."""
-        self.response.headers["Content-Encoding"].append("gzip")
+        self.response.headers["Content-Encoding"] = "gzip"
         if isinstance(self.response.body, str):
             logger.debug("Converting string response to bytes before compressing it")
             self.response.body = bytes(self.response.body, "utf-8")
