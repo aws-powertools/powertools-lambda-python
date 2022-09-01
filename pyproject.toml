@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "1.28.0"
+version = "1.26.6"
 description = "A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, batching, idempotency, feature flags, and more."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -59,7 +59,7 @@ pytest-benchmark = "^3.4.1"
 mypy-boto3-appconfig = { version = "^1.24.29", python = ">=3.7" }
 mypy-boto3-cloudformation = { version = "^1.24.0", python = ">=3.7" }
 mypy-boto3-cloudwatch = { version = "^1.24.35", python = ">=3.7" }
-mypy-boto3-dynamodb = { version = "^1.24.60", python = ">=3.7" }
+mypy-boto3-dynamodb = { version = "^1.24.27", python = ">=3.7" }
 mypy-boto3-lambda = { version = "^1.24.0", python = ">=3.7" }
 mypy-boto3-logs = { version = "^1.24.0", python = ">=3.7" }
 mypy-boto3-secretsmanager = { version = "^1.24.11", python = ">=3.7" }
@@ -69,7 +69,7 @@ mypy-boto3-xray = { version = "^1.24.0", python = ">=3.7" }
 types-requests = "^2.28.8"
 typing-extensions = { version = "^4.3.0", python = ">=3.7" }
 python-snappy = "^0.6.1"
-mkdocs-material = { version = "^8.4.2", python = ">=3.7" }
+mkdocs-material = { version = "^8.3.9", python = ">=3.7" }
 filelock = { version = "^3.8.0", python = ">=3.7" }
 
 [tool.poetry.extras]
