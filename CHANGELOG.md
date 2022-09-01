@@ -13,6 +13,10 @@
 * **ci:** event resolution for on_label_added workflow
 * **event_handler:** fix bug with previous array implementation
 
+## Code Refactoring
+
+* **batch:** remove legacy sqs_batch_processor ([#1492](https://github.com/awslabs/aws-lambda-powertools-python/issues/1492))
+
 ## Documentation
 
 * **homepage:** note about v2 version
@@ -27,8 +31,10 @@
 ## Maintenance
 
 * **bandit:** update baseline
-* **ci:** add missing description fields
+* **ci:** remove dangling debug step
 * **ci:** limit E2E workflow run for source code change
+* **ci:** sync package version with pypi
+* **ci:** remove unused and undeclared OS matrix env
 * **ci:** create adhoc docs workflow for v2
 * **ci:** create adhoc docs workflow for v2
 * **ci:** create docs workflow for v2
@@ -37,16 +43,16 @@
 * **ci:** add note for state persistence on comment_large_pr
 * **ci:** destructure assignment on comment_large_pr
 * **ci:** record pr details upon labeling
-* **ci:** sync package version with pypi
-* **ci:** remove unused and undeclared OS matrix env
+* **ci:** add missing description fields
+* **ci:** fix invalid dependency leftover
 * **ci:** enable ci checks for v2
 * **ci:** add workflow to suggest splitting large PRs ([#1480](https://github.com/awslabs/aws-lambda-powertools-python/issues/1480))
 * **ci:** add linter for GitHub Actions as pre-commit hook ([#1479](https://github.com/awslabs/aws-lambda-powertools-python/issues/1479))
-* **ci:** remove dangling debug step
-* **ci:** fix invalid dependency leftover
-* **deps-dev:** bump mypy-boto3-dynamodb from 1.24.55.post1 to 1.24.60 ([#306](https://github.com/awslabs/aws-lambda-powertools-python/issues/306))
+* **deps:** bump pydantic from 1.10.0 to 1.10.1 ([#1491](https://github.com/awslabs/aws-lambda-powertools-python/issues/1491))
 * **deps-dev:** bump mypy-boto3-dynamodb from 1.24.55.post1 to 1.24.60 ([#1481](https://github.com/awslabs/aws-lambda-powertools-python/issues/1481))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.24.55.post1 to 1.24.60 ([#306](https://github.com/awslabs/aws-lambda-powertools-python/issues/306))
 * **deps-dev:** bump mkdocs-material from 8.4.1 to 8.4.2 ([#1483](https://github.com/awslabs/aws-lambda-powertools-python/issues/1483))
+* **deps-dev:** bump flake8-variables-names from 0.0.4 to 0.0.5 ([#1490](https://github.com/awslabs/aws-lambda-powertools-python/issues/1490))
 * **maintainers:** update release workflow link
 
 
