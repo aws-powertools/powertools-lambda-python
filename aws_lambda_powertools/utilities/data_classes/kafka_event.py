@@ -104,9 +104,10 @@ class KafkaEvent(DictWrapper):
     @property
     def bootstrap_servers(self) -> Optional[List[str]]:
         """The Kafka bootstrap URL."""
-        if "bootstrapServers" not in self:
+        servers = self.get("bootstrapServers")
+        if not servers:
             return None
-        return self["bootstrapServers"].split(",")
+        return servers.split(",")
 
     @property
     def records(self) -> Iterator[KafkaEventRecord]:
