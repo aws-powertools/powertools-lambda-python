@@ -11,7 +11,7 @@ class SameSite(Enum):
     NONE_MODE = "None"
 
 
-def _getdate(timestamp: datetime) -> str:
+def _format_date(timestamp: datetime) -> str:
     return timestamp.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
 
@@ -51,7 +51,7 @@ class Cookie:
             payload.write(f"; Domain={self.domain}")
 
         if self.expires:
-            payload.write(f"; Expires={_getdate(self.expires)}")
+            payload.write(f"; Expires={_format_date(self.expires)}")
 
         if self.max_age:
             if self.max_age > 0:
