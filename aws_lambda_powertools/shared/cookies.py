@@ -11,6 +11,10 @@ class SameSite(Enum):
     NONE_MODE = "None"
 
 
+def _getdate(timestamp: datetime) -> str:
+    return timestamp.strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+
 class Cookie:
     def __init__(
         self,
@@ -38,21 +42,16 @@ class Cookie:
 
     def __str__(self) -> str:
         payload = StringIO()
-        payload.write(f"{self.name}=")
-
-        # Maintenance(rf): the value needs to be sanitized
-        payload.write(self.value)
+        payload.write(f"{self.name}={self.value}")
 
         if self.path and len(self.path) > 0:
-            # Maintenance(rf): the value of path needs to be sanitized
             payload.write(f"; Path={self.path}")
 
         if self.domain and len(self.domain) > 0:
             payload.write(f"; Domain={self.domain}")
 
         if self.expires:
-            # Maintenance(rf) this format is wrong
-            payload.write(f"; Expires={self.expires.strftime('YYYY-MM-dd')}")
+            payload.write(f"; Expires={_getdate(self.expires)}")
 
         if self.max_age:
             if self.max_age > 0:
@@ -71,7 +70,6 @@ class Cookie:
 
         if self.custom_attributes:
             for attr in self.custom_attributes:
-                # Maintenance(rf): the value needs to be sanitized
                 payload.write(f"; {attr}")
 
         return payload.getvalue()
