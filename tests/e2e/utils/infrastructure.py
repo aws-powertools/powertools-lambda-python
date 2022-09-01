@@ -19,7 +19,6 @@ from aws_cdk import (
     Environment,
     RemovalPolicy,
     Stack,
-    aws_ec2,
     aws_logs,
 )
 from aws_cdk.aws_lambda import Code, Function, LayerVersion, Runtime, Tracing
@@ -67,13 +66,6 @@ class BaseInfrastructure(ABC):
 
         self.app = App(outdir=str(SOURCE_CODE_ROOT_PATH / ".cdk"))
         self.stack = Stack(self.app, self.stack_name, env=Environment(account=self.account_id, region=self.region))
-
-        # NOTE: Lookup from base infra didn't work either
-        self.default_vpc = aws_ec2.Vpc.from_lookup(
-            self.stack,
-            "DefaultVPC",
-            is_default=True,
-        )
 
     def create_lambda_functions(self, function_props: Optional[Dict] = None) -> Dict[str, Function]:
         """Create Lambda functions available under handlers_dir
