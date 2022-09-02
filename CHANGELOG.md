@@ -25,16 +25,20 @@
 ## Features
 
 * **ci:** add actionlint in pre-commit hook
+* **event_handler:** add cookies as 1st class citizen in v2 ([#1487](https://github.com/awslabs/aws-lambda-powertools-python/issues/1487))
 * **event_handler:** improved support for headers and cookies in v2 ([#1455](https://github.com/awslabs/aws-lambda-powertools-python/issues/1455))
 * **event_sources:** add CloudWatch dashboard custom widget event ([#1474](https://github.com/awslabs/aws-lambda-powertools-python/issues/1474))
 
 ## Maintenance
 
 * **bandit:** update baseline
-* **ci:** remove dangling debug step
+* **ci:** add workflow to suggest splitting large PRs ([#1480](https://github.com/awslabs/aws-lambda-powertools-python/issues/1480))
 * **ci:** limit E2E workflow run for source code change
-* **ci:** sync package version with pypi
+* **ci:** add linter for GitHub Actions as pre-commit hook ([#1479](https://github.com/awslabs/aws-lambda-powertools-python/issues/1479))
+* **ci:** add missing description fields
 * **ci:** remove unused and undeclared OS matrix env
+* **ci:** sync package version with pypi
+* **ci:** fix invalid dependency leftover
 * **ci:** create adhoc docs workflow for v2
 * **ci:** create adhoc docs workflow for v2
 * **ci:** create docs workflow for v2
@@ -43,17 +47,17 @@
 * **ci:** add note for state persistence on comment_large_pr
 * **ci:** destructure assignment on comment_large_pr
 * **ci:** record pr details upon labeling
-* **ci:** add missing description fields
-* **ci:** fix invalid dependency leftover
+* **ci:** remove dangling debug step
 * **ci:** enable ci checks for v2
-* **ci:** add workflow to suggest splitting large PRs ([#1480](https://github.com/awslabs/aws-lambda-powertools-python/issues/1480))
-* **ci:** add linter for GitHub Actions as pre-commit hook ([#1479](https://github.com/awslabs/aws-lambda-powertools-python/issues/1479))
 * **deps:** bump pydantic from 1.10.0 to 1.10.1 ([#1491](https://github.com/awslabs/aws-lambda-powertools-python/issues/1491))
+* **deps-dev:** bump black from 22.6.0 to 22.8.0 ([#1494](https://github.com/awslabs/aws-lambda-powertools-python/issues/1494))
 * **deps-dev:** bump mypy-boto3-dynamodb from 1.24.55.post1 to 1.24.60 ([#1481](https://github.com/awslabs/aws-lambda-powertools-python/issues/1481))
 * **deps-dev:** bump mypy-boto3-dynamodb from 1.24.55.post1 to 1.24.60 ([#306](https://github.com/awslabs/aws-lambda-powertools-python/issues/306))
 * **deps-dev:** bump mkdocs-material from 8.4.1 to 8.4.2 ([#1483](https://github.com/awslabs/aws-lambda-powertools-python/issues/1483))
 * **deps-dev:** bump flake8-variables-names from 0.0.4 to 0.0.5 ([#1490](https://github.com/awslabs/aws-lambda-powertools-python/issues/1490))
+* **deps-dev:** bump aws-cdk-lib from 2.39.1 to 2.40.0 ([#1495](https://github.com/awslabs/aws-lambda-powertools-python/issues/1495))
 * **maintainers:** update release workflow link
+* **maintenance:** add discord link to first PR and first issue ([#1493](https://github.com/awslabs/aws-lambda-powertools-python/issues/1493))
 
 
 <a name="v1.28.0"></a>
