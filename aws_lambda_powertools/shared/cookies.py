@@ -41,8 +41,8 @@ class Cookie:
         domain: str = "",
         secure: bool = True,
         http_only: bool = False,
-        expires: Optional[datetime] = None,
         max_age: Optional[int] = None,
+        expires: Optional[datetime] = None,
         same_site: Optional[SameSite] = None,
         custom_attributes: Optional[List[str]] = None,
     ):
@@ -62,10 +62,10 @@ class Cookie:
             Marks the cookie as secure, only sendable to the server with an encrypted request over the HTTPS protocol
         http_only: bool
             Enabling this attribute makes the cookie inaccessible to the JavaScript `Document.cookie` API
-        expires: Optional[datetime]
-            Defines a date where the permanent cookie expires.
         max_age: Optional[int]
             Defines the period of time after which the cookie is invalid. Use negative values to force cookie deletion.
+        expires: Optional[datetime]
+            Defines a date where the permanent cookie expires.
         same_site: Optional[SameSite]
             Determines if the cookie should be sent to third party websites
         custom_attributes: Optional[List[str]]
