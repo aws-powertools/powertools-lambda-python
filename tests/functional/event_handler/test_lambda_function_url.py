@@ -1,4 +1,5 @@
 from aws_lambda_powertools.event_handler import LambdaFunctionUrlResolver, Response, content_types
+from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.utilities.data_classes import LambdaFunctionUrlEvent
 from tests.functional.utils import load_event
 
@@ -28,7 +29,7 @@ def test_lambda_function_url_event():
 def test_lambda_function_url_event_with_cookies():
     # GIVEN a Lambda Function Url type event
     app = LambdaFunctionUrlResolver()
-    cookie = "CookieMonster"
+    cookie = Cookie(name="CookieMonster", value="MonsterCookie")
 
     @app.get("/")
     def foo():
@@ -42,7 +43,7 @@ def test_lambda_function_url_event_with_cookies():
     # THEN process event correctly
     # AND set the current_event type as LambdaFunctionUrlEvent
     assert result["statusCode"] == 200
-    assert result["cookies"] == [cookie]
+    assert result["cookies"] == ["CookieMonster=MonsterCookie; Secure"]
 
 
 def test_lambda_function_url_no_matches():
