@@ -21,6 +21,7 @@ class SameSite(Enum):
 
 
 def _format_date(timestamp: datetime) -> str:
+    # Specification example: Wed, 21 Oct 2015 07:28:00 GMT
     return timestamp.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
 
