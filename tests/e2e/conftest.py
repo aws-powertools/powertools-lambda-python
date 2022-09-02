@@ -1,10 +1,11 @@
 import pytest
 
-from tests.e2e.utils.infrastructure import LambdaLayerStack, deploy_once
+from tests.e2e.lambda_layer.infrastructure import LambdaLayerStack
+from tests.e2e.utils.infrastructure import deploy_once
 
 
 @pytest.fixture(scope="session")
-def lambda_layer_arn(lambda_layer_deployment):
+def lambda_layer_arn(lambda_layer_deployment: dict):
     yield lambda_layer_deployment.get("LayerArn")
 
 

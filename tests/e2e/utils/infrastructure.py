@@ -12,17 +12,7 @@ from uuid import uuid4
 
 import boto3
 import pytest
-from aws_cdk import (
-    App,
-    AssetStaging,
-    BundlingOptions,
-    CfnOutput,
-    DockerImage,
-    Environment,
-    RemovalPolicy,
-    Stack,
-    aws_logs,
-)
+from aws_cdk import App, CfnOutput, Environment, RemovalPolicy, Stack, aws_logs
 from aws_cdk.aws_lambda import Code, Function, LayerVersion, Runtime, Tracing
 from filelock import FileLock
 from mypy_boto3_cloudformation import CloudFormationClient
@@ -71,6 +61,11 @@ class BaseInfrastructure(ABC):
 
         self.app = App()
         self.stack = Stack(self.app, self.stack_name, env=Environment(account=self.account_id, region=self.region))
+
+        # NOTE: Inspect subclass path to generate CDK App (_create_temp_cdk_app method)
+        self._feature_path = Path(sys.modules[self.__class__.__module__].__file__).parent
+        self._feature_infra_class_name = self.__class__.__name__
+        self._feature_infra_module_path = self._feature_path / "infrastructure"
 
     def create_lambda_functions(self, function_props: Optional[Dict] = None) -> Dict[str, Function]:
         """Create Lambda functions available under handlers_dir
@@ -161,8 +156,7 @@ class BaseInfrastructure(ABC):
             CloudFormation Stack Outputs with output key and value
         """
         cdk_app_file = self._create_temp_cdk_app()
-        self.stack_outputs = self._deploy_stack(cdk_app_file)
-        return self.stack_outputs
+        return self._deploy_stack(cdk_app_file)
 
     def delete(self) -> None:
         """Delete CloudFormation Stack"""
@@ -202,27 +196,24 @@ class BaseInfrastructure(ABC):
     def _read_stack_output(self):
         content = Path(self.stack_outputs_file).read_text()
         outputs: Dict = json.loads(content)
-
         self._sync_stack_name(stack_output=outputs)
-        return dict(outputs.values())
+
+        # discard stack_name and get outputs as dict
+        self.stack_outputs = list(outputs.values())[0]
+        return self.stack_outputs
 
     def _create_temp_cdk_app(self):
         """Autogenerate a CDK App with our Stack so that CDK CLI can deploy it
 
         This allows us to keep our BaseInfrastructure while supporting context lookups.
         """
-        # tests/e2e/tracer
-        stack_module_path = self.handlers_dir.relative_to(SOURCE_CODE_ROOT_PATH).parent
-
+        # NOTE: Confirm infrastructure module exists before proceeding.
         # tests.e2e.tracer.infrastructure
-        stack_infrastructure_module = str(stack_module_path / "infrastructure").replace(os.sep, ".")
-
-        # TracerStack
-        stack_infrastructure_name = self.__class__.__name__
+        infra_module = str(self._feature_infra_module_path.relative_to(SOURCE_CODE_ROOT_PATH)).replace(os.sep, ".")
 
         code = f"""
-        from {stack_infrastructure_module} import {stack_infrastructure_name}
-        stack = {stack_infrastructure_name}(handlers_dir="{self.handlers_dir}")
+        from {infra_module} import {self._feature_infra_class_name}
+        stack = {self._feature_infra_class_name}(handlers_dir="{self.handlers_dir}")
         stack.create_resources()
         stack.app.synth()
         """
@@ -331,46 +322,3 @@ def deploy_once(
             yield stack_outputs
     finally:
         stack.delete()
-
-
-class LambdaLayerStack(BaseInfrastructure):
-    FEATURE_NAME = "lambda-layer"
-
-    def __init__(self, handlers_dir: Path, feature_name: str = FEATURE_NAME, layer_arn: str = "") -> None:
-        super().__init__(feature_name, handlers_dir, layer_arn)
-
-    def create_resources(self):
-        layer = self._create_layer()
-        CfnOutput(self.stack, "LayerArn", value=layer)
-
-    def _create_layer(self) -> str:
-        logger.debug("Creating Lambda Layer with latest source code available")
-        output_dir = Path(str(AssetStaging.BUNDLING_OUTPUT_DIR), "python")
-        input_dir = Path(str(AssetStaging.BUNDLING_INPUT_DIR), "aws_lambda_powertools")
-
-        build_commands = [f"pip install .[pydantic] -t {output_dir}", f"cp -R {input_dir} {output_dir}"]
-        layer = LayerVersion(
-            self.stack,
-            "aws-lambda-powertools-e2e-test",
-            layer_version_name="aws-lambda-powertools-e2e-test",
-            compatible_runtimes=[PythonVersion[PYTHON_RUNTIME_VERSION].value["runtime"]],
-            code=Code.from_asset(
-                path=str(SOURCE_CODE_ROOT_PATH),
-                bundling=BundlingOptions(
-                    image=DockerImage.from_build(
-                        str(Path(__file__).parent),
-                        build_args={"IMAGE": PythonVersion[PYTHON_RUNTIME_VERSION].value["image"]},
-                    ),
-                    command=["bash", "-c", " && ".join(build_commands)],
-                ),
-            ),
-        )
-        return layer.layer_version_arn
-
-
-if __name__ == "__main__":
-    layer = LambdaLayerStack(handlers_dir="")
-    layer.create_resources()
-
-    # Required for CDK CLI deploy
-    layer.app.synth()
