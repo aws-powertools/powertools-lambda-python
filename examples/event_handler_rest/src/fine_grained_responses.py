@@ -27,7 +27,7 @@ def get_todos():
         content_type=content_types.APPLICATION_JSON,
         body=todos.json()[:10],
         headers=custom_headers,
-        cookies=[Cookie(name="session_id", value="12345", secure=True)],
+        cookies=[Cookie(name="session_id", value="12345")],
     )
 
 
