@@ -2,6 +2,8 @@ import warnings
 from collections import defaultdict
 from typing import Any, Dict, List, Union
 
+from aws_lambda_powertools.shared.cookies import Cookie
+
 
 class BaseHeadersSerializer:
     """
@@ -9,7 +11,7 @@ class BaseHeadersSerializer:
     ALB and Lambda Function URL response payload.
     """
 
-    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[str]) -> Dict[str, Any]:
+    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[Cookie]) -> Dict[str, Any]:
         """
         Serializes headers and cookies according to the request type.
         Returns a dict that can be merged with the response payload.
@@ -25,7 +27,7 @@ class BaseHeadersSerializer:
 
 
 class HttpApiHeadersSerializer(BaseHeadersSerializer):
-    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[str]) -> Dict[str, Any]:
+    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[Cookie]) -> Dict[str, Any]:
         """
         When using HTTP APIs or LambdaFunctionURLs, everything is taken care automatically for us.
         We can directly assign a list of cookies and a dict of headers to the response payload, and the
@@ -44,11 +46,11 @@ class HttpApiHeadersSerializer(BaseHeadersSerializer):
             else:
                 combined_headers[key] = ", ".join(values)
 
-        return {"headers": combined_headers, "cookies": cookies}
+        return {"headers": combined_headers, "cookies": list(map(str, cookies))}
 
 
 class MultiValueHeadersSerializer(BaseHeadersSerializer):
-    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[str]) -> Dict[str, Any]:
+    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[Cookie]) -> Dict[str, Any]:
         """
         When using REST APIs, headers can be encoded using the `multiValueHeaders` key on the response.
         This is also the case when using an ALB integration with the `multiValueHeaders` option enabled.
@@ -69,13 +71,13 @@ class MultiValueHeadersSerializer(BaseHeadersSerializer):
         if cookies:
             payload.setdefault("Set-Cookie", [])
             for cookie in cookies:
-                payload["Set-Cookie"].append(cookie)
+                payload["Set-Cookie"].append(str(cookie))
 
         return {"multiValueHeaders": payload}
 
 
 class SingleValueHeadersSerializer(BaseHeadersSerializer):
-    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[str]) -> Dict[str, Any]:
+    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[Cookie]) -> Dict[str, Any]:
         """
         The ALB integration has `multiValueHeaders` disabled by default.
         If we try to set multiple headers with the same key, or more than one cookie, print a warning.
@@ -93,7 +95,7 @@ class SingleValueHeadersSerializer(BaseHeadersSerializer):
                 )
 
             # We can only send one cookie, send the last one
-            payload["headers"]["Set-Cookie"] = cookies[-1]
+            payload["headers"]["Set-Cookie"] = str(cookies[-1])
 
         for key, values in headers.items():
             if isinstance(values, str):

@@ -53,7 +53,7 @@ def get_todos():
     return Response(
         # ...
         headers={"Content-Type": ["text/plain"]},
-        cookies=["CookieName=CookieValue"]
+        cookies=[Cookie(name="session_id", value="12345", secure=True, http_only=True)],
     )
 ```
 
