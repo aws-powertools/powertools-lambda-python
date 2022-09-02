@@ -30,6 +30,7 @@ from aws_lambda_powertools.event_handler.exceptions import (
     UnauthorizedError,
 )
 from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
@@ -98,7 +99,7 @@ def test_api_gateway_v1():
 def test_api_gateway_v1_cookies():
     # GIVEN a Http API V1 proxy type event
     app = APIGatewayRestResolver()
-    cookie = "CookieMonster"
+    cookie = Cookie(name="CookieMonster", value="MonsterCookie")
 
     @app.get("/my/path")
     def get_lambda() -> Response:
@@ -111,7 +112,7 @@ def test_api_gateway_v1_cookies():
     # THEN process event correctly
     # AND set the current_event type as APIGatewayProxyEvent
     assert result["statusCode"] == 200
-    assert result["multiValueHeaders"]["Set-Cookie"] == [cookie]
+    assert result["multiValueHeaders"]["Set-Cookie"] == ["CookieMonster=MonsterCookie; Secure"]
 
 
 def test_api_gateway():
@@ -158,7 +159,7 @@ def test_api_gateway_v2():
 def test_api_gateway_v2_cookies():
     # GIVEN a Http API V2 proxy type event
     app = APIGatewayHttpResolver()
-    cookie = "CookieMonster"
+    cookie = Cookie(name="CookieMonster", value="MonsterCookie")
 
     @app.post("/my/path")
     def my_path() -> Response:
@@ -172,7 +173,7 @@ def test_api_gateway_v2_cookies():
     # AND set the current_event type as APIGatewayProxyEventV2
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
-    assert result["cookies"] == [cookie]
+    assert result["cookies"] == ["CookieMonster=MonsterCookie; Secure"]
 
 
 def test_include_rule_matching():

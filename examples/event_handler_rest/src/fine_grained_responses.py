@@ -6,6 +6,7 @@ import requests
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response, content_types
 from aws_lambda_powertools.logging import correlation_paths
+from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
@@ -26,7 +27,7 @@ def get_todos():
         content_type=content_types.APPLICATION_JSON,
         body=todos.json()[:10],
         headers=custom_headers,
-        cookies=["<cookie-name>=<cookie-value>; Secure; Expires=<date>"],
+        cookies=[Cookie(name="session_id", value="12345")],
     )
 
 
