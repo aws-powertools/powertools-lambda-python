@@ -28,6 +28,8 @@ from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set, strtobool
+from aws_lambda_powertools.shared.cookies import Cookie
+from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
@@ -159,7 +161,7 @@ class Response:
         content_type: Optional[str] = None,
         body: Union[str, bytes, None] = None,
         headers: Optional[Dict[str, Union[str, List[str]]]] = None,
-        cookies: Optional[List[str]] = None,
+        cookies: Optional[List[Cookie]] = None,
     ):
         """
 
@@ -174,7 +176,7 @@ class Response:
             Optionally set the response body. Note: bytes body will be automatically base64 encoded
         headers: dict[str, Union[str, List[str]]]
             Optionally set specific http headers. Setting "Content-Type" here would override the `content_type` value.
-        cookies: list[str]
+        cookies: list[Cookie]
             Optionally set cookies.
         """
         self.status_code = status_code
