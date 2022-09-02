@@ -11,10 +11,11 @@ def hello():
     status_code = payload.get("status_code", 200)
     headers = payload.get("headers", {})
     cookies = payload.get("cookies", [])
+    content_type = headers.get("Content-Type", content_types.TEXT_PLAIN)
 
     return Response(
         status_code=status_code,
-        content_type=headers.get("Content-Type", content_types.TEXT_PLAIN),
+        content_type=content_type,
         body=body,
         cookies=cookies,
         headers=headers,

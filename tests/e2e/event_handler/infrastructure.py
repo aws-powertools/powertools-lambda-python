@@ -61,7 +61,7 @@ class EventHandlerStack(BaseInfrastructure):
         apigw = apigwv2.HttpApi(self.stack, "APIGatewayHTTP", create_default_stage=True)
         apigw.add_routes(
             path="/todos",
-            methods=[apigwv2.HttpMethod.GET],
+            methods=[apigwv2.HttpMethod.POST],
             integration=apigwv2integrations.HttpLambdaIntegration("TodosIntegration", function),
         )
 
@@ -71,7 +71,7 @@ class EventHandlerStack(BaseInfrastructure):
         apigw = apigwv1.RestApi(self.stack, "APIGatewayRest", deploy_options=apigwv1.StageOptions(stage_name="dev"))
 
         todos = apigw.root.add_resource("todos")
-        todos.add_method("GET", apigwv1.LambdaIntegration(function, proxy=True))
+        todos.add_method("POST", apigwv1.LambdaIntegration(function, proxy=True))
 
         CfnOutput(self.stack, "APIGatewayRestUrl", value=apigw.url)
 
