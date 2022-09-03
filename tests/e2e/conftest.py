@@ -1,36 +1,32 @@
-import pytest
+# import pytest
 
-from tests.e2e.lambda_layer.infrastructure import LambdaLayerStack
-from tests.e2e.utils.infrastructure import deploy_once
-
-
-@pytest.fixture(scope="session")
-def lambda_layer_arn(lambda_layer_deployment: dict):
-    yield lambda_layer_deployment.get("LayerArn")
+# from tests.e2e.lambda_layer.infrastructure import build_layer
+# from tests.e2e.utils.infrastructure import call_once
 
 
-@pytest.fixture(scope="session")
-def lambda_layer_deployment(request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory, worker_id: str):
-    """Setup and teardown logic for E2E test infrastructure
+# # @pytest.fixture(scope="session")
+# # def lambda_layer_arn(lambda_layer_deployment: dict):
+# #     yield lambda_layer_deployment.get("LayerArn")
 
-    Parameters
-    ----------
-    request : pytest.FixtureRequest
-        pytest request fixture to introspect absolute path to test being executed
-    tmp_path_factory : pytest.TempPathFactory
-        pytest temporary path factory to discover shared tmp when multiple CPU processes are spun up
-    worker_id : str
-        pytest-xdist worker identification to detect whether parallelization is enabled
 
-    Yields
-    ------
-    Dict[str, str]
-        CloudFormation Outputs from deployed infrastructure
-    """
-    yield from deploy_once(
-        stack=LambdaLayerStack,
-        request=request,
-        tmp_path_factory=tmp_path_factory,
-        worker_id=worker_id,
-        layer_arn="",
-    )
+# @pytest.fixture(scope="session", autouse=True)
+# def lambda_layer_deployment(tmp_path_factory: pytest.TempPathFactory, worker_id: str):
+#     """Setup and teardown logic for E2E test infrastructure
+
+#     Parameters
+#     ----------
+#     tmp_path_factory : pytest.TempPathFactory
+#         pytest temporary path factory to discover shared tmp when multiple CPU processes are spun up
+#     worker_id : str
+#         pytest-xdist worker identification to detect whether parallelization is enabled
+
+#     Yields
+#     ------
+#     Dict[str, str]
+#         CloudFormation Outputs from deployed infrastructure
+#     """
+#     yield from call_once(
+#         callable=build_layer,
+#         tmp_path_factory=tmp_path_factory,
+#         worker_id=worker_id,
+#     )

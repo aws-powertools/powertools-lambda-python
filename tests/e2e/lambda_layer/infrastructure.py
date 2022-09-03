@@ -1,47 +1,18 @@
-from pathlib import Path
+import logging
+import subprocess
 
-from aws_cdk import AssetStaging, BundlingOptions, CfnOutput, DockerImage
-from aws_cdk.aws_lambda import Code, LayerVersion
+from tests.e2e.utils.infrastructure import CDK_OUT_PATH, SOURCE_CODE_ROOT_PATH
 
-from tests.e2e.utils.infrastructure import (
-    PYTHON_RUNTIME_VERSION,
-    SOURCE_CODE_ROOT_PATH,
-    BaseInfrastructure,
-    PythonVersion,
-    logger,
-)
+logger = logging.getLogger(__name__)
 
 
-class LambdaLayerStack(BaseInfrastructure):
-    FEATURE_NAME = "lambda-layer"
+def build_layer(feature_name: str = "") -> str:
+    LAYER_BUILD_PATH = CDK_OUT_PATH / f"layer_build_{feature_name}"
 
-    def __init__(self, handlers_dir: Path, feature_name: str = FEATURE_NAME, layer_arn: str = "") -> None:
-        super().__init__(feature_name, handlers_dir, layer_arn)
+    # TODO: Check if source code hasn't changed (dirsum)
+    package = f"{SOURCE_CODE_ROOT_PATH}\[pydantic\]"
+    build_args = "--platform manylinux1_x86_64 --only-binary=:all: --upgrade"
+    build_command = f"pip install {package} {build_args} --target {LAYER_BUILD_PATH}/python"
+    subprocess.run(build_command, shell=True)
 
-    def create_resources(self):
-        layer = self._create_layer()
-        CfnOutput(self.stack, "LayerArn", value=layer)
-
-    def _create_layer(self) -> str:
-        logger.debug("Creating Lambda Layer with latest source code available")
-        output_dir = Path(str(AssetStaging.BUNDLING_OUTPUT_DIR), "python")
-        input_dir = Path(str(AssetStaging.BUNDLING_INPUT_DIR), "aws_lambda_powertools")
-
-        build_commands = [f"pip install .[pydantic] -t {output_dir}", f"cp -R {input_dir} {output_dir}"]
-        layer = LayerVersion(
-            self.stack,
-            "aws-lambda-powertools-e2e-test",
-            layer_version_name="aws-lambda-powertools-e2e-test",
-            compatible_runtimes=[PythonVersion[PYTHON_RUNTIME_VERSION].value["runtime"]],
-            code=Code.from_asset(
-                path=str(SOURCE_CODE_ROOT_PATH),
-                bundling=BundlingOptions(
-                    image=DockerImage.from_build(
-                        str(Path(__file__).parent),
-                        build_args={"IMAGE": PythonVersion[PYTHON_RUNTIME_VERSION].value["image"]},
-                    ),
-                    command=["bash", "-c", " && ".join(build_commands)],
-                ),
-            ),
-        )
-        return layer.layer_version_arn
+    return str(LAYER_BUILD_PATH)

@@ -5,9 +5,8 @@ import subprocess
 import sys
 import textwrap
 from abc import ABC, abstractmethod
-from enum import Enum
 from pathlib import Path
-from typing import Dict, Generator, Optional, Tuple, Type
+from typing import Callable, Dict, Generator, Optional, Tuple
 from uuid import uuid4
 
 import boto3
@@ -17,11 +16,8 @@ from aws_cdk.aws_lambda import Code, Function, LayerVersion, Runtime, Tracing
 from filelock import FileLock
 from mypy_boto3_cloudformation import CloudFormationClient
 
-from aws_lambda_powertools import PACKAGE_PATH
-
-PYTHON_RUNTIME_VERSION = f"V{''.join(map(str, sys.version_info[:2]))}"
-SOURCE_CODE_ROOT_PATH = PACKAGE_PATH.parent
-CDK_OUT_PATH = SOURCE_CODE_ROOT_PATH / "cdk.out"
+from tests.e2e.lambda_layer.infrastructure import build_layer
+from tests.e2e.utils.constants import CDK_OUT_PATH, PYTHON_RUNTIME_VERSION, SOURCE_CODE_ROOT_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -36,20 +32,12 @@ class BaseInfrastructureStack(ABC):
         ...
 
 
-class PythonVersion(Enum):
-    V37 = {"runtime": Runtime.PYTHON_3_7, "image": Runtime.PYTHON_3_7.bundling_image.image}
-    V38 = {"runtime": Runtime.PYTHON_3_8, "image": Runtime.PYTHON_3_8.bundling_image.image}
-    V39 = {"runtime": Runtime.PYTHON_3_9, "image": Runtime.PYTHON_3_9.bundling_image.image}
-
-
 class BaseInfrastructure(ABC):
     RANDOM_STACK_VALUE: str = f"{uuid4()}"
 
-    def __init__(self, feature_name: str, handlers_dir: Path, layer_arn: str = "") -> None:
+    def __init__(self, feature_name: str) -> None:
         self.feature_name = feature_name
         self.stack_name = f"test{PYTHON_RUNTIME_VERSION}-{feature_name}-{self.RANDOM_STACK_VALUE}"
-        self.handlers_dir = handlers_dir
-        self.layer_arn = layer_arn
         self.stack_outputs: Dict[str, str] = {}
         self.stack_outputs_file = f"{CDK_OUT_PATH / self.feature_name}_stack_outputs.json"  # tracer_stack_outputs.json
 
@@ -66,6 +54,7 @@ class BaseInfrastructure(ABC):
         self._feature_path = Path(sys.modules[self.__class__.__module__].__file__).parent
         self._feature_infra_class_name = self.__class__.__name__
         self._feature_infra_module_path = self._feature_path / "infrastructure"
+        self._handlers_dir = self._feature_path / "handlers"
 
     def create_lambda_functions(self, function_props: Optional[Dict] = None) -> Dict[str, Function]:
         """Create Lambda functions available under handlers_dir
@@ -101,16 +90,26 @@ class BaseInfrastructure(ABC):
         self.create_lambda_functions(function_props={"runtime": Runtime.PYTHON_3_7)
         ```
         """
-        handlers = list(self.handlers_dir.rglob("*.py"))
-        source = Code.from_asset(f"{self.handlers_dir}")
-        logger.debug(f"Creating functions for handlers: {handlers}")
-        if not self.layer_arn:
-            raise ValueError(
-                """Lambda Layer ARN cannot be empty when creating Lambda functions.
-                Make sure to inject `lambda_layer_arn` fixture and pass at the constructor level"""
-            )
+        if not self._handlers_dir.exists():
+            raise RuntimeError(f"Handlers dir '{self._handlers_dir}' must exist for functions to be created.")
 
-        layer = LayerVersion.from_layer_version_arn(self.stack, "layer-arn", layer_version_arn=self.layer_arn)
+        layer = LayerVersion(
+            self.stack,
+            "aws-lambda-powertools-e2e-test",
+            layer_version_name="aws-lambda-powertools-e2e-test",
+            compatible_runtimes=[
+                Runtime.PYTHON_3_7,
+                Runtime.PYTHON_3_8,
+                Runtime.PYTHON_3_9,
+            ],
+            code=Code.from_asset(path=build_layer(self.feature_name)),
+            # code=Code.from_asset(path=f"{LAYER_BUILD_PATH}"),
+        )
+
+        handlers = list(self._handlers_dir.rglob("*.py"))
+        source = Code.from_asset(f"{self._handlers_dir}")
+        logger.debug(f"Creating functions for handlers: {handlers}")
+
         function_settings_override = function_props or {}
         output: Dict[str, Function] = {}
 
@@ -177,7 +176,7 @@ class BaseInfrastructure(ABC):
             Stack Output values as dict
         """
         stack_file = self._create_temp_cdk_app()
-        command = f"cdk deploy --app 'python {stack_file}' -O {self.stack_outputs_file}"
+        command = f"npx cdk deploy --app 'python {stack_file}' -O {self.stack_outputs_file} --require-approval=never"
 
         # CDK launches a background task, so we must wait
         subprocess.check_output(command, shell=True)
@@ -213,7 +212,7 @@ class BaseInfrastructure(ABC):
 
         code = f"""
         from {infra_module} import {self._feature_infra_class_name}
-        stack = {self._feature_infra_class_name}(handlers_dir="{self.handlers_dir}")
+        stack = {self._feature_infra_class_name}()
         stack.create_resources()
         stack.app.synth()
         """
@@ -272,53 +271,50 @@ class BaseInfrastructure(ABC):
             CfnOutput(self.stack, f"{name}Arn", value=arn)
 
 
-def deploy_once(
-    stack: Type[BaseInfrastructure],
-    request: pytest.FixtureRequest,
+def call_once(
+    callable: Callable,
     tmp_path_factory: pytest.TempPathFactory,
     worker_id: str,
-    layer_arn: str,
-) -> Generator[Dict[str, str], None, None]:
-    """Deploys provided stack once whether CPU parallelization is enabled or not
+    callback: Optional[Callable] = None,
+) -> Generator[object, None, None]:
+    """Call function and serialize results once whether CPU parallelization is enabled or not
 
     Parameters
     ----------
-    stack : Type[BaseInfrastructure]
-        stack class to instantiate and deploy, for example MetricStack.
-        Not to be confused with class instance (MetricStack()).
-    request : pytest.FixtureRequest
-        pytest request fixture to introspect absolute path to test being executed
+    callable : Callable
+        Function to call once and JSON serialize result whether parallel test is enabled or not.
     tmp_path_factory : pytest.TempPathFactory
         pytest temporary path factory to discover shared tmp when multiple CPU processes are spun up
     worker_id : str
         pytest-xdist worker identification to detect whether parallelization is enabled
+    callback : Callable
+        Function to call when job is complete.
 
     Yields
     ------
-    Generator[Dict[str, str], None, None]
-        stack CloudFormation outputs
+    Generator[object, None, None]
+        Callable output when called
     """
-    handlers_dir = f"{request.node.path.parent}/handlers"
-    stack = stack(handlers_dir=Path(handlers_dir), layer_arn=layer_arn)
 
     try:
         if worker_id == "master":
-            # no parallelization, deploy stack and let fixture be cached
-            yield stack.deploy()
+            # no parallelization, call and return
+            yield callable()
         else:
             # tmp dir shared by all workers
             root_tmp_dir = tmp_path_factory.getbasetemp().parent
             cache = root_tmp_dir / f"{PYTHON_RUNTIME_VERSION}_cache.json"
 
             with FileLock(f"{cache}.lock"):
-                # If cache exists, return stack outputs back
+                # If cache exists, return callable outputs back
                 # otherwise it's the first run by the main worker
-                # deploy and return stack outputs so subsequent workers can reuse
+                # run and return callable outputs for subsequent workers reuse
                 if cache.is_file():
-                    stack_outputs = json.loads(cache.read_text())
+                    callable_result = json.loads(cache.read_text())
                 else:
-                    stack_outputs: Dict = stack.deploy()
-                    cache.write_text(json.dumps(stack_outputs))
-            yield stack_outputs
+                    callable_result: Dict = callable()
+                    cache.write_text(json.dumps(callable_result))
+            yield callable_result
     finally:
-        stack.delete()
+        if callback is not None:
+            callback()
