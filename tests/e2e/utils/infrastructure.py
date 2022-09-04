@@ -16,7 +16,7 @@ from aws_cdk.aws_lambda import Code, Function, LayerVersion, Runtime, Tracing
 from filelock import FileLock
 from mypy_boto3_cloudformation import CloudFormationClient
 
-from tests.e2e.lambda_layer.infrastructure import build_layer
+# from tests.e2e.lambda_layer.infrastructure import build_layer
 from tests.e2e.utils.constants import CDK_OUT_PATH, PYTHON_RUNTIME_VERSION, SOURCE_CODE_ROOT_PATH
 
 logger = logging.getLogger(__name__)
@@ -30,6 +30,18 @@ class BaseInfrastructureStack(ABC):
     @abstractmethod
     def __call__(self) -> Tuple[dict, str]:
         ...
+
+
+def build_layer(out_dir: Path, feature_name: str = "") -> str:
+    LAYER_BUILD_PATH = out_dir / f"layer_build_{feature_name}"
+
+    # TODO: Check if source code hasn't changed (dirsum)
+    package = f"{SOURCE_CODE_ROOT_PATH}\[pydantic\]"
+    build_args = "--platform manylinux1_x86_64 --only-binary=:all: --upgrade"
+    build_command = f"pip install {package} {build_args} --target {LAYER_BUILD_PATH}/python"
+    subprocess.run(build_command, shell=True)
+
+    return str(LAYER_BUILD_PATH)
 
 
 class BaseInfrastructure(ABC):
@@ -55,6 +67,7 @@ class BaseInfrastructure(ABC):
         self._feature_infra_class_name = self.__class__.__name__
         self._feature_infra_module_path = self._feature_path / "infrastructure"
         self._handlers_dir = self._feature_path / "handlers"
+        self._cdk_out_dir = CDK_OUT_PATH / self.feature_name
 
     def create_lambda_functions(self, function_props: Optional[Dict] = None) -> Dict[str, Function]:
         """Create Lambda functions available under handlers_dir
@@ -102,8 +115,7 @@ class BaseInfrastructure(ABC):
                 Runtime.PYTHON_3_8,
                 Runtime.PYTHON_3_9,
             ],
-            code=Code.from_asset(path=build_layer(self.feature_name)),
-            # code=Code.from_asset(path=f"{LAYER_BUILD_PATH}"),
+            code=Code.from_asset(path=build_layer(out_dir=self._cdk_out_dir, feature_name=self.feature_name)),
         )
 
         handlers = list(self._handlers_dir.rglob("*.py"))
@@ -176,10 +188,14 @@ class BaseInfrastructure(ABC):
             Stack Output values as dict
         """
         stack_file = self._create_temp_cdk_app()
-        command = f"npx cdk deploy --app 'python {stack_file}' -O {self.stack_outputs_file} --require-approval=never"
+        synth_command = f"npx cdk synth --app 'python {stack_file}' -o {self._cdk_out_dir}"
+        deploy_command = (
+            f"npx cdk deploy --app '{self._cdk_out_dir}' -O {self.stack_outputs_file} --require-approval=never"
+        )
 
         # CDK launches a background task, so we must wait
-        subprocess.check_output(command, shell=True)
+        subprocess.check_output(synth_command, shell=True)
+        subprocess.check_output(deploy_command, shell=True)
         return self._read_stack_output()
 
     def _sync_stack_name(self, stack_output: Dict):
