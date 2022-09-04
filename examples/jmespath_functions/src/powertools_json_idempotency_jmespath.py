@@ -20,8 +20,8 @@ class PaymentError(Exception):
 def handler(event, context) -> dict:
     body = json.loads(event["body"])
     try:
-        payment = create_subscription_payment(user=body["user"], product_id=body["product_id"])
-        return {"payment_id": payment.id, "message": "success", "statusCode": 200}
+        payment: dict = create_subscription_payment(user=body["user"], product_id=body["product_id"])
+        return {"payment_id": payment.get("id"), "message": "success", "statusCode": 200}
     except requests.HTTPError as e:
         raise PaymentError("Unable to create payment subscription") from e
 

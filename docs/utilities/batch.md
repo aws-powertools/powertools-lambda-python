@@ -1141,215 +1141,16 @@ class MyProcessor(BatchProcessor):
 		return super().failure_handler(record, exception)
 ```
 
-## Legacy
-
-???+ tip
-    This is kept for historical purposes. Use the new [BatchProcessor](#processing-messages-from-sqs) instead.
-
-### Migration guide
-
-???+ info
-    Keep reading if you are using `sqs_batch_processor` or `PartialSQSProcessor`.
-
-[As of Nov 2021](https://aws.amazon.com/about-aws/whats-new/2021/11/aws-lambda-partial-batch-response-sqs-event-source/){target="_blank"}, this is no longer needed as both SQS, Kinesis, and DynamoDB Streams offer this capability natively with one caveat - it's an [opt-in feature](#required-resources).
-
-Being a native feature, we no longer need to instantiate boto3 nor other customizations like exception suppressing – this lowers the cost of your Lambda function as you can delegate deleting partial failures to Lambda.
-
-???+ tip
-    It's also easier to test since it's mostly a [contract based response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-batchfailurereporting-syntax){target="_blank"}.
-
-You can migrate in three steps:
-
-1. If you are using **`sqs_batch_decorator`** you can now use **`batch_processor`** decorator
-2. If you were using **`PartialSQSProcessor`** you can now use **`BatchProcessor`**
-3. Change your Lambda Handler to return the new response format
-
-=== "Decorator: Before"
-
-    ```python hl_lines="1 6"
-    from aws_lambda_powertools.utilities.batch import sqs_batch_processor
-
-    def record_handler(record):
-        return do_something_with(record["body"])
-
-    @sqs_batch_processor(record_handler=record_handler)
-    def lambda_handler(event, context):
-        return {"statusCode": 200}
-    ```
-
-=== "Decorator: After"
-
-    ```python hl_lines="3 5 11"
-    import json
-
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-
-    processor = BatchProcessor(event_type=EventType.SQS)
-
-
-    def record_handler(record):
-        return do_something_with(record["body"])
-
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context):
-        return processor.response()
-    ```
-
-=== "Context manager: Before"
-
-    ```python hl_lines="1-2 4 14 19"
-    from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
-    from botocore.config import Config
-
-    config = Config(region_name="us-east-1")
-
-    def record_handler(record):
-        return_value = do_something_with(record["body"])
-        return return_value
-
-
-    def lambda_handler(event, context):
-        records = event["Records"]
-
-        processor = PartialSQSProcessor(config=config)
-
-        with processor(records, record_handler):
-            result = processor.process()
-
-        return result
-    ```
-
-=== "Context manager: After"
-
-    ```python hl_lines="1 11"
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-
-
-    def record_handler(record):
-        return_value = do_something_with(record["body"])
-        return return_value
-
-    def lambda_handler(event, context):
-        records = event["Records"]
-
-        processor = BatchProcessor(event_type=EventType.SQS)
-
-        with processor(records, record_handler):
-            result = processor.process()
-
-        return processor.response()
-    ```
-
-### Customizing boto configuration
-
-The **`config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html)
-or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html) when using the `sqs_batch_processor`
-decorator or `PartialSQSProcessor` class.
-
-> Custom config example
-
-=== "Decorator"
-
-    ```python  hl_lines="4 12"
-    from aws_lambda_powertools.utilities.batch import sqs_batch_processor
-    from botocore.config import Config
-
-    config = Config(region_name="us-east-1")
-
-    def record_handler(record):
-        # This will be called for each individual message from a batch
-        # It should raise an exception if the message was not processed successfully
-        return_value = do_something_with(record["body"])
-        return return_value
-
-    @sqs_batch_processor(record_handler=record_handler, config=config)
-    def lambda_handler(event, context):
-        return {"statusCode": 200}
-    ```
-
-=== "Context manager"
-
-    ```python  hl_lines="4 16"
-    from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
-    from botocore.config import Config
-
-    config = Config(region_name="us-east-1")
-
-    def record_handler(record):
-        # This will be called for each individual message from a batch
-        # It should raise an exception if the message was not processed successfully
-        return_value = do_something_with(record["body"])
-        return return_value
-
-
-    def lambda_handler(event, context):
-        records = event["Records"]
-
-        processor = PartialSQSProcessor(config=config)
-
-        with processor(records, record_handler):
-            result = processor.process()
-
-        return result
-    ```
-
-> Custom boto3 session example
-
-=== "Decorator"
-
-    ```python  hl_lines="4 12"
-    from aws_lambda_powertools.utilities.batch import sqs_batch_processor
-    from botocore.config import Config
-
-    session = boto3.session.Session()
-
-    def record_handler(record):
-        # This will be called for each individual message from a batch
-        # It should raise an exception if the message was not processed successfully
-        return_value = do_something_with(record["body"])
-        return return_value
-
-    @sqs_batch_processor(record_handler=record_handler, boto3_session=session)
-    def lambda_handler(event, context):
-        return {"statusCode": 200}
-    ```
-
-=== "Context manager"
-
-    ```python  hl_lines="4 16"
-    from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
-    import boto3
-
-    session = boto3.session.Session()
-
-    def record_handler(record):
-        # This will be called for each individual message from a batch
-        # It should raise an exception if the message was not processed successfully
-        return_value = do_something_with(record["body"])
-        return return_value
-
-
-    def lambda_handler(event, context):
-        records = event["Records"]
-
-        processor = PartialSQSProcessor(boto3_session=session)
-
-        with processor(records, record_handler):
-            result = processor.process()
-
-        return result
-    ```
-
 ### Suppressing exceptions
 
-If you want to disable the default behavior where `SQSBatchProcessingError` is raised if there are any errors, you can pass the `suppress_exception` boolean argument.
+If you want to disable the default behavior where `BatchProcessingError` is raised if there are any errors, you can pass the `suppress_exception` boolean argument.
 
 === "Decorator"
 
     ```python hl_lines="3"
-    from aws_lambda_powertools.utilities.batch import sqs_batch_processor
+    from aws_lambda_powertools.utilities.batch import batch_processor
 
-    @sqs_batch_processor(record_handler=record_handler, config=config, suppress_exception=True)
+    @batch_processor(record_handler=record_handler, suppress_exception=True)
     def lambda_handler(event, context):
         return {"statusCode": 200}
     ```
@@ -1357,9 +1158,9 @@ If you want to disable the default behavior where `SQSBatchProcessingError` is r
 === "Context manager"
 
     ```python hl_lines="3"
-    from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
 
-    processor = PartialSQSProcessor(config=config, suppress_exception=True)
+    processor = BatchProcessor(event_type=EventType.SQS, suppress_exception=True)
 
     with processor(records, record_handler):
         result = processor.process()

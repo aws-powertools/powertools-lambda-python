@@ -1,0 +1,38 @@
+name: On Label added
+
+on:
+  workflow_run:
+    workflows: ["Record PR details"]
+    types:
+      - completed
+
+jobs:
+  get_pr_details:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    uses: ./.github/workflows/reusable_export_pr_details.yml
+    with:
+      record_pr_workflow_id: ${{ github.event.workflow_run.id }}
+      workflow_origin: ${{ github.event.repository.full_name }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+
+  split-large-pr:
+    needs: get_pr_details
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+      # Maintenance: Persist state per PR as an artifact to avoid spam on label add
+      - name: "Suggest split large Pull Request"
+        uses: actions/github-script@v6
+        env:
+          PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
+          PR_ACTION: ${{ needs.get_pr_details.outputs.prAction }}
+          PR_AUTHOR: ${{ needs.get_pr_details.outputs.prAuthor }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const script = require('.github/scripts/comment_on_large_pr.js');
+            await script({github, context, core});

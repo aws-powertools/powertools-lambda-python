@@ -15,6 +15,8 @@
     - [Releasing a new version](#releasing-a-new-version)
         - [Drafting release notes](#drafting-release-notes)
     - [Run end to end tests](#run-end-to-end-tests)
+        - [Structure](#structure)
+        - [Workflow](#workflow)
     - [Releasing a documentation hotfix](#releasing-a-documentation-hotfix)
     - [Maintain Overall Health of the Repo](#maintain-overall-health-of-the-repo)
     - [Manage Roadmap](#manage-roadmap)
@@ -37,13 +39,14 @@ This is document explains who the maintainers are (see below), what they do in t
 
 ## Current Maintainers
 
-| Maintainer       | GitHub ID                                       | Affiliation |
-| ---------------- | ----------------------------------------------- | ----------- |
-| Heitor Lessa     | [heitorlessa](https://github.com/heitorlessa)   | Amazon      |
-| Alexander Melnyk | [am29d](https://github.com/am29d)               | Amazon      |
-| Michal Ploski    | [mploski](https://github.com/mploski)           | Amazon      |
-| Simon Thulbourn  | [sthulb](https://github.com/sthulb)             | Amazon      |
-| Ruben Fonseca    | [rubenfonseca](https://github.com/rubenfonseca) | Amazon      |
+| Maintainer        | GitHub ID                                               | Affiliation |
+| ----------------- | ------------------------------------------------------- | ----------- |
+| Heitor Lessa      | [heitorlessa](https://github.com/heitorlessa)           | Amazon      |
+| Alexander Melnyk  | [am29d](https://github.com/am29d)                       | Amazon      |
+| Michal Ploski     | [mploski](https://github.com/mploski)                   | Amazon      |
+| Simon Thulbourn   | [sthulb](https://github.com/sthulb)                     | Amazon      |
+| Ruben Fonseca     | [rubenfonseca](https://github.com/rubenfonseca)         | Amazon      |
+| Leandro Damascena | [leandrodamascena](https://github.com/leandrodamascena) | Amazon      |
 
 ## Emeritus
 
@@ -205,17 +208,91 @@ These are some questions to keep in mind when drafting your first or future rele
 
 Once you're happy, hit `Publish release` 🎉🎉🎉.
 
-This will kick off the [Publishing workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/publish.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be closed and notified.
+This will kick off the [Publishing workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/on_release_notes.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be closed and notified.
 
 > TODO: Include information to verify SAR and Lambda Layers deployment; we're still finalizing Lambda Layer automated deployment in GitHub Actions - ping @am29d when in doubt.
 
 ### Run end to end tests
 
-In order to run end to end tests you need to install CDK CLI first and bootstrap your account with `cdk bootstrap` command. For additional details follow [documentation](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html).
+E2E tests are run on every push to `develop` or manually via [run-e2e-tests workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/run-e2e-tests.yml).
 
-To run locally, export `AWS_PROFILE` environment variable and run `make e2e tests`. To run from GitHub Actions, use [run-e2e-tests workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/run-e2e-tests.yml) and pick the branch you want to run tests against.
+To run locally, you need [AWS CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_prerequisites) and an [account bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) (`cdk bootstrap`). With a default AWS CLI profile configured, or `AWS_PROFILE` environment variable set, run `make e2e tests`.
 
-**NOTE**: E2E tests are run as part of each merge to `develop` branch.
+#### Structure
+
+Our E2E framework relies on pytest fixtures to coordinate infrastructure and test parallelization (see [Workflow](#workflow)). You'll notice multiple `conftest.py`, `infrastructure.py`, and `handlers`.
+
+- **`infrastructure`**. Uses CDK to define what a Stack for a given feature should look like. It inherits from `BaseInfrastructure` to handle all boilerplate and deployment logic necessary.
+- **`conftest.py`**. Imports and deploys a given feature Infrastructure. Hierarchy matters. Top-level `conftest` deploys stacks only once and blocks I/O across all CPUs. Feature-level `conftest` deploys stacks in parallel, and once complete run all tests in parallel.
+- **`handlers`**. Lambda function handlers that will be automatically deployed and exported as PascalCase for later use.
+
+```shell
+.
+├── __init__.py
+├── conftest.py # deploys Lambda Layer stack
+├── logger
+│   ├── __init__.py
+│   ├── conftest.py  # deploys LoggerStack
+│   ├── handlers
+│   │   └── basic_handler.py
+│   ├── infrastructure.py # LoggerStack definition
+│   └── test_logger.py
+├── metrics
+│   ├── __init__.py
+│   ├── conftest.py  # deploys MetricsStack
+│   ├── handlers
+│   │   ├── basic_handler.py
+│   │   └── cold_start.py
+│   ├── infrastructure.py # MetricsStack definition
+│   └── test_metrics.py
+├── tracer
+│   ├── __init__.py
+│   ├── conftest.py  # deploys TracerStack
+│   ├── handlers
+│   │   ├── async_capture.py
+│   │   └── basic_handler.py
+│   ├── infrastructure.py  # TracerStack definition
+│   └── test_tracer.py
+└── utils
+    ├── Dockerfile
+    ├── __init__.py
+    ├── data_builder  # build_service_name(), build_add_dimensions_input, etc.
+    ├── data_fetcher  # get_traces(), get_logs(), get_lambda_response(), etc.
+    ├── infrastructure.py # base infrastructure like deploy logic, Layer Stack, etc.
+```
+
+#### Workflow
+
+We parallelize our end-to-end tests to benefit from speed and isolate Lambda functions to ease assessing side effects (e.g., traces, logs, etc.). The following diagram demonstrates the process we take every time you use `make e2e`:
+
+```mermaid
+graph TD
+    A[make e2e test] -->Spawn{"Split and group tests <br>by feature and CPU"}
+
+    Spawn -->|Worker0| Worker0_Start["Load tests"]
+    Spawn -->|Worker1| Worker1_Start["Load tests"]
+    Spawn -->|WorkerN| WorkerN_Start["Load tests"]
+
+    Worker0_Start -->|Wait| LambdaLayerStack["Lambda Layer Stack Deployment"]
+    Worker1_Start -->|Wait| LambdaLayerStack["Lambda Layer Stack Deployment"]
+    WorkerN_Start -->|Wait| LambdaLayerStack["Lambda Layer Stack Deployment"]
+
+    LambdaLayerStack -->|Worker0| Worker0_Deploy["Launch feature stack"]
+    LambdaLayerStack -->|Worker1| Worker1_Deploy["Launch feature stack"]
+    LambdaLayerStack -->|WorkerN| WorkerN_Deploy["Launch feature stack"]
+
+    Worker0_Deploy -->|Worker0| Worker0_Tests["Run tests"]
+    Worker1_Deploy -->|Worker1| Worker1_Tests["Run tests"]
+    WorkerN_Deploy -->|WorkerN| WorkerN_Tests["Run tests"]
+
+    Worker0_Tests --> ResultCollection
+    Worker1_Tests --> ResultCollection
+    WorkerN_Tests --> ResultCollection
+
+    ResultCollection{"Wait for workers<br/>Collect test results"}
+    ResultCollection --> TestEnd["Report results"]
+    ResultCollection --> DeployEnd["Delete Stacks"]
+```
 
 ### Releasing a documentation hotfix
 

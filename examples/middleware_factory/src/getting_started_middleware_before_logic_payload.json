@@ -1,0 +1,14 @@
+{
+    "version": "0",
+    "id": "9c95e8e4-96a4-ef3f-b739-b6aa5b193afb",
+    "detail-type": "PaymentCreated",
+    "source": "app.payment",
+    "account": "0123456789012",
+    "time": "2022-08-08T20:41:53Z",
+    "region": "eu-east-1",
+    "detail": {
+      "amount": "150.00",
+      "order_id": "8f1f1710-1b30-48a5-a6bd-153fd23b866b",
+      "user_id": "f80e3c51-5b8c-49d5-af7d-c7804966235f"
+    }
+  }

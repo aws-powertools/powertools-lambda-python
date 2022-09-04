@@ -3,14 +3,23 @@ title: Middleware factory
 description: Utility
 ---
 
+<!-- markdownlint-disable MD043 -->
+
 Middleware factory provides a decorator factory to create your own middleware to run logic before, and after each Lambda invocation synchronously.
 
 ## Key features
 
 * Run logic before, after, and handle exceptions
-* Trace each middleware when requested
+* Built-in tracing opt-in capability
 
-## Middleware with no params
+## Getting started
+
+???+ tip
+    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+
+You might need a custom middleware to abstract non-functional code. These are often custom authorization or any reusable logic you might need to run before/after a Lambda function invocation.
+
+### Middleware with no params
 
 You can create your own middleware using `lambda_handler_decorator`. The decorator factory expects 3 arguments in your function signature:
 
@@ -18,74 +27,120 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
 * **event** - Lambda function invocation event
 * **context** - Lambda function context object
 
-```python hl_lines="3-4 10" title="Creating your own middleware for before/after logic"
-from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+### Middleware with before logic
 
-@lambda_handler_decorator
-def middleware_before_after(handler, event, context):
-	# logic_before_handler_execution()
-	response = handler(event, context)
-	# logic_after_handler_execution()
-	return response
+=== "getting_started_middleware_before_logic_function.py"
+    ```python hl_lines="5 23 24 29 30 32 37 38"
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_before_logic_function.py"
+    ```
 
-@middleware_before_after
-def lambda_handler(event, context):
-	...
-```
+=== "getting_started_middleware_before_logic_payload.json"
 
-## Middleware with params
+    ```json hl_lines="9-13"
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_before_logic_payload.json"
+    ```
+
+### Middleware with after logic
+
+=== "getting_started_middleware_after_logic_function.py"
+    ```python hl_lines="7 14 15 21-23 37"
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_after_logic_function.py"
+    ```
+
+=== "getting_started_middleware_after_logic_payload.json"
+
+    ```json
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_after_logic_payload.json"
+    ```
+
+### Middleware with params
 
 You can also have your own keyword arguments after the mandatory arguments.
 
-```python hl_lines="2 12" title="Accepting arbitrary keyword arguments"
-@lambda_handler_decorator
-def obfuscate_sensitive_data(handler, event, context, fields: List = None):
-	# Obfuscate email before calling Lambda handler
-	if fields:
-		for field in fields:
-			if field in event:
-				event[field] = obfuscate(event[field])
+=== "getting_started_middleware_with_params_function.py"
+    ```python hl_lines="6 27 28 29 33 49"
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_with_params_function.py"
+    ```
 
-	return handler(event, context)
+=== "getting_started_middleware_with_params_payload.json"
 
-@obfuscate_sensitive_data(fields=["email"])
-def lambda_handler(event, context):
-	...
-```
+    ```json hl_lines="18 19 20"
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_with_params_payload.json"
+    ```
 
-## Tracing middleware execution
+## Advanced
+
+For advanced use cases, you can instantiate [Tracer](../core/tracer.md) inside your middleware, and add annotations as well as metadata for additional operational insights.
+
+=== "advanced_middleware_tracer_function.py"
+    ```python hl_lines="7 9 12 16 17 19 25 42"
+    --8<-- "examples/middleware_factory/src/advanced_middleware_tracer_function.py"
+    ```
+
+=== "advanced_middleware_tracer_payload.json"
+
+    ```json
+    --8<-- "examples/middleware_factory/src/advanced_middleware_tracer_payload.json"
+    ```
+
+![Middleware advanced Tracer](../media/middleware_factory_tracer_2.png)
+
+### Tracing middleware **execution**
 
 If you are making use of [Tracer](../core/tracer.md), you can trace the execution of your middleware to ease operations.
 
 This makes use of an existing Tracer instance that you may have initialized anywhere in your code.
 
-```python hl_lines="3" title="Tracing custom middlewares with Tracer"
-from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+???+ warning
+    You must [enable Active Tracing](../core/tracer/#permissions) in your Lambda function when using this feature, otherwise Lambda cannot send traces to XRay.
 
-@lambda_handler_decorator(trace_execution=True)
-def my_middleware(handler, event, context):
-	return handler(event, context)
+=== "getting_started_middleware_tracer_function.py"
+    ```python hl_lines="8 14 15 36"
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_tracer_function.py"
+    ```
 
-@my_middleware
-def lambda_handler(event, context):
-	...
-```
+=== "getting_started_middleware_tracer_payload.json"
 
-When executed, your middleware name will [appear in AWS X-Ray Trace details as](../core/tracer.md) `## middleware_name`.
+    ```json hl_lines="18 19 20"
+    --8<-- "examples/middleware_factory/src/getting_started_middleware_tracer_payload.json"
+    ```
 
-For advanced use cases, you can instantiate [Tracer](../core/tracer.md) inside your middleware, and add annotations as well as metadata for additional operational insights.
+When executed, your middleware name will [appear in AWS X-Ray Trace details as](../core/tracer.md) `## middleware_name`, in this example the middleware name is `## middleware_with_tracing`.
 
-```python hl_lines="6-8" title="Add custom tracing insights before/after in your middlware"
-from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools import Tracer
+![Middleware simple Tracer](../media/middleware_factory_tracer_1.png)
 
-@lambda_handler_decorator(trace_execution=True)
-def middleware_name(handler, event, context):
-	# tracer = Tracer() # Takes a copy of an existing tracer instance
-	# tracer.add_annotation...
-	# tracer.add_metadata...
-	return handler(event, context)
-```
+### Combining Powertools utilities
+
+You can create your own middleware and combine many features of Lambda Powertools such as [trace](../core/logger.md), [logs](../core/logger.md), [feature flags](feature_flags.md), [validation](validation.md), [jmespath_functions](jmespath_functions.md) and others to abstract non-functional code.
+
+In the example below, we create a Middleware with the following features:
+
+* Logs and traces
+* Validate if the payload contains a specific header
+* Extract specific keys from event
+* Automatically add security headers on every execution
+* Validate if a specific feature flag is enabled
+* Save execution history to a DynamoDB table
+
+=== "combining_powertools_utilities_function.py"
+    ```python hl_lines="11 28 29 119 52 61 73"
+    --8<-- "examples/middleware_factory/src/combining_powertools_utilities_function.py"
+    ```
+
+=== "combining_powertools_utilities_schema.py"
+    ```python hl_lines="12 14"
+    --8<-- "examples/middleware_factory/src/combining_powertools_utilities_schema.py"
+    ```
+
+=== "combining_powertools_utilities_event.json"
+    ```python hl_lines="10"
+    --8<-- "examples/middleware_factory/src/combining_powertools_utilities_event.json"
+    ```
+
+=== "SAM TEMPLATE"
+    ```python hl_lines="66 83 89 96 103 108-113 119 130"
+    --8<-- "examples/middleware_factory/sam/combining_powertools_utilities_template.yaml"
+    ```
 
 ## Tips
 

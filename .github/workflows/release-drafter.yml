@@ -10,6 +10,6 @@ jobs:
   update_release_draft:
     runs-on: ubuntu-latest
     steps:
-      - uses: release-drafter/release-drafter@ac463ffd9cc4c6ad5682af93dc3e3591c4657ee3 # v5.20.0
+      - uses: release-drafter/release-drafter@06a49bf28488e030d35ca2ac6dbf7f408a481779 # v5.20.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

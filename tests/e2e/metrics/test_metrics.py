@@ -1,40 +1,67 @@
-import datetime
-import uuid
+import json
 
-import boto3
 import pytest
-from e2e import conftest
-from e2e.utils import helpers
+
+from tests.e2e.utils import data_builder, data_fetcher
 
 
-@pytest.fixture(scope="module")
-def config() -> conftest.LambdaConfig:
-    return {
-        "parameters": {},
-        "environment_variables": {
-            "POWERTOOLS_METRICS_NAMESPACE": "powertools-e2e-metric",
-            "POWERTOOLS_SERVICE_NAME": "test-powertools-service",
-            "METRIC_NAME": f"business-metric-{str(uuid.uuid4()).replace('-','_')}",
-        },
-    }
+@pytest.fixture
+def basic_handler_fn(infrastructure: dict) -> str:
+    return infrastructure.get("BasicHandler", "")
 
 
-def test_basic_lambda_metric_visible(execute_lambda: conftest.InfrastructureOutput, config: conftest.LambdaConfig):
+@pytest.fixture
+def basic_handler_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("BasicHandlerArn", "")
+
+
+@pytest.fixture
+def cold_start_fn(infrastructure: dict) -> str:
+    return infrastructure.get("ColdStart", "")
+
+
+@pytest.fixture
+def cold_start_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("ColdStartArn", "")
+
+
+METRIC_NAMESPACE = "powertools-e2e-metric"
+
+
+def test_basic_lambda_metric_is_visible(basic_handler_fn: str, basic_handler_fn_arn: str):
     # GIVEN
-    start_date = execute_lambda.get_lambda_execution_time()
-    end_date = start_date + datetime.timedelta(minutes=5)
+    metric_name = data_builder.build_metric_name()
+    service = data_builder.build_service_name()
+    dimensions = data_builder.build_add_dimensions_input(service=service)
+    metrics = data_builder.build_multiple_add_metric_input(metric_name=metric_name, value=1, quantity=3)
 
     # WHEN
-    metrics = helpers.get_metrics(
-        start_date=start_date,
-        end_date=end_date,
-        namespace=config["environment_variables"]["POWERTOOLS_METRICS_NAMESPACE"],
-        metric_name=config["environment_variables"]["METRIC_NAME"],
-        service_name=config["environment_variables"]["POWERTOOLS_SERVICE_NAME"],
-        cw_client=boto3.client(service_name="cloudwatch"),
+    event = json.dumps({"metrics": metrics, "service": service, "namespace": METRIC_NAMESPACE})
+    _, execution_time = data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn, payload=event)
+
+    metric_values = data_fetcher.get_metrics(
+        namespace=METRIC_NAMESPACE, start_date=execution_time, metric_name=metric_name, dimensions=dimensions
     )
 
     # THEN
-    assert metrics.get("Timestamps") and len(metrics.get("Timestamps")) == 1
-    assert metrics.get("Values") and len(metrics.get("Values")) == 1
-    assert metrics.get("Values") and metrics.get("Values")[0] == 1
+    assert metric_values == [3.0]
+
+
+def test_cold_start_metric(cold_start_fn_arn: str, cold_start_fn: str):
+    # GIVEN
+    metric_name = "ColdStart"
+    service = data_builder.build_service_name()
+    dimensions = data_builder.build_add_dimensions_input(function_name=cold_start_fn, service=service)
+
+    # WHEN we invoke twice
+    event = json.dumps({"service": service, "namespace": METRIC_NAMESPACE})
+
+    _, execution_time = data_fetcher.get_lambda_response(lambda_arn=cold_start_fn_arn, payload=event)
+    data_fetcher.get_lambda_response(lambda_arn=cold_start_fn_arn, payload=event)
+
+    metric_values = data_fetcher.get_metrics(
+        namespace=METRIC_NAMESPACE, start_date=execution_time, metric_name=metric_name, dimensions=dimensions
+    )
+
+    # THEN
+    assert metric_values == [1.0]

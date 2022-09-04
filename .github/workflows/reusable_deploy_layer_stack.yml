@@ -8,12 +8,15 @@ on:
   workflow_call:
     inputs:
       stage:
+        description: "Deployment stage (BETA, PROD)"
         required: true
         type: string
       artefact-name:
+        description: "CDK Layer Artefact name to download"
         required: true
         type: string
       environment:
+        description: "GitHub Environment to use for encrypted secrets"
         required: true
         type: string
 

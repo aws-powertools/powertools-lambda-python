@@ -1,0 +1,35 @@
+name: Docs
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "examples/**"
+
+jobs:
+  changelog:
+    permissions:
+      contents: write
+    uses: ./.github/workflows/reusable_publish_changelog.yml
+
+  release-docs:
+    needs: changelog
+    permissions:
+      contents: write
+      pages: write
+    uses: ./.github/workflows/reusable_publish_docs.yml
+    with:
+      version: develop
+      alias: stage
+# Maintenance: Only necessary in repo migration
+# - name: Create redirect from old docs
+#   run: |
+#     git checkout gh-pages
+#     test -f 404.html && echo "Redirect already set" && exit 0
+#     git checkout develop -- 404.html
+#     git add 404.html
+#     git commit -m "chore: set docs redirect" --no-verify
+#     git push origin gh-pages -f

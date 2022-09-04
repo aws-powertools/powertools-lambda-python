@@ -1,17 +1,11 @@
-import os
-
 from aws_lambda_powertools import Logger
 
 logger = Logger()
 
-MESSAGE = os.environ["MESSAGE"]
-ADDITIONAL_KEY = os.environ["ADDITIONAL_KEY"]
 
-
-@logger.inject_lambda_context(log_event=True)
+@logger.inject_lambda_context
 def lambda_handler(event, context):
-    logger.debug(MESSAGE)
-    logger.info(MESSAGE)
-    logger.append_keys(**{ADDITIONAL_KEY: "test"})
-    logger.info(MESSAGE)
+    message, append_keys = event.get("message", ""), event.get("append_keys", {})
+    logger.append_keys(**append_keys)
+    logger.info(message)
     return "success"
