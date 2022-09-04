@@ -6,7 +6,7 @@ import sys
 import textwrap
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Callable, Dict, Generator, Optional, Tuple
+from typing import Callable, Dict, Generator, Optional
 from uuid import uuid4
 
 import boto3
@@ -22,22 +22,13 @@ from tests.e2e.utils.lambda_layer.powertools_layer import LocalLambdaPowertoolsL
 logger = logging.getLogger(__name__)
 
 
-class BaseInfrastructureStack(ABC):
-    @abstractmethod
-    def synthesize(self) -> Tuple[dict, str]:
-        ...
-
-    @abstractmethod
-    def __call__(self) -> Tuple[dict, str]:
-        ...
-
-
 class BaseInfrastructure(ABC):
     RANDOM_STACK_VALUE: str = f"{uuid4()}"
 
-    def __init__(self, feature_name: str) -> None:
-        self.feature_name = feature_name
-        self.stack_name = f"test{PYTHON_RUNTIME_VERSION}-{feature_name}-{self.RANDOM_STACK_VALUE}"
+    def __init__(self) -> None:
+        self.feature_path = Path(sys.modules[self.__class__.__module__].__file__).parent  # absolute path to feature
+        self.feature_name = self.feature_path.parts[-1].replace("_", "-")  # logger, tracer, event-handler, etc.
+        self.stack_name = f"test{PYTHON_RUNTIME_VERSION}-{self.feature_name}-{self.RANDOM_STACK_VALUE}"
         self.stack_outputs: Dict[str, str] = {}
         self.stack_outputs_file = f"{CDK_OUT_PATH / self.feature_name}_stack_outputs.json"  # tracer_stack_outputs.json
 
@@ -50,12 +41,11 @@ class BaseInfrastructure(ABC):
         self.app = App()
         self.stack = Stack(self.app, self.stack_name, env=Environment(account=self.account_id, region=self.region))
 
-        # NOTE: Inspect subclass path to generate CDK App (_create_temp_cdk_app method)
-        self._feature_path = Path(sys.modules[self.__class__.__module__].__file__).parent
+        # NOTE: Introspect feature details to generate CDK App (_create_temp_cdk_app method)
         self._feature_infra_class_name = self.__class__.__name__
-        self._feature_infra_module_path = self._feature_path / "infrastructure"
-        self._feature_infra_file = self._feature_path / "infrastructure.py"
-        self._handlers_dir = self._feature_path / "handlers"
+        self._feature_infra_module_path = self.feature_path / "infrastructure"
+        self._feature_infra_file = self.feature_path / "infrastructure.py"
+        self._handlers_dir = self.feature_path / "handlers"
         self._cdk_out_dir: Path = CDK_OUT_PATH / self.feature_name
 
         if not self._feature_infra_file.exists():
@@ -178,7 +168,7 @@ class BaseInfrastructure(ABC):
         self.cfn.delete_stack(StackName=self.stack_name)
 
     def _sync_stack_name(self, stack_output: Dict):
-        """Synchronize initial stack name with CDK's final stack name
+        """Synchronize initial stack name with CDK final stack name
 
         Parameters
         ----------

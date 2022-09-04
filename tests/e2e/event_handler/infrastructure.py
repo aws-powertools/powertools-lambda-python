@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Dict, Optional
 
 from aws_cdk import CfnOutput
@@ -14,11 +13,6 @@ from tests.e2e.utils.infrastructure import BaseInfrastructure
 
 
 class EventHandlerStack(BaseInfrastructure):
-    FEATURE_NAME = "event-handlers"
-
-    def __init__(self, feature_name: str = FEATURE_NAME) -> None:
-        super().__init__(feature_name)
-
     def create_resources(self):
         functions = self.create_lambda_functions()
 
