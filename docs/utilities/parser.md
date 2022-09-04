@@ -168,6 +168,7 @@ Parser comes with the following built-in models:
 | **APIGatewayProxyEventModel**   | Lambda Event Source payload for Amazon API Gateway                 |
 | **APIGatewayProxyEventV2Model** | Lambda Event Source payload for Amazon API Gateway v2 payload      |
 | **LambdaFunctionUrlModel**      | Lambda Event Source payload for Lambda Function URL payload        |
+| **KafkaModel**                  | Lambda Event Source payload for self managed Kafka payload         |
 
 ### extending built-in models
 
@@ -308,6 +309,7 @@ Parser comes with the following built-in envelopes, where `Model` in the return 
 | **ApiGatewayEnvelope**        | 1. Parses data using `APIGatewayProxyEventModel`. <br/> 2. Parses `body` key using your model and returns it.                                                                                               | `Model`                            |
 | **ApiGatewayV2Envelope**      | 1. Parses data using `APIGatewayProxyEventV2Model`. <br/> 2. Parses `body` key using your model and returns it.                                                                                             | `Model`                            |
 | **LambdaFunctionUrlEnvelope** | 1. Parses data using `LambdaFunctionUrlModel`. <br/> 2. Parses `body` key using your model and returns it.                                                                                                  | `Model`                            |
+| **KafkaEnvelope**             | 1. Parses data using `KafkaRecordModel`. <br/> 2. Parses `value` key using your model and returns it.                                                                                                       | `Model`                            |
 
 ### Bringing your own envelope
 
