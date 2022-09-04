@@ -16,8 +16,8 @@ from aws_cdk.aws_lambda import Code, Function, LayerVersion, Runtime, Tracing
 from filelock import FileLock
 from mypy_boto3_cloudformation import CloudFormationClient
 
-# from tests.e2e.lambda_layer.infrastructure import build_layer
 from tests.e2e.utils.constants import CDK_OUT_PATH, PYTHON_RUNTIME_VERSION, SOURCE_CODE_ROOT_PATH
+from tests.e2e.utils.lambda_layer.powertools_layer import LocalLambdaPowertoolsLayer
 
 logger = logging.getLogger(__name__)
 
@@ -30,18 +30,6 @@ class BaseInfrastructureStack(ABC):
     @abstractmethod
     def __call__(self) -> Tuple[dict, str]:
         ...
-
-
-def build_layer(out_dir: Path, feature_name: str = "") -> str:
-    LAYER_BUILD_PATH = out_dir / f"layer_build_{feature_name}"
-
-    # TODO: Check if source code hasn't changed (dirsum)
-    package = f"{SOURCE_CODE_ROOT_PATH}\[pydantic\]"
-    build_args = "--platform manylinux1_x86_64 --only-binary=:all: --upgrade"
-    build_command = f"pip install {package} {build_args} --target {LAYER_BUILD_PATH}/python"
-    subprocess.run(build_command, shell=True)
-
-    return str(LAYER_BUILD_PATH)
 
 
 class BaseInfrastructure(ABC):
@@ -67,6 +55,7 @@ class BaseInfrastructure(ABC):
         self._feature_infra_class_name = self.__class__.__name__
         self._feature_infra_module_path = self._feature_path / "infrastructure"
         self._handlers_dir = self._feature_path / "handlers"
+        # TODO: Change to cdk_feature_dir
         self._cdk_out_dir = CDK_OUT_PATH / self.feature_name
 
     def create_lambda_functions(self, function_props: Optional[Dict] = None) -> Dict[str, Function]:
@@ -106,6 +95,8 @@ class BaseInfrastructure(ABC):
         if not self._handlers_dir.exists():
             raise RuntimeError(f"Handlers dir '{self._handlers_dir}' must exist for functions to be created.")
 
+        layer_build = LocalLambdaPowertoolsLayer(output_dir=self._cdk_out_dir).build()
+
         layer = LayerVersion(
             self.stack,
             "aws-lambda-powertools-e2e-test",
@@ -115,7 +106,7 @@ class BaseInfrastructure(ABC):
                 Runtime.PYTHON_3_8,
                 Runtime.PYTHON_3_9,
             ],
-            code=Code.from_asset(path=build_layer(out_dir=self._cdk_out_dir, feature_name=self.feature_name)),
+            code=Code.from_asset(path=layer_build),
         )
 
         handlers = list(self._handlers_dir.rglob("*.py"))
@@ -222,7 +213,7 @@ class BaseInfrastructure(ABC):
 
         This allows us to keep our BaseInfrastructure while supporting context lookups.
         """
-        # NOTE: Confirm infrastructure module exists before proceeding.
+        # TODO: Confirm infrastructure module exists before proceeding.
         # tests.e2e.tracer.infrastructure
         infra_module = str(self._feature_infra_module_path.relative_to(SOURCE_CODE_ROOT_PATH)).replace(os.sep, ".")
 
@@ -233,10 +224,10 @@ class BaseInfrastructure(ABC):
         stack.app.synth()
         """
 
-        if not CDK_OUT_PATH.is_dir():
-            CDK_OUT_PATH.mkdir()
+        if not self._cdk_out_dir.is_dir():
+            self._cdk_out_dir.mkdir(parents=True, exist_ok=True)
 
-        temp_file = CDK_OUT_PATH / f"{self.stack_name}_cdk_app.py"
+        temp_file = self._cdk_out_dir / f"{self.stack_name}_cdk_app.py"
         with temp_file.open("w") as fd:
             fd.write(textwrap.dedent(code))
 
