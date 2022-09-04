@@ -29,8 +29,8 @@ class KafkaEnvelope(BaseEnvelope):
 
         Returns
         -------
-        Any
-            Parsed detail payload with model provided
+        List
+            List of records parsed with model provided
         """
         logger.debug(f"Parsing incoming data with Kafka event model {KafkaEventModel}")
         parsed_envelope: KafkaEventModel = KafkaEventModel.parse_obj(data)
