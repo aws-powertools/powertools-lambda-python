@@ -54,9 +54,14 @@ class BaseInfrastructure(ABC):
         self._feature_path = Path(sys.modules[self.__class__.__module__].__file__).parent
         self._feature_infra_class_name = self.__class__.__name__
         self._feature_infra_module_path = self._feature_path / "infrastructure"
+        self._feature_infra_file = self._feature_path / "infrastructure.py"
         self._handlers_dir = self._feature_path / "handlers"
-        # TODO: Change to cdk_feature_dir
         self._cdk_out_dir: Path = CDK_OUT_PATH / self.feature_name
+
+        if not self._feature_infra_file.exists():
+            raise FileNotFoundError(
+                "You must have your infrastructure defined in 'tests/e2e/<feature>/infrastructure.py'."
+            )
 
     def create_lambda_functions(self, function_props: Optional[Dict] = None) -> Dict[str, Function]:
         """Create Lambda functions available under handlers_dir
@@ -156,27 +161,6 @@ class BaseInfrastructure(ABC):
         Dict[str, str]
             CloudFormation Stack Outputs with output key and value
         """
-        cdk_app_file = self._create_temp_cdk_app()
-        return self._deploy_stack(cdk_app_file)
-
-    def delete(self) -> None:
-        """Delete CloudFormation Stack"""
-        logger.debug(f"Deleting stack: {self.stack_name}")
-        self.cfn.delete_stack(StackName=self.stack_name)
-
-    def _deploy_stack(self, cdk_app_file: str) -> Dict:
-        """Deploys CDK App auto-generated using CDK CLI
-
-        Parameters
-        ----------
-        cdk_app_file : str
-            Path to temporary CDK App
-
-        Returns
-        -------
-        Dict
-            Stack Output values as dict
-        """
         stack_file = self._create_temp_cdk_app()
         synth_command = f"npx cdk synth --app 'python {stack_file}' -o {self._cdk_out_dir}"
         deploy_command = (
@@ -187,6 +171,11 @@ class BaseInfrastructure(ABC):
         subprocess.check_output(synth_command, shell=True)
         subprocess.check_output(deploy_command, shell=True)
         return self._read_stack_output()
+
+    def delete(self) -> None:
+        """Delete CloudFormation Stack"""
+        logger.debug(f"Deleting stack: {self.stack_name}")
+        self.cfn.delete_stack(StackName=self.stack_name)
 
     def _sync_stack_name(self, stack_output: Dict):
         """Synchronize initial stack name with CDK's final stack name
@@ -212,7 +201,6 @@ class BaseInfrastructure(ABC):
 
         This allows us to keep our BaseInfrastructure while supporting context lookups.
         """
-        # TODO: Confirm infrastructure module exists before proceeding.
         # tests.e2e.tracer.infrastructure
         infra_module = str(self._feature_infra_module_path.relative_to(SOURCE_CODE_ROOT_PATH)).replace(os.sep, ".")
 
