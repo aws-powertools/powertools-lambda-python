@@ -56,7 +56,7 @@ class BaseInfrastructure(ABC):
         self._feature_infra_module_path = self._feature_path / "infrastructure"
         self._handlers_dir = self._feature_path / "handlers"
         # TODO: Change to cdk_feature_dir
-        self._cdk_out_dir = CDK_OUT_PATH / self.feature_name
+        self._cdk_out_dir: Path = CDK_OUT_PATH / self.feature_name
 
     def create_lambda_functions(self, function_props: Optional[Dict] = None) -> Dict[str, Function]:
         """Create Lambda functions available under handlers_dir
@@ -95,8 +95,7 @@ class BaseInfrastructure(ABC):
         if not self._handlers_dir.exists():
             raise RuntimeError(f"Handlers dir '{self._handlers_dir}' must exist for functions to be created.")
 
-        layer_build = LocalLambdaPowertoolsLayer(output_dir=self._cdk_out_dir).build()
-
+        layer_build = LocalLambdaPowertoolsLayer().build()
         layer = LayerVersion(
             self.stack,
             "aws-lambda-powertools-e2e-test",
@@ -279,7 +278,7 @@ class BaseInfrastructure(ABC):
 
 
 def call_once(
-    callable: Callable,
+    task: Callable,
     tmp_path_factory: pytest.TempPathFactory,
     worker_id: str,
     callback: Optional[Callable] = None,
@@ -288,7 +287,7 @@ def call_once(
 
     Parameters
     ----------
-    callable : Callable
+    task : Callable
         Function to call once and JSON serialize result whether parallel test is enabled or not.
     tmp_path_factory : pytest.TempPathFactory
         pytest temporary path factory to discover shared tmp when multiple CPU processes are spun up
@@ -306,20 +305,20 @@ def call_once(
     try:
         if worker_id == "master":
             # no parallelization, call and return
-            yield callable()
+            yield task()
         else:
             # tmp dir shared by all workers
             root_tmp_dir = tmp_path_factory.getbasetemp().parent
             cache = root_tmp_dir / f"{PYTHON_RUNTIME_VERSION}_cache.json"
 
             with FileLock(f"{cache}.lock"):
-                # If cache exists, return callable outputs back
+                # If cache exists, return task outputs back
                 # otherwise it's the first run by the main worker
-                # run and return callable outputs for subsequent workers reuse
+                # run and return task outputs for subsequent workers reuse
                 if cache.is_file():
                     callable_result = json.loads(cache.read_text())
                 else:
-                    callable_result: Dict = callable()
+                    callable_result: Dict = task()
                     cache.write_text(json.dumps(callable_result))
             yield callable_result
     finally:

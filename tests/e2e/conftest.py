@@ -1,32 +1,29 @@
-# import pytest
+import pytest
 
-# from tests.e2e.lambda_layer.infrastructure import build_layer
-# from tests.e2e.utils.infrastructure import call_once
-
-
-# # @pytest.fixture(scope="session")
-# # def lambda_layer_arn(lambda_layer_deployment: dict):
-# #     yield lambda_layer_deployment.get("LayerArn")
+from tests.e2e.utils.infrastructure import call_once
+from tests.e2e.utils.lambda_layer.powertools_layer import LocalLambdaPowertoolsLayer
 
 
-# @pytest.fixture(scope="session", autouse=True)
-# def lambda_layer_deployment(tmp_path_factory: pytest.TempPathFactory, worker_id: str):
-#     """Setup and teardown logic for E2E test infrastructure
+@pytest.fixture(scope="session", autouse=True)
+def lambda_layer_build(tmp_path_factory: pytest.TempPathFactory, worker_id: str) -> str:
+    """Build Lambda Layer once before stacks are created
 
-#     Parameters
-#     ----------
-#     tmp_path_factory : pytest.TempPathFactory
-#         pytest temporary path factory to discover shared tmp when multiple CPU processes are spun up
-#     worker_id : str
-#         pytest-xdist worker identification to detect whether parallelization is enabled
+    Parameters
+    ----------
+    tmp_path_factory : pytest.TempPathFactory
+        pytest temporary path factory to discover shared tmp when multiple CPU processes are spun up
+    worker_id : str
+        pytest-xdist worker identification to detect whether parallelization is enabled
 
-#     Yields
-#     ------
-#     Dict[str, str]
-#         CloudFormation Outputs from deployed infrastructure
-#     """
-#     yield from call_once(
-#         callable=build_layer,
-#         tmp_path_factory=tmp_path_factory,
-#         worker_id=worker_id,
-#     )
+    Yields
+    ------
+    str
+        Lambda Layer artefact location
+    """
+
+    layer = LocalLambdaPowertoolsLayer()
+    yield from call_once(
+        task=layer.build,
+        tmp_path_factory=tmp_path_factory,
+        worker_id=worker_id,
+    )

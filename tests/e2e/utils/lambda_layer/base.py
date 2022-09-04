@@ -1,6 +1,5 @@
-from pathlib import Path
-
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 
 class BaseLocalLambdaLayer(ABC):
@@ -10,12 +9,24 @@ class BaseLocalLambdaLayer(ABC):
 
     @abstractmethod
     def build(self) -> str:
+        """Builds a Lambda Layer locally
+
+        Returns
+        -------
+        build_path : str
+            Path where newly built Lambda Layer is
+        """
         raise NotImplementedError()
 
     def before_build(self):
+        """Any step to run before build process begins.
+
+        By default, it creates output dir and its parents if it doesn't exist.
+        """
         if not self.output_dir.exists():
             # Create missing parent directories if missing
             self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def after_build(self):
+        """Any step after a build succeed"""
         ...
