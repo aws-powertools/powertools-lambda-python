@@ -323,7 +323,7 @@ You can use the `Response` class to have full control over the response. For exa
 
 === "fine_grained_responses.py"
 
-    ```python hl_lines="7 24-29"
+    ```python hl_lines="7 25-30"
     --8<-- "examples/event_handler_rest/src/fine_grained_responses.py"
     ```
 
