@@ -54,7 +54,16 @@ class KafkaRecordModel(BaseModel):
         return value
 
 
-class KafkaEventModel(BaseModel):
+class KafkaBaseEventModel(BaseModel):
+    bootstrapServers: Optional[List[str]]
+    records: Dict[str, List[KafkaRecordModel]]
+
+    @validator("bootstrapServers", pre=True, allow_reuse=True)
+    def split_servers(cls, value):
+        return None if not value else value.split(SERVERS_DELIMITER)
+
+
+class KafkaEventModel(KafkaBaseEventModel):
     """Self-managed Apache Kafka event trigger
     Documentation:
     --------------
@@ -62,9 +71,14 @@ class KafkaEventModel(BaseModel):
     """
 
     eventSource: Literal["aws:SelfManagedKafka"]
-    bootstrapServers: Optional[List[str]]
-    records: Dict[str, List[KafkaRecordModel]]
 
-    @validator("bootstrapServers", pre=True, allow_reuse=True)
-    def split_servers(cls, value):
-        return None if not value else value.split(SERVERS_DELIMITER)
+
+class MSKEventModel(KafkaBaseEventModel):
+    """Fully-managed AWS Apache Kafka event trigger
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html
+    """
+
+    eventSource: Literal["aws:kafka"]
+    eventSourceArn: str

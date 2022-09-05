@@ -17,7 +17,7 @@ from .apigwv2 import (
 from .cloudwatch import CloudWatchLogsData, CloudWatchLogsDecode, CloudWatchLogsLogEvent, CloudWatchLogsModel
 from .dynamodb import DynamoDBStreamChangedRecordModel, DynamoDBStreamModel, DynamoDBStreamRecordModel
 from .event_bridge import EventBridgeModel
-from .kafka import KafkaEventModel, KafkaRecordModel
+from .kafka import KafkaBaseEventModel, KafkaEventModel, KafkaRecordModel, MSKEventModel
 from .kinesis import KinesisDataStreamModel, KinesisDataStreamRecord, KinesisDataStreamRecordPayload
 from .lambda_function_url import LambdaFunctionUrlModel
 from .s3 import S3Model, S3RecordModel
@@ -101,4 +101,6 @@ __all__ = [
     "APIGatewayEventIdentity",
     "KafkaEventModel",
     "KafkaRecordModel",
+    "MSKEventModel",
+    "KafkaBaseEventModel",
 ]
