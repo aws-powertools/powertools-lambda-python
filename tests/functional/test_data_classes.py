@@ -1141,7 +1141,8 @@ def test_base_proxy_event_json_body_with_base64_encoded_data():
 
 def test_kafka_event():
     event = KafkaEvent(load_event("kafkaEvent.json"))
-    assert event.event_source == "aws:SelfManagedKafka"
+    assert event.event_source == "aws:kafka"
+    assert event.event_source_arn == "arn:aws:kafka:us-east-1:0123456789019:cluster/SalesCluster/abcd1234-abcd-cafe-abab-9876543210ab-4"
     bootstrap_servers = [
         "b-2.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
         "b-1.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
