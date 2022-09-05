@@ -97,17 +97,14 @@ class KafkaEvent(DictWrapper):
         return self["eventSource"]
 
     @property
-    def event_source_arn(self) -> str:
+    def event_source_arn(self) -> Optional[str]:
         """The AWS service ARN from which the Kafka event record originated."""
-        return self["eventSourceArn"]
+        return self.get("eventSourceArn")
 
     @property
-    def bootstrap_servers(self) -> Optional[List[str]]:
+    def bootstrap_servers(self) -> List[str]:
         """The Kafka bootstrap URL."""
-        servers = self.get("bootstrapServers")
-        if not servers:
-            return None
-        return servers.split(",")
+        return self["bootstrapServers"].split(",")
 
     @property
     def records(self) -> Iterator[KafkaEventRecord]:
