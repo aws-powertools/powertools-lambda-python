@@ -102,9 +102,14 @@ class KafkaEvent(DictWrapper):
         return self.get("eventSourceArn")
 
     @property
-    def bootstrap_servers(self) -> List[str]:
+    def bootstrap_servers(self) -> str:
         """The Kafka bootstrap URL."""
-        return self["bootstrapServers"].split(",")
+        return self["bootstrapServers"]
+
+    @property
+    def decoded_bootstrap_servers(self) -> List[str]:
+        """The decoded Kafka bootstrap URL."""
+        return self.bootstrap_servers.split(",")
 
     @property
     def records(self) -> Iterator[KafkaEventRecord]:
