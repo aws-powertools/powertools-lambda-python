@@ -75,6 +75,7 @@ Event Source | Data_class
 [Connect Contact Flow](#connect-contact-flow) | `ConnectContactFlowEvent`
 [DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName`
 [EventBridge](#eventbridge) | `EventBridgeEvent`
+[Kafka](#kafka) | `KafkaEvent`
 [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent`
 [Lambda Function URL](#lambda-function-url) | `LambdaFunctionUrlEvent`
 [Rabbit MQ](#rabbit-mq) | `RabbitMQEvent`
@@ -849,6 +850,22 @@ attributes values (`AttributeValue`), as well as enums for stream view type (`St
     @event_source(data_class=EventBridgeEvent)
     def lambda_handler(event: EventBridgeEvent, context):
         do_something_with(event.detail)
+
+    ```
+
+### Kafka
+
+This example is based on the AWS docs for [Amazon MSK](https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html){target="_blank"} and [self-managed Apache Kafka](https://docs.aws.amazon.com/lambda/latest/dg/with-kafka.html){target="_blank"}.
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import event_source, KafkaEvent
+
+    @event_source(data_class=KafkaEvent)
+    def lambda_handler(event: KafkaEvent, context):
+        for record in event.records:
+            do_something_with(record.decoded_key, record.json_value)
 
     ```
 
