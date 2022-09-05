@@ -1147,7 +1147,7 @@ def test_kafka_event():
         "b-2.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
         "b-1.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
     ]
-    assert event.bootstrap_servers == bootstrap_servers
+    assert event.decoded_bootstrap_servers == bootstrap_servers
 
     records = list(event.records)
     assert len(records) == 1
