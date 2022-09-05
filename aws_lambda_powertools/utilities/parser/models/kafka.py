@@ -73,7 +73,7 @@ class KafkaEventModel(KafkaBaseEventModel):
     eventSource: Literal["aws:SelfManagedKafka"]
 
 
-class MSKEventModel(KafkaBaseEventModel):
+class MskEventModel(KafkaBaseEventModel):
     """Fully-managed AWS Apache Kafka event trigger
     Documentation:
     --------------

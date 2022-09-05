@@ -169,7 +169,7 @@ Parser comes with the following built-in models:
 | **APIGatewayProxyEventV2Model** | Lambda Event Source payload for Amazon API Gateway v2 payload      |
 | **LambdaFunctionUrlModel**      | Lambda Event Source payload for Lambda Function URL payload        |
 | **KafkaModel**                  | Lambda Event Source payload for self managed Kafka payload         |
-| **MSKEventModel**               | Lambda Event Source payload for AWS MSK payload                    |
+| **MskEventModel**               | Lambda Event Source payload for AWS MSK payload                    |
 
 ### extending built-in models
 

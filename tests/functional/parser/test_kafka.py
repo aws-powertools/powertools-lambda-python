@@ -1,7 +1,7 @@
 from typing import List
 
 from aws_lambda_powertools.utilities.parser import envelopes, event_parser
-from aws_lambda_powertools.utilities.parser.models import KafkaEventModel, KafkaRecordModel, MSKEventModel
+from aws_lambda_powertools.utilities.parser.models import KafkaEventModel, KafkaRecordModel, MskEventModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyALambdaKafkaBusiness
 from tests.functional.utils import load_event
@@ -49,14 +49,14 @@ def test_self_managed_kafka_event():
     assert record.headers[0]["headerKey"] == b"headerValue"
 
 
-@event_parser(model=MSKEventModel)
-def handle_msk_event(event: MSKEventModel, _: LambdaContext):
+@event_parser(model=MskEventModel)
+def handle_msk_event(event: MskEventModel, _: LambdaContext):
     return event
 
 
 def test_msk_event():
     json_event = load_event("kafkaEventMsk.json")
-    event: MSKEventModel = handle_msk_event(json_event, LambdaContext())
+    event: MskEventModel = handle_msk_event(json_event, LambdaContext())
     assert event.eventSource == "aws:kafka"
     bootstrap_servers = [
         "b-2.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
