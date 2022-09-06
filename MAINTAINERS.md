@@ -220,11 +220,7 @@ To run locally, you need [AWS CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/
 
 #### Structure
 
-Our E2E framework relies on pytest fixtures to coordinate infrastructure and test parallelization (see [Workflow](#workflow)). You'll notice multiple `conftest.py`, `infrastructure.py`, and `handlers`.
-
-- **`infrastructure`**. Uses CDK to define what a Stack for a given feature should look like. It inherits from `BaseInfrastructure` to handle all boilerplate and deployment logic necessary.
-- **`conftest.py`**. Imports and deploys a given feature Infrastructure. Hierarchy matters. Top-level `conftest` deploys stacks only once and blocks I/O across all CPUs. Feature-level `conftest` deploys stacks in parallel, and once complete run all tests in parallel.
-- **`handlers`**. Lambda function handlers that will be automatically deployed and exported as PascalCase for later use.
+Our E2E framework relies on pytest fixtures to coordinate infrastructure and test parallelization (see [Parallelization](#Parallelization)).
 
 **tests/e2e structure**
 
@@ -262,7 +258,15 @@ Our E2E framework relies on pytest fixtures to coordinate infrastructure and tes
     ├── infrastructure.py # base infrastructure like deploy logic, etc.
 ```
 
-#### Workflow
+You probably notice we have multiple `conftest.py`, `infrastructure.py`, and `handlers` directory.
+
+- **`infrastructure.py`**. Uses CDK to define the infrastructure a given feature needs.
+- **`conftest.py`**. Handles deployment and deletion a given feature Infrastructure. Hierarchy matters
+    - Top-level `e2e/conftest` deploys stacks only once and blocks I/O across all CPUs.
+    - Feature-level `e2e/<feature>/conftest` deploys stacks in parallel and make them independent of each other.
+- **`handlers/`**. Lambda function handlers that will be automatically deployed and exported as PascalCase for later use.
+
+#### Parallelization
 
 We parallelize our end-to-end tests to benefit from speed and isolate Lambda functions to ease assessing side effects (e.g., traces, logs, etc.). The following diagram demonstrates the process we take every time you use `make e2e`:
 
