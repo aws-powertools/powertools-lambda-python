@@ -19,12 +19,12 @@ def handle_kafka_event(event: KafkaEventModel, _: LambdaContext):
 
 
 def test_kafka_event_with_envelope():
-    event = load_event("kafkaEvent.json")
+    event = load_event("kafkaEventSelfManaged.json")
     handle_lambda_kafka_with_envelope(event, LambdaContext())
 
 
 def test_self_managed_kafka_event():
-    json_event = load_event("kafkaEvent.json")
+    json_event = load_event("kafkaEventSelfManaged.json")
     event: KafkaEventModel = handle_kafka_event(json_event, LambdaContext())
     assert event.eventSource == "aws:SelfManagedKafka"
     bootstrap_servers = [
