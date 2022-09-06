@@ -226,10 +226,12 @@ Our E2E framework relies on pytest fixtures to coordinate infrastructure and tes
 - **`conftest.py`**. Imports and deploys a given feature Infrastructure. Hierarchy matters. Top-level `conftest` deploys stacks only once and blocks I/O across all CPUs. Feature-level `conftest` deploys stacks in parallel, and once complete run all tests in parallel.
 - **`handlers`**. Lambda function handlers that will be automatically deployed and exported as PascalCase for later use.
 
+**tests/e2e structure**
+
 ```shell
 .
 ├── __init__.py
-├── conftest.py # deploys Lambda Layer stack
+├── conftest.py # builds Lambda Layer once
 ├── logger
 │   ├── __init__.py
 │   ├── conftest.py  # deploys LoggerStack
@@ -254,11 +256,10 @@ Our E2E framework relies on pytest fixtures to coordinate infrastructure and tes
 │   ├── infrastructure.py  # TracerStack definition
 │   └── test_tracer.py
 └── utils
-    ├── Dockerfile
     ├── __init__.py
     ├── data_builder  # build_service_name(), build_add_dimensions_input, etc.
     ├── data_fetcher  # get_traces(), get_logs(), get_lambda_response(), etc.
-    ├── infrastructure.py # base infrastructure like deploy logic, Layer Stack, etc.
+    ├── infrastructure.py # base infrastructure like deploy logic, etc.
 ```
 
 #### Workflow
