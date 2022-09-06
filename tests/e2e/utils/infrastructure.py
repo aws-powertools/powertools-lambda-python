@@ -30,7 +30,6 @@ class BaseInfrastructure(ABC):
         self.feature_name = self.feature_path.parts[-1].replace("_", "-")  # logger, tracer, event-handler, etc.
         self.stack_name = f"test{PYTHON_RUNTIME_VERSION}-{self.feature_name}-{self.RANDOM_STACK_VALUE}"
         self.stack_outputs: Dict[str, str] = {}
-        self.stack_outputs_file = f"{CDK_OUT_PATH / self.feature_name}_stack_outputs.json"  # tracer_stack_outputs.json
 
         # NOTE: CDK stack account and region are tokens, we need to resolve earlier
         self.session = boto3.Session()
@@ -41,12 +40,13 @@ class BaseInfrastructure(ABC):
         self.app = App()
         self.stack = Stack(self.app, self.stack_name, env=Environment(account=self.account_id, region=self.region))
 
-        # NOTE: Introspect feature details to generate CDK App (_create_temp_cdk_app method)
+        # NOTE: Introspect feature details to generate CDK App (_create_temp_cdk_app method), Synth and Deployment
         self._feature_infra_class_name = self.__class__.__name__
         self._feature_infra_module_path = self.feature_path / "infrastructure"
         self._feature_infra_file = self.feature_path / "infrastructure.py"
         self._handlers_dir = self.feature_path / "handlers"
         self._cdk_out_dir: Path = CDK_OUT_PATH / self.feature_name
+        self._stack_outputs_file = f'{self._cdk_out_dir / "stack_outputs.json"}'
 
         if not self._feature_infra_file.exists():
             raise FileNotFoundError(
@@ -154,7 +154,7 @@ class BaseInfrastructure(ABC):
         stack_file = self._create_temp_cdk_app()
         synth_command = f"npx cdk synth --app 'python {stack_file}' -o {self._cdk_out_dir}"
         deploy_command = (
-            f"npx cdk deploy --app '{self._cdk_out_dir}' -O {self.stack_outputs_file} --require-approval=never"
+            f"npx cdk deploy --app '{self._cdk_out_dir}' -O {self._stack_outputs_file} --require-approval=never"
         )
 
         # CDK launches a background task, so we must wait
@@ -178,7 +178,7 @@ class BaseInfrastructure(ABC):
         self.stack_name = list(stack_output.keys())[0]
 
     def _read_stack_output(self):
-        content = Path(self.stack_outputs_file).read_text()
+        content = Path(self._stack_outputs_file).read_text()
         outputs: Dict = json.loads(content)
         self._sync_stack_name(stack_output=outputs)
 
@@ -204,7 +204,8 @@ class BaseInfrastructure(ABC):
         if not self._cdk_out_dir.is_dir():
             self._cdk_out_dir.mkdir(parents=True, exist_ok=True)
 
-        temp_file = self._cdk_out_dir / f"{self.stack_name}_cdk_app.py"
+        # cdk.out/tracer/cdk_app_v39.py
+        temp_file = self._cdk_out_dir / f"cdk_app_{PYTHON_RUNTIME_VERSION}.py"
         with temp_file.open("w") as fd:
             fd.write(textwrap.dedent(code))
 
