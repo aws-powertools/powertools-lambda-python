@@ -195,7 +195,14 @@ class BaseInfrastructure(ABC):
 
         This allows us to keep our BaseInfrastructure while supporting context lookups.
         """
-        # tests.e2e.tracer.infrastructure
+        # cdk.out/tracer/cdk_app_v39.py
+        temp_file = self._cdk_out_dir / f"cdk_app_{PYTHON_RUNTIME_VERSION}.py"
+
+        if temp_file.exists():
+            # no need to regenerate CDK app since it's just boilerplate
+            return temp_file
+
+        # Convert from POSIX path to Python module: tests.e2e.tracer.infrastructure
         infra_module = str(self._feature_infra_module_path.relative_to(SOURCE_CODE_ROOT_PATH)).replace(os.sep, ".")
 
         code = f"""
@@ -208,8 +215,6 @@ class BaseInfrastructure(ABC):
         if not self._cdk_out_dir.is_dir():
             self._cdk_out_dir.mkdir(parents=True, exist_ok=True)
 
-        # cdk.out/tracer/cdk_app_v39.py
-        temp_file = self._cdk_out_dir / f"cdk_app_{PYTHON_RUNTIME_VERSION}.py"
         with temp_file.open("w") as fd:
             fd.write(textwrap.dedent(code))
 
