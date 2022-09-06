@@ -170,6 +170,10 @@ class BaseInfrastructure(ABC):
     def _sync_stack_name(self, stack_output: Dict):
         """Synchronize initial stack name with CDK final stack name
 
+        When using `cdk synth` with context methods (`from_lookup`),
+        CDK can initialize the Stack multiple times until it resolves
+        the context.
+
         Parameters
         ----------
         stack_output : Dict
