@@ -273,13 +273,13 @@ graph TD
     Spawn -->|Worker1| Worker1_Start["Load tests"]
     Spawn -->|WorkerN| WorkerN_Start["Load tests"]
 
-    Worker0_Start -->|Wait| LambdaLayerStack["Lambda Layer Stack Deployment"]
-    Worker1_Start -->|Wait| LambdaLayerStack["Lambda Layer Stack Deployment"]
-    WorkerN_Start -->|Wait| LambdaLayerStack["Lambda Layer Stack Deployment"]
+    Worker0_Start -->|Wait| LambdaLayer["Lambda Layer build"]
+    Worker1_Start -->|Wait| LambdaLayer["Lambda Layer build"]
+    WorkerN_Start -->|Wait| LambdaLayer["Lambda Layer build"]
 
-    LambdaLayerStack -->|Worker0| Worker0_Deploy["Launch feature stack"]
-    LambdaLayerStack -->|Worker1| Worker1_Deploy["Launch feature stack"]
-    LambdaLayerStack -->|WorkerN| WorkerN_Deploy["Launch feature stack"]
+    LambdaLayer -->|Worker0| Worker0_Deploy["Launch feature stack"]
+    LambdaLayer -->|Worker1| Worker1_Deploy["Launch feature stack"]
+    LambdaLayer -->|WorkerN| WorkerN_Deploy["Launch feature stack"]
 
     Worker0_Deploy -->|Worker0| Worker0_Tests["Run tests"]
     Worker1_Deploy -->|Worker1| Worker1_Tests["Run tests"]
