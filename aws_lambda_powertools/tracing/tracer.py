@@ -354,7 +354,8 @@ class Tracer:
         """Decorator to create subsegment for arbitrary functions
 
         It also captures both response and exceptions as metadata
-        and creates a subsegment named `## <method_name>`
+        and creates a subsegment named `## <method_module.method_qualifiedname>`
+        # see here: [Qualified name for classes and functions](https://peps.python.org/pep-3155/)
 
         When running [async functions concurrently](https://docs.python.org/3/library/asyncio-task.html#id6),
         methods may impact each others subsegment, and can trigger

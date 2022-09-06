@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from uuid import uuid4
 
 from aws_lambda_powertools import Tracer
@@ -6,13 +7,22 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 tracer = Tracer()
 
 
-class Comments:
+class MainAbstractClass(ABC):
+    def __init__(self):
+        super().__init__()
+
+    @abstractmethod
+    def get_all(self):
+        raise NotImplementedError
+
+
+class Comments(MainAbstractClass):
     @tracer.capture_method
     def get_all(self):
         return [{"id": f"{uuid4()}", "completed": False} for _ in range(5)]
 
 
-class Todos:
+class Todos(MainAbstractClass):
     @tracer.capture_method
     def get_all(self):
         return [{"id": f"{uuid4()}", "completed": False} for _ in range(5)]

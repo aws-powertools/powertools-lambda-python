@@ -10,6 +10,8 @@ from aws_lambda_powertools import Tracer
 
 # Maintenance: This should move to Functional tests and use Fake over mocks.
 
+__MODULE_PREFIX__ = "unit.test_tracing"
+
 
 @pytest.fixture
 def dummy_response():
@@ -126,10 +128,12 @@ def test_tracer_method(mocker, dummy_response, provider_stub, in_subsegment_mock
     # and use service name as a metadata namespace
     assert in_subsegment_mock.in_subsegment.call_count == 1
     assert in_subsegment_mock.in_subsegment.call_args == mocker.call(
-        name="## unit.test_tracing.test_tracer_method.<locals>.greeting"
+        name=f"## {__MODULE_PREFIX__}.test_tracer_method.<locals>.greeting"
     )
     assert in_subsegment_mock.put_metadata.call_args == mocker.call(
-        key="unit.test_tracing.test_tracer_method.<locals>.greeting response", value=dummy_response, namespace="booking"
+        key=f"{__MODULE_PREFIX__}.test_tracer_method.<locals>.greeting response",
+        value=dummy_response,
+        namespace="booking",
     )
 
 
@@ -257,7 +261,7 @@ def test_tracer_method_exception_metadata(mocker, provider_stub, in_subsegment_m
     put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
     assert (
         put_metadata_mock_args["key"]
-        == "unit.test_tracing.test_tracer_method_exception_metadata.<locals>.greeting error"
+        == f"{__MODULE_PREFIX__}.test_tracer_method_exception_metadata.<locals>.greeting error"
     )
     assert put_metadata_mock_args["namespace"] == "booking"
 
@@ -311,20 +315,20 @@ async def test_tracer_method_nested_async(mocker, dummy_response, provider_stub,
     # THEN we should add metadata for each response like we would for a sync decorated method
     assert in_subsegment_mock.in_subsegment.call_count == 2
     assert in_subsegment_greeting_call_args == mocker.call(
-        name="## unit.test_tracing.test_tracer_method_nested_async.<locals>.greeting"
+        name=f"## {__MODULE_PREFIX__}.test_tracer_method_nested_async.<locals>.greeting"
     )
     assert in_subsegment_greeting2_call_args == mocker.call(
-        name="## unit.test_tracing.test_tracer_method_nested_async.<locals>.greeting_2"
+        name=f"## {__MODULE_PREFIX__}.test_tracer_method_nested_async.<locals>.greeting_2"
     )
 
     assert in_subsegment_mock.put_metadata.call_count == 2
     assert put_metadata_greeting2_call_args == mocker.call(
-        key="unit.test_tracing.test_tracer_method_nested_async.<locals>.greeting_2 response",
+        key=f"{__MODULE_PREFIX__}.test_tracer_method_nested_async.<locals>.greeting_2 response",
         value=dummy_response,
         namespace="booking",
     )
     assert put_metadata_greeting_call_args == mocker.call(
-        key="unit.test_tracing.test_tracer_method_nested_async.<locals>.greeting response",
+        key=f"{__MODULE_PREFIX__}.test_tracer_method_nested_async.<locals>.greeting response",
         value=dummy_response,
         namespace="booking",
     )
@@ -370,7 +374,7 @@ async def test_tracer_method_exception_metadata_async(mocker, provider_stub, in_
     put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
     assert (
         put_metadata_mock_args["key"]
-        == "unit.test_tracing.test_tracer_method_exception_metadata_async.<locals>.greeting error"
+        == f"{__MODULE_PREFIX__}.test_tracer_method_exception_metadata_async.<locals>.greeting error"
     )
     assert put_metadata_mock_args["namespace"] == "booking"
 
@@ -404,7 +408,7 @@ def test_tracer_yield_from_context_manager(mocker, provider_stub, in_subsegment_
     assert in_subsegment_mock.in_subsegment.call_count == 2
     assert handler_trace == mocker.call(name="## handler")
     assert yield_function_trace == mocker.call(
-        name="## unit.test_tracing.test_tracer_yield_from_context_manager.<locals>.yield_with_capture"
+        name=f"## {__MODULE_PREFIX__}.test_tracer_yield_from_context_manager.<locals>.yield_with_capture"
     )
     assert "test result" in result
 
@@ -431,7 +435,7 @@ def test_tracer_yield_from_context_manager_exception_metadata(mocker, provider_s
     put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
     assert (
         put_metadata_mock_args["key"]
-        == "unit.test_tracing.test_tracer_yield_from_context_manager_exception_metadata.<locals>.yield_with_capture error"  # noqa E501
+        == f"{__MODULE_PREFIX__}.test_tracer_yield_from_context_manager_exception_metadata.<locals>.yield_with_capture error"  # noqa E501
     )
     assert isinstance(put_metadata_mock_args["value"], ValueError)
     assert put_metadata_mock_args["namespace"] == "booking"
@@ -475,7 +479,7 @@ def test_tracer_yield_from_nested_context_manager(mocker, provider_stub, in_subs
     assert in_subsegment_mock.in_subsegment.call_count == 2
     assert handler_trace == mocker.call(name="## handler")
     assert yield_function_trace == mocker.call(
-        name="## unit.test_tracing.test_tracer_yield_from_nested_context_manager.<locals>.yield_with_capture"
+        name=f"## {__MODULE_PREFIX__}.test_tracer_yield_from_nested_context_manager.<locals>.yield_with_capture"
     )
     assert "test result" in result
 
@@ -507,7 +511,7 @@ def test_tracer_yield_from_generator(mocker, provider_stub, in_subsegment_mock):
     assert in_subsegment_mock.in_subsegment.call_count == 2
     assert handler_trace == mocker.call(name="## handler")
     assert generator_fn_trace == mocker.call(
-        name="## unit.test_tracing.test_tracer_yield_from_generator.<locals>.generator_fn"
+        name=f"## {__MODULE_PREFIX__}.test_tracer_yield_from_generator.<locals>.generator_fn"
     )
     assert "test result" in result
 
@@ -533,7 +537,7 @@ def test_tracer_yield_from_generator_exception_metadata(mocker, provider_stub, i
     put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
     assert (
         put_metadata_mock_args["key"]
-        == "unit.test_tracing.test_tracer_yield_from_generator_exception_metadata.<locals>.generator_fn error"
+        == f"{__MODULE_PREFIX__}.test_tracer_yield_from_generator_exception_metadata.<locals>.generator_fn error"
     )
     assert put_metadata_mock_args["namespace"] == "booking"
     assert isinstance(put_metadata_mock_args["value"], ValueError)
