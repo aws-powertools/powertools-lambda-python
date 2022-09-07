@@ -1,7 +1,11 @@
 from typing import List
 
 from aws_lambda_powertools.utilities.parser import envelopes, event_parser
-from aws_lambda_powertools.utilities.parser.models import KafkaEventModel, KafkaRecordModel, MskEventModel
+from aws_lambda_powertools.utilities.parser.models import (
+    KafkaMskEventModel,
+    KafkaRecordModel,
+    KafkaSelfManagedEventModel,
+)
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyLambdaKafkaBusiness
 from tests.functional.utils import load_event
@@ -13,19 +17,19 @@ def handle_lambda_kafka_with_envelope(event: List[MyLambdaKafkaBusiness], _: Lam
     assert len(event) == 1
 
 
-@event_parser(model=KafkaEventModel)
-def handle_kafka_event(event: KafkaEventModel, _: LambdaContext):
+@event_parser(model=KafkaSelfManagedEventModel)
+def handle_kafka_event(event: KafkaSelfManagedEventModel, _: LambdaContext):
     return event
 
 
 def test_kafka_event_with_envelope():
-    event = load_event("kafkaEventSelfManaged.json")
+    event = load_event("kafkaEventMsk.json")
     handle_lambda_kafka_with_envelope(event, LambdaContext())
 
 
 def test_self_managed_kafka_event():
     json_event = load_event("kafkaEventSelfManaged.json")
-    event: KafkaEventModel = handle_kafka_event(json_event, LambdaContext())
+    event: KafkaSelfManagedEventModel = handle_kafka_event(json_event, LambdaContext())
     assert event.eventSource == "aws:SelfManagedKafka"
     bootstrap_servers = [
         "b-2.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
@@ -49,14 +53,14 @@ def test_self_managed_kafka_event():
     assert record.headers[0]["headerKey"] == b"headerValue"
 
 
-@event_parser(model=MskEventModel)
-def handle_msk_event(event: MskEventModel, _: LambdaContext):
+@event_parser(model=KafkaMskEventModel)
+def handle_msk_event(event: KafkaMskEventModel, _: LambdaContext):
     return event
 
 
 def test_kafka_msk_event():
     json_event = load_event("kafkaEventMsk.json")
-    event: MskEventModel = handle_msk_event(json_event, LambdaContext())
+    event: KafkaMskEventModel = handle_msk_event(json_event, LambdaContext())
     assert event.eventSource == "aws:kafka"
     bootstrap_servers = [
         "b-2.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",

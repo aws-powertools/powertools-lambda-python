@@ -44,7 +44,7 @@ class KafkaBaseEventModel(BaseModel):
         return None if not value else value.split(SERVERS_DELIMITER)
 
 
-class KafkaEventModel(KafkaBaseEventModel):
+class KafkaSelfManagedEventModel(KafkaBaseEventModel):
     """Self-managed Apache Kafka event trigger
     Documentation:
     --------------
@@ -54,7 +54,7 @@ class KafkaEventModel(KafkaBaseEventModel):
     eventSource: Literal["aws:SelfManagedKafka"]
 
 
-class MskEventModel(KafkaBaseEventModel):
+class KafkaMskEventModel(KafkaBaseEventModel):
     """Fully-managed AWS Apache Kafka event trigger
     Documentation:
     --------------

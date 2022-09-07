@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, List, Optional, Type, Union
 
-from ..models import KafkaEventModel
+from ..models import KafkaMskEventModel
 from ..types import Model
 from .base import BaseEnvelope
 
@@ -32,8 +32,8 @@ class KafkaEnvelope(BaseEnvelope):
         List
             List of records parsed with model provided
         """
-        logger.debug(f"Parsing incoming data with Kafka event model {KafkaEventModel}")
-        parsed_envelope: KafkaEventModel = KafkaEventModel.parse_obj(data)
+        logger.debug(f"Parsing incoming data with Kafka event model {KafkaMskEventModel}")
+        parsed_envelope: KafkaMskEventModel = KafkaMskEventModel.parse_obj(data)
         logger.debug(f"Parsing Kafka event records in `value` with {model}")
         ret_list = []
         for records in parsed_envelope.records.values():
