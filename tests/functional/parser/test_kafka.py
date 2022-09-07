@@ -3,7 +3,7 @@ from typing import List
 from aws_lambda_powertools.utilities.parser import envelopes, event_parser
 from aws_lambda_powertools.utilities.parser.models import KafkaEventModel, KafkaRecordModel, MskEventModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from tests.functional.parser.schemas import MyALambdaKafkaBusiness
+from tests.functional.parser.schemas import MyLambdaKafkaBusiness
 from tests.functional.utils import load_event
 
 
