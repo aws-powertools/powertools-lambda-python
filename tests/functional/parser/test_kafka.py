@@ -7,7 +7,7 @@ from tests.functional.parser.schemas import MyALambdaKafkaBusiness
 from tests.functional.utils import load_event
 
 
-@event_parser(model=MyALambdaKafkaBusiness, envelope=envelopes.KafkaEnvelope)
+@event_parser(model=MyLambdaKafkaBusiness, envelope=envelopes.KafkaEnvelope)
 def handle_lambda_kafka_with_envelope(event: List[MyALambdaKafkaBusiness], _: LambdaContext):
     assert event[0].key == "value"
     assert len(event) == 1
