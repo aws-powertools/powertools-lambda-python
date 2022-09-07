@@ -8,9 +8,6 @@ tracer = Tracer()
 
 
 class MainAbstractClass(ABC):
-    def __init__(self):
-        super().__init__()
-
     @abstractmethod
     def get_all(self):
         raise NotImplementedError
