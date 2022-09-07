@@ -1,4 +1,9 @@
+import base64
+import logging
+from binascii import Error as BinAsciiError
 from typing import Optional, Union
+
+logger = logging.getLogger(__name__)
 
 
 def strtobool(value: str) -> bool:
@@ -58,3 +63,18 @@ def resolve_env_var_choice(
         resolved choice as either bool or environment value
     """
     return choice if choice is not None else env
+
+
+def base64_decode(value: str) -> bytes:
+    try:
+        logger.debug("Decoding base64 Kafka record item before parsing")
+        return base64.b64decode(value)
+    except (BinAsciiError, TypeError):
+        raise ValueError("base64 decode failed")
+
+
+def bytes_to_string(value: bytes) -> str:
+    try:
+        return value.decode("utf-8")
+    except (BinAsciiError, TypeError):
+        raise ValueError("base64 UTF-8 decode failed")

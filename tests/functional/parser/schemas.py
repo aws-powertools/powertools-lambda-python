@@ -93,5 +93,5 @@ class MyALambdaFuncUrlBusiness(BaseModel):
     username: str
 
 
-class MyALambdaKafkaBusiness(BaseModel):
+class MyLambdaKafkaBusiness(BaseModel):
     key: str

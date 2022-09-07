@@ -1,31 +1,12 @@
-import base64
-import logging
-from binascii import Error as BinAsciiError
 from datetime import datetime
-from typing import Dict, List, Optional, Type, Union
+from typing import Dict, List, Type, Union
 
 from pydantic import BaseModel, validator
 
+from aws_lambda_powertools.shared.functions import base64_decode, bytes_to_string
 from aws_lambda_powertools.utilities.parser.types import Literal
 
 SERVERS_DELIMITER = ","
-
-logger = logging.getLogger(__name__)
-
-
-def _base64_decode(value: str) -> bytes:
-    try:
-        logger.debug("Decoding base64 Kafka record item before parsing")
-        return base64.b64decode(value)
-    except (BinAsciiError, TypeError):
-        raise ValueError("base64 decode failed")
-
-
-def _bytes_to_string(value: bytes) -> str:
-    try:
-        return value.decode("utf-8")
-    except (BinAsciiError, TypeError):
-        raise ValueError("base64 UTF-8 decode failed")
 
 
 class KafkaRecordModel(BaseModel):
@@ -39,12 +20,12 @@ class KafkaRecordModel(BaseModel):
     headers: List[Dict[str, bytes]]
 
     # validators
-    _decode_key = validator("key", allow_reuse=True)(_base64_decode)
+    _decode_key = validator("key", allow_reuse=True)(base64_decode)
 
     @validator("value", pre=True, allow_reuse=True)
     def data_base64_decode(cls, value):
-        as_bytes = _base64_decode(value)
-        return _bytes_to_string(as_bytes)
+        as_bytes = base64_decode(value)
+        return bytes_to_string(as_bytes)
 
     @validator("headers", pre=True, allow_reuse=True)
     def decode_headers_list(cls, value):
@@ -55,7 +36,7 @@ class KafkaRecordModel(BaseModel):
 
 
 class KafkaBaseEventModel(BaseModel):
-    bootstrapServers: Optional[List[str]]
+    bootstrapServers: List[str]
     records: Dict[str, List[KafkaRecordModel]]
 
     @validator("bootstrapServers", pre=True, allow_reuse=True)
