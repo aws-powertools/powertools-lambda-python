@@ -54,7 +54,7 @@ def handle_msk_event(event: MskEventModel, _: LambdaContext):
     return event
 
 
-def test_msk_event():
+def test_kafka_msk_event():
     json_event = load_event("kafkaEventMsk.json")
     event: MskEventModel = handle_msk_event(json_event, LambdaContext())
     assert event.eventSource == "aws:kafka"
