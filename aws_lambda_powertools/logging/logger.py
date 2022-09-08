@@ -4,7 +4,7 @@ import logging
 import os
 import random
 import sys
-from typing import IO, Any, Callable, Dict, Iterable, Optional, TypeVar, Union
+from typing import IO, Any, Callable, Dict, Iterable, Mapping, Optional, TypeVar, Union
 
 import jmespath
 
@@ -354,6 +354,20 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             return lambda_handler(event, context, *args, **kwargs)
 
         return decorate
+
+    def _log(
+        self,
+        level: int,
+        msg: object,
+        args: object,
+        exc_info: Optional[object] = None,
+        extra: Optional[Mapping[str, object]] = None,
+        stack_info: bool = False,
+        stacklevel: int = 1,
+        **kwargs,
+    ) -> None:
+        self.append_keys(**kwargs)
+        return super()._log(level, msg, args, exc_info, extra, stack_info, stacklevel)  # type: ignore
 
     def append_keys(self, **additional_keys):
         self.registered_formatter.append_keys(**additional_keys)
