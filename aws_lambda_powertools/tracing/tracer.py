@@ -354,7 +354,8 @@ class Tracer:
         """Decorator to create subsegment for arbitrary functions
 
         It also captures both response and exceptions as metadata
-        and creates a subsegment named `## <method_name>`
+        and creates a subsegment named `## <method_module.method_qualifiedname>`
+        # see here: [Qualified name for classes and functions](https://peps.python.org/pep-3155/)
 
         When running [async functions concurrently](https://docs.python.org/3/library/asyncio-task.html#id6),
         methods may impact each others subsegment, and can trigger
@@ -508,7 +509,8 @@ class Tracer:
                 functools.partial(self.capture_method, capture_response=capture_response, capture_error=capture_error),
             )
 
-        method_name = f"{method.__name__}"
+        # Example: app.ClassA.get_all  # noqa E800
+        method_name = f"{method.__module__}.{method.__qualname__}"
 
         capture_response = resolve_truthy_env_var_choice(
             env=os.getenv(constants.TRACER_CAPTURE_RESPONSE_ENV, "true"), choice=capture_response
