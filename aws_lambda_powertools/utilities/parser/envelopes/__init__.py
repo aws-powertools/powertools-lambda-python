@@ -4,6 +4,7 @@ from .base import BaseEnvelope
 from .cloudwatch import CloudWatchLogsEnvelope
 from .dynamodb import DynamoDBStreamEnvelope
 from .event_bridge import EventBridgeEnvelope
+from .kafka import KafkaEnvelope
 from .kinesis import KinesisDataStreamEnvelope
 from .lambda_function_url import LambdaFunctionUrlEnvelope
 from .sns import SnsEnvelope, SnsSqsEnvelope
@@ -20,5 +21,6 @@ __all__ = [
     "SnsEnvelope",
     "SnsSqsEnvelope",
     "SqsEnvelope",
+    "KafkaEnvelope",
     "BaseEnvelope",
 ]

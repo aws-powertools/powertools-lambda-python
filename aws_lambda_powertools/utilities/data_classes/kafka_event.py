@@ -85,10 +85,11 @@ class KafkaEventRecord(DictWrapper):
 
 
 class KafkaEvent(DictWrapper):
-    """Self-managed Apache Kafka event trigger
+    """Self-managed or MSK Apache Kafka event trigger
     Documentation:
     --------------
     - https://docs.aws.amazon.com/lambda/latest/dg/with-kafka.html
+    - https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html
     """
 
     @property
@@ -98,7 +99,7 @@ class KafkaEvent(DictWrapper):
 
     @property
     def event_source_arn(self) -> Optional[str]:
-        """The AWS service ARN from which the Kafka event record originated."""
+        """The AWS service ARN from which the Kafka event record originated, mandatory for AWS MSK."""
         return self.get("eventSourceArn")
 
     @property
