@@ -15,12 +15,6 @@
     - [Releasing a new version](#releasing-a-new-version)
         - [Drafting release notes](#drafting-release-notes)
     - [Run end to end tests](#run-end-to-end-tests)
-        - [Structure](#structure)
-        - [Mechanics](#mechanics)
-        - [Authoring an E2E test](#authoring-an-e2e-test)
-        - [Internals](#internals)
-            - [Parallelization](#parallelization)
-            - [CDK safe parallelization](#cdk-safe-parallelization)
     - [Releasing a documentation hotfix](#releasing-a-documentation-hotfix)
     - [Maintain Overall Health of the Repo](#maintain-overall-health-of-the-repo)
     - [Manage Roadmap](#manage-roadmap)
@@ -34,6 +28,13 @@
     - [Is that a bug?](#is-that-a-bug)
     - [Mentoring contributions](#mentoring-contributions)
     - [Long running issues or PRs](#long-running-issues-or-prs)
+- [E2E framework](#e2e-framework)
+    - [Structure](#structure)
+    - [Mechanics](#mechanics)
+    - [Authoring an E2E test](#authoring-an-e2e-test)
+    - [Internals](#internals)
+        - [Test runner parallelization](#test-runner-parallelization)
+        - [CDK CLI parallelization](#cdk-cli-parallelization)
 
 ## Overview
 
@@ -222,7 +223,79 @@ E2E tests are run on every push to `develop` or manually via [run-e2e-tests work
 
 To run locally, you need [AWS CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_prerequisites) and an [account bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) (`cdk bootstrap`). With a default AWS CLI profile configured, or `AWS_PROFILE` environment variable set, run `make e2e tests`.
 
-#### Structure
+### Releasing a documentation hotfix
+
+You can rebuild the latest documentation without a full release via this [GitHub Actions Workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/rebuild_latest_docs.yml). Choose `Run workflow`, keep `develop` as the branch, and input the latest Powertools version available.
+
+This workflow will update both user guide and API documentation.
+
+### Maintain Overall Health of the Repo
+
+> TODO: Coordinate renaming `develop` to `main`
+
+Keep the `develop` branch at production quality at all times. Backport features as needed. Cut release branches and tags to enable future patches.
+
+### Manage Roadmap
+
+See [Roadmap section](https://awslabs.github.io/aws-lambda-powertools-python/latest/roadmap/)
+
+Ensure the repo highlights features that should be elevated to the project roadmap. Be clear about the feature’s status, priority, target version, and whether or not it should be elevated to the roadmap.
+
+### Add Continuous Integration Checks
+
+Add integration checks that validate pull requests and pushes to ease the burden on Pull Request reviewers. Continuously revisit areas of improvement to reduce operational burden in all parties involved.
+
+### Negative Impact on the Project
+
+Actions that negatively impact the project will be handled by the admins, in coordination with other maintainers, in balance with the urgency of the issue. Examples would be [Code of Conduct](CODE_OF_CONDUCT.md) violations, deliberate harmful or malicious actions, spam, monopolization, and security risks.
+
+### Becoming a maintainer
+
+In 2023, we will revisit this. We need to improve our understanding of how other projects are doing, their mechanisms to promote key contributors, and how they interact daily.
+
+We suspect this process might look similar to the [OpenSearch project](https://github.com/opensearch-project/.github/blob/main/MAINTAINERS.md#becoming-a-maintainer).
+
+## Common scenarios
+
+These are recurring ambiguous situations that new and existing maintainers may encounter. They serve as guidance. It is up to each maintainer to follow, adjust, or handle in a different manner as long as [our conduct is consistent](#uphold-code-of-conduct)
+
+### Contribution is stuck
+
+A contribution can get stuck often due to lack of bandwidth and language barrier. For bandwidth issues, check whether the author needs help. Make sure you get their permission before pushing code into their existing PR - do not create a new PR unless strictly necessary.
+
+For language barrier and others, offer a 1:1 chat to get them unblocked. Often times, English might not be their primary language, and writing in public might put them off, or come across not the way they intended to be.
+
+In other cases, you may have constrained capacity. Use `help wanted` label when you want to signal other maintainers and external contributors that you could use a hand to move it forward.
+
+### Insufficient feedback or information
+
+When in doubt, use `need-more-information` or `need-customer-feedback` labels to signal more context and feedback are necessary before proceeding. You can also use `revisit-in-3-months` label when you expect it might take a while to gather enough information before you can decide.
+
+### Crediting contributions
+
+We credit all contributions as part of each [release note](https://github.com/awslabs/aws-lambda-powertools-python/releases) as an automated process. If you find  contributors are missing from the release note you're producing, please add them manually.
+
+### Is that a bug?
+
+A bug produces incorrect or unexpected results at runtime that differ from its intended behavior. Bugs must be reproducible. They directly affect customers experience at runtime despite following its recommended usage.
+
+Documentation snippets, use of internal components, or unadvertised functionalities are not considered bugs.
+
+### Mentoring contributions
+
+Always favor mentoring issue authors to contribute, unless they're not interested or the implementation is sensitive (_e.g., complexity, time to release, etc._).
+
+Make use of `help wanted` and `good first issue` to signal additional contributions the community can help.
+
+### Long running issues or PRs
+
+Try offering a 1:1 call in the attempt to get to a mutual understanding and clarify areas that maintainers could help.
+
+In the rare cases where both parties don't have the bandwidth or expertise to continue, it's best to use the `revisit-in-3-months` label. By then, see if it's possible to break the PR or issue in smaller chunks, and eventually close if there is no progress.
+
+## E2E framework
+
+### Structure
 
 Our E2E framework relies on pytest fixtures to coordinate infrastructure and test parallelization (see [Parallelization](#Parallelization)).
 
@@ -270,7 +343,7 @@ You probably notice we have multiple `conftest.py`, `infrastructure.py`, and `ha
     - Feature-level `e2e/<feature>/conftest` deploys stacks in parallel and make them independent of each other.
 - **`handlers/`**. Lambda function handlers that will be automatically deployed and exported as PascalCase for later use.
 
-#### Mechanics
+### Mechanics
 
 Under `BaseInfrastructure`, we hide the complexity of handling CDK parallel deployments, exposing CloudFormation Outputs, building Lambda Layer with the latest available code, and creating Lambda functions found in `handlers`.
 
@@ -318,7 +391,7 @@ classDiagram
     BaseInfrastructure <|-- EventHandlerStack : inherit
 ```
 
-#### Authoring an E2E test
+### Authoring an E2E test
 
 Imagine you're going to create E2E for Event Handler feature for the first time.
 
@@ -430,9 +503,9 @@ def test_alb_headers_serializer(alb_basic_listener_endpoint):
     ...
 ```
 
-#### Internals
+### Internals
 
-##### Parallelization
+#### Test runner parallelization
 
 We parallelize our end-to-end tests to benefit from speed and isolate Lambda functions to ease assessing side effects (e.g., traces, logs, etc.). The following diagram demonstrates the process we take every time you use `make e2e`:
 
@@ -465,76 +538,37 @@ graph TD
     ResultCollection --> DeployEnd["Delete Stacks"]
 ```
 
-##### CDK safe parallelization
+#### CDK CLI parallelization
 
-Describe CDK App, Stack, synth, etc.
+For CDK CLI to work with [independent CDK Apps](https://docs.aws.amazon.com/cdk/v2/guide/apps.html), we specify an output directory when running `cdk synth -o cdk.out/<feature>` and then deploy from that said output directory with `cdk deploy --app cdk.out/<feature>`.
 
-### Releasing a documentation hotfix
+We also create a typical CDK `app.py` at runtime with the information we know for a given feature when tests run on a per Python version basis.
 
-You can rebuild the latest documentation without a full release via this [GitHub Actions Workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/rebuild_latest_docs.yml). Choose `Run workflow`, keep `develop` as the branch, and input the latest Powertools version available.
+> Excerpt `cdk_app_V39.py` for Event Handler created at deploy phase
 
-This workflow will update both user guide and API documentation.
+```python
+from tests.e2e.event_handler.infrastructure import EventHandlerStack
+stack = EventHandlerStack()
+stack.create_resources()
+stack.app.synth()
+```
 
-### Maintain Overall Health of the Repo
+When E2E tests are run for a single feature or all of them, `cdk.out` looks like the following:
 
-> TODO: Coordinate renaming `develop` to `main`
+```shell
+total 8
+drwxr-xr-x  18 lessa  staff   576B Sep  6 15:38 event-handler
+drwxr-xr-x   3 lessa  staff    96B Sep  6 15:08 layer_build
+-rw-r--r--   1 lessa  staff    32B Sep  6 15:08 layer_build.diff
+drwxr-xr-x  18 lessa  staff   576B Sep  6 15:38 logger
+drwxr-xr-x  18 lessa  staff   576B Sep  6 15:38 metrics
+drwxr-xr-x  22 lessa  staff   704B Sep  9 10:52 tracer
+```
 
-Keep the `develop` branch at production quality at all times. Backport features as needed. Cut release branches and tags to enable future patches.
+Where:
 
-### Manage Roadmap
+- `<feature>` has CDK Assets, CDK `manifest.json`, our `cdk_app_<PyVersion>.py` and `stack_outputs.json`
+- `layer_build` contains our Lambda Layer source code built once, used by all stacks independently
+- `layer_build.diff` contains a hash on whether our source code has changed to speed up further deployments and E2E tests
 
-See [Roadmap section](https://awslabs.github.io/aws-lambda-powertools-python/latest/roadmap/)
-
-Ensure the repo highlights features that should be elevated to the project roadmap. Be clear about the feature’s status, priority, target version, and whether or not it should be elevated to the roadmap.
-
-### Add Continuous Integration Checks
-
-Add integration checks that validate pull requests and pushes to ease the burden on Pull Request reviewers. Continuously revisit areas of improvement to reduce operational burden in all parties involved.
-
-### Negative Impact on the Project
-
-Actions that negatively impact the project will be handled by the admins, in coordination with other maintainers, in balance with the urgency of the issue. Examples would be [Code of Conduct](CODE_OF_CONDUCT.md) violations, deliberate harmful or malicious actions, spam, monopolization, and security risks.
-
-### Becoming a maintainer
-
-In 2023, we will revisit this. We need to improve our understanding of how other projects are doing, their mechanisms to promote key contributors, and how they interact daily.
-
-We suspect this process might look similar to the [OpenSearch project](https://github.com/opensearch-project/.github/blob/main/MAINTAINERS.md#becoming-a-maintainer).
-
-## Common scenarios
-
-These are recurring ambiguous situations that new and existing maintainers may encounter. They serve as guidance. It is up to each maintainer to follow, adjust, or handle in a different manner as long as [our conduct is consistent](#uphold-code-of-conduct)
-
-### Contribution is stuck
-
-A contribution can get stuck often due to lack of bandwidth and language barrier. For bandwidth issues, check whether the author needs help. Make sure you get their permission before pushing code into their existing PR - do not create a new PR unless strictly necessary.
-
-For language barrier and others, offer a 1:1 chat to get them unblocked. Often times, English might not be their primary language, and writing in public might put them off, or come across not the way they intended to be.
-
-In other cases, you may have constrained capacity. Use `help wanted` label when you want to signal other maintainers and external contributors that you could use a hand to move it forward.
-
-### Insufficient feedback or information
-
-When in doubt, use `need-more-information` or `need-customer-feedback` labels to signal more context and feedback are necessary before proceeding. You can also use `revisit-in-3-months` label when you expect it might take a while to gather enough information before you can decide.
-
-### Crediting contributions
-
-We credit all contributions as part of each [release note](https://github.com/awslabs/aws-lambda-powertools-python/releases) as an automated process. If you find  contributors are missing from the release note you're producing, please add them manually.
-
-### Is that a bug?
-
-A bug produces incorrect or unexpected results at runtime that differ from its intended behavior. Bugs must be reproducible. They directly affect customers experience at runtime despite following its recommended usage.
-
-Documentation snippets, use of internal components, or unadvertised functionalities are not considered bugs.
-
-### Mentoring contributions
-
-Always favor mentoring issue authors to contribute, unless they're not interested or the implementation is sensitive (_e.g., complexity, time to release, etc._).
-
-Make use of `help wanted` and `good first issue` to signal additional contributions the community can help.
-
-### Long running issues or PRs
-
-Try offering a 1:1 call in the attempt to get to a mutual understanding and clarify areas that maintainers could help.
-
-In the rare cases where both parties don't have the bandwidth or expertise to continue, it's best to use the `revisit-in-3-months` label. By then, see if it's possible to break the PR or issue in smaller chunks, and eventually close if there is no progress.
+Together, all of this allows us to use Pytest like we would for any project, use CDK CLI and its [context methods](https://docs.aws.amazon.com/cdk/v2/guide/context.html#context_methods) (`from_lookup`), and use step-through debugging for a single E2E test without any extra configuration.
