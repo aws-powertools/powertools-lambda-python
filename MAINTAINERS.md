@@ -620,3 +620,5 @@ Where:
 - **`layer_build.diff`**. Contains a hash on whether our source code has changed to speed up further deployments and E2E tests
 
 Together, all of this allows us to use Pytest like we would for any project, use CDK CLI and its [context methods](https://docs.aws.amazon.com/cdk/v2/guide/context.html#context_methods) (`from_lookup`), and use step-through debugging for a single E2E test without any extra configuration.
+
+> NOTE: VSCode doesn't support debugging processes spawning sub-processes (like CDK CLI does w/ shell and CDK App). Maybe [this works](https://stackoverflow.com/a/65339352). PyCharm works just fine.
