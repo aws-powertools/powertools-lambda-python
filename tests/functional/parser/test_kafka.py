@@ -22,8 +22,13 @@ def handle_kafka_event(event: KafkaSelfManagedEventModel, _: LambdaContext):
     return event
 
 
-def test_kafka_event_with_envelope():
+def test_kafka_msk_event_with_envelope():
     event = load_event("kafkaEventMsk.json")
+    handle_lambda_kafka_with_envelope(event, LambdaContext())
+
+
+def test_kafka_self_managed_event_with_envelope():
+    event = load_event("kafkaEventSelfManaged.json")
     handle_lambda_kafka_with_envelope(event, LambdaContext())
 
 
