@@ -1174,7 +1174,7 @@ def test_kafka_msk_event():
 
 def test_kafka_self_managed_event():
     event = KafkaEvent(load_event("kafkaEventSelfManaged.json"))
-    assert event.event_source == "aws:aws:SelfManagedKafka"
+    assert event.event_source == "aws:SelfManagedKafka"
 
     bootstrap_servers_raw = "b-2.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092,b-1.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092"  # noqa E501
 

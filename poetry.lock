@@ -45,7 +45,7 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.40.0"
+version = "2.41.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 category = "dev"
 optional = false
@@ -53,7 +53,7 @@ python-versions = "~=3.7"
 
 [package.dependencies]
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.66.0,<2.0.0"
+jsii = ">=1.67.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -552,7 +552,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "jsii"
-version = "1.66.0"
+version = "1.67.0"
 description = "Python client for jsii runtime"
 category = "dev"
 optional = false
@@ -1392,7 +1392,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "d4f7debfcf6f2acf064697110e19b88a770851aa64c225608fc008ba177bb379"
+content-hash = "44959a0e3e6b9fc24de921c3a958fe8be7ad1154990a4fe401b29708e9119786"
 
 [metadata.files]
 attrs = [
@@ -1408,8 +1408,8 @@ attrs = [
     {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.40.0a0-py3-none-any.whl", hash = "sha256:fae244046f07101216d0c3e981ac30c4520c1b4a5b95a349d02f3bc627ddca76"},
 ]
 aws-cdk-lib = [
-    {file = "aws-cdk-lib-2.40.0.tar.gz", hash = "sha256:0a4c2c9ad95e126b4a157134f968c7d0bcd74b6bd91f208be72aa562952114ce"},
-    {file = "aws_cdk_lib-2.40.0-py3-none-any.whl", hash = "sha256:376c64aefe5971c121c6098ab7fd7efa7a61a9caa8f1b9deeeb87c1a5a768318"},
+    {file = "aws-cdk-lib-2.41.0.tar.gz", hash = "sha256:fec5d44c17ce3d59a4aa43b7978de87a8a2bbfa8768ba2620524c84d66d317d6"},
+    {file = "aws_cdk_lib-2.41.0-py3-none-any.whl", hash = "sha256:cbb6822a1e08ae6720d9117862ec9605c5a5a0e9d4e8ac8792da33ccd2cbf14b"},
 ]
 aws-xray-sdk = [
     {file = "aws-xray-sdk-2.10.0.tar.gz", hash = "sha256:9b14924fd0628cf92936055864655354003f0b1acc3e1c3ffde6403d0799dd7a"},
@@ -1640,8 +1640,8 @@ jmespath = [
     {file = "jmespath-1.0.1.tar.gz", hash = "sha256:90261b206d6defd58fdd5e85f478bf633a2901798906be2ad389150c5c60edbe"},
 ]
 jsii = [
-    {file = "jsii-1.66.0-py3-none-any.whl", hash = "sha256:3c776c3fc32ed1e28fc95625617f106ca28e9e87b0b47d4d0bb66b78b873cafe"},
-    {file = "jsii-1.66.0.tar.gz", hash = "sha256:11c64c7c799776fe05922032970c36ac81c726dbdc18039dd3d2e848458d105c"},
+    {file = "jsii-1.67.0-py3-none-any.whl", hash = "sha256:a4868f8ae05ff62fef328dd197d5834c0f3c291948a1768ad931f1fc05935cb2"},
+    {file = "jsii-1.67.0.tar.gz", hash = "sha256:ca16eb9c15377b77d10942439b089a10eb9657bffc63559c7a08bb7141cacc0c"},
 ]
 mako = [
     {file = "Mako-1.2.2-py3-none-any.whl", hash = "sha256:8efcb8004681b5f71d09c983ad5a9e6f5c40601a6ec469148753292abc0da534"},
