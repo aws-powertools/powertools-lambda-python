@@ -29,39 +29,41 @@
 * **event_handler:** add cookies as 1st class citizen in v2 ([#1487](https://github.com/awslabs/aws-lambda-powertools-python/issues/1487))
 * **event_handler:** improved support for headers and cookies in v2 ([#1455](https://github.com/awslabs/aws-lambda-powertools-python/issues/1455))
 * **event_sources:** add CloudWatch dashboard custom widget event ([#1474](https://github.com/awslabs/aws-lambda-powertools-python/issues/1474))
+* **parser:** add KafkaMskEventModel and KafkaSelfManagedEventModel ([#1499](https://github.com/awslabs/aws-lambda-powertools-python/issues/1499))
 * **tracer:** support methods with the same name (ABCs) by including fully qualified name in v2 ([#1486](https://github.com/awslabs/aws-lambda-powertools-python/issues/1486))
 
 ## Maintenance
 
 * **bandit:** update baseline
-* **ci:** enable ci checks for v2
-* **ci:** destructure assignment on comment_large_pr
+* **ci:** record pr details upon labeling
 * **ci:** add missing description fields
+* **ci:** add note for state persistence on comment_large_pr
 * **ci:** fix invalid dependency leftover
 * **ci:** remove dangling debug step
-* **ci:** limit E2E workflow run for source code change
-* **ci:** add note for state persistence on comment_large_pr
 * **ci:** add linter for GitHub Actions as pre-commit hook ([#1479](https://github.com/awslabs/aws-lambda-powertools-python/issues/1479))
+* **ci:** limit E2E workflow run for source code change
+* **ci:** format comment  on comment_large_pr script
+* **ci:** add workflow to suggest splitting large PRs ([#1480](https://github.com/awslabs/aws-lambda-powertools-python/issues/1480))
 * **ci:** remove unused and undeclared OS matrix env
 * **ci:** sync package version with pypi
-* **ci:** add workflow to suggest splitting large PRs ([#1480](https://github.com/awslabs/aws-lambda-powertools-python/issues/1480))
+* **ci:** enable ci checks for v2
 * **ci:** create adhoc docs workflow for v2
 * **ci:** create adhoc docs workflow for v2
 * **ci:** create docs workflow for v2
 * **ci:** create reusable docs publishing workflow ([#1482](https://github.com/awslabs/aws-lambda-powertools-python/issues/1482))
-* **ci:** format comment  on comment_large_pr script
-* **ci:** record pr details upon labeling
+* **ci:** destructure assignment on comment_large_pr
 * **deps:** bump pydantic from 1.10.0 to 1.10.1 ([#1491](https://github.com/awslabs/aws-lambda-powertools-python/issues/1491))
 * **deps:** bump pydantic from 1.10.1 to 1.10.2 ([#1502](https://github.com/awslabs/aws-lambda-powertools-python/issues/1502))
-* **deps-dev:** bump aws-cdk-aws-apigatewayv2-integrations-alpha from 2.39.1a0 to 2.40.0a0 ([#1496](https://github.com/awslabs/aws-lambda-powertools-python/issues/1496))
-* **deps-dev:** bump mypy-boto3-dynamodb from 1.24.55.post1 to 1.24.60 ([#1481](https://github.com/awslabs/aws-lambda-powertools-python/issues/1481))
+* **deps-dev:** bump aws-cdk-lib from 2.40.0 to 2.41.0 ([#1507](https://github.com/awslabs/aws-lambda-powertools-python/issues/1507))
 * **deps-dev:** bump mypy-boto3-dynamodb from 1.24.55.post1 to 1.24.60 ([#306](https://github.com/awslabs/aws-lambda-powertools-python/issues/306))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.24.55.post1 to 1.24.60 ([#1481](https://github.com/awslabs/aws-lambda-powertools-python/issues/1481))
 * **deps-dev:** bump mkdocs-material from 8.4.1 to 8.4.2 ([#1483](https://github.com/awslabs/aws-lambda-powertools-python/issues/1483))
 * **deps-dev:** bump flake8-variables-names from 0.0.4 to 0.0.5 ([#1490](https://github.com/awslabs/aws-lambda-powertools-python/issues/1490))
 * **deps-dev:** bump aws-cdk-lib from 2.39.1 to 2.40.0 ([#1495](https://github.com/awslabs/aws-lambda-powertools-python/issues/1495))
 * **deps-dev:** bump black from 22.6.0 to 22.8.0 ([#1494](https://github.com/awslabs/aws-lambda-powertools-python/issues/1494))
 * **deps-dev:** bump pytest from 7.1.2 to 7.1.3 ([#1497](https://github.com/awslabs/aws-lambda-powertools-python/issues/1497))
 * **deps-dev:** bump mkdocs-material from 8.4.2 to 8.4.3 ([#1504](https://github.com/awslabs/aws-lambda-powertools-python/issues/1504))
+* **deps-dev:** bump aws-cdk-aws-apigatewayv2-integrations-alpha from 2.39.1a0 to 2.40.0a0 ([#1496](https://github.com/awslabs/aws-lambda-powertools-python/issues/1496))
 * **maintainers:** update release workflow link
 * **maintenance:** add discord link to first PR and first issue ([#1493](https://github.com/awslabs/aws-lambda-powertools-python/issues/1493))
 
