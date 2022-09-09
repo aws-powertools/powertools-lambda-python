@@ -4,7 +4,6 @@ import os
 import subprocess
 import sys
 import textwrap
-from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Callable, Dict, Generator, Optional
 from uuid import uuid4
@@ -16,13 +15,14 @@ from aws_cdk.aws_lambda import Code, Function, LayerVersion, Runtime, Tracing
 from filelock import FileLock
 from mypy_boto3_cloudformation import CloudFormationClient
 
+from tests.e2e.utils.base import InfrastructureProvider
 from tests.e2e.utils.constants import CDK_OUT_PATH, PYTHON_RUNTIME_VERSION, SOURCE_CODE_ROOT_PATH
 from tests.e2e.utils.lambda_layer.powertools_layer import LocalLambdaPowertoolsLayer
 
 logger = logging.getLogger(__name__)
 
 
-class BaseInfrastructure(ABC):
+class BaseInfrastructure(InfrastructureProvider):
     RANDOM_STACK_VALUE: str = f"{uuid4()}"
 
     def __init__(self) -> None:
@@ -103,6 +103,8 @@ class BaseInfrastructure(ABC):
             code=Code.from_asset(path=layer_build),
         )
 
+        # NOTE: Agree on a convention if we need to support multi-file handlers
+        # as we're simply taking any file under `handlers/` to be a Lambda function.
         handlers = list(self._handlers_dir.rglob("*.py"))
         source = Code.from_asset(f"{self._handlers_dir}")
         logger.debug(f"Creating functions for handlers: {handlers}")
@@ -222,7 +224,6 @@ class BaseInfrastructure(ABC):
         temp_file.chmod(0o755)
         return temp_file
 
-    @abstractmethod
     def create_resources(self) -> None:
         """Create any necessary CDK resources. It'll be called before deploy
 
@@ -246,7 +247,7 @@ class BaseInfrastructure(ABC):
             self.create_lambda_functions()
         ```
         """
-        ...
+        raise NotImplementedError()
 
     def add_cfn_output(self, name: str, value: str, arn: str = ""):
         """Create {Name} and optionally {Name}Arn CloudFormation Outputs.

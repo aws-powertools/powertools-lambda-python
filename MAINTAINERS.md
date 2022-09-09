@@ -16,7 +16,11 @@
         - [Drafting release notes](#drafting-release-notes)
     - [Run end to end tests](#run-end-to-end-tests)
         - [Structure](#structure)
-        - [Workflow](#workflow)
+        - [Mechanics](#mechanics)
+        - [Authoring an E2E test](#authoring-an-e2e-test)
+        - [Internals](#internals)
+            - [Parallelization](#parallelization)
+            - [CDK safe parallelization](#cdk-safe-parallelization)
     - [Releasing a documentation hotfix](#releasing-a-documentation-hotfix)
     - [Maintain Overall Health of the Repo](#maintain-overall-health-of-the-repo)
     - [Manage Roadmap](#manage-roadmap)
@@ -266,7 +270,169 @@ You probably notice we have multiple `conftest.py`, `infrastructure.py`, and `ha
     - Feature-level `e2e/<feature>/conftest` deploys stacks in parallel and make them independent of each other.
 - **`handlers/`**. Lambda function handlers that will be automatically deployed and exported as PascalCase for later use.
 
-#### Parallelization
+#### Mechanics
+
+Under `BaseInfrastructure`, we hide the complexity of handling CDK parallel deployments, exposing CloudFormation Outputs, building Lambda Layer with the latest available code, and creating Lambda functions found in `handlers`.
+
+This allows us to benefit from test and deployment parallelization, use IDE step-through debugging for a single test, run a subset of tests and only deploy their related infrastructure, without any custom configuration.
+
+> Class diagram to understand abstraction built when defining a new stack (`LoggerStack`)
+
+```mermaid
+classDiagram
+    class InfrastructureProvider {
+        <<interface>>
+        +deploy() Dict
+        +delete()
+        +create_resources()
+        +create_lambda_functions(function_props: Dict)
+    }
+
+    class BaseInfrastructure {
+        +deploy() Dict
+        +delete()
+        +create_lambda_functions(function_props: Dict) Dict~Functions~
+        +add_cfn_output(name: str, value: str, arn: Optional[str])
+    }
+
+    class TracerStack {
+        +create_resources()
+    }
+
+    class LoggerStack {
+        +create_resources()
+    }
+
+    class MetricsStack {
+        +create_resources()
+    }
+
+    class EventHandlerStack {
+        +create_resources()
+    }
+
+    InfrastructureProvider <|-- BaseInfrastructure : implement
+    BaseInfrastructure <|-- TracerStack : inherit
+    BaseInfrastructure <|-- LoggerStack : inherit
+    BaseInfrastructure <|-- MetricsStack : inherit
+    BaseInfrastructure <|-- EventHandlerStack : inherit
+```
+
+#### Authoring an E2E test
+
+Imagine you're going to create E2E for Event Handler feature for the first time.
+
+As a mental model, you'll need to: **(1)** Define infrastructure, **(2)** Deploy/Delete infrastructure when tests run, and **(3)** Expose resources for E2E tests.
+
+**Define infrastructure**
+
+We use CDK as our Infrastructure as Code tool of choice. Before you start using CDK, you need to take the following steps:
+
+1. Create `tests/e2e/event_handler/infrastructure.py` file
+2. Create a new class `EventHandlerStack` and inherit from `BaseInfrastructure`
+3. Override `create_resources` method and define your infrastructure using CDK
+4. (Optional) Create a Lambda function under `handlers/alb_handler.py`
+
+> Excerpt `infrastructure.py` for Event Handler
+
+```python
+class EventHandlerStack(BaseInfrastructure):
+    def create_resources(self):
+        functions = self.create_lambda_functions()
+
+        self._create_alb(function=functions["AlbHandler"])
+        ...
+
+    def _create_alb(self, function: Function):
+        vpc = ec2.Vpc.from_lookup(
+            self.stack,
+            "VPC",
+            is_default=True,
+            region=self.region,
+        )
+
+        alb = elbv2.ApplicationLoadBalancer(self.stack, "ALB", vpc=vpc, internet_facing=True)
+        CfnOutput(self.stack, "ALBDnsName", value=alb.load_balancer_dns_name)
+        ...
+```
+
+> Excerpt `alb_handler.py` for Event Handler
+
+```python
+from aws_lambda_powertools.event_handler import ALBResolver, Response, content_types
+
+app = ALBResolver()
+
+
+@app.get("/todos")
+def hello():
+    return Response(
+        status_code=200,
+        content_type=content_types.TEXT_PLAIN,
+        body="Hello world",
+        cookies=["CookieMonster", "MonsterCookie"],
+        headers={"Foo": ["bar", "zbr"]},
+    )
+
+
+def lambda_handler(event, context):
+    return app.resolve(event, context)
+```
+
+**Deploy/Delete infrastructure when tests run**
+
+We need to instruct Pytest to deploy our infrastructure when our tests start, and delete it when they complete (successfully or not).
+
+For this, we create a `test/e2e/event_handler/conftest.py` and create fixture scoped to our test module. This will remain static and will not need any further modification in the future.
+
+> Excerpt `conftest.py` for Event Handler
+
+```python
+import pytest
+
+from tests.e2e.event_handler.infrastructure import EventHandlerStack
+
+
+@pytest.fixture(autouse=True, scope="module")
+def infrastructure():
+    """Setup and teardown logic for E2E test infrastructure
+
+    Yields
+    ------
+    Dict[str, str]
+        CloudFormation Outputs from deployed infrastructure
+    """
+    stack = EventHandlerStack()
+    try:
+        yield stack.deploy()
+    finally:
+        stack.delete()
+
+```
+
+**Expose resources for E2E tests**
+
+Within our tests, we should now have access to the `infrastructure` fixture we defined. We can access any Stack Output using pytest dependency injection.
+
+> Excerpt `test_header_serializer.py` for Event Handler
+
+```python
+@pytest.fixture
+def alb_basic_listener_endpoint(infrastructure: dict) -> str:
+    dns_name = infrastructure.get("ALBDnsName")
+    port = infrastructure.get("ALBBasicListenerPort", "")
+    return f"http://{dns_name}:{port}"
+
+
+def test_alb_headers_serializer(alb_basic_listener_endpoint):
+    # GIVEN
+    url = f"{alb_basic_listener_endpoint}/todos"
+    ...
+```
+
+#### Internals
+
+##### Parallelization
 
 We parallelize our end-to-end tests to benefit from speed and isolate Lambda functions to ease assessing side effects (e.g., traces, logs, etc.). The following diagram demonstrates the process we take every time you use `make e2e`:
 
@@ -298,6 +464,10 @@ graph TD
     ResultCollection --> TestEnd["Report results"]
     ResultCollection --> DeployEnd["Delete Stacks"]
 ```
+
+##### CDK safe parallelization
+
+Describe CDK App, Stack, synth, etc.
 
 ### Releasing a documentation hotfix
 
