@@ -335,13 +335,14 @@ Our E2E framework relies on pytest fixtures to coordinate infrastructure and tes
     ├── infrastructure.py # base infrastructure like deploy logic, etc.
 ```
 
-You probably noticed we have multiple `conftest.py`, `infrastructure.py`, and `handlers` directory.
+Where:
 
-- **`infrastructure.py`**. Uses CDK to define the infrastructure a given feature needs.
+- **`<feature>/infrastructure.py`**. Uses CDK to define the infrastructure a given feature needs.
+- **`<feature>/handlers/`**. Lambda function handlers that will be automatically deployed and exported in PascalCase (e.g., `BasicHandler`) for later use.
+- **`util/>`**. Test utilities to build data and fetch AWS data to ease assertion
 - **`conftest.py`**. Handles deployment and deletion a given feature Infrastructure. Hierarchy matters:
     - Top-level `e2e/conftest` deploys stacks only once and blocks I/O across all CPUs.
     - Feature-level `e2e/<feature>/conftest` deploys stacks in parallel and make them independent of each other.
-- **`handlers/`**. Lambda function handlers that will be automatically deployed and exported in PascalCase (e.g., `BasicHandler`) for later use.
 
 ### Mechanics
 
