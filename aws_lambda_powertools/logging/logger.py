@@ -363,10 +363,13 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         exc_info: Optional[object] = None,
         extra: Optional[Mapping[str, object]] = None,
         stack_info: bool = False,
+        stacklevel: int = 1,
         **kwargs,
     ) -> None:
         self.append_keys(**kwargs)
-        return super()._log(level, msg, args, exc_info=exc_info, extra=extra, stack_info=stack_info)  # type: ignore
+        if sys.version_info < (3, 8):
+            return super()._log(level, msg, args, exc_info, extra, stack_info)  # type: ignore
+        return super()._log(level, msg, args, exc_info, extra, stack_info, stacklevel)  # type: ignore
 
     def append_keys(self, **additional_keys):
         self.registered_formatter.append_keys(**additional_keys)
