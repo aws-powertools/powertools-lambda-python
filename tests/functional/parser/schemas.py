@@ -91,3 +91,7 @@ class MyApiGatewayBusiness(BaseModel):
 class MyALambdaFuncUrlBusiness(BaseModel):
     message: str
     username: str
+
+
+class MyLambdaKafkaBusiness(BaseModel):
+    key: str
