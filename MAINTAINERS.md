@@ -31,7 +31,7 @@
 - [E2E framework](#e2e-framework)
     - [Structure](#structure)
     - [Mechanics](#mechanics)
-    - [Authoring an E2E test](#authoring-an-e2e-test)
+    - [Authoring a new feature E2E test](#authoring-a-new-feature-e2e-test)
     - [Internals](#internals)
         - [Test runner parallelization](#test-runner-parallelization)
         - [CDK CLI parallelization](#cdk-cli-parallelization)
@@ -346,7 +346,7 @@ Where:
 
 ### Mechanics
 
-Under [`BaseInfrastructure`](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/e2e/utils/infrastructure.py), we hide the complexity of handling CDK parallel deployments, exposing CloudFormation Outputs, building Lambda Layer with the latest available code, and creating Lambda functions found in `handlers`.
+Under [`BaseInfrastructure`](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/e2e/utils/infrastructure.py), we hide the complexity of deployment/delete coordination under `deploy`, `delete`, and `create_lambda_functions` methods.
 
 This allows us to benefit from test and deployment parallelization, use IDE step-through debugging for a single test, run a subset of tests and only deploy their related infrastructure, without any custom configuration.
 
@@ -392,7 +392,7 @@ classDiagram
     BaseInfrastructure <|-- EventHandlerStack : inherit
 ```
 
-### Authoring an E2E test
+### Authoring a new feature E2E test
 
 Imagine you're going to create E2E for Event Handler feature for the first time.
 
@@ -508,7 +508,7 @@ def test_alb_headers_serializer(alb_basic_listener_endpoint):
 
 #### Test runner parallelization
 
-We parallelize our end-to-end tests to benefit from speed and isolate Lambda functions to ease assessing side effects (e.g., traces, logs, etc.). The following diagram demonstrates the process we take every time you use `make e2e`:
+We parallelize our end-to-end tests to benefit from speed and isolate Lambda functions to ease asserting side effects (e.g., traces, logs, etc.). The following diagram demonstrates the process we take every time you use `make e2e`:
 
 ```mermaid
 graph TD
