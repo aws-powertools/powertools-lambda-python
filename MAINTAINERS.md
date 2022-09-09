@@ -297,7 +297,7 @@ In the rare cases where both parties don't have the bandwidth or expertise to co
 
 ### Structure
 
-Our E2E framework relies on pytest fixtures to coordinate infrastructure and test parallelization (see [Parallelization](#Parallelization)).
+Our E2E framework relies on pytest fixtures to coordinate infrastructure and test parallelization - see [Test Parallelization](#test-runner-parallelization), and [CDK CLI Parallelization](#cdk-cli-parallelization).
 
 **tests/e2e structure**
 
