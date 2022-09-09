@@ -32,6 +32,9 @@
     - [Structure](#structure)
     - [Mechanics](#mechanics)
     - [Authoring a new feature E2E test](#authoring-a-new-feature-e2e-test)
+        - [1. Define infrastructure](#1-define-infrastructure)
+        - [2. Deploy/Delete infrastructure when tests run](#2-deploydelete-infrastructure-when-tests-run)
+        - [3. Access stack outputs for E2E tests](#3-access-stack-outputs-for-e2e-tests)
     - [Internals](#internals)
         - [Test runner parallelization](#test-runner-parallelization)
         - [CDK CLI parallelization](#cdk-cli-parallelization)
@@ -297,7 +300,7 @@ In the rare cases where both parties don't have the bandwidth or expertise to co
 
 ### Structure
 
-Our E2E framework relies on pytest fixtures to coordinate infrastructure and test parallelization - see [Test Parallelization](#test-runner-parallelization) and [CDK CLI Parallelization](#cdk-cli-parallelization).
+Our E2E framework relies on [Pytest fixtures](https://docs.pytest.org/en/6.2.x/fixture.html) to coordinate infrastructure and test parallelization - see [Test Parallelization](#test-runner-parallelization) and [CDK CLI Parallelization](#cdk-cli-parallelization).
 
 **tests/e2e structure**
 
@@ -338,17 +341,17 @@ Our E2E framework relies on pytest fixtures to coordinate infrastructure and tes
 Where:
 
 - **`<feature>/infrastructure.py`**. Uses CDK to define the infrastructure a given feature needs.
-- **`<feature>/handlers/`**. Lambda function handlers that will be automatically deployed and exported in PascalCase (e.g., `BasicHandler`) for later use.
-- **`util/>`**. Test utilities to build data and fetch AWS data to ease assertion
-- **`conftest.py`**. Handles deployment and deletion a given feature Infrastructure. Hierarchy matters:
-    - Top-level `e2e/conftest` deploys stacks only once and blocks I/O across all CPUs.
-    - Feature-level `e2e/<feature>/conftest` deploys stacks in parallel and make them independent of each other.
+- **`<feature>/handlers/`**. Lambda function handlers to build, deploy, and exposed as stack output in PascalCase (e.g., `BasicHandler`).
+- **`utils/`**. Test utilities to build data and fetch AWS data to ease assertion
+- **`conftest.py`**. Deploys and deletes a given feature infrastructure. Hierarchy matters:
+    - **Top-level (`e2e/conftest`)**. Builds Lambda Layer only once and blocks I/O across all CPU workers.
+    - **Feature-level (`e2e/<feature>/conftest`)**. Deploys stacks in parallel and make them independent of each other.
 
 ### Mechanics
 
-Under [`BaseInfrastructure`](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/e2e/utils/infrastructure.py), we hide the complexity of deployment/delete coordination under `deploy`, `delete`, and `create_lambda_functions` methods.
+Under [`BaseInfrastructure`](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/e2e/utils/infrastructure.py), we hide the complexity of deployment and delete coordination under `deploy`, `delete`, and `create_lambda_functions` methods.
 
-This allows us to benefit from test and deployment parallelization, use IDE step-through debugging for a single test, run a subset of tests and only deploy their related infrastructure, without any custom configuration.
+This allows us to benefit from test and deployment parallelization, use IDE step-through debugging for a single test, run one, subset, or all tests and only deploy their related infrastructure, without any custom configuration.
 
 > Class diagram to understand abstraction built when defining a new stack (`LoggerStack`)
 
@@ -394,20 +397,23 @@ classDiagram
 
 ### Authoring a new feature E2E test
 
-Imagine you're going to create E2E for Event Handler feature for the first time.
+Imagine you're going to create E2E for Event Handler feature for the first time. Keep the following mental model when reading:
 
-As a mental model, you'll need to: **(1)** Define infrastructure, **(2)** Deploy/Delete infrastructure when tests run, and **(3)** Expose resources for E2E tests.
+```mermaid
+graph LR
+    A["1. Define infrastructure"]-->B["2. Deploy/Delete infrastructure"]-->C["3.Access Stack outputs" ]
+```
 
-**Define infrastructure**
+#### 1. Define infrastructure
 
-We use CDK as our Infrastructure as Code tool of choice. Before you start using CDK, you need to take the following steps:
+We use CDK as our Infrastructure as Code tool of choice. Before you start using CDK, you'd take the following steps:
 
 1. Create `tests/e2e/event_handler/infrastructure.py` file
 2. Create a new class `EventHandlerStack` and inherit from `BaseInfrastructure`
 3. Override `create_resources` method and define your infrastructure using CDK
 4. (Optional) Create a Lambda function under `handlers/alb_handler.py`
 
-> Excerpt `infrastructure.py` for Event Handler
+> Excerpt `tests/e2e/event_handler/infrastructure.py`
 
 ```python
 class EventHandlerStack(BaseInfrastructure):
@@ -430,7 +436,7 @@ class EventHandlerStack(BaseInfrastructure):
         ...
 ```
 
-> Excerpt `alb_handler.py` for Event Handler
+> Excerpt `tests/e2e/event_handler/handlers/alb_handler.py`
 
 ```python
 from aws_lambda_powertools.event_handler import ALBResolver, Response, content_types
@@ -453,11 +459,11 @@ def lambda_handler(event, context):
     return app.resolve(event, context)
 ```
 
-**Deploy/Delete infrastructure when tests run**
+#### 2. Deploy/Delete infrastructure when tests run
 
-We need to instruct Pytest to deploy our infrastructure when our tests start, and delete it when they complete (successfully or not).
+We need to create a Pytest fixture for our new feature under `tests/e2e/event_handler/conftest.py`.
 
-For this, we create a `test/e2e/event_handler/conftest.py` and create fixture scoped to our test module. This will remain static and will not need any further modification in the future.
+This will instruct Pytest to deploy our infrastructure when our tests start, and delete it when they complete whether tests are successful or not. Note that this file will not need any modification in the future.
 
 > Excerpt `conftest.py` for Event Handler
 
@@ -484,11 +490,13 @@ def infrastructure():
 
 ```
 
-**Expose resources for E2E tests**
+#### 3. Access stack outputs for E2E tests
 
-Within our tests, we should now have access to the `infrastructure` fixture we defined. We can access any Stack Output using pytest dependency injection.
+Within our tests, we should now have access to the `infrastructure` fixture we defined earlier in `tests/e2e/event_handler/conftest.py`.
 
-> Excerpt `test_header_serializer.py` for Event Handler
+We can access any Stack Output using pytest dependency injection.
+
+> Excerpt `tests/e2e/event_handler/test_header_serializer.py`
 
 ```python
 @pytest.fixture
@@ -508,7 +516,9 @@ def test_alb_headers_serializer(alb_basic_listener_endpoint):
 
 #### Test runner parallelization
 
-We parallelize our end-to-end tests to benefit from speed and isolate Lambda functions to ease asserting side effects (e.g., traces, logs, etc.). The following diagram demonstrates the process we take every time you use `make e2e`:
+Besides speed, we parallelize our end-to-end tests to ease asserting async side-effects may take a while per test too, _e.g., traces to become available_.
+
+The following diagram demonstrates the process we take every time you use `make e2e` locally or at CI:
 
 ```mermaid
 graph TD
@@ -541,9 +551,20 @@ graph TD
 
 #### CDK CLI parallelization
 
-For CDK CLI to work with [independent CDK Apps](https://docs.aws.amazon.com/cdk/v2/guide/apps.html), we specify an output directory when running `cdk synth -o cdk.out/<feature>` and then deploy from that said output directory with `cdk deploy --app cdk.out/<feature>`.
+For CDK CLI to work with [independent CDK Apps](https://docs.aws.amazon.com/cdk/v2/guide/apps.html), we specify an output directory when synthesizing our stack and deploy from said output directory.
 
-We also create a typical CDK `app.py` at runtime with the information we know for a given feature when tests run on a per Python version basis.
+```mermaid
+flowchart TD
+    subgraph "Deploying distinct CDK Apps"
+        EventHandlerInfra["Event Handler CDK App"] --> EventHandlerSynth
+        TracerInfra["Tracer CDK App"] --> TracerSynth
+       EventHandlerSynth["cdk synth --out cdk.out/event_handler"] --> EventHandlerDeploy["cdk deploy --app cdk.out/event_handler"]
+
+       TracerSynth["cdk synth --out cdk.out/tracer"] --> TracerDeploy["cdk deploy --app cdk.out/tracer"]
+    end
+```
+
+We create the typical CDK `app.py` at runtime when tests run, since we know which feature and Python version we're dealing with (locally or at CI).
 
 > Excerpt `cdk_app_V39.py` for Event Handler created at deploy phase
 
@@ -554,7 +575,7 @@ stack.create_resources()
 stack.app.synth()
 ```
 
-When E2E tests are run for a single feature or all of them, `cdk.out` looks like the following:
+When we run E2E tests for a single feature or all of them, our `cdk.out` looks like this:
 
 ```shell
 total 8
@@ -566,10 +587,36 @@ drwxr-xr-x  18 lessa  staff   576B Sep  6 15:38 metrics
 drwxr-xr-x  22 lessa  staff   704B Sep  9 10:52 tracer
 ```
 
+```mermaid
+classDiagram
+    class CdkOutDirectory {
+        feature_name/
+        layer_build/
+        layer_build.diff
+    }
+
+    class EventHandler {
+        manifest.json
+        stack_outputs.json
+        cdk_app_V39.py
+        asset.uuid/
+        ...
+    }
+
+    class StackOutputsJson {
+        BasicHandlerArn: str
+        ALBDnsName: str
+        ...
+    }
+
+    CdkOutDirectory <|-- EventHandler : feature_name/
+    StackOutputsJson <|-- EventHandler
+```
+
 Where:
 
-- `<feature>` has CDK Assets, CDK `manifest.json`, our `cdk_app_<PyVersion>.py` and `stack_outputs.json`
-- `layer_build` contains our Lambda Layer source code built once, used by all stacks independently
-- `layer_build.diff` contains a hash on whether our source code has changed to speed up further deployments and E2E tests
+- **`<feature>`**. Contains CDK Assets, CDK `manifest.json`, our `cdk_app_<PyVersion>.py` and `stack_outputs.json`
+- **`layer_build`**. Contains our Lambda Layer source code built once, used by all stacks independently
+- **`layer_build.diff`**. Contains a hash on whether our source code has changed to speed up further deployments and E2E tests
 
 Together, all of this allows us to use Pytest like we would for any project, use CDK CLI and its [context methods](https://docs.aws.amazon.com/cdk/v2/guide/context.html#context_methods) (`from_lookup`), and use step-through debugging for a single E2E test without any extra configuration.
