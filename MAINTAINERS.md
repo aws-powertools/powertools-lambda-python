@@ -297,7 +297,7 @@ In the rare cases where both parties don't have the bandwidth or expertise to co
 
 ### Structure
 
-Our E2E framework relies on pytest fixtures to coordinate infrastructure and test parallelization - see [Test Parallelization](#test-runner-parallelization), and [CDK CLI Parallelization](#cdk-cli-parallelization).
+Our E2E framework relies on pytest fixtures to coordinate infrastructure and test parallelization - see [Test Parallelization](#test-runner-parallelization) and [CDK CLI Parallelization](#cdk-cli-parallelization).
 
 **tests/e2e structure**
 
@@ -335,17 +335,17 @@ Our E2E framework relies on pytest fixtures to coordinate infrastructure and tes
     ├── infrastructure.py # base infrastructure like deploy logic, etc.
 ```
 
-You probably notice we have multiple `conftest.py`, `infrastructure.py`, and `handlers` directory.
+You probably noticed we have multiple `conftest.py`, `infrastructure.py`, and `handlers` directory.
 
 - **`infrastructure.py`**. Uses CDK to define the infrastructure a given feature needs.
-- **`conftest.py`**. Handles deployment and deletion a given feature Infrastructure. Hierarchy matters
+- **`conftest.py`**. Handles deployment and deletion a given feature Infrastructure. Hierarchy matters:
     - Top-level `e2e/conftest` deploys stacks only once and blocks I/O across all CPUs.
     - Feature-level `e2e/<feature>/conftest` deploys stacks in parallel and make them independent of each other.
-- **`handlers/`**. Lambda function handlers that will be automatically deployed and exported as PascalCase for later use.
+- **`handlers/`**. Lambda function handlers that will be automatically deployed and exported in PascalCase (e.g., `BasicHandler`) for later use.
 
 ### Mechanics
 
-Under `BaseInfrastructure`, we hide the complexity of handling CDK parallel deployments, exposing CloudFormation Outputs, building Lambda Layer with the latest available code, and creating Lambda functions found in `handlers`.
+Under [`BaseInfrastructure`](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/e2e/utils/infrastructure.py), we hide the complexity of handling CDK parallel deployments, exposing CloudFormation Outputs, building Lambda Layer with the latest available code, and creating Lambda functions found in `handlers`.
 
 This allows us to benefit from test and deployment parallelization, use IDE step-through debugging for a single test, run a subset of tests and only deploy their related infrastructure, without any custom configuration.
 
@@ -358,14 +358,14 @@ classDiagram
         +deploy() Dict
         +delete()
         +create_resources()
-        +create_lambda_functions(function_props: Dict)
+        +create_lambda_functions() Dict~Functions~
     }
 
     class BaseInfrastructure {
         +deploy() Dict
         +delete()
-        +create_lambda_functions(function_props: Dict) Dict~Functions~
-        +add_cfn_output(name: str, value: str, arn: Optional[str])
+        +create_lambda_functions() Dict~Functions~
+        +add_cfn_output()
     }
 
     class TracerStack {
