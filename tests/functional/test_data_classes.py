@@ -74,6 +74,7 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
     AttributeValueType,
     DynamoDBRecordEventName,
     DynamoDBStreamEvent,
+    StreamRecord,
     StreamViewType,
 )
 from aws_lambda_powertools.utilities.data_classes.event_source import event_source
@@ -99,6 +100,19 @@ def test_dict_wrapper_equals():
     assert data1 is not DataClassSample(data1)
 
     assert DataClassSample(data1).raw_event is data1
+
+
+def test_dict_wrapper_imlements_mapping():
+    class DataClassSample(DictWrapper):
+        pass
+
+    data = {"message": "foo1"}
+    dcs = DataClassSample(data)
+    assert len(dcs) == len(data)
+    assert list(dcs) == list(data)
+    assert dcs.keys() == data.keys()
+    assert list(dcs.values()) == list(data.values())
+    assert dcs.items() == data.items()
 
 
 def test_cloud_watch_dashboard_event():
@@ -615,6 +629,23 @@ def test_dynamo_attribute_value_type_error():
         print(attribute_value.get_value)
     with pytest.raises(ValueError):
         print(attribute_value.get_type)
+
+
+def test_stream_record_keys_with_valid_keys():
+    attribute_value = {"Foo": "Bar"}
+    sr = StreamRecord({"Keys": {"Key1": attribute_value}})
+    assert sr.keys == {"Key1": AttributeValue(attribute_value)}
+
+
+def test_stream_record_keys_with_no_keys():
+    sr = StreamRecord({})
+    assert sr.keys is None
+
+
+def test_stream_record_keys_overrides_dict_wrapper_keys():
+    data = {"Keys": {"key1": {"attr1": "value1"}}}
+    sr = StreamRecord(data)
+    assert sr.keys != data.keys()
 
 
 def test_event_bridge_event():

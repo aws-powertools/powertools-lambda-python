@@ -1,9 +1,9 @@
 import base64
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Iterator, Mapping, Optional
 
 
-class DictWrapper:
+class DictWrapper(Mapping):
     """Provides a single read only access to a wrapper dict"""
 
     def __init__(self, data: Dict[str, Any]):
@@ -18,6 +18,12 @@ class DictWrapper:
             return False
 
         return self._data == other._data
+
+    def __iter__(self) -> Iterator:
+        return iter(self._data)
+
+    def __len__(self) -> int:
+        return len(self._data)
 
     def get(self, key: str, default: Optional[Any] = None) -> Optional[Any]:
         return self._data.get(key, default)
