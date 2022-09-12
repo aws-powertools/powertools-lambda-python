@@ -691,7 +691,7 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-material"
-version = "8.4.3"
+version = "8.4.4"
 description = "Documentation that simply works"
 category = "dev"
 optional = false
@@ -1392,7 +1392,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "10336c9583b6886fe421fbfde47eb6287c6d9ca5b87d1c82df536c4d20b3ccb0"
+content-hash = "ed049615a1b629b3d1431c679c6636eeef442f76065f72ec4ce9436b8cb8ae29"
 
 [metadata.files]
 attrs = [
@@ -1717,8 +1717,8 @@ mkdocs-git-revision-date-plugin = [
     {file = "mkdocs_git_revision_date_plugin-0.3.2-py3-none-any.whl", hash = "sha256:2e67956cb01823dd2418e2833f3623dee8604cdf223bddd005fe36226a56f6ef"},
 ]
 mkdocs-material = [
-    {file = "mkdocs-material-8.4.3.tar.gz", hash = "sha256:f39af3234ce0b60024b7712995af0de5b5227ab6504f0b9c8709c9a770bd94bf"},
-    {file = "mkdocs_material-8.4.3-py2.py3-none-any.whl", hash = "sha256:d5cc6f5023061a663514f61810052ad266f5199feafcf15ad23ea4891b21e6bc"},
+    {file = "mkdocs-material-8.4.4.tar.gz", hash = "sha256:877cdaff642a224ea50e8f0f0a024c6e4a883c731c2efe4a6aaa4b958f3fd693"},
+    {file = "mkdocs_material-8.4.4-py2.py3-none-any.whl", hash = "sha256:fa18477fabc61a50c73b206191574eb550021efcf3fff9824d034f82e3f9406a"},
 ]
 mkdocs-material-extensions = [
     {file = "mkdocs-material-extensions-1.0.3.tar.gz", hash = "sha256:bfd24dfdef7b41c312ede42648f9eb83476ea168ec163b613f9abd12bbfddba2"},
