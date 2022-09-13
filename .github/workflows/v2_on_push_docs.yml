@@ -1,13 +1,13 @@
 name: Docs v2
 
-on:
-  push:
-    branches:
-      - v2
-    paths:
-      - "docs/**"
-      - "mkdocs.yml"
-      - "examples/**"
+# on:
+#   push:
+#     branches:
+#       - v2
+#     paths:
+#       - "docs/**"
+#       - "mkdocs.yml"
+#       - "examples/**"
 
 jobs:
   changelog:
