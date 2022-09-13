@@ -32,7 +32,7 @@ email-validator = {version = "*", optional = true }
 # issue #1148
 coverage = {extras = ["toml"], version = "^6.2"}
 pytest = "^7.0.1"
-black = "^21.12b0"
+black = "^22.8"
 flake8-builtins = "^1.5.3"
 flake8-comprehensions = "^3.7.0"
 flake8-debugger = "^4.0.0"
