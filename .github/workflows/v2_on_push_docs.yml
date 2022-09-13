@@ -1,6 +1,7 @@
 name: Docs v2
 
-# on:
+on:
+  workflow_dispatch:
 #   push:
 #     branches:
 #       - v2
