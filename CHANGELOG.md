@@ -4,6 +4,46 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **ci:** pass core fns to large pr workflow script
+* **ci:** on_label permissioning model & workflow execution
+* **ci:** ensure PR_AUTHOR is present for large_pr_split workflow
+* **ci:** gracefully and successful exit changelog upon no changes
+* **ci:** event resolution for on_label_added workflow
+* **core:** fixes leftovers from rebase
+
+## Documentation
+
+* **layer:** upgrade to 1.28.0 (v33)
+
+## Features
+
+* **data-classes:** add KafkaEvent and KafkaEventRecord ([#1485](https://github.com/awslabs/aws-lambda-powertools-python/issues/1485))
+* **event_sources:** add CloudWatch dashboard custom widget event ([#1474](https://github.com/awslabs/aws-lambda-powertools-python/issues/1474))
+* **parser:** add KafkaMskEventModel and KafkaSelfManagedEventModel ([#1499](https://github.com/awslabs/aws-lambda-powertools-python/issues/1499))
+
+## Maintenance
+
+* **ci:** add note for state persistence on comment_large_pr
+* **ci:** add workflow to suggest splitting large PRs ([#1480](https://github.com/awslabs/aws-lambda-powertools-python/issues/1480))
+* **ci:** enable ci checks for v2
+* **ci:** sync package version with pypi
+* **ci:** record pr details upon labeling
+* **ci:** create adhoc docs workflow for v2
+* **ci:** create adhoc docs workflow for v2
+* **ci:** destructure assignment on comment_large_pr
+* **ci:** create docs workflow for v2
+* **ci:** create reusable docs publishing workflow ([#1482](https://github.com/awslabs/aws-lambda-powertools-python/issues/1482))
+* **ci:** format comment  on comment_large_pr script
+* **ci:** disable v2 docs
+* **ci:** add linter for GitHub Actions as pre-commit hook ([#1479](https://github.com/awslabs/aws-lambda-powertools-python/issues/1479))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.24.55.post1 to 1.24.60 ([#306](https://github.com/awslabs/aws-lambda-powertools-python/issues/306))
+* **deps-dev:** bump mkdocs-material from 8.4.1 to 8.4.2 ([#1483](https://github.com/awslabs/aws-lambda-powertools-python/issues/1483))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.24.55.post1 to 1.24.60 ([#1481](https://github.com/awslabs/aws-lambda-powertools-python/issues/1481))
+* **deps-dev:** revert to v1.28.0 dependencies
+* **maintenance:** add discord link to first PR and first issue ([#1493](https://github.com/awslabs/aws-lambda-powertools-python/issues/1493))
+
 
 <a name="v1.29.0"></a>
 ## [v1.29.0] - 2022-09-13
