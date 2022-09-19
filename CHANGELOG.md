@@ -5,6 +5,19 @@
 # Unreleased
 
 
+<a name="v1.29.2"></a>
+## [v1.29.2] - 2022-09-19
+## Bug Fixes
+
+* **deps:** bump dev dep mako version to address CVE-2022-40023 ([#1524](https://github.com/awslabs/aws-lambda-powertools-python/issues/1524))
+
+## Maintenance
+
+* **deps:** bump release-drafter/release-drafter from 5.20.1 to 5.21.0 ([#1520](https://github.com/awslabs/aws-lambda-powertools-python/issues/1520))
+* **deps-dev:** bump mkdocs-material from 8.5.0 to 8.5.1 ([#1521](https://github.com/awslabs/aws-lambda-powertools-python/issues/1521))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.24.60 to 1.24.74 ([#1522](https://github.com/awslabs/aws-lambda-powertools-python/issues/1522))
+
+
 <a name="v1.29.1"></a>
 ## [v1.29.1] - 2022-09-13
 
@@ -2319,7 +2332,8 @@
 * Merge pull request [#5](https://github.com/awslabs/aws-lambda-powertools-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.29.1...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.29.2...HEAD
+[v1.29.2]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.29.1...v1.29.2
 [v1.29.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.29.0...v1.29.1
 [v1.29.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.28.0...v1.29.0
 [v1.28.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.27.0...v1.28.0
