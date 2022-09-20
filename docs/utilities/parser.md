@@ -171,7 +171,7 @@ Parser comes with the following built-in models:
 | **KafkaSelfManagedEventModel**  | Lambda Event Source payload for self managed Kafka payload         |
 | **KafkaMskEventModel**          | Lambda Event Source payload for AWS MSK payload                    |
 
-### extending built-in models
+### Extending built-in models
 
 You can extend them to include your own models, and yet have all other known fields parsed along the way.
 
@@ -235,6 +235,19 @@ for order_item in ret.detail.items:
 2. Defined how our `Order` should look like
 3. Defined how part of our EventBridge event should look like by overriding `detail` key within our `OrderEventModel`
 4. Parser parsed the original event against `OrderEventModel`
+
+???+ tip
+    When extending a `string` field containing JSON, you need to wrap the field
+    with [Pydantic's Json Type](https://pydantic-docs.helpmanual.io/usage/types/#json-type):
+
+    ```python
+    from pydantic import Json
+
+    ...
+
+    class OrderEventModel(APIGatewayProxyEventV2Model):
+        body: Json[Order]
+    ```
 
 ## Envelopes
 
