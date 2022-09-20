@@ -66,6 +66,7 @@ def test_lambda_handler_trace_is_visible(basic_handler_fn_arn: str, basic_handle
 
 def test_lambda_handler_trace_multiple_functions_same_name(same_function_name_arn: str, same_function_name_fn: str):
     # GIVEN
+    service = data_builder.build_service_name()
     method_name_todos = "same_function_name.Todos.get_all"
     method_subsegment_todos = f"## {method_name_todos}"
     method_metadata_key_todos = f"{method_name_todos} response"
@@ -77,13 +78,14 @@ def test_lambda_handler_trace_multiple_functions_same_name(same_function_name_ar
     trace_query = data_builder.build_trace_default_query(function_name=same_function_name_fn)
 
     # WHEN
-    _, execution_time = data_fetcher.get_lambda_response(lambda_arn=same_function_name_arn)
+    event = json.dumps({"service": service})
+    _, execution_time = data_fetcher.get_lambda_response(lambda_arn=same_function_name_arn, payload=event)
 
     # THEN
     trace = data_fetcher.get_traces(start_date=execution_time, filter_expression=trace_query)
 
-    assert len(trace.get_metadata(key=method_metadata_key_todos, namespace=TracerStack.SERVICE_NAME)) == 1
-    assert len(trace.get_metadata(key=method_metadata_key_comments, namespace=TracerStack.SERVICE_NAME)) == 1
+    assert len(trace.get_metadata(key=method_metadata_key_todos, namespace=service)) == 1
+    assert len(trace.get_metadata(key=method_metadata_key_comments, namespace=service)) == 1
     assert len(trace.get_subsegment(name=method_subsegment_todos)) == 1
     assert len(trace.get_subsegment(name=method_subsegment_comments)) == 1
 
@@ -91,7 +93,7 @@ def test_lambda_handler_trace_multiple_functions_same_name(same_function_name_ar
 def test_async_trace_is_visible(async_fn_arn: str, async_fn: str):
     # GIVEN
     service = data_builder.build_service_name()
-    async_fn_name = f"async_capture.{async_capture.async_get_users.__name__}"
+    async_fn_name = async_capture.async_get_users.__name__
     async_fn_name_subsegment = f"## {async_fn_name}"
     async_fn_name_metadata_key = f"{async_fn_name} response"
 
