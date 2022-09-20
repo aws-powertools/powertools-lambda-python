@@ -26,6 +26,8 @@ class Todos(MainAbstractClass):
 
 
 def lambda_handler(event: dict, context: LambdaContext):
+    # Maintenance: create a public method to set these explicitly
+    tracer.service = event["service"]
 
     todos = Todos()
     comments = Comments()

@@ -93,7 +93,7 @@ def test_lambda_handler_trace_multiple_functions_same_name(same_function_name_ar
 def test_async_trace_is_visible(async_fn_arn: str, async_fn: str):
     # GIVEN
     service = data_builder.build_service_name()
-    async_fn_name = async_capture.async_get_users.__name__
+    async_fn_name = f"async_capture.{async_capture.async_get_users.__name__}"
     async_fn_name_subsegment = f"## {async_fn_name}"
     async_fn_name_metadata_key = f"{async_fn_name} response"
 
