@@ -13,4 +13,5 @@ def get_todos():
 
 @tracer.capture_lambda_handler
 def lambda_handler(event: dict, context: LambdaContext):
+    tracer.service = event.get("service")
     return get_todos()

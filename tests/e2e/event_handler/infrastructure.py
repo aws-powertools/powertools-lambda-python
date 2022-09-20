@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Dict, Optional
 
 from aws_cdk import CfnOutput
@@ -14,11 +13,6 @@ from tests.e2e.utils.infrastructure import BaseInfrastructure
 
 
 class EventHandlerStack(BaseInfrastructure):
-    FEATURE_NAME = "event-handlers"
-
-    def __init__(self, handlers_dir: Path, feature_name: str = FEATURE_NAME, layer_arn: str = "") -> None:
-        super().__init__(feature_name, handlers_dir, layer_arn)
-
     def create_resources(self):
         functions = self.create_lambda_functions()
 
@@ -28,7 +22,12 @@ class EventHandlerStack(BaseInfrastructure):
         self._create_lambda_function_url(function=functions["LambdaFunctionUrlHandler"])
 
     def _create_alb(self, function: Function):
-        vpc = ec2.Vpc(self.stack, "EventHandlerVPC", max_azs=2)
+        vpc = ec2.Vpc.from_lookup(
+            self.stack,
+            "VPC",
+            is_default=True,
+            region=self.region,
+        )
 
         alb = elbv2.ApplicationLoadBalancer(self.stack, "ALB", vpc=vpc, internet_facing=True)
         CfnOutput(self.stack, "ALBDnsName", value=alb.load_balancer_dns_name)
