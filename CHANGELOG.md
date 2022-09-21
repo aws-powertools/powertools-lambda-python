@@ -4,6 +4,20 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **typing:** level arg in copy_config_to_registered_loggers ([#1534](https://github.com/awslabs/aws-lambda-powertools-python/issues/1534))
+
+## Maintenance
+
+* **deps:** bump email-validator from 1.2.1 to 1.3.0 ([#1533](https://github.com/awslabs/aws-lambda-powertools-python/issues/1533))
+* **deps:** bump fastjsonschema from 2.16.1 to 2.16.2 ([#1530](https://github.com/awslabs/aws-lambda-powertools-python/issues/1530))
+* **deps:** bump codecov/codecov-action from 3.1.0 to 3.1.1 ([#1529](https://github.com/awslabs/aws-lambda-powertools-python/issues/1529))
+* **deps:** bump actions/setup-python from 3 to 4 ([#1528](https://github.com/awslabs/aws-lambda-powertools-python/issues/1528))
+* **deps-dev:** bump mypy-boto3-s3 from 1.24.36.post1 to 1.24.76 ([#1531](https://github.com/awslabs/aws-lambda-powertools-python/issues/1531))
+* **deps-dev:** bump mkdocs-material from 8.5.1 to 8.5.3 ([#1532](https://github.com/awslabs/aws-lambda-powertools-python/issues/1532))
+* **docs:** bump layer version to 36 (1.29.2)
+
 
 <a name="v1.29.2"></a>
 ## [v1.29.2] - 2022-09-19
