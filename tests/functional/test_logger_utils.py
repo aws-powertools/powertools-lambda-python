@@ -161,15 +161,17 @@ def test_copy_config_to_ext_loggers_clean_old_handlers(stdout, logger, log_level
     assert isinstance(logger.handlers[0].formatter, formatter.LambdaPowertoolsFormatter)
 
 
-def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level):
+@pytest.mark.parametrize("level_to_set", ["WARNING", 30])
+def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level, level_to_set):
     # GIVEN an external logger and powertools logger initialized
     logger = logger()
     powertools_logger = Logger(service=service_name(), level=log_level.CRITICAL.value, stream=stdout)
-    level = log_level.WARNING.name
 
     # WHEN configuration copied from powertools logger to INCLUDED external logger
     # AND external logger used with custom log_level
-    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={logger.name}, log_level=level)
+    utils.copy_config_to_registered_loggers(
+        source_logger=powertools_logger, include={logger.name}, log_level=level_to_set
+    )
     msg = "test message4"
     logger.warning(msg)
     log = capture_logging_output(stdout)

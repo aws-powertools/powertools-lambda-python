@@ -8,7 +8,7 @@ PACKAGE_LOGGER = "aws_lambda_powertools"
 
 def copy_config_to_registered_loggers(
     source_logger: Logger,
-    log_level: Optional[str] = None,
+    log_level: Optional[Union[int, str]] = None,
     exclude: Optional[Set[str]] = None,
     include: Optional[Set[str]] = None,
 ) -> None:
@@ -19,7 +19,7 @@ def copy_config_to_registered_loggers(
     ----------
     source_logger : Logger
         Powertools Logger to copy configuration from
-    log_level : str, optional
+    log_level : Union[int, str], optional
         Logging level to set to registered loggers, by default uses source_logger logging level
     include : Optional[Set[str]], optional
         List of logger names to include, by default all registered loggers are included
