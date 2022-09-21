@@ -15,10 +15,15 @@ def basic_handler_fn_arn(infrastructure: dict) -> str:
     return infrastructure.get("BasicHandlerArn", "")
 
 
-def test_basic_idempotency_record(basic_handler_fn_arn: str, basic_handler_fn: str):
+@pytest.fixture
+def idempotency_table_name(infrastructure: dict) -> str:
+    return infrastructure.get("DynamoDBTable", "")
+
+
+def test_basic_idempotency_record(basic_handler_fn_arn: str, basic_handler_fn: str, idempotency_table_name: str):
     # GIVEN
     function_name = "basic_handler.lambda_handler"
-    table_name = "IdempotencyTable"
+    table_name = idempotency_table_name
     payload = json.dumps({"message": "Lambda Powertools"})
 
     # WHEN
@@ -27,4 +32,4 @@ def test_basic_idempotency_record(basic_handler_fn_arn: str, basic_handler_fn: s
     # THEN
     ddb_records = data_fetcher.get_ddb_idempotency_record(function_name=function_name, table_name=table_name)
 
-    assert (ddb_records.get_records()) == 1
+    assert ddb_records == 1
