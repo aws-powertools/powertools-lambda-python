@@ -1,6 +1,7 @@
+from typing import Any
+
 from aws_cdk import CfnOutput, RemovalPolicy
 from aws_cdk import aws_dynamodb as dynamodb
-from aws_cdk.aws_lambda import Function
 
 from tests.e2e.utils.infrastructure import BaseInfrastructure
 
@@ -8,9 +9,9 @@ from tests.e2e.utils.infrastructure import BaseInfrastructure
 class IdempotencyDynamoDBStack(BaseInfrastructure):
     def create_resources(self):
         functions = self.create_lambda_functions()
-        self._create_dynamodb_table(function=functions["BasicHandler"])
+        self._create_dynamodb_table(function=functions)
 
-    def _create_dynamodb_table(self, function: Function):
+    def _create_dynamodb_table(self, function: Any):
         table = dynamodb.Table(
             self.stack,
             "Idempotency",
@@ -21,6 +22,6 @@ class IdempotencyDynamoDBStack(BaseInfrastructure):
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
         )
 
-        table.grant_read_write_data(function)
+        table.grant_read_write_data(function["TtlExpirationHandler"])
 
         CfnOutput(self.stack, "DynamoDBTable", value=table.table_name)

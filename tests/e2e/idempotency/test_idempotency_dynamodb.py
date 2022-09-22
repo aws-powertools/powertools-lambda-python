@@ -1,4 +1,5 @@
 import json
+from time import sleep
 
 import pytest
 
@@ -6,13 +7,13 @@ from tests.e2e.utils import data_fetcher
 
 
 @pytest.fixture
-def basic_handler_fn(infrastructure: dict) -> str:
-    return infrastructure.get("BasicHandler", "")
+def ttl_expiration_handler_fn(infrastructure: dict) -> str:
+    return infrastructure.get("TtlExpirationHandler", "")
 
 
 @pytest.fixture
-def basic_handler_fn_arn(infrastructure: dict) -> str:
-    return infrastructure.get("BasicHandlerArn", "")
+def ttl_expiration_handler_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("TtlExpirationHandlerArn", "")
 
 
 @pytest.fixture
@@ -20,16 +21,24 @@ def idempotency_table_name(infrastructure: dict) -> str:
     return infrastructure.get("DynamoDBTable", "")
 
 
-def test_basic_idempotency_record(basic_handler_fn_arn: str, basic_handler_fn: str, idempotency_table_name: str):
+def test_ttl_expiration_idempotency(ttl_expiration_handler_fn_arn: str, ttl_expiration_handler_fn: str):
     # GIVEN
-    function_name = "basic_handler.lambda_handler"
-    table_name = idempotency_table_name
-    payload = json.dumps({"message": "Lambda Powertools"})
+    payload = json.dumps({"message": "Lambda Powertools - TTL 20 secs"})
 
     # WHEN
-    data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn, payload=payload)
+    # first call
+    first_call, _ = data_fetcher.get_lambda_response(lambda_arn=ttl_expiration_handler_fn_arn, payload=payload)
+    first_call_response = first_call["Payload"].read().decode("utf-8")
+
+    # second call should return same response as first call
+    second_call, _ = data_fetcher.get_lambda_response(lambda_arn=ttl_expiration_handler_fn_arn, payload=payload)
+    second_call_response = second_call["Payload"].read().decode("utf-8")
+
+    # wait 10s to expire ttl and call again, this should return a new value
+    sleep(20)
+    third_call, _ = data_fetcher.get_lambda_response(lambda_arn=ttl_expiration_handler_fn_arn, payload=payload)
+    third_call_response = third_call["Payload"].read().decode("utf-8")
 
     # THEN
-    ddb_records = data_fetcher.get_ddb_idempotency_record(function_name=function_name, table_name=table_name)
-
-    assert ddb_records == 1
+    assert first_call_response == second_call_response
+    assert third_call_response != second_call_response
