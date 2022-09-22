@@ -240,13 +240,14 @@ for order_item in ret.detail.items:
     When extending a `string` field containing JSON, you need to wrap the field
     with [Pydantic's Json Type](https://pydantic-docs.helpmanual.io/usage/types/#json-type):
 
-    ```python
-    from pydantic import Json
+    ```python hl_lines="14 18-19"
+    --8<-- "examples/parser/src/extending_built_in_models_with_json_mypy.py"
+    ```
 
-    ...
+    Alternatively, you could use a [Pydantic validator](https://pydantic-docs.helpmanual.io/usage/validators/) to transform the JSON string into a dict before the mapping:
 
-    class OrderEventModel(APIGatewayProxyEventV2Model):
-        body: Json[Order]
+    ```python hl_lines="18-20 24-25"
+    --8<-- "examples/parser/src/extending_built_in_models_with_json_validator.py"
     ```
 
 ## Envelopes
