@@ -89,8 +89,8 @@ def test_parallel_execution_idempotency(parallel_execution_handler_fn_arn: str):
         [data_fetcher.get_lambda_response, data_fetcher.get_lambda_response], arguments
     )
 
-    error_idempotency_execution_response = execution_result_list[0][0]["Payload"].read().decode("utf-8")
-    timeout_execution_response = execution_result_list[1][0]["Payload"].read().decode("utf-8")
+    timeout_execution_response = execution_result_list[0][0]["Payload"].read().decode("utf-8")
+    error_idempotency_execution_response = execution_result_list[1][0]["Payload"].read().decode("utf-8")
 
     # THEN
     assert "Execution already in progress with idempotency key" in error_idempotency_execution_response
