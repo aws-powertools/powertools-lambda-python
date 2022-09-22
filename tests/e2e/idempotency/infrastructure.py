@@ -22,6 +22,8 @@ class IdempotencyDynamoDBStack(BaseInfrastructure):
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
         )
 
-        table.grant_read_write_data(function["TtlExpirationHandler"])
+        table.grant_read_write_data(function["TtlCacheExpirationHandler"])
+        table.grant_read_write_data(function["TtlCacheTimeoutHandler"])
+        table.grant_read_write_data(function["ParallelExecutionHandler"])
 
         CfnOutput(self.stack, "DynamoDBTable", value=table.table_name)
