@@ -13,7 +13,7 @@ class CancelOrder(BaseModel):
 
 
 class CancelOrderModel(APIGatewayProxyEventV2Model):
-    body: CancelOrder  # type: ignore
+    body: CancelOrder  # type: ignore[assignment]
 
     @validator("body", pre=True)
     def transform_body_to_dict(cls, value: str):
