@@ -16,6 +16,6 @@ class CancelOrderModel(APIGatewayProxyEventV2Model):
 
 @event_parser(model=CancelOrderModel)
 def handler(event: CancelOrderModel, context: LambdaContext):
-    cancel_order: CancelOrder = event.body  # type: ignore
+    cancel_order: CancelOrder = event.body  # type: ignore[assignment]
 
     assert cancel_order.order_id is not None
