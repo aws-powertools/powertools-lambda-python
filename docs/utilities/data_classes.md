@@ -918,7 +918,7 @@ function to access the data either as json or plain text, depending on the origi
             # or swap for below if data was delivered as text
             # data = kinesis_firehose_record.data_as_text
             
-            modified_record = do_sometime(data)
+            modified_record = do_sometime_with(data)
 
             firehose_record_output = {
                 "recordId": rec.record_id,

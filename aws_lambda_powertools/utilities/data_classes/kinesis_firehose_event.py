@@ -1,33 +1,33 @@
 import base64
 import json
-from typing import Iterator
+from typing import Iterator, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
 class KinesisFirehoseRecordMetadata(DictWrapper):
     @property
-    def shard_id(self) -> str:
+    def shard_id(self) -> Optional[str]:
         """Kinesis stream shard ID; present only when Kinesis Stream is source"""
         return self.get("shardId")
 
     @property
-    def partition_key(self) -> str:
+    def partition_key(self) -> Optional[str]
         """Kinesis stream partition key; present only when Kinesis Stream is source"""
         return self.get("partitionKey")
 
     @property
-    def approximate_arrival_timestamp(self) -> str:
+    def approximate_arrival_timestamp(self) -> Optional[str]
         """Kinesis stream approximate arrival ISO timestamp; present only when Kinesis Stream is source"""
         return self.get("approximateArrivalTimestamp")
 
     @property
-    def sequence_number(self) -> str:
+    def sequence_number(self) -> Optional[str]
         """Kinesis stream sequence number; present only when Kinesis Stream is source"""
         return self.get("sequenceNumber")
 
     @property
-    def subsequence_number(self) -> str:
+    def subsequence_number(self) -> Optional[str]
         """Kinesis stream sub-sequence number; present only when Kinesis Stream is source
         
         Note: this will only be present for Kinesis streams using record aggregation
@@ -50,9 +50,9 @@ class KinesisFirehoseRecord(DictWrapper):
     def data(self) -> str:
         """The data blob, base64-encoded"""
         return self["data"]
-    
+
     @property
-    def metadata(self) -> KinesisFirehoseRecordMetadata:
+    def metadata(self) -> Optional[KinesisFirehoseRecordMetadata]:
         """Optional: metadata associated with this record; present only when Kinesis Stream is source"""
         return KinesisFirehoseRecordMetadata(self.get('kinesisRecordMetadata', {}))
 
@@ -93,7 +93,7 @@ class KinesisFirehoseEvent(DictWrapper):
         return self["deliveryStreamArn"]
 
     @property
-    def source_kinesis_stream_arn(self) -> str:
+    def source_kinesis_stream_arn(self) -> Optional[str]:
         """ARN of the Kinesis Stream; present only when Kinesis Stream is source"""
         return self.get("sourceKinesisStreamArn")
 
