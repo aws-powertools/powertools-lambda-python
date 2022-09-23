@@ -568,8 +568,8 @@ python-dateutil = "*"
 typing-extensions = ">=3.7,<5.0"
 
 [[package]]
-name = "mako"
-version = "1.2.2"
+name = "Mako"
+version = "1.2.3"
 description = "A super-fast templating language that borrows the best ideas from the existing templating languages."
 category = "dev"
 optional = false
@@ -1383,7 +1383,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "f4bf6a61f98d66c83fc62e6568ba0463f21c68bdec6dc0ace0baa951d1ec0d25"
+content-hash = "9df2ddf2595d3af6988f10ee3702a5dc10faf1c65cd2f426d6889569a6c1cec7"
 
 [metadata.files]
 atomicwrites = [
@@ -1631,9 +1631,9 @@ jsii = [
     {file = "jsii-1.57.0-py3-none-any.whl", hash = "sha256:4888091986a9ed8d50b042cc9c35a9564dd54c19e78adb890bf06d9ffac1b325"},
     {file = "jsii-1.57.0.tar.gz", hash = "sha256:ff7a3c51c1a653dd8a4342043b5f8e40b928bc617e3141e0d5d66175d22a754b"},
 ]
-mako = [
-    {file = "Mako-1.2.2-py3-none-any.whl", hash = "sha256:8efcb8004681b5f71d09c983ad5a9e6f5c40601a6ec469148753292abc0da534"},
-    {file = "Mako-1.2.2.tar.gz", hash = "sha256:3724869b363ba630a272a5f89f68c070352137b8fd1757650017b7e06fda163f"},
+Mako = [
+    {file = "Mako-1.2.3-py3-none-any.whl", hash = "sha256:c413a086e38cd885088d5e165305ee8eed04e8b3f8f62df343480da0a385735f"},
+    {file = "Mako-1.2.3.tar.gz", hash = "sha256:7fde96466fcfeedb0eed94f187f20b23d85e4cb41444be0e542e2c8c65c396cd"},
 ]
 mando = [
     {file = "mando-0.6.4-py2.py3-none-any.whl", hash = "sha256:4ce09faec7e5192ffc3c57830e26acba0fd6cd11e1ee81af0d4df0657463bd1c"},
