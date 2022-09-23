@@ -72,7 +72,7 @@ python-snappy = "^0.6.1"
 mkdocs-material = { version = "^8.5.3", python = ">=3.7" }
 filelock = { version = "^3.8.0", python = ">=3.7" }
 # Maintenance: 2022-09-19 pinned mako to fix vulnerability as a pdoc3 dependency. Remove once we drop python 3.6.
-Mako = {version = "1.2.2", python = ">=3.7"}
+Mako = {version = "1.2.3", python = ">=3.7"}
 
 [tool.poetry.extras]
 pydantic = ["pydantic", "email-validator"]
