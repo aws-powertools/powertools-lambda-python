@@ -11,7 +11,7 @@ class CancelOrder(BaseModel):
 
 
 class CancelOrderModel(APIGatewayProxyEventV2Model):
-    body: Json[CancelOrder]  # type: ignore
+    body: Json[CancelOrder]  # type: ignore[assignment]
 
 
 @event_parser(model=CancelOrderModel)
