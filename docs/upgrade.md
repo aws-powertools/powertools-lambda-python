@@ -142,3 +142,9 @@ You can migrate to the [native batch processing](https://aws.amazon.com/about-aw
 
         return processor.response()
     ```
+
+## Idempotency
+
+We've made a change to the way the Idempotency feature saves the record in DynamoDB. Prior to this change, the record in DynamoDB was saved using the function name and Idempotency key, like this: `lambda_handler#282e83393862a613b612c00283fef4c8`. After this change, the record will be saved using the `module name` + `qualified function name` + `idempotency key`, like this: `app.classExample.function#app.handler#282e83393862a613b612c00283fef4c8`.
+
+You don't need to change anything in your code, but remember that Idempotency records already saved in DynamoDB will have no effect and your executions will generate a new one.

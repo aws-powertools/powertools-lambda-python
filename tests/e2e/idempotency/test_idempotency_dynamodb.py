@@ -81,13 +81,12 @@ def test_ttl_caching_timeout_idempotency(ttl_cache_timeout_handler_fn_arn: str):
 
 def test_parallel_execution_idempotency(parallel_execution_handler_fn_arn: str):
     # GIVEN
-    arguments = {"lambda_arn": parallel_execution_handler_fn_arn}
+    arguments = json.dumps({"message": "Lambda Powertools - Parallel execution"})
 
     # WHEN
     # executing Lambdas in parallel
-    execution_result_list = execute_lambdas_in_parallel(
-        [data_fetcher.get_lambda_response, data_fetcher.get_lambda_response], arguments
-    )
+    lambdas_arn = [parallel_execution_handler_fn_arn, parallel_execution_handler_fn_arn]
+    execution_result_list = execute_lambdas_in_parallel("data_fetcher.get_lambda_response", lambdas_arn, arguments)
 
     timeout_execution_response = execution_result_list[0][0]["Payload"].read().decode("utf-8")
     error_idempotency_execution_response = execution_result_list[1][0]["Payload"].read().decode("utf-8")
