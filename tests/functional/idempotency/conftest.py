@@ -172,18 +172,24 @@ def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_vali
 
 
 @pytest.fixture
-def hashed_idempotency_key(lambda_apigw_event, default_jmespath, lambda_context):
+def hashed_idempotency_key(request, lambda_apigw_event, default_jmespath, lambda_context):
     compiled_jmespath = jmespath.compile(default_jmespath)
     data = compiled_jmespath.search(lambda_apigw_event)
-    return "test-func.lambda_handler#" + hash_idempotency_key(data)
+    return (
+        f"test-func.{request.function.__module__}.{request.function.__qualname__}.<locals>.lambda_handler#"
+        + hash_idempotency_key(data)
+    )
 
 
 @pytest.fixture
-def hashed_idempotency_key_with_envelope(lambda_apigw_event):
+def hashed_idempotency_key_with_envelope(request, lambda_apigw_event):
     event = extract_data_from_envelope(
         data=lambda_apigw_event, envelope=envelopes.API_GATEWAY_HTTP, jmespath_options={}
     )
-    return "test-func.lambda_handler#" + hash_idempotency_key(event)
+    return (
+        f"test-func.{request.function.__module__}.{request.function.__qualname__}.<locals>.lambda_handler#"
+        + hash_idempotency_key(event)
+    )
 
 
 @pytest.fixture

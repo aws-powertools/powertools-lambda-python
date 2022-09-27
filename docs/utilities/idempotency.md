@@ -42,7 +42,7 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 | TTL attribute name | `expiration` | This can only be configured after your table is created if you're using AWS Console |
 
 ???+ tip "Tip: You can share a single state table for all functions"
-    You can reuse the same DynamoDB table to store idempotency state. We add your `function_name` in addition to the idempotency key as a hash key.
+    You can reuse the same DynamoDB table to store idempotency state. We add `module_name` and [qualified name for classes and functions](https://peps.python.org/pep-3155/) in addition to the idempotency key as a hash key.
 
 ```yaml hl_lines="5-13 21-23" title="AWS Serverless Application Model (SAM) example"
 Resources:
