@@ -32,6 +32,7 @@ from tests.functional.idempotency.utils import (
 from tests.functional.utils import json_serialize, load_event
 
 TABLE_NAME = "TEST_TABLE"
+TESTS_MODULE_PREFIX = "test-func.functional.idempotency.test_idempotency"
 
 
 def get_dataclasses_lib():
@@ -770,7 +771,7 @@ def test_idempotent_lambda_expires_in_progress_after_expire(
 
 def test_idempotent_lambda_expires_in_progress_unavailable_remaining_time():
     mock_event = {"data": "value"}
-    idempotency_key = "test-func.function#" + hash_idempotency_key(mock_event)
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_lambda_expires_in_progress_unavailable_remaining_time.<locals>.function#{hash_idempotency_key(mock_event)}"  # noqa E501
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
 
@@ -1109,7 +1110,8 @@ class MockPersistenceLayer(BasePersistenceLayer):
 def test_idempotent_lambda_event_source(lambda_context):
     # Scenario to validate that we can use the event_source decorator before or after the idempotent decorator
     mock_event = load_event("apiGatewayProxyV2Event.json")
-    persistence_layer = MockPersistenceLayer("test-func.lambda_handler#" + hash_idempotency_key(mock_event))
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_lambda_event_source.<locals>.lambda_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(idempotency_key)
     expected_result = {"message": "Foo"}
 
     # GIVEN an event_source decorator
@@ -1129,7 +1131,9 @@ def test_idempotent_lambda_event_source(lambda_context):
 def test_idempotent_function():
     # Scenario to validate we can use idempotent_function with any function
     mock_event = {"data": "value"}
-    idempotency_key = "test-func.record_handler#" + hash_idempotency_key(mock_event)
+    idempotency_key = (
+        f"{TESTS_MODULE_PREFIX}.test_idempotent_function.<locals>.record_handler#{hash_idempotency_key(mock_event)}"
+    )
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
 
@@ -1147,7 +1151,7 @@ def test_idempotent_function_arbitrary_args_kwargs():
     # Scenario to validate we can use idempotent_function with a function
     # with an arbitrary number of args and kwargs
     mock_event = {"data": "value"}
-    idempotency_key = "test-func.record_handler#" + hash_idempotency_key(mock_event)
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_arbitrary_args_kwargs.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
 
@@ -1163,7 +1167,7 @@ def test_idempotent_function_arbitrary_args_kwargs():
 
 def test_idempotent_function_invalid_data_kwarg():
     mock_event = {"data": "value"}
-    idempotency_key = "test-func.record_handler#" + hash_idempotency_key(mock_event)
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_invalid_data_kwarg.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
     keyword_argument = "payload"
@@ -1200,7 +1204,7 @@ def test_idempotent_function_arg_instead_of_kwarg():
 def test_idempotent_function_and_lambda_handler(lambda_context):
     # Scenario to validate we can use both idempotent_function and idempotent decorators
     mock_event = {"data": "value"}
-    idempotency_key = "test-func.record_handler#" + hash_idempotency_key(mock_event)
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_and_lambda_handler.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
 
@@ -1208,7 +1212,9 @@ def test_idempotent_function_and_lambda_handler(lambda_context):
     def record_handler(record):
         return expected_result
 
-    persistence_layer = MockPersistenceLayer("test-func.lambda_handler#" + hash_idempotency_key(mock_event))
+    persistence_layer = MockPersistenceLayer(
+        f"{TESTS_MODULE_PREFIX}.test_idempotent_function_and_lambda_handler.<locals>.lambda_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
+    )
 
     @idempotent(persistence_store=persistence_layer)
     def lambda_handler(event, _):
@@ -1229,7 +1235,9 @@ def test_idempotent_data_sorting():
     # Scenario to validate same data in different order hashes to the same idempotency key
     data_one = {"data": "test message 1", "more_data": "more data 1"}
     data_two = {"more_data": "more data 1", "data": "test message 1"}
-    idempotency_key = "test-func.dummy#" + hash_idempotency_key(data_one)
+    idempotency_key = (
+        f"{TESTS_MODULE_PREFIX}.test_idempotent_data_sorting.<locals>.dummy#{hash_idempotency_key(data_one)}"
+    )
     # Assertion will happen in MockPersistenceLayer
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
 
@@ -1337,7 +1345,7 @@ def test_idempotent_function_dataclass_with_jmespath():
     dataclasses = get_dataclasses_lib()
     config = IdempotencyConfig(event_key_jmespath="transaction_id", use_local_cache=True)
     mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
-    idempotency_key = "test-func.collect_payment#" + hash_idempotency_key(mock_event["transaction_id"])
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_dataclass_with_jmespath.<locals>.collect_payment#{hash_idempotency_key(mock_event['transaction_id'])}"  # noqa E501
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
 
     @dataclasses.dataclass
@@ -1362,7 +1370,7 @@ def test_idempotent_function_pydantic_with_jmespath():
     # GIVEN
     config = IdempotencyConfig(event_key_jmespath="transaction_id", use_local_cache=True)
     mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
-    idempotency_key = "test-func.collect_payment#" + hash_idempotency_key(mock_event["transaction_id"])
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_pydantic_with_jmespath.<locals>.collect_payment#{hash_idempotency_key(mock_event['transaction_id'])}"  # noqa E501
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
 
     class Payment(BaseModel):
