@@ -12,6 +12,7 @@ Changes at a glance:
 
 * The API for **event handler's `Response`** has minor changes to support multi value headers and cookies.
 * The **legacy SQS batch processor** was removed.
+* The **Idempotency key** format changed slightly, invalidating all the existing cached results.
 
 ???+ important
     Powertools for Python v2 drops suport for Python 3.6, following the Python 3.6 End-Of-Life (EOL) reached on December 23, 2021.
@@ -143,8 +144,13 @@ You can migrate to the [native batch processing](https://aws.amazon.com/about-aw
         return processor.response()
     ```
 
-## Idempotency
+## Idempotency key format
 
-We've made a change to the way the Idempotency feature saves the record in DynamoDB. Prior to this change, the record in DynamoDB was saved using the function name and Idempotency key, like this: `lambda_handler#282e83393862a613b612c00283fef4c8`. After this change, the record will be saved using the `module name` + `qualified function name` + `idempotency key`, like this: `app.classExample.function#app.handler#282e83393862a613b612c00283fef4c8`.
+The format of the Idempotency key was changed. This is used store the invocation results on a persistent store like DynamoDB.
 
-You don't need to change anything in your code, but remember that Idempotency records already saved in DynamoDB will have no effect and your executions will generate a new one.
+No changes are necessary in your code, but remember that existing Idempotency records will be ignored when you upgrade, as new executions generate keys with the new format.
+
+Prior to this change, the Idempotency key was generated using only the caller function name (e.g: `lambda_handler#282e83393862a613b612c00283fef4c8`).
+After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key` (e.g: `app.classExample.function#app.handler#282e83393862a613b612c00283fef4c8`).
+
+Using qualified names prevents distinct functions with the same name to contend for the same Idempotency key.
