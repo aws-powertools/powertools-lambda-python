@@ -1204,22 +1204,22 @@ def test_kafka_self_managed_event():
 
 def test_kinesis_firehose_event():
     event = KinesisFirehoseEvent(load_event("kinesisFirehoseEvent.json"))
-    
+
     assert event.region == "us-east-2"
     assert event.invocation_id == "2b4d1ad9-2f48-94bd-a088-767c317e994a"
     assert event.delivery_stream_arn == "arn:aws:firehose:us-east-2:123456789012:deliverystream/delivery-stream-name"
     assert event.source_kinesis_stream_arn is None
-    
+
     records = list(event.records)
     assert len(records) == 2
     record_01, record_02 = records[:]
-    
+
     assert record_01.approximate_arrival_timestamp == 1510772160000
     assert record_01.record_id == "record1"
     assert record_01.data == "SGVsbG8gV29ybGQ="
-    assert record_01.data_as_bytes == b'Hello World'
-    assert record_01.data_as_text == 'Hello World'
-    
+    assert record_01.data_as_bytes == b"Hello World"
+    assert record_01.data_as_text == "Hello World"
+
     assert record_02.data == "eyJIZWxsbyI6ICJXb3JsZCJ9"
     assert record_02.data_as_bytes == b'{"Hello": "World"}'
     assert record_02.data_as_text == '{"Hello": "World"}'

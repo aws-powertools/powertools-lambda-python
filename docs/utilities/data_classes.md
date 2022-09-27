@@ -893,7 +893,7 @@ or plain text, depending on the original payload.
         do_something_with(data)
     ```
 
-### Kinesis Firehose Delivery Stream
+### Kinesis Firehose delivery stream
 
 Kinesis Firehose Data Transformation can use a Lambda Function to modify the records
 inline, and re-emit them back to the Delivery Stream.
@@ -904,32 +904,7 @@ function to access the data either as json or plain text, depending on the origi
 === "app.py"
 
     ```python
-    import base64
-    import json
-    from aws_lambda_powertools.utilities.data_classes import event_source, KinesisFirehoseEvent
-
-    @event_source(data_class=KinesisFirehoseEvent)
-    def lambda_handler(event: KinesisFirehoseEvent, context):
-        result = []
-        for rec in event.records:
-            # if data was delivered as json; caches loaded value
-            data = kinesis_firehose_record.data_as_json
-            
-            # or swap for below if data was delivered as text
-            # data = kinesis_firehose_record.data_as_text
-            
-            modified_record = do_sometime_with(data)
-
-            firehose_record_output = {
-                "recordId": rec.record_id,
-                "data": base64.b64encode(json.dump(modified_record).encode('utf-8')),
-                "result": "Ok"
-            }
-
-            result.append(firehose_record_output)
-        
-        # return transformed records
-        return = {'records': result}
+    --8<-- "examples/event_sources/src/kinesis_firehose_delivery_stream.py"
     ```
 
 ### Lambda Function URL
