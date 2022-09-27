@@ -1,6 +1,7 @@
 """aws_lambda_logging tests."""
 import io
 import json
+import os
 import random
 import string
 import time
@@ -288,3 +289,22 @@ def test_log_formatting(stdout, service_name):
 
     # THEN the formatting should be applied (NB. this is valid json, but hasn't be parsed)
     assert log_dict["message"] == '["foo bar 123 [1, None]", null]'
+
+
+def test_log_json_indent_default(stdout, service_name, monkeypatch):
+    # GIVEN a logger with default settings while NOT in AWS SAM Local
+    if "AWS_SAM_LOCAL" in os.environ:
+        monkeypatch.delenv(name="AWS_SAM_LOCAL")
+    logger = Logger(service=service_name, stream=stdout)
+    logger.info("Test message")
+    # THEN the json should not be indented at all (using four blank spaces)
+    assert " " * 4 not in stdout.getvalue()
+
+
+def test_log_json_indent_aws_sam_local(stdout, service_name, monkeypatch):
+    # GIVEN a logger with default settings while in AWS SAM Local
+    monkeypatch.setenv(name="AWS_SAM_LOCAL", value="true")
+    logger = Logger(service=service_name, stream=stdout)
+    logger.info("Test message")
+    # THEN the json should contain indentation (of four blank spaces)
+    assert " " * 4 in stdout.getvalue()

@@ -111,9 +111,15 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             Key-value to be included in log messages
 
         """
+
         self.json_deserializer = json_deserializer or json.loads
         self.json_default = json_default or str
-        self.json_serializer = json_serializer or partial(json.dumps, default=self.json_default, separators=(",", ":"))
+        self.json_indent = (
+            4 if os.getenv("AWS_SAM_LOCAL", "").lower() == "true" else None
+        )  # indented json serialization when in AWS SAM Local
+        self.json_serializer = json_serializer or partial(
+            json.dumps, default=self.json_default, separators=(",", ":"), indent=self.json_indent
+        )
 
         self.datefmt = datefmt
         self.use_datetime_directive = use_datetime_directive

@@ -555,6 +555,9 @@ As parameters don't always translate well between them, you can pass any callabl
 --8<-- "examples/logger/src/bring_your_own_json_serializer.py"
 ```
 
+???+ info
+    When your code runs in [AWS SAM local invoke](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-invoke.html) (marked by the `AWS_SAM_LOCAL` env var), Logger's default `json.dumps` will apply indentation by four spaces.
+
 ## Testing your code
 
 ### Inject Lambda Context
