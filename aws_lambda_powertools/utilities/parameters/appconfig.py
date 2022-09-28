@@ -11,7 +11,7 @@ import boto3
 from botocore.config import Config
 
 if TYPE_CHECKING:
-    from mypy_boto3_appconfig import AppConfigClient
+    from mypy_boto3_appconfigdata import AppConfigDataClient
 
 from ...shared import constants
 from ...shared.functions import resolve_env_var_choice
@@ -34,8 +34,8 @@ class AppConfigProvider(BaseProvider):
         Botocore configuration to pass during client initialization
     boto3_session : boto3.session.Session, optional
             Boto3 session to create a boto3_client from
-    boto3_client: AppConfigClient, optional
-            Boto3 AppConfig Client to use, boto3_session will be ignored if both are provided
+    boto3_client: AppConfigDataClient, optional
+            Boto3 AppConfigData Client to use, boto3_session will be ignored if both are provided
 
     Example
     -------
@@ -73,7 +73,7 @@ class AppConfigProvider(BaseProvider):
         application: Optional[str] = None,
         config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
-        boto3_client: Optional["AppConfigClient"] = None,
+        boto3_client: Optional["AppConfigDataClient"] = None,
     ):
         """
         Initialize the App Config client
@@ -81,8 +81,8 @@ class AppConfigProvider(BaseProvider):
 
         super().__init__()
 
-        self.client: "AppConfigClient" = self._build_boto3_client(
-            service_name="appconfig", client=boto3_client, session=boto3_session, config=config
+        self.client: "AppConfigDataClient" = self._build_boto3_client(
+            service_name="appconfigdata", client=boto3_client, session=boto3_session, config=config
         )
 
         self.application = resolve_env_var_choice(
@@ -90,6 +90,10 @@ class AppConfigProvider(BaseProvider):
         )
         self.environment = environment
         self.current_version = ""
+
+        # new appconfidgdata apis
+        self.api_token = ""
+        self.last_returned_value = ""
 
     def _get(self, name: str, **sdk_options) -> str:
         """
@@ -102,14 +106,24 @@ class AppConfigProvider(BaseProvider):
         sdk_options: dict, optional
             Dictionary of options that will be passed to the client's get_configuration API call
         """
+        if not self.api_token:
+            print("TOKEN")
+            sdk_options["ConfigurationProfileIdentifier"] = name
+            sdk_options["ApplicationIdentifier"] = self.application
+            sdk_options["EnvironmentIdentifier"] = self.environment
 
-        sdk_options["Configuration"] = name
-        sdk_options["Application"] = self.application
-        sdk_options["Environment"] = self.environment
-        sdk_options["ClientId"] = CLIENT_ID
+            response_configuration = self.client.start_configuration_session(**sdk_options)
 
-        response = self.client.get_configuration(**sdk_options)
-        return response["Content"].read()  # read() of botocore.response.StreamingBody
+            self.api_token = response_configuration["InitialConfigurationToken"]
+
+        response = self.client.get_latest_configuration(ConfigurationToken=self.api_token)
+        return_value = response["Content"].read()
+        self.api_token = response["NextPollConfigurationToken"]
+
+        if return_value:
+            self.last_returned_value = return_value
+
+        return self.last_returned_value
 
     def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
         """

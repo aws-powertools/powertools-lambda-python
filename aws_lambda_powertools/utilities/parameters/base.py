@@ -15,7 +15,7 @@ from botocore.config import Config
 from .exceptions import GetParameterError, TransformParameterError
 
 if TYPE_CHECKING:
-    from mypy_boto3_appconfig import AppConfigClient
+    from mypy_boto3_appconfigdata import AppConfigDataClient
     from mypy_boto3_dynamodb import DynamoDBServiceResource
     from mypy_boto3_secretsmanager import SecretsManagerClient
     from mypy_boto3_ssm import SSMClient
@@ -28,7 +28,7 @@ DEFAULT_PROVIDERS: Dict[str, Any] = {}
 TRANSFORM_METHOD_JSON = "json"
 TRANSFORM_METHOD_BINARY = "binary"
 SUPPORTED_TRANSFORM_METHODS = [TRANSFORM_METHOD_JSON, TRANSFORM_METHOD_BINARY]
-ParameterClients = Union["AppConfigClient", "SecretsManagerClient", "SSMClient"]
+ParameterClients = Union["AppConfigDataClient", "SecretsManagerClient", "SSMClient"]
 
 
 class BaseProvider(ABC):
