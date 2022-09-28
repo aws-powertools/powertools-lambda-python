@@ -1,6 +1,7 @@
 import base64
 import json
-from typing import Any, Dict, Iterator, Mapping, Optional
+from collections.abc import Mapping
+from typing import Any, Dict, Iterator, Optional
 
 
 class DictWrapper(Mapping):

@@ -102,17 +102,17 @@ def test_dict_wrapper_equals():
     assert DataClassSample(data1).raw_event is data1
 
 
-def test_dict_wrapper_imlements_mapping():
+def test_dict_wrapper_implements_mapping():
     class DataClassSample(DictWrapper):
         pass
 
     data = {"message": "foo1"}
-    dcs = DataClassSample(data)
-    assert len(dcs) == len(data)
-    assert list(dcs) == list(data)
-    assert dcs.keys() == data.keys()
-    assert list(dcs.values()) == list(data.values())
-    assert dcs.items() == data.items()
+    event_source = DataClassSample(data)
+    assert len(event_source) == len(data)
+    assert list(event_source) == list(data)
+    assert event_source.keys() == data.keys()
+    assert list(event_source.values()) == list(data.values())
+    assert event_source.items() == data.items()
 
 
 def test_cloud_watch_dashboard_event():
@@ -633,19 +633,19 @@ def test_dynamo_attribute_value_type_error():
 
 def test_stream_record_keys_with_valid_keys():
     attribute_value = {"Foo": "Bar"}
-    sr = StreamRecord({"Keys": {"Key1": attribute_value}})
-    assert sr.keys == {"Key1": AttributeValue(attribute_value)}
+    record = StreamRecord({"Keys": {"Key1": attribute_value}})
+    assert record.keys == {"Key1": AttributeValue(attribute_value)}
 
 
 def test_stream_record_keys_with_no_keys():
-    sr = StreamRecord({})
-    assert sr.keys is None
+    record = StreamRecord({})
+    assert record.keys is None
 
 
 def test_stream_record_keys_overrides_dict_wrapper_keys():
     data = {"Keys": {"key1": {"attr1": "value1"}}}
-    sr = StreamRecord(data)
-    assert sr.keys != data.keys()
+    record = StreamRecord(data)
+    assert record.keys != data.keys()
 
 
 def test_event_bridge_event():

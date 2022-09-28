@@ -182,10 +182,10 @@ class StreamRecord(DictWrapper):
         item = self.get("ApproximateCreationDateTime")
         return None if item is None else int(item)
 
-    # This override breaks the Mapping protocol of DictWrapper, it's left here for backwards compatibility with
-    # a 'type: ignore' comment. This is currently the only subclass of DictWrapper that breaks this protocol.
+    # NOTE: This override breaks the Mapping protocol of DictWrapper, it's left here for backwards compatibility with
+    # a 'type: ignore' comment. See #1516 for discussion
     @property
-    def keys(self) -> Optional[Dict[str, AttributeValue]]:  # type: ignore
+    def keys(self) -> Optional[Dict[str, AttributeValue]]:  # type: ignore[override]
         """The primary key attribute(s) for the DynamoDB item that was modified."""
         return _attribute_value_dict(self._data, "Keys")
 
