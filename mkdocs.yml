@@ -89,6 +89,9 @@ copyright: Copyright &copy; 2022 Amazon Web Services
 plugins:
   - git-revision-date
   - search
+  - mkdocs-simple-hooks:
+      hooks:
+        on_page_markdown: "docs.plugins.lambda_layer_version:inject"
 
 extra_css:
   - stylesheets/extra.css

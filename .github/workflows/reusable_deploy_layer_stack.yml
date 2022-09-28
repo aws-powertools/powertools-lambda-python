@@ -94,6 +94,14 @@ jobs:
       - name: unzip artefact
         run: unzip cdk.out.zip
       - name: CDK Deploy Layer
-        run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'LayerStack' --require-approval never --verbose
+        run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'LayerStack' --require-approval never --verbose --outputs-file cdk-outputs.json
+      - name: Store latest layer ARN
+        if: ${{ inputs.stage == 'PROD' }}
+        run: jq -c '.LayerStack.LatestLayerArn' cdk-outputs.json > cdk-layer-stack-${{ matrix.region }}-layer-version.txt
       - name: CDK Deploy Canary
         run: cdk deploy --app cdk.out --context region=${{ matrix.region}} --parameters DeployStage="${{ inputs.stage }}" 'CanaryStack' --require-approval never --verbose
+      - name: Save layer stack ARN artifact
+        uses: actions/upload-artifacts@v3
+        with:
+          name: cdk-layer-stack
+          path: cdk-layer-stack*
