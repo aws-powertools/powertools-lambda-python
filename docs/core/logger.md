@@ -369,6 +369,9 @@ If you prefer configuring it separately, or you'd want to bring this JSON Format
 | **`log_record_order`**       | set order of log keys when logging                                                                                       | `["level", "location", "message", "timestamp"]`               |
 | **`kwargs`**                 | key-value to be included in log messages                                                                                 | `None`                                                        |
 
+???+ info
+    When `POWERTOOLS_DEV` env var is present and set to `"true"`, Logger's default serializer (`json.dumps`) will pretty-print log messages for easier readability.
+
 ```python hl_lines="2 7-8" title="Pre-configuring Lambda Powertools Formatter"
 --8<-- "examples/logger/src/powertools_formatter_setup.py"
 ```
@@ -554,9 +557,6 @@ As parameters don't always translate well between them, you can pass any callabl
 ```python hl_lines="1 3 7-8 13" title="Using Rust orjson library as serializer"
 --8<-- "examples/logger/src/bring_your_own_json_serializer.py"
 ```
-
-???+ info
-    When your code runs in [AWS SAM local invoke](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-invoke.html) (marked by the `AWS_SAM_LOCAL` env var), Logger's default `json.dumps` will apply indentation by four spaces.
 
 ## Testing your code
 

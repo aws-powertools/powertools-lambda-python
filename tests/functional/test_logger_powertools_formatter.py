@@ -9,6 +9,7 @@ import time
 import pytest
 
 from aws_lambda_powertools import Logger
+from aws_lambda_powertools.shared import constants
 
 
 @pytest.fixture
@@ -291,20 +292,20 @@ def test_log_formatting(stdout, service_name):
     assert log_dict["message"] == '["foo bar 123 [1, None]", null]'
 
 
-def test_log_json_indent_default(stdout, service_name, monkeypatch):
-    # GIVEN a logger with default settings while NOT in AWS SAM Local
-    if "AWS_SAM_LOCAL" in os.environ:
-        monkeypatch.delenv(name="AWS_SAM_LOCAL")
+def test_log_json_indent_compact_indent(stdout, service_name, monkeypatch):
+    # GIVEN a logger with default settings and WHEN POWERTOOLS_DEV is not set
+    if "POWERTOOLS_DEV" in os.environ:
+        monkeypatch.delenv(name="POWERTOOLS_DEV")
     logger = Logger(service=service_name, stream=stdout)
     logger.info("Test message")
-    # THEN the json should not be indented at all (using four blank spaces)
-    assert " " * 4 not in stdout.getvalue()
+    # THEN the json should not be indented using constant.PRETTY_INDENT blank spaces
+    assert " " * constants.PRETTY_INDENT not in stdout.getvalue()
 
 
-def test_log_json_indent_aws_sam_local(stdout, service_name, monkeypatch):
-    # GIVEN a logger with default settings while in AWS SAM Local
-    monkeypatch.setenv(name="AWS_SAM_LOCAL", value="true")
+def test_log_json_pretty_indent(stdout, service_name, monkeypatch):
+    # GIVEN a logger with default settings and WHEN POWERTOOLS_DEV=="true"
+    monkeypatch.setenv(name="POWERTOOLS_DEV", value="true")
     logger = Logger(service=service_name, stream=stdout)
     logger.info("Test message")
-    # THEN the json should contain indentation (of four blank spaces)
-    assert " " * 4 in stdout.getvalue()
+    # THEN the json should contain indentation (of constant.PRETTY_INDENT blank spaces)
+    assert " " * constants.PRETTY_INDENT in stdout.getvalue()

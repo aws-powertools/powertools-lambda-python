@@ -32,3 +32,6 @@ LOGGER_LAMBDA_CONTEXT_KEYS = [
     "cold_start",
     "xray_trace_id",
 ]
+
+PRETTY_INDENT: int = 4
+COMPACT_INDENT = None
