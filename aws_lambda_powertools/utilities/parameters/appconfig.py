@@ -5,7 +5,6 @@ AWS App Config configuration retrieval and caching utility
 
 import os
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
-from uuid import uuid4
 
 import boto3
 from botocore.config import Config
@@ -16,8 +15,6 @@ if TYPE_CHECKING:
 from ...shared import constants
 from ...shared.functions import resolve_env_var_choice
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
-
-CLIENT_ID = str(uuid4())
 
 
 class AppConfigProvider(BaseProvider):
@@ -91,8 +88,7 @@ class AppConfigProvider(BaseProvider):
         self.environment = environment
         self.current_version = ""
 
-        # new appconfidgdata apis
-        self.api_token = ""
+        self.next_call = ""
         self.last_returned_value = ""
 
     def _get(self, name: str, **sdk_options) -> str:
@@ -104,21 +100,18 @@ class AppConfigProvider(BaseProvider):
         name: str
             Name of the configuration
         sdk_options: dict, optional
-            Dictionary of options that will be passed to the client's get_configuration API call
+            Dictionary of options that will be passed to the client's start_configuration_session API call
         """
-        if not self.api_token:
-            print("TOKEN")
+        if not self.next_call:
             sdk_options["ConfigurationProfileIdentifier"] = name
             sdk_options["ApplicationIdentifier"] = self.application
             sdk_options["EnvironmentIdentifier"] = self.environment
-
             response_configuration = self.client.start_configuration_session(**sdk_options)
+            self.next_call = response_configuration["InitialConfigurationToken"]
 
-            self.api_token = response_configuration["InitialConfigurationToken"]
-
-        response = self.client.get_latest_configuration(ConfigurationToken=self.api_token)
-        return_value = response["Content"].read()
-        self.api_token = response["NextPollConfigurationToken"]
+        response = self.client.get_latest_configuration(ConfigurationToken=self.next_call)
+        return_value = response["Configuration"].read()
+        self.next_call = response["NextPollConfigurationToken"]
 
         if return_value:
             self.last_returned_value = return_value
@@ -159,7 +152,7 @@ def get_app_config(
     max_age: int
         Maximum age of the cached value
     sdk_options: dict, optional
-        Dictionary of options that will be passed to the boto client get_configuration API call
+        Dictionary of options that will be passed to the boto client start_configuration_session API call
 
     Raises
     ------
@@ -193,8 +186,6 @@ def get_app_config(
     # Only create the provider if this function is called at least once
     if "appconfig" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["appconfig"] = AppConfigProvider(environment=environment, application=application)
-
-    sdk_options["ClientId"] = CLIENT_ID
 
     return DEFAULT_PROVIDERS["appconfig"].get(
         name, max_age=max_age, transform=transform, force_fetch=force_fetch, **sdk_options

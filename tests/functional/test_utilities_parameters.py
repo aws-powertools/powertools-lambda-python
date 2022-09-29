@@ -1641,12 +1641,24 @@ def test_appconf_provider_get_configuration_json_content_type(mock_name, config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
-    response = {"Content": mock_value, "ConfigurationVersion": "1", "ContentType": "application/json"}
-    stubber.add_response("get_configuration", response)
+
+    # start_configuration_session response
+    response_start = {"InitialConfigurationToken": "initial_token"}
+    stubber.add_response("start_configuration_session", response_start)
+
+    # get_latest_configuration response
+    response_latest = {
+        "Configuration": mock_value,
+        "NextPollConfigurationToken": "initial_token",
+        "ContentType": "application/json",
+    }
+    stubber.add_response("get_latest_configuration", response_latest)
     stubber.activate()
 
     try:
-        value = provider.get(mock_name, transform="json", ClientConfigurationVersion="2")
+        value = provider.get(
+            mock_name, transform="json", ApplicationIdentifier=application, EnvironmentIdentifier=environment
+        )
 
         assert value == mock_body_json
         stubber.assert_no_pending_responses()
@@ -1659,7 +1671,7 @@ def test_appconf_provider_get_configuration_json_content_type_with_custom_client
     Test get_configuration.get with default values
     """
 
-    client = boto3.client("appconfig", config=config)
+    client = boto3.client("appconfigdata", config=config)
 
     # Create a new provider
     environment = "dev"
@@ -1672,12 +1684,23 @@ def test_appconf_provider_get_configuration_json_content_type_with_custom_client
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
-    response = {"Content": mock_value, "ConfigurationVersion": "1", "ContentType": "application/json"}
-    stubber.add_response("get_configuration", response)
+    # start_configuration_session response
+    response_start = {"InitialConfigurationToken": "initial_token"}
+    stubber.add_response("start_configuration_session", response_start)
+
+    # get_latest_configuration response
+    response_latest = {
+        "Configuration": mock_value,
+        "NextPollConfigurationToken": "initial_token",
+        "ContentType": "application/json",
+    }
+    stubber.add_response("get_latest_configuration", response_latest)
     stubber.activate()
 
     try:
-        value = provider.get(mock_name, transform="json", ClientConfigurationVersion="2")
+        value = provider.get(
+            mock_name, transform="json", ApplicationIdentifier=application, EnvironmentIdentifier=environment
+        )
 
         assert value == mock_body_json
         stubber.assert_no_pending_responses()
@@ -1701,8 +1724,17 @@ def test_appconf_provider_get_configuration_no_transform(mock_name, config):
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
-    response = {"Content": mock_value, "ConfigurationVersion": "1", "ContentType": "application/json"}
-    stubber.add_response("get_configuration", response)
+    # start_configuration_session response
+    response_start = {"InitialConfigurationToken": "initial_token"}
+    stubber.add_response("start_configuration_session", response_start)
+
+    # get_latest_configuration response
+    response_latest = {
+        "Configuration": mock_value,
+        "NextPollConfigurationToken": "initial_token",
+        "ContentType": "application/json",
+    }
+    stubber.add_response("get_latest_configuration", response_latest)
     stubber.activate()
 
     try:
