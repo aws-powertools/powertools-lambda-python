@@ -1,13 +1,9 @@
-import base64
-import logging
-from binascii import Error as BinAsciiError
 from typing import List, Type, Union
 
 from pydantic import BaseModel, validator
 
+from aws_lambda_powertools.shared.functions import base64_decode
 from aws_lambda_powertools.utilities.parser.types import Literal
-
-logger = logging.getLogger(__name__)
 
 
 class KinesisDataStreamRecordPayload(BaseModel):
@@ -19,11 +15,7 @@ class KinesisDataStreamRecordPayload(BaseModel):
 
     @validator("data", pre=True, allow_reuse=True)
     def data_base64_decode(cls, value):
-        try:
-            logger.debug("Decoding base64 Kinesis data record before parsing")
-            return base64.b64decode(value)
-        except (BinAsciiError, TypeError):
-            raise ValueError("base64 decode failed")
+        return base64_decode(value)
 
 
 class KinesisDataStreamRecord(BaseModel):

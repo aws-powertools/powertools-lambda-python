@@ -67,7 +67,7 @@ def resolve_env_var_choice(
 
 def base64_decode(value: str) -> bytes:
     try:
-        logger.debug("Decoding base64 Kafka record item before parsing")
+        logger.debug("Decoding base64 record item before parsing")
         return base64.b64decode(value)
     except (BinAsciiError, TypeError):
         raise ValueError("base64 decode failed")

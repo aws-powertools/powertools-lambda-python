@@ -6,6 +6,7 @@ from .dynamodb import DynamoDBStreamEnvelope
 from .event_bridge import EventBridgeEnvelope
 from .kafka import KafkaEnvelope
 from .kinesis import KinesisDataStreamEnvelope
+from .kinesis_firehose import KinesisFirehoseEnvelope
 from .lambda_function_url import LambdaFunctionUrlEnvelope
 from .sns import SnsEnvelope, SnsSqsEnvelope
 from .sqs import SqsEnvelope
@@ -17,6 +18,7 @@ __all__ = [
     "DynamoDBStreamEnvelope",
     "EventBridgeEnvelope",
     "KinesisDataStreamEnvelope",
+    "KinesisFirehoseEnvelope",
     "LambdaFunctionUrlEnvelope",
     "SnsEnvelope",
     "SnsSqsEnvelope",

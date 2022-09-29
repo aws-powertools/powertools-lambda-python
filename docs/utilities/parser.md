@@ -163,6 +163,7 @@ Parser comes with the following built-in models:
 | **S3Model**                     | Lambda Event Source payload for Amazon S3                          |
 | **S3ObjectLambdaEvent**         | Lambda Event Source payload for Amazon S3 Object Lambda            |
 | **KinesisDataStreamModel**      | Lambda Event Source payload for Amazon Kinesis Data Streams        |
+| **KinesisFirehoseModel**		  | Lambda Event Source payload for Amazon Kinesis Firehose            |
 | **SesModel**                    | Lambda Event Source payload for Amazon Simple Email Service        |
 | **SnsModel**                    | Lambda Event Source payload for Amazon Simple Notification Service |
 | **APIGatewayProxyEventModel**   | Lambda Event Source payload for Amazon API Gateway                 |
@@ -319,6 +320,7 @@ Parser comes with the following built-in envelopes, where `Model` in the return 
 | **SqsEnvelope**               | 1. Parses data using `SqsModel`. <br/> 2. Parses records in `body` key using your model and return them in a list.                                                                                          | `List[Model]`                      |
 | **CloudWatchLogsEnvelope**    | 1. Parses data using `CloudwatchLogsModel` which will base64 decode and decompress it. <br/> 2. Parses records in `message` key using your model and return them in a list.                                 | `List[Model]`                      |
 | **KinesisDataStreamEnvelope** | 1. Parses data using `KinesisDataStreamModel` which will base64 decode it. <br/> 2. Parses records in in `Records` key using your model and returns them in a list.                                         | `List[Model]`                      |
+| **KinesisFirehoseEnvelope**   | 1. Parses data using `KinesisFirehoseModel` which will base64 decode it. <br/> 2. Parses records in in `Records` key using your model and returns them in a list.                                         | `List[Model]`                      |
 | **SnsEnvelope**               | 1. Parses data using `SnsModel`. <br/> 2. Parses records in `body` key using your model and return them in a list.                                                                                          | `List[Model]`                      |
 | **SnsSqsEnvelope**            | 1. Parses data using `SqsModel`. <br/> 2. Parses SNS records in `body` key using `SnsNotificationModel`. <br/> 3. Parses data in `Message` key using your model and return them in a list.                  | `List[Model]`                      |
 | **ApiGatewayEnvelope**        | 1. Parses data using `APIGatewayProxyEventModel`. <br/> 2. Parses `body` key using your model and returns it.                                                                                               | `Model`                            |
