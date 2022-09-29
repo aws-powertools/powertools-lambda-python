@@ -1,0 +1,86 @@
+name: Deploy v2 layer to all regions
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      latest_published_version:
+        description: "Latest PyPi published version to rebuild latest docs for, e.g. v1.22.0"
+        default: "v1.22.0"
+        required: true
+  # workflow_run:
+  #   workflows: ["Publish to PyPi"]
+  #   types:
+  #     - completed
+
+jobs:
+  build-layer:
+    runs-on: ubuntu-latest
+    if: ${{ (github.event.workflow_run.conclusion == 'success') || (github.event_name == 'workflow_dispatch') }}
+    defaults:
+      run:
+        working-directory: ./layer
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.12"
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+          cache: "pip"
+      - name: Resolve and install project dependencies
+        # CDK spawns system python when compiling stack
+        # therefore it ignores both activated virtual env and cached interpreter by GH
+        run: |
+          poetry export --format requirements.txt --output requirements.txt
+          pip install -r requirements.txt
+      - name: Set release notes tag
+        run: |
+          RELEASE_INPUT=${{ inputs.latest_published_version }}
+          LATEST_TAG=$(git describe --tag --abbrev=0)
+          RELEASE_TAG_VERSION=${RELEASE_INPUT:-$LATEST_TAG}
+          echo RELEASE_TAG_VERSION="${RELEASE_TAG_VERSION:1}" >> "$GITHUB_ENV"
+      - name: install cdk and deps
+        run: |
+          npm install -g aws-cdk@2.29.0
+          cdk --version
+      - name: CDK build
+        run: cdk synth --context version="$RELEASE_TAG_VERSION" -o cdk.out
+      - name: zip output
+        run: zip -r cdk.out.zip cdk.out
+      - name: Archive CDK artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: cdk-layer-artefact
+          path: layer/cdk.out.zip
+
+  deploy-beta:
+    needs:
+      - build-layer
+    uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
+    secrets: inherit
+    with:
+      stage: "BETA"
+      artefact-name: "cdk-layer-artefact"
+      environment: "layer-beta"
+
+  # deploy-prod:
+  #   needs:
+  #     - deploy-beta
+  #   uses: ./.github/workflows/reusable_deploy_layer_stack.yml
+  #   secrets: inherit
+  #   with:
+  #     stage: "PROD"
+  #     artefact-name: "cdk-layer-artefact"
+  #     environment: "layer-prod"
