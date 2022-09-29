@@ -6,6 +6,7 @@
 
 ## Bug Fixes
 
+* **typing:** fix mypy error
 * **typing:** level arg in copy_config_to_registered_loggers ([#1534](https://github.com/awslabs/aws-lambda-powertools-python/issues/1534))
 
 ## Documentation
@@ -14,12 +15,14 @@
 
 ## Maintenance
 
+* **deps:** bump fastjsonschema from 2.16.1 to 2.16.2 ([#1530](https://github.com/awslabs/aws-lambda-powertools-python/issues/1530))
 * **deps:** bump codecov/codecov-action from 3.1.0 to 3.1.1 ([#1529](https://github.com/awslabs/aws-lambda-powertools-python/issues/1529))
 * **deps:** bump actions/setup-python from 3 to 4 ([#1528](https://github.com/awslabs/aws-lambda-powertools-python/issues/1528))
 * **deps:** bump email-validator from 1.2.1 to 1.3.0 ([#1533](https://github.com/awslabs/aws-lambda-powertools-python/issues/1533))
-* **deps:** bump fastjsonschema from 2.16.1 to 2.16.2 ([#1530](https://github.com/awslabs/aws-lambda-powertools-python/issues/1530))
+* **deps-dev:** bump mypy-boto3-ssm from 1.24.80 to 1.24.81 ([#1544](https://github.com/awslabs/aws-lambda-powertools-python/issues/1544))
 * **deps-dev:** bump mypy-boto3-s3 from 1.24.36.post1 to 1.24.76 ([#1531](https://github.com/awslabs/aws-lambda-powertools-python/issues/1531))
 * **deps-dev:** bump mkdocs-material from 8.5.1 to 8.5.3 ([#1532](https://github.com/awslabs/aws-lambda-powertools-python/issues/1532))
+* **deps-dev:** bump mypy-boto3-ssm from 1.24.69 to 1.24.80 ([#1542](https://github.com/awslabs/aws-lambda-powertools-python/issues/1542))
 * **deps-dev:** bump mako from 1.2.2 to 1.2.3 ([#1537](https://github.com/awslabs/aws-lambda-powertools-python/issues/1537))
 * **deps-dev:** bump types-requests from 2.28.10 to 2.28.11 ([#1538](https://github.com/awslabs/aws-lambda-powertools-python/issues/1538))
 * **docs:** bump layer version to 36 (1.29.2)
