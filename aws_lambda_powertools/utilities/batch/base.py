@@ -98,7 +98,7 @@ class BasePartialProcessor(ABC):
     def __exit__(self, exception_type, exception_value, traceback):
         self._clean()
 
-    def __call__(self, records: List[dict], handler: Callable):
+    def __call__(self, records: List[dict], handler: Callable, lambda_context: Optional[LambdaContext] = None):
         """
         Set instance attributes before execution
 
@@ -111,6 +111,31 @@ class BasePartialProcessor(ABC):
         """
         self.records = records
         self.handler = handler
+
+        # NOTE: If a record handler has `lambda_context` parameter in its function signature, we inject it.
+        # This is the earliest we can inspect for signature to prevent impacting performance.
+        #
+        #   Mechanism:
+        #
+        #   1. When using the `@batch_processor` decorator, this happens automatically.
+        #   2. When using the context manager, customers have to include `lambda_context` param.
+        #
+        #   Scenario: Injects Lambda context
+        #
+        #   def record_handler(record, lambda_context): ... # noqa: E800
+        #   with processor(records=batch, handler=record_handler, lambda_context=context): ... # noqa: E800
+        #
+        #   Scenario: Does NOT inject Lambda context (default)
+        #
+        #   def record_handler(record): pass # noqa: E800
+        #   with processor(records=batch, handler=record_handler): ... # noqa: E800
+        #
+        if lambda_context is None:
+            self._handler_accepts_lambda_context = False
+        else:
+            self.lambda_context = lambda_context
+            self._handler_accepts_lambda_context = "lambda_context" in inspect.signature(self.handler).parameters
+
         return self
 
     def success_handler(self, record, result: Any) -> SuccessResponse:
@@ -197,8 +222,7 @@ def batch_processor(
     """
     records = event["Records"]
 
-    processor.lambda_context = context
-    with processor(records, record_handler):
+    with processor(records, record_handler, lambda_context=context):
         processor.process()
 
     return handler(event, context)
@@ -369,13 +393,12 @@ class BatchProcessor(BasePartialProcessor):
             A batch record to be processed.
         """
         data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
-        handler_signature = inspect.signature(self.handler).parameters
         try:
-            # NOTE: negative first for faster execution, since that's how >80% customers use
-            if "lambda_context" not in handler_signature:
-                result = self.handler(record=data)
-            else:
+            if self._handler_accepts_lambda_context:
                 result = self.handler(record=data, lambda_context=self.lambda_context)
+            else:
+                result = self.handler(record=data)
+
             return self.success_handler(record=record, result=result)
         except Exception:
             return self.failure_handler(record=data, exception=sys.exc_info())
