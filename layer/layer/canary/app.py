@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import platform
 from importlib.metadata import version
 
 import boto3
@@ -66,7 +67,7 @@ def verify_powertools_version() -> None:
     current_version = version("aws_lambda_powertools")
     if powertools_version != current_version:
         raise ValueError(
-            f'Expected powertoosl version is "{powertools_version}", but layer contains version "{current_version}"'
+            f'Expected powertools version is "{powertools_version}", but layer contains version "{current_version}"'
         )
     logger.info(f"Current Powertools version is: {current_version}")
 
@@ -80,6 +81,8 @@ def send_notification():
             "Not sending notification to event bus, because this is not the PROD stage"
         )
         return
+
+    architecture = platform.uname()[4]
     event = {
         "Time": datetime.datetime.now(),
         "Source": "powertools.layer.canary",
@@ -90,6 +93,7 @@ def send_notification():
                 "version": powertools_version,
                 "region": os.environ["AWS_REGION"],
                 "layerArn": layer_arn,
+                "architecture": architecture,
             }
         ),
     }
