@@ -294,8 +294,7 @@ def test_log_formatting(stdout, service_name):
 
 def test_log_json_indent_compact_indent(stdout, service_name, monkeypatch):
     # GIVEN a logger with default settings and WHEN POWERTOOLS_DEV is not set
-    if "POWERTOOLS_DEV" in os.environ:
-        monkeypatch.delenv(name="POWERTOOLS_DEV")
+    monkeypatch.delenv(name="POWERTOOLS_DEV", raising=False)
     logger = Logger(service=service_name, stream=stdout)
     logger.info("Test message")
     # THEN the json should not be indented using constant.PRETTY_INDENT blank spaces
