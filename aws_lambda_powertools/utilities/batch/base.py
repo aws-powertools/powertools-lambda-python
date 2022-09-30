@@ -4,6 +4,7 @@
 Batch processing utilities
 """
 import copy
+import inspect
 import logging
 import sys
 from abc import ABC, abstractmethod
@@ -15,6 +16,7 @@ from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingErro
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
 from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +56,8 @@ class BasePartialProcessor(ABC):
     """
     Abstract class for batch processors.
     """
+
+    lambda_context: LambdaContext
 
     def __init__(self):
         self.success_messages: List[BatchEventTypes] = []
@@ -155,7 +159,7 @@ class BasePartialProcessor(ABC):
 
 @lambda_handler_decorator
 def batch_processor(
-    handler: Callable, event: Dict, context: Dict, record_handler: Callable, processor: BasePartialProcessor
+    handler: Callable, event: Dict, context: LambdaContext, record_handler: Callable, processor: BasePartialProcessor
 ):
     """
     Middleware to handle batch event processing
@@ -166,7 +170,7 @@ def batch_processor(
         Lambda's handler
     event: Dict
         Lambda's Event
-    context: Dict
+    context: LambdaContext
         Lambda's Context
     record_handler: Callable
         Callable to process each record from the batch
@@ -193,6 +197,7 @@ def batch_processor(
     """
     records = event["Records"]
 
+    processor.lambda_context = context
     with processor(records, record_handler):
         processor.process()
 
@@ -364,8 +369,13 @@ class BatchProcessor(BasePartialProcessor):
             A batch record to be processed.
         """
         data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
+        handler_signature = inspect.signature(self.handler).parameters
         try:
-            result = self.handler(record=data)
+            # NOTE: negative first for faster execution, since that's how >80% customers use
+            if "lambda_context" not in handler_signature:
+                result = self.handler(record=data)
+            else:
+                result = self.handler(record=data, lambda_context=self.lambda_context)
             return self.success_handler(record=record, result=result)
         except Exception:
             return self.failure_handler(record=data, exception=sys.exc_info())
