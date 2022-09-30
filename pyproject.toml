@@ -21,7 +21,7 @@ license = "MIT-0"
 [tool.poetry.dependencies]
 python = "^3.7.4"
 aws-xray-sdk = { version = "^2.8.0", optional = true }
-fastjsonschema = "^2.14.5"
+fastjsonschema = { version = "^2.14.5", optional = true }
 pydantic = {version = "^1.8.2", optional = true }
 email-validator = {version = "*", optional = true }
 
@@ -77,7 +77,7 @@ checksumdir = "^1.2.0"
 importlib-metadata = "^4.13"
 
 [tool.poetry.extras]
-extras = ["pydantic", "email-validator", "aws-xray-sdk"]
+extras = ["pydantic", "email-validator", "aws-xray-sdk", "fastjsonschema"]
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]
