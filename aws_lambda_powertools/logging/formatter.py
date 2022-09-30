@@ -9,6 +9,7 @@ from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from ..shared import constants
+from ..shared.functions import strtobool
 
 RESERVED_LOG_ATTRS = (
     "name",

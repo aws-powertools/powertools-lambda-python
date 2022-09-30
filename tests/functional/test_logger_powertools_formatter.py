@@ -9,7 +9,6 @@ import time
 import pytest
 
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.shared import constants
 
 
 @pytest.fixture
@@ -297,8 +296,9 @@ def test_log_json_indent_compact_indent(stdout, service_name, monkeypatch):
     monkeypatch.delenv(name="POWERTOOLS_DEV", raising=False)
     logger = Logger(service=service_name, stream=stdout)
     logger.info("Test message")
-    # THEN the json should not be indented using constant.PRETTY_INDENT blank spaces
-    assert " " * constants.PRETTY_INDENT not in stdout.getvalue()
+    # THEN the json should not have multiple lines
+    new_lines = stdout.getvalue().count(os.linesep)
+    assert new_lines == 1
 
 
 def test_log_json_pretty_indent(stdout, service_name, monkeypatch):
@@ -306,5 +306,6 @@ def test_log_json_pretty_indent(stdout, service_name, monkeypatch):
     monkeypatch.setenv(name="POWERTOOLS_DEV", value="true")
     logger = Logger(service=service_name, stream=stdout)
     logger.info("Test message")
-    # THEN the json should contain indentation (of constant.PRETTY_INDENT blank spaces)
-    assert " " * constants.PRETTY_INDENT in stdout.getvalue()
+    # THEN the json should contain more than line
+    new_lines = stdout.getvalue().count(os.linesep)
+    assert new_lines > 1
