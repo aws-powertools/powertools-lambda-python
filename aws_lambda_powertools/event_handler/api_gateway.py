@@ -143,8 +143,8 @@ class Response:
     def __init__(
         self,
         status_code: int,
-        content_type: Optional[str],
-        body: Union[str, bytes, None],
+        content_type: Optional[str] = None,
+        body: Union[str, bytes, None] = None,
         headers: Optional[Dict] = None,
     ):
         """
