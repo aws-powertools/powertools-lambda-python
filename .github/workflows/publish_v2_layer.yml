@@ -51,9 +51,14 @@ jobs:
           LATEST_TAG=$(git describe --tag --abbrev=0)
           RELEASE_TAG_VERSION=${RELEASE_INPUT:-$LATEST_TAG}
           echo RELEASE_TAG_VERSION="${RELEASE_TAG_VERSION:1}" >> "$GITHUB_ENV"
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        id: builder
+        uses: docker/setup-buildx-action@v2
       - name: install cdk and deps
         run: |
-          npm install -g aws-cdk@2.29.0
+          npm install -g aws-cdk@2.44.0
           cdk --version
       - name: CDK build
         run: cdk synth --context version="$RELEASE_TAG_VERSION" -o cdk.out
