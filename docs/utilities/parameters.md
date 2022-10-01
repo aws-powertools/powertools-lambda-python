@@ -27,14 +27,15 @@ This utility requires additional permissions to work as expected.
 ???+ note
     Different parameter providers require different permissions.
 
-| Provider            | Function/Method                                      | IAM Permission                                                                          |
-| ------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| SSM Parameter Store | `get_parameter`, `SSMProvider.get`                   | `ssm:GetParameter`                                                                      |
-| SSM Parameter Store | `get_parameters`, `SSMProvider.get_multiple`         | `ssm:GetParametersByPath`                                                               |
-| Secrets Manager     | `get_secret`, `SecretsManager.get`                   | `secretsmanager:GetSecretValue`                                                         |
-| DynamoDB            | `DynamoDBProvider.get`                               | `dynamodb:GetItem`                                                                      |
-| DynamoDB            | `DynamoDBProvider.get_multiple`                      | `dynamodb:Query`                                                                        |
-| App Config          | `get_app_config`, `AppConfigProvider.get_app_config` | `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession`  |
+| Provider            | Function/Method                                                  | IAM Permission                                                               |
+| ------------------- | -----------------------------------------------------------------| -----------------------------------------------------------------------------|
+| SSM Parameter Store | `get_parameter`, `SSMProvider.get`                               | `ssm:GetParameter`                                                           |
+| SSM Parameter Store | `get_parameters`, `SSMProvider.get_multiple`                     | `ssm:GetParametersByPath`                                                    |
+| SSM Parameter Store | If using `decrypt=True`                                          | You must add an additional permission `kms:Decrypt`                          |
+| Secrets Manager     | `get_secret`, `SecretsManager.get`                               | `secretsmanager:GetSecretValue`                                              |
+| DynamoDB            | `DynamoDBProvider.get`                                           | `dynamodb:GetItem`                                                           |
+| DynamoDB            | `DynamoDBProvider.get_multiple`                                  | `dynamodb:Query`                                                             |
+| App Config          | `get_app_config`, `AppConfigProvider.get_app_config`             | `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession` |
 
 ### Fetching parameters
 
@@ -153,7 +154,7 @@ The AWS Systems Manager Parameter Store provider supports two additional argumen
 | **decrypt**   | `False` | Will automatically decrypt the parameter.                                                      |
 | **recursive** | `True`  | For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix. |
 
-You can create secure string parameters, which are parameters that have a plaintext parameter name and an encrypted parameter value. Read [here](https://docs.aws.amazon.com/kms/latest/developerguide/services-parameter-store.html) about best practices using KMS to secure your parameters.
+You can create `SecureString` parameters, which are parameters that have a plaintext parameter name and an encrypted parameter value. If you don't use the `decrypt` argument, you will get an encrypted value. Read [here](https://docs.aws.amazon.com/kms/latest/developerguide/services-parameter-store.html) about best practices using KMS to secure your parameters.
 
 === "builtin_provider_ssm_with_decrypt.py"
     ```python hl_lines="3 5 9 10 15"
@@ -494,26 +495,10 @@ You can use `boto3_client` parameter via any of the available [Provider Classes]
 
 Bringing them together in a single code snippet would look like this:
 
-```python title="Example: passing a custom boto3 client for each provider"
-import boto3
-from botocore.config import Config
-
-from aws_lambda_powertools.utilities import parameters
-
-config = Config(region_name="us-west-1")
-
-# construct boto clients with any custom configuration
-ssm = boto3.client("ssm", config=config)
-secrets = boto3.client("secrets", config=config)
-appconfig = boto3.client("appconfig", config=config)
-dynamodb = boto3.resource("dynamodb", config=config)
-
-ssm_provider = parameters.SSMProvider(boto3_client=ssm)
-secrets_provider = parameters.SecretsProvider(boto3_client=secrets)
-appconf_provider = parameters.AppConfigProvider(boto3_client=appconfig, environment="my_env", application="my_app")
-dynamodb_provider = parameters.DynamoDBProvider(boto3_client=dynamodb, table_name="my-table")
-
-```
+=== "custom_boto3_all_providers.py"
+    ```python
+    --8<-- "examples/parameters/src/custom_boto3_all_providers.py"
+    ```
 
 ???+ question "When is this useful?"
 	Injecting a custom boto3 client can make unit/snapshot testing easier, including SDK customizations.
