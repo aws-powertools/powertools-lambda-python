@@ -1,3 +1,5 @@
+from typing import Any
+
 import requests
 
 from aws_lambda_powertools.utilities import parameters
@@ -8,9 +10,9 @@ def lambda_handler(event: dict, context: LambdaContext):
 
     try:
         # Usually an endpoint is not sensitive data, so we store it in SSM Parameters
-        endpoint_comments: str = parameters.get_parameter("/lambda-powertools/endpoint_comments")
+        endpoint_comments: Any = parameters.get_parameter("/lambda-powertools/endpoint_comments")
         # An API-KEY is a sensitive data and should be stored in SecretsManager
-        api_key: str = parameters.get_secret("/lambda-powertools/api-key", max_age=20)
+        api_key: Any = parameters.get_secret("/lambda-powertools/api-key", max_age=20)
 
         headers: dict = {"X-API-Key": api_key}
 

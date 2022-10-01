@@ -34,7 +34,7 @@ This utility requires additional permissions to work as expected.
 | Secrets Manager     | `get_secret`, `SecretsManager.get`                   | `secretsmanager:GetSecretValue`                                                         |
 | DynamoDB            | `DynamoDBProvider.get`                               | `dynamodb:GetItem`                                                                      |
 | DynamoDB            | `DynamoDBProvider.get_multiple`                      | `dynamodb:Query`                                                                        |
-| App Config          | `AppConfigProvider.get_app_config`, `get_app_config` | `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession`  |
+| App Config          | `get_app_config`, `AppConfigProvider.get_app_config` | `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession`  |
 
 ### Fetching parameters
 
@@ -107,39 +107,44 @@ You can adjust how long we should keep values in cache by using the param `max_a
 
 If you'd like to always ensure you fetch the latest parameter from the store regardless if already available in cache, use `force_fetch` param.
 
-```python hl_lines="5" title="Forcefully fetching the latest parameter whether TTL has expired or not"
-from aws_lambda_powertools.utilities import parameters
+=== "single_ssm_parameter_force_fetch.py"
+    ```python hl_lines="3 10 16"
+    --8<-- "examples/parameters/src/single_ssm_parameter_force_fetch.py"
+    ```
 
-def handler(event, context):
-	# Retrieve a single parameter
-	value = parameters.get_parameter("/my/parameter", force_fetch=True)
-```
+=== "recursive_ssm_parameter_force_fetch.py"
+    ```python hl_lines="3 10 13 22"
+    --8<-- "examples/parameters/src/recursive_ssm_parameter_force_fetch.py"
+    ```
+
+=== "secret_force_fetch.py"
+    ```python hl_lines="3 13 20"
+    --8<-- "examples/parameters/src/secret_force_fetch.py"
+    ```
+
+=== "appconfig_force_fetch.py"
+    ```python hl_lines="3 10 11 18"
+    --8<-- "examples/parameters/src/appconfig_force_fetch.py"
+    ```
 
 ### Built-in provider class
 
 For greater flexibility such as configuring the underlying SDK client used by built-in providers, you can use their respective Provider Classes directly.
 
 ???+ tip
-    This can be used to retrieve values from other regions, change the retry behavior, etc.
+    This is useful when you need to customize parameters for the SDK client, such as region, credentials, retries and others. For more information, read [botocore.config](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) and [boto3.session](<https://boto3.amazonaws> .com/v1/documentation/api/latest/reference/core/session.html#module-boto3.session).
 
 #### SSMProvider
 
-```python hl_lines="5 9 12" title="Example with SSMProvider for further extensibility"
-from aws_lambda_powertools.utilities import parameters
-from botocore.config import Config
+=== "builtin_provider_ssm_single_parameter.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/builtin_provider_ssm_single_parameter.py"
+    ```
 
-config = Config(region_name="us-west-1")
-ssm_provider = parameters.SSMProvider(config=config) # or boto3_session=boto3.Session()
-
-def handler(event, context):
-	# Retrieve a single parameter
-	value = ssm_provider.get("/my/parameter")
-
-	# Retrieve multiple parameters from a path prefix
-	values = ssm_provider.get_multiple("/my/path/prefix")
-	for k, v in values.items():
-		print(f"{k}: {v}")
-```
+=== "builtin_provider_ssm_recursive_parameter.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/builtin_provider_ssm_recursive_parameter.py"
+    ```
 
 The AWS Systems Manager Parameter Store provider supports two additional arguments for the `get()` and `get_multiple()` methods:
 
@@ -148,16 +153,17 @@ The AWS Systems Manager Parameter Store provider supports two additional argumen
 | **decrypt**   | `False` | Will automatically decrypt the parameter.                                                      |
 | **recursive** | `True`  | For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix. |
 
-```python hl_lines="6 8" title="Example with get() and get_multiple()"
-from aws_lambda_powertools.utilities import parameters
+You can create secure string parameters, which are parameters that have a plaintext parameter name and an encrypted parameter value. Read [here](https://docs.aws.amazon.com/kms/latest/developerguide/services-parameter-store.html) about best practices using KMS to secure your parameters.
 
-ssm_provider = parameters.SSMProvider()
+=== "builtin_provider_ssm_with_decrypt.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/builtin_provider_ssm_with_decrypt.py"
+    ```
 
-def handler(event, context):
-	decrypted_value = ssm_provider.get("/my/encrypted/parameter", decrypt=True)
-
-	no_recursive_values = ssm_provider.get_multiple("/my/path/prefix", recursive=False)
-```
+=== "builtin_provider_ssm_with_no_recursive.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/builtin_provider_ssm_with_no_recursive.py"
+    ```
 
 #### SecretsProvider
 
@@ -473,18 +479,18 @@ Here is the mapping between this utility's functions and methods and the underly
 | Secrets Manager     | `SecretsManager.get`            | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value) |
 | DynamoDB            | `DynamoDBProvider.get`          | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table))                                        | [get_item](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.get_item) |
 | DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table))                                        | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)       |
-| App Config          | `get_app_config`                | `appconfig`      | [get_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfig.html#AppConfig.Client.get_configuration)         |
+| App Config          | `get_app_config`                | `appconfigdata`  | [start_configuration_session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.start_configuration_session) and [get_latest_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.get_latest_configuration)         |
 
 ### Bring your own boto client
 
 You can use `boto3_client` parameter via any of the available [Provider Classes](#built-in-provider-class). Some providers expect a low level boto3 client while others expect a high level boto3 client, here is the mapping for each of them:
 
-| Provider                                | Type       | Boto client construction     |
-| --------------------------------------- | ---------- | ---------------------------- |
-| [SSMProvider](#ssmprovider)             | low level  | `boto3.client("ssm")`        |
-| [SecretsProvider](#secretsprovider)     | low level  | `boto3.client("secrets")`    |
-| [AppConfigProvider](#appconfigprovider) | low level  | `boto3.client("appconfig")`  |
-| [DynamoDBProvider](#dynamodbprovider)   | high level | `boto3.resource("dynamodb")` |
+| Provider                                | Type       | Boto client construction         |
+| --------------------------------------- | ---------- | -------------------------------- |
+| [SSMProvider](#ssmprovider)             | low level  | `boto3.client("ssm")`            |
+| [SecretsProvider](#secretsprovider)     | low level  | `boto3.client("secrets")`        |
+| [AppConfigProvider](#appconfigprovider) | low level  | `boto3.client("appconfigdata")`  |
+| [DynamoDBProvider](#dynamodbprovider)   | high level | `boto3.resource("dynamodb")`     |
 
 Bringing them together in a single code snippet would look like this:
 

@@ -9,7 +9,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 def lambda_handler(event: dict, context: LambdaContext):
     try:
         # Retrieve multiple parameters from a path prefix
-        all_parameters: Any = parameters.get_parameters("/lambda-powertools/", max_age=20)
+        all_parameters: Any = parameters.get_parameters("/lambda-powertools/", force_fetch=True)
         endpoint_comments = "https://jsonplaceholder.typicode.com/noexists/"
 
         for parameter, value in all_parameters.items():

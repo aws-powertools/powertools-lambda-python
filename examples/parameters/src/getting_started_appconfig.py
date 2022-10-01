@@ -1,3 +1,5 @@
+from typing import Any
+
 import requests
 
 from aws_lambda_powertools.utilities import parameters
@@ -7,7 +9,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 def lambda_handler(event: dict, context: LambdaContext):
     try:
         # Retrieve a single parameter
-        endpoint_comments: bytes = parameters.get_app_config(name="config", environment="dev", application="comments")
+        endpoint_comments: Any = parameters.get_app_config(name="config", environment="dev", application="comments")
 
         # the value of this parameter is https://jsonplaceholder.typicode.com/comments/
         comments: requests.Response = requests.get(endpoint_comments)
