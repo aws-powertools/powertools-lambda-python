@@ -68,7 +68,7 @@ You can fetch application configurations in AWS AppConfig using `get_app_config`
 The following will retrieve the latest version and store it in the cache.
 
 === "getting_started_appconfig.py"
-    ```python hl_lines="3 10 17"
+    ```python hl_lines="3 10 16"
     --8<-- "examples/parameters/src/getting_started_appconfig.py"
     ```
 
@@ -77,28 +77,31 @@ The following will retrieve the latest version and store it in the cache.
 ### Adjusting cache TTL
 
 ???+ tip
-	`max_age` parameter is also available in high level functions like `get_parameter`, `get_secret`, etc.
+	`max_age` parameter is also available in underlying provider functions like `get()`, `get_multiple()`, etc.
 
 By default, we cache parameters retrieved in-memory for 5 seconds.
 
-You can adjust how long we should keep values in cache by using the param `max_age`, when using  `get()` or `get_multiple()` methods across all providers.
+You can adjust how long we should keep values in cache by using the param `max_age`, when using  `get_parameter()`, `get_parameters()` and `get_secret()` methods across all providers.
 
-```python hl_lines="9" title="Caching parameter(s) value in memory for longer than 5 seconds"
-from aws_lambda_powertools.utilities import parameters
-from botocore.config import Config
+=== "single_ssm_parameter_with_cache.py"
+    ```python hl_lines="3 10 16"
+    --8<-- "examples/parameters/src/single_ssm_parameter_with_cache.py"
+    ```
 
-config = Config(region_name="us-west-1")
-ssm_provider = parameters.SSMProvider(config=config)
+=== "recursive_ssm_parameter_with_cache.py"
+    ```python hl_lines="3 10 13 22"
+    --8<-- "examples/parameters/src/recursive_ssm_parameter_with_cache.py"
+    ```
 
-def handler(event, context):
-	# Retrieve a single parameter
-	value = ssm_provider.get("/my/parameter", max_age=60) # 1 minute
+=== "secret_with_cache.py"
+    ```python hl_lines="3 13 20"
+    --8<-- "examples/parameters/src/secret_with_cache.py"
+    ```
 
-	# Retrieve multiple parameters from a path prefix
-	values = ssm_provider.get_multiple("/my/path/prefix", max_age=60)
-	for k, v in values.items():
-		print(f"{k}: {v}")
-```
+=== "appconfig_with_cache.py"
+    ```python hl_lines="3 10 11 18"
+    --8<-- "examples/parameters/src/appconfig_with_cache.py"
+    ```
 
 ### Always fetching the latest
 
