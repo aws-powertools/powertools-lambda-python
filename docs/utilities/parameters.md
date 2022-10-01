@@ -15,6 +15,9 @@ The parameters utility provides high-level functions to retrieve one or multiple
 
 ## Getting started
 
+???+ tip
+    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+
 By default, we fetch parameters from System Manager Parameter Store, secrets from Secrets Manager, and application configuration from AppConfig.
 
 ### IAM Permissions
@@ -24,14 +27,14 @@ This utility requires additional permissions to work as expected.
 ???+ note
     Different parameter providers require different permissions.
 
-| Provider            | Function/Method                                      | IAM Permission                  |
-| ------------------- | ---------------------------------------------------- | ------------------------------- |
-| SSM Parameter Store | `get_parameter`, `SSMProvider.get`                   | `ssm:GetParameter`              |
-| SSM Parameter Store | `get_parameters`, `SSMProvider.get_multiple`         | `ssm:GetParametersByPath`       |
-| Secrets Manager     | `get_secret`, `SecretsManager.get`                   | `secretsmanager:GetSecretValue` |
-| DynamoDB            | `DynamoDBProvider.get`                               | `dynamodb:GetItem`              |
-| DynamoDB            | `DynamoDBProvider.get_multiple`                      | `dynamodb:Query`                |
-| App Config          | `AppConfigProvider.get_app_config`, `get_app_config` | `appconfig:GetConfiguration`    |
+| Provider            | Function/Method                                      | IAM Permission                                                                          |
+| ------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| SSM Parameter Store | `get_parameter`, `SSMProvider.get`                   | `ssm:GetParameter`                                                                      |
+| SSM Parameter Store | `get_parameters`, `SSMProvider.get_multiple`         | `ssm:GetParametersByPath`                                                               |
+| Secrets Manager     | `get_secret`, `SecretsManager.get`                   | `secretsmanager:GetSecretValue`                                                         |
+| DynamoDB            | `DynamoDBProvider.get`                               | `dynamodb:GetItem`                                                                      |
+| DynamoDB            | `DynamoDBProvider.get_multiple`                      | `dynamodb:Query`                                                                        |
+| App Config          | `AppConfigProvider.get_app_config`, `get_app_config` | `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession`  |
 
 ### Fetching parameters
 
@@ -39,31 +42,24 @@ You can retrieve a single parameter  using `get_parameter` high-level function.
 
 For multiple parameters, you can use `get_parameters` and pass a path to retrieve them recursively.
 
-```python hl_lines="1 5 9" title="Fetching multiple parameters recursively"
-from aws_lambda_powertools.utilities import parameters
+=== "getting_started_single_ssm_parameter.py"
+    ```python hl_lines="3 10 16"
+    --8<-- "examples/parameters/src/getting_started_single_ssm_parameter.py"
+    ```
 
-def handler(event, context):
-	# Retrieve a single parameter
-	value = parameters.get_parameter("/my/parameter")
-
-	# Retrieve multiple parameters from a path prefix recursively
-	# This returns a dict with the parameter name as key
-	values = parameters.get_parameters("/my/path/prefix")
-	for k, v in values.items():
-		print(f"{k}: {v}")
-```
+=== "getting_started_recursive_ssm_parameter.py"
+    ```python hl_lines="3 10 13 22"
+    --8<-- "examples/parameters/src/getting_started_recursive_ssm_parameter.py"
+    ```
 
 ### Fetching secrets
 
 You can fetch secrets stored in Secrets Manager using `get_secrets`.
 
-```python hl_lines="1 5" title="Fetching secrets"
-from aws_lambda_powertools.utilities import parameters
-
-def handler(event, context):
-	# Retrieve a single secret
-	value = parameters.get_secret("my-secret")
-```
+=== "getting_started_secret.py"
+    ```python hl_lines="3 13 20"
+    --8<-- "examples/parameters/src/getting_started_secret.py"
+    ```
 
 ### Fetching app configurations
 
@@ -71,13 +67,10 @@ You can fetch application configurations in AWS AppConfig using `get_app_config`
 
 The following will retrieve the latest version and store it in the cache.
 
-```python hl_lines="1 5" title="Fetching latest config from AppConfig"
-from aws_lambda_powertools.utilities import parameters
-
-def handler(event, context):
-	# Retrieve a single configuration, latest version
-	value: bytes = parameters.get_app_config(name="my_configuration", environment="my_env", application="my_app")
-```
+=== "getting_started_appconfig.py"
+    ```python hl_lines="3 10 17"
+    --8<-- "examples/parameters/src/getting_started_appconfig.py"
+    ```
 
 ## Advanced
 
