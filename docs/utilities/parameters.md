@@ -448,49 +448,20 @@ The **`config`** , **`boto3_session`**, and **`boto3_client`**  parameters enabl
 
 	When using VPC private endpoints, you can pass a custom client altogether. It's also useful for testing when injecting fake instances.
 
-=== "Custom session"
+=== "custom_boto_session.py"
+    ```python
+    --8<-- "examples/parameters/src/custom_boto_session.py"
+    ```
 
-	```python hl_lines="2 4 5"
-	from aws_lambda_powertools.utilities import parameters
-	import boto3
+=== "custom_boto_config.py"
+    ```python
+    --8<-- "examples/parameters/src/custom_boto_config.py"
+    ```
 
-	boto3_session = boto3.session.Session()
-	ssm_provider = parameters.SSMProvider(boto3_session=boto3_session)
-
-	def handler(event, context):
-		# Retrieve a single parameter
-		value = ssm_provider.get("/my/parameter")
-		...
-	```
-=== "Custom config"
-
-	```python hl_lines="2 4 5"
-	from aws_lambda_powertools.utilities import parameters
-	from botocore.config import Config
-
-	boto_config = Config()
-	ssm_provider = parameters.SSMProvider(config=boto_config)
-
-	def handler(event, context):
-		# Retrieve a single parameter
-		value = ssm_provider.get("/my/parameter")
-		...
-	```
-
-=== "Custom client"
-
-	```python hl_lines="2 4 5"
-	from aws_lambda_powertools.utilities import parameters
-	import boto3
-
-	boto3_client= boto3.client("ssm")
-	ssm_provider = parameters.SSMProvider(boto3_client=boto3_client)
-
-	def handler(event, context):
-		# Retrieve a single parameter
-		value = ssm_provider.get("/my/parameter")
-		...
-	```
+=== "custom_boto_client.py"
+    ```python
+    --8<-- "examples/parameters/src/custom_boto_client.py"
+    ```
 
 ## Testing your code
 
@@ -498,29 +469,15 @@ The **`config`** , **`boto3_session`**, and **`boto3_client`**  parameters enabl
 
 For unit testing your applications, you can mock the calls to the parameters utility to avoid calling AWS APIs. This can be achieved in a number of ways - in this example, we use the [pytest monkeypatch fixture](https://docs.pytest.org/en/latest/how-to/monkeypatch.html) to patch the `parameters.get_parameter` method:
 
-=== "tests.py"
-	```python
-	from src import index
+=== "test_single_mock.py"
+    ```python
+    --8<-- "examples/parameters/tests/test_single_mock.py"
+    ```
 
-	def test_handler(monkeypatch):
-
-		def mockreturn(name):
-			return "mock_value"
-
-		monkeypatch.setattr(index.parameters, "get_parameter", mockreturn)
-		return_val = index.handler({}, {})
-		assert return_val.get('message') == 'mock_value'
-	```
-
-=== "src/index.py"
-	```python
-	from aws_lambda_powertools.utilities import parameters
-
-	def handler(event, context):
-		# Retrieve a single parameter
-		value = parameters.get_parameter("my-parameter-name")
-		return {"message": value}
-	```
+=== "single_mock.py"
+    ```python
+    --8<-- "examples/parameters/tests/src/single_mock.py"
+    ```
 
 If we need to use this pattern across multiple tests, we can avoid repetition by refactoring to use our own pytest fixture:
 
