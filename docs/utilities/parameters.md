@@ -296,28 +296,14 @@ For parameters stored in JSON or Base64 format, you can use the `transform` argu
 ???+ info
     The `transform` argument is available across all providers, including the high level functions.
 
-=== "High level functions"
-
-    ```python hl_lines="4"
-    from aws_lambda_powertools.utilities import parameters
-
-    def handler(event, context):
-        value_from_json = parameters.get_parameter("/my/json/parameter", transform="json")
+=== "working_with_transform_high_level.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/working_with_transform_high_level.py"
     ```
 
-=== "Providers"
-
-    ```python hl_lines="7 10"
-    from aws_lambda_powertools.utilities import parameters
-
-    ssm_provider = parameters.SSMProvider()
-
-    def handler(event, context):
-        # Transform a JSON string
-        value_from_json = ssm_provider.get("/my/json/parameter", transform="json")
-
-        # Transform a Base64 encoded string
-        value_from_binary = ssm_provider.get("/my/binary/parameter", transform="binary")
+=== "working_with_transform_provider.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/working_with_transform_provider.py"
     ```
 
 #### Partial transform failures with `get_multiple()`
@@ -328,26 +314,10 @@ You can override this by setting the `raise_on_transform_error` argument to `Tru
 
 For example, if you have three parameters, */param/a*, */param/b* and */param/c*, but */param/c* is malformed:
 
-```python hl_lines="9 16" title="Raising TransformParameterError at first malformed parameter"
-from aws_lambda_powertools.utilities import parameters
-
-ssm_provider = parameters.SSMProvider()
-
-def handler(event, context):
-	# This will display:
-	# /param/a: [some value]
-	# /param/b: [some value]
-	# /param/c: None
-	values = ssm_provider.get_multiple("/param", transform="json")
-	for k, v in values.items():
-		print(f"{k}: {v}")
-
-	try:
-		# This will raise a TransformParameterError exception
-		values = ssm_provider.get_multiple("/param", transform="json", raise_on_transform_error=True)
-	except parameters.exceptions.TransformParameterError:
-		...
-```
+=== "handling_error_transform.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/handling_error_transform.py"
+    ```
 
 #### Auto-transform values on suffix
 
@@ -358,14 +328,10 @@ You can do this with a single request by using `transform="auto"`. This will ins
 ???+ info
     `transform="auto"` feature is available across all providers, including the high level functions.
 
-```python hl_lines="6" title="Deserializing parameter values based on their suffix"
-from aws_lambda_powertools.utilities import parameters
-
-ssm_provider = parameters.SSMProvider()
-
-def handler(event, context):
-	values = ssm_provider.get_multiple("/param", transform="auto")
-```
+=== "working_with_auto_transform.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/working_with_auto_transform.py"
+    ```
 
 For example, if you have two parameters with the following suffixes `.json` and `.binary`:
 
@@ -387,15 +353,10 @@ The return of `ssm_provider.get_multiple("/param", transform="auto")` call will 
 
 You can use arbitrary keyword arguments to pass it directly to the underlying SDK method.
 
-```python hl_lines="8" title=""
-from aws_lambda_powertools.utilities import parameters
-
-secrets_provider = parameters.SecretsProvider()
-
-def handler(event, context):
-	# The 'VersionId' argument will be passed to the underlying get_secret_value() call.
-	value = secrets_provider.get("my-secret", VersionId="e62ec170-6b01-48c7-94f3-d7497851a8d2")
-```
+=== "working_with_sdk_additional_arguments.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/working_with_sdk_additional_arguments.py"
+    ```
 
 Here is the mapping between this utility's functions and methods and the underlying SDK:
 
