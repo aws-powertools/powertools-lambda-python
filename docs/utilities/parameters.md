@@ -44,12 +44,12 @@ You can retrieve a single parameter  using `get_parameter` high-level function.
 For multiple parameters, you can use `get_parameters` and pass a path to retrieve them recursively.
 
 === "getting_started_single_ssm_parameter.py"
-    ```python hl_lines="3 10 16"
+    ```python hl_lines="5 12"
     --8<-- "examples/parameters/src/getting_started_single_ssm_parameter.py"
     ```
 
 === "getting_started_recursive_ssm_parameter.py"
-    ```python hl_lines="3 10 13 22"
+    ```python hl_lines="5 12 15"
     --8<-- "examples/parameters/src/getting_started_recursive_ssm_parameter.py"
     ```
 
@@ -58,7 +58,7 @@ For multiple parameters, you can use `get_parameters` and pass a path to retriev
 You can fetch secrets stored in Secrets Manager using `get_secrets`.
 
 === "getting_started_secret.py"
-    ```python hl_lines="3 13 20"
+    ```python hl_lines="5 15"
     --8<-- "examples/parameters/src/getting_started_secret.py"
     ```
 
@@ -69,7 +69,7 @@ You can fetch application configurations in AWS AppConfig using `get_app_config`
 The following will retrieve the latest version and store it in the cache.
 
 === "getting_started_appconfig.py"
-    ```python hl_lines="3 10 16"
+    ```python hl_lines="5 12"
     --8<-- "examples/parameters/src/getting_started_appconfig.py"
     ```
 
@@ -85,22 +85,22 @@ By default, we cache parameters retrieved in-memory for 5 seconds.
 You can adjust how long we should keep values in cache by using the param `max_age`, when using  `get_parameter()`, `get_parameters()` and `get_secret()` methods across all providers.
 
 === "single_ssm_parameter_with_cache.py"
-    ```python hl_lines="3 10 16"
+    ```python hl_lines="5 12"
     --8<-- "examples/parameters/src/single_ssm_parameter_with_cache.py"
     ```
 
 === "recursive_ssm_parameter_with_cache.py"
-    ```python hl_lines="3 10 13 22"
+    ```python hl_lines="5 12"
     --8<-- "examples/parameters/src/recursive_ssm_parameter_with_cache.py"
     ```
 
 === "secret_with_cache.py"
-    ```python hl_lines="3 13 20"
+    ```python hl_lines="5 15"
     --8<-- "examples/parameters/src/secret_with_cache.py"
     ```
 
 === "appconfig_with_cache.py"
-    ```python hl_lines="3 10 11 18"
+    ```python hl_lines="5 12-14"
     --8<-- "examples/parameters/src/appconfig_with_cache.py"
     ```
 
@@ -109,22 +109,22 @@ You can adjust how long we should keep values in cache by using the param `max_a
 If you'd like to always ensure you fetch the latest parameter from the store regardless if already available in cache, use `force_fetch` param.
 
 === "single_ssm_parameter_force_fetch.py"
-    ```python hl_lines="3 10 16"
+    ```python hl_lines="5 12"
     --8<-- "examples/parameters/src/single_ssm_parameter_force_fetch.py"
     ```
 
 === "recursive_ssm_parameter_force_fetch.py"
-    ```python hl_lines="3 10 13 22"
+    ```python hl_lines="5 12"
     --8<-- "examples/parameters/src/recursive_ssm_parameter_force_fetch.py"
     ```
 
 === "secret_force_fetch.py"
-    ```python hl_lines="3 13 20"
+    ```python hl_lines="5 15"
     --8<-- "examples/parameters/src/secret_force_fetch.py"
     ```
 
 === "appconfig_force_fetch.py"
-    ```python hl_lines="3 10 11 18"
+    ```python hl_lines="5 12-14"
     --8<-- "examples/parameters/src/appconfig_force_fetch.py"
     ```
 
@@ -138,12 +138,12 @@ For greater flexibility such as configuring the underlying SDK client used by bu
 #### SSMProvider
 
 === "builtin_provider_ssm_single_parameter.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="6 11 12"
     --8<-- "examples/parameters/src/builtin_provider_ssm_single_parameter.py"
     ```
 
 === "builtin_provider_ssm_recursive_parameter.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="6 19-25"
     --8<-- "examples/parameters/src/builtin_provider_ssm_recursive_parameter.py"
     ```
 
@@ -157,19 +157,19 @@ The AWS Systems Manager Parameter Store provider supports two additional argumen
 You can create `SecureString` parameters, which are parameters that have a plaintext parameter name and an encrypted parameter value. If you don't use the `decrypt` argument, you will get an encrypted value. Read [here](https://docs.aws.amazon.com/kms/latest/developerguide/services-parameter-store.html) about best practices using KMS to secure your parameters.
 
 === "builtin_provider_ssm_with_decrypt.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="6 10 16"
     --8<-- "examples/parameters/src/builtin_provider_ssm_with_decrypt.py"
     ```
 
 === "builtin_provider_ssm_with_no_recursive.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="5 8 21"
     --8<-- "examples/parameters/src/builtin_provider_ssm_with_no_recursive.py"
     ```
 
 #### SecretsProvider
 
 === "builtin_provider_secret.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="4 6 9"
     --8<-- "examples/parameters/src/builtin_provider_secret.py"
     ```
 
@@ -192,19 +192,19 @@ For single parameters, you must use `id` as the [partition key](https://docs.aws
 With this table, `dynamodb_provider.get("my-param")` will return `my-value`.
 
 === "builtin_provider_dynamodb_single_parameter.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="5 8 15"
     --8<-- "examples/parameters/src/builtin_provider_dynamodb_single_parameter.py"
     ```
 
 === "sam_dynamodb_table_single.yaml"
-    ```yaml hl_lines="3 5 9 10 15"
+    ```yaml hl_lines="12-14"
     --8<-- "examples/parameters/sam/sam_dynamodb_table_single.yaml"
     ```
 
 You can initialize the DynamoDB provider pointing to [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html) using `endpoint_url` parameter:
 
 === "builtin_provider_dynamodb_custom_endpoint.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="5 8 15"
     --8<-- "examples/parameters/src/builtin_provider_dynamodb_custom_endpoint.py"
     ```
 
@@ -224,12 +224,12 @@ You can retrieve multiple parameters sharing the same `id` by having a sort key 
 With this table, `dynamodb_provider.get_multiple("config")` will return a dictionary response in the shape of `sk:value`.
 
 === "builtin_provider_dynamodb_recursive_parameter.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="5 8 15"
     --8<-- "examples/parameters/src/builtin_provider_dynamodb_recursive_parameter.py"
     ```
 
 === "sam_dynamodb_table_recursive.yaml"
-    ```yaml hl_lines="3 5 9 10 15"
+    ```yaml hl_lines="15-18"
     --8<-- "examples/parameters/sam/sam_dynamodb_table_recursive.yaml"
     ```
 
@@ -250,14 +250,14 @@ DynamoDB provider can be customized at initialization to match your table struct
     ```
 
 === "sam_dynamodb_custom_fields.yaml"
-    ```yaml hl_lines="3 5 9 10 15"
+    ```yaml hl_lines="5 8-10 17"
     --8<-- "examples/parameters/sam/sam_dynamodb_custom_fields.yaml"
     ```
 
 #### AppConfigProvider
 
 === "builtin_provider_appconfig.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="6 9 10 16"
     --8<-- "examples/parameters/src/builtin_provider_appconfig.py"
     ```
 
@@ -270,22 +270,22 @@ All transformation and caching logic is handled by the `get()` and `get_multiple
 Here are two examples of implementing a custom parameter store. One using an external service like [Hashicorp Vault](https://www.vaultproject.io/), a widely popular key-value and secret storage and the other one using [Amazon S3](https://aws.amazon.com/s3/?nc1=h_ls), a popular object storage.
 
 === "working_with_own_provider_vault.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="5 13 20 24"
     --8<-- "examples/parameters/src/working_with_own_provider_vault.py"
     ```
 
 === "custom_provider_vault.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="6 9 17 24"
     --8<-- "examples/parameters/src/custom_provider_vault.py"
     ```
 
 === "working_with_own_provider_s3.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="4 11 18 21"
     --8<-- "examples/parameters/src/working_with_own_provider_s3.py"
     ```
 
 === "custom_provider_s3.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="6 9 19 29"
     --8<-- "examples/parameters/src/custom_provider_s3.py"
     ```
 
@@ -297,12 +297,12 @@ For parameters stored in JSON or Base64 format, you can use the `transform` argu
     The `transform` argument is available across all providers, including the high level functions.
 
 === "working_with_transform_high_level.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="5 12"
     --8<-- "examples/parameters/src/working_with_transform_high_level.py"
     ```
 
 === "working_with_transform_provider.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="6 9 16"
     --8<-- "examples/parameters/src/working_with_transform_provider.py"
     ```
 
@@ -315,7 +315,7 @@ You can override this by setting the `raise_on_transform_error` argument to `Tru
 For example, if you have three parameters, */param/a*, */param/b* and */param/c*, but */param/c* is malformed:
 
 === "handling_error_transform.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="3 14 20"
     --8<-- "examples/parameters/src/handling_error_transform.py"
     ```
 
@@ -329,7 +329,7 @@ You can do this with a single request by using `transform="auto"`. This will ins
     `transform="auto"` feature is available across all providers, including the high level functions.
 
 === "working_with_auto_transform.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="1 4 8"
     --8<-- "examples/parameters/src/working_with_auto_transform.py"
     ```
 
@@ -354,7 +354,7 @@ The return of `ssm_provider.get_multiple("/param", transform="auto")` call will 
 You can use arbitrary keyword arguments to pass it directly to the underlying SDK method.
 
 === "working_with_sdk_additional_arguments.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="1 4 9"
     --8<-- "examples/parameters/src/working_with_sdk_additional_arguments.py"
     ```
 
@@ -386,7 +386,7 @@ You can use `boto3_client` parameter via any of the available [Provider Classes]
 Bringing them together in a single code snippet would look like this:
 
 === "custom_boto3_all_providers.py"
-    ```python
+    ```python hl_lines="4 6"
     --8<-- "examples/parameters/src/custom_boto3_all_providers.py"
     ```
 
@@ -403,17 +403,17 @@ The **`config`** , **`boto3_session`**, and **`boto3_client`**  parameters enabl
 	When using VPC private endpoints, you can pass a custom client altogether. It's also useful for testing when injecting fake instances.
 
 === "custom_boto_session.py"
-    ```python
+    ```python hl_lines="5 6"
     --8<-- "examples/parameters/src/custom_boto_session.py"
     ```
 
 === "custom_boto_config.py"
-    ```python
+    ```python hl_lines="5 6"
     --8<-- "examples/parameters/src/custom_boto_config.py"
     ```
 
 === "custom_boto_client.py"
-    ```python
+    ```python hl_lines="5 6"
     --8<-- "examples/parameters/src/custom_boto_client.py"
     ```
 
@@ -424,7 +424,7 @@ The **`config`** , **`boto3_session`**, and **`boto3_client`**  parameters enabl
 For unit testing your applications, you can mock the calls to the parameters utility to avoid calling AWS APIs. This can be achieved in a number of ways - in this example, we use the [pytest monkeypatch fixture](https://docs.pytest.org/en/latest/how-to/monkeypatch.html) to patch the `parameters.get_parameter` method:
 
 === "test_single_mock.py"
-    ```python
+    ```python hl_lines="4 8"
     --8<-- "examples/parameters/tests/test_single_mock.py"
     ```
 
@@ -436,7 +436,7 @@ For unit testing your applications, you can mock the calls to the parameters uti
 If we need to use this pattern across multiple tests, we can avoid repetition by refactoring to use our own pytest fixture:
 
 === "test_with_fixture.py"
-    ```python
+    ```python hl_lines="5 10"
     --8<-- "examples/parameters/tests/test_with_fixture.py"
     ```
 
@@ -446,7 +446,7 @@ can use [unittest.mock](https://docs.python.org/3/library/unittest.mock.html) fr
 object named `get_parameter_mock`.
 
 === "test_with_monkeypatch.py"
-    ```python
+    ```python hl_lines="7 12"
     --8<-- "examples/parameters/tests/test_with_monkeypatch.py"
     ```
 
@@ -457,12 +457,12 @@ Parameters utility caches all parameter values for performance and cost reasons.
 Within your tests, you can use `clear_cache` method available in [every provider](#built-in-provider-class). When using multiple providers or higher level functions like `get_parameter`, use `clear_caches` standalone function to clear cache globally.
 
 === "test_clear_cache_method.py"
-    ```python
+    ```python hl_lines="8"
     --8<-- "examples/parameters/tests/test_clear_cache_method.py"
     ```
 
 === "test_clear_cache_global.py"
-    ```python
+    ```python hl_lines="10"
     --8<-- "examples/parameters/tests/test_clear_cache_global.py"
     ```
 
