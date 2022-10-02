@@ -168,17 +168,10 @@ You can create `SecureString` parameters, which are parameters that have a plain
 
 #### SecretsProvider
 
-```python hl_lines="5 9" title="Example with SecretsProvider for further extensibility"
-from aws_lambda_powertools.utilities import parameters
-from botocore.config import Config
-
-config = Config(region_name="us-west-1")
-secrets_provider = parameters.SecretsProvider(config=config)
-
-def handler(event, context):
-	# Retrieve a single secret
-	value = secrets_provider.get("my-secret")
-```
+=== "builtin_provider_secret.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/builtin_provider_secret.py"
+    ```
 
 #### DynamoDBProvider
 

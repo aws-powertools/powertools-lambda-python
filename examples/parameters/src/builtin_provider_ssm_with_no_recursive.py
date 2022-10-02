@@ -23,13 +23,13 @@ def lambda_handler(event: dict, context: LambdaContext):
 
         for parameter, value in all_parameters.items():
 
-            # scheme is http or https
+            # query parameter is used to query endpoint
             if "query" in parameter:
                 endpoint_comments = f"{endpoint_comments}{value}"
                 break
         else:
             # scheme config was not found because get_multiple is not recursive
-            raise ConfigNotFound("URL query was not found")
+            raise ConfigNotFound("URL query parameter was not found")
 
         # the value of parameter is https://jsonplaceholder.typicode.com/comments/
         comments: requests.Response = requests.get(endpoint_comments)
