@@ -305,7 +305,7 @@ You can create your own custom parameter store provider by inheriting the `BaseP
 
 All transformation and caching logic is handled by the `get()` and `get_multiple()` methods from the base provider class.
 
-Here are two examples of implementing a custom parameter store. One using an external service like [Hashicorp Vault](https://www.vaultproject.io/), a widely popular key-value and secret storage.
+Here are two examples of implementing a custom parameter store. One using an external service like [Hashicorp Vault](https://www.vaultproject.io/), a widely popular key-value and secret storage and the other one using [Amazon S3](https://aws.amazon.com/s3/?nc1=h_ls), a popular an object storage.
 
 === "working_with_own_provider_vault.py"
     ```python hl_lines="3 5 9 10 15"
