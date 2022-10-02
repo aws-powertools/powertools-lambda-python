@@ -256,17 +256,10 @@ DynamoDB provider can be customized at initialization to match your table struct
 
 #### AppConfigProvider
 
-```python hl_lines="5 9" title="Using AppConfigProvider"
-from aws_lambda_powertools.utilities import parameters
-from botocore.config import Config
-
-config = Config(region_name="us-west-1")
-appconf_provider = parameters.AppConfigProvider(environment="my_env", application="my_app", config=config)
-
-def handler(event, context):
-	# Retrieve a single secret
-	value: bytes = appconf_provider.get("my_conf")
-```
+=== "builtin_provider_appconfig.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/builtin_provider_appconfig.py"
+    ```
 
 ### Create your own provider
 
