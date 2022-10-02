@@ -191,25 +191,22 @@ For single parameters, you must use `id` as the [partition key](https://docs.aws
 
 With this table, `dynamodb_provider.get("my-param")` will return `my-value`.
 
-=== "app.py"
-	```python hl_lines="3 7"
-	from aws_lambda_powertools.utilities import parameters
+=== "builtin_provider_dynamodb_single_parameter.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/builtin_provider_dynamodb_single_parameter.py"
+    ```
 
-	dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table")
+=== "sam_dynamodb_table_single.yaml"
+    ```yaml hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/sam/sam_dynamodb_table_single.yaml"
+    ```
 
-	def handler(event, context):
-		# Retrieve a value from DynamoDB
-		value = dynamodb_provider.get("my-parameter")
-	```
+You can initialize the DynamoDB provider pointing to [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html) using `endpoint_url` parameter:
 
-=== "DynamoDB Local example"
-	You can initialize the DynamoDB provider pointing to [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html) using `endpoint_url` parameter:
-
-	```python hl_lines="3"
-	from aws_lambda_powertools.utilities import parameters
-
-	dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table", endpoint_url="http://localhost:8000")
-	```
+=== "builtin_provider_dynamodb_custom_endpoint.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/builtin_provider_dynamodb_custom_endpoint.py"
+    ```
 
 **DynamoDB table structure for multiple values parameters**
 
@@ -219,39 +216,22 @@ You can retrieve multiple parameters sharing the same `id` by having a sort key 
 
 	DynamoDB table with `id` primary key, `sk` as sort key` and `value` as attribute
 
- | id          | sk      | value      |
- | ----------- | ------- | ---------- |
- | my-hash-key | param-a | my-value-a |
- | my-hash-key | param-b | my-value-b |
- | my-hash-key | param-c | my-value-c |
+ | id     | sk                | value                                          |
+ | -------| ----------------- | ---------------------------------------------- |
+ | config | endpoint_comments | <https://jsonplaceholder.typicode.com/comments/> |
+ | config | limit             | 10                                             |
 
-With this table, `dynamodb_provider.get_multiple("my-hash-key")` will return a dictionary response in the shape of `sk:value`.
+With this table, `dynamodb_provider.get_multiple("config")` will return a dictionary response in the shape of `sk:value`.
 
-=== "app.py"
-	```python hl_lines="3 8"
-	from aws_lambda_powertools.utilities import parameters
+=== "builtin_provider_dynamodb_recursive_parameter.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/builtin_provider_dynamodb_recursive_parameter.py"
+    ```
 
-	dynamodb_provider = parameters.DynamoDBProvider(table_name="my-table")
-
-	def handler(event, context):
-		# Retrieve multiple values by performing a Query on the DynamoDB table
-		# This returns a dict with the sort key attribute as dict key.
-		parameters = dynamodb_provider.get_multiple("my-hash-key")
-		for k, v in parameters.items():
-			# k: param-a
-			# v: "my-value-a"
-			print(f"{k}: {v}")
-	```
-
-=== "parameters dict response"
-
-	```json
-	{
-		"param-a": "my-value-a",
-		"param-b": "my-value-b",
-		"param-c": "my-value-c"
-	}
-	```
+=== "sam_dynamodb_table_recursive.yaml"
+    ```yaml hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/sam/sam_dynamodb_table_recursive.yaml"
+    ```
 
 **Customizing DynamoDBProvider**
 
@@ -264,19 +244,15 @@ DynamoDB provider can be customized at initialization to match your table struct
 | **sort_attr**  | No        | `sk`    | Range key for the DynamoDB table. You don't need to set this if you don't use the `get_multiple()` method. |
 | **value_attr** | No        | `value` | Name of the attribute containing the parameter value.                                                      |
 
-```python hl_lines="3-8" title="Customizing DynamoDBProvider to suit your table design"
-from aws_lambda_powertools.utilities import parameters
+=== "builtin_provider_dynamodb_custom_fields.py"
+    ```python hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/src/builtin_provider_dynamodb_custom_fields.py"
+    ```
 
-dynamodb_provider = parameters.DynamoDBProvider(
-	table_name="my-table",
-	key_attr="MyKeyAttr",
-	sort_attr="MySortAttr",
-	value_attr="MyvalueAttr"
-)
-
-def handler(event, context):
-	value = dynamodb_provider.get("my-parameter")
-```
+=== "sam_dynamodb_custom_fields.yaml"
+    ```yaml hl_lines="3 5 9 10 15"
+    --8<-- "examples/parameters/sam/sam_dynamodb_custom_fields.yaml"
+    ```
 
 #### AppConfigProvider
 
@@ -298,7 +274,7 @@ You can create your own custom parameter store provider by inheriting the `BaseP
 
 All transformation and caching logic is handled by the `get()` and `get_multiple()` methods from the base provider class.
 
-Here are two examples of implementing a custom parameter store. One using an external service like [Hashicorp Vault](https://www.vaultproject.io/), a widely popular key-value and secret storage and the other one using [Amazon S3](https://aws.amazon.com/s3/?nc1=h_ls), a popular an object storage.
+Here are two examples of implementing a custom parameter store. One using an external service like [Hashicorp Vault](https://www.vaultproject.io/), a widely popular key-value and secret storage and the other one using [Amazon S3](https://aws.amazon.com/s3/?nc1=h_ls), a popular object storage.
 
 === "working_with_own_provider_vault.py"
     ```python hl_lines="3 5 9 10 15"
