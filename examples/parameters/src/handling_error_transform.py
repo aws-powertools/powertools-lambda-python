@@ -1,3 +1,5 @@
+from typing import Any
+
 from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -9,7 +11,7 @@ def lambda_handler(event: dict, context: LambdaContext):
     # /param/a: [some value]
     # /param/b: [some value]
     # /param/c: None
-    values = ssm_provider.get_multiple("/param", transform="json")
+    values: Any = ssm_provider.get_multiple("/param", transform="json")
     for key, value in values.items():
         print(f"{key}: {value}")
 
