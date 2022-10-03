@@ -77,8 +77,8 @@ checksumdir = "^1.2.0"
 importlib-metadata = "^4.13"
 
 [tool.poetry.extras]
-parser = ["pydantic", "email-validator"]
-validation = ["fastjsonschema"]
+parser = ["pydantic", "email-validator", "jmespath"]
+validation = ["fastjsonschema", "jmespath"]
 tracer = ["aws-xray-sdk"]
 all = ["pydantic", "email-validator", "aws-xray-sdk", "fastjsonschema"]
 

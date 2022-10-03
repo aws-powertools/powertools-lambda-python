@@ -12,7 +12,7 @@ class LayerStack(Stack):
         construct_id: str,
         powertools_version: str,
         ssm_paramter_layer_arn: str,
-        ssm_parameter_arm64_layer_arn: str,
+        ssm_parameter_layer_arm64_arn: str,
         **kwargs
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -66,9 +66,9 @@ class LayerStack(Stack):
         StringParameter(
             self,
             "Arm64VersionArn",
-            parameter_name=ssm_parameter_arm64_layer_arn,
+            parameter_name=ssm_parameter_layer_arm64_arn,
             string_value=layer_arm64.layer_version_arn,
         )
 
         CfnOutput(self, "LatestLayerArn", value=layer.layer_version_arn)
-        CfnOutput(self, "LatestArm64LayerArn", value=layer_arm64.layer_version_arn)
+        CfnOutput(self, "LatestLayerArm64Arn", value=layer_arm64.layer_version_arn)

@@ -20,7 +20,7 @@ class CanaryStack(Stack):
         construct_id: str,
         powertools_version: str,
         ssm_paramter_layer_arn: str,
-        ssm_parameter_arm64_layer_arn: str,
+        ssm_parameter_layer_arm64_arn: str,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -39,7 +39,7 @@ class CanaryStack(Stack):
         layer_arm64_arn = StringParameter.from_string_parameter_attributes(
             self,
             "LayerArm64VersionArnParam",
-            parameter_name=ssm_parameter_arm64_layer_arn,
+            parameter_name=ssm_parameter_layer_arm64_arn,
         ).string_value
         Canary(
             self,
@@ -94,7 +94,7 @@ class Canary(Construct):
             layers=[layer],
             memory_size=512,
             timeout=Duration.seconds(10),
-            runtime=Runtime.PYTHON_3_9(),
+            runtime=Runtime.PYTHON_3_9,
             architecture=architecture,
             log_retention=RetentionDays.ONE_MONTH,
             role=execution_role,

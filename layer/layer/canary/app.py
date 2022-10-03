@@ -67,7 +67,7 @@ def verify_powertools_version() -> None:
     current_version = version("aws_lambda_powertools")
     if powertools_version != current_version:
         raise ValueError(
-            f'Expected powertools version is "{powertools_version}", but layer contains version "{current_version}"'
+            f'Expected Powertools version is "{powertools_version}", but layer contains version "{current_version}"'
         )
     logger.info(f"Current Powertools version is: {current_version}")
 
