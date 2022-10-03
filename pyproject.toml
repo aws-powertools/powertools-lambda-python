@@ -80,6 +80,8 @@ importlib-metadata = "^4.13"
 parser = ["pydantic", "email-validator", "jmespath"]
 validation = ["fastjsonschema", "jmespath"]
 tracer = ["aws-xray-sdk"]
+idempotency = ["jmespath"]
+jmespath = ["jmespath"]
 all = ["pydantic", "email-validator", "aws-xray-sdk", "fastjsonschema"]
 
 [tool.coverage.run]
