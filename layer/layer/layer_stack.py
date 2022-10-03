@@ -1,7 +1,7 @@
 from aws_cdk import CfnOutput, RemovalPolicy, Stack
 from aws_cdk.aws_lambda import Architecture, CfnLayerVersionPermission
 from aws_cdk.aws_ssm import StringParameter
-from cdk_lambda_powertools_python_layer import LambdaPowertoolsLayer
+from cdk_aws_lambda_powertools_layer import LambdaPowertoolsLayer
 from constructs import Construct
 
 
