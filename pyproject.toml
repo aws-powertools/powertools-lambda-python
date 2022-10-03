@@ -77,7 +77,10 @@ checksumdir = "^1.2.0"
 importlib-metadata = "^4.13"
 
 [tool.poetry.extras]
-extras = ["pydantic", "email-validator", "aws-xray-sdk", "fastjsonschema"]
+parser = ["pydantic", "email-validator"]
+validation = ["fastjsonschema"]
+tracer = ["aws-xray-sdk"]
+all = ["pydantic", "email-validator", "aws-xray-sdk", "fastjsonschema"]
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]
