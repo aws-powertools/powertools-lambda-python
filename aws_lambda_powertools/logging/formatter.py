@@ -9,6 +9,7 @@ from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from ..shared import constants
+from ..shared.functions import strtobool
 
 RESERVED_LOG_ATTRS = (
     "name",
@@ -111,9 +112,15 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             Key-value to be included in log messages
 
         """
+
         self.json_deserializer = json_deserializer or json.loads
         self.json_default = json_default or str
-        self.json_serializer = json_serializer or partial(json.dumps, default=self.json_default, separators=(",", ":"))
+        self.json_indent = (
+            constants.PRETTY_INDENT if strtobool(os.getenv("POWERTOOLS_DEV", "0")) else constants.COMPACT_INDENT
+        )  # indented json serialization when in AWS SAM Local
+        self.json_serializer = json_serializer or partial(
+            json.dumps, default=self.json_default, separators=(",", ":"), indent=self.json_indent
+        )
 
         self.datefmt = datefmt
         self.use_datetime_directive = use_datetime_directive
