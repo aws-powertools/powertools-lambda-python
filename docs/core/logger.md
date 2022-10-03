@@ -369,6 +369,9 @@ If you prefer configuring it separately, or you'd want to bring this JSON Format
 | **`log_record_order`**       | set order of log keys when logging                                                                                       | `["level", "location", "message", "timestamp"]`               |
 | **`kwargs`**                 | key-value to be included in log messages                                                                                 | `None`                                                        |
 
+???+ info
+    When `POWERTOOLS_DEV` env var is present and set to `"true"`, Logger's default serializer (`json.dumps`) will pretty-print log messages for easier readability.
+
 ```python hl_lines="2 7-8" title="Pre-configuring Lambda Powertools Formatter"
 --8<-- "examples/logger/src/powertools_formatter_setup.py"
 ```

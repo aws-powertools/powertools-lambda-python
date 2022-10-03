@@ -32,3 +32,7 @@ LOGGER_LAMBDA_CONTEXT_KEYS = [
     "cold_start",
     "xray_trace_id",
 ]
+
+# JSON indentation level
+PRETTY_INDENT: int = 4
+COMPACT_INDENT = None

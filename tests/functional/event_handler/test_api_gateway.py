@@ -1289,3 +1289,10 @@ def test_event_source_compatibility():
     # THEN
     result = handler(load_event("apiGatewayProxyV2Event.json"), None)
     assert result["statusCode"] == 200
+
+
+def test_response_with_status_code_only():
+    ret = Response(status_code=204)
+    assert ret.status_code == 204
+    assert ret.body is None
+    assert ret.headers == {}
