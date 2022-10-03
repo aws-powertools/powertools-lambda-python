@@ -33,7 +33,7 @@ class CanaryStack(Stack):
             "Canary-x86-64",
             layer_arn=layer_arn,
             powertools_version=powertools_version,
-            architecture=Architecture.X86_64(),
+            architecture=Architecture.X86_64,
         )
 
         layer_arm64_arn = StringParameter.from_string_parameter_attributes(
@@ -46,7 +46,7 @@ class CanaryStack(Stack):
             "Canary-arm64",
             layer_arn=layer_arm64_arn,
             powertools_version=powertools_version,
-            architecture=Architecture.ARM_64(),
+            architecture=Architecture.ARM_64,
         )
 
 

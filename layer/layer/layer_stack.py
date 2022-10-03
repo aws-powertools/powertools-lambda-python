@@ -23,7 +23,7 @@ class LayerStack(Stack):
             layer_version_name="AWSLambdaPowertoolsPythonV2",
             version=powertools_version,
             include_extras=True,
-            compatible_architectures=[Architecture.X86_64()],
+            compatible_architectures=[Architecture.X86_64],
         )
 
         layer_arm64 = LambdaPowertoolsLayer(
@@ -32,7 +32,7 @@ class LayerStack(Stack):
             layer_version_name="AWSLambdaPowertoolsPythonV2-Arm64",
             version=powertools_version,
             include_extras=True,
-            compatible_architectures=[Architecture.ARM_64()],
+            compatible_architectures=[Architecture.ARM_64],
         )
 
         layer_permission = CfnLayerVersionPermission(
