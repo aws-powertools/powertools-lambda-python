@@ -4,6 +4,9 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  CDK_VERSION: 2.44.0
+
 on:
   workflow_call:
     inputs:
@@ -82,7 +85,7 @@ jobs:
           pip install -r requirements.txt
       - name: install cdk and deps
         run: |
-          npm install -g aws-cdk@2.29.0
+          npm install -g "aws-cdk@$CDK_VERSION"
           cdk --version
       - name: install deps
         run: poetry install
