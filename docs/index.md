@@ -438,19 +438,35 @@ Core utilities such as Tracing, Logging, Metrics, and Event Handler will be avai
 ???+ info
 	Explicit parameters take precedence over environment variables
 
-| Environment variable                      | Description                                                                            | Utility                                                         | Default               |
-| ----------------------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------- | --------------------- |
-| **POWERTOOLS_SERVICE_NAME**               | Sets service name used for tracing namespace, metrics dimension and structured logging | All                                                             | `"service_undefined"` |
-| **POWERTOOLS_METRICS_NAMESPACE**          | Sets namespace used for metrics                                                        | [Metrics](./core/metrics)                                       | `None`                |
-| **POWERTOOLS_TRACE_DISABLED**             | Explicitly disables tracing                                                            | [Tracing](./core/tracer)                                        | `false`               |
-| **POWERTOOLS_TRACER_CAPTURE_RESPONSE**    | Captures Lambda or method return as metadata.                                          | [Tracing](./core/tracer)                                        | `true`                |
-| **POWERTOOLS_TRACER_CAPTURE_ERROR**       | Captures Lambda or method exception as metadata.                                       | [Tracing](./core/tracer)                                        | `true`                |
-| **POWERTOOLS_TRACE_MIDDLEWARES**          | Creates sub-segment for each custom middleware                                         | [Middleware factory](./utilities/middleware_factory)            | `false`               |
-| **POWERTOOLS_LOGGER_LOG_EVENT**           | Logs incoming event                                                                    | [Logging](./core/logger)                                        | `false`               |
-| **POWERTOOLS_LOGGER_SAMPLE_RATE**         | Debug log sampling                                                                     | [Logging](./core/logger)                                        | `0`                   |
-| **POWERTOOLS_LOG_DEDUPLICATION_DISABLED** | Disables log deduplication filter protection to use Pytest Live Log feature            | [Logging](./core/logger)                                        | `false`               |
-| **POWERTOOLS_EVENT_HANDLER_DEBUG**        | Enables debugging mode for event handler                                               | [Event Handler](./core/event_handler/api_gateway.md#debug-mode) | `false`               |
-| **LOG_LEVEL**                             | Sets logging level                                                                     | [Logging](./core/logger)                                        | `INFO`                |
+| Environment variable                      | Description                                                                            | Utility                                                                             | Default               |
+| ----------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------- |
+| **POWERTOOLS_SERVICE_NAME**               | Sets service name used for tracing namespace, metrics dimension and structured logging | All                                                                                 | `"service_undefined"` |
+| **POWERTOOLS_METRICS_NAMESPACE**          | Sets namespace used for metrics                                                        | [Metrics](./core/metrics)                                                           | `None`                |
+| **POWERTOOLS_TRACE_DISABLED**             | Explicitly disables tracing                                                            | [Tracing](./core/tracer)                                                            | `false`               |
+| **POWERTOOLS_TRACER_CAPTURE_RESPONSE**    | Captures Lambda or method return as metadata.                                          | [Tracing](./core/tracer)                                                            | `true`                |
+| **POWERTOOLS_TRACER_CAPTURE_ERROR**       | Captures Lambda or method exception as metadata.                                       | [Tracing](./core/tracer)                                                            | `true`                |
+| **POWERTOOLS_TRACE_MIDDLEWARES**          | Creates sub-segment for each custom middleware                                         | [Middleware factory](./utilities/middleware_factory)                                | `false`               |
+| **POWERTOOLS_LOGGER_LOG_EVENT**           | Logs incoming event                                                                    | [Logging](./core/logger)                                                            | `false`               |
+| **POWERTOOLS_LOGGER_SAMPLE_RATE**         | Debug log sampling                                                                     | [Logging](./core/logger)                                                            | `0`                   |
+| **POWERTOOLS_LOG_DEDUPLICATION_DISABLED** | Disables log deduplication filter protection to use Pytest Live Log feature            | [Logging](./core/logger)                                                            | `false`               |
+| **POWERTOOLS_EVENT_HANDLER_DEBUG**        | Enables debugging mode for event handler                                               | [Event Handler](./core/event_handler/api_gateway.md#debug-mode)                     | `false`               |
+| **POWERTOOLS_DEV**                        | Increases verbosity across utilities                                                   | Multiple; see [POWERTOOLS_DEV effect below](#increasing-verbosity-across-utilities) | `0`                   |
+| **LOG_LEVEL**                             | Sets logging level                                                                     | [Logging](./core/logger)                                                            | `INFO`                |
+
+### Increasing verbosity across utilities
+
+Whether you're prototyping locally or against a non-production environment, you can use `POWERTOOLS_DEV` to increase verbosity across multiple utilities.
+
+???+ info
+    We will emit a warning when `POWERTOOLS_DEV` is enabled to help you detect misuse in production environments.
+
+When `POWERTOOLS_DEV` is set to a truthy value (`1`, `true`), it'll have the following effects:
+
+| Utility           | Effect                                                                                                                                                                                                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Logger**        | Increase JSON indentation to 4. This will ease local debugging when running functions locally under emulators or direct calls while not affecting unit tests                                                                                                                          |
+| **Event Handler** | Enable full traceback errors in the response, indented request/responses, and CORS in dev mode (`*`). This will deprecate [`POWERTOOLS_EVENT_HANDLER_DEBUG`](https://awslabs.github.io/aws-lambda-powertools-python/latest/core/event_handler/api_gateway/#debug-mode) in the future. |
+| **Tracer**        | Future-proof safety to disables tracing operations in non-Lambda environments. This already happens automatically in the Tracer utility.                                                                                                                                              |
 
 ## Debug mode
 
