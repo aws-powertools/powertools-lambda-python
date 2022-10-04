@@ -280,9 +280,11 @@ def test_logger_name_is_included_during_copy(stdout, logger, log_level):
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={logger_1.name, logger_2.name})
     logger_1.info(msg)
     logger_2.info(msg)
+    powertools_logger.info(msg)
 
-    logger1_log, logger2_log = capture_multiple_logging_statements_output(stdout)
+    logger1_log, logger2_log, pt_log = capture_multiple_logging_statements_output(stdout)
 
-    # THEN
+    # THEN name attribute should be present in all loggers
     assert logger1_log["name"] == logger_1.name
     assert logger2_log["name"] == logger_2.name
+    assert pt_log["name"] == powertools_logger.name
