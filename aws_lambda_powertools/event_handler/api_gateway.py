@@ -383,6 +383,14 @@ class BaseRouter(ABC):
         """
         return self.route(rule, "PATCH", cors, compress, cache_control)
 
+    def append_context(self, **additional_context):
+        """Append key=value data as routing context"""
+        self.context.update(**additional_context)
+
+    def clear_context(self):
+        """Resets routing context"""
+        self.context.clear()
+
 
 class ApiGatewayResolver(BaseRouter):
     """API Gateway and ALB proxy resolver
@@ -448,6 +456,7 @@ class ApiGatewayResolver(BaseRouter):
             env=os.getenv(constants.EVENT_HANDLER_DEBUG_ENV, "false"), choice=debug
         )
         self._strip_prefixes = strip_prefixes
+        self.context: Dict = {}  # early init as customers might add context before event resolution
 
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
@@ -502,11 +511,17 @@ class ApiGatewayResolver(BaseRouter):
                 "You don't need to serialize event to Event Source Data Class when using Event Handler; see issue #1152"
             )
             event = event.raw_event
+
         if self._debug:
             print(self._json_dump(event), end="")
+
+        # Populate router(s) dependencies without keeping a reference to each registered router
         BaseRouter.current_event = self._to_proxy_event(event)
         BaseRouter.lambda_context = context
-        return self._resolve().build(self.current_event, self._cors)
+
+        response = self._resolve().build(self.current_event, self._cors)
+        self.clear_context()
+        return response
 
     def __call__(self, event, context) -> Any:
         return self.resolve(event, context)
@@ -705,7 +720,7 @@ class ApiGatewayResolver(BaseRouter):
         return self._serializer(obj)
 
     def include_router(self, router: "Router", prefix: Optional[str] = None) -> None:
-        """Adds all routes defined in a router
+        """Adds all routes and context defined in a router
 
         Parameters
         ----------
@@ -717,6 +732,11 @@ class ApiGatewayResolver(BaseRouter):
 
         # Add reference to parent ApiGatewayResolver to support use cases where people subclass it to add custom logic
         router.api_resolver = self
+
+        # Merge app and router context
+        self.context.update(**router.context)
+        # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
+        router.context = self.context
 
         for route, func in router._routes.items():
             if prefix:
@@ -733,6 +753,7 @@ class Router(BaseRouter):
     def __init__(self):
         self._routes: Dict[tuple, Callable] = {}
         self.api_resolver: Optional[BaseRouter] = None
+        self.context = {}  # early init as customers might add context before event resolution
 
     def route(
         self,
