@@ -449,6 +449,28 @@ When necessary, you can set a prefix when including a router object. This means 
     --8<-- "examples/event_handler_rest/src/split_route_prefix_module.py"
     ```
 
+#### Sharing contextual data
+
+You can use `append_context` when you want to share data between your App and Router instances. Any data you share will be available via the `context` dictionary available in your App or Router context.
+
+???+ info
+    For safety, we always clear any data available in the `context` dictionary after each invocation.
+
+???+ tip
+    This can also be useful for middlewares injecting contextual information before a request is processed.
+
+=== "split_route_append_context.py"
+
+	```python hl_lines="18"
+    --8<-- "examples/event_handler_rest/src/split_route_append_context.py"
+	```
+
+=== "split_route_append_context_module.py"
+
+	```python hl_lines="16"
+    --8<-- "examples/event_handler_rest/src/split_route_append_context_module.py"
+	```
+
 #### Sample layout
 
 This is a sample project layout for a monolithic function with routes split in different files (`/todos`, `/health`).
