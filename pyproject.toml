@@ -74,6 +74,7 @@ typing-extensions = "^4.4.0"
 mkdocs-material = "^8.5.4"
 filelock = "^3.8.0"
 checksumdir = "^1.2.0"
+importlib-metadata = "^4.13"
 
 [tool.poetry.extras]
 pydantic = ["pydantic", "email-validator"]
