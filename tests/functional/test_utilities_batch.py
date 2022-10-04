@@ -3,6 +3,7 @@ import math
 from random import randint
 from typing import Callable, Dict, Optional
 from unittest.mock import patch
+from uuid import uuid4
 
 import pytest
 from botocore.config import Config
@@ -24,6 +25,7 @@ from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamChangedR
 from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecord as KinesisDataStreamRecordModel
 from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecordPayload, SqsRecordModel
 from aws_lambda_powertools.utilities.parser.types import Literal
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import b64_to_str, str_to_b64
 
 
@@ -165,6 +167,18 @@ def order_event_factory() -> Callable:
         return json.dumps({"item": item})
 
     return factory
+
+
+@pytest.fixture(scope="module")
+def lambda_context() -> LambdaContext:
+    class DummyLambdaContext:
+        def __init__(self):
+            self.function_name = "test-func"
+            self.memory_limit_in_mb = 128
+            self.invoked_function_arn = "arn:aws:lambda:eu-west-1:809313241234:function:test-func"
+            self.aws_request_id = f"{uuid4()}"
+
+    return DummyLambdaContext
 
 
 @pytest.mark.parametrize(
@@ -908,3 +922,41 @@ def test_batch_processor_error_when_entire_batch_fails(sqs_event_factory, record
 
     # THEN raise BatchProcessingError
     assert "All records failed processing. " in str(e.value)
+
+
+def test_batch_processor_handler_receives_lambda_context(sqs_event_factory, lambda_context: LambdaContext):
+    # GIVEN
+    def record_handler(record, lambda_context: LambdaContext = None):
+        return lambda_context.function_name == "test-func"
+
+    first_record = SQSRecord(sqs_event_factory("success"))
+    event = {"Records": [first_record.raw_event]}
+
+    processor = BatchProcessor(event_type=EventType.SQS)
+
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
+
+    # WHEN/THEN
+    lambda_handler(event, lambda_context())
+
+
+def test_batch_processor_context_manager_handler_receives_lambda_context(
+    sqs_event_factory, lambda_context: LambdaContext
+):
+    # GIVEN
+    def record_handler(record, lambda_context: LambdaContext = None):
+        return lambda_context.function_name == "test-func"
+
+    first_record = SQSRecord(sqs_event_factory("success"))
+    event = {"Records": [first_record.raw_event]}
+
+    processor = BatchProcessor(event_type=EventType.SQS)
+
+    def lambda_handler(event, context):
+        with processor(records=event["Records"], handler=record_handler, lambda_context=context) as batch:
+            batch.process()
+
+    # WHEN/THEN
+    lambda_handler(event, lambda_context())
