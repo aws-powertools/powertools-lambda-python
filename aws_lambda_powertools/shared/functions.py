@@ -1,5 +1,7 @@
 import base64
 import logging
+import os
+import warnings
 from binascii import Error as BinAsciiError
 from typing import Optional, Union
 
@@ -78,3 +80,12 @@ def bytes_to_string(value: bytes) -> str:
         return value.decode("utf-8")
     except (BinAsciiError, TypeError):
         raise ValueError("base64 UTF-8 decode failed")
+
+
+def powertools_dev_is_set() -> bool:
+    is_on = strtobool(os.getenv("POWERTOOLS_DEV", "0"))
+    if is_on:
+        warnings.warn("POWERTOOLS_DEV environment variable is enabled. Increasing verbosity across utilities.")
+        return True
+
+    return False
