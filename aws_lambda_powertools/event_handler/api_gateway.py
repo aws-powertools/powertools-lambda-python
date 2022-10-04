@@ -237,6 +237,7 @@ class ResponseBuilder:
 class BaseRouter(ABC):
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
+    context: dict
 
     @abstractmethod
     def route(
