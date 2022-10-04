@@ -686,6 +686,16 @@ def test_debug_mode_environment_variable(monkeypatch):
     assert app._debug
 
 
+def test_powertools_dev_sets_debug_mode(monkeypatch):
+    # GIVEN a debug mode environment variable is set
+    monkeypatch.setenv(constants.POWERTOOLS_DEV_ENV, "true")
+    app = ApiGatewayResolver()
+
+    # WHEN calling app._debug
+    # THEN the debug mode is enabled
+    assert app._debug
+
+
 def test_debug_json_formatting(json_dump):
     # GIVEN debug is True
     app = ApiGatewayResolver(debug=True)
