@@ -25,6 +25,10 @@ class CanaryStack(Stack):
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
+        deploy_stage = CfnParameter(
+            self, "DeployStage", description="Deployment stage for canary"
+        ).value_as_string
+
         layer_arn = StringParameter.from_string_parameter_attributes(
             self, "LayerVersionArnParam", parameter_name=ssm_paramter_layer_arn
         ).string_value
@@ -34,6 +38,7 @@ class CanaryStack(Stack):
             layer_arn=layer_arn,
             powertools_version=powertools_version,
             architecture=Architecture.X86_64,
+            stage=deploy_stage,
         )
 
         layer_arm64_arn = StringParameter.from_string_parameter_attributes(
@@ -47,6 +52,7 @@ class CanaryStack(Stack):
             layer_arn=layer_arm64_arn,
             powertools_version=powertools_version,
             architecture=Architecture.ARM_64,
+            stage=deploy_stage,
         )
 
 
@@ -58,15 +64,13 @@ class Canary(Construct):
         layer_arn: str,
         powertools_version: str,
         architecture: Architecture,
+        stage: str,
     ):
         super().__init__(scope, construct_id)
 
         layer = LayerVersion.from_layer_version_arn(
             self, "PowertoolsLayer", layer_version_arn=layer_arn
         )
-        deploy_stage = CfnParameter(
-            self, "DeployStage", description="Deployment stage for canary"
-        ).value_as_string
 
         execution_role = Role(
             self,
@@ -102,7 +106,7 @@ class Canary(Construct):
                 "POWERTOOLS_VERSION": powertools_version,
                 "POWERTOOLS_LAYER_ARN": layer_arn,
                 "VERSION_TRACKING_EVENT_BUS_ARN": VERSION_TRACKING_EVENT_BUS_ARN,
-                "LAYER_PIPELINE_STAGE": deploy_stage,
+                "LAYER_PIPELINE_STAGE": stage,
             },
         )
 
