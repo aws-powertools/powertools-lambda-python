@@ -849,7 +849,7 @@ def test_set_package_logger_handler_with_powertools_debug_env_var(stdout, monkey
 def test_powertools_debug_env_var_warning(monkeypatch: pytest.MonkeyPatch):
     # GIVEN POWERTOOLS_DEBUG is set
     monkeypatch.setenv(constants.POWERTOOLS_DEBUG_ENV, "1")
-    warning_message = "POWERTOOLS_DEBUG environment variable is enabled. Setting logging level to DEBUG"
+    warning_message = "POWERTOOLS_DEBUG environment variable is enabled. Setting logging level to DEBUG."
 
     # WHEN set_package_logger is used at initialization
     # THEN a warning should be emitted
