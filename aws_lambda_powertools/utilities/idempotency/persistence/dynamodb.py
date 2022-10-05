@@ -12,7 +12,10 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
 )
-from aws_lambda_powertools.utilities.idempotency.persistence.base import STATUS_CONSTANTS, DataRecord
+from aws_lambda_powertools.utilities.idempotency.persistence.base import (
+    STATUS_CONSTANTS,
+    DataRecord,
+)
 
 logger = logging.getLogger(__name__)
 

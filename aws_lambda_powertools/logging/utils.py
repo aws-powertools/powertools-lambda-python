@@ -81,6 +81,8 @@ def _configure_logger(source_logger: Logger, logger: logging.Logger, level: Unio
     logger.handlers = []
     logger.setLevel(level)
     logger.propagate = False  # ensure we don't propagate logs to existing loggers, #1073
+    source_logger.append_keys(name="%(name)s")  # include logger name, see #1267
+
     source_logger.debug(f"Logger {logger} reconfigured to use logging level {level}")
     for source_handler in source_logger.handlers:
         logger.addHandler(source_handler)

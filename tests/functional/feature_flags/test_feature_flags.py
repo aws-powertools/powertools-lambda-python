@@ -3,7 +3,10 @@ from typing import Dict, List, Optional
 import pytest
 from botocore.config import Config
 
-from aws_lambda_powertools.utilities.feature_flags import ConfigurationStoreError, schema
+from aws_lambda_powertools.utilities.feature_flags import (
+    ConfigurationStoreError,
+    schema,
+)
 from aws_lambda_powertools.utilities.feature_flags.appconfig import AppConfigStore
 from aws_lambda_powertools.utilities.feature_flags.exceptions import StoreClientError
 from aws_lambda_powertools.utilities.feature_flags.feature_flags import FeatureFlags

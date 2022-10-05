@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
-from aws_lambda_powertools.utilities.typing.lambda_client_context import LambdaClientContext
-from aws_lambda_powertools.utilities.typing.lambda_cognito_identity import LambdaCognitoIdentity
+from aws_lambda_powertools.utilities.typing.lambda_client_context import (
+    LambdaClientContext,
+)
+from aws_lambda_powertools.utilities.typing.lambda_cognito_identity import (
+    LambdaCognitoIdentity,
+)
 
 
 class LambdaContext(object):

@@ -10,9 +10,19 @@ import pytest
 from botocore import stub
 from pydantic import BaseModel
 
-from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2, event_source
-from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, IdempotencyConfig
-from aws_lambda_powertools.utilities.idempotency.base import MAX_RETRIES, IdempotencyHandler, _prepare_data
+from aws_lambda_powertools.utilities.data_classes import (
+    APIGatewayProxyEventV2,
+    event_source,
+)
+from aws_lambda_powertools.utilities.idempotency import (
+    DynamoDBPersistenceLayer,
+    IdempotencyConfig,
+)
+from aws_lambda_powertools.utilities.idempotency.base import (
+    MAX_RETRIES,
+    IdempotencyHandler,
+    _prepare_data,
+)
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
@@ -21,8 +31,14 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyPersistenceLayerError,
     IdempotencyValidationError,
 )
-from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent, idempotent_function
-from aws_lambda_powertools.utilities.idempotency.persistence.base import BasePersistenceLayer, DataRecord
+from aws_lambda_powertools.utilities.idempotency.idempotency import (
+    idempotent,
+    idempotent_function,
+)
+from aws_lambda_powertools.utilities.idempotency.persistence.base import (
+    BasePersistenceLayer,
+    DataRecord,
+)
 from aws_lambda_powertools.utilities.validation import envelopes, validator
 from tests.functional.idempotency.utils import (
     build_idempotency_put_item_stub,
