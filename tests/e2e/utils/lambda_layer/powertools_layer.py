@@ -16,9 +16,16 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
 
     def __init__(self, output_dir: Path = CDK_OUT_PATH):
         super().__init__(output_dir)
-        self.package = f"{SOURCE_CODE_ROOT_PATH}[pydantic]"
+        self.package = f"{SOURCE_CODE_ROOT_PATH}[all]"
         self.build_args = "--platform manylinux1_x86_64 --only-binary=:all: --upgrade"
         self.build_command = f"python -m pip install {self.package} {self.build_args} --target {self.target_dir}"
+        self.cleanup_command = (
+            f"rm -rf {self.target_dir}/boto* {self.target_dir}/s3transfer* && "
+            f"rm -rf {self.target_dir}/*dateutil* {self.target_dir}/urllib3* {self.target_dir}/six* && "
+            f"find {self.target_dir} -name '*.so' -type f -exec strip '{{}}' \; && "  # noqa: W605
+            f"find {self.target_dir} -wholename '*/tests/*' -type f -delete && "  # noqa: W605
+            f"find {self.target_dir} -regex '^.*\(__pycache__\|\.py[co]\)$' -delete"  # noqa: W605
+        )
         self.source_diff_file: Path = CDK_OUT_PATH / "layer_build.diff"
 
     def build(self) -> str:
@@ -30,6 +37,11 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
         self.after_build()
 
         return str(self.output_dir)
+
+    def after_build(self):
+        subprocess.run(self.cleanup_command, shell=True)
+
+        super(LocalLambdaPowertoolsLayer, self).after_build()
 
     def _has_source_changed(self) -> bool:
         """Hashes source code and

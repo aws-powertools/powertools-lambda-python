@@ -156,7 +156,8 @@ class BaseInfrastructure(InfrastructureProvider):
         stack_file = self._create_temp_cdk_app()
         synth_command = f"npx cdk synth --app 'python {stack_file}' -o {self._cdk_out_dir}"
         deploy_command = (
-            f"npx cdk deploy --app '{self._cdk_out_dir}' -O {self._stack_outputs_file} --require-approval=never"
+            f"npx cdk deploy --app '{self._cdk_out_dir}' -O {self._stack_outputs_file} "
+            "--require-approval=never --method=direct"
         )
 
         # CDK launches a background task, so we must wait
