@@ -453,7 +453,7 @@ Core utilities such as Tracing, Logging, Metrics, and Event Handler will be avai
 | **POWERTOOLS_DEV**                        | Increases verbosity across utilities                                                   | Multiple; see [POWERTOOLS_DEV effect below](#increasing-verbosity-across-utilities) | `0`                   |
 | **LOG_LEVEL**                             | Sets logging level                                                                     | [Logging](./core/logger)                                                            | `INFO`                |
 
-### Increasing verbosity across utilities
+### Optimizing for non-production environments
 
 Whether you're prototyping locally or against a non-production environment, you can use `POWERTOOLS_DEV` to increase verbosity across multiple utilities.
 
