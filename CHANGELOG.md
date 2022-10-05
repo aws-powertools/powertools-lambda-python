@@ -14,6 +14,7 @@
 
 ## Documentation
 
+* **batch:** document the new lambda context feature
 * **homepage:** introduce POWERTOOLS_DEV env var ([#1569](https://github.com/awslabs/aws-lambda-powertools-python/issues/1569))
 * **multiple:** fix highlighting after new isort/black integration
 * **parser:** add JSON string field extension example ([#1526](https://github.com/awslabs/aws-lambda-powertools-python/issues/1526))
