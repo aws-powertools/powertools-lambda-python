@@ -96,7 +96,7 @@ def powertools_dev_is_set() -> bool:
 def powertools_debug_is_set() -> bool:
     is_on = strtobool(os.getenv(constants.POWERTOOLS_DEBUG_ENV, "0"))
     if is_on:
-        warnings.warn("POWERTOOLS_DEBUG environment variable is enabled. Setting logging level to DEBUG")
+        warnings.warn("POWERTOOLS_DEBUG environment variable is enabled. Setting logging level to DEBUG.")
         return True
 
     return False
