@@ -22,9 +22,9 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
         self.cleanup_command = (
             f"rm -rf {self.target_dir}/boto* {self.target_dir}/s3transfer* && "
             f"rm -rf {self.target_dir}/*dateutil* {self.target_dir}/urllib3* {self.target_dir}/six* && "
-            f"find {self.target_dir} -name '*.so' -type f -exec strip '{{}}' \; && "  # noqa: W605
-            f"find {self.target_dir} -wholename '*/tests/*' -type f -delete && "  # noqa: W605
-            f"find {self.target_dir} -regex '^.*\(__pycache__\|\.py[co]\)$' -delete"  # noqa: W605
+            f"find {self.target_dir} -name '*.so' -type f -exec strip '{{}}' \\; && "
+            f"find {self.target_dir} -wholename '*/tests/*' -type f -delete && "
+            f"find {self.target_dir} -regex '^.*\\(__pycache__\\|\\.py[co]\\)$' -delete"
         )
         self.source_diff_file: Path = CDK_OUT_PATH / "layer_build.diff"
 
