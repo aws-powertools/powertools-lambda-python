@@ -15,7 +15,7 @@ from typing import Any, Callable, Dict, List, Match, Optional, Pattern, Set, Tup
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
+from aws_lambda_powertools.shared.functions import powertools_dev_is_set, strtobool
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
@@ -453,9 +453,7 @@ class ApiGatewayResolver(BaseRouter):
         self._cors = cors
         self._cors_enabled: bool = cors is not None
         self._cors_methods: Set[str] = {"OPTIONS"}
-        self._debug = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.EVENT_HANDLER_DEBUG_ENV, "false"), choice=debug
-        )
+        self._debug = self._has_debug(debug)
         self._strip_prefixes = strip_prefixes
         self.context: Dict = {}  # early init as customers might add context before event resolution
 
@@ -526,6 +524,22 @@ class ApiGatewayResolver(BaseRouter):
 
     def __call__(self, event, context) -> Any:
         return self.resolve(event, context)
+
+    @staticmethod
+    def _has_debug(debug: Optional[bool] = None) -> bool:
+        # It might have been explicitly switched off (debug=False)
+        if debug is not None:
+            return debug
+
+        # Maintenance: deprecate EVENT_HANDLER_DEBUG later in V2.
+        env_debug = os.getenv(constants.EVENT_HANDLER_DEBUG_ENV)
+        if env_debug is not None:
+            warnings.warn(
+                "POWERTOOLS_EVENT_HANDLER_DEBUG is set and will be deprecated in V2. Please use POWERTOOLS_DEV instead."
+            )
+            return strtobool(env_debug) or powertools_dev_is_set()
+
+        return powertools_dev_is_set()
 
     @staticmethod
     def _compile_regex(rule: str):
