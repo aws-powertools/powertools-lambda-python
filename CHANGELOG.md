@@ -21,6 +21,7 @@
 
 * **batch:** inject lambda_context if record handler signature accepts it ([#1561](https://github.com/awslabs/aws-lambda-powertools-python/issues/1561))
 * **event-handler:** context support to share data between routers ([#1567](https://github.com/awslabs/aws-lambda-powertools-python/issues/1567))
+* **logger:** include logger name attribute when copy_config_to_registered_logger is used ([#1568](https://github.com/awslabs/aws-lambda-powertools-python/issues/1568))
 * **logger:** pretty-print JSON when POWERTOOLS_DEV is set ([#1548](https://github.com/awslabs/aws-lambda-powertools-python/issues/1548))
 
 ## Maintenance
