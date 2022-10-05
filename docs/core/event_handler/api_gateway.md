@@ -214,7 +214,7 @@ By default, we return `404` for any unmatched route.
 
 You can use **`not_found`** decorator to override this behavior, and return a custom **`Response`**.
 
-```python hl_lines="14 18" title="Handling not found"
+```python hl_lines="18 22" title="Handling not found"
 --8<-- "examples/event_handler_rest/src/not_found_routes.py"
 ```
 
@@ -222,7 +222,7 @@ You can use **`not_found`** decorator to override this behavior, and return a cu
 
 You can use **`exception_handler`** decorator with any Python exception. This allows you to handle a common exception outside your route, for example validation errors.
 
-```python hl_lines="13-14" title="Exception handling"
+```python hl_lines="17-18" title="Exception handling"
 --8<-- "examples/event_handler_rest/src/exception_handling.py"
 ```
 
@@ -316,7 +316,7 @@ You can use the `Response` class to have full control over the response, for exa
 
 === "fine_grained_responses.py"
 
-    ```python hl_lines="7 24-28"
+    ```python hl_lines="9 28-32"
     --8<-- "examples/event_handler_rest/src/fine_grained_responses.py"
     ```
 
@@ -364,7 +364,7 @@ Like `compress` feature, the client must send the `Accept` header with the corre
     Lambda Function URLs handle binary media types automatically.
 === "binary_responses.py"
 
-    ```python hl_lines="14 20"
+    ```python hl_lines="17 23"
     --8<-- "examples/event_handler_rest/src/binary_responses.py"
     ```
 

@@ -4,7 +4,10 @@ from pathlib import Path
 from typing import List
 
 import pytest
-from assert_async_graphql_response_module import Todo, app  # instance of AppSyncResolver
+from assert_async_graphql_response_module import (  # instance of AppSyncResolver
+    Todo,
+    app,
+)
 
 
 @pytest.fixture

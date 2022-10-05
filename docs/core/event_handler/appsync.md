@@ -185,7 +185,7 @@ You can subclass [AppSyncResolverEvent](../../utilities/data_classes.md#appsync-
 
 === "custom_models.py.py"
 
-    ```python hl_lines="11 14 30-32 35-36 43 50"
+    ```python hl_lines="11 14 32-34 37-38 45 52"
     --8<-- "examples/event_handler_graphql/src/custom_models.py"
     ```
 
@@ -281,7 +281,7 @@ And an example for testing asynchronous resolvers. Note that this requires the `
 
 === "assert_async_graphql_response.py"
 
-    ```python hl_lines="28"
+    ```python hl_lines="31"
     --8<-- "examples/event_handler_graphql/src/assert_async_graphql_response.py"
     ```
 
