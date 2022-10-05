@@ -5,17 +5,41 @@ import platform
 from importlib.metadata import version
 
 import boto3
+from pydantic import EmailStr
 
 from aws_lambda_powertools import Logger, Metrics, Tracer
+from aws_lambda_powertools.utilities.parser import BaseModel, envelopes, event_parser
+from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.utilities.validation import validator
 
 logger = Logger(service="version-track")
-tracer = Tracer()
+tracer = Tracer()  # this checks for aws-xray-sdk presence
 metrics = Metrics(namespace="powertools-layer-canary", service="PowertoolsLayerCanary")
 
 layer_arn = os.getenv("POWERTOOLS_LAYER_ARN")
 powertools_version = os.getenv("POWERTOOLS_VERSION")
 stage = os.getenv("LAYER_PIPELINE_STAGE")
 event_bus_arn = os.getenv("VERSION_TRACKING_EVENT_BUS_ARN")
+
+
+# Model to check parser imports correctly, tests for pydantic and email-validator
+class OrderItem(BaseModel):
+    order_id: int
+    quantity: int
+    description: str
+    email: EmailStr
+
+
+# Tests for jmespath presence
+@event_parser(model=OrderItem, envelope=envelopes.EventBridgeEnvelope)
+def envelope_handler(event: OrderItem, context: LambdaContext):
+    assert event.order_id != 1
+
+
+# Tests for fastjsonschema presence
+@validator(inbound_schema={}, envelope="detail")
+def validator_handler(event, context: LambdaContext):
+    pass
 
 
 def handler(event):
