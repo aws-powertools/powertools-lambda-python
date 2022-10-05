@@ -20,9 +20,9 @@ def strtobool(value: str) -> bool:
     > note:: Copied from distutils.util.
     """
     value = value.lower()
-    if value in ("y", "yes", "t", "true", "on", "1"):
+    if value in ("1", "y", "yes", "t", "true", "on"):
         return True
-    if value in ("n", "no", "f", "false", "off", "0"):
+    if value in ("0", "n", "no", "f", "false", "off"):
         return False
     raise ValueError(f"invalid truth value {value!r}")
 
