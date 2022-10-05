@@ -4,6 +4,14 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **readme:** add lambda layer latest version badge
+
+## Maintenance
+
+* **layer:** bump to latest version 37
+
 
 <a name="v1.30.0"></a>
 ## [v1.30.0] - 2022-10-05
