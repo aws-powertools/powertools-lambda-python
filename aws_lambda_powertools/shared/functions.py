@@ -5,6 +5,8 @@ import warnings
 from binascii import Error as BinAsciiError
 from typing import Optional, Union
 
+import constants
+
 logger = logging.getLogger(__name__)
 
 
