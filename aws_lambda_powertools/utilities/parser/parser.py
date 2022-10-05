@@ -1,7 +1,11 @@
 import logging
 from typing import Any, Callable, Dict, Optional, Type, overload
 
-from aws_lambda_powertools.utilities.parser.types import EnvelopeModel, EventParserReturnType, Model
+from aws_lambda_powertools.utilities.parser.types import (
+    EnvelopeModel,
+    EventParserReturnType,
+    Model,
+)
 
 from ...middleware_factory import lambda_handler_decorator
 from ..typing import LambdaContext

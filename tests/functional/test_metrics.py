@@ -6,7 +6,12 @@ from typing import Any, Dict, List
 import pytest
 
 from aws_lambda_powertools import Metrics, single_metric
-from aws_lambda_powertools.metrics import MetricUnit, MetricUnitError, MetricValueError, SchemaValidationError
+from aws_lambda_powertools.metrics import (
+    MetricUnit,
+    MetricUnitError,
+    MetricValueError,
+    SchemaValidationError,
+)
 from aws_lambda_powertools.metrics import metrics as metrics_global
 from aws_lambda_powertools.metrics.base import MAX_DIMENSIONS, MetricManager
 

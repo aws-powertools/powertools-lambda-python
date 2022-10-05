@@ -4,7 +4,12 @@ import jmespath
 import pytest
 from jmespath import functions
 
-from aws_lambda_powertools.utilities.validation import envelopes, exceptions, validate, validator
+from aws_lambda_powertools.utilities.validation import (
+    envelopes,
+    exceptions,
+    validate,
+    validator,
+)
 
 
 def test_validate_raw_event(schema, raw_event):

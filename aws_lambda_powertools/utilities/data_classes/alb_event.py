@@ -1,6 +1,9 @@
 from typing import Dict, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import (
+    BaseProxyEvent,
+    DictWrapper,
+)
 
 
 class ALBEventRequestContext(DictWrapper):

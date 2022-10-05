@@ -10,7 +10,19 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from functools import partial
 from http import HTTPStatus
-from typing import Any, Callable, Dict, List, Match, Optional, Pattern, Set, Tuple, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Match,
+    Optional,
+    Pattern,
+    Set,
+    Tuple,
+    Type,
+    Union,
+)
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError

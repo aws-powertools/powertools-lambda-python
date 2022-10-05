@@ -1,6 +1,10 @@
 import pytest
 
-from aws_lambda_powertools.shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice, strtobool
+from aws_lambda_powertools.shared.functions import (
+    resolve_env_var_choice,
+    resolve_truthy_env_var_choice,
+    strtobool,
+)
 
 
 def test_resolve_env_var_choice_explicit_wins_over_env_var():

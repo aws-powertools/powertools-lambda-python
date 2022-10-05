@@ -12,9 +12,16 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, overload
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError, ExceptionInfo
-from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
-from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
+from aws_lambda_powertools.utilities.batch.exceptions import (
+    BatchProcessingError,
+    ExceptionInfo,
+)
+from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
+    DynamoDBRecord,
+)
+from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
+    KinesisStreamRecord,
+)
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -36,7 +43,9 @@ has_pydantic = "pydantic" in sys.modules
 # We need them as subclasses as we must access their message ID or sequence number metadata via dot notation
 if has_pydantic:
     from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamRecordModel
-    from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecord as KinesisDataStreamRecordModel
+    from aws_lambda_powertools.utilities.parser.models import (
+        KinesisDataStreamRecord as KinesisDataStreamRecordModel,
+    )
     from aws_lambda_powertools.utilities.parser.models import SqsRecordModel
 
     BatchTypeModels = Optional[

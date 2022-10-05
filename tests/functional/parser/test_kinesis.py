@@ -2,8 +2,15 @@ from typing import Any, List
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, event_parser
-from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamModel, KinesisDataStreamRecordPayload
+from aws_lambda_powertools.utilities.parser import (
+    ValidationError,
+    envelopes,
+    event_parser,
+)
+from aws_lambda_powertools.utilities.parser.models import (
+    KinesisDataStreamModel,
+    KinesisDataStreamRecordPayload,
+)
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyKinesisBusiness
 from tests.functional.utils import load_event

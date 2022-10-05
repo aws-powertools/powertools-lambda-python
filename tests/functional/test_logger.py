@@ -15,7 +15,10 @@ import pytest
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
-from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter, LambdaPowertoolsFormatter
+from aws_lambda_powertools.logging.formatter import (
+    BasePowertoolsFormatter,
+    LambdaPowertoolsFormatter,
+)
 from aws_lambda_powertools.logging.logger import set_package_logger
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.data_classes import S3Event, event_source
