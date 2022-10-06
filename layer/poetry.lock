@@ -14,7 +14,7 @@ tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.44.0"
+version = "2.45.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 category = "main"
 optional = false
@@ -28,14 +28,14 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "boto3"
-version = "1.24.84"
+version = "1.24.87"
 description = "The AWS SDK for Python"
 category = "dev"
 optional = false
 python-versions = ">= 3.7"
 
 [package.dependencies]
-botocore = ">=1.27.84,<1.28.0"
+botocore = ">=1.27.87,<1.28.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -44,7 +44,7 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.27.84"
+version = "1.27.87"
 description = "Low-level, data-driven core of boto 3."
 category = "dev"
 optional = false
@@ -72,7 +72,7 @@ exceptiongroup = {version = "*", markers = "python_version <= \"3.10\""}
 
 [[package]]
 name = "cdk-aws-lambda-powertools-layer"
-version = "3.0.0"
+version = "3.0.1"
 description = "A lambda layer for AWS Powertools for python and typescript"
 category = "main"
 optional = false
@@ -95,7 +95,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "constructs"
-version = "10.1.120"
+version = "10.1.123"
 description = "A programming model for software-defined state"
 category = "main"
 optional = false
@@ -304,26 +304,26 @@ attrs = [
     {file = "attrs-22.1.0.tar.gz", hash = "sha256:29adc2665447e5191d0e7c568fde78b21f9672d344281d0c6e1ab085429b22b6"},
 ]
 aws-cdk-lib = [
-    {file = "aws-cdk-lib-2.44.0.tar.gz", hash = "sha256:92eb87d6576a8be20bf8c359e25dbfd8c8890b53be54be57b71fbcdd16886eea"},
-    {file = "aws_cdk_lib-2.44.0-py3-none-any.whl", hash = "sha256:f0de47d4a6e84391d2ec9f551e514c0f4f9be822d17695a305307f2f31751387"},
+    {file = "aws-cdk-lib-2.45.0.tar.gz", hash = "sha256:ed4166498205a6507666a9fdb69f5dbeffa11cd69bf7e98b279ec305e4970374"},
+    {file = "aws_cdk_lib-2.45.0-py3-none-any.whl", hash = "sha256:9463fe6d84563c4c23ae96810be0ea0ff0a260eebb85a4a7afe0c3747eca18a8"},
 ]
 boto3 = [
-    {file = "boto3-1.24.84-py3-none-any.whl", hash = "sha256:be151711bbb4db53e85dd5bbe506002ce6f2f21fc4e45fcf6d2cf356d32cc4c6"},
-    {file = "boto3-1.24.84.tar.gz", hash = "sha256:6194763348545bb1669ce8d03ba104be1ba822daa184613aa10b9303a6a79017"},
+    {file = "boto3-1.24.87-py3-none-any.whl", hash = "sha256:bcc579e801774cb2c7dda87ff985feda1ae7e10591d11ef37526363139138bd4"},
+    {file = "boto3-1.24.87.tar.gz", hash = "sha256:3dd7ed74d1d29dd8094a078be86ed61c45de6638fe18856f7a1ff9282b4d929e"},
 ]
 botocore = [
-    {file = "botocore-1.27.84-py3-none-any.whl", hash = "sha256:da15026329706caf83323d84996f5ff5c527837347633fca9b3b1be0efa60841"},
-    {file = "botocore-1.27.84.tar.gz", hash = "sha256:11f05d2acdf9a5f722856704b7b951b180647fb4340e1b5048b27273dc323909"},
+    {file = "botocore-1.27.87-py3-none-any.whl", hash = "sha256:c4cbd22056ace4c7aa99e62e8ae629865ab80cc8bbf7c6d68ccf0f768f0034b6"},
+    {file = "botocore-1.27.87.tar.gz", hash = "sha256:216de9751116d0d1cc3901e26d95a5c9a30ecb6973ae6147af1cf504858d845a"},
 ]
 cattrs = []
 cdk-aws-lambda-powertools-layer = [
-    {file = "cdk-aws-lambda-powertools-layer-3.0.0.tar.gz", hash = "sha256:f877a4fa5a3530b0fbe59b53b635929f06a2ee6f2848cdbb83bbc0eda9549a46"},
-    {file = "cdk_aws_lambda_powertools_layer-3.0.0-py3-none-any.whl", hash = "sha256:7574a149a1fd152404c9ee0114d4f24232336aa1b3ab7e8217b51fa0c14a1c9e"},
+    {file = "cdk-aws-lambda-powertools-layer-3.0.1.tar.gz", hash = "sha256:fc6e3f8aa43ee82cd9131916dd06edeed98dc5880fdf71fef20bcd8295be7097"},
+    {file = "cdk_aws_lambda_powertools_layer-3.0.1-py3-none-any.whl", hash = "sha256:4d5689cddfd16adf9f71a4d81bdea9483c49f09b76d9f2361ad1976575d151c4"},
 ]
 colorama = []
 constructs = [
-    {file = "constructs-10.1.120-py3-none-any.whl", hash = "sha256:2dce2910f7012dadcc61faba92e9376a17b1052b6366b6ec666d889f2ac4a6b4"},
-    {file = "constructs-10.1.120.tar.gz", hash = "sha256:39ed9156ab9508419a22a2d798c3b5c58e8e5c1c156d4c9f27e40fd7e87ea7c0"},
+    {file = "constructs-10.1.123-py3-none-any.whl", hash = "sha256:a095dc34ac5d1ba582a6bd9364c2676d4c4de3d99466dc7cea0445ec4acdf226"},
+    {file = "constructs-10.1.123.tar.gz", hash = "sha256:5f183f6c87ad755e96a0395aac043c0b4c1edd52e67e7c2b18affaf5f7eff284"},
 ]
 exceptiongroup = [
     {file = "exceptiongroup-1.0.0rc9-py3-none-any.whl", hash = "sha256:2e3c3fc1538a094aab74fad52d6c33fc94de3dfee3ee01f187c0e0c72aec5337"},
