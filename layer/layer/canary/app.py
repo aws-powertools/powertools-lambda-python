@@ -106,7 +106,7 @@ def send_notification():
         )
         return
 
-    architecture = platform.uname()[4]
+    architecture = platform.uname()[4]  # arm64, x86_64
     event = {
         "Time": datetime.datetime.now(),
         "Source": "powertools.layer.canary",
