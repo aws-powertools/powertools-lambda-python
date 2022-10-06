@@ -22,6 +22,7 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
         self.cleanup_command = (
             f"rm -rf {self.target_dir}/boto* {self.target_dir}/s3transfer* && "
             f"rm -rf {self.target_dir}/*dateutil* {self.target_dir}/urllib3* {self.target_dir}/six* && "
+            f"rm -rf {self.target_dir}/jmespath* && "
             f"find {self.target_dir} -name '*.so' -type f -exec strip '{{}}' \\; && "
             f"find {self.target_dir} -wholename '*/tests/*' -type f -delete && "
             f"find {self.target_dir} -regex '^.*\\(__pycache__\\|\\.py[co]\\)$' -delete"
