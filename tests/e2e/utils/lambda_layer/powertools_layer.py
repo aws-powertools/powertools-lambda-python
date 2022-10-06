@@ -42,8 +42,6 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
     def after_build(self):
         subprocess.run(self.cleanup_command, shell=True)
 
-        super(LocalLambdaPowertoolsLayer, self).after_build()
-
     def _has_source_changed(self) -> bool:
         """Hashes source code and
 
