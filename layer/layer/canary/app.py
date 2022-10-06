@@ -67,9 +67,7 @@ def on_create(event):
 
 
 def check_envs():
-    logger.info(
-        'Checking required envs ["POWERTOOLS_LAYER_ARN", "AWS_REGION", "STAGE"]'
-    )
+    logger.info('Checking required envs ["POWERTOOLS_LAYER_ARN", "AWS_REGION", "STAGE"]')
     if not layer_arn:
         raise ValueError("POWERTOOLS_LAYER_ARN is not set. Aborting...")
     if not powertools_version:
@@ -93,7 +91,7 @@ def verify_powertools_version() -> None:
         raise ValueError(
             f'Expected Powertools version is "{powertools_version}", but layer contains version "{current_version}"'
         )
-    logger.info(f"Current Powertools version is: {current_version}")
+    logger.info(f"Current Powertools version is: {current_version} [{_get_architecture()}]")
 
 
 def send_notification():
@@ -101,12 +99,9 @@ def send_notification():
     sends an event to version tracking event bridge
     """
     if stage != "PROD":
-        logger.info(
-            "Not sending notification to event bus, because this is not the PROD stage"
-        )
+        logger.info("Not sending notification to event bus, because this is not the PROD stage")
         return
 
-    architecture = platform.uname()[4]  # arm64, x86_64
     event = {
         "Time": datetime.datetime.now(),
         "Source": "powertools.layer.canary",
@@ -117,7 +112,7 @@ def send_notification():
                 "version": powertools_version,
                 "region": os.environ["AWS_REGION"],
                 "layerArn": layer_arn,
-                "architecture": architecture,
+                "architecture": _get_architecture(),
             }
         ),
     }
@@ -130,3 +125,8 @@ def send_notification():
     if resp["FailedEntryCount"] != 0:
         logger.error(resp)
         raise ValueError("Failed to send deployment notification to version tracking")
+
+
+def _get_architecture() -> str:
+    """Returns aarch64, x86_64"""
+    return platform.uname()[4]

@@ -2,6 +2,7 @@ import logging
 import subprocess
 from pathlib import Path
 
+from aws_cdk.aws_lambda import Architecture
 from checksumdir import dirhash
 
 from aws_lambda_powertools import PACKAGE_PATH
@@ -14,10 +15,12 @@ logger = logging.getLogger(__name__)
 class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
     IGNORE_EXTENSIONS = ["pyc"]
 
-    def __init__(self, output_dir: Path = CDK_OUT_PATH):
+    def __init__(self, output_dir: Path = CDK_OUT_PATH, architecture: Architecture = Architecture.X86_64):
         super().__init__(output_dir)
         self.package = f"{SOURCE_CODE_ROOT_PATH}[all]"
-        self.build_args = "--platform manylinux1_x86_64 --only-binary=:all: --upgrade"
+
+        platform_name = self._platform_name(architecture)
+        self.build_args = f"--platform {platform_name} --only-binary=:all: --upgrade"
         self.build_command = f"python -m pip install {self.package} {self.build_args} --target {self.target_dir}"
         self.cleanup_command = (
             f"rm -rf {self.target_dir}/boto* {self.target_dir}/s3transfer* && "
@@ -57,3 +60,18 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
             return True
 
         return False
+
+    def _platform_name(self, architecture: Architecture) -> str:
+        """Returns the correct plaform name for the manylinux project (see PEP 599)
+
+        Returns
+        -------
+        platform_name : str
+            The platform tag
+        """
+        if architecture.name == Architecture.X86_64.name:
+            return "manylinux1_x86_64"
+        elif architecture.name == Architecture.ARM_64.name:
+            return "manylinux2014_aarch64"
+        else:
+            raise ValueError(f"unknown architecture {architecture.name}")
