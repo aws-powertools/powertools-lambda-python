@@ -14,7 +14,7 @@ tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.44.0"
+version = "2.45.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 category = "dev"
 optional = false
@@ -28,14 +28,14 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk.aws-apigatewayv2-alpha"
-version = "2.44.0a0"
+version = "2.45.0a0"
 description = "The CDK Construct Library for AWS::APIGatewayv2"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 
 [package.dependencies]
-aws-cdk-lib = ">=2.44.0,<3.0.0"
+aws-cdk-lib = ">=2.45.0,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.68.0,<2.0.0"
 publication = ">=0.0.3"
@@ -43,15 +43,15 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk.aws-apigatewayv2-integrations-alpha"
-version = "2.44.0a0"
+version = "2.45.0a0"
 description = "Integrations for AWS APIGateway V2"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 
 [package.dependencies]
-aws-cdk-lib = ">=2.44.0,<3.0.0"
-"aws-cdk.aws-apigatewayv2-alpha" = "2.44.0.a0"
+aws-cdk-lib = ">=2.45.0,<3.0.0"
+"aws-cdk.aws-apigatewayv2-alpha" = "2.45.0.a0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.68.0,<2.0.0"
 publication = ">=0.0.3"
@@ -1380,7 +1380,7 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "5c9d50c6b28685bc519a664caea9ce01be1f49b338390dc81430290ec2d61656"
+content-hash = "81bfd6a037da187ac628b5880dd3b351959e74b418ced37041d7cc3d4c45fb58"
 
 [metadata.files]
 attrs = [
@@ -1388,16 +1388,16 @@ attrs = [
     {file = "attrs-22.1.0.tar.gz", hash = "sha256:29adc2665447e5191d0e7c568fde78b21f9672d344281d0c6e1ab085429b22b6"},
 ]
 aws-cdk-lib = [
-    {file = "aws-cdk-lib-2.44.0.tar.gz", hash = "sha256:92eb87d6576a8be20bf8c359e25dbfd8c8890b53be54be57b71fbcdd16886eea"},
-    {file = "aws_cdk_lib-2.44.0-py3-none-any.whl", hash = "sha256:f0de47d4a6e84391d2ec9f551e514c0f4f9be822d17695a305307f2f31751387"},
+    {file = "aws-cdk-lib-2.45.0.tar.gz", hash = "sha256:ed4166498205a6507666a9fdb69f5dbeffa11cd69bf7e98b279ec305e4970374"},
+    {file = "aws_cdk_lib-2.45.0-py3-none-any.whl", hash = "sha256:9463fe6d84563c4c23ae96810be0ea0ff0a260eebb85a4a7afe0c3747eca18a8"},
 ]
 "aws-cdk.aws-apigatewayv2-alpha" = [
-    {file = "aws-cdk.aws-apigatewayv2-alpha-2.44.0a0.tar.gz", hash = "sha256:df570880ef6089d40ae7e61c5377d6516a54ac28ee96e26810bc034dce45871e"},
-    {file = "aws_cdk.aws_apigatewayv2_alpha-2.44.0a0-py3-none-any.whl", hash = "sha256:9cc0eb04c2589616b31b1f9eaf878287adfe6a2d9786b672078c8f658381f6e4"},
+    {file = "aws-cdk.aws-apigatewayv2-alpha-2.45.0a0.tar.gz", hash = "sha256:1539f66d4c4ca18c83e7cbc929595f583a006c62afa74e901b091bdb3ede30d6"},
+    {file = "aws_cdk.aws_apigatewayv2_alpha-2.45.0a0-py3-none-any.whl", hash = "sha256:7f92c3fc6146b8bb7ae9ef353c42485b8ca40ce6c8001827c233de3833e03a6e"},
 ]
 "aws-cdk.aws-apigatewayv2-integrations-alpha" = [
-    {file = "aws-cdk.aws-apigatewayv2-integrations-alpha-2.44.0a0.tar.gz", hash = "sha256:8ef1897ae1872cc27f8f8c35c47f67bdc61cb60e9cdc5e75c045eec20923f5f3"},
-    {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.44.0a0-py3-none-any.whl", hash = "sha256:3b89793b3b9ffb1136c4f063dc5cf7bf76cfd5305212a24ce662efa82993dd06"},
+    {file = "aws-cdk.aws-apigatewayv2-integrations-alpha-2.45.0a0.tar.gz", hash = "sha256:a3a3413c34e444d752d44d7bbe8891d5c1af6d64e10185eaa21885710c12b33a"},
+    {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.45.0a0-py3-none-any.whl", hash = "sha256:d8ed1c1f0b1ea29255c561f528f494e3e8a85ebc7373234a58872c558408acbc"},
 ]
 aws-xray-sdk = []
 bandit = [
