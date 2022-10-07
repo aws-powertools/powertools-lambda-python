@@ -54,7 +54,7 @@ class BaseInfrastructure(InfrastructureProvider):
             )
 
     def create_lambda_functions(
-        self, function_props: Optional[Dict] = None, architecture: Optional[Architecture] = Architecture.X86_64
+        self, function_props: Optional[Dict] = None, architecture: Architecture = Architecture.X86_64
     ) -> Dict[str, Function]:
         """Create Lambda functions available under handlers_dir
 
