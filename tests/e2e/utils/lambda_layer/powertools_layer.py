@@ -61,7 +61,7 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
 
         return False
 
-    def _platform_name(self, architecture: Architecture) -> str:
+    def _resolve_platform(self, architecture: Architecture) -> str:
         """Returns the correct plaform name for the manylinux project (see PEP 599)
 
         Returns
