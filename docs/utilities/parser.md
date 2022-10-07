@@ -1,5 +1,5 @@
 ---
-title: Parser
+title: Parser (Pydantic)
 description: Utility
 ---
 <!-- markdownlint-disable MD043 -->
@@ -25,7 +25,11 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 
 Install parser's extra dependencies using **`pip install aws-lambda-powertools[pydantic]`**.
 
-## Defining models
+## Getting started
+
+### Install
+
+### Defining models
 
 You can define models to parse incoming events by inheriting from `BaseModel`.
 
@@ -47,11 +51,11 @@ class Order(BaseModel):
 
 These are simply Python classes that inherit from BaseModel. **Parser** enforces type hints declared in your model at runtime.
 
-## Parsing events
+### Parsing events
 
 You can parse inbound events using **event_parser** decorator, or the standalone `parse` function. Both are also able to parse either dictionary or JSON string as an input.
 
-### event_parser decorator
+#### event_parser decorator
 
 Use the decorator for fail fast scenarios where you want your Lambda function to raise an exception in the event of a malformed payload.
 
@@ -104,7 +108,7 @@ handler(event=payload, context=LambdaContext())
 handler(event=json.dumps(payload), context=LambdaContext()) # also works if event is a JSON string
 ```
 
-### parse function
+#### parse function
 
 Use this standalone function when you want more control over the data validation process, for example returning a 400 error for malformed payloads.
 
@@ -149,7 +153,7 @@ def my_function():
 		}
 ```
 
-## Built-in models
+### Built-in models
 
 Parser comes with the following built-in models:
 
@@ -171,7 +175,7 @@ Parser comes with the following built-in models:
 | **KafkaSelfManagedEventModel**  | Lambda Event Source payload for self managed Kafka payload         |
 | **KafkaMskEventModel**          | Lambda Event Source payload for AWS MSK payload                    |
 
-### extending built-in models
+#### extending built-in models
 
 You can extend them to include your own models, and yet have all other known fields parsed along the way.
 
@@ -236,7 +240,9 @@ for order_item in ret.detail.items:
 3. Defined how part of our EventBridge event should look like by overriding `detail` key within our `OrderEventModel`
 4. Parser parsed the original event against `OrderEventModel`
 
-## Envelopes
+## Advanced
+
+### Envelopes
 
 When trying to parse your payloads wrapped in a known structure, you might encounter the following situations:
 
@@ -294,7 +300,7 @@ def handler(event: UserModel, context: LambdaContext):
 3. Parser parsed the original event against the EventBridge model
 4. Parser then parsed the `detail` key using `UserModel`
 
-### Built-in envelopes
+#### Built-in envelopes
 
 Parser comes with the following built-in envelopes, where `Model` in the return section is your given model.
 
@@ -312,7 +318,7 @@ Parser comes with the following built-in envelopes, where `Model` in the return 
 | **LambdaFunctionUrlEnvelope** | 1. Parses data using `LambdaFunctionUrlModel`. <br/> 2. Parses `body` key using your model and returns it.                                                                                                  | `Model`                            |
 | **KafkaEnvelope**             | 1. Parses data using `KafkaRecordModel`. <br/> 2. Parses `value` key using your model and returns it.                                                                                                       | `Model`                            |
 
-### Bringing your own envelope
+#### Bringing your own envelope
 
 You can create your own Envelope model and logic by inheriting from `BaseEnvelope`, and implementing the `parse` method.
 
@@ -377,7 +383,7 @@ Here's a snippet of how the EventBridge envelope we demonstrated previously is i
 3. Then, we parsed the incoming data with our envelope to confirm it matches EventBridge's structure defined in `EventBridgeModel`
 4. Lastly, we call `_parse` from `BaseEnvelope` to parse the data in our envelope (.detail) using the customer model
 
-## Data model validation
+### Data model validation
 
 ???+ warning
     This is radically different from the **Validator utility** which validates events against JSON Schema.
@@ -394,7 +400,7 @@ Keep the following in mind regardless of which decorator you end up using it:
 * You must raise either `ValueError`, `TypeError`, or `AssertionError` when value is not compliant
 * You must return the value(s) itself if compliant
 
-### validating fields
+#### validating fields
 
 Quick validation to verify whether the field `message` has the value of `hello world`.
 
@@ -439,7 +445,7 @@ class HelloWorldModel(BaseModel):
 parse(model=HelloWorldModel, event={"message": "hello universe", "sender": "universe"})
 ```
 
-### validating entire model
+#### validating entire model
 
 `root_validator` can help when you have a complex validation mechanism. For example finding whether data has been omitted, comparing field values, etc.
 
@@ -470,7 +476,7 @@ parse(model=UserModel, event=payload)
 ???+ info
     You can read more about validating list items, reusing validators, validating raw inputs, and a lot more in <a href="https://pydantic-docs.helpmanual.io/usage/validators/">Pydantic's documentation</a>.
 
-## Advanced use cases
+### Advanced use cases
 
 ???+ tip "Tip: Looking to auto-generate models from JSON, YAML, JSON Schemas, OpenApi, etc?"
     Use Koudai Aono's [data model code generation tool for Pydantic](https://github.com/koxudaxi/datamodel-code-generator)
