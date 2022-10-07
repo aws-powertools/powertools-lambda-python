@@ -16,9 +16,11 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 
 ### Install
 
-!!! info "This is not necessary if you're using Lambda Layer"
+!!! info "This is not necessary if you're installing Powertools via [Lambda Layer](../index.md#lambda-layer){target="_blank"}"
 
-Add `aws-lambda-powertools[parser]` in your preferred dependency management tool.
+Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
+
+This will ensure you have the required dependencies before using Parser.
 
 ???+ warning
     This will increase the compressed package size by >10MB due to the Pydantic dependency.
