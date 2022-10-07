@@ -19,7 +19,7 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
         super().__init__(output_dir)
         self.package = f"{SOURCE_CODE_ROOT_PATH}[all]"
 
-        platform_name = self._platform_name(architecture)
+        platform_name = self._resolve_platform(architecture)
         self.build_args = f"--platform {platform_name} --only-binary=:all: --upgrade"
         self.build_command = f"python -m pip install {self.package} {self.build_args} --target {self.target_dir}"
         self.cleanup_command = (
