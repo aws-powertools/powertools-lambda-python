@@ -20,6 +20,11 @@ Powertools is available in the following formats:
 * **Lambda Layer**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:33**](#){: .copyMe}:clipboard:
 * **PyPi**: **`pip install aws-lambda-powertools`**
 
+???+ info "Some utilities require additional dependencies"
+    You can stop reading if you're using Lambda Layer.
+
+    [Tracer](./core/tracer.md){target="_blank"}, [Validation](./utilities/validation.md){target="_blank"} and [Parser](./utilities/parser.md){target="_blank"} require additional dependencies. If you prefer to install all of them, use `pip install aws-lambda-powertools[all]`.
+
 ???+ hint "Support this project by using Lambda Layers :heart:"
     Lambda Layers allow us to understand who uses this library in a non-intrusive way. This helps us justify and gain future investments for other Lambda Powertools languages.
 
