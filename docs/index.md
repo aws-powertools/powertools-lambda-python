@@ -25,6 +25,19 @@ Powertools is available in the following formats:
 
     When using Layers, you can add Lambda Powertools as a dev dependency (or as part of your virtual env) to not impact the development process.
 
+### Local development
+
+Powertools relies on the AWS SDK bundled in the Lambda runtime. This helps us achieve an optimal package size and initialization.
+
+This means you need to add AWS SDK as a development dependency (not as a production dependency).
+
+* **Pip**: `pip install aws-lambda-powertools[aws-sdk]`
+* **Poetry**: `poetry add aws-lambda-powertools[aws-sdk] --dev`
+* **Pipenv**: `pipenv install --dev "aws-lambda-powertools[aws-sdk]"`
+
+???+ note "Local emulation"
+    If you're running your code locally with [AWS SAM CLI](https://github.com/aws/aws-sam-cli){target="_blank"}, and not with your Python/IDE interpreter directly, this is not necessary. SAM CLI already brings the AWS SDK in its emulation image.
+
 ### Lambda Layer
 
 [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. Layers promote code sharing and separation of responsibilities so that you can iterate faster on writing business logic.
