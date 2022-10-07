@@ -67,7 +67,7 @@ class BaseInfrastructure(InfrastructureProvider):
         function_props: Optional[Dict]
             Dictionary representing CDK Lambda FunctionProps to override defaults
 
-        architecture: Optional[Architecture]
+        architecture: Architecture
             Used to create Lambda Layer and functions in a different architecture. Defaults to x86_64.
 
         Returns
