@@ -11,7 +11,7 @@ description: AWS Lambda Powertools for Python
 A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, idempotency, batching, and more.
 
 ???+ note
-    Lambda Powertools is also available for [Java](https://awslabs.github.io/aws-lambda-powertools-java/){target="_blank"} and [TypeScript](https://awslabs.github.io/aws-lambda-powertools-typescript/latest/){target="_blank"}.
+    Powertools is also available for [Java](https://awslabs.github.io/aws-lambda-powertools-java/){target="_blank"}, [TypeScript](https://awslabs.github.io/aws-lambda-powertools-typescript/latest/){target="_blank"}, and [.NET](https://awslabs.github.io/aws-lambda-powertools-dotnet/){target="_blank"}
 
 ## Install
 
@@ -20,10 +20,28 @@ Powertools is available in the following formats:
 * **Lambda Layer**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:38**](#){: .copyMe}:clipboard:
 * **PyPi**: **`pip install aws-lambda-powertools`**
 
+???+ info "Some utilities require additional dependencies"
+    You can stop reading if you're using Lambda Layer.
+
+    [Tracer](./core/tracer.md){target="_blank"}, [Validation](./utilities/validation.md){target="_blank"} and [Parser](./utilities/parser.md){target="_blank"} require additional dependencies. If you prefer to install all of them, use `pip install aws-lambda-powertools[all]`.
+
 ???+ hint "Support this project by using Lambda Layers :heart:"
     Lambda Layers allow us to understand who uses this library in a non-intrusive way. This helps us justify and gain future investments for other Lambda Powertools languages.
 
     When using Layers, you can add Lambda Powertools as a dev dependency (or as part of your virtual env) to not impact the development process.
+
+### Local development
+
+Powertools relies on the AWS SDK bundled in the Lambda runtime. This helps us achieve an optimal package size and initialization.
+
+This means you need to add AWS SDK as a development dependency (not as a production dependency).
+
+* **Pip**: `pip install aws-lambda-powertools[aws-sdk]`
+* **Poetry**: `poetry add aws-lambda-powertools[aws-sdk] --dev`
+* **Pipenv**: `pipenv install --dev "aws-lambda-powertools[aws-sdk]"`
+
+???+ note "Local emulation"
+    If you're running your code locally with [AWS SAM CLI](https://github.com/aws/aws-sam-cli){target="_blank"}, and not with your Python/IDE interpreter directly, this is not necessary. SAM CLI already brings the AWS SDK in its emulation image.
 
 ### Lambda Layer
 
