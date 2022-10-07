@@ -67,7 +67,7 @@ mypy-boto3-ssm = { version = "^1.24.81", python = ">=3.7" }
 mypy-boto3-s3 = { version = "^1.24.76", python = ">=3.7" }
 mypy-boto3-xray = { version = "^1.24.0", python = ">=3.7" }
 types-requests = "^2.28.11"
-typing-extensions = { version = "^4.3.0", python = ">=3.7" }
+typing-extensions = { version = "^4.4.0", python = ">=3.7" }
 python-snappy = "^0.6.1"
 mkdocs-material = { version = "^8.5.4", python = ">=3.7" }
 filelock = { version = "^3.8.0", python = ">=3.7" }
