@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-cdk-aws-lambda-powertools-layer = "^3.0.0"
+cdk-aws-lambda-powertools-layer = "^3.1.0"
 aws-cdk-lib = "^2.44.0"
 
 [tool.poetry.dev-dependencies]

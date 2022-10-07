@@ -28,14 +28,14 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "boto3"
-version = "1.24.87"
+version = "1.24.88"
 description = "The AWS SDK for Python"
 category = "dev"
 optional = false
 python-versions = ">= 3.7"
 
 [package.dependencies]
-botocore = ">=1.27.87,<1.28.0"
+botocore = ">=1.27.88,<1.28.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -44,7 +44,7 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.27.87"
+version = "1.27.88"
 description = "Low-level, data-driven core of boto 3."
 category = "dev"
 optional = false
@@ -72,7 +72,7 @@ exceptiongroup = {version = "*", markers = "python_version <= \"3.10\""}
 
 [[package]]
 name = "cdk-aws-lambda-powertools-layer"
-version = "3.0.1"
+version = "3.1.0"
 description = "A lambda layer for AWS Powertools for python and typescript"
 category = "main"
 optional = false
@@ -95,7 +95,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "constructs"
-version = "10.1.123"
+version = "10.1.124"
 description = "A programming model for software-defined state"
 category = "main"
 optional = false
@@ -274,7 +274,7 @@ doc = ["sphinx-autodoc-typehints (>=1.2.0)", "sphinx-rtd-theme"]
 
 [[package]]
 name = "typing-extensions"
-version = "4.3.0"
+version = "4.4.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
 category = "main"
 optional = false
@@ -296,7 +296,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "58c6dea4f27ff2c98dad77255fb56184d918596e188d3cc83e4227d2e4d4a15d"
+content-hash = "cceb24edf99719274b946c811ad41ebbbdc0181593d4f07555c0977767cdd19a"
 
 [metadata.files]
 attrs = [
@@ -308,22 +308,22 @@ aws-cdk-lib = [
     {file = "aws_cdk_lib-2.45.0-py3-none-any.whl", hash = "sha256:9463fe6d84563c4c23ae96810be0ea0ff0a260eebb85a4a7afe0c3747eca18a8"},
 ]
 boto3 = [
-    {file = "boto3-1.24.87-py3-none-any.whl", hash = "sha256:bcc579e801774cb2c7dda87ff985feda1ae7e10591d11ef37526363139138bd4"},
-    {file = "boto3-1.24.87.tar.gz", hash = "sha256:3dd7ed74d1d29dd8094a078be86ed61c45de6638fe18856f7a1ff9282b4d929e"},
+    {file = "boto3-1.24.88-py3-none-any.whl", hash = "sha256:6b4cf1cd0be65202c4cf0e4c69099bac3620bcd4049ca25a5e223c668401dd69"},
+    {file = "boto3-1.24.88.tar.gz", hash = "sha256:93934343cac76084600a520e5be70c52152364d0c410681c2e25c2290f0e151c"},
 ]
 botocore = [
-    {file = "botocore-1.27.87-py3-none-any.whl", hash = "sha256:c4cbd22056ace4c7aa99e62e8ae629865ab80cc8bbf7c6d68ccf0f768f0034b6"},
-    {file = "botocore-1.27.87.tar.gz", hash = "sha256:216de9751116d0d1cc3901e26d95a5c9a30ecb6973ae6147af1cf504858d845a"},
+    {file = "botocore-1.27.88-py3-none-any.whl", hash = "sha256:de4e087b24cd3bc369eb2e27f8fe94a6499f7dea08c919fba13cefb2496bd2bb"},
+    {file = "botocore-1.27.88.tar.gz", hash = "sha256:ded0a4035baf91eb358ef501c92a8512543f5ab7658f459df3077a70a555b5cd"},
 ]
 cattrs = []
 cdk-aws-lambda-powertools-layer = [
-    {file = "cdk-aws-lambda-powertools-layer-3.0.1.tar.gz", hash = "sha256:fc6e3f8aa43ee82cd9131916dd06edeed98dc5880fdf71fef20bcd8295be7097"},
-    {file = "cdk_aws_lambda_powertools_layer-3.0.1-py3-none-any.whl", hash = "sha256:4d5689cddfd16adf9f71a4d81bdea9483c49f09b76d9f2361ad1976575d151c4"},
+    {file = "cdk-aws-lambda-powertools-layer-3.1.0.tar.gz", hash = "sha256:1e1457edbebfbb62ab2d21ae0f9b991db1b6c8508730fab8c99c3a7d3dfd99cb"},
+    {file = "cdk_aws_lambda_powertools_layer-3.1.0-py3-none-any.whl", hash = "sha256:c66cc722c924a50458418600df4060a1396e134df25b3cc85de59d5914541b31"},
 ]
 colorama = []
 constructs = [
-    {file = "constructs-10.1.123-py3-none-any.whl", hash = "sha256:a095dc34ac5d1ba582a6bd9364c2676d4c4de3d99466dc7cea0445ec4acdf226"},
-    {file = "constructs-10.1.123.tar.gz", hash = "sha256:5f183f6c87ad755e96a0395aac043c0b4c1edd52e67e7c2b18affaf5f7eff284"},
+    {file = "constructs-10.1.124-py3-none-any.whl", hash = "sha256:76ef2e6776cfdd1c4131a18b0e83c1b154d462b3ebb37ddbeaf3043b3b0de301"},
+    {file = "constructs-10.1.124.tar.gz", hash = "sha256:5e4bfcca275867e5cfb4636ef65ed334c861a816f287ce1136f082ad0e0c1c2c"},
 ]
 exceptiongroup = [
     {file = "exceptiongroup-1.0.0rc9-py3-none-any.whl", hash = "sha256:2e3c3fc1538a094aab74fad52d6c33fc94de3dfee3ee01f187c0e0c72aec5337"},
@@ -365,8 +365,8 @@ typeguard = [
     {file = "typeguard-2.13.3.tar.gz", hash = "sha256:00edaa8da3a133674796cf5ea87d9f4b4c367d77476e185e80251cc13dfbb8c4"},
 ]
 typing-extensions = [
-    {file = "typing_extensions-4.3.0-py3-none-any.whl", hash = "sha256:25642c956049920a5aa49edcdd6ab1e06d7e5d467fc00e0506c44ac86fbfca02"},
-    {file = "typing_extensions-4.3.0.tar.gz", hash = "sha256:e6d2677a32f47fc7eb2795db1dd15c1f34eff616bcaf2cfb5e997f854fa1c4a6"},
+    {file = "typing_extensions-4.4.0-py3-none-any.whl", hash = "sha256:16fa4864408f655d35ec496218b85f79b3437c829e93320c7c9215ccfd92489e"},
+    {file = "typing_extensions-4.4.0.tar.gz", hash = "sha256:1511434bb92bf8dd198c12b1cc812e800d4181cfcb867674e0f8279cc93087aa"},
 ]
 urllib3 = [
     {file = "urllib3-1.26.12-py2.py3-none-any.whl", hash = "sha256:b930dd878d5a8afb066a637fbb35144fe7901e3b209d1cd4f524bd0e9deee997"},
