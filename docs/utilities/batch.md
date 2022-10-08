@@ -833,6 +833,73 @@ def lambda_handler(event, context: LambdaContext):
 	return processor.response()
 ```
 
+### Accessing Lambda Context
+
+Within your `record_handler` function, you might need access to the Lambda context to determine how much time you have left before your function times out.
+
+We can automatically inject the [Lambda context](https://docs.aws.amazon.com/lambda/latest/dg/python-context.html){target="_blank"} into your `record_handler` if your function signature has a parameter named `lambda_context`. When using a context manager, you also need to pass the Lambda context object like in the example below.
+
+=== "As a decorator"
+
+    ```python hl_lines="15"
+    from typing import Optional
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import (BatchProcessor, EventType,
+                                                       batch_processor)
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+    processor = BatchProcessor(event_type=EventType.SQS)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    def record_handler(record: SQSRecord, lambda_context: Optional[LambdaContext] = None):
+        if lambda_context is not None:
+            remaining_time = lambda_context.get_remaining_time_in_millis()
+        ...
+
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context: LambdaContext):
+        return processor.response()
+    ```
+
+=== "As a context manager"
+
+    ```python hl_lines="14 23"
+    from typing import Optional
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+    processor = BatchProcessor(event_type=EventType.SQS)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    def record_handler(record: SQSRecord, lambda_context: Optional[LambdaContext] = None):
+        if lambda_context is not None:
+            remaining_time = lambda_context.get_remaining_time_in_millis()
+        ...
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context: LambdaContext):
+        batch = event["Records"]
+        with processor(records=batch, handler=record_handler, lambda_context=context):
+            result = processor.process()
+
+        return result
+    ```
+
 ### Extending BatchProcessor
 
 You might want to bring custom logic to the existing `BatchProcessor` to slightly override how we handle successes and failures.

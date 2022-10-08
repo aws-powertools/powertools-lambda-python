@@ -1,4 +1,8 @@
-from aws_lambda_powertools.event_handler import LambdaFunctionUrlResolver, Response, content_types
+from aws_lambda_powertools.event_handler import (
+    LambdaFunctionUrlResolver,
+    Response,
+    content_types,
+)
 from aws_lambda_powertools.utilities.data_classes import LambdaFunctionUrlEvent
 from tests.functional.utils import load_event
 

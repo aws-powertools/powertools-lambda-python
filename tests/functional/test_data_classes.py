@@ -49,7 +49,9 @@ from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import 
     AppSyncResolverEventInfo,
     get_identity_object,
 )
-from aws_lambda_powertools.utilities.data_classes.code_pipeline_job_event import CodePipelineData
+from aws_lambda_powertools.utilities.data_classes.code_pipeline_job_event import (
+    CodePipelineData,
+)
 from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import (
     CreateAuthChallengeTriggerEvent,
     CustomMessageTriggerEvent,
@@ -62,7 +64,10 @@ from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import
     UserMigrationTriggerEvent,
     VerifyAuthChallengeResponseTriggerEvent,
 )
-from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import (
+    BaseProxyEvent,
+    DictWrapper,
+)
 from aws_lambda_powertools.utilities.data_classes.connect_contact_flow_event import (
     ConnectContactFlowChannel,
     ConnectContactFlowEndpointType,
@@ -78,7 +83,9 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
     StreamViewType,
 )
 from aws_lambda_powertools.utilities.data_classes.event_source import event_source
-from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
+from aws_lambda_powertools.utilities.data_classes.s3_object_event import (
+    S3ObjectLambdaEvent,
+)
 from tests.functional.utils import load_event
 
 

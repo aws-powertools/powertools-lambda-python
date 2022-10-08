@@ -188,3 +188,68 @@ def test_resolver_include_resolver():
     # THEN
     assert result1 == "get_locations#value"
     assert result2 == "get_locations2#value"
+
+
+def test_append_context():
+    app = AppSyncResolver()
+    app.append_context(is_admin=True)
+    assert app.context.get("is_admin") is True
+
+
+def test_router_append_context():
+    router = Router()
+    router.append_context(is_admin=True)
+    assert router.context.get("is_admin") is True
+
+
+def test_route_context_is_cleared_after_resolve():
+    # GIVEN
+    app = AppSyncResolver()
+    event = {"typeName": "Query", "fieldName": "listLocations", "arguments": {"name": "value"}}
+
+    @app.resolver(field_name="listLocations")
+    def get_locations(name: str):
+        return f"get_locations#{name}"
+
+    # WHEN event resolution kicks in
+    app.append_context(is_admin=True)
+    app.resolve(event, {})
+
+    # THEN context should be empty
+    assert app.context == {}
+
+
+def test_router_has_access_to_app_context():
+    # GIVEN
+    app = AppSyncResolver()
+    router = Router()
+    event = {"typeName": "Query", "fieldName": "listLocations", "arguments": {"name": "value"}}
+
+    @router.resolver(type_name="Query", field_name="listLocations")
+    def get_locations(name: str):
+        if router.context["is_admin"]:
+            return f"get_locations#{name}"
+
+    app.include_router(router)
+
+    # WHEN
+    app.append_context(is_admin=True)
+    ret = app.resolve(event, {})
+
+    # THEN
+    assert ret == "get_locations#value"
+    assert router.context == {}
+
+
+def test_include_router_merges_context():
+    # GIVEN
+    app = AppSyncResolver()
+    router = Router()
+
+    # WHEN
+    app.append_context(is_admin=True)
+    router.append_context(product_access=True)
+
+    app.include_router(router)
+
+    assert app.context == router.context

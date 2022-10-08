@@ -1,7 +1,14 @@
 from typing import Dict
 
-from aws_lambda_powertools.utilities.data_classes.active_mq_event import ActiveMQEvent, ActiveMQMessage
-from aws_lambda_powertools.utilities.data_classes.rabbit_mq_event import BasicProperties, RabbitMessage, RabbitMQEvent
+from aws_lambda_powertools.utilities.data_classes.active_mq_event import (
+    ActiveMQEvent,
+    ActiveMQMessage,
+)
+from aws_lambda_powertools.utilities.data_classes.rabbit_mq_event import (
+    BasicProperties,
+    RabbitMessage,
+    RabbitMQEvent,
+)
 from tests.functional.utils import load_event
 
 

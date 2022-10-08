@@ -12,7 +12,11 @@ from ..shared import constants
 from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
 from .exceptions import InvalidLoggerSamplingRateError
 from .filters import SuppressFilter
-from .formatter import RESERVED_FORMATTER_CUSTOM_KEYS, BasePowertoolsFormatter, LambdaPowertoolsFormatter
+from .formatter import (
+    RESERVED_FORMATTER_CUSTOM_KEYS,
+    BasePowertoolsFormatter,
+    LambdaPowertoolsFormatter,
+)
 from .lambda_context import build_lambda_context_model
 
 logger = logging.getLogger(__name__)

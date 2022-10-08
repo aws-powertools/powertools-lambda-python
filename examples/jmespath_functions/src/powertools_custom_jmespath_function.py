@@ -5,7 +5,10 @@ import snappy
 from jmespath.exceptions import JMESPathTypeError
 from jmespath.functions import signature
 
-from aws_lambda_powertools.utilities.jmespath_utils import PowertoolsFunctions, extract_data_from_envelope
+from aws_lambda_powertools.utilities.jmespath_utils import (
+    PowertoolsFunctions,
+    extract_data_from_envelope,
+)
 
 
 class CustomFunctions(PowertoolsFunctions):

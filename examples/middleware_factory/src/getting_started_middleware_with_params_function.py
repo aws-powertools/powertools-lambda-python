@@ -4,7 +4,10 @@ from typing import Any, Callable, List
 from uuid import uuid4
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.utilities.jmespath_utils import envelopes, extract_data_from_envelope
+from aws_lambda_powertools.utilities.jmespath_utils import (
+    envelopes,
+    extract_data_from_envelope,
+)
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 

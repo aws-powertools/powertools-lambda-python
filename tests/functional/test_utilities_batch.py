@@ -16,14 +16,29 @@ from aws_lambda_powertools.utilities.batch import (
     batch_processor,
     sqs_batch_processor,
 )
-from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError, SQSBatchProcessingError
-from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
-from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
+from aws_lambda_powertools.utilities.batch.exceptions import (
+    BatchProcessingError,
+    SQSBatchProcessingError,
+)
+from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
+    DynamoDBRecord,
+)
+from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
+    KinesisStreamRecord,
+)
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.parser import BaseModel, validator
-from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamChangedRecordModel, DynamoDBStreamRecordModel
-from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecord as KinesisDataStreamRecordModel
-from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecordPayload, SqsRecordModel
+from aws_lambda_powertools.utilities.parser.models import (
+    DynamoDBStreamChangedRecordModel,
+    DynamoDBStreamRecordModel,
+)
+from aws_lambda_powertools.utilities.parser.models import (
+    KinesisDataStreamRecord as KinesisDataStreamRecordModel,
+)
+from aws_lambda_powertools.utilities.parser.models import (
+    KinesisDataStreamRecordPayload,
+    SqsRecordModel,
+)
 from aws_lambda_powertools.utilities.parser.types import Literal
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import b64_to_str, str_to_b64

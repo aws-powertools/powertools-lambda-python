@@ -3,7 +3,11 @@ from typing import Dict, Union
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import ValidationError, event_parser, exceptions
+from aws_lambda_powertools.utilities.parser import (
+    ValidationError,
+    event_parser,
+    exceptions,
+)
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 

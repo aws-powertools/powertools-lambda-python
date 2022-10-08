@@ -1,7 +1,9 @@
 import boto3
 import getting_started_validator_unwrapping_schema as schemas
 
-from aws_lambda_powertools.utilities.data_classes.event_bridge_event import EventBridgeEvent
+from aws_lambda_powertools.utilities.data_classes.event_bridge_event import (
+    EventBridgeEvent,
+)
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import validator
 

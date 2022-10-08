@@ -185,7 +185,7 @@ You can subclass [AppSyncResolverEvent](../../utilities/data_classes.md#appsync-
 
 === "custom_models.py.py"
 
-    ```python hl_lines="11 14 30-32 35-36 43 50"
+    ```python hl_lines="11 14 32-34 37-38 45 52"
     --8<-- "examples/event_handler_graphql/src/custom_models.py"
     ```
 
@@ -226,6 +226,28 @@ Let's assume you have `split_operation.py` as your Lambda function entrypoint an
     --8<-- "examples/event_handler_graphql/src/split_operation.py"
     ```
 
+#### Sharing contextual data
+
+You can use `append_context` when you want to share data between your App and Router instances. Any data you share will be available via the `context` dictionary available in your App or Router context.
+
+???+ info
+    For safety, we always clear any data available in the `context` dictionary after each invocation.
+
+???+ tip
+    This can also be useful for middlewares injecting contextual information before a request is processed.
+
+=== "split_route_append_context.py"
+
+	```python hl_lines="17"
+    --8<-- "examples/event_handler_graphql/src/split_operation_append_context.py"
+	```
+
+=== "split_route_append_context_module.py"
+
+	```python hl_lines="29"
+    --8<-- "examples/event_handler_graphql/src/split_operation_append_context_module.py"
+	```
+
 ## Testing your code
 
 You can test your resolvers by passing a mocked or actual AppSync Lambda event that you're expecting.
@@ -259,7 +281,7 @@ And an example for testing asynchronous resolvers. Note that this requires the `
 
 === "assert_async_graphql_response.py"
 
-    ```python hl_lines="28"
+    ```python hl_lines="31"
     --8<-- "examples/event_handler_graphql/src/assert_async_graphql_response.py"
     ```
 

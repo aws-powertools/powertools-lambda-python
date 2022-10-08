@@ -10,7 +10,16 @@ from uuid import uuid4
 import boto3
 import pytest
 import yaml
-from aws_cdk import App, AssetStaging, BundlingOptions, CfnOutput, DockerImage, RemovalPolicy, Stack, aws_logs
+from aws_cdk import (
+    App,
+    AssetStaging,
+    BundlingOptions,
+    CfnOutput,
+    DockerImage,
+    RemovalPolicy,
+    Stack,
+    aws_logs,
+)
 from aws_cdk.aws_lambda import Code, Function, LayerVersion, Runtime, Tracing
 from filelock import FileLock
 from mypy_boto3_cloudformation import CloudFormationClient

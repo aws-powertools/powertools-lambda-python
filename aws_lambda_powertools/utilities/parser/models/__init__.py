@@ -14,8 +14,17 @@ from .apigwv2 import (
     RequestContextV2AuthorizerJwt,
     RequestContextV2Http,
 )
-from .cloudwatch import CloudWatchLogsData, CloudWatchLogsDecode, CloudWatchLogsLogEvent, CloudWatchLogsModel
-from .dynamodb import DynamoDBStreamChangedRecordModel, DynamoDBStreamModel, DynamoDBStreamRecordModel
+from .cloudwatch import (
+    CloudWatchLogsData,
+    CloudWatchLogsDecode,
+    CloudWatchLogsLogEvent,
+    CloudWatchLogsModel,
+)
+from .dynamodb import (
+    DynamoDBStreamChangedRecordModel,
+    DynamoDBStreamModel,
+    DynamoDBStreamRecordModel,
+)
 from .event_bridge import EventBridgeModel
 from .kafka import KafkaBaseEventModel, KafkaMskEventModel, KafkaRecordModel, KafkaSelfManagedEventModel
 from .kinesis import KinesisDataStreamModel, KinesisDataStreamRecord, KinesisDataStreamRecordPayload

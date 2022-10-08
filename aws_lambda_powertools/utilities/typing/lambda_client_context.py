@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from typing import Any, Dict
 
-from aws_lambda_powertools.utilities.typing.lambda_client_context_mobile_client import LambdaClientContextMobileClient
+from aws_lambda_powertools.utilities.typing.lambda_client_context_mobile_client import (
+    LambdaClientContextMobileClient,
+)
 
 
 class LambdaClientContext(object):

@@ -1,6 +1,9 @@
 from typing import Dict, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, get_header_value
+from aws_lambda_powertools.utilities.data_classes.common import (
+    DictWrapper,
+    get_header_value,
+)
 
 
 class S3ObjectContext(DictWrapper):

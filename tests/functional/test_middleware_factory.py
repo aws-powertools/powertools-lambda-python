@@ -4,7 +4,9 @@ from typing import Callable
 import pytest
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.middleware_factory.exceptions import MiddlewareInvalidArgumentError
+from aws_lambda_powertools.middleware_factory.exceptions import (
+    MiddlewareInvalidArgumentError,
+)
 
 
 @pytest.fixture

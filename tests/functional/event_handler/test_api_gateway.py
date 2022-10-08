@@ -686,6 +686,16 @@ def test_debug_mode_environment_variable(monkeypatch):
     assert app._debug
 
 
+def test_powertools_dev_sets_debug_mode(monkeypatch):
+    # GIVEN a debug mode environment variable is set
+    monkeypatch.setenv(constants.POWERTOOLS_DEV_ENV, "true")
+    app = ApiGatewayResolver()
+
+    # WHEN calling app._debug
+    # THEN the debug mode is enabled
+    assert app._debug
+
+
 def test_debug_json_formatting(json_dump):
     # GIVEN debug is True
     app = ApiGatewayResolver(debug=True)
@@ -1296,3 +1306,66 @@ def test_response_with_status_code_only():
     assert ret.status_code == 204
     assert ret.body is None
     assert ret.headers == {}
+
+
+def test_append_context():
+    app = APIGatewayRestResolver()
+    app.append_context(is_admin=True)
+    assert app.context.get("is_admin") is True
+
+
+def test_router_append_context():
+    router = Router()
+    router.append_context(is_admin=True)
+    assert router.context.get("is_admin") is True
+
+
+def test_route_context_is_cleared_after_resolve():
+    # GIVEN a Http API V1 proxy type event
+    app = APIGatewayRestResolver()
+    app.append_context(is_admin=True)
+
+    @app.get("/my/path")
+    def my_path():
+        return {"is_admin": app.context["is_admin"]}
+
+    # WHEN event resolution kicks in
+    app.resolve(LOAD_GW_EVENT, {})
+
+    # THEN context should be empty
+    assert app.context == {}
+
+
+def test_router_has_access_to_app_context(json_dump):
+    # GIVEN a Router with registered routes
+    app = ApiGatewayResolver()
+    router = Router()
+    ctx = {"is_admin": True}
+
+    @router.get("/my/path")
+    def my_path():
+        return {"is_admin": router.context["is_admin"]}
+
+    app.include_router(router)
+
+    # WHEN context is added and event resolution kicks in
+    app.append_context(**ctx)
+    ret = app.resolve(LOAD_GW_EVENT, {})
+
+    # THEN response include initial context
+    assert ret["body"] == json_dump(ctx)
+    assert router.context == {}
+
+
+def test_include_router_merges_context():
+    # GIVEN
+    app = APIGatewayRestResolver()
+    router = Router()
+
+    # WHEN
+    app.append_context(is_admin=True)
+    router.append_context(product_access=True)
+
+    app.include_router(router)
+
+    assert app.context == router.context
