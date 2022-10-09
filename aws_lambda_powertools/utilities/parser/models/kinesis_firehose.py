@@ -1,6 +1,6 @@
 from typing import List, Optional, Type, Union
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, PositiveInt, validator
 
 from aws_lambda_powertools.shared.functions import base64_decode
 
@@ -8,7 +8,7 @@ from aws_lambda_powertools.shared.functions import base64_decode
 class KinesisFirehoseRecordMetadata(BaseModel):
     shardId: str
     partitionKey: str
-    approximateArrivalTimestamp: int
+    approximateArrivalTimestamp: PositiveInt
     sequenceNumber: str
     subsequenceNumber: str
 
@@ -16,7 +16,7 @@ class KinesisFirehoseRecordMetadata(BaseModel):
 class KinesisFirehoseRecord(BaseModel):
     data: Union[bytes, Type[BaseModel]]  # base64 encoded str is parsed into bytes
     recordId: str
-    approximateArrivalTimestamp: int
+    approximateArrivalTimestamp: PositiveInt
     kinesisRecordMetadata: Optional[KinesisFirehoseRecordMetadata]
 
     @validator("data", pre=True, allow_reuse=True)

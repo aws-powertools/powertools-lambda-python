@@ -26,9 +26,22 @@ from .dynamodb import (
     DynamoDBStreamRecordModel,
 )
 from .event_bridge import EventBridgeModel
-from .kafka import KafkaBaseEventModel, KafkaMskEventModel, KafkaRecordModel, KafkaSelfManagedEventModel
-from .kinesis import KinesisDataStreamModel, KinesisDataStreamRecord, KinesisDataStreamRecordPayload
-from .kinesis_firehose import KinesisFirehoseModel, KinesisFirehoseRecord, KinesisFirehoseRecordMetadata
+from .kafka import (
+    KafkaBaseEventModel,
+    KafkaMskEventModel,
+    KafkaRecordModel,
+    KafkaSelfManagedEventModel,
+)
+from .kinesis import (
+    KinesisDataStreamModel,
+    KinesisDataStreamRecord,
+    KinesisDataStreamRecordPayload,
+)
+from .kinesis_firehose import (
+    KinesisFirehoseModel,
+    KinesisFirehoseRecord,
+    KinesisFirehoseRecordMetadata,
+)
 from .lambda_function_url import LambdaFunctionUrlModel
 from .s3 import S3Model, S3RecordModel
 from .s3_object_event import (

@@ -2,7 +2,11 @@ from typing import List
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, event_parser
+from aws_lambda_powertools.utilities.parser import (
+    ValidationError,
+    envelopes,
+    event_parser,
+)
 from aws_lambda_powertools.utilities.parser.models import (
     KinesisFirehoseModel,
     KinesisFirehoseRecord,
@@ -92,5 +96,19 @@ def test_firehose_trigger_event_put_no_envelope():
 def test_kinesis_trigger_bad_base64_event():
     event_dict = load_event("kinesisFirehoseKinesisEvent.json")
     event_dict["records"][0]["data"] = {"bad base64"}
+    with pytest.raises(ValidationError):
+        handle_firehose_no_envelope_kinesis(event_dict, LambdaContext())
+
+
+def test_kinesis_trigger_bad_timestamp_event():
+    event_dict = load_event("kinesisFirehoseKinesisEvent.json")
+    event_dict["records"][0]["approximateArrivalTimestamp"] = -1
+    with pytest.raises(ValidationError):
+        handle_firehose_no_envelope_kinesis(event_dict, LambdaContext())
+
+
+def test_kinesis_trigger_bad_metadata_timestamp_event():
+    event_dict = load_event("kinesisFirehoseKinesisEvent.json")
+    event_dict["records"][0]["kinesisRecordMetadata"]["approximateArrivalTimestamp"] = "-1"
     with pytest.raises(ValidationError):
         handle_firehose_no_envelope_kinesis(event_dict, LambdaContext())
