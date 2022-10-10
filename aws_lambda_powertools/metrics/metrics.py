@@ -77,7 +77,8 @@ class Metrics(MetricManager):
         self.namespace: Optional[str] = namespace
         self.metadata_set = self._metadata
         self.default_dimensions = self._default_dimensions
-        self.dimension_set = {**self._default_dimensions, **self._dimensions}
+        self.dimension_set = self._dimensions
+        self.dimension_set.update(**self._default_dimensions)
 
         super().__init__(
             metric_set=self.metric_set,
