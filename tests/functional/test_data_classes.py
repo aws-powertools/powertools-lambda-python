@@ -83,6 +83,9 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
     StreamRecord,
     StreamViewType,
 )
+from aws_lambda_powertools.utilities.data_classes.dynamodb import (
+    DynamoDBImageDeserializer,
+)
 from aws_lambda_powertools.utilities.data_classes.event_source import event_source
 from aws_lambda_powertools.utilities.data_classes.s3_object_event import (
     S3ObjectLambdaEvent,
@@ -654,6 +657,48 @@ def test_stream_record_keys_overrides_dict_wrapper_keys():
     data = {"Keys": {"key1": {"attr1": "value1"}}}
     record = StreamRecord(data)
     assert record.keys != data.keys()
+
+
+def test_deserialize_stream_record():
+    byte_list = [s.encode("utf-8") for s in ["item1", "item2"]]
+    data = {
+        "Keys": {"key1": {"attr1": "value1"}},
+        "NewImage": {
+            "Name": {"S": "Joe"},
+            "Age": {"N": "35"},
+            "TypesMap": {
+                "M": {
+                    "string": {"S": "value"},
+                    "number": {"N": "100"},
+                    "bool": {"BOOL": True},
+                    "dict": {"M": {"key": {"S": "value"}}},
+                    "stringSet": {"SS": ["item1", "item2"]},
+                    "numberSet": {"NS": ["100", "200", "300"]},
+                    "byteSet": {"BS": byte_list},
+                    "list": {"L": [{"S": "item1"}, {"N": "3.14159"}, {"BOOL": False}]},
+                    "null": {"NULL": True},
+                },
+            },
+        },
+    }
+    record = StreamRecord(data)
+    deserializer = DynamoDBImageDeserializer()
+    new_image = deserializer.deserialize(record.new_image)
+    assert new_image == {
+        "Name": "Joe",
+        "Age": "35",
+        "TypesMap": {
+            "string": "value",
+            "number": "100",
+            "bool": True,
+            "dict": {"key": "value"},
+            "stringSet": {"item1", "item2"},
+            "numberSet": {"100", "200", "300"},
+            "byteSet": set(byte_list),
+            "list": ["item1", "3.14159", False],
+            "null": None,
+        },
+    }
 
 
 def test_event_bridge_event():
