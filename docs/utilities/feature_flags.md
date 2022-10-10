@@ -38,7 +38,7 @@ If you want to learn more about feature flags, their variations and trade-offs, 
 
 ### IAM Permissions
 
-Your Lambda function must have `appconfig:GetConfiguration` IAM permission in order to fetch configuration from AWS AppConfig.
+Your Lambda function must have `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession` IAM permissions in order to fetch configuration from AWS AppConfig.
 
 ### Required resources
 

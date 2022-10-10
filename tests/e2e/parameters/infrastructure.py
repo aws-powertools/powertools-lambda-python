@@ -23,6 +23,7 @@ class ParametersStack(BaseInfrastructure):
         parameter.grant_read(function["ParameterStringHandler"])
 
         CfnOutput(self.stack, "ParameterString", value=parameter.parameter_name)
+        CfnOutput(self.stack, "ParameterStringValue", value=parameter.string_value)
 
     def _create_app_config(self, function: Any):
 
@@ -78,6 +79,7 @@ class ParametersStack(BaseInfrastructure):
             content_type="application/json",
             description="hostedconfiguratione2e",
         )
+        CfnOutput(self.stack, "AppConfigConfigurationValue", value=cfn_hosted_configuration_version.content)
 
         appconfig.CfnDeployment(
             self.stack,

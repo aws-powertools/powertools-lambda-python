@@ -1639,14 +1639,10 @@ def test_appconf_provider_get_configuration_json_content_type(mock_name, config)
     encoded_message = json.dumps(mock_body_json).encode("utf-8")
     mock_value = StreamingBody(BytesIO(encoded_message), len(encoded_message))
 
-    # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
-
-    # start_configuration_session response
     response_start = {"InitialConfigurationToken": "initial_token"}
     stubber.add_response("start_configuration_session", response_start)
 
-    # get_latest_configuration response
     response_latest = {
         "Configuration": mock_value,
         "NextPollConfigurationToken": "initial_token",
@@ -1682,13 +1678,10 @@ def test_appconf_provider_get_configuration_json_content_type_with_custom_client
     encoded_message = json.dumps(mock_body_json).encode("utf-8")
     mock_value = StreamingBody(BytesIO(encoded_message), len(encoded_message))
 
-    # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
-    # start_configuration_session response
     response_start = {"InitialConfigurationToken": "initial_token"}
     stubber.add_response("start_configuration_session", response_start)
 
-    # get_latest_configuration response
     response_latest = {
         "Configuration": mock_value,
         "NextPollConfigurationToken": "initial_token",
@@ -1722,13 +1715,10 @@ def test_appconf_provider_get_configuration_no_transform(mock_name, config):
     encoded_message = json.dumps(mock_body_json).encode("utf-8")
     mock_value = StreamingBody(BytesIO(encoded_message), len(encoded_message))
 
-    # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
-    # start_configuration_session response
     response_start = {"InitialConfigurationToken": "initial_token"}
     stubber.add_response("start_configuration_session", response_start)
 
-    # get_latest_configuration response
     response_latest = {
         "Configuration": mock_value,
         "NextPollConfigurationToken": "initial_token",

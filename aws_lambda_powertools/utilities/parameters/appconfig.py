@@ -109,6 +109,9 @@ class AppConfigProvider(BaseProvider):
             response_configuration = self.client.start_configuration_session(**sdk_options)
             self.next_call = response_configuration["InitialConfigurationToken"]
 
+        # The new AppConfig APIs require two API calls to return the configuration
+        # First we start the session and after that we retrieve the configuration
+        # We need to store the token to use in the next execution
         response = self.client.get_latest_configuration(ConfigurationToken=self.next_call)
         return_value = response["Configuration"].read()
         self.next_call = response["NextPollConfigurationToken"]
