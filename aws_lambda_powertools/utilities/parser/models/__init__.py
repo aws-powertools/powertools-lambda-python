@@ -37,6 +37,11 @@ from .kinesis import (
     KinesisDataStreamRecord,
     KinesisDataStreamRecordPayload,
 )
+from .kinesis_firehose import (
+    KinesisFirehoseModel,
+    KinesisFirehoseRecord,
+    KinesisFirehoseRecordMetadata,
+)
 from .lambda_function_url import LambdaFunctionUrlModel
 from .s3 import S3Model, S3RecordModel
 from .s3_object_event import (
@@ -86,6 +91,9 @@ __all__ = [
     "KinesisDataStreamModel",
     "KinesisDataStreamRecord",
     "KinesisDataStreamRecordPayload",
+    "KinesisFirehoseModel",
+    "KinesisFirehoseRecord",
+    "KinesisFirehoseRecordMetadata",
     "LambdaFunctionUrlModel",
     "S3Model",
     "S3RecordModel",
