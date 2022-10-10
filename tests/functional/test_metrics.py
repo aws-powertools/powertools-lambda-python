@@ -901,7 +901,7 @@ def test_log_metrics_with_default_dimensions(capsys, metrics, dimensions, namesp
 
 
 def test_metrics_reuse_dimension_set(metric, dimension, namespace):
-    # GIVEN Metrics is initialized
+    # GIVEN Metrics is initialized with a metric and dimension
     my_metrics = Metrics(namespace=namespace)
     my_metrics.add_dimension(**dimension)
     my_metrics.add_metric(**metric)
@@ -909,12 +909,12 @@ def test_metrics_reuse_dimension_set(metric, dimension, namespace):
     # WHEN Metrics is initialized one more time
     my_metrics_2 = Metrics(namespace=namespace)
 
-    # THEN Both class instances should have the same dimension set
+    # THEN both class instances should have the same dimension set
     assert my_metrics_2.dimension_set == my_metrics.dimension_set
 
 
 def test_metrics_reuse_metadata_set(metric, dimension, namespace):
-    # GIVEN Metrics is initialized
+    # GIVEN Metrics is initialized with a metric, dimension, and metadata
     my_metrics = Metrics(namespace=namespace)
     my_metrics.add_dimension(**dimension)
     my_metrics.add_metric(**metric)
@@ -923,5 +923,5 @@ def test_metrics_reuse_metadata_set(metric, dimension, namespace):
     # WHEN Metrics is initialized one more time
     my_metrics_2 = Metrics(namespace=namespace)
 
-    # THEN Both class instances should have the same metadata set
+    # THEN both class instances should have the same metadata set
     assert my_metrics_2.metadata_set == my_metrics.metadata_set
