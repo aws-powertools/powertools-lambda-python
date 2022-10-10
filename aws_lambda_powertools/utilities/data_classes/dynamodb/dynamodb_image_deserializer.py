@@ -89,17 +89,22 @@ class DynamoDBImageDeserializer:
         return attr_value.b_value
 
     def _deserialize_ns(self, attr_value: AttributeValue):
-        return set(attr_value.ns_value)
+        return set(attr_value.ns_value) if attr_value.ns_value else set()
 
     def _deserialize_ss(self, attr_value: AttributeValue):
-        print(attr_value)
-        return set(attr_value.ss_value)
+        return set(attr_value.ss_value) if attr_value.ss_value else set()
 
     def _deserialize_bs(self, attr_value: AttributeValue):
-        return set(attr_value.bs_value)
+        return set(attr_value.bs_value) if attr_value.bs_value else set()
 
     def _deserialize_l(self, attr_value: AttributeValue):
-        return [self._deserialize_attr_value(v) for v in attr_value.list_value]
+        if attr_value.list_value:
+            return [self._deserialize_attr_value(v) for v in attr_value.list_value]
+        else:
+            return []
 
     def _deserialize_m(self, attr_value: AttributeValue):
-        return {k: self._deserialize_attr_value(v) for k, v in attr_value.map_value.items()}
+        if attr_value.map_value:
+            return {k: self._deserialize_attr_value(v) for k, v in attr_value.map_value.items()}
+        else:
+            return {}
