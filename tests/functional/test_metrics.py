@@ -911,3 +911,17 @@ def test_metrics_reuse_dimension_set(metric, dimension, namespace):
 
     # THEN Both class instances should have the same dimension set
     assert my_metrics_2.dimension_set == my_metrics.dimension_set
+
+
+def test_metrics_reuse_metadata_set(metric, dimension, namespace):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(namespace=namespace)
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_metric(**metric)
+    my_metrics.add_metadata(key="meta", value="data")
+
+    # WHEN Metrics is initialized one more time
+    my_metrics_2 = Metrics(namespace=namespace)
+
+    # THEN Both class instances should have the same metadata set
+    assert my_metrics_2.metadata_set == my_metrics.metadata_set
