@@ -11,7 +11,7 @@ from uuid import uuid4
 import boto3
 import pytest
 from aws_cdk import App, CfnOutput, Environment, RemovalPolicy, Stack, aws_logs
-from aws_cdk.aws_lambda import Code, Function, LayerVersion, Runtime, Tracing
+from aws_cdk.aws_lambda import Architecture, Code, Function, LayerVersion, Runtime, Tracing
 from filelock import FileLock
 from mypy_boto3_cloudformation import CloudFormationClient
 
@@ -53,7 +53,9 @@ class BaseInfrastructure(InfrastructureProvider):
                 "You must have your infrastructure defined in 'tests/e2e/<feature>/infrastructure.py'."
             )
 
-    def create_lambda_functions(self, function_props: Optional[Dict] = None) -> Dict[str, Function]:
+    def create_lambda_functions(
+        self, function_props: Optional[Dict] = None, architecture: Architecture = Architecture.X86_64
+    ) -> Dict[str, Function]:
         """Create Lambda functions available under handlers_dir
 
         It creates CloudFormation Outputs for every function found in PascalCase. For example,
@@ -64,6 +66,9 @@ class BaseInfrastructure(InfrastructureProvider):
         ----------
         function_props: Optional[Dict]
             Dictionary representing CDK Lambda FunctionProps to override defaults
+
+        architecture: Architecture
+            Used to create Lambda Layer and functions in a different architecture. Defaults to x86_64.
 
         Returns
         -------
@@ -90,7 +95,7 @@ class BaseInfrastructure(InfrastructureProvider):
         if not self._handlers_dir.exists():
             raise RuntimeError(f"Handlers dir '{self._handlers_dir}' must exist for functions to be created.")
 
-        layer_build = LocalLambdaPowertoolsLayer().build()
+        layer_build = LocalLambdaPowertoolsLayer(architecture=architecture).build()
         layer = LayerVersion(
             self.stack,
             "aws-lambda-powertools-e2e-test",
@@ -100,6 +105,7 @@ class BaseInfrastructure(InfrastructureProvider):
                 Runtime.PYTHON_3_8,
                 Runtime.PYTHON_3_9,
             ],
+            compatible_architectures=[architecture],
             code=Code.from_asset(path=layer_build),
         )
 
@@ -123,6 +129,7 @@ class BaseInfrastructure(InfrastructureProvider):
                 "tracing": Tracing.ACTIVE,
                 "runtime": Runtime.PYTHON_3_9,
                 "layers": [layer],
+                "architecture": architecture,
                 **function_settings_override,
             }
 
@@ -156,7 +163,8 @@ class BaseInfrastructure(InfrastructureProvider):
         stack_file = self._create_temp_cdk_app()
         synth_command = f"npx cdk synth --app 'python {stack_file}' -o {self._cdk_out_dir}"
         deploy_command = (
-            f"npx cdk deploy --app '{self._cdk_out_dir}' -O {self._stack_outputs_file} --require-approval=never"
+            f"npx cdk deploy --app '{self._cdk_out_dir}' -O {self._stack_outputs_file} "
+            "--require-approval=never --method=direct"
         )
 
         # CDK launches a background task, so we must wait
