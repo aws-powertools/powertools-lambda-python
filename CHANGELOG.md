@@ -4,6 +4,10 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+* bump layer version to 38
+
 
 <a name="v1.31.0"></a>
 ## [v1.31.0] - 2022-10-10
