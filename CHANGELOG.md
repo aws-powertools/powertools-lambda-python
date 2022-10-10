@@ -4,6 +4,13 @@
 <a name="unreleased"></a>
 # Unreleased
 
+
+<a name="v1.31.0"></a>
+## [v1.31.0] - 2022-10-10
+## Bug Fixes
+
+* **metrics:** ensure dimension_set is reused across instances (pointer) ([#1581](https://github.com/awslabs/aws-lambda-powertools-python/issues/1581))
+
 ## Documentation
 
 * **readme:** add lambda layer latest version badge
@@ -2397,7 +2404,8 @@
 * Merge pull request [#5](https://github.com/awslabs/aws-lambda-powertools-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.30.0...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.31.0...HEAD
+[v1.31.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.30.0...v1.31.0
 [v1.30.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.29.2...v1.30.0
 [v1.29.2]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.29.1...v1.29.2
 [v1.29.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.29.0...v1.29.1
