@@ -8,8 +8,15 @@
 
 * **readme:** add lambda layer latest version badge
 
+## Features
+
+* **parser:** add KinesisFirehoseModel ([#1556](https://github.com/awslabs/aws-lambda-powertools-python/issues/1556))
+
 ## Maintenance
 
+* **deps-dev:** bump types-requests from 2.28.11.1 to 2.28.11.2 ([#1576](https://github.com/awslabs/aws-lambda-powertools-python/issues/1576))
+* **deps-dev:** bump typing-extensions from 4.3.0 to 4.4.0 ([#1575](https://github.com/awslabs/aws-lambda-powertools-python/issues/1575))
+* **layer:** remove unsused GetFunction permission for the canary
 * **layer:** bump to latest version 37
 
 
