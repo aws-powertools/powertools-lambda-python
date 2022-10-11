@@ -42,7 +42,7 @@ jobs:
       - name: aws credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-region: $AWS_REGION
+          aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_SAR_ROLE_ARN }}
       - name: Setup Node.js
         uses: actions/setup-node@v3
