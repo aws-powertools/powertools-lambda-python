@@ -29,7 +29,7 @@ def idempotency_table_name(infrastructure: dict) -> str:
 
 def test_ttl_caching_expiration_idempotency(ttl_cache_expiration_handler_fn_arn: str):
     # GIVEN
-    payload = json.dumps({"message": "Lambda Powertools - TTL 20s"})
+    payload = json.dumps({"message": "Lambda Powertools - TTL 5s"})
 
     # WHEN
     # first execution
@@ -44,8 +44,8 @@ def test_ttl_caching_expiration_idempotency(ttl_cache_expiration_handler_fn_arn:
     )
     second_execution_response = second_execution["Payload"].read().decode("utf-8")
 
-    # wait 20s to expire ttl and execute again, this should return a new response value
-    sleep(20)
+    # wait 8s to expire ttl and execute again, this should return a new response value
+    sleep(8)
     third_execution, _ = data_fetcher.get_lambda_response(
         lambda_arn=ttl_cache_expiration_handler_fn_arn, payload=payload
     )
@@ -58,7 +58,7 @@ def test_ttl_caching_expiration_idempotency(ttl_cache_expiration_handler_fn_arn:
 
 def test_ttl_caching_timeout_idempotency(ttl_cache_timeout_handler_fn_arn: str):
     # GIVEN
-    payload_timeout_execution = json.dumps({"sleep": 10, "message": "Lambda Powertools - TTL 1s"})
+    payload_timeout_execution = json.dumps({"sleep": 5, "message": "Lambda Powertools - TTL 1s"})
     payload_working_execution = json.dumps({"sleep": 0, "message": "Lambda Powertools - TTL 1s"})
 
     # WHEN
