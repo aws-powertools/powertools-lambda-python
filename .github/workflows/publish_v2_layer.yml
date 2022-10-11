@@ -68,7 +68,7 @@ jobs:
       - name: CDK build
         run: |
           # cdk synth --context version="$RELEASE_TAG_VERSION" -o cdk.out
-          cdk synth --context version="git+https://github.com/awslabs/aws-lambda-powertools-python@RELEASE_TAG_VERSION" -o cdk.out
+          cdk synth --context version="git+https://github.com/awslabs/aws-lambda-powertools-python@$RELEASE_TAG_VERSION" -o cdk.out
       - name: zip output
         run: zip -r cdk.out.zip cdk.out
       - name: Archive CDK artifacts
