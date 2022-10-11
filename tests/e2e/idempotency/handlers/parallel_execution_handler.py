@@ -10,6 +10,6 @@ persistence_layer = DynamoDBPersistenceLayer(table_name=TABLE_NAME)
 @idempotent(persistence_store=persistence_layer)
 def lambda_handler(event, context):
 
-    time.sleep(10)
+    time.sleep(5)
 
     return event

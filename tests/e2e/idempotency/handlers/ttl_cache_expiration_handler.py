@@ -5,7 +5,7 @@ from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
 
 TABLE_NAME = os.getenv("IdempotencyTable", "")
 persistence_layer = DynamoDBPersistenceLayer(table_name=TABLE_NAME)
-config = IdempotencyConfig(expires_after_seconds=20)
+config = IdempotencyConfig(expires_after_seconds=5)
 
 
 @idempotent(config=config, persistence_store=persistence_layer)
