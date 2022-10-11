@@ -7,6 +7,7 @@
 ## Documentation
 
 * **homepage:** include .NET powertools
+* **logger:** fix typo. ([#1587](https://github.com/awslabs/aws-lambda-powertools-python/issues/1587))
 
 ## Maintenance
 
