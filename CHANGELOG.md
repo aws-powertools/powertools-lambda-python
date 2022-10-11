@@ -4,9 +4,15 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **homepage:** include .NET powertools
+
 ## Maintenance
 
+* add dummy v2 sar deploy job
 * bump layer version to 38
+* **deps-dev:** bump flake8-builtins from 1.5.3 to 2.0.0 ([#1582](https://github.com/awslabs/aws-lambda-powertools-python/issues/1582))
 
 
 <a name="v1.31.0"></a>
