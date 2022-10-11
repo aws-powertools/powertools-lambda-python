@@ -1,0 +1,76 @@
+name: Deploy V2 SAR
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  SAM_VERSION: 2.44.0
+  NODE_VERSION: 16.12
+  AWS_REGION: eu-central-1
+
+on:
+  workflow_call:
+    inputs:
+      stage:
+        description: "Deployment stage (BETA, PROD)"
+        required: true
+        type: string
+      artefact-name:
+        description: "CDK Layer Artefact name to download"
+        required: true
+        type: string
+      package-version:
+        description: "The version of the package to deploy"
+        required: true
+        type: string
+      environment:
+        description: "GitHub Environment to use for encrypted secrets"
+        required: true
+        type: string
+
+jobs:
+  deploy-cdk-stack:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    defaults:
+      run:
+        working-directory: ./layer
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: $AWS_REGION
+          role-to-assume: ${{ secrets.AWS_SAR_ROLE_ARN }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: $NODE_VERSION
+      - name: install cdk and deps
+        run: |
+          npm install -g "aws-cdk@$CDK_VERSION"
+          cdk --version
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.artefact-name }}
+          path: layer
+      - name: unzip artefact
+        run: |
+          unzip cdk.out.zip
+      - name: Deploy x86_64 SAR
+        run: |
+          asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["x86_64"]) | .Metadata."aws:asset:path"' cdk.out/LayerStack.template.json)
+          sed -e "s/<VERSION>/${{ inputs.package-version }}/g" -e "s/<SAR_APP_NAME>/aws-lambda-powertools-python-layer-v2/g" -e "s/<LAYER_CONTENT_PATH>/.\/cdk.out\/$asset/g" sar/template.txt > sar/template.yml
+          cp ../README.md ../LICENSE "./cdk.out/$asset/"
+          pipx run sam=="$SAM_VERSION" package --template-file sar/template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
+          pipx run sam=="$SAM_VERSION" publish --template packaged.yml --region "$AWS_REGION"
+      - name: Deploy arm64 SAR
+        run: |
+          asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["arm64"]) | .Metadata."aws:asset:path"' cdk.out/LayerStack.template.json)
+          sed -e "s/<VERSION>/${{ inputs.package-version }}/g" -e "s/<SAR_APP_NAME>/aws-lambda-powertools-python-layer-v2-arm64/g" -e "s/<LAYER_CONTENT_PATH>/.\/cdk.out\/$asset/g" sar/template.txt > sar/template.yml
+          cp ../README.md ../LICENSE "./cdk.out/$asset/"
+          pipx run sam=="$SAM_VERSION" package --template-file sar/template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
+          pipx run sam=="$SAM_VERSION" publish --template packaged.yml --region "$AWS_REGION"

@@ -23,6 +23,8 @@ jobs:
     defaults:
       run:
         working-directory: ./layer
+    outputs:
+      release-tag-version: ${{ steps.release-notes-tag.outputs.release-tag-version }}
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -46,11 +48,13 @@ jobs:
           poetry export --format requirements.txt --output requirements.txt
           pip install -r requirements.txt
       - name: Set release notes tag
+        id: release-notes-tag
         run: |
           RELEASE_INPUT=${{ inputs.latest_published_version }}
           LATEST_TAG=$(git describe --tag --abbrev=0)
           RELEASE_TAG_VERSION=${RELEASE_INPUT:-$LATEST_TAG}
           echo RELEASE_TAG_VERSION="${RELEASE_TAG_VERSION:1}" >> "$GITHUB_ENV"
+          echo "::set-output name=release-tag-version::$RELEASE_TAG_VERSION"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
         # NOTE: we need QEMU to build Layer against a different architecture (e.g., ARM)
@@ -81,6 +85,17 @@ jobs:
       artefact-name: "cdk-layer-artefact"
       environment: "layer-beta"
 
+  deploy-sar-beta:
+    needs:
+      - build-layer
+    uses: ./.github/workflows/reusable_deploy_v2_sar.yml
+    secrets: inherit
+    with:
+      stage: "BETA"
+      artefact-name: "cdk-layer-artefact"
+      environment: "layer-beta"
+      package-version: ${{ needs.build-layer.outputs.release-tag-version }}
+
   # deploy-prod:
   #   needs:
   #     - deploy-beta
@@ -90,3 +105,14 @@ jobs:
   #     stage: "PROD"
   #     artefact-name: "cdk-layer-artefact"
   #     environment: "layer-prod"
+
+  # deploy-sar-prod:
+  #   needs:
+  #     - build-layer
+  #   uses: ./.github/workflows/reusable_deploy_v2_sar.yml
+  #   secrets: inherit
+  #   with:
+  #     stage: "PROD"
+  #     artefact-name: "cdk-layer-artefact"
+  #     environment: "layer-beta"
+  #     package-version: ${{ needs.build-layer.outputs.release-tag-version }}
