@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from tests.e2e.utils import data_fetcher
@@ -15,7 +17,7 @@ def parameter_string_value(infrastructure: dict) -> str:
 
 def test_simple_parameter_string(parameter_string_handler_fn_arn: str, parameter_string_value: str):
     # GIVEN
-    expected_return = parameter_string_value
+    expected_return = json.dumps({"value": parameter_string_value})
 
     # WHEN
     parameter_execution, _ = data_fetcher.get_lambda_response(lambda_arn=parameter_string_handler_fn_arn)
