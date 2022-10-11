@@ -1,5 +1,4 @@
 from pyclbr import Function
-from typing import Any
 
 from aws_cdk import CfnOutput
 from aws_cdk import aws_appconfig as appconfig
@@ -12,20 +11,20 @@ from tests.e2e.utils.infrastructure import BaseInfrastructure
 class ParametersStack(BaseInfrastructure):
     def create_resources(self):
         functions = self.create_lambda_functions()
-        self._create_parameter_string(function=functions)
-        self._create_app_config(function=functions)
+        self._create_parameter_string(function=functions["ParameterStringHandler"])
+        self._create_app_config(function=functions["ParameterAppconfigFreeformHandler"])
 
-    def _create_parameter_string(self, function: Any):
+    def _create_parameter_string(self, function: Function):
         parameter = ssm.StringParameter(
             self.stack, id="string_parameter", parameter_name="sample_string", string_value="Lambda Powertools"
         )
 
-        parameter.grant_read(function["ParameterStringHandler"])
+        parameter.grant_read(function)
 
         CfnOutput(self.stack, "ParameterString", value=parameter.parameter_name)
         CfnOutput(self.stack, "ParameterStringValue", value=parameter.string_value)
 
-    def _create_app_config(self, function: Any):
+    def _create_app_config(self, function: Function):
 
         cfn_application = appconfig.CfnApplication(self.stack, id="appconfig-app", name="appe2e", description="appe2e")
         CfnOutput(self.stack, "AppConfigApplication", value=cfn_application.name)
@@ -92,7 +91,7 @@ class ParametersStack(BaseInfrastructure):
             description="deployment",
         )
 
-        function["ParameterAppconfigFreeformHandler"].add_to_role_policy(
+        function.add_to_role_policy(
             iam.PolicyStatement(
                 effect=iam.Effect.ALLOW,
                 actions=[
