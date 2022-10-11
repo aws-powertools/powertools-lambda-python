@@ -19,7 +19,7 @@ if not POWERTOOLS_VERSION:
 
 LayerStack(
     app,
-    "LayerStack",
+    "LayerV2Stack",
     powertools_version=POWERTOOLS_VERSION,
     ssm_paramter_layer_arn=SSM_PARAM_LAYER_ARN,
     ssm_parameter_layer_arm64_arn=SSM_PARAM_LAYER_ARM64_ARN,
@@ -27,7 +27,7 @@ LayerStack(
 
 CanaryStack(
     app,
-    "CanaryStack",
+    "CanaryV2Stack",
     powertools_version=POWERTOOLS_VERSION,
     ssm_paramter_layer_arn=SSM_PARAM_LAYER_ARN,
     ssm_parameter_layer_arm64_arn=SSM_PARAM_LAYER_ARM64_ARN,
