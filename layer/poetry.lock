@@ -72,7 +72,7 @@ exceptiongroup = {version = "*", markers = "python_version <= \"3.10\""}
 
 [[package]]
 name = "cdk-aws-lambda-powertools-layer"
-version = "3.1.0"
+version = "3.2.0"
 description = "A lambda layer for AWS Powertools for python and typescript"
 category = "main"
 optional = false
@@ -296,7 +296,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "c2e19583ada823d6a5855df46e4851c1c21cd320fcb0edb57bd87e94b43e898c"
+content-hash = "10a4e60fe1abbe982f077699767b8a7949b2be5ca82f909647f34d1e30ffb9a9"
 
 [metadata.files]
 attrs = [
@@ -320,8 +320,8 @@ cattrs = [
     {file = "cattrs-22.1.0.tar.gz", hash = "sha256:94b67b64cf92c994f8784c40c082177dc916e0489a73a9a36b24eb18a9db40c6"},
 ]
 cdk-aws-lambda-powertools-layer = [
-    {file = "cdk-aws-lambda-powertools-layer-3.1.0.tar.gz", hash = "sha256:1e1457edbebfbb62ab2d21ae0f9b991db1b6c8508730fab8c99c3a7d3dfd99cb"},
-    {file = "cdk_aws_lambda_powertools_layer-3.1.0-py3-none-any.whl", hash = "sha256:c66cc722c924a50458418600df4060a1396e134df25b3cc85de59d5914541b31"},
+    {file = "cdk-aws-lambda-powertools-layer-3.2.0.tar.gz", hash = "sha256:75b86a6c8714c82293d754f1d799134c4159953711312e261f8b3aaf77492fa6"},
+    {file = "cdk_aws_lambda_powertools_layer-3.2.0-py3-none-any.whl", hash = "sha256:a293a2f42b459de70ccd9d2a16b0b0789f7c682aa31ab80d6696e93ff07caa92"},
 ]
 colorama = [
     {file = "colorama-0.4.5-py2.py3-none-any.whl", hash = "sha256:854bf444933e37f5824ae7bfc1e98d5bce2ebe4160d46b5edf346a89358e99da"},
