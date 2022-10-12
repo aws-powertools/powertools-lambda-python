@@ -65,11 +65,11 @@ jobs:
           unzip cdk.out.zip
       - name: Set SAR name
         run: |
-          name=${{ env.SAR_NAME }}
+          NAME=${{ env.SAR_NAME }}
           if [[ "${{ inputs.stage }}" == "BETA" ]]; then
-            name=test-$sar_name
+            NAME="test-$NAME"
           fi
-          echo SAR_NAME="${name}" >> "$GITHUB_ENV"
+          echo SAR_NAME="${NAME}" >> "$GITHUB_ENV"
       - name: Deploy x86_64 SAR
         run: |
           asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["x86_64"]) | .Metadata."aws:asset:path"' cdk.out/LayerV2Stack.template.json)
