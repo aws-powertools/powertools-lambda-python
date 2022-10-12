@@ -42,7 +42,7 @@ class KinesisFirehoseRecordMetadata(DictWrapper):
 
 class KinesisFirehoseRecord(DictWrapper):
     @property
-    def approximate_arrival_timestamp(self) -> float:
+    def approximate_arrival_timestamp(self) -> int:
         """The approximate time that the record was inserted into the delivery stream"""
         return float(self["approximateArrivalTimestamp"])
 
