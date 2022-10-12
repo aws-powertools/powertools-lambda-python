@@ -35,14 +35,14 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v3
-      - name: aws credentials
+      - name: AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
-      - name: aws credentials SAR role
+      - name: AWS credentials SAR role
         uses: aws-actions/configure-aws-credentials@v1
         id: aws-credentials-sar-role
         with:
@@ -60,7 +60,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ${{ inputs.artefact-name }}
-      - name: unzip artefact
+      - name: Unzip artefact
         run: |
           unzip cdk.out.zip
       - name: Set SAR name
@@ -69,7 +69,7 @@ jobs:
           if [[ "${{ inputs.stage }}" == "BETA" ]]; then
             name=test-$sar_name
           fi
-          echo SAR__NAME="${name}" >> "$GITHUB_ENV"
+          echo SAR_NAME="${name}" >> "$GITHUB_ENV"
       - name: Deploy x86_64 SAR
         run: |
           asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["x86_64"]) | .Metadata."aws:asset:path"' cdk.out/LayerV2Stack.template.json)
@@ -84,7 +84,35 @@ jobs:
           cp README.md LICENSE "./cdk.out/$asset/"
           sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
           sam publish --template packaged.yml --region "$AWS_REGION"
-      # - name: Deploy canary
+      - name: Deploy BETA canary
+        if: ${{ inputs.stage == 'BETA' }}
+        run: |
+          STACK_NAME=serverlessrepo-v2-testing
+
+          echo "Check if stack does not exist"
+          stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName > '$STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}")
+          echo "$stack_exists"
+          if [[ -n "$stack_exists" ]] ; then
+            echo "Found test deployment stack, removing..."
+            aws cloudformation delete-stack --stack-name "$STACK_NAME"
+            aws cloudformation wait stack-delete-complete --stack-name "$STACK_NAME"
+          fi
+
+          echo "Creating canary stack"
+          aws serverlessrepo create-cloud-formation-change-set --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} --stack-name "$STACK_NAME" --capabilities CAPABILITY_NAMED_IAM
+          CHANGE_SET_ID=$(aws cloudformation list-change-sets --stack-name "$STACK_NAME" --query 'Summaries[*].ChangeSetId' --output text)
+          aws cloudformation wait change-set-create-complete --change-set-name "$CHANGE_SET_ID"
+          aws cloudformation execute-change-set --change-set-name "$CHANGE_SET_ID"
+          aws cloudformation wait stack-create-complete --stack-name "$STACK_NAME"
+          echo "Waiting until stack deployment completes..."
+
+          echo "Exit with error if stack is not in CREATE_COMPLETE"
+          stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName > '$STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}")
+          if [[ -z "$stack_exists" ]] ; then
+            echo "Could find successful deployment, exit error..."
+            exit 1
+          fi
+          echo "Deployment successful"
       - name: Cleanup BETA x86_64 SAR
         if: ${{ inputs.stage == 'BETA' }}
         run: |
