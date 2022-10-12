@@ -95,7 +95,8 @@ jobs:
       stage: "BETA"
       artefact-name: "cdk-layer-artefact"
       environment: "layer-beta"
-      package-version: ${{ needs.build-layer.outputs.release-tag-version }}
+      package-version: 2.0.0
+      # package-version: ${{ needs.build-layer.outputs.release-tag-version }}
 
   # deploy-prod:
   #   needs:
