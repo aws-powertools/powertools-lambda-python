@@ -22,7 +22,7 @@ class KinesisFirehoseRecordMetadata(DictWrapper):
         return self._metadata.get("partitionKey")
 
     @property
-    def approximate_arrival_timestamp(self) -> Optional[str]:
+    def approximate_arrival_timestamp(self) -> int:
         """Kinesis stream approximate arrival ISO timestamp; present only when Kinesis Stream is source"""
         return self._metadata.get("approximateArrivalTimestamp")
 
