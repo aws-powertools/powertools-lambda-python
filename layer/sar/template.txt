@@ -6,8 +6,8 @@ Metadata:
     Description: "AWS Lambda Layer for aws-lambda-powertools "
     Author: AWS
     SpdxLicenseId: Apache-2.0
-    LicenseUrl: LICENSE
-    ReadmeUrl: README.md
+    LicenseUrl: <LAYER_CONTENT_PATH>/LICENSE
+    ReadmeUrl: <LAYER_CONTENT_PATH>/README.md
     Labels: ['layer','lambda','powertools','python', 'aws']
     HomePageUrl: https://github.com/awslabs/aws-lambda-powertools-python
     SemanticVersion: <VERSION>
