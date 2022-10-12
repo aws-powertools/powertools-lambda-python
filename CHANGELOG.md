@@ -6,6 +6,7 @@
 
 ## Documentation
 
+* **governance:** new form to allow customers self-nominate as public reference ([#1589](https://github.com/awslabs/aws-lambda-powertools-python/issues/1589))
 * **homepage:** include .NET powertools
 * **logger:** fix typo. ([#1587](https://github.com/awslabs/aws-lambda-powertools-python/issues/1587))
 
