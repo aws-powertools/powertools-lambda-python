@@ -402,7 +402,7 @@ To prevent against extended failed retries when a [Lambda function times out](ht
     This means that if an invocation expired during execution, it will be quickly executed again on the next retry.
 
 ???+ important
-    If you are only using the [@idempotent_function decorator](#idempotentfunction-decorator) to guard isolated parts of your code, you must use `register_lambda_context` available in the [idempotency config object](#customizing-the-default-behavior) to benefit from this protection.
+    If you are only using the [@idempotent_function decorator](#idempotent_function-decorator) to guard isolated parts of your code, you must use `register_lambda_context` available in the [idempotency config object](#customizing-the-default-behavior) to benefit from this protection.
 
 Here is an example on how you register the Lambda context in your handler:
 
