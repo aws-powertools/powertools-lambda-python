@@ -7,7 +7,7 @@ permissions:
 env:
   SAM_VERSION: 2.44.0
   NODE_VERSION: 16.12
-  AWS_REGION: eu-central-1
+  AWS_REGION: eu-west-1
 
 on:
   workflow_call:
