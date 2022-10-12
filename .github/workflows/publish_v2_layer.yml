@@ -115,5 +115,5 @@ jobs:
   #   with:
   #     stage: "PROD"
   #     artefact-name: "cdk-layer-artefact"
-  #     environment: "layer-beta"
+  #     environment: "layer-prod"
   #     package-version: ${{ needs.build-layer.outputs.release-tag-version }}
