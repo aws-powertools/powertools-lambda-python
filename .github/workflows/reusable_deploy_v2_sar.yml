@@ -8,6 +8,7 @@ env:
   SAM_VERSION: 2.44.0
   NODE_VERSION: 16.12
   AWS_REGION: eu-west-1
+  SAR_NAME: aws-lambda-powertools-python-layer-v2
 
 on:
   workflow_call:
@@ -30,12 +31,9 @@ on:
         type: string
 
 jobs:
-  deploy-cdk-stack:
+  deploy-sar-app:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
-    defaults:
-      run:
-        working-directory: ./layer
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -46,6 +44,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
       - name: aws credentials SAR role
         uses: aws-actions/configure-aws-credentials@v1
+        id: aws-credentials-sar-role
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
@@ -65,18 +64,41 @@ jobs:
       - name: unzip artefact
         run: |
           unzip cdk.out.zip
+      - name: Set SAR name
+        run: |
+          name=${{ env.SAR_NAME }}
+          if [[ "${{ inputs.stage }}" == "BETA" ]]; then
+            name=test-$sar_name
+          fi
+          echo SAR__NAME="${name}" >> "$GITHUB_ENV"
       - name: Deploy x86_64 SAR
         run: |
           asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["x86_64"]) | .Metadata."aws:asset:path"' cdk.out/LayerV2Stack.template.json)
-          sed -e "s|<VERSION>|${{ inputs.package-version }}|g" -e "s/<SAR_APP_NAME>/aws-lambda-powertools-python-layer-v2/g" -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" sar/template.txt > template.yml
-          cp ../README.md ../LICENSE "./cdk.out/$asset/"
-          ls -la "./cdk.out/$asset/"
+          sed -e "s|<VERSION>|${{ inputs.package-version }}|g" -e "s/<SAR_APP_NAME>/${{ env.SAR_NAME }}/g" -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" layer/sar/template.txt > template.yml
+          cp README.md LICENSE "./cdk.out/$asset/"
           sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
           sam publish --template packaged.yml --region "$AWS_REGION"
       - name: Deploy arm64 SAR
         run: |
           asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["arm64"]) | .Metadata."aws:asset:path"' cdk.out/LayerV2Stack.template.json)
-          sed -e "s|<VERSION>|${{ inputs.package-version }}|g" -e "s/<SAR_APP_NAME>/aws-lambda-powertools-python-layer-v2-arm64/g" -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" sar/template.txt > template.yml
-          cp ../README.md ../LICENSE "./cdk.out/$asset/"
+          sed -e "s|<VERSION>|${{ inputs.package-version }}|g" -e "s/<SAR_APP_NAME>/${{ env.SAR_NAME }}-arm64/g" -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" layer/sar/template.txt > template.yml
+          cp README.md LICENSE "./cdk.out/$asset/"
           sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
           sam publish --template packaged.yml --region "$AWS_REGION"
+      # - name: Deploy canary
+      - name: Cleanup BETA x86_64 SAR
+        if: ${{ inputs.stage == 'BETA' }}
+        run: |
+          app_id=$(aws serverlessrepo list-applications --output text --query "Applications[?ApplicationId=='arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }}'].ApplicationId")
+          if [ -z "${app_id}" ]; then
+            echo "Could not find the SAR that we just deployed."
+          fi
+          aws serverlessrepo delete-application --application-id "$app_id"
+      - name: Cleanup BETA arm64 SAR
+        if: ${{ inputs.stage == 'BETA' }}
+        run: |
+          app_id=$(aws serverlessrepo list-applications --output text --query "Applications[?ApplicationId=='arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }}-arm64'].ApplicationId")
+          if [ -z "${app_id}" ]; then
+            echo "Could not find the SAR that we just deployed."
+          fi
+          aws serverlessrepo delete-application --application-id "$app_id"
