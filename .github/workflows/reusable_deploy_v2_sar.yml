@@ -68,15 +68,15 @@ jobs:
       - name: Deploy x86_64 SAR
         run: |
           asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["x86_64"]) | .Metadata."aws:asset:path"' cdk.out/LayerV2Stack.template.json)
-          sed -e "s|<VERSION>|${{ inputs.package-version }}|g" -e "s/<SAR_APP_NAME>/aws-lambda-powertools-python-layer-v2/g" -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" sar/template.txt > sar/template.yml
+          sed -e "s|<VERSION>|${{ inputs.package-version }}|g" -e "s/<SAR_APP_NAME>/aws-lambda-powertools-python-layer-v2/g" -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" sar/template.txt > template.yml
           cp ../README.md ../LICENSE "./cdk.out/$asset/"
           ls -la "./cdk.out/$asset/"
-          sam package --template-file sar/template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
+          sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
           sam publish --template packaged.yml --region "$AWS_REGION"
       - name: Deploy arm64 SAR
         run: |
           asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["arm64"]) | .Metadata."aws:asset:path"' cdk.out/LayerV2Stack.template.json)
-          sed -e "s|<VERSION>|${{ inputs.package-version }}|g" -e "s/<SAR_APP_NAME>/aws-lambda-powertools-python-layer-v2-arm64/g" -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" sar/template.txt > sar/template.yml
+          sed -e "s|<VERSION>|${{ inputs.package-version }}|g" -e "s/<SAR_APP_NAME>/aws-lambda-powertools-python-layer-v2-arm64/g" -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" sar/template.txt > template.yml
           cp ../README.md ../LICENSE "./cdk.out/$asset/"
-          sam package --template-file sar/template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
+          sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
           sam publish --template packaged.yml --region "$AWS_REGION"
