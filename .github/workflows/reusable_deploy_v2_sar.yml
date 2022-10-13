@@ -1,14 +1,25 @@
 name: Deploy V2 SAR
 
+# SAR deployment process
+#
+# 1. This workflow starts after the layer artifact is produced on `publish_v2_layer`
+# 2. We use the same layer artifact to ensure the SAR app is consistent with the published Lambda Layer
+# 3. We publish the SAR for both x86_64 and arm64 (see `matrix` section)
+# 4. Publishing the SAR app is done with the help of `sam package` and `sam publish`
+# 5. In order to test if the SAR app works, we deploy a Canary stack on the BETA environment
+#   5.1. The process starts by removing the previous canary to ensure we can do a clean SAR install
+#   5.2. The deployed canary is retained on the account for debugging purposes
+# 6. Finally the published SAR app is made public on the PROD environment
+
 permissions:
   id-token: write
   contents: read
 
 env:
-  SAM_VERSION: 2.44.0
   NODE_VERSION: 16.12
   AWS_REGION: eu-west-1
   SAR_NAME: aws-lambda-powertools-python-layer-v2
+  TEST_STACK_NAME: serverlessrepo-v2-powertools-layer-test-stack
 
 on:
   workflow_call:
@@ -67,50 +78,55 @@ jobs:
         run: unzip cdk.out.zip
       - name: Configure SAR name
         run: |
-          NAME=${{ env.SAR_NAME }}
           if [[ "${{ inputs.stage }}" == "BETA" ]]; then
-            NAME="test-${NAME}"
+            SAR_NAME="test-${SAR_NAME}"
           fi
-          echo SAR_NAME="${NAME}" >> "$GITHUB_ENV"
+          echo SAR_NAME="${SAR_NAME}" >> "$GITHUB_ENV"
       - name: Adds arm64 suffix to SAR name
         if: ${{ matrix.architecture == 'arm64' }}
         run: echo SAR_NAME="${SAR_NAME}-arm64" >> "$GITHUB_ENV"
       - name: Deploy SAR
         run: |
+          # From the generated LayerStack cdk.out artifact, find the layer asset path for the correct architecture.
+          # We'll use this as the source directory of our SAR. This way we are re-using the same layer asset for our SAR.
           asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["${{ matrix.architecture }}"]) | .Metadata."aws:asset:path"' cdk.out/LayerV2Stack.template.json)
+
+          # fill in the SAR SAM template
           sed -e "s|<VERSION>|${{ inputs.package-version }}|g" -e "s/<SAR_APP_NAME>/${{ env.SAR_NAME }}/g" -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" layer/sar/template.txt > template.yml
+
+          # SAR needs a README and a LICENSE, so just copy the ones from the repo
           cp README.md LICENSE "./cdk.out/$asset/"
+
+          # Package the SAR to our SAR S3 bucket, and publish it
           sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
           sam publish --template packaged.yml --region "$AWS_REGION"
       - name: Deploy BETA canary
         if: ${{ inputs.stage == 'BETA' }}
         run: |
-          STACK_NAME=serverlessrepo-v2-powertools-layer-test-stack
-
           if [[ "${{ matrix.architecture }}" == "arm64" ]]; then
-            STACK_NAME="${STACK_NAME}-arm64"
+            TEST_STACK_NAME="${TEST_STACK_NAME}-arm64"
           fi
 
           echo "Check if stack does not exist"
-          stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName == '$STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}" --output text)
+          stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName == '$TEST_STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}" --output text)
 
           if [[ -n "$stack_exists" ]] ; then
             echo "Found test deployment stack, removing..."
-            aws cloudformation delete-stack --stack-name "$STACK_NAME"
-            aws cloudformation wait stack-delete-complete --stack-name "$STACK_NAME"
+            aws cloudformation delete-stack --stack-name "$TEST_STACK_NAME"
+            aws cloudformation wait stack-delete-complete --stack-name "$TEST_STACK_NAME"
           fi
 
           echo "Creating canary stack"
-          echo "Stack name: $STACK_NAME"
-          aws serverlessrepo create-cloud-formation-change-set --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} --stack-name "${STACK_NAME/serverlessrepo-/}" --capabilities CAPABILITY_NAMED_IAM
-          CHANGE_SET_ID=$(aws cloudformation list-change-sets --stack-name "$STACK_NAME" --query 'Summaries[*].ChangeSetId' --output text)
+          echo "Stack name: $TEST_STACK_NAME"
+          aws serverlessrepo create-cloud-formation-change-set --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} --stack-name "${TEST_STACK_NAME/serverlessrepo-/}" --capabilities CAPABILITY_NAMED_IAM
+          CHANGE_SET_ID=$(aws cloudformation list-change-sets --stack-name "$TEST_STACK_NAME" --query 'Summaries[*].ChangeSetId' --output text)
           aws cloudformation wait change-set-create-complete --change-set-name "$CHANGE_SET_ID"
           aws cloudformation execute-change-set --change-set-name "$CHANGE_SET_ID"
-          aws cloudformation wait stack-create-complete --stack-name "$STACK_NAME"
+          aws cloudformation wait stack-create-complete --stack-name "$TEST_STACK_NAME"
           echo "Waiting until stack deployment completes..."
 
           echo "Exit with error if stack is not in CREATE_COMPLETE"
-          stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName == '$STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}")
+          stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName == '$TEST_STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}")
           if [[ -z "$stack_exists" ]] ; then
             echo "Could find successful deployment, exit error..."
             exit 1
