@@ -52,7 +52,7 @@ jobs:
           RELEASE_INPUT=${{ inputs.latest_published_version }}
           LATEST_TAG=$(git describe --tag --abbrev=0)
           RELEASE_TAG_VERSION=${RELEASE_INPUT:-$LATEST_TAG}
-          echo "::set-output name=release-tag-version::$RELEASE_TAG_VERSION"
+          echo release-tag-version="$RELEASE_TAG_VERSION" >> "$GITHUB_OUTPUT"
           echo RELEASE_TAG_VERSION="${RELEASE_TAG_VERSION:1}" >> "$GITHUB_ENV"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
