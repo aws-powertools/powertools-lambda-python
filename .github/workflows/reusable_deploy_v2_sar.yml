@@ -124,11 +124,3 @@ jobs:
             exit 1
           fi
           echo "Deployment successful"
-      - name: Cleanup BETA SAR
-        if: ${{ inputs.stage == 'BETA' }}
-        run: |
-          app_id=$(aws serverlessrepo list-applications --output text --query "Applications[?ApplicationId=='arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }}'].ApplicationId")
-          if [ -z "${app_id}" ]; then
-            echo "Could not find the SAR that we just deployed."
-          fi
-          aws serverlessrepo delete-application --application-id "$app_id"

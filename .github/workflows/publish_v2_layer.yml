@@ -10,10 +10,10 @@ on:
       latest_published_version:
         description: "Latest PyPi published version to rebuild latest docs for, e.g. v2.0.0"
         required: true
-  # workflow_run:
-  #   workflows: ["Publish to PyPi"]
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows: ["Publish to PyPi"]
+    types:
+      - completed
 
 jobs:
   build-layer:
@@ -66,8 +66,7 @@ jobs:
           cdk --version
       - name: CDK build
         run: |
-          # cdk synth --context version="$RELEASE_TAG_VERSION" -o cdk.out
-          cdk synth --context version="git+https://github.com/awslabs/aws-lambda-powertools-python@${{ inputs.latest_published_version }}" -o cdk.out
+          cdk synth --context version="$RELEASE_TAG_VERSION" -o cdk.out
       - name: zip output
         run: zip -r cdk.out.zip cdk.out
       - name: Archive CDK artifacts
@@ -86,6 +85,16 @@ jobs:
       artefact-name: "cdk-layer-artefact"
       environment: "layer-beta"
 
+  deploy-prod:
+    needs:
+      - deploy-beta
+    uses: ./.github/workflows/reusable_deploy_layer_stack.yml
+    secrets: inherit
+    with:
+      stage: "PROD"
+      artefact-name: "cdk-layer-artefact"
+      environment: "layer-prod"
+
   deploy-sar-beta:
     needs:
       - build-layer
@@ -95,8 +104,7 @@ jobs:
       stage: "BETA"
       artefact-name: "cdk-layer-artefact"
       environment: "layer-beta"
-      package-version: 2.0.0
-      # package-version: ${{ needs.build-layer.outputs.release-tag-version }}
+      package-version: ${{ needs.build-layer.outputs.release-tag-version }}
 
   deploy-sar-prod:
     needs:
@@ -107,26 +115,4 @@ jobs:
       stage: "PROD"
       artefact-name: "cdk-layer-artefact"
       environment: "layer-prod"
-      package-version: 2.0.0
-      # package-version: ${{ needs.build-layer.outputs.release-tag-version }}
-
-  # deploy-prod:
-  #   needs:
-  #     - deploy-beta
-  #   uses: ./.github/workflows/reusable_deploy_layer_stack.yml
-  #   secrets: inherit
-  #   with:
-  #     stage: "PROD"
-  #     artefact-name: "cdk-layer-artefact"
-  #     environment: "layer-prod"
-
-  # deploy-sar-prod:
-  #   needs:
-  #     - build-layer
-  #   uses: ./.github/workflows/reusable_deploy_v2_sar.yml
-  #   secrets: inherit
-  #   with:
-  #     stage: "PROD"
-  #     artefact-name: "cdk-layer-artefact"
-  #     environment: "layer-prod"
-  #     package-version: ${{ needs.build-layer.outputs.release-tag-version }}
+      package-version: ${{ needs.build-layer.outputs.release-tag-version }}
