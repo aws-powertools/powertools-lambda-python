@@ -99,6 +99,7 @@ jobs:
           fi
 
           echo "Creating canary stack"
+          echo "Stack name: $STACK_NAME"
           aws serverlessrepo create-cloud-formation-change-set --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} --stack-name "$STACK_NAME" --capabilities CAPABILITY_NAMED_IAM
           CHANGE_SET_ID=$(aws cloudformation list-change-sets --stack-name "$STACK_NAME" --query 'Summaries[*].ChangeSetId' --output text)
           aws cloudformation wait change-set-create-complete --change-set-name "$CHANGE_SET_ID"
