@@ -3,34 +3,31 @@ from pyclbr import Function
 from aws_cdk import CfnOutput
 from aws_cdk import aws_appconfig as appconfig
 from aws_cdk import aws_iam as iam
-from aws_cdk import aws_ssm as ssm
 
+from tests.e2e.utils.data_builder import build_service_name
 from tests.e2e.utils.infrastructure import BaseInfrastructure
 
 
 class ParametersStack(BaseInfrastructure):
     def create_resources(self):
         functions = self.create_lambda_functions()
-        self._create_parameter_string(function=functions["ParameterStringHandler"])
         self._create_app_config(function=functions["ParameterAppconfigFreeformHandler"])
-
-    def _create_parameter_string(self, function: Function):
-        parameter = ssm.StringParameter(
-            self.stack, id="string_parameter", parameter_name="sample_string", string_value="Lambda Powertools"
-        )
-
-        parameter.grant_read(function)
-
-        CfnOutput(self.stack, "ParameterString", value=parameter.parameter_name)
-        CfnOutput(self.stack, "ParameterStringValue", value=parameter.string_value)
 
     def _create_app_config(self, function: Function):
 
-        cfn_application = appconfig.CfnApplication(self.stack, id="appconfig-app", name="appe2e", description="appe2e")
+        service_name = build_service_name()
+
+        cfn_application = appconfig.CfnApplication(
+            self.stack, id="appconfig-app", name=f"appe2e{service_name}", description="appe2e"
+        )
         CfnOutput(self.stack, "AppConfigApplication", value=cfn_application.name)
 
         cfn_environment = appconfig.CfnEnvironment(
-            self.stack, "appconfig-env", application_id=cfn_application.ref, name="enve2e", description="enve2e"
+            self.stack,
+            "appconfig-env",
+            application_id=cfn_application.ref,
+            name=f"enve2e{service_name}",
+            description="enve2e",
         )
         CfnOutput(self.stack, "AppConfigEnvironment", value=cfn_environment.name)
 
@@ -40,14 +37,18 @@ class ParametersStack(BaseInfrastructure):
             deployment_duration_in_minutes=0,
             final_bake_time_in_minutes=0,
             growth_factor=100,
-            name="deploymente2e",
+            name=f"deploymente2e{service_name}",
             description="deploymente2e",
             replicate_to="NONE",
             growth_type="LINEAR",
         )
 
         self._create_app_config_freeform(
-            app=cfn_application, environment=cfn_environment, strategy=cfn_deployment_strategy, function=function
+            app=cfn_application,
+            environment=cfn_environment,
+            strategy=cfn_deployment_strategy,
+            function=function,
+            service_name=service_name,
         )
 
     def _create_app_config_freeform(
@@ -56,6 +57,7 @@ class ParametersStack(BaseInfrastructure):
         environment: appconfig.CfnEnvironment,
         strategy: appconfig.CfnDeploymentStrategy,
         function: Function,
+        service_name: str,
     ):
 
         cfn_configuration_profile = appconfig.CfnConfigurationProfile(
@@ -64,7 +66,7 @@ class ParametersStack(BaseInfrastructure):
             application_id=app.ref,
             location_uri="hosted",
             type="AWS.Freeform",
-            name="profilee2e",
+            name=f"profilee2e{service_name}",
             description="profilee2e",
         )
         CfnOutput(self.stack, "AppConfigProfile", value=cfn_configuration_profile.name)
