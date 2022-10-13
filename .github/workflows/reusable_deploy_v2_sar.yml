@@ -90,7 +90,7 @@ jobs:
           STACK_NAME=serverlessrepo-v2-powertools-layer-test-stack
 
           echo "Check if stack does not exist"
-          stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName > '$STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}" --output text)
+          stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName == '$STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}" --output text)
           echo "$stack_exists"
           if [[ -n "$stack_exists" ]] ; then
             echo "Found test deployment stack, removing..."
@@ -100,7 +100,7 @@ jobs:
 
           echo "Creating canary stack"
           echo "Stack name: $STACK_NAME"
-          aws serverlessrepo create-cloud-formation-change-set --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} --stack-name "$STACK_NAME" --capabilities CAPABILITY_NAMED_IAM
+          aws serverlessrepo create-cloud-formation-change-set --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} --stack-name "${STACK_NAME/serverlessrepo-//}" --capabilities CAPABILITY_NAMED_IAM
           CHANGE_SET_ID=$(aws cloudformation list-change-sets --stack-name "$STACK_NAME" --query 'Summaries[*].ChangeSetId' --output text)
           aws cloudformation wait change-set-create-complete --change-set-name "$CHANGE_SET_ID"
           aws cloudformation execute-change-set --change-set-name "$CHANGE_SET_ID"
