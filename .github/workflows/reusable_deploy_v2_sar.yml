@@ -63,7 +63,7 @@ jobs:
       - name: Unzip artefact
         run: |
           unzip cdk.out.zip
-      - name: Set SAR name
+      - name: Set test SAR name
         run: |
           NAME=${{ env.SAR_NAME }}
           if [[ "${{ inputs.stage }}" == "BETA" ]]; then
@@ -77,6 +77,13 @@ jobs:
           cp README.md LICENSE "./cdk.out/$asset/"
           sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
           sam publish --template packaged.yml --region "$AWS_REGION"
+      - name: Publish x86_64 SAR
+        if: ${{ inputs.stage == 'PROD' }}
+        run: |
+          # wait until sar registers the app, otherwise it fails to make it public
+          sleep 15
+          echo "Make x86_64 SAR app public"
+          aws serverlessrepo put-application-policy --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} --statements Principals='*',Actions=Deploy
       - name: Deploy arm64 SAR
         run: |
           asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["arm64"]) | .Metadata."aws:asset:path"' cdk.out/LayerV2Stack.template.json)
@@ -84,6 +91,13 @@ jobs:
           cp README.md LICENSE "./cdk.out/$asset/"
           sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
           sam publish --template packaged.yml --region "$AWS_REGION"
+      - name: Publish arm64 SAR
+        if: ${{ inputs.stage == 'PROD' }}
+        run: |
+          # wait until sar registers the app, otherwise it fails to make it public
+          sleep 15
+          echo "Make arm64 SAR app public"
+          aws serverlessrepo put-application-policy --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }}-arm64 --statements Principals='*',Actions=Deploy
       - name: Deploy BETA canary
         if: ${{ inputs.stage == 'BETA' }}
         run: |

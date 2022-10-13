@@ -98,6 +98,18 @@ jobs:
       package-version: 2.0.0
       # package-version: ${{ needs.build-layer.outputs.release-tag-version }}
 
+  deploy-sar-prod:
+    needs:
+      - deploy-sar-beta
+    uses: ./.github/workflows/reusable_deploy_v2_sar.yml
+    secrets: inherit
+    with:
+      stage: "PROD"
+      artefact-name: "cdk-layer-artefact"
+      environment: "layer-prod"
+      package-version: 2.0.0
+      # package-version: ${{ needs.build-layer.outputs.release-tag-version }}
+
   # deploy-prod:
   #   needs:
   #     - deploy-beta
