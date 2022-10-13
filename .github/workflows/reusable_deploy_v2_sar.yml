@@ -5,7 +5,7 @@ name: Deploy V2 SAR
 # 1. This workflow starts after the layer artifact is produced on `publish_v2_layer`
 # 2. We use the same layer artifact to ensure the SAR app is consistent with the published Lambda Layer
 # 3. We publish the SAR for both x86_64 and arm64 (see `matrix` section)
-# 4. Publishing the SAR app is done with the help of `sam package` and `sam publish`
+# 4. We use `sam package` and `sam publish` to publish the SAR app
 # 5. We deploy a Canary stack in the BETA environment to test the SAR App
 #   5.1. The process starts by removing the previous canary to ensure we can do a clean SAR install
 #   5.2. The canary is in the account for debugging purposes
