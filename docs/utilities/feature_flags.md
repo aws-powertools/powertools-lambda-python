@@ -27,10 +27,9 @@ If you want to learn more about feature flags, their variations and trade-offs, 
 * [Feature Toggles (aka Feature Flags) - Pete Hodgson](https://martinfowler.com/articles/feature-toggles.html)
 * [AWS Lambda Feature Toggles Made Simple - Ran Isenberg](https://isenberg-ran.medium.com/aws-lambda-feature-toggles-made-simple-580b0c444233)
 * [Feature Flags Getting Started - CloudBees](https://www.cloudbees.com/blog/ultimate-feature-flag-guide)
-* [Best Practices for validating AWS AppConfig Feature Flags and Configuration Data](https://aws.amazon.com/pt/blogs/mt/best-practices-for-validating-aws-appconfig-feature-flags-and-configuration-data/)
 
 ???+ note
-    Optimize your Lambda execution time by putting your feature settings in a single [Configuration](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html).
+    AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single [Configuration](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html).
 
 ## Key features
 
@@ -42,7 +41,7 @@ If you want to learn more about feature flags, their variations and trade-offs, 
 
 ### IAM Permissions
 
-Your Lambda function must have `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession` IAM permissions in order to fetch configuration from AWS AppConfig.
+Your Lambda function IAM Role must have `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession` IAM permissions before using this feature.
 
 ### Required resources
 

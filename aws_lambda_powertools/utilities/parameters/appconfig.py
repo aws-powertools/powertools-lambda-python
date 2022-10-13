@@ -88,7 +88,7 @@ class AppConfigProvider(BaseProvider):
         self.environment = environment
         self.current_version = ""
 
-        self.next_call = ""
+        self._next_token = ""  # nosec - token for get_latest_configuration executions
         self.last_returned_value = ""
 
     def _get(self, name: str, **sdk_options) -> str:
@@ -100,21 +100,21 @@ class AppConfigProvider(BaseProvider):
         name: str
             Name of the configuration
         sdk_options: dict, optional
-            Dictionary of options that will be passed to the client's start_configuration_session API call
+            SDK options to propagate to `start_configuration_session` API call
         """
-        if not self.next_call:
+        if not self._next_token:
             sdk_options["ConfigurationProfileIdentifier"] = name
             sdk_options["ApplicationIdentifier"] = self.application
             sdk_options["EnvironmentIdentifier"] = self.environment
             response_configuration = self.client.start_configuration_session(**sdk_options)
-            self.next_call = response_configuration["InitialConfigurationToken"]
+            self._next_token = response_configuration["InitialConfigurationToken"]
 
         # The new AppConfig APIs require two API calls to return the configuration
         # First we start the session and after that we retrieve the configuration
         # We need to store the token to use in the next execution
-        response = self.client.get_latest_configuration(ConfigurationToken=self.next_call)
+        response = self.client.get_latest_configuration(ConfigurationToken=self._next_token)
         return_value = response["Configuration"].read()
-        self.next_call = response["NextPollConfigurationToken"]
+        self._next_token = response["NextPollConfigurationToken"]
 
         if return_value:
             self.last_returned_value = return_value
@@ -155,7 +155,7 @@ def get_app_config(
     max_age: int
         Maximum age of the cached value
     sdk_options: dict, optional
-        Dictionary of options that will be passed to the boto client start_configuration_session API call
+        SDK options to propagate to `start_configuration_session` API call
 
     Raises
     ------
