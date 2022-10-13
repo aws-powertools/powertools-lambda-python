@@ -100,7 +100,7 @@ jobs:
 
           echo "Creating canary stack"
           echo "Stack name: $STACK_NAME"
-          aws serverlessrepo create-cloud-formation-change-set --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} --stack-name "${STACK_NAME/serverlessrepo-//}" --capabilities CAPABILITY_NAMED_IAM
+          aws serverlessrepo create-cloud-formation-change-set --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} --stack-name "${STACK_NAME/serverlessrepo-/}" --capabilities CAPABILITY_NAMED_IAM
           CHANGE_SET_ID=$(aws cloudformation list-change-sets --stack-name "$STACK_NAME" --query 'Summaries[*].ChangeSetId' --output text)
           aws cloudformation wait change-set-create-complete --change-set-name "$CHANGE_SET_ID"
           aws cloudformation execute-change-set --change-set-name "$CHANGE_SET_ID"
@@ -108,7 +108,7 @@ jobs:
           echo "Waiting until stack deployment completes..."
 
           echo "Exit with error if stack is not in CREATE_COMPLETE"
-          stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName > '$STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}")
+          stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName == '$STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}")
           if [[ -z "$stack_exists" ]] ; then
             echo "Could find successful deployment, exit error..."
             exit 1
