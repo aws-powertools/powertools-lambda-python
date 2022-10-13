@@ -63,7 +63,7 @@ mypy-boto3-dynamodb = { version = "^1.24.74", python = ">=3.7" }
 mypy-boto3-lambda = { version = "^1.24.0", python = ">=3.7" }
 mypy-boto3-logs = { version = "^1.24.0", python = ">=3.7" }
 mypy-boto3-secretsmanager = { version = "^1.24.83", python = ">=3.7" }
-mypy-boto3-ssm = { version = "^1.24.81", python = ">=3.7" }
+mypy-boto3-ssm = { version = "^1.24.90", python = ">=3.7" }
 mypy-boto3-s3 = { version = "^1.24.76", python = ">=3.7" }
 mypy-boto3-xray = { version = "^1.24.0", python = ">=3.7" }
 types-requests = "^2.28.11"

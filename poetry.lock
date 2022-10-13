@@ -18,7 +18,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 dev = ["cloudpickle", "coverage[toml] (>=5.0.2)", "furo", "hypothesis", "mypy", "pre-commit", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "six", "sphinx", "sphinx-notfound-page", "zope.interface"]
 docs = ["furo", "sphinx", "sphinx-notfound-page", "zope.interface"]
 tests = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "six", "zope.interface"]
-tests_no_zope = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "six"]
+tests-no-zope = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "six"]
 
 [[package]]
 name = "aws-cdk-lib"
@@ -159,7 +159,7 @@ optional = false
 python-versions = ">=3.5.0"
 
 [package.extras]
-unicode_backport = ["unicodedata2"]
+unicode-backport = ["unicodedata2"]
 
 [[package]]
 name = "click"
@@ -523,9 +523,9 @@ python-versions = ">=3.6.1,<4.0"
 
 [package.extras]
 colors = ["colorama (>=0.4.3,<0.5.0)"]
-pipfile_deprecated_finder = ["pipreqs", "requirementslib"]
+pipfile-deprecated-finder = ["pipreqs", "requirementslib"]
 plugins = ["setuptools"]
-requirements_deprecated_finder = ["pip-api", "pipreqs"]
+requirements-deprecated-finder = ["pip-api", "pipreqs"]
 
 [[package]]
 name = "jinja2"
@@ -596,7 +596,7 @@ python-versions = "*"
 six = "*"
 
 [package.extras]
-restructuredText = ["rst2ansi"]
+restructuredtext = ["rst2ansi"]
 
 [[package]]
 name = "markdown"
@@ -824,8 +824,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-ssm"
-version = "1.24.81"
-description = "Type annotations for boto3.SSM 1.24.81 service generated with mypy-boto3-builder 7.11.9"
+version = "1.24.90"
+description = "Type annotations for boto3.SSM 1.24.90 service generated with mypy-boto3-builder 7.11.10"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -1186,7 +1186,7 @@ urllib3 = ">=1.21.1,<1.27"
 
 [package.extras]
 socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
-use_chardet_on_py3 = ["chardet (>=3.0.2,<5)"]
+use-chardet-on-py3 = ["chardet (>=3.0.2,<5)"]
 
 [[package]]
 name = "retry"
@@ -1383,7 +1383,7 @@ pydantic = ["pydantic", "email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "f7f2c132b9a5803a6dab1095a5fa4c039edbec684bd849e829d8ccbd49e2b547"
+content-hash = "f41f8a4ab4a0734540d6f34d1b99fe926df7f3d40cde90db062e9a0fb0a1baa0"
 
 [metadata.files]
 atomicwrites = [
@@ -1799,8 +1799,8 @@ mypy-boto3-secretsmanager = [
     {file = "mypy_boto3_secretsmanager-1.24.83-py3-none-any.whl", hash = "sha256:9ed3ec38a6c05961cb39a2d9fb891441d4cf22c63e34a6998fbd3d28ba290d9a"},
 ]
 mypy-boto3-ssm = [
-    {file = "mypy-boto3-ssm-1.24.81.tar.gz", hash = "sha256:2b3167faa868442e43f0c6065fac8549762aafc967e487aae2d9e15c5bad20c3"},
-    {file = "mypy_boto3_ssm-1.24.81-py3-none-any.whl", hash = "sha256:a50fe448f3c18f76255e15878e21020001ec04a85b42996db721d9b89770ff11"},
+    {file = "mypy-boto3-ssm-1.24.90.tar.gz", hash = "sha256:8fdc65a34958ae89d4ae8ea7748caec46226216b35d75adf87e8ed40a798bf95"},
+    {file = "mypy_boto3_ssm-1.24.90-py3-none-any.whl", hash = "sha256:6fc26896e1fb4f84f5bbc04f79ba698e4dd296586ca462c517bc64e78d326fb5"},
 ]
 mypy-boto3-xray = [
     {file = "mypy-boto3-xray-1.24.36.post1.tar.gz", hash = "sha256:104f1ecf7f1f6278c582201e71a7ab64843d3a3fdc8f23295cf68788cc77e9bb"},
