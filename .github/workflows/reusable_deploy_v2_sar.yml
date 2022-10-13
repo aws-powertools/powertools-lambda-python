@@ -87,10 +87,10 @@ jobs:
       - name: Deploy BETA canary
         if: ${{ inputs.stage == 'BETA' }}
         run: |
-          STACK_NAME=serverlessrepo-v2-testing
+          STACK_NAME=serverlessrepo-v2-powertools-layer-test-stack
 
           echo "Check if stack does not exist"
-          stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName > '$STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}")
+          stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName > '$STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}" --output text)
           echo "$stack_exists"
           if [[ -n "$stack_exists" ]] ; then
             echo "Found test deployment stack, removing..."
