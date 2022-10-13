@@ -23,7 +23,7 @@ jobs:
       run:
         working-directory: ./layer
     outputs:
-      release-tag-version: ${{ steps.release-notes-tag.outputs.release-tag-version }}
+      release-tag-version: ${{ steps.release-notes-tag.outputs.RELEASE_TAG_VERSION }}
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -52,8 +52,7 @@ jobs:
           RELEASE_INPUT=${{ inputs.latest_published_version }}
           LATEST_TAG=$(git describe --tag --abbrev=0)
           RELEASE_TAG_VERSION=${RELEASE_INPUT:-$LATEST_TAG}
-          echo release-tag-version="$RELEASE_TAG_VERSION" >> "$GITHUB_OUTPUT"
-          echo RELEASE_TAG_VERSION="${RELEASE_TAG_VERSION:1}" >> "$GITHUB_ENV"
+          echo RELEASE_TAG_VERSION="${RELEASE_TAG_VERSION:1}" >> "$GITHUB_OUTPUT"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
         # NOTE: we need QEMU to build Layer against a different architecture (e.g., ARM)
@@ -65,7 +64,7 @@ jobs:
           npm install -g aws-cdk@2.44.0
           cdk --version
       - name: CDK build
-        run: cdk synth --context version="$RELEASE_TAG_VERSION" -o cdk.out
+        run: cdk synth --context version="${{ steps.release-notes-tag.outputs.RELEASE_TAG_VERSION }}" -o cdk.out
       - name: zip output
         run: zip -r cdk.out.zip cdk.out
       - name: Archive CDK artifacts
