@@ -69,7 +69,7 @@ jobs:
         run: |
           NAME=${{ env.SAR_NAME }}
           if [[ "${{ inputs.stage }}" == "BETA" ]]; then
-            NAME="test-$NAME"
+            NAME="test-${NAME}"
           fi
           echo SAR_NAME="${NAME}" >> "$GITHUB_ENV"
       - name: Adds arm64 suffix to SAR name
@@ -93,6 +93,7 @@ jobs:
 
           echo "Check if stack does not exist"
           stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName == '$STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}" --output text)
+
           if [[ -n "$stack_exists" ]] ; then
             echo "Found test deployment stack, removing..."
             aws cloudformation delete-stack --stack-name "$STACK_NAME"

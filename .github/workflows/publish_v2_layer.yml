@@ -95,8 +95,7 @@ jobs:
   #     environment: "layer-prod"
 
   deploy-sar-beta:
-    needs:
-      - build-layer
+    needs: build-layer
     uses: ./.github/workflows/reusable_deploy_v2_sar.yml
     secrets: inherit
     with:
@@ -106,8 +105,7 @@ jobs:
       package-version: ${{ needs.build-layer.outputs.release-tag-version }}
 
   deploy-sar-prod:
-    needs:
-      - deploy-sar-beta
+    needs: deploy-sar-beta
     uses: ./.github/workflows/reusable_deploy_v2_sar.yml
     secrets: inherit
     with:
