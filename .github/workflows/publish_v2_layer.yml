@@ -85,15 +85,15 @@ jobs:
       artefact-name: "cdk-layer-artefact"
       environment: "layer-beta"
 
-  deploy-prod:
-    needs:
-      - deploy-beta
-    uses: ./.github/workflows/reusable_deploy_layer_stack.yml
-    secrets: inherit
-    with:
-      stage: "PROD"
-      artefact-name: "cdk-layer-artefact"
-      environment: "layer-prod"
+  # deploy-prod:
+  #   needs:
+  #     - deploy-beta
+  #   uses: ./.github/workflows/reusable_deploy_layer_stack.yml
+  #   secrets: inherit
+  #   with:
+  #     stage: "PROD"
+  #     artefact-name: "cdk-layer-artefact"
+  #     environment: "layer-prod"
 
   deploy-sar-beta:
     needs:
