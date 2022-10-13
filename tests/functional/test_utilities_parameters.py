@@ -1640,15 +1640,15 @@ def test_appconf_provider_get_configuration_json_content_type(mock_name, config)
     mock_value = StreamingBody(BytesIO(encoded_message), len(encoded_message))
 
     stubber = stub.Stubber(provider.client)
-    response_start = {"InitialConfigurationToken": "initial_token"}
-    stubber.add_response("start_configuration_session", response_start)
+    response_start_config_session = {"InitialConfigurationToken": "initial_token"}
+    stubber.add_response("start_configuration_session", response_start_config_session)
 
-    response_latest = {
+    response_get_latest_config = {
         "Configuration": mock_value,
         "NextPollConfigurationToken": "initial_token",
         "ContentType": "application/json",
     }
-    stubber.add_response("get_latest_configuration", response_latest)
+    stubber.add_response("get_latest_configuration", response_get_latest_config)
     stubber.activate()
 
     try:
@@ -1679,15 +1679,15 @@ def test_appconf_provider_get_configuration_json_content_type_with_custom_client
     mock_value = StreamingBody(BytesIO(encoded_message), len(encoded_message))
 
     stubber = stub.Stubber(provider.client)
-    response_start = {"InitialConfigurationToken": "initial_token"}
-    stubber.add_response("start_configuration_session", response_start)
+    response_start_config_session = {"InitialConfigurationToken": "initial_token"}
+    stubber.add_response("start_configuration_session", response_start_config_session)
 
-    response_latest = {
+    response_get_latest_config = {
         "Configuration": mock_value,
         "NextPollConfigurationToken": "initial_token",
         "ContentType": "application/json",
     }
-    stubber.add_response("get_latest_configuration", response_latest)
+    stubber.add_response("get_latest_configuration", response_get_latest_config)
     stubber.activate()
 
     try:
@@ -1716,15 +1716,15 @@ def test_appconf_provider_get_configuration_no_transform(mock_name, config):
     mock_value = StreamingBody(BytesIO(encoded_message), len(encoded_message))
 
     stubber = stub.Stubber(provider.client)
-    response_start = {"InitialConfigurationToken": "initial_token"}
-    stubber.add_response("start_configuration_session", response_start)
+    response_start_config_session = {"InitialConfigurationToken": "initial_token"}
+    stubber.add_response("start_configuration_session", response_start_config_session)
 
-    response_latest = {
+    response_get_latest_config = {
         "Configuration": mock_value,
         "NextPollConfigurationToken": "initial_token",
         "ContentType": "application/json",
     }
-    stubber.add_response("get_latest_configuration", response_latest)
+    stubber.add_response("get_latest_configuration", response_get_latest_config)
     stubber.activate()
 
     try:
