@@ -8,8 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       latest_published_version:
-        description: "Latest PyPi published version to rebuild latest docs for, e.g. v1.22.0"
-        default: "v2.0.0"
+        description: "Latest PyPi published version to rebuild latest docs for, e.g. v2.0.0"
         required: true
   # workflow_run:
   #   workflows: ["Publish to PyPi"]
@@ -23,6 +22,8 @@ jobs:
     defaults:
       run:
         working-directory: ./layer
+    outputs:
+      release-tag-version: ${{ steps.release-notes-tag.outputs.RELEASE_TAG_VERSION }}
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -46,11 +47,12 @@ jobs:
           poetry export --format requirements.txt --output requirements.txt
           pip install -r requirements.txt
       - name: Set release notes tag
+        id: release-notes-tag
         run: |
           RELEASE_INPUT=${{ inputs.latest_published_version }}
           LATEST_TAG=$(git describe --tag --abbrev=0)
           RELEASE_TAG_VERSION=${RELEASE_INPUT:-$LATEST_TAG}
-          echo RELEASE_TAG_VERSION="${RELEASE_TAG_VERSION:1}" >> "$GITHUB_ENV"
+          echo RELEASE_TAG_VERSION="${RELEASE_TAG_VERSION:1}" >> "$GITHUB_OUTPUT"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
         # NOTE: we need QEMU to build Layer against a different architecture (e.g., ARM)
@@ -62,7 +64,7 @@ jobs:
           npm install -g aws-cdk@2.44.0
           cdk --version
       - name: CDK build
-        run: cdk synth --context version="$RELEASE_TAG_VERSION" -o cdk.out
+        run: cdk synth --context version="${{ steps.release-notes-tag.outputs.RELEASE_TAG_VERSION }}" -o cdk.out
       - name: zip output
         run: zip -r cdk.out.zip cdk.out
       - name: Archive CDK artifacts
@@ -90,3 +92,23 @@ jobs:
   #     stage: "PROD"
   #     artefact-name: "cdk-layer-artefact"
   #     environment: "layer-prod"
+
+  deploy-sar-beta:
+    needs: build-layer
+    uses: ./.github/workflows/reusable_deploy_v2_sar.yml
+    secrets: inherit
+    with:
+      stage: "BETA"
+      artefact-name: "cdk-layer-artefact"
+      environment: "layer-beta"
+      package-version: ${{ needs.build-layer.outputs.release-tag-version }}
+
+  deploy-sar-prod:
+    needs: deploy-sar-beta
+    uses: ./.github/workflows/reusable_deploy_v2_sar.yml
+    secrets: inherit
+    with:
+      stage: "PROD"
+      artefact-name: "cdk-layer-artefact"
+      environment: "layer-prod"
+      package-version: ${{ needs.build-layer.outputs.release-tag-version }}
