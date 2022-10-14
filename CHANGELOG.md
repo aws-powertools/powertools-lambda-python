@@ -8,12 +8,14 @@
 
 * **governance:** new form to allow customers self-nominate as public reference ([#1589](https://github.com/awslabs/aws-lambda-powertools-python/issues/1589))
 * **homepage:** include .NET powertools
+* **idempotency:** "persisntence" typo ([#1596](https://github.com/awslabs/aws-lambda-powertools-python/issues/1596))
 * **logger:** fix typo. ([#1587](https://github.com/awslabs/aws-lambda-powertools-python/issues/1587))
 
 ## Maintenance
 
 * add dummy v2 sar deploy job
 * bump layer version to 38
+* **deps-dev:** bump mypy-boto3-ssm from 1.24.81 to 1.24.90 ([#1594](https://github.com/awslabs/aws-lambda-powertools-python/issues/1594))
 * **deps-dev:** bump flake8-builtins from 1.5.3 to 2.0.0 ([#1582](https://github.com/awslabs/aws-lambda-powertools-python/issues/1582))
 
 
