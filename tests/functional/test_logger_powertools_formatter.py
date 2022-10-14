@@ -1,6 +1,7 @@
 """aws_lambda_logging tests."""
 import io
 import json
+import os
 import random
 import string
 import time
@@ -288,3 +289,23 @@ def test_log_formatting(stdout, service_name):
 
     # THEN the formatting should be applied (NB. this is valid json, but hasn't be parsed)
     assert log_dict["message"] == '["foo bar 123 [1, None]", null]'
+
+
+def test_log_json_indent_compact_indent(stdout, service_name, monkeypatch):
+    # GIVEN a logger with default settings and WHEN POWERTOOLS_DEV is not set
+    monkeypatch.delenv(name="POWERTOOLS_DEV", raising=False)
+    logger = Logger(service=service_name, stream=stdout)
+    logger.info("Test message")
+    # THEN the json should not have multiple lines
+    new_lines = stdout.getvalue().count(os.linesep)
+    assert new_lines == 1
+
+
+def test_log_json_pretty_indent(stdout, service_name, monkeypatch):
+    # GIVEN a logger with default settings and WHEN POWERTOOLS_DEV=="true"
+    monkeypatch.setenv(name="POWERTOOLS_DEV", value="true")
+    logger = Logger(service=service_name, stream=stdout)
+    logger.info("Test message")
+    # THEN the json should contain more than line
+    new_lines = stdout.getvalue().count(os.linesep)
+    assert new_lines > 1

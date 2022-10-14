@@ -369,6 +369,9 @@ If you prefer configuring it separately, or you'd want to bring this JSON Format
 | **`log_record_order`**       | set order of log keys when logging                                                                                       | `["level", "location", "message", "timestamp"]`               |
 | **`kwargs`**                 | key-value to be included in log messages                                                                                 | `None`                                                        |
 
+???+ info
+    When `POWERTOOLS_DEV` env var is present and set to `"true"`, Logger's default serializer (`json.dumps`) will pretty-print log messages for easier readability.
+
 ```python hl_lines="2 7-8" title="Pre-configuring Lambda Powertools Formatter"
 --8<-- "examples/logger/src/powertools_formatter_setup.py"
 ```
@@ -605,6 +608,9 @@ for the given name and level to the logging module. By default, this logs all bo
 
 You can copy the Logger setup to all or sub-sets of registered external loggers. Use the `copy_config_to_registered_logger` method to do this.
 
+???+ tip
+    To help differentiate between loggers, we include the standard logger `name` attribute for all loggers we copied configuration to.
+
 By default all registered loggers will be modified. You can change this behavior by providing `include` and `exclude` attributes. You can also provide optional `log_level` attribute external loggers will be configured with.
 
 ```python hl_lines="10" title="Cloning Logger config to all other registered standard loggers"
@@ -613,7 +619,7 @@ By default all registered loggers will be modified. You can change this behavior
 
 ### How can I add standard library logging attributes to a log record?
 
-The Python standard library log records contains a [large set of atttributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank"}, however only a few are included in Powertools Logger log record by default.
+The Python standard library log records contains a [large set of attributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank"}, however only a few are included in Powertools Logger log record by default.
 
 You can include any of these logging attributes as key value arguments (`kwargs`) when instantiating `Logger` or `LambdaPowertoolsFormatter`.
 

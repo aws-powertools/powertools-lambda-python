@@ -3,7 +3,11 @@ from typing import Any, List
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, event_parser
+from aws_lambda_powertools.utilities.parser import (
+    ValidationError,
+    envelopes,
+    event_parser,
+)
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedSnsBusiness, MySnsBusiness
 from tests.functional.utils import load_event
@@ -106,19 +110,6 @@ def test_handle_sns_sqs_trigger_event_json_body():  # noqa: F811
     handle_sns_sqs_json_body(event_dict, LambdaContext())
 
 
-def test_handle_sns_sqs_trigger_event_json_body_missing_signing_cert_url():
-    # GIVEN an event is tampered with a missing SigningCertURL
-    event_dict = load_event("snsSqsEvent.json")
-    payload = json.loads(event_dict["Records"][0]["body"])
-    payload.pop("SigningCertURL")
-    event_dict["Records"][0]["body"] = json.dumps(payload)
-
-    # WHEN parsing the payload
-    # THEN raise a ValidationError error
-    with pytest.raises(ValidationError):
-        handle_sns_sqs_json_body(event_dict, LambdaContext())
-
-
 def test_handle_sns_sqs_trigger_event_json_body_missing_unsubscribe_url():
     # GIVEN an event is tampered with a missing UnsubscribeURL
     event_dict = load_event("snsSqsEvent.json")
@@ -130,3 +121,8 @@ def test_handle_sns_sqs_trigger_event_json_body_missing_unsubscribe_url():
     # THEN raise a ValidationError error
     with pytest.raises(ValidationError):
         handle_sns_sqs_json_body(event_dict, LambdaContext())
+
+
+def test_handle_sns_sqs_fifo_trigger_event_json_body():
+    event_dict = load_event("snsSqsFifoEvent.json")
+    handle_sns_sqs_json_body(event_dict, LambdaContext())

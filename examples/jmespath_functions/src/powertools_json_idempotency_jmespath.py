@@ -3,7 +3,11 @@ from uuid import uuid4
 
 import requests
 
-from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, IdempotencyConfig, idempotent
+from aws_lambda_powertools.utilities.idempotency import (
+    DynamoDBPersistenceLayer,
+    IdempotencyConfig,
+    idempotent,
+)
 
 persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 

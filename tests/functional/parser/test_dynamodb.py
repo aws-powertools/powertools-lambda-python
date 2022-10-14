@@ -2,7 +2,11 @@ from typing import Any, Dict, List
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, event_parser
+from aws_lambda_powertools.utilities.parser import (
+    ValidationError,
+    envelopes,
+    event_parser,
+)
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyAdvancedDynamoBusiness, MyDynamoBusiness
 from tests.functional.utils import load_event

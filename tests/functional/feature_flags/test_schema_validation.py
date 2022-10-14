@@ -2,7 +2,9 @@ import logging
 
 import pytest  # noqa: F401
 
-from aws_lambda_powertools.utilities.feature_flags.exceptions import SchemaValidationError
+from aws_lambda_powertools.utilities.feature_flags.exceptions import (
+    SchemaValidationError,
+)
 from aws_lambda_powertools.utilities.feature_flags.schema import (
     CONDITION_ACTION,
     CONDITION_KEY,

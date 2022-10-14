@@ -50,7 +50,9 @@ from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import 
     AppSyncResolverEventInfo,
     get_identity_object,
 )
-from aws_lambda_powertools.utilities.data_classes.code_pipeline_job_event import CodePipelineData
+from aws_lambda_powertools.utilities.data_classes.code_pipeline_job_event import (
+    CodePipelineData,
+)
 from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import (
     CreateAuthChallengeTriggerEvent,
     CustomMessageTriggerEvent,
@@ -63,7 +65,10 @@ from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import
     UserMigrationTriggerEvent,
     VerifyAuthChallengeResponseTriggerEvent,
 )
-from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import (
+    BaseProxyEvent,
+    DictWrapper,
+)
 from aws_lambda_powertools.utilities.data_classes.connect_contact_flow_event import (
     ConnectContactFlowChannel,
     ConnectContactFlowEndpointType,
@@ -75,10 +80,13 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
     AttributeValueType,
     DynamoDBRecordEventName,
     DynamoDBStreamEvent,
+    StreamRecord,
     StreamViewType,
 )
 from aws_lambda_powertools.utilities.data_classes.event_source import event_source
-from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
+from aws_lambda_powertools.utilities.data_classes.s3_object_event import (
+    S3ObjectLambdaEvent,
+)
 from tests.functional.utils import load_event
 
 
@@ -100,6 +108,19 @@ def test_dict_wrapper_equals():
     assert data1 is not DataClassSample(data1)
 
     assert DataClassSample(data1).raw_event is data1
+
+
+def test_dict_wrapper_implements_mapping():
+    class DataClassSample(DictWrapper):
+        pass
+
+    data = {"message": "foo1"}
+    event_source = DataClassSample(data)
+    assert len(event_source) == len(data)
+    assert list(event_source) == list(data)
+    assert event_source.keys() == data.keys()
+    assert list(event_source.values()) == list(data.values())
+    assert event_source.items() == data.items()
 
 
 def test_cloud_watch_dashboard_event():
@@ -616,6 +637,23 @@ def test_dynamo_attribute_value_type_error():
         print(attribute_value.get_value)
     with pytest.raises(ValueError):
         print(attribute_value.get_type)
+
+
+def test_stream_record_keys_with_valid_keys():
+    attribute_value = {"Foo": "Bar"}
+    record = StreamRecord({"Keys": {"Key1": attribute_value}})
+    assert record.keys == {"Key1": AttributeValue(attribute_value)}
+
+
+def test_stream_record_keys_with_no_keys():
+    record = StreamRecord({})
+    assert record.keys is None
+
+
+def test_stream_record_keys_overrides_dict_wrapper_keys():
+    data = {"Keys": {"key1": {"attr1": "value1"}}}
+    record = StreamRecord(data)
+    assert record.keys != data.keys()
 
 
 def test_event_bridge_event():

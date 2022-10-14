@@ -37,10 +37,6 @@ class CanaryStack(Stack):
             ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
         )
 
-        execution_role.add_to_policy(
-            PolicyStatement(effect=Effect.ALLOW, actions=["lambda:GetFunction"], resources=["*"])
-        )
-
         canary_lambda = Function(
             self,
             "CanaryLambdaFunction",

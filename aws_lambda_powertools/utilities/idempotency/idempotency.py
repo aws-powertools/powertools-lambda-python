@@ -11,7 +11,9 @@ from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.types import AnyCallableT
 from aws_lambda_powertools.utilities.idempotency.base import IdempotencyHandler
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
-from aws_lambda_powertools.utilities.idempotency.persistence.base import BasePersistenceLayer
+from aws_lambda_powertools.utilities.idempotency.persistence.base import (
+    BasePersistenceLayer,
+)
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)

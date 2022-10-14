@@ -1,7 +1,13 @@
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from aws_lambda_powertools.utilities.typing.lambda_client_context import LambdaClientContext
-from aws_lambda_powertools.utilities.typing.lambda_client_context_mobile_client import LambdaClientContextMobileClient
-from aws_lambda_powertools.utilities.typing.lambda_cognito_identity import LambdaCognitoIdentity
+from aws_lambda_powertools.utilities.typing.lambda_client_context import (
+    LambdaClientContext,
+)
+from aws_lambda_powertools.utilities.typing.lambda_client_context_mobile_client import (
+    LambdaClientContextMobileClient,
+)
+from aws_lambda_powertools.utilities.typing.lambda_cognito_identity import (
+    LambdaCognitoIdentity,
+)
 
 
 def test_typing():

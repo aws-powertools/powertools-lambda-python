@@ -52,7 +52,7 @@ We provide built-in envelopes for popular AWS Lambda event sources to easily dec
 
 === "extract_data_from_builtin_envelope.py"
 
-	```python hl_lines="1 6"
+	```python hl_lines="1-4 9"
     --8<-- "examples/jmespath_functions/src/extract_data_from_builtin_envelope.py"
 	```
 
@@ -116,7 +116,7 @@ This sample will deserialize the JSON string within the `body` key before [Idemp
 
 === "powertools_json_idempotency_jmespath.py"
 
-    ```python hl_lines="12"
+    ```python hl_lines="16"
     --8<-- "examples/jmespath_functions/src/powertools_json_idempotency_jmespath.py"
     ```
 
@@ -185,7 +185,7 @@ Here is an example of how to decompress messages using [snappy](https://github.c
 
 === "powertools_custom_jmespath_function.py"
 
-    ```python hl_lines="8 11 14-15 20 31 36 38 40"
+    ```python hl_lines="9 14 17-18 23 34 39 41 43"
 	--8<-- "examples/jmespath_functions/src/powertools_custom_jmespath_function.py"
     ```
 

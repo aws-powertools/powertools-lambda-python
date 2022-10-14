@@ -95,3 +95,7 @@ class MyALambdaFuncUrlBusiness(BaseModel):
 
 class MyLambdaKafkaBusiness(BaseModel):
     key: str
+
+
+class MyKinesisFirehoseBusiness(BaseModel):
+    Hello: str
