@@ -18,7 +18,7 @@ class ParametersStack(BaseInfrastructure):
         service_name = build_service_name()
 
         cfn_application = appconfig.CfnApplication(
-            self.stack, id="appconfig-app", name=f"appe2e{service_name}", description="appe2e"
+            self.stack, id="appconfig-app", name=f"powertools-e2e-{service_name}", description="Lambda Powertools End-to-End testing for AppConfig"
         )
         CfnOutput(self.stack, "AppConfigApplication", value=cfn_application.name)
 
