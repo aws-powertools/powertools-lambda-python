@@ -76,8 +76,8 @@ Event Source | Data_class
 [DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName`
 [EventBridge](#eventbridge) | `EventBridgeEvent`
 [Kafka](#kafka) | `KafkaEvent`
-[Kinesis Firehose Delivery Stream](#kinesis-firehose-delivery-stream) | `KinesisFirehoseEvent`
 [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent`
+[Kinesis Firehose Delivery Stream](#kinesis-firehose-delivery-stream) | `KinesisFirehoseEvent`
 [Lambda Function URL](#lambda-function-url) | `LambdaFunctionUrlEvent`
 [Rabbit MQ](#rabbit-mq) | `RabbitMQEvent`
 [S3](#s3) | `S3Event`
