@@ -1,7 +1,7 @@
 name: Support Lambda Powertools (become a reference)
 description: Add your organization's name or logo to the Lambda Powertools documentation
 title: "[Support Lambda Powertools]: <your organization name>"
-labels: ["customer_reference"]
+labels: ["customer-reference"]
 body:
   - type: markdown
     attributes:
