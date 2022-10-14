@@ -7,7 +7,6 @@ The feature flags utility provides a simple rule engine to define when one or mu
 
 ???+ info
     We currently only support AppConfig using [freeform configuration profile](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations).
-    We are planning to add support for the [feature flag configuration profile](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-feature-flags) in future releases.
 
 ## Terminology
 
