@@ -134,3 +134,8 @@ def test_handle_sns_sqs_trigger_event_json_body_missing_unsubscribe_url():
     # THEN raise a ValidationError error
     with pytest.raises(ValidationError):
         handle_sns_sqs_json_body(event_dict, LambdaContext())
+
+
+def test_handle_sns_sqs_fifo_trigger_event_json_body():
+    event_dict = load_event("snsSqsFifoEvent.json")
+    handle_sns_sqs_json_body(event_dict, LambdaContext())

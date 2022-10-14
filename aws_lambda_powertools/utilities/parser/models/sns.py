@@ -22,10 +22,10 @@ class SnsNotificationModel(BaseModel):
     MessageAttributes: Optional[Dict[str, SnsMsgAttributeModel]]
     Message: Union[str, TypingType[BaseModel]]
     MessageId: str
-    SigningCertUrl: HttpUrl
-    Signature: str
+    SigningCertUrl: Optional[HttpUrl]  # NOTE: FIFO opt-in removes attribute
+    Signature: Optional[str]  # NOTE: FIFO opt-in removes attribute
     Timestamp: datetime
-    SignatureVersion: str
+    SignatureVersion: Optional[str]  # NOTE: FIFO opt-in removes attribute
 
     @root_validator(pre=True, allow_reuse=True)
     def check_sqs_protocol(cls, values):
