@@ -4,8 +4,16 @@
 <a name="unreleased"></a>
 # Unreleased
 
+
+<a name="v1.31.1"></a>
+## [v1.31.1] - 2022-10-14
+## Bug Fixes
+
+* **parser:** loose validation on SNS fields to support FIFO ([#1606](https://github.com/awslabs/aws-lambda-powertools-python/issues/1606))
+
 ## Documentation
 
+* **governance:** allow community to suggest feature content ([#1593](https://github.com/awslabs/aws-lambda-powertools-python/issues/1593))
 * **governance:** new form to allow customers self-nominate as public reference ([#1589](https://github.com/awslabs/aws-lambda-powertools-python/issues/1589))
 * **homepage:** include .NET powertools
 * **idempotency:** "persisntence" typo ([#1596](https://github.com/awslabs/aws-lambda-powertools-python/issues/1596))
@@ -2418,7 +2426,8 @@
 * Merge pull request [#5](https://github.com/awslabs/aws-lambda-powertools-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.31.0...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.31.1...HEAD
+[v1.31.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.31.0...v1.31.1
 [v1.31.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.30.0...v1.31.0
 [v1.30.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.29.2...v1.30.0
 [v1.29.2]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v1.29.1...v1.29.2
