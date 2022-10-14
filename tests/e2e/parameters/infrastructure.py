@@ -27,7 +27,7 @@ class ParametersStack(BaseInfrastructure):
             "appconfig-env",
             application_id=cfn_application.ref,
             name=f"powertools-e2e{service_name}",
-            description="enve2e",
+            description="Lambda Powertools End-to-End testing environment",
         )
         CfnOutput(self.stack, "AppConfigEnvironment", value=cfn_environment.name)
 
