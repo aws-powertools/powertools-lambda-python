@@ -842,7 +842,7 @@ This utility provides an abstract base class (ABC), so that you can implement yo
 You can inherit from the `BasePersistenceLayer` class and implement the abstract methods `_get_record`, `_put_record`,
 `_update_record` and `_delete_record`.
 
-```python hl_lines="8-13 57 65 74 96 124" title="Excerpt DynamoDB Persisntence Layer implementation for reference"
+```python hl_lines="8-13 57 65 74 96 124" title="Excerpt DynamoDB Persistence Layer implementation for reference"
 import datetime
 import logging
 from typing import Any, Dict, Optional
