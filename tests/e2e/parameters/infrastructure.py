@@ -26,7 +26,7 @@ class ParametersStack(BaseInfrastructure):
             self.stack,
             "appconfig-env",
             application_id=cfn_application.ref,
-            name=f"enve2e{service_name}",
+            name=f"powertools-e2e{service_name}",
             description="enve2e",
         )
         CfnOutput(self.stack, "AppConfigEnvironment", value=cfn_environment.name)
