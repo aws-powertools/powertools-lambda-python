@@ -4,6 +4,10 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+* **layer:** bump to 1.31.1 (v39)
+
 
 <a name="v1.31.1"></a>
 ## [v1.31.1] - 2022-10-14
