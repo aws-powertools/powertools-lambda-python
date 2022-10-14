@@ -27,9 +27,8 @@ from typing import (
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import powertools_dev_is_set, strtobool
 from aws_lambda_powertools.shared.cookies import Cookie
-from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
+from aws_lambda_powertools.shared.functions import powertools_dev_is_set, strtobool
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,

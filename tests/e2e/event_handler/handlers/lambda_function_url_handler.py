@@ -1,4 +1,8 @@
-from aws_lambda_powertools.event_handler import LambdaFunctionUrlResolver, Response, content_types
+from aws_lambda_powertools.event_handler import (
+    LambdaFunctionUrlResolver,
+    Response,
+    content_types,
+)
 
 app = LambdaFunctionUrlResolver()
 

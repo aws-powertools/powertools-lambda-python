@@ -5,10 +5,18 @@ from typing import Callable, Dict, Optional
 import pytest
 from botocore.config import Config
 
-from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+from aws_lambda_powertools.utilities.batch import (
+    BatchProcessor,
+    EventType,
+    batch_processor,
+)
 from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError
-from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
-from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
+from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
+    DynamoDBRecord,
+)
+from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
+    KinesisStreamRecord,
+)
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.parser import BaseModel, validator
 from aws_lambda_powertools.utilities.parser.models import (
@@ -23,7 +31,6 @@ from aws_lambda_powertools.utilities.parser.models import (
     SqsRecordModel,
 )
 from aws_lambda_powertools.utilities.parser.types import Literal
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import b64_to_str, str_to_b64
 
 

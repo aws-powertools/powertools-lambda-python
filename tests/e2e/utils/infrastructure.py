@@ -11,12 +11,23 @@ from uuid import uuid4
 import boto3
 import pytest
 from aws_cdk import App, CfnOutput, Environment, RemovalPolicy, Stack, aws_logs
-from aws_cdk.aws_lambda import Architecture, Code, Function, LayerVersion, Runtime, Tracing
+from aws_cdk.aws_lambda import (
+    Architecture,
+    Code,
+    Function,
+    LayerVersion,
+    Runtime,
+    Tracing,
+)
 from filelock import FileLock
 from mypy_boto3_cloudformation import CloudFormationClient
 
 from tests.e2e.utils.base import InfrastructureProvider
-from tests.e2e.utils.constants import CDK_OUT_PATH, PYTHON_RUNTIME_VERSION, SOURCE_CODE_ROOT_PATH
+from tests.e2e.utils.constants import (
+    CDK_OUT_PATH,
+    PYTHON_RUNTIME_VERSION,
+    SOURCE_CODE_ROOT_PATH,
+)
 from tests.e2e.utils.lambda_layer.powertools_layer import LocalLambdaPowertoolsLayer
 
 logger = logging.getLogger(__name__)

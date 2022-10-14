@@ -5,7 +5,10 @@ from aws_lambda_powertools.shared.headers_serializer import (
     MultiValueHeadersSerializer,
     SingleValueHeadersSerializer,
 )
-from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import (
+    BaseProxyEvent,
+    DictWrapper,
+)
 
 
 class ALBEventRequestContext(DictWrapper):
