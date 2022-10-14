@@ -77,10 +77,10 @@ mypy-boto3-appconfigdata = "^1.24.36"
 importlib-metadata = "^4.13"
 
 [tool.poetry.extras]
-parser = ["pydantic", "email-validator"]
+parser = ["pydantic"]
 validation = ["fastjsonschema"]
 tracer = ["aws-xray-sdk"]
-all = ["pydantic", "email-validator", "aws-xray-sdk", "fastjsonschema"]
+all = ["pydantic", "aws-xray-sdk", "fastjsonschema"]
 # allow customers to run code locally without emulators (SAM CLI, etc.)
 aws-sdk = ["boto3"]
 [tool.coverage.run]
