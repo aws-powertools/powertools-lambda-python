@@ -6,12 +6,12 @@ target:
 
 dev:
 	pip install --upgrade pip pre-commit poetry
-	poetry install --extras "all"
+	poetry install --extras "dev"
 	pre-commit install
 
 dev-gitpod:
 	pip install --upgrade pip poetry
-	poetry install --extras "all"
+	poetry install --extras "dev"
 	pre-commit install
 
 format:
