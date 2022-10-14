@@ -12,39 +12,39 @@ class KinesisFirehoseRecordMetadata(DictWrapper):
         return self["kinesisRecordMetadata"]  # could raise KeyError
 
     @property
-    def shard_id(self) -> Optional[str]:
+    def shard_id(self) -> str:
         """Kinesis stream shard ID; present only when Kinesis Stream is source"""
-        return self._metadata.get("shardId")
+        return self._metadata["shardId"]
 
     @property
-    def partition_key(self) -> Optional[str]:
+    def partition_key(self) -> str:
         """Kinesis stream partition key; present only when Kinesis Stream is source"""
-        return self._metadata.get("partitionKey")
+        return self._metadata["partitionKey"]
 
     @property
     def approximate_arrival_timestamp(self) -> int:
         """Kinesis stream approximate arrival ISO timestamp; present only when Kinesis Stream is source"""
-        return self._metadata.get("approximateArrivalTimestamp")
+        return self._metadata["approximateArrivalTimestamp"]
 
     @property
-    def sequence_number(self) -> Optional[str]:
+    def sequence_number(self) -> str:
         """Kinesis stream sequence number; present only when Kinesis Stream is source"""
-        return self._metadata.get("sequenceNumber")
+        return self._metadata["sequenceNumber"]
 
     @property
-    def subsequence_number(self) -> Optional[str]:
+    def subsequence_number(self) -> str:
         """Kinesis stream sub-sequence number; present only when Kinesis Stream is source
 
         Note: this will only be present for Kinesis streams using record aggregation
         """
-        return self._metadata.get("subsequenceNumber")
+        return self._metadata["subsequenceNumber"]
 
 
 class KinesisFirehoseRecord(DictWrapper):
     @property
     def approximate_arrival_timestamp(self) -> int:
         """The approximate time that the record was inserted into the delivery stream"""
-        return float(self["approximateArrivalTimestamp"])
+        return self["approximateArrivalTimestamp"]
 
     @property
     def record_id(self) -> str:
@@ -57,9 +57,9 @@ class KinesisFirehoseRecord(DictWrapper):
         return self["data"]
 
     @property
-    def metadata(self) -> KinesisFirehoseRecordMetadata:
+    def metadata(self) -> Optional[KinesisFirehoseRecordMetadata]:
         """Optional: metadata associated with this record; present only when Kinesis Stream is source"""
-        return KinesisFirehoseRecordMetadata(self._data)
+        return KinesisFirehoseRecordMetadata(self._data) if self.get("kinesisRecordMetadata") else None
 
     @property
     def data_as_bytes(self) -> bytes:
