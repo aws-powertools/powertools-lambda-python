@@ -113,14 +113,14 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.24.90"
+version = "1.24.91"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 
 [package.dependencies]
-botocore = ">=1.27.90,<1.28.0"
+botocore = ">=1.27.91,<1.28.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -129,7 +129,7 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.27.90"
+version = "1.27.91"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -746,6 +746,17 @@ reports = ["lxml"]
 name = "mypy-boto3-appconfig"
 version = "1.24.36.post1"
 description = "Type annotations for boto3.AppConfig 1.24.36 service generated with mypy-boto3-builder 7.10.0"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+typing-extensions = ">=4.1.0"
+
+[[package]]
+name = "mypy-boto3-appconfigdata"
+version = "1.24.36.post1"
+description = "Type annotations for boto3.AppConfigData 1.24.36 service generated with mypy-boto3-builder 7.10.0"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -1381,7 +1392,7 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "1e4e1c94d7bb2e4dc1bf4d5631c5548db3e4f2912ef454903816c97f09e04cc1"
+content-hash = "bc65bd1113d0d6d5494bd63fc42cbd98bfe00322d8da3f510e1600a7dbdd727c"
 
 [metadata.files]
 attrs = [
@@ -1432,12 +1443,12 @@ black = [
     {file = "black-22.10.0.tar.gz", hash = "sha256:f513588da599943e0cde4e32cc9879e825d58720d6557062d1098c5ad80080e1"},
 ]
 boto3 = [
-    {file = "boto3-1.24.90-py3-none-any.whl", hash = "sha256:2a058a86989d88e27c79dd3e17218b3b167070d8738e20844d49363a3dd64281"},
-    {file = "boto3-1.24.90.tar.gz", hash = "sha256:83c2bc50f762ba87471fc73ec3eefd86626883b38533e98d7993259450c043db"},
+    {file = "boto3-1.24.91-py3-none-any.whl", hash = "sha256:b295640bc1be637f8f7c8c8fca70781048d6397196109e59f20541824fab4b67"},
+    {file = "boto3-1.24.91.tar.gz", hash = "sha256:3225366014949039e6687387242e73f237f0fee0a9b7c20461894f1ee40686b8"},
 ]
 botocore = [
-    {file = "botocore-1.27.90-py3-none-any.whl", hash = "sha256:2a934e713e83ae7f4dde1dd013be280538e3c4a3825c5f5a2727a1956d4cd82c"},
-    {file = "botocore-1.27.90.tar.gz", hash = "sha256:4ecc149d1dd36d32ba222de135c2e147731107ae444440b12714282dc00f88a4"},
+    {file = "botocore-1.27.91-py3-none-any.whl", hash = "sha256:1d6e97bd8653f732c7078b34aa2bb438e750898957e5a0a74b6c72918bc1d0f7"},
+    {file = "botocore-1.27.91.tar.gz", hash = "sha256:c8fac203a391cc2e4b682877bfce70e723e33c529b35b399a1d574605fbeb1af"},
 ]
 cattrs = [
     {file = "cattrs-22.1.0-py3-none-any.whl", hash = "sha256:d55c477b4672f93606e992049f15d526dc7867e6c756cd6256d4af92e2b1e364"},
@@ -1742,6 +1753,10 @@ mypy = [
 mypy-boto3-appconfig = [
     {file = "mypy-boto3-appconfig-1.24.36.post1.tar.gz", hash = "sha256:e1916b3754915cb411ef977083500e1f30f81f7b3aea6ff5eed1cec91944dea6"},
     {file = "mypy_boto3_appconfig-1.24.36.post1-py3-none-any.whl", hash = "sha256:a5dbe549dbebf4bc7a6cfcbfa9dff89ceb4983c042b785763ee656504bdb49f6"},
+]
+mypy-boto3-appconfigdata = [
+    {file = "mypy-boto3-appconfigdata-1.24.36.post1.tar.gz", hash = "sha256:48c0b29a99f5e5a54a4585a4b3661bc00c7db40e481c5d014a4bfd86d1ae645e"},
+    {file = "mypy_boto3_appconfigdata-1.24.36.post1-py3-none-any.whl", hash = "sha256:2bc495e6b6bd358d78d30f84b750d17ac326b2b4356a7786d0d1334812416edd"},
 ]
 mypy-boto3-cloudformation = [
     {file = "mypy-boto3-cloudformation-1.24.36.post1.tar.gz", hash = "sha256:ed7df9ae3a8390a145229122a1489d0a58bbf9986cb54f0d7a65ed54f12c8e63"},

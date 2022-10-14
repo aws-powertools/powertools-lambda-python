@@ -13,6 +13,7 @@ Changes at a glance:
 * The API for **event handler's `Response`** has minor changes to support multi value headers and cookies.
 * The **legacy SQS batch processor** was removed.
 * The **Idempotency key** format changed slightly, invalidating all the existing cached results.
+* The **Feature Flags and AppConfig Parameter utility** API calls have changed and you must update your IAM permissions.
 
 ???+ important
     Powertools for Python v2 drops suport for Python 3.6, following the Python 3.6 End-Of-Life (EOL) reached on December 23, 2021.
@@ -154,3 +155,9 @@ Prior to this change, the Idempotency key was generated using only the caller fu
 After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key` (e.g: `app.classExample.function#app.handler#282e83393862a613b612c00283fef4c8`).
 
 Using qualified names prevents distinct functions with the same name to contend for the same Idempotency key.
+
+## Feature Flags and AppConfig Parameter utility
+
+AWS AppConfig deprecated the current API (GetConfiguration) - [more details here](https://github.com/awslabs/aws-lambda-powertools-python/issues/1506#issuecomment-1266645884).
+
+You must update your IAM permissions to allow `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession`. There are no code changes required.
