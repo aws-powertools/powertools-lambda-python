@@ -1203,7 +1203,7 @@ def test_kafka_self_managed_event():
 
 
 def test_kinesis_firehose_event():
-    event = KinesisFirehoseEvent(load_event("kinesisFirehoseEvent.json"))
+    event = KinesisFirehoseEvent(load_event("kinesisFirehoseKinesisEvent.json"))
 
     assert event.region == "us-east-2"
     assert event.invocation_id == "2b4d1ad9-2f48-94bd-a088-767c317e994a"

@@ -1,5 +1,6 @@
 {
   "invocationId": "2b4d1ad9-2f48-94bd-a088-767c317e994a",
+  "sourceKinesisStreamArn":"arn:aws:kinesis:us-east-1:123456789012:stream/kinesis-source",
   "deliveryStreamArn": "arn:aws:firehose:us-east-2:123456789012:deliverystream/delivery-stream-name",
   "region": "us-east-2",
   "records": [
