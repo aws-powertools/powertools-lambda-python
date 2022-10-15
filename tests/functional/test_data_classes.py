@@ -1298,7 +1298,7 @@ def test_kinesis_firehose_put_event():
     assert record_01.metadata is None
 
     assert record_02.approximate_arrival_timestamp == 1664029186945
-    assert record_01.record_id == "record2"
+    assert record_02.record_id == "record2"
     assert record_02.data == "eyJIZWxsbyI6ICJXb3JsZCJ9"
     assert record_02.data_as_bytes == b'{"Hello": "World"}'
     assert record_02.data_as_text == '{"Hello": "World"}'
