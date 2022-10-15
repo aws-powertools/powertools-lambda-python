@@ -1290,13 +1290,15 @@ def test_kinesis_firehose_put_event():
     assert len(records) == 2
     record_01, record_02 = records[:]
 
-    assert record_01.approximate_arrival_timestamp == 1510772160000
+    assert record_01.approximate_arrival_timestamp == 1664029185290
     assert record_01.record_id == "record1"
     assert record_01.data == "SGVsbG8gV29ybGQ="
     assert record_01.data_as_bytes == b"Hello World"
     assert record_01.data_as_text == "Hello World"
     assert record_01.metadata is None
 
+    assert record_02.approximate_arrival_timestamp == 1664029186945
+    assert record_01.record_id == "record2"
     assert record_02.data == "eyJIZWxsbyI6ICJXb3JsZCJ9"
     assert record_02.data_as_bytes == b'{"Hello": "World"}'
     assert record_02.data_as_text == '{"Hello": "World"}'
