@@ -4,6 +4,10 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Features
+
+* **data_classes:** add KinesisFirehoseEvent ([#1540](https://github.com/awslabs/aws-lambda-powertools-python/issues/1540))
+
 ## Maintenance
 
 * **layer:** bump to 1.31.1 (v39)
