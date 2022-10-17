@@ -1,4 +1,4 @@
-name: Publish V2 Layer ARN
+name: Update V2 Layer ARN Docs
 
 on:
   workflow_call:
@@ -57,4 +57,4 @@ jobs:
     uses: ./.github/workflows/reusable_publish_docs.yml
     with:
       version: ${{ inputs.latest_published_version }}
-      alias: alpha
+      alias: latest
