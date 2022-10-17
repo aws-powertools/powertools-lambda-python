@@ -17,7 +17,8 @@ A suite of utilities for AWS Lambda functions to ease adopting best practices su
 
 Powertools is available in the following formats:
 
-* **Lambda Layer**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:38**](#){: .copyMe}:clipboard:
+* **Lambda Layer (x86_64)**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:1**](#){: .copyMe}:clipboard:
+* **Lambda Layer (arm64)**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1**](#){: .copyMe}:clipboard:
 * **PyPi**: **`pip install aws-lambda-powertools`**
 
 ???+ info "Some utilities require additional dependencies"
@@ -51,160 +52,322 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 
 ??? note "Note: Expand to copy any regional Lambda Layer ARN"
 
-    | Region           | Layer ARN                                                                                                |
-    | ---------------- | -------------------------------------------------------------------------------------------------------- |
-    | `af-south-1`     | [arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:     |
-    | `ap-east-1`      | [arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:      |
-    | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard: |
-    | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard: |
-    | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard: |
-    | `ap-south-1`     | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:     |
-    | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard: |
-    | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard: |
-    | `ap-southeast-3` | [arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard: |
-    | `ca-central-1`   | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:   |
-    | `eu-central-1`   | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:   |
-    | `eu-north-1`     | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:     |
-    | `eu-south-1`     | [arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:     |
-    | `eu-west-1`      | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:      |
-    | `eu-west-2`      | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:      |
-    | `eu-west-3`      | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:      |
-    | `me-south-1`     | [arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:     |
-    | `sa-east-1`      | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:      |
-    | `us-east-1`      | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:      |
-    | `us-east-2`      | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:      |
-    | `us-west-1`      | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:      |
-    | `us-west-2`      | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPython:38](#){: .copyMe}:clipboard:      |
+    === "x86_64"
+
+        | Region           | Layer ARN                                                                                                |
+        | ---------------- | -------------------------------------------------------------------------------------------------------- |
+        | `af-south-1`     | [arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:     |
+        | `ap-east-1`      | [arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:      |
+        | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard: |
+        | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard: |
+        | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard: |
+        | `ap-south-1`     | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:     |
+        | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard: |
+        | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard: |
+        | `ap-southeast-3` | [arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard: |
+        | `ca-central-1`   | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:   |
+        | `eu-central-1`   | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:   |
+        | `eu-north-1`     | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:     |
+        | `eu-south-1`     | [arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:     |
+        | `eu-west-1`      | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:      |
+        | `eu-west-2`      | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:      |
+        | `eu-west-3`      | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:      |
+        | `me-south-1`     | [arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:     |
+        | `sa-east-1`      | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:      |
+        | `us-east-1`      | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:      |
+        | `us-east-2`      | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:      |
+        | `us-west-1`      | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:      |
+        | `us-west-2`      | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:      |
+
+    === "arm64"
+
+        | Region           | Layer ARN                                                                                                |
+        | ---------------- | -------------------------------------------------------------------------------------------------------- |
+        | `af-south-1`     | [arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:     |
+        | `ap-east-1`      | [arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:      |
+        | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard: |
+        | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard: |
+        | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard: |
+        | `ap-south-1`     | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:     |
+        | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard: |
+        | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard: |
+        | `ap-southeast-3` | [arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard: |
+        | `ca-central-1`   | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:   |
+        | `eu-central-1`   | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:   |
+        | `eu-north-1`     | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:     |
+        | `eu-south-1`     | [arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:     |
+        | `eu-west-1`      | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:      |
+        | `eu-west-2`      | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:      |
+        | `eu-west-3`      | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:      |
+        | `me-south-1`     | [arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:     |
+        | `sa-east-1`      | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:      |
+        | `us-east-1`      | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:      |
+        | `us-east-2`      | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:      |
+        | `us-west-1`      | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:      |
+        | `us-west-2`      | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:      |
 
 ??? question "Can't find our Lambda Layer for your preferred AWS region?"
     You can use [Serverless Application Repository (SAR)](#sar) method, our [CDK Layer Construct](https://github.com/aws-samples/cdk-lambda-powertools-python-layer){target="_blank"}, or PyPi like you normally would for any other library.
 
     Please do file a feature request with the region you'd want us to prioritize making our Lambda Layer available.
 
-=== "SAM"
+=== "x86_64"
 
-    ```yaml hl_lines="5"
-    MyLambdaFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            Layers:
-                - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:38
-    ```
+    === "SAM"
 
-=== "Serverless framework"
+        ```yaml hl_lines="5"
+        MyLambdaFunction:
+            Type: AWS::Serverless::Function
+            Properties:
+                Layers:
+                    - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:1
+        ```
 
-    ```yaml hl_lines="5"
-	functions:
-		hello:
-		  handler: lambda_function.lambda_handler
-		  layers:
-			- arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPython:38
-    ```
+    === "Serverless framework"
 
-=== "CDK"
+        ```yaml hl_lines="5"
+    	functions:
+    		hello:
+    		  handler: lambda_function.lambda_handler
+    		  layers:
+    			- arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:1
+        ```
 
-    ```python hl_lines="11 16"
-    from aws_cdk import core, aws_lambda
+    === "CDK"
 
-    class SampleApp(core.Construct):
+        ```python hl_lines="11 16"
+        from aws_cdk import core, aws_lambda
 
-        def __init__(self, scope: core.Construct, id_: str, env: core.Environment) -> None:
-            super().__init__(scope, id_)
+        class SampleApp(core.Construct):
 
-            powertools_layer = aws_lambda.LayerVersion.from_layer_version_arn(
-                self,
-                id="lambda-powertools",
-                layer_version_arn=f"arn:aws:lambda:{env.region}:017000801446:layer:AWSLambdaPowertoolsPython:38"
-            )
-            aws_lambda.Function(self,
-                'sample-app-lambda',
-                runtime=aws_lambda.Runtime.PYTHON_3_9,
-                layers=[powertools_layer]
-                # other props...
-            )
-    ```
+            def __init__(self, scope: core.Construct, id_: str, env: core.Environment) -> None:
+                super().__init__(scope, id_)
 
-=== "Terraform"
+                powertools_layer = aws_lambda.LayerVersion.from_layer_version_arn(
+                    self,
+                    id="lambda-powertools",
+                    layer_version_arn=f"arn:aws:lambda:{env.region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:1"
+                )
+                aws_lambda.Function(self,
+                    'sample-app-lambda',
+                    runtime=aws_lambda.Runtime.PYTHON_3_9,
+                    layers=[powertools_layer]
+                    # other props...
+                )
+        ```
 
-    ```terraform hl_lines="9 38"
-    terraform {
-      required_version = "~> 1.0.5"
-      required_providers {
-        aws = "~> 3.50.0"
-      }
-    }
+    === "Terraform"
 
-    provider "aws" {
-      region  = "{region}"
-    }
-
-    resource "aws_iam_role" "iam_for_lambda" {
-      name = "iam_for_lambda"
-
-      assume_role_policy = <<EOF
-        {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Principal": {
-                "Service": "lambda.amazonaws.com"
-              },
-              "Effect": "Allow"
-            }
-          ]
+        ```terraform hl_lines="9 38"
+        terraform {
+          required_version = "~> 1.0.5"
+          required_providers {
+            aws = "~> 3.50.0"
+          }
         }
-        EOF
-	}
 
-    resource "aws_lambda_function" "test_lambda" {
-      filename      = "lambda_function_payload.zip"
-      function_name = "lambda_function_name"
-      role          = aws_iam_role.iam_for_lambda.arn
-      handler       = "index.test"
-      runtime 		= "python3.9"
-      layers 		= ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:38"]
+        provider "aws" {
+          region  = "{region}"
+        }
 
-      source_code_hash = filebase64sha256("lambda_function_payload.zip")
-    }
+        resource "aws_iam_role" "iam_for_lambda" {
+          name = "iam_for_lambda"
+
+          assume_role_policy = <<EOF
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "sts:AssumeRole",
+                  "Principal": {
+                    "Service": "lambda.amazonaws.com"
+                  },
+                  "Effect": "Allow"
+                }
+              ]
+            }
+            EOF
+    	}
+
+        resource "aws_lambda_function" "test_lambda" {
+          filename      = "lambda_function_payload.zip"
+          function_name = "lambda_function_name"
+          role          = aws_iam_role.iam_for_lambda.arn
+          handler       = "index.test"
+          runtime 		= "python3.9"
+          layers 		= ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:1"]
+
+          source_code_hash = filebase64sha256("lambda_function_payload.zip")
+        }
 
 
-    ```
+        ```
 
-=== "Amplify"
+    === "Amplify"
 
-    ```zsh
-    # Create a new one with the layer
-    ❯ amplify add function
-    ? Select which capability you want to add: Lambda function (serverless function)
-    ? Provide an AWS Lambda function name: <NAME-OF-FUNCTION>
-    ? Choose the runtime that you want to use: Python
-    ? Do you want to configure advanced settings? Yes
-    ...
-    ? Do you want to enable Lambda layers for this function? Yes
-    ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:38
-    ❯ amplify push -y
+        ```zsh
+        # Create a new one with the layer
+        ❯ amplify add function
+        ? Select which capability you want to add: Lambda function (serverless function)
+        ? Provide an AWS Lambda function name: <NAME-OF-FUNCTION>
+        ? Choose the runtime that you want to use: Python
+        ? Do you want to configure advanced settings? Yes
+        ...
+        ? Do you want to enable Lambda layers for this function? Yes
+        ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1
+        ❯ amplify push -y
 
 
-    # Updating an existing function and add the layer
-    ❯ amplify update function
-    ? Select the Lambda function you want to update test2
-    General information
-    - Name: <NAME-OF-FUNCTION>
-    ? Which setting do you want to update? Lambda layers configuration
-    ? Do you want to enable Lambda layers for this function? Yes
-    ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPython:38
-    ? Do you want to edit the local lambda function now? No
-    ```
+        # Updating an existing function and add the layer
+        ❯ amplify update function
+        ? Select the Lambda function you want to update test2
+        General information
+        - Name: <NAME-OF-FUNCTION>
+        ? Which setting do you want to update? Lambda layers configuration
+        ? Do you want to enable Lambda layers for this function? Yes
+        ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1
+        ? Do you want to edit the local lambda function now? No
+        ```
 
-=== "Get the Layer .zip contents"
-	Change {region} to your AWS region, e.g. `eu-west-1`
+    === "Get the Layer .zip contents"
+    	Change {region} to your AWS region, e.g. `eu-west-1`
 
-    ```bash title="AWS CLI"
-	aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:38 --region {region}
-    ```
+        ```bash title="AWS CLI"
+    	aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:1 --region {region}
+        ```
 
-    The pre-signed URL to download this Lambda Layer will be within `Location` key.
+        The pre-signed URL to download this Lambda Layer will be within `Location` key.
+
+=== "arm64"
+
+    === "SAM"
+
+        ```yaml hl_lines="6"
+        MyLambdaFunction:
+            Type: AWS::Serverless::Function
+            Properties:
+                Architectures: [arm64]
+                Layers:
+                    - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1
+        ```
+
+    === "Serverless framework"
+
+        ```yaml hl_lines="6"
+    	functions:
+    		hello:
+    		    handler: lambda_function.lambda_handler
+                architecture: arm64
+    		    layers:
+    		  	- arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1
+        ```
+
+    === "CDK"
+
+        ```python hl_lines="11 17"
+        from aws_cdk import core, aws_lambda
+
+        class SampleApp(core.Construct):
+
+            def __init__(self, scope: core.Construct, id_: str, env: core.Environment) -> None:
+                super().__init__(scope, id_)
+
+                powertools_layer = aws_lambda.LayerVersion.from_layer_version_arn(
+                    self,
+                    id="lambda-powertools",
+                    layer_version_arn=f"arn:aws:lambda:{env.region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1"
+                )
+                aws_lambda.Function(self,
+                    'sample-app-lambda',
+                    runtime=aws_lambda.Runtime.PYTHON_3_9,
+                    architecture=aws_lambda.Architecture.ARM_64,
+                    layers=[powertools_layer]
+                    # other props...
+                )
+        ```
+
+    === "Terraform"
+
+        ```terraform hl_lines="9 37"
+        terraform {
+          required_version = "~> 1.0.5"
+          required_providers {
+            aws = "~> 3.50.0"
+          }
+        }
+
+        provider "aws" {
+          region  = "{region}"
+        }
+
+        resource "aws_iam_role" "iam_for_lambda" {
+          name = "iam_for_lambda"
+
+          assume_role_policy = <<EOF
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "sts:AssumeRole",
+                  "Principal": {
+                    "Service": "lambda.amazonaws.com"
+                  },
+                  "Effect": "Allow"
+                }
+              ]
+            }
+            EOF
+    	}
+
+        resource "aws_lambda_function" "test_lambda" {
+          filename      = "lambda_function_payload.zip"
+          function_name = "lambda_function_name"
+          role          = aws_iam_role.iam_for_lambda.arn
+          handler       = "index.test"
+          runtime 		= "python3.9"
+          layers 		= ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1"]
+          architectures = ["arm64"]
+
+          source_code_hash = filebase64sha256("lambda_function_payload.zip")
+        }
+
+
+        ```
+
+    === "Amplify"
+
+        ```zsh
+        # Create a new one with the layer
+        ❯ amplify add function
+        ? Select which capability you want to add: Lambda function (serverless function)
+        ? Provide an AWS Lambda function name: <NAME-OF-FUNCTION>
+        ? Choose the runtime that you want to use: Python
+        ? Do you want to configure advanced settings? Yes
+        ...
+        ? Do you want to enable Lambda layers for this function? Yes
+        ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1
+        ❯ amplify push -y
+
+
+        # Updating an existing function and add the layer
+        ❯ amplify update function
+        ? Select the Lambda function you want to update test2
+        General information
+        - Name: <NAME-OF-FUNCTION>
+        ? Which setting do you want to update? Lambda layers configuration
+        ? Do you want to enable Lambda layers for this function? Yes
+        ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1
+        ? Do you want to edit the local lambda function now? No
+        ```
+
+    === "Get the Layer .zip contents"
+    	Change {region} to your AWS region, e.g. `eu-west-1`
+
+        ```bash title="AWS CLI"
+    	aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1 --region {region}
+        ```
+
+        The pre-signed URL to download this Lambda Layer will be within `Location` key.
 
 ???+ warning "Warning: Limitations"
 
@@ -218,13 +381,10 @@ Serverless Application Repository (SAR) App deploys a CloudFormation stack with 
 
 Despite having more steps compared to the [public Layer ARN](#lambda-layer) option, the benefit is that you can specify a semantic version you want to use.
 
-| App                                                                                                                                                              | ARN                                                                                                                             | Description                                                                           |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer)               | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer](#){: .copyMe}:clipboard:        | Core dependencies only; sufficient for nearly all utilities.                          |
-| [aws-lambda-powertools-python-layer-extras](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-extras) | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-extras](#){: .copyMe}:clipboard: | Core plus extra dependencies such as `pydantic` that is required by `parser` utility. |
-
-???+ warning
-    **Layer-extras** does not support Python 3.6 runtime. This layer also includes all extra dependencies: `22.4MB zipped`, `~155MB unzipped`.
+| App                                                                                                                                                                  | ARN                                                                                                                               | Description                                                           |
+|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
+| [aws-lambda-powertools-python-layer-v2](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v2)             | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v2](#){: .copyMe}:clipboard:       | Contains all extra dependencies (e.g: pydantic).                      |
+| [aws-lambda-powertools-python-layer-v2-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v2-arm64) | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v2-arm64](#){: .copyMe}:clipboard: | Contains all extra dependencies (e.g: pydantic). For arm64 functions. |
 
 ???+ tip
 	You can create a shared Lambda Layers stack and make this along with other account level layers stack.
