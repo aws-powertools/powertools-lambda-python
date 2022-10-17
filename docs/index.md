@@ -106,11 +106,6 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
         | `us-west-1`      | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:      |
         | `us-west-2`      | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:      |
 
-??? question "Can't find our Lambda Layer for your preferred AWS region?"
-    You can use [Serverless Application Repository (SAR)](#sar) method, our [CDK Layer Construct](https://github.com/aws-samples/cdk-lambda-powertools-python-layer){target="_blank"}, or PyPi like you normally would for any other library.
-
-    Please do file a feature request with the region you'd want us to prioritize making our Lambda Layer available.
-
 === "x86_64"
 
     === "SAM"
