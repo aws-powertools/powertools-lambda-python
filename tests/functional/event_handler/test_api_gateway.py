@@ -53,6 +53,7 @@ def read_media(file_name: str) -> bytes:
 
 
 LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
+LOAD_GW_EVENT_TRAILING_SLASH = load_event("apiGatewayProxyEventPathTrailingSlash.json")
 
 
 def test_alb_event():
@@ -76,6 +77,27 @@ def test_alb_event():
     assert result["body"] == "foo"
 
 
+def test_alb_event_path_trailing_slash(json_dump):
+    # GIVEN an Application Load Balancer proxy type event
+    app = ALBResolver()
+
+    @app.get("/lambda")
+    def foo():
+        assert isinstance(app.current_event, ALBEvent)
+        assert app.lambda_context == {}
+        assert app.current_event.request_context.elb_target_group_arn is not None
+        return Response(200, content_types.TEXT_HTML, "foo")
+
+    # WHEN calling the event handler using path with trailing "/"
+    result = app(load_event("albEventPathTrailingSlash.json"), {})
+
+    # THEN
+    assert result["statusCode"] == 404
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    expected = {"statusCode": 404, "message": "Not found"}
+    assert result["body"] == json_dump(expected)
+
+
 def test_api_gateway_v1():
     # GIVEN a Http API V1 proxy type event
     app = APIGatewayRestResolver()
@@ -89,6 +111,26 @@ def test_api_gateway_v1():
 
     # WHEN calling the event handler
     result = app(LOAD_GW_EVENT, {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEvent
+    assert result["statusCode"] == 200
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+
+
+def test_api_gateway_v1_path_trailing_slash():
+    # GIVEN a Http API V1 proxy type event
+    app = APIGatewayRestResolver()
+
+    @app.get("/my/path")
+    def get_lambda() -> Response:
+        assert isinstance(app.current_event, APIGatewayProxyEvent)
+        assert app.lambda_context == {}
+        assert app.current_event.request_context.domain_name == "id.execute-api.us-east-1.amazonaws.com"
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"foo": "value"}))
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT_TRAILING_SLASH, {})
 
     # THEN process event correctly
     # AND set the current_event type as APIGatewayProxyEvent
@@ -134,6 +176,24 @@ def test_api_gateway():
     assert result["body"] == "foo"
 
 
+def test_api_gateway_event_path_trailing_slash(json_dump):
+    # GIVEN a Rest API Gateway proxy type event
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
+
+    @app.get("/my/path")
+    def get_lambda() -> Response:
+        assert isinstance(app.current_event, APIGatewayProxyEvent)
+        return Response(200, content_types.TEXT_HTML, "foo")
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT_TRAILING_SLASH, {})
+    # THEN
+    assert result["statusCode"] == 404
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    expected = {"statusCode": 404, "message": "Not found"}
+    assert result["body"] == json_dump(expected)
+
+
 def test_api_gateway_v2():
     # GIVEN a Http API V2 proxy type event
     app = APIGatewayHttpResolver()
@@ -154,6 +214,26 @@ def test_api_gateway_v2():
     assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
     assert "Cookies" not in result["headers"]
     assert result["body"] == "tom"
+
+
+def test_api_gateway_v2_http_path_trailing_slash(json_dump):
+    # GIVEN a Http API V2 proxy type event
+    app = APIGatewayHttpResolver()
+
+    @app.post("/my/path")
+    def my_path() -> Response:
+        assert isinstance(app.current_event, APIGatewayProxyEventV2)
+        post_data = app.current_event.json_body
+        return Response(200, content_types.TEXT_PLAIN, post_data["username"])
+
+    # WHEN calling the event handler
+    result = app(load_event("apiGatewayProxyV2EventPathTrailingSlash.json"), {})
+
+    # THEN expect a 404 response
+    assert result["statusCode"] == 404
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    expected = {"statusCode": 404, "message": "Not found"}
+    assert result["body"] == json_dump(expected)
 
 
 def test_api_gateway_v2_cookies():

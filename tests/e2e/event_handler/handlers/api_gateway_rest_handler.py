@@ -8,7 +8,7 @@ app = APIGatewayRestResolver()
 
 
 @app.post("/todos")
-def hello():
+def todos():
     payload = app.current_event.json_body
 
     body = payload.get("body", "Hello World")
@@ -24,6 +24,11 @@ def hello():
         cookies=cookies,
         headers=headers,
     )
+
+
+@app.get("/hello")
+def hello():
+    return Response(status_code=200, content_type=content_types.TEXT_PLAIN, body="Hello World")
 
 
 def lambda_handler(event, context):
