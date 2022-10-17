@@ -22,6 +22,10 @@ on:
         description: "GitHub Environment to use for encrypted secrets"
         required: true
         type: string
+      latest_published_version:
+        description: "Latest version that is published"
+        required: true
+        type: string
 
 jobs:
   deploy-cdk-stack:
@@ -97,6 +101,23 @@ jobs:
       - name: unzip artefact
         run: unzip cdk.out.zip
       - name: CDK Deploy Layer
-        run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'LayerV2Stack' --require-approval never --verbose
+        run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'LayerV2Stack' --require-approval never --verbose --outputs-file cdk-outputs.json
+      - name: Store latest Layer ARN
+        if: ${{ inputs.stage == 'PROD' }}
+        run: |
+          jq -c '.LayerV2Stack.VersionArn' cdk-outputs.json > cdk-layer-stack-${{ matrix.region }}-layer-version.txt
+          jq -c '.LayerV2Stack.Arm64VersionArn' cdk-outputs.json >> cdk-layer-stack-${{ matrix.region }}-layer-version.txt
       - name: CDK Deploy Canary
         run: cdk deploy --app cdk.out --context region=${{ matrix.region}} --parameters DeployStage="${{ inputs.stage }}" 'CanaryV2Stack' --require-approval never --verbose
+      - name: Save Layer ARN artifact
+        uses: actions/upload-artifacts@v3
+        with:
+          name: cdk-layer-stack
+          path: cdk-layer-stack*
+
+  publish_v2_layer_arn:
+    permissions:
+      contents: write
+    uses: ./.github/workflows/reusable_publish_v2_layer_arn.yml
+    with:
+      latest_published_version: ${{ inputs.latest_published_version }}
