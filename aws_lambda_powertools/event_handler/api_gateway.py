@@ -46,6 +46,7 @@ _SAFE_URI = "-._~()'!*:@,;"  # https://www.ietf.org/rfc/rfc3986.txt
 # API GW/ALB decode non-safe URI chars; we must support them too
 _UNSAFE_URI = "%<> \[\]{}|^"  # noqa: W605
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
+_ROUTE_REGEX = "^{}$"
 
 
 class ProxyEventType(Enum):
@@ -561,8 +562,8 @@ class ApiGatewayResolver(BaseRouter):
 
         return powertools_dev_is_set()
 
-    @staticmethod
-    def _compile_regex(rule: str):
+    @classmethod
+    def _compile_regex(cls, rule: str, base_regex: Optional[str] = _ROUTE_REGEX):
         """Precompile regex pattern
 
         Logic
@@ -592,7 +593,7 @@ class ApiGatewayResolver(BaseRouter):
         NOTE: See #520 for context
         """
         rule_regex: str = re.sub(_DYNAMIC_ROUTE_PATTERN, _NAMED_GROUP_BOUNDARY_PATTERN, rule)
-        return re.compile("^{}$".format(rule_regex))
+        return re.compile(base_regex.format(rule_regex))
 
     def _to_proxy_event(self, event: Dict) -> BaseProxyEvent:
         """Convert the event dict to the corresponding data class"""
@@ -818,6 +819,24 @@ class APIGatewayRestResolver(ApiGatewayResolver):
     ):
         """Amazon API Gateway REST and HTTP API v1 payload resolver"""
         super().__init__(ProxyEventType.APIGatewayProxyEvent, cors, debug, serializer, strip_prefixes)
+
+    # override route to ignore trailing "/" in routes for REST API
+    def route(
+        self,
+        rule: str,
+        method: Union[str, Union[List[str], Tuple[str]]],
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+    ):
+        # remove trailing "/" character from route rule for correct routing behaviour
+        return super().route(rule.rstrip("/"), method, cors, compress, cache_control)
+
+    # Override _compile_regex to exclude traling slashes for route resolution
+    @classmethod
+    def _compile_regex(cls, rule: str, base_regex: Optional[str] = _ROUTE_REGEX):
+
+        return super()._compile_regex(rule, "^{}/*$")
 
 
 class APIGatewayHttpResolver(ApiGatewayResolver):
