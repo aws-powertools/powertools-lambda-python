@@ -115,7 +115,7 @@ jobs:
           name: cdk-layer-stack
           path: cdk-layer-stack*
 
-  publish_v2_layer_arn:
+  update_v2_layer_arn_docs:
     permissions:
       contents: write
     uses: ./.github/workflows/reusable_update_v2_layer_arn_docs.yml
