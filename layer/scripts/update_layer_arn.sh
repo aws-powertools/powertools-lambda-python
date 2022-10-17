@@ -49,6 +49,9 @@ do
     sed -i '' -e "s/$prefix:[[:digit:]][[:digit:]]*/$line/g" docs/index.md
 
     # We use the eu-central-1 layer as the version for all the frameworks (SAM, CDK, SLS, etc)
+    # We could have used any other region. What's important is the version at the end.
+
+    # Examples of strings found in the documentation with pseudo regions:
     # arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:39
     # arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:39
     # arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPython:39
