@@ -2,6 +2,9 @@ from aws_lambda_powertools.event_handler import ALBResolver, Response, content_t
 
 app = ALBResolver()
 
+# The reason we use post is that whoever is writing tests can easily assert on the
+# content being sent (body, headers, cookies, content-type) to reduce cognitive load.
+
 
 @app.post("/todos")
 def todos():
@@ -20,11 +23,6 @@ def todos():
         cookies=cookies,
         headers=headers,
     )
-
-
-@app.get("/hello")
-def hello():
-    return Response(status_code=200, content_type=content_types.TEXT_PLAIN, body="Hello World")
 
 
 def lambda_handler(event, context):

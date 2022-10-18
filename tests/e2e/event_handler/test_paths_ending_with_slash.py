@@ -34,62 +34,66 @@ def lambda_function_url_endpoint(infrastructure: dict) -> str:
 
 
 def test_api_gateway_rest_trailing_slash(apigw_rest_endpoint):
-    # GIVEN
-    url = f"{apigw_rest_endpoint}hello/"
+    # GIVEN API URL ends in a trailing slash
+    url = f"{apigw_rest_endpoint}todos/"
     body = "Hello World"
-    status_code = 200
 
     # WHEN
     response = data_fetcher.get_http_response(
         Request(
-            method="GET",
+            method="POST",
             url=url,
+            json={"body": body},
         )
     )
 
-    # THEN
-    assert response.status_code == status_code
-    # response.content is a binary string, needs to be decoded to compare with the real string
-    assert response.text == body
+    # THEN expect a HTTP 200 response
+    assert response.status_code == 200
 
 
 def test_api_gateway_http_trailing_slash(apigw_http_endpoint):
     # GIVEN the URL for the API ends in a trailing slash API gateway should return a 404
-    url = f"{apigw_http_endpoint}hello/"
+    url = f"{apigw_http_endpoint}todos/"
+    body = "Hello World"
 
-    # WHEN
+    # WHEN calling an invalid URL (with trailing slash) expect HTTPError exception from data_fetcher
     with pytest.raises(HTTPError):
         data_fetcher.get_http_response(
             Request(
-                method="GET",
+                method="POST",
                 url=url,
+                json={"body": body},
             )
         )
 
 
 def test_lambda_function_url_trailing_slash(lambda_function_url_endpoint):
     # GIVEN the URL for the API ends in a trailing slash it should behave as if there was not one
-    url = f"{lambda_function_url_endpoint}hello/"  # the function url endpoint already has the trailing /
+    url = f"{lambda_function_url_endpoint}todos/"  # the function url endpoint already has the trailing /
+    body = "Hello World"
 
-    # WHEN
+    # WHEN calling an invalid URL (with trailing slash) expect HTTPError exception from data_fetcher
     with pytest.raises(HTTPError):
         data_fetcher.get_http_response(
             Request(
-                method="GET",
+                method="POST",
                 url=url,
+                json={"body": body},
             )
         )
 
 
 def test_alb_url_trailing_slash(alb_multi_value_header_listener_endpoint):
     # GIVEN url has a trailing slash - it should behave as if there was not one
-    url = f"{alb_multi_value_header_listener_endpoint}/hello/"
+    url = f"{alb_multi_value_header_listener_endpoint}/todos/"
+    body = "Hello World"
 
-    # WHEN
+    # WHEN calling an invalid URL (with trailing slash) expect HTTPError exception from data_fetcher
     with pytest.raises(HTTPError):
         data_fetcher.get_http_response(
             Request(
-                method="GET",
+                method="POST",
                 url=url,
+                json={"body": body},
             )
         )

@@ -64,11 +64,6 @@ class EventHandlerStack(BaseInfrastructure):
             integration=apigwv2integrations.HttpLambdaIntegration("TodosIntegration", function),
         )
 
-        apigw.add_routes(
-            path="/hello",
-            methods=[apigwv2.HttpMethod.GET],
-            integration=apigwv2integrations.HttpLambdaIntegration("HelloIntegration", function),
-        )
         CfnOutput(self.stack, "APIGatewayHTTPUrl", value=(apigw.url or ""))
 
     def _create_api_gateway_rest(self, function: Function):
@@ -76,9 +71,6 @@ class EventHandlerStack(BaseInfrastructure):
 
         todos = apigw.root.add_resource("todos")
         todos.add_method("POST", apigwv1.LambdaIntegration(function, proxy=True))
-
-        hello = apigw.root.add_resource("hello")
-        hello.add_method("GET", apigwv1.LambdaIntegration(function, proxy=True))
 
         CfnOutput(self.stack, "APIGatewayRestUrl", value=apigw.url)
 
