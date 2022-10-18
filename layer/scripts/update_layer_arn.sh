@@ -60,13 +60,13 @@ do
       # These are all the framework pseudo parameters currently found in the docs
       for pseudo_region in '{region}' '${AWS::Region}' '${aws:region}' '{env.region}'
       do
-        generic_prefix=$(echo "$prefix" | sed "s/eu-central-1/${pseudo_region}/")
-        # generic_prefix = arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython
+        prefix_pseudo_region=$(echo "$prefix" | sed "s/eu-central-1/${pseudo_region}/")
+        # prefix_pseudo_region = arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython
 
-        generic_line=$(echo "$line" | sed "s/eu-central-1/${pseudo_region}/")
-        # generic_line = arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:49
+        line_pseudo_region=$(echo "$line" | sed "s/eu-central-1/${pseudo_region}/")
+        # line_pseudo_region = arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:49
 
-        # Replace all the "generic_prefix"'s in the file
+        # Replace all the "prefix_pseudo_region"'s in the file
         # generic_prefix:\d+ ==> generic_line
         sed -i '' -e "s/$generic_prefix:[[:digit:]][[:digit:]]*/$generic_line/g" docs/index.md
       done
