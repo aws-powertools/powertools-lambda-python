@@ -27,15 +27,15 @@ This utility requires additional permissions to work as expected.
 ???+ note
     Different parameter providers require different permissions.
 
-| Provider            | Function/Method                                                  | IAM Permission                                                               |
-| ------------------- | -----------------------------------------------------------------| -----------------------------------------------------------------------------|
-| SSM Parameter Store | `get_parameter`, `SSMProvider.get`                               | `ssm:GetParameter`                                                           |
-| SSM Parameter Store | `get_parameters`, `SSMProvider.get_multiple`                     | `ssm:GetParametersByPath`                                                    |
-| SSM Parameter Store | If using `decrypt=True`                                          | You must add an additional permission `kms:Decrypt`                          |
-| Secrets Manager     | `get_secret`, `SecretsManager.get`                               | `secretsmanager:GetSecretValue`                                              |
-| DynamoDB            | `DynamoDBProvider.get`                                           | `dynamodb:GetItem`                                                           |
-| DynamoDB            | `DynamoDBProvider.get_multiple`                                  | `dynamodb:Query`                                                             |
-| App Config          | `get_app_config`, `AppConfigProvider.get_app_config`             | `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession` |
+| Provider            | Function/Method                                      | IAM Permission                                                               |
+| ------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------- |
+| SSM Parameter Store | `get_parameter`, `SSMProvider.get`                   | `ssm:GetParameter`                                                           |
+| SSM Parameter Store | `get_parameters`, `SSMProvider.get_multiple`         | `ssm:GetParametersByPath`                                                    |
+| SSM Parameter Store | If using `decrypt=True`                              | You must add an additional permission `kms:Decrypt`                          |
+| Secrets Manager     | `get_secret`, `SecretsManager.get`                   | `secretsmanager:GetSecretValue`                                              |
+| DynamoDB            | `DynamoDBProvider.get`                               | `dynamodb:GetItem`                                                           |
+| DynamoDB            | `DynamoDBProvider.get_multiple`                      | `dynamodb:Query`                                                             |
+| App Config          | `get_app_config`, `AppConfigProvider.get_app_config` | `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession` |
 
 ### Fetching parameters
 
@@ -133,7 +133,7 @@ If you'd like to always ensure you fetch the latest parameter from the store reg
 For greater flexibility such as configuring the underlying SDK client used by built-in providers, you can use their respective Provider Classes directly.
 
 ???+ tip
-    This is useful when you need to customize parameters for the SDK client, such as region, credentials, retries and others. For more information, read [botocore.config](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) and [boto3.session](<https://boto3.amazonaws> .com/v1/documentation/api/latest/reference/core/session.html#module-boto3.session).
+    This is useful when you need to customize parameters for the SDK client, such as region, credentials, retries and others. For more information, read [botocore.config](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) and [boto3.session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html#module-boto3.session).
 
 #### SSMProvider
 
@@ -216,10 +216,10 @@ You can retrieve multiple parameters sharing the same `id` by having a sort key 
 
 	DynamoDB table with `id` primary key, `sk` as sort key` and `value` as attribute
 
- | id     | sk                | value                                          |
- | -------| ----------------- | ---------------------------------------------- |
+ | id     | sk                | value                                            |
+ | ------ | ----------------- | ------------------------------------------------ |
  | config | endpoint_comments | <https://jsonplaceholder.typicode.com/comments/> |
- | config | limit             | 10                                             |
+ | config | limit             | 10                                               |
 
 With this table, `dynamodb_provider.get_multiple("config")` will return a dictionary response in the shape of `sk:value`.
 
@@ -360,28 +360,28 @@ You can use arbitrary keyword arguments to pass it directly to the underlying SD
 
 Here is the mapping between this utility's functions and methods and the underlying SDK:
 
-| Provider            | Function/Method                 | Client name      | Function name                                                                                                                                             |
-| ------------------- | ------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SSM Parameter Store | `get_parameter`                 | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter)                             |
-| SSM Parameter Store | `get_parameters`                | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path)           |
-| SSM Parameter Store | `SSMProvider.get`               | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter)                             |
-| SSM Parameter Store | `SSMProvider.get_multiple`      | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path)           |
-| Secrets Manager     | `get_secret`                    | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value) |
-| Secrets Manager     | `SecretsManager.get`            | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value) |
-| DynamoDB            | `DynamoDBProvider.get`          | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table))                                        | [get_item](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.get_item) |
-| DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table))                                        | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)       |
-| App Config          | `get_app_config`                | `appconfigdata`  | [start_configuration_session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.start_configuration_session) and [get_latest_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.get_latest_configuration)         |
+| Provider            | Function/Method                 | Client name      | Function name                                                                                                                                                                                                                                                                                                                                             |
+| ------------------- | ------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SSM Parameter Store | `get_parameter`                 | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter)                                                                                                                                                                                                                             |
+| SSM Parameter Store | `get_parameters`                | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path)                                                                                                                                                                                                           |
+| SSM Parameter Store | `SSMProvider.get`               | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter)                                                                                                                                                                                                                             |
+| SSM Parameter Store | `SSMProvider.get_multiple`      | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path)                                                                                                                                                                                                           |
+| Secrets Manager     | `get_secret`                    | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value)                                                                                                                                                                                                 |
+| Secrets Manager     | `SecretsManager.get`            | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value)                                                                                                                                                                                                 |
+| DynamoDB            | `DynamoDBProvider.get`          | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table))                                                                                                                                                                                                                                        | [get_item](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.get_item) |
+| DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table))                                                                                                                                                                                                                                        | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)       |
+| App Config          | `get_app_config`                | `appconfigdata`  | [start_configuration_session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.start_configuration_session) and [get_latest_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.get_latest_configuration) |
 
 ### Bring your own boto client
 
 You can use `boto3_client` parameter via any of the available [Provider Classes](#built-in-provider-class). Some providers expect a low level boto3 client while others expect a high level boto3 client, here is the mapping for each of them:
 
-| Provider                                | Type       | Boto client construction         |
-| --------------------------------------- | ---------- | -------------------------------- |
-| [SSMProvider](#ssmprovider)             | low level  | `boto3.client("ssm")`            |
-| [SecretsProvider](#secretsprovider)     | low level  | `boto3.client("secrets")`        |
-| [AppConfigProvider](#appconfigprovider) | low level  | `boto3.client("appconfigdata")`  |
-| [DynamoDBProvider](#dynamodbprovider)   | high level | `boto3.resource("dynamodb")`     |
+| Provider                                | Type       | Boto client construction        |
+| --------------------------------------- | ---------- | ------------------------------- |
+| [SSMProvider](#ssmprovider)             | low level  | `boto3.client("ssm")`           |
+| [SecretsProvider](#secretsprovider)     | low level  | `boto3.client("secrets")`       |
+| [AppConfigProvider](#appconfigprovider) | low level  | `boto3.client("appconfigdata")` |
+| [DynamoDBProvider](#dynamodbprovider)   | high level | `boto3.resource("dynamodb")`    |
 
 Bringing them together in a single code snippet would look like this:
 
