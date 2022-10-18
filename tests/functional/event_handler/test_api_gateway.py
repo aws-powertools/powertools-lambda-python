@@ -124,9 +124,6 @@ def test_api_gateway_v1_path_trailing_slash():
 
     @app.get("/my/path")
     def get_lambda() -> Response:
-        assert isinstance(app.current_event, APIGatewayProxyEvent)
-        assert app.lambda_context == {}
-        assert app.current_event.request_context.domain_name == "id.execute-api.us-east-1.amazonaws.com"
         return Response(200, content_types.APPLICATION_JSON, json.dumps({"foo": "value"}))
 
     # WHEN calling the event handler
