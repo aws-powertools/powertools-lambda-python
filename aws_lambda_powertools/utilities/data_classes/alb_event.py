@@ -1,5 +1,10 @@
 from typing import Dict, List, Optional
 
+from aws_lambda_powertools.shared.headers_serializer import (
+    BaseHeadersSerializer,
+    MultiValueHeadersSerializer,
+    SingleValueHeadersSerializer,
+)
 from aws_lambda_powertools.utilities.data_classes.common import (
     BaseProxyEvent,
     DictWrapper,
@@ -33,3 +38,11 @@ class ALBEvent(BaseProxyEvent):
     @property
     def multi_value_headers(self) -> Optional[Dict[str, List[str]]]:
         return self.get("multiValueHeaders")
+
+    def header_serializer(self) -> BaseHeadersSerializer:
+        # When using the ALB integration, the `multiValueHeaders` feature can be disabled (default) or enabled.
+        # We can determine if the feature is enabled by looking if the event has a `multiValueHeaders` key.
+        if self.multi_value_headers:
+            return MultiValueHeadersSerializer()
+
+        return SingleValueHeadersSerializer()

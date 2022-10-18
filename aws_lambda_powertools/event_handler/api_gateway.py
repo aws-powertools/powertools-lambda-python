@@ -27,6 +27,7 @@ from typing import (
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set, strtobool
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import (
@@ -136,10 +137,11 @@ class CORSConfig:
 
     def to_dict(self) -> Dict[str, str]:
         """Builds the configured Access-Control http headers"""
-        headers = {
+        headers: Dict[str, str] = {
             "Access-Control-Allow-Origin": self.allow_origin,
             "Access-Control-Allow-Headers": ",".join(sorted(self.allow_headers)),
         }
+
         if self.expose_headers:
             headers["Access-Control-Expose-Headers"] = ",".join(self.expose_headers)
         if self.max_age is not None:
@@ -157,7 +159,8 @@ class Response:
         status_code: int,
         content_type: Optional[str] = None,
         body: Union[str, bytes, None] = None,
-        headers: Optional[Dict] = None,
+        headers: Optional[Dict[str, Union[str, List[str]]]] = None,
+        cookies: Optional[List[Cookie]] = None,
     ):
         """
 
@@ -170,13 +173,16 @@ class Response:
             provided http headers
         body: Union[str, bytes, None]
             Optionally set the response body. Note: bytes body will be automatically base64 encoded
-        headers: dict
-            Optionally set specific http headers. Setting "Content-Type" hear would override the `content_type` value.
+        headers: dict[str, Union[str, List[str]]]
+            Optionally set specific http headers. Setting "Content-Type" here would override the `content_type` value.
+        cookies: list[Cookie]
+            Optionally set cookies.
         """
         self.status_code = status_code
         self.body = body
         self.base64_encoded = False
-        self.headers: Dict = headers or {}
+        self.headers: Dict[str, Union[str, List[str]]] = headers if headers else {}
+        self.cookies = cookies or []
         if content_type:
             self.headers.setdefault("Content-Type", content_type)
 
@@ -208,7 +214,8 @@ class ResponseBuilder:
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
-        self.response.headers["Cache-Control"] = cache_control if self.response.status_code == 200 else "no-cache"
+        cache_control = cache_control if self.response.status_code == 200 else "no-cache"
+        self.response.headers["Cache-Control"] = cache_control
 
     def _compress(self):
         """Compress the response body, but only if `Accept-Encoding` headers includes gzip."""
@@ -238,11 +245,12 @@ class ResponseBuilder:
             logger.debug("Encoding bytes response with base64")
             self.response.base64_encoded = True
             self.response.body = base64.b64encode(self.response.body).decode()
+
         return {
             "statusCode": self.response.status_code,
-            "headers": self.response.headers,
             "body": self.response.body,
             "isBase64Encoded": self.response.base64_encoded,
+            **event.header_serializer().serialize(headers=self.response.headers, cookies=self.response.cookies),
         }
 
 
@@ -638,7 +646,7 @@ class ApiGatewayResolver(BaseRouter):
 
     def _not_found(self, method: str) -> ResponseBuilder:
         """Called when no matching route was found and includes support for the cors preflight response"""
-        headers = {}
+        headers: Dict[str, Union[str, List[str]]] = {}
         if self._cors:
             logger.debug("CORS is enabled, updating headers.")
             headers.update(self._cors.to_dict())
