@@ -34,11 +34,14 @@ repos:
     hooks:
       - id: markdownlint
         args: ["--fix"]
-  - repo: https://github.com/aws-cloudformation/cfn-python-lint
-    rev: v0.61.1
+  - repo: local
     hooks:
-      - id: cfn-python-lint
-        files: examples/.*\.(yaml|yml)$
+      - id: cloudformation
+        name: linting::cloudformation
+        entry: poetry run cfn-lint
+        language: system
+        types: [yaml]
+        files: examples/.*
   - repo: https://github.com/rhysd/actionlint
     rev: v1.6.21
     hooks:
