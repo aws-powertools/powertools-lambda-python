@@ -1,169 +1,78 @@
 from enum import Enum
-from typing import Any, Dict, Iterator, List, Optional, Union
+from typing import Any, Dict, Iterator, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
-class AttributeValueType(Enum):
-    Binary = "B"
-    BinarySet = "BS"
-    Boolean = "BOOL"
-    List = "L"
-    Map = "M"
-    Number = "N"
-    NumberSet = "NS"
-    Null = "NULL"
-    String = "S"
-    StringSet = "SS"
-
-
-class AttributeValue(DictWrapper):
-    """Represents the data for an attribute
-
-    Documentation:
-    --------------
-    - https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_streams_AttributeValue.html
-    - https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html
+class TypeDeserializer:
+    """
+    This class deserializes DynamoDB types to Python types.
+    It based on boto3's DynamoDB TypeDeserializer found here:
+    https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html
+    Except that it deserializes DynamoDB numbers into strings, and does not wrap binary
+    with a Binary class.
     """
 
-    def __init__(self, data: Dict[str, Any]):
-        """AttributeValue constructor
+    def deserialize(self, value):
+        """The method to deserialize the DynamoDB data types.
 
-        Parameters
-        ----------
-        data: Dict[str, Any]
-            Raw lambda event dict
+        :param value: A DynamoDB value to be deserialized to a pythonic value.
+            Here are the various conversions:
+
+            DynamoDB                                Python
+            --------                                ------
+            {'NULL': True}                          None
+            {'BOOL': True/False}                    True/False
+            {'N': str(value)}                       str(value)
+            {'S': string}                           string
+            {'B': bytes}                            bytes
+            {'NS': [str(value)]}                    set([str(value)])
+            {'SS': [string]}                        set([string])
+            {'BS': [bytes]}                         set([bytes])
+            {'L': list}                             list
+            {'M': dict}                             dict
+
+        :returns: The pythonic value of the DynamoDB type.
         """
-        super().__init__(data)
-        self.dynamodb_type = list(data.keys())[0]
 
-    @property
-    def b_value(self) -> Optional[str]:
-        """An attribute of type Base64-encoded binary data object
+        if not value:
+            raise TypeError("Value must be a nonempty dictionary whose key " "is a valid dynamodb type.")
+        dynamodb_type = list(value.keys())[0]
+        try:
+            deserializer = getattr(self, f"_deserialize_{dynamodb_type}".lower())
+        except AttributeError:
+            raise TypeError(f"Dynamodb type {dynamodb_type} is not supported")
+        return deserializer(value[dynamodb_type])
 
-        Example:
-            >>> {"B": "dGhpcyB0ZXh0IGlzIGJhc2U2NC1lbmNvZGVk"}
-        """
-        return self.get("B")
-
-    @property
-    def bs_value(self) -> Optional[List[str]]:
-        """An attribute of type Array of Base64-encoded binary data objects
-
-        Example:
-            >>> {"BS": ["U3Vubnk=", "UmFpbnk=", "U25vd3k="]}
-        """
-        return self.get("BS")
-
-    @property
-    def bool_value(self) -> Optional[bool]:
-        """An attribute of type Boolean
-
-        Example:
-            >>> {"BOOL": True}
-        """
-        item = self.get("BOOL")
-        return None if item is None else bool(item)
-
-    @property
-    def list_value(self) -> Optional[List["AttributeValue"]]:
-        """An attribute of type Array of AttributeValue objects
-
-        Example:
-            >>> {"L": [ {"S": "Cookies"} , {"S": "Coffee"}, {"N": "3.14159"}]}
-        """
-        item = self.get("L")
-        return None if item is None else [AttributeValue(v) for v in item]
-
-    @property
-    def map_value(self) -> Optional[Dict[str, "AttributeValue"]]:
-        """An attribute of type String to AttributeValue object map
-
-        Example:
-            >>> {"M": {"Name": {"S": "Joe"}, "Age": {"N": "35"}}}
-        """
-        return _attribute_value_dict(self._data, "M")
-
-    @property
-    def n_value(self) -> Optional[str]:
-        """An attribute of type Number
-
-        Numbers are sent across the network to DynamoDB as strings, to maximize compatibility across languages
-        and libraries. However, DynamoDB treats them as number type attributes for mathematical operations.
-
-        Example:
-            >>> {"N": "123.45"}
-        """
-        return self.get("N")
-
-    @property
-    def ns_value(self) -> Optional[List[str]]:
-        """An attribute of type Number Set
-
-        Example:
-            >>> {"NS": ["42.2", "-19", "7.5", "3.14"]}
-        """
-        return self.get("NS")
-
-    @property
-    def null_value(self) -> None:
-        """An attribute of type Null.
-
-        Example:
-            >>> {"NULL": True}
-        """
+    def _deserialize_null(self, value):
         return None
 
-    @property
-    def s_value(self) -> Optional[str]:
-        """An attribute of type String
+    def _deserialize_bool(self, value):
+        return value
 
-        Example:
-            >>> {"S": "Hello"}
-        """
-        return self.get("S")
+    def _deserialize_n(self, value):
+        return value
 
-    @property
-    def ss_value(self) -> Optional[List[str]]:
-        """An attribute of type Array of strings
+    def _deserialize_s(self, value):
+        return value
 
-        Example:
-            >>> {"SS": ["Giraffe", "Hippo" ,"Zebra"]}
-        """
-        return self.get("SS")
+    def _deserialize_b(self, value):
+        return value
 
-    @property
-    def get_type(self) -> AttributeValueType:
-        """Get the attribute value type based on the contained data"""
-        return AttributeValueType(self.dynamodb_type)
+    def _deserialize_ns(self, value):
+        return set(map(self._deserialize_n, value))
 
-    @property
-    def l_value(self) -> Optional[List["AttributeValue"]]:
-        """Alias of list_value"""
-        return self.list_value
+    def _deserialize_ss(self, value):
+        return set(map(self._deserialize_s, value))
 
-    @property
-    def m_value(self) -> Optional[Dict[str, "AttributeValue"]]:
-        """Alias of map_value"""
-        return self.map_value
+    def _deserialize_bs(self, value):
+        return set(map(self._deserialize_b, value))
 
-    @property
-    def get_value(self) -> Union[Optional[bool], Optional[str], Optional[List], Optional[Dict]]:
-        """Get the attribute value"""
-        try:
-            return getattr(self, f"{self.dynamodb_type.lower()}_value")
-        except AttributeError:
-            raise TypeError(f"Dynamodb type {self.dynamodb_type} is not supported")
+    def _deserialize_l(self, value):
+        return [self.deserialize(v) for v in value]
 
-
-def _attribute_value_dict(attr_values: Dict[str, dict], key: str) -> Optional[Dict[str, AttributeValue]]:
-    """A dict of type String to AttributeValue object map
-
-    Example:
-        >>> {"NewImage": {"Id": {"S": "xxx-xxx"}, "Value": {"N": "35"}}}
-    """
-    attr_values_dict = attr_values.get(key)
-    return None if attr_values_dict is None else {k: AttributeValue(v) for k, v in attr_values_dict.items()}
+    def _deserialize_m(self, value):
+        return {k: self.deserialize(v) for k, v in value.items()}
 
 
 class StreamViewType(Enum):
@@ -176,28 +85,43 @@ class StreamViewType(Enum):
 
 
 class StreamRecord(DictWrapper):
+    def __init__(self, data: Dict[str, Any]):
+        """StreamRecord constructor
+
+        Parameters
+        ----------
+        data: Dict[str, Any]
+            Represents the dynamodb dict inside DynamoDBStreamEvent's records
+        """
+        super().__init__(data)
+        self._deserializer = TypeDeserializer()
+
+    def _deserialize_dynamodb_dict(self, key: str) -> Optional[Dict[str, Any]]:
+        dynamodb_dict = self._data.get(key)
+        return (
+            None if dynamodb_dict is None else {k: self._deserializer.deserialize(v) for k, v in dynamodb_dict.items()}
+        )
+
     @property
     def approximate_creation_date_time(self) -> Optional[int]:
         """The approximate date and time when the stream record was created, in UNIX epoch time format."""
         item = self.get("ApproximateCreationDateTime")
         return None if item is None else int(item)
 
-    # NOTE: This override breaks the Mapping protocol of DictWrapper, it's left here for backwards compatibility with
-    # a 'type: ignore' comment. See #1516 for discussion
     @property
-    def keys(self) -> Optional[Dict[str, AttributeValue]]:  # type: ignore[override]
+    def keys(self) -> Optional[Dict[str, Any]]:  # type: ignore[override]
         """The primary key attribute(s) for the DynamoDB item that was modified."""
-        return _attribute_value_dict(self._data, "Keys")
+        return self._deserialize_dynamodb_dict("Keys")
 
     @property
-    def new_image(self) -> Optional[Dict[str, AttributeValue]]:
+    def new_image(self) -> Optional[Dict[str, Any]]:
         """The item in the DynamoDB table as it appeared after it was modified."""
-        return _attribute_value_dict(self._data, "NewImage")
+        return self._deserialize_dynamodb_dict("NewImage")
 
     @property
-    def old_image(self) -> Optional[Dict[str, AttributeValue]]:
+    def old_image(self) -> Optional[Dict[str, Any]]:
         """The item in the DynamoDB table as it appeared before it was modified."""
-        return _attribute_value_dict(self._data, "OldImage")
+        return self._deserialize_dynamodb_dict("OldImage")
 
     @property
     def sequence_number(self) -> Optional[str]:
@@ -233,7 +157,7 @@ class DynamoDBRecord(DictWrapper):
 
     @property
     def dynamodb(self) -> Optional[StreamRecord]:
-        """The main body of the stream record, containing all the DynamoDB-specific fields."""
+        """The main body of the stream record, containing all the DynamoDB-specific dicts."""
         stream_record = self.get("dynamodb")
         return None if stream_record is None else StreamRecord(stream_record)
 
