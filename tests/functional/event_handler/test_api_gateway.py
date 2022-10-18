@@ -219,7 +219,6 @@ def test_api_gateway_v2_http_path_trailing_slash(json_dump):
 
     @app.post("/my/path")
     def my_path() -> Response:
-        assert isinstance(app.current_event, APIGatewayProxyEventV2)
         post_data = app.current_event.json_body
         return Response(200, content_types.TEXT_PLAIN, post_data["username"])
 
