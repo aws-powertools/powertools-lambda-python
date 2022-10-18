@@ -39,17 +39,17 @@ This utility requires additional permissions to work as expected.
 
 ### Fetching parameters
 
-You can retrieve a single parameter  using `get_parameter` high-level function.
+You can retrieve a single parameter  using the `get_parameter` high-level function.
 
 For multiple parameters, you can use `get_parameters` and pass a path to retrieve them recursively.
 
 === "getting_started_single_ssm_parameter.py"
-    ```python hl_lines="5 12"
+    ```python hl_lines="3 10"
     --8<-- "examples/parameters/src/getting_started_single_ssm_parameter.py"
     ```
 
 === "getting_started_recursive_ssm_parameter.py"
-    ```python hl_lines="5 12 15"
+    ```python hl_lines="3 10 13"
     --8<-- "examples/parameters/src/getting_started_recursive_ssm_parameter.py"
     ```
 
