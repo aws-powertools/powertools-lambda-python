@@ -562,8 +562,8 @@ class ApiGatewayResolver(BaseRouter):
 
         return powertools_dev_is_set()
 
-    @classmethod
-    def _compile_regex(cls, rule: str, base_regex: str = _ROUTE_REGEX):
+    @staticmethod
+    def _compile_regex(rule: str, base_regex: str = _ROUTE_REGEX):
         """Precompile regex pattern
 
         Logic
@@ -833,10 +833,10 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         return super().route(rule.rstrip("/"), method, cors, compress, cache_control)
 
     # Override _compile_regex to exclude trailing slashes for route resolution
-    @classmethod
-    def _compile_regex(cls, rule: str, base_regex: str = _ROUTE_REGEX):
+    @staticmethod
+    def _compile_regex(rule: str, base_regex: str = _ROUTE_REGEX):
 
-        return super()._compile_regex(rule, "^{}/*$")
+        return super(APIGatewayRestResolver, APIGatewayRestResolver)._compile_regex(rule, "^{}/*$")
 
 
 class APIGatewayHttpResolver(ApiGatewayResolver):
