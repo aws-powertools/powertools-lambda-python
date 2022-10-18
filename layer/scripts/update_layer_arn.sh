@@ -67,8 +67,8 @@ do
         # line_pseudo_region = arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:49
 
         # Replace all the "prefix_pseudo_region"'s in the file
-        # generic_prefix:\d+ ==> generic_line
-        sed -i '' -e "s/$generic_prefix:[[:digit:]][[:digit:]]*/$generic_line/g" docs/index.md
+        # prefix_pseudo_region:\d+ ==> line_pseudo_region
+        sed -i '' -e "s/$prefix_pseudo_region:[[:digit:]][[:digit:]]*/$line_pseudo_region/g" docs/index.md
       done
     fi
   done
