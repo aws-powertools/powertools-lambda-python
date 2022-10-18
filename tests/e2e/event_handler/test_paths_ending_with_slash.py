@@ -50,7 +50,7 @@ def test_api_gateway_rest_trailing_slash(apigw_rest_endpoint):
     # THEN
     assert response.status_code == status_code
     # response.content is a binary string, needs to be decoded to compare with the real string
-    assert response.content.decode("ascii") == body
+    assert response.text == body
 
 
 def test_api_gateway_http_trailing_slash(apigw_http_endpoint):
