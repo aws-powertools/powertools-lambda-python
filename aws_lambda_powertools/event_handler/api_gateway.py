@@ -829,7 +829,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         compress: bool = False,
         cache_control: Optional[str] = None,
     ):
-        # remove trailing "/" character from route rule for correct routing behaviour
+        # NOTE: see #1552 for more context.
         return super().route(rule.rstrip("/"), method, cors, compress, cache_control)
 
     # Override _compile_regex to exclude trailing slashes for route resolution
