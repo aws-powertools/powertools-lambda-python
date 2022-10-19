@@ -66,7 +66,7 @@ class TypeDeserializer:
 
         return deserializer(value[dynamodb_type])
 
-    def _deserialize_null(self, value: bool) -> bool:
+    def _deserialize_null(self, value: bool) -> None:
         return None
 
     def _deserialize_bool(self, value: bool) -> bool:
