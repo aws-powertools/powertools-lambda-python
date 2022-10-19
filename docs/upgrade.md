@@ -10,14 +10,14 @@ description: Guide to update between major Powertools versions
 The transition from Powertools for Python v1 to v2 is as painless as possible, as we aimed for minimal breaking changes.
 Changes at a glance:
 
-* The API for **event handler's `Response`** has minor changes to support multi value headers and cookies.
-* The **legacy SQS batch processor** was removed.
-* The **Idempotency key** format changed slightly, invalidating all the existing cached results.
-* The **Feature Flags and AppConfig Parameter utility** API calls have changed and you must update your IAM permissions.
-* The **`DynamoDBStreamEvent`** replaced `AttributeValue` with native Python types.
-
-???+ important
-    Powertools for Python v2 drops suport for Python 3.6, following the Python 3.6 End-Of-Life (EOL) reached on December 23, 2021.
+| Area                               | Change                                                                                                                      | Code change required  | IAM Permissions change required |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------------------- |
+| **Batch Processor**                | Removed legacy [SQS batch processor](#legacy-sqs-batch-processor).                                                          | Yes                   | No                              |
+| **Environment variables**          | `POWERTOOLS_EVENT_HANDLER_DEBUG` was removed in [favor of POWERTOOLS_DEV](../#optimizing-for-non-production-environments).  | If using verbose mode | No                              |
+| **Event Handler**                  | Added multi value headers and cookies support to [Response method](#event-handler-response-headers-and-cookies).            | Unit tests only       | No                              |
+| **Event Source Data Classes**      | [DynamoDBStreamEvent replaced](#dynamodbstreamevent-in-event-source-data-classes) `AttributeValue` with native Python types.| Yes                   | No                              |
+| **Feature Flags** / **Parameters** | [API calls have changed](#feature-flags-and-appconfig-parameter-utility) and you must update your IAM permissions.          | No                    | Yes                             |
+| **Idempotency**                    | [Key format](#idempotency-key-format) changed slightly and invalidated all the existing cached results.                     | No                    | No                              |
 
 ### Initial Steps
 
@@ -32,33 +32,6 @@ Before you start, we suggest making a copy of your current working project or cr
     ```
 
 3. **Review** the following sections to confirm whether they affect your code
-
-## Event Handler Response (headers and cookies)
-
-The `Response` class of the event handler utility changed slightly:
-
-1. The `headers` parameter now expects either a value or list of values per header (type `Union[str, Dict[str, List[str]]]`)
-2. We introduced a new `cookies` parameter (type `List[str]`)
-
-???+ note
-    Code that set headers as `Dict[str, str]` will still work unchanged.
-
-```python hl_lines="6 12 13"
-@app.get("/todos")
-def get_todos():
-    # Before
-    return Response(
-        # ...
-        headers={"Content-Type": "text/plain"}
-    )
-
-    # After
-    return Response(
-        # ...
-        headers={"Content-Type": ["text/plain"]},
-        cookies=[Cookie(name="session_id", value="12345", secure=True, http_only=True)],
-    )
-```
 
 ## Legacy SQS Batch Processor
 
@@ -146,22 +119,32 @@ You can migrate to the [native batch processing](https://aws.amazon.com/about-aw
         return processor.response()
     ```
 
-## Idempotency key format
+## Event Handler Response (headers and cookies)
 
-The format of the Idempotency key was changed. This is used store the invocation results on a persistent store like DynamoDB.
+The `Response` class of the event handler utility changed slightly:
 
-No changes are necessary in your code, but remember that existing Idempotency records will be ignored when you upgrade, as new executions generate keys with the new format.
+1. The `headers` parameter now expects either a value or list of values per header (type `Union[str, Dict[str, List[str]]]`)
+2. We introduced a new `cookies` parameter (type `List[str]`)
 
-Prior to this change, the Idempotency key was generated using only the caller function name (e.g: `lambda_handler#282e83393862a613b612c00283fef4c8`).
-After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key` (e.g: `app.classExample.function#app.handler#282e83393862a613b612c00283fef4c8`).
+???+ note
+    Code that set headers as `Dict[str, str]` will still work unchanged.
 
-Using qualified names prevents distinct functions with the same name to contend for the same Idempotency key.
+```python hl_lines="6 12 13"
+@app.get("/todos")
+def get_todos():
+    # Before
+    return Response(
+        # ...
+        headers={"Content-Type": "text/plain"}
+    )
 
-## Feature Flags and AppConfig Parameter utility
-
-AWS AppConfig deprecated the current API (GetConfiguration) - [more details here](https://github.com/awslabs/aws-lambda-powertools-python/issues/1506#issuecomment-1266645884).
-
-You must update your IAM permissions to allow `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession`. There are no code changes required.
+    # After
+    return Response(
+        # ...
+        headers={"Content-Type": ["text/plain"]},
+        cookies=[Cookie(name="session_id", value="12345", secure=True, http_only=True)],
+    )
+```
 
 ## DynamoDBStreamEvent in Event Source Data Classes
 
@@ -206,3 +189,27 @@ def lambda_handler(event: DynamoDBStreamEvent, context):
             send_to_sqs(new_image)  # Here new_image is just a Python Dict type
 
 ```
+
+## Feature Flags and AppConfig Parameter utility
+
+???+ info
+    AWS AppConfig deprecated the current API (GetConfiguration) - [more details here](https://github.com/awslabs/aws-lambda-powertools-python/issues/1506#issuecomment-1266645884).
+
+You must update your IAM permissions to allow `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession`. There are no code changes required.
+
+## Idempotency key format
+
+???+ note
+    Using qualified names prevents distinct functions with the same name to contend for the same Idempotency key.
+
+The format of the Idempotency key was changed. This is used store the invocation results on a persistent store like DynamoDB.
+
+No changes are necessary in your code, but remember that existing Idempotency records will be ignored when you upgrade, as new executions generate keys with the new format.
+
+Prior to this change, the Idempotency key was generated using only the caller function name (e.g: `HelloWorldFunction.lambda_handler#99914b932bd37a50b983c5e7c90ae93b`).
+
+![Idempotency Before](../media/upgrade_idempotency_before.png)
+
+After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key` (e.g: `HelloWorldFunction.app.lambda_handler#99914b932bd37a50b983c5e7c90ae93b`).
+
+![Idempotency Before](../media/upgrade_idempotency_after.png)
