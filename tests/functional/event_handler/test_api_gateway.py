@@ -793,16 +793,6 @@ def test_debug_unhandled_exceptions_debug_off():
     assert e.value.args == ("Foo",)
 
 
-def test_debug_mode_environment_variable(monkeypatch):
-    # GIVEN a debug mode environment variable is set
-    monkeypatch.setenv(constants.EVENT_HANDLER_DEBUG_ENV, "true")
-    app = ApiGatewayResolver()
-
-    # WHEN calling app._debug
-    # THEN the debug mode is enabled
-    assert app._debug
-
-
 def test_powertools_dev_sets_debug_mode(monkeypatch):
     # GIVEN a debug mode environment variable is set
     monkeypatch.setenv(constants.POWERTOOLS_DEV_ENV, "true")
