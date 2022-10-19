@@ -799,6 +799,7 @@ This example is based on the AWS Cognito docs for [Verify Auth Challenge Respons
 
 The DynamoDB data class utility provides the base class for `DynamoDBStreamEvent`, as well as enums for stream view type (`StreamViewType`) and event type.
 (`DynamoDBRecordEventName`).
+The class automatically deserializes DynamoDB types into their equivalent Python types.
 
 === "app.py"
 
@@ -828,6 +829,7 @@ The DynamoDB data class utility provides the base class for `DynamoDBStreamEvent
     @event_source(data_class=DynamoDBStreamEvent)
     def lambda_handler(event: DynamoDBStreamEvent, context: LambdaContext):
         for record in event.records:
+            # {"N": "123.45"} => Decimal("123.45")
             key: str = record.dynamodb.keys["id"]
             print(key)
     ```

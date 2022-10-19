@@ -230,6 +230,7 @@ class DynamoDBStreamEvent(DictWrapper):
         @event_source(data_class=DynamoDBStreamEvent)
         def lambda_handler(event: DynamoDBStreamEvent, context: LambdaContext):
             for record in event.records:
+                # {"N": "123.45"} => Decimal("123.45")
                 key: str = record.dynamodb.keys["id"]
                 print(key)
     """
