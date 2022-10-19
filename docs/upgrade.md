@@ -171,6 +171,9 @@ Previously, you'd receive a `AttributeValue` instance and need to deserialize ea
 
 With this change, you can access data deserialized as stored in DynamoDB, and no longer need to recursively deserialize nested objects (Maps) if you had them.
 
+???+ note
+    For a lossless conversion of DynamoDB `Number` type, we follow AWS Python SDK (boto3) approach and convert to `Decimal`.
+
 ```python hl_lines="15-20 24-25"
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
     DynamoDBStreamEvent,
