@@ -30,6 +30,22 @@ def test_lambda_function_url_event():
     assert result["body"] == "foo"
 
 
+def test_lambda_function_url_event_path_trailing_slash():
+    # GIVEN a Lambda Function Url type event
+    app = LambdaFunctionUrlResolver()
+
+    @app.post("/my/path")
+    def foo():
+        return Response(200, content_types.TEXT_HTML, "foo")
+
+    # WHEN calling the event handler with an event with a trailing slash
+    result = app(load_event("lambdaFunctionUrlEventPathTrailingSlash.json"), {})
+
+    # THEN return a 404 error
+    assert result["statusCode"] == 404
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+
+
 def test_lambda_function_url_event_with_cookies():
     # GIVEN a Lambda Function Url type event
     app = LambdaFunctionUrlResolver()

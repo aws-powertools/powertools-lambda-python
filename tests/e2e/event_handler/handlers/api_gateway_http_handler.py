@@ -6,9 +6,12 @@ from aws_lambda_powertools.event_handler import (
 
 app = APIGatewayHttpResolver()
 
+# The reason we use post is that whoever is writing tests can easily assert on the
+# content being sent (body, headers, cookies, content-type) to reduce cognitive load.
+
 
 @app.post("/todos")
-def hello():
+def todos():
     payload = app.current_event.json_body
 
     body = payload.get("body", "Hello World")
