@@ -120,6 +120,18 @@ class StreamRecord(DictWrapper):
         self._deserializer = TypeDeserializer()
 
     def _deserialize_dynamodb_dict(self, key: str) -> Optional[Dict[str, Any]]:
+        """Deserialize DynamoDB records available in `Keys`, `NewImage`, and `OldImage`
+
+        Parameters
+        ----------
+        key : str
+            DynamoDB key (e.g., Keys, NewImage, or OldImage)
+
+        Returns
+        -------
+        Optional[Dict[str, Any]]
+            Deserialized records in Python native types
+        """
         dynamodb_dict = self._data.get(key)
         if dynamodb_dict is None:
             return None
