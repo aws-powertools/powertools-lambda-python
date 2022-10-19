@@ -1,6 +1,6 @@
-from decimal import Clamped, Context, Inexact, Overflow, Rounded, Underflow
+from decimal import Clamped, Context, Decimal, Inexact, Overflow, Rounded, Underflow
 from enum import Enum
-from typing import Any, Dict, Iterator, Optional, Sequence
+from typing import Any, Callable, Dict, Iterator, Optional, Sequence, Set
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -24,7 +24,7 @@ class TypeDeserializer:
     since we don't support Python 2.
     """
 
-    def deserialize(self, value):
+    def deserialize(self, value: Dict) -> Any:
         """Deserialize DynamoDB data types into Python types.
 
         Parameters
@@ -60,40 +60,40 @@ class TypeDeserializer:
         """
 
         dynamodb_type = list(value.keys())[0]
-        deserializer = getattr(self, f"_deserialize_{dynamodb_type}".lower(), None)
+        deserializer: Optional[Callable] = getattr(self, f"_deserialize_{dynamodb_type}".lower(), None)
         if deserializer is None:
             raise TypeError(f"Dynamodb type {dynamodb_type} is not supported")
 
         return deserializer(value[dynamodb_type])
 
-    def _deserialize_null(self, value: bool):
+    def _deserialize_null(self, value: bool) -> bool:
         return None
 
-    def _deserialize_bool(self, value: bool):
+    def _deserialize_bool(self, value: bool) -> bool:
         return value
 
-    def _deserialize_n(self, value: str):
+    def _deserialize_n(self, value: str) -> Decimal:
         return DYNAMODB_CONTEXT.create_decimal(value)
 
-    def _deserialize_s(self, value: str):
+    def _deserialize_s(self, value: str) -> str:
         return value
 
-    def _deserialize_b(self, value: bytes):
+    def _deserialize_b(self, value: bytes) -> bytes:
         return value
 
-    def _deserialize_ns(self, value: Sequence[str]):
+    def _deserialize_ns(self, value: Sequence[str]) -> Set[Decimal]:
         return set(map(self._deserialize_n, value))
 
-    def _deserialize_ss(self, value: Sequence[str]):
+    def _deserialize_ss(self, value: Sequence[str]) -> Set[str]:
         return set(map(self._deserialize_s, value))
 
-    def _deserialize_bs(self, value: Sequence[bytes]):
+    def _deserialize_bs(self, value: Sequence[bytes]) -> Set[bytes]:
         return set(map(self._deserialize_b, value))
 
-    def _deserialize_l(self, value: Sequence[Dict]):
+    def _deserialize_l(self, value: Sequence[Dict]) -> Sequence[Any]:
         return [self.deserialize(v) for v in value]
 
-    def _deserialize_m(self, value: Dict):
+    def _deserialize_m(self, value: Dict) -> Dict:
         return {k: self.deserialize(v) for k, v in value.items()}
 
 
