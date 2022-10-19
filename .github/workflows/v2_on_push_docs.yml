@@ -1,5 +1,7 @@
 name: Docs v2
 
+# Maintenance: to be removed after we merge v2 into develop
+
 on:
   workflow_dispatch:
 #   push:

@@ -30,7 +30,7 @@ on:
     inputs:
       version_to_publish:
         description: "Version to be released in PyPi, Docs, and Lambda Layer, e.g. v1.26.4"
-        default: v1.26.4
+        default: v2.0.0
         required: true
       skip_pypi:
         description: "Skip publishing to PyPi as it can't publish more than once. Useful for semi-failed releases"

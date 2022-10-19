@@ -10,10 +10,10 @@ on:
       latest_published_version:
         description: "Latest PyPi published version to rebuild latest docs for, e.g. v2.0.0"
         required: true
-  # workflow_run:
-  #   workflows: ["Publish to PyPi"]
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows: ["Publish to PyPi"]
+    types:
+      - completed
 
 jobs:
   build-layer:
@@ -74,8 +74,7 @@ jobs:
           path: layer/cdk.out.zip
 
   deploy-beta:
-    needs:
-      - build-layer
+    needs: build-layer
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
     with:
@@ -84,16 +83,15 @@ jobs:
       environment: "layer-beta"
       latest_published_version: ${{ inputs.latest_published_version }}
 
-  # deploy-prod:
-  #   needs:
-  #     - deploy-beta
-  #   uses: ./.github/workflows/reusable_deploy_layer_stack.yml
-  #   secrets: inherit
-  #   with:
-  #     stage: "PROD"
-  #     artefact-name: "cdk-layer-artefact"
-  #     environment: "layer-prod"
-  #     latest_published_version: ${{ inputs.latest_published_version }}
+  deploy-prod:
+    needs: deploy-beta
+    uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
+    secrets: inherit
+    with:
+      stage: "PROD"
+      artefact-name: "cdk-layer-artefact"
+      environment: "layer-prod"
+      latest_published_version: ${{ inputs.latest_published_version }}
 
   deploy-sar-beta:
     needs: build-layer

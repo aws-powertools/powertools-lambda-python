@@ -1,5 +1,7 @@
 name: V2 Rebuild latest docs
 
+# Maintenance: to be removed after we merge v2 into develop
+
 on:
   workflow_dispatch:
 
