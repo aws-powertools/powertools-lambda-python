@@ -129,7 +129,7 @@ def kinesis_record_handler() -> Callable:
 @pytest.fixture(scope="module")
 def dynamodb_record_handler() -> Callable:
     def handler(record: DynamoDBRecord):
-        body = record.dynamodb.new_image.get("Message").get_value
+        body = record.dynamodb.new_image.get("Message")
         if "fail" in body:
             raise Exception("Failed to process record.")
         return body

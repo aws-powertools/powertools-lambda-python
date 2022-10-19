@@ -2,6 +2,7 @@ import base64
 import datetime
 import json
 import zipfile
+from decimal import Clamped, Context, Inexact, Overflow, Rounded, Underflow
 from secrets import compare_digest
 from urllib.parse import quote_plus
 
@@ -75,8 +76,6 @@ from aws_lambda_powertools.utilities.data_classes.connect_contact_flow_event imp
     ConnectContactFlowInitiationMethod,
 )
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
-    AttributeValue,
-    AttributeValueType,
     DynamoDBRecordEventName,
     DynamoDBStreamEvent,
     StreamRecord,
@@ -490,7 +489,13 @@ def test_connect_contact_flow_event_all():
     assert event.parameters == {"ParameterOne": "One", "ParameterTwo": "Two"}
 
 
-def test_dynamo_db_stream_trigger_event():
+def test_dynamodb_stream_trigger_event():
+    decimal_context = Context(
+        Emin=-128,
+        Emax=126,
+        prec=38,
+        traps=[Clamped, Overflow, Inexact, Rounded, Underflow],
+    )
     event = DynamoDBStreamEvent(load_event("dynamoStreamEvent.json"))
 
     records = list(event.records)
@@ -502,20 +507,8 @@ def test_dynamo_db_stream_trigger_event():
     assert dynamodb.approximate_creation_date_time is None
     keys = dynamodb.keys
     assert keys is not None
-    id_key = keys["Id"]
-    assert id_key.b_value is None
-    assert id_key.bs_value is None
-    assert id_key.bool_value is None
-    assert id_key.list_value is None
-    assert id_key.map_value is None
-    assert id_key.n_value == "101"
-    assert id_key.ns_value is None
-    assert id_key.null_value is None
-    assert id_key.s_value is None
-    assert id_key.ss_value is None
-    message_key = dynamodb.new_image["Message"]
-    assert message_key is not None
-    assert message_key.s_value == "New item!"
+    assert keys["Id"] == decimal_context.create_decimal(101)
+    assert dynamodb.new_image["Message"] == "New item!"
     assert dynamodb.old_image is None
     assert dynamodb.sequence_number == "111"
     assert dynamodb.size_bytes == 26
@@ -528,129 +521,61 @@ def test_dynamo_db_stream_trigger_event():
     assert record.user_identity is None
 
 
-def test_dynamo_attribute_value_b_value():
-    example_attribute_value = {"B": "dGhpcyB0ZXh0IGlzIGJhc2U2NC1lbmNvZGVk"}
-
-    attribute_value = AttributeValue(example_attribute_value)
-
-    assert attribute_value.get_type == AttributeValueType.Binary
-    assert attribute_value.b_value == attribute_value.get_value
-
-
-def test_dynamo_attribute_value_bs_value():
-    example_attribute_value = {"BS": ["U3Vubnk=", "UmFpbnk=", "U25vd3k="]}
-
-    attribute_value = AttributeValue(example_attribute_value)
-
-    assert attribute_value.get_type == AttributeValueType.BinarySet
-    assert attribute_value.bs_value == attribute_value.get_value
-
-
-def test_dynamo_attribute_value_bool_value():
-    example_attribute_value = {"BOOL": True}
-
-    attribute_value = AttributeValue(example_attribute_value)
-
-    assert attribute_value.get_type == AttributeValueType.Boolean
-    assert attribute_value.bool_value == attribute_value.get_value
-
-
-def test_dynamo_attribute_value_list_value():
-    example_attribute_value = {"L": [{"S": "Cookies"}, {"S": "Coffee"}, {"N": "3.14159"}]}
-    attribute_value = AttributeValue(example_attribute_value)
-    list_value = attribute_value.list_value
-    assert list_value is not None
-    item = list_value[0]
-    assert item.s_value == "Cookies"
-    assert attribute_value.get_type == AttributeValueType.List
-    assert attribute_value.l_value == attribute_value.list_value
-    assert attribute_value.list_value == attribute_value.get_value
-
-
-def test_dynamo_attribute_value_map_value():
-    example_attribute_value = {"M": {"Name": {"S": "Joe"}, "Age": {"N": "35"}}}
-
-    attribute_value = AttributeValue(example_attribute_value)
-
-    map_value = attribute_value.map_value
-    assert map_value is not None
-    item = map_value["Name"]
-    assert item.s_value == "Joe"
-    assert attribute_value.get_type == AttributeValueType.Map
-    assert attribute_value.m_value == attribute_value.map_value
-    assert attribute_value.map_value == attribute_value.get_value
+def test_dynamodb_stream_record_deserialization():
+    byte_list = [s.encode("utf-8") for s in ["item1", "item2"]]
+    decimal_context = Context(
+        Emin=-128,
+        Emax=126,
+        prec=38,
+        traps=[Clamped, Overflow, Inexact, Rounded, Underflow],
+    )
+    data = {
+        "Keys": {"key1": {"attr1": "value1"}},
+        "NewImage": {
+            "Name": {"S": "Joe"},
+            "Age": {"N": "35"},
+            "TypesMap": {
+                "M": {
+                    "string": {"S": "value"},
+                    "number": {"N": "100"},
+                    "bool": {"BOOL": True},
+                    "dict": {"M": {"key": {"S": "value"}}},
+                    "stringSet": {"SS": ["item1", "item2"]},
+                    "numberSet": {"NS": ["100", "200", "300"]},
+                    "binary": {"B": b"\x00"},
+                    "byteSet": {"BS": byte_list},
+                    "list": {"L": [{"S": "item1"}, {"N": "3.14159"}, {"BOOL": False}]},
+                    "null": {"NULL": True},
+                },
+            },
+        },
+    }
+    record = StreamRecord(data)
+    assert record.new_image == {
+        "Name": "Joe",
+        "Age": decimal_context.create_decimal("35"),
+        "TypesMap": {
+            "string": "value",
+            "number": decimal_context.create_decimal("100"),
+            "bool": True,
+            "dict": {"key": "value"},
+            "stringSet": {"item1", "item2"},
+            "numberSet": {decimal_context.create_decimal(n) for n in ["100", "200", "300"]},
+            "binary": b"\x00",
+            "byteSet": set(byte_list),
+            "list": ["item1", decimal_context.create_decimal("3.14159"), False],
+            "null": None,
+        },
+    }
 
 
-def test_dynamo_attribute_value_n_value():
-    example_attribute_value = {"N": "123.45"}
-
-    attribute_value = AttributeValue(example_attribute_value)
-
-    assert attribute_value.get_type == AttributeValueType.Number
-    assert attribute_value.n_value == attribute_value.get_value
-
-
-def test_dynamo_attribute_value_ns_value():
-    example_attribute_value = {"NS": ["42.2", "-19", "7.5", "3.14"]}
-
-    attribute_value = AttributeValue(example_attribute_value)
-
-    assert attribute_value.get_type == AttributeValueType.NumberSet
-    assert attribute_value.ns_value == attribute_value.get_value
-
-
-def test_dynamo_attribute_value_null_value():
-    example_attribute_value = {"NULL": True}
-
-    attribute_value = AttributeValue(example_attribute_value)
-
-    assert attribute_value.get_type == AttributeValueType.Null
-    assert attribute_value.null_value is None
-    assert attribute_value.null_value == attribute_value.get_value
-
-
-def test_dynamo_attribute_value_s_value():
-    example_attribute_value = {"S": "Hello"}
-
-    attribute_value = AttributeValue(example_attribute_value)
-
-    assert attribute_value.get_type == AttributeValueType.String
-    assert attribute_value.s_value == attribute_value.get_value
-
-
-def test_dynamo_attribute_value_ss_value():
-    example_attribute_value = {"SS": ["Giraffe", "Hippo", "Zebra"]}
-
-    attribute_value = AttributeValue(example_attribute_value)
-
-    assert attribute_value.get_type == AttributeValueType.StringSet
-    assert attribute_value.ss_value == attribute_value.get_value
-
-
-def test_dynamo_attribute_value_type_error():
-    example_attribute_value = {"UNSUPPORTED": "'value' should raise a type error"}
-
-    attribute_value = AttributeValue(example_attribute_value)
-
-    with pytest.raises(TypeError):
-        print(attribute_value.get_value)
-    with pytest.raises(ValueError):
-        print(attribute_value.get_type)
-
-
-def test_stream_record_keys_with_valid_keys():
-    attribute_value = {"Foo": "Bar"}
-    record = StreamRecord({"Keys": {"Key1": attribute_value}})
-    assert record.keys == {"Key1": AttributeValue(attribute_value)}
-
-
-def test_stream_record_keys_with_no_keys():
+def test_dynamodb_stream_record_keys_with_no_keys():
     record = StreamRecord({})
     assert record.keys is None
 
 
-def test_stream_record_keys_overrides_dict_wrapper_keys():
-    data = {"Keys": {"key1": {"attr1": "value1"}}}
+def test_dynamodb_stream_record_keys_overrides_dict_wrapper_keys():
+    data = {"Keys": {"key1": {"N": "101"}}}
     record = StreamRecord(data)
     assert record.keys != data.keys()
 
