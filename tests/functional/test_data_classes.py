@@ -489,7 +489,7 @@ def test_connect_contact_flow_event_all():
     assert event.parameters == {"ParameterOne": "One", "ParameterTwo": "Two"}
 
 
-def test_dynamo_db_stream_trigger_event():
+def test_dynamodb_stream_trigger_event():
     decimal_context = Context(
         Emin=-128,
         Emax=126,
@@ -521,7 +521,7 @@ def test_dynamo_db_stream_trigger_event():
     assert record.user_identity is None
 
 
-def test_dynamo_stream_record():
+def test_dynamodb_stream_record_deserialization():
     byte_list = [s.encode("utf-8") for s in ["item1", "item2"]]
     decimal_context = Context(
         Emin=-128,
@@ -569,12 +569,12 @@ def test_dynamo_stream_record():
     }
 
 
-def test_stream_record_keys_with_no_keys():
+def test_dynamodb_stream_record_keys_with_no_keys():
     record = StreamRecord({})
     assert record.keys is None
 
 
-def test_stream_record_keys_overrides_dict_wrapper_keys():
+def test_dynamodb_stream_record_keys_overrides_dict_wrapper_keys():
     data = {"Keys": {"key1": {"N": "101"}}}
     record = StreamRecord(data)
     assert record.keys != data.keys()
