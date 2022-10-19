@@ -205,23 +205,14 @@ class DynamoDBStreamEvent(DictWrapper):
     **Process dynamodb stream events and use get_type and get_value for handling conversions**
 
         from aws_lambda_powertools.utilities.data_classes import event_source, DynamoDBStreamEvent
-        from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
-            AttributeValueType,
-            AttributeValue,
-        )
         from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
         @event_source(data_class=DynamoDBStreamEvent)
         def lambda_handler(event: DynamoDBStreamEvent, context: LambdaContext):
             for record in event.records:
-                key: AttributeValue = record.dynamodb.keys["id"]
-                if key == AttributeValueType.Number:
-                    assert key.get_value == key.n_value
-                    print(key.get_value)
-                elif key == AttributeValueType.Map:
-                    assert key.get_value == key.map_value
-                    print(key.get_value)
+                key: str = record.dynamodb.keys["id"]
+                print(key)
     """
 
     @property

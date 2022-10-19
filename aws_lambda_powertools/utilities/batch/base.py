@@ -323,10 +323,10 @@ class BatchProcessor(BasePartialProcessor):
     @tracer.capture_method
     def record_handler(record: DynamoDBRecord):
         logger.info(record.dynamodb.new_image)
-        payload: dict = json.loads(record.dynamodb.new_image.get("item").s_value)
+        payload: dict = json.loads(record.dynamodb.new_image.get("item"))
         # alternatively:
-        # changes: Dict[str, dynamo_db_stream_event.AttributeValue] = record.dynamodb.new_image  # noqa: E800
-        # payload = change.get("Message").raw_event -> {"S": "<payload>"}
+        # changes: Dict[str, Any] = record.dynamodb.new_image  # noqa: E800
+        # payload = change.get("Message") -> "<payload>"
         ...
 
     @logger.inject_lambda_context
