@@ -9,8 +9,7 @@ on:
       - "poetry.lock"
       - "mypy.ini"
     branches:
-      - develop
-      - v2
+      - v1
   push:
     paths:
       - "aws_lambda_powertools/**"
@@ -19,8 +18,7 @@ on:
       - "poetry.lock"
       - "mypy.ini"
     branches:
-      - develop
-      - v2
+      - v1
 
 jobs:
   build:

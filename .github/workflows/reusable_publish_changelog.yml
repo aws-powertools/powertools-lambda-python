@@ -7,7 +7,7 @@ permissions:
   contents: write
 
 env:
-  BRANCH: develop
+  BRANCH: v1
 
 jobs:
   publish_changelog:

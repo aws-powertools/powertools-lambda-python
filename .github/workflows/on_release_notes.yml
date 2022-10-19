@@ -21,10 +21,11 @@ name: Publish to PyPi
 # See MAINTAINERS.md "Releasing a new version" for release mechanisms
 
 env:
-  BRANCH: develop
+  BRANCH: v1
 
 on:
   release:
+    # We can't filter by tag here, so we filter later on the first job
     types: [published]
   workflow_dispatch:
     inputs:
@@ -45,6 +46,7 @@ on:
 
 jobs:
   release:
+    if: ${{ startsWith(github.ref, 'refs/tags/v1') }}
     environment: release
     runs-on: ubuntu-latest
     permissions:
@@ -120,6 +122,12 @@ jobs:
       version: ${{ needs.release.outputs.RELEASE_VERSION }}
       alias: latest
       detached_mode: true
+
+  publish_layer:
+    needs: release
+    uses: ./.github/workflows/publish_layer.yml
+    with:
+      latest_published_version: ${{ needs.release.outputs.RELEASE_VERSION }}
 
   post_release:
     needs: release
