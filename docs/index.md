@@ -54,8 +54,8 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 
     === "x86_64"
 
-        | Region           | Layer ARN                                                                                                |
-        | ---------------- | -------------------------------------------------------------------------------------------------------- |
+        | Region           | Layer ARN                                                                                                 |
+        | ---------------- | --------------------------------------------------------------------------------------------------------- |
         | `af-south-1`     | [arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:     |
         | `ap-east-1`      | [arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:      |
         | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard: |
@@ -81,8 +81,8 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 
     === "arm64"
 
-        | Region           | Layer ARN                                                                                                |
-        | ---------------- | -------------------------------------------------------------------------------------------------------- |
+        | Region           | Layer ARN                                                                                                       |
+        | ---------------- | --------------------------------------------------------------------------------------------------------------- |
         | `af-south-1`     | [arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:     |
         | `ap-east-1`      | [arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard:      |
         | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1](#){: .copyMe}:clipboard: |
@@ -377,7 +377,7 @@ Serverless Application Repository (SAR) App deploys a CloudFormation stack with 
 Despite having more steps compared to the [public Layer ARN](#lambda-layer) option, the benefit is that you can specify a semantic version you want to use.
 
 | App                                                                                                                                                                  | ARN                                                                                                                               | Description                                                           |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
 | [aws-lambda-powertools-python-layer-v2](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v2)             | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v2](#){: .copyMe}:clipboard:       | Contains all extra dependencies (e.g: pydantic).                      |
 | [aws-lambda-powertools-python-layer-v2-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v2-arm64) | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v2-arm64](#){: .copyMe}:clipboard: | Contains all extra dependencies (e.g: pydantic). For arm64 functions. |
 
@@ -625,7 +625,6 @@ Core utilities such as Tracing, Logging, Metrics, and Event Handler will be avai
 | **POWERTOOLS_LOGGER_LOG_EVENT**           | Logs incoming event                                                                    | [Logging](./core/logger)                                                            | `false`               |
 | **POWERTOOLS_LOGGER_SAMPLE_RATE**         | Debug log sampling                                                                     | [Logging](./core/logger)                                                            | `0`                   |
 | **POWERTOOLS_LOG_DEDUPLICATION_DISABLED** | Disables log deduplication filter protection to use Pytest Live Log feature            | [Logging](./core/logger)                                                            | `false`               |
-| **POWERTOOLS_EVENT_HANDLER_DEBUG**        | Enables debugging mode for event handler                                               | [Event Handler](./core/event_handler/api_gateway.md#debug-mode)                     | `false`               |
 | **POWERTOOLS_DEV**                        | Increases verbosity across utilities                                                   | Multiple; see [POWERTOOLS_DEV effect below](#increasing-verbosity-across-utilities) | `0`                   |
 | **LOG_LEVEL**                             | Sets logging level                                                                     | [Logging](./core/logger)                                                            | `INFO`                |
 
@@ -638,11 +637,11 @@ Whether you're prototyping locally or against a non-production environment, you 
 
 When `POWERTOOLS_DEV` is set to a truthy value (`1`, `true`), it'll have the following effects:
 
-| Utility           | Effect                                                                                                                                                                                                                                                                              |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Logger**        | Increase JSON indentation to 4. This will ease local debugging when running functions locally under emulators or direct calls while not affecting unit tests                                                                                                                        |
-| **Event Handler** | Enable full traceback errors in the response, indent request/responses, and CORS in dev mode (`*`). This will deprecate [`POWERTOOLS_EVENT_HANDLER_DEBUG`](https://awslabs.github.io/aws-lambda-powertools-python/latest/core/event_handler/api_gateway/#debug-mode) in the future. |
-| **Tracer**        | Future-proof safety to disables tracing operations in non-Lambda environments. This already happens automatically in the Tracer utility.                                                                                                                                            |
+| Utility           | Effect                                                                                                                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Logger**        | Increase JSON indentation to 4. This will ease local debugging when running functions locally under emulators or direct calls while not affecting unit tests |
+| **Event Handler** | Enable full traceback errors in the response, indent request/responses, and CORS in dev mode (`*`).                                                          |
+| **Tracer**        | Future-proof safety to disables tracing operations in non-Lambda environments. This already happens automatically in the Tracer utility.                     |
 
 ## Debug mode
 

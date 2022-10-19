@@ -1,7 +1,6 @@
 import base64
 import json
 import logging
-import os
 import re
 import traceback
 import warnings
@@ -26,9 +25,8 @@ from typing import (
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
-from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.cookies import Cookie
-from aws_lambda_powertools.shared.functions import powertools_dev_is_set, strtobool
+from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
@@ -459,7 +457,7 @@ class ApiGatewayResolver(BaseRouter):
         cors: CORSConfig
             Optionally configure and enabled CORS. Not each route will need to have to cors=True
         debug: Optional[bool]
-            Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_EVENT_HANDLER_DEBUG"
+            Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_DEV"
             environment variable
         serializer : Callable, optional
             function to serialize `obj` to a JSON formatted `str`, by default json.dumps
@@ -551,14 +549,6 @@ class ApiGatewayResolver(BaseRouter):
         # It might have been explicitly switched off (debug=False)
         if debug is not None:
             return debug
-
-        # Maintenance: deprecate EVENT_HANDLER_DEBUG later in V2.
-        env_debug = os.getenv(constants.EVENT_HANDLER_DEBUG_ENV)
-        if env_debug is not None:
-            warnings.warn(
-                "POWERTOOLS_EVENT_HANDLER_DEBUG is set and will be deprecated in V2. Please use POWERTOOLS_DEV instead."
-            )
-            return strtobool(env_debug) or powertools_dev_is_set()
 
         return powertools_dev_is_set()
 
