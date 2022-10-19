@@ -165,6 +165,9 @@ You must update your IAM permissions to allow `appconfig:GetLatestConfiguration`
 
 ## DynamoDBStreamEvent in Event Source Data Classes
 
+???+ info
+    This also applies if you're using [**`BatchProcessor`**](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank"} to handle DynamoDB Stream events.
+
 You will now receive native Python types when accessing DynamoDB records via `keys`, `new_image`, and `old_image` attributes in `DynamoDBStreamEvent`.
 
 Previously, you'd receive a `AttributeValue` instance and need to deserialize each item to the type you'd want for convenience, or to the type DynamoDB stored via `get_value` method.
