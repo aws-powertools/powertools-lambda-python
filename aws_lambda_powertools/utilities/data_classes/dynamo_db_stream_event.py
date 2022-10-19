@@ -1,9 +1,11 @@
 from decimal import Clamped, Context, Inexact, Overflow, Rounded, Underflow
 from enum import Enum
-from typing import Any, Dict, Iterator, Optional
+from typing import Any, Dict, Iterator, Optional, Sequence
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
+# NOTE: DynamoDB supports up to 38 digits precision
+# Therefore, this ensures our Decimal follows what's stored in the table
 DYNAMODB_CONTEXT = Context(
     Emin=-128,
     Emax=126,
@@ -14,16 +16,16 @@ DYNAMODB_CONTEXT = Context(
 
 class TypeDeserializer:
     """
-    This class deserializes DynamoDB types to Python types.
-    It based on boto3's DynamoDB TypeDeserializer found here:
-    https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html
+    Deserializes DynamoDB types to Python types.
+
+    It's based on boto3's [DynamoDB TypeDeserializer](https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html). # noqa: E501
 
     The only notable difference is that for Binary (`B`, `BS`) values we return Python Bytes directly,
     since we don't support Python 2.
     """
 
     def deserialize(self, value):
-        """The method to deserialize the DynamoDB data types.
+        """Deserialize DynamoDB data types into Python types.
 
         Parameters
         ----------
@@ -32,6 +34,7 @@ class TypeDeserializer:
 
 
             Here are the various conversions:
+
             DynamoDB                                Python
             --------                                ------
             {'NULL': True}                          None
@@ -44,10 +47,12 @@ class TypeDeserializer:
             {'BS': [bytes]}                         set([bytes])
             {'L': list}                             list
             {'M': dict}                             dict
+
         Parameters
         ----------
         value: Any
             DynamoDB value to be deserialized to a python type
+
         Returns
         --------
         any
@@ -61,34 +66,34 @@ class TypeDeserializer:
 
         return deserializer(value[dynamodb_type])
 
-    def _deserialize_null(self, value):
+    def _deserialize_null(self, value: bool):
         return None
 
-    def _deserialize_bool(self, value):
+    def _deserialize_bool(self, value: bool):
         return value
 
-    def _deserialize_n(self, value):
+    def _deserialize_n(self, value: str):
         return DYNAMODB_CONTEXT.create_decimal(value)
 
-    def _deserialize_s(self, value):
+    def _deserialize_s(self, value: str):
         return value
 
-    def _deserialize_b(self, value):
+    def _deserialize_b(self, value: bytes):
         return value
 
-    def _deserialize_ns(self, value):
+    def _deserialize_ns(self, value: Sequence[str]):
         return set(map(self._deserialize_n, value))
 
-    def _deserialize_ss(self, value):
+    def _deserialize_ss(self, value: Sequence[str]):
         return set(map(self._deserialize_s, value))
 
-    def _deserialize_bs(self, value):
+    def _deserialize_bs(self, value: Sequence[bytes]):
         return set(map(self._deserialize_b, value))
 
-    def _deserialize_l(self, value):
+    def _deserialize_l(self, value: Sequence[Dict]):
         return [self.deserialize(v) for v in value]
 
-    def _deserialize_m(self, value):
+    def _deserialize_m(self, value: Dict):
         return {k: self.deserialize(v) for k, v in value.items()}
 
 
