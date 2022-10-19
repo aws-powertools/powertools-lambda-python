@@ -1,7 +1,15 @@
+from decimal import Clamped, Context, Inexact, Overflow, Rounded, Underflow
 from enum import Enum
 from typing import Any, Dict, Iterator, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+
+DYNAMODB_CONTEXT = Context(
+    Emin=-128,
+    Emax=126,
+    prec=38,
+    traps=[Clamped, Overflow, Inexact, Rounded, Underflow],
+)
 
 
 class TypeDeserializer:
@@ -9,16 +17,21 @@ class TypeDeserializer:
     This class deserializes DynamoDB types to Python types.
     It based on boto3's DynamoDB TypeDeserializer found here:
     https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html
-    Except that it deserializes DynamoDB numbers into strings, and does not wrap binary
-    with a Binary class.
+
+    The only notable difference is that for Binary (`B`, `BS`) values we return Python Bytes directly,
+    since we don't support Python 2.
     """
 
     def deserialize(self, value):
         """The method to deserialize the DynamoDB data types.
 
-        :param value: A DynamoDB value to be deserialized to a pythonic value.
-            Here are the various conversions:
+        Parameters
+        ----------
+        value: Any
+            DynamoDB value to be deserialized to a python type
 
+
+            Here are the various conversions:
             DynamoDB                                Python
             --------                                ------
             {'NULL': True}                          None
@@ -31,17 +44,21 @@ class TypeDeserializer:
             {'BS': [bytes]}                         set([bytes])
             {'L': list}                             list
             {'M': dict}                             dict
-
-        :returns: The pythonic value of the DynamoDB type.
+        Parameters
+        ----------
+        value: Any
+            DynamoDB value to be deserialized to a python type
+        Returns
+        --------
+        any
+            Python native type converted from DynamoDB type
         """
 
-        if not value:
-            raise TypeError("Value must be a nonempty dictionary whose key " "is a valid dynamodb type.")
         dynamodb_type = list(value.keys())[0]
-        try:
-            deserializer = getattr(self, f"_deserialize_{dynamodb_type}".lower())
-        except AttributeError:
+        deserializer = getattr(self, f"_deserialize_{dynamodb_type}".lower(), None)
+        if deserializer is None:
             raise TypeError(f"Dynamodb type {dynamodb_type} is not supported")
+
         return deserializer(value[dynamodb_type])
 
     def _deserialize_null(self, value):
@@ -51,7 +68,7 @@ class TypeDeserializer:
         return value
 
     def _deserialize_n(self, value):
-        return value
+        return DYNAMODB_CONTEXT.create_decimal(value)
 
     def _deserialize_s(self, value):
         return value
@@ -85,9 +102,10 @@ class StreamViewType(Enum):
 
 
 class StreamRecord(DictWrapper):
+    _deserializer = TypeDeserializer()
+
     def __init__(self, data: Dict[str, Any]):
         """StreamRecord constructor
-
         Parameters
         ----------
         data: Dict[str, Any]
@@ -98,9 +116,10 @@ class StreamRecord(DictWrapper):
 
     def _deserialize_dynamodb_dict(self, key: str) -> Optional[Dict[str, Any]]:
         dynamodb_dict = self._data.get(key)
-        return (
-            None if dynamodb_dict is None else {k: self._deserializer.deserialize(v) for k, v in dynamodb_dict.items()}
-        )
+        if dynamodb_dict is None:
+            return None
+
+        return {k: self._deserializer.deserialize(v) for k, v in dynamodb_dict.items()}
 
     @property
     def approximate_creation_date_time(self) -> Optional[int]:

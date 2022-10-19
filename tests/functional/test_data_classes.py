@@ -2,6 +2,7 @@ import base64
 import datetime
 import json
 import zipfile
+from decimal import Clamped, Context, Inexact, Overflow, Rounded, Underflow
 from secrets import compare_digest
 from urllib.parse import quote_plus
 
@@ -489,6 +490,12 @@ def test_connect_contact_flow_event_all():
 
 
 def test_dynamo_db_stream_trigger_event():
+    decimal_context = Context(
+        Emin=-128,
+        Emax=126,
+        prec=38,
+        traps=[Clamped, Overflow, Inexact, Rounded, Underflow],
+    )
     event = DynamoDBStreamEvent(load_event("dynamoStreamEvent.json"))
 
     records = list(event.records)
@@ -500,7 +507,7 @@ def test_dynamo_db_stream_trigger_event():
     assert dynamodb.approximate_creation_date_time is None
     keys = dynamodb.keys
     assert keys is not None
-    assert keys["Id"] == "101"
+    assert keys["Id"] == decimal_context.create_decimal(101)
     assert dynamodb.new_image["Message"] == "New item!"
     assert dynamodb.old_image is None
     assert dynamodb.sequence_number == "111"
@@ -516,6 +523,12 @@ def test_dynamo_db_stream_trigger_event():
 
 def test_dynamo_stream_record():
     byte_list = [s.encode("utf-8") for s in ["item1", "item2"]]
+    decimal_context = Context(
+        Emin=-128,
+        Emax=126,
+        prec=38,
+        traps=[Clamped, Overflow, Inexact, Rounded, Underflow],
+    )
     data = {
         "Keys": {"key1": {"attr1": "value1"}},
         "NewImage": {
@@ -539,16 +552,16 @@ def test_dynamo_stream_record():
     record = StreamRecord(data)
     assert record.new_image == {
         "Name": "Joe",
-        "Age": "35",
+        "Age": decimal_context.create_decimal("35"),
         "TypesMap": {
             "string": "value",
-            "number": "100",
+            "number": decimal_context.create_decimal("100"),
             "bool": True,
             "dict": {"key": "value"},
             "stringSet": {"item1", "item2"},
-            "numberSet": {"100", "200", "300"},
+            "numberSet": {decimal_context.create_decimal(n) for n in ["100", "200", "300"]},
             "byteSet": set(byte_list),
-            "list": ["item1", "3.14159", False],
+            "list": ["item1", decimal_context.create_decimal("3.14159"), False],
             "null": None,
         },
     }
