@@ -119,7 +119,6 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
         ```
 
     === "Serverless framework"
-
         ```yaml hl_lines="5"
     	functions:
     		hello:
@@ -137,7 +136,6 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 
             def __init__(self, scope: core.Construct, id_: str, env: core.Environment) -> None:
                 super().__init__(scope, id_)
-
                 powertools_layer = aws_lambda.LayerVersion.from_layer_version_arn(
                     self,
                     id="lambda-powertools",
@@ -194,7 +192,6 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
 
           source_code_hash = filebase64sha256("lambda_function_payload.zip")
         }
-
 
         ```
 

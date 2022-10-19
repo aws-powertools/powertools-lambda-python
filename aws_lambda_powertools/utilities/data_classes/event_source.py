@@ -34,6 +34,6 @@ def event_source(
 
         @event_source(data_class=S3Event)
         def handler(event: S3Event, context):
-             return {"key": event.object_key}
+            return {"key": event.object_key}
     """
     return handler(data_class(event), context)

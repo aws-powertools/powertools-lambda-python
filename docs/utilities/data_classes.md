@@ -77,6 +77,7 @@ Event Source | Data_class
 [EventBridge](#eventbridge) | `EventBridgeEvent`
 [Kafka](#kafka) | `KafkaEvent`
 [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent`
+[Kinesis Firehose Delivery Stream](#kinesis-firehose-delivery-stream) | `KinesisFirehoseEvent`
 [Lambda Function URL](#lambda-function-url) | `LambdaFunctionUrlEvent`
 [Rabbit MQ](#rabbit-mq) | `RabbitMQEvent`
 [S3](#s3) | `S3Event`
@@ -890,6 +891,20 @@ or plain text, depending on the original payload.
         data = kinesis_record.data_as_json()
 
         do_something_with(data)
+    ```
+
+### Kinesis Firehose delivery stream
+
+Kinesis Firehose Data Transformation can use a Lambda Function to modify the records
+inline, and re-emit them back to the Delivery Stream.
+
+Similar to Kinesis Data Streams, the events contain base64 encoded data. You can use the helper
+function to access the data either as json or plain text, depending on the original payload.
+
+=== "app.py"
+
+    ```python
+    --8<-- "examples/event_sources/src/kinesis_firehose_delivery_stream.py"
     ```
 
 ### Lambda Function URL
