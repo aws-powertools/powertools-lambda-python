@@ -221,7 +221,7 @@ class DynamoDBStreamEvent(DictWrapper):
 
     Example
     -------
-    **Process dynamodb stream events and use get_type and get_value for handling conversions**
+    **Process dynamodb stream events. DynamoDB types are automatically converted to their equivalent Python values.**
 
         from aws_lambda_powertools.utilities.data_classes import event_source, DynamoDBStreamEvent
         from aws_lambda_powertools.utilities.typing import LambdaContext
