@@ -105,15 +105,20 @@ jobs:
       - name: Store latest Layer ARN
         if: ${{ inputs.stage == 'PROD' }}
         run: |
-          jq -c '.LayerV2Stack.VersionArn' cdk-outputs.json > cdk-layer-stack-${{ matrix.region }}-layer-version.txt
-          jq -c '.LayerV2Stack.Arm64VersionArn' cdk-outputs.json >> cdk-layer-stack-${{ matrix.region }}-layer-version.txt
-      - name: CDK Deploy Canary
-        run: cdk deploy --app cdk.out --context region=${{ matrix.region}} --parameters DeployStage="${{ inputs.stage }}" 'CanaryV2Stack' --require-approval never --verbose
+          mkdir cdk-layer-stack
+          jq -r -c '.LayerV2Stack.LatestLayerArn' cdk-outputs.json > cdk-layer-stack/${{ matrix.region }}-layer-version.txt
+          jq -r -c '.LayerV2Stack.LatestLayerArm64Arn' cdk-outputs.json >> cdk-layer-stack/${{ matrix.region }}-layer-version.txt
+          cat cdk-layer-stack/${{ matrix.region }}-layer-version.txt
       - name: Save Layer ARN artifact
+        if: ${{ inputs.stage == 'PROD' }}
         uses: actions/upload-artifact@v3
         with:
           name: cdk-layer-stack
-          path: cdk-layer-stack*
+          path: ./layer/cdk-layer-stack/* # NOTE: upload-artifact does not inherit working-directory setting.
+          if-no-files-found: error
+          retention-days: 1
+      - name: CDK Deploy Canary
+        run: cdk deploy --app cdk.out --context region=${{ matrix.region}} --parameters DeployStage="${{ inputs.stage }}" 'CanaryV2Stack' --require-approval never --verbose
 
   update_v2_layer_arn_docs:
     needs: deploy-cdk-stack

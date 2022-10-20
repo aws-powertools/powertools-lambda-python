@@ -31,7 +31,7 @@ on:
   workflow_dispatch:
     inputs:
       version_to_publish:
-        description: "Version to be released in PyPi, Docs, and Lambda Layer, e.g. v2.0.0, v2.0.0.a0 (pre-release)"
+        description: "Version to be released in PyPi, Docs, and Lambda Layer, e.g. v2.0.0, v2.0.0a0 (pre-release)"
         default: v2.0.0
         required: true
       skip_pypi:
@@ -51,7 +51,7 @@ on:
         type: boolean
         required: false
       pre_release:
-        description: "Publishes documentation using a pre-release tag (v2.0.0.a0). You are still responsible for passing a pre-release version tag to the workflow."
+        description: "Publishes documentation using a pre-release tag (v2.0.0a0). You are still responsible for passing a pre-release version tag to the workflow."
         default: false
         type: boolean
         required: false
@@ -95,6 +95,8 @@ jobs:
       - name: Build python package and wheel
         if: ${{ !inputs.skip_pypi }}
         run: poetry build
+      # NOTE: TestPyPi is undergoing a CDN migration https://status.python.org/#
+      # re-enable for the next release, when degraded status changes
       # - name: Upload to PyPi test
       #   if: ${{ !inputs.skip_pypi }}
       #   run: make release-test

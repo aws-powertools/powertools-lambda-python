@@ -9,25 +9,21 @@ on:
   workflow_dispatch:
     inputs:
       latest_published_version:
-        description: "Latest PyPi published version to rebuild latest docs for, e.g. 2.0.0, v2.0.0.a0 (pre-release)"
+        description: "Latest PyPi published version to rebuild latest docs for, e.g. 2.0.0, 2.0.0.a1 (pre-release)"
         required: true
       pre_release:
-        description: "Publishes documentation using a pre-release tag (v2.0.0.a0)."
+        description: "Publishes documentation using a pre-release tag (2.0.0.a1)."
         default: false
         type: boolean
-        required: false
-      test_role:
-        type: string
-        description: "Test IAM Role ARN"
         required: false
   workflow_call:
     inputs:
       latest_published_version:
         type: string
-        description: "Latest PyPi published version to rebuild latest docs for, e.g. 2.0.0, v2.0.0.a0 (pre-release)"
+        description: "Latest PyPi published version to rebuild latest docs for, e.g. 2.0.0, 2.0.0.a1 (pre-release)"
         required: true
       pre_release:
-        description: "Publishes documentation using a pre-release tag (v2.0.0.a0)."
+        description: "Publishes documentation using a pre-release tag (2.0.0.a1)."
         default: false
         type: boolean
         required: false
@@ -82,7 +78,7 @@ jobs:
           name: cdk-layer-artefact
           path: layer/cdk.out.zip
 
-  deploy-beta:
+  beta:
     needs: build-layer
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
@@ -92,8 +88,8 @@ jobs:
       environment: "layer-beta"
       latest_published_version: ${{ inputs.latest_published_version }}
 
-  deploy-prod:
-    needs: deploy-beta
+  prod:
+    needs: beta
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
     with:
@@ -102,7 +98,7 @@ jobs:
       environment: "layer-prod"
       latest_published_version: ${{ inputs.latest_published_version }}
 
-  deploy-sar-beta:
+  sar-beta:
     needs: build-layer
     uses: ./.github/workflows/reusable_deploy_v2_sar.yml
     secrets: inherit
@@ -112,8 +108,8 @@ jobs:
       environment: "layer-beta"
       package-version: ${{ inputs.latest_published_version }}
 
-  deploy-sar-prod:
-    needs: [build-layer, deploy-sar-beta]
+  sar-prod:
+    needs: [build-layer, sar-beta]
     uses: ./.github/workflows/reusable_deploy_v2_sar.yml
     secrets: inherit
     with:
@@ -139,7 +135,7 @@ jobs:
           echo DOCS_ALIAS="$DOCS_ALIAS" >> "$GITHUB_OUTPUT"
 
   release-docs:
-    needs: [deploy-prod, prepare_docs_alias]
+    needs: [prod, prepare_docs_alias]
     permissions:
       contents: write
       pages: write

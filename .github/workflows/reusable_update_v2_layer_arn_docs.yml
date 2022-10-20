@@ -37,9 +37,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: cdk-layer-stack
-          path: cdk-layer-stack
+          path: cdk-layer-stack/
       - name: Replace layer versions in documentation
-        run: ./layer/scripts/update_layer_arn.sh cdk-layer-stack
+        run: |
+          ls -la cdk-layer-stack/
+          ./layer/scripts/update_layer_arn.sh cdk-layer-stack
       - name: Update documentation in trunk
         run: |
           HAS_CHANGE=$(git status --porcelain)
