@@ -40,7 +40,7 @@ repos:
       - id: cfn-python-lint
         files: examples/.*\.(yaml|yml)$
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.6.16
+    rev: v1.6.21
     hooks:
       - id: actionlint-docker
         args: [-pyflakes=]

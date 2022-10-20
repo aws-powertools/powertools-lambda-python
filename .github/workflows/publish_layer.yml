@@ -11,15 +11,16 @@ on:
         description: "Latest PyPi published version to rebuild latest docs for, e.g. v1.22.0"
         default: "v1.22.0"
         required: true
-  workflow_run:
-    workflows: ["Publish to PyPi"]
-    types:
-      - completed
+  workflow_call:
+    inputs:
+      latest_published_version:
+        type: string
+        description: "Latest PyPi published version to rebuild latest docs for, e.g. v1.22.0"
+        required: true
 
 jobs:
   build-layer:
     runs-on: ubuntu-latest
-    if: ${{ (github.event.workflow_run.conclusion == 'success') || (github.event_name == 'workflow_dispatch') }}
     defaults:
       run:
         working-directory: ./layer
@@ -50,13 +51,13 @@ jobs:
           RELEASE_INPUT=${{ inputs.latest_published_version }}
           LATEST_TAG=$(git describe --tag --abbrev=0)
           RELEASE_TAG_VERSION=${RELEASE_INPUT:-$LATEST_TAG}
-          echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> $GITHUB_ENV
+          echo "RELEASE_TAG_VERSION=${RELEASE_TAG_VERSION:1}" >> "$GITHUB_ENV"
       - name: install cdk and deps
         run: |
           npm install -g aws-cdk@2.29.0
           cdk --version
       - name: CDK build
-        run: cdk synth --context version=$RELEASE_TAG_VERSION -o cdk.out
+        run: cdk synth --context version="$RELEASE_TAG_VERSION" -o cdk.out
       - name: zip output
         run: zip -r cdk.out.zip cdk.out
       - name: Archive CDK artifacts
@@ -66,8 +67,7 @@ jobs:
           path: layer/cdk.out.zip
 
   deploy-beta:
-    needs:
-      - build-layer
+    needs: build-layer
     uses: ./.github/workflows/reusable_deploy_layer_stack.yml
     secrets: inherit
     with:
@@ -76,8 +76,7 @@ jobs:
       environment: "layer-beta"
 
   deploy-prod:
-    needs:
-      - deploy-beta
+    needs: deploy-beta
     uses: ./.github/workflows/reusable_deploy_layer_stack.yml
     secrets: inherit
     with:

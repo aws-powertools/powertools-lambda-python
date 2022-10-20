@@ -1,7 +1,7 @@
 name: Reusable publish documentation
 
 env:
-  BRANCH: develop
+  BRANCH: v1
   ORIGIN: awslabs/aws-lambda-powertools-python
 
 on:

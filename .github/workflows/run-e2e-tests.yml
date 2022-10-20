@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
   push:
-    branches: [develop, v2]
+    branches: [v1]
     paths:
       - "aws_lambda_powertools/**"
       - "tests/e2e/**"
