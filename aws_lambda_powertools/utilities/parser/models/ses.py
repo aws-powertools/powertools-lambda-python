@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
-from pydantic.networks import EmailStr
 from pydantic.types import PositiveInt
 
 from ..types import Literal
@@ -21,7 +20,7 @@ class SesReceiptAction(BaseModel):
 class SesReceipt(BaseModel):
     timestamp: datetime
     processingTimeMillis: PositiveInt
-    recipients: List[EmailStr]
+    recipients: List[str]
     spamVerdict: SesReceiptVerdict
     virusVerdict: SesReceiptVerdict
     spfVerdict: SesReceiptVerdict
@@ -41,7 +40,7 @@ class SesMailCommonHeaders(BaseModel):
     bcc: Optional[List[str]]
     sender: Optional[List[str]]
     reply_to: Optional[List[str]] = Field(None, alias="reply-to")
-    returnPath: EmailStr
+    returnPath: str
     messageId: str
     date: str
     subject: str
@@ -49,9 +48,9 @@ class SesMailCommonHeaders(BaseModel):
 
 class SesMail(BaseModel):
     timestamp: datetime
-    source: EmailStr
+    source: str
     messageId: str
-    destination: List[EmailStr]
+    destination: List[str]
     headersTruncated: bool
     headers: List[SesMailHeaders]
     commonHeaders: SesMailCommonHeaders

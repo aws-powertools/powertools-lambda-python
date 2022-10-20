@@ -8,12 +8,108 @@ on:
   workflow_dispatch:
     inputs:
       latest_published_version:
-        description: "Latest PyPi published version to rebuild latest docs for, e.g. v1.22.0"
+        description: "Latest PyPi published version to rebuild latest docs for, e.g. v2.0.0"
+        required: true
+  workflow_call:
+    inputs:
+      latest_published_version:
+        type: string
+        description: "Latest PyPi published version to rebuild latest docs for, e.g. v2.0.0"
         required: true
 
 jobs:
-  dummy:
+  build-layer:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./layer
+    outputs:
+      release-tag-version: ${{ steps.release-notes-tag.outputs.RELEASE_TAG_VERSION }}
     steps:
-      - name: Hello world
-        run: echo "hello world"
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.12"
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+          cache: "pip"
+      - name: Resolve and install project dependencies
+        # CDK spawns system python when compiling stack
+        # therefore it ignores both activated virtual env and cached interpreter by GH
+        run: |
+          poetry export --format requirements.txt --output requirements.txt
+          pip install -r requirements.txt
+      - name: Set release notes tag
+        id: release-notes-tag
+        run: |
+          RELEASE_INPUT=${{ inputs.latest_published_version }}
+          LATEST_TAG=$(git describe --tag --abbrev=0)
+          RELEASE_TAG_VERSION=${RELEASE_INPUT:-$LATEST_TAG}
+          echo RELEASE_TAG_VERSION="${RELEASE_TAG_VERSION:1}" >> "$GITHUB_OUTPUT"
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
+        # NOTE: we need QEMU to build Layer against a different architecture (e.g., ARM)
+      - name: Set up Docker Buildx
+        id: builder
+        uses: docker/setup-buildx-action@dc7b9719a96d48369863986a06765841d7ea23f6 # v2.0.0
+      - name: install cdk and deps
+        run: |
+          npm install -g aws-cdk@2.44.0
+          cdk --version
+      - name: CDK build
+        run: cdk synth --context version="${{ steps.release-notes-tag.outputs.RELEASE_TAG_VERSION }}" -o cdk.out
+      - name: zip output
+        run: zip -r cdk.out.zip cdk.out
+      - name: Archive CDK artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: cdk-layer-artefact
+          path: layer/cdk.out.zip
+
+  deploy-beta:
+    needs: build-layer
+    uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
+    secrets: inherit
+    with:
+      stage: "BETA"
+      artefact-name: "cdk-layer-artefact"
+      environment: "layer-beta"
+      latest_published_version: ${{ inputs.latest_published_version }}
+
+  deploy-prod:
+    needs: deploy-beta
+    uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
+    secrets: inherit
+    with:
+      stage: "PROD"
+      artefact-name: "cdk-layer-artefact"
+      environment: "layer-prod"
+      latest_published_version: ${{ inputs.latest_published_version }}
+
+  deploy-sar-beta:
+    needs: build-layer
+    uses: ./.github/workflows/reusable_deploy_v2_sar.yml
+    secrets: inherit
+    with:
+      stage: "BETA"
+      artefact-name: "cdk-layer-artefact"
+      environment: "layer-beta"
+      package-version: ${{ needs.build-layer.outputs.release-tag-version }}
+
+  deploy-sar-prod:
+    needs: [build-layer, deploy-sar-beta]
+    uses: ./.github/workflows/reusable_deploy_v2_sar.yml
+    secrets: inherit
+    with:
+      stage: "PROD"
+      artefact-name: "cdk-layer-artefact"
+      environment: "layer-prod"
+      package-version: ${{ needs.build-layer.outputs.release-tag-version }}

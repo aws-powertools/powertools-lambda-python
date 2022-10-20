@@ -1,4 +1,4 @@
-<!-- markdownlint-disable MD043 MD041 -->
+<!-- markdownlint-disable MD013 MD041 MD043  -->
 # AWS Lambda Powertools for Python
 
 [![Build](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/python_build.yml/badge.svg)](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/python_build.yml)

@@ -25,12 +25,14 @@ env:
 
 on:
   release:
+    # We can't filter by tag here, so we filter later on the first job
     types: [published]
+
   workflow_dispatch:
     inputs:
       version_to_publish:
         description: "Version to be released in PyPi, Docs, and Lambda Layer, e.g. v1.26.4"
-        default: v1.26.4
+        default: v2.0.0
         required: true
       skip_pypi:
         description: "Skip publishing to PyPi as it can't publish more than once. Useful for semi-failed releases"
@@ -42,9 +44,15 @@ on:
         default: false
         type: boolean
         required: false
+      pre_release:
+        description: "Publishes documentation using a pre-release tag. You are still responsible for passing a pre-release version tag to the workflow."
+        default: false
+        type: boolean
+        required: false
 
 jobs:
   release:
+    if: ${{ startsWith(github.ref, 'refs/tags/v2') }}
     environment: release
     runs-on: ubuntu-latest
     permissions:
@@ -110,16 +118,37 @@ jobs:
       contents: write
     uses: ./.github/workflows/reusable_publish_changelog.yml
 
+  # When doing a pre-release, we want to publish the docs as "alpha" instead of replacing the latest docs
+  prepare_docs_alias:
+    runs-on: ubuntu-latest
+    outputs:
+      DOCS_ALIAS: ${{ steps.set-alias.outputs.DOCS_ALIAS }}
+    steps:
+      - name: Set docs alias
+        id: set-alias
+        run: |
+          DOCS_ALIAS=latest
+          if [[ "${{ github.event.release.prerelease || inputs.pre_release }}" == true ]] ; then
+            DOCS_ALIAS=alpha
+          fi
+          echo DOCS_ALIAS="$DOCS_ALIAS" >> "$GITHUB_OUTPUT"
+
   docs:
-    needs: [release, changelog]
+    needs: [release, changelog, prepare_docs_alias]
     permissions:
       contents: write
       pages: write
     uses: ./.github/workflows/reusable_publish_docs.yml
     with:
       version: ${{ needs.release.outputs.RELEASE_VERSION }}
-      alias: latest
+      alias: ${{ needs.prepare_docs_alias.outputs.DOCS_ALIAS }}
       detached_mode: true
+
+  publish_layer:
+    needs: release
+    uses: ./.github/workflows/publish_v2_layer.yml
+    with:
+      latest_published_version: ${{ needs.release.outputs.RELEASE_VERSION }}
 
   post_release:
     needs: release

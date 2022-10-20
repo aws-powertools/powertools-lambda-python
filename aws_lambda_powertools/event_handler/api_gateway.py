@@ -1,7 +1,6 @@
 import base64
 import json
 import logging
-import os
 import re
 import traceback
 import warnings
@@ -26,8 +25,8 @@ from typing import (
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
-from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import powertools_dev_is_set, strtobool
+from aws_lambda_powertools.shared.cookies import Cookie
+from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
@@ -45,6 +44,7 @@ _SAFE_URI = "-._~()'!*:@,;"  # https://www.ietf.org/rfc/rfc3986.txt
 # API GW/ALB decode non-safe URI chars; we must support them too
 _UNSAFE_URI = "%<> \[\]{}|^"  # noqa: W605
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
+_ROUTE_REGEX = "^{}$"
 
 
 class ProxyEventType(Enum):
@@ -136,10 +136,11 @@ class CORSConfig:
 
     def to_dict(self) -> Dict[str, str]:
         """Builds the configured Access-Control http headers"""
-        headers = {
+        headers: Dict[str, str] = {
             "Access-Control-Allow-Origin": self.allow_origin,
             "Access-Control-Allow-Headers": ",".join(sorted(self.allow_headers)),
         }
+
         if self.expose_headers:
             headers["Access-Control-Expose-Headers"] = ",".join(self.expose_headers)
         if self.max_age is not None:
@@ -157,7 +158,8 @@ class Response:
         status_code: int,
         content_type: Optional[str] = None,
         body: Union[str, bytes, None] = None,
-        headers: Optional[Dict] = None,
+        headers: Optional[Dict[str, Union[str, List[str]]]] = None,
+        cookies: Optional[List[Cookie]] = None,
     ):
         """
 
@@ -170,13 +172,16 @@ class Response:
             provided http headers
         body: Union[str, bytes, None]
             Optionally set the response body. Note: bytes body will be automatically base64 encoded
-        headers: dict
-            Optionally set specific http headers. Setting "Content-Type" hear would override the `content_type` value.
+        headers: dict[str, Union[str, List[str]]]
+            Optionally set specific http headers. Setting "Content-Type" here would override the `content_type` value.
+        cookies: list[Cookie]
+            Optionally set cookies.
         """
         self.status_code = status_code
         self.body = body
         self.base64_encoded = False
-        self.headers: Dict = headers or {}
+        self.headers: Dict[str, Union[str, List[str]]] = headers if headers else {}
+        self.cookies = cookies or []
         if content_type:
             self.headers.setdefault("Content-Type", content_type)
 
@@ -208,7 +213,8 @@ class ResponseBuilder:
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
-        self.response.headers["Cache-Control"] = cache_control if self.response.status_code == 200 else "no-cache"
+        cache_control = cache_control if self.response.status_code == 200 else "no-cache"
+        self.response.headers["Cache-Control"] = cache_control
 
     def _compress(self):
         """Compress the response body, but only if `Accept-Encoding` headers includes gzip."""
@@ -238,11 +244,12 @@ class ResponseBuilder:
             logger.debug("Encoding bytes response with base64")
             self.response.base64_encoded = True
             self.response.body = base64.b64encode(self.response.body).decode()
+
         return {
             "statusCode": self.response.status_code,
-            "headers": self.response.headers,
             "body": self.response.body,
             "isBase64Encoded": self.response.base64_encoded,
+            **event.header_serializer().serialize(headers=self.response.headers, cookies=self.response.cookies),
         }
 
 
@@ -450,7 +457,7 @@ class ApiGatewayResolver(BaseRouter):
         cors: CORSConfig
             Optionally configure and enabled CORS. Not each route will need to have to cors=True
         debug: Optional[bool]
-            Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_EVENT_HANDLER_DEBUG"
+            Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_DEV"
             environment variable
         serializer : Callable, optional
             function to serialize `obj` to a JSON formatted `str`, by default json.dumps
@@ -543,18 +550,10 @@ class ApiGatewayResolver(BaseRouter):
         if debug is not None:
             return debug
 
-        # Maintenance: deprecate EVENT_HANDLER_DEBUG later in V2.
-        env_debug = os.getenv(constants.EVENT_HANDLER_DEBUG_ENV)
-        if env_debug is not None:
-            warnings.warn(
-                "POWERTOOLS_EVENT_HANDLER_DEBUG is set and will be deprecated in V2. Please use POWERTOOLS_DEV instead."
-            )
-            return strtobool(env_debug) or powertools_dev_is_set()
-
         return powertools_dev_is_set()
 
     @staticmethod
-    def _compile_regex(rule: str):
+    def _compile_regex(rule: str, base_regex: str = _ROUTE_REGEX):
         """Precompile regex pattern
 
         Logic
@@ -584,7 +583,7 @@ class ApiGatewayResolver(BaseRouter):
         NOTE: See #520 for context
         """
         rule_regex: str = re.sub(_DYNAMIC_ROUTE_PATTERN, _NAMED_GROUP_BOUNDARY_PATTERN, rule)
-        return re.compile("^{}$".format(rule_regex))
+        return re.compile(base_regex.format(rule_regex))
 
     def _to_proxy_event(self, event: Dict) -> BaseProxyEvent:
         """Convert the event dict to the corresponding data class"""
@@ -638,7 +637,7 @@ class ApiGatewayResolver(BaseRouter):
 
     def _not_found(self, method: str) -> ResponseBuilder:
         """Called when no matching route was found and includes support for the cors preflight response"""
-        headers = {}
+        headers: Dict[str, Union[str, List[str]]] = {}
         if self._cors:
             logger.debug("CORS is enabled, updating headers.")
             headers.update(self._cors.to_dict())
@@ -810,6 +809,24 @@ class APIGatewayRestResolver(ApiGatewayResolver):
     ):
         """Amazon API Gateway REST and HTTP API v1 payload resolver"""
         super().__init__(ProxyEventType.APIGatewayProxyEvent, cors, debug, serializer, strip_prefixes)
+
+    # override route to ignore trailing "/" in routes for REST API
+    def route(
+        self,
+        rule: str,
+        method: Union[str, Union[List[str], Tuple[str]]],
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+    ):
+        # NOTE: see #1552 for more context.
+        return super().route(rule.rstrip("/"), method, cors, compress, cache_control)
+
+    # Override _compile_regex to exclude trailing slashes for route resolution
+    @staticmethod
+    def _compile_regex(rule: str, base_regex: str = _ROUTE_REGEX):
+
+        return super(APIGatewayRestResolver, APIGatewayRestResolver)._compile_regex(rule, "^{}/*$")
 
 
 class APIGatewayHttpResolver(ApiGatewayResolver):

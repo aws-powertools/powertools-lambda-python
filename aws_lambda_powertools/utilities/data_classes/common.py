@@ -3,6 +3,8 @@ import json
 from collections.abc import Mapping
 from typing import Any, Dict, Iterator, Optional
 
+from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
+
 
 class DictWrapper(Mapping):
     """Provides a single read only access to a wrapper dict"""
@@ -133,6 +135,9 @@ class BaseProxyEvent(DictWrapper):
             Header value
         """
         return get_header_value(self.headers, name, default_value, case_sensitive)
+
+    def header_serializer(self) -> BaseHeadersSerializer:
+        raise NotImplementedError()
 
 
 class RequestContextClientCert(DictWrapper):
