@@ -188,7 +188,7 @@ def lambda_handler(event: DynamoDBStreamEvent, context):
 
 ## Feature Flags and AppConfig Parameter utility
 
-!!! note "There are no code changes required"
+!!! note "No code changes required"
 
 We replaced `GetConfiguration` API ([now deprecated](https://github.com/awslabs/aws-lambda-powertools-python/issues/1506#issuecomment-1266645884){target="_blank"}) with `GetLatestConfiguration` and `StartConfigurationSession`.
 
@@ -197,19 +197,24 @@ As such, you must update your IAM Role permissions to allow the following IAM ac
 * `appconfig:GetLatestConfiguration`
 * `appconfig:StartConfigurationSession`
 
-## Idempotency key format
+## Idempotency partition key format
 
-???+ note
-    Using qualified names prevents distinct functions with the same name to contend for the same Idempotency key.
+!!! note "No code changes required"
 
-The format of the Idempotency key was changed. This is used store the invocation results on a persistent store like DynamoDB.
+We replaced the DynamoDB partition key format to include fully qualified function/method names. This means that recent non-expired idempotent transactions will be ignored.
 
-No changes are necessary in your code, but remember that existing Idempotency records will be ignored when you upgrade, as new executions generate keys with the new format.
+Previously, we used the function/method name to generate the partition key value.
 
-Prior to this change, the Idempotency key was generated using only the caller function name (e.g: `HelloWorldFunction.lambda_handler#99914b932bd37a50b983c5e7c90ae93b`).
+> e.g. `HelloWorldFunction.lambda_handler#99914b932bd37a50b983c5e7c90ae93b`
 
 ![Idempotency Before](./media/upgrade_idempotency_before.png)
 
-After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key` (e.g: `HelloWorldFunction.app.lambda_handler#99914b932bd37a50b983c5e7c90ae93b`).
+In V2, we now distinguish between distinct classes or modules that may have the same function/method name.
+
+[For example](https://github.com/awslabs/aws-lambda-powertools-python/issues/1330){target="_blank"}, an ABC or Protocol class may have multiple implementations of `process_payment` method and may have different results.
+
+<!-- After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key`  -->
+
+> e.g. `HelloWorldFunction.app.lambda_handler#99914b932bd37a50b983c5e7c90ae93b`
 
 ![Idempotency Before](./media/upgrade_idempotency_after.png)
