@@ -7,18 +7,10 @@
 ## Bug Fixes
 
 * lock dependencies
-* lint files
 * mypy errors
+* lint files
+* **ci:** secret and OIDC inheritance in nested children workflow
 * **ci:** workflow should use npx for CDK CLI
-* **ci:** workflow permissions and typos
-* **ci:** version propagation
-* **ci:** fixing permissions
-* **ci:** workflow permissions
-* **ci:** fix workflow permissions
-* **ci:** workflow permissions
-* **ci:** fix workflow permissions
-* **ci:** remove cdk permission override
-* **docs:** fix v2 layer arn
 
 ## Code Refactoring
 
@@ -50,30 +42,10 @@
 
 ## Maintenance
 
-* bump pyproject version to 2.0
 * merge v2 branch
-* **ci:** debug creds one level up and with CLI
-* **ci:** [debug creds] test multiple oidp requests
-* **ci:** [debug creds] test disable secret inheritance
-* **ci:** [debug creds] test official creds with region
-* **ci:** [debug creds] test official creds
-* **ci:** [debug creds] disable changelog job
-* **ci:** [debug creds] curl oidc idp
-* **ci:** debug creds with workspace dir
-* **ci:** debug creds one level up and with CLI debug level
-* **ci:** [debug creds] uncomment layer and sar jobs
-* **ci:** remove creds debug
-* **ci:** test hypothesis of secret resolution failure
-* **ci:** debug oidc credentials trading with general secret
-* **ci:** use latest aws-credentials
-* **ci:** debug oidc credentials trade
-* **ci:** remove old SAR pipeline call
-* **ci:** add option to skip v1 release guard
-* **ci:** resolve workflow_call depth limit
-* **ci:** [debug creds] replace pypi pre-release tag to sar semver pre-release tag
-* **ci:** migrate E2E tests to CDK CLI and off Docker ([#1501](https://github.com/awslabs/aws-lambda-powertools-python/issues/1501))
+* bump pyproject version to 2.0
 * **ci:** remove v1 workflows ([#1617](https://github.com/awslabs/aws-lambda-powertools-python/issues/1617))
-* **ci:** [debug creds] replace pypi pre-release tag to sar semver pre-release tag part2
+* **ci:** migrate E2E tests to CDK CLI and off Docker ([#1501](https://github.com/awslabs/aws-lambda-powertools-python/issues/1501))
 * **core:** expose modules in the Top-level package ([#1517](https://github.com/awslabs/aws-lambda-powertools-python/issues/1517))
 * **dep:** add cfn-lint as a dev dependency; pre-commit ([#1612](https://github.com/awslabs/aws-lambda-powertools-python/issues/1612))
 * **deps:** remove email-validator; use Str over EmailStr in SES model ([#1608](https://github.com/awslabs/aws-lambda-powertools-python/issues/1608))
