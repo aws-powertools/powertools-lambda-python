@@ -7,8 +7,9 @@ description: Guide to update between major Powertools versions
 
 ## Migrate to v2 from v1
 
-The transition from Powertools for Python v1 to v2 is as painless as possible, as we aimed for minimal breaking changes.
-Changes at a glance:
+We've made minimal breaking changes to make your transition to v2 as smooth as possible.
+
+### Quick summary
 
 | Area                               | Change                                                                                                                       | Code change required  | IAM Permissions change required |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------------------- |
