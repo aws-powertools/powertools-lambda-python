@@ -142,6 +142,50 @@ def get_todos():
     )
 ```
 
+The output from the `Response` class now depends on the kind of gateway you're using.
+
+=== "HTTP API Gateway"
+
+    ```json
+    {
+        "headers": { "Content-Type": "text/plain" },
+        "cookies": [ "session_id=12345; HttpOnly; Secure" ],
+    }
+    ```
+
+=== "REST API Gateway"
+
+    ```json
+    {
+        "multiValueHeaders": {
+            "Content-Type": ["text/plain"],
+            "Set-Cookie": [ "session_id=12345; HttpOnly; Secure" ]
+        }
+    }
+    ```
+
+=== "ALB (without Multi Value Headers)"
+
+    ```json
+    {
+        "headers": {
+            "Content-Type": "text/plain",
+            "Set-Cookie": "session_id=12345; HttpOnly; Secure"
+        }
+    }
+    ```
+
+=== "ALB (with Multi Value Headers)"
+
+    ```json
+    {
+        "multiValueHeaders": {
+            "Content-Type": ["text/plain"],
+            "Set-Cookie": [ "session_id=12345; HttpOnly; Secure" ]
+        }
+    }
+    ```
+
 ## DynamoDBStreamEvent in Event Source Data Classes
 
 ???+ info
