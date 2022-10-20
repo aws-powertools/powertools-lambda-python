@@ -188,8 +188,7 @@ The output from the `Response` class now depends on the kind of gateway you're u
 
 ## DynamoDBStreamEvent in Event Source Data Classes
 
-???+ info
-    This also applies if you're using [**`BatchProcessor`**](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank"} to handle DynamoDB Stream events.
+!!! info "This also applies if you're using [**DynamoDB BatchProcessor**](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank"}."
 
 You will now receive native Python types when accessing DynamoDB records via `keys`, `new_image`, and `old_image` attributes in `DynamoDBStreamEvent`.
 
