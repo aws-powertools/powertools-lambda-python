@@ -128,23 +128,3 @@ jobs:
     uses: ./.github/workflows/publish_layer.yml
     with:
       latest_published_version: ${{ needs.release.outputs.RELEASE_VERSION }}
-
-  post_release:
-    needs: release
-    permissions:
-      contents: read
-      issues: write
-      discussions: write
-      pull-requests: write
-    runs-on: ubuntu-latest
-    env:
-      RELEASE_VERSION: ${{ needs.release.outputs.RELEASE_VERSION }}
-    steps:
-      - uses: actions/checkout@v3
-      - name: Close issues related to this release
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const post_release = require('.github/scripts/post_release.js')
-            await post_release({github, context, core})
