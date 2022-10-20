@@ -10,14 +10,14 @@ description: Guide to update between major Powertools versions
 The transition from Powertools for Python v1 to v2 is as painless as possible, as we aimed for minimal breaking changes.
 Changes at a glance:
 
-| Area                               | Change                                                                                                                      | Code change required  | IAM Permissions change required |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------------------- |
-| **Batch Processor**                | Removed legacy [SQS batch processor](#legacy-sqs-batch-processor).                                                          | Yes                   | No                              |
-| **Environment variables**          | `POWERTOOLS_EVENT_HANDLER_DEBUG` was removed in [favor of POWERTOOLS_DEV](../#optimizing-for-non-production-environments).  | If using verbose mode | No                              |
-| **Event Handler**                  | Added multi value headers and cookies support to [Response method](#event-handler-response-headers-and-cookies).            | Unit tests only       | No                              |
-| **Event Source Data Classes**      | [DynamoDBStreamEvent replaced](#dynamodbstreamevent-in-event-source-data-classes) `AttributeValue` with native Python types.| Yes                   | No                              |
-| **Feature Flags** / **Parameters** | [API calls have changed](#feature-flags-and-appconfig-parameter-utility) and you must update your IAM permissions.          | No                    | Yes                             |
-| **Idempotency**                    | [Key format](#idempotency-key-format) changed slightly and invalidated all the existing cached results.                     | No                    | No                              |
+| Area                               | Change                                                                                                                       | Code change required  | IAM Permissions change required |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------------------- |
+| **Batch Processor**                | Removed legacy [SQS batch processor](#legacy-sqs-batch-processor).                                                           | Yes                   | No                              |
+| **Environment variables**          | `POWERTOOLS_EVENT_HANDLER_DEBUG` was removed in [favor of POWERTOOLS_DEV](../#optimizing-for-non-production-environments).   | If using verbose mode | No                              |
+| **Event Handler**                  | Added multi value headers and cookies support to [Response method](#event-handler-response-headers-and-cookies).             | Unit tests only       | No                              |
+| **Event Source Data Classes**      | [DynamoDBStreamEvent replaced](#dynamodbstreamevent-in-event-source-data-classes) `AttributeValue` with native Python types. | Yes                   | No                              |
+| **Feature Flags** / **Parameters** | [API calls have changed](#feature-flags-and-appconfig-parameter-utility) and you must update your IAM permissions.           | No                    | Yes                             |
+| **Idempotency**                    | [Key format](#idempotency-key-format) changed slightly and invalidated all the existing cached results.                      | No                    | No                              |
 
 ### Initial Steps
 
@@ -208,8 +208,8 @@ No changes are necessary in your code, but remember that existing Idempotency re
 
 Prior to this change, the Idempotency key was generated using only the caller function name (e.g: `HelloWorldFunction.lambda_handler#99914b932bd37a50b983c5e7c90ae93b`).
 
-![Idempotency Before](../media/upgrade_idempotency_before.png)
+![Idempotency Before](./media/upgrade_idempotency_before.png)
 
 After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key` (e.g: `HelloWorldFunction.app.lambda_handler#99914b932bd37a50b983c5e7c90ae93b`).
 
-![Idempotency Before](../media/upgrade_idempotency_after.png)
+![Idempotency Before](./media/upgrade_idempotency_after.png)
