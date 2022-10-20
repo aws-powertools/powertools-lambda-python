@@ -402,7 +402,7 @@ To prevent against extended failed retries when a [Lambda function times out](ht
     This means that if an invocation expired during execution, it will be quickly executed again on the next retry.
 
 ???+ important
-    If you are only using the [@idempotent_function decorator](#idempotentfunction-decorator) to guard isolated parts of your code, you must use `register_lambda_context` available in the [idempotency config object](#customizing-the-default-behavior) to benefit from this protection.
+    If you are only using the [@idempotent_function decorator](#idempotent_function-decorator) to guard isolated parts of your code, you must use `register_lambda_context` available in the [idempotency config object](#customizing-the-default-behavior) to benefit from this protection.
 
 Here is an example on how you register the Lambda context in your handler:
 
@@ -842,7 +842,7 @@ This utility provides an abstract base class (ABC), so that you can implement yo
 You can inherit from the `BasePersistenceLayer` class and implement the abstract methods `_get_record`, `_put_record`,
 `_update_record` and `_delete_record`.
 
-```python hl_lines="8-13 57 65 74 96 124" title="Excerpt DynamoDB Persisntence Layer implementation for reference"
+```python hl_lines="8-13 57 65 74 96 124" title="Excerpt DynamoDB Persistence Layer implementation for reference"
 import datetime
 import logging
 from typing import Any, Dict, Optional

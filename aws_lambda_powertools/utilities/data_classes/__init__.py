@@ -13,6 +13,7 @@ from .dynamo_db_stream_event import DynamoDBStreamEvent
 from .event_bridge_event import EventBridgeEvent
 from .event_source import event_source
 from .kafka_event import KafkaEvent
+from .kinesis_firehose_event import KinesisFirehoseEvent
 from .kinesis_stream_event import KinesisStreamEvent
 from .lambda_function_url_event import LambdaFunctionUrlEvent
 from .s3_event import S3Event
@@ -32,6 +33,7 @@ __all__ = [
     "DynamoDBStreamEvent",
     "EventBridgeEvent",
     "KafkaEvent",
+    "KinesisFirehoseEvent",
     "KinesisStreamEvent",
     "LambdaFunctionUrlEvent",
     "S3Event",

@@ -102,6 +102,8 @@ These are the most common labels used by maintainers to triage issues, pull requ
 | github-actions         | Changes in GitHub workflows                                                 | PR automation                                                   |
 | github-templates       | Changes in GitHub issue/PR templates                                        | PR automation                                                   |
 | internal               | Changes in governance, tech debt and chores (linting setup, baseline, etc.) | PR automation                                                   |
+| customer-reference     | Authorization to use company name in our documentation                      | Public Relations                                                |
+| community-content      | Suggested content to feature in our documentation                           | Public Relations                                                |
 
 ## Maintainer Responsibilities
 
