@@ -11,14 +11,14 @@ We've made minimal breaking changes to make your transition to v2 as smooth as p
 
 ### Quick summary
 
-| Area                               | Change                                                                                                                                                     | Code change required | IAM Permissions change required |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------- |
-| **Batch**                          | Removed legacy [SQS batch processor](#legacy-sqs-batch-processor) in favour of **`BatchProcessor`**.                                                       | Yes                  | -                               |
-| **Environment variables**          | Removed legacy **`POWERTOOLS_EVENT_HANDLER_DEBUG`** in favour of [`POWERTOOLS_DEV`](index.md#optimizing-for-non-production-environments){target="_blank"}. | -                    | -                               |
-| **Event Handler**                  | Added multi value headers and cookies support to [Response method](#event-handler-response-headers-and-cookies).                                           | Unit tests only      | -                               |
-| **Event Source Data Classes**      | Replaced [DynamoDBStreamEvent](#dynamodbstreamevent-in-event-source-data-classes) `AttributeValue` with native Python types.                               | Yes                  | -                               |
-| **Feature Flags** / **Parameters** | Updated [AppConfig API calls](#feature-flags-and-appconfig-parameter-utility) due to **`GetConfiguration`** API deprecation.                               | -                    | Yes                             |
-| **Idempotency**                    | Updated [partition key](#idempotency-key-format) to include fully qualified function/method names.                                                         | -                    | -                               |
+| Area                               | Change                                                                                                                                                                                                  | Code change required | IAM Permissions change required |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------- |
+| **Batch**                          | Removed legacy [SQS batch processor](#legacy-sqs-batch-processor) in favour of **`BatchProcessor`**.                                                                                                    | Yes                  | -                               |
+| **Environment variables**          | Removed legacy **`POWERTOOLS_EVENT_HANDLER_DEBUG`** in favour of [`POWERTOOLS_DEV`](index.md#optimizing-for-non-production-environments){target="_blank"}.                                              | -                    | -                               |
+| **Event Handler**                  | Updated [headers response format](#event-handler-headers-response-format) due to [multi-value headers and cookie support](./core/event_handler/api_gateway.md#fine-grained-responses){target="_blank"}. | Tests only           | -                               |
+| **Event Source Data Classes**      | Replaced [DynamoDBStreamEvent](#dynamodbstreamevent-in-event-source-data-classes) `AttributeValue` with native Python types.                                                                            | Yes                  | -                               |
+| **Feature Flags** / **Parameters** | Updated [AppConfig API calls](#feature-flags-and-appconfig-parameter-utility) due to **`GetConfiguration`** API deprecation.                                                                            | -                    | Yes                             |
+| **Idempotency**                    | Updated [partition key](#idempotency-key-format) to include fully qualified function/method names.                                                                                                      | -                    | -                               |
 
 ### First Steps
 
@@ -39,7 +39,7 @@ You can migrate to `BatchProcessor` with the following changes:
 3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](../utilities/batch#required-resources){target="_blank"}
 4. Change your Lambda Handler to return the new response format
 
-=== "Decorator: Before"
+=== "[Before] Decorator"
 
      ```python hl_lines="1 6"
      from aws_lambda_powertools.utilities.batch import sqs_batch_processor
@@ -52,7 +52,7 @@ You can migrate to `BatchProcessor` with the following changes:
          return {"statusCode": 200}
      ```
 
-=== "Decorator: After"
+=== "[After] Decorator"
 
      ```python hl_lines="3 5 11 13"
      import json
@@ -70,7 +70,7 @@ You can migrate to `BatchProcessor` with the following changes:
          return processor.response()
      ```
 
-=== "Context manager: Before"
+=== "[Before] Context manager"
 
      ```python hl_lines="1-2 4 14 19"
      from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
@@ -94,7 +94,7 @@ You can migrate to `BatchProcessor` with the following changes:
          return result
      ```
 
-=== "Context manager: After"
+=== "[After] Context manager"
 
     ```python hl_lines="1 11 16"
     from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
@@ -115,76 +115,31 @@ You can migrate to `BatchProcessor` with the following changes:
         return processor.response()
     ```
 
-## Event Handler Response (headers and cookies)
+## Event Handler headers response format
 
-The `Response` class of the event handler utility changed slightly:
+!!! note "No code changes required"
 
-1. The `headers` parameter now expects either a value or list of values per header (type `Union[str, Dict[str, List[str]]]`)
-2. We introduced a new `cookies` parameter (type `List[str]`)
+This only applies if you're using `APIGatewayRestResolver` and asserting custom header values in your tests.
 
-???+ note
-    Code that set headers as `Dict[str, str]` will still work unchanged.
+Previously, custom headers were available under `headers` key in the Event Handler response.
 
-```python hl_lines="6 12 13"
-@app.get("/todos")
-def get_todos():
-    # Before
-    return Response(
-        # ...
-        headers={"Content-Type": "text/plain"}
-    )
-
-    # After
-    return Response(
-        # ...
-        headers={"Content-Type": ["text/plain"]},
-        cookies=[Cookie(name="session_id", value="12345", secure=True, http_only=True)],
-    )
+```python title="V1 response headers" hl_lines="2"
+{
+    "headers": {
+        "Content-Type": "application/json"
+    }
+}
 ```
 
-The output from the `Response` class now depends on the kind of gateway you're using.
+In V2, we add all headers under `multiValueHeaders` key. This enables seamless support for multi-value headers and cookies in [fine grained responses](./core/event_handler/api_gateway.md#fine-grained-responses){target="_blank"}.
 
-=== "HTTP API Gateway"
-
-    ```json
-    {
-        "headers": { "Content-Type": "text/plain" },
-        "cookies": [ "session_id=12345; HttpOnly; Secure" ],
+```python title="V2 response headers" hl_lines="2"
+{
+    "multiValueHeaders": {
+        "Content-Type": "application/json"
     }
-    ```
-
-=== "REST API Gateway"
-
-    ```json
-    {
-        "multiValueHeaders": {
-            "Content-Type": ["text/plain"],
-            "Set-Cookie": [ "session_id=12345; HttpOnly; Secure" ]
-        }
-    }
-    ```
-
-=== "ALB (without Multi Value Headers)"
-
-    ```json
-    {
-        "headers": {
-            "Content-Type": "text/plain",
-            "Set-Cookie": "session_id=12345; HttpOnly; Secure"
-        }
-    }
-    ```
-
-=== "ALB (with Multi Value Headers)"
-
-    ```json
-    {
-        "multiValueHeaders": {
-            "Content-Type": ["text/plain"],
-            "Set-Cookie": [ "session_id=12345; HttpOnly; Secure" ]
-        }
-    }
-    ```
+}
+```
 
 ## DynamoDBStreamEvent in Event Source Data Classes
 
