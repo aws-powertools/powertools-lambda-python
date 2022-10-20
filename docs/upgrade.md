@@ -20,28 +20,23 @@ We've made minimal breaking changes to make your transition to v2 as smooth as p
 | **Feature Flags** / **Parameters** | Updated [AppConfig API calls](#feature-flags-and-appconfig-parameter-utility) due to **`GetConfiguration`** API deprecation.                               | -                    | Yes                             |
 | **Idempotency**                    | Updated [partition key](#idempotency-key-format) to include fully qualified function/method names.                                                         | -                    | -                               |
 
-### Initial Steps
+### First Steps
 
 Before you start, we suggest making a copy of your current working project or create a new branch with git.
 
 1. **Upgrade** Python to at least v3.7
-
-2. **Ensure** you have the latest `aws-lambda-powertools`
-
-    ```bash
-    pip install aws-lambda-powertools -U
-    ```
-
+2. **Ensure** you have the latest version via [Lambda Layer or PyPi](index.md#install){target="_blank"}
 3. **Review** the following sections to confirm whether they affect your code
 
 ## Legacy SQS Batch Processor
 
 The deprecated `PartialSQSProcessor` and `sqs_batch_processor` were removed.
-You can migrate to the [native batch processing](https://aws.amazon.com/about-aws/whats-new/2021/11/aws-lambda-partial-batch-response-sqs-event-source/) capability by:
 
-1. If you use **`sqs_batch_decorator`** you can now use **`batch_processor`** decorator
-2. If you use **`PartialSQSProcessor`** you can now use **`BatchProcessor`**
-3. [Enable the functionality](../utilities/batch#required-resources) on SQS
+You can migrate to `BatchProcessor` with the following changes:
+
+1. If you use **`sqs_batch_decorator`**, change to **`batch_processor`** decorator
+2. If you use **`PartialSQSProcessor`**, change to **`BatchProcessor`**
+3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](../utilities/batch#required-resources)
 4. Change your Lambda Handler to return the new response format
 
 === "Decorator: Before"
@@ -59,7 +54,7 @@ You can migrate to the [native batch processing](https://aws.amazon.com/about-aw
 
 === "Decorator: After"
 
-     ```python hl_lines="3 5 11"
+     ```python hl_lines="3 5 11 13"
      import json
 
      from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
@@ -101,7 +96,7 @@ You can migrate to the [native batch processing](https://aws.amazon.com/about-aw
 
 === "Context manager: After"
 
-    ```python hl_lines="1 11"
+    ```python hl_lines="1 11 16"
     from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
 
 
