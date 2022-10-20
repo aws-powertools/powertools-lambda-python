@@ -119,7 +119,7 @@ jobs:
     uses: ./.github/workflows/reusable_publish_changelog.yml
 
   # When doing a pre-release, we want to publish the docs as "alpha" instead of replacing the latest docs
-  prepare-docs-alias:
+  prepare_docs_alias:
     runs-on: ubuntu-latest
     outputs:
       DOCS_ALIAS: ${{ steps.set-alias.outputs.DOCS_ALIAS }}
@@ -134,14 +134,14 @@ jobs:
           echo DOCS_ALIAS="$DOCS_ALIAS" >> "$GITHUB_OUTPUT"
 
   docs:
-    needs: [release, changelog, prepare-docs-alias]
+    needs: [release, changelog, prepare_docs_alias]
     permissions:
       contents: write
       pages: write
     uses: ./.github/workflows/reusable_publish_docs.yml
     with:
       version: ${{ needs.release.outputs.RELEASE_VERSION }}
-      alias: ${{ needs.prepare-docs-alias.outputs.DOCS_ALIAS }}
+      alias: ${{ needs.prepare_docs_alias.outputs.DOCS_ALIAS }}
       detached_mode: true
 
   publish_layer:
