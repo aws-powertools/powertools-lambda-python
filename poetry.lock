@@ -13,7 +13,7 @@ tests = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy (>=0.900
 tests-no-zope = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy (>=0.900,!=0.940)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins"]
 
 [[package]]
-name = "aws-cdk.aws-apigatewayv2-alpha"
+name = "aws-cdk-aws-apigatewayv2-alpha"
 version = "2.46.0a0"
 description = "The CDK Construct Library for AWS::APIGatewayv2"
 category = "dev"
@@ -28,7 +28,7 @@ publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
-name = "aws-cdk.aws-apigatewayv2-integrations-alpha"
+name = "aws-cdk-aws-apigatewayv2-integrations-alpha"
 version = "2.46.0a0"
 description = "Integrations for AWS APIGateway V2"
 category = "dev"
@@ -128,14 +128,14 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.24.91"
+version = "1.24.94"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 
 [package.dependencies]
-botocore = ">=1.27.91,<1.28.0"
+botocore = ">=1.27.94,<1.28.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -144,7 +144,7 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.27.91"
+version = "1.27.94"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -160,16 +160,16 @@ crt = ["awscrt (==0.14.0)"]
 
 [[package]]
 name = "cattrs"
-version = "22.1.0"
+version = "22.2.0"
 description = "Composable complex class support for attrs and dataclasses."
 category = "dev"
 optional = false
-python-versions = ">=3.7,<4.0"
+python-versions = ">=3.7"
 
 [package.dependencies]
 attrs = ">=20"
-exceptiongroup = {version = "*", markers = "python_version <= \"3.10\""}
-typing_extensions = {version = "*", markers = "python_version >= \"3.7\" and python_version < \"3.8\""}
+exceptiongroup = {version = "*", markers = "python_version < \"3.11\""}
+typing_extensions = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "certifi"
@@ -238,14 +238,14 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "constructs"
-version = "10.1.131"
+version = "10.1.134"
 description = "A programming model for software-defined state"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 
 [package.dependencies]
-jsii = ">=1.69.0,<2.0.0"
+jsii = ">=1.70.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -581,7 +581,7 @@ pbr = "*"
 
 [[package]]
 name = "jsii"
-version = "1.69.0"
+version = "1.70.0"
 description = "Python client for jsii runtime"
 category = "dev"
 optional = false
@@ -589,7 +589,7 @@ python-versions = "~=3.7"
 
 [package.dependencies]
 attrs = ">=21.2,<23.0"
-cattrs = ">=1.8,<22.2"
+cattrs = ">=1.8,<22.3"
 publication = ">=0.0.3"
 python-dateutil = "*"
 typeguard = ">=2.13.3,<2.14.0"
@@ -995,7 +995,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "pbr"
-version = "5.10.0"
+version = "5.11.0"
 description = "Python Build Reasonableness"
 category = "dev"
 optional = false
@@ -1385,7 +1385,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "stevedore"
-version = "3.5.1"
+version = "3.5.2"
 description = "Manage dynamic plugins for Python applications"
 category = "dev"
 optional = false
@@ -1528,18 +1528,18 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "b5cc8cfb68d83b842c7c95beede8788b16905ef398c71b0704ed8ae83156ea30"
+content-hash = "3efc3b4c3dd7b7a6fe37f519330fb3e450c84ca57b190e7a05fabd444eef8aaa"
 
 [metadata.files]
 attrs = [
     {file = "attrs-22.1.0-py2.py3-none-any.whl", hash = "sha256:86efa402f67bf2df34f51a335487cf46b1ec130d02b8d39fd248abfd30da551c"},
     {file = "attrs-22.1.0.tar.gz", hash = "sha256:29adc2665447e5191d0e7c568fde78b21f9672d344281d0c6e1ab085429b22b6"},
 ]
-"aws-cdk.aws-apigatewayv2-alpha" = [
+aws-cdk-aws-apigatewayv2-alpha = [
     {file = "aws-cdk.aws-apigatewayv2-alpha-2.46.0a0.tar.gz", hash = "sha256:10d9324da26db7aeee3a45853a2e249b6b85866fcc8f8f43fa1a0544ce582482"},
     {file = "aws_cdk.aws_apigatewayv2_alpha-2.46.0a0-py3-none-any.whl", hash = "sha256:2cdeac84fb1fe219e5686ee95d9528a1810e9d426b2bb7f305ea07cb43e328a8"},
 ]
-"aws-cdk.aws-apigatewayv2-integrations-alpha" = [
+aws-cdk-aws-apigatewayv2-integrations-alpha = [
     {file = "aws-cdk.aws-apigatewayv2-integrations-alpha-2.46.0a0.tar.gz", hash = "sha256:91a792c94500987b69fd97cb00afec5ace00f2039ffebebd99f91ee6b47c3c8b"},
     {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.46.0a0-py3-none-any.whl", hash = "sha256:c7bbe1c08019cee41c14b6c1513f673d60b337422ef338c67f9a0cb3e17cc963"},
 ]
@@ -1584,16 +1584,16 @@ black = [
     {file = "black-22.10.0.tar.gz", hash = "sha256:f513588da599943e0cde4e32cc9879e825d58720d6557062d1098c5ad80080e1"},
 ]
 boto3 = [
-    {file = "boto3-1.24.91-py3-none-any.whl", hash = "sha256:b295640bc1be637f8f7c8c8fca70781048d6397196109e59f20541824fab4b67"},
-    {file = "boto3-1.24.91.tar.gz", hash = "sha256:3225366014949039e6687387242e73f237f0fee0a9b7c20461894f1ee40686b8"},
+    {file = "boto3-1.24.94-py3-none-any.whl", hash = "sha256:f13db0beb3c9fe2cc1ed0f031189f144610d2909b5874a616e77b0bd1ae3b686"},
+    {file = "boto3-1.24.94.tar.gz", hash = "sha256:f4842b395d1580454756622069f4ca0408993885ecede967001d2c101201cdfa"},
 ]
 botocore = [
-    {file = "botocore-1.27.91-py3-none-any.whl", hash = "sha256:1d6e97bd8653f732c7078b34aa2bb438e750898957e5a0a74b6c72918bc1d0f7"},
-    {file = "botocore-1.27.91.tar.gz", hash = "sha256:c8fac203a391cc2e4b682877bfce70e723e33c529b35b399a1d574605fbeb1af"},
+    {file = "botocore-1.27.94-py3-none-any.whl", hash = "sha256:8237c070d2ab29fac4fbcfe9dd2e84e0ee147402e0fed3ac1629f92459c7f1d2"},
+    {file = "botocore-1.27.94.tar.gz", hash = "sha256:572224608a0b7662966fc303b768e2eba61bf53bdbf314481cd9e63a0d8e1a66"},
 ]
 cattrs = [
-    {file = "cattrs-22.1.0-py3-none-any.whl", hash = "sha256:d55c477b4672f93606e992049f15d526dc7867e6c756cd6256d4af92e2b1e364"},
-    {file = "cattrs-22.1.0.tar.gz", hash = "sha256:94b67b64cf92c994f8784c40c082177dc916e0489a73a9a36b24eb18a9db40c6"},
+    {file = "cattrs-22.2.0-py3-none-any.whl", hash = "sha256:bc12b1f0d000b9f9bee83335887d532a1d3e99a833d1bf0882151c97d3e68c21"},
+    {file = "cattrs-22.2.0.tar.gz", hash = "sha256:f0eed5642399423cf656e7b66ce92cdc5b963ecafd041d1b24d136fdde7acf6d"},
 ]
 certifi = [
     {file = "certifi-2022.9.24-py3-none-any.whl", hash = "sha256:90c1a32f1d68f940488354e36370f6cca89f0f106db09518524c88d6ed83f382"},
@@ -1620,8 +1620,8 @@ colorama = [
     {file = "colorama-0.4.5.tar.gz", hash = "sha256:e6c6b4334fc50988a639d9b98aa429a0b57da6e17b9a44f0451f930b6967b7a4"},
 ]
 constructs = [
-    {file = "constructs-10.1.131-py3-none-any.whl", hash = "sha256:3dc720ce1593ad8e05c76b11abee1ab196e7a9ced3a5e1b4539c7d06cd9cd5cf"},
-    {file = "constructs-10.1.131.tar.gz", hash = "sha256:90b2ca25b6f26f7547d1ea695bb55f9ce2f08072d322af5afcce0347a3add9af"},
+    {file = "constructs-10.1.134-py3-none-any.whl", hash = "sha256:b3f05ad138af83473cc9bd5f8949558bd31d38fb32c09fcc56d0de9057c2e61d"},
+    {file = "constructs-10.1.134.tar.gz", hash = "sha256:4ab253a74e62a2c918456d20dff42ec0abb2e4393a6bab0218c81c09e19c1a41"},
 ]
 coverage = [
     {file = "coverage-6.5.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:ef8674b0ee8cc11e2d574e3e2998aea5df5ab242e012286824ea3c6970580e53"},
@@ -1782,8 +1782,8 @@ jschema-to-python = [
     {file = "jschema_to_python-1.2.3.tar.gz", hash = "sha256:76ff14fe5d304708ccad1284e4b11f96a658949a31ee7faed9e0995279549b91"},
 ]
 jsii = [
-    {file = "jsii-1.69.0-py3-none-any.whl", hash = "sha256:f3ae5cdf5e854b4d59256dc1f8818cd3fabb8eb43fbd3134a8e8aef962643005"},
-    {file = "jsii-1.69.0.tar.gz", hash = "sha256:7c7ed2a913372add17d63322a640c6435324770eb78c6b89e4c701e07d9c84db"},
+    {file = "jsii-1.70.0-py3-none-any.whl", hash = "sha256:d0867c0d2f60ceda1664c026033ae34ea36178c7027315e577ded13043827664"},
+    {file = "jsii-1.70.0.tar.gz", hash = "sha256:9fc57ff37868364ba3417b26dc97189cd0cc71282196a3f4765768c067354be0"},
 ]
 jsonpatch = [
     {file = "jsonpatch-1.32-py2.py3-none-any.whl", hash = "sha256:26ac385719ac9f54df8a2f0827bb8253aa3ea8ab7b3368457bcdb8c14595a397"},
@@ -1971,8 +1971,8 @@ pathspec = [
     {file = "pathspec-0.10.1.tar.gz", hash = "sha256:7ace6161b621d31e7902eb6b5ae148d12cfd23f4a249b9ffb6b9fee12084323d"},
 ]
 pbr = [
-    {file = "pbr-5.10.0-py2.py3-none-any.whl", hash = "sha256:da3e18aac0a3c003e9eea1a81bd23e5a3a75d745670dcf736317b7d966887fdf"},
-    {file = "pbr-5.10.0.tar.gz", hash = "sha256:cfcc4ff8e698256fc17ea3ff796478b050852585aa5bae79ecd05b2ab7b39b9a"},
+    {file = "pbr-5.11.0-py2.py3-none-any.whl", hash = "sha256:db2317ff07c84c4c63648c9064a79fe9d9f5c7ce85a9099d4b6258b3db83225a"},
+    {file = "pbr-5.11.0.tar.gz", hash = "sha256:b97bc6695b2aff02144133c2e7399d5885223d42b7912ffaec2ca3898e673bfe"},
 ]
 pdoc3 = [
     {file = "pdoc3-0.10.0-py3-none-any.whl", hash = "sha256:ba45d1ada1bd987427d2bf5cdec30b2631a3ff5fb01f6d0e77648a572ce6028b"},
@@ -2239,8 +2239,8 @@ smmap = [
     {file = "smmap-5.0.0.tar.gz", hash = "sha256:c840e62059cd3be204b0c9c9f74be2c09d5648eddd4580d9314c3ecde0b30936"},
 ]
 stevedore = [
-    {file = "stevedore-3.5.1-py3-none-any.whl", hash = "sha256:df36e6c003264de286d6e589994552d3254052e7fc6a117753d87c471f06de2a"},
-    {file = "stevedore-3.5.1.tar.gz", hash = "sha256:1fecadf3d7805b940227f10e6a0140b202c9a24ba5c60cb539159046dc11e8d7"},
+    {file = "stevedore-3.5.2-py3-none-any.whl", hash = "sha256:fa2630e3d0ad3e22d4914aff2501445815b9a4467a6edc49387c667a38faf5bf"},
+    {file = "stevedore-3.5.2.tar.gz", hash = "sha256:cf99f41fc0d5a4f185ca4d3d42b03be9011b0a1ec1a4ea1a282be1b4b306dcc2"},
 ]
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
