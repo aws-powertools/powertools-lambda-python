@@ -30,7 +30,7 @@ Before you start, we suggest making a copy of your current working project or cr
 
 ## Legacy SQS Batch Processor
 
-The deprecated `PartialSQSProcessor` and `sqs_batch_processor` were removed.
+We removed the deprecated `PartialSQSProcessor` class and `sqs_batch_processor` decorator.
 
 You can migrate to `BatchProcessor` with the following changes:
 
