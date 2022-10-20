@@ -11,14 +11,14 @@ We've made minimal breaking changes to make your transition to v2 as smooth as p
 
 ### Quick summary
 
-| Area                               | Change                                                                                                                       | Code change required  | IAM Permissions change required |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------------------- |
-| **Batch Processor**                | Removed legacy [SQS batch processor](#legacy-sqs-batch-processor).                                                           | Yes                   | No                              |
-| **Environment variables**          | `POWERTOOLS_EVENT_HANDLER_DEBUG` was removed in [favor of POWERTOOLS_DEV](../#optimizing-for-non-production-environments).   | If using verbose mode | No                              |
-| **Event Handler**                  | Added multi value headers and cookies support to [Response method](#event-handler-response-headers-and-cookies).             | Unit tests only       | No                              |
-| **Event Source Data Classes**      | [DynamoDBStreamEvent replaced](#dynamodbstreamevent-in-event-source-data-classes) `AttributeValue` with native Python types. | Yes                   | No                              |
-| **Feature Flags** / **Parameters** | [API calls have changed](#feature-flags-and-appconfig-parameter-utility) and you must update your IAM permissions.           | No                    | Yes                             |
-| **Idempotency**                    | [Key format](#idempotency-key-format) changed slightly and invalidated all the existing cached results.                      | No                    | No                              |
+| Area                               | Change                                                                                                                                                     | Code change required | IAM Permissions change required |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------- |
+| **Batch**                          | Removed legacy [SQS batch processor](#legacy-sqs-batch-processor) in favour of **`BatchProcessor`**.                                                       | Yes                  | -                               |
+| **Environment variables**          | Removed legacy **`POWERTOOLS_EVENT_HANDLER_DEBUG`** in favour of [`POWERTOOLS_DEV`](index.md#optimizing-for-non-production-environments){target="_blank"}. | -                    | -                               |
+| **Event Handler**                  | Added multi value headers and cookies support to [Response method](#event-handler-response-headers-and-cookies).                                           | Unit tests only      | -                               |
+| **Event Source Data Classes**      | Replaced [DynamoDBStreamEvent](#dynamodbstreamevent-in-event-source-data-classes) `AttributeValue` with native Python types.                               | Yes                  | -                               |
+| **Feature Flags** / **Parameters** | Updated [AppConfig API calls](#feature-flags-and-appconfig-parameter-utility) due to **`GetConfiguration`** API deprecation.                               | -                    | Yes                             |
+| **Idempotency**                    | Updated [partition key](#idempotency-key-format) to include fully qualified function/method names.                                                         | -                    | -                               |
 
 ### Initial Steps
 
