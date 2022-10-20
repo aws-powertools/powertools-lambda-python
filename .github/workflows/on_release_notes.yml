@@ -118,7 +118,7 @@ jobs:
       contents: write
     uses: ./.github/workflows/reusable_publish_changelog.yml
 
-  # When we're doing a pre-release, we want to publish the docs as alpha
+  # When doing a pre-release, we want to publish the docs as "alpha" instead of replacing the latest docs
   prepare-docs-alias:
     runs-on: ubuntu-latest
     outputs:
