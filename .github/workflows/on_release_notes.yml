@@ -95,12 +95,12 @@ jobs:
       - name: Build python package and wheel
         if: ${{ !inputs.skip_pypi }}
         run: poetry build
-      - name: Upload to PyPi test
-        if: ${{ !inputs.skip_pypi }}
-        run: make release-test
-        env:
-          PYPI_USERNAME: __token__
-          PYPI_TEST_TOKEN: ${{ secrets.PYPI_TEST_TOKEN }}
+      # - name: Upload to PyPi test
+      #   if: ${{ !inputs.skip_pypi }}
+      #   run: make release-test
+      #   env:
+      #     PYPI_USERNAME: __token__
+      #     PYPI_TEST_TOKEN: ${{ secrets.PYPI_TEST_TOKEN }}
       - name: Upload to PyPi prod
         if: ${{ !inputs.skip_pypi }}
         run: make release-prod
