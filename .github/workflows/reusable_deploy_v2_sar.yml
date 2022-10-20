@@ -50,12 +50,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
       - name: AWS credentials SAR role
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838
         id: aws-credentials-sar-role
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
@@ -83,18 +83,35 @@ jobs:
       - name: Adds arm64 suffix to SAR name
         if: ${{ matrix.architecture == 'arm64' }}
         run: echo SAR_NAME="${SAR_NAME}-arm64" >> "$GITHUB_ENV"
-      - name: Deploy SAR
+      - name: Normalize semantic version
+        id: semantic-version # v2.0.0.a0 -> v2.0.0-a0
+        env:
+          VERSION: ${{ inputs.package-version }}
+        run: |
+          VERSION="${VERSION/.a/-a}"
+          echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+      - name: Prepare SAR App
+        env:
+          VERSION: ${{ steps.semantic-version.outputs.VERSION }}
         run: |
           # From the generated LayerStack cdk.out artifact, find the layer asset path for the correct architecture.
           # We'll use this as the source directory of our SAR. This way we are re-using the same layer asset for our SAR.
           asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["${{ matrix.architecture }}"]) | .Metadata."aws:asset:path"' cdk.out/LayerV2Stack.template.json)
 
           # fill in the SAR SAM template
-          sed -e "s|<VERSION>|${{ inputs.package-version }}|g" -e "s/<SAR_APP_NAME>/${{ env.SAR_NAME }}/g" -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" layer/sar/template.txt > template.yml
+          sed \
+            -e "s|<VERSION>|${VERSION}|g" \
+            -e "s/<SAR_APP_NAME>/${{ env.SAR_NAME }}/g" \
+            -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" \
+            layer/sar/template.txt > template.yml
 
           # SAR needs a README and a LICENSE, so just copy the ones from the repo
           cp README.md LICENSE "./cdk.out/$asset/"
 
+          # Debug purposes
+          cat template.yml
+      - name: Deploy SAR
+        run: |
           # Package the SAR to our SAR S3 bucket, and publish it
           sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
           sam publish --template packaged.yml --region "$AWS_REGION"
@@ -116,11 +133,16 @@ jobs:
 
           echo "Creating canary stack"
           echo "Stack name: $TEST_STACK_NAME"
-          aws serverlessrepo create-cloud-formation-change-set --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} --stack-name "${TEST_STACK_NAME/serverlessrepo-/}" --capabilities CAPABILITY_NAMED_IAM
+          aws serverlessrepo create-cloud-formation-change-set \
+            --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} \
+            --stack-name "${TEST_STACK_NAME/serverlessrepo-/}" \
+            --capabilities CAPABILITY_NAMED_IAM
+
           CHANGE_SET_ID=$(aws cloudformation list-change-sets --stack-name "$TEST_STACK_NAME" --query 'Summaries[*].ChangeSetId' --output text)
           aws cloudformation wait change-set-create-complete --change-set-name "$CHANGE_SET_ID"
           aws cloudformation execute-change-set --change-set-name "$CHANGE_SET_ID"
           aws cloudformation wait stack-create-complete --stack-name "$TEST_STACK_NAME"
+
           echo "Waiting until stack deployment completes..."
 
           echo "Exit with error if stack is not in CREATE_COMPLETE"
@@ -136,4 +158,6 @@ jobs:
           # wait until SAR registers the app, otherwise it fails to make it public
           sleep 15
           echo "Make SAR app public"
-          aws serverlessrepo put-application-policy --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} --statements Principals='*',Actions=Deploy
+          aws serverlessrepo put-application-policy \
+            --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} \
+            --statements Principals='*',Actions=Deploy

@@ -17,7 +17,8 @@ A suite of utilities for AWS Lambda functions to ease adopting best practices su
 
 Powertools is available in the following formats:
 
-* **Lambda Layer**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPython:39**](#){: .copyMe}:clipboard:
+* **Lambda Layer (x86_64)**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:1**](#){: .copyMe}:clipboard:
+* **Lambda Layer (arm64)**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:1**](#){: .copyMe}:clipboard:
 * **PyPi**: **`pip install aws-lambda-powertools`**
 
 ???+ info "Some utilities require additional dependencies"
@@ -222,7 +223,7 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
         ```
 
     === "Get the Layer .zip contents"
-    
+
     	Change {region} to your AWS region, e.g. `eu-west-1`
 
         ```bash title="AWS CLI"

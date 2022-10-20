@@ -31,7 +31,7 @@ on:
   workflow_dispatch:
     inputs:
       version_to_publish:
-        description: "Version to be released in PyPi, Docs, and Lambda Layer, e.g. v1.26.4"
+        description: "Version to be released in PyPi, Docs, and Lambda Layer, e.g. v2.0.0, v2.0.0.a0 (pre-release)"
         default: v2.0.0
         required: true
       skip_pypi:
@@ -44,19 +44,24 @@ on:
         default: false
         type: boolean
         required: false
+      # Only use this until v1 is completely dropped, and for manual releases
+      skip_version_guard:
+        description: "Skips conditions to prevent v1 into v2 releases"
+        default: false
+        type: boolean
+        required: false
       pre_release:
-        description: "Publishes documentation using a pre-release tag. You are still responsible for passing a pre-release version tag to the workflow."
+        description: "Publishes documentation using a pre-release tag (v2.0.0.a0). You are still responsible for passing a pre-release version tag to the workflow."
         default: false
         type: boolean
         required: false
 
 jobs:
   release:
-    if: ${{ startsWith(github.ref, 'refs/tags/v2') }}
+    if: ${{ startsWith(github.ref, 'refs/tags/v2') || inputs.skip_version_guard }}
     environment: release
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: read
     outputs:
       RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
@@ -102,15 +107,6 @@ jobs:
         env:
           PYPI_USERNAME: __token__
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-      - name: aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: eu-west-1
-          role-to-assume: ${{ secrets.AWS_SAR_ROLE_ARN }}
-      - name: publish lambda layer in SAR by triggering the internal codepipeline
-        run: |
-          aws ssm put-parameter --name "powertools-python-release-version" --value "$RELEASE_VERSION" --overwrite
-          aws codepipeline start-pipeline-execution --name ${{ secrets.AWS_SAR_PIPELINE_NAME }}
 
   changelog:
     needs: release
@@ -118,40 +114,22 @@ jobs:
       contents: write
     uses: ./.github/workflows/reusable_publish_changelog.yml
 
-  # When doing a pre-release, we want to publish the docs as "alpha" instead of replacing the latest docs
-  prepare_docs_alias:
-    runs-on: ubuntu-latest
-    outputs:
-      DOCS_ALIAS: ${{ steps.set-alias.outputs.DOCS_ALIAS }}
-    steps:
-      - name: Set docs alias
-        id: set-alias
-        run: |
-          DOCS_ALIAS=latest
-          if [[ "${{ github.event.release.prerelease || inputs.pre_release }}" == true ]] ; then
-            DOCS_ALIAS=alpha
-          fi
-          echo DOCS_ALIAS="$DOCS_ALIAS" >> "$GITHUB_OUTPUT"
-
-  docs:
-    needs: [release, changelog, prepare_docs_alias]
-    permissions:
-      contents: write
-      pages: write
-    uses: ./.github/workflows/reusable_publish_docs.yml
-    with:
-      version: ${{ needs.release.outputs.RELEASE_VERSION }}
-      alias: ${{ needs.prepare_docs_alias.outputs.DOCS_ALIAS }}
-      detached_mode: true
-
+  # NOTE: Watch out for the depth limit of 4 nested workflow_calls.
+  # publish_layer -> publish_v2_layer -> reusable_deploy_v2_layer_stack -> reusable_update_v2_layer_arn_docs
   publish_layer:
     needs: release
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: write
+      pages: write
     uses: ./.github/workflows/publish_v2_layer.yml
     with:
       latest_published_version: ${{ needs.release.outputs.RELEASE_VERSION }}
+      pre_release: ${{ github.event.release.prerelease || inputs.pre_release }}
 
   post_release:
-    needs: release
+    needs: [release, publish_layer]
     permissions:
       contents: read
       issues: write

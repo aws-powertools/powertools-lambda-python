@@ -2,29 +2,44 @@ name: Deploy v2 layer to all regions
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
+  pages: write
 
 on:
   workflow_dispatch:
     inputs:
       latest_published_version:
-        description: "Latest PyPi published version to rebuild latest docs for, e.g. v2.0.0"
+        description: "Latest PyPi published version to rebuild latest docs for, e.g. 2.0.0, v2.0.0.a0 (pre-release)"
         required: true
+      pre_release:
+        description: "Publishes documentation using a pre-release tag (v2.0.0.a0)."
+        default: false
+        type: boolean
+        required: false
+      test_role:
+        type: string
+        description: "Test IAM Role ARN"
+        required: false
   workflow_call:
     inputs:
       latest_published_version:
         type: string
-        description: "Latest PyPi published version to rebuild latest docs for, e.g. v2.0.0"
+        description: "Latest PyPi published version to rebuild latest docs for, e.g. 2.0.0, v2.0.0.a0 (pre-release)"
         required: true
+      pre_release:
+        description: "Publishes documentation using a pre-release tag (v2.0.0.a0)."
+        default: false
+        type: boolean
+        required: false
 
 jobs:
   build-layer:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./layer
-    outputs:
-      release-tag-version: ${{ steps.release-notes-tag.outputs.RELEASE_TAG_VERSION }}
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -47,13 +62,6 @@ jobs:
         run: |
           poetry export --format requirements.txt --output requirements.txt
           pip install -r requirements.txt
-      - name: Set release notes tag
-        id: release-notes-tag
-        run: |
-          RELEASE_INPUT=${{ inputs.latest_published_version }}
-          LATEST_TAG=$(git describe --tag --abbrev=0)
-          RELEASE_TAG_VERSION=${RELEASE_INPUT:-$LATEST_TAG}
-          echo RELEASE_TAG_VERSION="${RELEASE_TAG_VERSION:1}" >> "$GITHUB_OUTPUT"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
         # NOTE: we need QEMU to build Layer against a different architecture (e.g., ARM)
@@ -65,7 +73,7 @@ jobs:
           npm install -g aws-cdk@2.44.0
           cdk --version
       - name: CDK build
-        run: cdk synth --context version="${{ steps.release-notes-tag.outputs.RELEASE_TAG_VERSION }}" -o cdk.out
+        run: cdk synth --context version="${{ inputs.latest_published_version }}" -o cdk.out
       - name: zip output
         run: zip -r cdk.out.zip cdk.out
       - name: Archive CDK artifacts
@@ -102,7 +110,7 @@ jobs:
       stage: "BETA"
       artefact-name: "cdk-layer-artefact"
       environment: "layer-beta"
-      package-version: ${{ needs.build-layer.outputs.release-tag-version }}
+      package-version: ${{ inputs.latest_published_version }}
 
   deploy-sar-prod:
     needs: [build-layer, deploy-sar-beta]
@@ -112,4 +120,31 @@ jobs:
       stage: "PROD"
       artefact-name: "cdk-layer-artefact"
       environment: "layer-prod"
-      package-version: ${{ needs.build-layer.outputs.release-tag-version }}
+      package-version: ${{ inputs.latest_published_version }}
+
+  prepare_docs_alias:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      DOCS_ALIAS: ${{ steps.set-alias.outputs.DOCS_ALIAS }}
+    steps:
+      - name: Set docs alias
+        id: set-alias
+        run: |
+          DOCS_ALIAS=latest
+          if [[ "${{ inputs.pre_release }}" == true ]] ; then
+            DOCS_ALIAS=alpha
+          fi
+          echo DOCS_ALIAS="$DOCS_ALIAS" >> "$GITHUB_OUTPUT"
+
+  release-docs:
+    needs: [deploy-prod, prepare_docs_alias]
+    permissions:
+      contents: write
+      pages: write
+    uses: ./.github/workflows/reusable_publish_docs.yml
+    with:
+      version: ${{ inputs.latest_published_version }}
+      alias: ${{ needs.prepare_docs_alias.outputs.DOCS_ALIAS }}
+      detached_mode: true
