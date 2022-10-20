@@ -129,7 +129,7 @@ jobs:
         run: |
           DOCS_ALIAS=latest
           if [[ "${{ github.event.release.prerelease || inputs.pre_release }}" == true ]] ; then
-            DOCS_ALIAS="alpha"
+            DOCS_ALIAS=alpha
           fi
           echo DOCS_ALIAS="$DOCS_ALIAS" >> "$GITHUB_OUTPUT"
 
