@@ -36,7 +36,7 @@ You can migrate to `BatchProcessor` with the following changes:
 
 1. If you use **`sqs_batch_decorator`**, change to **`batch_processor`** decorator
 2. If you use **`PartialSQSProcessor`**, change to **`BatchProcessor`**
-3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](../utilities/batch#required-resources)
+3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](../utilities/batch#required-resources){target="_blank"}
 4. Change your Lambda Handler to return the new response format
 
 === "Decorator: Before"
@@ -188,10 +188,14 @@ def lambda_handler(event: DynamoDBStreamEvent, context):
 
 ## Feature Flags and AppConfig Parameter utility
 
-???+ info
-    AWS AppConfig deprecated the current API (GetConfiguration) - [more details here](https://github.com/awslabs/aws-lambda-powertools-python/issues/1506#issuecomment-1266645884).
+!!! note "There are no code changes required"
 
-You must update your IAM permissions to allow `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession`. There are no code changes required.
+We replaced `GetConfiguration` API ([now deprecated](https://github.com/awslabs/aws-lambda-powertools-python/issues/1506#issuecomment-1266645884){target="_blank"}) with `GetLatestConfiguration` and `StartConfigurationSession`.
+
+As such, you must update your IAM Role permissions to allow the following IAM actions:
+
+* `appconfig:GetLatestConfiguration`
+* `appconfig:StartConfigurationSession`
 
 ## Idempotency key format
 
