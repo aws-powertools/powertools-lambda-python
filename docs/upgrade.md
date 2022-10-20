@@ -7,70 +7,39 @@ description: Guide to update between major Powertools versions
 
 ## Migrate to v2 from v1
 
-The transition from Powertools for Python v1 to v2 is as painless as possible, as we aimed for minimal breaking changes.
-Changes at a glance:
+We've made minimal breaking changes to make your transition to v2 as smooth as possible.
 
-* The API for **event handler's `Response`** has minor changes to support multi value headers and cookies.
-* The **legacy SQS batch processor** was removed.
-* The **Idempotency key** format changed slightly, invalidating all the existing cached results.
-* The **Feature Flags and AppConfig Parameter utility** API calls have changed and you must update your IAM permissions.
-* The **`DynamoDBStreamEvent`** replaced `AttributeValue` with native Python types.
+### Quick summary
 
-???+ important
-    Powertools for Python v2 drops suport for Python 3.6, following the Python 3.6 End-Of-Life (EOL) reached on December 23, 2021.
+| Area                               | Change                                                                                                                                                                                                  | Code change required | IAM Permissions change required |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------- |
+| **Batch**                          | Removed legacy [SQS batch processor](#legacy-sqs-batch-processor) in favour of **`BatchProcessor`**.                                                                                                    | Yes                  | -                               |
+| **Environment variables**          | Removed legacy **`POWERTOOLS_EVENT_HANDLER_DEBUG`** in favour of [`POWERTOOLS_DEV`](index.md#optimizing-for-non-production-environments){target="_blank"}.                                              | -                    | -                               |
+| **Event Handler**                  | Updated [headers response format](#event-handler-headers-response-format) due to [multi-value headers and cookie support](./core/event_handler/api_gateway.md#fine-grained-responses){target="_blank"}. | Tests only           | -                               |
+| **Event Source Data Classes**      | Replaced [DynamoDBStreamEvent](#dynamodbstreamevent-in-event-source-data-classes) `AttributeValue` with native Python types.                                                                            | Yes                  | -                               |
+| **Feature Flags** / **Parameters** | Updated [AppConfig API calls](#feature-flags-and-appconfig-parameter-utility) due to **`GetConfiguration`** API deprecation.                                                                            | -                    | Yes                             |
+| **Idempotency**                    | Updated [partition key](#idempotency-key-format) to include fully qualified function/method names.                                                                                                      | -                    | -                               |
 
-### Initial Steps
+### First Steps
 
 Before you start, we suggest making a copy of your current working project or create a new branch with git.
 
 1. **Upgrade** Python to at least v3.7
-
-2. **Ensure** you have the latest `aws-lambda-powertools`
-
-    ```bash
-    pip install aws-lambda-powertools -U
-    ```
-
+2. **Ensure** you have the latest version via [Lambda Layer or PyPi](index.md#install){target="_blank"}
 3. **Review** the following sections to confirm whether they affect your code
-
-## Event Handler Response (headers and cookies)
-
-The `Response` class of the event handler utility changed slightly:
-
-1. The `headers` parameter now expects either a value or list of values per header (type `Union[str, Dict[str, List[str]]]`)
-2. We introduced a new `cookies` parameter (type `List[str]`)
-
-???+ note
-    Code that set headers as `Dict[str, str]` will still work unchanged.
-
-```python hl_lines="6 12 13"
-@app.get("/todos")
-def get_todos():
-    # Before
-    return Response(
-        # ...
-        headers={"Content-Type": "text/plain"}
-    )
-
-    # After
-    return Response(
-        # ...
-        headers={"Content-Type": ["text/plain"]},
-        cookies=[Cookie(name="session_id", value="12345", secure=True, http_only=True)],
-    )
-```
 
 ## Legacy SQS Batch Processor
 
-The deprecated `PartialSQSProcessor` and `sqs_batch_processor` were removed.
-You can migrate to the [native batch processing](https://aws.amazon.com/about-aws/whats-new/2021/11/aws-lambda-partial-batch-response-sqs-event-source/) capability by:
+We removed the deprecated `PartialSQSProcessor` class and `sqs_batch_processor` decorator.
 
-1. If you use **`sqs_batch_decorator`** you can now use **`batch_processor`** decorator
-2. If you use **`PartialSQSProcessor`** you can now use **`BatchProcessor`**
-3. [Enable the functionality](../utilities/batch#required-resources) on SQS
+You can migrate to `BatchProcessor` with the following changes:
+
+1. If you use **`sqs_batch_decorator`**, change to **`batch_processor`** decorator
+2. If you use **`PartialSQSProcessor`**, change to **`BatchProcessor`**
+3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](../utilities/batch#required-resources){target="_blank"}
 4. Change your Lambda Handler to return the new response format
 
-=== "Decorator: Before"
+=== "[Before] Decorator"
 
      ```python hl_lines="1 6"
      from aws_lambda_powertools.utilities.batch import sqs_batch_processor
@@ -83,9 +52,9 @@ You can migrate to the [native batch processing](https://aws.amazon.com/about-aw
          return {"statusCode": 200}
      ```
 
-=== "Decorator: After"
+=== "[After] Decorator"
 
-     ```python hl_lines="3 5 11"
+     ```python hl_lines="3 5 11 13"
      import json
 
      from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
@@ -101,7 +70,7 @@ You can migrate to the [native batch processing](https://aws.amazon.com/about-aw
          return processor.response()
      ```
 
-=== "Context manager: Before"
+=== "[Before] Context manager"
 
      ```python hl_lines="1-2 4 14 19"
      from aws_lambda_powertools.utilities.batch import PartialSQSProcessor
@@ -125,9 +94,9 @@ You can migrate to the [native batch processing](https://aws.amazon.com/about-aw
          return result
      ```
 
-=== "Context manager: After"
+=== "[After] Context manager"
 
-    ```python hl_lines="1 11"
+    ```python hl_lines="1 11 16"
     from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
 
 
@@ -146,27 +115,35 @@ You can migrate to the [native batch processing](https://aws.amazon.com/about-aw
         return processor.response()
     ```
 
-## Idempotency key format
+## Event Handler headers response format
 
-The format of the Idempotency key was changed. This is used store the invocation results on a persistent store like DynamoDB.
+!!! note "No code changes required"
 
-No changes are necessary in your code, but remember that existing Idempotency records will be ignored when you upgrade, as new executions generate keys with the new format.
+This only applies if you're using `APIGatewayRestResolver` and asserting custom header values in your tests.
 
-Prior to this change, the Idempotency key was generated using only the caller function name (e.g: `lambda_handler#282e83393862a613b612c00283fef4c8`).
-After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key` (e.g: `app.classExample.function#app.handler#282e83393862a613b612c00283fef4c8`).
+Previously, custom headers were available under `headers` key in the Event Handler response.
 
-Using qualified names prevents distinct functions with the same name to contend for the same Idempotency key.
+```python title="V1 response headers" hl_lines="2"
+{
+    "headers": {
+        "Content-Type": "application/json"
+    }
+}
+```
 
-## Feature Flags and AppConfig Parameter utility
+In V2, we add all headers under `multiValueHeaders` key. This enables seamless support for multi-value headers and cookies in [fine grained responses](./core/event_handler/api_gateway.md#fine-grained-responses){target="_blank"}.
 
-AWS AppConfig deprecated the current API (GetConfiguration) - [more details here](https://github.com/awslabs/aws-lambda-powertools-python/issues/1506#issuecomment-1266645884).
-
-You must update your IAM permissions to allow `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession`. There are no code changes required.
+```python title="V2 response headers" hl_lines="2"
+{
+    "multiValueHeaders": {
+        "Content-Type": "application/json"
+    }
+}
+```
 
 ## DynamoDBStreamEvent in Event Source Data Classes
 
-???+ info
-    This also applies if you're using [**`BatchProcessor`**](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank"} to handle DynamoDB Stream events.
+!!! info "This also applies if you're using [**DynamoDB BatchProcessor**](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank"}."
 
 You will now receive native Python types when accessing DynamoDB records via `keys`, `new_image`, and `old_image` attributes in `DynamoDBStreamEvent`.
 
@@ -206,3 +183,36 @@ def lambda_handler(event: DynamoDBStreamEvent, context):
             send_to_sqs(new_image)  # Here new_image is just a Python Dict type
 
 ```
+
+## Feature Flags and AppConfig Parameter utility
+
+!!! note "No code changes required"
+
+We replaced `GetConfiguration` API ([now deprecated](https://github.com/awslabs/aws-lambda-powertools-python/issues/1506#issuecomment-1266645884){target="_blank"}) with `GetLatestConfiguration` and `StartConfigurationSession`.
+
+As such, you must update your IAM Role permissions to allow the following IAM actions:
+
+* `appconfig:GetLatestConfiguration`
+* `appconfig:StartConfigurationSession`
+
+## Idempotency partition key format
+
+!!! note "No code changes required"
+
+We replaced the DynamoDB partition key format to include fully qualified function/method names. This means that recent non-expired idempotent transactions will be ignored.
+
+Previously, we used the function/method name to generate the partition key value.
+
+> e.g. `HelloWorldFunction.lambda_handler#99914b932bd37a50b983c5e7c90ae93b`
+
+![Idempotency Before](./media/upgrade_idempotency_before.png)
+
+In V2, we now distinguish between distinct classes or modules that may have the same function/method name.
+
+[For example](https://github.com/awslabs/aws-lambda-powertools-python/issues/1330){target="_blank"}, an ABC or Protocol class may have multiple implementations of `process_payment` method and may have different results.
+
+<!-- After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key`  -->
+
+> e.g. `HelloWorldFunction.app.lambda_handler#99914b932bd37a50b983c5e7c90ae93b`
+
+![Idempotency Before](./media/upgrade_idempotency_after.png)
