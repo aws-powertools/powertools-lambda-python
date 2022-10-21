@@ -7,18 +7,11 @@
 ## Bug Fixes
 
 * lock dependencies
-* lint files
 * mypy errors
-* **ci:** sed in-place syntax for GNU/Linux; improve debugging
-* **ci:** layer artifact path
-* **ci:** fix artifact path
-* **ci:** typo
-* **ci:** SAR tagging schema
+* lint files
+* **ci:** new artifact path, sed gnu/linux syntax, and pypi test
 * **ci:** temporarly remove pypi test deployment
 * **ci:** secret and OIDC inheritance in nested children workflow
-* **ci:** force fail if layer artifact cannot be uploaded
-* **ci:** [artifact-debug] shift artifact upload up
-* **ci:** [artifact-debug] upload-artefact ignores working-directory
 * **ci:** workflow should use npx for CDK CLI
 
 ## Code Refactoring
@@ -51,21 +44,17 @@
 
 ## Maintenance
 
-* bump pyproject version to 2.0
-* update v2 layer ARN on documentation
 * merge v2 branch
-* **ci:** reinstate test.pypi before public launch
-* **ci:** clarified pre-release tags
-* **ci:** migrate E2E tests to CDK CLI and off Docker ([#1501](https://github.com/awslabs/aws-lambda-powertools-python/issues/1501))
+* bump pyproject version to 2.0
 * **ci:** remove v1 workflows ([#1617](https://github.com/awslabs/aws-lambda-powertools-python/issues/1617))
-* **ci:** revert reinstate test.pypi before public launch
+* **ci:** migrate E2E tests to CDK CLI and off Docker ([#1501](https://github.com/awslabs/aws-lambda-powertools-python/issues/1501))
 * **core:** expose modules in the Top-level package ([#1517](https://github.com/awslabs/aws-lambda-powertools-python/issues/1517))
 * **dep:** add cfn-lint as a dev dependency; pre-commit ([#1612](https://github.com/awslabs/aws-lambda-powertools-python/issues/1612))
 * **deps:** bump release-drafter/release-drafter from 5.21.0 to 5.21.1 ([#1611](https://github.com/awslabs/aws-lambda-powertools-python/issues/1611))
-* **deps:** lock importlib to 4.x
 * **deps:** remove email-validator; use Str over EmailStr in SES model ([#1608](https://github.com/awslabs/aws-lambda-powertools-python/issues/1608))
-* **deps-dev:** bump mypy-boto3-s3 from 1.24.76 to 1.24.94 ([#1622](https://github.com/awslabs/aws-lambda-powertools-python/issues/1622))
+* **deps:** lock importlib to 4.x
 * **deps-dev:** bump aws-cdk-lib from 2.46.0 to 2.47.0 ([#1629](https://github.com/awslabs/aws-lambda-powertools-python/issues/1629))
+* **deps-dev:** bump mypy-boto3-s3 from 1.24.76 to 1.24.94 ([#1622](https://github.com/awslabs/aws-lambda-powertools-python/issues/1622))
 * **layer:** bump to 1.31.1 (v39)
 
 
