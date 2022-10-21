@@ -377,8 +377,8 @@ Despite having more steps compared to the [public Layer ARN](#lambda-layer) opti
 
 | App                                                                                                                                                                  | ARN                                                                                                                               | Description                                                           |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| [aws-lambda-powertools-python-layer-v2](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v2)             | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v2](#){: .copyMe}:clipboard:       | Contains all extra dependencies (e.g: pydantic).                      |
-| [aws-lambda-powertools-python-layer-v2-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v2-arm64) | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v2-arm64](#){: .copyMe}:clipboard: | Contains all extra dependencies (e.g: pydantic). For arm64 functions. |
+| [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer)             | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer](#){: .copyMe}:clipboard:       | Contains all extra dependencies (e.g: pydantic).                      |
+| [aws-lambda-powertools-python-layer-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64) | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64](#){: .copyMe}:clipboard: | Contains all extra dependencies (e.g: pydantic). For arm64 functions. |
 
 ???+ tip
 	You can create a shared Lambda Layers stack and make this along with other account level layers stack.
@@ -392,7 +392,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
         Type: AWS::Serverless::Application
         Properties:
             Location:
-                ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v2
+                ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
                 SemanticVersion: 2.0.0 # change to latest semantic version available in SAR
 
     MyLambdaFunction:
@@ -419,7 +419,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
             Type: AWS::Serverless::Application
             Properties:
                 Location:
-                    ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v2
+                    ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
                     # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
                     SemanticVersion: 2.0.0
     ```
@@ -432,7 +432,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
     POWERTOOLS_BASE_NAME = 'AWSLambdaPowertools'
     # Find latest from github.com/awslabs/aws-lambda-powertools-python/releases
     POWERTOOLS_VER = '2.0.0'
-    POWERTOOLS_ARN = 'arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v2'
+    POWERTOOLS_ARN = 'arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer'
 
     class SampleApp(core.Construct):
 
@@ -489,7 +489,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
     }
 
     data "aws_serverlessapplicationrepository_application" "sar_app" {
-      application_id   = "arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v2"
+      application_id   = "arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer"
       semantic_version = var.aws_powertools_version
     }
 
@@ -552,7 +552,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
                         - serverlessrepo:GetCloudFormationTemplate
                     Resource:
                         # this is arn of the powertools SAR app
-                        - arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v2
+                        - arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
                     - Sid: S3AccessLayer
                     Effect: Allow
                     Action:
@@ -569,7 +569,7 @@ If using SAM, you can include this SAR App as part of your shared Layers stack, 
                         - lambda:PublishLayerVersion
                         - lambda:GetLayerVersion
                     Resource:
-                        - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:aws-lambda-powertools-python-layer-v2*
+                        - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:aws-lambda-powertools-python-layer*
                 Roles:
                 - Ref: "PowertoolsLayerIamRole"
         ```
@@ -578,7 +578,7 @@ You can fetch available versions via SAR ListApplicationVersions API:
 
 ```bash title="AWS CLI example"
 aws serverlessrepo list-application-versions \
-	--application-id arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v2
+	--application-id arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
 ```
 
 ## Quick getting started

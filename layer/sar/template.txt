@@ -3,7 +3,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: <SAR_APP_NAME>
-    Description: "AWS Lambda Layer for aws-lambda-powertools "
+    Description: "AWS Lambda Layer for aws-lambda-powertools"
     Author: AWS
     SpdxLicenseId: Apache-2.0
     LicenseUrl: <LAYER_CONTENT_PATH>/LICENSE
