@@ -6,12 +6,13 @@
 
 ## Bug Fixes
 
+* lint files
 * lock dependencies
 * mypy errors
-* lint files
 * **ci:** new artifact path, sed gnu/linux syntax, and pypi test
 * **ci:** temporarly remove pypi test deployment
 * **ci:** secret and OIDC inheritance in nested children workflow
+* **ci:** remove v2 suffix from SAR apps ([#1633](https://github.com/awslabs/aws-lambda-powertools-python/issues/1633))
 * **ci:** workflow should use npx for CDK CLI
 
 ## Code Refactoring
