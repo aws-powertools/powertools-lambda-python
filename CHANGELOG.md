@@ -6,12 +6,14 @@
 
 ## Bug Fixes
 
+* lock dependencies
 * mypy errors
 * lint files
-* lock dependencies
+* **ci:** use docker driver on buildx
 * **ci:** new artifact path, sed gnu/linux syntax, and pypi test
 * **ci:** temporarly remove pypi test deployment
 * **ci:** secret and OIDC inheritance in nested children workflow
+* **ci:** build without buildkit
 * **ci:** fix arm64 layer builds
 * **ci:** remove v2 suffix from SAR apps ([#1633](https://github.com/awslabs/aws-lambda-powertools-python/issues/1633))
 * **ci:** workflow should use npx for CDK CLI
@@ -28,6 +30,7 @@
 * **batch:** remove legacy reference to sqs processor
 * **homepage:** auto-update Layer ARN on every release ([#1610](https://github.com/awslabs/aws-lambda-powertools-python/issues/1610))
 * **homepage:** note about v2 version
+* **roadmap:** refresh roadmap post-v2 launch
 * **upgrade_guide:** add latest changes and quick summary ([#1623](https://github.com/awslabs/aws-lambda-powertools-python/issues/1623))
 * **v2:** document optional dependencies and local dev ([#1574](https://github.com/awslabs/aws-lambda-powertools-python/issues/1574))
 
@@ -48,6 +51,7 @@
 ## Maintenance
 
 * bump pyproject version to 2.0
+* update v2 layer ARN on documentation
 * merge v2 branch
 * update v2 layer ARN on documentation
 * **ci:** migrate E2E tests to CDK CLI and off Docker ([#1501](https://github.com/awslabs/aws-lambda-powertools-python/issues/1501))
