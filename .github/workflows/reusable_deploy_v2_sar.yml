@@ -16,7 +16,7 @@ permissions:
 env:
   NODE_VERSION: 16.12
   AWS_REGION: eu-west-1
-  SAR_NAME: aws-lambda-powertools-python-layer-v2
+  SAR_NAME: aws-lambda-powertools-python-layer
   TEST_STACK_NAME: serverlessrepo-v2-powertools-layer-test-stack
 
 on:
