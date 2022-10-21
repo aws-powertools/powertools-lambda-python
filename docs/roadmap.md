@@ -10,29 +10,25 @@ This is our public roadmap that outlines the high level direction we are working
 
 Themes are key activities maintainers are focusing on, besides bug reports. These are updated periodically and you can find the latest [under Epics in our public board](https://github.com/orgs/awslabs/projects/51/views/11?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}.
 
-### Lambda Layers migration
+### Increased end-to-end coverage
 
-We are migrating our Lambda Layers internal release pipeline towards an AWS CodePipeline based system. This will allow us to more rapidly adopt additional regions, custom builds, and decrease our rollout time to all commercial regions.
+We continue to work on increasing end-to-end coverage for all features. Our main challenge is creating a mechanism to periodically test contracts for Lambda Event Sources, since there is no official JSON Schema at the moment.
 
-### End-to-end testing
+Some Lambda Event Sources require clusters (e.g., MSK) leading to additional delays of up to 30m in the end-to-end feedback loop. We need a RFC to start discussing viable options, and whether we should publish JSON Schemas from identified contracts.
 
-We are working on a framework to selectively run end-to-end tests as part of Pull Requests and upon merge. This will increase our confidence in detecting regressions early, and also explore ideas for utilities that can make testing easier for customers.
+### Strict typing
 
-### Python 3.6 deprecation
+We want to enable MyPy strict mode against the code base. We need a RFC to identify most critical areas to start, and do so gradually as to not impact new features and enhancements in parallel.
 
-We will remove support for Python 3.6 after July 18th, following AWS Lambda [deprecation notice for Python 3.6 runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html#runtime-support-policy){target="_blank"}. We will monitor the deprecation notice in the event of any extension.
+This also means bringing `typing-extensions` as a runtime dependency to ensure complete coverage across all Python versions. Future wise, we might be able to experiment with [MyPyC](https://github.com/mypyc/mypyc) to compile less performing parts of the code base as a C-Extension.
 
-### Reduce release operational overhead
+### New utilities
 
-We are working on a consistent label and automation strategy across all Lambda Powertools projects ([Java](https://awslabs.github.io/aws-lambda-powertools-java/){target="_blank"}, [TypeScript](https://awslabs.github.io/aws-lambda-powertools-typescript/latest/){target="_blank"}).
+With V2 launched, we want to resume working on new utilities, specifically but not limited to the most commonly asked: **(1)** [Sensitive Data Masking](https://github.com/awslabs/aws-lambda-powertools-python/issues/1173), **(2)** [Integration/End-to-end Testing](https://github.com/awslabs/aws-lambda-powertools-python/issues/1169), and **(3)** [Event Bridge](https://github.com/awslabs/aws-lambda-powertools-python/issues/1168).
 
-This will be our baseline to automate areas where we don't need human intervention, and reduce our manual effort to areas where clear communication is crucial.
+### Open iteration planning
 
-### Revamp roadmap
-
-We are beta testing the [new GitHub Projects Beta](https://github.com/orgs/awslabs/projects/51/views/1?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"} to provide more visibility on our current activities. This also includes new GitHub Issue Forms Beta to streamline feature requests, bug reports, RFCs, etc., including a new mechanism to add external links like `Ask a Question`.
-
-Once complete, we will repurpose our [central roadmap repository](https://github.com/awslabs/aws-lambda-powertools-roadmap){target="_blank"} to provide a landing page for all Powertools languages, including an experiment to better highlight feature parity across them.
+We want to experiment running a bi-weekly audio channel on [Discord](https://discord.gg/B8zZKbbyET) to help us prioritize backlog in real-time. Depending on attendance, we might switch to run an office hours instead.
 
 ## Roadmap status definition
 
