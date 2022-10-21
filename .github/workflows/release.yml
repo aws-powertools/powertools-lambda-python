@@ -1,22 +1,21 @@
-name: Publish to PyPi
+name: Release
 
 # RELEASE PROCESS
+#
+# === Automated activities ===
+#
+# 1. Run tests, linting, security and complexity base line
+# 2. Bump package version and generate latest Changelog
+# 3. Publish package to PyPi test and prod repository
+# 4. Kick off SAR App pipeline to publish latest version with minimal and extra dependencies
+# 5. Builds and publish latest changelog from tip of the branch
+# 6. Builds a new user guide and API docs with release version; update /latest pointing to newly released version
+# 7. Close all issues labeled "pending-release" and notify customers about the release
 #
 # === Manual activities ===
 #
 # 1. Edit the current draft release notes
 # 2. If not already set, use `v<new version>` as a tag, e.g., v1.26.4, and select develop as target branch
-#
-# === Automated activities ===
-#
-# 1. Extract release notes tag that was published
-# 2. Run tests, linting, security and complexity base line
-# 3. Bump package version and generate latest Changelog
-# 4. Publish package to PyPi test and prod repository
-# 5. Kick off SAR App pipeline to publish latest version with minimal and extra dependencies
-# 6. Builds and publish latest changelog from tip of the branch
-# 7. Builds a new user guide and API docs with release version; update /latest pointing to newly released version
-# 8. Close all issues labeled "pending-release" and notify customers about the release
 
 # See MAINTAINERS.md "Releasing a new version" for release mechanisms
 
@@ -24,10 +23,6 @@ env:
   BRANCH: develop
 
 on:
-  release:
-    # We can't filter by tag here, so we filter later on the first job
-    types: [published]
-
   workflow_dispatch:
     inputs:
       version_to_publish:
@@ -44,12 +39,6 @@ on:
         default: false
         type: boolean
         required: false
-      # Only use this until v1 is completely dropped, and for manual releases
-      skip_version_guard:
-        description: "Skips conditions to prevent v1 into v2 releases"
-        default: false
-        type: boolean
-        required: false
       pre_release:
         description: "Publishes documentation using a pre-release tag (v2.0.0a0). You are still responsible for passing a pre-release version tag to the workflow."
         default: false
@@ -58,7 +47,6 @@ on:
 
 jobs:
   release:
-    if: ${{ startsWith(github.ref, 'refs/tags/v2') || inputs.skip_version_guard }}
     environment: release
     runs-on: ubuntu-latest
     permissions:
@@ -66,7 +54,7 @@ jobs:
     outputs:
       RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
     env:
-      RELEASE_TAG_VERSION: ${{ github.event.release.tag_name || inputs.version_to_publish }}
+      RELEASE_TAG_VERSION: ${{ inputs.version_to_publish }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -76,7 +64,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.9"
           cache: "poetry"
       - name: Set release notes tag
         id: release_version
@@ -128,7 +116,7 @@ jobs:
     uses: ./.github/workflows/publish_v2_layer.yml
     with:
       latest_published_version: ${{ needs.release.outputs.RELEASE_VERSION }}
-      pre_release: ${{ github.event.release.prerelease || inputs.pre_release }}
+      pre_release: ${{ inputs.pre_release }}
 
   post_release:
     needs: [release, publish_layer]
