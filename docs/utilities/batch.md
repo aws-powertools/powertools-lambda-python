@@ -1207,28 +1207,3 @@ class MyProcessor(BatchProcessor):
 		capture_exception()  # send exception to Sentry
 		return super().failure_handler(record, exception)
 ```
-
-### Suppressing exceptions
-
-If you want to disable the default behavior where `BatchProcessingError` is raised if there are any errors, you can pass the `suppress_exception` boolean argument.
-
-=== "Decorator"
-
-    ```python hl_lines="3"
-    from aws_lambda_powertools.utilities.batch import batch_processor
-
-    @batch_processor(record_handler=record_handler, suppress_exception=True)
-    def lambda_handler(event, context):
-        return {"statusCode": 200}
-    ```
-
-=== "Context manager"
-
-    ```python hl_lines="3"
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
-
-    processor = BatchProcessor(event_type=EventType.SQS, suppress_exception=True)
-
-    with processor(records, record_handler):
-        result = processor.process()
-    ```
