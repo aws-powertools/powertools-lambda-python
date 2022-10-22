@@ -18,6 +18,14 @@ This utility provides JSON Schema validation for events and responses, including
 ???+ tip
     All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
 
+### Install
+
+!!! info "This is not necessary if you're installing Powertools via [Lambda Layer](../index.md#lambda-layer){target="_blank"}"
+
+Add `aws-lambda-powertools[validation]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
+
+This will ensure you have the required dependencies before using Validation.
+
 You can validate inbound and outbound events using [`validator` decorator](#validator-decorator).
 
 You can also use the standalone `validate` function, if you want more control over the validation process such as handling a validation error.
@@ -91,7 +99,7 @@ Here is a sample custom EventBridge event, where we only validate what's inside 
 
 === "getting_started_validator_unwrapping_function.py"
 
-	```python hl_lines="2 6 12"
+	```python hl_lines="2 8 14"
     --8<-- "examples/validation/src/getting_started_validator_unwrapping_function.py"
 	```
 
@@ -117,7 +125,7 @@ We provide built-in envelopes to easily extract the payload from popular event s
 
 === "unwrapping_popular_event_source_function.py"
 
-	```python hl_lines="2 7 12"
+	```python hl_lines="2 9 14"
     --8<-- "examples/validation/src/unwrapping_popular_event_source_function.py"
 	```
 

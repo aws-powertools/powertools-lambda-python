@@ -13,4 +13,5 @@ async def async_get_users():
 
 
 def lambda_handler(event: dict, context: LambdaContext):
+    tracer.service = event.get("service")
     return asyncio.run(async_get_users())

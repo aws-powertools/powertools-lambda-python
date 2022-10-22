@@ -1,6 +1,9 @@
 from typing import Any, Dict, List, Optional, Union
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, get_header_value
+from aws_lambda_powertools.utilities.data_classes.common import (
+    DictWrapper,
+    get_header_value,
+)
 
 
 def get_identity_object(identity: Optional[dict]) -> Any:

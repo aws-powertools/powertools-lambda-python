@@ -1,8 +1,11 @@
-name: Deploy cdk stack
+name: Deploy CDK Layer v2 stack
+
+env:
+  CDK_VERSION: 2.44.0
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 on:
   workflow_call:
@@ -17,6 +20,10 @@ on:
         type: string
       environment:
         description: "GitHub Environment to use for encrypted secrets"
+        required: true
+        type: string
+      latest_published_version:
+        description: "Latest version that is published"
         required: true
         type: string
 
@@ -61,7 +68,7 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
       - name: aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838
         with:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
@@ -82,7 +89,7 @@ jobs:
           pip install -r requirements.txt
       - name: install cdk and deps
         run: |
-          npm install -g aws-cdk@2.29.0
+          npm install -g "aws-cdk@$CDK_VERSION"
           cdk --version
       - name: install deps
         run: poetry install
@@ -94,6 +101,28 @@ jobs:
       - name: unzip artefact
         run: unzip cdk.out.zip
       - name: CDK Deploy Layer
-        run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'LayerStack' --require-approval never --verbose
+        run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'LayerV2Stack' --require-approval never --verbose --outputs-file cdk-outputs.json
+      - name: Store latest Layer ARN
+        if: ${{ inputs.stage == 'PROD' }}
+        run: |
+          mkdir cdk-layer-stack
+          jq -r -c '.LayerV2Stack.LatestLayerArn' cdk-outputs.json > cdk-layer-stack/${{ matrix.region }}-layer-version.txt
+          jq -r -c '.LayerV2Stack.LatestLayerArm64Arn' cdk-outputs.json >> cdk-layer-stack/${{ matrix.region }}-layer-version.txt
+          cat cdk-layer-stack/${{ matrix.region }}-layer-version.txt
+      - name: Save Layer ARN artifact
+        if: ${{ inputs.stage == 'PROD' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: cdk-layer-stack
+          path: ./layer/cdk-layer-stack/* # NOTE: upload-artifact does not inherit working-directory setting.
+          if-no-files-found: error
+          retention-days: 1
       - name: CDK Deploy Canary
-        run: cdk deploy --app cdk.out --context region=${{ matrix.region}} --parameters DeployStage="${{ inputs.stage }}" 'CanaryStack' --require-approval never --verbose
+        run: cdk deploy --app cdk.out --context region=${{ matrix.region}} --parameters DeployStage="${{ inputs.stage }}" 'CanaryV2Stack' --require-approval never --verbose
+
+  update_v2_layer_arn_docs:
+    needs: deploy-cdk-stack
+    if: ${{ inputs.stage == 'PROD' }}
+    uses: ./.github/workflows/reusable_update_v2_layer_arn_docs.yml
+    with:
+      latest_published_version: ${{ inputs.latest_published_version }}

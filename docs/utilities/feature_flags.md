@@ -3,10 +3,10 @@ title: Feature flags
 description: Utility
 ---
 
-???+ note
-    This is currently in Beta, as we might change Store parameters in the next release.
-
 The feature flags utility provides a simple rule engine to define when one or multiple features should be enabled depending on the input.
+
+???+ info
+    We currently only support AppConfig using [freeform configuration profile](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations).
 
 ## Terminology
 
@@ -28,6 +28,9 @@ If you want to learn more about feature flags, their variations and trade-offs, 
 * [AWS Lambda Feature Toggles Made Simple - Ran Isenberg](https://isenberg-ran.medium.com/aws-lambda-feature-toggles-made-simple-580b0c444233)
 * [Feature Flags Getting Started - CloudBees](https://www.cloudbees.com/blog/ultimate-feature-flag-guide)
 
+???+ note
+    AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single [Configuration](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html).
+
 ## Key features
 
 * Define simple feature flags to dynamically decide when to enable a feature
@@ -38,7 +41,7 @@ If you want to learn more about feature flags, their variations and trade-offs, 
 
 ### IAM Permissions
 
-Your Lambda function must have `appconfig:GetConfiguration` IAM permission in order to fetch configuration from AWS AppConfig.
+Your Lambda function IAM Role must have `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession` IAM permissions before using this feature.
 
 ### Required resources
 

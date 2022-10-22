@@ -5,8 +5,15 @@ from typing import Any, List
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, event_parser
-from aws_lambda_powertools.utilities.parser.models import CloudWatchLogsLogEvent, CloudWatchLogsModel
+from aws_lambda_powertools.utilities.parser import (
+    ValidationError,
+    envelopes,
+    event_parser,
+)
+from aws_lambda_powertools.utilities.parser.models import (
+    CloudWatchLogsLogEvent,
+    CloudWatchLogsModel,
+)
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyCloudWatchBusiness
 from tests.functional.utils import load_event

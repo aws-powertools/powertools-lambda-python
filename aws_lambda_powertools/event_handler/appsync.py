@@ -12,6 +12,7 @@ AppSyncResolverEventT = TypeVar("AppSyncResolverEventT", bound=AppSyncResolverEv
 class BaseRouter:
     current_event: AppSyncResolverEventT  # type: ignore[valid-type]
     lambda_context: LambdaContext
+    context: dict
 
     def __init__(self):
         self._resolvers: dict = {}
@@ -33,6 +34,14 @@ class BaseRouter:
             return func
 
         return register_resolver
+
+    def append_context(self, **additional_context):
+        """Append key=value data as routing context"""
+        self.context.update(**additional_context)
+
+    def clear_context(self):
+        """Resets routing context"""
+        self.context.clear()
 
 
 class AppSyncResolver(BaseRouter):
@@ -68,6 +77,7 @@ class AppSyncResolver(BaseRouter):
 
     def __init__(self):
         super().__init__()
+        self.context = {}  # early init as customers might add context before event resolution
 
     def resolve(
         self, event: dict, context: LambdaContext, data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent
@@ -144,8 +154,12 @@ class AppSyncResolver(BaseRouter):
         # Maintenance: revisit generics/overload to fix [attr-defined] in mypy usage
         BaseRouter.current_event = data_model(event)
         BaseRouter.lambda_context = context
+
         resolver = self._get_resolver(BaseRouter.current_event.type_name, BaseRouter.current_event.field_name)
-        return resolver(**BaseRouter.current_event.arguments)
+        response = resolver(**BaseRouter.current_event.arguments)
+        self.clear_context()
+
+        return response
 
     def _get_resolver(self, type_name: str, field_name: str) -> Callable:
         """Get resolver for field_name
@@ -182,9 +196,15 @@ class AppSyncResolver(BaseRouter):
         router : Router
             A router containing a dict of field resolvers
         """
+        # Merge app and router context
+        self.context.update(**router.context)
+        # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
+        router.context = self.context
+
         self._resolvers.update(router._resolvers)
 
 
 class Router(BaseRouter):
     def __init__(self):
         super().__init__()
+        self.context = {}  # early init as customers might add context before event resolution

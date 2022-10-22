@@ -76,7 +76,7 @@ class IdempotencyHandler:
         self.fn_kwargs = function_kwargs
         self.config = config
 
-        persistence_store.configure(config, self.function.__name__)
+        persistence_store.configure(config, f"{self.function.__module__}.{self.function.__qualname__}")
         self.persistence_store = persistence_store
 
     def handle(self) -> Any:

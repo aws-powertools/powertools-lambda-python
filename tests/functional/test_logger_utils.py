@@ -265,3 +265,26 @@ def test_copy_config_to_ext_loggers_no_duplicate_logs(stdout, logger, log_level)
     logs = capture_multiple_logging_statements_output(stdout)
     assert {"message": msg} not in logs
     assert sum(msg in log.values() for log in logs) == 1
+
+
+def test_logger_name_is_included_during_copy(stdout, logger, log_level):
+    # GIVEN two external loggers and powertools logger initialized
+    logger_1: logging.Logger = logger()
+    logger_2: logging.Logger = logger()
+    msg = "test message1"
+
+    powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
+
+    # WHEN configuration copied from powertools logger to ALL external loggers
+    # AND external loggers used
+    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={logger_1.name, logger_2.name})
+    logger_1.info(msg)
+    logger_2.info(msg)
+    powertools_logger.info(msg)
+
+    logger1_log, logger2_log, pt_log = capture_multiple_logging_statements_output(stdout)
+
+    # THEN name attribute should be present in all loggers
+    assert logger1_log["name"] == logger_1.name
+    assert logger2_log["name"] == logger_2.name
+    assert pt_log["name"] == powertools_logger.name

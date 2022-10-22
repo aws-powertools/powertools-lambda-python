@@ -1,0 +1,23 @@
+{
+    "Records": [
+        {
+            "messageId": "69bc4bbd-ed69-4325-a434-85c3b428ceab",
+            "receiptHandle": "AQEBbfAqjhrgIdW3HGWYPz57mdDatG/dT9LZhRPAsNQ1pJmw495w4esDc8ZSbOwMZuPBol7wtiNWug8U25GpSQDDLY1qv//8/lfmdzXOiprG6xRVeiXSHj0j731rJQ3xo+GPdGjOzjIxI09CrE3HtZ4lpXY9NjjHzP8hdxkCLlbttumc8hDBUR365/Tk+GfV2nNP9qvZtLGEbKCdTm/GYdTSoAr+ML9HnnGrS9T25Md71ASiZMI4DZqptN6g7CYYojFPs1LVM9o1258ferA72zbNoQ==",
+            "body": "{\n  \"Type\" : \"Notification\",\n  \"MessageId\" : \"a7c9d2fa-77fa-5184-9de9-89391027cc7d\",\n  \"SequenceNumber\" : \"10000000000000004000\",\n  \"TopicArn\" : \"arn:aws:sns:eu-west-1:231436140809:Test.fifo\",\n  \"Message\" : \"{\\\"message\\\": \\\"hello world\\\", \\\"username\\\": \\\"lessa\\\"}\",\n  \"Timestamp\" : \"2022-10-14T13:35:25.419Z\",\n  \"UnsubscribeURL\" : \"https://sns.eu-west-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:eu-west-1:231436140809:Test.fifo:bb81d3de-a0f9-46e4-b619-d3152a4d545f\"\n}",
+            "attributes": {
+                "ApproximateReceiveCount": "1",
+                "SentTimestamp": "1665754525442",
+                "SequenceNumber": "18873177232222703872",
+                "MessageGroupId": "powertools-test",
+                "SenderId": "AIDAWYJAWPFU7SUQGUJC6",
+                "MessageDeduplicationId": "4e0a0f61eed277a4b9e4c01d5722b07b0725e42fe782102abee5711adfac701f",
+                "ApproximateFirstReceiveTimestamp": "1665754525442"
+            },
+            "messageAttributes": {},
+            "md5OfBody": "f3c788e623445e3feb263e80c1bffc0b",
+            "eventSource": "aws:sqs",
+            "eventSourceARN": "arn:aws:sqs:eu-west-1:231436140809:Test.fifo",
+            "awsRegion": "eu-west-1"
+        }
+    ]
+}

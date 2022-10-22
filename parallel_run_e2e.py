@@ -8,7 +8,6 @@ def main():
     workers = len(list(features)) - 1
 
     command = f"poetry run pytest -n {workers} --dist loadfile -o log_cli=true tests/e2e"
-    print(f"Running E2E tests with: {command}")
     subprocess.run(command.split(), shell=False)
 
 

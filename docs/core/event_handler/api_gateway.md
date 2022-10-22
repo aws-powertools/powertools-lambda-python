@@ -42,10 +42,10 @@ Before you decorate your functions to handle a given path and HTTP method(s), yo
 
 A resolver will handle request resolution, including [one or more routers](#split-routes-with-router), and give you access to the current event via typed properties.
 
-For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, `ALBResolver`, and `LambdaFunctionUrlResolver` .
+For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, `ALBResolver`, and `LambdaFunctionUrlResolver`. From here on, we will default to `APIGatewayRestResolver` across examples.
 
-???+ info
-    We will use `APIGatewayRestResolver` as the default across examples.
+???+ info "Auto-serialization"
+    We serialize `Dict` responses as JSON, trim whitespace for compact responses, and set content-type to `application/json`.
 
 #### API Gateway REST API
 
@@ -53,8 +53,8 @@ When using Amazon API Gateway REST API to front your Lambda functions, you can u
 
 Here's an example on how we can handle the `/todos` path.
 
-???+ info
-    We automatically serialize `Dict` responses as JSON, trim whitespace for compact responses, and set content-type to `application/json`.
+???+ info "Trailing slash in routes"
+    For `APIGatewayRestResolver`, we seamless handle routes with a trailing slash (`/todos/`).
 
 === "getting_started_rest_api_resolver.py"
 
@@ -214,7 +214,7 @@ By default, we return `404` for any unmatched route.
 
 You can use **`not_found`** decorator to override this behavior, and return a custom **`Response`**.
 
-```python hl_lines="14 18" title="Handling not found"
+```python hl_lines="18 22" title="Handling not found"
 --8<-- "examples/event_handler_rest/src/not_found_routes.py"
 ```
 
@@ -222,7 +222,7 @@ You can use **`not_found`** decorator to override this behavior, and return a cu
 
 You can use **`exception_handler`** decorator with any Python exception. This allows you to handle a common exception outside your route, for example validation errors.
 
-```python hl_lines="13-14" title="Exception handling"
+```python hl_lines="17-18" title="Exception handling"
 --8<-- "examples/event_handler_rest/src/exception_handling.py"
 ```
 
@@ -312,11 +312,18 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 
 ### Fine grained responses
 
-You can use the `Response` class to have full control over the response, for example you might want to add additional headers or set a custom Content-type.
+You can use the `Response` class to have full control over the response. For example, you might want to add additional headers, cookies, or set a custom Content-type.
+
+???+ info
+    Powertools serializes headers and cookies according to the type of input event.
+    Some event sources require headers and cookies to be encoded as `multiValueHeaders`.
+
+???+ warning "Using multiple values for HTTP headers in ALB?"
+    Make sure you [enable the multi value headers feature](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers) to serialize response headers correctly.
 
 === "fine_grained_responses.py"
 
-    ```python hl_lines="7 24-28"
+    ```python hl_lines="9 28-32"
     --8<-- "examples/event_handler_rest/src/fine_grained_responses.py"
     ```
 
@@ -364,7 +371,7 @@ Like `compress` feature, the client must send the `Accept` header with the corre
     Lambda Function URLs handle binary media types automatically.
 === "binary_responses.py"
 
-    ```python hl_lines="14 20"
+    ```python hl_lines="17 23"
     --8<-- "examples/event_handler_rest/src/binary_responses.py"
     ```
 
@@ -388,7 +395,7 @@ Like `compress` feature, the client must send the `Accept` header with the corre
 
 ### Debug mode
 
-You can enable debug mode via `debug` param, or via `POWERTOOLS_EVENT_HANDLER_DEBUG` [environment variable](../../index.md#environment-variables).
+You can enable debug mode via `debug` param, or via `POWERTOOLS_DEV` [environment variable](../../index.md#environment-variables).
 
 This will enable full tracebacks errors in the response, print request and responses, and set CORS in development mode.
 
@@ -448,6 +455,28 @@ When necessary, you can set a prefix when including a router object. This means 
     ```python hl_lines="13 25"
     --8<-- "examples/event_handler_rest/src/split_route_prefix_module.py"
     ```
+
+#### Sharing contextual data
+
+You can use `append_context` when you want to share data between your App and Router instances. Any data you share will be available via the `context` dictionary available in your App or Router context.
+
+???+ info
+    For safety, we always clear any data available in the `context` dictionary after each invocation.
+
+???+ tip
+    This can also be useful for middlewares injecting contextual information before a request is processed.
+
+=== "split_route_append_context.py"
+
+	```python hl_lines="18"
+    --8<-- "examples/event_handler_rest/src/split_route_append_context.py"
+	```
+
+=== "split_route_append_context_module.py"
+
+	```python hl_lines="16"
+    --8<-- "examples/event_handler_rest/src/split_route_append_context_module.py"
+	```
 
 #### Sample layout
 
