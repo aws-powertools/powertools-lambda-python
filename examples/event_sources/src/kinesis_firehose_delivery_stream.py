@@ -1,7 +1,10 @@
 import base64
 import json
 
-from aws_lambda_powertools.utilities.data_classes import KinesisFirehoseEvent, event_source
+from aws_lambda_powertools.utilities.data_classes import (
+    KinesisFirehoseEvent,
+    event_source,
+)
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
