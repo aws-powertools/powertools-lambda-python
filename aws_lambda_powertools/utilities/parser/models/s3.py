@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator
 from pydantic.fields import Field
 from pydantic.networks import IPvAnyNetwork
 from pydantic.types import NonNegativeFloat
@@ -43,8 +43,8 @@ class S3Bucket(BaseModel):
 
 class S3Object(BaseModel):
     key: str
-    size: NonNegativeFloat
-    eTag: str
+    size: Optional[NonNegativeFloat]
+    eTag: Optional[str]
     sequencer: str
     versionId: Optional[str]
 
@@ -67,6 +67,15 @@ class S3RecordModel(BaseModel):
     responseElements: S3ResponseElements
     s3: S3Message
     glacierEventData: Optional[S3EventRecordGlacierEventData]
+
+    @root_validator
+    def validate_s3_object(cls, values):
+        event_name = values.get("eventName")
+        s3_object = values.get("s3").object
+        if s3_object and "ObjectRemoved" not in event_name:
+            if s3_object.size is None or s3_object.eTag is None:
+                raise ValueError("S3Object.size and S3Object.eTag are required for non-ObjectRemoved events")
+        return values
 
 
 class S3Model(BaseModel):
