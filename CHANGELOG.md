@@ -10,6 +10,7 @@
 
 ## Maintenance
 
+* **ci:** fix typo on version description
 * **docs:** remove v2 banner on top of the docs
 
 
