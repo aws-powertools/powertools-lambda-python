@@ -8,7 +8,7 @@ on:
   workflow_call:
     inputs:
       version:
-        description: "Version to build and publish docs (v1.28.0, develop)"
+        description: "Version to build and publish docs (1.28.0, develop)"
         required: true
         type: string
       alias:
