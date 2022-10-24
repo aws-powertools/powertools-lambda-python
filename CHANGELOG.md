@@ -4,6 +4,10 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **index:** add quotes to pip for zsh customers
+
 ## Maintenance
 
 * **docs:** remove v2 banner on top of the docs
