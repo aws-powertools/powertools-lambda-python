@@ -10,7 +10,7 @@ A suite of utilities for AWS Lambda functions to ease adopting best practices su
 ???+ tip
     Powertools is also available for [Java](https://awslabs.github.io/aws-lambda-powertools-java/){target="_blank"}, [TypeScript](https://awslabs.github.io/aws-lambda-powertools-typescript/latest/){target="_blank"}, and [.NET](https://awslabs.github.io/aws-lambda-powertools-dotnet/){target="_blank"}
 
-???+ hint "Support this project by becoming a reference customer, sharing your work, or using Layers/SAR :heart:"
+??? hint "Support this project by becoming a reference customer, sharing your work, or using Layers/SAR :heart:"
 
     You can choose to support us in three ways:
 
