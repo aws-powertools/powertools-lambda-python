@@ -3,9 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
-	"golang.org/x/sync/errgroup"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,9 +10,13 @@ import (
 	"os/signal"
 	"sort"
 	"sync"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
+	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
+	"golang.org/x/sync/errgroup"
 )
-import "github.com/aws/aws-sdk-go-v2/config"
-import "github.com/aws/aws-sdk-go-v2/service/lambda"
 
 type LayerInfo struct {
 	Name         string
@@ -83,6 +84,9 @@ func getLayerVersion(ctx context.Context, layerName string, region string) (int6
 		return 0, err
 	}
 
+	if len(layerVersionsResult.LayerVersions) == 0 {
+		return 0, fmt.Errorf("no layer meets the search criteria %s - %s", layerName, region)
+	}
 	return layerVersionsResult.LayerVersions[0].Version, nil
 }
 
