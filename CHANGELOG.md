@@ -6,6 +6,7 @@
 
 ## Documentation
 
+* **index:** fold support us banner
 * **index:** add quotes to pip for zsh customers
 * **install:** address early v2 feedback on installation and project support
 
