@@ -443,14 +443,11 @@ test = ["pytest-cov"]
 
 [[package]]
 name = "flake8-variables-names"
-version = "0.0.4"
+version = "0.0.5"
 description = "A flake8 extension that helps to make more readable variables names"
 category = "dev"
 optional = false
-python-versions = "*"
-
-[package.dependencies]
-setuptools = "*"
+python-versions = ">=3.7"
 
 [[package]]
 name = "future"
@@ -1529,7 +1526,7 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "78d574666c1b004d5469cbdd22acba5c1da5577dac11dae703bdef4f4e6e419a"
+content-hash = "026b049a610e7643a180c269a4d323b203e9f5737efbeea23f78ca7594010a5d"
 
 [metadata.files]
 attrs = [
@@ -1737,7 +1734,8 @@ flake8-isort = [
     {file = "flake8_isort-4.2.0-py3-none-any.whl", hash = "sha256:5b87630fb3719bf4c1833fd11e0d9534f43efdeba524863e15d8f14a7ef6adbf"},
 ]
 flake8-variables-names = [
-    {file = "flake8_variables_names-0.0.4.tar.gz", hash = "sha256:d6fa0571a807c72940b5773827c5760421ea6f8206595ff0a8ecfa01e42bf2cf"},
+    {file = "flake8_variables_names-0.0.5-py3-none-any.whl", hash = "sha256:e3277031696bbe10b5132b49938cde1d70fcae9561533b7bd7ab8e69cb27addb"},
+    {file = "flake8_variables_names-0.0.5.tar.gz", hash = "sha256:30133e14ee2300e13a60393a00f74d98110c76070ac67d1ab91606f02824a7e1"},
 ]
 future = [
     {file = "future-0.18.2.tar.gz", hash = "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"},
