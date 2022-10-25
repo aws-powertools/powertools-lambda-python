@@ -47,9 +47,26 @@ This article dives into what idempotency means for APIs, their use cases, and ho
 
 > **Author: [Michael Walmsley](https://twitter.com/walmsles){target="_blank"}** :material-twitter:
 
-This articles describes how to best calculate your idempotency token, implementation details, and how to handle idempotency in RESTful APIs.
+This article describes how to best calculate your idempotency token, implementation details, and how to handle idempotency in RESTful APIs.
 
 * [blog.walmsles.io/aws-lambda-powertools-idempotency-a-deeper-dive](https://blog.walmsles.io/aws-lambda-powertools-idempotency-a-deeper-dive){target="_blank"}
+
+### Developing AWS Lambda functions with AWS Lambda Powertools
+
+> **Author: [Stephan Huber](https://linkedin.com/in/sthuber90){target="_blank"}** :material-linkedin:
+
+This article walks through how to add Powertools to an existing project, covers Tracer, Logger, Metrics, and JSON Schema Validation.
+
+* [globaldatanet.com/tech-blog/develop-lambda-functions-with-aws-lambda-powertools](https://globaldatanet.com/tech-blog/develop-lambda-functions-with-aws-lambda-powertools){target="_blank"}
+
+### Speed-up event-driven projects
+
+> **Author: [Joris Conijn](https://www.linkedin.com/in/jorisconijn){target="_blank"}** :material-linkedin:
+
+This article walks through a sample AWS EventBridge cookiecutter template presented at the AWS Community Day Netherlands 2022.
+
+* [binx.io/2022/10/11/speedup-event-driven-projects/](https://binx.io/2022/10/11/speedup-event-driven-projects/){target="_blank"}
+* [Slides](https://www.slideshare.net/JorisConijn/let-codecommit-work-for-you){target="_blank"}
 
 ## Videos
 
