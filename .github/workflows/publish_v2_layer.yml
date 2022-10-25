@@ -59,7 +59,7 @@ jobs:
           poetry export --format requirements.txt --output requirements.txt
           pip install -r requirements.txt
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
+        uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18 # v2.0.0
         with:
           platforms: arm64
         # NOTE: we need QEMU to build Layer against a different architecture (e.g., ARM)
