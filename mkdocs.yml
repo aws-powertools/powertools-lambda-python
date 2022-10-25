@@ -11,6 +11,7 @@ nav:
   - Roadmap: roadmap.md
   - API reference: api/" target="_blank
   - Upgrade guide: upgrade.md
+  - We Made This (Community): we_made_this.md
   - Core utilities:
       - core/tracer.md
       - core/logger.md
@@ -77,7 +78,9 @@ markdown_extensions:
       permalink: true
       toc_depth: 4
   - attr_list
-  - pymdownx.emoji
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
   - pymdownx.inlinehilite
   - pymdownx.superfences:
       custom_fences:
