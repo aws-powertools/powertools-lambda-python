@@ -11,6 +11,7 @@
 
 ## Documentation
 
+* **community:** fix social handlers for Ran ([#1654](https://github.com/awslabs/aws-lambda-powertools-python/issues/1654))
 * **community:** fix twitch parent domain for embedded video
 * **index:** fold support us banner
 * **index:** add quotes to pip for zsh customers
