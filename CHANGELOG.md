@@ -6,6 +6,7 @@
 
 ## Bug Fixes
 
+* **ci:** linting issues after flake8-blackbear,mypy upgrades
 * **deps:** update build system to poetry-core ([#1651](https://github.com/awslabs/aws-lambda-powertools-python/issues/1651))
 
 ## Documentation
