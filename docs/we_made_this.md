@@ -19,7 +19,7 @@ Join us on [Discord](https://discord.gg/B8zZKbbyET){target="_blank"} to connect 
 
 ### AWS Lambda Cookbook — Following best practices with Lambda Powertools
 
-> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/ranthebuilder){target="_blank"}**
+> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/IsenbergRan){target="_blank"} [:material-linkedin:](https://www.linkedin.com/in/ranisenberg/){target="_blank"}**
 
 A collection of articles explaining in detail how Lambda Powertools helps with a Serverless adoption strategy and its challenges.
 
@@ -72,7 +72,7 @@ This article walks through a sample AWS EventBridge cookiecutter template presen
 
 #### Building a resilient input handling with Parser
 
-> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/ranthebuilder){target="_blank"}**
+> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/IsenbergRan){target="_blank"} [:material-linkedin:](https://www.linkedin.com/in/ranisenberg/){target="_blank"}**
 
 When building applications with AWS Lambda it is critical to verify the data structure and validate the input due to the multiple different sources that can trigger them. In this session Ran Isenberg (CyberArk) will present one of the interesting features of AWS Lambda Powertools for python: the parser.
 
@@ -82,7 +82,7 @@ In this session you will learn how to increase code quality, extensibility and t
 
 #### Talk DEV to me | Feature Flags with AWS Lambda Powertools
 
-> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/ranthebuilder){target="_blank"}**
+> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/IsenbergRan){target="_blank"} [:material-linkedin:](https://www.linkedin.com/in/ranisenberg/){target="_blank"}**
 
 A deep dive in the [Feature Flags](./utilities/feature_flags.md){target="_blank"} feature along with tips and tricks.
 
@@ -108,7 +108,7 @@ Throughout the labs we will introduce each of the AWS Lambda Powertools Core uti
 
 ### Complete Lambda Handler Cookbook
 
-> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/ranthebuilder){target="_blank"}**
+> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/IsenbergRan){target="_blank"} [:material-linkedin:](https://www.linkedin.com/in/ranisenberg/){target="_blank"}**
 
 This repository provides a working, deployable, open source based, AWS Lambda handler and [AWS CDK](https://aws.amazon.com/cdk/){target="_blank"} Python code.
 
