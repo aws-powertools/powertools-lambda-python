@@ -11,9 +11,9 @@ This space is dedicated to highlight our awesome community content featuring Lam
 
 ## Connect
 
-[![Join our Discord](https://dcbadge.vercel.app/api/server/B8zZKbbyET)](https://discord.gg/B8zZKbbyET)
+[![Join our Discord](https://dcbadge.vercel.app/api/server/B8zZKbbyET)](https://discord.gg/B8zZKbbyET){target="_blank"}
 
-Join us on [Discord](https://discord.gg/B8zZKbbyET) to connect with the Powertools community 👋. Ask questions, learn from each other, hang out with key contributors, and more!
+Join us on [Discord](https://discord.gg/B8zZKbbyET){target="_blank"} to connect with the Powertools community 👋. Ask questions, learn from each other, contribute, hang out with key contributors, and more!
 
 ## Blog posts
 
@@ -23,29 +23,27 @@ Join us on [Discord](https://discord.gg/B8zZKbbyET) to connect with the Powertoo
 
 A collection of articles explaining in detail how Lambda Powertools helps with a Serverless adoption strategy and its challenges.
 
-Click to read the [Part 1 - Logging](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-1-logging){:target="_blank"}
+* [Part 1 - Logging](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-1-logging){:target="_blank"}
 
-Click to read the [Part 2 - Observability: monitoring and tracing](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-2-observability){:target="_blank"}
+* [Part 2 - Observability: monitoring and tracing](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-2-observability){:target="_blank"}
 
-Click to read the [Part 3 - Business Domain Observability](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-3-business-domain-observability){:target="_blank"}
+* [Part 3 - Business Domain Observability](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-3-business-domain-observability){:target="_blank"}
 
-Click to read the [Part 4 - Environment Variables](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-environment-variables){:target="_blank"}
+* [Part 4 - Environment Variables](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-environment-variables){:target="_blank"}
 
-Click to read the [Part 5 - Input Validation](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-5-input-validation){:target="_blank"}
+* [Part 5 - Input Validation](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-5-input-validation){:target="_blank"}
 
-Click to read the [Part 6 - Configuration & Feature Flags](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-part-6-feature-flags-configuration-best-practices){:target="_blank"}
+* [Part 6 - Configuration & Feature Flags](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-part-6-feature-flags-configuration-best-practices){:target="_blank"}
 
 ## Videos
 
-#### Building a resilient input handling with AWS Lambda Parser
+#### Building a resilient input handling with Parser
 
 > **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/ranthebuilder)**
 
 When building applications with AWS Lambda it is critical to verify the data structure and validate the input due to the multiple different sources that can trigger them. In this session Ran Isenberg (CyberArk) will present one of the interesting features of AWS Lambda Powertools for python: the parser.
 
-On this session you will learn how to increase code quality, extensibility and testability, boost you productivity and ship rock solid apps to production.
-
-Watch the video below or [directly on Twitch](https://www.twitch.tv/videos/1034744364){:target="_blank"}:
+In this session you will learn how to increase code quality, extensibility and testability, boost you productivity and ship rock solid apps to production.
 
 <iframe src="https://player.twitch.tv/?video=1034744364&parent=localhost&autoplay=false" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
 
@@ -53,18 +51,16 @@ Watch the video below or [directly on Twitch](https://www.twitch.tv/videos/10347
 
 > **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/ranthebuilder)**
 
-A deep dive in how Lambda Powertools helped with the use of Feature Flags
-
-Watch the video below or [directly on Twitch](https://www.twitch.tv/videos/1174133534){:target="_blank"}:
+A deep dive in the [Feature Flags](./utilities/feature_flags.md){target="_blank"} feature along with tips and tricks.
 
 <iframe src="https://player.twitch.tv/?video=1174133534&parent=localhost&autoplay=false" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
 
 ## Sample projects
 
-### Python Serverless GitHub Template Project
+### Complete Lambda Handler Cookbook
 
 > **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/ranthebuilder)**
 
-This repository provides a working, deployable, open source based, AWS Lambda handler and CDK Python code. This handler embodies Serverless best practices and has all the bells and whistles for a proper production ready handler. It uses many of the AWS Lambda Powertools utilities for Python.
+This repository provides a working, deployable, open source based, AWS Lambda handler and [AWS CDK](https://aws.amazon.com/cdk/){target="_blank"} Python code. This handler embodies Serverless best practices and has all the bells and whistles for a proper production ready handler. It uses many of the AWS Lambda Powertools utilities for Python.
 
-[Click here](https://github.com/ran-isenberg/aws-lambda-handler-cookbook){:target="_blank"}
+:material-github: [github.com/ran-isenberg/aws-lambda-handler-cookbook](https://github.com/ran-isenberg/aws-lambda-handler-cookbook){:target="_blank"}
