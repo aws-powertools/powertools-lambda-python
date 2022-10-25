@@ -11,6 +11,7 @@ nav:
   - Roadmap: roadmap.md
   - API reference: api/" target="_blank
   - Upgrade guide: upgrade.md
+  - We Made This: we_made_this.md
   - Core utilities:
       - core/tracer.md
       - core/logger.md
