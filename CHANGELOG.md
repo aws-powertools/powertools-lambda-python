@@ -4,15 +4,28 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **deps:** update build system to poetry-core ([#1651](https://github.com/awslabs/aws-lambda-powertools-python/issues/1651))
+
 ## Documentation
 
 * **index:** fold support us banner
 * **index:** add quotes to pip for zsh customers
 * **install:** address early v2 feedback on installation and project support
+* **we-made-this:** new community content section ([#1650](https://github.com/awslabs/aws-lambda-powertools-python/issues/1650))
+
+## Features
+
+* **layers:** add layer balancer script ([#1643](https://github.com/awslabs/aws-lambda-powertools-python/issues/1643))
 
 ## Maintenance
 
 * **ci:** fix typo on version description
+* **deps:** bump docker/setup-qemu-action from 2.0.0 to 2.1.0 ([#1627](https://github.com/awslabs/aws-lambda-powertools-python/issues/1627))
+* **deps:** bump peaceiris/actions-gh-pages from 3.8.0 to 3.9.0 ([#1649](https://github.com/awslabs/aws-lambda-powertools-python/issues/1649))
+* **deps-dev:** bump flake8-variables-names from 0.0.4 to 0.0.5 ([#1628](https://github.com/awslabs/aws-lambda-powertools-python/issues/1628))
+* **deps-dev:** bump pytest-asyncio from 0.16.0 to 0.20.1 ([#1635](https://github.com/awslabs/aws-lambda-powertools-python/issues/1635))
 * **docs:** remove v2 banner on top of the docs
 
 
