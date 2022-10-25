@@ -27,6 +27,6 @@ class BaseLocalLambdaLayer(ABC):
             # Create missing parent directories if missing
             self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def after_build(self):
+    def after_build(self):  # noqa: B027
         """Any step after a build succeed"""
         ...
