@@ -240,8 +240,8 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
                 runtime=aws.lambda_.Runtime.PYTHON3D9,
                 handler="index.handler",
                 role=role.arn,
-                architectures=["x86_64"]
-                # other props like code and more...
+                architectures=["x86_64"],
+                code=pulumi.FileArchive("lambda_function_payload.zip")
             )
             ```
 
@@ -408,8 +408,8 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
                 runtime=aws.lambda_.Runtime.PYTHON3D9,
                 handler="index.handler",
                 role=role.arn,
-                architectures=["arm64"]
-                # other props like code and more...
+                architectures=["arm64"],
+                code=pulumi.FileArchive("lambda_function_payload.zip")
             )
             ```
 
