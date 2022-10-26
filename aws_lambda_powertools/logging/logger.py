@@ -378,7 +378,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         extra = {**extra, **kwargs}
 
         # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-        if sys.version_info < (3, 8):
+        if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.info(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.info(
             msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
@@ -398,7 +398,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         extra = {**extra, **kwargs}
 
         # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-        if sys.version_info < (3, 8):
+        if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.error(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.error(
             msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
@@ -408,7 +408,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self,
         msg: object,
         *args,
-        exc_info=None,
+        exc_info=True,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
@@ -418,7 +418,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         extra = {**extra, **kwargs}
 
         # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-        if sys.version_info < (3, 8):
+        if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.exception(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.exception(
             msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
@@ -438,7 +438,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         extra = {**extra, **kwargs}
 
         # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-        if sys.version_info < (3, 8):
+        if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.critical(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.critical(
             msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
@@ -458,7 +458,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         extra = {**extra, **kwargs}
 
         # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-        if sys.version_info < (3, 8):
+        if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.warning(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.warning(
             msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
