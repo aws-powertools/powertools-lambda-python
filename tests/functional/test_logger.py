@@ -415,14 +415,14 @@ def test_logger_extra_kwargs(stdout, service_name):
     assert "request_id" not in no_extra_fields_log
 
 
-def test_logger_kwargs_no_extra(stdout, service_name):
+def test_logger_arbitrary_fields_as_kwargs(stdout, service_name):
     # GIVEN Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
 
-    # WHEN `request_id` is an extra field in a log message to the existing structured log
+    # WHEN `request_id` is an arbitrary field in a log message to the existing structured log
     fields = {"request_id": "blah"}
 
-    logger.info("with extra fields", **fields)
+    logger.info("with arbitrary fields", **fields)
     logger.info("without extra fields")
 
     extra_fields_log, no_extra_fields_log = capture_multiple_logging_statements_output(stdout)
