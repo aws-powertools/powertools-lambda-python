@@ -13,6 +13,7 @@
 
 * **community:** fix social handlers for Ran ([#1654](https://github.com/awslabs/aws-lambda-powertools-python/issues/1654))
 * **community:** fix twitch parent domain for embedded video
+* **homepage:** add Pulumi code example ([#1652](https://github.com/awslabs/aws-lambda-powertools-python/issues/1652))
 * **index:** fold support us banner
 * **index:** add quotes to pip for zsh customers
 * **install:** address early v2 feedback on installation and project support
