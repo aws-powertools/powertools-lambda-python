@@ -464,6 +464,26 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
         )
 
+    def debug(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        if sys.version_info < (3, 8):  # pragma: no cover
+            return self._logger.debug(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.debug(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
     def append_keys(self, **additional_keys):
         self.registered_formatter.append_keys(**additional_keys)
 
