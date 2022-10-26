@@ -4,7 +4,7 @@ import logging
 import os
 import random
 import sys
-from typing import IO, Any, Callable, Dict, Iterable, Optional, TypeVar, Union
+from typing import IO, Any, Callable, Dict, Iterable, Mapping, Optional, TypeVar, Union
 
 import jmespath
 
@@ -358,6 +358,101 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             return lambda_handler(event, context, *args, **kwargs)
 
         return decorate
+
+    def info(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        # NOTE: We need to solve stack frame location for Python <3.8
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+        if sys.version_info < (3, 8):
+            return self._logger.info(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.info(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
+    def error(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        # NOTE: We need to solve stack frame location for Python <3.8
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+        if sys.version_info < (3, 8):
+            return self._logger.error(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.error(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
+    def exception(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        # NOTE: We need to solve stack frame location for Python <3.8
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+        if sys.version_info < (3, 8):
+            return self._logger.exception(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.exception(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
+    def critical(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        # NOTE: We need to solve stack frame location for Python <3.8
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+        if sys.version_info < (3, 8):
+            return self._logger.critical(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.critical(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
+    def warning(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        # NOTE: We need to solve stack frame location for Python <3.8
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+        if sys.version_info < (3, 8):
+            return self._logger.warning(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.warning(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
 
     def append_keys(self, **additional_keys):
         self.registered_formatter.append_keys(**additional_keys)

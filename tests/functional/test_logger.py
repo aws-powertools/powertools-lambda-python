@@ -415,6 +415,25 @@ def test_logger_extra_kwargs(stdout, service_name):
     assert "request_id" not in no_extra_fields_log
 
 
+def test_logger_kwargs_no_extra(stdout, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN `request_id` is an extra field in a log message to the existing structured log
+    fields = {"request_id": "blah"}
+
+    logger.info("with extra fields", **fields)
+    logger.info("without extra fields")
+
+    extra_fields_log, no_extra_fields_log = capture_multiple_logging_statements_output(stdout)
+
+    # THEN first log should have request_id field in the root structure
+    assert "request_id" in extra_fields_log
+
+    # THEN second log should not have request_id in the root structure
+    assert "request_id" not in no_extra_fields_log
+
+
 def test_logger_log_twice_when_log_filter_isnt_present_and_root_logger_is_setup(monkeypatch, stdout, service_name):
     # GIVEN Lambda configures the root logger with a handler
     root_logger = logging.getLogger()
