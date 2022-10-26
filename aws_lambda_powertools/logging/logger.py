@@ -1,10 +1,12 @@
 import functools
 import inspect
+import io
 import logging
 import os
 import random
 import sys
-from typing import IO, Any, Callable, Dict, Iterable, Optional, TypeVar, Union
+import traceback
+from typing import IO, Any, Callable, Dict, Iterable, Mapping, Optional, TypeVar, Union
 
 import jmespath
 
@@ -235,6 +237,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self._logger.addHandler(self.logger_handler)
         self.structure_logs(**kwargs)
 
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        self._logger.findCaller = self.findCaller
+
         # Pytest Live Log feature duplicates log records for colored output
         # but we explicitly add a filter for log deduplication.
         # This flag disables this protection when you explicit want logs to be duplicated (#262)
@@ -359,6 +364,126 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
         return decorate
 
+    def info(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        if sys.version_info < (3, 8):  # pragma: no cover
+            return self._logger.info(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.info(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
+    def error(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        if sys.version_info < (3, 8):  # pragma: no cover
+            return self._logger.error(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.error(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
+    def exception(
+        self,
+        msg: object,
+        *args,
+        exc_info=True,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        if sys.version_info < (3, 8):  # pragma: no cover
+            return self._logger.exception(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.exception(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
+    def critical(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        if sys.version_info < (3, 8):  # pragma: no cover
+            return self._logger.critical(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.critical(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
+    def warning(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        if sys.version_info < (3, 8):  # pragma: no cover
+            return self._logger.warning(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.warning(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
+    def debug(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        if sys.version_info < (3, 8):  # pragma: no cover
+            return self._logger.debug(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.debug(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
     def append_keys(self, **additional_keys):
         self.registered_formatter.append_keys(**additional_keys)
 
@@ -462,6 +587,41 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         caller_frame = frame.f_back.f_back.f_back
         return caller_frame.f_globals["__name__"]
 
+    # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+    def findCaller(self, stack_info=False, stacklevel=2):  # pragma: no cover
+        """
+        Find the stack frame of the caller so that we can note the source
+        file name, line number and function name.
+        """
+        f = logging.currentframe()  # noqa: VNE001
+        # On some versions of IronPython, currentframe() returns None if
+        # IronPython isn't run with -X:Frames.
+        if f is None:
+            return "(unknown file)", 0, "(unknown function)", None
+        while stacklevel > 0:
+            next_f = f.f_back
+            if next_f is None:
+                ## We've got options here.
+                ## If we want to use the last (deepest) frame:
+                break
+                ## If we want to mimic the warnings module:
+                # return ("sys", 1, "(unknown function)", None) # noqa: E800
+                ## If we want to be pedantic:  # noqa: E800
+                # raise ValueError("call stack is not deep enough") # noqa: E800
+            f = next_f  # noqa: VNE001
+            if not _is_internal_frame(f):
+                stacklevel -= 1
+        co = f.f_code
+        sinfo = None
+        if stack_info:
+            with io.StringIO() as sio:
+                sio.write("Stack (most recent call last):\n")
+                traceback.print_stack(f, file=sio)
+                sinfo = sio.getvalue()
+                if sinfo[-1] == "\n":
+                    sinfo = sinfo[:-1]
+        return co.co_filename, f.f_lineno, co.co_name, sinfo
+
 
 def set_package_logger(
     level: Union[str, int] = logging.DEBUG,
@@ -500,3 +660,13 @@ def set_package_logger(
     handler = logging.StreamHandler(stream)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+
+
+# Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+# The following is based on warnings._is_internal_frame. It makes sure that
+# frames of the import mechanism are skipped when logging at module level and
+# using a stacklevel value greater than one.
+def _is_internal_frame(frame):  # pragma: no cover
+    """Signal whether the frame is a CPython or logging module internal."""
+    filename = os.path.normcase(frame.f_code.co_filename)
+    return filename == logging._srcfile or ("importlib" in filename and "_bootstrap" in filename)
