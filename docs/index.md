@@ -233,16 +233,15 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
             )
 
             lambda_function = aws.lambda_.Function("function",
-                layers=[pulumi.Output.concat("arn:aws:lambda:",aws.get_region_output().name,":094274105915:layer:AWSLambdaPowertoolsTypeScript:3")],
-                code=pulumi.AssetArchive({
-                    ".": pulumi.FileArchive("./app")
-                }),
+                layers=[pulumi.Output.concat("arn:aws:lambda:",aws.get_region_output().name,":017000801446:layer:AWSLambdaPowertoolsPythonV2:11")],
                 tracing_config={
                     "mode": "Active"
                 },
-                runtime=aws.lambda_.Runtime.NODE_JS16D_X,
+                runtime=aws.lambda_.Runtime.PYTHON3D9,
                 handler="index.handler",
-                role=role.arn
+                role=role.arn,
+                architectures=["x86_64"]
+                # other props like code and more...
             )
             ```
 
@@ -402,19 +401,15 @@ You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https:
             )
 
             lambda_function = aws.lambda_.Function("function",
-                layers=[
-                    pulumi.Output.concat("arn:aws:lambda:",aws.get_region_output().name,":017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:11")
-                ],
-                code=pulumi.AssetArchive({
-                    ".": pulumi.FileArchive("./app")
-                }),
+                layers=[pulumi.Output.concat("arn:aws:lambda:",aws.get_region_output().name,":017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:11")],
                 tracing_config={
                     "mode": "Active"
                 },
-                runtime=aws.lambda_.Runtime.NODE_JS16D_X,
+                runtime=aws.lambda_.Runtime.PYTHON3D9,
                 handler="index.handler",
                 role=role.arn,
                 architectures=["arm64"]
+                # other props like code and more...
             )
             ```
 
