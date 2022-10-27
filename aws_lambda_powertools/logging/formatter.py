@@ -62,6 +62,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
     default_time_format = "%Y-%m-%d %H:%M:%S,%F%z"  # '2021-04-17 18:19:57,656+0200'
     custom_ms_time_directive = "%F"
+    RFC3339_ISO8601_FORMAT = "%Y-%m-%dT%H:%M:%S.%F%z"  # '2022-10-27T16:27:43.738+02:00'
 
     def __init__(
         self,
@@ -72,6 +73,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         use_datetime_directive: bool = False,
         log_record_order: Optional[List[str]] = None,
         utc: bool = False,
+        use_rfc3339_iso8601: bool = False,
         **kwargs,
     ):
         """Return a LambdaPowertoolsFormatter instance.
@@ -106,6 +108,9 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             also supports a custom %F directive for milliseconds.
         utc : bool, optional
             set logging timestamp to UTC, by default False to continue to use local time as per stdlib
+        use_rfc3339_iso8601: bool, optional
+            Whether to use a popular dateformat that complies with both RFC3339 and ISO8601.
+
         log_record_order : list, optional
             set order of log keys when logging, by default ["level", "location", "message", "timestamp"]
         kwargs
@@ -129,6 +134,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
         self.log_format = dict.fromkeys(self.log_record_order)  # Set the insertion order for the log messages
         self.update_formatter = self.append_keys  # alias to old method
+        self.use_rfc3339_iso8601 = use_rfc3339_iso8601
 
         if self.utc:
             self.converter = time.gmtime  # type: ignore
@@ -153,36 +159,51 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         return self.serialize(log=formatted_log)
 
     def formatTime(self, record: logging.LogRecord, datefmt: Optional[str] = None) -> str:
+        # As of Py3.7, we can infer milliseconds directly from any datetime
+        # saving processing time as we can shortcircuit early
+        # Maintenance: In V3, we (and Java) should move to this format by default
+        # since we've provided enough time for those migrating from std logging
+        if self.use_rfc3339_iso8601:
+            if self.utc:
+                ts_as_datetime = datetime.fromtimestamp(record.created, tz=timezone.utc)
+            else:
+                ts_as_datetime = datetime.fromtimestamp(record.created).astimezone()
+
+            return ts_as_datetime.isoformat(timespec="milliseconds")  # 2022-10-27T17:42:26.841+0200
+
+        # converts to local/UTC TZ as struct time
         record_ts = self.converter(record.created)  # type: ignore
 
         if datefmt is None:  # pragma: no cover, it'll always be None in std logging, but mypy
             datefmt = self.datefmt
 
         # NOTE: Python `time.strftime` doesn't provide msec directives
-        # so we create a custom one (%F) and replace logging record ts
+        # so we create a custom one (%F) and replace logging record_ts
         # Reason 2 is that std logging doesn't support msec after TZ
         msecs = "%03d" % record.msecs
 
-        # Datetime format codes might be optionally used
-        # however it only makes a difference if `datefmt` is passed
-        # since format codes are the same except %f
+        # Datetime format codes is a superset of time format codes
+        # therefore we only honour them if explicitly asked
+        # by default, those migrating from std logging will use time format codes
+        # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes
         if self.use_datetime_directive and datefmt:
-            # record.msecs are microseconds, divide by 1000 and we get milliseconds
+            # record.msecs are microseconds, divide by 1000 to get milliseconds
             timestamp = record.created + record.msecs / 1000
 
             if self.utc:
                 dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
             else:
-                # make sure local timezone is included
                 dt = datetime.fromtimestamp(timestamp).astimezone()
 
             custom_fmt = datefmt.replace(self.custom_ms_time_directive, msecs)
             return dt.strftime(custom_fmt)
 
+        # Only time format codes being used
         elif datefmt:
             custom_fmt = datefmt.replace(self.custom_ms_time_directive, msecs)
             return time.strftime(custom_fmt, record_ts)
 
+        # Use default fmt: 2021-05-03 10:20:19,650+0200
         custom_fmt = self.default_time_format.replace(self.custom_ms_time_directive, msecs)
         return time.strftime(custom_fmt, record_ts)
 

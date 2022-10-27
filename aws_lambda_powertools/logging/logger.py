@@ -94,6 +94,10 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
         See https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior . This
         also supports a custom %F directive for milliseconds.
+    use_rfc3339_iso8601: bool, optional
+        Whether to use a popular dateformat that complies with both RFC3339 and ISO8601.
+
+        Example: 2022-10-27T16:27:43.738+02:00.
     json_serializer : Callable, optional
         function to serialize `obj` to a JSON formatted `str`, by default json.dumps
     json_deserializer : Callable, optional
