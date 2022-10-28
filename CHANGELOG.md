@@ -8,11 +8,13 @@
 
 * **ci:** linting issues after flake8-blackbear,mypy upgrades
 * **deps:** update build system to poetry-core ([#1651](https://github.com/awslabs/aws-lambda-powertools-python/issues/1651))
+* **idempotency:** idempotent_function should support standalone falsy values ([#1669](https://github.com/awslabs/aws-lambda-powertools-python/issues/1669))
 
 ## Documentation
 
 * **community:** fix social handlers for Ran ([#1654](https://github.com/awslabs/aws-lambda-powertools-python/issues/1654))
 * **community:** fix twitch parent domain for embedded video
+* **homepage:** remove 3.6 and add hero image
 * **homepage:** add Pulumi code example ([#1652](https://github.com/awslabs/aws-lambda-powertools-python/issues/1652))
 * **index:** fold support us banner
 * **index:** add quotes to pip for zsh customers
@@ -22,6 +24,7 @@
 ## Features
 
 * **layers:** add layer balancer script ([#1643](https://github.com/awslabs/aws-lambda-powertools-python/issues/1643))
+* **logger:** add use_rfc3339 and auto-complete formatter opts in Logger ([#1662](https://github.com/awslabs/aws-lambda-powertools-python/issues/1662))
 * **logger:** accept arbitrary keyword=value for ephemeral metadata ([#1658](https://github.com/awslabs/aws-lambda-powertools-python/issues/1658))
 
 ## Maintenance
@@ -29,6 +32,7 @@
 * **ci:** fix typo on version description
 * **deps:** bump docker/setup-qemu-action from 2.0.0 to 2.1.0 ([#1627](https://github.com/awslabs/aws-lambda-powertools-python/issues/1627))
 * **deps:** bump peaceiris/actions-gh-pages from 3.8.0 to 3.9.0 ([#1649](https://github.com/awslabs/aws-lambda-powertools-python/issues/1649))
+* **deps-dev:** bump aws-cdk-lib from 2.47.0 to 2.48.0 ([#1664](https://github.com/awslabs/aws-lambda-powertools-python/issues/1664))
 * **deps-dev:** bump flake8-variables-names from 0.0.4 to 0.0.5 ([#1628](https://github.com/awslabs/aws-lambda-powertools-python/issues/1628))
 * **deps-dev:** bump pytest-asyncio from 0.16.0 to 0.20.1 ([#1635](https://github.com/awslabs/aws-lambda-powertools-python/issues/1635))
 * **docs:** remove v2 banner on top of the docs
