@@ -6,6 +6,7 @@ from ...shared.types import JSONType
 from . import schema
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError
+from .time_conditions import time_range_compare, time_selected_days_compare
 
 
 class FeatureFlags:
@@ -59,6 +60,8 @@ class FeatureFlags:
             schema.RuleAction.KEY_NOT_IN_VALUE.value: lambda a, b: a not in b,
             schema.RuleAction.VALUE_IN_KEY.value: lambda a, b: b in a,
             schema.RuleAction.VALUE_NOT_IN_KEY.value: lambda a, b: b not in a,
+            schema.RuleAction.TIME_RANGE.value: lambda a, b: time_range_compare(a, b),
+            schema.RuleAction.TIME_SELECTED_DAYS.value: lambda a, b: time_selected_days_compare(a, b),
         }
 
         try:
@@ -86,6 +89,10 @@ class FeatureFlags:
             context_value = context.get(str(condition.get(schema.CONDITION_KEY)))
             cond_action = condition.get(schema.CONDITION_ACTION, "")
             cond_value = condition.get(schema.CONDITION_VALUE)
+
+            # rule based actions have no user context. the context is the condition key
+            if cond_action == schema.RuleAction.TIME_RANGE.value:
+                context_value = condition.get(schema.CONDITION_KEY)
 
             if not self._match_by_action(action=cond_action, condition_value=cond_value, context_value=context_value):
                 self.logger.debug(
@@ -228,7 +235,7 @@ class FeatureFlags:
         # method `get_matching_features` returning Dict[feature_name, feature_value]
         boolean_feature = feature.get(
             schema.FEATURE_DEFAULT_VAL_TYPE_KEY, True
-        )  # backwards compatability ,assume feature flag
+        )  # backwards compatibility ,assume feature flag
         if not rules:
             self.logger.debug(
                 f"no rules found, returning feature default, name={name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # noqa: E501
@@ -287,7 +294,7 @@ class FeatureFlags:
             feature_default_value = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
             boolean_feature = feature.get(
                 schema.FEATURE_DEFAULT_VAL_TYPE_KEY, True
-            )  # backwards compatability ,assume feature flag
+            )  # backwards compatibility ,assume feature flag
 
             if feature_default_value and not rules:
                 self.logger.debug(f"feature is enabled by default and has no defined rules, name={name}")

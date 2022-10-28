@@ -31,6 +31,26 @@ class RuleAction(str, Enum):
     KEY_NOT_IN_VALUE = "KEY_NOT_IN_VALUE"
     VALUE_IN_KEY = "VALUE_IN_KEY"
     VALUE_NOT_IN_KEY = "VALUE_NOT_IN_KEY"
+    TIME_RANGE = "TIME_RANGE"  # 24 hours clock UTC time
+    TIME_SELECTED_DAYS = "TIME_SELECTED_DAYS"
+
+
+class TimeKeys(str, Enum):
+    CURRENT_HOUR_UTC = "CURRENT_HOUR_UTC"
+    CURRENT_DAY_UTC = "CURRENT_DAY_UTC"
+    CURRENT_TIME_UTC = "CURRENT_TIME_UTC"
+
+
+class TimeValues(str, Enum):
+    START_TIME = "START_TIME"
+    END_TIME = "END_TIME"
+    SUNDAY = "SUNDAY"
+    MONDAY = "MONDAY"
+    TUESDAY = "TUESDAY"
+    WEDNESDAY = "WEDNESDAY"
+    THURSDAY = "THURSDAY"
+    FRIDAY = "FRIDAY"
+    SATURDAY = "SATURDAY"
 
 
 class SchemaValidator(BaseValidator):
