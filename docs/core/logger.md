@@ -291,6 +291,30 @@ Use `logger.exception` method to log contextual information about exceptions. Lo
     --8<-- "examples/logger/src/logging_exceptions_output.json"
     ```
 
+### Date formatting
+
+Logger uses Python's standard logging date format with the addition of timezone: `2021-05-03 11:47:12,494+0200`.
+
+You can easily change the date format using one of the following parameters:
+
+* **`datefmt`**. You can pass any [strftime format codes](https://strftime.org/){target="_blank"}. Use `%F` if you need milliseconds.
+* **`use_rfc3339`**. This flag will use a format compliant with both RFC3339 and ISO8601: `2022-10-27T16:27:43.738+02:00`
+
+???+ tip "Prefer using [datetime string formats](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes){target="_blank"}?"
+	Use `use_datetime_directive` flag along with `datefmt` to instruct Logger to use `datetime` instead of `time.strftime`.
+
+=== "date_formatting.py"
+
+    ```python hl_lines="5 8"
+    --8<-- "examples/logger/src/date_formatting.py"
+    ```
+
+=== "date_formatting_output.json"
+
+    ```json hl_lines="6 13"
+    --8<-- "examples/logger/src/date_formatting_output.json"
+    ```
+
 ## Advanced
 
 ### Built-in Correlation ID expressions
@@ -451,24 +475,19 @@ Do this instead:
 
 #### Overriding Log records
 
-???+ tip
-	Use `datefmt` for custom date formats - We honour standard [logging library string formats](https://docs.python.org/3/howto/logging.html#displaying-the-date-time-in-messages){target="_blank"}.
-
-	Prefer using [datetime string formats](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes){target="_blank"}? Set `use_datetime_directive` at Logger constructor or at [Lambda Powertools Formatter](#lambdapowertoolsformatter).
-
 You might want to continue to use the same date formatting style, or override `location` to display the `package.function_name:line_number` as you previously had.
 
-Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, `xray_trace_id`.
+Logger allows you to either change the format or suppress the following keys at initialization: `location`, `timestamp`, `xray_trace_id`.
 
 === "overriding_log_records.py"
 
-    ```python hl_lines="7 10"
+    ```python hl_lines="6 10"
     --8<-- "examples/logger/src/overriding_log_records.py"
     ```
 
 === "overriding_log_records_output.json"
 
-    ```json hl_lines="3 5"
+    ```json hl_lines="4"
     --8<-- "examples/logger/src/overriding_log_records_output.json"
     ```
 
