@@ -814,6 +814,21 @@ def test_use_datetime(stdout, service_name, utc):
     )
 
 
+@pytest.mark.parametrize("utc", [False, True])
+def test_use_rfc3339_iso8601(stdout, service_name, utc):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout, use_rfc3339=True, utc=utc)
+    RFC3339_REGEX = r"^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[\+-]\d{2}:\d{2})?)$"
+
+    # WHEN a log statement happens
+    logger.info({})
+
+    # THEN the timestamp has the appropriate formatting
+    log = capture_logging_output(stdout)
+
+    assert re.fullmatch(RFC3339_REGEX, log["timestamp"])  # "2022-10-27T17:42:26.841+0200"
+
+
 def test_inject_lambda_context_log_event_request_data_classes(lambda_context, stdout, lambda_event, service_name):
     # GIVEN Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
