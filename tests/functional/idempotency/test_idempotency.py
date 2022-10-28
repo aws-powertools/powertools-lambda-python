@@ -1255,8 +1255,6 @@ def test_idempotent_function_falsy_values(data):
     mock_event = data
     idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_falsy_values.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa: E501
 
-    # 'test-func.functional.idempotency.test_idempotency.test_idempotent_function_falsy_values.<locals>.record_handler#37a6259cc0c1dae299a7866489dff0bd'
-
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
 
@@ -1268,6 +1266,25 @@ def test_idempotent_function_falsy_values(data):
     result = record_handler(record=mock_event)
     # THEN we expect the function to execute successfully
     assert result == expected_result
+
+
+@pytest.mark.parametrize("data", [None, 0, False])
+def test_idempotent_function_falsy_values_with_raise_on_no_idempotency_key(
+    data, persistence_store: DynamoDBPersistenceLayer
+):
+    # GIVEN raise_on_no_idempotency_key is True
+    idempotency_config = IdempotencyConfig(event_key_jmespath="idemKey", raise_on_no_idempotency_key=True)
+
+    @idempotent_function(data_keyword_argument="record", persistence_store=persistence_store, config=idempotency_config)
+    def record_handler(record):
+        return ValueError("Should not be raised")
+
+    # WHEN calling the function
+    with pytest.raises(IdempotencyKeyError) as e:
+        record_handler(record=data)
+
+    # THEN we expect an idempotency key error message
+    assert "No data found to create a hashed idempotency_key" == e.value.args[0]
 
 
 def test_idempotent_data_sorting():
