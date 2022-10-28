@@ -73,7 +73,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         use_datetime_directive: bool = False,
         log_record_order: Optional[List[str]] = None,
         utc: bool = False,
-        use_rfc3339_iso8601: bool = False,
+        use_rfc3339: bool = False,
         **kwargs,
     ):
         """Return a LambdaPowertoolsFormatter instance.
@@ -108,9 +108,9 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             also supports a custom %F directive for milliseconds.
         utc : bool, optional
             set logging timestamp to UTC, by default False to continue to use local time as per stdlib
-        use_rfc3339_iso8601: bool, optional
+        use_rfc3339: bool, optional
             Whether to use a popular dateformat that complies with both RFC3339 and ISO8601.
-
+            e.g., 2022-10-27T16:27:43.738+02:00.
         log_record_order : list, optional
             set order of log keys when logging, by default ["level", "location", "message", "timestamp"]
         kwargs
@@ -134,7 +134,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
         self.log_format = dict.fromkeys(self.log_record_order)  # Set the insertion order for the log messages
         self.update_formatter = self.append_keys  # alias to old method
-        self.use_rfc3339_iso8601 = use_rfc3339_iso8601
+        self.use_rfc3339_iso8601 = use_rfc3339
 
         if self.utc:
             self.converter = time.gmtime  # type: ignore

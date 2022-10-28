@@ -817,7 +817,7 @@ def test_use_datetime(stdout, service_name, utc):
 @pytest.mark.parametrize("utc", [False, True])
 def test_use_rfc3339_iso8601(stdout, service_name, utc):
     # GIVEN
-    logger = Logger(service=service_name, stream=stdout, use_rfc3339_iso8601=True, utc=utc)
+    logger = Logger(service=service_name, stream=stdout, use_rfc3339=True, utc=utc)
     RFC3339_REGEX = r"^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[\+-]\d{2}:\d{2})?)$"
 
     # WHEN a log statement happens
