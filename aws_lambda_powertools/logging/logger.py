@@ -6,7 +6,18 @@ import os
 import random
 import sys
 import traceback
-from typing import IO, Any, Callable, Dict, Iterable, Mapping, Optional, TypeVar, Union
+from typing import (
+    IO,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    TypeVar,
+    Union,
+)
 
 import jmespath
 
@@ -86,8 +97,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     Parameters propagated to LambdaPowertoolsFormatter
     --------------------------------------------------
     datefmt: str, optional
-        String directives (strftime) to format log timestamp using `time`, by default it uses RFC
-        3339.
+        String directives (strftime) to format log timestamp using `time`, by default it uses 2021-05-03 11:47:12,494+0200. # noqa: E501
     use_datetime_directive: bool, optional
         Interpret `datefmt` as a format string for `datetime.datetime.strftime`, rather than
         `time.strftime`.
@@ -191,6 +201,14 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         stream: Optional[IO[str]] = None,
         logger_formatter: Optional[PowertoolsFormatter] = None,
         logger_handler: Optional[logging.Handler] = None,
+        json_serializer: Optional[Callable[[Dict], str]] = None,
+        json_deserializer: Optional[Callable[[Union[Dict, str, bool, int, float]], str]] = None,
+        json_default: Optional[Callable[[Any], Any]] = None,
+        datefmt: Optional[str] = None,
+        use_datetime_directive: bool = False,
+        log_record_order: Optional[List[str]] = None,
+        utc: bool = False,
+        use_rfc3339_iso8601: bool = False,
         **kwargs,
     ):
         self.service = resolve_env_var_choice(
@@ -209,7 +227,20 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
 
-        self._init_logger(**kwargs)
+        # NOTE: This is primarily to improve UX, so IDEs can autocomplete LambdaPowertoolsFormatter options
+        # previously, we masked all of them as kwargs thus limiting feature discovery
+        formatter_options = {
+            "json_serializer": json_serializer,
+            "json_deserializer": json_deserializer,
+            "json_default": json_default,
+            "datefmt": datefmt,
+            "use_datetime_directive": use_datetime_directive,
+            "log_record_order": log_record_order,
+            "utc": utc,
+            "use_rfc3339_iso8601": use_rfc3339_iso8601,
+        }
+
+        self._init_logger(formatter_options=formatter_options, **kwargs)
 
     def __getattr__(self, name):
         # Proxy attributes not found to actual logger to support backward compatibility
@@ -224,7 +255,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
         return logging.getLogger(logger_name)
 
-    def _init_logger(self, **kwargs):
+    def _init_logger(self, formatter_options: Optional[Dict] = None, **kwargs):
         """Configures new logger"""
 
         # Skip configuration if it's a child logger or a pre-configured logger
@@ -239,7 +270,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self._configure_sampling()
         self._logger.setLevel(self.log_level)
         self._logger.addHandler(self.logger_handler)
-        self.structure_logs(**kwargs)
+        self.structure_logs(formatter_options=formatter_options, **kwargs)
 
         # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
         self._logger.findCaller = self.findCaller
@@ -505,11 +536,11 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         """Convenience property to access logger formatter"""
         return self.registered_handler.formatter  # type: ignore
 
-    def structure_logs(self, append: bool = False, **keys):
+    def structure_logs(self, append: bool = False, formatter_options: Optional[Dict] = None, **keys):
         """Sets logging formatting to JSON.
 
         Optionally, it can append keyword arguments
-        to an existing logger so it is available across future log statements.
+        to an existing logger, so it is available across future log statements.
 
         Last keyword argument and value wins if duplicated.
 
@@ -517,7 +548,11 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         ----------
         append : bool, optional
             append keys provided to logger formatter, by default False
+        formatter_options : dict, optional
+            LambdaPowertoolsFormatter options to be propagated, by default {}
         """
+        formatter_options = formatter_options or {}
+
         # There are 3 operational modes for this method
         ## 1. Register a Powertools Formatter for the first time
         ## 2. Append new keys to the current logger formatter; deprecated in favour of append_keys
@@ -527,7 +562,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         log_keys = {**self._default_log_keys, **keys}
         is_logger_preconfigured = getattr(self._logger, "init", False)
         if not is_logger_preconfigured:
-            formatter = self.logger_formatter or LambdaPowertoolsFormatter(**log_keys)  # type: ignore
+            formatter = self.logger_formatter or LambdaPowertoolsFormatter(**formatter_options, **log_keys)  # type: ignore # noqa: E501
             self.registered_handler.setFormatter(formatter)
 
             # when using a custom Lambda Powertools Formatter
