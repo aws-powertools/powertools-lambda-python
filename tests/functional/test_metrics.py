@@ -925,3 +925,51 @@ def test_metrics_reuse_metadata_set(metric, dimension, namespace):
 
     # THEN both class instances should have the same metadata set
     assert my_metrics_2.metadata_set == my_metrics.metadata_set
+
+
+def test_metrics_singleton_disabled_isolates_data_set(metric, dimension, namespace, metadata):
+    # GIVEN two Metrics instance are initialized, but one has singleton disabled
+    my_metrics = Metrics(namespace=namespace)
+    isolated_metrics = Metrics(namespace=namespace, singleton=False)
+
+    # WHEN metrics, dimensions and metadata are added to the first instance
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_metric(**metric)
+    my_metrics.add_metadata(**metadata)
+
+    # THEN the non-singleton instance should not have them
+    assert my_metrics.metric_set != isolated_metrics.metric_set
+    assert my_metrics.metadata_set != isolated_metrics.metadata_set
+    assert my_metrics.dimension_set != isolated_metrics.dimension_set
+
+
+def test_metrics_singleton_disabled_do_not_share_default_dimensions(dimension, namespace):
+    # GIVEN Metrics is initialized with a default dimension
+    my_metrics = Metrics(namespace=namespace)
+    my_metrics.set_default_dimensions(**dimension)
+
+    # WHEN a non-singleton Metrics instance is initialized thereafter
+    isolated_metrics = Metrics(namespace=namespace, singleton=False)
+
+    # THEN the non-singleton instance should not have them
+    assert my_metrics.default_dimensions != isolated_metrics.default_dimensions
+
+
+def test_metrics_singleton_disabled_do_not_clear_existing_data_set(metric, dimension, namespace, metadata):
+    # GIVEN Metrics is initialized with some data
+    my_metrics = Metrics(namespace=namespace)
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_metric(**metric)
+    my_metrics.add_metadata(**metadata)
+
+    # WHEN a non-singleton Metrics instance is initialized thereafter
+    _ = Metrics(namespace=namespace, singleton=False)
+    my_metrics_2 = Metrics(namespace=namespace)
+
+    # THEN the existing metrics instance should still have their data
+    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
+    my_metrics_output = my_metrics.serialize_metric_set()
+    my_metrics_2_output = my_metrics_2.serialize_metric_set()
+
+    remove_timestamp(metrics=[my_metrics_output, my_metrics_2_output, expected])
+    assert my_metrics_output == my_metrics_2_output

@@ -55,6 +55,9 @@ class Metrics(MetricManager):
         service name to be used as metric dimension, by default "service_undefined"
     namespace : str, optional
         Namespace for metrics
+    singleton : boolean, by default True
+        Whether to reuse metrics data across Metrics instances (isolation)
+
 
     Raises
     ------
@@ -66,27 +69,49 @@ class Metrics(MetricManager):
         When metric object fails EMF schema validation
     """
 
+    # NOTE: We use class attrs to share metrics data across instances
+    # this allows customers to initialize Metrics() throughout their code base (and middlewares)
+    # and not get caught by accident with metrics data loss
+    # e.g., m1 and m2 add metric ProductCreated, however m1 has 'version' dimension  but m2 doesn't
+    # Result: ProductCreated is created twice as we now have 2 different EMF blobs
     _metrics: Dict[str, Any] = {}
     _dimensions: Dict[str, str] = {}
     _metadata: Dict[str, Any] = {}
     _default_dimensions: Dict[str, Any] = {}
 
-    def __init__(self, service: Optional[str] = None, namespace: Optional[str] = None):
+    def __init__(self, service: Optional[str] = None, namespace: Optional[str] = None, singleton: bool = True):
         self.metric_set = self._metrics
         self.service = service
         self.namespace: Optional[str] = namespace
         self.metadata_set = self._metadata
         self.default_dimensions = self._default_dimensions
         self.dimension_set = self._dimensions
-        self.dimension_set.update(**self._default_dimensions)
 
-        super().__init__(
-            metric_set=self.metric_set,
-            dimension_set=self.dimension_set,
-            namespace=self.namespace,
-            metadata_set=self.metadata_set,
-            service=self.service,
-        )
+        # We couldn't find a better name for a new class; 'singleton' param fits the purpose
+        # Customers can now disable data sharing with singleton=False
+        # It unlocks distinct namespace metrics, multi-EMF blobs and multi-tenant use cases
+        # See https://github.com/awslabs/aws-lambda-powertools-python/issues/1668
+        if singleton:
+            self.dimension_set.update(**self._default_dimensions)
+            return super().__init__(
+                metric_set=self.metric_set,
+                dimension_set=self.dimension_set,
+                namespace=self.namespace,
+                metadata_set=self.metadata_set,
+                service=self.service,
+                default_dimensions=self.default_dimensions,
+            )
+
+        # NOTE: With class initialized, we can safely clean this instance attrs
+        # this ensures instantiating a non-singleton instance after a singleton instance
+        # won't affect metric data sets, as we have different memory pointers
+        # e.g., `self._metrics != Metrics._metrics` (instance attrs vs class attrs)
+        self._metrics = {}
+        self._dimensions = {}
+        self._metadata = {}
+        self._default_dimensions = {}
+
+        return super().__init__()
 
     def set_default_dimensions(self, **dimensions) -> None:
         """Persist dimensions across Lambda invocations
