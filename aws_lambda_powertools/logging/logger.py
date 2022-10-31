@@ -8,6 +8,7 @@ import sys
 import traceback
 from typing import (
     IO,
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -241,10 +242,14 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
         self._init_logger(formatter_options=formatter_options, **kwargs)
 
-    def __getattr__(self, name):
-        # Proxy attributes not found to actual logger to support backward compatibility
-        # https://github.com/awslabs/aws-lambda-powertools-python/issues/97
-        return getattr(self._logger, name)
+    # Prevent __getattr__ from shielding unknown attribute errors in type checkers
+    # https://github.com/awslabs/aws-lambda-powertools-python/issues/1660
+    if not TYPE_CHECKING:
+
+        def __getattr__(self, name):
+            # Proxy attributes not found to actual logger to support backward compatibility
+            # https://github.com/awslabs/aws-lambda-powertools-python/issues/97
+            return getattr(self._logger, name)
 
     def _get_logger(self):
         """Returns a Logger named {self.service}, or {self.service.filename} for child loggers"""
