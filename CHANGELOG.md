@@ -9,6 +9,7 @@
 * **ci:** linting issues after flake8-blackbear,mypy upgrades
 * **deps:** update build system to poetry-core ([#1651](https://github.com/awslabs/aws-lambda-powertools-python/issues/1651))
 * **idempotency:** idempotent_function should support standalone falsy values ([#1669](https://github.com/awslabs/aws-lambda-powertools-python/issues/1669))
+* **logger:** fix unknown attributes being ignored by mypy ([#1670](https://github.com/awslabs/aws-lambda-powertools-python/issues/1670))
 
 ## Documentation
 
@@ -30,12 +31,14 @@
 ## Maintenance
 
 * **ci:** fix typo on version description
-* **deps:** bump docker/setup-qemu-action from 2.0.0 to 2.1.0 ([#1627](https://github.com/awslabs/aws-lambda-powertools-python/issues/1627))
 * **deps:** bump peaceiris/actions-gh-pages from 3.8.0 to 3.9.0 ([#1649](https://github.com/awslabs/aws-lambda-powertools-python/issues/1649))
+* **deps:** bump docker/setup-qemu-action from 2.0.0 to 2.1.0 ([#1627](https://github.com/awslabs/aws-lambda-powertools-python/issues/1627))
 * **deps-dev:** bump aws-cdk-lib from 2.47.0 to 2.48.0 ([#1664](https://github.com/awslabs/aws-lambda-powertools-python/issues/1664))
 * **deps-dev:** bump flake8-variables-names from 0.0.4 to 0.0.5 ([#1628](https://github.com/awslabs/aws-lambda-powertools-python/issues/1628))
 * **deps-dev:** bump pytest-asyncio from 0.16.0 to 0.20.1 ([#1635](https://github.com/awslabs/aws-lambda-powertools-python/issues/1635))
+* **deps-dev:** bump aws-cdk-lib from 2.48.0 to 2.49.0 ([#1671](https://github.com/awslabs/aws-lambda-powertools-python/issues/1671))
 * **docs:** remove v2 banner on top of the docs
+* **governance:** remove 'area/' from PR labels
 
 
 <a name="v2.0.0"></a>
