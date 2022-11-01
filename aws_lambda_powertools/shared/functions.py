@@ -3,7 +3,7 @@ import logging
 import os
 import warnings
 from binascii import Error as BinAsciiError
-from typing import Optional, Union
+from typing import Optional, Union, overload
 
 from aws_lambda_powertools.shared import constants
 
@@ -45,6 +45,21 @@ def resolve_truthy_env_var_choice(env: str, choice: Optional[bool] = None) -> bo
         resolved choice as either bool or environment value
     """
     return choice if choice is not None else strtobool(env)
+
+
+@overload
+def resolve_env_var_choice(env: Optional[str], choice: float) -> float:
+    ...
+
+
+@overload
+def resolve_env_var_choice(env: Optional[str], choice: str) -> str:
+    ...
+
+
+@overload
+def resolve_env_var_choice(env: Optional[str], choice: Optional[str]) -> str:
+    ...
 
 
 def resolve_env_var_choice(
