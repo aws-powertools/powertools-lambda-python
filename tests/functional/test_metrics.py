@@ -973,3 +973,29 @@ def test_metrics_singleton_disabled_do_not_clear_existing_data_set(metric, dimen
 
     remove_timestamp(metrics=[my_metrics_output, my_metrics_2_output, expected])
     assert my_metrics_output == my_metrics_2_output
+
+
+def test_nested_log_metrics(metric, dimension, namespace, metadata, capsys):
+    # GIVEN two distinct Metrics are initialized
+    my_metrics = Metrics(namespace=namespace)
+    isolated_metrics = Metrics(namespace=namespace, singleton=False)
+
+    my_metrics.add_metric(**metric)
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_metadata(**metadata)
+
+    isolated_metrics.add_metric(**metric)
+    isolated_metrics.add_dimension(**dimension)
+    isolated_metrics.add_metadata(**metadata)
+
+    # WHEN we nest log_metrics to serialize
+    # and flush all metrics at the end of a function execution
+    @isolated_metrics.log_metrics
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        pass
+
+    lambda_handler({}, {})
+
+    output = capture_metrics_output_multiple_emf_objects(capsys)
+    assert len(output) == 2
