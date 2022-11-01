@@ -209,6 +209,29 @@ def test_service_env_var(monkeypatch, capsys, metric, namespace):
     assert expected == output
 
 
+def test_service_env_var_with_metrics_instance(monkeypatch, capsys, metric, namespace, service):
+    # GIVEN we use POWERTOOLS_SERVICE_NAME
+    monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", service)
+
+    # WHEN initializing Metrics without an explicit service name
+    metrics = Metrics(namespace=namespace)
+    metrics.add_metric(**metric)
+
+    @metrics.log_metrics
+    def lambda_handler(_, __):
+        pass
+
+    lambda_handler({}, {})
+
+    output = capture_metrics_output(capsys)
+    expected_dimension = {"name": "service", "value": service}
+    expected = serialize_single_metric(metric=metric, dimension=expected_dimension, namespace=namespace)
+
+    # THEN a metric should be logged using the implicitly created "service" dimension
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
 def test_metrics_spillover(monkeypatch, capsys, metric, dimension, namespace, a_hundred_metrics):
     # GIVEN Metrics is initialized and we have over a hundred metrics to add
     my_metrics = Metrics(namespace=namespace)

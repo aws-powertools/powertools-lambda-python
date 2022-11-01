@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from .base import MetricManager
 
@@ -67,21 +67,19 @@ class Metrics(MetricManager):
     _metadata: Dict[str, Any] = {}
     _default_dimensions: Dict[str, Any] = {}
 
-    def __init__(self, service: str = "", namespace: str = ""):
+    def __init__(self, service: Optional[str] = None, namespace: Optional[str] = None):
         self.metric_set = self._metrics
-        self.service = service
-        self.namespace = namespace
         self.metadata_set = self._metadata
         self.default_dimensions = self._default_dimensions
         self.dimension_set = self._dimensions
 
         self.dimension_set.update(**self._default_dimensions)
         return super().__init__(
+            namespace=namespace,
+            service=service,
             metric_set=self.metric_set,
             dimension_set=self.dimension_set,
-            namespace=self.namespace,
             metadata_set=self.metadata_set,
-            service=self.service,
             default_dimensions=self.default_dimensions,
         )
 
