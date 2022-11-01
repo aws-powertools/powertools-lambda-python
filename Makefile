@@ -28,11 +28,11 @@ lint-docs-fix:
 	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli --fix "docs"
 
 test:
-	poetry run pytest -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=xml
-	poetry run pytest --cache-clear tests/performance
+	poetry run pytest --junitxml=./results/result-e2e.xml -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=xml
+	poetry run pytest --junitxml=./results/result-performance.xml --cache-clear tests/performance
 
 unit-test:
-	poetry run pytest tests/unit
+	poetry run pytest --junitxml=./results/result-unit.xml tests/unit
 
 e2e-test:
 	python parallel_run_e2e.py
