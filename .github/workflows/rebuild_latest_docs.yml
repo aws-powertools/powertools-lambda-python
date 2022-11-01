@@ -7,8 +7,7 @@ name: Rebuild latest docs
 # 2. Use the latest version released under Releases e.g. 2.0.0
 
 on:
-  schedule:
-    - cron: 0,30 * * * *
+  workflow_dispatch:
 
 jobs:
   changelog:
