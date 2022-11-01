@@ -2,29 +2,25 @@ name: Code quality
 
 on:
   pull_request:
+    types: [opened, reopened]
     paths:
       - "aws_lambda_powertools/**"
-      - "tests/**"
+      - "tests/e2e/**"
       - "pyproject.toml"
       - "poetry.lock"
       - "mypy.ini"
-    branches:
-      - develop
-      - v2
-  push:
-    paths:
-      - "aws_lambda_powertools/**"
-      - "tests/**"
-      - "pyproject.toml"
-      - "poetry.lock"
-      - "mypy.ini"
-    branches:
-      - develop
-      - v2
+      - "parallel_run_e2e.py"
+      
+env:
+  WORKFLOW_TELEMETRY_BASE_URL: https://api.service.runforesight.me
+  FORESIGHT_UPLOADER_SIGNER_URL: https://upload.service.runforesight.me
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     strategy:
       max-parallel: 4
       matrix:
@@ -33,6 +29,11 @@ jobs:
       PYTHON: ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v3
+      - name: Collect Workflow Telemetry
+        uses: runforesight/foresight-workflow-kit-action@v1
+        if: ${{ always() }}
+        with:
+          api_key: ${{ secrets.APIKEY_LAB }}
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}
@@ -42,19 +43,15 @@ jobs:
           cache: "poetry"
       - name: Install dependencies
         run: make dev
-      - name: Formatting and Linting
-        run: make lint
-      - name: Static type checking
-        run: make mypy
       - name: Test with pytest
         run: make test
-      - name: Security baseline
-        run: make security-baseline
-      - name: Complexity baseline
-        run: make complexity-baseline
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70 # 3.1.1
+      - name: Analyze Test and/or Coverage Results
+        uses: runforesight/foresight-test-kit-action@v1
+        if: ${{ always() }}
         with:
-          file: ./coverage.xml
-          env_vars: PYTHON
-          name: aws-lambda-powertools-python-codecov
+          api_key: ${{ secrets.APIKEY_LAB }}
+          test_format: JUNIT
+          test_framework: PYTEST
+          test_path: ./results/**
+          coverage_path: ./coverage.xml
+          coverage_format: JACOCO/XML
