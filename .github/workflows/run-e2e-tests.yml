@@ -1,7 +1,8 @@
 name: Run end-to-end tests
 
 on:
-  workflow_dispatch:
+  schedule:
+    - cron: '0 */1 * * *'
 
   pull_request:
     types: [opened, reopened]
