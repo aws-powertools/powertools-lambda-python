@@ -8,6 +8,11 @@ jobs:
   update_release_draft:
     runs-on: ubuntu-latest
     steps:
+      - name: Collect Workflow Telemetry
+        uses: runforesight/foresight-workflow-kit-action@v1
+        if: ${{ always() }}
+        with:
+          api_key: ${{ secrets.APIKEY_LAB }}
       - uses: release-drafter/release-drafter@6df64e4ba4842c203c604c1f45246c5863410adb # v5.20.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
