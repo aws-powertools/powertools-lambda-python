@@ -4,15 +4,6 @@ from typing import Dict, List
 from .schema import TimeKeys, TimeValues
 
 HOUR_MIN_SEPARATOR = ":"
-DAY_MAPPING = {
-    1: TimeValues.MONDAY,
-    2: TimeValues.TUESDAY,
-    3: TimeValues.WEDNESDAY,
-    4: TimeValues.THURSDAY,
-    5: TimeValues.FRIDAY,
-    6: TimeValues.SATURDAY,
-    7: TimeValues.SUNDAY,
-}
 
 
 def time_range_compare(action: str, values: Dict) -> bool:
