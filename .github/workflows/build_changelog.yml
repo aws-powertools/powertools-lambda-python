@@ -3,7 +3,7 @@ name: Build changelog
 
 on:
   schedule:
-    - cron: 0,30 * * * *
+    - cron: '0,30 * * * *'
 
 jobs:
   changelog:
