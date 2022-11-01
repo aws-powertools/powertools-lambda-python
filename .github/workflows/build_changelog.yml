@@ -2,8 +2,7 @@
 name: Build changelog
 
 on:
-  schedule:
-    - cron: 0,30 * * * *
+  workflow_dispatch:
 
 jobs:
   changelog:
