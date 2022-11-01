@@ -2,13 +2,14 @@
 AWS SSM Parameter retrieval and caching utility
 """
 
-
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union, overload
 
 import boto3
 from botocore.config import Config
+from typing_extensions import Literal
 
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
+from .types import TransformOptions
 
 if TYPE_CHECKING:
     from mypy_boto3_ssm import SSMClient
@@ -207,7 +208,7 @@ def get_parameter(
     force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
     **sdk_options
-) -> Union[str, list, dict, bytes]:
+) -> Union[str, dict, bytes]:
     """
     Retrieve a parameter value from AWS Systems Manager (SSM) Parameter Store
 
@@ -344,3 +345,107 @@ def get_parameters(
         force_fetch=force_fetch,
         **sdk_options
     )
+
+
+@overload
+def get_parameters_by_name(
+    parameters: Dict[str, Dict],
+    transform: None = None,
+    decrypt: bool = False,
+    force_fetch: bool = False,
+    max_age: int = DEFAULT_MAX_AGE_SECS,
+) -> Dict[str, str]:
+    ...
+
+
+@overload
+def get_parameters_by_name(
+    parameters: Dict[str, Dict],
+    transform: Literal["binary"],
+    decrypt: bool = False,
+    force_fetch: bool = False,
+    max_age: int = DEFAULT_MAX_AGE_SECS,
+) -> Dict[str, bytes]:
+    ...
+
+
+@overload
+def get_parameters_by_name(
+    parameters: Dict[str, Dict],
+    transform: Literal["json"],
+    decrypt: bool = False,
+    force_fetch: bool = False,
+    max_age: int = DEFAULT_MAX_AGE_SECS,
+) -> Dict[str, Dict[str, Any]]:
+    ...
+
+
+@overload
+def get_parameters_by_name(
+    parameters: Dict[str, Dict],
+    transform: Literal["auto"],
+    decrypt: bool = False,
+    force_fetch: bool = False,
+    max_age: int = DEFAULT_MAX_AGE_SECS,
+) -> Union[Dict[str, str], Dict[str, dict]]:
+    ...
+
+
+def get_parameters_by_name(
+    parameters: Dict[str, Any],
+    transform: TransformOptions = None,
+    decrypt: bool = False,
+    force_fetch: bool = False,
+    max_age: int = DEFAULT_MAX_AGE_SECS,
+) -> Union[Dict[str, str], Dict[str, bytes], Dict[str, dict]]:
+    """
+    Retrieve multiple parameter values by name from AWS Systems Manager (SSM) Parameter Store
+
+    Parameters
+    ----------
+    parameters: List[Dict[str, Dict]]
+        List of parameter names, and any optional overrides
+    transform: str, optional
+        Transforms the content from a JSON object ('json') or base64 binary string ('binary')
+    decrypt: bool, optional
+        If the parameter values should be decrypted
+    force_fetch: bool, optional
+        Force update even before a cached item has expired, defaults to False
+    max_age: int
+        Maximum age of the cached value
+    sdk_options: dict, optional
+        Dictionary of options that will be passed to the Parameter Store get_parameter API call
+
+    Raises
+    ------
+    GetParameterError
+        When the parameter provider fails to retrieve a parameter value for
+        a given name.
+    TransformParameterError
+        When the parameter provider fails to transform a parameter value.
+    """
+
+    # NOTE: Need a param for hard failure mode on parameter retrieval
+    # by default, we should return an empty string on failure (ask customer for desired behaviour)
+
+    # NOTE: Check costs of threads to assess when it's worth the overhead.
+    # for threads, assess failure mode to absorb OR raise/cancel futures
+
+    ret: Dict[str, Any] = {}
+
+    for parameter, options in parameters.items():
+        if isinstance(options, dict):
+            transform = options.get("transform") or transform
+            decrypt = options.get("decrypt") or decrypt
+            max_age = options.get("max_age") or max_age
+            force_fetch = options.get("force_fetch") or force_fetch
+
+        ret[parameter] = get_parameter(
+            name=parameter,
+            transform=transform,
+            decrypt=decrypt,
+            max_age=max_age,
+            force_fetch=force_fetch,
+        )
+
+    return ret
