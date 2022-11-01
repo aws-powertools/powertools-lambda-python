@@ -3,7 +3,7 @@ name: "CodeQL"
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/5 * * * *'
 
 jobs:
   analyze:
