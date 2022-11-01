@@ -23,6 +23,7 @@ env:
 permissions:
   contents: read # to fetch code (actions/checkout)
   actions: read
+  id-token: write
 jobs:
   run:
     runs-on: ubuntu-latest
