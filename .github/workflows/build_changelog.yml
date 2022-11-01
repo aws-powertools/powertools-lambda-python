@@ -2,6 +2,7 @@
 name: Build changelog
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '*/30 * * * *'
 
