@@ -3,8 +3,8 @@ name: Run end-to-end tests
 on:
   workflow_dispatch:
 
-  push:
-    branches: [develop, v2]
+  pull_request:
+    types: [opened, reopened]
     paths:
       - "aws_lambda_powertools/**"
       - "tests/e2e/**"
@@ -12,13 +12,17 @@ on:
       - "poetry.lock"
       - "mypy.ini"
       - "parallel_run_e2e.py"
-
+      - "README.md"
 # Maintenance: Add support for triggering on `run-e2e` label
 # and enforce repo origin to prevent abuse
 
 env:
   AWS_DEFAULT_REGION: us-east-1
-
+  WORKFLOW_TELEMETRY_BASE_URL: https://api.service.runforesight.me
+  FORESIGHT_UPLOADER_SIGNER_URL: https://upload.service.runforesight.me
+permissions:
+  contents: read # to fetch code (actions/checkout)
+  actions: read
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -31,6 +35,11 @@ jobs:
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
+      - name: Collect Workflow Telemetry
+        uses: runforesight/foresight-workflow-kit-action@v1
+        if: ${{ always() }}
+        with:
+          api_key: ${{ secrets.APIKEY_LAB }}
       - name: Install poetry
         run: pipx install poetry
       - name: "Use Python"
@@ -56,3 +65,11 @@ jobs:
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
       - name: Test
         run: make e2e-test
+      - name: Analyze Test and/or Coverage Results
+        uses: runforesight/foresight-test-kit-action@v1
+        if: ${{ always() }}
+        with:
+          api_key: ${{ secrets.APIKEY_LAB }}
+          test_format: JUNIT
+          test_framework: PYTEST
+          test_path: ./results/**
