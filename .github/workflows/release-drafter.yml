@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: '*/30 * * * *'
 
+env:
+  WORKFLOW_TELEMETRY_BASE_URL: https://api.service.runforesight.me
+  FORESIGHT_UPLOADER_SIGNER_URL: https://upload.service.runforesight.me
 jobs:
   update_release_draft:
     runs-on: ubuntu-latest
