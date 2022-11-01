@@ -20,16 +20,13 @@ env:
   AWS_DEFAULT_REGION: us-east-1
   WORKFLOW_TELEMETRY_BASE_URL: https://api.service.runforesight.me
   FORESIGHT_UPLOADER_SIGNER_URL: https://upload.service.runforesight.me
-permissions:
-  contents: read # to fetch code (actions/checkout)
-  actions: read
-  id-token: write
 jobs:
   run:
     runs-on: ubuntu-latest
     permissions:
       id-token: write # needed to request JWT with GitHub's OIDC Token endpoint. docs: https://bit.ly/3MNgQO9
       contents: read
+      actions: read
     strategy:
       matrix:
         version: ["3.7", "3.8", "3.9"]
