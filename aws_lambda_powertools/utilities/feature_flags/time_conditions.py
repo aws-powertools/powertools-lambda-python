@@ -32,8 +32,8 @@ def time_selected_days_compare(action: str, values: List[str]) -> bool:
 
 
 def _time_selected_days_current_days_compare(values: List[str]) -> bool:
-    current_day_number: datetime = datetime.now(timezone.utc).isoweekday()
-    return DAY_MAPPING.get(current_day_number, "") in values
+    current_day: datetime = datetime.now(timezone.utc).strftime('%A').lower()
+    return current_day in values
 
 
 def _time_range_compare_current_time_utc(values: Dict) -> bool:
