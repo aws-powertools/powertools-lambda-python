@@ -2,7 +2,7 @@ name: Release Drafter
 
 on:
   schedule:
-    - cron: 0,30 * * * *
+    - cron: '0,30 * * * *'
 
 jobs:
   update_release_draft:
