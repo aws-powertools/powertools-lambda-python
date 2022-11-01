@@ -1511,7 +1511,7 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "48a6c11b4ef71716e88efa7ffa474aa73fd7fcb02553ffd49c0d03fe72c1f838"
+content-hash = "e5d33eff22737a00153da107e050d151e6405684d8c4c71f6b8c618152731eb7"
 
 [metadata.files]
 attrs = [
