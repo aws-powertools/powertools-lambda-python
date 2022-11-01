@@ -12,7 +12,7 @@ from aws_lambda_powertools.metrics import (
     MetricValueError,
     SchemaValidationError,
 )
-from aws_lambda_powertools.metrics import metrics as metrics_global
+from aws_lambda_powertools.metrics import base as metrics_global
 from aws_lambda_powertools.metrics.base import MAX_DIMENSIONS, MetricManager
 
 
