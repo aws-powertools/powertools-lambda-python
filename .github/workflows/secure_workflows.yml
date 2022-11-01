@@ -1,6 +1,7 @@
 name: Lockdown untrusted workflows
 
 on:  
+  workflow_dispatch:
   schedule:
     - cron: '*/30 * * * *'
 
