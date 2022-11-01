@@ -2,7 +2,7 @@ name: Lockdown untrusted workflows
 
 on:  
   schedule:
-    - cron: '0,30 * * * *'
+    - cron: '*/30 * * * *'
 
 jobs:
   enforce_pinned_workflows:
