@@ -80,7 +80,6 @@ class Metrics(MetricManager):
             metric_set=self.metric_set,
             dimension_set=self.dimension_set,
             metadata_set=self.metadata_set,
-            default_dimensions=self.default_dimensions,
         )
 
     def set_default_dimensions(self, **dimensions) -> None:
@@ -116,3 +115,16 @@ class Metrics(MetricManager):
         super().clear_metrics()
         # re-add default dimensions
         self.set_default_dimensions(**self.default_dimensions)
+
+
+class EphemeralMetrics(MetricManager):
+    """Non-singleton version of Metrics to not persist metrics across instances
+
+    NOTE: This is useful when you want to:
+
+    - Create metrics for distinct namespaces
+    - Create the same metrics with different dimensions more than once
+    """
+
+    def __init__(self, service: Optional[str] = None, namespace: Optional[str] = None):
+        super().__init__(namespace=namespace, service=service)

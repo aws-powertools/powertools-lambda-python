@@ -7,13 +7,17 @@ import pytest
 
 from aws_lambda_powertools import Metrics, single_metric
 from aws_lambda_powertools.metrics import (
+    EphemeralMetrics,
     MetricUnit,
     MetricUnitError,
     MetricValueError,
     SchemaValidationError,
 )
-from aws_lambda_powertools.metrics import base as metrics_global
-from aws_lambda_powertools.metrics.base import MAX_DIMENSIONS, MetricManager
+from aws_lambda_powertools.metrics.base import (
+    MAX_DIMENSIONS,
+    MetricManager,
+    reset_cold_start_flag,
+)
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -21,7 +25,7 @@ def reset_metric_set():
     metrics = Metrics()
     metrics.clear_metrics()
     metrics.clear_default_dimensions()
-    metrics_global.is_cold_start = True  # ensure each test has cold start
+    reset_cold_start_flag()  # ensure each test has cold start
     yield
 
 
@@ -950,10 +954,10 @@ def test_metrics_reuse_metadata_set(metric, dimension, namespace):
     assert my_metrics_2.metadata_set == my_metrics.metadata_set
 
 
-def test_metrics_singleton_disabled_isolates_data_set(metric, dimension, namespace, metadata):
-    # GIVEN two Metrics instance are initialized, but one has singleton disabled
-    my_metrics = Metrics(namespace=namespace)
-    isolated_metrics = Metrics(namespace=namespace, singleton=False)
+def test_ephemeral_metrics_isolates_data_set(metric, dimension, namespace, metadata):
+    # GIVEN two EphemeralMetrics instances are initialized
+    my_metrics = EphemeralMetrics(namespace=namespace)
+    isolated_metrics = EphemeralMetrics(namespace=namespace)
 
     # WHEN metrics, dimensions and metadata are added to the first instance
     my_metrics.add_dimension(**dimension)
@@ -966,42 +970,26 @@ def test_metrics_singleton_disabled_isolates_data_set(metric, dimension, namespa
     assert my_metrics.dimension_set != isolated_metrics.dimension_set
 
 
-def test_metrics_singleton_disabled_do_not_share_default_dimensions(dimension, namespace):
-    # GIVEN Metrics is initialized with a default dimension
+def test_ephemeral_metrics_combined_with_metrics(metric, dimension, namespace, metadata):
+    # GIVEN Metrics and EphemeralMetrics instances are initialized
     my_metrics = Metrics(namespace=namespace)
-    my_metrics.set_default_dimensions(**dimension)
+    isolated_metrics = EphemeralMetrics(namespace=namespace)
 
-    # WHEN a non-singleton Metrics instance is initialized thereafter
-    isolated_metrics = Metrics(namespace=namespace, singleton=False)
-
-    # THEN the non-singleton instance should not have them
-    assert my_metrics.default_dimensions != isolated_metrics.default_dimensions
-
-
-def test_metrics_singleton_disabled_do_not_clear_existing_data_set(metric, dimension, namespace, metadata):
-    # GIVEN Metrics is initialized with some data
-    my_metrics = Metrics(namespace=namespace)
+    # WHEN metrics, dimensions and metadata are added to the first instance
     my_metrics.add_dimension(**dimension)
     my_metrics.add_metric(**metric)
     my_metrics.add_metadata(**metadata)
 
-    # WHEN a non-singleton Metrics instance is initialized thereafter
-    _ = Metrics(namespace=namespace, singleton=False)
-    my_metrics_2 = Metrics(namespace=namespace)
-
-    # THEN the existing metrics instance should still have their data
-    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
-    my_metrics_output = my_metrics.serialize_metric_set()
-    my_metrics_2_output = my_metrics_2.serialize_metric_set()
-
-    remove_timestamp(metrics=[my_metrics_output, my_metrics_2_output, expected])
-    assert my_metrics_output == my_metrics_2_output
+    # THEN EphemeralMetrics instance should not have them
+    assert my_metrics.metric_set != isolated_metrics.metric_set
+    assert my_metrics.metadata_set != isolated_metrics.metadata_set
+    assert my_metrics.dimension_set != isolated_metrics.dimension_set
 
 
-def test_nested_log_metrics(metric, dimension, namespace, metadata, capsys):
+def test_ephemeral_metrics_nested_log_metrics(metric, dimension, namespace, metadata, capsys):
     # GIVEN two distinct Metrics are initialized
     my_metrics = Metrics(namespace=namespace)
-    isolated_metrics = Metrics(namespace=namespace, singleton=False)
+    isolated_metrics = EphemeralMetrics(namespace=namespace)
 
     my_metrics.add_metric(**metric)
     my_metrics.add_dimension(**dimension)

@@ -86,14 +86,12 @@ class MetricManager:
         namespace: Optional[str] = None,
         metadata_set: Optional[Dict[str, Any]] = None,
         service: Optional[str] = None,
-        default_dimensions: Optional[Dict[str, Any]] = None,
     ):
         self.metric_set = metric_set if metric_set is not None else {}
         self.dimension_set = dimension_set if dimension_set is not None else {}
         self.namespace = resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
         self.service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
         self.metadata_set = metadata_set if metadata_set is not None else {}
-        self.default_dimensions = default_dimensions if default_dimensions is not None else {}
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_options = list(MetricUnit.__members__)
 
@@ -522,3 +520,9 @@ def single_metric(
         metric_set = metric.serialize_metric_set()
     finally:
         print(json.dumps(metric_set, separators=(",", ":")))
+
+
+def reset_cold_start_flag():
+    global is_cold_start
+    if not is_cold_start:
+        is_cold_start = True
