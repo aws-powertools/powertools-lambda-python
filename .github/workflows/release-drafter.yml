@@ -5,9 +5,6 @@ on:
   schedule:
     - cron: '*/30 * * * *'
 
-env:
-  WORKFLOW_TELEMETRY_BASE_URL: https://api.service.runforesight.me
-  FORESIGHT_UPLOADER_SIGNER_URL: https://upload.service.runforesight.me
 jobs:
   update_release_draft:
     runs-on: ubuntu-latest
@@ -16,7 +13,7 @@ jobs:
         uses: runforesight/foresight-workflow-kit-action@v1
         if: ${{ always() }}
         with:
-          api_key: ${{ secrets.APIKEY_LAB }}
+          api_key: ${{ secrets.FORESIGHT_APIKEY }}
       - uses: release-drafter/release-drafter@6df64e4ba4842c203c604c1f45246c5863410adb # v5.20.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
