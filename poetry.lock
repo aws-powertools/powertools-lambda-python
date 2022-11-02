@@ -836,8 +836,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-cloudformation"
-version = "1.25.0"
-description = "Type annotations for boto3.CloudFormation 1.25.0 service generated with mypy-boto3-builder 7.11.10"
+version = "1.26.0.post1"
+description = "Type annotations for boto3.CloudFormation 1.26.0 service generated with mypy-boto3-builder 7.11.10"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -1511,7 +1511,7 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "48a6c11b4ef71716e88efa7ffa474aa73fd7fcb02553ffd49c0d03fe72c1f838"
+content-hash = "466727c09806540c25598164b30c2e5f141f9eb9664f03cb71b687249433771d"
 
 [metadata.files]
 attrs = [
@@ -1900,8 +1900,8 @@ mypy-boto3-appconfigdata = [
     {file = "mypy_boto3_appconfigdata-1.25.0-py3-none-any.whl", hash = "sha256:21a332c85080ce2c5416b751f4fc4870e057af85d1aedc33516bde2a86330caa"},
 ]
 mypy-boto3-cloudformation = [
-    {file = "mypy-boto3-cloudformation-1.25.0.tar.gz", hash = "sha256:1251b0f24b0a7c21a6e1f7f88fbf6aaa7fcc490b82d6ada46b5778cfd12d112f"},
-    {file = "mypy_boto3_cloudformation-1.25.0-py3-none-any.whl", hash = "sha256:469e3cbc0a78003cc3134dece0203d0a0bfa908af34187aa53cd610b5f9bb19f"},
+    {file = "mypy-boto3-cloudformation-1.26.0.post1.tar.gz", hash = "sha256:9e8dce3149c5f5dee5ab05850ec9cae0925abb9da3aa63397b098219709db077"},
+    {file = "mypy_boto3_cloudformation-1.26.0.post1-py3-none-any.whl", hash = "sha256:e0dd01030209b77c3159a299a04a5c6353a6feb0dd49bff9f5acec9e0274264c"},
 ]
 mypy-boto3-cloudwatch = [
     {file = "mypy-boto3-cloudwatch-1.25.0.tar.gz", hash = "sha256:d5323ffeafe5144a232e27242c5d2f334f5e7ff10d0733145328888783ffcf12"},
