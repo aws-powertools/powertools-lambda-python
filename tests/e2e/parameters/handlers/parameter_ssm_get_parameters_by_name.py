@@ -12,4 +12,4 @@ def lambda_handler(event: dict, context: LambdaContext) -> Dict[str, Any]:
     parameters_to_fetch: Dict[str, Any] = {param: {} for param in parameters_list}
 
     # response`{parameter:value}`
-    return get_parameters_by_name(parameters=parameters_to_fetch, max_age=0, parallel=True)
+    return get_parameters_by_name(parameters=parameters_to_fetch, max_age=0)
