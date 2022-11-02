@@ -1,7 +1,9 @@
 """
 AWS SSM Parameter retrieval and caching utility
 """
-
+import concurrent.futures
+import functools
+from concurrent.futures import Future
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union, overload
 
 import boto3
@@ -107,7 +109,7 @@ class SSMProvider(BaseProvider):
         transform: Optional[str] = None,
         decrypt: bool = False,
         force_fetch: bool = False,
-        **sdk_options
+        **sdk_options,
     ) -> Optional[Union[str, dict, bytes]]:
         """
         Retrieve a parameter value or return the cached value
@@ -207,7 +209,7 @@ def get_parameter(
     decrypt: bool = False,
     force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
-    **sdk_options
+    **sdk_options,
 ) -> Union[str, dict, bytes]:
     """
     Retrieve a parameter value from AWS Systems Manager (SSM) Parameter Store
@@ -276,7 +278,7 @@ def get_parameters(
     force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
     raise_on_transform_error: bool = False,
-    **sdk_options
+    **sdk_options,
 ) -> Union[Dict[str, str], Dict[str, dict], Dict[str, bytes]]:
     """
     Retrieve multiple parameter values from AWS Systems Manager (SSM) Parameter Store
@@ -343,7 +345,7 @@ def get_parameters(
         transform=transform,
         raise_on_transform_error=raise_on_transform_error,
         force_fetch=force_fetch,
-        **sdk_options
+        **sdk_options,
     )
 
 
@@ -354,6 +356,7 @@ def get_parameters_by_name(
     decrypt: bool = False,
     force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
+    parallel: bool = False,
 ) -> Dict[str, str]:
     ...
 
@@ -365,6 +368,7 @@ def get_parameters_by_name(
     decrypt: bool = False,
     force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
+    parallel: bool = False,
 ) -> Dict[str, bytes]:
     ...
 
@@ -376,6 +380,7 @@ def get_parameters_by_name(
     decrypt: bool = False,
     force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
+    parallel: bool = False,
 ) -> Dict[str, Dict[str, Any]]:
     ...
 
@@ -387,6 +392,7 @@ def get_parameters_by_name(
     decrypt: bool = False,
     force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
+    parallel: bool = False,
 ) -> Union[Dict[str, str], Dict[str, dict]]:
     ...
 
@@ -397,6 +403,7 @@ def get_parameters_by_name(
     decrypt: bool = False,
     force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
+    parallel: bool = True,
 ) -> Union[Dict[str, str], Dict[str, bytes], Dict[str, dict]]:
     """
     Retrieve multiple parameter values by name from AWS Systems Manager (SSM) Parameter Store
@@ -428,24 +435,53 @@ def get_parameters_by_name(
     # NOTE: Need a param for hard failure mode on parameter retrieval
     # by default, we should return an empty string on failure (ask customer for desired behaviour)
 
-    # NOTE: Check costs of threads to assess when it's worth the overhead.
-    # for threads, assess failure mode to absorb OR raise/cancel futures
+    # NOTE: Decide whether to leave multi-threaded option or not due to slower results (throttling+fork cost)
 
     ret: Dict[str, Any] = {}
+    future_to_param: Dict[Future, str] = {}
 
-    for parameter, options in parameters.items():
-        if isinstance(options, dict):
-            transform = options.get("transform") or transform
-            decrypt = options.get("decrypt") or decrypt
-            max_age = options.get("max_age") or max_age
-            force_fetch = options.get("force_fetch") or force_fetch
+    if parallel:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(parameters)) as pool:
+            for parameter, options in parameters.items():
+                if isinstance(options, dict):
+                    transform = options.get("transform") or transform
+                    decrypt = options.get("decrypt") or decrypt
+                    max_age = options.get("max_age") or max_age
+                    force_fetch = options.get("force_fetch") or force_fetch
 
-        ret[parameter] = get_parameter(
-            name=parameter,
-            transform=transform,
-            decrypt=decrypt,
-            max_age=max_age,
-            force_fetch=force_fetch,
-        )
+                fetch_parameter_callable = functools.partial(
+                    get_parameter,
+                    name=parameter,
+                    transform=transform,
+                    decrypt=decrypt,
+                    max_age=max_age,
+                    force_fetch=force_fetch,
+                )
+
+                future = pool.submit(fetch_parameter_callable)
+                future_to_param[future] = parameter
+
+            for future in concurrent.futures.as_completed(future_to_param):
+                try:
+                    # "parameter": "future result"
+                    ret[future_to_param[future]] = future.result()
+                except Exception as exc:
+                    print(f"Uh oh, failed to fetch '{future_to_param[future]}': {exc}")
+
+    else:
+        for parameter, options in parameters.items():
+            if isinstance(options, dict):
+                transform = options.get("transform") or transform
+                decrypt = options.get("decrypt") or decrypt
+                max_age = options.get("max_age") or max_age
+                force_fetch = options.get("force_fetch") or force_fetch
+
+            ret[parameter] = get_parameter(
+                name=parameter,
+                transform=transform,
+                decrypt=decrypt,
+                max_age=max_age,
+                force_fetch=force_fetch,
+            )
 
     return ret
