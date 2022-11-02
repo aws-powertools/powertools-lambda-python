@@ -20,8 +20,6 @@ on:
 
 env:
   AWS_DEFAULT_REGION: us-east-1
-  WORKFLOW_TELEMETRY_BASE_URL: https://api.service.runforesight.me
-  FORESIGHT_UPLOADER_SIGNER_URL: https://upload.service.runforesight.me
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -39,7 +37,7 @@ jobs:
         uses: runforesight/foresight-workflow-kit-action@v1
         if: ${{ always() }}
         with:
-          api_key: ${{ secrets.APIKEY_LAB }}
+          api_key: ${{ secrets.FORESIGHT_APIKEY }}
       - name: Install poetry
         run: pipx install poetry
       - name: "Use Python"
@@ -70,7 +68,7 @@ jobs:
         uses: runforesight/foresight-test-kit-action@v1
         if: ${{ always() }}
         with:
-          api_key: ${{ secrets.APIKEY_LAB }}
+          api_key: ${{ secrets.FORESIGHT_APIKEY }}
           test_format: JUNIT
           test_framework: PYTEST
           test_path: ./results/**
