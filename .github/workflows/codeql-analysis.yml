@@ -4,9 +4,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '*/30 * * * *'
-env:
-  WORKFLOW_TELEMETRY_BASE_URL: https://api.service.runforesight.me
-  FORESIGHT_UPLOADER_SIGNER_URL: https://upload.service.runforesight.me
 jobs:
   analyze:
     name: Analyze
@@ -29,7 +26,7 @@ jobs:
         uses: runforesight/foresight-workflow-kit-action@v1
         if: ${{ always() }}
         with:
-          api_key: ${{ secrets.APIKEY_LAB }}
+          api_key: ${{ secrets.FORESIGHT_APIKEY }}
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
