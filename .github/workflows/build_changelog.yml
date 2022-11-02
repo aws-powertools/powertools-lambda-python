@@ -9,3 +9,5 @@ on:
 jobs:
   changelog:
     uses: ./.github/workflows/reusable_publish_changelog.yml
+    with:
+      api_key: ${{ secrets.APIKEY_LAB }}
