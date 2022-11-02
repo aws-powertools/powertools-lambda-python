@@ -24,35 +24,66 @@ This utility requires additional permissions to work as expected.
 ???+ note
     Different parameter providers require different permissions.
 
-| Provider            | Function/Method                                                  | IAM Permission                                                               |
-| ------------------- | -----------------------------------------------------------------| -----------------------------------------------------------------------------|
-| SSM Parameter Store | `get_parameter`, `SSMProvider.get`                               | `ssm:GetParameter`                                                           |
-| SSM Parameter Store | `get_parameters`, `SSMProvider.get_multiple`                     | `ssm:GetParametersByPath`                                                    |
-| SSM Parameter Store | If using `decrypt=True`                                          | You must add an additional permission `kms:Decrypt`                          |
-| Secrets Manager     | `get_secret`, `SecretsManager.get`                               | `secretsmanager:GetSecretValue`                                              |
-| DynamoDB            | `DynamoDBProvider.get`                                           | `dynamodb:GetItem`                                                           |
-| DynamoDB            | `DynamoDBProvider.get_multiple`                                  | `dynamodb:Query`                                                             |
-| App Config          | `get_app_config`, `AppConfigProvider.get_app_config`             | `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession` |
+| Provider            | Function/Method                                      | IAM Permission                                                               |
+| ------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------- |
+| SSM Parameter Store | `get_parameter`, `SSMProvider.get`                   | `ssm:GetParameter`                                                           |
+| SSM Parameter Store | `get_parameters`, `SSMProvider.get_multiple`         | `ssm:GetParametersByPath`                                                    |
+| SSM Parameter Store | If using `decrypt=True`                              | You must add an additional permission `kms:Decrypt`                          |
+| Secrets Manager     | `get_secret`, `SecretsManager.get`                   | `secretsmanager:GetSecretValue`                                              |
+| DynamoDB            | `DynamoDBProvider.get`                               | `dynamodb:GetItem`                                                           |
+| DynamoDB            | `DynamoDBProvider.get_multiple`                      | `dynamodb:Query`                                                             |
+| App Config          | `get_app_config`, `AppConfigProvider.get_app_config` | `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession` |
 
 ### Fetching parameters
 
 You can retrieve a single parameter  using `get_parameter` high-level function.
 
-For multiple parameters, you can use `get_parameters` and pass a path to retrieve them recursively.
-
-```python hl_lines="1 5 9" title="Fetching multiple parameters recursively"
+```python hl_lines="5" title="Fetching a single parameter"
 from aws_lambda_powertools.utilities import parameters
 
 def handler(event, context):
 	# Retrieve a single parameter
 	value = parameters.get_parameter("/my/parameter")
 
-	# Retrieve multiple parameters from a path prefix recursively
-	# This returns a dict with the parameter name as key
-	values = parameters.get_parameters("/my/path/prefix")
-	for k, v in values.items():
-		print(f"{k}: {v}")
 ```
+
+For multiple parameters, you can use either:
+
+* `get_parameters` to recursively fetch all parameters by path
+* `get_parameters_by_name` to fetch distinct parameters by their full name. It also accepts custom caching, transform, and decrypt per parameter.
+
+=== "get_parameters"
+
+    ```python hl_lines="1 6"
+    from aws_lambda_powertools.utilities import parameters
+
+    def handler(event, context):
+    	# Retrieve multiple parameters from a path prefix recursively
+    	# This returns a dict with the parameter name as key
+    	values = parameters.get_parameters("/my/path/prefix")
+    	for parameter, value in values.items():
+    		print(f"{parameter}: {value}")
+    ```
+
+=== "get_parameters_by_name"
+
+    ```python hl_lines="1 3 13"
+    from aws_lambda_powertools.utilities import get_parameters_by_name
+
+	parameters = {
+      "/develop/service/commons/telemetry/config": {"max_age": 300, "transform": "json"},
+      "/develop/service/amplify/auth/userpool/arn": {"max_age": 300},
+      # inherit default values
+	  "/develop/service/payment/api/capture/url": {},
+      "/develop/service/payment/api/charge/url": {},
+	}
+
+    def handler(event, context):
+    	# This returns a dict with the parameter name as key
+    	values = parameters.get_parameters_by_name(parameters=parameters, max_age=60)
+    	for parameter, value in values.items():
+    		print(f"{parameter}: {value}")
+    ```
 
 ### Fetching secrets
 
