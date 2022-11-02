@@ -4,6 +4,10 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **homepage:** remove v1 layer limitation on pydantic not being included
+
 ## Features
 
 * **metrics:** add EphemeralMetrics as a non-singleton option ([#1676](https://github.com/awslabs/aws-lambda-powertools-python/issues/1676))
