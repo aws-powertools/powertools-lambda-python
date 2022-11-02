@@ -57,5 +57,5 @@ jobs:
           test_format: JUNIT
           test_framework: PYTEST
           test_path: ./results/**
-          coverage_path: ./cov.info
-          coverage_format: LCOV/TXT
+          coverage_path: ./coverage.xml
+          coverage_format: COBERTURA/XML
