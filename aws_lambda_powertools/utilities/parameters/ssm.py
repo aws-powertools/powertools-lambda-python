@@ -403,7 +403,7 @@ def get_parameters_by_name(
     decrypt: bool = False,
     force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
-    parallel: bool = True,
+    parallel: bool = False,
 ) -> Union[Dict[str, str], Dict[str, bytes], Dict[str, dict]]:
     """
     Retrieve multiple parameter values by name from AWS Systems Manager (SSM) Parameter Store
@@ -432,10 +432,8 @@ def get_parameters_by_name(
         When the parameter provider fails to transform a parameter value.
     """
 
-    # NOTE: Need a param for hard failure mode on parameter retrieval
-    # by default, we should return an empty string on failure (ask customer for desired behaviour)
-
-    # NOTE: Decide whether to leave multi-threaded option or not due to slower results (throttling+fork cost)
+    # NOTE: Need a param for hard failure mode on parameter retrieval (asked feature request author)
+    # NOTE: Decide whether to leave multi-threaded option or not due to slower results (throttling+LWP cost)
 
     ret: Dict[str, Any] = {}
     future_to_param: Dict[Future, str] = {}
