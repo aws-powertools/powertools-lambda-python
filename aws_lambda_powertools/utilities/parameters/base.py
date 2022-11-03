@@ -7,10 +7,23 @@ import json
 from abc import ABC, abstractmethod
 from collections import namedtuple
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+    overload,
+)
 
 import boto3
 from botocore.config import Config
+
+from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
 from .exceptions import GetParameterError, TransformParameterError
 
@@ -29,6 +42,14 @@ TRANSFORM_METHOD_JSON = "json"
 TRANSFORM_METHOD_BINARY = "binary"
 SUPPORTED_TRANSFORM_METHODS = [TRANSFORM_METHOD_JSON, TRANSFORM_METHOD_BINARY]
 ParameterClients = Union["AppConfigDataClient", "SecretsManagerClient", "SSMClient"]
+
+TRANSFORM_METHOD_MAPPING = {
+    TRANSFORM_METHOD_JSON: json.loads,
+    TRANSFORM_METHOD_BINARY: base64.b64decode,
+    ".json": json.loads,
+    ".binary": base64.b64decode,
+    None: lambda x: x,
+}
 
 
 class BaseProvider(ABC):
@@ -52,7 +73,7 @@ class BaseProvider(ABC):
         self,
         name: str,
         max_age: int = DEFAULT_MAX_AGE_SECS,
-        transform: Optional[str] = None,
+        transform: TransformOptions = None,
         force_fetch: bool = False,
         **sdk_options,
     ) -> Optional[Union[str, dict, bytes]]:
@@ -107,7 +128,7 @@ class BaseProvider(ABC):
         if transform:
             if isinstance(value, bytes):
                 value = value.decode("utf-8")
-            value = transform_value(value, transform)
+            value = transform_value(value, transform, raise_on_transform_error=True)
 
         self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
 
@@ -124,7 +145,7 @@ class BaseProvider(ABC):
         self,
         path: str,
         max_age: int = DEFAULT_MAX_AGE_SECS,
-        transform: Optional[str] = None,
+        transform: TransformOptions = None,
         raise_on_transform_error: bool = False,
         force_fetch: bool = False,
         **sdk_options,
@@ -170,13 +191,8 @@ class BaseProvider(ABC):
             raise GetParameterError(str(exc))
 
         if transform:
-            transformed_values: dict = {}
-            for (item, value) in values.items():
-                _transform = get_transform_method(item, transform)
-                if not _transform:
-                    continue
-                transformed_values[item] = transform_value(value, _transform, raise_on_transform_error)
-            values.update(transformed_values)
+            values.update(transform_value(values, transform, raise_on_transform_error))
+
         self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age))
 
         return values
@@ -258,7 +274,7 @@ class BaseProvider(ABC):
         return session.resource(service_name=service_name, config=config, endpoint_url=endpoint_url)
 
 
-def get_transform_method(key: str, transform: Optional[str] = None) -> Optional[str]:
+def get_transform_method(key: str, transform: TransformOptions = None) -> Callable[..., Any]:
     """
     Determine the transform method
 
@@ -278,37 +294,50 @@ def get_transform_method(key: str, transform: Optional[str] = None) -> Optional[
     Parameters
     ---------
     key: str
-        Only used when the tranform is "auto".
+        Only used when the transform is "auto".
     transform: str, optional
         Original transform method, only "auto" will try to detect the transform method by the key
 
     Returns
     ------
-    Optional[str]:
-        The transform method either when transform is "auto" then None, "json" or "binary" is returned
-        or the original transform method
+    Callable:
+        Transform function could be json.loads, base64.b64decode, or a lambda that echo the str value
     """
-    if transform != "auto":
-        return transform
+    transform_method = TRANSFORM_METHOD_MAPPING.get(transform)
 
-    for transform_method in SUPPORTED_TRANSFORM_METHODS:
-        if key.endswith("." + transform_method):
-            return transform_method
-    return None
+    if transform == "auto":
+        key_suffix = key.rsplit(".")[-1]
+        transform_method = TRANSFORM_METHOD_MAPPING.get(key_suffix, TRANSFORM_METHOD_MAPPING[None])
+
+    return cast(Callable, transform_method)  # https://github.com/python/mypy/issues/10740
+
+
+@overload
+def transform_value(
+    value: Dict[str, Any], transform: TransformOptions, raise_on_transform_error: bool = False
+) -> Dict[str, Any]:
+    ...
+
+
+@overload
+def transform_value(
+    value: Union[str, bytes, Dict[str, Any]], transform: TransformOptions, raise_on_transform_error: bool = False
+) -> Optional[Union[str, bytes, Dict[str, Any]]]:
+    ...
 
 
 def transform_value(
-    value: str, transform: str, raise_on_transform_error: Optional[bool] = True
-) -> Optional[Union[dict, bytes]]:
+    value: Union[str, bytes, Dict[str, Any]], transform: TransformOptions, raise_on_transform_error: bool = True
+) -> Optional[Union[str, bytes, Dict[str, Any]]]:
     """
-    Apply a transform to a value
+    Transform a value using one of the available options.
 
     Parameters
     ---------
     value: str
         Parameter value to transform
     transform: str
-        Type of transform, supported values are "json" and "binary"
+        Type of transform, supported values are "json", "binary", and "auto" based on suffix (.json, .binary)
     raise_on_transform_error: bool, optional
         Raises an exception if any transform fails, otherwise this will
         return a None value for each transform that failed
@@ -318,18 +347,35 @@ def transform_value(
     TransformParameterError:
         When the parameter value could not be transformed
     """
+    # Maintenance: For v3, we should consider returning the original value for soft transform failures.
+
+    err_msg = "Unable to transform value using '{transform}' transform: {exc}"
+
+    if isinstance(value, bytes):
+        value = value.decode("utf-8")
+
+    if isinstance(value, dict):
+        # NOTE: We must handle partial failures when receiving multiple values
+        # where one of the keys might fail during transform, e.g. `{"a": "valid", "b": "{"}`
+        # expected: `{"a": "valid", "b": None}`
+
+        transformed_values: Dict[str, Any] = {}
+        for dict_key, dict_value in value.items():
+            transform_method = get_transform_method(key=dict_key, transform=transform)
+            try:
+                transformed_values[dict_key] = transform_method(dict_value)
+            except Exception as exc:
+                if raise_on_transform_error:
+                    raise TransformParameterError(err_msg.format(transform=transform, exc=exc)) from exc
+                transformed_values[dict_key] = None
+        return transformed_values
 
     try:
-        if transform == TRANSFORM_METHOD_JSON:
-            return json.loads(value)
-        elif transform == TRANSFORM_METHOD_BINARY:
-            return base64.b64decode(value)
-        else:
-            raise ValueError(f"Invalid transform type '{transform}'")
-
+        transform_method = get_transform_method(key=value, transform=transform)
+        return transform_method(value)
     except Exception as exc:
         if raise_on_transform_error:
-            raise TransformParameterError(str(exc))
+            raise TransformParameterError(err_msg.format(transform=transform, exc=exc)) from exc
         return None
 
 

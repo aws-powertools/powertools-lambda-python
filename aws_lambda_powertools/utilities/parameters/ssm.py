@@ -103,7 +103,7 @@ class SSMProvider(BaseProvider):
         self,
         name: str,
         max_age: int = DEFAULT_MAX_AGE_SECS,
-        transform: Optional[str] = None,
+        transform: TransformOptions = None,
         decrypt: bool = False,
         force_fetch: bool = False,
         **sdk_options,

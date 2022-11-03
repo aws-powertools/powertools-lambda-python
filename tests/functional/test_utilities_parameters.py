@@ -14,7 +14,11 @@ from botocore.config import Config
 from botocore.response import StreamingBody
 
 from aws_lambda_powertools.utilities import parameters
-from aws_lambda_powertools.utilities.parameters.base import BaseProvider, ExpirableValue
+from aws_lambda_powertools.utilities.parameters.base import (
+    TRANSFORM_METHOD_MAPPING,
+    BaseProvider,
+    ExpirableValue,
+)
 
 
 @pytest.fixture(scope="function")
@@ -1863,17 +1867,6 @@ def test_transform_value_binary_exception():
     assert "Incorrect padding" in str(excinfo)
 
 
-def test_transform_value_wrong(mock_value):
-    """
-    Test transform_value() with an incorrect transform
-    """
-
-    with pytest.raises(parameters.TransformParameterError) as excinfo:
-        parameters.base.transform_value(mock_value, "INCORRECT")
-
-    assert "Invalid transform type" in str(excinfo)
-
-
 def test_transform_value_ignore_error(mock_value):
     """
     Test transform_value() does not raise errors when raise_on_transform_error is False
@@ -1884,16 +1877,6 @@ def test_transform_value_ignore_error(mock_value):
     assert value is None
 
 
-@pytest.mark.parametrize("original_transform", ["json", "binary", "other", "Auto", None])
-def test_get_transform_method_preserve_original(original_transform):
-    """
-    Check if original transform method is returned for anything other than "auto"
-    """
-    transform = parameters.base.get_transform_method("key", original_transform)
-
-    assert transform == original_transform
-
-
 @pytest.mark.parametrize("extension", ["json", "binary"])
 def test_get_transform_method_preserve_auto(extension, mock_name):
     """
@@ -1901,18 +1884,7 @@ def test_get_transform_method_preserve_auto(extension, mock_name):
     """
     transform = parameters.base.get_transform_method(f"{mock_name}.{extension}", "auto")
 
-    assert transform == extension
-
-
-@pytest.mark.parametrize("key", ["json", "binary", "example", "example.jsonp"])
-def test_get_transform_method_preserve_auto_unhandled(key):
-    """
-    Check if any key that does not end with a supported extension returns None when
-    using the transform="auto"
-    """
-    transform = parameters.base.get_transform_method(key, "auto")
-
-    assert transform is None
+    assert transform == TRANSFORM_METHOD_MAPPING[extension]
 
 
 def test_base_provider_get_multiple_force_update(mock_name, mock_value):
