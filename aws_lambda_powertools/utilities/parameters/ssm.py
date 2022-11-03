@@ -1,13 +1,16 @@
 """
 AWS SSM Parameter retrieval and caching utility
 """
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union, overload
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, overload
 
 import boto3
 from botocore.config import Config
 from typing_extensions import Literal
 
+from aws_lambda_powertools.shared.functions import slice_dictionary
+
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
+from .exceptions import GetParameterError
 from .types import TransformOptions
 
 if TYPE_CHECKING:
@@ -80,6 +83,7 @@ class SSMProvider(BaseProvider):
     """
 
     client: Any = None
+    _MAX_GET_PARAMETERS_ITEM = 10
 
     def __init__(
         self,
@@ -198,6 +202,162 @@ class SSMProvider(BaseProvider):
                 parameters[name] = parameter["Value"]
 
         return parameters
+
+    def get_parameters_by_name(
+        self,
+        parameters: Dict[str, Dict],
+        transform: TransformOptions = None,
+        decrypt: bool = False,
+        max_age: int = DEFAULT_MAX_AGE_SECS,
+        raise_on_failure: bool = True,
+    ) -> Union[Dict[str, str], Dict[str, bytes], Dict[str, dict]]:
+        """
+        Retrieve multiple parameter values by name from SSM or cache.
+
+        Parameters
+        ----------
+        parameters: List[Dict[str, Dict]]
+            List of parameter names, and any optional overrides
+        transform: str, optional
+            Transforms the content from a JSON object ('json') or base64 binary string ('binary')
+        decrypt: bool, optional
+            If the parameter values should be decrypted
+        max_age: int
+            Maximum age of the cached value
+
+        Raises
+        ------
+        GetParameterError
+            When the parameter provider fails to retrieve a parameter value for
+            a given name.
+        """
+
+        ret: Dict[str, Any] = {}
+
+        # Tasks:
+        # 1. [DONE] Move to GetParameters
+        # 2. [DONE] Slice parameters in 10 if more than 10
+        # 3. [DONE] Split batch and decrypt parameters
+        # 4. [DONE] Use GetParameters for batch parameters
+        # 5. [DONE] Cache successful ones individually as they might have overrides
+        # 6. [DONE] Use GetParameter for those using `decrypt`
+        # 7. [DONE] Introduce raise_on_error
+        # 8. [DONE] Return from cache
+        # 9. [DONE] Migrate high-level function get_parameters_by_name to use new class get_parameters_by_name
+        # 10. Handle soft error with "_errors" key upon raise_on_error being False
+        # 11. Include raise_on_transform in inner functions too
+
+        batch_params, decrypt_params = self._split_batch_and_decrypt_parameters(parameters, transform, max_age, decrypt)
+
+        # Decided for single-thread as it outperforms in 128M and 1G + reduce timeout risk
+        # see: https://github.com/awslabs/aws-lambda-powertools-python/issues/1040#issuecomment-1299954613
+        for parameter, options in decrypt_params.items():
+            ret[parameter] = self.get(
+                parameter, max_age=options["max_age"], transform=options["transform"], decrypt=options["decrypt"]
+            )
+
+        # Merge both batched parameters and those that required decryption
+        return {**self._get_parameters_from_batch(batch=batch_params, raise_on_failure=raise_on_failure), **ret}
+
+    def _get_parameters_from_batch(self, batch: Dict[str, Dict], raise_on_failure: bool = True) -> Dict[str, Any]:
+        ret: Dict[str, Any] = {}
+
+        # Check if it's in cache first to prevent unnecessary calls
+        # also confirm whether the incoming batch matches our cached
+        for name, options in batch.items():
+            cache_key = (name, options["transform"])
+            if self._has_not_expired(cache_key):
+                ret[name] = self.store[cache_key].value
+
+        if len(ret) == len(batch):
+            return ret
+
+        # Take out the differences to prevent over-fetching
+        # since there could be parameters with distinct max_age override
+        batch_diff = {key: value for key, value in batch.items() if key not in ret}
+
+        for chunk in slice_dictionary(data=batch_diff, chunk_size=self._MAX_GET_PARAMETERS_ITEM):
+            ret.update(**self._get_parameters_by_name(parameters=chunk, raise_on_failure=raise_on_failure))
+
+        return ret
+
+    def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_failure: bool = True) -> Dict[str, Any]:
+        """Use SSM GetParameters to fetch parameters, hydrate cache, and handle partial failure
+
+        Parameters
+        ----------
+        parameters : Dict[str, Dict]
+            Parameters to fetch
+        raise_on_failure : bool, optional
+            Whether to fail-fast or fail gracefully by including "_errors" key in the response, by default True
+
+        Returns
+        -------
+        Dict[str, Any]
+            Retrieved parameters as key names and their values
+
+        Raises
+        ------
+        GetParameterError
+            When one or more parameters failed on fetching, and raise_on_failure is enabled
+        """
+        ret = {}
+        response = self.client.get_parameters(Names=list(parameters.keys()))
+        if response["InvalidParameters"] and raise_on_failure:
+            raise GetParameterError(f"Failed to fetch parameters: {response['InvalidParameters']}")
+
+        # Built up cache_key, hydrate cache, and return `{name:value}`
+        for parameter in response["Parameters"]:
+            name = parameter["Name"]
+            value = parameter["Value"]
+            options = parameters[name]
+
+            _cache_key = (name, options["transform"])
+            self._add_to_cache(key=_cache_key, value=value, max_age=options["max_age"])
+
+            ret[name] = value
+
+        return ret
+
+    @staticmethod
+    def _split_batch_and_decrypt_parameters(
+        parameters: Dict[str, Dict], transform: TransformOptions, max_age: int, decrypt: bool
+    ) -> Tuple[Dict[str, Dict], Dict[str, Dict]]:
+        """Split parameters that can be fetched by GetParameters vs GetParameter
+
+        Parameters
+        ----------
+        parameters : Dict[str, Dict]
+            Parameters containing names as key and optional config override as value
+        transform : TransformOptions
+            Transform configuration
+        max_age : int
+            How long to cache a parameter for
+        decrypt : bool
+            Whether to use KMS to decrypt a parameter
+
+        Returns
+        -------
+        Tuple[Dict[str, Dict], Dict[str, Dict]]
+            GetParameters and GetParameter parameters dict along with their overrides/globals merged
+        """
+        batch_parameters: Dict[str, Dict] = {}
+        decrypt_parameters: Dict[str, Any] = {}
+
+        for parameter, options in parameters.items():
+            # NOTE: TypeDict later
+            _overrides = options or {}
+            _overrides["transform"] = _overrides.get("transform") or transform
+            _overrides["decrypt"] = _overrides.get("decrypt") or decrypt
+            _overrides["max_age"] = _overrides.get("max_age") or max_age
+
+            # NOTE: Split parameters who have decrypt OR have it global
+            if _overrides["decrypt"]:
+                decrypt_parameters[parameter] = _overrides
+            else:
+                batch_parameters[parameter] = _overrides
+
+        return batch_parameters, decrypt_parameters
 
 
 def get_parameter(
@@ -351,8 +511,8 @@ def get_parameters_by_name(
     parameters: Dict[str, Dict],
     transform: None = None,
     decrypt: bool = False,
-    force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
+    raise_on_failure: bool = True,
 ) -> Dict[str, str]:
     ...
 
@@ -362,8 +522,8 @@ def get_parameters_by_name(
     parameters: Dict[str, Dict],
     transform: Literal["binary"],
     decrypt: bool = False,
-    force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
+    raise_on_failure: bool = True,
 ) -> Dict[str, bytes]:
     ...
 
@@ -373,8 +533,8 @@ def get_parameters_by_name(
     parameters: Dict[str, Dict],
     transform: Literal["json"],
     decrypt: bool = False,
-    force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
+    raise_on_failure: bool = True,
 ) -> Dict[str, Dict[str, Any]]:
     ...
 
@@ -384,8 +544,8 @@ def get_parameters_by_name(
     parameters: Dict[str, Dict],
     transform: Literal["auto"],
     decrypt: bool = False,
-    force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
+    raise_on_failure: bool = True,
 ) -> Union[Dict[str, str], Dict[str, dict]]:
     ...
 
@@ -394,8 +554,8 @@ def get_parameters_by_name(
     parameters: Dict[str, Any],
     transform: TransformOptions = None,
     decrypt: bool = False,
-    force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
+    raise_on_failure: bool = True,
 ) -> Union[Dict[str, str], Dict[str, bytes], Dict[str, dict]]:
     """
     Retrieve multiple parameter values by name from AWS Systems Manager (SSM) Parameter Store
@@ -408,8 +568,6 @@ def get_parameters_by_name(
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
     decrypt: bool, optional
         If the parameter values should be decrypted
-    force_fetch: bool, optional
-        Force update even before a cached item has expired, defaults to False
     max_age: int
         Maximum age of the cached value
 
@@ -425,21 +583,10 @@ def get_parameters_by_name(
     # NOTE: Decided against using multi-thread due to single-thread outperforming in 128M and 1G + timeout risk
     # see: https://github.com/awslabs/aws-lambda-powertools-python/issues/1040#issuecomment-1299954613
 
-    ret: Dict[str, Any] = {}
+    # Only create the provider if this function is called at least once
+    if "ssm" not in DEFAULT_PROVIDERS:
+        DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
-    for parameter, options in parameters.items():
-        if isinstance(options, dict):
-            transform = options.get("transform") or transform
-            decrypt = options.get("decrypt") or decrypt
-            max_age = options.get("max_age") or max_age
-            force_fetch = options.get("force_fetch") or force_fetch
-
-        ret[parameter] = get_parameter(
-            name=parameter,
-            transform=transform,
-            decrypt=decrypt,
-            max_age=max_age,
-            force_fetch=force_fetch,
-        )
-
-    return ret
+    return DEFAULT_PROVIDERS["ssm"].get_parameters_by_name(
+        parameters=parameters, max_age=max_age, transform=transform, decrypt=decrypt, raise_on_failure=raise_on_failure
+    )

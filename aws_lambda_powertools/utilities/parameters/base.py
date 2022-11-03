@@ -5,13 +5,13 @@ Base for Parameter providers
 import base64
 import json
 from abc import ABC, abstractmethod
-from collections import namedtuple
 from datetime import datetime, timedelta
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     Dict,
+    NamedTuple,
     Optional,
     Tuple,
     Type,
@@ -35,7 +35,6 @@ if TYPE_CHECKING:
 
 
 DEFAULT_MAX_AGE_SECS = 5
-ExpirableValue = namedtuple("ExpirableValue", ["value", "ttl"])
 # These providers will be dynamically initialized on first use of the helper functions
 DEFAULT_PROVIDERS: Dict[str, Any] = {}
 TRANSFORM_METHOD_JSON = "json"
@@ -52,21 +51,26 @@ TRANSFORM_METHOD_MAPPING = {
 }
 
 
+class ExpirableValue(NamedTuple):
+    value: Union[str, bytes, Dict[str, Any]]
+    ttl: datetime
+
+
 class BaseProvider(ABC):
     """
     Abstract Base Class for Parameter providers
     """
 
-    store: Any = None
+    store: Dict[Tuple[str, TransformOptions], ExpirableValue]
 
     def __init__(self):
         """
         Initialize the base provider
         """
 
-        self.store = {}
+        self.store: Dict[Tuple[str, TransformOptions], ExpirableValue] = {}
 
-    def _has_not_expired(self, key: Tuple[str, Optional[str]]) -> bool:
+    def _has_not_expired(self, key: Tuple[str, TransformOptions]) -> bool:
         return key in self.store and self.store[key].ttl >= datetime.now()
 
     def get(
@@ -130,7 +134,9 @@ class BaseProvider(ABC):
                 value = value.decode("utf-8")
             value = transform_value(value, transform, raise_on_transform_error=True)
 
-        self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
+        # NOTE: don't cache None, as they might've been failed transforms and may be corrected
+        if value is not None:
+            self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
 
         return value
 
@@ -182,7 +188,7 @@ class BaseProvider(ABC):
         key = (path, transform)
 
         if not force_fetch and self._has_not_expired(key):
-            return self.store[key].value
+            return self.store[key].value  # type: ignore # need to revisit entire typing here
 
         try:
             values = self._get_multiple(path, **sdk_options)
@@ -206,6 +212,9 @@ class BaseProvider(ABC):
 
     def clear_cache(self):
         self.store.clear()
+
+    def _add_to_cache(self, key: Tuple[str, TransformOptions], value: Any, max_age: int):
+        self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
 
     @staticmethod
     def _build_boto3_client(

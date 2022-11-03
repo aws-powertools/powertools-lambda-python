@@ -1,4 +1,5 @@
 import base64
+import itertools
 import logging
 import os
 import warnings
@@ -115,3 +116,13 @@ def powertools_debug_is_set() -> bool:
         return True
 
     return False
+
+
+def slice_dictionary(data, chunk_size: int):
+    # save CPU cycles if input is already small than chunk_size
+    if len(data) <= chunk_size:
+        yield data
+
+    data_iterator = iter(data)  # we don't know how big this is
+    for _ in range(0, len(data), chunk_size):
+        yield {dict_key: data[dict_key] for dict_key in itertools.islice(data_iterator, chunk_size)}
