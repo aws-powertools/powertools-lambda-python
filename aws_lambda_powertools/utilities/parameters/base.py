@@ -1,6 +1,7 @@
 """
 Base for Parameter providers
 """
+from __future__ import annotations
 
 import base64
 import json
@@ -52,7 +53,7 @@ TRANSFORM_METHOD_MAPPING = {
 
 
 class ExpirableValue(NamedTuple):
-    value: Union[str, bytes, Dict[str, Any]]
+    value: str | bytes | Dict[str, Any]
     ttl: datetime
 
 
@@ -211,7 +212,7 @@ class BaseProvider(ABC):
     def clear_cache(self):
         self.store.clear()
 
-    def _add_to_cache(self, key: Tuple[str, TransformOptions], value: Any, max_age: int):
+    def add_to_cache(self, key: Tuple[str, TransformOptions], value: Any, max_age: int):
         self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
 
     @staticmethod

@@ -270,6 +270,7 @@ class SSMProvider(BaseProvider):
             if self._has_not_expired(cache_key):
                 ret[name] = self.store[cache_key].value
 
+        # Return early if all parameters were in cache OR batch was empty
         if len(ret) == len(batch):
             return ret
 
@@ -321,7 +322,7 @@ class SSMProvider(BaseProvider):
                 )
 
             _cache_key = (name, options["transform"])
-            self._add_to_cache(key=_cache_key, value=value, max_age=options["max_age"])
+            self.add_to_cache(key=_cache_key, value=value, max_age=options["max_age"])
 
             ret[name] = value
 
