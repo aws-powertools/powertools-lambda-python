@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import base64
 import json
 import random
 import string
 from datetime import datetime, timedelta
 from io import BytesIO
-from typing import Dict
+from typing import Any, Dict
 
 import boto3
 import pytest
@@ -19,6 +21,11 @@ from aws_lambda_powertools.utilities.parameters.base import (
     BaseProvider,
     ExpirableValue,
 )
+from aws_lambda_powertools.utilities.parameters.ssm import (
+    DEFAULT_MAX_AGE_SECS,
+    SSMProvider,
+)
+from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
 
 @pytest.fixture(scope="function")
@@ -612,6 +619,47 @@ def test_ssm_provider_clear_cache(mock_name, mock_value, config):
 
     # THEN store should be empty
     assert provider.store == {}
+
+
+def test_ssm_provider_get_parameters_by_name_raise_on_failure(mock_name, mock_value, mock_version, config):
+    # GIVEN two parameters are requested
+    provider = parameters.SSMProvider(config=config)
+    dev_param = f"/dev/{mock_name}"
+    prod_param = f"/prod/{mock_name}"
+
+    params = {dev_param: {}, prod_param: {}}
+    param_names = list(params.keys())
+
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "Parameters": [
+            {
+                "Name": dev_param,
+                "Type": "String",
+                "Value": "string",
+                "Version": mock_version,
+                "Selector": f"{dev_param}:{mock_version}",
+                "SourceResult": "string",
+                "LastModifiedDate": datetime(2015, 1, 1),
+                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{dev_param.removeprefix('/')}",
+                "DataType": "string",
+            },
+        ],
+        "InvalidParameters": [prod_param],
+    }
+
+    expected_params = {"Names": param_names}
+    stubber.add_response("get_parameters", response, expected_params)
+    stubber.activate()
+
+    # WHEN one of them fails to be retrieved
+    # THEN raise GetParameterError
+    with pytest.raises(parameters.exceptions.GetParameterError, match=f"Failed to fetch parameters: .*{prod_param}.*"):
+        try:
+            provider.get_parameters_by_name(parameters=params)
+            stubber.assert_no_pending_responses()
+        finally:
+            stubber.deactivate()
 
 
 def test_dynamodb_provider_clear_cache(mock_name, mock_value, config):
@@ -1520,6 +1568,120 @@ def test_get_parameter(monkeypatch, mock_name, mock_value):
     value = parameters.get_parameter(mock_name)
 
     assert value == mock_value
+
+
+def test_get_parameters_by_name(monkeypatch, mock_name, mock_value):
+    params = {mock_name: {}}
+
+    class TestProvider(SSMProvider):
+        def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
+            return mock_value
+
+        def get_parameters_by_name(
+            self,
+            parameters: Dict[str, Dict],
+            transform: TransformOptions = None,
+            decrypt: bool = False,
+            max_age: int = DEFAULT_MAX_AGE_SECS,
+            raise_on_error: bool = True,
+        ) -> Dict[str, str] | Dict[str, bytes] | Dict[str, dict]:
+            return {mock_name: mock_value}
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+
+    values = parameters.get_parameters_by_name(parameters=params)
+
+    assert len(values) == 1
+    assert values[mock_name] == mock_value
+
+
+def test_get_parameters_by_name_with_decrypt_override(monkeypatch, mock_name, mock_value):
+    # GIVEN 2 out of 3 parameters have decrypt override
+    decrypt_param = "/api_key"
+    decrypt_param_two = "/another/secret"
+    decrypt_params = {decrypt_param: {"decrypt": True}, decrypt_param_two: {"decrypt": True}}
+    decrypted_response = "decrypted"
+    params = {mock_name: {}, **decrypt_params}
+
+    class TestProvider(SSMProvider):
+        def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
+            # THEN params with `decrypt` override should use GetParameter` (`_get`)
+            assert name in decrypt_params
+            assert decrypt
+            return decrypted_response
+
+        def _get_parameters_by_name(self, *args, **kwargs) -> Dict[str, Any]:
+            return {mock_name: mock_value}
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+
+    # WHEN get_parameters_by_name is called
+    values = parameters.get_parameters_by_name(parameters=params)
+
+    # THEN all parameters should be merged in the response
+    assert len(values) == 3
+    assert values[mock_name] == mock_value
+    assert values[decrypt_param] == decrypted_response
+    assert values[decrypt_param_two] == decrypted_response
+
+
+def test_get_parameters_by_name_with_max_age_override(monkeypatch, mock_name, mock_value):
+    # GIVEN 1 out of 2 parameters overrides max_age to 0
+    no_cache_param = "/no_cache"
+    params = {mock_name: {}, no_cache_param: {"max_age": 0}}
+
+    class TestProvider(SSMProvider):
+        # NOTE: By convention, we check at `_get_parameters_by_name`
+        # as that's right before we call SSM, and when options have been merged
+        def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
+            # THEN max_age should use no_cache_param override
+            assert parameters[no_cache_param]["max_age"] == 0
+
+            return {mock_name: mock_value, no_cache_param: mock_value}
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+
+    # WHEN get_parameters_by_name is called
+    parameters.get_parameters_by_name(parameters=params)
+
+
+def test_get_parameters_by_name_with_override_and_explicit_global(monkeypatch, mock_name, mock_value):
+    # GIVEN a parameter overrides a default setting
+    default_cache_period = 500
+    params = {mock_name: {"max_age": 0}, "no-override": {}}
+
+    class TestProvider(SSMProvider):
+        # NOTE: By convention, we check at `_get_parameters_by_name`
+        # as that's right before we call SSM, and when options have been merged
+        def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
+            # THEN max_age should use no_cache_param override
+            assert parameters[mock_name]["max_age"] == 0
+            assert parameters["no-override"]["max_age"] == default_cache_period
+
+            return {mock_name: mock_value}
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+
+    # WHEN get_parameters_by_name is called with max_age set to 500 as the default
+    parameters.get_parameters_by_name(parameters=params, max_age=default_cache_period)
+
+
+def test_get_parameters_by_name_with_max_batch(monkeypatch, mock_value):
+    # GIVEN a batch of 20 parameters
+    params = {f"param_{i}": {} for i in range(20)}
+
+    class TestProvider(SSMProvider):
+        # NOTE: By convention, we check at `_get_parameters_by_name`
+        # as that's right before we call SSM, and when options have been merged
+        def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
+            # THEN we should always split to respect GetParameters max
+            assert len(parameters) == self._MAX_GET_PARAMETERS_ITEM
+            return {}
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+
+    # WHEN get_parameters_by_name is called
+    parameters.get_parameters_by_name(parameters=params)
 
 
 def test_get_parameter_new(monkeypatch, mock_name, mock_value):
