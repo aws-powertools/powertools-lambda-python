@@ -130,9 +130,7 @@ class BaseProvider(ABC):
             raise GetParameterError(str(exc))
 
         if transform:
-            if isinstance(value, bytes):
-                value = value.decode("utf-8")
-            value = transform_value(value, transform, raise_on_transform_error=True)
+            value = transform_value(key=name, value=value, transform=transform, raise_on_transform_error=True)
 
         # NOTE: don't cache None, as they might've been failed transforms and may be corrected
         if value is not None:
@@ -283,26 +281,26 @@ class BaseProvider(ABC):
         return session.resource(service_name=service_name, config=config, endpoint_url=endpoint_url)
 
 
-def get_transform_method(key: str, transform: TransformOptions = None) -> Callable[..., Any]:
+def get_transform_method(value: str, transform: TransformOptions = None) -> Callable[..., Any]:
     """
     Determine the transform method
 
     Examples
     -------
-        >>> get_transform_method("key", "any_other_value")
+        >>> get_transform_method("key","any_other_value")
         'any_other_value'
-        >>> get_transform_method("key.json", "auto")
+        >>> get_transform_method("key.json","auto")
         'json'
-        >>> get_transform_method("key.binary", "auto")
+        >>> get_transform_method("key.binary","auto")
         'binary'
-        >>> get_transform_method("key", "auto")
+        >>> get_transform_method("key","auto")
         None
-        >>> get_transform_method("key", None)
+        >>> get_transform_method("key",None)
         None
 
     Parameters
     ---------
-    key: str
+    value: str
         Only used when the transform is "auto".
     transform: str, optional
         Original transform method, only "auto" will try to detect the transform method by the key
@@ -315,7 +313,7 @@ def get_transform_method(key: str, transform: TransformOptions = None) -> Callab
     transform_method = TRANSFORM_METHOD_MAPPING.get(transform)
 
     if transform == "auto":
-        key_suffix = key.rsplit(".")[-1]
+        key_suffix = value.rsplit(".")[-1]
         transform_method = TRANSFORM_METHOD_MAPPING.get(key_suffix, TRANSFORM_METHOD_MAPPING[None])
 
     return cast(Callable, transform_method)  # https://github.com/python/mypy/issues/10740
@@ -323,20 +321,29 @@ def get_transform_method(key: str, transform: TransformOptions = None) -> Callab
 
 @overload
 def transform_value(
-    value: Dict[str, Any], transform: TransformOptions, raise_on_transform_error: bool = False
+    value: Dict[str, Any],
+    transform: TransformOptions,
+    raise_on_transform_error: bool = False,
+    key: str = "",
 ) -> Dict[str, Any]:
     ...
 
 
 @overload
 def transform_value(
-    value: Union[str, bytes, Dict[str, Any]], transform: TransformOptions, raise_on_transform_error: bool = False
+    value: Union[str, bytes, Dict[str, Any]],
+    transform: TransformOptions,
+    raise_on_transform_error: bool = False,
+    key: str = "",
 ) -> Optional[Union[str, bytes, Dict[str, Any]]]:
     ...
 
 
 def transform_value(
-    value: Union[str, bytes, Dict[str, Any]], transform: TransformOptions, raise_on_transform_error: bool = True
+    value: Union[str, bytes, Dict[str, Any]],
+    transform: TransformOptions,
+    raise_on_transform_error: bool = True,
+    key: str = "",
 ) -> Optional[Union[str, bytes, Dict[str, Any]]]:
     """
     Transform a value using one of the available options.
@@ -347,6 +354,8 @@ def transform_value(
         Parameter value to transform
     transform: str
         Type of transform, supported values are "json", "binary", and "auto" based on suffix (.json, .binary)
+    key: str
+        Parameter key when transform is auto to infer its transform method
     raise_on_transform_error: bool, optional
         Raises an exception if any transform fails, otherwise this will
         return a None value for each transform that failed
@@ -370,7 +379,7 @@ def transform_value(
 
         transformed_values: Dict[str, Any] = {}
         for dict_key, dict_value in value.items():
-            transform_method = get_transform_method(key=dict_key, transform=transform)
+            transform_method = get_transform_method(value=dict_key, transform=transform)
             try:
                 transformed_values[dict_key] = transform_method(dict_value)
             except Exception as exc:
@@ -379,8 +388,14 @@ def transform_value(
                 transformed_values[dict_key] = None
         return transformed_values
 
+    if transform == "auto":
+        # key="a.json", value='{"a": "b"}', or key="a.binary", value="b64_encoded"
+        transform_method = get_transform_method(value=key, transform=transform)
+    else:
+        # value='{"key": "value"}
+        transform_method = get_transform_method(value=value, transform=transform)
+
     try:
-        transform_method = get_transform_method(key=value, transform=transform)
         return transform_method(value)
     except Exception as exc:
         if raise_on_transform_error:

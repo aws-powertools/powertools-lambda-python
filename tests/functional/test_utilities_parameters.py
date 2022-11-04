@@ -1814,6 +1814,50 @@ def test_appconf_get_app_config_new(monkeypatch, mock_name, mock_value):
     assert value == mock_value
 
 
+def test_transform_value_auto(mock_value: str):
+    # GIVEN
+    json_data = json.dumps({"A": mock_value})
+    mock_binary = mock_value.encode()
+    binary_data = base64.b64encode(mock_binary).decode()
+
+    # WHEN
+    json_value = parameters.base.transform_value(key="/a.json", value=json_data, transform="auto")
+    binary_value = parameters.base.transform_value(key="/a.binary", value=binary_data, transform="auto")
+
+    # THEN
+    assert isinstance(json_value, dict)
+    assert isinstance(binary_value, bytes)
+    assert json_value["A"] == mock_value
+    assert binary_value == mock_binary
+
+
+def test_transform_value_auto_incorrect_key(mock_value: str):
+    # GIVEN
+    mock_key = "/missing/json/suffix"
+    json_data = json.dumps({"A": mock_value})
+
+    # WHEN
+    value = parameters.base.transform_value(key=mock_key, value=json_data, transform="auto")
+
+    # THEN it should echo back its value
+    assert isinstance(value, str)
+    assert value == json_data
+
+
+def test_transform_value_auto_unsupported_transform(mock_value: str):
+    # GIVEN
+    mock_key = "/a.does_not_exist"
+    mock_dict = {"hello": "world"}
+
+    # WHEN
+    value = parameters.base.transform_value(key=mock_key, value=mock_value, transform="auto")
+    dict_value = parameters.base.transform_value(key=mock_key, value=mock_dict, transform="auto")
+
+    # THEN it should echo back its value
+    assert value == mock_value
+    assert dict_value == mock_dict
+
+
 def test_transform_value_json(mock_value):
     """
     Test transform_value() with a json transform

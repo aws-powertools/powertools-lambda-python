@@ -17,7 +17,8 @@ def parameters_list(infrastructure: dict) -> List[str]:
     return json.loads(param_list)
 
 
-def test_get_parameter_appconfig_freeform(
+#
+def test_get_parameters_by_name(
     ssm_get_parameters_by_name_fn_arn: str,
     parameters_list: str,
 ):

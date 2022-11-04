@@ -9,7 +9,7 @@ from typing_extensions import Literal
 
 from aws_lambda_powertools.shared.functions import slice_dictionary
 
-from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
+from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider, transform_value
 from .exceptions import GetParameterError
 from .types import TransformOptions
 
@@ -209,7 +209,7 @@ class SSMProvider(BaseProvider):
         transform: TransformOptions = None,
         decrypt: bool = False,
         max_age: int = DEFAULT_MAX_AGE_SECS,
-        raise_on_failure: bool = True,
+        raise_on_error: bool = True,
     ) -> Union[Dict[str, str], Dict[str, bytes], Dict[str, dict]]:
         """
         Retrieve multiple parameter values by name from SSM or cache.
@@ -224,6 +224,8 @@ class SSMProvider(BaseProvider):
             If the parameter values should be decrypted
         max_age: int
             Maximum age of the cached value
+        raise_on_error: bool
+            Whether to raise GetParameterError if a parameter fails to be fetched or not
 
         Raises
         ------
@@ -245,7 +247,6 @@ class SSMProvider(BaseProvider):
         # 8. [DONE] Return from cache
         # 9. [DONE] Migrate high-level function get_parameters_by_name to use new class get_parameters_by_name
         # 10. Handle soft error with "_errors" key upon raise_on_error being False
-        # 11. Include raise_on_transform in inner functions too
 
         batch_params, decrypt_params = self._split_batch_and_decrypt_parameters(parameters, transform, max_age, decrypt)
 
@@ -257,9 +258,9 @@ class SSMProvider(BaseProvider):
             )
 
         # Merge both batched parameters and those that required decryption
-        return {**self._get_parameters_from_batch(batch=batch_params, raise_on_failure=raise_on_failure), **ret}
+        return {**self._get_parameters_from_batch(batch=batch_params, raise_on_error=raise_on_error), **ret}
 
-    def _get_parameters_from_batch(self, batch: Dict[str, Dict], raise_on_failure: bool = True) -> Dict[str, Any]:
+    def _get_parameters_from_batch(self, batch: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
         ret: Dict[str, Any] = {}
 
         # Check if it's in cache first to prevent unnecessary calls
@@ -277,18 +278,18 @@ class SSMProvider(BaseProvider):
         batch_diff = {key: value for key, value in batch.items() if key not in ret}
 
         for chunk in slice_dictionary(data=batch_diff, chunk_size=self._MAX_GET_PARAMETERS_ITEM):
-            ret.update(**self._get_parameters_by_name(parameters=chunk, raise_on_failure=raise_on_failure))
+            ret.update(**self._get_parameters_by_name(parameters=chunk, raise_on_error=raise_on_error))
 
         return ret
 
-    def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_failure: bool = True) -> Dict[str, Any]:
+    def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
         """Use SSM GetParameters to fetch parameters, hydrate cache, and handle partial failure
 
         Parameters
         ----------
         parameters : Dict[str, Dict]
             Parameters to fetch
-        raise_on_failure : bool, optional
+        raise_on_error : bool, optional
             Whether to fail-fast or fail gracefully by including "_errors" key in the response, by default True
 
         Returns
@@ -299,11 +300,11 @@ class SSMProvider(BaseProvider):
         Raises
         ------
         GetParameterError
-            When one or more parameters failed on fetching, and raise_on_failure is enabled
+            When one or more parameters failed on fetching, and raise_on_error is enabled
         """
         ret = {}
         response = self.client.get_parameters(Names=list(parameters.keys()))
-        if response["InvalidParameters"] and raise_on_failure:
+        if response["InvalidParameters"] and raise_on_error:
             raise GetParameterError(f"Failed to fetch parameters: {response['InvalidParameters']}")
 
         # Built up cache_key, hydrate cache, and return `{name:value}`
@@ -311,6 +312,13 @@ class SSMProvider(BaseProvider):
             name = parameter["Name"]
             value = parameter["Value"]
             options = parameters[name]
+            transform = options.get("transform", "")
+
+            # NOTE: If transform is set, we do it before caching to reduce number of operations
+            if transform:
+                value = transform_value(
+                    key=name, value=value, transform=transform, raise_on_transform_error=raise_on_error
+                )
 
             _cache_key = (name, options["transform"])
             self._add_to_cache(key=_cache_key, value=value, max_age=options["max_age"])
@@ -512,7 +520,7 @@ def get_parameters_by_name(
     transform: None = None,
     decrypt: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
-    raise_on_failure: bool = True,
+    raise_on_error: bool = True,
 ) -> Dict[str, str]:
     ...
 
@@ -523,7 +531,7 @@ def get_parameters_by_name(
     transform: Literal["binary"],
     decrypt: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
-    raise_on_failure: bool = True,
+    raise_on_error: bool = True,
 ) -> Dict[str, bytes]:
     ...
 
@@ -534,7 +542,7 @@ def get_parameters_by_name(
     transform: Literal["json"],
     decrypt: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
-    raise_on_failure: bool = True,
+    raise_on_error: bool = True,
 ) -> Dict[str, Dict[str, Any]]:
     ...
 
@@ -545,7 +553,7 @@ def get_parameters_by_name(
     transform: Literal["auto"],
     decrypt: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
-    raise_on_failure: bool = True,
+    raise_on_error: bool = True,
 ) -> Union[Dict[str, str], Dict[str, dict]]:
     ...
 
@@ -555,7 +563,7 @@ def get_parameters_by_name(
     transform: TransformOptions = None,
     decrypt: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
-    raise_on_failure: bool = True,
+    raise_on_error: bool = True,
 ) -> Union[Dict[str, str], Dict[str, bytes], Dict[str, dict]]:
     """
     Retrieve multiple parameter values by name from AWS Systems Manager (SSM) Parameter Store
@@ -588,5 +596,5 @@ def get_parameters_by_name(
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
     return DEFAULT_PROVIDERS["ssm"].get_parameters_by_name(
-        parameters=parameters, max_age=max_age, transform=transform, decrypt=decrypt, raise_on_failure=raise_on_failure
+        parameters=parameters, max_age=max_age, transform=transform, decrypt=decrypt, raise_on_error=raise_on_error
     )
