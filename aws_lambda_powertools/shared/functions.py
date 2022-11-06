@@ -4,7 +4,7 @@ import logging
 import os
 import warnings
 from binascii import Error as BinAsciiError
-from typing import Optional, Union, overload
+from typing import Dict, Generator, Optional, Union, overload
 
 from aws_lambda_powertools.shared import constants
 
@@ -118,11 +118,6 @@ def powertools_debug_is_set() -> bool:
     return False
 
 
-def slice_dictionary(data, chunk_size: int):
-    # save CPU cycles if input is already small than chunk_size
-    if len(data) <= chunk_size:
-        yield data
-
-    data_iterator = iter(data)  # we don't know how big this is
+def slice_dictionary(data: Dict, chunk_size: int) -> Generator[Dict, None, None]:
     for _ in range(0, len(data), chunk_size):
-        yield {dict_key: data[dict_key] for dict_key in itertools.islice(data_iterator, chunk_size)}
+        yield {dict_key: data[dict_key] for dict_key in itertools.islice(data, chunk_size)}

@@ -1,7 +1,7 @@
 """
 AWS SSM Parameter retrieval and caching utility
 """
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, overload
 
 import boto3
 from botocore.config import Config
@@ -191,7 +191,7 @@ class SSMProvider(BaseProvider):
         for page in self.client.get_paginator("get_parameters_by_path").paginate(**sdk_options):
             for parameter in page.get("Parameters", []):
                 # Standardize the parameter name
-                # The parameter name returned by SSM will contained the full path.
+                # The parameter name returned by SSM will contain the full path.
                 # However, for readability, we should return only the part after
                 # the path.
                 name = parameter["Name"]
@@ -225,7 +225,7 @@ class SSMProvider(BaseProvider):
         max_age: int
             Maximum age of the cached value
         raise_on_error: bool
-            Whether to raise GetParameterError if a parameter fails to be fetched or not
+            Whether to fail-fast or fail gracefully by including "_errors" key in the response, by default True
 
         Raises
         ------
@@ -235,36 +235,38 @@ class SSMProvider(BaseProvider):
         """
 
         ret: Dict[str, Any] = {}
-
-        # Tasks:
-        # 1. [DONE] Move to GetParameters
-        # 2. [DONE] Slice parameters in 10 if more than 10
-        # 3. [DONE] Split batch and decrypt parameters
-        # 4. [DONE] Use GetParameters for batch parameters
-        # 5. [DONE] Cache successful ones individually as they might have overrides
-        # 6. [DONE] Use GetParameter for those using `decrypt`
-        # 7. [DONE] Introduce raise_on_error
-        # 8. [DONE] Return from cache
-        # 9. [DONE] Migrate high-level function get_parameters_by_name to use new class get_parameters_by_name
-        # 10. Handle soft error with "_errors" key upon raise_on_error being False
+        decrypt_errors: List[str] = []
 
         batch_params, decrypt_params = self._split_batch_and_decrypt_parameters(parameters, transform, max_age, decrypt)
 
         # Decided for single-thread as it outperforms in 128M and 1G + reduce timeout risk
         # see: https://github.com/awslabs/aws-lambda-powertools-python/issues/1040#issuecomment-1299954613
         for parameter, options in decrypt_params.items():
-            ret[parameter] = self.get(
-                parameter, max_age=options["max_age"], transform=options["transform"], decrypt=options["decrypt"]
-            )
+            try:
+                ret[parameter] = self.get(
+                    parameter, max_age=options["max_age"], transform=options["transform"], decrypt=options["decrypt"]
+                )
+            except GetParameterError:
+                if raise_on_error:
+                    raise
+                decrypt_errors.append(parameter)
+                continue
+
+        batch_ret, batch_err = self._get_parameters_from_batch(batch=batch_params, raise_on_error=raise_on_error)
+        if not raise_on_error:
+            # merge batch and decrypt errors if instructed
+            ret["_errors"] = [*batch_err, *decrypt_errors]
 
         # Merge both batched parameters and those that required decryption
-        return {**self._get_parameters_from_batch(batch=batch_params, raise_on_error=raise_on_error), **ret}
+        return {**batch_ret, **ret}
 
-    def _get_parameters_from_batch(self, batch: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
+    def _get_parameters_from_batch(
+        self, batch: Dict[str, Dict], raise_on_error: bool = True
+    ) -> Tuple[Dict[str, Any], List[str]]:
         ret: Dict[str, Any] = {}
+        errors: List[str] = []
 
-        # Check if it's in cache first to prevent unnecessary calls
-        # also confirm whether the incoming batch matches our cached
+        # Check if it's in cache to prevent unnecessary calls
         for name, options in batch.items():
             cache_key = (name, options["transform"])
             if self._has_not_expired(cache_key):
@@ -272,18 +274,24 @@ class SSMProvider(BaseProvider):
 
         # Return early if all parameters were in cache OR batch was empty
         if len(ret) == len(batch):
-            return ret
+            return ret, errors
 
         # Take out the differences to prevent over-fetching
-        # since there could be parameters with distinct max_age override
+        # there could be parameters with cache expired
         batch_diff = {key: value for key, value in batch.items() if key not in ret}
 
         for chunk in slice_dictionary(data=batch_diff, chunk_size=self._MAX_GET_PARAMETERS_ITEM):
-            ret.update(**self._get_parameters_by_name(parameters=chunk, raise_on_error=raise_on_error))
+            response, possible_errors = self._get_parameters_by_name(parameters=chunk, raise_on_error=raise_on_error)
+            ret.update(response)
 
-        return ret
+            if not raise_on_error:
+                errors = possible_errors
 
-    def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
+        return ret, errors
+
+    def _get_parameters_by_name(
+        self, parameters: Dict[str, Dict], raise_on_error: bool = True
+    ) -> Tuple[Dict[str, Any], List[str]]:
         """Use SSM GetParameters to fetch parameters, hydrate cache, and handle partial failure
 
         Parameters
@@ -304,9 +312,15 @@ class SSMProvider(BaseProvider):
             When one or more parameters failed on fetching, and raise_on_error is enabled
         """
         ret = {}
+        batch_errors: List[str] = []
+
         response = self.client.get_parameters(Names=list(parameters.keys()))
-        if response["InvalidParameters"] and raise_on_error:
-            raise GetParameterError(f"Failed to fetch parameters: {response['InvalidParameters']}")
+        failed_parameters = response["InvalidParameters"]
+        if failed_parameters:
+            if raise_on_error:
+                raise GetParameterError(f"Failed to fetch parameters: {failed_parameters}")
+            else:
+                batch_errors = failed_parameters
 
         # Built up cache_key, hydrate cache, and return `{name:value}`
         for parameter in response["Parameters"]:
@@ -326,7 +340,7 @@ class SSMProvider(BaseProvider):
 
             ret[name] = value
 
-        return ret
+        return ret, batch_errors
 
     @staticmethod
     def _split_batch_and_decrypt_parameters(
@@ -584,6 +598,8 @@ def get_parameters_by_name(
         If the parameter values should be decrypted
     max_age: int
         Maximum age of the cached value
+    raise_on_error: bool, optional
+        Whether to fail-fast or fail gracefully by including "_errors" key in the response, by default True
 
     Raises
     ------

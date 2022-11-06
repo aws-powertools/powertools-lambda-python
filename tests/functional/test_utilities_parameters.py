@@ -6,7 +6,7 @@ import random
 import string
 from datetime import datetime, timedelta
 from io import BytesIO
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import boto3
 import pytest
@@ -648,14 +648,14 @@ def test_ssm_provider_get_parameters_by_name_raise_on_failure(mock_name, mock_va
     # GIVEN two parameters are requested
     provider = parameters.SSMProvider(config=config)
     dev_param = f"/dev/{mock_name}"
-    prod_param = f"/prod/{mock_name}"
+    fail_param = f"/prod/{mock_name}"
 
-    params = {dev_param: {}, prod_param: {}}
+    params = {dev_param: {}, fail_param: {}}
     param_names = list(params.keys())
     stub_params = {dev_param: mock_value}
 
     stubber = stub.Stubber(provider.client)
-    response = build_get_parameters_stub(params=stub_params, invalid_parameters=[prod_param])
+    response = build_get_parameters_stub(params=stub_params, invalid_parameters=[fail_param])
 
     expected_params = {"Names": param_names}
     stubber.add_response("get_parameters", response, expected_params)
@@ -663,12 +663,105 @@ def test_ssm_provider_get_parameters_by_name_raise_on_failure(mock_name, mock_va
 
     # WHEN one of them fails to be retrieved
     # THEN raise GetParameterError
-    with pytest.raises(parameters.exceptions.GetParameterError, match=f"Failed to fetch parameters: .*{prod_param}.*"):
+    with pytest.raises(parameters.exceptions.GetParameterError, match=f"Failed to fetch parameters: .*{fail_param}.*"):
         try:
             provider.get_parameters_by_name(parameters=params)
             stubber.assert_no_pending_responses()
         finally:
             stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure(mock_name, mock_value, mock_version, config):
+    # GIVEN two parameters are requested
+    success = f"/dev/{mock_name}"
+    fail = f"/prod/{mock_name}"
+    params = {success: {}, fail: {}}
+    param_names = list(params.keys())
+    stub_params = {success: mock_value}
+
+    expected_stub_response = build_get_parameters_stub(params=stub_params, invalid_parameters=[fail])
+    expected_stub_params = {"Names": param_names}
+
+    provider = parameters.SSMProvider(config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_parameters", expected_stub_response, expected_stub_params)
+    stubber.activate()
+
+    # WHEN one of them fails to be retrieved
+    try:
+        ret = provider.get_parameters_by_name(parameters=params, raise_on_error=False)
+
+        # THEN there should be no error raised
+        # and failed ones available within "_errors" key
+        stubber.assert_no_pending_responses()
+        assert ret["_errors"]
+        assert len(ret["_errors"]) == 1
+        assert fail not in ret
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_with_decrypt(mock_name, mock_version, config):
+    # GIVEN one parameter requires decryption and an arbitrary SDK error occurs
+    param = f"/{mock_name}"
+    params = {param: {"decrypt": True}}
+
+    provider = parameters.SSMProvider(config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error("get_parameter")
+    stubber.activate()
+
+    # WHEN fail-fast is disabled in get_parameters_by_name
+    try:
+        ret = provider.get_parameters_by_name(parameters=params, raise_on_error=False)
+        stubber.assert_no_pending_responses()
+
+        # THEN there should be no error raised but added under `_errors` key
+        assert ret["_errors"]
+        assert len(ret["_errors"]) == 1
+        assert param not in ret
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_batch_decrypt_combined(
+    mock_value, mock_version, config
+):
+    # GIVEN three parameters are requested
+    # one requires decryption, two can be batched
+    fail = "/fail"
+    success = "/success"
+    decrypt_fail = "/fail/decrypt"
+    params = {decrypt_fail: {"decrypt": True}, success: {}, fail: {}}
+
+    expected_stub_params = {"Names": [success, fail]}
+    expected_stub_response = build_get_parameters_stub(
+        params={fail: mock_value, success: mock_value}, invalid_parameters=[fail]
+    )
+
+    # GIVEN an arbitrary SDK error is injected
+    provider = parameters.SSMProvider(config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error("get_parameter")
+    stubber.add_response("get_parameters", expected_stub_response, expected_stub_params)
+    stubber.activate()
+
+    # WHEN fail-fast is disabled in get_parameters_by_name
+    # and only one parameter succeeds out of three
+    try:
+        ret = provider.get_parameters_by_name(parameters=params, raise_on_error=False)
+
+        # THEN there should be no error raised
+        # successful params returned accordingly
+        # and failed ones available within "_errors" key
+        stubber.assert_no_pending_responses()
+        assert success in ret
+        assert ret["_errors"]
+        assert len(ret["_errors"]) == 2
+        assert fail not in ret
+        assert decrypt_fail not in ret
+    finally:
+        stubber.deactivate()
 
 
 def test_dynamodb_provider_clear_cache(mock_name, mock_value, config):
@@ -1616,8 +1709,11 @@ def test_get_parameters_by_name_with_decrypt_override(monkeypatch, mock_name, mo
             assert decrypt
             return decrypted_response
 
-        def _get_parameters_by_name(self, *args, **kwargs) -> Dict[str, Any]:
-            return {mock_name: mock_value}
+        # def _get_parameters_by_name(self, *args, **kwargs) -> Dict[str, Any]:
+        def _get_parameters_by_name(
+            self, parameters: Dict[str, Dict], raise_on_error: bool = True
+        ) -> Tuple[Dict[str, Any], List[str]]:
+            return {mock_name: mock_value}, []
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
 
@@ -1667,12 +1763,15 @@ def test_get_parameters_by_name_with_override_and_explicit_global(monkeypatch, m
     class TestProvider(SSMProvider):
         # NOTE: By convention, we check at `_get_parameters_by_name`
         # as that's right before we call SSM, and when options have been merged
-        def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
+        # def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
+        def _get_parameters_by_name(
+            self, parameters: Dict[str, Dict], raise_on_error: bool = True
+        ) -> Tuple[Dict[str, Any], List[str]]:
             # THEN max_age should use no_cache_param override
             assert parameters[mock_name]["max_age"] == 0
             assert parameters["no-override"]["max_age"] == default_cache_period
 
-            return {mock_name: mock_value}
+            return {mock_name: mock_value}, []
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
 
@@ -1685,10 +1784,12 @@ def test_get_parameters_by_name_with_max_batch(monkeypatch, mock_value):
     params = {f"param_{i}": {} for i in range(20)}
 
     class TestProvider(SSMProvider):
-        def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
+        def _get_parameters_by_name(
+            self, parameters: Dict[str, Dict], raise_on_error: bool = True
+        ) -> Tuple[Dict[str, Any], List[str]]:
             # THEN we should always split to respect GetParameters max
             assert len(parameters) == self._MAX_GET_PARAMETERS_ITEM
-            return {}
+            return {}, []
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
 
