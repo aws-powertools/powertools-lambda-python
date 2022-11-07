@@ -562,7 +562,7 @@ your development, building, deployment tooling need to accommodate the distinct 
 
 ## Testing your code
 
-You can test your routes by passing a proxy event request where `path` and `httpMethod`.
+You can test your routes by passing a proxy event request with required params.
 
 === "assert_http_response.py"
 
