@@ -1769,36 +1769,6 @@ def test_get_parameters_by_name_with_decrypt_override(monkeypatch, mock_name, mo
     assert values[decrypt_param_two] == decrypted_response
 
 
-def test_get_parameters_by_name_with_overrides(monkeypatch, mock_value):
-    # GIVEN 1 out of 2 parameters overrides max_age to 0
-    no_cache_param = "/no_cache"
-    json_param = "/json"
-    params = {no_cache_param: {"max_age": 0}, json_param: {"transform": "json"}}
-
-    stub_params = {no_cache_param: mock_value, json_param: '{"a":"b"}'}
-    stub_response = build_get_parameters_stub(params=stub_params)
-
-    class FakeClient:
-        def get_parameters(self, *args, **kwargs):
-            return stub_response
-
-    class TestProvider(SSMProvider):
-        def _get_parameters_by_name(
-            self, parameters: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
-        ) -> Tuple[Dict[str, Any], List[str]]:
-            # THEN max_age should use no_cache_param override
-            assert parameters[no_cache_param]["max_age"] == 0
-            return super()._get_parameters_by_name(parameters, raise_on_error, decrypt)
-
-    provider = TestProvider(boto3_client=FakeClient())
-    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider(boto3_client=FakeClient()))
-
-    # WHEN get_parameters_by_name is called
-    ret = provider.get_parameters_by_name(parameters=params)
-    # THEN json_param should be transformed
-    assert isinstance(ret[json_param], dict)
-
-
 def test_get_parameters_by_name_with_override_and_explicit_global(monkeypatch, mock_name, mock_value):
     # GIVEN a parameter overrides a default setting
     default_cache_period = 500
