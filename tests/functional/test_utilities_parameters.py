@@ -708,7 +708,7 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_with_decryp
 
     provider = parameters.SSMProvider(config=config)
     stubber = stub.Stubber(provider.client)
-    stubber.add_client_error("get_parameter")
+    stubber.add_client_error("get_parameters", "InvalidKeyId")
     stubber.activate()
 
     # WHEN fail-fast is disabled in get_parameters_by_name
@@ -776,6 +776,35 @@ def test_ssm_provider_get_parameters_by_name_raise_on_reserved_errors_key(mock_n
     # THEN raise GetParameterError
     with pytest.raises(parameters.exceptions.GetParameterError, match="You cannot fetch a parameter named"):
         provider.get_parameters_by_name(parameters=params, raise_on_error=False)
+
+
+def test_ssm_provider_get_parameters_by_name_all_decrypt_should_use_get_parameters_api(mock_name, mock_value, config):
+    # GIVEN all parameters require decryption
+    param_a = f"/a/{mock_name}"
+    param_b = f"/b/{mock_name}"
+    fail = "/does_not_exist"  # stub model doesn't support all-success yet
+
+    all_params = {param_a: {}, param_b: {}, fail: {}}
+    all_params_names = list(all_params.keys())
+
+    expected_param_values = {param_a: mock_value, param_b: mock_value}
+    expected_stub_response = build_get_parameters_stub(params=expected_param_values, invalid_parameters=[fail])
+    expected_stub_params = {"Names": all_params_names, "WithDecryption": True}
+
+    provider = parameters.SSMProvider(config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_parameters", expected_stub_response, expected_stub_params)
+    stubber.activate()
+
+    # WHEN get_parameters_by_name is called
+    # THEN we should only use GetParameters WithDecryption=true to prevent throttling
+    try:
+        ret = provider.get_parameters_by_name(parameters=all_params, decrypt=True, raise_on_error=False)
+        stubber.assert_no_pending_responses()
+
+        assert ret is not None
+    finally:
+        stubber.deactivate()
 
 
 def test_dynamodb_provider_clear_cache(mock_name, mock_value, config):
@@ -1724,7 +1753,7 @@ def test_get_parameters_by_name_with_decrypt_override(monkeypatch, mock_name, mo
             return decrypted_response
 
         def _get_parameters_by_name(
-            self, parameters: Dict[str, Dict], raise_on_error: bool = True
+            self, parameters: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
         ) -> Tuple[Dict[str, Any], List[str]]:
             return {mock_name: mock_value}, []
 
@@ -1755,11 +1784,11 @@ def test_get_parameters_by_name_with_overrides(monkeypatch, mock_value):
 
     class TestProvider(SSMProvider):
         def _get_parameters_by_name(
-            self, parameters: Dict[str, Dict], raise_on_error: bool = True
+            self, parameters: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
         ) -> Tuple[Dict[str, Any], List[str]]:
             # THEN max_age should use no_cache_param override
             assert parameters[no_cache_param]["max_age"] == 0
-            return super()._get_parameters_by_name(parameters, raise_on_error)
+            return super()._get_parameters_by_name(parameters, raise_on_error, decrypt)
 
     provider = TestProvider(boto3_client=FakeClient())
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider(boto3_client=FakeClient()))
@@ -1780,7 +1809,7 @@ def test_get_parameters_by_name_with_override_and_explicit_global(monkeypatch, m
         # as that's right before we call SSM, and when options have been merged
         # def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
         def _get_parameters_by_name(
-            self, parameters: Dict[str, Dict], raise_on_error: bool = True
+            self, parameters: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
         ) -> Tuple[Dict[str, Any], List[str]]:
             # THEN max_age should use no_cache_param override
             assert parameters[mock_name]["max_age"] == 0
@@ -1800,7 +1829,7 @@ def test_get_parameters_by_name_with_max_batch(monkeypatch, mock_value):
 
     class TestProvider(SSMProvider):
         def _get_parameters_by_name(
-            self, parameters: Dict[str, Dict], raise_on_error: bool = True
+            self, parameters: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
         ) -> Tuple[Dict[str, Any], List[str]]:
             # THEN we should always split to respect GetParameters max
             assert len(parameters) == self._MAX_GET_PARAMETERS_ITEM
