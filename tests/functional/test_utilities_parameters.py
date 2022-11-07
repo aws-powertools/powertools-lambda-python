@@ -2347,10 +2347,10 @@ def test_base_provider_get_force_update(mock_name, mock_value):
     assert value == mock_value
 
 
-def test_cache_ignores_max_age_zero_or_negative(mock_value):
+def test_cache_ignores_max_age_zero_or_negative(mock_value, config):
     # GIVEN we have two parameters that shouldn't be cached
     param = "/no_cache"
-    provider = SSMProvider()
+    provider = SSMProvider(config=config)
     cache_key = (param, None)
 
     # WHEN a provider adds them into the cache
