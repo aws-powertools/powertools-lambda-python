@@ -836,8 +836,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-cloudformation"
-version = "1.25.0"
-description = "Type annotations for boto3.CloudFormation 1.25.0 service generated with mypy-boto3-builder 7.11.10"
+version = "1.26.0.post1"
+description = "Type annotations for boto3.CloudFormation 1.26.0 service generated with mypy-boto3-builder 7.11.10"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -858,8 +858,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-dynamodb"
-version = "1.25.0"
-description = "Type annotations for boto3.DynamoDB 1.25.0 service generated with mypy-boto3-builder 7.11.10"
+version = "1.26.0.post1"
+description = "Type annotations for boto3.DynamoDB 1.26.0 service generated with mypy-boto3-builder 7.11.10"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -1511,7 +1511,7 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "e5d33eff22737a00153da107e050d151e6405684d8c4c71f6b8c618152731eb7"
+content-hash = "f3cccc32f76cf0b88aea124389f80b456592852d1971a993ad9d50459c3be786"
 
 [metadata.files]
 attrs = [
@@ -1900,16 +1900,16 @@ mypy-boto3-appconfigdata = [
     {file = "mypy_boto3_appconfigdata-1.25.0-py3-none-any.whl", hash = "sha256:21a332c85080ce2c5416b751f4fc4870e057af85d1aedc33516bde2a86330caa"},
 ]
 mypy-boto3-cloudformation = [
-    {file = "mypy-boto3-cloudformation-1.25.0.tar.gz", hash = "sha256:1251b0f24b0a7c21a6e1f7f88fbf6aaa7fcc490b82d6ada46b5778cfd12d112f"},
-    {file = "mypy_boto3_cloudformation-1.25.0-py3-none-any.whl", hash = "sha256:469e3cbc0a78003cc3134dece0203d0a0bfa908af34187aa53cd610b5f9bb19f"},
+    {file = "mypy-boto3-cloudformation-1.26.0.post1.tar.gz", hash = "sha256:9e8dce3149c5f5dee5ab05850ec9cae0925abb9da3aa63397b098219709db077"},
+    {file = "mypy_boto3_cloudformation-1.26.0.post1-py3-none-any.whl", hash = "sha256:e0dd01030209b77c3159a299a04a5c6353a6feb0dd49bff9f5acec9e0274264c"},
 ]
 mypy-boto3-cloudwatch = [
     {file = "mypy-boto3-cloudwatch-1.25.0.tar.gz", hash = "sha256:d5323ffeafe5144a232e27242c5d2f334f5e7ff10d0733145328888783ffcf12"},
     {file = "mypy_boto3_cloudwatch-1.25.0-py3-none-any.whl", hash = "sha256:e4934d92972f8ea531959593e476a5967b16aed223dc3c076e7e123acc8a2e77"},
 ]
 mypy-boto3-dynamodb = [
-    {file = "mypy-boto3-dynamodb-1.25.0.tar.gz", hash = "sha256:a858453090955e29c0ca479ea19f627a2d0dcf916469b104a5c6ad648f1299ba"},
-    {file = "mypy_boto3_dynamodb-1.25.0-py3-none-any.whl", hash = "sha256:03437167a084ac0eb718fdaf5931949247b344acc4f75b8b5528f078c8f6f073"},
+    {file = "mypy-boto3-dynamodb-1.26.0.post1.tar.gz", hash = "sha256:731141ff962033b77603a8a02626d64eb8575a0070e865aff31fe7443e4be6e3"},
+    {file = "mypy_boto3_dynamodb-1.26.0.post1-py3-none-any.whl", hash = "sha256:abe06c4c819ef2faa4b2f5cea127549f4c50e83a9869be80c9e77893f682a11b"},
 ]
 mypy-boto3-lambda = [
     {file = "mypy-boto3-lambda-1.25.0.tar.gz", hash = "sha256:441ea9b9a6aa94a70e4e69dd9c7148434e7e501decb5cd8e278f8ca878ef77d3"},
