@@ -219,7 +219,25 @@ class SSMProvider(BaseProvider):
         """
         Retrieve multiple parameter values by name from SSM or cache.
 
-        It uses GetParameter if a param requires decryption, otherwise GetParameters.
+        Raise_on_error decides on error handling strategy:
+
+        - A) Default to fail-fast. Raises GetParameterError upon any error
+        - B) Gracefully aggregate all parameters that failed under "_errors" key
+
+        It transparently uses GetParameter and/or GetParameters depending on decryption requirements.
+
+                                    ┌────────────────────────┐
+                                ┌───▶  Decrypt entire batch  │─────┐
+                                │   └────────────────────────┘     │     ┌────────────────────┐
+                                │                                  ├─────▶ GetParameters API  │
+        ┌──────────────────┐    │   ┌────────────────────────┐     │     └────────────────────┘
+        │   Split batch    │─── ┼──▶│ No decryption required │─────┘
+        └──────────────────┘    │   └────────────────────────┘
+                                │                                        ┌────────────────────┐
+                                │   ┌────────────────────────┐           │  GetParameter API  │
+                                └──▶│Decrypt some but not all│───────────▶────────────────────┤
+                                    └────────────────────────┘           │ GetParameters API  │
+                                                                         └────────────────────┘
 
         Parameters
         ----------
