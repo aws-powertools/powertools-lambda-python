@@ -1,6 +1,8 @@
 """
 AWS SSM Parameter retrieval and caching utility
 """
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, overload
 
 import boto3
@@ -210,9 +212,11 @@ class SSMProvider(BaseProvider):
         decrypt: bool = False,
         max_age: int = DEFAULT_MAX_AGE_SECS,
         raise_on_error: bool = True,
-    ) -> Union[Dict[str, str], Dict[str, bytes], Dict[str, dict]]:
+    ) -> Dict[str, str] | Dict[str, bytes] | Dict[str, dict]:
         """
         Retrieve multiple parameter values by name from SSM or cache.
+
+        It uses GetParameter if a param requires decryption, otherwise GetParameters.
 
         Parameters
         ----------
@@ -237,7 +241,7 @@ class SSMProvider(BaseProvider):
 
         batch_params, decrypt_params = self._split_batch_and_decrypt_parameters(parameters, transform, max_age, decrypt)
         decrypt_ret, decrypt_err = self._get_parameters_by_name_with_decrypt_option(decrypt_params, raise_on_error)
-        batch_ret, batch_err = self._get_parameters_by_name_batch(batch=batch_params, raise_on_error=raise_on_error)
+        batch_ret, batch_err = self._get_parameters_by_name_batch(batch_params, raise_on_error)
 
         response.update(**batch_ret, **decrypt_ret)
         if not raise_on_error:
@@ -619,13 +623,36 @@ def get_parameters_by_name(
     raise_on_error: bool, optional
         Whether to fail-fast or fail gracefully by including "_errors" key in the response, by default True
 
+    Example
+    -------
+
+    **Retrieves multiple parameters from distinct paths from Systems Manager Parameter Store**
+
+        from aws_lambda_powertools.utilities.parameters import get_parameters_by_name
+
+        params = {
+            "/param": {},
+            "/json": {"transform": "json"},
+            "/binary": {"transform": "binary"},
+            "/no_cache": {"max_age": 0},
+            "/api_key": {"decrypt": True},
+        }
+
+        values = get_parameters_by_name(parameters=params)
+        for param_name, value in values.items():
+            print(f"{param_name}: {value}")
+
+        # "/param": value
+        # "/json": value
+        # "/binary": value
+        # "/no_cache": value
+        # "/api_key": value
+
     Raises
     ------
     GetParameterError
         When the parameter provider fails to retrieve a parameter value for
         a given name.
-    TransformParameterError
-        When the parameter provider fails to transform a parameter value.
     """
 
     # NOTE: Decided against using multi-thread due to single-thread outperforming in 128M and 1G + timeout risk
