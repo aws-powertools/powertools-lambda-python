@@ -269,7 +269,7 @@ class SSMProvider(BaseProvider):
         # Check if it's in cache to prevent unnecessary calls
         for name, options in batch.items():
             cache_key = (name, options["transform"])
-            if self._has_not_expired(cache_key):
+            if self.has_not_expired_in_cache(cache_key):
                 ret[name] = self.store[cache_key].value
 
         # Return early if all parameters were in cache OR batch was empty

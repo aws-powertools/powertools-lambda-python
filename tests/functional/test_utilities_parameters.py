@@ -647,23 +647,23 @@ def test_ssm_provider_clear_cache(mock_name, mock_value, config):
 def test_ssm_provider_get_parameters_by_name_raise_on_failure(mock_name, mock_value, mock_version, config):
     # GIVEN two parameters are requested
     provider = parameters.SSMProvider(config=config)
-    dev_param = f"/dev/{mock_name}"
-    fail_param = f"/prod/{mock_name}"
+    success = f"/dev/{mock_name}"
+    fail = f"/prod/{mock_name}"
 
-    params = {dev_param: {}, fail_param: {}}
+    params = {success: {}, fail: {}}
     param_names = list(params.keys())
-    stub_params = {dev_param: mock_value}
+    stub_params = {success: mock_value}
+
+    expected_stub_response = build_get_parameters_stub(params=stub_params, invalid_parameters=[fail])
+    expected_stub_params = {"Names": param_names}
 
     stubber = stub.Stubber(provider.client)
-    response = build_get_parameters_stub(params=stub_params, invalid_parameters=[fail_param])
-
-    expected_params = {"Names": param_names}
-    stubber.add_response("get_parameters", response, expected_params)
+    stubber.add_response("get_parameters", expected_stub_response, expected_stub_params)
     stubber.activate()
 
     # WHEN one of them fails to be retrieved
     # THEN raise GetParameterError
-    with pytest.raises(parameters.exceptions.GetParameterError, match=f"Failed to fetch parameters: .*{fail_param}.*"):
+    with pytest.raises(parameters.exceptions.GetParameterError, match=f"Failed to fetch parameters: .*{fail}.*"):
         try:
             provider.get_parameters_by_name(parameters=params)
             stubber.assert_no_pending_responses()
@@ -729,6 +729,7 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_batch_decry
 ):
     # GIVEN three parameters are requested
     # one requires decryption, two can be batched
+    # and an arbitrary SDK error is injected
     fail = "/fail"
     success = "/success"
     decrypt_fail = "/fail/decrypt"
@@ -739,7 +740,6 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_batch_decry
         params={fail: mock_value, success: mock_value}, invalid_parameters=[fail]
     )
 
-    # GIVEN an arbitrary SDK error is injected
     provider = parameters.SSMProvider(config=config)
     stubber = stub.Stubber(provider.client)
     stubber.add_client_error("get_parameter")
@@ -1709,7 +1709,6 @@ def test_get_parameters_by_name_with_decrypt_override(monkeypatch, mock_name, mo
             assert decrypt
             return decrypted_response
 
-        # def _get_parameters_by_name(self, *args, **kwargs) -> Dict[str, Any]:
         def _get_parameters_by_name(
             self, parameters: Dict[str, Dict], raise_on_error: bool = True
         ) -> Tuple[Dict[str, Any], List[str]]:
@@ -1741,7 +1740,9 @@ def test_get_parameters_by_name_with_overrides(monkeypatch, mock_value):
             return stub_response
 
     class TestProvider(SSMProvider):
-        def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
+        def _get_parameters_by_name(
+            self, parameters: Dict[str, Dict], raise_on_error: bool = True
+        ) -> Tuple[Dict[str, Any], List[str]]:
             # THEN max_age should use no_cache_param override
             assert parameters[no_cache_param]["max_age"] == 0
             return super()._get_parameters_by_name(parameters, raise_on_error)
@@ -1800,12 +1801,12 @@ def test_get_parameters_by_name_with_max_batch(monkeypatch, mock_value):
 def test_get_parameters_by_name_cache(monkeypatch, mock_name, mock_value):
     # GIVEN we have a parameter to fetch but is already in cache
     params = {mock_name: {}}
+    cache_key = (mock_name, None)
 
     class TestProvider(SSMProvider):
         def _get_parameters_by_name(
             self, parameters: Dict[str, Dict], raise_on_error: bool = True, **kwargs
         ) -> Dict[str, Any]:
-            # THEN this should never be called
             raise RuntimeError("Should not be called if it's in cache")
 
     provider = TestProvider()
@@ -1815,6 +1816,9 @@ def test_get_parameters_by_name_cache(monkeypatch, mock_name, mock_value):
 
     # WHEN get_parameters_by_name is called
     provider.get_parameters_by_name(parameters=params)
+
+    # THEN the cache should be used and _get_parameters_by_name should not be called
+    assert provider.has_not_expired_in_cache(key=cache_key)
 
 
 def test_get_parameters_by_name_empty_batch(monkeypatch, mock_name, mock_value):
@@ -1827,6 +1831,7 @@ def test_get_parameters_by_name_empty_batch(monkeypatch, mock_name, mock_value):
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
 
     # WHEN get_parameters_by_name is called
+    # THEN it should return an empty response
     assert parameters.get_parameters_by_name(parameters=params) == {}
 
 
@@ -1843,15 +1848,13 @@ def test_get_parameters_by_name_cache_them_individually_not_batch(monkeypatch, m
         def get_parameters(self, *args, **kwargs):
             return stub_response
 
-    class TestProvider(SSMProvider):
-        def get_parameters_by_name(self, *args, **kwargs) -> Dict[str, str] | Dict[str, bytes] | Dict[str, dict]:
-            return super().get_parameters_by_name(*args, **kwargs)
-
-    provider = TestProvider(boto3_client=FakeClient())
+    provider = SSMProvider(boto3_client=FakeClient())
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", provider)
 
     # WHEN get_parameters_by_name is called
     provider.get_parameters_by_name(parameters=params)
+
+    # THEN the cache should be populated with each parameter
     assert len(provider.store) == len(params)
 
 

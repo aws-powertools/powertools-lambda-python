@@ -71,7 +71,7 @@ class BaseProvider(ABC):
 
         self.store: Dict[Tuple[str, TransformOptions], ExpirableValue] = {}
 
-    def _has_not_expired(self, key: Tuple[str, TransformOptions]) -> bool:
+    def has_not_expired_in_cache(self, key: Tuple[str, TransformOptions]) -> bool:
         return key in self.store and self.store[key].ttl >= datetime.now()
 
     def get(
@@ -121,7 +121,7 @@ class BaseProvider(ABC):
         value: Optional[Union[str, bytes, dict]] = None
         key = (name, transform)
 
-        if not force_fetch and self._has_not_expired(key):
+        if not force_fetch and self.has_not_expired_in_cache(key):
             return self.store[key].value
 
         try:
@@ -186,7 +186,7 @@ class BaseProvider(ABC):
         """
         key = (path, transform)
 
-        if not force_fetch and self._has_not_expired(key):
+        if not force_fetch and self.has_not_expired_in_cache(key):
             return self.store[key].value  # type: ignore # need to revisit entire typing here
 
         try:
