@@ -59,7 +59,7 @@ def build_get_parameters_stub(params: Dict[str, Any], invalid_parameters: List[s
                 "Selector": f"{param}:{version}",
                 "SourceResult": "string",
                 "LastModifiedDate": datetime(2015, 1, 1),
-                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{param.removeprefix('/')}",
+                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{param.lstrip('/')}",
                 "DataType": "string",
             }
             for param, value in params.items()
