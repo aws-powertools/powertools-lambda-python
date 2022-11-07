@@ -644,7 +644,7 @@ def test_ssm_provider_clear_cache(mock_name, mock_value, config):
     assert provider.store == {}
 
 
-def test_ssm_provider_get_parameters_by_name_raise_on_failure(mock_name, mock_value, mock_version, config):
+def test_ssm_provider_get_parameters_by_name_raise_on_failure(mock_name, mock_value, config):
     # GIVEN two parameters are requested
     provider = parameters.SSMProvider(config=config)
     success = f"/dev/{mock_name}"
@@ -671,7 +671,7 @@ def test_ssm_provider_get_parameters_by_name_raise_on_failure(mock_name, mock_va
             stubber.deactivate()
 
 
-def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure(mock_name, mock_value, mock_version, config):
+def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure(mock_name, mock_value, config):
     # GIVEN two parameters are requested
     success = f"/dev/{mock_name}"
     fail = f"/prod/{mock_name}"
@@ -701,7 +701,7 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure(mock_name, 
         stubber.deactivate()
 
 
-def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_with_decrypt(mock_name, mock_version, config):
+def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_with_decrypt(mock_name, config):
     # GIVEN one parameter requires decryption and an arbitrary SDK error occurs
     param = f"/{mock_name}"
     params = {param: {"decrypt": True}}
@@ -762,6 +762,20 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_batch_decry
         assert decrypt_fail not in ret
     finally:
         stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_raise_on_reserved_errors_key(mock_name, mock_value, config):
+    # GIVEN one of the parameters is named `_errors`
+    success = f"/dev/{mock_name}"
+    fail = "_errors"
+
+    params = {success: {}, fail: {}}
+    provider = parameters.SSMProvider(config=config)
+
+    # WHEN using get_parameters_by_name to fetch
+    # THEN raise GetParameterError
+    with pytest.raises(parameters.exceptions.GetParameterError, match="You cannot fetch a parameter named"):
+        provider.get_parameters_by_name(parameters=params, raise_on_error=False)
 
 
 def test_dynamodb_provider_clear_cache(mock_name, mock_value, config):

@@ -239,6 +239,10 @@ class SSMProvider(BaseProvider):
         """
         response: Dict[str, Any] = {}
 
+        # NOTE: We fail early to avoid unintended graceful errors being replaced with their param values
+        if "_errors" in parameters and not raise_on_error:
+            raise GetParameterError("You cannot fetch a parameter named '_errors' in graceful error mode.")
+
         batch_params, decrypt_params = self._split_batch_and_decrypt_parameters(parameters, transform, max_age, decrypt)
         decrypt_ret, decrypt_err = self._get_parameters_by_name_with_decrypt_option(decrypt_params, raise_on_error)
         batch_ret, batch_err = self._get_parameters_by_name_batch(batch_params, raise_on_error)
