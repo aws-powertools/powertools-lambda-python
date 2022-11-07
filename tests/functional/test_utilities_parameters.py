@@ -21,11 +21,7 @@ from aws_lambda_powertools.utilities.parameters.base import (
     BaseProvider,
     ExpirableValue,
 )
-from aws_lambda_powertools.utilities.parameters.ssm import (
-    DEFAULT_MAX_AGE_SECS,
-    SSMProvider,
-)
-from aws_lambda_powertools.utilities.parameters.types import TransformOptions
+from aws_lambda_powertools.utilities.parameters.ssm import SSMProvider
 
 
 @pytest.fixture(scope="function")
@@ -1715,18 +1711,14 @@ def test_get_parameter(monkeypatch, mock_name, mock_value):
     assert value == mock_value
 
 
-def test_get_parameters_by_name(monkeypatch, mock_name, mock_value):
+def test_get_parameters_by_name(monkeypatch, mock_name, mock_value, config):
     params = {mock_name: {}}
 
     class TestProvider(SSMProvider):
-        def get_parameters_by_name(
-            self,
-            parameters: Dict[str, Dict],
-            transform: TransformOptions = None,
-            decrypt: bool = False,
-            max_age: int = DEFAULT_MAX_AGE_SECS,
-            raise_on_error: bool = True,
-        ) -> Dict[str, str] | Dict[str, bytes] | Dict[str, dict]:
+        def __init__(self, config: Config = config, **kwargs):
+            super().__init__(config, **kwargs)
+
+        def get_parameters_by_name(self, *args, **kwargs) -> Dict[str, str] | Dict[str, bytes] | Dict[str, dict]:
             return {mock_name: mock_value}
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
@@ -1737,7 +1729,7 @@ def test_get_parameters_by_name(monkeypatch, mock_name, mock_value):
     assert values[mock_name] == mock_value
 
 
-def test_get_parameters_by_name_with_decrypt_override(monkeypatch, mock_name, mock_value):
+def test_get_parameters_by_name_with_decrypt_override(monkeypatch, mock_name, mock_value, config):
     # GIVEN 2 out of 3 parameters have decrypt override
     decrypt_param = "/api_key"
     decrypt_param_two = "/another/secret"
@@ -1746,15 +1738,16 @@ def test_get_parameters_by_name_with_decrypt_override(monkeypatch, mock_name, mo
     params = {mock_name: {}, **decrypt_params}
 
     class TestProvider(SSMProvider):
+        def __init__(self, config: Config = config, **kwargs):
+            super().__init__(config, **kwargs)
+
         def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
             # THEN params with `decrypt` override should use GetParameter` (`_get`)
             assert name in decrypt_params
             assert decrypt
             return decrypted_response
 
-        def _get_parameters_by_name(
-            self, parameters: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
-        ) -> Tuple[Dict[str, Any], List[str]]:
+        def _get_parameters_by_name(self, *args, **kwargs) -> Tuple[Dict[str, Any], List[str]]:
             return {mock_name: mock_value}, []
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
@@ -1769,12 +1762,15 @@ def test_get_parameters_by_name_with_decrypt_override(monkeypatch, mock_name, mo
     assert values[decrypt_param_two] == decrypted_response
 
 
-def test_get_parameters_by_name_with_override_and_explicit_global(monkeypatch, mock_name, mock_value):
+def test_get_parameters_by_name_with_override_and_explicit_global(monkeypatch, mock_name, mock_value, config):
     # GIVEN a parameter overrides a default setting
     default_cache_period = 500
     params = {mock_name: {"max_age": 0}, "no-override": {}}
 
     class TestProvider(SSMProvider):
+        def __init__(self, config: Config = config, **kwargs):
+            super().__init__(config, **kwargs)
+
         # NOTE: By convention, we check at `_get_parameters_by_name`
         # as that's right before we call SSM, and when options have been merged
         # def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
@@ -1793,11 +1789,14 @@ def test_get_parameters_by_name_with_override_and_explicit_global(monkeypatch, m
     parameters.get_parameters_by_name(parameters=params, max_age=default_cache_period)
 
 
-def test_get_parameters_by_name_with_max_batch(monkeypatch, mock_value):
+def test_get_parameters_by_name_with_max_batch(monkeypatch, config):
     # GIVEN a batch of 20 parameters
     params = {f"param_{i}": {} for i in range(20)}
 
     class TestProvider(SSMProvider):
+        def __init__(self, config: Config = config, **kwargs):
+            super().__init__(config, **kwargs)
+
         def _get_parameters_by_name(
             self, parameters: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
         ) -> Tuple[Dict[str, Any], List[str]]:
@@ -1811,15 +1810,16 @@ def test_get_parameters_by_name_with_max_batch(monkeypatch, mock_value):
     parameters.get_parameters_by_name(parameters=params)
 
 
-def test_get_parameters_by_name_cache(monkeypatch, mock_name, mock_value):
+def test_get_parameters_by_name_cache(monkeypatch, mock_name, mock_value, config):
     # GIVEN we have a parameter to fetch but is already in cache
     params = {mock_name: {}}
     cache_key = (mock_name, None)
 
     class TestProvider(SSMProvider):
-        def _get_parameters_by_name(
-            self, parameters: Dict[str, Dict], raise_on_error: bool = True, **kwargs
-        ) -> Dict[str, Any]:
+        def __init__(self, config: Config = config, **kwargs):
+            super().__init__(config, **kwargs)
+
+        def _get_parameters_by_name(self, *args, **kwargs) -> Tuple[Dict[str, Any], List[str]]:
             raise RuntimeError("Should not be called if it's in cache")
 
     provider = TestProvider()
@@ -1834,12 +1834,13 @@ def test_get_parameters_by_name_cache(monkeypatch, mock_name, mock_value):
     assert provider.has_not_expired_in_cache(key=cache_key)
 
 
-def test_get_parameters_by_name_empty_batch(monkeypatch, mock_name, mock_value):
+def test_get_parameters_by_name_empty_batch(monkeypatch, config):
     # GIVEN we have an empty dictionary
     params = {}
 
     class TestProvider(SSMProvider):
-        ...
+        def __init__(self, config: Config = config, **kwargs):
+            super().__init__(config, **kwargs)
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
 
@@ -1937,13 +1938,16 @@ def test_get_parameters_new(monkeypatch, mock_name, mock_value):
     assert value == mock_value
 
 
-def test_get_parameters_by_name_new(monkeypatch, mock_name, mock_value):
+def test_get_parameters_by_name_new(monkeypatch, mock_name, mock_value, config):
     """
     Test get_parameters_by_name() without a default provider
     """
     params = {mock_name: {}}
 
     class TestProvider(SSMProvider):
+        def __init__(self, config: Config = config, **kwargs):
+            super().__init__(config, **kwargs)
+
         def get_parameters_by_name(self, *args, **kwargs) -> Dict[str, str] | Dict[str, bytes] | Dict[str, dict]:
             return {mock_name: mock_value}
 
