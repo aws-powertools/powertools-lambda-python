@@ -233,61 +233,79 @@ class SSMProvider(BaseProvider):
             When the parameter provider fails to retrieve a parameter value for
             a given name.
         """
-
-        ret: Dict[str, Any] = {}
-        decrypt_errors: List[str] = []
+        response: Dict[str, Any] = {}
 
         batch_params, decrypt_params = self._split_batch_and_decrypt_parameters(parameters, transform, max_age, decrypt)
+        decrypt_ret, decrypt_err = self._get_parameters_by_name_with_decrypt_option(decrypt_params, raise_on_error)
+        batch_ret, batch_err = self._get_parameters_by_name_batch(batch=batch_params, raise_on_error=raise_on_error)
+
+        response.update(**batch_ret, **decrypt_ret)
+        if not raise_on_error:
+            response["_errors"] = [*decrypt_err, *batch_err]
+
+        return response
+
+    def _get_parameters_by_name_with_decrypt_option(
+        self, batch: Dict[str, Dict], raise_on_error: bool
+    ) -> Tuple[Dict, List]:
+        response: Dict[str, Any] = {}
+        errors: List[str] = []
 
         # Decided for single-thread as it outperforms in 128M and 1G + reduce timeout risk
         # see: https://github.com/awslabs/aws-lambda-powertools-python/issues/1040#issuecomment-1299954613
-        for parameter, options in decrypt_params.items():
+        for parameter, options in batch.items():
             try:
-                ret[parameter] = self.get(
+                response[parameter] = self.get(
                     parameter, max_age=options["max_age"], transform=options["transform"], decrypt=options["decrypt"]
                 )
             except GetParameterError:
                 if raise_on_error:
                     raise
-                decrypt_errors.append(parameter)
+                errors.append(parameter)
                 continue
 
-        batch_ret, batch_err = self._get_parameters_from_batch(batch=batch_params, raise_on_error=raise_on_error)
-        if not raise_on_error:
-            # merge batch and decrypt errors if instructed
-            ret["_errors"] = [*batch_err, *decrypt_errors]
+        return response, errors
 
-        # Merge both batched parameters and those that required decryption
-        return {**batch_ret, **ret}
-
-    def _get_parameters_from_batch(
-        self, batch: Dict[str, Dict], raise_on_error: bool = True
-    ) -> Tuple[Dict[str, Any], List[str]]:
-        ret: Dict[str, Any] = {}
+    def _get_parameters_by_name_batch(self, batch: Dict[str, Dict], raise_on_error: bool = True) -> Tuple[Dict, List]:
         errors: List[str] = []
 
-        # Check if it's in cache to prevent unnecessary calls
+        # Fetch each possible batch param from cache and return if entire batch is cached
+        cached_params = self._get_parameters_by_name_from_cache(batch)
+        if len(cached_params) == len(batch):
+            return cached_params, errors
+
+        # Slice batch by max permitted GetParameters call
+        batch_ret, errors = self._get_parameters_by_name_in_chunks(
+            batch=batch, cache=cached_params, raise_on_error=raise_on_error
+        )
+
+        return {**cached_params, **batch_ret}, errors
+
+    def _get_parameters_by_name_from_cache(self, batch: Dict[str, Dict]) -> Dict[str, Any]:
+        """Fetch each parameter from batch that hasn't been expired"""
+        cache = {}
         for name, options in batch.items():
             cache_key = (name, options["transform"])
             if self.has_not_expired_in_cache(cache_key):
-                ret[name] = self.store[cache_key].value
+                cache[name] = self.store[cache_key].value
 
-        # Return early if all parameters were in cache OR batch was empty
-        if len(ret) == len(batch):
-            return ret, errors
+        return cache
 
-        # Take out the differences to prevent over-fetching
-        # there could be parameters with cache expired
-        batch_diff = {key: value for key, value in batch.items() if key not in ret}
+    def _get_parameters_by_name_in_chunks(
+        self, batch: Dict[str, Dict], cache: Dict[str, Any], raise_on_error: bool
+    ) -> Tuple[Dict, List]:
+        """Take out differences from cache and batch, slice it and fetch from SSM"""
+        response: Dict[str, Any] = {}
+        errors: List[str] = []
 
-        for chunk in slice_dictionary(data=batch_diff, chunk_size=self._MAX_GET_PARAMETERS_ITEM):
+        diff = {key: value for key, value in batch.items() if key not in cache}
+
+        for chunk in slice_dictionary(data=diff, chunk_size=self._MAX_GET_PARAMETERS_ITEM):
             response, possible_errors = self._get_parameters_by_name(parameters=chunk, raise_on_error=raise_on_error)
-            ret.update(response)
+            response.update(response)
+            errors.extend(possible_errors)
 
-            if not raise_on_error:
-                errors = possible_errors
-
-        return ret, errors
+        return response, errors
 
     def _get_parameters_by_name(
         self, parameters: Dict[str, Dict], raise_on_error: bool = True
