@@ -24,15 +24,16 @@ This utility requires additional permissions to work as expected.
 ???+ note
     Different parameter providers require different permissions.
 
-| Provider            | Function/Method                                      | IAM Permission                                                               |
-| ------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------- |
-| SSM Parameter Store | `get_parameter`, `SSMProvider.get`                   | `ssm:GetParameter`                                                           |
-| SSM Parameter Store | `get_parameters`, `SSMProvider.get_multiple`         | `ssm:GetParametersByPath`                                                    |
-| SSM Parameter Store | If using `decrypt=True`                              | You must add an additional permission `kms:Decrypt`                          |
-| Secrets Manager     | `get_secret`, `SecretsManager.get`                   | `secretsmanager:GetSecretValue`                                              |
-| DynamoDB            | `DynamoDBProvider.get`                               | `dynamodb:GetItem`                                                           |
-| DynamoDB            | `DynamoDBProvider.get_multiple`                      | `dynamodb:Query`                                                             |
-| App Config          | `get_app_config`, `AppConfigProvider.get_app_config` | `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession` |
+| Provider  | Function/Method                                                        | IAM Permission                                                                       |
+| --------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| SSM       | **`get_parameter`**, **`SSMProvider.get`**                             | **`ssm:GetParameter`**                                                               |
+| SSM       | **`get_parameters`**, **`SSMProvider.get_multiple`**                   | **`ssm:GetParametersByPath`**                                                        |
+| SSM       | **`get_parameters_by_name`**, **`SSMProvider.get_parameters_by_name`** | **`ssm:GetParameter`** and **`ssm:GetParameters`**                                   |
+| SSM       | If using **`decrypt=True`**                                            | You must add an additional permission **`kms:Decrypt`**                              |
+| Secrets   | **`get_secret`**, **`SecretsManager.get`**                             | **`secretsmanager:GetSecretValue`**                                                  |
+| DynamoDB  | **`DynamoDBProvider.get`**                                             | **`dynamodb:GetItem`**                                                               |
+| DynamoDB  | **`DynamoDBProvider.get_multiple`**                                    | **`dynamodb:Query`**                                                                 |
+| AppConfig | **`get_app_config`**, **`AppConfigProvider.get_app_config`**           | **`appconfig:GetLatestConfiguration`** and **`appconfig:StartConfigurationSession`** |
 
 ### Fetching parameters
 
