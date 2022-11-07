@@ -49,8 +49,8 @@ def handler(event, context):
 
 For multiple parameters, you can use either:
 
-* `get_parameters` to recursively fetch all parameters by path
-* `get_parameters_by_name` to fetch distinct parameters by their full name. It also accepts custom caching, transform, and decrypt per parameter.
+* `get_parameters` to recursively fetch all parameters by path.
+* `get_parameters_by_name` to fetch distinct parameters by their full name. It also accepts custom caching, transform, decrypt per parameter.
 
 === "get_parameters"
 
@@ -67,23 +67,56 @@ For multiple parameters, you can use either:
 
 === "get_parameters_by_name"
 
-    ```python hl_lines="1 3 13"
+    ```python hl_lines="3 5 14"
+	from typing import Any
+
     from aws_lambda_powertools.utilities import get_parameters_by_name
 
 	parameters = {
       "/develop/service/commons/telemetry/config": {"max_age": 300, "transform": "json"},
-      "/develop/service/amplify/auth/userpool/arn": {"max_age": 300},
+      "/no_cache_param": {"max_age": 0},
       # inherit default values
 	  "/develop/service/payment/api/capture/url": {},
-      "/develop/service/payment/api/charge/url": {},
 	}
 
     def handler(event, context):
     	# This returns a dict with the parameter name as key
-    	values = parameters.get_parameters_by_name(parameters=parameters, max_age=60)
-    	for parameter, value in values.items():
+    	response: dict[str, Any] = parameters.get_parameters_by_name(parameters=parameters, max_age=60)
+    	for parameter, value in response.items():
     		print(f"{parameter}: {value}")
     ```
+
+???+ tip "`get_parameters_by_name` supports graceful error handling"
+	By default, we will raise `GetParameterError` when any parameter fails to be fetched. You can override it by setting `raise_on_error=False`.
+
+	When disabled, we take the following actions:
+
+	* Add failed parameter name in the `_errors` key, _e.g._, `{_errors: ["/param1", "/param2"]}`
+	* Keep only successful parameter names and their values in the response
+	* Raise `GetParameterError` if any of your parameters is named `_errors`
+
+```python hl_lines="3 5 12-13 15" title="Graceful error handling"
+from typing import Any
+
+from aws_lambda_powertools.utilities import get_parameters_by_name
+
+parameters = {
+  "/develop/service/commons/telemetry/config": {"max_age": 300, "transform": "json"},
+  # it would fail by default
+  "/this/param/does/not/exist"
+}
+
+def handler(event, context):
+	values: dict[str, Any] = parameters.get_parameters_by_name(parameters=parameters, raise_on_error=False)
+	errors: list[str] = values.get("_errors", [])
+
+    # Handle gracefully, since '/this/param/does/not/exist' will only be available in `_errors`
+	if errors:
+		...
+
+	for parameter, value in values.items():
+		print(f"{parameter}: {value}")
+```
 
 ### Fetching secrets
 
