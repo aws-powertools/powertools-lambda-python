@@ -398,17 +398,18 @@ class SSMProvider(BaseProvider):
         self, api_response: GetParametersResultTypeDef, parameters: Dict[str, Any], raise_on_error: bool = True
     ) -> Dict[str, Any]:
         response: Dict[str, Any] = {}
+
         for parameter in api_response["Parameters"]:
             name = parameter["Name"]
             value = parameter["Value"]
             options = parameters[name]
-            transform = options.get("transform", "")
+            transform = options.get("transform")
 
             # NOTE: If transform is set, we do it before caching to reduce number of operations
             if transform:
                 value = transform_value(
                     key=name, value=value, transform=transform, raise_on_transform_error=raise_on_error
-                )
+                )  # type: ignore[assignment] # transform dynamism challenge
 
             _cache_key = (name, options["transform"])
             self.add_to_cache(key=_cache_key, value=value, max_age=options["max_age"])
