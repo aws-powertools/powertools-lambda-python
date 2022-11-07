@@ -913,8 +913,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-ssm"
-version = "1.25.0"
-description = "Type annotations for boto3.SSM 1.25.0 service generated with mypy-boto3-builder 7.11.10"
+version = "1.26.0.post1"
+description = "Type annotations for boto3.SSM 1.26.0 service generated with mypy-boto3-builder 7.11.10"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -1511,7 +1511,7 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "071841d4883c874f0f7ea8a8bc9b4b9cce97eaf8fce1122e2304d74879305b3d"
+content-hash = "09722a1d1e8a8c0b1070879df1996647b498828f0bfc79d266e074505b3fd95c"
 
 [metadata.files]
 attrs = [
@@ -1928,8 +1928,8 @@ mypy-boto3-secretsmanager = [
     {file = "mypy_boto3_secretsmanager-1.25.0-py3-none-any.whl", hash = "sha256:a11c40f1e89273107fdba4b6f219e728a8bfea19e7a46a0aaff9c3b3fe095211"},
 ]
 mypy-boto3-ssm = [
-    {file = "mypy-boto3-ssm-1.25.0.tar.gz", hash = "sha256:8162d6677c3a1432131ef41b85f339fcf37c106a1916dcb1c54dc0621353be3b"},
-    {file = "mypy_boto3_ssm-1.25.0-py3-none-any.whl", hash = "sha256:3fc7fb8b59a57330c7546190002717e094ff57532b6f286707f57f54e9156d03"},
+    {file = "mypy-boto3-ssm-1.26.0.post1.tar.gz", hash = "sha256:8b467247384ad2d519a517847ab748070f0694d408089e3ceac1f249017e87c1"},
+    {file = "mypy_boto3_ssm-1.26.0.post1-py3-none-any.whl", hash = "sha256:746122e41d7354b3569ccb156937453dbbf0e714888e1de3fa6388bb7136bfef"},
 ]
 mypy-boto3-xray = [
     {file = "mypy-boto3-xray-1.25.0.tar.gz", hash = "sha256:db95b35c7075e610d6e0b4031e8dbdd08314cfc87f5634e14a1981f094a3a9d0"},
