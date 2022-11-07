@@ -213,6 +213,9 @@ class BaseProvider(ABC):
         self.store.clear()
 
     def add_to_cache(self, key: Tuple[str, TransformOptions], value: Any, max_age: int):
+        if max_age <= 0:
+            return
+
         self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
 
     @staticmethod

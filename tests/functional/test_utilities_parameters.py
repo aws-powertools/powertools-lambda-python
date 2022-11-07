@@ -2328,3 +2328,18 @@ def test_base_provider_get_force_update(mock_name, mock_value):
 
     assert isinstance(value, str)
     assert value == mock_value
+
+
+def test_cache_ignores_max_age_zero_or_negative(mock_value):
+    # GIVEN we have two parameters that shouldn't be cached
+    param = "/no_cache"
+    provider = SSMProvider()
+    cache_key = (param, None)
+
+    # WHEN a provider adds them into the cache
+    provider.add_to_cache(key=cache_key, value=mock_value, max_age=0)
+    provider.add_to_cache(key=cache_key, value=mock_value, max_age=-10)
+
+    # THEN they should not be added to the cache
+    assert len(provider.store) == 0
+    assert provider.has_not_expired_in_cache(cache_key) is False
