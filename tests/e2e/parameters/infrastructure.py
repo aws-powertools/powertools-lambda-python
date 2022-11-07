@@ -1,17 +1,37 @@
-from pyclbr import Function
+import json
+from typing import List
 
-from aws_cdk import CfnOutput
+from aws_cdk import CfnOutput, Duration
 from aws_cdk import aws_appconfig as appconfig
 from aws_cdk import aws_iam as iam
+from aws_cdk import aws_ssm as ssm
+from aws_cdk.aws_lambda import Function
 
-from tests.e2e.utils.data_builder import build_service_name
+from tests.e2e.utils.data_builder import build_random_value, build_service_name
 from tests.e2e.utils.infrastructure import BaseInfrastructure
 
 
 class ParametersStack(BaseInfrastructure):
     def create_resources(self):
-        functions = self.create_lambda_functions()
+        parameters = self._create_ssm_parameters()
+
+        env_vars = {"parameters": json.dumps(parameters)}
+        functions = self.create_lambda_functions(
+            function_props={"environment": env_vars, "timeout": Duration.seconds(30)}
+        )
+
         self._create_app_config(function=functions["ParameterAppconfigFreeformHandler"])
+
+        # NOTE: Enforce least-privilege for our param tests only
+        functions["ParameterSsmGetParametersByName"].add_to_role_policy(
+            iam.PolicyStatement(
+                effect=iam.Effect.ALLOW,
+                actions=[
+                    "ssm:GetParameter",
+                ],
+                resources=[f"arn:aws:ssm:{self.region}:{self.account_id}:parameter/powertools/e2e/parameters/*"],
+            )
+        )
 
     def _create_app_config(self, function: Function):
 
@@ -106,3 +126,16 @@ class ParametersStack(BaseInfrastructure):
                 resources=["*"],
             )
         )
+
+    def _create_ssm_parameters(self) -> List[str]:
+        parameters: List[str] = []
+
+        for _ in range(10):
+            param = f"/powertools/e2e/parameters/{build_random_value()}"
+            rand = build_random_value()
+            ssm.StringParameter(self.stack, f"param-{rand}", parameter_name=param, string_value=rand)
+            parameters.append(param)
+
+        CfnOutput(self.stack, "ParametersNameList", value=json.dumps(parameters))
+
+        return parameters

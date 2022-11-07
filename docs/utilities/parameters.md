@@ -24,34 +24,99 @@ This utility requires additional permissions to work as expected.
 ???+ note
     Different parameter providers require different permissions.
 
-| Provider            | Function/Method                                                  | IAM Permission                                                               |
-| ------------------- | -----------------------------------------------------------------| -----------------------------------------------------------------------------|
-| SSM Parameter Store | `get_parameter`, `SSMProvider.get`                               | `ssm:GetParameter`                                                           |
-| SSM Parameter Store | `get_parameters`, `SSMProvider.get_multiple`                     | `ssm:GetParametersByPath`                                                    |
-| SSM Parameter Store | If using `decrypt=True`                                          | You must add an additional permission `kms:Decrypt`                          |
-| Secrets Manager     | `get_secret`, `SecretsManager.get`                               | `secretsmanager:GetSecretValue`                                              |
-| DynamoDB            | `DynamoDBProvider.get`                                           | `dynamodb:GetItem`                                                           |
-| DynamoDB            | `DynamoDBProvider.get_multiple`                                  | `dynamodb:Query`                                                             |
-| App Config          | `get_app_config`, `AppConfigProvider.get_app_config`             | `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession` |
+| Provider  | Function/Method                                                        | IAM Permission                                                                       |
+| --------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| SSM       | **`get_parameter`**, **`SSMProvider.get`**                             | **`ssm:GetParameter`**                                                               |
+| SSM       | **`get_parameters`**, **`SSMProvider.get_multiple`**                   | **`ssm:GetParametersByPath`**                                                        |
+| SSM       | **`get_parameters_by_name`**, **`SSMProvider.get_parameters_by_name`** | **`ssm:GetParameter`** and **`ssm:GetParameters`**                                   |
+| SSM       | If using **`decrypt=True`**                                            | You must add an additional permission **`kms:Decrypt`**                              |
+| Secrets   | **`get_secret`**, **`SecretsManager.get`**                             | **`secretsmanager:GetSecretValue`**                                                  |
+| DynamoDB  | **`DynamoDBProvider.get`**                                             | **`dynamodb:GetItem`**                                                               |
+| DynamoDB  | **`DynamoDBProvider.get_multiple`**                                    | **`dynamodb:Query`**                                                                 |
+| AppConfig | **`get_app_config`**, **`AppConfigProvider.get_app_config`**           | **`appconfig:GetLatestConfiguration`** and **`appconfig:StartConfigurationSession`** |
 
 ### Fetching parameters
 
 You can retrieve a single parameter  using `get_parameter` high-level function.
 
-For multiple parameters, you can use `get_parameters` and pass a path to retrieve them recursively.
-
-```python hl_lines="1 5 9" title="Fetching multiple parameters recursively"
+```python hl_lines="5" title="Fetching a single parameter"
 from aws_lambda_powertools.utilities import parameters
 
 def handler(event, context):
 	# Retrieve a single parameter
 	value = parameters.get_parameter("/my/parameter")
 
-	# Retrieve multiple parameters from a path prefix recursively
-	# This returns a dict with the parameter name as key
-	values = parameters.get_parameters("/my/path/prefix")
-	for k, v in values.items():
-		print(f"{k}: {v}")
+```
+
+For multiple parameters, you can use either:
+
+* `get_parameters` to recursively fetch all parameters by path.
+* `get_parameters_by_name` to fetch distinct parameters by their full name. It also accepts custom caching, transform, decrypt per parameter.
+
+=== "get_parameters"
+
+    ```python hl_lines="1 6"
+    from aws_lambda_powertools.utilities import parameters
+
+    def handler(event, context):
+    	# Retrieve multiple parameters from a path prefix recursively
+    	# This returns a dict with the parameter name as key
+    	values = parameters.get_parameters("/my/path/prefix")
+    	for parameter, value in values.items():
+    		print(f"{parameter}: {value}")
+    ```
+
+=== "get_parameters_by_name"
+
+    ```python hl_lines="3 5 14"
+	from typing import Any
+
+    from aws_lambda_powertools.utilities import get_parameters_by_name
+
+	parameters = {
+      "/develop/service/commons/telemetry/config": {"max_age": 300, "transform": "json"},
+      "/no_cache_param": {"max_age": 0},
+      # inherit default values
+	  "/develop/service/payment/api/capture/url": {},
+	}
+
+    def handler(event, context):
+    	# This returns a dict with the parameter name as key
+    	response: dict[str, Any] = parameters.get_parameters_by_name(parameters=parameters, max_age=60)
+    	for parameter, value in response.items():
+    		print(f"{parameter}: {value}")
+    ```
+
+???+ tip "`get_parameters_by_name` supports graceful error handling"
+	By default, we will raise `GetParameterError` when any parameter fails to be fetched. You can override it by setting `raise_on_error=False`.
+
+	When disabled, we take the following actions:
+
+	* Add failed parameter name in the `_errors` key, _e.g._, `{_errors: ["/param1", "/param2"]}`
+	* Keep only successful parameter names and their values in the response
+	* Raise `GetParameterError` if any of your parameters is named `_errors`
+
+```python hl_lines="3 5 12-13 15" title="Graceful error handling"
+from typing import Any
+
+from aws_lambda_powertools.utilities import get_parameters_by_name
+
+parameters = {
+  "/develop/service/commons/telemetry/config": {"max_age": 300, "transform": "json"},
+  # it would fail by default
+  "/this/param/does/not/exist"
+}
+
+def handler(event, context):
+	values: dict[str, Any] = parameters.get_parameters_by_name(parameters=parameters, raise_on_error=False)
+	errors: list[str] = values.get("_errors", [])
+
+    # Handle gracefully, since '/this/param/does/not/exist' will only be available in `_errors`
+	if errors:
+		...
+
+	for parameter, value in values.items():
+		print(f"{parameter}: {value}")
 ```
 
 ### Fetching secrets
