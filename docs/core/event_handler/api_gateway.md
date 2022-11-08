@@ -564,7 +564,7 @@ your development, building, deployment tooling need to accommodate the distinct 
 
 You can test your routes by passing a proxy event request with required params.
 
-=== "APIGatewayRestResolver"
+=== "API Gateway REST API"
 
     === "assert_rest_api_resolver_response.py"
 
@@ -578,7 +578,7 @@ You can test your routes by passing a proxy event request with required params.
         --8<-- "examples/event_handler_rest/src/assert_rest_api_response_module.py"
         ```
 
-=== "APIGatewayHttpResolver"
+=== "API Gateway HTTP API"
 
     === "assert_http_api_resolver_response.py"
 
@@ -592,7 +592,7 @@ You can test your routes by passing a proxy event request with required params.
         --8<-- "examples/event_handler_rest/src/assert_http_api_response_module.py"
         ```
 
-=== "ALBResolver"
+=== "Application Load Balancer"
 
     === "assert_alb_api_resolver_response.py"
 
@@ -606,7 +606,7 @@ You can test your routes by passing a proxy event request with required params.
         --8<-- "examples/event_handler_rest/src/assert_alb_api_response_module.py"
         ```
 
-=== "LambdaFunctionUrlResolver"
+=== "Lambda Function URL"
 
     === "assert_function_url_api_resolver_response.py"
 
