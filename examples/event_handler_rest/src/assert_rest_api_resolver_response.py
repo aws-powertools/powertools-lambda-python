@@ -22,7 +22,9 @@ def test_lambda_handler(lambda_context):
         "httpMethod": "GET",
         "requestContext": {"requestId": "227b78aa-779d-47d4-a48e-ce62120393b8"},  # correlation ID
     }
-
+    # Example of API Gateway REST API request event:
+    # https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway.html#apigateway-example-event
+    
     ret = assert_rest_api_resolver_response.lambda_handler(minimal_event, lambda_context)
     assert ret["statusCode"] == 200
     assert ret["body"] != ""
