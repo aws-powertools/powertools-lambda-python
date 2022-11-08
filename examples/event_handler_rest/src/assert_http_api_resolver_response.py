@@ -27,6 +27,8 @@ def test_lambda_handler(lambda_context):
             "stage": "$default",
         },
     }
+    # Example of API Gateway HTTP API request event:
+    # https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html
 
     ret = assert_http_api_response_module.lambda_handler(minimal_event, lambda_context)
     assert ret["statusCode"] == 200
