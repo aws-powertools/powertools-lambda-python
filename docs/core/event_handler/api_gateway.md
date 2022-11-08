@@ -564,17 +564,33 @@ your development, building, deployment tooling need to accommodate the distinct 
 
 You can test your routes by passing a proxy event request with required params.
 
-=== "assert_http_response.py"
+=== "APIGatewayRestResolver"
 
-    ```python hl_lines="21-24"
-    --8<-- "examples/event_handler_rest/src/assert_http_response.py"
-    ```
+    === "assert_http_response.py"
 
-=== "assert_http_response_module.py"
+        ```python hl_lines="21-24"
+        --8<-- "examples/event_handler_rest/src/assert_http_response.py"
+        ```
 
-    ```python
-    --8<-- "examples/event_handler_rest/src/assert_http_response_module.py"
-    ```
+    === "assert_http_response_module.py"
+
+        ```python
+        --8<-- "examples/event_handler_rest/src/assert_http_response_module.py"
+        ```
+
+=== "APIGatewayHttpResolver"
+
+    === "assert_http_api_resolver_http_response.py"
+
+        ```python hl_lines="21-29"
+        --8<-- "examples/event_handler_rest/src/assert_http_api_resolver_response.py"
+        ```
+
+    === "assert_http_api_response_module.py"
+
+        ```python
+        --8<-- "examples/event_handler_rest/src/assert_http_api_response_module.py"
+        ```
 
 ## FAQ
 

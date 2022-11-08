@@ -18,9 +18,14 @@ def lambda_context():
 
 def test_lambda_handler(lambda_context):
     minimal_event = {
-        "path": "/todos",
-        "httpMethod": "GET",
-        "requestContext": {"requestId": "227b78aa-779d-47d4-a48e-ce62120393b8"},  # correlation ID
+        "rawPath": "/todos",
+        "requestContext": {
+            "requestContext": {"requestId": "227b78aa-779d-47d4-a48e-ce62120393b8"},  # correlation ID
+            "http": {
+                "method": "GET",
+            },
+            "stage": "$default",
+        },
     }
 
     ret = assert_http_response_module.lambda_handler(minimal_event, lambda_context)
