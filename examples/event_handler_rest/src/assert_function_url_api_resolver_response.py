@@ -27,6 +27,8 @@ def test_lambda_handler(lambda_context):
             "stage": "$default",
         },
     }
+    # Example of Lambda Function URL request event:
+    # https://docs.aws.amazon.com/lambda/latest/dg/urls-invocation.html#urls-payloads
 
     ret = assert_function_url_api_response_module.lambda_handler(minimal_event, lambda_context)
     assert ret["statusCode"] == 200
