@@ -606,6 +606,20 @@ You can test your routes by passing a proxy event request with required params.
         --8<-- "examples/event_handler_rest/src/assert_alb_api_response_module.py"
         ```
 
+=== "LambdaFunctionUrlResolver"
+
+    === "assert_function_url_api_resolver_response.py"
+
+        ```python hl_lines="21-29"
+        --8<-- "examples/event_handler_rest/src/assert_function_url_api_resolver_response.py"
+        ```
+
+    === "assert_function_url_api_response_module.py"
+
+        ```python
+        --8<-- "examples/event_handler_rest/src/assert_function_url_api_response_module.py"
+        ```
+
 ## FAQ
 
 **What's the difference between this utility and frameworks like Chalice?**
