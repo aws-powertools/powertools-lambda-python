@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-import assert_http_response_module
+import assert_rest_api_resolver_response
 import pytest
 
 
@@ -23,6 +23,6 @@ def test_lambda_handler(lambda_context):
         "requestContext": {"requestId": "227b78aa-779d-47d4-a48e-ce62120393b8"},  # correlation ID
     }
 
-    ret = assert_http_response_module.lambda_handler(minimal_event, lambda_context)
+    ret = assert_rest_api_resolver_response.lambda_handler(minimal_event, lambda_context)
     assert ret["statusCode"] == 200
     assert ret["body"] != ""

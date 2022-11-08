@@ -566,21 +566,21 @@ You can test your routes by passing a proxy event request with required params.
 
 === "APIGatewayRestResolver"
 
-    === "assert_http_response.py"
+    === "assert_rest_api_resolver_response.py"
 
         ```python hl_lines="21-24"
-        --8<-- "examples/event_handler_rest/src/assert_http_response.py"
+        --8<-- "examples/event_handler_rest/src/assert_rest_api_resolver_response.py"
         ```
 
-    === "assert_http_response_module.py"
+    === "assert_rest_api_response_module.py"
 
         ```python
-        --8<-- "examples/event_handler_rest/src/assert_http_response_module.py"
+        --8<-- "examples/event_handler_rest/src/assert_rest_api_response_module.py"
         ```
 
 === "APIGatewayHttpResolver"
 
-    === "assert_http_api_resolver_http_response.py"
+    === "assert_http_api_resolver_response.py"
 
         ```python hl_lines="21-29"
         --8<-- "examples/event_handler_rest/src/assert_http_api_resolver_response.py"
@@ -594,7 +594,7 @@ You can test your routes by passing a proxy event request with required params.
 
 === "ALBResolver"
 
-    === "assert_alb_api_resolver_http_response.py"
+    === "assert_alb_api_resolver_response.py"
 
         ```python hl_lines="21-24"
         --8<-- "examples/event_handler_rest/src/assert_alb_api_resolver_response.py"

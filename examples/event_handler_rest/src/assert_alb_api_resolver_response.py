@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-import assert_http_response_module
+import assert_alb_api_response_module
 import pytest
 
 
@@ -23,6 +23,6 @@ def test_lambda_handler(lambda_context):
         "headers": {"x-amzn-trace-id": "b25827e5-0e30-4d52-85a8-4df449ee4c5a"},
     }
 
-    ret = assert_http_response_module.lambda_handler(minimal_event, lambda_context)
+    ret = assert_alb_api_response_module.lambda_handler(minimal_event, lambda_context)
     assert ret["statusCode"] == 200
     assert ret["body"] != ""

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-import assert_http_response_module
+import assert_http_api_response_module
 import pytest
 
 
@@ -28,6 +28,6 @@ def test_lambda_handler(lambda_context):
         },
     }
 
-    ret = assert_http_response_module.lambda_handler(minimal_event, lambda_context)
+    ret = assert_http_api_response_module.lambda_handler(minimal_event, lambda_context)
     assert ret["statusCode"] == 200
     assert ret["body"] != ""
