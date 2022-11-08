@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import base64
 import json
 import random
 import string
 from datetime import datetime, timedelta
 from io import BytesIO
-from typing import Dict
+from typing import Any, Dict, List, Tuple
 
 import boto3
 import pytest
@@ -14,7 +16,12 @@ from botocore.config import Config
 from botocore.response import StreamingBody
 
 from aws_lambda_powertools.utilities import parameters
-from aws_lambda_powertools.utilities.parameters.base import BaseProvider, ExpirableValue
+from aws_lambda_powertools.utilities.parameters.base import (
+    TRANSFORM_METHOD_MAPPING,
+    BaseProvider,
+    ExpirableValue,
+)
+from aws_lambda_powertools.utilities.parameters.ssm import SSMProvider
 
 
 @pytest.fixture(scope="function")
@@ -37,6 +44,29 @@ def mock_version():
 @pytest.fixture(scope="module")
 def config():
     return Config(region_name="us-east-1")
+
+
+def build_get_parameters_stub(params: Dict[str, Any], invalid_parameters: List[str] | None = None) -> Dict[str, List]:
+    invalid_parameters = invalid_parameters or []
+    version = random.randrange(1, 1000)
+    return {
+        "Parameters": [
+            {
+                "Name": param,
+                "Type": "String",
+                "Value": value,
+                "Version": version,
+                "Selector": f"{param}:{version}",
+                "SourceResult": "string",
+                "LastModifiedDate": datetime(2015, 1, 1),
+                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{param.lstrip('/')}",
+                "DataType": "string",
+            }
+            for param, value in params.items()
+            if param not in invalid_parameters
+        ],
+        "InvalidParameters": invalid_parameters,  # official SDK stub fails validation here, need to raise an issue
+    }
 
 
 def test_dynamodb_provider_get(mock_name, mock_value, config):
@@ -608,6 +638,169 @@ def test_ssm_provider_clear_cache(mock_name, mock_value, config):
 
     # THEN store should be empty
     assert provider.store == {}
+
+
+def test_ssm_provider_get_parameters_by_name_raise_on_failure(mock_name, mock_value, config):
+    # GIVEN two parameters are requested
+    provider = parameters.SSMProvider(config=config)
+    success = f"/dev/{mock_name}"
+    fail = f"/prod/{mock_name}"
+
+    params = {success: {}, fail: {}}
+    param_names = list(params.keys())
+    stub_params = {success: mock_value}
+
+    expected_stub_response = build_get_parameters_stub(params=stub_params, invalid_parameters=[fail])
+    expected_stub_params = {"Names": param_names}
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_parameters", expected_stub_response, expected_stub_params)
+    stubber.activate()
+
+    # WHEN one of them fails to be retrieved
+    # THEN raise GetParameterError
+    with pytest.raises(parameters.exceptions.GetParameterError, match=f"Failed to fetch parameters: .*{fail}.*"):
+        try:
+            provider.get_parameters_by_name(parameters=params)
+            stubber.assert_no_pending_responses()
+        finally:
+            stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure(mock_name, mock_value, config):
+    # GIVEN two parameters are requested
+    success = f"/dev/{mock_name}"
+    fail = f"/prod/{mock_name}"
+    params = {success: {}, fail: {}}
+    param_names = list(params.keys())
+    stub_params = {success: mock_value}
+
+    expected_stub_response = build_get_parameters_stub(params=stub_params, invalid_parameters=[fail])
+    expected_stub_params = {"Names": param_names}
+
+    provider = parameters.SSMProvider(config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_parameters", expected_stub_response, expected_stub_params)
+    stubber.activate()
+
+    # WHEN one of them fails to be retrieved
+    try:
+        ret = provider.get_parameters_by_name(parameters=params, raise_on_error=False)
+
+        # THEN there should be no error raised
+        # and failed ones available within "_errors" key
+        stubber.assert_no_pending_responses()
+        assert ret["_errors"]
+        assert len(ret["_errors"]) == 1
+        assert fail not in ret
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_with_decrypt(mock_name, config):
+    # GIVEN one parameter requires decryption and an arbitrary SDK error occurs
+    param = f"/{mock_name}"
+    params = {param: {"decrypt": True}}
+
+    provider = parameters.SSMProvider(config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error("get_parameters", "InvalidKeyId")
+    stubber.activate()
+
+    # WHEN fail-fast is disabled in get_parameters_by_name
+    try:
+        ret = provider.get_parameters_by_name(parameters=params, raise_on_error=False)
+        stubber.assert_no_pending_responses()
+
+        # THEN there should be no error raised but added under `_errors` key
+        assert ret["_errors"]
+        assert len(ret["_errors"]) == 1
+        assert param not in ret
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_batch_decrypt_combined(
+    mock_value, mock_version, config
+):
+    # GIVEN three parameters are requested
+    # one requires decryption, two can be batched
+    # and an arbitrary SDK error is injected
+    fail = "/fail"
+    success = "/success"
+    decrypt_fail = "/fail/decrypt"
+    params = {decrypt_fail: {"decrypt": True}, success: {}, fail: {}}
+
+    expected_stub_params = {"Names": [success, fail]}
+    expected_stub_response = build_get_parameters_stub(
+        params={fail: mock_value, success: mock_value}, invalid_parameters=[fail]
+    )
+
+    provider = parameters.SSMProvider(config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error("get_parameter")
+    stubber.add_response("get_parameters", expected_stub_response, expected_stub_params)
+    stubber.activate()
+
+    # WHEN fail-fast is disabled in get_parameters_by_name
+    # and only one parameter succeeds out of three
+    try:
+        ret = provider.get_parameters_by_name(parameters=params, raise_on_error=False)
+
+        # THEN there should be no error raised
+        # successful params returned accordingly
+        # and failed ones available within "_errors" key
+        stubber.assert_no_pending_responses()
+        assert success in ret
+        assert ret["_errors"]
+        assert len(ret["_errors"]) == 2
+        assert fail not in ret
+        assert decrypt_fail not in ret
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_raise_on_reserved_errors_key(mock_name, mock_value, config):
+    # GIVEN one of the parameters is named `_errors`
+    success = f"/dev/{mock_name}"
+    fail = "_errors"
+
+    params = {success: {}, fail: {}}
+    provider = parameters.SSMProvider(config=config)
+
+    # WHEN using get_parameters_by_name to fetch
+    # THEN raise GetParameterError
+    with pytest.raises(parameters.exceptions.GetParameterError, match="You cannot fetch a parameter named"):
+        provider.get_parameters_by_name(parameters=params, raise_on_error=False)
+
+
+def test_ssm_provider_get_parameters_by_name_all_decrypt_should_use_get_parameters_api(mock_name, mock_value, config):
+    # GIVEN all parameters require decryption
+    param_a = f"/a/{mock_name}"
+    param_b = f"/b/{mock_name}"
+    fail = "/does_not_exist"  # stub model doesn't support all-success yet
+
+    all_params = {param_a: {}, param_b: {}, fail: {}}
+    all_params_names = list(all_params.keys())
+
+    expected_param_values = {param_a: mock_value, param_b: mock_value}
+    expected_stub_response = build_get_parameters_stub(params=expected_param_values, invalid_parameters=[fail])
+    expected_stub_params = {"Names": all_params_names, "WithDecryption": True}
+
+    provider = parameters.SSMProvider(config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_parameters", expected_stub_response, expected_stub_params)
+    stubber.activate()
+
+    # WHEN get_parameters_by_name is called
+    # THEN we should only use GetParameters WithDecryption=true to prevent throttling
+    try:
+        ret = provider.get_parameters_by_name(parameters=all_params, decrypt=True, raise_on_error=False)
+        stubber.assert_no_pending_responses()
+
+        assert ret is not None
+    finally:
+        stubber.deactivate()
 
 
 def test_dynamodb_provider_clear_cache(mock_name, mock_value, config):
@@ -1518,6 +1711,167 @@ def test_get_parameter(monkeypatch, mock_name, mock_value):
     assert value == mock_value
 
 
+def test_get_parameters_by_name(monkeypatch, mock_name, mock_value, config):
+    params = {mock_name: {}}
+
+    class TestProvider(SSMProvider):
+        def __init__(self, config: Config = config, **kwargs):
+            super().__init__(config, **kwargs)
+
+        def get_parameters_by_name(self, *args, **kwargs) -> Dict[str, str] | Dict[str, bytes] | Dict[str, dict]:
+            return {mock_name: mock_value}
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+
+    values = parameters.get_parameters_by_name(parameters=params)
+
+    assert len(values) == 1
+    assert values[mock_name] == mock_value
+
+
+def test_get_parameters_by_name_with_decrypt_override(monkeypatch, mock_name, mock_value, config):
+    # GIVEN 2 out of 3 parameters have decrypt override
+    decrypt_param = "/api_key"
+    decrypt_param_two = "/another/secret"
+    decrypt_params = {decrypt_param: {"decrypt": True}, decrypt_param_two: {"decrypt": True}}
+    decrypted_response = "decrypted"
+    params = {mock_name: {}, **decrypt_params}
+
+    class TestProvider(SSMProvider):
+        def __init__(self, config: Config = config, **kwargs):
+            super().__init__(config, **kwargs)
+
+        def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
+            # THEN params with `decrypt` override should use GetParameter` (`_get`)
+            assert name in decrypt_params
+            assert decrypt
+            return decrypted_response
+
+        def _get_parameters_by_name(self, *args, **kwargs) -> Tuple[Dict[str, Any], List[str]]:
+            return {mock_name: mock_value}, []
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+
+    # WHEN get_parameters_by_name is called
+    values = parameters.get_parameters_by_name(parameters=params)
+
+    # THEN all parameters should be merged in the response
+    assert len(values) == 3
+    assert values[mock_name] == mock_value
+    assert values[decrypt_param] == decrypted_response
+    assert values[decrypt_param_two] == decrypted_response
+
+
+def test_get_parameters_by_name_with_override_and_explicit_global(monkeypatch, mock_name, mock_value, config):
+    # GIVEN a parameter overrides a default setting
+    default_cache_period = 500
+    params = {mock_name: {"max_age": 0}, "no-override": {}}
+
+    class TestProvider(SSMProvider):
+        def __init__(self, config: Config = config, **kwargs):
+            super().__init__(config, **kwargs)
+
+        # NOTE: By convention, we check at `_get_parameters_by_name`
+        # as that's right before we call SSM, and when options have been merged
+        # def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
+        def _get_parameters_by_name(
+            self, parameters: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
+        ) -> Tuple[Dict[str, Any], List[str]]:
+            # THEN max_age should use no_cache_param override
+            assert parameters[mock_name]["max_age"] == 0
+            assert parameters["no-override"]["max_age"] == default_cache_period
+
+            return {mock_name: mock_value}, []
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+
+    # WHEN get_parameters_by_name is called with max_age set to 500 as the default
+    parameters.get_parameters_by_name(parameters=params, max_age=default_cache_period)
+
+
+def test_get_parameters_by_name_with_max_batch(monkeypatch, config):
+    # GIVEN a batch of 20 parameters
+    params = {f"param_{i}": {} for i in range(20)}
+
+    class TestProvider(SSMProvider):
+        def __init__(self, config: Config = config, **kwargs):
+            super().__init__(config, **kwargs)
+
+        def _get_parameters_by_name(
+            self, parameters: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
+        ) -> Tuple[Dict[str, Any], List[str]]:
+            # THEN we should always split to respect GetParameters max
+            assert len(parameters) == self._MAX_GET_PARAMETERS_ITEM
+            return {}, []
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+
+    # WHEN get_parameters_by_name is called
+    parameters.get_parameters_by_name(parameters=params)
+
+
+def test_get_parameters_by_name_cache(monkeypatch, mock_name, mock_value, config):
+    # GIVEN we have a parameter to fetch but is already in cache
+    params = {mock_name: {}}
+    cache_key = (mock_name, None)
+
+    class TestProvider(SSMProvider):
+        def __init__(self, config: Config = config, **kwargs):
+            super().__init__(config, **kwargs)
+
+        def _get_parameters_by_name(self, *args, **kwargs) -> Tuple[Dict[str, Any], List[str]]:
+            raise RuntimeError("Should not be called if it's in cache")
+
+    provider = TestProvider()
+    provider.add_to_cache(key=(mock_name, None), value=mock_value, max_age=10)
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", provider)
+
+    # WHEN get_parameters_by_name is called
+    provider.get_parameters_by_name(parameters=params)
+
+    # THEN the cache should be used and _get_parameters_by_name should not be called
+    assert provider.has_not_expired_in_cache(key=cache_key)
+
+
+def test_get_parameters_by_name_empty_batch(monkeypatch, config):
+    # GIVEN we have an empty dictionary
+    params = {}
+
+    class TestProvider(SSMProvider):
+        def __init__(self, config: Config = config, **kwargs):
+            super().__init__(config, **kwargs)
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+
+    # WHEN get_parameters_by_name is called
+    # THEN it should return an empty response
+    assert parameters.get_parameters_by_name(parameters=params) == {}
+
+
+def test_get_parameters_by_name_cache_them_individually_not_batch(monkeypatch, mock_name, mock_version):
+    # GIVEN we have a parameter to fetch but is already in cache
+    dev_param = f"/dev/{mock_name}"
+    prod_param = f"/prod/{mock_name}"
+    params = {dev_param: {}, prod_param: {}}
+
+    stub_params = {dev_param: mock_value, prod_param: mock_value}
+    stub_response = build_get_parameters_stub(params=stub_params)
+
+    class FakeClient:
+        def get_parameters(self, *args, **kwargs):
+            return stub_response
+
+    provider = SSMProvider(boto3_client=FakeClient())
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", provider)
+
+    # WHEN get_parameters_by_name is called
+    provider.get_parameters_by_name(parameters=params)
+
+    # THEN the cache should be populated with each parameter
+    assert len(provider.store) == len(params)
+
+
 def test_get_parameter_new(monkeypatch, mock_name, mock_value):
     """
     Test get_parameter() without a default provider
@@ -1582,6 +1936,27 @@ def test_get_parameters_new(monkeypatch, mock_name, mock_value):
     value = parameters.get_parameters(mock_name)
 
     assert value == mock_value
+
+
+def test_get_parameters_by_name_new(monkeypatch, mock_name, mock_value, config):
+    """
+    Test get_parameters_by_name() without a default provider
+    """
+    params = {mock_name: {}}
+
+    class TestProvider(SSMProvider):
+        def __init__(self, config: Config = config, **kwargs):
+            super().__init__(config, **kwargs)
+
+        def get_parameters_by_name(self, *args, **kwargs) -> Dict[str, str] | Dict[str, bytes] | Dict[str, dict]:
+            return {mock_name: mock_value}
+
+    monkeypatch.setattr(parameters.ssm, "DEFAULT_PROVIDERS", {})
+    monkeypatch.setattr(parameters.ssm, "SSMProvider", TestProvider)
+
+    value = parameters.get_parameters_by_name(params)
+
+    assert value[mock_name] == mock_value
 
 
 def test_get_secret(monkeypatch, mock_name, mock_value):
@@ -1810,6 +2185,50 @@ def test_appconf_get_app_config_new(monkeypatch, mock_name, mock_value):
     assert value == mock_value
 
 
+def test_transform_value_auto(mock_value: str):
+    # GIVEN
+    json_data = json.dumps({"A": mock_value})
+    mock_binary = mock_value.encode()
+    binary_data = base64.b64encode(mock_binary).decode()
+
+    # WHEN
+    json_value = parameters.base.transform_value(key="/a.json", value=json_data, transform="auto")
+    binary_value = parameters.base.transform_value(key="/a.binary", value=binary_data, transform="auto")
+
+    # THEN
+    assert isinstance(json_value, dict)
+    assert isinstance(binary_value, bytes)
+    assert json_value["A"] == mock_value
+    assert binary_value == mock_binary
+
+
+def test_transform_value_auto_incorrect_key(mock_value: str):
+    # GIVEN
+    mock_key = "/missing/json/suffix"
+    json_data = json.dumps({"A": mock_value})
+
+    # WHEN
+    value = parameters.base.transform_value(key=mock_key, value=json_data, transform="auto")
+
+    # THEN it should echo back its value
+    assert isinstance(value, str)
+    assert value == json_data
+
+
+def test_transform_value_auto_unsupported_transform(mock_value: str):
+    # GIVEN
+    mock_key = "/a.does_not_exist"
+    mock_dict = {"hello": "world"}
+
+    # WHEN
+    value = parameters.base.transform_value(key=mock_key, value=mock_value, transform="auto")
+    dict_value = parameters.base.transform_value(key=mock_key, value=mock_dict, transform="auto")
+
+    # THEN it should echo back its value
+    assert value == mock_value
+    assert dict_value == mock_dict
+
+
 def test_transform_value_json(mock_value):
     """
     Test transform_value() with a json transform
@@ -1863,17 +2282,6 @@ def test_transform_value_binary_exception():
     assert "Incorrect padding" in str(excinfo)
 
 
-def test_transform_value_wrong(mock_value):
-    """
-    Test transform_value() with an incorrect transform
-    """
-
-    with pytest.raises(parameters.TransformParameterError) as excinfo:
-        parameters.base.transform_value(mock_value, "INCORRECT")
-
-    assert "Invalid transform type" in str(excinfo)
-
-
 def test_transform_value_ignore_error(mock_value):
     """
     Test transform_value() does not raise errors when raise_on_transform_error is False
@@ -1884,16 +2292,6 @@ def test_transform_value_ignore_error(mock_value):
     assert value is None
 
 
-@pytest.mark.parametrize("original_transform", ["json", "binary", "other", "Auto", None])
-def test_get_transform_method_preserve_original(original_transform):
-    """
-    Check if original transform method is returned for anything other than "auto"
-    """
-    transform = parameters.base.get_transform_method("key", original_transform)
-
-    assert transform == original_transform
-
-
 @pytest.mark.parametrize("extension", ["json", "binary"])
 def test_get_transform_method_preserve_auto(extension, mock_name):
     """
@@ -1901,18 +2299,7 @@ def test_get_transform_method_preserve_auto(extension, mock_name):
     """
     transform = parameters.base.get_transform_method(f"{mock_name}.{extension}", "auto")
 
-    assert transform == extension
-
-
-@pytest.mark.parametrize("key", ["json", "binary", "example", "example.jsonp"])
-def test_get_transform_method_preserve_auto_unhandled(key):
-    """
-    Check if any key that does not end with a supported extension returns None when
-    using the transform="auto"
-    """
-    transform = parameters.base.get_transform_method(key, "auto")
-
-    assert transform is None
+    assert transform == TRANSFORM_METHOD_MAPPING[extension]
 
 
 def test_base_provider_get_multiple_force_update(mock_name, mock_value):
@@ -1958,3 +2345,18 @@ def test_base_provider_get_force_update(mock_name, mock_value):
 
     assert isinstance(value, str)
     assert value == mock_value
+
+
+def test_cache_ignores_max_age_zero_or_negative(mock_value, config):
+    # GIVEN we have two parameters that shouldn't be cached
+    param = "/no_cache"
+    provider = SSMProvider(config=config)
+    cache_key = (param, None)
+
+    # WHEN a provider adds them into the cache
+    provider.add_to_cache(key=cache_key, value=mock_value, max_age=0)
+    provider.add_to_cache(key=cache_key, value=mock_value, max_age=-10)
+
+    # THEN they should not be added to the cache
+    assert len(provider.store) == 0
+    assert provider.has_not_expired_in_cache(cache_key) is False

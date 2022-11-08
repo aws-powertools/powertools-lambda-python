@@ -15,8 +15,6 @@ from ... import Logger
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError, StoreClientError
 
-TRANSFORM_TYPE = "json"
-
 
 class AppConfigStore(StoreProvider):
     def __init__(
@@ -74,7 +72,7 @@ class AppConfigStore(StoreProvider):
                 dict,
                 self._conf_store.get(
                     name=self.name,
-                    transform=TRANSFORM_TYPE,
+                    transform="json",
                     max_age=self.cache_seconds,
                 ),
             )

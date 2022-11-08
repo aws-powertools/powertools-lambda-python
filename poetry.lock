@@ -45,7 +45,7 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.49.0"
+version = "2.50.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 category = "dev"
 optional = false
@@ -53,7 +53,7 @@ python-versions = "~=3.7"
 
 [package.dependencies]
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.70.0,<2.0.0"
+jsii = ">=1.69.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -353,7 +353,7 @@ tomli = "*"
 
 [[package]]
 name = "flake8-bugbear"
-version = "22.10.25"
+version = "22.10.27"
 description = "A plugin for flake8 finding likely bugs and design problems in your program. Contains warnings that don't belong in pyflakes and pycodestyle."
 category = "dev"
 optional = false
@@ -836,8 +836,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-cloudformation"
-version = "1.25.0"
-description = "Type annotations for boto3.CloudFormation 1.25.0 service generated with mypy-boto3-builder 7.11.10"
+version = "1.26.0.post1"
+description = "Type annotations for boto3.CloudFormation 1.26.0 service generated with mypy-boto3-builder 7.11.10"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -858,8 +858,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-dynamodb"
-version = "1.25.0"
-description = "Type annotations for boto3.DynamoDB 1.25.0 service generated with mypy-boto3-builder 7.11.10"
+version = "1.26.0.post1"
+description = "Type annotations for boto3.DynamoDB 1.26.0 service generated with mypy-boto3-builder 7.11.10"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -902,8 +902,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-secretsmanager"
-version = "1.25.0"
-description = "Type annotations for boto3.SecretsManager 1.25.0 service generated with mypy-boto3-builder 7.11.10"
+version = "1.26.0.post1"
+description = "Type annotations for boto3.SecretsManager 1.26.0 service generated with mypy-boto3-builder 7.11.10"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -913,8 +913,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-ssm"
-version = "1.25.0"
-description = "Type annotations for boto3.SSM 1.25.0 service generated with mypy-boto3-builder 7.11.10"
+version = "1.26.0.post1"
+description = "Type annotations for boto3.SSM 1.26.0 service generated with mypy-boto3-builder 7.11.10"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -1156,11 +1156,11 @@ testing = ["coverage (>=6.2)", "flaky (>=3.5.0)", "hypothesis (>=5.7.1)", "mypy 
 
 [[package]]
 name = "pytest-benchmark"
-version = "3.4.1"
+version = "4.0.0"
 description = "A ``pytest`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer."
 category = "dev"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+python-versions = ">=3.7"
 
 [package.dependencies]
 py-cpuinfo = "*"
@@ -1511,7 +1511,7 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "48a6c11b4ef71716e88efa7ffa474aa73fd7fcb02553ffd49c0d03fe72c1f838"
+content-hash = "adeb783e8f19611e064c119d66336a9e4b4ce0a4477651d4f6b520509e680d44"
 
 [metadata.files]
 attrs = [
@@ -1527,8 +1527,8 @@ aws-cdk-aws-apigatewayv2-integrations-alpha = [
     {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.47.0a0-py3-none-any.whl", hash = "sha256:4633c4e020400c7ee5790652f099f02d4f84bab24fff013250e2b41a4ffca1b0"},
 ]
 aws-cdk-lib = [
-    {file = "aws-cdk-lib-2.49.0.tar.gz", hash = "sha256:9146f03988aff823cb5b561090875c311d733bf1786859c706381e9b49f6adb7"},
-    {file = "aws_cdk_lib-2.49.0-py3-none-any.whl", hash = "sha256:c9c197463e2685aa67248c2cea2a4d3f15e33a3c19250aa34e754e455295417b"},
+    {file = "aws-cdk-lib-2.50.0.tar.gz", hash = "sha256:60a44b4045cbe1ab33e001d62ded579a45b5f6b011c612f6804c109666807918"},
+    {file = "aws_cdk_lib-2.50.0-py3-none-any.whl", hash = "sha256:8f9157c906485308631edbf398a77641e5986aaccba73c3254502138a340a79a"},
 ]
 aws-sam-translator = [
     {file = "aws-sam-translator-1.53.0.tar.gz", hash = "sha256:392ed4f5fb08f72cb68a8800f0bc278d2a3b6609bd1ac66bfcdeaaa94cdc18e5"},
@@ -1691,8 +1691,8 @@ flake8-black = [
     {file = "flake8_black-0.3.3-py3-none-any.whl", hash = "sha256:7d667d0059fd1aa468de1669d77cc934b7f1feeac258d57bdae69a8e73c4cd90"},
 ]
 flake8-bugbear = [
-    {file = "flake8-bugbear-22.10.25.tar.gz", hash = "sha256:89e51284eb929fbb7f23fbd428491e7427f7cdc8b45a77248daffe86a039d696"},
-    {file = "flake8_bugbear-22.10.25-py3-none-any.whl", hash = "sha256:584631b608dc0d7d3f9201046d5840a45502da4732d5e8df6c7ac1694a91cb9e"},
+    {file = "flake8-bugbear-22.10.27.tar.gz", hash = "sha256:a6708608965c9e0de5fff13904fed82e0ba21ac929fe4896459226a797e11cd5"},
+    {file = "flake8_bugbear-22.10.27-py3-none-any.whl", hash = "sha256:6ad0ab754507319060695e2f2be80e6d8977cfcea082293089a9226276bd825d"},
 ]
 flake8-builtins = [
     {file = "flake8-builtins-2.0.0.tar.gz", hash = "sha256:98833fa16139a75cd4913003492a9bd9a61c6f8ac146c3db12a2ebaf420dade3"},
@@ -1900,16 +1900,16 @@ mypy-boto3-appconfigdata = [
     {file = "mypy_boto3_appconfigdata-1.25.0-py3-none-any.whl", hash = "sha256:21a332c85080ce2c5416b751f4fc4870e057af85d1aedc33516bde2a86330caa"},
 ]
 mypy-boto3-cloudformation = [
-    {file = "mypy-boto3-cloudformation-1.25.0.tar.gz", hash = "sha256:1251b0f24b0a7c21a6e1f7f88fbf6aaa7fcc490b82d6ada46b5778cfd12d112f"},
-    {file = "mypy_boto3_cloudformation-1.25.0-py3-none-any.whl", hash = "sha256:469e3cbc0a78003cc3134dece0203d0a0bfa908af34187aa53cd610b5f9bb19f"},
+    {file = "mypy-boto3-cloudformation-1.26.0.post1.tar.gz", hash = "sha256:9e8dce3149c5f5dee5ab05850ec9cae0925abb9da3aa63397b098219709db077"},
+    {file = "mypy_boto3_cloudformation-1.26.0.post1-py3-none-any.whl", hash = "sha256:e0dd01030209b77c3159a299a04a5c6353a6feb0dd49bff9f5acec9e0274264c"},
 ]
 mypy-boto3-cloudwatch = [
     {file = "mypy-boto3-cloudwatch-1.25.0.tar.gz", hash = "sha256:d5323ffeafe5144a232e27242c5d2f334f5e7ff10d0733145328888783ffcf12"},
     {file = "mypy_boto3_cloudwatch-1.25.0-py3-none-any.whl", hash = "sha256:e4934d92972f8ea531959593e476a5967b16aed223dc3c076e7e123acc8a2e77"},
 ]
 mypy-boto3-dynamodb = [
-    {file = "mypy-boto3-dynamodb-1.25.0.tar.gz", hash = "sha256:a858453090955e29c0ca479ea19f627a2d0dcf916469b104a5c6ad648f1299ba"},
-    {file = "mypy_boto3_dynamodb-1.25.0-py3-none-any.whl", hash = "sha256:03437167a084ac0eb718fdaf5931949247b344acc4f75b8b5528f078c8f6f073"},
+    {file = "mypy-boto3-dynamodb-1.26.0.post1.tar.gz", hash = "sha256:731141ff962033b77603a8a02626d64eb8575a0070e865aff31fe7443e4be6e3"},
+    {file = "mypy_boto3_dynamodb-1.26.0.post1-py3-none-any.whl", hash = "sha256:abe06c4c819ef2faa4b2f5cea127549f4c50e83a9869be80c9e77893f682a11b"},
 ]
 mypy-boto3-lambda = [
     {file = "mypy-boto3-lambda-1.25.0.tar.gz", hash = "sha256:441ea9b9a6aa94a70e4e69dd9c7148434e7e501decb5cd8e278f8ca878ef77d3"},
@@ -1924,12 +1924,12 @@ mypy-boto3-s3 = [
     {file = "mypy_boto3_s3-1.25.0-py3-none-any.whl", hash = "sha256:a597db46fef02232417f6e4c2bd5d4960af0b7dc330b8a5a91ad0538405d46c6"},
 ]
 mypy-boto3-secretsmanager = [
-    {file = "mypy-boto3-secretsmanager-1.25.0.tar.gz", hash = "sha256:8f61d60fbe8a662f2a16a936615724d6d6e0aee7792f613e3be8a397d91de988"},
-    {file = "mypy_boto3_secretsmanager-1.25.0-py3-none-any.whl", hash = "sha256:a11c40f1e89273107fdba4b6f219e728a8bfea19e7a46a0aaff9c3b3fe095211"},
+    {file = "mypy-boto3-secretsmanager-1.26.0.post1.tar.gz", hash = "sha256:20fde0ef5c1f023aa6cb6f5376e3bcd1c9d1e66f3217e61581aee079763201c6"},
+    {file = "mypy_boto3_secretsmanager-1.26.0.post1-py3-none-any.whl", hash = "sha256:4fb63d1322b5731676425590ad6109b78fd8087418ac757c746d636aa9390a89"},
 ]
 mypy-boto3-ssm = [
-    {file = "mypy-boto3-ssm-1.25.0.tar.gz", hash = "sha256:8162d6677c3a1432131ef41b85f339fcf37c106a1916dcb1c54dc0621353be3b"},
-    {file = "mypy_boto3_ssm-1.25.0-py3-none-any.whl", hash = "sha256:3fc7fb8b59a57330c7546190002717e094ff57532b6f286707f57f54e9156d03"},
+    {file = "mypy-boto3-ssm-1.26.0.post1.tar.gz", hash = "sha256:8b467247384ad2d519a517847ab748070f0694d408089e3ceac1f249017e87c1"},
+    {file = "mypy_boto3_ssm-1.26.0.post1-py3-none-any.whl", hash = "sha256:746122e41d7354b3569ccb156937453dbbf0e714888e1de3fa6388bb7136bfef"},
 ]
 mypy-boto3-xray = [
     {file = "mypy-boto3-xray-1.25.0.tar.gz", hash = "sha256:db95b35c7075e610d6e0b4031e8dbdd08314cfc87f5634e14a1981f094a3a9d0"},
@@ -2068,8 +2068,8 @@ pytest-asyncio = [
     {file = "pytest_asyncio-0.20.1-py3-none-any.whl", hash = "sha256:2c85a835df33fda40fe3973b451e0c194ca11bc2c007eabff90bb3d156fc172b"},
 ]
 pytest-benchmark = [
-    {file = "pytest-benchmark-3.4.1.tar.gz", hash = "sha256:40e263f912de5a81d891619032983557d62a3d85843f9a9f30b98baea0cd7b47"},
-    {file = "pytest_benchmark-3.4.1-py2.py3-none-any.whl", hash = "sha256:36d2b08c4882f6f997fd3126a3d6dfd70f3249cde178ed8bbc0b73db7c20f809"},
+    {file = "pytest-benchmark-4.0.0.tar.gz", hash = "sha256:fb0785b83efe599a6a956361c0691ae1dbb5318018561af10f3e915caa0048d1"},
+    {file = "pytest_benchmark-4.0.0-py3-none-any.whl", hash = "sha256:fdb7db64e31c8b277dff9850d2a2556d8b60bcb0ea6524e36e28ffd7c87f71d6"},
 ]
 pytest-cov = [
     {file = "pytest-cov-4.0.0.tar.gz", hash = "sha256:996b79efde6433cdbd0088872dbc5fb3ed7fe1578b68cdbba634f14bb8dd0470"},

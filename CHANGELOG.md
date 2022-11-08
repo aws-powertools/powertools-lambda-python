@@ -4,9 +4,22 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **homepage:** remove v1 layer limitation on pydantic not being included
+* **tracer:** add note on why X-Ray SDK over ADOT closes [#1675](https://github.com/awslabs/aws-lambda-powertools-python/issues/1675)
+
 ## Features
 
 * **metrics:** add EphemeralMetrics as a non-singleton option ([#1676](https://github.com/awslabs/aws-lambda-powertools-python/issues/1676))
+* **parameters:** add get_parameters_by_name for SSM params in distinct paths ([#1678](https://github.com/awslabs/aws-lambda-powertools-python/issues/1678))
+
+## Maintenance
+
+* **deps-dev:** bump aws-cdk-lib from 2.49.0 to 2.50.0 ([#1683](https://github.com/awslabs/aws-lambda-powertools-python/issues/1683))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.25.0 to 1.26.0.post1 ([#1682](https://github.com/awslabs/aws-lambda-powertools-python/issues/1682))
+* **deps-dev:** bump mypy-boto3-cloudformation from 1.25.0 to 1.26.0.post1 ([#1679](https://github.com/awslabs/aws-lambda-powertools-python/issues/1679))
+* **package:** correct pyproject version manually
 
 
 <a name="v2.1.0"></a>
