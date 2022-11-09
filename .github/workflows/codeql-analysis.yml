@@ -2,7 +2,10 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [develop, v2]
+    paths:
+      - "aws_lambda_powertools/**"
+    branches:
+      - develop
 
 jobs:
   analyze:
