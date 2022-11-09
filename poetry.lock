@@ -880,8 +880,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-logs"
-version = "1.25.0"
-description = "Type annotations for boto3.CloudWatchLogs 1.25.0 service generated with mypy-boto3-builder 7.11.10"
+version = "1.26.3"
+description = "Type annotations for boto3.CloudWatchLogs 1.26.3 service generated with mypy-boto3-builder 7.11.10"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -1498,7 +1498,7 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "f732adcca05c4db10e7de9464bb97c6dfc50f3e91a162c8e483dccbfaffa843a"
+content-hash = "ec47a4a538301304933b43fbb5cd65582c92e1a9a10471a14f5c86623b5a166a"
 
 [metadata.files]
 attrs = [
@@ -1903,8 +1903,8 @@ mypy-boto3-lambda = [
     {file = "mypy_boto3_lambda-1.25.0-py3-none-any.whl", hash = "sha256:2564695a40b962a026f6fd642544df7c76ca6ea664d76b13f400e216f09bd78c"},
 ]
 mypy-boto3-logs = [
-    {file = "mypy-boto3-logs-1.25.0.tar.gz", hash = "sha256:21769777f8ae286d9232ec7ebde0c4074de2253f7658df43dcb6835a8aada2e3"},
-    {file = "mypy_boto3_logs-1.25.0-py3-none-any.whl", hash = "sha256:fddc937f53a25bb3849e3bbe5b07d0baae504a87f19060308dacee99b76c8f7f"},
+    {file = "mypy-boto3-logs-1.26.3.tar.gz", hash = "sha256:45f6616118ef758eb899fff206f4c835b443845af5d77b16f39c19c1a257dcec"},
+    {file = "mypy_boto3_logs-1.26.3-py3-none-any.whl", hash = "sha256:676355cc513a3a38ae83ba7d69a7aa62ce45522e298d510cbbb3011045be6931"},
 ]
 mypy-boto3-s3 = [
     {file = "mypy-boto3-s3-1.25.0.tar.gz", hash = "sha256:68977f744ce3b9c42088467ff66e33e791ca3f27b0dc55f3b550298f03ea1a6f"},
