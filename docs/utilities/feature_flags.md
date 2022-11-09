@@ -53,7 +53,7 @@ The following sample infrastructure will be used throughout this documentation:
 
     ```yaml hl_lines="5 11 18 25 31-50 54"
     AWSTemplateFormatVersion: "2010-09-09"
-    Description: Lambda Powertools Feature flags sample template
+    Description: Lambda Powertools for Python Feature flags sample template
     Resources:
       FeatureStoreApp:
         Type: AWS::AppConfig::Application
@@ -580,20 +580,20 @@ The `conditions` block is a list of conditions that contain `action`, `key`, and
 
 The `action` configuration can have the following values, where the expressions **`a`** is the `key` and **`b`** is the `value` above:
 
-Action | Equivalent expression
-------------------------------------------------- | ---------------------------------------------------------------------------------
-**EQUALS** | `lambda a, b: a == b`
-**NOT_EQUALS** | `lambda a, b: a != b`
-**KEY_GREATER_THAN_VALUE** | `lambda a, b: a > b`
-**KEY_GREATER_THAN_OR_EQUAL_VALUE** | `lambda a, b: a >= b`
-**KEY_LESS_THAN_VALUE** | `lambda a, b: a < b`
-**KEY_LESS_THAN_OR_EQUAL_VALUE** | `lambda a, b: a <= b`
-**STARTSWITH** | `lambda a, b: a.startswith(b)`
-**ENDSWITH** | `lambda a, b: a.endswith(b)`
-**KEY_IN_VALUE** | `lambda a, b: a in b`
-**KEY_NOT_IN_VALUE** | `lambda a, b: a not in b`
-**VALUE_IN_KEY** | `lambda a, b: b in a`
-**VALUE_NOT_IN_KEY** | `lambda a, b: b not in a`
+| Action                              | Equivalent expression          |
+| ----------------------------------- | ------------------------------ |
+| **EQUALS**                          | `lambda a, b: a == b`          |
+| **NOT_EQUALS**                      | `lambda a, b: a != b`          |
+| **KEY_GREATER_THAN_VALUE**          | `lambda a, b: a > b`           |
+| **KEY_GREATER_THAN_OR_EQUAL_VALUE** | `lambda a, b: a >= b`          |
+| **KEY_LESS_THAN_VALUE**             | `lambda a, b: a < b`           |
+| **KEY_LESS_THAN_OR_EQUAL_VALUE**    | `lambda a, b: a <= b`          |
+| **STARTSWITH**                      | `lambda a, b: a.startswith(b)` |
+| **ENDSWITH**                        | `lambda a, b: a.endswith(b)`   |
+| **KEY_IN_VALUE**                    | `lambda a, b: a in b`          |
+| **KEY_NOT_IN_VALUE**                | `lambda a, b: a not in b`      |
+| **VALUE_IN_KEY**                    | `lambda a, b: b in a`          |
+| **VALUE_NOT_IN_KEY**                | `lambda a, b: b not in a`      |
 
 ???+ info
     The `**key**` and `**value**` will be compared to the input from the `**context**` parameter.
@@ -667,16 +667,16 @@ AppConfig store provider fetches any JSON document from AWS AppConfig.
 
 These are the available options for further customization.
 
-Parameter | Default | Description
-------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
-**environment** | `""` | AWS AppConfig Environment, e.g. `test`
-**application** | `""` | AWS AppConfig Application
-**name** | `""` | AWS AppConfig Configuration name
-**envelope** | `None` | JMESPath expression to use to extract feature flags configuration from AWS AppConfig configuration
-**max_age** | `5` | Number of seconds to cache feature flags configuration fetched from AWS AppConfig
-**sdk_config** | `None` | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}
-**jmespath_options** | `None` | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"}
-**logger** | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools Logger.
+| Parameter            | Default          | Description                                                                                                                                            |
+| -------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **environment**      | `""`             | AWS AppConfig Environment, e.g. `test`                                                                                                                 |
+| **application**      | `""`             | AWS AppConfig Application                                                                                                                              |
+| **name**             | `""`             | AWS AppConfig Configuration name                                                                                                                       |
+| **envelope**         | `None`           | JMESPath expression to use to extract feature flags configuration from AWS AppConfig configuration                                                     |
+| **max_age**          | `5`              | Number of seconds to cache feature flags configuration fetched from AWS AppConfig                                                                      |
+| **sdk_config**       | `None`           | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}                            |
+| **jmespath_options** | `None`           | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"} |
+| **logger**           | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools Logger.                                                                  |
 
 ```python hl_lines="21-27" title="AppConfigStore sample"
 from botocore.config import Config
@@ -771,17 +771,17 @@ def test_flags_condition_match(mocker):
 
 ## Feature flags vs Parameters vs env vars
 
-Method | When to use | Requires new deployment on changes | Supported services
-------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------
-**[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment. | Yes | Lambda
-**[Parameters utility](parameters.md)** | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No | Parameter Store, DynamoDB, Secrets Manager, AppConfig
-**Feature flags utility** | Rule engine to define when one or multiple features should be enabled depending on the input. | No | AppConfig
+| Method                                                                                                                | When to use                                                                                                             | Requires new deployment on changes | Supported services                                    |
+| --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------- |
+| **[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment.        | Yes                                | Lambda                                                |
+| **[Parameters utility](parameters.md)**                                                                               | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No                                 | Parameter Store, DynamoDB, Secrets Manager, AppConfig |
+| **Feature flags utility**                                                                                             | Rule engine to define when one or multiple features should be enabled depending on the input.                           | No                                 | AppConfig                                             |
 
 ## Deprecation list when GA
 
-Breaking change | Recommendation
-------------------------------------------------- | ---------------------------------------------------------------------------------
-`IN` RuleAction | Use `KEY_IN_VALUE` instead
-`NOT_IN` RuleAction | Use `KEY_NOT_IN_VALUE` instead
-`get_enabled_features` | Return type changes from `List[str]` to `Dict[str, Any]`. New return will contain a list of features enabled and their values. List of enabled features will be in `enabled_features` key to keep ease of assertion we have in Beta.
-`boolean_type` Schema | This **might** not be necessary anymore before we go GA. We will return either the `default` value when there are no rules as well as `when_match` value. This will simplify on-boarding if we can keep the same set of validations already offered.
+| Breaking change        | Recommendation                                                                                                                                                                                                                                       |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `IN` RuleAction        | Use `KEY_IN_VALUE` instead                                                                                                                                                                                                                           |
+| `NOT_IN` RuleAction    | Use `KEY_NOT_IN_VALUE` instead                                                                                                                                                                                                                       |
+| `get_enabled_features` | Return type changes from `List[str]` to `Dict[str, Any]`. New return will contain a list of features enabled and their values. List of enabled features will be in `enabled_features` key to keep ease of assertion we have in Beta.                 |
+| `boolean_type` Schema  | This **might** not be necessary anymore before we go GA. We will return either the `default` value when there are no rules as well as `when_match` value. This will simplify on-boarding if we can keep the same set of validations already offered. |

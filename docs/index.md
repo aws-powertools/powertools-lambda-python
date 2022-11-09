@@ -18,9 +18,9 @@ A suite of utilities for AWS Lambda functions to ease adopting best practices su
 
     2) [**Share your work**](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E). Blog posts, video, sample projects you used Powertools!
 
-    3) Use [**Lambda Layers**](#lambda-layer) or [**SAR**](#sar), if possible. This helps us understand who uses Powertools in a non-intrusive way, and helps us gain future investments for other Lambda Powertools languages.
+    3) Use [**Lambda Layers**](#lambda-layer) or [**SAR**](#sar), if possible. This helps us understand who uses Powertools in a non-intrusive way, and helps us gain future investments for other Powertools languages.
 
-    When using Layers, you can add Lambda Powertools as a dev dependency (or as part of your virtual env) to not impact the development process.
+    When using Layers, you can add Powertools as a dev dependency (or as part of your virtual env) to not impact the development process.
 
 ## Install
 
@@ -59,7 +59,7 @@ This means you need to add AWS SDK as a development dependency (not as a product
 
 [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. Layers promote code sharing and separation of responsibilities so that you can iterate faster on writing business logic.
 
-You can include Lambda Powertools Lambda Layer using [AWS Lambda Console](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html#invocation-layers-using){target="_blank"}, or your preferred deployment framework.
+You can include Powertools Lambda Layer using [AWS Lambda Console](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html#invocation-layers-using){target="_blank"}, or your preferred deployment framework.
 
 ??? note "Note: Click to expand and copy any regional Lambda Layer ARN"
 
@@ -585,7 +585,7 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
           value = data.aws_serverlessapplicationrepository_application.sar_app.semantic_version
         }
 
-    	# Fetch Lambda Powertools Layer ARN from deployed SAR App
+    	# Fetch Powertools Layer ARN from deployed SAR App
     	output "aws_lambda_powertools_layer_arn" {
     	  value = aws_serverlessapplicationrepository_cloudformation_stack.deploy_sar_stack.outputs.LayerVersionArn
     	}
@@ -673,7 +673,7 @@ sam init --location https://github.com/aws-samples/cookiecutter-aws-sam-python
 
 ## Features
 
-Core utilities such as Tracing, Logging, Metrics, and Event Handler will be available across all Lambda Powertools languages. Additional utilities are subjective to each language ecosystem and customer demand.
+Core utilities such as Tracing, Logging, Metrics, and Event Handler will be available across all Powertools languages. Additional utilities are subjective to each language ecosystem and customer demand.
 
 | Utility                                                                                                                                                      | Description                                                                                                                                               |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -728,7 +728,7 @@ When `POWERTOOLS_DEV` is set to a truthy value (`1`, `true`), it'll have the fol
 
 ## Debug mode
 
-As a best practice for libraries, AWS Lambda Powertools module logging statements are suppressed.
+As a best practice for libraries, Powertools module logging statements are suppressed.
 
 When necessary, you can use `POWERTOOLS_DEBUG` environment variable to enable debugging. This will provide additional information on every internal operation.
 

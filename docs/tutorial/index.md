@@ -3,6 +3,8 @@ title: Tutorial
 description: Powertools introduction
 ---
 
+<!-- markdownlint-disable MD043 MD041 -->
+
 This tutorial progressively introduces Lambda Powertools core utilities by using one feature at a time.
 
 ## Requirements
@@ -343,7 +345,7 @@ Let's include Lambda Powertools as a dependency in `requirement.txt`, and use Ev
 === "requirements.txt"
 
     ```bash
-    aws-lambda-powertools
+    aws-lambda-powertools[tracer]  # Tracer requires AWS X-Ray SDK dependency
     ```
 
 Use `sam build && sam local start-api` and try run it locally again.
