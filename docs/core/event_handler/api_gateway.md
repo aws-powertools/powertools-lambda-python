@@ -226,6 +226,9 @@ You can use **`exception_handler`** decorator with any Python exception. This al
 --8<-- "examples/event_handler_rest/src/exception_handling.py"
 ```
 
+???+ info
+    The `exception_handler` also supports passing a list of exception types you wish to handle with one handler.
+
 ### Raising HTTP errors
 
 You can easily raise any HTTP Error back to the client using `ServiceError` exception. This ensures your Lambda function doesn't fail but return the correct HTTP response signalling the error.
