@@ -689,7 +689,7 @@ class ApiGatewayResolver(BaseRouter):
             return self.exception_handler(NotFoundError)
         return self.exception_handler(NotFoundError)(func)
 
-    def exception_handler(self, exc_class: Union[Type[Exception], List[Exception]]):
+    def exception_handler(self, exc_class: Union[Type[Exception], List[Type[Exception]]]):
         def register_exception_handler(func: Callable):
             if isinstance(exc_class, list):
                 for exp in exc_class:
