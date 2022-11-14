@@ -1480,6 +1480,7 @@ def test_include_router_merges_context():
 
 def test_nested_app_decorator():
     # GIVEN a Http API V1 proxy type event
+    # with a function registered with two distinct routes
     app = APIGatewayRestResolver()
 
     @app.get("/my/path")
@@ -1499,6 +1500,7 @@ def test_nested_app_decorator():
 
 def test_nested_router_decorator():
     # GIVEN a Http API V1 proxy type event
+    # with a function registered with two distinct routes
     app = APIGatewayRestResolver()
     router = Router()
 
@@ -1509,7 +1511,6 @@ def test_nested_router_decorator():
 
     app.include_router(router)
 
-    # WHEN calling the event handler
     # WHEN calling the event handler
     result = app(LOAD_GW_EVENT, {})
     result2 = app(load_event("apiGatewayProxyEventAnotherPath.json"), {})
