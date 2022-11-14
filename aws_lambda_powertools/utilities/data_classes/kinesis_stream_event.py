@@ -64,6 +64,7 @@ class KinesisStreamRecord(DictWrapper):
         """A globally unique identifier for the event that was recorded in this stream record."""
         return self["eventID"]
 
+    @property
     def event_name(self) -> str:
         """Event type eg: aws:kinesis:record"""
         return self["eventName"]
