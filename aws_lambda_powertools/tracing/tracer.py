@@ -300,16 +300,6 @@ class Tracer:
         @functools.wraps(lambda_handler)
         def decorate(event, context, **kwargs):
             with self.provider.in_subsegment(name=f"## {lambda_handler_name}") as subsegment:
-                global is_cold_start
-                logger.debug("Annotating cold start")
-                subsegment.put_annotation(key="ColdStart", value=is_cold_start)
-
-                if is_cold_start:
-                    is_cold_start = False
-
-                if self.service:
-                    subsegment.put_annotation(key="Service", value=self.service)
-
                 try:
                     logger.debug("Calling lambda handler")
                     response = lambda_handler(event, context, **kwargs)
@@ -325,7 +315,18 @@ class Tracer:
                     self._add_full_exception_as_metadata(
                         method_name=lambda_handler_name, error=err, subsegment=subsegment, capture_error=capture_error
                     )
+
                     raise
+                finally:
+                    global is_cold_start
+                    logger.debug("Annotating cold start")
+                    subsegment.put_annotation(key="ColdStart", value=is_cold_start)
+
+                    if is_cold_start:
+                        is_cold_start = False
+
+                    if self.service:
+                        subsegment.put_annotation(key="Service", value=self.service)
 
                 return response
 
@@ -354,7 +355,8 @@ class Tracer:
         """Decorator to create subsegment for arbitrary functions
 
         It also captures both response and exceptions as metadata
-        and creates a subsegment named `## <method_name>`
+        and creates a subsegment named `## <method_module.method_qualifiedname>`
+        # see here: [Qualified name for classes and functions](https://peps.python.org/pep-3155/)
 
         When running [async functions concurrently](https://docs.python.org/3/library/asyncio-task.html#id6),
         methods may impact each others subsegment, and can trigger
@@ -508,7 +510,8 @@ class Tracer:
                 functools.partial(self.capture_method, capture_response=capture_response, capture_error=capture_error),
             )
 
-        method_name = f"{method.__name__}"
+        # Example: app.ClassA.get_all  # noqa E800
+        method_name = f"{method.__module__}.{method.__qualname__}"
 
         capture_response = resolve_truthy_env_var_choice(
             env=os.getenv(constants.TRACER_CAPTURE_RESPONSE_ENV, "true"), choice=capture_response
@@ -670,7 +673,7 @@ class Tracer:
         if data is None or not capture_response or subsegment is None:
             return
 
-        subsegment.put_metadata(key=f"{method_name} response", value=data, namespace=self._config["service"])
+        subsegment.put_metadata(key=f"{method_name} response", value=data, namespace=self.service)
 
     def _add_full_exception_as_metadata(
         self,
@@ -695,7 +698,7 @@ class Tracer:
         if not capture_error:
             return
 
-        subsegment.put_metadata(key=f"{method_name} error", value=error, namespace=self._config["service"])
+        subsegment.put_metadata(key=f"{method_name} error", value=error, namespace=self.service)
 
     @staticmethod
     def _disable_tracer_provider():

@@ -227,6 +227,61 @@ If you prefer not to use `log_metrics` because you might want to encapsulate add
 --8<-- "examples/metrics/src/single_metric.py"
 ```
 
+### Metrics isolation
+
+You can use `EphemeralMetrics` class when looking to isolate multiple instances of metrics with distinct namespaces and/or dimensions.
+
+!!! note "This is a typical use case is for multi-tenant, or emitting same metrics for distinct applications."
+
+```python hl_lines="1 4" title="EphemeralMetrics usage"
+--8<-- "examples/metrics/src/ephemeral_metrics.py"
+```
+
+**Differences between `EphemeralMetrics` and `Metrics`**
+
+`EphemeralMetrics` has only two differences while keeping nearly the exact same set of features:
+
+| Feature                                                                                                     | Metrics | EphemeralMetrics |
+| ----------------------------------------------------------------------------------------------------------- | ------- | ---------------- |
+| **Share data across instances** (metrics, dimensions, metadata, etc.)                                       | Yes     | -                |
+| **[Default dimensions](#adding-default-dimensions) that persists across Lambda invocations** (metric flush) | Yes     | -                |
+
+!!! question "Why not changing the default `Metrics` behaviour to not share data across instances?"
+
+This is an intentional design to prevent accidental data deduplication or data loss issues due to [CloudWatch EMF](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html){target="_blank"} metric dimension constraint.
+
+In CloudWatch, there are two metric ingestion mechanisms: [EMF (async)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html){target="_blank"} and [`PutMetricData` API (sync)](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.put_metric_data){target="_blank"}.
+
+The former creates metrics asynchronously via CloudWatch Logs, and the latter uses a synchronous and more flexible ingestion API.
+
+!!! important "Key concept"
+    CloudWatch [considers a metric unique](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Metric){target="_blank"} by a combination of metric **name**, metric **namespace**, and zero or more metric **dimensions**.
+
+With EMF, metric dimensions are shared with any metrics you define. With `PutMetricData` API, you can set a [list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html) defining one or more metrics with distinct dimensions.
+
+This is a subtle yet important distinction. Imagine you had the following metrics to emit:
+
+| Metric Name            | Dimension                                 | Intent             |
+| ---------------------- | ----------------------------------------- | ------------------ |
+| **SuccessfulBooking**  | service="booking", **tenant_id**="sample" | Application metric |
+| **IntegrationLatency** | service="booking", function_name="sample" | Operational metric |
+| **ColdStart**          | service="booking", function_name="sample" | Operational metric |
+
+The `tenant_id` dimension could vary leading to two common issues:
+
+1. `ColdStart` metric will be created multiple times (N * number of unique tenant_id dimension value), despite the `function_name` being the same
+2. `IntegrationLatency` metric will be also created multiple times due to `tenant_id` as well as `function_name` (may or not be intentional)
+
+These issues are exacerbated when you create **(A)** metric dimensions conditionally, **(B)** multiple metrics' instances throughout your code  instead of reusing them (globals). Subsequent metrics' instances will have (or lack) different metric dimensions resulting in different metrics and data points with the same name.
+
+!!! note "Intentional design to address these scenarios"
+
+**On 1**, when you enable [capture_start_metric feature](#capturing-cold-start-metric), we transparently create and flush an additional EMF JSON Blob that is independent from your application metrics. This prevents data pollution.
+
+**On 2**, you can use `EphemeralMetrics` to create an additional EMF JSON Blob from your application metric (`SuccessfulBooking`). This ensures that `IntegrationLatency` operational metric data points aren't tied to any dynamic dimension values like `tenant_id`.
+
+That is why `Metrics` shares data across instances by default, as that covers 80% of use cases and different personas using Powertools. This allows them to instantiate `Metrics` in multiple places throughout their code - be a separate file, a middleware, or an abstraction that sets default dimensions.
+
 ## Testing your code
 
 ### Environment variables

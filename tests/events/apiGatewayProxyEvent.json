@@ -76,5 +76,5 @@
   "pathParameters": null,
   "stageVariables": null,
   "body": "Hello from Lambda!",
-  "isBase64Encoded": true
+  "isBase64Encoded": false
 }

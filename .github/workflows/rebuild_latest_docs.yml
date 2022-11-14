@@ -4,14 +4,14 @@ name: Rebuild latest docs
 # === Documentation hotfix ===
 #
 # 1. Trigger "Rebuild latest docs" workflow manually: https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow
-# 2. Use the latest version released under Releases e.g. v1.22.0
+# 2. Use the latest version released under Releases e.g. 2.0.0
 
 on:
   workflow_dispatch:
     inputs:
       latest_published_version:
-        description: "Latest PyPi published version to rebuild latest docs for, e.g. v1.26.7"
-        default: "v1.28.0"
+        description: "Latest PyPi published version to rebuild latest docs for, e.g. 2.0.0"
+        default: "2.0.0"
         required: true
 
 jobs:

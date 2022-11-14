@@ -158,7 +158,7 @@ To ease routine tasks like extracting correlation ID from popular event sources,
 You can append additional keys using either mechanism:
 
 * Persist new keys across all future log messages via `append_keys` method
-* Add additional keys on a per log message basis via `extra` parameter
+* Add additional keys on a per log message basis as a keyword=value, or via `extra` parameter
 
 #### append_keys method
 
@@ -184,14 +184,33 @@ You can append your own keys to your existing Logger via `append_keys(**addition
 
     This example will add `order_id` if its value is not empty, and in subsequent invocations where `order_id` might not be present it'll remove it from the Logger.
 
+#### ephemeral metadata
+
+You can pass an arbitrary number of keyword arguments (kwargs) to all log level's methods, e.g. `logger.info, logger.warning`.
+
+Two common use cases for this feature is to enrich log statements with additional metadata, or only add certain keys conditionally.
+
+!!! info "Any keyword argument added will not be persisted in subsequent messages."
+
+=== "append_keys_kwargs.py"
+
+    ```python hl_lines="8"
+    --8<-- "examples/logger/src/append_keys_kwargs.py"
+    ```
+
+=== "append_keys_kwargs_output.json"
+
+    ```json hl_lines="7"
+    --8<-- "examples/logger/src/append_keys_kwargs_output.json"
+    ```
+
 #### extra parameter
 
 Extra parameter is available for all log levels' methods, as implemented in the standard logging library - e.g. `logger.info, logger.warning`.
 
 It accepts any dictionary, and all keyword arguments will be added as part of the root structure of the logs for that log statement.
 
-???+ info
-    Any keyword argument added using `extra` will not be persisted for subsequent messages.
+!!! info "Any keyword argument added using `extra` will not be persisted in subsequent messages."
 
 === "append_keys_extra.py"
 
@@ -270,6 +289,30 @@ Use `logger.exception` method to log contextual information about exceptions. Lo
 
     ```json hl_lines="7-8"
     --8<-- "examples/logger/src/logging_exceptions_output.json"
+    ```
+
+### Date formatting
+
+Logger uses Python's standard logging date format with the addition of timezone: `2021-05-03 11:47:12,494+0200`.
+
+You can easily change the date format using one of the following parameters:
+
+* **`datefmt`**. You can pass any [strftime format codes](https://strftime.org/){target="_blank"}. Use `%F` if you need milliseconds.
+* **`use_rfc3339`**. This flag will use a format compliant with both RFC3339 and ISO8601: `2022-10-27T16:27:43.738+02:00`
+
+???+ tip "Prefer using [datetime string formats](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes){target="_blank"}?"
+	Use `use_datetime_directive` flag along with `datefmt` to instruct Logger to use `datetime` instead of `time.strftime`.
+
+=== "date_formatting.py"
+
+    ```python hl_lines="5 8"
+    --8<-- "examples/logger/src/date_formatting.py"
+    ```
+
+=== "date_formatting_output.json"
+
+    ```json hl_lines="6 13"
+    --8<-- "examples/logger/src/date_formatting_output.json"
     ```
 
 ## Advanced
@@ -432,24 +475,19 @@ Do this instead:
 
 #### Overriding Log records
 
-???+ tip
-	Use `datefmt` for custom date formats - We honour standard [logging library string formats](https://docs.python.org/3/howto/logging.html#displaying-the-date-time-in-messages){target="_blank"}.
-
-	Prefer using [datetime string formats](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes){target="_blank"}? Set `use_datetime_directive` at Logger constructor or at [Lambda Powertools Formatter](#lambdapowertoolsformatter).
-
 You might want to continue to use the same date formatting style, or override `location` to display the `package.function_name:line_number` as you previously had.
 
-Logger allows you to either change the format or suppress the following keys altogether at the initialization: `location`, `timestamp`, `level`, `xray_trace_id`.
+Logger allows you to either change the format or suppress the following keys at initialization: `location`, `timestamp`, `xray_trace_id`.
 
 === "overriding_log_records.py"
 
-    ```python hl_lines="7 10"
+    ```python hl_lines="6 10"
     --8<-- "examples/logger/src/overriding_log_records.py"
     ```
 
 === "overriding_log_records_output.json"
 
-    ```json hl_lines="3 5"
+    ```json hl_lines="4"
     --8<-- "examples/logger/src/overriding_log_records_output.json"
     ```
 
@@ -619,7 +657,7 @@ By default all registered loggers will be modified. You can change this behavior
 
 ### How can I add standard library logging attributes to a log record?
 
-The Python standard library log records contains a [large set of atttributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank"}, however only a few are included in Powertools Logger log record by default.
+The Python standard library log records contains a [large set of attributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank"}, however only a few are included in Powertools Logger log record by default.
 
 You can include any of these logging attributes as key value arguments (`kwargs`) when instantiating `Logger` or `LambdaPowertoolsFormatter`.
 

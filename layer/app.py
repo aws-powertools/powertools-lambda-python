@@ -8,7 +8,8 @@ from layer.layer_stack import LayerStack
 app = cdk.App()
 
 POWERTOOLS_VERSION: str = app.node.try_get_context("version")
-SSM_PARAM_LAYER_ARN: str = "/layers/powertools-layer-arn"
+SSM_PARAM_LAYER_ARN: str = "/layers/powertools-layer-v2-arn"
+SSM_PARAM_LAYER_ARM64_ARN: str = "/layers/powertools-layer-v2-arm64-arn"
 
 if not POWERTOOLS_VERSION:
     raise ValueError(
@@ -18,16 +19,18 @@ if not POWERTOOLS_VERSION:
 
 LayerStack(
     app,
-    "LayerStack",
+    "LayerV2Stack",
     powertools_version=POWERTOOLS_VERSION,
     ssm_paramter_layer_arn=SSM_PARAM_LAYER_ARN,
+    ssm_parameter_layer_arm64_arn=SSM_PARAM_LAYER_ARM64_ARN,
 )
 
 CanaryStack(
     app,
-    "CanaryStack",
+    "CanaryV2Stack",
     powertools_version=POWERTOOLS_VERSION,
     ssm_paramter_layer_arn=SSM_PARAM_LAYER_ARN,
+    ssm_parameter_layer_arm64_arn=SSM_PARAM_LAYER_ARM64_ARN,
 )
 
 app.synth()

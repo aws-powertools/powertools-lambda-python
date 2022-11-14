@@ -1,20 +1,45 @@
 import datetime
 import json
 import os
+import platform
 from importlib.metadata import version
 
 import boto3
+from pydantic import HttpUrl
 
 from aws_lambda_powertools import Logger, Metrics, Tracer
+from aws_lambda_powertools.utilities.parser import BaseModel, envelopes, event_parser
+from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.utilities.validation import validator
 
 logger = Logger(service="version-track")
-tracer = Tracer()
+tracer = Tracer()  # this checks for aws-xray-sdk presence
 metrics = Metrics(namespace="powertools-layer-canary", service="PowertoolsLayerCanary")
 
 layer_arn = os.getenv("POWERTOOLS_LAYER_ARN")
 powertools_version = os.getenv("POWERTOOLS_VERSION")
 stage = os.getenv("LAYER_PIPELINE_STAGE")
 event_bus_arn = os.getenv("VERSION_TRACKING_EVENT_BUS_ARN")
+
+
+# Model to check parser imports correctly, tests for pydantic
+class OrderItem(BaseModel):
+    order_id: int
+    quantity: int
+    description: str
+    url: HttpUrl
+
+
+# Tests for jmespath presence
+@event_parser(model=OrderItem, envelope=envelopes.EventBridgeEnvelope)
+def envelope_handler(event: OrderItem, context: LambdaContext):
+    assert event.order_id != 1
+
+
+# Tests for fastjsonschema presence
+@validator(inbound_schema={}, envelope="detail")
+def validator_handler(event, context: LambdaContext):
+    pass
 
 
 def handler(event):
@@ -42,9 +67,7 @@ def on_create(event):
 
 
 def check_envs():
-    logger.info(
-        'Checking required envs ["POWERTOOLS_LAYER_ARN", "AWS_REGION", "STAGE"]'
-    )
+    logger.info('Checking required envs ["POWERTOOLS_LAYER_ARN", "AWS_REGION", "STAGE"]')
     if not layer_arn:
         raise ValueError("POWERTOOLS_LAYER_ARN is not set. Aborting...")
     if not powertools_version:
@@ -66,9 +89,9 @@ def verify_powertools_version() -> None:
     current_version = version("aws_lambda_powertools")
     if powertools_version != current_version:
         raise ValueError(
-            f'Expected powertoosl version is "{powertools_version}", but layer contains version "{current_version}"'
+            f'Expected Powertools version is "{powertools_version}", but layer contains version "{current_version}"'
         )
-    logger.info(f"Current Powertools version is: {current_version}")
+    logger.info(f"Current Powertools version is: {current_version} [{_get_architecture()}]")
 
 
 def send_notification():
@@ -76,10 +99,9 @@ def send_notification():
     sends an event to version tracking event bridge
     """
     if stage != "PROD":
-        logger.info(
-            "Not sending notification to event bus, because this is not the PROD stage"
-        )
+        logger.info("Not sending notification to event bus, because this is not the PROD stage")
         return
+
     event = {
         "Time": datetime.datetime.now(),
         "Source": "powertools.layer.canary",
@@ -90,6 +112,7 @@ def send_notification():
                 "version": powertools_version,
                 "region": os.environ["AWS_REGION"],
                 "layerArn": layer_arn,
+                "architecture": _get_architecture(),
             }
         ),
     }
@@ -102,3 +125,8 @@ def send_notification():
     if resp["FailedEntryCount"] != 0:
         logger.error(resp)
         raise ValueError("Failed to send deployment notification to version tracking")
+
+
+def _get_architecture() -> str:
+    """Returns aarch64, x86_64"""
+    return platform.uname()[4]

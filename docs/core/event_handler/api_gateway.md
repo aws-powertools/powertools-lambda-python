@@ -42,10 +42,10 @@ Before you decorate your functions to handle a given path and HTTP method(s), yo
 
 A resolver will handle request resolution, including [one or more routers](#split-routes-with-router), and give you access to the current event via typed properties.
 
-For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, `ALBResolver`, and `LambdaFunctionUrlResolver` .
+For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, `ALBResolver`, and `LambdaFunctionUrlResolver`. From here on, we will default to `APIGatewayRestResolver` across examples.
 
-???+ info
-    We will use `APIGatewayRestResolver` as the default across examples.
+???+ info "Auto-serialization"
+    We serialize `Dict` responses as JSON, trim whitespace for compact responses, and set content-type to `application/json`.
 
 #### API Gateway REST API
 
@@ -53,8 +53,8 @@ When using Amazon API Gateway REST API to front your Lambda functions, you can u
 
 Here's an example on how we can handle the `/todos` path.
 
-???+ info
-    We automatically serialize `Dict` responses as JSON, trim whitespace for compact responses, and set content-type to `application/json`.
+???+ info "Trailing slash in routes"
+    For `APIGatewayRestResolver`, we seamless handle routes with a trailing slash (`/todos/`).
 
 === "getting_started_rest_api_resolver.py"
 
@@ -226,6 +226,9 @@ You can use **`exception_handler`** decorator with any Python exception. This al
 --8<-- "examples/event_handler_rest/src/exception_handling.py"
 ```
 
+???+ info
+    The `exception_handler` also supports passing a list of exception types you wish to handle with one handler.
+
 ### Raising HTTP errors
 
 You can easily raise any HTTP Error back to the client using `ServiceError` exception. This ensures your Lambda function doesn't fail but return the correct HTTP response signalling the error.
@@ -312,7 +315,14 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 
 ### Fine grained responses
 
-You can use the `Response` class to have full control over the response, for example you might want to add additional headers or set a custom Content-type.
+You can use the `Response` class to have full control over the response. For example, you might want to add additional headers, cookies, or set a custom Content-type.
+
+???+ info
+    Powertools serializes headers and cookies according to the type of input event.
+    Some event sources require headers and cookies to be encoded as `multiValueHeaders`.
+
+???+ warning "Using multiple values for HTTP headers in ALB?"
+    Make sure you [enable the multi value headers feature](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers) to serialize response headers correctly.
 
 === "fine_grained_responses.py"
 
@@ -555,19 +565,63 @@ your development, building, deployment tooling need to accommodate the distinct 
 
 ## Testing your code
 
-You can test your routes by passing a proxy event request where `path` and `httpMethod`.
+You can test your routes by passing a proxy event request with required params.
 
-=== "assert_http_response.py"
+=== "API Gateway REST API"
 
-    ```python hl_lines="21-24"
-    --8<-- "examples/event_handler_rest/src/assert_http_response.py"
-    ```
+    === "assert_rest_api_resolver_response.py"
 
-=== "assert_http_response_module.py"
+        ```python hl_lines="21-24"
+        --8<-- "examples/event_handler_rest/src/assert_rest_api_resolver_response.py"
+        ```
 
-    ```python
-    --8<-- "examples/event_handler_rest/src/assert_http_response_module.py"
-    ```
+    === "assert_rest_api_response_module.py"
+
+        ```python
+        --8<-- "examples/event_handler_rest/src/assert_rest_api_response_module.py"
+        ```
+
+=== "API Gateway HTTP API"
+
+    === "assert_http_api_resolver_response.py"
+
+        ```python hl_lines="21-29"
+        --8<-- "examples/event_handler_rest/src/assert_http_api_resolver_response.py"
+        ```
+
+    === "assert_http_api_response_module.py"
+
+        ```python
+        --8<-- "examples/event_handler_rest/src/assert_http_api_response_module.py"
+        ```
+
+=== "Application Load Balancer"
+
+    === "assert_alb_api_resolver_response.py"
+
+        ```python hl_lines="21-24"
+        --8<-- "examples/event_handler_rest/src/assert_alb_api_resolver_response.py"
+        ```
+
+    === "assert_alb_api_response_module.py"
+
+        ```python
+        --8<-- "examples/event_handler_rest/src/assert_alb_api_response_module.py"
+        ```
+
+=== "Lambda Function URL"
+
+    === "assert_function_url_api_resolver_response.py"
+
+        ```python hl_lines="21-29"
+        --8<-- "examples/event_handler_rest/src/assert_function_url_api_resolver_response.py"
+        ```
+
+    === "assert_function_url_api_response_module.py"
+
+        ```python
+        --8<-- "examples/event_handler_rest/src/assert_function_url_api_response_module.py"
+        ```
 
 ## FAQ
 

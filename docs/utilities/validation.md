@@ -30,6 +30,12 @@ You can also use the standalone `validate` function, if you want more control ov
 ???+ warning
     Both `validator` decorator and `validate` standalone function expects your JSON Schema to be a **dictionary**, not a filename.
 
+### Install
+
+!!! info "This is not necessary if you're installing Powertools via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
+
+Add `aws-lambda-powertools[validation]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Validation.
+
 ### Validator decorator
 
 **Validator** decorator is typically used to validate either inbound or functions' response.

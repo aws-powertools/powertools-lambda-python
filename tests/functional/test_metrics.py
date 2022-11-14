@@ -7,13 +7,17 @@ import pytest
 
 from aws_lambda_powertools import Metrics, single_metric
 from aws_lambda_powertools.metrics import (
+    EphemeralMetrics,
     MetricUnit,
     MetricUnitError,
     MetricValueError,
     SchemaValidationError,
 )
-from aws_lambda_powertools.metrics import metrics as metrics_global
-from aws_lambda_powertools.metrics.base import MAX_DIMENSIONS, MetricManager
+from aws_lambda_powertools.metrics.base import (
+    MAX_DIMENSIONS,
+    MetricManager,
+    reset_cold_start_flag,
+)
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -21,7 +25,7 @@ def reset_metric_set():
     metrics = Metrics()
     metrics.clear_metrics()
     metrics.clear_default_dimensions()
-    metrics_global.is_cold_start = True  # ensure each test has cold start
+    reset_cold_start_flag()  # ensure each test has cold start
     yield
 
 
@@ -202,6 +206,29 @@ def test_service_env_var(monkeypatch, capsys, metric, namespace):
 
     output = capture_metrics_output(capsys)
     expected_dimension = {"name": "service", "value": "test_service"}
+    expected = serialize_single_metric(metric=metric, dimension=expected_dimension, namespace=namespace)
+
+    # THEN a metric should be logged using the implicitly created "service" dimension
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
+def test_service_env_var_with_metrics_instance(monkeypatch, capsys, metric, namespace, service):
+    # GIVEN we use POWERTOOLS_SERVICE_NAME
+    monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", service)
+
+    # WHEN initializing Metrics without an explicit service name
+    metrics = Metrics(namespace=namespace)
+    metrics.add_metric(**metric)
+
+    @metrics.log_metrics
+    def lambda_handler(_, __):
+        pass
+
+    lambda_handler({}, {})
+
+    output = capture_metrics_output(capsys)
+    expected_dimension = {"name": "service", "value": service}
     expected = serialize_single_metric(metric=metric, dimension=expected_dimension, namespace=namespace)
 
     # THEN a metric should be logged using the implicitly created "service" dimension
@@ -925,3 +952,61 @@ def test_metrics_reuse_metadata_set(metric, dimension, namespace):
 
     # THEN both class instances should have the same metadata set
     assert my_metrics_2.metadata_set == my_metrics.metadata_set
+
+
+def test_ephemeral_metrics_isolates_data_set(metric, dimension, namespace, metadata):
+    # GIVEN two EphemeralMetrics instances are initialized
+    my_metrics = EphemeralMetrics(namespace=namespace)
+    isolated_metrics = EphemeralMetrics(namespace=namespace)
+
+    # WHEN metrics, dimensions and metadata are added to the first instance
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_metric(**metric)
+    my_metrics.add_metadata(**metadata)
+
+    # THEN the non-singleton instance should not have them
+    assert my_metrics.metric_set != isolated_metrics.metric_set
+    assert my_metrics.metadata_set != isolated_metrics.metadata_set
+    assert my_metrics.dimension_set != isolated_metrics.dimension_set
+
+
+def test_ephemeral_metrics_combined_with_metrics(metric, dimension, namespace, metadata):
+    # GIVEN Metrics and EphemeralMetrics instances are initialized
+    my_metrics = Metrics(namespace=namespace)
+    isolated_metrics = EphemeralMetrics(namespace=namespace)
+
+    # WHEN metrics, dimensions and metadata are added to the first instance
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_metric(**metric)
+    my_metrics.add_metadata(**metadata)
+
+    # THEN EphemeralMetrics instance should not have them
+    assert my_metrics.metric_set != isolated_metrics.metric_set
+    assert my_metrics.metadata_set != isolated_metrics.metadata_set
+    assert my_metrics.dimension_set != isolated_metrics.dimension_set
+
+
+def test_ephemeral_metrics_nested_log_metrics(metric, dimension, namespace, metadata, capsys):
+    # GIVEN two distinct Metrics are initialized
+    my_metrics = Metrics(namespace=namespace)
+    isolated_metrics = EphemeralMetrics(namespace=namespace)
+
+    my_metrics.add_metric(**metric)
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_metadata(**metadata)
+
+    isolated_metrics.add_metric(**metric)
+    isolated_metrics.add_dimension(**dimension)
+    isolated_metrics.add_metadata(**metadata)
+
+    # WHEN we nest log_metrics to serialize
+    # and flush all metrics at the end of a function execution
+    @isolated_metrics.log_metrics
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        pass
+
+    lambda_handler({}, {})
+
+    output = capture_metrics_output_multiple_emf_objects(capsys)
+    assert len(output) == 2

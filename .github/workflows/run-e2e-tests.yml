@@ -27,9 +27,8 @@ jobs:
       contents: read
     strategy:
       matrix:
-        # Maintenance: disabled until we discover concurrency lock issue with multiple versions and tmp
-        # version: ["3.7", "3.8", "3.9"]
-        version: ["3.7"]
+        version: ["3.7", "3.8", "3.9"]
+    if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
@@ -41,6 +40,14 @@ jobs:
           python-version: ${{ matrix.version }}
           architecture: "x64"
           cache: "poetry"
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.12"
+      - name: Install CDK CLI
+        run: |
+          npm install
+          npx cdk --version
       - name: Install dependencies
         run: make dev
       - name: Configure AWS credentials

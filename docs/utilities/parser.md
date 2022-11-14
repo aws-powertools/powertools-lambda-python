@@ -1,5 +1,5 @@
 ---
-title: Parser
+title: Parser (Pydantic)
 description: Utility
 ---
 <!-- markdownlint-disable MD043 -->
@@ -12,20 +12,23 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 * Built-in envelopes to unwrap, extend, and validate popular event sources payloads
 * Enforces type hints at runtime with user-friendly errors
 
-**Extra dependency**
+## Getting started
+
+### Install
+
+!!! info "This is not necessary if you're installing Powertools via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
+
+Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Parser.
 
 ???+ warning
-
     This will increase the compressed package size by >10MB due to the Pydantic dependency.
 
     To reduce the impact on the package size at the expense of 30%-50% of its performance [Pydantic can also be
     installed without binary files](https://pydantic-docs.helpmanual.io/install/#performance-vs-package-size-trade-off):
 
-    `SKIP_CYTHON=1 pip install --no-binary pydantic aws-lambda-powertools[pydantic]`
+	Pip example: `SKIP_CYTHON=1 pip install --no-binary pydantic aws-lambda-powertools[parser]`
 
-Install parser's extra dependencies using **`pip install aws-lambda-powertools[pydantic]`**.
-
-## Defining models
+### Defining models
 
 You can define models to parse incoming events by inheriting from `BaseModel`.
 
@@ -47,11 +50,11 @@ class Order(BaseModel):
 
 These are simply Python classes that inherit from BaseModel. **Parser** enforces type hints declared in your model at runtime.
 
-## Parsing events
+### Parsing events
 
 You can parse inbound events using **event_parser** decorator, or the standalone `parse` function. Both are also able to parse either dictionary or JSON string as an input.
 
-### event_parser decorator
+#### event_parser decorator
 
 Use the decorator for fail fast scenarios where you want your Lambda function to raise an exception in the event of a malformed payload.
 
@@ -104,7 +107,7 @@ handler(event=payload, context=LambdaContext())
 handler(event=json.dumps(payload), context=LambdaContext()) # also works if event is a JSON string
 ```
 
-### parse function
+#### parse function
 
 Use this standalone function when you want more control over the data validation process, for example returning a 400 error for malformed payloads.
 
@@ -149,7 +152,7 @@ def my_function():
 		}
 ```
 
-## Built-in models
+### Built-in models
 
 Parser comes with the following built-in models:
 
@@ -163,7 +166,7 @@ Parser comes with the following built-in models:
 | **S3Model**                     | Lambda Event Source payload for Amazon S3                          |
 | **S3ObjectLambdaEvent**         | Lambda Event Source payload for Amazon S3 Object Lambda            |
 | **KinesisDataStreamModel**      | Lambda Event Source payload for Amazon Kinesis Data Streams        |
-| **KinesisFirehoseModel**		  | Lambda Event Source payload for Amazon Kinesis Firehose            |
+| **KinesisFirehoseModel**        | Lambda Event Source payload for Amazon Kinesis Firehose            |
 | **SesModel**                    | Lambda Event Source payload for Amazon Simple Email Service        |
 | **SnsModel**                    | Lambda Event Source payload for Amazon Simple Notification Service |
 | **APIGatewayProxyEventModel**   | Lambda Event Source payload for Amazon API Gateway                 |
@@ -172,7 +175,7 @@ Parser comes with the following built-in models:
 | **KafkaSelfManagedEventModel**  | Lambda Event Source payload for self managed Kafka payload         |
 | **KafkaMskEventModel**          | Lambda Event Source payload for AWS MSK payload                    |
 
-### Extending built-in models
+#### Extending built-in models
 
 You can extend them to include your own models, and yet have all other known fields parsed along the way.
 
@@ -251,7 +254,7 @@ for order_item in ret.detail.items:
     --8<-- "examples/parser/src/extending_built_in_models_with_json_validator.py"
     ```
 
-## Envelopes
+### Envelopes
 
 When trying to parse your payloads wrapped in a known structure, you might encounter the following situations:
 
@@ -309,7 +312,7 @@ def handler(event: UserModel, context: LambdaContext):
 3. Parser parsed the original event against the EventBridge model
 4. Parser then parsed the `detail` key using `UserModel`
 
-### Built-in envelopes
+#### Built-in envelopes
 
 Parser comes with the following built-in envelopes, where `Model` in the return section is your given model.
 
@@ -320,7 +323,7 @@ Parser comes with the following built-in envelopes, where `Model` in the return 
 | **SqsEnvelope**               | 1. Parses data using `SqsModel`. <br/> 2. Parses records in `body` key using your model and return them in a list.                                                                                          | `List[Model]`                      |
 | **CloudWatchLogsEnvelope**    | 1. Parses data using `CloudwatchLogsModel` which will base64 decode and decompress it. <br/> 2. Parses records in `message` key using your model and return them in a list.                                 | `List[Model]`                      |
 | **KinesisDataStreamEnvelope** | 1. Parses data using `KinesisDataStreamModel` which will base64 decode it. <br/> 2. Parses records in in `Records` key using your model and returns them in a list.                                         | `List[Model]`                      |
-| **KinesisFirehoseEnvelope**   | 1. Parses data using `KinesisFirehoseModel` which will base64 decode it. <br/> 2. Parses records in in `Records` key using your model and returns them in a list.                                         | `List[Model]`                      |
+| **KinesisFirehoseEnvelope**   | 1. Parses data using `KinesisFirehoseModel` which will base64 decode it. <br/> 2. Parses records in in `Records` key using your model and returns them in a list.                                           | `List[Model]`                      |
 | **SnsEnvelope**               | 1. Parses data using `SnsModel`. <br/> 2. Parses records in `body` key using your model and return them in a list.                                                                                          | `List[Model]`                      |
 | **SnsSqsEnvelope**            | 1. Parses data using `SqsModel`. <br/> 2. Parses SNS records in `body` key using `SnsNotificationModel`. <br/> 3. Parses data in `Message` key using your model and return them in a list.                  | `List[Model]`                      |
 | **ApiGatewayEnvelope**        | 1. Parses data using `APIGatewayProxyEventModel`. <br/> 2. Parses `body` key using your model and returns it.                                                                                               | `Model`                            |
@@ -328,7 +331,7 @@ Parser comes with the following built-in envelopes, where `Model` in the return 
 | **LambdaFunctionUrlEnvelope** | 1. Parses data using `LambdaFunctionUrlModel`. <br/> 2. Parses `body` key using your model and returns it.                                                                                                  | `Model`                            |
 | **KafkaEnvelope**             | 1. Parses data using `KafkaRecordModel`. <br/> 2. Parses `value` key using your model and returns it.                                                                                                       | `Model`                            |
 
-### Bringing your own envelope
+#### Bringing your own envelope
 
 You can create your own Envelope model and logic by inheriting from `BaseEnvelope`, and implementing the `parse` method.
 
@@ -393,7 +396,7 @@ Here's a snippet of how the EventBridge envelope we demonstrated previously is i
 3. Then, we parsed the incoming data with our envelope to confirm it matches EventBridge's structure defined in `EventBridgeModel`
 4. Lastly, we call `_parse` from `BaseEnvelope` to parse the data in our envelope (.detail) using the customer model
 
-## Data model validation
+### Data model validation
 
 ???+ warning
     This is radically different from the **Validator utility** which validates events against JSON Schema.
@@ -410,7 +413,7 @@ Keep the following in mind regardless of which decorator you end up using it:
 * You must raise either `ValueError`, `TypeError`, or `AssertionError` when value is not compliant
 * You must return the value(s) itself if compliant
 
-### validating fields
+#### validating fields
 
 Quick validation to verify whether the field `message` has the value of `hello world`.
 
@@ -455,7 +458,7 @@ class HelloWorldModel(BaseModel):
 parse(model=HelloWorldModel, event={"message": "hello universe", "sender": "universe"})
 ```
 
-### validating entire model
+#### validating entire model
 
 `root_validator` can help when you have a complex validation mechanism. For example finding whether data has been omitted, comparing field values, etc.
 
@@ -486,7 +489,7 @@ parse(model=UserModel, event=payload)
 ???+ info
     You can read more about validating list items, reusing validators, validating raw inputs, and a lot more in <a href="https://pydantic-docs.helpmanual.io/usage/validators/">Pydantic's documentation</a>.
 
-## Advanced use cases
+### Advanced use cases
 
 ???+ tip "Tip: Looking to auto-generate models from JSON, YAML, JSON Schemas, OpenApi, etc?"
     Use Koudai Aono's [data model code generation tool for Pydantic](https://github.com/koxudaxi/datamodel-code-generator)
@@ -550,56 +553,4 @@ If what you're trying to use isn't available as part of the high level import sy
 
 ```python title="Pydantic import escape hatch"
 from aws_lambda_powertools.utilities.parser.pydantic import <what you'd like to import'>
-```
-
-**What is the cold start impact in bringing this additional dependency?**
-
-No significant cold start impact. It does increase the final uncompressed package by **71M**, when you bring the additional dependency that parser requires.
-
-Artillery load test sample against a [hello world sample](https://github.com/aws-samples/cookiecutter-aws-sam-python) using Tracer, Metrics, and Logger with and without parser.
-
-**No parser**
-
-???+ info
-    **Uncompressed package size**: 55M, **p99**: 180.3ms
-
-```javascript
-Summary report @ 14:36:07(+0200) 2020-10-23
-Scenarios launched:  10
-Scenarios completed: 10
-Requests completed:  2000
-Mean response/sec: 114.81
-Response time (msec):
-    min: 54.9
-    max: 1684.9
-    median: 68
-    p95: 109.1
-    p99: 180.3
-Scenario counts:
-    0: 10 (100%)
-Codes:
-    200: 2000
-```
-
-**With parser**
-
-???+ info
-    **Uncompressed package size**: 128M, **p99**: 193.1ms
-
-```javascript
-Summary report @ 14:29:23(+0200) 2020-10-23
-Scenarios launched:  10
-Scenarios completed: 10
-Requests completed:  2000
-Mean response/sec: 111.67
-Response time (msec):
-    min: 54.3
-    max: 1887.2
-    median: 66.1
-    p95: 113.3
-    p99: 193.1
-Scenario counts:
-    0: 10 (100%)
-Codes:
-    200: 2000
 ```

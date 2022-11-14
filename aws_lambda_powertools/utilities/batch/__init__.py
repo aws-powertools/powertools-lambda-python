@@ -13,10 +13,6 @@ from aws_lambda_powertools.utilities.batch.base import (
     batch_processor,
 )
 from aws_lambda_powertools.utilities.batch.exceptions import ExceptionInfo
-from aws_lambda_powertools.utilities.batch.sqs import (
-    PartialSQSProcessor,
-    sqs_batch_processor,
-)
 
 __all__ = (
     "BatchProcessor",
@@ -24,8 +20,6 @@ __all__ = (
     "ExceptionInfo",
     "EventType",
     "FailureResponse",
-    "PartialSQSProcessor",
     "SuccessResponse",
     "batch_processor",
-    "sqs_batch_processor",
 )
