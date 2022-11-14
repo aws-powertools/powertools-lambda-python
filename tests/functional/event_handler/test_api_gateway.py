@@ -1476,3 +1476,45 @@ def test_include_router_merges_context():
     app.include_router(router)
 
     assert app.context == router.context
+
+
+def test_nested_app_decorator():
+    # GIVEN a Http API V1 proxy type event
+    app = APIGatewayRestResolver()
+
+    @app.get("/my/path")
+    @app.get("/my/anotherPath")
+    def get_lambda() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"foo": "value"}))
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+    result2 = app(load_event("apiGatewayProxyEventAnotherPath.json"), {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEvent
+    assert result["statusCode"] == 200
+    assert result2["statusCode"] == 200
+
+
+def test_nested_router_decorator():
+    # GIVEN a Http API V1 proxy type event
+    app = APIGatewayRestResolver()
+    router = Router()
+
+    @router.get("/my/path")
+    @router.get("/my/anotherPath")
+    def get_lambda() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"foo": "value"}))
+
+    app.include_router(router)
+
+    # WHEN calling the event handler
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+    result2 = app(load_event("apiGatewayProxyEventAnotherPath.json"), {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEvent
+    assert result["statusCode"] == 200
+    assert result2["statusCode"] == 200

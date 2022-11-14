@@ -793,6 +793,7 @@ class Router(BaseRouter):
             # Convert methods to tuple. It needs to be hashable as its part of the self._routes dict key
             methods = (method,) if isinstance(method, str) else tuple(method)
             self._routes[(rule, methods, cors, compress, cache_control)] = func
+            return func
 
         return register_route
 
