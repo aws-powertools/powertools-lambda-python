@@ -71,7 +71,7 @@ typing-extensions = "^4.4.0"
 mkdocs-material = "^8.5.9"
 filelock = "^3.8.0"
 checksumdir = "^1.2.0"
-mypy-boto3-appconfigdata = "^1.24.36"
+mypy-boto3-appconfigdata = "^1.26.0"
 importlib-metadata = "^4.13"
 
 [tool.poetry.extras]

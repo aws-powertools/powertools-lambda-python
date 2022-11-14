@@ -825,8 +825,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-appconfigdata"
-version = "1.25.0"
-description = "Type annotations for boto3.AppConfigData 1.25.0 service generated with mypy-boto3-builder 7.11.10"
+version = "1.26.0.post1"
+description = "Type annotations for boto3.AppConfigData 1.26.0 service generated with mypy-boto3-builder 7.11.10"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -1498,7 +1498,7 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "cee836c8da4408844c6da87c49e6db2436f39c750ae258b7c19cfb638cf537a2"
+content-hash = "fb037eb11a59cd569d8c32d4f9d7e09ed03f325dea42a9f4af1a805f74eaf59c"
 
 [metadata.files]
 attrs = [
@@ -1883,8 +1883,8 @@ mypy-boto3-appconfig = [
     {file = "mypy_boto3_appconfig-1.25.0-py3-none-any.whl", hash = "sha256:2137d81caa379db120ded09cbd9263da7e504f83696fa24e3cbb58c10471e1ee"},
 ]
 mypy-boto3-appconfigdata = [
-    {file = "mypy-boto3-appconfigdata-1.25.0.tar.gz", hash = "sha256:1ce2bb2bace41a3c8641547b55276a61360b53d38e7572f98cd838657baabee2"},
-    {file = "mypy_boto3_appconfigdata-1.25.0-py3-none-any.whl", hash = "sha256:21a332c85080ce2c5416b751f4fc4870e057af85d1aedc33516bde2a86330caa"},
+    {file = "mypy-boto3-appconfigdata-1.26.0.post1.tar.gz", hash = "sha256:9f28686ba800c9c5cdbf42b4385164df2de7084758e9ab0850959c7c0a058935"},
+    {file = "mypy_boto3_appconfigdata-1.26.0.post1-py3-none-any.whl", hash = "sha256:bacf16229bfdf0c001107cde3c1a2c8219cf708b8cc69b6cb34ad52a29518917"},
 ]
 mypy-boto3-cloudformation = [
     {file = "mypy-boto3-cloudformation-1.26.0.post1.tar.gz", hash = "sha256:9e8dce3149c5f5dee5ab05850ec9cae0925abb9da3aa63397b098219709db077"},
