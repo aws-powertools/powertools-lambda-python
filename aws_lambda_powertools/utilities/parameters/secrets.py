@@ -96,7 +96,12 @@ class SecretsProvider(BaseProvider):
         # Explicit arguments will take precedence over keyword arguments
         sdk_options["SecretId"] = name
 
-        return self.client.get_secret_value(**sdk_options)["SecretString"]
+        secret_value = self.client.get_secret_value(**sdk_options)
+
+        if "SecretString" in secret_value:
+            return secret_value["SecretString"]
+        else:
+            return secret_value["SecretBinary"]
 
     def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
         """
