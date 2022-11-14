@@ -1388,6 +1388,65 @@ def test_exception_handler_raises_service_error(json_dump):
     assert result["body"] == json_dump(expected)
 
 
+def test_exception_handler_supports_list(json_dump):
+    # GIVEN a resolver with an exception handler defined for a multiple exceptions in a list
+    app = ApiGatewayResolver()
+    event = deepcopy(LOAD_GW_EVENT)
+
+    @app.exception_handler([ValueError, NotFoundError])
+    def multiple_error(ex: Exception):
+        raise BadRequestError("Bad request")
+
+    @app.get("/path/a")
+    def path_a() -> Response:
+        raise ValueError("foo")
+
+    @app.get("/path/b")
+    def path_b() -> Response:
+        raise NotFoundError
+
+    # WHEN calling the app generating each exception
+    for route in ["/path/a", "/path/b"]:
+        event["path"] = route
+        result = app(event, {})
+
+        # THEN call the exception handler in the same way for both exceptions
+        assert result["statusCode"] == 400
+        assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+        expected = {"statusCode": 400, "message": "Bad request"}
+        assert result["body"] == json_dump(expected)
+
+
+def test_exception_handler_supports_multiple_decorators(json_dump):
+    # GIVEN a resolver with an exception handler defined with multiple decorators
+    app = ApiGatewayResolver()
+    event = deepcopy(LOAD_GW_EVENT)
+
+    @app.exception_handler(ValueError)
+    @app.exception_handler(NotFoundError)
+    def multiple_error(ex: Exception):
+        raise BadRequestError("Bad request")
+
+    @app.get("/path/a")
+    def path_a() -> Response:
+        raise ValueError("foo")
+
+    @app.get("/path/b")
+    def path_b() -> Response:
+        raise NotFoundError
+
+    # WHEN calling the app generating each exception
+    for route in ["/path/a", "/path/b"]:
+        event["path"] = route
+        result = app(event, {})
+
+        # THEN call the exception handler in the same way for both exceptions
+        assert result["statusCode"] == 400
+        assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+        expected = {"statusCode": 400, "message": "Bad request"}
+        assert result["body"] == json_dump(expected)
+
+
 def test_event_source_compatibility():
     # GIVEN
     app = APIGatewayHttpResolver()
