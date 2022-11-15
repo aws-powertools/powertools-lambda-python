@@ -814,8 +814,8 @@ reports = ["lxml"]
 
 [[package]]
 name = "mypy-boto3-appconfig"
-version = "1.25.0"
-description = "Type annotations for boto3.AppConfig 1.25.0 service generated with mypy-boto3-builder 7.11.10"
+version = "1.26.0.post1"
+description = "Type annotations for boto3.AppConfig 1.26.0 service generated with mypy-boto3-builder 7.11.10"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -1498,7 +1498,7 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "f573ca04c94e8d75dad66d8d3323d1edbce0d40d115ed7865522279db7c83874"
+content-hash = "79de09ebbf7657194662684ea22d4b9b6d8a21d8bff55209f18362444e2c8336"
 
 [metadata.files]
 attrs = [
@@ -1879,8 +1879,8 @@ mypy = [
     {file = "mypy-0.982.tar.gz", hash = "sha256:85f7a343542dc8b1ed0a888cdd34dca56462654ef23aa673907305b260b3d746"},
 ]
 mypy-boto3-appconfig = [
-    {file = "mypy-boto3-appconfig-1.25.0.tar.gz", hash = "sha256:a4674c2c616d67a4a5b6cd722a32e24bdd05149c195e66a986657d500dc821c8"},
-    {file = "mypy_boto3_appconfig-1.25.0-py3-none-any.whl", hash = "sha256:2137d81caa379db120ded09cbd9263da7e504f83696fa24e3cbb58c10471e1ee"},
+    {file = "mypy-boto3-appconfig-1.26.0.post1.tar.gz", hash = "sha256:eb1473f3e3f6b78f1a1a747a1373dd2e574db016a6b9bc5259f721c3482f2e56"},
+    {file = "mypy_boto3_appconfig-1.26.0.post1-py3-none-any.whl", hash = "sha256:749daf4ed2494a899ccfee1e9f564985fb163ede9c82778847276604a6783c15"},
 ]
 mypy-boto3-appconfigdata = [
     {file = "mypy-boto3-appconfigdata-1.26.0.post1.tar.gz", hash = "sha256:9f28686ba800c9c5cdbf42b4385164df2de7084758e9ab0850959c7c0a058935"},
