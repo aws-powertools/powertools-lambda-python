@@ -1,10 +1,11 @@
 import io
 import logging
 import typing
-from typing import TYPE_CHECKING, List, Literal, Optional, Sequence, Union, overload
+from typing import TYPE_CHECKING, List, Optional, Sequence, Union, overload
 
 import boto3
 from botocore.response import StreamingBody
+from typing_extensions import Literal
 
 from aws_lambda_powertools.utilities.streaming.transformations.base import (
     BaseTransform,
