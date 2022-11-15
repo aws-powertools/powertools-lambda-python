@@ -100,8 +100,8 @@ class SecretsProvider(BaseProvider):
 
         if "SecretString" in secret_value:
             return secret_value["SecretString"]
-        else:
-            return secret_value["SecretBinary"]
+
+        return secret_value["SecretBinary"]
 
     def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
         """
