@@ -46,6 +46,11 @@ def config():
     return Config(region_name="us-east-1")
 
 
+@pytest.fixture
+def mock_binary_value() -> str:
+    return "ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnpkV0lpT2lJeE1qTTBOVFkzT0Rrd0lpd2libUZ0WlNJNklrcHZhRzRnUkc5bElpd2lhV0YwSWpveE5URTJNak01TURJeWZRLlNmbEt4d1JKU01lS0tGMlFUNGZ3cE1lSmYzNlBPazZ5SlZfYWRRc3N3NWMK"  # noqa: E501
+
+
 def build_get_parameters_stub(params: Dict[str, Any], invalid_parameters: List[str] | None = None) -> Dict[str, List]:
     invalid_parameters = invalid_parameters or []
     version = random.randrange(1, 1000)
@@ -1184,6 +1189,31 @@ def test_secrets_provider_get(mock_name, mock_value, config):
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
+
+
+def test_secrets_provider_get_binary_secret(mock_name, mock_binary_value, config):
+    # GIVEN a new provider
+    provider = parameters.SecretsProvider(config=config)
+    expected_params = {"SecretId": mock_name}
+    expected_response = {
+        "ARN": f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{mock_name}",
+        "Name": mock_name,
+        "VersionId": "edc66e31-3d5f-4276-aaa1-95ed44cfed72",
+        "SecretBinary": mock_binary_value,
+        "CreatedDate": datetime(2015, 1, 1),
+    }
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_secret_value", expected_response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+    assert value == mock_binary_value
 
 
 def test_secrets_provider_get_with_custom_client(mock_name, mock_value, config):
