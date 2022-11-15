@@ -368,11 +368,11 @@ dev = ["coverage", "hypothesis", "hypothesmith (>=0.2)", "pre-commit", "tox"]
 
 [[package]]
 name = "flake8-builtins"
-version = "2.0.0"
+version = "2.0.1"
 description = "Check for python builtins being used as variables or parameters."
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7"
 
 [package.dependencies]
 flake8 = "*"
@@ -1498,7 +1498,7 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "6a7411f6b58a98699f10fa019ebb33b15052c369feca0b94c370a6a7e2b1a3f5"
+content-hash = "a2a1ac8fa45ea0c52ef620431988b1a4639aad98ebc86f672acc5eb22ff22eab"
 
 [metadata.files]
 attrs = [
@@ -1682,8 +1682,8 @@ flake8-bugbear = [
     {file = "flake8_bugbear-22.10.27-py3-none-any.whl", hash = "sha256:6ad0ab754507319060695e2f2be80e6d8977cfcea082293089a9226276bd825d"},
 ]
 flake8-builtins = [
-    {file = "flake8-builtins-2.0.0.tar.gz", hash = "sha256:98833fa16139a75cd4913003492a9bd9a61c6f8ac146c3db12a2ebaf420dade3"},
-    {file = "flake8_builtins-2.0.0-py3-none-any.whl", hash = "sha256:39bfa3badb5e8d22f92baf4e0ea1b816707245233846932d6b13e81fc6f673e8"},
+    {file = "flake8-builtins-2.0.1.tar.gz", hash = "sha256:5aeb420130efe8acbdaf8708a582492413293a3ca25653518f687937879650a5"},
+    {file = "flake8_builtins-2.0.1-py3-none-any.whl", hash = "sha256:a5b9ca9cbc921c4455ea02e2e9963c990ac66d028c15b654625e012a1e3bbb4d"},
 ]
 flake8-comprehensions = [
     {file = "flake8-comprehensions-3.10.1.tar.gz", hash = "sha256:412052ac4a947f36b891143430fef4859705af11b2572fbb689f90d372cf26ab"},
@@ -1919,6 +1919,7 @@ mypy-boto3-ssm = [
     {file = "mypy_boto3_ssm-1.26.4-py3-none-any.whl", hash = "sha256:e4a5d54086501a4216dfc604cf27dc7c4e626b1ec76613be333a4bb9b40d1da1"},
 ]
 mypy-boto3-xray = [
+    {file = "mypy-boto3-xray-1.26.9.tar.gz", hash = "sha256:1b4a66f5d4aafa1f2ba516a8d4a4584aa8c1a6f98bd92709c508152fcd36febb"},
     {file = "mypy_boto3_xray-1.26.9-py3-none-any.whl", hash = "sha256:5128669234525bd8e5b6071b098711b4845db974d0168d3c64de9cfc70944b22"},
 ]
 mypy-extensions = [
