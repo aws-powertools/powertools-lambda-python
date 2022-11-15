@@ -42,6 +42,8 @@ labelPRBasedOnFilePath:
   typing:
     - aws_lambda_powertools/utilities/typing/*
     - mypy.ini
+  streaming:
+    - aws_lambda_powertools/utilities/streaming/*
   commons:
     - aws_lambda_powertools/shared/*
 
