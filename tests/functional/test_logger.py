@@ -1,3 +1,4 @@
+import functools
 import inspect
 import io
 import json
@@ -5,6 +6,7 @@ import logging
 import random
 import re
 import string
+import sys
 import warnings
 from ast import Dict
 from collections import namedtuple
@@ -892,3 +894,15 @@ def test_powertools_debug_env_var_warning(monkeypatch: pytest.MonkeyPatch):
         set_package_logger_handler()
         assert len(w) == 1
         assert str(w[0].message) == warning_message
+
+
+def test_logger_log_uncaught_exceptions(service_name, stdout):
+    # GIVEN an initialized Logger is set with log_uncaught_exceptions
+    logger = Logger(service=service_name, stream=stdout, log_uncaught_exceptions=True)
+
+    # WHEN Python's exception hook is inspected
+    exception_hook = sys.excepthook
+
+    # THEN it should contain our custom exception hook with a copy of our logger
+    assert isinstance(exception_hook, functools.partial)
+    assert exception_hook.keywords.get("logger") == logger
