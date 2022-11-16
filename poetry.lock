@@ -74,7 +74,7 @@ dev = ["black (==20.8b1)", "boto3 (>=1.23,<2)", "boto3-stubs[appconfig,serverles
 
 [[package]]
 name = "aws-xray-sdk"
-version = "2.10.0"
+version = "2.11.0"
 description = "The AWS X-Ray SDK for Python (the SDK) enables Python developers to record and emit information from within their applications to the AWS X-Ray service."
 category = "main"
 optional = true
@@ -1523,8 +1523,8 @@ aws-sam-translator = [
     {file = "aws_sam_translator-1.53.0-py3-none-any.whl", hash = "sha256:84d780ad82f1a176e2f5d4c397749d1e71214cc97ee7cccd50f823fd7c7e7cdf"},
 ]
 aws-xray-sdk = [
-    {file = "aws-xray-sdk-2.10.0.tar.gz", hash = "sha256:9b14924fd0628cf92936055864655354003f0b1acc3e1c3ffde6403d0799dd7a"},
-    {file = "aws_xray_sdk-2.10.0-py2.py3-none-any.whl", hash = "sha256:7551e81a796e1a5471ebe84844c40e8edf7c218db33506d046fec61f7495eda4"},
+    {file = "aws-xray-sdk-2.11.0.tar.gz", hash = "sha256:78835fc841f03e550858f18a9973eab8618f47f22d2f59edf130578fa545a867"},
+    {file = "aws_xray_sdk-2.11.0-py2.py3-none-any.whl", hash = "sha256:693fa3a4c790e131fe1e20814ede415a9eeeab5c3b7c868686d3e3c696b8524d"},
 ]
 bandit = [
     {file = "bandit-1.7.4-py3-none-any.whl", hash = "sha256:412d3f259dab4077d0e7f0c11f50f650cc7d10db905d98f6520a95a18049658a"},
