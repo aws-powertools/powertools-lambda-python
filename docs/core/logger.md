@@ -291,6 +291,30 @@ Use `logger.exception` method to log contextual information about exceptions. Lo
     --8<-- "examples/logger/src/logging_exceptions_output.json"
     ```
 
+#### Uncaught exceptions
+
+Logger can optionally log uncaught exceptions by setting `log_uncaught_exceptions=True` at initialization.
+
+!!! info "Logger will replace any exception hook previously registered via [sys.excepthook](https://docs.python.org/3/library/sys.html#sys.excepthook){target='_blank'}."
+
+??? question "What are uncaught exceptions?"
+
+    It's any raised exception that wasn't handled by the [`except` statement](https://docs.python.org/3.9/tutorial/errors.html#handling-exceptions){target="_blank"}, leading a Python program to a non-successful exit.
+
+    They are typically raised intentionally to signal a problem (`raise ValueError`), or a propagated exception from elsewhere in your code that you didn't handle it willingly or not (`KeyError`, `jsonDecoderError`, etc.).
+
+=== "logging_uncaught_exceptions.py"
+
+    ```python hl_lines="7"
+    --8<-- "examples/logger/src/logging_uncaught_exceptions.py"
+    ```
+
+=== "logging_uncaught_exceptions_output.json"
+
+    ```json hl_lines="7-8"
+    --8<-- "examples/logger/src/logging_uncaught_exceptions_output.json"
+    ```
+
 ### Date formatting
 
 Logger uses Python's standard logging date format with the addition of timezone: `2021-05-03 11:47:12,494+0200`.
