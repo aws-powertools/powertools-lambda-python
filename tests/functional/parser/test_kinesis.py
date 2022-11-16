@@ -3,6 +3,7 @@ from typing import Any, List
 import pytest
 
 from aws_lambda_powertools.utilities.parser import (
+    BaseModel,
     ValidationError,
     envelopes,
     event_parser,
@@ -10,6 +11,13 @@ from aws_lambda_powertools.utilities.parser import (
 from aws_lambda_powertools.utilities.parser.models import (
     KinesisDataStreamModel,
     KinesisDataStreamRecordPayload,
+)
+from aws_lambda_powertools.utilities.parser.models.cloudwatch import (
+    CloudWatchLogsDecode,
+)
+from aws_lambda_powertools.utilities.parser.models.kinesis import (
+    extract_cloudwatch_logs_from_event,
+    extract_cloudwatch_logs_from_record,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyKinesisBusiness
@@ -111,3 +119,35 @@ def test_validate_event_does_not_conform_with_model():
     event_dict: Any = {"hello": "s"}
     with pytest.raises(ValidationError):
         handle_kinesis(event_dict, LambdaContext())
+
+
+def test_kinesis_stream_event_cloudwatch_logs_data_extraction():
+    # GIVEN a KinesisDataStreamModel is instantiated with CloudWatch Logs compressed data
+    event_dict = load_event("kinesisStreamCloudWatchLogsEvent.json")
+    stream_data = KinesisDataStreamModel(**event_dict)
+    single_record = stream_data.Records[0]
+
+    # WHEN we try to extract CloudWatch Logs from KinesisDataStreamRecordPayload model
+    extracted_logs = extract_cloudwatch_logs_from_event(stream_data)
+    individual_logs = [extract_cloudwatch_logs_from_record(record) for record in stream_data.Records]
+    single_log = extract_cloudwatch_logs_from_record(single_record)
+
+    # THEN we should have extracted any potential logs as CloudWatchLogsDecode models
+    assert len(extracted_logs) == len(individual_logs)
+    assert isinstance(single_log, CloudWatchLogsDecode)
+
+
+def test_kinesis_stream_event_cloudwatch_logs_data_extraction_fails_with_custom_model():
+    # GIVEN a custom model replaces Kinesis Record Data bytes
+    class DummyModel(BaseModel):
+        ...
+
+    event_dict = load_event("kinesisStreamCloudWatchLogsEvent.json")
+    stream_data = KinesisDataStreamModel(**event_dict)
+
+    # WHEN decompress_zlib_record_data_as_json is used
+    # THEN ValueError should be raised
+    with pytest.raises(ValueError, match="We can only decompress bytes data"):
+        for record in stream_data.Records:
+            record.kinesis.data = DummyModel()
+            record.decompress_zlib_record_data_as_json()
