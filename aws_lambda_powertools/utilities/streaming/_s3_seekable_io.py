@@ -39,6 +39,9 @@ class _S3SeekableIO(IO[bytes]):
         # Holds the current position in the stream
         self._position = 0
 
+        # Stores the closed state of the stream
+        self._closed: bool = False
+
         # Caches the size of the object
         self._size: Optional[int] = None
 
@@ -88,6 +91,7 @@ class _S3SeekableIO(IO[bytes]):
             range_header = "bytes=%d-" % self._position
             logging.debug(f"Starting new stream at {range_header}...")
             self._raw_stream = self.s3_object.get(Range=range_header)["Body"]
+            self._closed = False
 
         return self._raw_stream
 
@@ -140,11 +144,13 @@ class _S3SeekableIO(IO[bytes]):
 
     def readlines(self, hint: int = -1) -> List[bytes]:
         # boto3's StreamingResponse doesn't implement the "hint" parameter
-        return self.raw_stream.readlines()
+        data = self.raw_stream.readlines()
+        self._position += sum(len(line) for line in data)
+        return data
 
     @property
     def closed(self) -> bool:
-        return self.raw_stream.closed
+        return self._closed
 
     def __next__(self):
         return self.raw_stream.__next__()
@@ -155,11 +161,12 @@ class _S3SeekableIO(IO[bytes]):
     def __enter__(self):
         return self
 
-    def __exit__(self, **kwargs):
+    def __exit__(self, *kwargs):
         self.close()
 
     def close(self) -> None:
         self.raw_stream.close()
+        self._closed = True
 
     def fileno(self) -> int:
         raise NotImplementedError()
