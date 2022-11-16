@@ -255,6 +255,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self._init_logger(formatter_options=formatter_options, **kwargs)
 
         if self.log_uncaught_exceptions:
+            logger.debug("Replacing exception hook")
             sys.excepthook = functools.partial(log_uncaught_exception_hook, logger=self)
 
     # Prevent __getattr__ from shielding unknown attribute errors in type checkers
