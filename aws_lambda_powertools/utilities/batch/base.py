@@ -256,7 +256,7 @@ def batch_processor(
 
 
 @lambda_handler_decorator
-def async_batch_processor(
+async def async_batch_processor(
         handler: Callable, event: Dict, context: LambdaContext, record_handler: Callable, processor: AsyncBasePartialProcessor
 ):
     """
