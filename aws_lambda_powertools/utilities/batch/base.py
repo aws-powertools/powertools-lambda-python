@@ -3,6 +3,7 @@
 """
 Batch processing utilities
 """
+import asyncio
 import copy
 import inspect
 import logging
@@ -86,19 +87,6 @@ class BasePartialProcessor(ABC):
         Clear context manager.
         """
         raise NotImplementedError()
-
-    @abstractmethod
-    def _process_record(self, record: dict):
-        """
-        Process record with handler.
-        """
-        raise NotImplementedError()
-
-    def process(self) -> List[Tuple]:
-        """
-        Call instance's handler for each record.
-        """
-        return [self._process_record(record) for record in self.records]
 
     def __enter__(self):
         self._prepare()
@@ -191,9 +179,39 @@ class BasePartialProcessor(ABC):
         return entry
 
 
+class SyncBasePartialProcessor(BasePartialProcessor):
+    @abstractmethod
+    def _process_record(self, record: dict):
+        """
+        Process record with handler.
+        """
+        raise NotImplementedError()
+
+    def process(self) -> List[Tuple]:
+        """
+        Call instance's handler for each record.
+        """
+        return [self._process_record(record) for record in self.records]
+
+
+class AsyncBasePartialProcessor(BasePartialProcessor):
+    @abstractmethod
+    async def _async_process_record(self, record: dict):
+        """
+        Process record with handler.
+        """
+        raise NotImplementedError()
+
+    async def async_process(self) -> List[Tuple]:
+        """
+        Call instance's handler for each record.
+        """
+        return list(await asyncio.gather(*[self._async_process_record(record) for record in self.records]))
+
+
 @lambda_handler_decorator
 def batch_processor(
-    handler: Callable, event: Dict, context: LambdaContext, record_handler: Callable, processor: BasePartialProcessor
+        handler: Callable, event: Dict, context: LambdaContext, record_handler: Callable, processor: SyncBasePartialProcessor
 ):
     """
     Middleware to handle batch event processing
@@ -237,7 +255,58 @@ def batch_processor(
     return handler(event, context)
 
 
-class BatchProcessor(BasePartialProcessor):
+@lambda_handler_decorator
+def async_batch_processor(
+        handler: Callable, event: Dict, context: LambdaContext, record_handler: Callable, processor: AsyncBasePartialProcessor
+):
+    """
+    Middleware to handle batch event processing
+
+    Parameters
+    ----------
+    handler: Callable
+        Lambda's handler
+    event: Dict
+        Lambda's Event
+    context: LambdaContext
+        Lambda's Context
+    record_handler: Callable
+        Callable to process each record from the batch
+    processor: BasePartialProcessor
+        Batch Processor to handle partial failure cases
+
+    Examples
+    --------
+    **Processes Lambda's event with a BasePartialProcessor**
+
+        >>> from aws_lambda_powertools.asynchrony import async_lambda_handler
+        >>> from aws_lambda_powertools.utilities.batch import async_batch_processor, AsyncBatchProcessor
+        >>>
+        >>> async def async_record_handler(record):
+        >>>     payload: str = record.body
+        >>>     return payload
+        >>>
+        >>> processor = AsyncBatchProcessor(event_type=EventType.SQS)
+        >>>
+        >>> @async_lambda_handler
+        >>> @async_batch_processor(record_handler=async_record_handler, processor=processor)
+        >>> async def lambda_handler(event, context: LambdaContext):
+        >>>     return processor.response()
+
+    Limitations
+    -----------
+    * Async batch processors
+
+    """
+    records = event["Records"]
+
+    with processor(records, record_handler, lambda_context=context):
+        await processor.async_process()
+
+    return await handler(event, context)
+
+
+class BaseBatchProcessorMixin(BasePartialProcessor):
     """Process native partial responses from SQS, Kinesis Data Streams, and DynamoDB.
 
 
@@ -392,26 +461,6 @@ class BatchProcessor(BasePartialProcessor):
         self.exceptions.clear()
         self.batch_response = copy.deepcopy(self.DEFAULT_RESPONSE)
 
-    def _process_record(self, record: dict) -> Union[SuccessResponse, FailureResponse]:
-        """
-        Process a record with instance's handler
-
-        Parameters
-        ----------
-        record: dict
-            A batch record to be processed.
-        """
-        data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
-        try:
-            if self._handler_accepts_lambda_context:
-                result = self.handler(record=data, lambda_context=self.lambda_context)
-            else:
-                result = self.handler(record=data)
-
-            return self.success_handler(record=record, result=result)
-        except Exception:
-            return self.failure_handler(record=data, exception=sys.exc_info())
-
     def _clean(self):
         """
         Report messages to be deleted in case of partial failure.
@@ -423,7 +472,7 @@ class BatchProcessor(BasePartialProcessor):
         if self._entire_batch_failed():
             raise BatchProcessingError(
                 msg=f"All records failed processing. {len(self.exceptions)} individual errors logged "
-                f"separately below.",
+                    f"separately below.",
                 child_exceptions=self.exceptions,
             )
 
@@ -481,3 +530,48 @@ class BatchProcessor(BasePartialProcessor):
         if model is not None:
             return model.parse_obj(record)
         return self._DATA_CLASS_MAPPING[event_type](record)
+
+
+class BatchProcessor(BaseBatchProcessorMixin, SyncBasePartialProcessor):  # Keep old name for compatibility
+    def _process_record(self, record: dict) -> Union[SuccessResponse, FailureResponse]:
+        """
+        Process a record with instance's handler
+
+        Parameters
+        ----------
+        record: dict
+            A batch record to be processed.
+        """
+        data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
+        try:
+            if self._handler_accepts_lambda_context:
+                result = self.handler(record=data, lambda_context=self.lambda_context)
+            else:
+                result = self.handler(record=data)
+
+            return self.success_handler(record=record, result=result)
+        except Exception:
+            return self.failure_handler(record=data, exception=sys.exc_info())
+
+
+class AsyncBatchProcessor(BaseBatchProcessorMixin, AsyncBasePartialProcessor):
+
+    async def _async_process_record(self, record: dict) -> Union[SuccessResponse, FailureResponse]:
+        """
+        Process a record with instance's handler
+
+        Parameters
+        ----------
+        record: dict
+            A batch record to be processed.
+        """
+        data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
+        try:
+            if self._handler_accepts_lambda_context:
+                result = await self.handler(record=data, lambda_context=self.lambda_context)
+            else:
+                result = await self.handler(record=data)
+
+            return self.success_handler(record=record, result=result)
+        except Exception:
+            return self.failure_handler(record=data, exception=sys.exc_info())
