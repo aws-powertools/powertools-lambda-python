@@ -5,14 +5,13 @@ from typing import Callable, Dict, Optional
 
 import pytest
 from botocore.config import Config
-from tests.functional.utils import b64_to_str, str_to_b64
 
 from aws_lambda_powertools.asynchrony import async_lambda_handler
 from aws_lambda_powertools.utilities.batch import (
     BatchProcessor,
+    AsyncBatchProcessor,
     EventType,
     batch_processor,
-    AsyncBatchProcessor,
     async_batch_processor,
 )
 from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError
@@ -24,9 +23,19 @@ from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
 )
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.parser import BaseModel, validator
-from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamChangedRecordModel, DynamoDBStreamRecordModel, KinesisDataStreamRecord as KinesisDataStreamRecordModel, \
-    KinesisDataStreamRecordPayload, SqsRecordModel
+from aws_lambda_powertools.utilities.parser.models import (
+    DynamoDBStreamChangedRecordModel,
+    DynamoDBStreamRecordModel,
+)
+from aws_lambda_powertools.utilities.parser.models import (
+    KinesisDataStreamRecord as KinesisDataStreamRecordModel,
+)
+from aws_lambda_powertools.utilities.parser.models import (
+    KinesisDataStreamRecordPayload,
+    SqsRecordModel,
+)
 from aws_lambda_powertools.utilities.parser.types import Literal
+from tests.functional.utils import b64_to_str, str_to_b64
 
 
 @pytest.fixture(scope="module")
