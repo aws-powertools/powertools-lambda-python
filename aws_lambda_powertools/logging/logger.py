@@ -752,4 +752,4 @@ def _is_internal_frame(frame):  # pragma: no cover
 
 def log_uncaught_exception_hook(exc_type, exc_value, exc_traceback, logger: Logger):
     """Callback function for sys.excepthook to use Logger to log uncaught exceptions"""
-    logger.exception("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+    logger.exception("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))  # pragma: no cover
