@@ -678,7 +678,7 @@ def test_async_batch_processor_middleware_with_failure(sqs_event_factory, async_
 
     @async_lambda_handler
     @async_batch_processor(record_handler=async_record_handler, processor=processor)
-    def lambda_handler(event, context):
+    async def lambda_handler(event, context):
         return processor.response()
 
     # WHEN
@@ -693,14 +693,14 @@ def test_async_batch_processor_context_success_only(sqs_event_factory, async_rec
     first_record = SQSRecord(sqs_event_factory("success"))
     second_record = SQSRecord(sqs_event_factory("success"))
     records = [first_record.raw_event, second_record.raw_event]
-    processor = BatchProcessor(event_type=EventType.SQS)
+    processor = AsyncBatchProcessor(event_type=EventType.SQS)
 
     # WHEN
-    async def process_messages():
-        with processor(records, async_record_handler) as _batch:
-            return _batch, await batch.async_process()
+    with processor(records, async_record_handler) as batch:
+        async def process_messages():
+            return await batch.async_process()
 
-    batch, processed_messages = asyncio.run(process_messages())
+        processed_messages = asyncio.run(process_messages())
 
     # THEN
     assert processed_messages == [
@@ -717,14 +717,14 @@ def test_async_batch_processor_context_with_failure(sqs_event_factory, async_rec
     second_record = SQSRecord(sqs_event_factory("success"))
     third_record = SQSRecord(sqs_event_factory("fail"))
     records = [first_record.raw_event, second_record.raw_event, third_record.raw_event]
-    processor = BatchProcessor(event_type=EventType.SQS)
+    processor = AsyncBatchProcessor(event_type=EventType.SQS)
 
     # WHEN
-    async def process_messages():
-        with processor(records, async_record_handler) as _batch:
-            return _batch, await batch.async_process()
+    with processor(records, async_record_handler) as batch:
+        async def process_messages():
+            return await batch.async_process()
 
-    batch, processed_messages = asyncio.run(process_messages())
+        processed_messages = asyncio.run(process_messages())
 
     # THEN
     assert processed_messages[1] == ("success", second_record.body, second_record.raw_event)
