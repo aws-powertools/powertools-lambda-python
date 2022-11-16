@@ -42,13 +42,13 @@ The code above will stream the contents from S3 as fast as possible, using minim
 
 The utility has some built-in data transformations to help deal with common scenarios while streaming data from S3.
 
-| Name                            | Description                                                                                 |
-|---------------------------------|---------------------------------------------------------------------------------------------|
-| **Gzip**                        | Gunzips the stream of data using the [gzip library](https://docs.python.org/3/library/gzip.html) |
-| **Zip**                         | Exposes the stream as a [ZipFile object](https://docs.python.org/3/library/zipfile.html)    |
-| **JSON**                        | Parses each line as a JSON object, returning matched objects                                |
+| Name     | Description                                                                                      |
+|----------|--------------------------------------------------------------------------------------------------|
+| **Gzip** | Gunzips the stream of data using the [gzip library](https://docs.python.org/3/library/gzip.html) |
+| **Zip**  | Exposes the stream as a [ZipFile object](https://docs.python.org/3/library/zipfile.html)         |
+| **CSV**  | Parses each line as a CSV object, returning dictionary objects                                   |
 
-Common options like gunzipping a stream and parsing data as JSON can be enabled directly on the constructor:
+Common options like gunzipping a stream and parsing data as CSV can be enabled directly on the constructor:
 
 ```python hl_lines="8"
 --8<-- "examples/streaming/src/s3_transform_common.py"
@@ -79,7 +79,7 @@ Each data transformation class accepts additional options to customize the trans
 |----------|----------------------------------------------------------------------------------------------------------------|
 | **Gzip** | All the options from the [GzipFile constructor](https://docs.python.org/3/library/gzip.html#gzip.GzipFile)     |
 | **Zip**  | All the options from the [ZipFile constructor](https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile) |
-| **JSON** | No additional options are supported at the moment                                                             |
+| **CSV**  | All the options from the [DictReader constructor](https://docs.python.org/3/library/csv.html#csv.DictReader)   |
 
 For instance, if you want to unzip an S3 file compressed using `LZMA` you could pass that option in the constructor:
 

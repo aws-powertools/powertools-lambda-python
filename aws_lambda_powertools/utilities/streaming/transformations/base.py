@@ -1,14 +1,23 @@
-import io
 from abc import abstractmethod
-from typing import Generic, TypeVar
+from typing import IO, Generic, TypeVar
 
-T = TypeVar("T", bound=io.RawIOBase)
+T = TypeVar("T", bound=IO[bytes])
 
 
 class BaseTransform(Generic[T]):
-    def __init__(self, **kwargs):
+    """
+    BaseTransform is the base class all data transformations need to implement.
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.args = args
         self.kwargs = kwargs
 
     @abstractmethod
-    def transform(self, input_stream: io.RawIOBase) -> T:
+    def transform(self, input_stream: IO[bytes]) -> T:
+        """
+        Transform the data from input_stream into something that implements IO[bytes].
+        This allows you to return your own object while still conforming to a protocol
+        that allows transformations to be nested.
+        """
         pass

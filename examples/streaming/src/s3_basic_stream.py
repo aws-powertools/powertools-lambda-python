@@ -1,6 +1,6 @@
 from typing import Dict
 
-from aws_lambda_powertools.utilities.streaming.s3 import S3Object
+from aws_lambda_powertools.utilities.streaming.s3_object import S3Object
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
