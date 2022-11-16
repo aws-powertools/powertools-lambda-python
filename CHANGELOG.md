@@ -20,6 +20,8 @@
 
 * **apigateway:** multiple exceptions in exception_handler ([#1707](https://github.com/awslabs/aws-lambda-powertools-python/issues/1707))
 * **event_sources:** extract CloudWatch Logs in Kinesis streams ([#1710](https://github.com/awslabs/aws-lambda-powertools-python/issues/1710))
+* **logger:** log uncaught exceptions via system's exception hook ([#1727](https://github.com/awslabs/aws-lambda-powertools-python/issues/1727))
+* **parser:** extract CloudWatch Logs in Kinesis streams ([#1726](https://github.com/awslabs/aws-lambda-powertools-python/issues/1726))
 
 ## Maintenance
 
