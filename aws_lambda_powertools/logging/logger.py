@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import functools
 import inspect
 import io
@@ -96,6 +98,11 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         custom logging formatter that implements PowertoolsFormatter
     logger_handler: logging.Handler, optional
         custom logging handler e.g. logging.FileHandler("file.log")
+    log_uncaught_exceptions: bool, by default False
+        logs uncaught exception using sys.excepthook
+
+        See: https://docs.python.org/3/library/sys.html#sys.excepthook
+
 
     Parameters propagated to LambdaPowertoolsFormatter
     --------------------------------------------------
@@ -203,6 +210,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         stream: Optional[IO[str]] = None,
         logger_formatter: Optional[PowertoolsFormatter] = None,
         logger_handler: Optional[logging.Handler] = None,
+        log_uncaught_exceptions: bool = False,
         json_serializer: Optional[Callable[[Dict], str]] = None,
         json_deserializer: Optional[Callable[[Union[Dict, str, bool, int, float]], str]] = None,
         json_default: Optional[Callable[[Any], Any]] = None,
@@ -222,6 +230,8 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self.child = child
         self.logger_formatter = logger_formatter
         self.logger_handler = logger_handler or logging.StreamHandler(stream)
+        self.log_uncaught_exceptions = log_uncaught_exceptions
+
         self.log_level = self._get_log_level(level)
         self._is_deduplication_disabled = resolve_truthy_env_var_choice(
             env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false")
@@ -243,6 +253,10 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         }
 
         self._init_logger(formatter_options=formatter_options, **kwargs)
+
+        if self.log_uncaught_exceptions:
+            logger.debug("Replacing exception hook")
+            sys.excepthook = functools.partial(log_uncaught_exception_hook, logger=self)
 
     # Prevent __getattr__ from shielding unknown attribute errors in type checkers
     # https://github.com/awslabs/aws-lambda-powertools-python/issues/1660
@@ -735,3 +749,8 @@ def _is_internal_frame(frame):  # pragma: no cover
     """Signal whether the frame is a CPython or logging module internal."""
     filename = os.path.normcase(frame.f_code.co_filename)
     return filename == logging._srcfile or ("importlib" in filename and "_bootstrap" in filename)
+
+
+def log_uncaught_exception_hook(exc_type, exc_value, exc_traceback, logger: Logger):
+    """Callback function for sys.excepthook to use Logger to log uncaught exceptions"""
+    logger.exception("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))  # pragma: no cover
