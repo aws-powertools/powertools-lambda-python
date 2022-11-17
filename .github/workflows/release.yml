@@ -110,7 +110,7 @@ jobs:
           HAS_CHANGE=$(git status --porcelain)
           test -z "${HAS_CHANGE}" && echo "Nothing to update" && exit 0
           git add pyproject.toml
-          git commit -m "bump version to ${RELEASE_VERSION}"
+          git commit -m "bump version to ${RELEASE_VERSION}" --no-verify
           git pull origin "${BRANCH}" # prevents concurrent branch update failing push
           git push origin HEAD:refs/heads/"${BRANCH}"
 
