@@ -32,7 +32,7 @@ jobs:
   build-layer:
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: aws-lambda-powertools_ubuntu-latest_4-core
     defaults:
       run:
         working-directory: ./layer

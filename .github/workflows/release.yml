@@ -49,7 +49,7 @@ on:
 jobs:
   release:
     environment: release
-    runs-on: ubuntu-latest
+    runs-on: aws-lambda-powertools_ubuntu-latest_4-core
     permissions:
       contents: read
     outputs:
