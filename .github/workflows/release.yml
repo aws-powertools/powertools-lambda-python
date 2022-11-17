@@ -79,6 +79,13 @@ jobs:
       - name: Run all tests, linting and baselines
         if: ${{ !inputs.skip_code_quality }}
         run: make pr
+      - name: Git client setup and refresh tip
+        run: |
+          git config user.name "Release bot"
+          git config user.email "aws-devax-open-source@amazon.com"
+          git config pull.rebase true
+          git config remote.origin.url >&- || git remote add origin https://github.com/"${ORIGIN}" # Git Detached mode (release notes) doesn't have origin
+          git pull origin "${BRANCH}"
       - name: Bump package version
         id: versioning
         run: poetry version "${RELEASE_VERSION}"
@@ -97,14 +104,6 @@ jobs:
         env:
           PYPI_USERNAME: __token__
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-      - name: Git client setup and refresh tip
-        if: steps.versioning.outcome == 'success'
-        run: |
-          git config user.name "Release bot"
-          git config user.email "aws-devax-open-source@amazon.com"
-          git config pull.rebase true
-          git config remote.origin.url >&- || git remote add origin https://github.com/"${ORIGIN}" # Git Detached mode (release notes) doesn't have origin
-          git pull origin "${BRANCH}"
       - name: Update version in trunk
         if: steps.versioning.outcome == 'success'
         run: |
