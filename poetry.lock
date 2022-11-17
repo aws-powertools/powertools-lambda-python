@@ -924,8 +924,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-xray"
-version = "1.26.9"
-description = "Type annotations for boto3.XRay 1.26.9 service generated with mypy-boto3-builder 7.11.10"
+version = "1.26.11.post1"
+description = "Type annotations for boto3.XRay 1.26.11 service generated with mypy-boto3-builder 7.11.10"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -1498,7 +1498,7 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "a2a1ac8fa45ea0c52ef620431988b1a4639aad98ebc86f672acc5eb22ff22eab"
+content-hash = "8047ebbdcc35bbbdb06615acecc25f1c591b5c1ba0a7f37e649e27cd1f7c2b47"
 
 [metadata.files]
 attrs = [
@@ -1919,8 +1919,8 @@ mypy-boto3-ssm = [
     {file = "mypy_boto3_ssm-1.26.4-py3-none-any.whl", hash = "sha256:e4a5d54086501a4216dfc604cf27dc7c4e626b1ec76613be333a4bb9b40d1da1"},
 ]
 mypy-boto3-xray = [
-    {file = "mypy-boto3-xray-1.26.9.tar.gz", hash = "sha256:1b4a66f5d4aafa1f2ba516a8d4a4584aa8c1a6f98bd92709c508152fcd36febb"},
-    {file = "mypy_boto3_xray-1.26.9-py3-none-any.whl", hash = "sha256:5128669234525bd8e5b6071b098711b4845db974d0168d3c64de9cfc70944b22"},
+    {file = "mypy-boto3-xray-1.26.11.post1.tar.gz", hash = "sha256:e720a766571b4f3e1e35193de74e6dfae21b0f641286aa39f7b938be43150ac0"},
+    {file = "mypy_boto3_xray-1.26.11.post1-py3-none-any.whl", hash = "sha256:e22bf1e7fa6a43c52ff6cd3e82892674929b75bb62ab3b0fe3d4c91ede710e1f"},
 ]
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
