@@ -125,8 +125,12 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
 !!! info "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.7/library/dataclasses.html){target="_blank"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
 
-???+ warning
-    Make sure to call your decorated function using keyword arguments
+???+ warning "Limitations"
+    Make sure to call your decorated function using keyword arguments.
+
+    Decorated functions with `idempotent_function` are not thread-safe, if the caller uses threading, not the function computation itself.
+
+    DynamoDB Persistency layer uses a Resource client [which is not thread-safe](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/resources.html?highlight=multithreading#multithreading-or-multiprocessing-with-resources){target="_blank"}.
 
 === "batch_sample.py"
 
@@ -1018,12 +1022,34 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 
 === "tests.py"
 
-    ```python hl_lines="2 3"
-    def test_idempotent_lambda_handler(monkeypatch):
+    ```python hl_lines="24-25"
+    from dataclasses import dataclass
+
+    import pytest
+
+    import app
+
+
+    @pytest.fixture
+    def lambda_context():
+        @dataclass
+        class LambdaContext:
+            function_name: str = "test"
+            memory_limit_in_mb: int = 128
+            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
+            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
+
+            def get_remaining_time_in_millis(self) -> int:
+              return 5
+
+        return LambdaContext()
+
+
+    def test_idempotent_lambda_handler(monkeypatch, lambda_context):
         # Set POWERTOOLS_IDEMPOTENCY_DISABLED before calling decorated functions
         monkeypatch.setenv("POWERTOOLS_IDEMPOTENCY_DISABLED", 1)
 
-        result = handler()
+        result = handler({}, lambda_context)
         ...
     ```
 === "app.py"
@@ -1051,18 +1077,36 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
 
 === "tests.py"
 
-    ```python hl_lines="6 7 8"
+    ```python hl_lines="24-27"
+    from dataclasses import dataclass
+
     import boto3
+    import pytest
 
     import app
 
-    def test_idempotent_lambda():
+
+    @pytest.fixture
+    def lambda_context():
+        @dataclass
+        class LambdaContext:
+            function_name: str = "test"
+            memory_limit_in_mb: int = 128
+            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
+            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
+
+            def get_remaining_time_in_millis(self) -> int:
+              return 5
+
+        return LambdaContext()
+
+    def test_idempotent_lambda(lambda_context):
         # Create our own Table resource using the endpoint for our DynamoDB Local instance
         resource = boto3.resource("dynamodb", endpoint_url='http://localhost:8000')
         table = resource.Table(app.persistence_layer.table_name)
         app.persistence_layer.table = table
 
-        result = app.handler({'testkey': 'testvalue'}, {})
+        result = app.handler({'testkey': 'testvalue'}, lambda_context)
         assert result['payment_id'] == 12345
     ```
 
@@ -1092,15 +1136,35 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 
 === "tests.py"
 
-    ```python hl_lines="6 7 8 9"
+    ```python hl_lines="26-29"
+    from dataclasses import dataclass
     from unittest.mock import MagicMock
+
+    import boto3
+    import pytest
 
     import app
 
-    def test_idempotent_lambda():
+
+    @pytest.fixture
+    def lambda_context():
+        @dataclass
+        class LambdaContext:
+            function_name: str = "test"
+            memory_limit_in_mb: int = 128
+            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
+            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
+
+            def get_remaining_time_in_millis(self) -> int:
+              return 5
+
+        return LambdaContext()
+
+
+    def test_idempotent_lambda(lambda_context):
         table = MagicMock()
         app.persistence_layer.table = table
-        result = app.handler({'testkey': 'testvalue'}, {})
+        result = app.handler({'testkey': 'testvalue'}, lambda_context)
         table.put_item.assert_called()
         ...
     ```
