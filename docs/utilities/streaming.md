@@ -22,6 +22,8 @@ to the data stream.
 
 ## Getting started
 
+### Streaming from a S3 object
+
 To stream an S3 file, you need the bucket name, the key and optionally a version ID.
 
 === "Non-versioned bucket"
@@ -54,7 +56,7 @@ Common options like gunzipping a stream and parsing data as CSV can be enabled d
 --8<-- "examples/streaming/src/s3_transform_common.py"
 ```
 
-Additionally, you can transform the data in place, or return a new object that encapsulates the transformation.
+Additionally, you can return a new object that encapsulates the transformation, or transform the data in place,
 Multiple transformations are applied in order.
 
 === "Returning a new object"
@@ -99,7 +101,7 @@ You can build your own custom data transformation by extending the `BaseTransfor
 The `transform` method receives an `IO[bytes]` object, and you are responsible for returning an object that is also
 a `IO[bytes]`.
 
-```python hl_lines="9 37 38"
+```python hl_lines="10 12 27-29"
 --8<-- "examples/streaming/src/s3_json_transform.py"
 ```
 
