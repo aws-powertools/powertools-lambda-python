@@ -15,12 +15,14 @@
 * **apigateway:** add all resolvers in testing your code section for accuracy ([#1688](https://github.com/awslabs/aws-lambda-powertools-python/issues/1688))
 * **examples:** linting unnecessary whitespace
 * **homepage:** update default value for `POWERTOOLS_DEV` ([#1695](https://github.com/awslabs/aws-lambda-powertools-python/issues/1695))
+* **idempotency:** add missing Lambda Context; note on thread-safe ([#1732](https://github.com/awslabs/aws-lambda-powertools-python/issues/1732))
 
 ## Features
 
 * **apigateway:** multiple exceptions in exception_handler ([#1707](https://github.com/awslabs/aws-lambda-powertools-python/issues/1707))
 * **event_sources:** extract CloudWatch Logs in Kinesis streams ([#1710](https://github.com/awslabs/aws-lambda-powertools-python/issues/1710))
 * **logger:** log uncaught exceptions via system's exception hook ([#1727](https://github.com/awslabs/aws-lambda-powertools-python/issues/1727))
+* **parser:** export Pydantic.errors through escape hatch ([#1728](https://github.com/awslabs/aws-lambda-powertools-python/issues/1728))
 * **parser:** extract CloudWatch Logs in Kinesis streams ([#1726](https://github.com/awslabs/aws-lambda-powertools-python/issues/1726))
 
 ## Maintenance
