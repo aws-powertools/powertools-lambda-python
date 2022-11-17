@@ -16,7 +16,8 @@ class BaseTransform(Generic[T]):
     @abstractmethod
     def transform(self, input_stream: IO[bytes]) -> T:
         """
-        Transform the data from input_stream into something that implements IO[bytes].
+        Transforms the data from input_stream into an implementation of IO[bytes].
+
         This allows you to return your own object while still conforming to a protocol
         that allows transformations to be nested.
         """

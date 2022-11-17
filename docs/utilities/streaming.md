@@ -9,13 +9,13 @@ The streaming utility handles streaming data from AWS for processing data sets b
 
 * Simple interface to stream data from S3, even when the data is larger than memory
 * Read your S3 file using the patterns you already know to deal with files in Python
-* Includes common transformations to data stored in S3, like Gzip and Json deserialization
+* Includes common transformations to data stored in S3, like Gzip and CSV deserialization
 * Build your own data transformation and add it to the pipeline
 
 ## Background
 
 Processing S3 files inside your Lambda function presents challenges when the file is bigger than the allocated
-amount of memory. Your data may also be stored using a set of encapsulation layers (gzip, JSON strings, etc).
+amount of memory. Your data may also be stored using a set of encapsulation layers (gzip, CSV, zip files, etc).
 
 This utility makes it easy to process data coming from S3 files, while applying data transformations transparently
 to the data stream.
@@ -87,14 +87,20 @@ For instance, if you want to unzip an S3 file compressed using `LZMA` you could 
 --8<-- "examples/streaming/src/s3_transform_lzma.py"
 ```
 
+Or, if you want to load a `TSV` file, you can just change the delimiter on the `CSV` transform:
+
+```python hl_lines="12"
+--8<-- "examples/streaming/src/s3_transform_tsv.py"
+```
+
 ### Building your own data transformation
 
 You can build your own custom data transformation by extending the `BaseTransform` class.
-The `transform` method receives an `io.RawIOBase` object, and you are responsible for returning an object that is also
-a `io.RawIOBase`.
+The `transform` method receives an `IO[bytes]` object, and you are responsible for returning an object that is also
+a `IO[bytes]`.
 
 ```python hl_lines="9 37 38"
---8<-- "aws_lambda_powertools/utilities/streaming/transformations/json.py"
+--8<-- "examples/streaming/src/s3_json_transform.py"
 ```
 
 ## Testing your code
