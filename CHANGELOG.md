@@ -7,6 +7,7 @@
 ## Bug Fixes
 
 * **apigateway:** support nested router decorators ([#1709](https://github.com/awslabs/aws-lambda-powertools-python/issues/1709))
+* **ci:** setup git client earlier to prevent dirty stash error
 * **parameters:** get_secret correctly return SecretBinary value ([#1717](https://github.com/awslabs/aws-lambda-powertools-python/issues/1717))
 
 ## Documentation
