@@ -91,7 +91,7 @@ class FeatureFlags:
             cond_value = condition.get(schema.CONDITION_VALUE)
 
             # rule based actions have no user context. the context is the condition key
-            if cond_action == schema.RuleAction.TIME_RANGE.value or schema.RuleAction.TIME_SELECTED_DAYS:
+            if cond_action in [schema.RuleAction.TIME_RANGE.value, schema.RuleAction.TIME_SELECTED_DAYS.value]:
                 context_value = condition.get(schema.CONDITION_KEY)
 
             if not self._match_by_action(action=cond_action, condition_value=cond_value, context_value=context_value):
