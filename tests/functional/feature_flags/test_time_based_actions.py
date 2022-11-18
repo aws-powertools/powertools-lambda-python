@@ -214,7 +214,7 @@ def test_time_based_multiple_conditions_utc_in_between_time_range_rule_match(moc
                     CONDITIONS_KEY: [
                         {
                             CONDITION_ACTION: RuleAction.TIME_RANGE.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_HOUR_UTC,
+                            CONDITION_KEY: TimeKeys.CURRENT_HOUR_UTC.value,
                             CONDITION_VALUE: {TimeValues.START_TIME: "09:00", TimeValues.END_TIME: "17:00"},
                         },
                         {
@@ -251,7 +251,7 @@ def test_time_based_multiple_conditions_utc_in_between_time_range_no_rule_match(
                     CONDITIONS_KEY: [
                         {
                             CONDITION_ACTION: RuleAction.TIME_RANGE.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_HOUR_UTC,
+                            CONDITION_KEY: TimeKeys.CURRENT_HOUR_UTC.value,
                             CONDITION_VALUE: {TimeValues.START_TIME: "09:00", TimeValues.END_TIME: "17:00"},
                         },
                         {
@@ -288,13 +288,13 @@ def test_time_based_utc_days_range_rule_match(mocker, config):
                     CONDITIONS_KEY: [
                         {
                             CONDITION_ACTION: RuleAction.TIME_SELECTED_DAYS.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC,  # similar to "IN" actions
+                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC.value,  # similar to "IN" actions
                             CONDITION_VALUE: [
-                                TimeValues.MONDAY,
-                                TimeValues.TUESDAY,
-                                TimeValues.WEDNESDAY,
-                                TimeValues.THURSDAY,
-                                TimeValues.FRIDAY,
+                                TimeValues.MONDAY.value,
+                                TimeValues.TUESDAY.value,
+                                TimeValues.WEDNESDAY.value,
+                                TimeValues.THURSDAY.value,
+                                TimeValues.FRIDAY.value,
                             ],
                         },
                     ],
@@ -324,13 +324,13 @@ def test_time_based_utc_days_range_no_rule_match(mocker, config):
                     CONDITIONS_KEY: [
                         {
                             CONDITION_ACTION: RuleAction.TIME_SELECTED_DAYS.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC,  # similar to "IN" actions
+                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC.value,  # similar to "IN" actions
                             CONDITION_VALUE: [
-                                TimeValues.MONDAY,
-                                TimeValues.TUESDAY,
-                                TimeValues.WEDNESDAY,
-                                TimeValues.THURSDAY,
-                                TimeValues.FRIDAY,
+                                TimeValues.MONDAY.value,
+                                TimeValues.TUESDAY.value,
+                                TimeValues.WEDNESDAY.value,
+                                TimeValues.THURSDAY.value,
+                                TimeValues.FRIDAY.value,
                             ],
                         },
                     ],
@@ -359,8 +359,8 @@ def test_time_based_utc_only_weekend_rule_match(mocker, config):
                     CONDITIONS_KEY: [
                         {
                             CONDITION_ACTION: RuleAction.TIME_SELECTED_DAYS.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC,  # similar to "IN" actions
-                            CONDITION_VALUE: [TimeValues.SATURDAY, TimeValues.SUNDAY],
+                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC.value,  # similar to "IN" actions
+                            CONDITION_VALUE: [TimeValues.SATURDAY.value, TimeValues.SUNDAY.value],
                         },
                     ],
                 }
@@ -389,8 +389,8 @@ def test_time_based_utc_only_weekend_no_rule_match(mocker, config):
                     CONDITIONS_KEY: [
                         {
                             CONDITION_ACTION: RuleAction.TIME_SELECTED_DAYS.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC,  # similar to "IN" actions
-                            CONDITION_VALUE: [TimeValues.SATURDAY, TimeValues.SUNDAY],
+                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC.value,  # similar to "IN" actions
+                            CONDITION_VALUE: [TimeValues.SATURDAY.value, TimeValues.SUNDAY.value],
                         },
                     ],
                 }
@@ -418,13 +418,13 @@ def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_rule_ma
                     CONDITIONS_KEY: [
                         {
                             CONDITION_ACTION: RuleAction.TIME_RANGE.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_HOUR_UTC,
-                            CONDITION_VALUE: {TimeValues.START_TIME: "11:00", TimeValues.END_TIME: "23:00"},
+                            CONDITION_KEY: TimeKeys.CURRENT_HOUR_UTC.value,
+                            CONDITION_VALUE: {TimeValues.START_TIME.value: "11:00", TimeValues.END_TIME.value: "23:00"},
                         },
                         {
                             CONDITION_ACTION: RuleAction.TIME_SELECTED_DAYS.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC,
-                            CONDITION_VALUE: [TimeValues.MONDAY, TimeValues.THURSDAY],
+                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC.value,
+                            CONDITION_VALUE: [TimeValues.MONDAY.value, TimeValues.THURSDAY.value],
                         },
                     ],
                 }
@@ -453,13 +453,13 @@ def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_no_rule
                     CONDITIONS_KEY: [
                         {
                             CONDITION_ACTION: RuleAction.TIME_RANGE.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_HOUR_UTC,
+                            CONDITION_KEY: TimeKeys.CURRENT_HOUR_UTC.value,
                             CONDITION_VALUE: {TimeValues.START_TIME: "11:00", TimeValues.END_TIME: "23:00"},
                         },
                         {
                             CONDITION_ACTION: RuleAction.TIME_SELECTED_DAYS.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC,
-                            CONDITION_VALUE: [TimeValues.MONDAY, TimeValues.THURSDAY],
+                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC.value,
+                            CONDITION_VALUE: [TimeValues.MONDAY.value, TimeValues.THURSDAY.value],
                         },
                     ],
                 }

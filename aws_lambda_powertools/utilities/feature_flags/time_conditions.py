@@ -6,17 +6,6 @@ from .schema import TimeKeys, TimeValues
 HOUR_MIN_SEPARATOR = ":"
 
 
-DAY_MAPPING = {
-    1: TimeValues.MONDAY.value,
-    2: TimeValues.TUESDAY.value,
-    3: TimeValues.WEDNESDAY.value,
-    4: TimeValues.THURSDAY.value,
-    5: TimeValues.FRIDAY.value,
-    6: TimeValues.SATURDAY.value,
-    7: TimeValues.SUNDAY.value,
-}
-
-
 def time_range_compare(action: str, values: Dict) -> bool:
     if action == TimeKeys.CURRENT_TIME_UTC.value:
         return _time_range_compare_current_time_utc(values)
@@ -38,8 +27,8 @@ def _get_utc_time_now() -> datetime:
 
 
 def _time_selected_days_current_days_compare(values: List[str]) -> bool:
-    current_day_number = _get_utc_time_now().isoweekday()
-    return DAY_MAPPING.get(current_day_number, "") in values
+    current_day = _get_utc_time_now().strftime("%A").upper()
+    return current_day in values
 
 
 def _time_range_compare_current_time_utc(values: Dict) -> bool:
