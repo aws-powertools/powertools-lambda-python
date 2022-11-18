@@ -8,8 +8,8 @@ from aws_lambda_powertools.utilities.streaming.transformations.base import BaseT
 
 class CsvTransform(BaseTransform):
     def transform(self, input_stream: IO[bytes]) -> DictReader:
-        encoding = self.kwargs.get("encoding", "utf-8")
-        newline = self.kwargs.get("newline")
+        encoding = self.kwargs.pop("encoding", "utf-8")
+        newline = self.kwargs.pop("newline", None)
 
         # csv module needs an Iterator[str], so we wrap the underlying stream into a TextIO
         iterator = io.TextIOWrapper(input_stream, encoding=encoding, newline=newline)
