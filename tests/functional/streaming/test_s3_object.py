@@ -39,7 +39,7 @@ def test_s3_transform():
     assert type(new_obj) is GzipFile
 
 
-def test_s3_transform_in_palce():
+def test_s3_transform_in_place():
     obj = S3Object(bucket="bucket", key="key")
 
     new_obj = obj.transform(GzipTransform(), in_place=True)
