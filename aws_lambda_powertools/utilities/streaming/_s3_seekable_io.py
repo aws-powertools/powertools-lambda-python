@@ -2,12 +2,14 @@ import io
 import logging
 from typing import IO, TYPE_CHECKING, AnyStr, Iterable, List, Optional
 
-import boto3
 from botocore import response
 
 from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
 
 response.StreamingBody = PowertoolsStreamingBody
+
+# We need to import boto3 after monkey patching StreamingBody, otherwise the patch is not applied
+import boto3  # noqa: E402
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3ServiceResource
