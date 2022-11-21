@@ -62,5 +62,6 @@ def test_s3_transform_after_read():
     assert obj.read(5) == b"hello"
 
     # THEN it raises ValueError
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as exc:
         obj.transform(GzipTransform())
+    assert str(exc.value) == "Cannot add transformations to a read object. Already read 5 bytes"

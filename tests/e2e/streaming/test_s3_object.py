@@ -1,5 +1,6 @@
 import json
 
+import boto3
 import pytest
 
 from tests.e2e.utils import data_fetcher
@@ -11,8 +12,27 @@ def regular_bucket_name(infrastructure: dict) -> str:
 
 
 @pytest.fixture
+def versioned_bucket_name(infrastructure: dict) -> str:
+    return infrastructure.get("VersionedBucket", "")
+
+
+@pytest.fixture
 def s3_object_handler_fn_arn(infrastructure: dict) -> str:
     return infrastructure.get("S3ObjectHandler", "")
+
+
+def get_object_version(bucket, key) -> str:
+    s3 = boto3.client("s3")
+    versions = s3.list_object_versions(Bucket=bucket)
+
+    for version in versions["Versions"]:
+        version_id = version["VersionId"]
+        version_key = version["Key"]
+
+        if version_key == key:
+            return version_id
+
+    raise ValueError(f"Cannot find versioned {key} inside {bucket}")
 
 
 def get_lambda_result_payload(s3_object_handler_fn_arn: str, payload: dict) -> dict:
@@ -30,8 +50,38 @@ def test_s3_object_size(s3_object_handler_fn_arn, regular_bucket_name):
     assert result.get("body") == "hello world"
 
 
+def test_s3_versioned_object_size(s3_object_handler_fn_arn, versioned_bucket_name):
+    key = "plain.txt"
+    payload = {
+        "bucket": versioned_bucket_name,
+        "key": key,
+        "version_id": get_object_version(versioned_bucket_name, key),
+    }
+    result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
+    assert result.get("size") == 12
+    assert result.get("body") == "hello world"
+
+
+def test_s3_object_non_existent(s3_object_handler_fn_arn, regular_bucket_name):
+    payload = {"bucket": regular_bucket_name, "key": "NOTEXISTENT.txt"}
+    result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
+    assert result.get("error") == "Not found"
+
+
 def test_s3_object_csv_constructor(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "csv.txt", "csv": True}
+    result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
+    assert result.get("body") == {"name": "hello", "value": "world"}
+
+
+def test_s3_versioned_object_csv_constructor(s3_object_handler_fn_arn, versioned_bucket_name):
+    key = "csv.txt"
+    payload = {
+        "bucket": versioned_bucket_name,
+        "key": key,
+        "version_id": get_object_version(versioned_bucket_name, key),
+        "csv": True,
+    }
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("body") == {"name": "hello", "value": "world"}
 
@@ -54,8 +104,33 @@ def test_s3_object_csv_gzip_constructor(s3_object_handler_fn_arn, regular_bucket
     assert result.get("body") == {"name": "hello", "value": "world"}
 
 
+def test_s3_versioned_object_csv_gzip_constructor(s3_object_handler_fn_arn, versioned_bucket_name):
+    key = "csv.txt.gz"
+    payload = {
+        "bucket": versioned_bucket_name,
+        "key": key,
+        "version_id": get_object_version(versioned_bucket_name, key),
+        "csv": True,
+        "gunzip": True,
+    }
+    result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
+    assert result.get("body") == {"name": "hello", "value": "world"}
+
+
 def test_s3_object_gzip_constructor(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "plain.txt.gz", "gunzip": True}
+    result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
+    assert result.get("body") == "hello world"
+
+
+def test_s3_versioned_object_gzip_constructor(s3_object_handler_fn_arn, versioned_bucket_name):
+    key = "plain.txt.gz"
+    payload = {
+        "bucket": versioned_bucket_name,
+        "key": key,
+        "version_id": get_object_version(versioned_bucket_name, key),
+        "gunzip": True,
+    }
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("body") == "hello world"
 

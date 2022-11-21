@@ -1,5 +1,7 @@
 import zipfile
 
+import botocore.exceptions
+
 from aws_lambda_powertools.utilities.streaming import S3Object
 from aws_lambda_powertools.utilities.streaming.transformations import (
     CsvTransform,
@@ -40,33 +42,41 @@ def lambda_handler(event, context):
     transform_zip_lzma = event.get("transform_zip_lzma", False)
     transform_in_place = event.get("transform_in_place", False)
 
-    obj = S3Object(bucket=bucket, key=key, version_id=version_id, gunzip=gunzip, csv=csv)
-    response = {"size": obj.size}
+    response = {}
 
-    transformations = []
-    if transform_gzip:
-        transformations.append(GzipTransform())
-    if transform_zip:
-        transformations.append(ZipTransform())
-    if transform_csv:
-        transformations.append(CsvTransform())
-    if transform_zip_lzma:
-        transformations.append(ZipTransform(compression=zipfile.ZIP_LZMA))
+    try:
+        obj = S3Object(bucket=bucket, key=key, version_id=version_id, gunzip=gunzip, csv=csv)
+        response["size"] = obj.size
 
-    if len(transformations) > 0:
-        if transform_in_place:
-            obj.transform(transformations, in_place=True)
+        transformations = []
+        if transform_gzip:
+            transformations.append(GzipTransform())
+        if transform_zip:
+            transformations.append(ZipTransform())
+        if transform_csv:
+            transformations.append(CsvTransform())
+        if transform_zip_lzma:
+            transformations.append(ZipTransform(compression=zipfile.ZIP_LZMA))
+
+        if len(transformations) > 0:
+            if transform_in_place:
+                obj.transform(transformations, in_place=True)
+            else:
+                obj = obj.transform(transformations)
+
+        if transform_zip or transform_zip_lzma:
+            response["manifest"] = obj.namelist()
+            response["body"] = obj.read(obj.namelist()[1]).rstrip()  # extracts the second file on the zip
+        elif transform_csv or csv:
+            response["body"] = obj.__next__()
+        elif transform_gzip or gunzip:
+            response["body"] = obj.readline().rstrip()
         else:
-            obj = obj.transform(transformations)
-
-    if transform_zip or transform_zip_lzma:
-        response["manifest"] = obj.namelist()
-        response["body"] = obj.read(obj.namelist()[1]).rstrip()  # extracts the second file on the zip
-    elif transform_csv or csv:
-        response["body"] = obj.__next__()
-    elif transform_gzip or gunzip:
-        response["body"] = obj.readline().rstrip()
-    else:
-        response["body"] = obj.readline().rstrip()
+            response["body"] = obj.readline().rstrip()
+    except botocore.exceptions.ClientError as e:
+        if e.response["Error"]["Code"] == "404":
+            response["error"] = "Not found"
+        else:
+            raise
 
     return response
