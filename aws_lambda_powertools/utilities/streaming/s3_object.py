@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import io
 from typing import (
     IO,
@@ -7,7 +9,6 @@ from typing import (
     List,
     Optional,
     Sequence,
-    Union,
     cast,
     overload,
 )
@@ -30,9 +31,9 @@ if TYPE_CHECKING:
 
 class S3Object(IO[bytes]):
     """
-    Seekable streamable S3 Object reader.
+    Seekable and streamable S3 Object reader.
 
-    S3Object implements the IO[bytes], backed by a seekable s3 streaming.
+    S3Object implements the IO[bytes], backed by a seekable S3 streaming.
 
     Parameters
     ----------
@@ -111,23 +112,21 @@ class S3Object(IO[bytes]):
         return self._transformed_stream
 
     @overload
-    def transform(
-        self, transformations: Union[BaseTransform[T], Sequence[BaseTransform[T]]], in_place: Literal[True]
-    ) -> T:
+    def transform(self, transformations: BaseTransform[T] | Sequence[BaseTransform[T]], in_place: Literal[True]) -> T:
         pass
 
     @overload
     def transform(
-        self, transformations: Union[BaseTransform[T], Sequence[BaseTransform[T]]], in_place: Literal[False]
+        self, transformations: BaseTransform[T] | Sequence[BaseTransform[T]], in_place: Literal[False]
     ) -> None:
         pass
 
     @overload
-    def transform(self, transformations: Union[BaseTransform[T], Sequence[BaseTransform[T]]]) -> T:
+    def transform(self, transformations: BaseTransform[T] | Sequence[BaseTransform[T]]) -> T:
         pass
 
     def transform(
-        self, transformations: Union[BaseTransform[T], Sequence[BaseTransform[T]]], in_place: Optional[bool] = False
+        self, transformations: BaseTransform[T] | Sequence[BaseTransform[T]], in_place: Optional[bool] = False
     ) -> Optional[T]:
         """
         Applies one or more data transformations to the stream.
