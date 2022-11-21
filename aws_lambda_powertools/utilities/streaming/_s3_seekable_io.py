@@ -1,6 +1,6 @@
 import io
 import logging
-from typing import IO, TYPE_CHECKING, AnyStr, Iterable, List, Optional
+from typing import IO, TYPE_CHECKING, Any, AnyStr, Dict, Iterable, List, Optional
 
 from botocore import response
 
@@ -12,8 +12,7 @@ response.StreamingBody = PowertoolsStreamingBody
 import boto3  # noqa: E402
 
 if TYPE_CHECKING:
-    from mypy_boto3_s3 import S3ServiceResource
-    from mypy_boto3_s3.service_resource import Object
+    from mypy_boto3_s3 import Client
 
 logger = logging.getLogger(__name__)
 
@@ -31,16 +30,19 @@ class _S3SeekableIO(IO[bytes]):
         The S3 key
     version_id: str, optional
         A version ID of the object, when the S3 bucket is versioned
-    boto3_s3_resource: S3ServiceResource, optional
-        An optional boto3 S3 resource. If missing, a new one will be created.
+    boto3_s3_client: boto3 S3 Client, optional
+        An optional boto3 S3 client. If missing, a new one will be created.
     """
 
     def __init__(
-        self, bucket: str, key: str, version_id: Optional[str] = None, boto3_s3_resource=Optional["S3ServiceResource"]
+        self,
+        bucket: str,
+        key: str,
+        version_id: Optional[str] = None,
+        boto3_s3_client=Optional["Client"],
     ):
         self.bucket = bucket
         self.key = key
-        self.version_id = version_id
 
         # Holds the current position in the stream
         self._position = 0
@@ -51,33 +53,21 @@ class _S3SeekableIO(IO[bytes]):
         # Caches the size of the object
         self._size: Optional[int] = None
 
-        self._s3_object: Optional["Object"] = None
-        self._s3_resource: Optional["S3ServiceResource"] = boto3_s3_resource
+        self._s3_kwargs: Dict[str, Any] = {"Bucket": bucket, "Key": key}
+        if version_id is not None:
+            self._s3_kwargs["VersionId"] = version_id
+
+        self._s3_client: Optional["Client"] = boto3_s3_client
         self._raw_stream: Optional[PowertoolsStreamingBody] = None
 
     @property
-    def s3_resource(self) -> "S3ServiceResource":
+    def s3_client(self) -> "Client":
         """
-        Returns a boto3 S3ServiceResource
+        Returns a boto3 S3 client
         """
-        if self._s3_resource is None:
-            self._s3_resource = boto3.resource("s3")
-        return self._s3_resource
-
-    @property
-    def s3_object(self) -> "Object":
-        """
-        Returns a boto3 S3Object
-        """
-        if self._s3_object is None:
-            if self.version_id is not None:
-                self._s3_object = self.s3_resource.ObjectVersion(
-                    bucket_name=self.bucket, object_key=self.key, id=self.version_id
-                ).Object()
-            else:
-                self._s3_object = self.s3_resource.Object(bucket_name=self.bucket, key=self.key)
-
-        return self._s3_object
+        if self._s3_client is None:
+            self._s3_client = boto3.client("s3")
+        return self._s3_client
 
     @property
     def size(self) -> int:
@@ -85,7 +75,7 @@ class _S3SeekableIO(IO[bytes]):
         Retrieves the size of the S3 object
         """
         if self._size is None:
-            self._size = self.s3_object.content_length
+            self._size = self.s3_client.head_object(**self._s3_kwargs).get("ContentLength", 0)
         return self._size
 
     @property
@@ -96,7 +86,7 @@ class _S3SeekableIO(IO[bytes]):
         if self._raw_stream is None:
             range_header = "bytes=%d-" % self._position
             logging.debug(f"Starting new stream at {range_header}...")
-            self._raw_stream = self.s3_object.get(Range=range_header)["Body"]
+            self._raw_stream = self.s3_client.get_object(**self._s3_kwargs, Range=range_header).get("Body")
             self._closed = False
 
         return self._raw_stream

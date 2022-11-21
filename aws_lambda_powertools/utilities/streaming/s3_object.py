@@ -25,7 +25,7 @@ from aws_lambda_powertools.utilities.streaming.transformations.base import (
 )
 
 if TYPE_CHECKING:
-    from mypy_boto3_s3 import S3ServiceResource
+    from mypy_boto3_s3 import Client
 
 
 class S3Object(IO[bytes]):
@@ -42,8 +42,8 @@ class S3Object(IO[bytes]):
         The S3 key
     version_id: str, optional
         A version ID of the object, when the S3 bucket is versioned
-    boto3_s3_resource: S3ServiceResource, optional
-        An optional boto3 S3 resource. If missing, a new one will be created.
+    boto3_s3_client: S3Client, optional
+        An optional boto3 S3 client. If missing, a new one will be created.
     gunzip: bool, optional
         Enables the Gunzip data transformation
     csv: bool, optional
@@ -67,7 +67,7 @@ class S3Object(IO[bytes]):
         bucket: str,
         key: str,
         version_id: Optional[str] = None,
-        boto3_s3_resource: Optional["S3ServiceResource"] = None,
+        boto3_s3_client: Optional["Client"] = None,
         gunzip: Optional[bool] = False,
         csv: Optional[bool] = False,
     ):
@@ -76,9 +76,7 @@ class S3Object(IO[bytes]):
         self.version_id = version_id
 
         # The underlying seekable IO, where all the magic happens
-        self.raw_stream = _S3SeekableIO(
-            bucket=bucket, key=key, version_id=version_id, boto3_s3_resource=boto3_s3_resource
-        )
+        self.raw_stream = _S3SeekableIO(bucket=bucket, key=key, version_id=version_id, boto3_s3_client=boto3_s3_client)
 
         # Stores the list of data transformations
         self._data_transformations: List[BaseTransform] = []
