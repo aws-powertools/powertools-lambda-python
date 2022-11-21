@@ -214,19 +214,19 @@ class S3Object(IO[bytes]):
         return self.transformed_stream.__iter__()
 
     def fileno(self) -> int:
-        raise NotImplementedError()
+        raise NotImplementedError("this stream is not backed by a file descriptor")
 
     def flush(self) -> None:
-        raise NotImplementedError()
+        raise NotImplementedError("this stream is not writable")
 
     def isatty(self) -> bool:
         return False
 
     def truncate(self, size: Optional[int] = 0) -> int:
-        raise NotImplementedError()
+        raise NotImplementedError("this stream is not writable")
 
     def write(self, data: AnyStr) -> int:
-        raise NotImplementedError()
+        raise NotImplementedError("this stream is not writable")
 
     def writelines(self, lines: Iterable[AnyStr]) -> None:
-        raise NotImplementedError()
+        raise NotImplementedError("this stream is not writable")
