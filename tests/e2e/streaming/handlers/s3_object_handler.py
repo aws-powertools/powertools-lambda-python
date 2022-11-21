@@ -66,5 +66,7 @@ def lambda_handler(event, context):
         response["body"] = obj.__next__()
     elif transform_gzip or gunzip:
         response["body"] = obj.readline().rstrip()
+    else:
+        response["body"] = obj.readline().rstrip()
 
     return response

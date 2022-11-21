@@ -3,7 +3,11 @@ import logging
 from typing import IO, TYPE_CHECKING, AnyStr, Iterable, List, Optional
 
 import boto3
-from botocore.response import StreamingBody
+from botocore import response
+
+from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
+
+response.StreamingBody = PowertoolsStreamingBody
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3ServiceResource
@@ -47,7 +51,7 @@ class _S3SeekableIO(IO[bytes]):
 
         self._s3_object: Optional["Object"] = None
         self._s3_resource: Optional["S3ServiceResource"] = boto3_s3_resource
-        self._raw_stream: Optional[StreamingBody] = None
+        self._raw_stream: Optional[PowertoolsStreamingBody] = None
 
     @property
     def s3_resource(self) -> "S3ServiceResource":
@@ -83,7 +87,7 @@ class _S3SeekableIO(IO[bytes]):
         return self._size
 
     @property
-    def raw_stream(self) -> StreamingBody:
+    def raw_stream(self) -> PowertoolsStreamingBody:
         """
         Returns the boto3 StreamingBody, starting the stream from the seeked position.
         """

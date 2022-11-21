@@ -27,6 +27,7 @@ def test_s3_object_size(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "plain.txt"}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("size") == 12
+    assert result.get("body") == "hello world"
 
 
 def test_s3_object_csv_constructor(s3_object_handler_fn_arn, regular_bucket_name):
