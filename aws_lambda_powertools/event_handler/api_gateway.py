@@ -40,7 +40,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger = logging.getLogger(__name__)
 
 _DYNAMIC_ROUTE_PATTERN = r"(<\w+>)"
-_SAFE_URI = "-._~()'!*:@,;"  # https://www.ietf.org/rfc/rfc3986.txt
+_SAFE_URI = "-._~()'!*:@,;="  # https://www.ietf.org/rfc/rfc3986.txt
 # API GW/ALB decode non-safe URI chars; we must support them too
 _UNSAFE_URI = "%<> \[\]{}|^"  # noqa: W605
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
