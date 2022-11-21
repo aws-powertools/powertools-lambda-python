@@ -31,7 +31,8 @@ nav:
       - utilities/feature_flags.md
       - utilities/jmespath_functions.md
       - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
-      - utilities/streaming.md
+      - Streaming:
+        - utilities/streaming/s3.md
 
 theme:
   name: material
