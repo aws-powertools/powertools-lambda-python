@@ -155,3 +155,38 @@ class PowertoolsStreamingBody(IOBase):
     def close(self):
         """Close the underlying http response stream."""
         self._raw_stream.close()
+
+
+def convert_to_response_dict(http_response, operation_model):
+    """Convert an HTTP response object to a request dict.
+
+    This converts the requests library's HTTP response object to
+    a dictionary.
+
+    :type http_response: botocore.vendored.requests.model.Response
+    :param http_response: The HTTP response from an AWS service request.
+
+    :rtype: dict
+    :return: A response dictionary which will contain the following keys:
+        * headers (dict)
+        * status_code (int)
+        * body (string or file-like object)
+
+    """
+    response_dict = {
+        "headers": http_response.headers,
+        "status_code": http_response.status_code,
+        "context": {
+            "operation_name": operation_model.name,
+        },
+    }
+    if response_dict["status_code"] >= 300:
+        response_dict["body"] = http_response.content
+    elif operation_model.has_event_stream_output:
+        response_dict["body"] = http_response.raw
+    elif operation_model.has_streaming_output:
+        length = response_dict["headers"].get("content-length")
+        response_dict["body"] = PowertoolsStreamingBody(http_response.raw, length)
+    else:
+        response_dict["body"] = http_response.content
+    return response_dict
