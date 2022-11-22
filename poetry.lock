@@ -911,8 +911,8 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-lambda"
-version = "1.26.0.post1"
-description = "Type annotations for boto3.Lambda 1.26.0 service generated with mypy-boto3-builder 7.11.10"
+version = "1.26.12"
+description = "Type annotations for boto3.Lambda 1.26.12 service generated with mypy-boto3-builder 7.11.10"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -1540,7 +1540,7 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.4"
-content-hash = "f99e9b9fc39b5f37397c13ea412f67c0d19a75de3978e3f1298ee32a7b367278"
+content-hash = "dbd8c3c8df7740ac805a0a6dc5c69f370edc9de23b6139df9b38813455198f7c"
 
 [metadata.files]
 attrs = [
@@ -1953,8 +1953,8 @@ mypy-boto3-dynamodb = [
     {file = "mypy_boto3_dynamodb-1.26.13.post16-py3-none-any.whl", hash = "sha256:76940c8aeb61945d6be3b78322825503d27d6481036d4c4498f02bf15a3de765"},
 ]
 mypy-boto3-lambda = [
-    {file = "mypy-boto3-lambda-1.26.0.post1.tar.gz", hash = "sha256:3e6dedf959aa13fc58e6721d56c93f91068c468659b3d0e22580830f3b39aebc"},
-    {file = "mypy_boto3_lambda-1.26.0.post1-py3-none-any.whl", hash = "sha256:c198f5a3749c945cb66eecaf225657d9e4ac23d825ca923827df8f771fab91c4"},
+    {file = "mypy-boto3-lambda-1.26.12.tar.gz", hash = "sha256:2063fa9c9f926e686a0d6229f063be3e5a083729f2f4de9c547073970a476ce3"},
+    {file = "mypy_boto3_lambda-1.26.12-py3-none-any.whl", hash = "sha256:8c9391f51f9ec0d2e6b472a9e465d17605b704535a9430017e2d2ace7d6679c5"},
 ]
 mypy-boto3-logs = [
     {file = "mypy-boto3-logs-1.26.3.tar.gz", hash = "sha256:45f6616118ef758eb899fff206f4c835b443845af5d77b16f39c19c1a257dcec"},
