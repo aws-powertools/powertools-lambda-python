@@ -6,7 +6,11 @@ from ...shared.types import JSONType
 from . import schema
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError
-from .time_conditions import time_range_compare, time_selected_days_compare
+from .time_conditions import (
+    compare_between_utc_days,
+    compare_utc_date_range,
+    compare_utc_datetime_range,
+)
 
 
 class FeatureFlags:
@@ -60,8 +64,9 @@ class FeatureFlags:
             schema.RuleAction.KEY_NOT_IN_VALUE.value: lambda a, b: a not in b,
             schema.RuleAction.VALUE_IN_KEY.value: lambda a, b: b in a,
             schema.RuleAction.VALUE_NOT_IN_KEY.value: lambda a, b: b not in a,
-            schema.RuleAction.TIME_RANGE.value: lambda a, b: time_range_compare(a, b),
-            schema.RuleAction.TIME_SELECTED_DAYS.value: lambda a, b: time_selected_days_compare(a, b),
+            schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value: lambda a, b: compare_utc_date_range(a, b),
+            schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value: lambda a, b: compare_utc_datetime_range(a, b),
+            schema.RuleAction.SCHEDULE_BETWEEN_DAYS.value: lambda a, b: compare_between_utc_days(a, b),
         }
 
         try:
@@ -91,7 +96,11 @@ class FeatureFlags:
             cond_value = condition.get(schema.CONDITION_VALUE)
 
             # time based rule actions have no user context. the context is the condition key
-            if cond_action in (schema.RuleAction.TIME_RANGE.value, schema.RuleAction.TIME_SELECTED_DAYS.value):
+            if cond_action in (
+                schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value,
+                schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value,
+                schema.RuleAction.SCHEDULE_BETWEEN_DAYS.value,
+            ):
                 context_value = condition.get(schema.CONDITION_KEY)  # e.g., CURRENT_HOUR_UTC
 
             if not self._match_by_action(action=cond_action, condition_value=cond_value, context_value=context_value):
