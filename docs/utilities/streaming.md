@@ -8,8 +8,8 @@ The streaming utility handles streaming data from AWS for processing data sets b
 ## Key Features
 
 * Simple interface to stream data from S3, even when the data is larger than memory
-* Read your S3 file using the patterns you already know to deal with files in Python
-* Includes common transformations to data stored in S3, like Gzip and CSV deserialization
+* Read your S3 file using the patterns you already know when dealing with files in Python
+* Includes common transformations to data stored in S3, like gunzip and CSV deserialization
 * Build your own data transformation and add it to the pipeline
 
 ## Background
@@ -17,7 +17,7 @@ The streaming utility handles streaming data from AWS for processing data sets b
 Processing S3 files inside your Lambda function presents challenges when the file is bigger than the allocated
 amount of memory. Your data may also be stored using a set of encapsulation layers (gzip, CSV, zip files, etc).
 
-This utility makes it easy to process data coming from S3 files, while applying data transformations transparently
+This utility makes it easy to process data coming from S3 files, while transparently applying data transformations
 to the data stream.
 
 ## Getting started
@@ -42,22 +42,24 @@ The code above will stream the contents from S3 as fast as possible, using minim
 
 ### Data transformations
 
-The utility has some built-in data transformations to help deal with common scenarios while streaming data from S3.
+The utility has some built-in data transformations to help dealing with common scenarios while streaming data from S3.
 
-| Name     | Description                                                                                      |
-|----------|--------------------------------------------------------------------------------------------------|
-| **Gzip** | Gunzips the stream of data using the [gzip library](https://docs.python.org/3/library/gzip.html) |
-| **Zip**  | Exposes the stream as a [ZipFile object](https://docs.python.org/3/library/zipfile.html)         |
-| **CSV**  | Parses each line as a CSV object, returning dictionary objects                                   |
+| Name     | Description                                                                                      | Class name    |
+|----------|--------------------------------------------------------------------------------------------------|---------------|
+| **Gzip** | Gunzips the stream of data using the [gzip library](https://docs.python.org/3/library/gzip.html) | GzipTransform |
+| **Zip**  | Exposes the stream as a [ZipFile object](https://docs.python.org/3/library/zipfile.html)         | ZipTransform  |
+| **CSV**  | Parses each line as a CSV object, returning dictionary objects                                   | CsvTransform  |
 
 Common options like gunzipping a stream and parsing data as CSV can be enabled directly on the constructor:
 
-```python hl_lines="8"
---8<-- "examples/streaming/src/s3_transform_common.py"
-```
+=== "Enabling inflation of gzip data"
 
-Additionally, you can return a new object that encapsulates the transformation, or transform the data in place,
-Multiple transformations are applied in order.
+    ```python hl_lines="8"
+    --8<-- "examples/streaming/src/s3_transform_common.py"
+    ```
+
+Additionally, you can return a new object that encapsulates a transformation, or transform the data in place, by calling
+the `transform` method. Multiple transformations are applied in order.
 
 === "Returning a new object"
 
@@ -77,23 +79,27 @@ Multiple transformations are applied in order.
 
 Each data transformation class accepts additional options to customize the transformation.
 
-| Name     | Description                                                                                                    |
-|----------|----------------------------------------------------------------------------------------------------------------|
-| **Gzip** | All the options from the [GzipFile constructor](https://docs.python.org/3/library/gzip.html#gzip.GzipFile)     |
-| **Zip**  | All the options from the [ZipFile constructor](https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile) |
-| **CSV**  | All the options from the [DictReader constructor](https://docs.python.org/3/library/csv.html#csv.DictReader)   |
+| Name              | Description                                                                                                    |
+|-------------------|----------------------------------------------------------------------------------------------------------------|
+| **GzipTransform** | All the options from the [GzipFile constructor](https://docs.python.org/3/library/gzip.html#gzip.GzipFile)     |
+| **ZipTransform**  | All the options from the [ZipFile constructor](https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile) |
+| **CsvTransform**  | All the options from the [DictReader constructor](https://docs.python.org/3/library/csv.html#csv.DictReader)   |
 
 For instance, if you want to unzip an S3 file compressed using `LZMA` you could pass that option in the constructor:
 
-```python hl_lines="12"
---8<-- "examples/streaming/src/s3_transform_lzma.py"
-```
+=== "Unzipping LZMA data"
+
+    ```python hl_lines="12"
+    --8<-- "examples/streaming/src/s3_transform_lzma.py"
+    ```
 
 Or, if you want to load a `TSV` file, you can just change the delimiter on the `CSV` transform:
 
-```python hl_lines="12"
---8<-- "examples/streaming/src/s3_transform_tsv.py"
-```
+=== "Loading TSV data"
+
+    ```python hl_lines="11"
+    --8<-- "examples/streaming/src/s3_transform_tsv.py"
+    ```
 
 ### Building your own data transformation
 
@@ -101,9 +107,11 @@ You can build your own custom data transformation by extending the `BaseTransfor
 The `transform` method receives an `IO[bytes]` object, and you are responsible for returning an object that is also
 a `IO[bytes]`.
 
-```python hl_lines="10 12 27-29"
---8<-- "examples/streaming/src/s3_json_transform.py"
-```
+=== "Custom JSON transform"
+
+    ```python hl_lines="10 12 27-29"
+    --8<-- "examples/streaming/src/s3_json_transform.py"
+    ```
 
 ## Testing your code
 
