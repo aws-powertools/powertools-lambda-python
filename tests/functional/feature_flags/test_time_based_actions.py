@@ -3,7 +3,6 @@ from typing import Dict, Optional
 
 import pytest
 from botocore.config import Config
-from dateutil import tz
 
 from aws_lambda_powertools.utilities.feature_flags.appconfig import AppConfigStore
 from aws_lambda_powertools.utilities.feature_flags.feature_flags import FeatureFlags
@@ -68,7 +67,16 @@ def mock_current_utc_time(
     msec: int,
 ) -> None:
     mocked_time = mocker.patch("aws_lambda_powertools.utilities.feature_flags.time_conditions._get_utc_time_now")
-    mocked_time.return_value = datetime.datetime(year, month, day, hour, minute, second, msec, tz.gettz("UTC"))
+    mocked_time.return_value = datetime.datetime(
+        year=year,
+        month=month,
+        day=day,
+        hour=hour,
+        minute=minute,
+        second=second,
+        microsecond=msec,
+        tzinfo=datetime.timezone.utc,
+    )
 
 
 def test_time_based_utc_in_between_time_range_rule_match(mocker, config):
