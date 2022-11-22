@@ -3,14 +3,8 @@ import logging
 from typing import IO, TYPE_CHECKING, Any, AnyStr, Dict, Iterable, List, Optional
 
 import boto3
-from botocore import endpoint
 
-from aws_lambda_powertools.utilities.streaming.compat import (
-    PowertoolsStreamingBody,
-    convert_to_response_dict,
-)
-
-endpoint.convert_to_response_dict = convert_to_response_dict
+from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import Client
