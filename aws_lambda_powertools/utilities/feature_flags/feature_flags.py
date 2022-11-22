@@ -86,13 +86,13 @@ class FeatureFlags:
             return False
 
         for condition in conditions:
-            context_value = context.get(str(condition.get(schema.CONDITION_KEY)))
+            context_value = context.get(condition.get(schema.CONDITION_KEY, ""))
             cond_action = condition.get(schema.CONDITION_ACTION, "")
             cond_value = condition.get(schema.CONDITION_VALUE)
 
-            # rule based actions have no user context. the context is the condition key
-            if cond_action in [schema.RuleAction.TIME_RANGE.value, schema.RuleAction.TIME_SELECTED_DAYS.value]:
-                context_value = condition.get(schema.CONDITION_KEY)
+            # time based rule actions have no user context. the context is the condition key
+            if cond_action in (schema.RuleAction.TIME_RANGE.value, schema.RuleAction.TIME_SELECTED_DAYS.value):
+                context_value = condition.get(schema.CONDITION_KEY)  # e.g., CURRENT_HOUR_UTC
 
             if not self._match_by_action(action=cond_action, condition_value=cond_value, context_value=context_value):
                 self.logger.debug(

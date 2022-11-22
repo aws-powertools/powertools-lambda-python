@@ -33,15 +33,15 @@ def _time_selected_days_current_days_compare(values: List[str]) -> bool:
 
 def _time_range_compare_current_time_utc(values: Dict) -> bool:
     current_time_utc: datetime = _get_utc_time_now()
-    start_date = datetime.strptime(values.get(TimeValues.START_TIME, ""), "%Y-%m-%dT%H:%M:%S%z")
-    end_date = datetime.strptime(values.get(TimeValues.END_TIME, ""), "%Y-%m-%dT%H:%M:%S%z")
+    start_date = datetime.strptime(values.get(TimeValues.START_TIME.value, ""), "%Y-%m-%dT%H:%M:%S%z")
+    end_date = datetime.strptime(values.get(TimeValues.END_TIME.value, ""), "%Y-%m-%dT%H:%M:%S%z")
     return current_time_utc >= start_date and current_time_utc <= end_date
 
 
 def _time_range_compare_current_hour_utc(values: Dict) -> bool:
     current_time_utc: datetime = _get_utc_time_now()
-    start_hour, start_min = values.get(TimeValues.START_TIME, HOUR_MIN_SEPARATOR).split(HOUR_MIN_SEPARATOR)
-    end_hour, end_min = values.get(TimeValues.END_TIME, HOUR_MIN_SEPARATOR).split(HOUR_MIN_SEPARATOR)
+    start_hour, start_min = values.get(TimeValues.START_TIME.value, HOUR_MIN_SEPARATOR).split(HOUR_MIN_SEPARATOR)
+    end_hour, end_min = values.get(TimeValues.END_TIME.value, HOUR_MIN_SEPARATOR).split(HOUR_MIN_SEPARATOR)
     return (
         current_time_utc.hour >= int(start_hour)
         and current_time_utc.hour <= int(end_hour)

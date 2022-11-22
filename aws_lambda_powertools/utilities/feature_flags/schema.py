@@ -16,7 +16,7 @@ CONDITION_ACTION = "action"
 FEATURE_DEFAULT_VAL_TYPE_KEY = "boolean_type"
 
 
-class RuleAction(str, Enum):
+class RuleAction(Enum):
     EQUALS = "EQUALS"
     NOT_EQUALS = "NOT_EQUALS"
     KEY_GREATER_THAN_VALUE = "KEY_GREATER_THAN_VALUE"
@@ -35,13 +35,13 @@ class RuleAction(str, Enum):
     TIME_SELECTED_DAYS = "TIME_SELECTED_DAYS"
 
 
-class TimeKeys(str, Enum):
+class TimeKeys(Enum):
     CURRENT_HOUR_UTC = "CURRENT_HOUR_UTC"
     CURRENT_DAY_UTC = "CURRENT_DAY_UTC"
     CURRENT_TIME_UTC = "CURRENT_TIME_UTC"
 
 
-class TimeValues(str, Enum):
+class TimeValues(Enum):
     START_TIME = "START_TIME"
     END_TIME = "END_TIME"
     SUNDAY = "SUNDAY"

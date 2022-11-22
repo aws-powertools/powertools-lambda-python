@@ -215,7 +215,7 @@ def test_time_based_multiple_conditions_utc_in_between_time_range_rule_match(moc
                         {
                             CONDITION_ACTION: RuleAction.TIME_RANGE.value,  # this condition matches
                             CONDITION_KEY: TimeKeys.CURRENT_HOUR_UTC.value,
-                            CONDITION_VALUE: {TimeValues.START_TIME: "09:00", TimeValues.END_TIME: "17:00"},
+                            CONDITION_VALUE: {TimeValues.START_TIME.value: "09:00", TimeValues.END_TIME.value: "17:00"},
                         },
                         {
                             CONDITION_ACTION: RuleAction.EQUALS.value,
