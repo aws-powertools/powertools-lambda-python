@@ -121,9 +121,7 @@ Or, if you want to load a tab-separated file (TSV), you can use the `delimiter` 
 
 ### Building your own data transformation
 
-You can build your own custom data transformation by extending the `BaseTransform` class.
-The `transform` method receives an `IO[bytes]` object, and you are responsible for returning an object that is also
-a `IO[bytes]`.
+You can build your own custom data transformation by extending the `BaseTransform` class. The `transform` method receives an `IO[bytes]` object, and you are responsible for returning an `IO[bytes]` object.
 
 === "Custom JSON transform"
 
