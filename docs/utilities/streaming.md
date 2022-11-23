@@ -13,17 +13,17 @@ The streaming utility handles datasets larger than the available memory as strea
 
 ## Background
 
-Processing S3 files inside your Lambda function presents challenges when the file is bigger than the allocated
-amount of memory. Your data may also be stored using a set of encapsulation layers (gzip, CSV, zip files, etc).
+Within Lambda, processing S3 objects larger than the allocated amount of memory can lead to out of memory or timeout situations. For cost efficiency, your S3 objects may be encoded and compressed in various formats (_gzip, CSV, zip files, etc_), increasing the  amount of non-business logic and reliability risks.
 
-This utility makes it easy to process data coming from S3 files, while transparently applying data transformations
-to the data stream.
+Streaming utility makes this process easier by fetching parts of your data as you consume it, and transparently applying data transformations to the data stream. This allows you to process one, a few, or all rows of your large dataset while consuming a few MBs only.
 
 ## Getting started
 
 ### Streaming from a S3 object
 
-To stream an S3 file, you need the bucket name, the key and optionally a version ID.
+With `S3Object`, you'll need the bucket, object key, and optionally a version ID to stream its content.
+
+We will fetch parts of your data from S3 as you process each line, consuming only the absolute minimal amount of memory.
 
 === "Non-versioned bucket"
 
@@ -37,28 +37,24 @@ To stream an S3 file, you need the bucket name, the key and optionally a version
     --8<-- "examples/streaming/src/s3_basic_stream_with_version.py"
     ```
 
-The code above will stream the contents from S3 as fast as possible, using minimal memory.
-
 ### Data transformations
 
-The utility has some built-in data transformations to help dealing with common scenarios while streaming data from S3.
+!!! tip "Think of data transformations like a data processing pipeline - apply one or more in order."
 
-| Name     | Description                                                                                      | Class name    |
-| -------- | ------------------------------------------------------------------------------------------------ | ------------- |
-| **Gzip** | Gunzips the stream of data using the [gzip library](https://docs.python.org/3/library/gzip.html) | GzipTransform |
-| **Zip**  | Exposes the stream as a [ZipFile object](https://docs.python.org/3/library/zipfile.html)         | ZipTransform  |
-| **CSV**  | Parses each line as a CSV object, returning dictionary objects                                   | CsvTransform  |
+As data is streamed, you can apply transformations to your data like decompressing gzip content and deserializing a CSV into a dictionary.
 
-Common options like processing a gzipped stream or parsing data as CSV can be enabled directly on the constructor:
+For popular data transformations like CSV or Gzip, you can quickly enable it at the constructor level:
 
-=== "Enabling inflation of gzip data"
+=== "Decompressing and deserializing CSV"
 
     ```python hl_lines="8"
     --8<-- "examples/streaming/src/s3_transform_common.py"
     ```
 
-Additionally, you can return a new object that encapsulates a transformation, or transform the data in place, by calling
-the `transform` method. Multiple transformations are applied in order.
+Alternatively, you can apply transformations later via the `transform` method. By default, it will return the transformed stream you can use to read its contents. If you prefer in-place modifications, use `in_place=True`.
+
+???+ question "When is this useful?"
+    In scenarios where you might have a reusable logic to apply common transformations. This might be a function or a class that receives an instance of `S3Object`.
 
 === "Returning a new object"
 
@@ -67,6 +63,8 @@ the `transform` method. Multiple transformations are applied in order.
     ```
 
 === "Transform in-place"
+
+    Note that when using `in_place=True`, there is no return (`None`).
 
     ```python hl_lines="13"
     --8<-- "examples/streaming/src/s3_transform_in_place.py"
@@ -82,6 +80,16 @@ the `transform` method. Multiple transformations are applied in order.
     --8<-- "examples/streaming/src/s3_transform_zipfile.py"
     ```
 
+#### Built-in data transformations
+
+We provide popular built-in transformations that you can apply against your streaming data.
+
+| Name     | Description                                                                                      | Class name    |
+| -------- | ------------------------------------------------------------------------------------------------ | ------------- |
+| **Gzip** | Gunzips the stream of data using the [gzip library](https://docs.python.org/3/library/gzip.html) | GzipTransform |
+| **Zip**  | Exposes the stream as a [ZipFile object](https://docs.python.org/3/library/zipfile.html)         | ZipTransform  |
+| **CSV**  | Parses each CSV line as a CSV object, returning dictionary objects                               | CsvTransform  |
+
 ## Advanced
 
 ### Custom options for data transformations
@@ -94,7 +102,7 @@ Each data transformation class accepts additional options to customize the trans
 | **ZipTransform**  | All the options from the [ZipFile constructor](https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile) |
 | **CsvTransform**  | All the options from the [DictReader constructor](https://docs.python.org/3/library/csv.html#csv.DictReader)   |
 
-For instance, if you want to unzip an S3 file compressed using `LZMA` you could pass that option in the constructor:
+For instance, if you want to unzip an S3 object compressed using `LZMA` you could pass that option in the constructor:
 
 === "Unzipping LZMA data"
 
