@@ -18,17 +18,17 @@ def test_s3_basic_stream():
 
 
 def test_s3_gzip_stream():
-    obj = S3Object(bucket="bucket", key="key", gunzip=True)
+    obj = S3Object(bucket="bucket", key="key", is_gzip=True)
     assert type(obj.transformed_stream) is GzipFile
 
 
 def test_s3_csv_stream():
-    obj = S3Object(bucket="bucket", key="key", csv=True)
+    obj = S3Object(bucket="bucket", key="key", is_csv=True)
     assert type(obj.transformed_stream) is DictReader
 
 
 def test_s3_gzip_csv_stream():
-    obj = S3Object(bucket="bucket", key="key", gunzip=True, csv=True)
+    obj = S3Object(bucket="bucket", key="key", is_gzip=True, is_csv=True)
     assert type(obj.transformed_stream) is DictReader
 
 
@@ -56,7 +56,7 @@ def test_s3_transform_after_read():
         "get_object", {"Body": StreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))}
     )
     s3_stub.activate()
-    obj = S3Object(bucket="bucket", key="key", boto3_s3_client=s3_client)
+    obj = S3Object(bucket="bucket", key="key", boto3_client=s3_client)
 
     # WHEN you read some part of the object and then apply a transformation
     assert obj.read(5) == b"hello"

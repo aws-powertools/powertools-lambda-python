@@ -16,8 +16,8 @@ bucket: str
 key: str
 version_id: str, optional
 
-gunzip: bool, optional
-csv: bool, optional
+is_gzip: bool, optional
+is_csv: bool, optional
 
 transform_gunzip: bool, optional
 transform_csv: bool, optional
@@ -33,8 +33,8 @@ def lambda_handler(event, context):
     key = event.get("key")
     version_id = event.get("version_id", None)
 
-    gunzip = event.get("gunzip", False)
-    csv = event.get("csv", False)
+    gunzip = event.get("is_gzip", False)
+    csv = event.get("is_csv", False)
 
     transform_gzip = event.get("transform_gzip", False)
     transform_csv = event.get("transform_csv", False)
@@ -45,7 +45,7 @@ def lambda_handler(event, context):
     response = {}
 
     try:
-        obj = S3Object(bucket=bucket, key=key, version_id=version_id, gunzip=gunzip, csv=csv)
+        obj = S3Object(bucket=bucket, key=key, version_id=version_id, is_gzip=gunzip, is_csv=csv)
         response["size"] = obj.size
 
         transformations = []

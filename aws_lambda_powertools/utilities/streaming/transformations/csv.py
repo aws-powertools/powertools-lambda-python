@@ -25,7 +25,7 @@ class CsvTransform(BaseTransform):
         >>>   print(row)
 
     Since the underlying stream of bytes needs to be converted into a stream of characters (Iterator[str]),
-    we wrap the input into a io.TextIOWrapper. This means you have control over the text encoding
+    we wrap the input into an io.TextIOWrapper. This means you have control over the text encoding
     and line termination options.
 
         >>> from aws_lambda_powertools.utilities.streaming import S3Object
@@ -48,9 +48,9 @@ class CsvTransform(BaseTransform):
     """
 
     def transform(self, input_stream: IO[bytes]) -> DictReader:
-        encoding = self.kwargs.pop("encoding", "utf-8")
-        newline = self.kwargs.pop("newline", None)
+        encoding = self.transform_options.pop("encoding", "utf-8")
+        newline = self.transform_options.pop("newline", None)
 
         # csv module needs an Iterator[str], so we wrap the underlying stream into a TextIO
         iterator = io.TextIOWrapper(input_stream, encoding=encoding, newline=newline)
-        return csv.DictReader(iterator, *self.args, **self.kwargs)
+        return csv.DictReader(iterator, **self.transform_options)

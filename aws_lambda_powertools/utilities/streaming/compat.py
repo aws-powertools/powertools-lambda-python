@@ -194,6 +194,7 @@ if StrictVersion(botocore.__version__) < StrictVersion("1.29.13"):  # noqa: C901
             response_dict["body"] = http_response.content
         return response_dict
 
+    # monkey patch boto3
     endpoint.convert_to_response_dict = convert_to_response_dict
 else:
     from botocore.response import StreamingBody

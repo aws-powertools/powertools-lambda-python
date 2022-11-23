@@ -15,7 +15,7 @@ def s3_client():
 
 @pytest.fixture
 def s3_seekable_obj(s3_client):
-    return _S3SeekableIO(bucket="bucket", key="key", boto3_s3_client=s3_client)
+    return _S3SeekableIO(bucket="bucket", key="key", boto3_client=s3_client)
 
 
 @pytest.fixture

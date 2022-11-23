@@ -25,4 +25,4 @@ class GzipTransform(BaseTransform):
     """
 
     def transform(self, input_stream: IO[bytes]) -> GzipFile:
-        return GzipFile(fileobj=input_stream, mode="rb", **self.kwargs)
+        return GzipFile(fileobj=input_stream, mode="rb", **self.transform_options)

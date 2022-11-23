@@ -1,6 +1,6 @@
 import io
 import logging
-from typing import IO, TYPE_CHECKING, Any, AnyStr, Dict, Iterable, List, Optional
+from typing import IO, TYPE_CHECKING, AnyStr, Iterable, List, Optional
 
 import boto3
 
@@ -25,16 +25,14 @@ class _S3SeekableIO(IO[bytes]):
         The S3 key
     version_id: str, optional
         A version ID of the object, when the S3 bucket is versioned
-    boto3_s3_client: boto3 S3 Client, optional
+    boto3_client: boto3 S3 Client, optional
         An optional boto3 S3 client. If missing, a new one will be created.
+    sdk_options: dict, optional
+        Dictionary of options that will be passed to the S3 Client get_object API call
     """
 
     def __init__(
-        self,
-        bucket: str,
-        key: str,
-        version_id: Optional[str] = None,
-        boto3_s3_client=Optional["Client"],
+        self, bucket: str, key: str, version_id: Optional[str] = None, boto3_client=Optional["Client"], **sdk_options
     ):
         self.bucket = bucket
         self.key = key
@@ -48,12 +46,14 @@ class _S3SeekableIO(IO[bytes]):
         # Caches the size of the object
         self._size: Optional[int] = None
 
-        self._s3_kwargs: Dict[str, Any] = {"Bucket": bucket, "Key": key}
-        if version_id is not None:
-            self._s3_kwargs["VersionId"] = version_id
-
-        self._s3_client: Optional["Client"] = boto3_s3_client
+        self._s3_client: Optional["Client"] = boto3_client
         self._raw_stream: Optional[PowertoolsStreamingBody] = None
+
+        self._sdk_options = sdk_options
+        self._sdk_options["Bucket"] = bucket
+        self._sdk_options["Key"] = key
+        if version_id is not None:
+            self._sdk_options["VersionId"] = version_id
 
     @property
     def s3_client(self) -> "Client":
@@ -70,7 +70,8 @@ class _S3SeekableIO(IO[bytes]):
         Retrieves the size of the S3 object
         """
         if self._size is None:
-            self._size = self.s3_client.head_object(**self._s3_kwargs).get("ContentLength", 0)
+            logger.debug("Getting size of S3 object")
+            self._size = self.s3_client.head_object(**self._sdk_options).get("ContentLength", 0)
         return self._size
 
     @property
@@ -79,9 +80,9 @@ class _S3SeekableIO(IO[bytes]):
         Returns the boto3 StreamingBody, starting the stream from the seeked position.
         """
         if self._raw_stream is None:
-            range_header = "bytes=%d-" % self._position
-            logging.debug(f"Starting new stream at {range_header}...")
-            self._raw_stream = self.s3_client.get_object(**self._s3_kwargs, Range=range_header).get("Body")
+            range_header = f"bytes={self._position}-"
+            logger.debug(f"Starting new stream at {range_header}")
+            self._raw_stream = self.s3_client.get_object(Range=range_header, **self._sdk_options).get("Body")
             self._closed = False
 
         return self._raw_stream
@@ -101,8 +102,13 @@ class _S3SeekableIO(IO[bytes]):
         else:
             raise ValueError(f"invalid whence ({whence}, should be {io.SEEK_SET}, {io.SEEK_CUR}, {io.SEEK_END})")
 
-        # If we changed the position in the stream, we should invalidate the existing stream
-        # and open a new one on the next read
+        # Invalidate the existing stream, so a new one will be open on the next IO operation.
+        #
+        # Some consumers of this class might call seek multiple times, without affecting the net position.
+        # zipfile.ZipFile does this often. If we just blindly invalidated the stream, we would have to re-open
+        # an S3 HTTP connection just to continue reading on the same position as before, which would be inefficient.
+        #
+        # So we only invalidate it if there's a net position change after seeking, and we have an existing S3 connection
         if current_position != self._position and self._raw_stream is not None:
             self._raw_stream.close()
             self._raw_stream = None

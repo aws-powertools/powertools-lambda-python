@@ -50,7 +50,7 @@ The utility has some built-in data transformations to help dealing with common s
 | **Zip**  | Exposes the stream as a [ZipFile object](https://docs.python.org/3/library/zipfile.html)         | ZipTransform  |
 | **CSV**  | Parses each line as a CSV object, returning dictionary objects                                   | CsvTransform  |
 
-Common options like gunzipping a stream and parsing data as CSV can be enabled directly on the constructor:
+Common options like processing a gzipped stream or parsing data as CSV can be enabled directly on the constructor:
 
 === "Enabling inflation of gzip data"
 
@@ -71,6 +71,16 @@ the `transform` method. Multiple transformations are applied in order.
 
     ```python hl_lines="13"
     --8<-- "examples/streaming/src/s3_transform_in_place.py"
+    ```
+
+???+ note "Handling ZIP files with ZipTransformation"
+
+    Currently, it's not possible to pipe the `ZipTransformation` into another data transformation,
+    since a Zip file contains multiple files, and not a single stream. However, you can still
+    open a specific file as a stream, reading only the necessary bytes to extract it:
+
+    ```python hl_lines="6"
+    --8<-- "examples/streaming/src/s3_transform_zipfile.py"
     ```
 
 ## Advanced
