@@ -95,15 +95,15 @@ We provide popular built-in transformations that you can apply against your stre
 
 ### Custom options for data transformations
 
-Each data transformation class accepts additional options to customize the transformation.
+We will propagate additional options to the underlying implementation for each transform class.
 
-| Name              | Description                                                                                                    |
-| ----------------- | -------------------------------------------------------------------------------------------------------------- |
-| **GzipTransform** | All the options from the [GzipFile constructor](https://docs.python.org/3/library/gzip.html#gzip.GzipFile)     |
-| **ZipTransform**  | All the options from the [ZipFile constructor](https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile) |
-| **CsvTransform**  | All the options from the [DictReader constructor](https://docs.python.org/3/library/csv.html#csv.DictReader)   |
+| Name              | Available options                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------- |
+| **GzipTransform** | [GzipFile constructor](https://docs.python.org/3/library/gzip.html#gzip.GzipFile)     |
+| **ZipTransform**  | [ZipFile constructor](https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile) |
+| **CsvTransform**  | [DictReader constructor](https://docs.python.org/3/library/csv.html#csv.DictReader)   |
 
-For instance, if you want to unzip an S3 object compressed using `LZMA` you could pass that option in the constructor:
+For instance, take `ZipTransform`. You can use the `compression` parameter if you want to unzip an S3 object compressed with `LZMA`.
 
 === "Unzipping LZMA data"
 
@@ -111,9 +111,9 @@ For instance, if you want to unzip an S3 object compressed using `LZMA` you coul
     --8<-- "examples/streaming/src/s3_transform_lzma.py"
     ```
 
-Or, if you want to load a `TSV` file, you can just change the delimiter on the `CSV` transform:
+Or, if you want to load a tab-separated file (TSV), you can use the `delimiter` parameter in the `CsvTransform`:
 
-=== "Loading TSV data"
+=== "Deserializing tab-separated data values"
 
     ```python hl_lines="11"
     --8<-- "examples/streaming/src/s3_transform_tsv.py"
