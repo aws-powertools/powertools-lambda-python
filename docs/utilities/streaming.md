@@ -70,15 +70,16 @@ Alternatively, you can apply transformations later via the `transform` method. B
     --8<-- "examples/streaming/src/s3_transform_in_place.py"
     ```
 
-???+ note "Handling ZIP files with ZipTransformation"
+#### Handling ZIP files
 
-    Currently, it's not possible to pipe the `ZipTransformation` into another data transformation,
-    since a Zip file contains multiple files, and not a single stream. However, you can still
-    open a specific file as a stream, reading only the necessary bytes to extract it:
+!!! warning "`ZipTransform` doesn't support combining other transformations."
+    This is because a Zip file contains multiple files while transformations apply to a single stream.
 
-    ```python hl_lines="6"
-    --8<-- "examples/streaming/src/s3_transform_zipfile.py"
-    ```
+That said, you can still open a specific file as a stream, reading only the necessary bytes to extract it:
+
+```python hl_lines="6" title="Reading an individual file in the zip as a stream"
+--8<-- "examples/streaming/src/s3_transform_zipfile.py"
+```
 
 #### Built-in data transformations
 
