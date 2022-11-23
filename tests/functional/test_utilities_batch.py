@@ -1,12 +1,10 @@
-import asyncio
 import json
 from random import randint
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict, Optional, Awaitable, Any
 
 import pytest
 from botocore.config import Config
 
-from aws_lambda_powertools.asynchrony import async_lambda_handler
 from aws_lambda_powertools.utilities.batch import (
     BatchProcessor,
     AsyncBatchProcessor,
@@ -120,7 +118,7 @@ def record_handler() -> Callable:
 
 
 @pytest.fixture(scope="module")
-def async_record_handler() -> Callable:
+def async_record_handler() -> Callable[..., Awaitable[Any]]:
     async def handler(record):
         body = record["body"]
         if "fail" in body:
@@ -664,9 +662,8 @@ def test_async_batch_processor_middleware_success_only(sqs_event_factory, async_
 
     processor = AsyncBatchProcessor(event_type=EventType.SQS)
 
-    @async_lambda_handler
     @async_batch_processor(record_handler=async_record_handler, processor=processor)
-    async def lambda_handler(event, context):
+    def lambda_handler(event, context):
         return processor.response()
 
     # WHEN
@@ -685,9 +682,8 @@ def test_async_batch_processor_middleware_with_failure(sqs_event_factory, async_
 
     processor = AsyncBatchProcessor(event_type=EventType.SQS)
 
-    @async_lambda_handler
     @async_batch_processor(record_handler=async_record_handler, processor=processor)
-    async def lambda_handler(event, context):
+    def lambda_handler(event, context):
         return processor.response()
 
     # WHEN
@@ -706,10 +702,7 @@ def test_async_batch_processor_context_success_only(sqs_event_factory, async_rec
 
     # WHEN
     with processor(records, async_record_handler) as batch:
-        async def process_messages():
-            return await batch.async_process()
-
-        processed_messages = asyncio.run(process_messages())
+        processed_messages = batch.async_process()
 
     # THEN
     assert processed_messages == [
@@ -730,10 +723,7 @@ def test_async_batch_processor_context_with_failure(sqs_event_factory, async_rec
 
     # WHEN
     with processor(records, async_record_handler) as batch:
-        async def process_messages():
-            return await batch.async_process()
-
-        processed_messages = asyncio.run(process_messages())
+        processed_messages = batch.async_process()
 
     # THEN
     assert processed_messages[1] == ("success", second_record.body, second_record.raw_event)

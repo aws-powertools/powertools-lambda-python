@@ -6,8 +6,7 @@ Batch processing utility
 
 from aws_lambda_powertools.utilities.batch.base import (
     BasePartialProcessor,
-    SyncBasePartialProcessor,
-    AsyncBasePartialProcessor,
+    BasePartialBatchProcessor,
     BatchProcessor,
     AsyncBatchProcessor,
     EventType,
@@ -21,9 +20,8 @@ from aws_lambda_powertools.utilities.batch.exceptions import ExceptionInfo
 __all__ = (
     "BatchProcessor",
     "AsyncBatchProcessor",
-    "SyncBasePartialProcessor",
-    "AsyncBasePartialProcessor",
     "BasePartialProcessor",
+    "BasePartialBatchProcessor",
     "ExceptionInfo",
     "EventType",
     "FailureResponse",
