@@ -17,9 +17,3 @@ class UpperIO(io.RawIOBase):
 class UpperTransform(BaseTransform):
     def transform(self, input_stream: IO[bytes]) -> UpperIO:
         return UpperIO(input_stream=input_stream, encoding="utf-8")
-
-
-def test_s3_pipeline_result():
-    stream = io.BytesIO(b"hello world")
-    stream = UpperTransform().transform(stream)
-    assert stream.read() == b"HELLO WORLD"

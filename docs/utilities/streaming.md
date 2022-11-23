@@ -131,32 +131,18 @@ You can build your own custom data transformation by extending the `BaseTransfor
 
 ## Testing your code
 
-### Testing that you transformation is applied
-
-Test that your transformation pipeline is returning the correct object:
-
-=== "Testing the data pipeline returned object"
-
-    ```python hl_lines="14 17"
-    --8<-- "examples/streaming/src/test_s3_pipeline_result.py"
-    ```
-
-### Testing that your transformation is working in isolation
+### Asserting data transformations
 
 Create an input payload using `io.BytesIO` and assert the response of the transformation:
 
-=== "Testing transformation in isolation"
+=== "assert_transformation.py"
 
-    ```python hl_lines="23-25"
-    --8<-- "examples/streaming/src/test_s3_transform_isolated.py"
+    ```python hl_lines="3 13 15 23-28 31-32"
+    --8<-- "examples/streaming/src/assert_transformation.py"
     ```
 
-### Testing that your transformation is working with S3 data
+=== "assert_transformation_module.py"
 
-Use `botocore.stub` to stub the `get_object` response from S3:
-
-=== "Testing transformation with mocked S3 data"
-
-    ```python hl_lines="32-34 37"
-    --8<-- "examples/streaming/src/test_s3_transform_mocked.py"
+    ```python hl_lines="16"
+    --8<-- "examples/streaming/src/assert_transformation_module.py"
     ```
