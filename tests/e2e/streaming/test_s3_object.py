@@ -69,13 +69,13 @@ def test_s3_object_non_existent(s3_object_handler_fn_arn, regular_bucket_name):
 
 
 def test_s3_object_csv_constructor(s3_object_handler_fn_arn, regular_bucket_name):
-    payload = {"bucket": regular_bucket_name, "key": "is_csv.txt", "is_csv": True}
+    payload = {"bucket": regular_bucket_name, "key": "csv.txt", "is_csv": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("body") == {"name": "hello", "value": "world"}
 
 
 def test_s3_versioned_object_csv_constructor(s3_object_handler_fn_arn, versioned_bucket_name):
-    key = "is_csv.txt"
+    key = "csv.txt"
     payload = {
         "bucket": versioned_bucket_name,
         "key": key,
@@ -87,25 +87,25 @@ def test_s3_versioned_object_csv_constructor(s3_object_handler_fn_arn, versioned
 
 
 def test_s3_object_csv_transform(s3_object_handler_fn_arn, regular_bucket_name):
-    payload = {"bucket": regular_bucket_name, "key": "is_csv.txt", "transform_csv": True}
+    payload = {"bucket": regular_bucket_name, "key": "csv.txt", "transform_csv": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("body") == {"name": "hello", "value": "world"}
 
 
 def test_s3_object_csv_transform_in_place(s3_object_handler_fn_arn, regular_bucket_name):
-    payload = {"bucket": regular_bucket_name, "key": "is_csv.txt", "transform_csv": True, "in_place": True}
+    payload = {"bucket": regular_bucket_name, "key": "csv.txt", "transform_csv": True, "in_place": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("body") == {"name": "hello", "value": "world"}
 
 
 def test_s3_object_csv_gzip_constructor(s3_object_handler_fn_arn, regular_bucket_name):
-    payload = {"bucket": regular_bucket_name, "key": "is_csv.txt.gz", "is_csv": True, "is_gzip": True}
+    payload = {"bucket": regular_bucket_name, "key": "csv.txt.gz", "is_csv": True, "is_gzip": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("body") == {"name": "hello", "value": "world"}
 
 
 def test_s3_versioned_object_csv_gzip_constructor(s3_object_handler_fn_arn, versioned_bucket_name):
-    key = "is_csv.txt.gz"
+    key = "csv.txt.gz"
     payload = {
         "bucket": versioned_bucket_name,
         "key": key,
