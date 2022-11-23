@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
@@ -285,9 +286,41 @@ class ConditionsValidator(BaseValidator):
         key = condition.get(CONDITION_KEY, "")
         if not key or not isinstance(key, str):
             raise SchemaValidationError(f"'key' value must be a non empty string, rule={rule_name}")
+        action = condition.get(CONDITION_ACTION, "")
+        if action == RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value and key != TimeKeys.CURRENT_HOUR_UTC.value:
+            raise SchemaValidationError(
+                f"'condition with a 'SCHEDULE_BETWEEN_TIME_RANGE' action must have a 'CURRENT_HOUR_UTC' condition key, rule={rule_name}"  # noqa: E501
+            )
 
     @staticmethod
     def validate_condition_value(condition: Dict[str, Any], rule_name: str):
         value = condition.get(CONDITION_VALUE, "")
         if not value:
             raise SchemaValidationError(f"'value' key must not be empty, rule={rule_name}")
+        action = condition.get(CONDITION_ACTION, "")
+        key = condition.get(CONDITION_KEY, "")
+        if action == RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value and key == TimeKeys.CURRENT_HOUR_UTC.value:
+            ConditionsValidator._validate_schedule_between_time_range_value(value, rule_name)
+
+    @staticmethod
+    def _validate_schedule_between_time_range_value(value: Any, rule_name: str):
+        error_str = f"condition with a 'SCHEDULE_BETWEEN_TIME_RANGE' action must have a condition value type dictionary with 'START_TIME' and 'END_TIME' keys, rule={rule_name}"  # noqa: E501
+        if not isinstance(value, dict):
+            raise SchemaValidationError(error_str)
+        start_time = value.get(TimeValues.START_TIME.value)
+        end_time = value.get(TimeValues.END_TIME.value)
+        if not start_time or not end_time:
+            raise SchemaValidationError(error_str)
+        if not isinstance(start_time, str) or not isinstance(end_time, str):
+            raise SchemaValidationError(f"'START_TIME' and 'END_TIME' must be a non empty string, rule={rule_name}")
+        ConditionsValidator._validate_time_value(start_time, rule_name)
+        ConditionsValidator._validate_time_value(end_time, rule_name)
+
+    @staticmethod
+    def _validate_time_value(time: str, rule_name: str):
+        try:
+            datetime.strptime(time, "%H:%M")
+        except Exception:
+            raise SchemaValidationError(
+                f"'START_TIME' and 'END_TIME' must be a valid 24 hours time format %H:%M, rule={rule_name}"
+            )
