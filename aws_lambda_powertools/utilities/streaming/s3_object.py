@@ -156,15 +156,6 @@ class S3Object(IO[bytes]):
         T[bound=IO[bytes]], optional
             If in_place is False, returns an IO[bytes] object representing the transformed stream
         """
-        # Once we start reading the stream, we should not change the data transformation.
-        # This would be a programming error:
-        #
-        #   >>> s3object.transform(GzipTransform(), in_place=True)
-        #   >>> s3object.readline()
-        #   >>> s3object.transform(CsvTransform(), in_place=True)
-        if self.tell() != 0:
-            raise ValueError(f"Cannot add transformations to a read object. Already read {self.tell()} bytes")
-
         # Make transformations always be a sequence to make mypy happy
         if not isinstance(transformations, Sequence):
             transformations = [transformations]
