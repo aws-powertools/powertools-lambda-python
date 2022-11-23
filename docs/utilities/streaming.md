@@ -133,4 +133,32 @@ a `IO[bytes]`.
 
 ## Testing your code
 
-TODO
+### Testing that you transformation is applied
+
+Test that your transformation pipeline is returning the correct object:
+
+=== "Testing the data pipeline returned object"
+
+    ```python hl_lines="14 17"
+    --8<-- "examples/streaming/src/test_s3_pipeline_result.py"
+    ```
+
+### Testing that your transformation is working in isolation
+
+Create an input payload using `io.BytesIO` and assert the response of the transformation:
+
+=== "Testing transformation in isolation"
+
+    ```python hl_lines="23-25"
+    --8<-- "examples/streaming/src/test_s3_transform_isolated.py"
+    ```
+
+### Testing that your transformation is working with S3 data
+
+Use `botocore.stub` to stub the `get_object` response from S3:
+
+=== "Testing transformation with mocked S3 data"
+
+    ```python hl_lines="32-34 37"
+    --8<-- "examples/streaming/src/test_s3_transform_mocked.py"
+    ```
