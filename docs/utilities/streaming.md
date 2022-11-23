@@ -3,13 +3,12 @@ title: Streaming
 description: Utility
 ---
 
-The streaming utility handles streaming data from AWS for processing data sets bigger than the available memory.
+The streaming utility handles datasets larger than the available memory as streaming data.
 
 ## Key Features
 
-* Simple interface to stream data from S3, even when the data is larger than memory
-* Read your S3 file using the patterns you already know when dealing with files in Python
-* Includes common transformations to data stored in S3, like gunzip and CSV deserialization
+* Stream Amazon S3 objects with a file-like interface with minimal memory consumption
+* Built-in popular data transformations to decompress and deserialize (gzip, CSV, and ZIP)
 * Build your own data transformation and add it to the pipeline
 
 ## Background
@@ -45,7 +44,7 @@ The code above will stream the contents from S3 as fast as possible, using minim
 The utility has some built-in data transformations to help dealing with common scenarios while streaming data from S3.
 
 | Name     | Description                                                                                      | Class name    |
-|----------|--------------------------------------------------------------------------------------------------|---------------|
+| -------- | ------------------------------------------------------------------------------------------------ | ------------- |
 | **Gzip** | Gunzips the stream of data using the [gzip library](https://docs.python.org/3/library/gzip.html) | GzipTransform |
 | **Zip**  | Exposes the stream as a [ZipFile object](https://docs.python.org/3/library/zipfile.html)         | ZipTransform  |
 | **CSV**  | Parses each line as a CSV object, returning dictionary objects                                   | CsvTransform  |
@@ -90,7 +89,7 @@ the `transform` method. Multiple transformations are applied in order.
 Each data transformation class accepts additional options to customize the transformation.
 
 | Name              | Description                                                                                                    |
-|-------------------|----------------------------------------------------------------------------------------------------------------|
+| ----------------- | -------------------------------------------------------------------------------------------------------------- |
 | **GzipTransform** | All the options from the [GzipFile constructor](https://docs.python.org/3/library/gzip.html#gzip.GzipFile)     |
 | **ZipTransform**  | All the options from the [ZipFile constructor](https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile) |
 | **CsvTransform**  | All the options from the [DictReader constructor](https://docs.python.org/3/library/csv.html#csv.DictReader)   |
