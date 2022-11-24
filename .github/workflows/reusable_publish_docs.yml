@@ -24,7 +24,6 @@ on:
 permissions:
   contents: write
   pages: write
-  id-token: write
 
 jobs:
   publish_docs:
@@ -65,49 +64,20 @@ jobs:
           make release-docs VERSION="$VERSION" ALIAS="$ALIAS"
           poetry run mike set-default --push latest
 
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v2
-      - name: Upload latest API docs
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: api
-      - name: Upload versioned API docs
-        uses: actions/upload-pages-artifact@v1
+      - name: Release API docs
+        uses: peaceiris/actions-gh-pages@de7ea6f8efb354206b205ef54722213d99067935 # v3.9.0
         env:
           VERSION: ${{ inputs.version }}
         with:
-          path: ${{ env.VERSION }}/api
-
-  # Deployment job
-  deploy:
-    concurrency:
-      group: on-docs-deploy
-    environment:
-      name: gh-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: publish_docs
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
-
-      # Maintenance: Migrate to new gh-pages action
-      # - name: Release API docs
-      #   uses: peaceiris/actions-gh-pages@de7ea6f8efb354206b205ef54722213d99067935 # v3.9.0
-      #   env:
-      #     VERSION: ${{ inputs.version }}
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_dir: ./api
-      #     keep_files: true
-      #     destination_dir: ${{ env.VERSION }}/api
-      # - name: Release API docs to latest
-      #   if: ${{ inputs.alias == 'latest' }}
-      #   uses: peaceiris/actions-gh-pages@de7ea6f8efb354206b205ef54722213d99067935 # v3.9.0
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_dir: ./api
-      #     keep_files: true
-      #     destination_dir: latest/api
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./api
+          keep_files: true
+          destination_dir: ${{ env.VERSION }}/api
+      - name: Release API docs to latest
+        if: ${{ inputs.alias == 'latest' }}
+        uses: peaceiris/actions-gh-pages@de7ea6f8efb354206b205ef54722213d99067935 # v3.9.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./api
+          keep_files: true
+          destination_dir: latest/api
