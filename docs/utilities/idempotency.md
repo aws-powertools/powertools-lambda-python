@@ -136,7 +136,7 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
     This example also demonstrates how you can integrate with [Batch utility](batch.md), so you can process each record in an idempotent manner.
 
-    ```python hl_lines="4-5 16 21 29"
+    ```python hl_lines="4-5 16 21 30"
     from aws_lambda_powertools.utilities.batch import (BatchProcessor, EventType,
                                                        batch_processor)
     from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
@@ -164,9 +164,9 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
     @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context):
+		config.register_lambda_context(context) # see Lambda timeouts section
         # `data` parameter must be called as a keyword argument to work
         dummy("hello", "universe", data="test")
-		config.register_lambda_context(context) # see Lambda timeouts section
         return processor.response()
     ```
 
