@@ -20,12 +20,14 @@
 ## Maintenance
 
 * update v2 layer ARN on documentation
+* **ci:** re-create versioned API docs for new pages deployment
+* **ci:** re-create versioned API docs for new pages deployment
 * **ci:** increase permission in parent job for docs publishing
 * **ci:** attempt gh-pages deployment via beta route
 * **deps:** bump aws-xray-sdk from 2.10.0 to 2.11.0 ([#1730](https://github.com/awslabs/aws-lambda-powertools-python/issues/1730))
-* **deps-dev:** bump aws-cdk-lib from 2.50.0 to 2.51.1 ([#1741](https://github.com/awslabs/aws-lambda-powertools-python/issues/1741))
 * **deps-dev:** bump mypy-boto3-lambda from 1.26.0.post1 to 1.26.12 ([#1742](https://github.com/awslabs/aws-lambda-powertools-python/issues/1742))
 * **deps-dev:** bump mypy-boto3-cloudformation from 1.26.0.post1 to 1.26.11.post1 ([#1746](https://github.com/awslabs/aws-lambda-powertools-python/issues/1746))
+* **deps-dev:** bump aws-cdk-lib from 2.50.0 to 2.51.1 ([#1741](https://github.com/awslabs/aws-lambda-powertools-python/issues/1741))
 * **deps-dev:** bump mypy-boto3-dynamodb from 1.26.0.post1 to 1.26.13.post16 ([#1743](https://github.com/awslabs/aws-lambda-powertools-python/issues/1743))
 * **deps-dev:** bump mypy-boto3-secretsmanager from 1.26.0.post1 to 1.26.12 ([#1744](https://github.com/awslabs/aws-lambda-powertools-python/issues/1744))
 * **deps-dev:** bump mypy-boto3-ssm from 1.26.4 to 1.26.11.post1 ([#1740](https://github.com/awslabs/aws-lambda-powertools-python/issues/1740))
