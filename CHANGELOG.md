@@ -15,6 +15,7 @@
 
 ## Maintenance
 
+* update v2 layer ARN on documentation
 * **deps:** bump aws-xray-sdk from 2.10.0 to 2.11.0 ([#1730](https://github.com/awslabs/aws-lambda-powertools-python/issues/1730))
 * **deps-dev:** bump mypy-boto3-ssm from 1.26.4 to 1.26.11.post1 ([#1740](https://github.com/awslabs/aws-lambda-powertools-python/issues/1740))
 * **deps-dev:** bump mypy-boto3-cloudformation from 1.26.0.post1 to 1.26.11.post1 ([#1746](https://github.com/awslabs/aws-lambda-powertools-python/issues/1746))
