@@ -93,7 +93,7 @@ We provide popular built-in transformations that you can apply against your stre
 
 ## Advanced
 
-### Reading ahead or backwards
+### Skipping or reading backwards
 
 `S3Object` implements [Python I/O interface](https://docs.python.org/3/tutorial/inputoutput.html){target="_blank"}. This means you can use `seek` to start reading contents of your file from any particular position, saving you processing time.
 
@@ -111,7 +111,7 @@ You found out the last row has exactly 30 bytes. We can use `seek()` to skip to 
 --8<-- "examples/streaming/src/s3_csv_stream_non_uniform_seek.py"
 ```
 
-#### Reading ahead
+#### Skipping
 
 !!! question "What if we want to jump the first N rows?"
 
