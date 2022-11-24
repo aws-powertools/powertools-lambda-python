@@ -93,6 +93,42 @@ We provide popular built-in transformations that you can apply against your stre
 
 ## Advanced
 
+### Reading ahead or backwards
+
+`S3Object` implements [Python I/O interface](https://docs.python.org/3/tutorial/inputoutput.html){target="_blank"}. This means you can use `seek` to start reading contents of your file from any particular position, saving you processing time.
+
+#### Reading backwards
+
+For example, let's imagine you have a large CSV file, each row has a non-uniform size (bytes), and you want to read and process the last row only.
+
+```csv title="non_uniform_sample.csv"
+--8<-- "examples/streaming/src/non_uniform_sample.csv"
+```
+
+You found out the last row has exactly 30 bytes. We can use `seek()` to skip to the end of the file, read 30 bytes, then transform to CSV.
+
+```python title="Reading only the last CSV row" hl_lines="16 18"
+--8<-- "examples/streaming/src/s3_csv_stream_non_uniform_seek.py"
+```
+
+#### Reading ahead
+
+!!! question "What if we want to jump the first N rows?"
+
+You can also solve with `seek`, but let's take a large uniform CSV file to make this easier to grasp.
+
+```csv title="uniform_sample.csv"
+--8<-- "examples/streaming/src/uniform_sample.csv"
+```
+
+You found out that each row has 8 bytes, the header line has 22 bytes, and every new line has 1 byte.
+
+You want to skip the first 100 lines.
+
+```python hl_lines="28 31" title="Skipping the first 100 rows"
+--8<-- "examples/streaming/src/s3_csv_stream_seek.py"
+```
+
 ### Custom options for data transformations
 
 We will propagate additional options to the underlying implementation for each transform class.
