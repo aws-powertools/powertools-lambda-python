@@ -121,9 +121,7 @@ You can also solve with `seek`, but let's take a large uniform CSV file to make 
 --8<-- "examples/streaming/src/uniform_sample.csv"
 ```
 
-You found out that each row has 8 bytes, the header line has 21 bytes, and every new line has 1 byte.
-
-You want to skip the first 100 lines.
+You found out that each row has 8 bytes, the header line has 21 bytes, and every new line has 1 byte. You want to skip the first 100 lines.
 
 ```python hl_lines="28 31" title="Skipping the first 100 rows"
 --8<-- "examples/streaming/src/s3_csv_stream_seek.py"
