@@ -107,7 +107,7 @@ For example, let's imagine you have a large CSV file, each row has a non-uniform
 
 You found out the last row has exactly 30 bytes. We can use `seek()` to skip to the end of the file, read 30 bytes, then transform to CSV.
 
-```python title="Reading only the last CSV row" hl_lines="16 18"
+```python title="Reading only the last CSV row" hl_lines="16 19"
 --8<-- "examples/streaming/src/s3_csv_stream_non_uniform_seek.py"
 ```
 
@@ -121,7 +121,7 @@ You can also solve with `seek`, but let's take a large uniform CSV file to make 
 --8<-- "examples/streaming/src/uniform_sample.csv"
 ```
 
-You found out that each row has 8 bytes, the header line has 22 bytes, and every new line has 1 byte.
+You found out that each row has 8 bytes, the header line has 21 bytes, and every new line has 1 byte.
 
 You want to skip the first 100 lines.
 

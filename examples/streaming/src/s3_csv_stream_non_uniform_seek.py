@@ -12,10 +12,8 @@ CSV_HEADERS = ["id", "name", "location"]
 def lambda_handler(event: Dict[str, str], context: LambdaContext):
     sample_csv = S3Object(bucket=event["bucket"], key="sample.csv")
 
-    # Jump to the end of the file
-    sample_csv.seek(0, io.SEEK_END)
-    # From the current position, jump exactly 30 bytes
-    sample_csv.seek(sample_csv.tell() - LAST_ROW_SIZE, io.SEEK_SET)
+    # From the end of the file, jump exactly 30 bytes backwards
+    sample_csv.seek(-LAST_ROW_SIZE, io.SEEK_END)
 
     # Transform portion of data into CSV with our headers
     sample_csv.transform(CsvTransform(fieldnames=CSV_HEADERS), in_place=True)
