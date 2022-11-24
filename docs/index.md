@@ -691,6 +691,7 @@ Core utilities such as Tracing, Logging, Metrics, and Event Handler will be avai
 | [**Parser**](./utilities/parser.md)                                                                                                                          | Data parsing and deep validation using Pydantic                                                                                                           |
 | [**Idempotency**](./utilities/idempotency.md)                                                                                                                | Idempotent Lambda handler                                                                                                                                 |
 | [**Feature Flags**](./utilities/feature_flags.md)                                                                                                            | A simple rule engine to evaluate when one or multiple features should be enabled depending on the input                                                   |
+| [**Streaming**](./utilities/streaming.md)                                                                                                                    | Streams datasets larger than the available memory as streaming data.                                                                                      |
 
 ## Environment variables
 
