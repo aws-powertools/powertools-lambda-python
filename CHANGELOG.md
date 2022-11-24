@@ -4,6 +4,10 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **ci:** api docs path
+
 ## Documentation
 
 * **idempotency:** fix register_lambda_context order ([#1747](https://github.com/awslabs/aws-lambda-powertools-python/issues/1747))
