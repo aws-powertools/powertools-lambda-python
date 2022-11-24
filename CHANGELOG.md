@@ -6,6 +6,7 @@
 
 ## Bug Fixes
 
+* **ci:** use gh-pages env as official docs are wrong
 * **ci:** api docs path
 
 ## Documentation
