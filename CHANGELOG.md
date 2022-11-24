@@ -4,6 +4,10 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **streaming:** fix leftover newline
+
 ## Features
 
 * **streaming:** add new s3 streaming utility ([#1719](https://github.com/awslabs/aws-lambda-powertools-python/issues/1719))
