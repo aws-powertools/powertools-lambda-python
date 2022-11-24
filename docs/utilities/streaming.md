@@ -146,3 +146,11 @@ Create an input payload using `io.BytesIO` and assert the response of the transf
     ```python hl_lines="16"
     --8<-- "examples/streaming/src/assert_transformation_module.py"
     ```
+
+## Known limitations
+
+### AWS X-Ray segment size limit
+
+We make multiple API calls to S3 as you read chunks from your S3 object. If your function is decorated with [Tracer](./../core/tracer.md), you can easily hit [AWS X-Ray 64K segment size](https://docs.aws.amazon.com/general/latest/gr/xray.html#limits_xray) when processing large files.
+
+!!! tip "Use tracer decorators in parts where you don't read your `S3Object` instead."
