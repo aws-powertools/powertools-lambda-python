@@ -71,9 +71,11 @@ jobs:
       - name: Upload latest API docs
         uses: actions/upload-pages-artifact@v1
         with:
-          path: ./api
+          path: api
       - name: Upload versioned API docs
         uses: actions/upload-pages-artifact@v1
+        env:
+          VERSION: ${{ inputs.version }}
         with:
           path: ${{ env.VERSION }}/api
 
