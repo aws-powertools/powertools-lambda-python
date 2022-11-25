@@ -249,6 +249,10 @@ class RulesValidator(BaseValidator):
 
 
 class ConditionsValidator(BaseValidator):
+
+    TIME_RANGE_FORMAT = "%H:%M"
+    DATETIME_RANGE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
+
     def __init__(self, rule: Dict[str, Any], rule_name: str, logger: Optional[Union[logging.Logger, Logger]] = None):
         self.conditions: List[Dict[str, Any]] = rule.get(CONDITIONS_KEY, {})
         self.rule_name = rule_name
@@ -291,6 +295,10 @@ class ConditionsValidator(BaseValidator):
             raise SchemaValidationError(
                 f"'condition with a 'SCHEDULE_BETWEEN_TIME_RANGE' action must have a 'CURRENT_HOUR_UTC' condition key, rule={rule_name}"  # noqa: E501
             )
+        elif action == RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value and key != TimeKeys.CURRENT_DATETIME_UTC.value:
+            raise SchemaValidationError(
+                f"'condition with a 'SCHEDULE_BETWEEN_DATETIME_RANGE' action must have a 'CURRENT_DATETIME_UTC' condition key, rule={rule_name}"  # noqa: E501
+            )
 
     @staticmethod
     def validate_condition_value(condition: Dict[str, Any], rule_name: str):
@@ -299,12 +307,30 @@ class ConditionsValidator(BaseValidator):
             raise SchemaValidationError(f"'value' key must not be empty, rule={rule_name}")
         action = condition.get(CONDITION_ACTION, "")
         key = condition.get(CONDITION_KEY, "")
+        # time actions
         if action == RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value and key == TimeKeys.CURRENT_HOUR_UTC.value:
-            ConditionsValidator._validate_schedule_between_time_range_value(value, rule_name)
+            ConditionsValidator._validate_schedule_between_time_and_datetime_ranges(
+                value, rule_name, action, ConditionsValidator.TIME_RANGE_FORMAT
+            )
+        elif action == RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value and key == TimeKeys.CURRENT_DATETIME_UTC.value:
+            ConditionsValidator._validate_schedule_between_time_and_datetime_ranges(
+                value, rule_name, action, ConditionsValidator.DATETIME_RANGE_FORMAT
+            )
 
     @staticmethod
-    def _validate_schedule_between_time_range_value(value: Any, rule_name: str):
-        error_str = f"condition with a 'SCHEDULE_BETWEEN_TIME_RANGE' action must have a condition value type dictionary with 'START_TIME' and 'END_TIME' keys, rule={rule_name}"  # noqa: E501
+    def _validate_time_value(time: str, rule_name: str, date_format: str):
+        try:
+            datetime.strptime(time, date_format)
+        except Exception:
+            raise SchemaValidationError(
+                f"'START_TIME' and 'END_TIME' must be a valid time format, time_format={date_format}, rule={rule_name}"
+            )
+
+    @staticmethod
+    def _validate_schedule_between_time_and_datetime_ranges(
+        value: Any, rule_name: str, action_name: str, date_format: str
+    ):
+        error_str = f"condition with a '{action_name}' action must have a condition value type dictionary with 'START_TIME' and 'END_TIME' keys, rule={rule_name}"  # noqa: E501
         if not isinstance(value, dict):
             raise SchemaValidationError(error_str)
         start_time = value.get(TimeValues.START_TIME.value)
@@ -313,14 +339,5 @@ class ConditionsValidator(BaseValidator):
             raise SchemaValidationError(error_str)
         if not isinstance(start_time, str) or not isinstance(end_time, str):
             raise SchemaValidationError(f"'START_TIME' and 'END_TIME' must be a non empty string, rule={rule_name}")
-        ConditionsValidator._validate_time_value(start_time, rule_name)
-        ConditionsValidator._validate_time_value(end_time, rule_name)
-
-    @staticmethod
-    def _validate_time_value(time: str, rule_name: str):
-        try:
-            datetime.strptime(time, "%H:%M")
-        except Exception:
-            raise SchemaValidationError(
-                f"'START_TIME' and 'END_TIME' must be a valid 24 hours time format %H:%M, rule={rule_name}"
-            )
+        ConditionsValidator._validate_time_value(start_time, rule_name, date_format)
+        ConditionsValidator._validate_time_value(end_time, rule_name, date_format)
