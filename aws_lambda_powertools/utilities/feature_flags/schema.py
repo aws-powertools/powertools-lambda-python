@@ -295,9 +295,13 @@ class ConditionsValidator(BaseValidator):
             raise SchemaValidationError(
                 f"'condition with a 'SCHEDULE_BETWEEN_TIME_RANGE' action must have a 'CURRENT_HOUR_UTC' condition key, rule={rule_name}"  # noqa: E501
             )
-        elif action == RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value and key != TimeKeys.CURRENT_DATETIME_UTC.value:
+        if action == RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value and key != TimeKeys.CURRENT_DATETIME_UTC.value:
             raise SchemaValidationError(
                 f"'condition with a 'SCHEDULE_BETWEEN_DATETIME_RANGE' action must have a 'CURRENT_DATETIME_UTC' condition key, rule={rule_name}"  # noqa: E501
+            )
+        if action == RuleAction.SCHEDULE_BETWEEN_DAYS.value and key != TimeKeys.CURRENT_DAY_UTC.value:
+            raise SchemaValidationError(
+                f"'condition with a 'SCHEDULE_BETWEEN_DAYS' action must have a 'CURRENT_DAY_UTC' condition key, rule={rule_name}"  # noqa: E501
             )
 
     @staticmethod
@@ -306,16 +310,17 @@ class ConditionsValidator(BaseValidator):
         if not value:
             raise SchemaValidationError(f"'value' key must not be empty, rule={rule_name}")
         action = condition.get(CONDITION_ACTION, "")
-        key = condition.get(CONDITION_KEY, "")
         # time actions
-        if action == RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value and key == TimeKeys.CURRENT_HOUR_UTC.value:
+        if action == RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value:
             ConditionsValidator._validate_schedule_between_time_and_datetime_ranges(
                 value, rule_name, action, ConditionsValidator.TIME_RANGE_FORMAT
             )
-        elif action == RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value and key == TimeKeys.CURRENT_DATETIME_UTC.value:
+        elif action == RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value:
             ConditionsValidator._validate_schedule_between_time_and_datetime_ranges(
                 value, rule_name, action, ConditionsValidator.DATETIME_RANGE_FORMAT
             )
+        elif action == RuleAction.SCHEDULE_BETWEEN_DAYS.value:
+            ConditionsValidator._validate_schedule_between_days(value, rule_name)
 
     @staticmethod
     def _validate_time_value(time: str, rule_name: str, date_format: str):
@@ -325,6 +330,26 @@ class ConditionsValidator(BaseValidator):
             raise SchemaValidationError(
                 f"'START_TIME' and 'END_TIME' must be a valid time format, time_format={date_format}, rule={rule_name}"
             )
+
+    @staticmethod
+    def _validate_schedule_between_days(value: Any, rule_name: str):
+        if not isinstance(value, list) or not value:
+            raise SchemaValidationError(
+                f"condition with a CURRENT_DAY_UTC action must have a non empty condition value type list, rule={rule_name}"  # noqa: E501
+            )
+        for day in value:
+            if not isinstance(day, str) or day not in [
+                TimeValues.SUNDAY.value,
+                TimeValues.MONDAY.value,
+                TimeValues.TUESDAY.value,
+                TimeValues.WEDNESDAY.value,
+                TimeValues.THURSDAY.value,
+                TimeValues.FRIDAY.value,
+                TimeValues.SATURDAY.value,
+            ]:
+                raise SchemaValidationError(
+                    f"condition value must represent a week day string defined in 'TimeValues' enum, rule={rule_name}"
+                )
 
     @staticmethod
     def _validate_schedule_between_time_and_datetime_ranges(
