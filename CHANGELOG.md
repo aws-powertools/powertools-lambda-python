@@ -4,6 +4,13 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+* **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 1.3.0 to 1.4.0 ([#1749](https://github.com/awslabs/aws-lambda-powertools-python/issues/1749))
+
+
+<a name="v2.4.0"></a>
+## [v2.4.0] - 2022-11-24
 ## Bug Fixes
 
 * **ci:** use gh-pages env as official docs are wrong
@@ -35,6 +42,10 @@
 * **deps-dev:** bump types-requests from 2.28.11.4 to 2.28.11.5 ([#1729](https://github.com/awslabs/aws-lambda-powertools-python/issues/1729))
 * **deps-dev:** bump mkdocs-material from 8.5.9 to 8.5.10 ([#1731](https://github.com/awslabs/aws-lambda-powertools-python/issues/1731))
 * **governance:** remove markdown rendering from docs issue template
+
+## Regression
+
+* **ci:** new gh-pages beta doesn't work either; reverting as gh-pages is disrupted
 
 
 <a name="v2.3.1"></a>
@@ -2665,7 +2676,8 @@
 * Merge pull request [#5](https://github.com/awslabs/aws-lambda-powertools-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.3.1...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.4.0...HEAD
+[v2.4.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.3.1...v2.4.0
 [v2.3.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.3.0...v2.3.1
 [v2.3.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.2.0...v2.3.0
 [v2.2.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.1.0...v2.2.0
