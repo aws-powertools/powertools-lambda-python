@@ -31,6 +31,11 @@ coverage = {extras = ["toml"], version = "^6.2"}
 pytest = "^7.0.1"
 black = "^22.8"
 boto3 = "^1.18"
+flake8 = [
+  # https://github.com/python/importlib_metadata/issues/406
+  { version = "*", python="^3.7" },
+  { version = ">=5", python= ">=3.8"},
+]
 flake8-builtins = "^2.0.1"
 flake8-comprehensions = "^3.10.1"
 flake8-debugger = "^4.0.0"
