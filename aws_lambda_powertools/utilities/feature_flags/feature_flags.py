@@ -66,7 +66,7 @@ class FeatureFlags:
             schema.RuleAction.VALUE_NOT_IN_KEY.value: lambda a, b: b not in a,
             schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value: lambda a, b: compare_utc_date_range(a, b),
             schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value: lambda a, b: compare_utc_datetime_range(a, b),
-            schema.RuleAction.SCHEDULE_BETWEEN_DAYS.value: lambda a, b: compare_between_utc_days(a, b),
+            schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value: lambda a, b: compare_between_utc_days(a, b),
         }
 
         try:
@@ -99,9 +99,9 @@ class FeatureFlags:
             if cond_action in (
                 schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value,
                 schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value,
-                schema.RuleAction.SCHEDULE_BETWEEN_DAYS.value,
+                schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,
             ):
-                context_value = condition.get(schema.CONDITION_KEY)  # e.g., CURRENT_HOUR_UTC
+                context_value = condition.get(schema.CONDITION_KEY)  # e.g., CURRENT_TIME_UTC
 
             if not self._match_by_action(action=cond_action, condition_value=cond_value, context_value=context_value):
                 self.logger.debug(
