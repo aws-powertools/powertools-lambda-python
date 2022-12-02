@@ -715,21 +715,21 @@ def test_validate_time_condition_between_days_range_invalid_condition_key():
     # THEN raise SchemaValidationError
     with pytest.raises(
         SchemaValidationError,
-        match=f"'condition with a 'SCHEDULE_BETWEEN_DAYS_OF_WEEK' action must have a 'CURRENT_DAY_UTC' condition key, rule={rule_name}",  # noqa: E501
+        match=f"'condition with a 'SCHEDULE_BETWEEN_DAYS_OF_WEEK' action must have a 'CURRENT_DAY_OF_WEEK_UTC' condition key, rule={rule_name}",  # noqa: E501
     ):
         ConditionsValidator.validate_condition_key(condition=condition, rule_name=rule_name)
 
 
 def test_validate_time_condition_between_days_range_invalid_condition_type():
     # GIVEN a configuration with a SCHEDULE_BETWEEN_DAYS_OF_WEEK action
-    # key CURRENT_DAY_UTC and invalid value type string
+    # key CURRENT_DAY_OF_WEEK_UTC and invalid value type string
     condition = {
         CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,
         CONDITION_VALUE: TimeValues.SATURDAY.value,
-        CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC.value,
+        CONDITION_KEY: TimeKeys.CURRENT_DAY_OF_WEEK_UTC.value,
     }
     rule_name = "dummy"
-    match_str = f"condition with a CURRENT_DAY_UTC action must have a non empty condition value type list, rule={rule_name}"  # noqa: E501
+    match_str = f"condition with a CURRENT_DAY_OF_WEEK_UTC action must have a non empty condition value type list, rule={rule_name}"  # noqa: E501
     # WHEN calling validate_condition
     # THEN raise SchemaValidationError
     with pytest.raises(
@@ -744,16 +744,14 @@ def test_validate_time_condition_between_days_range_invalid_condition_type():
 )
 def test_validate_time_condition_between_days_range_invalid_condition_value(cond_value):
     # GIVEN a configuration with a SCHEDULE_BETWEEN_DAYS_OF_WEEK action
-    # key CURRENT_DAY_UTC and invalid value not day string
+    # key CURRENT_DAY_OF_WEEK_UTC and invalid value not day string
     condition = {
         CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,
         CONDITION_VALUE: cond_value,
-        CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC.value,
+        CONDITION_KEY: TimeKeys.CURRENT_DAY_OF_WEEK_UTC.value,
     }
     rule_name = "dummy"
-    match_str = (
-        f"condition value must represent a week day string defined in 'TimeValues' enum, rule={rule_name}"  # noqa: E501
-    )
+    match_str = f"condition value must represent a day of the week in 'TimeValues' enum, rule={rule_name}"  # noqa: E501
     # WHEN calling validate_condition
     # THEN raise SchemaValidationError
     with pytest.raises(

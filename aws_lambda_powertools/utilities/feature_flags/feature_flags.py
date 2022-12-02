@@ -7,9 +7,9 @@ from . import schema
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError
 from .time_conditions import (
-    compare_between_utc_days,
-    compare_utc_date_range,
     compare_utc_datetime_range,
+    compare_utc_days_of_week,
+    compare_utc_time_range,
 )
 
 
@@ -64,9 +64,9 @@ class FeatureFlags:
             schema.RuleAction.KEY_NOT_IN_VALUE.value: lambda a, b: a not in b,
             schema.RuleAction.VALUE_IN_KEY.value: lambda a, b: b in a,
             schema.RuleAction.VALUE_NOT_IN_KEY.value: lambda a, b: b not in a,
-            schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value: lambda a, b: compare_utc_date_range(a, b),
+            schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value: lambda a, b: compare_utc_time_range(a, b),
             schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value: lambda a, b: compare_utc_datetime_range(a, b),
-            schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value: lambda a, b: compare_between_utc_days(a, b),
+            schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value: lambda a, b: compare_utc_days_of_week(a, b),
         }
 
         try:
@@ -244,7 +244,7 @@ class FeatureFlags:
         # method `get_matching_features` returning Dict[feature_name, feature_value]
         boolean_feature = feature.get(
             schema.FEATURE_DEFAULT_VAL_TYPE_KEY, True
-        )  # backwards compatibility ,assume feature flag
+        )  # backwards compatibility, assume feature flag
         if not rules:
             self.logger.debug(
                 f"no rules found, returning feature default, name={name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # noqa: E501
@@ -303,7 +303,7 @@ class FeatureFlags:
             feature_default_value = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
             boolean_feature = feature.get(
                 schema.FEATURE_DEFAULT_VAL_TYPE_KEY, True
-            )  # backwards compatibility ,assume feature flag
+            )  # backwards compatibility, assume feature flag
 
             if feature_default_value and not rules:
                 self.logger.debug(f"feature is enabled by default and has no defined rules, name={name}")

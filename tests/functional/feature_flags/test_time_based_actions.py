@@ -296,7 +296,7 @@ def test_time_based_utc_days_range_rule_match(mocker, config):
                     CONDITIONS_KEY: [
                         {
                             CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC.value,  # similar to "IN" actions
+                            CONDITION_KEY: TimeKeys.CURRENT_DAY_OF_WEEK_UTC.value,  # similar to "IN" actions
                             CONDITION_VALUE: [
                                 TimeValues.MONDAY.value,
                                 TimeValues.TUESDAY.value,
@@ -332,7 +332,7 @@ def test_time_based_utc_days_range_no_rule_match(mocker, config):
                     CONDITIONS_KEY: [
                         {
                             CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC.value,  # similar to "IN" actions
+                            CONDITION_KEY: TimeKeys.CURRENT_DAY_OF_WEEK_UTC.value,  # similar to "IN" actions
                             CONDITION_VALUE: [
                                 TimeValues.MONDAY.value,
                                 TimeValues.TUESDAY.value,
@@ -367,7 +367,7 @@ def test_time_based_utc_only_weekend_rule_match(mocker, config):
                     CONDITIONS_KEY: [
                         {
                             CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC.value,  # similar to "IN" actions
+                            CONDITION_KEY: TimeKeys.CURRENT_DAY_OF_WEEK_UTC.value,  # similar to "IN" actions
                             CONDITION_VALUE: [TimeValues.SATURDAY.value, TimeValues.SUNDAY.value],
                         },
                     ],
@@ -397,7 +397,7 @@ def test_time_based_utc_only_weekend_no_rule_match(mocker, config):
                     CONDITIONS_KEY: [
                         {
                             CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC.value,  # similar to "IN" actions
+                            CONDITION_KEY: TimeKeys.CURRENT_DAY_OF_WEEK_UTC.value,  # similar to "IN" actions
                             CONDITION_VALUE: [TimeValues.SATURDAY.value, TimeValues.SUNDAY.value],
                         },
                     ],
@@ -431,7 +431,7 @@ def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_rule_ma
                         },
                         {
                             CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC.value,
+                            CONDITION_KEY: TimeKeys.CURRENT_DAY_OF_WEEK_UTC.value,
                             CONDITION_VALUE: [TimeValues.MONDAY.value, TimeValues.THURSDAY.value],
                         },
                     ],
@@ -466,7 +466,7 @@ def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_no_rule
                         },
                         {
                             CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,  # this condition matches
-                            CONDITION_KEY: TimeKeys.CURRENT_DAY_UTC.value,
+                            CONDITION_KEY: TimeKeys.CURRENT_DAY_OF_WEEK_UTC.value,
                             CONDITION_VALUE: [TimeValues.MONDAY.value, TimeValues.THURSDAY.value],
                         },
                     ],
