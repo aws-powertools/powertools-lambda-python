@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional
+from typing import Any, Dict, Optional, Tuple
 
 from botocore.config import Config
 
@@ -21,10 +21,10 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
 
 def evaluate_mocked_schema(
     mocker,
-    rules: dict,
+    rules: Dict[str, Any],
     expected_value: bool,
-    mocked_time: tuple[int, int, int, int, int, int],
-    context: Optional[dict] = None,
+    mocked_time: Tuple[int, int, int, int, int, int],  # year, month, day, hour, minute, second
+    context: Optional[Dict[str, Any]] = None,
 ):
     """
     This helper does the following:
