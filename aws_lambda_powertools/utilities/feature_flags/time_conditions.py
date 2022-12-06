@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Dict, List
 
-from .schema import DATETIME_RANGE_FORMAT, HOUR_MIN_SEPARATOR, TimeValues
+from .schema import HOUR_MIN_SEPARATOR, TimeValues
 
 
 def _get_utc_time_now() -> datetime:
@@ -15,9 +15,15 @@ def compare_utc_days_of_week(action: str, values: List[str]) -> bool:
 
 def compare_utc_datetime_range(action: str, values: Dict) -> bool:
     current_time_utc: datetime = _get_utc_time_now()
-    start_date = datetime.strptime(values.get(TimeValues.START.value, ""), DATETIME_RANGE_FORMAT)
-    end_date = datetime.strptime(values.get(TimeValues.END.value, ""), DATETIME_RANGE_FORMAT)
-    return current_time_utc >= start_date and current_time_utc <= end_date
+
+    # python < 3.11 don't support Z as a timezone on datetime.fromisoformat,
+    # so we replace any Z with the equivalent "+00:00
+    start_date_str = values.get(TimeValues.START.value, "").replace("Z", "+00:00")
+    end_date_str = values.get(TimeValues.END.value, "").replace("Z", "+00:00")
+
+    start_date = datetime.fromisoformat(start_date_str)
+    end_date = datetime.fromisoformat(end_date_str)
+    return start_date <= current_time_utc <= end_date
 
 
 def compare_utc_time_range(action: str, values: Dict) -> bool:

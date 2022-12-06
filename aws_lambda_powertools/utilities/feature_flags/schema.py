@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from ... import Logger
 from .base import BaseValidator
@@ -16,7 +16,6 @@ CONDITION_VALUE = "value"
 CONDITION_ACTION = "action"
 FEATURE_DEFAULT_VAL_TYPE_KEY = "boolean_type"
 TIME_RANGE_FORMAT = "%H:%M"
-DATETIME_RANGE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 HOUR_MIN_SEPARATOR = ":"
 
 
@@ -312,22 +311,31 @@ class ConditionsValidator(BaseValidator):
         # time actions
         if action == RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value:
             ConditionsValidator._validate_schedule_between_time_and_datetime_ranges(
-                value, rule_name, action, TIME_RANGE_FORMAT
+                value, rule_name, action, ConditionsValidator._validate_time_value
             )
         elif action == RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value:
             ConditionsValidator._validate_schedule_between_time_and_datetime_ranges(
-                value, rule_name, action, DATETIME_RANGE_FORMAT
+                value, rule_name, action, ConditionsValidator._validate_datetime_value
             )
         elif action == RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value:
             ConditionsValidator._validate_schedule_between_days_of_week(value, rule_name)
 
     @staticmethod
-    def _validate_time_value(time: str, rule_name: str, date_format: str):
+    def _validate_datetime_value(datetime_str: str, rule_name: str):
         try:
-            datetime.strptime(time, date_format)
+            # python < 3.11 don't support the Z timezone on datetime.fromisoformat,
+            # so we replace any Z with the equivalent "+00:00"
+            datetime.fromisoformat(datetime_str.replace("Z", "+00:00"))
+        except Exception:
+            raise SchemaValidationError(f"'START' and 'END' must be a valid ISO8601 time format, rule={rule_name}")
+
+    @staticmethod
+    def _validate_time_value(time: str, rule_name: str):
+        try:
+            datetime.strptime(time, TIME_RANGE_FORMAT)
         except Exception:
             raise SchemaValidationError(
-                f"'START' and 'END' must be a valid time format, time_format={date_format}, rule={rule_name}"
+                f"'START' and 'END' must be a valid time format, time_format={TIME_RANGE_FORMAT}, rule={rule_name}"
             )
 
     @staticmethod
@@ -352,7 +360,7 @@ class ConditionsValidator(BaseValidator):
 
     @staticmethod
     def _validate_schedule_between_time_and_datetime_ranges(
-        value: Any, rule_name: str, action_name: str, date_format: str
+        value: Any, rule_name: str, action_name: str, validator: Callable[[str, str], None]
     ):
         error_str = f"condition with a '{action_name}' action must have a condition value type dictionary with 'START' and 'END' keys, rule={rule_name}"  # noqa: E501
         if not isinstance(value, dict):
@@ -363,5 +371,5 @@ class ConditionsValidator(BaseValidator):
             raise SchemaValidationError(error_str)
         if not isinstance(start_time, str) or not isinstance(end_time, str):
             raise SchemaValidationError(f"'START' and 'END' must be a non empty string, rule={rule_name}")
-        ConditionsValidator._validate_time_value(start_time, rule_name, date_format)
-        ConditionsValidator._validate_time_value(end_time, rule_name, date_format)
+        validator(start_time, rule_name)
+        validator(end_time, rule_name)

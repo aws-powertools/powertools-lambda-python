@@ -668,7 +668,7 @@ def test_validate_time_condition_between_datetime_range_invalid_condition_value_
         CONDITION_KEY: TimeKeys.CURRENT_DATETIME_UTC.value,
     }
     rule_name = "dummy"
-    match_str = f"START' and 'END' must be a valid time format, time_format=%Y-%m-%dT%H:%M:%S%z, rule={rule_name}"
+    match_str = f"START' and 'END' must be a valid ISO8601 time format, rule={rule_name}"
     # WHEN calling validate_condition
     # THEN raise SchemaValidationError
     with pytest.raises(
@@ -678,23 +678,16 @@ def test_validate_time_condition_between_datetime_range_invalid_condition_value_
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
 
 
-@pytest.mark.parametrize(
-    "cond_value",
-    [
-        {TimeValues.END.value: "10:10", TimeValues.START.value: "2022-10-10T12:15:00Z"},
-        {TimeValues.END.value: "2022-10-10", TimeValues.START.value: "2022-10-10T12:15:00Z"},
-    ],
-)
-def test_validate_time_condition_between_datetime_range_invalid_condition_value_invalid_end_time_value(cond_value):
+def test_validate_time_condition_between_datetime_range_invalid_condition_value_invalid_end_time_value():
     # GIVEN a configuration with a SCHEDULE_BETWEEN_DATETIME_RANGE action, key CURRENT_DATETIME_UTC and
     # invalid END value as an invalid time format
     condition = {
         CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value,
-        CONDITION_VALUE: cond_value,
+        CONDITION_VALUE: {TimeValues.END.value: "10:10", TimeValues.START.value: "2022-10-10T12:15:00Z"},
         CONDITION_KEY: TimeKeys.CURRENT_DATETIME_UTC.value,
     }
     rule_name = "dummy"
-    match_str = f"START' and 'END' must be a valid time format, time_format=%Y-%m-%dT%H:%M:%S%z, rule={rule_name}"
+    match_str = f"START' and 'END' must be a valid ISO8601 time format, rule={rule_name}"
     # WHEN calling validate_condition
     # THEN raise SchemaValidationError
     with pytest.raises(SchemaValidationError, match=match_str):
