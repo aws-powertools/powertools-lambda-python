@@ -335,7 +335,7 @@ def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_rule_ma
 
 
 def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_no_rule_match(mocker):
-    def evaluate(mocked_time: tuple[int, int, int, int, int, int], expected_value: bool):
+    def evaluate(mocked_time: Tuple[int, int, int, int, int, int], expected_value: bool):
         evaluate_mocked_schema(
             mocker=mocker,
             rules={
