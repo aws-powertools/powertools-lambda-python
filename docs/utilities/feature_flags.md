@@ -447,6 +447,44 @@ Feature flags can return any JSON values when `boolean_type` parameter is set to
     }
     ```
 
+#### Time based feature flags
+
+Feature flags can also return enabled features based on time or datetime ranges.
+This allows you to have features that are only enabled on certain days of the week, certain time
+intervals or between certain calendar dates.
+
+=== "app.py"
+
+    ```python hl_lines="12"
+    --8<-- "examples/feature_flags/src/timebased_feature.py"
+    ```
+
+=== "event.json"
+
+    ```json hl_lines="3"
+    --8<-- "examples/feature_flags/src/timebased_feature_event.json"
+    ```
+
+=== "features.json"
+
+    ```json hl_lines="15 19-21"
+    --8<-- "examples/feature_flags/src/timebased_features.json"
+    ```
+
+You can also have features enabled only at certain times of the day.
+
+=== "app.py"
+
+    ```python hl_lines="9"
+    --8<-- "examples/feature_flags/src/timebased_happyhour_feature.py"
+    ```
+
+=== "features.json"
+
+    ```json hl_lines="9-14"
+    --8<-- "examples/feature_flags/src/timebased_happyhour_features.json"
+    ```
+
 ## Advanced
 
 ### Adjusting in-memory cache
@@ -580,23 +618,36 @@ The `conditions` block is a list of conditions that contain `action`, `key`, and
 
 The `action` configuration can have the following values, where the expressions **`a`** is the `key` and **`b`** is the `value` above:
 
-| Action                              | Equivalent expression          |
-| ----------------------------------- | ------------------------------ |
-| **EQUALS**                          | `lambda a, b: a == b`          |
-| **NOT_EQUALS**                      | `lambda a, b: a != b`          |
-| **KEY_GREATER_THAN_VALUE**          | `lambda a, b: a > b`           |
-| **KEY_GREATER_THAN_OR_EQUAL_VALUE** | `lambda a, b: a >= b`          |
-| **KEY_LESS_THAN_VALUE**             | `lambda a, b: a < b`           |
-| **KEY_LESS_THAN_OR_EQUAL_VALUE**    | `lambda a, b: a <= b`          |
-| **STARTSWITH**                      | `lambda a, b: a.startswith(b)` |
-| **ENDSWITH**                        | `lambda a, b: a.endswith(b)`   |
-| **KEY_IN_VALUE**                    | `lambda a, b: a in b`          |
-| **KEY_NOT_IN_VALUE**                | `lambda a, b: a not in b`      |
-| **VALUE_IN_KEY**                    | `lambda a, b: b in a`          |
-| **VALUE_NOT_IN_KEY**                | `lambda a, b: b not in a`      |
+| Action                              | Equivalent expression                                    |
+|-------------------------------------|----------------------------------------------------------|
+| **EQUALS**                          | `lambda a, b: a == b`                                    |
+| **NOT_EQUALS**                      | `lambda a, b: a != b`                                    |
+| **KEY_GREATER_THAN_VALUE**          | `lambda a, b: a > b`                                     |
+| **KEY_GREATER_THAN_OR_EQUAL_VALUE** | `lambda a, b: a >= b`                                    |
+| **KEY_LESS_THAN_VALUE**             | `lambda a, b: a < b`                                     |
+| **KEY_LESS_THAN_OR_EQUAL_VALUE**    | `lambda a, b: a <= b`                                    |
+| **STARTSWITH**                      | `lambda a, b: a.startswith(b)`                           |
+| **ENDSWITH**                        | `lambda a, b: a.endswith(b)`                             |
+| **KEY_IN_VALUE**                    | `lambda a, b: a in b`                                    |
+| **KEY_NOT_IN_VALUE**                | `lambda a, b: a not in b`                                |
+| **VALUE_IN_KEY**                    | `lambda a, b: b in a`                                    |
+| **VALUE_NOT_IN_KEY**                | `lambda a, b: b not in a`                                |
+| **SCHEDULE_BETWEEN_TIME_RANGE**     | `lambda a, b: time(a).start <= b <= time(a).end`         |
+| **SCHEDULE_BETWEEN_DATETIME_RANGE** | `lambda a, b: datetime(a).start <= b <= datetime(b).end` |
+| **SCHEDULE_BETWEEN_DAYS_OF_WEEK**   | `lambda a, b: day_of_week(a) in b`                       |
 
 ???+ info
     The `**key**` and `**value**` will be compared to the input from the `**context**` parameter.
+
+???+ "Time based keys"
+
+    For time based keys, we provide a list of predefined keys. These will automatically get converted to the corresponding timestamp on each invocation of your Lambda function.
+
+    | Key                     | Meaning (always in UTC)                                                  |
+    |-------------------------|--------------------------------------------------------------------------|
+    | CURRENT_TIME_UTC        | The current time, 24 hour format (HH:mm)                                                 |
+    | CURRENT_DATETIME_UTC    | The current datetime ([ISO8601](https://en.wikipedia.org/wiki/ISO_8601)) |
+    | CURRENT_DAY_OF_WEEK_UTC | The current day of the week (Monday-Sunday)                              |
 
 **For multiple conditions**, we will evaluate the list of conditions as a logical `AND`, so all conditions needs to match to return `when_match` value.
 
