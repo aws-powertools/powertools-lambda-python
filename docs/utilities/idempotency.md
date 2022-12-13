@@ -218,9 +218,8 @@ You can can easily integrate with [Batch utility](batch.md) via context manager.
 
 === "batch_sample.py"
 
-    ```python hl_lines="4-5 11 16 22 26-27 30 32"
-    from aws_lambda_powertools.utilities.batch import (BatchProcessor, EventType,
-                                                       batch_processor)
+    ```python hl_lines="3-4 10 15 21 25-26 29 31"
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
     from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
     from aws_lambda_powertools.utilities.idempotency import (
         DynamoDBPersistenceLayer, IdempotencyConfig, idempotent_function)
