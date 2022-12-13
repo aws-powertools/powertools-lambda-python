@@ -162,11 +162,20 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
         return {"data": data}
 
 
-    @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context):
-		config.register_lambda_context(context) # see Lambda timeouts section
+        config.register_lambda_context(context) # see Lambda timeouts section
+
         # `data` parameter must be called as a keyword argument to work
         dummy("hello", "universe", data="test")
+
+        # with Lambda context registered for Idempotency
+        # we can now kick in the Bach processing logic
+        batch = event["Records"]
+        with processor(records=batch, handler=record_handler):
+            # in case you want to access each record processed by your record_handler
+            # otherwise ignore the result variable assignment
+            processed_messages = processor.process()
+
         return processor.response()
     ```
 
