@@ -26,7 +26,11 @@ from typing import (
 import jmespath
 
 from ..shared import constants
-from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
+from ..shared.functions import (
+    extract_event_from_common_models,
+    resolve_env_var_choice,
+    resolve_truthy_env_var_choice,
+)
 from ..shared.types import AnyCallableT
 from .exceptions import InvalidLoggerSamplingRateError
 from .filters import SuppressFilter
@@ -433,7 +437,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
             if log_event:
                 logger.debug("Event received")
-                self.info(getattr(event, "raw_event", event))
+                self.info(extract_event_from_common_models(event))
 
             return lambda_handler(event, context, *args, **kwargs)
 
