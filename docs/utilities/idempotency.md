@@ -989,6 +989,10 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
 ## Compatibility with other utilities
 
+### Batch
+
+See [Batch integration](#batch-integration) above.
+
 ### Validation utility
 
 The idempotency utility can be used with the `validator` decorator. Ensure that idempotency is the innermost decorator.
