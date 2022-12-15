@@ -83,6 +83,10 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
     StreamViewType,
 )
 from aws_lambda_powertools.utilities.data_classes.event_source import event_source
+from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
+    extract_cloudwatch_logs_from_event,
+    extract_cloudwatch_logs_from_record,
+)
 from aws_lambda_powertools.utilities.data_classes.s3_object_event import (
     S3ObjectLambdaEvent,
 )
@@ -1265,6 +1269,14 @@ def test_kinesis_stream_event_json_data():
     event = KinesisStreamEvent({"Records": [{"kinesis": {"data": data}}]})
     record = next(event.records)
     assert record.kinesis.data_as_json() == json_value
+
+
+def test_kinesis_stream_event_cloudwatch_logs_data_extraction():
+    event = KinesisStreamEvent(load_event("kinesisStreamCloudWatchLogsEvent.json"))
+    extracted_logs = extract_cloudwatch_logs_from_event(event)
+    individual_logs = [extract_cloudwatch_logs_from_record(record) for record in event.records]
+
+    assert len(extracted_logs) == len(individual_logs)
 
 
 def test_alb_event():

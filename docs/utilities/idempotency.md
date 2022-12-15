@@ -125,77 +125,12 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
 !!! info "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.7/library/dataclasses.html){target="_blank"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
 
-???+ warning
-    Make sure to call your decorated function using keyword arguments
+???+ warning "Limitations"
+    Make sure to call your decorated function using keyword arguments.
 
-=== "batch_sample.py"
+    Decorated functions with `idempotent_function` are not thread-safe, if the caller uses threading, not the function computation itself.
 
-    This example also demonstrates how you can integrate with [Batch utility](batch.md), so you can process each record in an idempotent manner.
-
-    ```python hl_lines="4-5 16 21 29"
-    from aws_lambda_powertools.utilities.batch import (BatchProcessor, EventType,
-                                                       batch_processor)
-    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-    from aws_lambda_powertools.utilities.idempotency import (
-        DynamoDBPersistenceLayer, IdempotencyConfig, idempotent_function)
-
-
-    processor = BatchProcessor(event_type=EventType.SQS)
-    dynamodb = DynamoDBPersistenceLayer(table_name="idem")
-    config =  IdempotencyConfig(
-        event_key_jmespath="messageId",  # see Choosing a payload subset section
-        use_local_cache=True,
-    )
-
-
-    @idempotent_function(data_keyword_argument="record", config=config, persistence_store=dynamodb)
-    def record_handler(record: SQSRecord):
-        return {"message": record["body"]}
-
-
-    @idempotent_function(data_keyword_argument="data", config=config, persistence_store=dynamodb)
-    def dummy(arg_one, arg_two, data: dict, **kwargs):
-        return {"data": data}
-
-
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context):
-        # `data` parameter must be called as a keyword argument to work
-        dummy("hello", "universe", data="test")
-		config.register_lambda_context(context) # see Lambda timeouts section
-        return processor.response()
-    ```
-
-=== "Batch event"
-
-    ```json hl_lines="4"
-    {
-        "Records": [
-            {
-                "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
-                "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a...",
-                "body": "Test message.",
-                "attributes": {
-                    "ApproximateReceiveCount": "1",
-                    "SentTimestamp": "1545082649183",
-                    "SenderId": "AIDAIENQZJOLO23YVJ4VO",
-                    "ApproximateFirstReceiveTimestamp": "1545082649185"
-                },
-                "messageAttributes": {
-                    "testAttr": {
-                    "stringValue": "100",
-                    "binaryValue": "base64Str",
-                    "dataType": "Number"
-                    }
-                },
-                "md5OfBody": "e4e68fb7bd0e697a0ae8f1bb342846b3",
-                "eventSource": "aws:sqs",
-                "eventSourceARN": "arn:aws:sqs:us-east-2:123456789012:my-queue",
-                "awsRegion": "us-east-2"
-            }
-        ]
-    }
-    ```
+    DynamoDB Persistency layer uses a Resource client [which is not thread-safe](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/resources.html?highlight=multithreading#multithreading-or-multiprocessing-with-resources){target="_blank"}.
 
 === "dataclass_sample.py"
 
@@ -270,6 +205,82 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
 		# `order` parameter must be called as a keyword argument to work
 		process_order(order=order)
+    ```
+
+#### Batch integration
+
+You can can easily integrate with [Batch utility](batch.md) via context manager. This ensures that you process each record in an idempotent manner, and guard against a [Lambda timeout](#lambda-timeouts) idempotent situation.
+
+???+ "Choosing an unique batch record attribute"
+    In this example, we choose `messageId` as our idempotency token since we know it'll be unique.
+
+    Depending on your use case, it might be more accurate [to choose another field](#choosing-a-payload-subset-for-idempotency) your producer intentionally set to define uniqueness.
+
+=== "batch_sample.py"
+
+    ```python hl_lines="3-4 10 15 21 25-26 29 31"
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+    from aws_lambda_powertools.utilities.idempotency import (
+        DynamoDBPersistenceLayer, IdempotencyConfig, idempotent_function)
+
+
+    processor = BatchProcessor(event_type=EventType.SQS)
+    dynamodb = DynamoDBPersistenceLayer(table_name="idem")
+    config =  IdempotencyConfig(
+        event_key_jmespath="messageId",  # see Choosing a payload subset section
+        use_local_cache=True,
+    )
+
+
+    @idempotent_function(data_keyword_argument="record", config=config, persistence_store=dynamodb)
+    def record_handler(record: SQSRecord):
+        return {"message": record.body}
+
+
+    def lambda_handler(event, context):
+        config.register_lambda_context(context) # see Lambda timeouts section
+
+        # with Lambda context registered for Idempotency
+        # we can now kick in the Bach processing logic
+        batch = event["Records"]
+        with processor(records=batch, handler=record_handler):
+            # in case you want to access each record processed by your record_handler
+            # otherwise ignore the result variable assignment
+            processed_messages = processor.process()
+
+        return processor.response()
+    ```
+
+=== "batch_event.json"
+
+    ```json hl_lines="4"
+    {
+        "Records": [
+            {
+                "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
+                "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a...",
+                "body": "Test message.",
+                "attributes": {
+                    "ApproximateReceiveCount": "1",
+                    "SentTimestamp": "1545082649183",
+                    "SenderId": "AIDAIENQZJOLO23YVJ4VO",
+                    "ApproximateFirstReceiveTimestamp": "1545082649185"
+                },
+                "messageAttributes": {
+                    "testAttr": {
+                    "stringValue": "100",
+                    "binaryValue": "base64Str",
+                    "dataType": "Number"
+                    }
+                },
+                "md5OfBody": "e4e68fb7bd0e697a0ae8f1bb342846b3",
+                "eventSource": "aws:sqs",
+                "eventSourceARN": "arn:aws:sqs:us-east-2:123456789012:my-queue",
+                "awsRegion": "us-east-2"
+            }
+        ]
+    }
     ```
 
 ### Choosing a payload subset for idempotency
@@ -978,6 +989,10 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
 ## Compatibility with other utilities
 
+### Batch
+
+See [Batch integration](#batch-integration) above.
+
 ### Validation utility
 
 The idempotency utility can be used with the `validator` decorator. Ensure that idempotency is the innermost decorator.
@@ -1018,12 +1033,34 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 
 === "tests.py"
 
-    ```python hl_lines="2 3"
-    def test_idempotent_lambda_handler(monkeypatch):
+    ```python hl_lines="24-25"
+    from dataclasses import dataclass
+
+    import pytest
+
+    import app
+
+
+    @pytest.fixture
+    def lambda_context():
+        @dataclass
+        class LambdaContext:
+            function_name: str = "test"
+            memory_limit_in_mb: int = 128
+            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
+            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
+
+            def get_remaining_time_in_millis(self) -> int:
+              return 5
+
+        return LambdaContext()
+
+
+    def test_idempotent_lambda_handler(monkeypatch, lambda_context):
         # Set POWERTOOLS_IDEMPOTENCY_DISABLED before calling decorated functions
         monkeypatch.setenv("POWERTOOLS_IDEMPOTENCY_DISABLED", 1)
 
-        result = handler()
+        result = handler({}, lambda_context)
         ...
     ```
 === "app.py"
@@ -1051,18 +1088,36 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
 
 === "tests.py"
 
-    ```python hl_lines="6 7 8"
+    ```python hl_lines="24-27"
+    from dataclasses import dataclass
+
     import boto3
+    import pytest
 
     import app
 
-    def test_idempotent_lambda():
+
+    @pytest.fixture
+    def lambda_context():
+        @dataclass
+        class LambdaContext:
+            function_name: str = "test"
+            memory_limit_in_mb: int = 128
+            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
+            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
+
+            def get_remaining_time_in_millis(self) -> int:
+              return 5
+
+        return LambdaContext()
+
+    def test_idempotent_lambda(lambda_context):
         # Create our own Table resource using the endpoint for our DynamoDB Local instance
         resource = boto3.resource("dynamodb", endpoint_url='http://localhost:8000')
         table = resource.Table(app.persistence_layer.table_name)
         app.persistence_layer.table = table
 
-        result = app.handler({'testkey': 'testvalue'}, {})
+        result = app.handler({'testkey': 'testvalue'}, lambda_context)
         assert result['payment_id'] == 12345
     ```
 
@@ -1092,15 +1147,35 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 
 === "tests.py"
 
-    ```python hl_lines="6 7 8 9"
+    ```python hl_lines="26-29"
+    from dataclasses import dataclass
     from unittest.mock import MagicMock
+
+    import boto3
+    import pytest
 
     import app
 
-    def test_idempotent_lambda():
+
+    @pytest.fixture
+    def lambda_context():
+        @dataclass
+        class LambdaContext:
+            function_name: str = "test"
+            memory_limit_in_mb: int = 128
+            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
+            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
+
+            def get_remaining_time_in_millis(self) -> int:
+              return 5
+
+        return LambdaContext()
+
+
+    def test_idempotent_lambda(lambda_context):
         table = MagicMock()
         app.persistence_layer.table = table
-        result = app.handler({'testkey': 'testvalue'}, {})
+        result = app.handler({'testkey': 'testvalue'}, lambda_context)
         table.put_item.assert_called()
         ...
     ```

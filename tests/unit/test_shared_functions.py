@@ -1,15 +1,19 @@
 import warnings
+from dataclasses import dataclass
 
 import pytest
+from pydantic import BaseModel
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
+    extract_event_from_common_models,
     powertools_debug_is_set,
     powertools_dev_is_set,
     resolve_env_var_choice,
     resolve_truthy_env_var_choice,
     strtobool,
 )
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
 def test_resolve_env_var_choice_explicit_wins_over_env_var():
@@ -64,3 +68,38 @@ def test_powertools_debug_warning(monkeypatch: pytest.MonkeyPatch):
         powertools_debug_is_set()
         assert len(w) == 1
         assert str(w[0].message) == warning_message
+
+
+def test_extract_event_dict():
+    data = {"hello": "world"}
+    assert extract_event_from_common_models(data) == data
+
+
+def test_extract_event_pydantic():
+    class DummyModel(BaseModel):
+        hello: str
+
+    data = {"hello": "world"}
+    assert extract_event_from_common_models(DummyModel(**data)) == data
+
+
+def test_extract_event_dict_wrapper():
+    class DummyClassSample(DictWrapper):
+        pass
+
+    data = {"hello": "world"}
+    assert extract_event_from_common_models(DummyClassSample(data)) == data
+
+
+def test_extract_event_dataclass():
+    @dataclass
+    class DummyDataclass:
+        hello: str
+
+    data = {"hello": "world"}
+    assert extract_event_from_common_models(DummyDataclass(**data)) == data
+
+
+@pytest.mark.parametrize("data", [False, True, "", 10, [], {}, object])
+def test_extract_event_any(data):
+    assert extract_event_from_common_models(data) == data

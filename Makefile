@@ -54,12 +54,13 @@ release-docs:
 	@echo "Updating website docs"
 	poetry run mike deploy --push --update-aliases ${VERSION} ${ALIAS}
 	@echo "Building API docs"
-	@$(MAKE) build-docs-api
+	@$(MAKE) build-docs-api VERSION=${VERSION}
 
 build-docs-api:
 	poetry run pdoc --html --output-dir ./api/ ./aws_lambda_powertools --force
 	mv -f ./api/aws_lambda_powertools/* ./api/
 	rm -rf ./api/aws_lambda_powertools
+	mkdir ${VERSION} && cp -R api ${VERSION}
 
 docs-local:
 	poetry run mkdocs serve
