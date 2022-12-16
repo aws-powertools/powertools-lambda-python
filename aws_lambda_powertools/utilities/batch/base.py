@@ -7,6 +7,7 @@ import asyncio
 import copy
 import inspect
 import logging
+import os
 import sys
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -120,8 +121,20 @@ class BasePartialProcessor(ABC):
         # Do not use "asyncio.run(async_process())" due to Lambda container thaws/freeze, otherwise we might get "Event Loop is closed"
         # Instead, get_event_loop() can also create one if a previous was erroneously closed
         # More: https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtime-environment.html#runtimes-lifecycle-shutdown
-        loop = asyncio.get_event_loop()
-        return loop.run_until_complete(async_process())
+        # Extra: just follow how the well-tested mangum library do:
+        #       https://github.com/jordaneremieff/mangum/discussions/256#discussioncomment-2638946
+        #       https://github.com/jordaneremieff/mangum/blob/b85cd4a97f8ddd56094ccc540ca7156c76081745/mangum/protocols/http.py#L44
+
+        # Detect environment and create a loop for each one
+        coro = async_process()
+        if os.environ.get('AWS_LAMBDA_RUNTIME_API'):
+            # Running in lambda server
+            loop = asyncio.get_event_loop()
+            task_instance = loop.create_task(coro)
+            return loop.run_until_complete(task_instance)
+        else:
+            # Running in another place like local tests
+            return asyncio.run(coro)
 
     def __enter__(self):
         self._prepare()
