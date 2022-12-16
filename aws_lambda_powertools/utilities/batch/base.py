@@ -116,8 +116,10 @@ class BasePartialProcessor(ABC):
         async def async_process():
             return list(await asyncio.gather(*[self._async_process_record(record) for record in self.records]))
 
-        # WARNING: Do not use "asyncio.run(async_process())", there are cases in which for some reason the main
-        # loop closes while using, causing the error "Event Loop is closed"
+        # WARNING
+        # Do not use "asyncio.run(async_process())" due to Lambda container thaws/freeze, otherwise we might get "Event Loop is closed"
+        # Instead, get_event_loop() can also create one if a previous was erroneously closed
+        # More: https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtime-environment.html#runtimes-lifecycle-shutdown
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(async_process())
 
