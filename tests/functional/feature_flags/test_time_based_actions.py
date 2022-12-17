@@ -22,15 +22,14 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
 def evaluate_mocked_schema(
     mocker,
     rules: Dict[str, Any],
-    expected_value: bool,
     mocked_time: Tuple[int, int, int, int, int, int],  # year, month, day, hour, minute, second
     context: Optional[Dict[str, Any]] = None,
-):
+) -> bool:
     """
     This helper does the following:
     1. mocks the current time
     2. mocks the feature flag payload returned from AppConfig
-    3. evaluates the rules against the expected value
+    3. evaluates the rules and return True for a rule match, otherwise a False
     """
 
     # Mock the current time
@@ -69,18 +68,15 @@ def evaluate_mocked_schema(
 
     # Evaluate our feature flag
     context = {} if context is None else context
-    toggle = feature_flags.evaluate(
+    return feature_flags.evaluate(
         name="my_feature",
         context=context,
         default=False,
     )
 
-    # Assert result against expected value
-    assert toggle == expected_value
-
 
 def test_time_based_utc_in_between_time_range_rule_match(mocker):
-    evaluate_mocked_schema(
+    assert evaluate_mocked_schema(
         mocker=mocker,
         rules={
             "lambda time is between UTC 11:11-23:59": {
@@ -94,13 +90,12 @@ def test_time_based_utc_in_between_time_range_rule_match(mocker):
                 ],
             }
         },
-        expected_value=True,
         mocked_time=(2022, 2, 15, 11, 12, 0),
     )
 
 
 def test_time_based_utc_in_between_time_range_no_rule_match(mocker):
-    evaluate_mocked_schema(
+    assert not evaluate_mocked_schema(
         mocker=mocker,
         rules={
             "lambda time is between UTC 11:11-23:59": {
@@ -114,13 +109,12 @@ def test_time_based_utc_in_between_time_range_no_rule_match(mocker):
                 ],
             }
         },
-        expected_value=False,
         mocked_time=(2022, 2, 15, 7, 12, 0),  # no rule match 7:12 am
     )
 
 
 def test_time_based_utc_in_between_full_time_range_rule_match(mocker):
-    evaluate_mocked_schema(
+    assert evaluate_mocked_schema(
         mocker=mocker,
         rules={
             "lambda time is between UTC october 5th 2022 12:14:32PM to october 10th 2022 12:15:00 PM": {
@@ -137,13 +131,12 @@ def test_time_based_utc_in_between_full_time_range_rule_match(mocker):
                 ],
             }
         },
-        expected_value=True,
         mocked_time=(2022, 10, 7, 10, 0, 0),  # will match rule
     )
 
 
 def test_time_based_utc_in_between_full_time_range_no_rule_match(mocker):
-    evaluate_mocked_schema(
+    assert not evaluate_mocked_schema(
         mocker=mocker,
         rules={
             "lambda time is between UTC october 5th 2022 12:14:32PM to october 10th 2022 12:15:00 PM": {
@@ -160,13 +153,12 @@ def test_time_based_utc_in_between_full_time_range_no_rule_match(mocker):
                 ],
             }
         },
-        expected_value=False,
         mocked_time=(2022, 9, 7, 10, 0, 0),  # will not rule match
     )
 
 
 def test_time_based_multiple_conditions_utc_in_between_time_range_rule_match(mocker):
-    evaluate_mocked_schema(
+    assert evaluate_mocked_schema(
         mocker=mocker,
         rules={
             "lambda time is between UTC 09:00-17:00 and username is ran": {
@@ -185,14 +177,13 @@ def test_time_based_multiple_conditions_utc_in_between_time_range_rule_match(moc
                 ],
             }
         },
-        expected_value=True,
         mocked_time=(2022, 10, 7, 10, 0, 0),  # will rule match
         context={"username": "ran"},
     )
 
 
 def test_time_based_multiple_conditions_utc_in_between_time_range_no_rule_match(mocker):
-    evaluate_mocked_schema(
+    assert not evaluate_mocked_schema(
         mocker=mocker,
         rules={
             "lambda time is between UTC 09:00-17:00 and username is ran": {
@@ -211,14 +202,13 @@ def test_time_based_multiple_conditions_utc_in_between_time_range_no_rule_match(
                 ],
             }
         },
-        expected_value=False,
         mocked_time=(2022, 10, 7, 7, 0, 0),  # will cause no rule match, 7:00
         context={"username": "ran"},
     )
 
 
 def test_time_based_utc_days_range_rule_match(mocker):
-    evaluate_mocked_schema(
+    assert evaluate_mocked_schema(
         mocker=mocker,
         rules={
             "match only monday through friday": {
@@ -238,13 +228,12 @@ def test_time_based_utc_days_range_rule_match(mocker):
                 ],
             }
         },
-        expected_value=True,
         mocked_time=(2022, 11, 18, 10, 0, 0),  # friday
     )
 
 
 def test_time_based_utc_days_range_no_rule_match(mocker):
-    evaluate_mocked_schema(
+    assert not evaluate_mocked_schema(
         mocker=mocker,
         rules={
             "match only monday through friday": {
@@ -264,13 +253,12 @@ def test_time_based_utc_days_range_no_rule_match(mocker):
                 ],
             }
         },
-        expected_value=False,
         mocked_time=(2022, 11, 20, 10, 0, 0),  # sunday, no match
     )
 
 
 def test_time_based_utc_only_weekend_rule_match(mocker):
-    evaluate_mocked_schema(
+    assert evaluate_mocked_schema(
         mocker=mocker,
         rules={
             "match only on weekend": {
@@ -284,13 +272,12 @@ def test_time_based_utc_only_weekend_rule_match(mocker):
                 ],
             }
         },
-        expected_value=True,
         mocked_time=(2022, 11, 19, 10, 0, 0),  # saturday
     )
 
 
 def test_time_based_utc_only_weekend_no_rule_match(mocker):
-    evaluate_mocked_schema(
+    assert not evaluate_mocked_schema(
         mocker=mocker,
         rules={
             "match only on weekend": {
@@ -304,13 +291,12 @@ def test_time_based_utc_only_weekend_no_rule_match(mocker):
                 ],
             }
         },
-        expected_value=False,
         mocked_time=(2022, 11, 18, 10, 0, 0),  # friday, no match
     )
 
 
 def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_rule_match(mocker):
-    evaluate_mocked_schema(
+    assert evaluate_mocked_schema(
         mocker=mocker,
         rules={
             "match when lambda time is between UTC 11:00-23:00 and day is either monday or thursday": {
@@ -329,13 +315,12 @@ def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_rule_ma
                 ],
             }
         },
-        expected_value=True,
         mocked_time=(2022, 11, 17, 16, 0, 0),  # thursday 16:00
     )
 
 
 def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_no_rule_match(mocker):
-    def evaluate(mocked_time: Tuple[int, int, int, int, int, int], expected_value: bool):
+    def evaluate(mocked_time: Tuple[int, int, int, int, int, int]):
         evaluate_mocked_schema(
             mocker=mocker,
             rules={
@@ -355,10 +340,9 @@ def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_no_rule
                     ],
                 }
             },
-            expected_value=expected_value,
             mocked_time=mocked_time,
         )
 
-    evaluate(mocked_time=(2022, 11, 17, 9, 0, 0), expected_value=False)  # thursday 9:00
-    evaluate(mocked_time=(2022, 11, 18, 13, 0, 0), expected_value=False)  # friday 16:00
-    evaluate(mocked_time=(2022, 11, 18, 9, 0, 0), expected_value=False)  # friday 9:00
+    assert not evaluate(mocked_time=(2022, 11, 17, 9, 0, 0))  # thursday 9:00
+    assert not evaluate(mocked_time=(2022, 11, 18, 13, 0, 0))  # friday 16:00
+    assert not evaluate(mocked_time=(2022, 11, 18, 9, 0, 0))  # friday 9:00
