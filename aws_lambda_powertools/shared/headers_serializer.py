@@ -44,7 +44,8 @@ class HttpApiHeadersSerializer(BaseHeadersSerializer):
             if isinstance(values, str):
                 combined_headers[key] = values
             else:
-                combined_headers[key] = ", ".join(values)
+                if values:
+                    combined_headers[key] = ", ".join(values)
 
         return {"headers": combined_headers, "cookies": list(map(str, cookies))}
 
@@ -65,8 +66,9 @@ class MultiValueHeadersSerializer(BaseHeadersSerializer):
             if isinstance(values, str):
                 payload[key].append(values)
             else:
-                for value in values:
-                    payload[key].append(value)
+                if values:
+                    for value in values:
+                        payload[key].append(value)
 
         if cookies:
             payload.setdefault("Set-Cookie", [])
@@ -101,13 +103,14 @@ class SingleValueHeadersSerializer(BaseHeadersSerializer):
             if isinstance(values, str):
                 payload["headers"][key] = values
             else:
-                if len(values) > 1:
-                    warnings.warn(
-                        f"Can't encode more than one header value for the same key ('{key}') in the response. "
-                        "Did you enable multiValueHeaders on the ALB Target Group?"
-                    )
+                if values:
+                    if len(values) > 1:
+                        warnings.warn(
+                            f"Can't encode more than one header value for the same key ('{key}') in the response. "
+                            "Did you enable multiValueHeaders on the ALB Target Group?"
+                        )
 
-                # We can only set one header per key, send the last one
-                payload["headers"][key] = values[-1]
+                    # We can only set one header per key, send the last one
+                    payload["headers"][key] = values[-1]
 
         return payload
