@@ -145,3 +145,21 @@ def test_single_value_headers_with_multiple_header_values_warning():
         payload = serializer.serialize(cookies=[], headers=headers)
 
     assert payload["headers"]["Foo"] == headers["Foo"][-1]
+
+
+def test_http_api_headers_serializer_with_null_values():
+    serializer = HttpApiHeadersSerializer()
+    payload = serializer.serialize(headers={"Foo": None}, cookies=[])
+    assert payload == {"headers": {}, "cookies": []}
+
+
+def test_multi_value_headers_serializer_with_null_values():
+    serializer = MultiValueHeadersSerializer()
+    payload = serializer.serialize(headers={"Foo": None}, cookies=[])
+    assert payload == {"multiValueHeaders": {}}
+
+
+def test_single_value_headers_serializer_with_null_values():
+    serializer = SingleValueHeadersSerializer()
+    payload = serializer.serialize(headers={"Foo": None}, cookies=[])
+    assert payload["headers"] == {}

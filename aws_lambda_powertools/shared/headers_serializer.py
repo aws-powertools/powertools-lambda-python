@@ -41,6 +41,10 @@ class HttpApiHeadersSerializer(BaseHeadersSerializer):
         # Duplicate headers are combined with commas and included in the headers field.
         combined_headers: Dict[str, str] = {}
         for key, values in headers.items():
+            # omit headers with explicit null values
+            if values is None:
+                continue
+
             if isinstance(values, str):
                 combined_headers[key] = values
             else:
@@ -60,13 +64,15 @@ class MultiValueHeadersSerializer(BaseHeadersSerializer):
         https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers-response
         """
         payload: Dict[str, List[str]] = defaultdict(list)
-
         for key, values in headers.items():
+            # omit headers with explicit null values
+            if values is None:
+                continue
+
             if isinstance(values, str):
                 payload[key].append(values)
             else:
-                for value in values:
-                    payload[key].append(value)
+                payload[key].extend(values)
 
         if cookies:
             payload.setdefault("Set-Cookie", [])
@@ -98,6 +104,10 @@ class SingleValueHeadersSerializer(BaseHeadersSerializer):
             payload["headers"]["Set-Cookie"] = str(cookies[-1])
 
         for key, values in headers.items():
+            # omit headers with explicit null values
+            if values is None:
+                continue
+
             if isinstance(values, str):
                 payload["headers"][key] = values
             else:
