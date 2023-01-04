@@ -113,7 +113,9 @@ class IdempotencyHandler:
             record = self._get_idempotency_record()
             return self._handle_for_status(record)
         except Exception as exc:
-            raise IdempotencyPersistenceLayerError("Failed to save in progress record to idempotency store") from exc
+            raise IdempotencyPersistenceLayerError(
+                "Failed to save in progress record to idempotency store", exc
+            ) from exc
 
         return self._get_function_response()
 
