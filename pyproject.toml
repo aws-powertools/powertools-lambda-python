@@ -36,7 +36,7 @@ flake8 = [
   { version = "*", python="^3.7" },
   { version = ">=5", python= ">=3.8"},
 ]
-flake8-builtins = "^2.0.1"
+flake8-builtins = "^2.1.0"
 flake8-comprehensions = "^3.10.1"
 flake8-debugger = "^4.0.0"
 flake8-fixme = "^1.1.1"
