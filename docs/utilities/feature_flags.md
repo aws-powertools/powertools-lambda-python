@@ -453,6 +453,12 @@ Feature flags can also return enabled features based on time or datetime ranges.
 This allows you to have features that are only enabled on certain days of the week, certain time
 intervals or between certain calendar dates.
 
+Use cases:
+
+* Enable maintenance mode during a weekend
+* Disable support/chat feature after working hours
+* Launch a new feature on a specific date and time
+
 === "app.py"
 
     ```python hl_lines="12"
