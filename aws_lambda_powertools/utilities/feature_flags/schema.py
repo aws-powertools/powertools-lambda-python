@@ -17,7 +17,7 @@ CONDITION_VALUE = "value"
 CONDITION_ACTION = "action"
 FEATURE_DEFAULT_VAL_TYPE_KEY = "boolean_type"
 TIME_RANGE_FORMAT = "%H:%M"
-TIME_RANGE_RE_PATTERN = re.compile(r"([0-2]\d):[0-5]\d")
+TIME_RANGE_RE_PATTERN = re.compile(r"2[0-3]:[0-5]\d|[0-1]\d:[0-5]\d")
 HOUR_MIN_SEPARATOR = ":"
 
 
@@ -336,7 +336,7 @@ class ConditionsValidator(BaseValidator):
         # Using a regex instead of strptime because it's several orders of magnitude faster
         match = TIME_RANGE_RE_PATTERN.match(time)
 
-        if not match or int(match.groups()[0]) > 23:
+        if not match:
             raise SchemaValidationError(
                 f"'START' and 'END' must be a valid time format, time_format={TIME_RANGE_FORMAT}, rule={rule_name}"
             )
