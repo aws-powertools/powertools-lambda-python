@@ -163,7 +163,7 @@ class IdempotencyHandler:
         # Wrap remaining unhandled exceptions with IdempotencyPersistenceLayerError to ease exception handling for
         # clients
         except Exception as exc:
-            raise IdempotencyPersistenceLayerError("Failed to get record from idempotency store") from exc
+            raise IdempotencyPersistenceLayerError("Failed to get record from idempotency store", exc) from exc
 
         return data_record
 
@@ -216,7 +216,7 @@ class IdempotencyHandler:
                 self.persistence_store.delete_record(data=self.data, exception=handler_exception)
             except Exception as delete_exception:
                 raise IdempotencyPersistenceLayerError(
-                    "Failed to delete record from idempotency store"
+                    "Failed to delete record from idempotency store", delete_exception
                 ) from delete_exception
             raise
 
@@ -225,7 +225,7 @@ class IdempotencyHandler:
                 self.persistence_store.save_success(data=self.data, result=response)
             except Exception as save_exception:
                 raise IdempotencyPersistenceLayerError(
-                    "Failed to update record state to success in idempotency store"
+                    "Failed to update record state to success in idempotency store", save_exception
                 ) from save_exception
 
         return response

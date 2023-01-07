@@ -1072,6 +1072,12 @@ def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPers
     stubber = stub.Stubber(persistence_store.table.meta.client)
     service_error_code = "ResourceNotFoundException"
     service_message = "Custom message"
+
+    exception_message = "Failed to save in progress record to idempotency store"
+    exception_details = (
+        f"An error occurred ({service_error_code}) when calling the PutItem operation: {service_message}"
+    )
+
     stubber.add_client_error(
         "put_item",
         service_error_code,
@@ -1092,11 +1098,10 @@ def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPers
     # AND append downstream exception details
     stubber.assert_no_pending_responses()
     stubber.deactivate()
-    assert "Failed to save in progress record to idempotency store" in e.value.args[0]
-    assert (
-        f": (An error occurred ({service_error_code}) when calling the PutItem operation: {service_message})"
-        in e.value.args[0]
-    )
+    assert exception_message == e.value.args[0]
+    assert isinstance(e.value.args[1], Exception)
+    assert exception_details in e.value.args[1].args
+    assert f"{exception_message} - ({exception_details})" in str(e.value)
 
 
 def test_handler_raise_idempotency_key_error(persistence_store: DynamoDBPersistenceLayer, lambda_context):
