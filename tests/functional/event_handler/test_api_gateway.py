@@ -20,7 +20,6 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     ProxyEventType,
     Response,
     ResponseBuilder,
-    Router,
 )
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
@@ -29,6 +28,7 @@ from aws_lambda_powertools.event_handler.exceptions import (
     ServiceError,
     UnauthorizedError,
 )
+from aws_lambda_powertools.event_handler.router import Router
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.json_encoder import Encoder
