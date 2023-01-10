@@ -4,6 +4,39 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **logger:** Add warning of uncaught exceptions ([#1826](https://github.com/awslabs/aws-lambda-powertools-python/issues/1826))
+
+## Maintenance
+
+* **deps:** bump gitpython from 3.1.29 to 3.1.30 ([#1812](https://github.com/awslabs/aws-lambda-powertools-python/issues/1812))
+* **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 2.0.1 to 2.0.3 ([#1801](https://github.com/awslabs/aws-lambda-powertools-python/issues/1801))
+* **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 2.0.3 to 2.0.4 ([#1821](https://github.com/awslabs/aws-lambda-powertools-python/issues/1821))
+* **deps:** bump release-drafter/release-drafter from 5.21.1 to 5.22.0 ([#1802](https://github.com/awslabs/aws-lambda-powertools-python/issues/1802))
+* **deps:** bump peaceiris/actions-gh-pages from 3.9.0 to 3.9.1 ([#1814](https://github.com/awslabs/aws-lambda-powertools-python/issues/1814))
+* **deps:** bump pydantic from 1.10.2 to 1.10.4 ([#1817](https://github.com/awslabs/aws-lambda-powertools-python/issues/1817))
+* **deps-dev:** bump mkdocs-material from 9.0.2 to 9.0.3 ([#1823](https://github.com/awslabs/aws-lambda-powertools-python/issues/1823))
+* **deps-dev:** bump mypy-boto3-logs from 1.26.27 to 1.26.43 ([#1820](https://github.com/awslabs/aws-lambda-powertools-python/issues/1820))
+* **deps-dev:** bump filelock from 3.8.2 to 3.9.0 ([#1816](https://github.com/awslabs/aws-lambda-powertools-python/issues/1816))
+* **deps-dev:** bump mypy-boto3-cloudformation from 1.26.11.post1 to 1.26.35.post1 ([#1818](https://github.com/awslabs/aws-lambda-powertools-python/issues/1818))
+* **deps-dev:** bump mkdocs-material from 8.5.11 to 9.0.2 ([#1808](https://github.com/awslabs/aws-lambda-powertools-python/issues/1808))
+* **deps-dev:** bump coverage from 6.5.0 to 7.0.3 ([#1806](https://github.com/awslabs/aws-lambda-powertools-python/issues/1806))
+* **deps-dev:** bump flake8-builtins from 2.0.1 to 2.1.0 ([#1799](https://github.com/awslabs/aws-lambda-powertools-python/issues/1799))
+* **deps-dev:** bump mypy-boto3-ssm from 1.26.11.post1 to 1.26.43 ([#1819](https://github.com/awslabs/aws-lambda-powertools-python/issues/1819))
+* **deps-dev:** bump mypy-boto3-secretsmanager from 1.26.12 to 1.26.40 ([#1811](https://github.com/awslabs/aws-lambda-powertools-python/issues/1811))
+* **deps-dev:** bump isort from 5.11.3 to 5.11.4 ([#1809](https://github.com/awslabs/aws-lambda-powertools-python/issues/1809))
+* **deps-dev:** bump aws-cdk-lib from 2.55.1 to 2.59.0 ([#1810](https://github.com/awslabs/aws-lambda-powertools-python/issues/1810))
+* **deps-dev:** bump importlib-metadata from 5.1.0 to 6.0.0 ([#1804](https://github.com/awslabs/aws-lambda-powertools-python/issues/1804))
+* **deps-dev:** bump ijson from 3.1.4 to 3.2.0.post0 ([#1815](https://github.com/awslabs/aws-lambda-powertools-python/issues/1815))
+* **deps-dev:** bump black from 22.10.0 to 22.12.0 ([#1770](https://github.com/awslabs/aws-lambda-powertools-python/issues/1770))
+* **deps-dev:** bump flake8-black from 0.3.5 to 0.3.6 ([#1792](https://github.com/awslabs/aws-lambda-powertools-python/issues/1792))
+* **deps-dev:** bump coverage from 7.0.3 to 7.0.4 ([#1822](https://github.com/awslabs/aws-lambda-powertools-python/issues/1822))
+* **deps-dev:** bump types-requests from 2.28.11.5 to 2.28.11.7 ([#1795](https://github.com/awslabs/aws-lambda-powertools-python/issues/1795))
+
+
+<a name="v2.5.0"></a>
+## [v2.5.0] - 2022-12-21
 ## Bug Fixes
 
 * **event_handlers:** omit explicit None HTTP header values ([#1793](https://github.com/awslabs/aws-lambda-powertools-python/issues/1793))
@@ -19,25 +52,26 @@
 
 ## Maintenance
 
+* update v2 layer ARN on documentation
 * **common:** reusable function to extract event from models
 * **deps:** bump certifi from 2022.9.24 to 2022.12.7 ([#1768](https://github.com/awslabs/aws-lambda-powertools-python/issues/1768))
 * **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 1.4.0 to 2.0.1 ([#1752](https://github.com/awslabs/aws-lambda-powertools-python/issues/1752))
 * **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 1.3.0 to 1.4.0 ([#1749](https://github.com/awslabs/aws-lambda-powertools-python/issues/1749))
-* **deps-dev:** bump aws-cdk-lib from 2.53.0 to 2.54.0 ([#1764](https://github.com/awslabs/aws-lambda-powertools-python/issues/1764))
-* **deps-dev:** bump mypy-boto3-cloudwatch from 1.26.0.post1 to 1.26.17 ([#1753](https://github.com/awslabs/aws-lambda-powertools-python/issues/1753))
 * **deps-dev:** bump pytest-asyncio from 0.20.2 to 0.20.3 ([#1767](https://github.com/awslabs/aws-lambda-powertools-python/issues/1767))
+* **deps-dev:** bump mypy-boto3-cloudwatch from 1.26.0.post1 to 1.26.17 ([#1753](https://github.com/awslabs/aws-lambda-powertools-python/issues/1753))
 * **deps-dev:** bump isort from 5.10.1 to 5.11.2 ([#1782](https://github.com/awslabs/aws-lambda-powertools-python/issues/1782))
-* **deps-dev:** bump mypy-boto3-dynamodb from 1.26.13.post16 to 1.26.24 ([#1765](https://github.com/awslabs/aws-lambda-powertools-python/issues/1765))
-* **deps-dev:** bump mypy-boto3-logs from 1.26.17 to 1.26.27 ([#1775](https://github.com/awslabs/aws-lambda-powertools-python/issues/1775))
 * **deps-dev:** bump mypy-boto3-cloudwatch from 1.26.17 to 1.26.30 ([#1785](https://github.com/awslabs/aws-lambda-powertools-python/issues/1785))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.26.13.post16 to 1.26.24 ([#1765](https://github.com/awslabs/aws-lambda-powertools-python/issues/1765))
+* **deps-dev:** bump aws-cdk-lib from 2.54.0 to 2.55.1 ([#1787](https://github.com/awslabs/aws-lambda-powertools-python/issues/1787))
+* **deps-dev:** bump aws-cdk-lib from 2.53.0 to 2.54.0 ([#1764](https://github.com/awslabs/aws-lambda-powertools-python/issues/1764))
 * **deps-dev:** bump flake8-bugbear from 22.10.27 to 22.12.6 ([#1760](https://github.com/awslabs/aws-lambda-powertools-python/issues/1760))
 * **deps-dev:** bump filelock from 3.8.0 to 3.8.2 ([#1759](https://github.com/awslabs/aws-lambda-powertools-python/issues/1759))
 * **deps-dev:** bump pytest-xdist from 3.0.2 to 3.1.0 ([#1758](https://github.com/awslabs/aws-lambda-powertools-python/issues/1758))
 * **deps-dev:** bump mkdocs-material from 8.5.10 to 8.5.11 ([#1756](https://github.com/awslabs/aws-lambda-powertools-python/issues/1756))
 * **deps-dev:** bump importlib-metadata from 4.13.0 to 5.1.0 ([#1750](https://github.com/awslabs/aws-lambda-powertools-python/issues/1750))
-* **deps-dev:** bump aws-cdk-lib from 2.54.0 to 2.55.1 ([#1787](https://github.com/awslabs/aws-lambda-powertools-python/issues/1787))
-* **deps-dev:** bump flake8-black from 0.3.3 to 0.3.5 ([#1738](https://github.com/awslabs/aws-lambda-powertools-python/issues/1738))
 * **deps-dev:** bump isort from 5.11.2 to 5.11.3 ([#1788](https://github.com/awslabs/aws-lambda-powertools-python/issues/1788))
+* **deps-dev:** bump flake8-black from 0.3.3 to 0.3.5 ([#1738](https://github.com/awslabs/aws-lambda-powertools-python/issues/1738))
+* **deps-dev:** bump mypy-boto3-logs from 1.26.17 to 1.26.27 ([#1775](https://github.com/awslabs/aws-lambda-powertools-python/issues/1775))
 * **tests:** move shared_functions to unit tests
 
 
@@ -2708,7 +2742,8 @@
 * Merge pull request [#5](https://github.com/awslabs/aws-lambda-powertools-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.5.0...HEAD
+[v2.5.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.4.0...v2.5.0
 [v2.4.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.3.1...v2.4.0
 [v2.3.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.3.0...v2.3.1
 [v2.3.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.2.0...v2.3.0
