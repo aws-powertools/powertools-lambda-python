@@ -293,6 +293,8 @@ Use `logger.exception` method to log contextual information about exceptions. Lo
 
 #### Uncaught exceptions
 
+!!! warning "CAUTION: some users reported a problem that causes this functionality not to work in the Lambda runtime. We recommend that you don't use this feature for the time being."
+
 Logger can optionally log uncaught exceptions by setting `log_uncaught_exceptions=True` at initialization.
 
 !!! info "Logger will replace any exception hook previously registered via [sys.excepthook](https://docs.python.org/3/library/sys.html#sys.excepthook){target='_blank'}."
