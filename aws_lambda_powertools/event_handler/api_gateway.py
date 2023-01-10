@@ -531,7 +531,7 @@ class ApiGatewayResolver(BaseRouter):
             event = event.raw_event
 
         if self._debug:
-            print(self._json_dump(event), end="")
+            print(self._json_dump(event))
 
         # Populate router(s) dependencies without keeping a reference to each registered router
         BaseRouter.current_event = self._to_proxy_event(event)
