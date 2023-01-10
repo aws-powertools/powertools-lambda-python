@@ -755,7 +755,7 @@ class ApiGatewayResolver(BaseRouter):
 
         Parameters
         ----------
-        router : aws_lambda_powertools.event_handler.Router
+        router : Router
             The Router containing a list of routes to be registered after the existing routes
         prefix : str, optional
             An optional prefix to be added to the originally defined rule

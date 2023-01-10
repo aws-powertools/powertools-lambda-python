@@ -10,7 +10,7 @@ from typing import Dict
 
 import pytest
 
-from aws_lambda_powertools.event_handler import Router, content_types
+from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.api_gateway import (
     ALBResolver,
     APIGatewayHttpResolver,
@@ -20,6 +20,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     ProxyEventType,
     Response,
     ResponseBuilder,
+    Router,
 )
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
