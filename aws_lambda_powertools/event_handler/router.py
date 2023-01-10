@@ -1,4 +1,4 @@
-from aws_lambda_powertools.event_handler import Router
+from aws_lambda_powertools.event_handler.api_gateway import Router
 from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
     APIGatewayProxyEvent,
