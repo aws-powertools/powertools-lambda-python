@@ -9,6 +9,7 @@ from .api_gateway import (
     APIGatewayRestResolver,
     CORSConfig,
     Response,
+    Router,
 )
 from .appsync import AppSyncResolver
 from .lambda_function_url import LambdaFunctionUrlResolver
@@ -17,7 +18,6 @@ from .router import (
     APIGatewayHttpRouter,
     APIGatewayRouter,
     LambdaFunctionUrlRouter,
-    Router,
 )
 
 __all__ = [

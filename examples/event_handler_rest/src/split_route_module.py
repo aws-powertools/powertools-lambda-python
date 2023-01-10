@@ -2,7 +2,7 @@ import requests
 from requests import Response
 
 from aws_lambda_powertools import Tracer
-from aws_lambda_powertools.event_handler.router import Router
+from aws_lambda_powertools.event_handler import Router
 
 tracer = Tracer()
 router = Router()
