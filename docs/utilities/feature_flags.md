@@ -473,7 +473,7 @@ Use cases:
 
 === "features.json"
 
-    ```json hl_lines="15 19-21"
+    ```json hl_lines="15 19-27"
     --8<-- "examples/feature_flags/src/timebased_features.json"
     ```
 
@@ -487,9 +487,17 @@ You can also have features enabled only at certain times of the day.
 
 === "features.json"
 
-    ```json hl_lines="9-14"
+    ```json hl_lines="9-15"
     --8<-- "examples/feature_flags/src/timebased_happyhour_features.json"
     ```
+
+???+ info "How should I use timezones?"
+    You can use any [IANA time zone](https://www.iana.org/time-zones) (as originally specified
+    in [PEP 615](https://peps.python.org/pep-0615/)) as part of your rules definition.
+    Powertools takes care of converting and calculate the correct timestamps for you.
+
+    When using `SCHEDULE_BETWEEN_DATETIME_RANGE`, use timestamps without timezone information, and
+    specify the timezone manually. This way, you'll avoid hitting problems with day light savings.
 
 ## Advanced
 
@@ -649,11 +657,13 @@ The `action` configuration can have the following values, where the expressions 
 
     For time based keys, we provide a list of predefined keys. These will automatically get converted to the corresponding timestamp on each invocation of your Lambda function.
 
-    | Key                     | Meaning (always in UTC)                                                  |
+    | Key                     | Meaning                                                                  |
     |-------------------------|--------------------------------------------------------------------------|
-    | CURRENT_TIME_UTC        | The current time, 24 hour format (HH:mm)                                                 |
-    | CURRENT_DATETIME_UTC    | The current datetime ([ISO8601](https://en.wikipedia.org/wiki/ISO_8601)) |
-    | CURRENT_DAY_OF_WEEK_UTC | The current day of the week (Monday-Sunday)                              |
+    | CURRENT_TIME            | The current time, 24 hour format (HH:mm)                                                 |
+    | CURRENT_DATETIME        | The current datetime ([ISO8601](https://en.wikipedia.org/wiki/ISO_8601)) |
+    | CURRENT_DAY_OF_WEEK     | The current day of the week (Monday-Sunday)                              |
+
+    If not specified, the timezone used for calculations will be UTC.
 
 **For multiple conditions**, we will evaluate the list of conditions as a logical `AND`, so all conditions needs to match to return `when_match` value.
 
