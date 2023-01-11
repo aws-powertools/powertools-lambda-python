@@ -4,6 +4,10 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **api_gateway:** fixed custom metrics issue when using debug mode ([#1827](https://github.com/awslabs/aws-lambda-powertools-python/issues/1827))
+
 ## Documentation
 
 * **logger:** Add warning of uncaught exceptions ([#1826](https://github.com/awslabs/aws-lambda-powertools-python/issues/1826))
