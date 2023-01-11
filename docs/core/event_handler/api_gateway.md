@@ -470,7 +470,7 @@ You can use specialized router classes according to the type of event that you a
 | ALBRouter               | ALBResolver               | ALBEvent               |
 | LambdaFunctionUrlRouter | LambdaFunctionUrlResolver | LambdaFunctionUrlEvent |
 
-```python hl_lines="3 9"
+```python hl_lines="1 5 9"
 --8<-- "examples/event_handler_rest/src/split_route_specialized_router.py"
 ```
 
