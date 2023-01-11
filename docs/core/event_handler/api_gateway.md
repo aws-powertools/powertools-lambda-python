@@ -459,6 +459,21 @@ When necessary, you can set a prefix when including a router object. This means 
     --8<-- "examples/event_handler_rest/src/split_route_prefix_module.py"
     ```
 
+#### Specialized router types
+
+You can use specialized router classes according to the type of event that you are resolving. This way you'll get type hints from your IDE as you access the `current_event` property.
+
+| Router                  | Resolver                  | `current_event` type   |
+|-------------------------|---------------------------|------------------------|
+| APIGatewayRouter        | APIGatewayRestResolver    | APIGatewayProxyEvent   |
+| APIGatewayHttpRouter    | APIGatewayHttpResolver    | APIGatewayProxyEventV2 |
+| ALBRouter               | ALBResolver               | ALBEvent               |
+| LambdaFunctionUrlRouter | LambdaFunctionUrlResolver | LambdaFunctionUrlEvent |
+
+```python hl_lines="1 5 9"
+--8<-- "examples/event_handler_rest/src/split_route_specialized_router.py"
+```
+
 #### Sharing contextual data
 
 You can use `append_context` when you want to share data between your App and Router instances. Any data you share will be available via the `context` dictionary available in your App or Router context.
