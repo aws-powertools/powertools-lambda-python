@@ -18,8 +18,8 @@ CONDITION_KEY = "key"
 CONDITION_VALUE = "value"
 CONDITION_ACTION = "action"
 FEATURE_DEFAULT_VAL_TYPE_KEY = "boolean_type"
-TIME_RANGE_FORMAT = "%H:%M"
-TIME_RANGE_RE_PATTERN = re.compile(r"2[0-3]:[0-5]\d|[0-1]\d:[0-5]\d")
+TIME_RANGE_FORMAT = "%H:%M"  # hour:min 24 hours clock
+TIME_RANGE_RE_PATTERN = re.compile(r"2[0-3]:[0-5]\d|[0-1]\d:[0-5]\d")  # 24 hour clock
 HOUR_MIN_SEPARATOR = ":"
 
 
@@ -38,18 +38,26 @@ class RuleAction(Enum):
     KEY_NOT_IN_VALUE = "KEY_NOT_IN_VALUE"
     VALUE_IN_KEY = "VALUE_IN_KEY"
     VALUE_NOT_IN_KEY = "VALUE_NOT_IN_KEY"
-    SCHEDULE_BETWEEN_TIME_RANGE = "SCHEDULE_BETWEEN_TIME_RANGE"  # hour:min 24 hours clock UTC time
-    SCHEDULE_BETWEEN_DATETIME_RANGE = "SCHEDULE_BETWEEN_DATETIME_RANGE"  # full datetime format
-    SCHEDULE_BETWEEN_DAYS_OF_WEEK = "SCHEDULE_BETWEEN_DAYS_OF_WEEK"
+    SCHEDULE_BETWEEN_TIME_RANGE = "SCHEDULE_BETWEEN_TIME_RANGE"  # hour:min 24 hours clock
+    SCHEDULE_BETWEEN_DATETIME_RANGE = "SCHEDULE_BETWEEN_DATETIME_RANGE"  # full datetime format, excluding timezone
+    SCHEDULE_BETWEEN_DAYS_OF_WEEK = "SCHEDULE_BETWEEN_DAYS_OF_WEEK"  # MONDAY, TUESDAY, .... see TimeValues enum
 
 
 class TimeKeys(Enum):
+    """
+    Possible keys when using time rules
+    """
+
     CURRENT_TIME = "CURRENT_TIME"
     CURRENT_DAY_OF_WEEK = "CURRENT_DAY_OF_WEEK"
     CURRENT_DATETIME = "CURRENT_DATETIME"
 
 
 class TimeValues(Enum):
+    """
+    Possible values when using time rules
+    """
+
     START = "START"
     END = "END"
     TIMEZONE = "TIMEZONE"
@@ -294,6 +302,11 @@ class ConditionsValidator(BaseValidator):
         key = condition.get(CONDITION_KEY, "")
         if not key or not isinstance(key, str):
             raise SchemaValidationError(f"'key' value must be a non empty string, rule={rule_name}")
+
+        # time actions need to have very specific keys
+        # SCHEDULE_BETWEEN_TIME_RANGE => CURRENT_TIME
+        # SCHEDULE_BETWEEN_DATETIME_RANGE => CURRENT_DATETIME
+        # SCHEDULE_BETWEEN_DAYS_OF_WEEK => CURRENT_DAY_OF_WEEK
         action = condition.get(CONDITION_ACTION, "")
         if action == RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value and key != TimeKeys.CURRENT_TIME.value:
             raise SchemaValidationError(
@@ -314,7 +327,8 @@ class ConditionsValidator(BaseValidator):
         if not value:
             raise SchemaValidationError(f"'value' key must not be empty, rule={rule_name}")
         action = condition.get(CONDITION_ACTION, "")
-        # time actions
+
+        # time actions need to be parsed to make sure date and time format is valid and timezone is recognized
         if action == RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value:
             ConditionsValidator._validate_schedule_between_time_and_datetime_ranges(
                 value, rule_name, action, ConditionsValidator._validate_time_value
@@ -330,9 +344,14 @@ class ConditionsValidator(BaseValidator):
     def _validate_datetime_value(datetime_str: str, rule_name: str):
         date = None
 
+        # We try to parse first with timezone information in order to return the correct error messages
+        # when a timestamp with timezone is used. Otherwise, the user would get the first error "must be a valid
+        # ISO8601 time format" which is misleading
+
         try:
             # python < 3.11 don't support the Z timezone on datetime.fromisoformat,
             # so we replace any Z with the equivalent "+00:00"
+            # datetime.fromisoformat is orders of magnitude faster than datetime.strptime
             date = datetime.fromisoformat(datetime_str.replace("Z", "+00:00"))
         except Exception:
             raise SchemaValidationError(f"'START' and 'END' must be a valid ISO8601 time format, rule={rule_name}")
@@ -383,6 +402,8 @@ class ConditionsValidator(BaseValidator):
         timezone = value.get(TimeValues.TIMEZONE.value, "UTC")
         if not isinstance(timezone, str):
             raise SchemaValidationError(error_str)
+
+        # try to see if the timezone string corresponds to any known timezone
         if not tz.gettz(timezone):
             raise SchemaValidationError(f"'TIMEZONE' value must represent a valid IANA timezone, rule={rule_name}")
 
@@ -393,17 +414,21 @@ class ConditionsValidator(BaseValidator):
         error_str = f"condition with a '{action_name}' action must have a condition value type dictionary with 'START' and 'END' keys, rule={rule_name}"  # noqa: E501
         if not isinstance(value, dict):
             raise SchemaValidationError(error_str)
+
         start_time = value.get(TimeValues.START.value)
         end_time = value.get(TimeValues.END.value)
         if not start_time or not end_time:
             raise SchemaValidationError(error_str)
         if not isinstance(start_time, str) or not isinstance(end_time, str):
             raise SchemaValidationError(f"'START' and 'END' must be a non empty string, rule={rule_name}")
+
         validator(start_time, rule_name)
         validator(end_time, rule_name)
 
         timezone = value.get(TimeValues.TIMEZONE.value, "UTC")
         if not isinstance(timezone, str):
             raise SchemaValidationError(f"'TIMEZONE' must be a string, rule={rule_name}")
+
+        # try to see if the timezone string corresponds to any known timezone
         if not tz.gettz(timezone):
             raise SchemaValidationError(f"'TIMEZONE' value must represent a valid IANA timezone, rule={rule_name}")

@@ -7,12 +7,19 @@ from .schema import HOUR_MIN_SEPARATOR, TimeValues
 
 
 def _get_now_from_timezone(timezone: Optional[tzinfo]) -> datetime:
+    """
+    Returns now in the specified timezone. Defaults to UTC if not present.
+    At this stage, we already validated that the passed timezone string is valid, so we assume that
+    gettz() will return a tzinfo object.
+    """
     timezone = gettz("UTC") if timezone is None else timezone
     return datetime.now(timezone)
 
 
 def compare_days_of_week(action: str, values: Dict) -> bool:
     timezone_name = values.get(TimeValues.TIMEZONE.value, "UTC")
+
+    # %A = Weekday as locale’s full name.
     current_day = _get_now_from_timezone(gettz(timezone_name)).strftime("%A").upper()
 
     days = values.get(TimeValues.DAYS.value, [])
@@ -27,9 +34,9 @@ def compare_datetime_range(action: str, values: Dict) -> bool:
     start_date_str = values.get(TimeValues.START.value, "")
     end_date_str = values.get(TimeValues.END.value, "")
 
-    # Since start_date and end_date don't include timezone information, we mark the timestamp
+    # Since start_date and end_date doesn't include timezone information, we mark the timestamp
     # with the same timezone as the current_time. This way all the 3 timestamps will be on
-    # the same timezone
+    # the same timezone.
     start_date = datetime.fromisoformat(start_date_str).replace(tzinfo=timezone)
     end_date = datetime.fromisoformat(end_date_str).replace(tzinfo=timezone)
     return start_date <= current_time <= end_date
