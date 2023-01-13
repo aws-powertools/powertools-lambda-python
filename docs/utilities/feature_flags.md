@@ -459,6 +459,8 @@ Use cases:
 * Disable support/chat feature after working hours
 * Launch a new feature on a specific date and time
 
+You can also have features enabled only at certain times of the day for premium tier customers
+
 === "app.py"
 
     ```python hl_lines="12"
@@ -473,7 +475,7 @@ Use cases:
 
 === "features.json"
 
-    ```json hl_lines="15 19-27"
+    ```json hl_lines="9-11 14-21"
     --8<-- "examples/feature_flags/src/timebased_features.json"
     ```
 
@@ -489,6 +491,20 @@ You can also have features enabled only at certain times of the day.
 
     ```json hl_lines="9-15"
     --8<-- "examples/feature_flags/src/timebased_happyhour_features.json"
+    ```
+
+You can also have features enabled only at specific days, for example: enable christmas sale discount during specific dates.
+
+=== "app.py"
+
+    ```python hl_lines="10"
+    --8<-- "examples/feature_flags/src/datetime_feature.py"
+    ```
+
+=== "features.json"
+
+    ```json hl_lines="9-14"
+    --8<-- "examples/feature_flags/src/datetime_feature.json"
     ```
 
 ???+ info "How should I use timezones?"
@@ -633,7 +649,7 @@ The `conditions` block is a list of conditions that contain `action`, `key`, and
 The `action` configuration can have the following values, where the expressions **`a`** is the `key` and **`b`** is the `value` above:
 
 | Action                              | Equivalent expression                                    |
-|-------------------------------------|----------------------------------------------------------|
+| ----------------------------------- | -------------------------------------------------------- |
 | **EQUALS**                          | `lambda a, b: a == b`                                    |
 | **NOT_EQUALS**                      | `lambda a, b: a != b`                                    |
 | **KEY_GREATER_THAN_VALUE**          | `lambda a, b: a > b`                                     |
@@ -657,11 +673,11 @@ The `action` configuration can have the following values, where the expressions 
 
     For time based keys, we provide a list of predefined keys. These will automatically get converted to the corresponding timestamp on each invocation of your Lambda function.
 
-    | Key                     | Meaning                                                                  |
-    |-------------------------|--------------------------------------------------------------------------|
-    | CURRENT_TIME            | The current time, 24 hour format (HH:mm)                                                 |
-    | CURRENT_DATETIME        | The current datetime ([ISO8601](https://en.wikipedia.org/wiki/ISO_8601)) |
-    | CURRENT_DAY_OF_WEEK     | The current day of the week (Monday-Sunday)                              |
+    | Key                 | Meaning                                                                  |
+    | ------------------- | ------------------------------------------------------------------------ |
+    | CURRENT_TIME        | The current time, 24 hour format (HH:mm)                                 |
+    | CURRENT_DATETIME    | The current datetime ([ISO8601](https://en.wikipedia.org/wiki/ISO_8601)) |
+    | CURRENT_DAY_OF_WEEK | The current day of the week (Monday-Sunday)                              |
 
     If not specified, the timezone used for calculations will be UTC.
 

@@ -1,0 +1,21 @@
+{
+  "christmas_discount": {
+    "default": false,
+    "rules": {
+      "enable discount during christmas": {
+        "when_match": true,
+        "conditions": [
+          {
+            "action": "SCHEDULE_BETWEEN_DATETIME_RANGE",
+            "key": "CURRENT_DATETIME",
+            "value": {
+              "START": "2022-12-25T12:00:00",
+              "END": "2022-12-31T23:59:59",
+              "TIMEZONE": "America/New_York"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
