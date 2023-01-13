@@ -20,14 +20,14 @@ tests-no-zope = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy 
 
 [[package]]
 name = "aws-cdk-asset-awscli-v1"
-version = "2.2.31"
+version = "2.2.49"
 description = "A library that contains the AWS CLI for use in Lambda Layers"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.asset-awscli-v1-2.2.31.tar.gz", hash = "sha256:c7e01034ae5f128f6853332a61282e51d8112bd975df6897436678bf358eceed"},
-    {file = "aws_cdk.asset_awscli_v1-2.2.31-py3-none-any.whl", hash = "sha256:3194fbf956578d85d16cd9bb0541f9011bc5564baa9c4495b47dbe3889165d44"},
+    {file = "aws-cdk.asset-awscli-v1-2.2.49.tar.gz", hash = "sha256:d367da8bdc83357792b1ef16b6166d400ef15f2389cf0032b607b6327768a41a"},
+    {file = "aws_cdk.asset_awscli_v1-2.2.49-py3-none-any.whl", hash = "sha256:28df4487e2fa5314d5c39c114e12d366714a1fab2de3269d55c4e544876cae44"},
 ]
 
 [package.dependencies]
@@ -110,18 +110,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.59.0"
+version = "2.60.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk-lib-2.59.0.tar.gz", hash = "sha256:1faeced63e37a4caa58472ba368664e3aea935b3193ccbc3f4f55a81d93b59d1"},
-    {file = "aws_cdk_lib-2.59.0-py3-none-any.whl", hash = "sha256:0f8718be6951facac8044c286e49c6459a00a833d9d8c56274f27af41ed194c6"},
+    {file = "aws-cdk-lib-2.60.0.tar.gz", hash = "sha256:05f69bdc8c1130b01cc4a8551b44da3bfce4e7d717dc8194f9c0884fad4c7eba"},
+    {file = "aws_cdk_lib-2.60.0-py3-none-any.whl", hash = "sha256:6abc46cac6ebfd64d20a0dcd653c17e590ec17e09909828ead3a36a3f0f185d8"},
 ]
 
 [package.dependencies]
-"aws-cdk.asset-awscli-v1" = ">=2.2.30,<3.0.0"
+"aws-cdk.asset-awscli-v1" = ">=2.2.49,<3.0.0"
 "aws-cdk.asset-kubectl-v20" = ">=2.1.1,<3.0.0"
 "aws-cdk.asset-node-proxy-agent-v5" = ">=2.0.38,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
@@ -2653,4 +2653,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "f0f65f1a63f7a02134227ccc6208b0023b91cb6a51b62c826571f4bb02df4a64"
+content-hash = "68d1e00ac2bcfc6451db9051e77dccf3817d37c45b731c0ca0f53e6285545429"
