@@ -7,9 +7,9 @@ from . import schema
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError
 from .time_conditions import (
-    compare_utc_datetime_range,
-    compare_utc_days_of_week,
-    compare_utc_time_range,
+    compare_datetime_range,
+    compare_days_of_week,
+    compare_time_range,
 )
 
 
@@ -64,9 +64,9 @@ class FeatureFlags:
             schema.RuleAction.KEY_NOT_IN_VALUE.value: lambda a, b: a not in b,
             schema.RuleAction.VALUE_IN_KEY.value: lambda a, b: b in a,
             schema.RuleAction.VALUE_NOT_IN_KEY.value: lambda a, b: b not in a,
-            schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value: lambda a, b: compare_utc_time_range(a, b),
-            schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value: lambda a, b: compare_utc_datetime_range(a, b),
-            schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value: lambda a, b: compare_utc_days_of_week(a, b),
+            schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value: lambda a, b: compare_time_range(a, b),
+            schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value: lambda a, b: compare_datetime_range(a, b),
+            schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value: lambda a, b: compare_days_of_week(a, b),
         }
 
         try:
@@ -101,7 +101,7 @@ class FeatureFlags:
                 schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value,
                 schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,
             ):
-                context_value = condition.get(schema.CONDITION_KEY)  # e.g., CURRENT_TIME_UTC
+                context_value = condition.get(schema.CONDITION_KEY)  # e.g., CURRENT_TIME
 
             if not self._match_by_action(action=cond_action, condition_value=cond_value, context_value=context_value):
                 self.logger.debug(
