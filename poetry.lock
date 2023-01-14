@@ -230,18 +230,18 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.26.49"
+version = "1.26.50"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.26.49-py3-none-any.whl", hash = "sha256:2260cb121b202c9f3483e1c5fabff2009a160369824f6da5608261e7c232a75c"},
-    {file = "boto3-1.26.49.tar.gz", hash = "sha256:6c9628f71d0723bf16b5ae4d4e78bbde53da80577e74b17762f3aea17c3c0f85"},
+    {file = "boto3-1.26.50-py3-none-any.whl", hash = "sha256:9c434bcd02c527485c89d6efbd38b7c205e06ab06abe80e5dbf9a8be836c77c2"},
+    {file = "boto3-1.26.50.tar.gz", hash = "sha256:3737d8a506f50065bb2366a6b8e7545d88034f4771527790a125e0abd307d8e8"},
 ]
 
 [package.dependencies]
-botocore = ">=1.29.49,<1.30.0"
+botocore = ">=1.29.50,<1.30.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -250,14 +250,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.29.49"
+version = "1.29.50"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.29.49-py3-none-any.whl", hash = "sha256:1d93d602fdc3512c4e1db6f418f274a3f5758fc3bd6dea1d6f9ea29bcfe32ae7"},
-    {file = "botocore-1.29.49.tar.gz", hash = "sha256:0a198d33a426fc8b3342ce238c6bccb7f5d3b0b6a33f624170f1c11aa2483a15"},
+    {file = "botocore-1.29.50-py3-none-any.whl", hash = "sha256:0e9ab19787ad7a079c00d3e40b16bc66423e54bc0e8a203b70b543bd8854d5ad"},
+    {file = "botocore-1.29.50.tar.gz", hash = "sha256:5cc68b78a48217550c18b4639420b7c3b48ed9e09e749343143acbfa423ceec5"},
 ]
 
 [package.dependencies]
@@ -459,14 +459,14 @@ files = [
 
 [[package]]
 name = "constructs"
-version = "10.1.218"
+version = "10.1.219"
 description = "A programming model for software-defined state"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "constructs-10.1.218-py3-none-any.whl", hash = "sha256:525365d41e7c7cb46b4f0ea8e7b5820554f1f3180074932dacfa76a38a50b648"},
-    {file = "constructs-10.1.218.tar.gz", hash = "sha256:9ce7fd475d213bd7ef50635f362f9f68d2fe37c138a14dc7558d7c40014b1485"},
+    {file = "constructs-10.1.219-py3-none-any.whl", hash = "sha256:62008af2e02fe7ddfc04afe488f944f4a44d55ef030bd5d27ebd3b68ec464aea"},
+    {file = "constructs-10.1.219.tar.gz", hash = "sha256:a03fed938006bbd1ee8d7924e51517f59849147a464cf60eb2778a8482ae7d1c"},
 ]
 
 [package.dependencies]
@@ -2759,4 +2759,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "5714107e22e0e34da5c5247c28262c8135b7c3bc718b309bac7ed62de27e16e5"
+content-hash = "f5ebadf79a02abdcd47c68d763db1f4dae6a2aec9c1f291324c54848464ff7da"
