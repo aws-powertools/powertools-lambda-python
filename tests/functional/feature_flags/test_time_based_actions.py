@@ -107,6 +107,63 @@ def test_time_based_utc_in_between_time_range_no_rule_match(mocker):
     )
 
 
+def test_time_based_utc_in_between_time_range_full_hour_rule_match(mocker):
+    assert evaluate_mocked_schema(
+        mocker=mocker,
+        rules={
+            "lambda time is between UTC 20:00-23:00": {
+                RULE_MATCH_VALUE: True,
+                CONDITIONS_KEY: [
+                    {
+                        CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value,  # this condition matches
+                        CONDITION_KEY: TimeKeys.CURRENT_TIME.value,
+                        CONDITION_VALUE: {TimeValues.START.value: "20:00", TimeValues.END.value: "23:00"},
+                    },
+                ],
+            }
+        },
+        mocked_time=(2022, 2, 15, 21, 12, 0, datetime.timezone.utc),  # rule match 21:12
+    )
+
+
+def test_time_based_utc_in_between_time_range_between_days_rule_match(mocker):
+    assert evaluate_mocked_schema(
+        mocker=mocker,
+        rules={
+            "lambda time is between UTC 23:00-04:00": {
+                RULE_MATCH_VALUE: True,
+                CONDITIONS_KEY: [
+                    {
+                        CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value,  # this condition matches
+                        CONDITION_KEY: TimeKeys.CURRENT_TIME.value,
+                        CONDITION_VALUE: {TimeValues.START.value: "23:00", TimeValues.END.value: "04:00"},
+                    },
+                ],
+            }
+        },
+        mocked_time=(2022, 2, 15, 2, 3, 0, datetime.timezone.utc),  # rule match 2:03 am
+    )
+
+
+def test_time_based_utc_in_between_time_range_between_days_rule_no_match(mocker):
+    assert not evaluate_mocked_schema(
+        mocker=mocker,
+        rules={
+            "lambda time is between UTC 23:00-04:00": {
+                RULE_MATCH_VALUE: True,
+                CONDITIONS_KEY: [
+                    {
+                        CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value,  # this condition matches
+                        CONDITION_KEY: TimeKeys.CURRENT_TIME.value,
+                        CONDITION_VALUE: {TimeValues.START.value: "23:00", TimeValues.END.value: "04:00"},
+                    },
+                ],
+            }
+        },
+        mocked_time=(2022, 2, 15, 5, 0, 0, datetime.timezone.utc),  # rule no match 5:00 am
+    )
+
+
 def test_time_based_between_time_range_rule_timezone_match(mocker):
     timezone_name = "Europe/Copenhagen"
 

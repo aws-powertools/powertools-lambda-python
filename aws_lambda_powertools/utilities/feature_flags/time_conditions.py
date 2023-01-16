@@ -48,9 +48,26 @@ def compare_time_range(action: str, values: Dict) -> bool:
 
     start_hour, start_min = values.get(TimeValues.START.value, "").split(HOUR_MIN_SEPARATOR)
     end_hour, end_min = values.get(TimeValues.END.value, "").split(HOUR_MIN_SEPARATOR)
-    return (
-        current_time.hour >= int(start_hour)
-        and current_time.hour <= int(end_hour)
-        and current_time.minute >= int(start_min)
-        and current_time.minute <= int(end_min)
-    )
+
+    start_datetime = current_time.replace(hour=int(start_hour), minute=int(start_min))
+    end_datetime = current_time.replace(hour=int(end_hour), minute=int(end_min))
+
+    if int(end_hour) < int(start_hour):
+        # When the end hour is smaller than start hour, it means we are crossing a day's boundary.
+        # In this case we need to assert that current_time is **either** on one side or the other side of the boundary
+        #
+        # ┌─────┐                                    ┌─────┐                                  ┌─────┐
+        # │20.00│                                    │00.00│                                  │04.00│
+        # └─────┘                                    └─────┘                                  └─────┘
+        #    ───────────────────────────────────────────┬─────────────────────────────────────────▶
+        #    ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─  │ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+        #                                             │ │                                        │
+        #    │           either this area               │ │             or this area
+        #                                             │ │                                        │
+        #    └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─  │ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+        #                                               │
+
+        return (start_datetime <= current_time) or (current_time <= end_datetime)
+    else:
+        # In normal circumstances, we need to assert **both** conditions
+        return (start_datetime <= current_time) and (current_time <= end_datetime)
