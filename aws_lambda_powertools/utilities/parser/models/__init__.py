@@ -44,6 +44,7 @@ from .kinesis_firehose import (
 )
 from .lambda_function_url import LambdaFunctionUrlModel
 from .s3 import S3Model, S3RecordModel
+from .s3_event_notification import SqsS3EventNotificationModel
 from .s3_object_event import (
     S3ObjectConfiguration,
     S3ObjectContext,
@@ -97,6 +98,7 @@ __all__ = [
     "LambdaFunctionUrlModel",
     "S3Model",
     "S3RecordModel",
+    "SqsS3EventNotificationModel",
     "S3ObjectLambdaEvent",
     "S3ObjectUserIdentity",
     "S3ObjectSessionContext",
