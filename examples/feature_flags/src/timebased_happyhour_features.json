@@ -1,0 +1,21 @@
+{
+  "happy_hour": {
+    "default": false,
+    "rules": {
+      "is happy hour": {
+        "when_match": true,
+        "conditions": [
+          {
+            "action": "SCHEDULE_BETWEEN_TIME_RANGE",
+            "key": "CURRENT_TIME",
+            "value": {
+              "START": "17:00",
+              "END": "19:00",
+              "TIMEZONE": "Europe/Copenhagen"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
