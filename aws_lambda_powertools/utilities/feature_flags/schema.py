@@ -234,10 +234,11 @@ class RulesValidator(BaseValidator):
             return
 
         if not isinstance(self.rules, dict):
+            self.logger.debug(f"Feature rules must be a dictionary, feature={self.feature_name}")
             raise SchemaValidationError(f"Feature rules must be a dictionary, feature={self.feature_name}")
 
         for rule_name, rule in self.rules.items():
-            self.logger.debug(f"Attempting to validate rule '{rule_name}'")
+            self.logger.debug(f"Attempting to validate rule={rule_name} and feature={self.feature_name}")
             self.validate_rule(
                 rule=rule, rule_name=rule_name, feature_name=self.feature_name, boolean_feature=self.boolean_feature
             )
@@ -271,12 +272,14 @@ class ConditionsValidator(BaseValidator):
         self.logger = logger or logging.getLogger(__name__)
 
     def validate(self):
+
         if not self.conditions or not isinstance(self.conditions, list):
+            self.logger.debug(f"Condition is empty or invalid for rule={self.rule_name}")
             raise SchemaValidationError(f"Invalid condition, rule={self.rule_name}")
 
         for condition in self.conditions:
             # Condition can contain PII data; do not log condition value
-            self.logger.debug(f"Attempting to validate condition for '{self.rule_name}'")
+            self.logger.debug(f"Attempting to validate condition for {self.rule_name}")
             self.validate_condition(rule_name=self.rule_name, condition=condition)
 
     @staticmethod
