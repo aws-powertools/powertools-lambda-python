@@ -185,7 +185,7 @@ class FeatureFlags:
         # parse result conf as JSON, keep in cache for max age defined in store
         self.logger.debug(f"Fetching schema from registered store, store={self.store}")
         config: Dict = self.store.get_configuration()
-        validator = schema.SchemaValidator(schema=config)
+        validator = schema.SchemaValidator(schema=config, logger=self.logger)
         validator.validate()
 
         return config

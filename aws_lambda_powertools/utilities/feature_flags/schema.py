@@ -181,7 +181,7 @@ class SchemaValidator(BaseValidator):
         if not isinstance(self.schema, dict):
             raise SchemaValidationError(f"Features must be a dictionary, schema={str(self.schema)}")
 
-        features = FeaturesValidator(schema=self.schema)
+        features = FeaturesValidator(schema=self.schema, logger=self.logger)
         features.validate()
 
 
@@ -196,7 +196,7 @@ class FeaturesValidator(BaseValidator):
         for name, feature in self.schema.items():
             self.logger.debug(f"Attempting to validate feature '{name}'")
             boolean_feature: bool = self.validate_feature(name, feature)
-            rules = RulesValidator(feature=feature, boolean_feature=boolean_feature)
+            rules = RulesValidator(feature=feature, boolean_feature=boolean_feature, logger=self.logger)
             rules.validate()
 
     # returns True in case the feature is a regular feature flag with a  boolean default value
@@ -242,7 +242,7 @@ class RulesValidator(BaseValidator):
             self.validate_rule(
                 rule=rule, rule_name=rule_name, feature_name=self.feature_name, boolean_feature=self.boolean_feature
             )
-            conditions = ConditionsValidator(rule=rule, rule_name=rule_name)
+            conditions = ConditionsValidator(rule=rule, rule_name=rule_name, logger=self.logger)
             conditions.validate()
 
     @staticmethod
