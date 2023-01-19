@@ -2428,6 +2428,18 @@ doc = ["sphinx-autodoc-typehints (>=1.2.0)", "sphinx-rtd-theme"]
 test = ["mypy", "pytest", "typing-extensions"]
 
 [[package]]
+name = "types-python-dateutil"
+version = "2.8.19.6"
+description = "Typing stubs for python-dateutil"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-python-dateutil-2.8.19.6.tar.gz", hash = "sha256:4a6f4cc19ce4ba1a08670871e297bf3802f55d4f129e6aa2443f540b6cf803d2"},
+    {file = "types_python_dateutil-2.8.19.6-py3-none-any.whl", hash = "sha256:cfb7d31021c6bce6f3362c69af6e3abb48fe3e08854f02487e844ff910deec2a"},
+]
+
+[[package]]
 name = "types-requests"
 version = "2.28.11.8"
 description = "Typing stubs for requests"
@@ -2653,4 +2665,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "68c48ad8be866ea55c784614e529a20ec08eb39b47536c461be0b6adc87c8d38"
+content-hash = "ac05041ebadb315e0fd5b9cbbfa2acecb1952458ac60f0433e76d31d34431bda"
