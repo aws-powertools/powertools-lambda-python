@@ -1,5 +1,5 @@
 import time
-from typing import Callable
+from typing import Callable, Tuple
 
 import requests
 from requests import Response
