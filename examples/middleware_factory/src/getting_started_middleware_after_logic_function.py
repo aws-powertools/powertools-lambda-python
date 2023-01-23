@@ -26,7 +26,7 @@ def middleware_after(handler, event, context) -> Callable:
 
 
 @app.post("/todos")
-def create_todo() -> dict:
+def create_todo() -> Tuple[dict, int]:
     todo_data: dict = app.current_event.json_body  # deserialize json str to dict
     todo: Response = requests.post("https://jsonplaceholder.typicode.com/todos", data=todo_data)
     todo.raise_for_status()
