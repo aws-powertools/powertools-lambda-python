@@ -735,13 +735,13 @@ class ApiGatewayResolver(BaseRouter):
 
         - Dict[str, Any]: Rest api response with just the Dict to json stringify and content-type is set to
           application/json
-        - Tuple[dict, str]: Same dict handling as above but with the option of including a status code
+        - Tuple[dict, int]: Same dict handling as above but with the option of including a status code
         - Response: returned as is, and allows for more flexibility
         """
-        status_code = 200
+        status_code = HTTPStatus.OK
         if isinstance(result, Response):
             return result
-        elif isinstance(result, tuple) and len(tuple) == 2:
+        elif isinstance(result, tuple) and len(result) == 2:
             # Unpack result dict and status code from tuple
             result, status_code = result
 

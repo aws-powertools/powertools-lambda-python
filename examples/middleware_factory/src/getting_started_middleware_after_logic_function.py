@@ -31,7 +31,7 @@ def create_todo() -> dict:
     todo: Response = requests.post("https://jsonplaceholder.typicode.com/todos", data=todo_data)
     todo.raise_for_status()
 
-    return {"todo": todo.json()}
+    return {"todo": todo.json()}, 201
 
 
 @middleware_after

@@ -1579,3 +1579,39 @@ def test_nested_router_decorator():
     # AND set the current_event type as APIGatewayProxyEvent
     assert result["statusCode"] == 200
     assert result2["statusCode"] == 200
+
+
+def test_dict_response():
+    # GIVEN a dict is returned
+    app = ApiGatewayResolver()
+
+    @app.get("/lambda")
+    def get_message():
+        return {"message": "success"}
+
+    # WHEN calling handler
+    response = app({"httpMethod": "GET", "path": "/lambda"}, None)
+
+    # THEN the body is correctly formatted, the status code is 200 and the content type is json
+    assert response["statusCode"] == 200
+    assert response["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    response_body = json.loads(response["body"])
+    assert response_body["message"] == "success"
+
+
+def test_dict_response_with_status_code():
+    # GIVEN a dict is returned with a status code
+    app = ApiGatewayResolver()
+
+    @app.get("/lambda")
+    def get_message():
+        return {"message": "success"}, 201
+
+    # WHEN calling handler
+    response = app({"httpMethod": "GET", "path": "/lambda"}, None)
+
+    # THEN the body is correctly formatted, the status code is 201 and the content type is json
+    assert response["statusCode"] == 201
+    assert response["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    response_body = json.loads(response["body"])
+    assert response_body["message"] == "success"

@@ -19,7 +19,7 @@ def create_todo():
     todo: Response = requests.post("https://jsonplaceholder.typicode.com/todos", data=todo_data)
     todo.raise_for_status()
 
-    return {"todo": todo.json()}
+    return {"todo": todo.json()}, 201
 
 
 # You can continue to use other utilities just as before
