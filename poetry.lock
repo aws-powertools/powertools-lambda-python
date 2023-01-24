@@ -1062,6 +1062,7 @@ category = "dev"
 optional = false
 python-versions = "*"
 files = [
+    {file = "junit-xml-1.9.tar.gz", hash = "sha256:de16a051990d4e25a3982b2dd9e89d671067548718866416faec14d9de56db9f"},
     {file = "junit_xml-1.9-py2.py3-none-any.whl", hash = "sha256:ec5ca1a55aefdd76d28fcc0b135251d156c7106fa979686a4b48d62b761b4732"},
 ]
 
@@ -1436,14 +1437,14 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-lambda"
-version = "1.26.49"
-description = "Type annotations for boto3.Lambda 1.26.49 service generated with mypy-boto3-builder 7.12.3"
+version = "1.26.55"
+description = "Type annotations for boto3.Lambda 1.26.55 service generated with mypy-boto3-builder 7.12.3"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-lambda-1.26.49.tar.gz", hash = "sha256:748222e6dfd602a667b76b9ce0e8c8b31664bc3bd78cc43363fb22ca2885b4c3"},
-    {file = "mypy_boto3_lambda-1.26.49-py3-none-any.whl", hash = "sha256:ef346c1fbbc80a907c1d44f19ea9335f8c3889fb48766cb0f7e4439e339fae2b"},
+    {file = "mypy-boto3-lambda-1.26.55.tar.gz", hash = "sha256:357e80e81c1e6674a1d5d879f6f1578103d3825bb87a7d2c897e8626a0f95fc0"},
+    {file = "mypy_boto3_lambda-1.26.55-py3-none-any.whl", hash = "sha256:3df0dc3e24ec0c79b0bdd024d40694aa41d2a5e355f9441863657eb632567312"},
 ]
 
 [package.dependencies]
@@ -2665,4 +2666,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "5b925c7de2441a1193ae75efe1548070b10b71cb99bc4627e5cabef683b05f95"
+content-hash = "bbd738d5ea06ac51cce9db50ee6cde80f00026611716e690272de80c45992d6b"
