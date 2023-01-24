@@ -1,5 +1,5 @@
 import time
-from typing import Callable, Tuple
+from typing import Callable
 
 import requests
 from requests import Response
@@ -26,12 +26,12 @@ def middleware_after(handler, event, context) -> Callable:
 
 
 @app.post("/todos")
-def create_todo() -> Tuple[dict, int]:
+def create_todo() -> dict:
     todo_data: dict = app.current_event.json_body  # deserialize json str to dict
     todo: Response = requests.post("https://jsonplaceholder.typicode.com/todos", data=todo_data)
     todo.raise_for_status()
 
-    return {"todo": todo.json()}, 201
+    return {"todo": todo.json()}
 
 
 @middleware_after
