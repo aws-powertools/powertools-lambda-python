@@ -4,6 +4,10 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* git-chlg docker image is broken
+
 ## Features
 
 * **feature_flags:** Add Time based feature flags actions ([#1846](https://github.com/awslabs/aws-lambda-powertools-python/issues/1846))
@@ -11,11 +15,15 @@
 ## Maintenance
 
 * **deps:** bump peaceiris/actions-gh-pages from 3.9.1 to 3.9.2 ([#1841](https://github.com/awslabs/aws-lambda-powertools-python/issues/1841))
-* **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 2.0.4 to 2.0.5 ([#1837](https://github.com/awslabs/aws-lambda-powertools-python/issues/1837))
 * **deps:** bump future from 0.18.2 to 0.18.3 ([#1836](https://github.com/awslabs/aws-lambda-powertools-python/issues/1836))
+* **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 2.0.4 to 2.0.5 ([#1837](https://github.com/awslabs/aws-lambda-powertools-python/issues/1837))
+* **deps-dev:** bump mkdocs-material from 9.0.5 to 9.0.6 ([#1851](https://github.com/awslabs/aws-lambda-powertools-python/issues/1851))
 * **deps-dev:** bump types-requests from 2.28.11.7 to 2.28.11.8 ([#1843](https://github.com/awslabs/aws-lambda-powertools-python/issues/1843))
+* **deps-dev:** bump mypy-boto3-cloudwatch from 1.26.30 to 1.26.52 ([#1847](https://github.com/awslabs/aws-lambda-powertools-python/issues/1847))
 * **deps-dev:** bump pytest from 7.2.0 to 7.2.1 ([#1838](https://github.com/awslabs/aws-lambda-powertools-python/issues/1838))
 * **deps-dev:** bump mkdocs-material from 9.0.4 to 9.0.5 ([#1840](https://github.com/awslabs/aws-lambda-powertools-python/issues/1840))
+* **deps-dev:** bump aws-cdk-lib from 2.60.0 to 2.61.1 ([#1849](https://github.com/awslabs/aws-lambda-powertools-python/issues/1849))
+* **deps-dev:** bump mypy-boto3-logs from 1.26.49 to 1.26.53 ([#1850](https://github.com/awslabs/aws-lambda-powertools-python/issues/1850))
 * **deps-dev:** bump mkdocs-material from 9.0.3 to 9.0.4 ([#1833](https://github.com/awslabs/aws-lambda-powertools-python/issues/1833))
 * **deps-dev:** bump mypy-boto3-logs from 1.26.43 to 1.26.49 ([#1834](https://github.com/awslabs/aws-lambda-powertools-python/issues/1834))
 * **deps-dev:** bump mypy-boto3-secretsmanager from 1.26.40 to 1.26.49 ([#1835](https://github.com/awslabs/aws-lambda-powertools-python/issues/1835))
