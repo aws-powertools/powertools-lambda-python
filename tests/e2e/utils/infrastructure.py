@@ -286,7 +286,6 @@ class BaseInfrastructure(InfrastructureProvider):
 
 
 def call_once(
-    job_id: str,
     task: Callable,
     tmp_path_factory: pytest.TempPathFactory,
     worker_id: str,
@@ -296,8 +295,6 @@ def call_once(
 
     Parameters
     ----------
-    id : str
-        Random string that uniquely identifies this call
     task : Callable
         Function to call once and JSON serialize result whether parallel test is enabled or not.
     tmp_path_factory : pytest.TempPathFactory
@@ -320,7 +317,7 @@ def call_once(
         else:
             # tmp dir shared by all workers
             root_tmp_dir = tmp_path_factory.getbasetemp().parent
-            cache = root_tmp_dir / f"{PYTHON_RUNTIME_VERSION}_{job_id}_cache.json"
+            cache = root_tmp_dir / f"{PYTHON_RUNTIME_VERSION}_cache.json"
 
             with FileLock(f"{cache}.lock"):
                 # If cache exists, return task outputs back

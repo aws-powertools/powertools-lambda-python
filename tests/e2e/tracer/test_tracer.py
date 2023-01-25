@@ -36,6 +36,7 @@ def async_fn(infrastructure: dict) -> str:
     return infrastructure.get("AsyncCapture", "")
 
 
+@pytest.mark.xdist_group(name="tracer")
 def test_lambda_handler_trace_is_visible(basic_handler_fn_arn: str, basic_handler_fn: str):
     # GIVEN
     service = data_builder.build_service_name()
@@ -64,6 +65,7 @@ def test_lambda_handler_trace_is_visible(basic_handler_fn_arn: str, basic_handle
     assert len(trace.get_subsegment(name=method_subsegment)) == 2
 
 
+@pytest.mark.xdist_group(name="tracer")
 def test_lambda_handler_trace_multiple_functions_same_name(same_function_name_arn: str, same_function_name_fn: str):
     # GIVEN
     service = data_builder.build_service_name()
@@ -90,6 +92,7 @@ def test_lambda_handler_trace_multiple_functions_same_name(same_function_name_ar
     assert len(trace.get_subsegment(name=method_subsegment_comments)) == 1
 
 
+@pytest.mark.xdist_group(name="tracer")
 def test_async_trace_is_visible(async_fn_arn: str, async_fn: str):
     # GIVEN
     service = data_builder.build_service_name()

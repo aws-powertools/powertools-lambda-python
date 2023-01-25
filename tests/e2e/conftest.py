@@ -23,7 +23,6 @@ def lambda_layer_build(tmp_path_factory: pytest.TempPathFactory, worker_id: str)
 
     layer = LocalLambdaPowertoolsLayer()
     yield from call_once(
-        job_id="lambda_layer",
         task=layer.build,
         tmp_path_factory=tmp_path_factory,
         worker_id=worker_id,
