@@ -27,7 +27,7 @@ boto3 = { version = "^1.20.32", optional = true }
 typing-extensions = "^4.4.0"
 
 [tool.poetry.dev-dependencies]
-coverage = {extras = ["toml"], version = "^7.0"}
+coverage = {extras = ["toml"], version = "^7.1"}
 pytest = "^7.2.1"
 black = "^22.12"
 boto3 = "^1.18"
