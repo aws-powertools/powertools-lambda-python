@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import platform
 import subprocess
 import sys
 import textwrap
@@ -57,7 +56,7 @@ class BaseInfrastructure(InfrastructureProvider):
         self._feature_infra_module_path = self.feature_path / "infrastructure"
         self._feature_infra_file = self.feature_path / "infrastructure.py"
         self._handlers_dir = self.feature_path / "handlers"
-        self._cdk_out_dir: Path = CDK_OUT_PATH / "-".join(platform.python_version_tuple()) / self.feature_name
+        self._cdk_out_dir: Path = CDK_OUT_PATH / self.feature_name
         self._stack_outputs_file = f'{self._cdk_out_dir / "stack_outputs.json"}'
 
         if not self._feature_infra_file.exists():
@@ -287,6 +286,7 @@ class BaseInfrastructure(InfrastructureProvider):
 
 
 def call_once(
+    job_id: str,
     task: Callable,
     tmp_path_factory: pytest.TempPathFactory,
     worker_id: str,
@@ -296,6 +296,8 @@ def call_once(
 
     Parameters
     ----------
+    id : str
+        Random string that uniquely identifies this call
     task : Callable
         Function to call once and JSON serialize result whether parallel test is enabled or not.
     tmp_path_factory : pytest.TempPathFactory
@@ -318,7 +320,7 @@ def call_once(
         else:
             # tmp dir shared by all workers
             root_tmp_dir = tmp_path_factory.getbasetemp().parent
-            cache = root_tmp_dir / f"{PYTHON_RUNTIME_VERSION}_cache.json"
+            cache = root_tmp_dir / f"{PYTHON_RUNTIME_VERSION}_{job_id}_cache.json"
 
             with FileLock(f"{cache}.lock"):
                 # If cache exists, return task outputs back
