@@ -6,8 +6,8 @@ from tests.e2e.utils import data_fetcher  # noqa F401
 
 
 def execute_lambdas_in_parallel(function_name: str, lambdas_arn: list, arguments: str):
-    def f(function_name, arn, arguments):
-        eval(function_name)(arn, arguments)
+    def f(fname: str, farn: str, fargs: str):
+        return eval(fname)(farn, fargs)
 
     result_list = []
     with ThreadPoolExecutor() as executor:
