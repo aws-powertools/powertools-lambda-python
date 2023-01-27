@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 import boto3
 from botocore.config import Config
 
+from aws_lambda_powertools.utilities.parameters.types import TransformOptions
+
 if TYPE_CHECKING:
     from mypy_boto3_appconfigdata import AppConfigDataClient
 
@@ -132,7 +134,7 @@ def get_app_config(
     name: str,
     environment: str,
     application: Optional[str] = None,
-    transform: Optional[str] = None,
+    transform: TransformOptions = None,
     force_fetch: bool = False,
     max_age: int = DEFAULT_MAX_AGE_SECS,
     **sdk_options

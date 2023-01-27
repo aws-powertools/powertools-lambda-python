@@ -53,7 +53,7 @@ The following sample infrastructure will be used throughout this documentation:
 
     ```yaml hl_lines="5 11 18 25 31-50 54"
     AWSTemplateFormatVersion: "2010-09-09"
-    Description: Lambda Powertools Feature flags sample template
+    Description: Lambda Powertools for Python Feature flags sample template
     Resources:
       FeatureStoreApp:
         Type: AWS::AppConfig::Application
@@ -447,6 +447,74 @@ Feature flags can return any JSON values when `boolean_type` parameter is set to
     }
     ```
 
+#### Time based feature flags
+
+Feature flags can also return enabled features based on time or datetime ranges.
+This allows you to have features that are only enabled on certain days of the week, certain time
+intervals or between certain calendar dates.
+
+Use cases:
+
+* Enable maintenance mode during a weekend
+* Disable support/chat feature after working hours
+* Launch a new feature on a specific date and time
+
+You can also have features enabled only at certain times of the day for premium tier customers
+
+=== "app.py"
+
+    ```python hl_lines="12"
+    --8<-- "examples/feature_flags/src/timebased_feature.py"
+    ```
+
+=== "event.json"
+
+    ```json hl_lines="3"
+    --8<-- "examples/feature_flags/src/timebased_feature_event.json"
+    ```
+
+=== "features.json"
+
+    ```json hl_lines="9-11 14-21"
+    --8<-- "examples/feature_flags/src/timebased_features.json"
+    ```
+
+You can also have features enabled only at certain times of the day.
+
+=== "app.py"
+
+    ```python hl_lines="9"
+    --8<-- "examples/feature_flags/src/timebased_happyhour_feature.py"
+    ```
+
+=== "features.json"
+
+    ```json hl_lines="9-15"
+    --8<-- "examples/feature_flags/src/timebased_happyhour_features.json"
+    ```
+
+You can also have features enabled only at specific days, for example: enable christmas sale discount during specific dates.
+
+=== "app.py"
+
+    ```python hl_lines="10"
+    --8<-- "examples/feature_flags/src/datetime_feature.py"
+    ```
+
+=== "features.json"
+
+    ```json hl_lines="9-14"
+    --8<-- "examples/feature_flags/src/datetime_feature.json"
+    ```
+
+???+ info "How should I use timezones?"
+    You can use any [IANA time zone](https://www.iana.org/time-zones) (as originally specified
+    in [PEP 615](https://peps.python.org/pep-0615/)) as part of your rules definition.
+    Powertools takes care of converting and calculate the correct timestamps for you.
+
+    When using `SCHEDULE_BETWEEN_DATETIME_RANGE`, use timestamps without timezone information, and
+    specify the timezone manually. This way, you'll avoid hitting problems with day light savings.
+
 ## Advanced
 
 ### Adjusting in-memory cache
@@ -580,23 +648,38 @@ The `conditions` block is a list of conditions that contain `action`, `key`, and
 
 The `action` configuration can have the following values, where the expressions **`a`** is the `key` and **`b`** is the `value` above:
 
-Action | Equivalent expression
-------------------------------------------------- | ---------------------------------------------------------------------------------
-**EQUALS** | `lambda a, b: a == b`
-**NOT_EQUALS** | `lambda a, b: a != b`
-**KEY_GREATER_THAN_VALUE** | `lambda a, b: a > b`
-**KEY_GREATER_THAN_OR_EQUAL_VALUE** | `lambda a, b: a >= b`
-**KEY_LESS_THAN_VALUE** | `lambda a, b: a < b`
-**KEY_LESS_THAN_OR_EQUAL_VALUE** | `lambda a, b: a <= b`
-**STARTSWITH** | `lambda a, b: a.startswith(b)`
-**ENDSWITH** | `lambda a, b: a.endswith(b)`
-**KEY_IN_VALUE** | `lambda a, b: a in b`
-**KEY_NOT_IN_VALUE** | `lambda a, b: a not in b`
-**VALUE_IN_KEY** | `lambda a, b: b in a`
-**VALUE_NOT_IN_KEY** | `lambda a, b: b not in a`
+| Action                              | Equivalent expression                                    |
+| ----------------------------------- | -------------------------------------------------------- |
+| **EQUALS**                          | `lambda a, b: a == b`                                    |
+| **NOT_EQUALS**                      | `lambda a, b: a != b`                                    |
+| **KEY_GREATER_THAN_VALUE**          | `lambda a, b: a > b`                                     |
+| **KEY_GREATER_THAN_OR_EQUAL_VALUE** | `lambda a, b: a >= b`                                    |
+| **KEY_LESS_THAN_VALUE**             | `lambda a, b: a < b`                                     |
+| **KEY_LESS_THAN_OR_EQUAL_VALUE**    | `lambda a, b: a <= b`                                    |
+| **STARTSWITH**                      | `lambda a, b: a.startswith(b)`                           |
+| **ENDSWITH**                        | `lambda a, b: a.endswith(b)`                             |
+| **KEY_IN_VALUE**                    | `lambda a, b: a in b`                                    |
+| **KEY_NOT_IN_VALUE**                | `lambda a, b: a not in b`                                |
+| **VALUE_IN_KEY**                    | `lambda a, b: b in a`                                    |
+| **VALUE_NOT_IN_KEY**                | `lambda a, b: b not in a`                                |
+| **SCHEDULE_BETWEEN_TIME_RANGE**     | `lambda a, b: time(a).start <= b <= time(a).end`         |
+| **SCHEDULE_BETWEEN_DATETIME_RANGE** | `lambda a, b: datetime(a).start <= b <= datetime(b).end` |
+| **SCHEDULE_BETWEEN_DAYS_OF_WEEK**   | `lambda a, b: day_of_week(a) in b`                       |
 
 ???+ info
     The `**key**` and `**value**` will be compared to the input from the `**context**` parameter.
+
+???+ "Time based keys"
+
+    For time based keys, we provide a list of predefined keys. These will automatically get converted to the corresponding timestamp on each invocation of your Lambda function.
+
+    | Key                 | Meaning                                                                  |
+    | ------------------- | ------------------------------------------------------------------------ |
+    | CURRENT_TIME        | The current time, 24 hour format (HH:mm)                                 |
+    | CURRENT_DATETIME    | The current datetime ([ISO8601](https://en.wikipedia.org/wiki/ISO_8601)) |
+    | CURRENT_DAY_OF_WEEK | The current day of the week (Monday-Sunday)                              |
+
+    If not specified, the timezone used for calculations will be UTC.
 
 **For multiple conditions**, we will evaluate the list of conditions as a logical `AND`, so all conditions needs to match to return `when_match` value.
 
@@ -667,16 +750,16 @@ AppConfig store provider fetches any JSON document from AWS AppConfig.
 
 These are the available options for further customization.
 
-Parameter | Default | Description
-------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
-**environment** | `""` | AWS AppConfig Environment, e.g. `test`
-**application** | `""` | AWS AppConfig Application
-**name** | `""` | AWS AppConfig Configuration name
-**envelope** | `None` | JMESPath expression to use to extract feature flags configuration from AWS AppConfig configuration
-**max_age** | `5` | Number of seconds to cache feature flags configuration fetched from AWS AppConfig
-**sdk_config** | `None` | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}
-**jmespath_options** | `None` | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"}
-**logger** | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools Logger.
+| Parameter            | Default          | Description                                                                                                                                            |
+| -------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **environment**      | `""`             | AWS AppConfig Environment, e.g. `test`                                                                                                                 |
+| **application**      | `""`             | AWS AppConfig Application                                                                                                                              |
+| **name**             | `""`             | AWS AppConfig Configuration name                                                                                                                       |
+| **envelope**         | `None`           | JMESPath expression to use to extract feature flags configuration from AWS AppConfig configuration                                                     |
+| **max_age**          | `5`              | Number of seconds to cache feature flags configuration fetched from AWS AppConfig                                                                      |
+| **sdk_config**       | `None`           | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}                            |
+| **jmespath_options** | `None`           | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"} |
+| **logger**           | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools Logger.                                                                  |
 
 ```python hl_lines="21-27" title="AppConfigStore sample"
 from botocore.config import Config
@@ -771,17 +854,17 @@ def test_flags_condition_match(mocker):
 
 ## Feature flags vs Parameters vs env vars
 
-Method | When to use | Requires new deployment on changes | Supported services
-------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------
-**[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment. | Yes | Lambda
-**[Parameters utility](parameters.md)** | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No | Parameter Store, DynamoDB, Secrets Manager, AppConfig
-**Feature flags utility** | Rule engine to define when one or multiple features should be enabled depending on the input. | No | AppConfig
+| Method                                                                                                                | When to use                                                                                                             | Requires new deployment on changes | Supported services                                    |
+| --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------- |
+| **[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment.        | Yes                                | Lambda                                                |
+| **[Parameters utility](parameters.md)**                                                                               | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No                                 | Parameter Store, DynamoDB, Secrets Manager, AppConfig |
+| **Feature flags utility**                                                                                             | Rule engine to define when one or multiple features should be enabled depending on the input.                           | No                                 | AppConfig                                             |
 
 ## Deprecation list when GA
 
-Breaking change | Recommendation
-------------------------------------------------- | ---------------------------------------------------------------------------------
-`IN` RuleAction | Use `KEY_IN_VALUE` instead
-`NOT_IN` RuleAction | Use `KEY_NOT_IN_VALUE` instead
-`get_enabled_features` | Return type changes from `List[str]` to `Dict[str, Any]`. New return will contain a list of features enabled and their values. List of enabled features will be in `enabled_features` key to keep ease of assertion we have in Beta.
-`boolean_type` Schema | This **might** not be necessary anymore before we go GA. We will return either the `default` value when there are no rules as well as `when_match` value. This will simplify on-boarding if we can keep the same set of validations already offered.
+| Breaking change        | Recommendation                                                                                                                                                                                                                                       |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `IN` RuleAction        | Use `KEY_IN_VALUE` instead                                                                                                                                                                                                                           |
+| `NOT_IN` RuleAction    | Use `KEY_NOT_IN_VALUE` instead                                                                                                                                                                                                                       |
+| `get_enabled_features` | Return type changes from `List[str]` to `Dict[str, Any]`. New return will contain a list of features enabled and their values. List of enabled features will be in `enabled_features` key to keep ease of assertion we have in Beta.                 |
+| `boolean_type` Schema  | This **might** not be necessary anymore before we go GA. We will return either the `default` value when there are no rules as well as `when_match` value. This will simplify on-boarding if we can keep the same set of validations already offered. |

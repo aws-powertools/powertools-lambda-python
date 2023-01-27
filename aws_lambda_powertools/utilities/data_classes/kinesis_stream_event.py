@@ -1,7 +1,11 @@
 import base64
 import json
-from typing import Iterator
+import zlib
+from typing import Iterator, List
 
+from aws_lambda_powertools.utilities.data_classes.cloud_watch_logs_event import (
+    CloudWatchLogsDecodedData,
+)
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
@@ -42,6 +46,11 @@ class KinesisStreamRecordPayload(DictWrapper):
     def data_as_json(self) -> dict:
         """Decode binary encoded data as json"""
         return json.loads(self.data_as_text())
+
+    def data_zlib_compressed_as_json(self) -> dict:
+        """Decode binary encoded data as bytes"""
+        decompressed = zlib.decompress(self.data_as_bytes(), zlib.MAX_WBITS | 32)
+        return json.loads(decompressed)
 
 
 class KinesisStreamRecord(DictWrapper):
@@ -98,3 +107,11 @@ class KinesisStreamEvent(DictWrapper):
     def records(self) -> Iterator[KinesisStreamRecord]:
         for record in self["Records"]:
             yield KinesisStreamRecord(record)
+
+
+def extract_cloudwatch_logs_from_event(event: KinesisStreamEvent) -> List[CloudWatchLogsDecodedData]:
+    return [CloudWatchLogsDecodedData(record.kinesis.data_zlib_compressed_as_json()) for record in event.records]
+
+
+def extract_cloudwatch_logs_from_record(record: KinesisStreamRecord) -> CloudWatchLogsDecodedData:
+    return CloudWatchLogsDecodedData(data=record.kinesis.data_zlib_compressed_as_json())

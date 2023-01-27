@@ -58,33 +58,33 @@ Same example as above, but using the `event_source` decorator
 
 ## Supported event sources
 
-Event Source | Data_class
-------------------------------------------------- | ---------------------------------------------------------------------------------
-[Active MQ](#active-mq) | `ActiveMQEvent`
-[API Gateway Authorizer](#api-gateway-authorizer) | `APIGatewayAuthorizerRequestEvent`
-[API Gateway Authorizer V2](#api-gateway-authorizer-v2) | `APIGatewayAuthorizerEventV2`
-[API Gateway Proxy](#api-gateway-proxy) | `APIGatewayProxyEvent`
-[API Gateway Proxy V2](#api-gateway-proxy-v2) | `APIGatewayProxyEventV2`
-[Application Load Balancer](#application-load-balancer) | `ALBEvent`
-[AppSync Authorizer](#appsync-authorizer) | `AppSyncAuthorizerEvent`
-[AppSync Resolver](#appsync-resolver) | `AppSyncResolverEvent`
-[CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget) | `CloudWatchDashboardCustomWidgetEvent`
-[CloudWatch Logs](#cloudwatch-logs) | `CloudWatchLogsEvent`
-[CodePipeline Job Event](#codepipeline-job) | `CodePipelineJobEvent`
-[Cognito User Pool](#cognito-user-pool) | Multiple available under `cognito_user_pool_event`
-[Connect Contact Flow](#connect-contact-flow) | `ConnectContactFlowEvent`
-[DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName`
-[EventBridge](#eventbridge) | `EventBridgeEvent`
-[Kafka](#kafka) | `KafkaEvent`
-[Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent`
-[Kinesis Firehose Delivery Stream](#kinesis-firehose-delivery-stream) | `KinesisFirehoseEvent`
-[Lambda Function URL](#lambda-function-url) | `LambdaFunctionUrlEvent`
-[Rabbit MQ](#rabbit-mq) | `RabbitMQEvent`
-[S3](#s3) | `S3Event`
-[S3 Object Lambda](#s3-object-lambda) | `S3ObjectLambdaEvent`
-[SES](#ses) | `SESEvent`
-[SNS](#sns) | `SNSEvent`
-[SQS](#sqs) | `SQSEvent`
+| Event Source                                                              | Data_class                                         |
+| ------------------------------------------------------------------------- | -------------------------------------------------- |
+| [Active MQ](#active-mq)                                                   | `ActiveMQEvent`                                    |
+| [API Gateway Authorizer](#api-gateway-authorizer)                         | `APIGatewayAuthorizerRequestEvent`                 |
+| [API Gateway Authorizer V2](#api-gateway-authorizer-v2)                   | `APIGatewayAuthorizerEventV2`                      |
+| [API Gateway Proxy](#api-gateway-proxy)                                   | `APIGatewayProxyEvent`                             |
+| [API Gateway Proxy V2](#api-gateway-proxy-v2)                             | `APIGatewayProxyEventV2`                           |
+| [Application Load Balancer](#application-load-balancer)                   | `ALBEvent`                                         |
+| [AppSync Authorizer](#appsync-authorizer)                                 | `AppSyncAuthorizerEvent`                           |
+| [AppSync Resolver](#appsync-resolver)                                     | `AppSyncResolverEvent`                             |
+| [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget) | `CloudWatchDashboardCustomWidgetEvent`             |
+| [CloudWatch Logs](#cloudwatch-logs)                                       | `CloudWatchLogsEvent`                              |
+| [CodePipeline Job Event](#codepipeline-job)                               | `CodePipelineJobEvent`                             |
+| [Cognito User Pool](#cognito-user-pool)                                   | Multiple available under `cognito_user_pool_event` |
+| [Connect Contact Flow](#connect-contact-flow)                             | `ConnectContactFlowEvent`                          |
+| [DynamoDB streams](#dynamodb-streams)                                     | `DynamoDBStreamEvent`, `DynamoDBRecordEventName`   |
+| [EventBridge](#eventbridge)                                               | `EventBridgeEvent`                                 |
+| [Kafka](#kafka)                                                           | `KafkaEvent`                                       |
+| [Kinesis Data Stream](#kinesis-streams)                                   | `KinesisStreamEvent`                               |
+| [Kinesis Firehose Delivery Stream](#kinesis-firehose-delivery-stream)     | `KinesisFirehoseEvent`                             |
+| [Lambda Function URL](#lambda-function-url)                               | `LambdaFunctionUrlEvent`                           |
+| [Rabbit MQ](#rabbit-mq)                                                   | `RabbitMQEvent`                                    |
+| [S3](#s3)                                                                 | `S3Event`                                          |
+| [S3 Object Lambda](#s3-object-lambda)                                     | `S3ObjectLambdaEvent`                              |
+| [SES](#ses)                                                               | `SESEvent`                                         |
+| [SNS](#sns)                                                               | `SNSEvent`                                         |
+| [SQS](#sqs)                                                               | `SQSEvent`                                         |
 
 ???+ info
     The examples provided below are far from exhaustive - the data classes themselves are designed to provide a form of
@@ -456,9 +456,9 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
     A simple echo script. Anything passed in \`\`\`echo\`\`\` parameter is returned as the content of custom widget.
 
     ### Widget parameters
-    Param | Description
-    ---|---
-    **echo** | The content to echo back
+    | Param    | Description              |
+    | -------- | ------------------------ |
+    | **echo** | The content to echo back |
 
     ### Example parameters
     \`\`\` yaml
@@ -491,10 +491,57 @@ decompress and parse json data from the event.
 
     @event_source(data_class=CloudWatchLogsEvent)
     def lambda_handler(event: CloudWatchLogsEvent, context):
-        decompressed_log: CloudWatchLogsDecodedData = event.parse_logs_data
+        decompressed_log: CloudWatchLogsDecodedData = event.parse_logs_data()
         log_events = decompressed_log.log_events
         for event in log_events:
             do_something_with(event.timestamp, event.message)
+    ```
+
+#### Kinesis integration
+
+[When streaming CloudWatch Logs to a Kinesis Data Stream](https://aws.amazon.com/premiumsupport/knowledge-center/streaming-cloudwatch-logs/){target="_blank"} (cross-account or not), you can use `extract_cloudwatch_logs_from_event` to decode, decompress and extract logs as `CloudWatchLogsDecodedData` to ease log processing.
+
+=== "app.py"
+
+    ```python hl_lines="5-6 11"
+    from typing import List
+
+    from aws_lambda_powertools.utilities.data_classes import event_source
+    from aws_lambda_powertools.utilities.data_classes.cloud_watch_logs_event import CloudWatchLogsDecodedData
+    from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
+        KinesisStreamEvent, extract_cloudwatch_logs_from_event)
+
+
+    @event_source(data_class=KinesisStreamEvent)
+    def simple_handler(event: KinesisStreamEvent, context):
+        logs: List[CloudWatchLogsDecodedData] = extract_cloudwatch_logs_from_event(event)
+        for log in logs:
+            if log.message_type == "DATA_MESSAGE":
+                return "success"
+        return "nothing to be processed"
+    ```
+
+Alternatively, you can use `extract_cloudwatch_logs_from_record` to seamless integrate with the [Batch utility](./batch.md) for more robust log processing.
+
+=== "app.py"
+
+    ```python hl_lines="3-4 10"
+    from aws_lambda_powertools.utilities.batch import (BatchProcessor, EventType,
+                                                       batch_processor)
+    from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
+        KinesisStreamRecord, extract_cloudwatch_logs_from_record)
+
+    processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
+
+
+    def record_handler(record: KinesisStreamRecord):
+        log = extract_cloudwatch_logs_from_record(record)
+        return log.message_type == "DATA_MESSAGE"
+
+
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
     ```
 
 ### CodePipeline Job
@@ -553,18 +600,18 @@ Data classes and utility functions to help create continuous delivery pipelines 
 Cognito User Pools have several [different Lambda trigger sources](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html#cognito-user-identity-pools-working-with-aws-lambda-trigger-sources), all of which map to a different data class, which
 can be imported from `aws_lambda_powertools.data_classes.cognito_user_pool_event`:
 
-Trigger/Event Source | Data Class
-------------------------------------------------- | -------------------------------------------------
-Custom message event | `data_classes.cognito_user_pool_event.CustomMessageTriggerEvent`
-Post authentication | `data_classes.cognito_user_pool_event.PostAuthenticationTriggerEvent`
-Post confirmation | `data_classes.cognito_user_pool_event.PostConfirmationTriggerEvent`
-Pre authentication | `data_classes.cognito_user_pool_event.PreAuthenticationTriggerEvent`
-Pre sign-up | `data_classes.cognito_user_pool_event.PreSignUpTriggerEvent`
-Pre token generation | `data_classes.cognito_user_pool_event.PreTokenGenerationTriggerEvent`
-User migration | `data_classes.cognito_user_pool_event.UserMigrationTriggerEvent`
-Define Auth Challenge | `data_classes.cognito_user_pool_event.DefineAuthChallengeTriggerEvent`
-Create Auth Challenge | `data_classes.cognito_user_pool_event.CreateAuthChallengeTriggerEvent`
-Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChallengeResponseTriggerEvent`
+| Trigger/Event Source  | Data Class                                                                     |
+| --------------------- | ------------------------------------------------------------------------------ |
+| Custom message event  | `data_classes.cognito_user_pool_event.CustomMessageTriggerEvent`               |
+| Post authentication   | `data_classes.cognito_user_pool_event.PostAuthenticationTriggerEvent`          |
+| Post confirmation     | `data_classes.cognito_user_pool_event.PostConfirmationTriggerEvent`            |
+| Pre authentication    | `data_classes.cognito_user_pool_event.PreAuthenticationTriggerEvent`           |
+| Pre sign-up           | `data_classes.cognito_user_pool_event.PreSignUpTriggerEvent`                   |
+| Pre token generation  | `data_classes.cognito_user_pool_event.PreTokenGenerationTriggerEvent`          |
+| User migration        | `data_classes.cognito_user_pool_event.UserMigrationTriggerEvent`               |
+| Define Auth Challenge | `data_classes.cognito_user_pool_event.DefineAuthChallengeTriggerEvent`         |
+| Create Auth Challenge | `data_classes.cognito_user_pool_event.CreateAuthChallengeTriggerEvent`         |
+| Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChallengeResponseTriggerEvent` |
 
 #### Post Confirmation Example
 

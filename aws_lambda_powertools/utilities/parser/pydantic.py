@@ -6,3 +6,4 @@
 # to use `from aws_lambda_powertools.utilities.parser.pydantic import <anything>`
 
 from pydantic import *  # noqa: F403,F401
+from pydantic.errors import *  # noqa: F403,F401

@@ -72,7 +72,7 @@ def test_idempotent_lambda_already_completed(
     lambda_context,
 ):
     """
-    Test idempotent decorator where event with matching event key has already been succesfully processed
+    Test idempotent decorator where event with matching event key has already been successfully processed
     """
 
     stubber = stub.Stubber(persistence_store.table.meta.client)
@@ -1070,7 +1070,19 @@ def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPers
     # GIVEN a miss configured persistence layer
     # like no table was created for the idempotency persistence layer
     stubber = stub.Stubber(persistence_store.table.meta.client)
-    stubber.add_client_error("put_item", "ResourceNotFoundException")
+    service_error_code = "ResourceNotFoundException"
+    service_message = "Custom message"
+
+    exception_message = "Failed to save in progress record to idempotency store"
+    exception_details = (
+        f"An error occurred ({service_error_code}) when calling the PutItem operation: {service_message}"
+    )
+
+    stubber.add_client_error(
+        "put_item",
+        service_error_code,
+        service_message,
+    )
     stubber.activate()
 
     @idempotent(persistence_store=persistence_store)
@@ -1083,9 +1095,13 @@ def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPers
         lambda_handler({}, lambda_context)
 
     # THEN idempotent should raise an IdempotencyPersistenceLayerError
+    # AND append downstream exception details
     stubber.assert_no_pending_responses()
     stubber.deactivate()
-    assert "Failed to save in progress record to idempotency store" == e.value.args[0]
+    assert exception_message == e.value.args[0]
+    assert isinstance(e.value.args[1], Exception)
+    assert exception_details in e.value.args[1].args
+    assert f"{exception_message} - ({exception_details})" in str(e.value)
 
 
 def test_handler_raise_idempotency_key_error(persistence_store: DynamoDBPersistenceLayer, lambda_context):
@@ -1245,6 +1261,46 @@ def test_idempotent_function_and_lambda_handler(lambda_context):
     # THEN we expect the function and lambda handler to execute successfully
     assert fn_result == expected_result
     assert handler_result == expected_result
+
+
+@pytest.mark.parametrize("data", [None, 0, False])
+def test_idempotent_function_falsy_values(data):
+    # Scenario to validate we can use idempotent_function with any function
+    # receiving a falsy value (`None`, `False`, `0`, etc.)
+    # shouldn't cause a RuntimeError
+    mock_event = data
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_falsy_values.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa: E501
+
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+    expected_result = {"message": "Foo"}
+
+    @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
+    def record_handler(record):
+        return expected_result
+
+    # WHEN calling the function
+    result = record_handler(record=mock_event)
+    # THEN we expect the function to execute successfully
+    assert result == expected_result
+
+
+@pytest.mark.parametrize("data", [None, 0, False])
+def test_idempotent_function_falsy_values_with_raise_on_no_idempotency_key(
+    data, persistence_store: DynamoDBPersistenceLayer
+):
+    # GIVEN raise_on_no_idempotency_key is True
+    idempotency_config = IdempotencyConfig(event_key_jmespath="idemKey", raise_on_no_idempotency_key=True)
+
+    @idempotent_function(data_keyword_argument="record", persistence_store=persistence_store, config=idempotency_config)
+    def record_handler(record):
+        return ValueError("Should not be raised")
+
+    # WHEN calling the function
+    with pytest.raises(IdempotencyKeyError) as e:
+        record_handler(record=data)
+
+    # THEN we expect an idempotency key error message
+    assert "No data found to create a hashed idempotency_key" == e.value.args[0]
 
 
 def test_idempotent_data_sorting():

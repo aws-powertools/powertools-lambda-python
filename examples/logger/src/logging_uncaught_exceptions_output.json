@@ -1,0 +1,9 @@
+{
+    "level": "ERROR",
+    "location": "log_uncaught_exception_hook:756",
+    "message": "500 Server Error: INTERNAL SERVER ERROR for url: http://httpbin.org/status/500",
+    "timestamp": "2022-11-16 13:51:29,198+0100",
+    "service": "payment",
+    "exception": "Traceback (most recent call last):\n  File \"<input>\", line 52, in <module>\n    handler({}, {})\n  File \"<input>\", line 17, in handler\n    ret.raise_for_status()\n  File \"<input>/lib/python3.9/site-packages/requests/models.py\", line 1021, in raise_for_status\n    raise HTTPError(http_error_msg, response=self)\nrequests.exceptions.HTTPError: 500 Server Error: INTERNAL SERVER ERROR for url: http://httpbin.org/status/500",
+    "exception_name": "HTTPError"
+}

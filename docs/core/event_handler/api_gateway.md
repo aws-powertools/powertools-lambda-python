@@ -45,7 +45,12 @@ A resolver will handle request resolution, including [one or more routers](#spli
 For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, `ALBResolver`, and `LambdaFunctionUrlResolver`. From here on, we will default to `APIGatewayRestResolver` across examples.
 
 ???+ info "Auto-serialization"
-    We serialize `Dict` responses as JSON, trim whitespace for compact responses, and set content-type to `application/json`.
+    We serialize `Dict` responses as JSON, trim whitespace for compact responses, set content-type to `application/json`, and
+    return a 200 OK HTTP status. You can optionally set a different HTTP status code as the second argument of the tuple:
+
+    ```python hl_lines="15 16"
+    --8<-- "examples/event_handler_rest/src/getting_started_return_tuple.py"
+    ```
 
 #### API Gateway REST API
 
@@ -225,6 +230,9 @@ You can use **`exception_handler`** decorator with any Python exception. This al
 ```python hl_lines="17-18" title="Exception handling"
 --8<-- "examples/event_handler_rest/src/exception_handling.py"
 ```
+
+???+ info
+    The `exception_handler` also supports passing a list of exception types you wish to handle with one handler.
 
 ### Raising HTTP errors
 
@@ -456,6 +464,21 @@ When necessary, you can set a prefix when including a router object. This means 
     --8<-- "examples/event_handler_rest/src/split_route_prefix_module.py"
     ```
 
+#### Specialized router types
+
+You can use specialized router classes according to the type of event that you are resolving. This way you'll get type hints from your IDE as you access the `current_event` property.
+
+| Router                  | Resolver                  | `current_event` type   |
+|-------------------------|---------------------------|------------------------|
+| APIGatewayRouter        | APIGatewayRestResolver    | APIGatewayProxyEvent   |
+| APIGatewayHttpRouter    | APIGatewayHttpResolver    | APIGatewayProxyEventV2 |
+| ALBRouter               | ALBResolver               | ALBEvent               |
+| LambdaFunctionUrlRouter | LambdaFunctionUrlResolver | LambdaFunctionUrlEvent |
+
+```python hl_lines="1 5 9"
+--8<-- "examples/event_handler_rest/src/split_route_specialized_router.py"
+```
+
 #### Sharing contextual data
 
 You can use `append_context` when you want to share data between your App and Router instances. Any data you share will be available via the `context` dictionary available in your App or Router context.
@@ -562,19 +585,63 @@ your development, building, deployment tooling need to accommodate the distinct 
 
 ## Testing your code
 
-You can test your routes by passing a proxy event request where `path` and `httpMethod`.
+You can test your routes by passing a proxy event request with required params.
 
-=== "assert_http_response.py"
+=== "API Gateway REST API"
 
-    ```python hl_lines="21-24"
-    --8<-- "examples/event_handler_rest/src/assert_http_response.py"
-    ```
+    === "assert_rest_api_resolver_response.py"
 
-=== "assert_http_response_module.py"
+        ```python hl_lines="21-24"
+        --8<-- "examples/event_handler_rest/src/assert_rest_api_resolver_response.py"
+        ```
 
-    ```python
-    --8<-- "examples/event_handler_rest/src/assert_http_response_module.py"
-    ```
+    === "assert_rest_api_response_module.py"
+
+        ```python
+        --8<-- "examples/event_handler_rest/src/assert_rest_api_response_module.py"
+        ```
+
+=== "API Gateway HTTP API"
+
+    === "assert_http_api_resolver_response.py"
+
+        ```python hl_lines="21-29"
+        --8<-- "examples/event_handler_rest/src/assert_http_api_resolver_response.py"
+        ```
+
+    === "assert_http_api_response_module.py"
+
+        ```python
+        --8<-- "examples/event_handler_rest/src/assert_http_api_response_module.py"
+        ```
+
+=== "Application Load Balancer"
+
+    === "assert_alb_api_resolver_response.py"
+
+        ```python hl_lines="21-24"
+        --8<-- "examples/event_handler_rest/src/assert_alb_api_resolver_response.py"
+        ```
+
+    === "assert_alb_api_response_module.py"
+
+        ```python
+        --8<-- "examples/event_handler_rest/src/assert_alb_api_response_module.py"
+        ```
+
+=== "Lambda Function URL"
+
+    === "assert_function_url_api_resolver_response.py"
+
+        ```python hl_lines="21-29"
+        --8<-- "examples/event_handler_rest/src/assert_function_url_api_resolver_response.py"
+        ```
+
+    === "assert_function_url_api_response_module.py"
+
+        ```python
+        --8<-- "examples/event_handler_rest/src/assert_function_url_api_response_module.py"
+        ```
 
 ## FAQ
 

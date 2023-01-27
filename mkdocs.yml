@@ -11,6 +11,7 @@ nav:
   - Roadmap: roadmap.md
   - API reference: api/" target="_blank
   - Upgrade guide: upgrade.md
+  - We Made This (Community): we_made_this.md
   - Core utilities:
       - core/tracer.md
       - core/logger.md
@@ -19,7 +20,6 @@ nav:
           - core/event_handler/api_gateway.md
           - core/event_handler/appsync.md
   - Utilities:
-      - utilities/middleware_factory.md
       - utilities/parameters.md
       - utilities/batch.md
       - utilities/typing.md
@@ -28,6 +28,8 @@ nav:
       - utilities/parser.md
       - utilities/idempotency.md
       - utilities/feature_flags.md
+      - utilities/streaming.md
+      - utilities/middleware_factory.md
       - utilities/jmespath_functions.md
       - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
 
@@ -77,7 +79,9 @@ markdown_extensions:
       permalink: true
       toc_depth: 4
   - attr_list
-  - pymdownx.emoji
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
   - pymdownx.inlinehilite
   - pymdownx.superfences:
       custom_fences:

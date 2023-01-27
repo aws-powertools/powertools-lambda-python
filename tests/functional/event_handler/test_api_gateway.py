@@ -829,6 +829,7 @@ def test_debug_print_event(capsys):
 
     # THEN print the event
     out, err = capsys.readouterr()
+    assert "\n" in out
     assert json.loads(out) == event
 
 
@@ -909,7 +910,7 @@ def test_similar_dynamic_routes_with_whitespaces():
     [
         pytest.param(123456789, id="num"),
         pytest.param("user@example.com", id="email"),
-        pytest.param("-._~'!*:@,;()", id="safe-rfc3986"),
+        pytest.param("-._~'!*:@,;()=", id="safe-rfc3986"),
         pytest.param("%<>[]{}|^", id="unsafe-rfc3986"),
     ],
 )
@@ -1388,6 +1389,65 @@ def test_exception_handler_raises_service_error(json_dump):
     assert result["body"] == json_dump(expected)
 
 
+def test_exception_handler_supports_list(json_dump):
+    # GIVEN a resolver with an exception handler defined for a multiple exceptions in a list
+    app = ApiGatewayResolver()
+    event = deepcopy(LOAD_GW_EVENT)
+
+    @app.exception_handler([ValueError, NotFoundError])
+    def multiple_error(ex: Exception):
+        raise BadRequestError("Bad request")
+
+    @app.get("/path/a")
+    def path_a() -> Response:
+        raise ValueError("foo")
+
+    @app.get("/path/b")
+    def path_b() -> Response:
+        raise NotFoundError
+
+    # WHEN calling the app generating each exception
+    for route in ["/path/a", "/path/b"]:
+        event["path"] = route
+        result = app(event, {})
+
+        # THEN call the exception handler in the same way for both exceptions
+        assert result["statusCode"] == 400
+        assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+        expected = {"statusCode": 400, "message": "Bad request"}
+        assert result["body"] == json_dump(expected)
+
+
+def test_exception_handler_supports_multiple_decorators(json_dump):
+    # GIVEN a resolver with an exception handler defined with multiple decorators
+    app = ApiGatewayResolver()
+    event = deepcopy(LOAD_GW_EVENT)
+
+    @app.exception_handler(ValueError)
+    @app.exception_handler(NotFoundError)
+    def multiple_error(ex: Exception):
+        raise BadRequestError("Bad request")
+
+    @app.get("/path/a")
+    def path_a() -> Response:
+        raise ValueError("foo")
+
+    @app.get("/path/b")
+    def path_b() -> Response:
+        raise NotFoundError
+
+    # WHEN calling the app generating each exception
+    for route in ["/path/a", "/path/b"]:
+        event["path"] = route
+        result = app(event, {})
+
+        # THEN call the exception handler in the same way for both exceptions
+        assert result["statusCode"] == 400
+        assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+        expected = {"statusCode": 400, "message": "Bad request"}
+        assert result["body"] == json_dump(expected)
+
+
 def test_event_source_compatibility():
     # GIVEN
     app = APIGatewayHttpResolver()
@@ -1476,3 +1536,82 @@ def test_include_router_merges_context():
     app.include_router(router)
 
     assert app.context == router.context
+
+
+def test_nested_app_decorator():
+    # GIVEN a Http API V1 proxy type event
+    # with a function registered with two distinct routes
+    app = APIGatewayRestResolver()
+
+    @app.get("/my/path")
+    @app.get("/my/anotherPath")
+    def get_lambda() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"foo": "value"}))
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+    result2 = app(load_event("apiGatewayProxyEventAnotherPath.json"), {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEvent
+    assert result["statusCode"] == 200
+    assert result2["statusCode"] == 200
+
+
+def test_nested_router_decorator():
+    # GIVEN a Http API V1 proxy type event
+    # with a function registered with two distinct routes
+    app = APIGatewayRestResolver()
+    router = Router()
+
+    @router.get("/my/path")
+    @router.get("/my/anotherPath")
+    def get_lambda() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"foo": "value"}))
+
+    app.include_router(router)
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+    result2 = app(load_event("apiGatewayProxyEventAnotherPath.json"), {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEvent
+    assert result["statusCode"] == 200
+    assert result2["statusCode"] == 200
+
+
+def test_dict_response():
+    # GIVEN a dict is returned
+    app = ApiGatewayResolver()
+
+    @app.get("/lambda")
+    def get_message():
+        return {"message": "success"}
+
+    # WHEN calling handler
+    response = app({"httpMethod": "GET", "path": "/lambda"}, None)
+
+    # THEN the body is correctly formatted, the status code is 200 and the content type is json
+    assert response["statusCode"] == 200
+    assert response["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    response_body = json.loads(response["body"])
+    assert response_body["message"] == "success"
+
+
+def test_dict_response_with_status_code():
+    # GIVEN a dict is returned with a status code
+    app = ApiGatewayResolver()
+
+    @app.get("/lambda")
+    def get_message():
+        return {"message": "success"}, 201
+
+    # WHEN calling handler
+    response = app({"httpMethod": "GET", "path": "/lambda"}, None)
+
+    # THEN the body is correctly formatted, the status code is 201 and the content type is json
+    assert response["statusCode"] == 201
+    assert response["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    response_body = json.loads(response["body"])
+    assert response_body["message"] == "success"

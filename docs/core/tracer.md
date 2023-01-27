@@ -19,13 +19,13 @@ Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.
 ???+ tip
     All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
 
+!!! note "Tracer relies on AWS X-Ray SDK over [OpenTelememetry Distro (ADOT)](https://aws-otel.github.io/docs/getting-started/lambda){target="_blank"} for optimal cold start (lower latency)."
+
 ### Install
 
-!!! info "This is not necessary if you're installing Powertools via [Lambda Layer](../index.md#lambda-layer){target="_blank"}"
+!!! info "This is not necessary if you're installing Powertools via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
 
-Add `aws-lambda-powertools[tracer]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
-
-This will ensure you have the required dependencies before using Tracer.
+Add `aws-lambda-powertools[tracer]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Tracer.
 
 ### Permissions
 

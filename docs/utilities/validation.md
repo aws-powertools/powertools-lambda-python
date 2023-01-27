@@ -18,14 +18,6 @@ This utility provides JSON Schema validation for events and responses, including
 ???+ tip
     All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
 
-### Install
-
-!!! info "This is not necessary if you're installing Powertools via [Lambda Layer](../index.md#lambda-layer){target="_blank"}"
-
-Add `aws-lambda-powertools[validation]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
-
-This will ensure you have the required dependencies before using Validation.
-
 You can validate inbound and outbound events using [`validator` decorator](#validator-decorator).
 
 You can also use the standalone `validate` function, if you want more control over the validation process such as handling a validation error.
@@ -37,6 +29,12 @@ You can also use the standalone `validate` function, if you want more control ov
 
 ???+ warning
     Both `validator` decorator and `validate` standalone function expects your JSON Schema to be a **dictionary**, not a filename.
+
+### Install
+
+!!! info "This is not necessary if you're installing Powertools via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
+
+Add `aws-lambda-powertools[validation]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Validation.
 
 ### Validator decorator
 
@@ -196,7 +194,7 @@ For each format defined in a dictionary key, you must use a regex, or a function
 
 You might have events or responses that contain non-encoded JSON, where you need to decode before validating them.
 
-You can use our built-in [JMESPath functions](/utilities/jmespath_functions) within your expressions to do exactly that to decode JSON Strings, base64, and uncompress gzip data.
+You can use our built-in [JMESPath functions](./jmespath_functions.md) within your expressions to do exactly that to [deserialize JSON Strings](./jmespath_functions.md#powertools_json-function), [decode base64](./jmespath_functions.md#powertools_base64-function), and [decompress gzip data](./jmespath_functions.md#powertools_base64_gzip-function).
 
 ???+ info
-    We use these for built-in envelopes to easily to decode and unwrap events from sources like Kinesis, CloudWatch Logs, etc.
+    We use these for [built-in envelopes](#built-in-envelopes) to easily to decode and unwrap events from sources like Kinesis, CloudWatch Logs, etc.

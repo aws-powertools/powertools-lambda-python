@@ -1,15 +1,37 @@
+from __future__ import annotations
+
 import functools
 import inspect
+import io
 import logging
 import os
 import random
 import sys
-from typing import IO, Any, Callable, Dict, Iterable, Optional, TypeVar, Union
+import traceback
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    TypeVar,
+    Union,
+    overload,
+)
 
 import jmespath
 
 from ..shared import constants
-from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
+from ..shared.functions import (
+    extract_event_from_common_models,
+    resolve_env_var_choice,
+    resolve_truthy_env_var_choice,
+)
+from ..shared.types import AnyCallableT
 from .exceptions import InvalidLoggerSamplingRateError
 from .filters import SuppressFilter
 from .formatter import (
@@ -80,18 +102,25 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         custom logging formatter that implements PowertoolsFormatter
     logger_handler: logging.Handler, optional
         custom logging handler e.g. logging.FileHandler("file.log")
+    log_uncaught_exceptions: bool, by default False
+        logs uncaught exception using sys.excepthook
+
+        See: https://docs.python.org/3/library/sys.html#sys.excepthook
+
 
     Parameters propagated to LambdaPowertoolsFormatter
     --------------------------------------------------
     datefmt: str, optional
-        String directives (strftime) to format log timestamp using `time`, by default it uses RFC
-        3339.
+        String directives (strftime) to format log timestamp using `time`, by default it uses 2021-05-03 11:47:12,494+0200. # noqa: E501
     use_datetime_directive: bool, optional
         Interpret `datefmt` as a format string for `datetime.datetime.strftime`, rather than
         `time.strftime`.
 
         See https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior . This
         also supports a custom %F directive for milliseconds.
+    use_rfc3339: bool, optional
+        Whether to use a popular date format that complies with both RFC3339 and ISO8601.
+        e.g., 2022-10-27T16:27:43.738+02:00.
     json_serializer : Callable, optional
         function to serialize `obj` to a JSON formatted `str`, by default json.dumps
     json_deserializer : Callable, optional
@@ -185,6 +214,15 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         stream: Optional[IO[str]] = None,
         logger_formatter: Optional[PowertoolsFormatter] = None,
         logger_handler: Optional[logging.Handler] = None,
+        log_uncaught_exceptions: bool = False,
+        json_serializer: Optional[Callable[[Dict], str]] = None,
+        json_deserializer: Optional[Callable[[Union[Dict, str, bool, int, float]], str]] = None,
+        json_default: Optional[Callable[[Any], Any]] = None,
+        datefmt: Optional[str] = None,
+        use_datetime_directive: bool = False,
+        log_record_order: Optional[List[str]] = None,
+        utc: bool = False,
+        use_rfc3339: bool = False,
         **kwargs,
     ):
         self.service = resolve_env_var_choice(
@@ -196,6 +234,8 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self.child = child
         self.logger_formatter = logger_formatter
         self.logger_handler = logger_handler or logging.StreamHandler(stream)
+        self.log_uncaught_exceptions = log_uncaught_exceptions
+
         self.log_level = self._get_log_level(level)
         self._is_deduplication_disabled = resolve_truthy_env_var_choice(
             env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false")
@@ -203,12 +243,33 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
 
-        self._init_logger(**kwargs)
+        # NOTE: This is primarily to improve UX, so IDEs can autocomplete LambdaPowertoolsFormatter options
+        # previously, we masked all of them as kwargs thus limiting feature discovery
+        formatter_options = {
+            "json_serializer": json_serializer,
+            "json_deserializer": json_deserializer,
+            "json_default": json_default,
+            "datefmt": datefmt,
+            "use_datetime_directive": use_datetime_directive,
+            "log_record_order": log_record_order,
+            "utc": utc,
+            "use_rfc3339": use_rfc3339,
+        }
 
-    def __getattr__(self, name):
-        # Proxy attributes not found to actual logger to support backward compatibility
-        # https://github.com/awslabs/aws-lambda-powertools-python/issues/97
-        return getattr(self._logger, name)
+        self._init_logger(formatter_options=formatter_options, **kwargs)
+
+        if self.log_uncaught_exceptions:
+            logger.debug("Replacing exception hook")
+            sys.excepthook = functools.partial(log_uncaught_exception_hook, logger=self)
+
+    # Prevent __getattr__ from shielding unknown attribute errors in type checkers
+    # https://github.com/awslabs/aws-lambda-powertools-python/issues/1660
+    if not TYPE_CHECKING:
+
+        def __getattr__(self, name):
+            # Proxy attributes not found to actual logger to support backward compatibility
+            # https://github.com/awslabs/aws-lambda-powertools-python/issues/97
+            return getattr(self._logger, name)
 
     def _get_logger(self):
         """Returns a Logger named {self.service}, or {self.service.filename} for child loggers"""
@@ -218,7 +279,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
         return logging.getLogger(logger_name)
 
-    def _init_logger(self, **kwargs):
+    def _init_logger(self, formatter_options: Optional[Dict] = None, **kwargs):
         """Configures new logger"""
 
         # Skip configuration if it's a child logger or a pre-configured logger
@@ -233,7 +294,10 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self._configure_sampling()
         self._logger.setLevel(self.log_level)
         self._logger.addHandler(self.logger_handler)
-        self.structure_logs(**kwargs)
+        self.structure_logs(formatter_options=formatter_options, **kwargs)
+
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        self._logger.findCaller = self.findCaller
 
         # Pytest Live Log feature duplicates log records for colored output
         # but we explicitly add a filter for log deduplication.
@@ -270,13 +334,33 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
                 f"Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
             )
 
+    @overload
     def inject_lambda_context(
         self,
-        lambda_handler: Optional[Callable[[Dict, Any], Any]] = None,
+        lambda_handler: AnyCallableT,
         log_event: Optional[bool] = None,
         correlation_id_path: Optional[str] = None,
         clear_state: Optional[bool] = False,
-    ):
+    ) -> AnyCallableT:
+        ...
+
+    @overload
+    def inject_lambda_context(
+        self,
+        lambda_handler: None = None,
+        log_event: Optional[bool] = None,
+        correlation_id_path: Optional[str] = None,
+        clear_state: Optional[bool] = False,
+    ) -> Callable[[AnyCallableT], AnyCallableT]:
+        ...
+
+    def inject_lambda_context(
+        self,
+        lambda_handler: Optional[AnyCallableT] = None,
+        log_event: Optional[bool] = None,
+        correlation_id_path: Optional[str] = None,
+        clear_state: Optional[bool] = False,
+    ) -> Any:
         """Decorator to capture Lambda contextual info and inject into logger
 
         Parameters
@@ -353,11 +437,131 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
 
             if log_event:
                 logger.debug("Event received")
-                self.info(getattr(event, "raw_event", event))
+                self.info(extract_event_from_common_models(event))
 
             return lambda_handler(event, context, *args, **kwargs)
 
         return decorate
+
+    def info(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        if sys.version_info < (3, 8):  # pragma: no cover
+            return self._logger.info(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.info(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
+    def error(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        if sys.version_info < (3, 8):  # pragma: no cover
+            return self._logger.error(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.error(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
+    def exception(
+        self,
+        msg: object,
+        *args,
+        exc_info=True,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        if sys.version_info < (3, 8):  # pragma: no cover
+            return self._logger.exception(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.exception(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
+    def critical(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        if sys.version_info < (3, 8):  # pragma: no cover
+            return self._logger.critical(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.critical(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
+    def warning(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        if sys.version_info < (3, 8):  # pragma: no cover
+            return self._logger.warning(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.warning(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
+
+    def debug(
+        self,
+        msg: object,
+        *args,
+        exc_info=None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Optional[Mapping[str, object]] = None,
+        **kwargs,
+    ):
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+        if sys.version_info < (3, 8):  # pragma: no cover
+            return self._logger.debug(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
+        return self._logger.debug(
+            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+        )
 
     def append_keys(self, **additional_keys):
         self.registered_formatter.append_keys(**additional_keys)
@@ -376,11 +580,11 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         """Convenience property to access logger formatter"""
         return self.registered_handler.formatter  # type: ignore
 
-    def structure_logs(self, append: bool = False, **keys):
+    def structure_logs(self, append: bool = False, formatter_options: Optional[Dict] = None, **keys):
         """Sets logging formatting to JSON.
 
         Optionally, it can append keyword arguments
-        to an existing logger so it is available across future log statements.
+        to an existing logger, so it is available across future log statements.
 
         Last keyword argument and value wins if duplicated.
 
@@ -388,7 +592,11 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         ----------
         append : bool, optional
             append keys provided to logger formatter, by default False
+        formatter_options : dict, optional
+            LambdaPowertoolsFormatter options to be propagated, by default {}
         """
+        formatter_options = formatter_options or {}
+
         # There are 3 operational modes for this method
         ## 1. Register a Powertools Formatter for the first time
         ## 2. Append new keys to the current logger formatter; deprecated in favour of append_keys
@@ -398,7 +606,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         log_keys = {**self._default_log_keys, **keys}
         is_logger_preconfigured = getattr(self._logger, "init", False)
         if not is_logger_preconfigured:
-            formatter = self.logger_formatter or LambdaPowertoolsFormatter(**log_keys)  # type: ignore
+            formatter = self.logger_formatter or LambdaPowertoolsFormatter(**formatter_options, **log_keys)  # type: ignore # noqa: E501
             self.registered_handler.setFormatter(formatter)
 
             # when using a custom Lambda Powertools Formatter
@@ -462,6 +670,41 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         caller_frame = frame.f_back.f_back.f_back
         return caller_frame.f_globals["__name__"]
 
+    # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+    def findCaller(self, stack_info=False, stacklevel=2):  # pragma: no cover
+        """
+        Find the stack frame of the caller so that we can note the source
+        file name, line number and function name.
+        """
+        f = logging.currentframe()  # noqa: VNE001
+        # On some versions of IronPython, currentframe() returns None if
+        # IronPython isn't run with -X:Frames.
+        if f is None:
+            return "(unknown file)", 0, "(unknown function)", None
+        while stacklevel > 0:
+            next_f = f.f_back
+            if next_f is None:
+                ## We've got options here.
+                ## If we want to use the last (deepest) frame:
+                break
+                ## If we want to mimic the warnings module:
+                # return ("sys", 1, "(unknown function)", None) # noqa: E800
+                ## If we want to be pedantic:  # noqa: E800
+                # raise ValueError("call stack is not deep enough") # noqa: E800
+            f = next_f  # noqa: VNE001
+            if not _is_internal_frame(f):
+                stacklevel -= 1
+        co = f.f_code
+        sinfo = None
+        if stack_info:
+            with io.StringIO() as sio:
+                sio.write("Stack (most recent call last):\n")
+                traceback.print_stack(f, file=sio)
+                sinfo = sio.getvalue()
+                if sinfo[-1] == "\n":
+                    sinfo = sinfo[:-1]
+        return co.co_filename, f.f_lineno, co.co_name, sinfo
+
 
 def set_package_logger(
     level: Union[str, int] = logging.DEBUG,
@@ -500,3 +743,18 @@ def set_package_logger(
     handler = logging.StreamHandler(stream)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+
+
+# Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
+# The following is based on warnings._is_internal_frame. It makes sure that
+# frames of the import mechanism are skipped when logging at module level and
+# using a stacklevel value greater than one.
+def _is_internal_frame(frame):  # pragma: no cover
+    """Signal whether the frame is a CPython or logging module internal."""
+    filename = os.path.normcase(frame.f_code.co_filename)
+    return filename == logging._srcfile or ("importlib" in filename and "_bootstrap" in filename)
+
+
+def log_uncaught_exception_hook(exc_type, exc_value, exc_traceback, logger: Logger):
+    """Callback function for sys.excepthook to use Logger to log uncaught exceptions"""
+    logger.exception(exc_value, exc_info=(exc_type, exc_value, exc_traceback))  # pragma: no cover

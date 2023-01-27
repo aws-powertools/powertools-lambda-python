@@ -8,7 +8,7 @@ on:
   workflow_call:
     inputs:
       version:
-        description: "Version to build and publish docs (v1.28.0, develop)"
+        description: "Version to build and publish docs (1.28.0, develop)"
         required: true
         type: string
       alias:
@@ -63,9 +63,9 @@ jobs:
         run: |
           make release-docs VERSION="$VERSION" ALIAS="$ALIAS"
           poetry run mike set-default --push latest
-      # Maintenance: Migrate to new gh-pages action
+
       - name: Release API docs
-        uses: peaceiris/actions-gh-pages@068dc23d9710f1ba62e86896f84735d869951305 # v3.8.0
+        uses: peaceiris/actions-gh-pages@bd8c6b06eba6b3d25d72b7a1767993c0aeee42e7 # v3.9.2
         env:
           VERSION: ${{ inputs.version }}
         with:
@@ -75,7 +75,7 @@ jobs:
           destination_dir: ${{ env.VERSION }}/api
       - name: Release API docs to latest
         if: ${{ inputs.alias == 'latest' }}
-        uses: peaceiris/actions-gh-pages@068dc23d9710f1ba62e86896f84735d869951305 # v3.8.0
+        uses: peaceiris/actions-gh-pages@bd8c6b06eba6b3d25d72b7a1767993c0aeee42e7 # v3.9.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./api

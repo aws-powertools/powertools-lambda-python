@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import platform
 import subprocess
 import sys
 import textwrap
@@ -56,7 +57,7 @@ class BaseInfrastructure(InfrastructureProvider):
         self._feature_infra_module_path = self.feature_path / "infrastructure"
         self._feature_infra_file = self.feature_path / "infrastructure.py"
         self._handlers_dir = self.feature_path / "handlers"
-        self._cdk_out_dir: Path = CDK_OUT_PATH / self.feature_name
+        self._cdk_out_dir: Path = CDK_OUT_PATH / "-".join(platform.python_version_tuple()) / self.feature_name
         self._stack_outputs_file = f'{self._cdk_out_dir / "stack_outputs.json"}'
 
         if not self._feature_infra_file.exists():

@@ -21,13 +21,14 @@ env:
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    runs-on: aws-lambda-powertools_ubuntu-latest_8-core
     permissions:
       id-token: write # needed to request JWT with GitHub's OIDC Token endpoint. docs: https://bit.ly/3MNgQO9
       contents: read
     strategy:
       matrix:
         version: ["3.7", "3.8", "3.9"]
+    if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3

@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import base64
+import dataclasses
+import itertools
 import logging
 import os
 import warnings
 from binascii import Error as BinAsciiError
-from typing import Optional, Union
+from typing import Any, Dict, Generator, Optional, Union, overload
 
 from aws_lambda_powertools.shared import constants
 
@@ -45,6 +49,21 @@ def resolve_truthy_env_var_choice(env: str, choice: Optional[bool] = None) -> bo
         resolved choice as either bool or environment value
     """
     return choice if choice is not None else strtobool(env)
+
+
+@overload
+def resolve_env_var_choice(env: Optional[str], choice: float) -> float:
+    ...
+
+
+@overload
+def resolve_env_var_choice(env: Optional[str], choice: str) -> str:
+    ...
+
+
+@overload
+def resolve_env_var_choice(env: Optional[str], choice: Optional[str]) -> str:
+    ...
 
 
 def resolve_env_var_choice(
@@ -100,3 +119,48 @@ def powertools_debug_is_set() -> bool:
         return True
 
     return False
+
+
+def slice_dictionary(data: Dict, chunk_size: int) -> Generator[Dict, None, None]:
+    for _ in range(0, len(data), chunk_size):
+        yield {dict_key: data[dict_key] for dict_key in itertools.islice(data, chunk_size)}
+
+
+def extract_event_from_common_models(data: Any) -> Dict | Any:
+    """Extract raw event from common types used in Powertools
+
+    If event cannot be extracted, return received data as is.
+
+    Common models:
+
+        - Event Source Data Classes (DictWrapper)
+        - Python Dataclasses
+        - Pydantic Models (BaseModel)
+
+    Parameters
+    ----------
+    data : Any
+        Original event, a potential instance of DictWrapper/BaseModel/Dataclass
+
+    Notes
+    -----
+
+    Why not using static type for function argument?
+
+    DictWrapper would cause a circular import. Pydantic BaseModel could
+    cause a ModuleNotFound or trigger init reflection worsening cold start.
+    """
+    # Short-circuit most common type first for perf
+    if isinstance(data, dict):
+        return data
+
+    # Is it an Event Source Data Class?
+    if getattr(data, "raw_event", None):
+        return data.raw_event
+
+    # Is it a Pydantic Model?
+    if callable(getattr(data, "dict", None)):
+        return data.dict()
+
+    # Is it a Dataclass? If not return as is
+    return dataclasses.asdict(data) if dataclasses.is_dataclass(data) else data

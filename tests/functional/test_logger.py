@@ -1,3 +1,4 @@
+import functools
 import inspect
 import io
 import json
@@ -5,6 +6,7 @@ import logging
 import random
 import re
 import string
+import sys
 import warnings
 from ast import Dict
 from collections import namedtuple
@@ -415,6 +417,25 @@ def test_logger_extra_kwargs(stdout, service_name):
     assert "request_id" not in no_extra_fields_log
 
 
+def test_logger_arbitrary_fields_as_kwargs(stdout, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN `request_id` is an arbitrary field in a log message to the existing structured log
+    fields = {"request_id": "blah"}
+
+    logger.info("with arbitrary fields", **fields)
+    logger.info("without extra fields")
+
+    extra_fields_log, no_extra_fields_log = capture_multiple_logging_statements_output(stdout)
+
+    # THEN first log should have request_id field in the root structure
+    assert "request_id" in extra_fields_log
+
+    # THEN second log should not have request_id in the root structure
+    assert "request_id" not in no_extra_fields_log
+
+
 def test_logger_log_twice_when_log_filter_isnt_present_and_root_logger_is_setup(monkeypatch, stdout, service_name):
     # GIVEN Lambda configures the root logger with a handler
     root_logger = logging.getLogger()
@@ -795,6 +816,21 @@ def test_use_datetime(stdout, service_name, utc):
     )
 
 
+@pytest.mark.parametrize("utc", [False, True])
+def test_use_rfc3339_iso8601(stdout, service_name, utc):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout, use_rfc3339=True, utc=utc)
+    RFC3339_REGEX = r"^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[\+-]\d{2}:\d{2})?)$"
+
+    # WHEN a log statement happens
+    logger.info({})
+
+    # THEN the timestamp has the appropriate formatting
+    log = capture_logging_output(stdout)
+
+    assert re.fullmatch(RFC3339_REGEX, log["timestamp"])  # "2022-10-27T17:42:26.841+0200"
+
+
 def test_inject_lambda_context_log_event_request_data_classes(lambda_context, stdout, lambda_event, service_name):
     # GIVEN Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
@@ -858,3 +894,15 @@ def test_powertools_debug_env_var_warning(monkeypatch: pytest.MonkeyPatch):
         set_package_logger_handler()
         assert len(w) == 1
         assert str(w[0].message) == warning_message
+
+
+def test_logger_log_uncaught_exceptions(service_name, stdout):
+    # GIVEN an initialized Logger is set with log_uncaught_exceptions
+    logger = Logger(service=service_name, stream=stdout, log_uncaught_exceptions=True)
+
+    # WHEN Python's exception hook is inspected
+    exception_hook = sys.excepthook
+
+    # THEN it should contain our custom exception hook with a copy of our logger
+    assert isinstance(exception_hook, functools.partial)
+    assert exception_hook.keywords.get("logger") == logger

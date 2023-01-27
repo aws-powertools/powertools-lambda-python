@@ -1,48 +1,50 @@
 ##### Labeler ##########################################################################################################
 labelPRBasedOnFilePath:
-  area/logger:
+  logger:
     - aws_lambda_powertools/logging/*
     - aws_lambda_powertools/logging/**/*
     - aws_lambda_powertools/package_logger.py
-  area/tracer:
+  tracer:
     - aws_lambda_powertools/tracing/*
     - aws_lambda_powertools/tracing/**/*
-  area/metrics:
+  metrics:
     - aws_lambda_powertools/metrics/*
     - aws_lambda_powertools/metrics/**/*
-  area/event_handlers:
+  event_handlers:
     - aws_lambda_powertools/event_handler/*
     - aws_lambda_powertools/event_handler/**/*
-  area/middleware_factory:
+  middleware_factory:
     - aws_lambda_powertools/middleware_factory/*
     - aws_lambda_powertools/middleware_factory/**/*
-  area/parameters:
+  parameters:
     - aws_lambda_powertools/parameters/*
     - aws_lambda_powertools/parameters/**/*
-  area/batch:
+  batch:
     - aws_lambda_powertools/batch/*
     - aws_lambda_powertools/batch/**/*
-  area/validator:
+  validator:
     - aws_lambda_powertools/validation/*
     - aws_lambda_powertools/validation/**/*
-  area/event_sources:
+  event_sources:
     - aws_lambda_powertools/data_classes/*
     - aws_lambda_powertools/data_classes/**/*
-  area/parser:
+  parser:
     - aws_lambda_powertools/parser/*
     - aws_lambda_powertools/parser/**/*
-  area/idempotency:
+  idempotency:
     - aws_lambda_powertools/idempotency/*
     - aws_lambda_powertools/idempotency/**/*
-  area/feature_flags:
+  feature_flags:
     - aws_lambda_powertools/feature_flags/*
     - aws_lambda_powertools/feature_flags/**/*
-  area/jmespath:
+  jmespath:
     - aws_lambda_powertools/utilities/jmespath_utils/*
-  area/typing:
+  typing:
     - aws_lambda_powertools/utilities/typing/*
     - mypy.ini
-  area/commons:
+  streaming:
+    - aws_lambda_powertools/utilities/streaming/*
+  commons:
     - aws_lambda_powertools/shared/*
 
   documentation:

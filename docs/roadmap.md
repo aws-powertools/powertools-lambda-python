@@ -8,13 +8,27 @@ This is our public roadmap that outlines the high level direction we are working
 
 ## Themes
 
+!!! info "Operational Excellence is priority number 1."
+
 Themes are key activities maintainers are focusing on, besides bug reports. These are updated periodically and you can find the latest [under Epics in our public board](https://github.com/orgs/awslabs/projects/51/views/11?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}.
 
 ### Increased end-to-end coverage
 
-We continue to work on increasing end-to-end coverage for all features. Our main challenge is creating a mechanism to periodically test contracts for Lambda Event Sources, since there is no official JSON Schema at the moment.
+We continue to work on increasing end-to-end coverage for all features. Our main challenge is testing contracts for Lambda Event Sources (Parser, Event Source Data Classes) due to the lack of an official JSON schema.
 
 Some Lambda Event Sources require clusters (e.g., MSK) leading to additional delays of up to 30m in the end-to-end feedback loop. We need a RFC to start discussing viable options, and whether we should publish JSON Schemas from identified contracts.
+
+### Observability providers
+
+We want to extend Tracer, Metrics, and Logger to support any [observability provider](https://github.com/awslabs/aws-lambda-powertools-python/issues/1433). We need a RFC to define a contract and to identify two most requested observability providers that we can work with as an initial step.
+
+### Lambda Layer in release notes
+
+We want to publish a JSON with a map of region and Lambda Layer ARN as a GitHub Release Note asset.
+
+As of V2, we prioritize Lambda Layers being available before release notes are out. This is due to X86 and ARM64 compilation for smaller binaries and extra speed.
+
+This means we have room to include a JSON map for Lambda Layers and facilitate automation for customers wanting the latest version as soon as it's available.
 
 ### Strict typing
 
