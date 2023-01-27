@@ -491,7 +491,7 @@ decompress and parse json data from the event.
 
     @event_source(data_class=CloudWatchLogsEvent)
     def lambda_handler(event: CloudWatchLogsEvent, context):
-        decompressed_log: CloudWatchLogsDecodedData = event.parse_logs_data
+        decompressed_log: CloudWatchLogsDecodedData = event.parse_logs_data()
         log_events = decompressed_log.log_events
         for event in log_events:
             do_something_with(event.timestamp, event.message)
