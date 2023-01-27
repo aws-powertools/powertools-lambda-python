@@ -13,6 +13,9 @@ def execute_lambdas_in_parallel(function_name: str, lambdas_arn: list, arguments
     with ThreadPoolExecutor() as executor:
         running_tasks: List[Future] = []
         for arn in lambdas_arn:
+            # Sleep 0.5, 1, 1.5, ... seconds between each invocation. This way
+            # we can guarantee that lambdas are executed in parallel, but they are
+            # called in the same "order" as they are passed in.
             time.sleep(0.5 * len(running_tasks))
             running_tasks.append(executor.submit(f, function_name, arn, arguments))
 
