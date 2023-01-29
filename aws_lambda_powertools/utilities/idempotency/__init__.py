@@ -8,7 +8,17 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
 from aws_lambda_powertools.utilities.idempotency.persistence.dynamodb import (
     DynamoDBPersistenceLayer,
 )
+from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
+    RedisCachePersistenceLayer,
+)
 
 from .idempotency import IdempotencyConfig, idempotent, idempotent_function
 
-__all__ = ("DynamoDBPersistenceLayer", "BasePersistenceLayer", "idempotent", "idempotent_function", "IdempotencyConfig")
+__all__ = (
+    "DynamoDBPersistenceLayer",
+    "BasePersistenceLayer",
+    "idempotent",
+    "idempotent_function",
+    "IdempotencyConfig",
+    "RedisCachePersistenceLayer",
+)
