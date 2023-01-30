@@ -40,54 +40,26 @@ This utility requires additional permissions to work as expected.
 
 ### Fetching parameters
 
-You can retrieve a single parameter  using the `get_parameter` high-level function.
+You can retrieve a single parameter using the `get_parameter` high-level function.
 
-```python hl_lines="5" title="Fetching a single parameter"
-from aws_lambda_powertools.utilities import parameters
-
-def handler(event, context):
-	# Retrieve a single parameter
-	value = parameters.get_parameter("/my/parameter")
-
-```
+=== "getting_started_single_ssm_parameter.py"
+    ```python hl_lines="3 10"
+    --8<-- "examples/parameters/src/getting_started_single_ssm_parameter.py"
+    ```
 
 For multiple parameters, you can use either:
 
 * `get_parameters` to recursively fetch all parameters by path.
 * `get_parameters_by_name` to fetch distinct parameters by their full name. It also accepts custom caching, transform, decrypt per parameter.
 
-=== "get_parameters"
-
-    ```python hl_lines="1 6"
-    from aws_lambda_powertools.utilities import parameters
-
-    def handler(event, context):
-    	# Retrieve multiple parameters from a path prefix recursively
-    	# This returns a dict with the parameter name as key
-    	values = parameters.get_parameters("/my/path/prefix")
-    	for parameter, value in values.items():
-    		print(f"{parameter}: {value}")
+=== "getting_started_recursive_ssm_parameter.py"
+    ```python hl_lines="3 10 13"
+    --8<-- "examples/parameters/src/getting_started_recursive_ssm_parameter.py"
     ```
 
-=== "get_parameters_by_name"
-
-    ```python hl_lines="3 5 14"
-	from typing import Any
-
-    from aws_lambda_powertools.utilities import get_parameters_by_name
-
-	parameters = {
-      "/develop/service/commons/telemetry/config": {"max_age": 300, "transform": "json"},
-      "/no_cache_param": {"max_age": 0},
-      # inherit default values
-	  "/develop/service/payment/api/capture/url": {},
-	}
-
-    def handler(event, context):
-    	# This returns a dict with the parameter name as key
-    	response: dict[str, Any] = parameters.get_parameters_by_name(parameters=parameters, max_age=60)
-    	for parameter, value in response.items():
-    		print(f"{parameter}: {value}")
+=== "getting_started_parameter_by_name.py"
+    ```python hl_lines="3 14"
+    --8<-- "examples/parameters/src/getting_started_parameter_by_name.py"
     ```
 
 ???+ tip "`get_parameters_by_name` supports graceful error handling"
@@ -99,32 +71,14 @@ For multiple parameters, you can use either:
 	* Keep only successful parameter names and their values in the response
 	* Raise `GetParameterError` if any of your parameters is named `_errors`
 
-```python hl_lines="3 5 12-13 15" title="Graceful error handling"
-from typing import Any
-
-from aws_lambda_powertools.utilities import get_parameters_by_name
-
-parameters = {
-  "/develop/service/commons/telemetry/config": {"max_age": 300, "transform": "json"},
-  # it would fail by default
-  "/this/param/does/not/exist"
-}
-
-def handler(event, context):
-	values: dict[str, Any] = parameters.get_parameters_by_name(parameters=parameters, raise_on_error=False)
-	errors: list[str] = values.get("_errors", [])
-
-    # Handle gracefully, since '/this/param/does/not/exist' will only be available in `_errors`
-	if errors:
-		...
-
-	for parameter, value in values.items():
-		print(f"{parameter}: {value}")
-```
+=== "get_parameter_by_name_error_handling.py"
+    ```python hl_lines="3 5 12-13 15"
+    --8<-- "examples/parameters/src/get_parameter_by_name_error_handling.py"
+    ```
 
 ### Fetching secrets
 
-You can fetch secrets stored in Secrets Manager using `get_secrets`.
+You can fetch secrets stored in Secrets Manager using `get_secret`.
 
 === "getting_started_secret.py"
     ```python hl_lines="5 15"
@@ -314,7 +268,7 @@ DynamoDB provider can be customized at initialization to match your table struct
 | **value_attr** | No        | `value` | Name of the attribute containing the parameter value.                                                      |
 
 === "builtin_provider_dynamodb_custom_fields.py"
-    ```python hl_lines="3 5 9 10 15"
+    ```python hl_lines="3 8-10 17"
     --8<-- "examples/parameters/src/builtin_provider_dynamodb_custom_fields.py"
     ```
 
