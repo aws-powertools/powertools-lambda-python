@@ -3,7 +3,7 @@ import pytest
 from tests.e2e.event_handler.infrastructure import EventHandlerStack
 
 
-@pytest.fixture(autouse=True, scope="module")
+@pytest.fixture(autouse=True, scope="package")
 def infrastructure():
     """Setup and teardown logic for E2E test infrastructure
 

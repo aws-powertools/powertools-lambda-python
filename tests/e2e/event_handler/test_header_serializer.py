@@ -36,6 +36,7 @@ def lambda_function_url_endpoint(infrastructure: dict) -> str:
     return infrastructure.get("LambdaFunctionUrl", "")
 
 
+@pytest.mark.xdist_group(name="event_handler")
 def test_alb_headers_serializer(alb_basic_listener_endpoint):
     # GIVEN
     url = f"{alb_basic_listener_endpoint}/todos"
@@ -74,6 +75,7 @@ def test_alb_headers_serializer(alb_basic_listener_endpoint):
     assert response.cookies.get(last_cookie.name) == last_cookie.value
 
 
+@pytest.mark.xdist_group(name="event_handler")
 def test_alb_multi_value_headers_serializer(alb_multi_value_header_listener_endpoint):
     # GIVEN
     url = f"{alb_multi_value_header_listener_endpoint}/todos"
@@ -112,6 +114,7 @@ def test_alb_multi_value_headers_serializer(alb_multi_value_header_listener_endp
         assert response.cookies.get(cookie.name) == cookie.value
 
 
+@pytest.mark.xdist_group(name="event_handler")
 def test_api_gateway_rest_headers_serializer(apigw_rest_endpoint):
     # GIVEN
     url = f"{apigw_rest_endpoint}todos"
@@ -147,6 +150,7 @@ def test_api_gateway_rest_headers_serializer(apigw_rest_endpoint):
         assert response.cookies.get(cookie.name) == cookie.value
 
 
+@pytest.mark.xdist_group(name="event_handler")
 def test_api_gateway_http_headers_serializer(apigw_http_endpoint):
     # GIVEN
     url = f"{apigw_http_endpoint}todos"
@@ -182,6 +186,7 @@ def test_api_gateway_http_headers_serializer(apigw_http_endpoint):
         assert response.cookies.get(cookie.name) == cookie.value
 
 
+@pytest.mark.xdist_group(name="event_handler")
 def test_lambda_function_url_headers_serializer(lambda_function_url_endpoint):
     # GIVEN
     url = f"{lambda_function_url_endpoint}todos"  # the function url endpoint already has the trailing /

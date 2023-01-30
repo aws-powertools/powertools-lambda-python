@@ -27,7 +27,7 @@ class ParametersStack(BaseInfrastructure):
             iam.PolicyStatement(
                 effect=iam.Effect.ALLOW,
                 actions=[
-                    "ssm:GetParameter",
+                    "ssm:GetParameters",
                 ],
                 resources=[f"arn:aws:ssm:{self.region}:{self.account_id}:parameter/powertools/e2e/parameters/*"],
             )
