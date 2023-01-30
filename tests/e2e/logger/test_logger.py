@@ -17,6 +17,7 @@ def basic_handler_fn_arn(infrastructure: dict) -> str:
     return infrastructure.get("BasicHandlerArn", "")
 
 
+@pytest.mark.xdist_group(name="logger")
 def test_basic_lambda_logs_visible(basic_handler_fn, basic_handler_fn_arn):
     # GIVEN
     message = "logs should be visible with default settings"
