@@ -33,6 +33,7 @@ def lambda_function_url_endpoint(infrastructure: dict) -> str:
     return infrastructure.get("LambdaFunctionUrl", "")
 
 
+@pytest.mark.xdist_group(name="event_handler")
 def test_api_gateway_rest_trailing_slash(apigw_rest_endpoint):
     # GIVEN API URL ends in a trailing slash
     url = f"{apigw_rest_endpoint}todos/"
@@ -51,6 +52,7 @@ def test_api_gateway_rest_trailing_slash(apigw_rest_endpoint):
     assert response.status_code == 200
 
 
+@pytest.mark.xdist_group(name="event_handler")
 def test_api_gateway_http_trailing_slash(apigw_http_endpoint):
     # GIVEN the URL for the API ends in a trailing slash API gateway should return a 404
     url = f"{apigw_http_endpoint}todos/"
@@ -67,6 +69,7 @@ def test_api_gateway_http_trailing_slash(apigw_http_endpoint):
         )
 
 
+@pytest.mark.xdist_group(name="event_handler")
 def test_lambda_function_url_trailing_slash(lambda_function_url_endpoint):
     # GIVEN the URL for the API ends in a trailing slash it should behave as if there was not one
     url = f"{lambda_function_url_endpoint}todos/"  # the function url endpoint already has the trailing /
@@ -83,6 +86,7 @@ def test_lambda_function_url_trailing_slash(lambda_function_url_endpoint):
         )
 
 
+@pytest.mark.xdist_group(name="event_handler")
 def test_alb_url_trailing_slash(alb_multi_value_header_listener_endpoint):
     # GIVEN url has a trailing slash - it should behave as if there was not one
     url = f"{alb_multi_value_header_listener_endpoint}/todos/"
