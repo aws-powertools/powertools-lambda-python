@@ -155,7 +155,7 @@ exclude = '''
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra -vv --dist loadgroup" # loadgroup is essential for e2e tests to run correctly
+addopts = "-ra -vv"
 testpaths = "./tests"
 markers = [
     "perf: marks perf tests to be deselected (deselect with '-m \"not perf\"')",
