@@ -21,7 +21,7 @@ env:
 
 jobs:
   run:
-    runs-on: aws-lambda-powertools_ubuntu-latest_8-core
+    runs-on: ubuntu-latest
     permissions:
       id-token: write # needed to request JWT with GitHub's OIDC Token endpoint. docs: https://bit.ly/3MNgQO9
       contents: read
