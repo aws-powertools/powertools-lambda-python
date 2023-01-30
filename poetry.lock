@@ -230,18 +230,18 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.26.59"
+version = "1.26.60"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.26.59-py3-none-any.whl", hash = "sha256:34ee771a5cc84c16e75d4b9ef4672f51c2bafdce66ec457bbaac630b37d9cd5e"},
-    {file = "boto3-1.26.59.tar.gz", hash = "sha256:7d9cebb507fc96e6eb429621ccb2e731b75e7bbb8d6d9f0cf0c08089ee3c1ab7"},
+    {file = "boto3-1.26.60-py3-none-any.whl", hash = "sha256:5fd2810217a74a38078a19fb85a9e5d6934d0c146eb060967a3ffd7ab33cdf00"},
+    {file = "boto3-1.26.60.tar.gz", hash = "sha256:f0824b3bcf803800d3ecef903b4840427e4b3d37a069f6fc9a86310f7e036ad5"},
 ]
 
 [package.dependencies]
-botocore = ">=1.29.59,<1.30.0"
+botocore = ">=1.29.60,<1.30.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -250,14 +250,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.29.59"
+version = "1.29.60"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.29.59-py3-none-any.whl", hash = "sha256:5533644ddefaccfaa98460a63eb73e61a46aad019771226d103b1054b0df6103"},
-    {file = "botocore-1.29.59.tar.gz", hash = "sha256:bc75d41c5eecf624a2f9875483135aa78088a50c8d29847793f92756697cfed5"},
+    {file = "botocore-1.29.60-py3-none-any.whl", hash = "sha256:c4ae251e7df0cf01d893eb945bc8f23c14989ed349775a8e16c949f08a068f9a"},
+    {file = "botocore-1.29.60.tar.gz", hash = "sha256:a21217ccf4613c9ebbe4c3192e13ba91d46be642560e39a16406662a398a107b"},
 ]
 
 [package.dependencies]
@@ -1413,14 +1413,14 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.0.8"
+version = "9.0.9"
 description = "Documentation that simply works"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mkdocs_material-9.0.8-py3-none-any.whl", hash = "sha256:03f8a2249627efb91a57d9f4a4e298d2d61d6e65fe2a864cc5961dc540bdd540"},
-    {file = "mkdocs_material-9.0.8.tar.gz", hash = "sha256:268e7aab0b8585352400b4e93bfe4efd0ca213005d7bae1a0ec69b7ded205fcd"},
+    {file = "mkdocs_material-9.0.9-py3-none-any.whl", hash = "sha256:29ebb2aa81e8cfb39e497bdafcacf4cc4aaa20ae31ce334f520c317c5bead1ba"},
+    {file = "mkdocs_material-9.0.9.tar.gz", hash = "sha256:c8fa9b1f0fded744a42317e594e5c21f4e3b56f1a0497e7d16951b3bd47784bf"},
 ]
 
 [package.dependencies]
@@ -1523,14 +1523,14 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-cloudformation"
-version = "1.26.57"
-description = "Type annotations for boto3.CloudFormation 1.26.57 service generated with mypy-boto3-builder 7.12.3"
+version = "1.26.60"
+description = "Type annotations for boto3.CloudFormation 1.26.60 service generated with mypy-boto3-builder 7.12.3"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-cloudformation-1.26.57.tar.gz", hash = "sha256:c1659cf032825293b3eef1acca1a29fb82a7149b6c3ce06bbf405f54b78d3172"},
-    {file = "mypy_boto3_cloudformation-1.26.57-py3-none-any.whl", hash = "sha256:4a45872b0fc1d503fa1147560fd842d3bcbec38aad4ca3516b51c33e6dfa05f2"},
+    {file = "mypy-boto3-cloudformation-1.26.60.tar.gz", hash = "sha256:1966b0f521e73d8d043e2499f33e252c71a7dba79bf79d89cb4a0bd8a79180a0"},
+    {file = "mypy_boto3_cloudformation-1.26.60-py3-none-any.whl", hash = "sha256:30305e6055076acc48e4346f599b6b24e1b1281d95aabb4d8b335f3915a001fa"},
 ]
 
 [package.dependencies]
@@ -2796,4 +2796,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "45b1be867a48119ebc7f13e990c48046c9413239437e1eb96c7c1c58c5b214e6"
+content-hash = "f4ca878c728c12c307107c8c14c4ceba6c8cf7b5481e78d6cc60427f4537c77c"
