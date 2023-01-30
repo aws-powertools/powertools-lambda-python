@@ -1,6 +1,6 @@
 from typing import Any
 
-from aws_lambda_powertools.utilities import get_parameters_by_name
+from aws_lambda_powertools.utilities.parameters.ssm import get_parameters_by_name
 
 parameters = {
     "/develop/service/commons/telemetry/config": {"max_age": 300, "transform": "json"},
