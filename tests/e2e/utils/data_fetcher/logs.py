@@ -134,7 +134,7 @@ def get_logs(
         Name of Lambda function to fetch logs for
     start_time : datetime
         Start date range to filter traces
-    expected_number_of_logs : Optional[int]
+    minimum_log_entries : Optional[int]
         Retry fetching logs until this number of log lines are obtained
     log_client : Optional[CloudWatchLogsClient], optional
         Amazon CloudWatch Logs Client, by default boto3.client('logs)
