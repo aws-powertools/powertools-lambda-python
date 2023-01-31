@@ -11,7 +11,18 @@ import os
 import sys
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, overload, Awaitable
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    overload,
+)
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities.batch.exceptions import (
@@ -118,7 +129,7 @@ class BasePartialProcessor(ABC):
             return list(await asyncio.gather(*[self._async_process_record(record) for record in self.records]))
 
         # WARNING
-        # Do not use "asyncio.run(async_process())" due to Lambda container thaws/freeze, otherwise we might get "Event Loop is closed"
+        # Do not use "asyncio.run(async_process())" due to Lambda container thaws/freeze, otherwise we might get "Event Loop is closed" # noqa: E501
         # Instead, get_event_loop() can also create one if a previous was erroneously closed
         # More: https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtime-environment.html#runtimes-lifecycle-shutdown
         # Extra: just follow how the well-tested mangum library do:
@@ -127,7 +138,7 @@ class BasePartialProcessor(ABC):
 
         # Detect environment and create a loop for each one
         coro = async_process()
-        if os.environ.get('AWS_LAMBDA_RUNTIME_API'):
+        if os.environ.get("AWS_LAMBDA_RUNTIME_API"):
             # Running in lambda server
             loop = asyncio.get_event_loop()
             task_instance = loop.create_task(coro)
@@ -393,7 +404,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         if self._entire_batch_failed():
             raise BatchProcessingError(
                 msg=f"All records failed processing. {len(self.exceptions)} individual errors logged "
-                    f"separately below.",
+                f"separately below.",
                 child_exceptions=self.exceptions,
             )
 
@@ -480,7 +491,7 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
 
 @lambda_handler_decorator
 def batch_processor(
-        handler: Callable, event: Dict, context: LambdaContext, record_handler: Callable, processor: BatchProcessor
+    handler: Callable, event: Dict, context: LambdaContext, record_handler: Callable, processor: BatchProcessor
 ):
     """
     Middleware to handle batch event processing
@@ -524,7 +535,6 @@ def batch_processor(
 
 
 class AsyncBatchProcessor(BasePartialBatchProcessor):
-
     def _process_record(self, record: dict):
         raise NotImplementedError()
 
@@ -551,7 +561,11 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
 
 @lambda_handler_decorator
 def async_batch_processor(
-        handler: Callable, event: Dict, context: LambdaContext, record_handler: Callable[..., Awaitable[Any]], processor: AsyncBatchProcessor
+    handler: Callable,
+    event: Dict,
+    context: LambdaContext,
+    record_handler: Callable[..., Awaitable[Any]],
+    processor: AsyncBatchProcessor,
 ):
     """
     Middleware to handle batch event processing

@@ -1,16 +1,16 @@
 import json
 from random import randint
-from typing import Callable, Dict, Optional, Awaitable, Any
+from typing import Any, Awaitable, Callable, Dict, Optional
 
 import pytest
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities.batch import (
-    BatchProcessor,
     AsyncBatchProcessor,
+    BatchProcessor,
     EventType,
-    batch_processor,
     async_batch_processor,
+    batch_processor,
 )
 from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
