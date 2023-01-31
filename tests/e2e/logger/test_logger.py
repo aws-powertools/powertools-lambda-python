@@ -30,7 +30,7 @@ def test_basic_lambda_logs_visible(basic_handler_fn, basic_handler_fn_arn):
     data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn, payload=payload)
 
     # THEN
-    logs = data_fetcher.get_logs(function_name=basic_handler_fn, start_time=execution_time)
+    logs = data_fetcher.get_logs(function_name=basic_handler_fn, start_time=execution_time, expected_number_of_logs=2)
 
     assert len(logs) == 2
     assert len(logs.get_cold_start_log()) == 1

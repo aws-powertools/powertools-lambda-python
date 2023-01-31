@@ -122,6 +122,7 @@ class LogFetcher:
 def get_logs(
     function_name: str,
     start_time: datetime,
+    expected_number_of_logs: Optional[int],
     filter_expression: Optional[str] = None,
     log_client: Optional[CloudWatchLogsClient] = None,
 ) -> LogFetcher:
@@ -133,6 +134,8 @@ def get_logs(
         Name of Lambda function to fetch logs for
     start_time : datetime
         Start date range to filter traces
+    expected_number_of_logs : Optional[int]
+        Retry fetching logs until this number of log lines are obtained
     log_client : Optional[CloudWatchLogsClient], optional
         Amazon CloudWatch Logs Client, by default boto3.client('logs)
     filter_expression : Optional[str], optional
@@ -143,6 +146,11 @@ def get_logs(
     LogFetcher
         LogFetcher instance with logs available as properties and methods
     """
-    return LogFetcher(
+    log_fetcher = LogFetcher(
         function_name=function_name, start_time=start_time, filter_expression=filter_expression, log_client=log_client
     )
+
+    if expected_number_of_logs is not None and len(log_fetcher) < expected_number_of_logs:
+        raise ValueError(f"expected {expected_number_of_logs} logs but only got ${len(log_fetcher)}")
+
+    return log_fetcher
