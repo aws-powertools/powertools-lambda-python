@@ -150,7 +150,7 @@ def get_logs(
         function_name=function_name, start_time=start_time, filter_expression=filter_expression, log_client=log_client
     )
 
-    if expected_number_of_logs is not None and len(log_fetcher) < expected_number_of_logs:
+    if minimum_log_entries < len(log_fetcher):
         raise ValueError(f"expected {expected_number_of_logs} logs but only got ${len(log_fetcher)}")
 
     return log_fetcher
