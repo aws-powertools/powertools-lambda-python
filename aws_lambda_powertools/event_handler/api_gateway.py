@@ -531,7 +531,7 @@ class ApiGatewayResolver(BaseRouter):
             event = event.raw_event
 
         if self._debug:
-            print(self._json_dump(event), end="")
+            print(self._json_dump(event))
 
         # Populate router(s) dependencies without keeping a reference to each registered router
         BaseRouter.current_event = self._to_proxy_event(event)
@@ -728,21 +728,26 @@ class ApiGatewayResolver(BaseRouter):
 
         return None
 
-    def _to_response(self, result: Union[Dict, Response]) -> Response:
+    def _to_response(self, result: Union[Dict, Tuple, Response]) -> Response:
         """Convert the route's result to a Response
 
-         2 main result types are supported:
+         3 main result types are supported:
 
         - Dict[str, Any]: Rest api response with just the Dict to json stringify and content-type is set to
           application/json
+        - Tuple[dict, int]: Same dict handling as above but with the option of including a status code
         - Response: returned as is, and allows for more flexibility
         """
+        status_code = HTTPStatus.OK
         if isinstance(result, Response):
             return result
+        elif isinstance(result, tuple) and len(result) == 2:
+            # Unpack result dict and status code from tuple
+            result, status_code = result
 
         logger.debug("Simple response detected, serializing return before constructing final response")
         return Response(
-            status_code=200,
+            status_code=status_code,
             content_type=content_types.APPLICATION_JSON,
             body=self._json_dump(result),
         )

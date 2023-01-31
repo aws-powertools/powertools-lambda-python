@@ -1,0 +1,28 @@
+{
+  "weekend_premium_discount": {
+    "default": false,
+    "rules": {
+      "customer tier equals premium and its time for a discount": {
+        "when_match": true,
+        "conditions": [
+          {
+            "action": "EQUALS",
+            "key": "tier",
+            "value": "premium"
+          },
+          {
+            "action": "SCHEDULE_BETWEEN_DAYS_OF_WEEK",
+            "key": "CURRENT_DAY_OF_WEEK",
+            "value": {
+              "DAYS": [
+                "SATURDAY",
+                "SUNDAY"
+              ],
+              "TIMEZONE": "America/New_York"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

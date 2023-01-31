@@ -28,6 +28,7 @@ def cold_start_fn_arn(infrastructure: dict) -> str:
 METRIC_NAMESPACE = "powertools-e2e-metric"
 
 
+@pytest.mark.xdist_group(name="metrics")
 def test_basic_lambda_metric_is_visible(basic_handler_fn: str, basic_handler_fn_arn: str):
     # GIVEN
     metric_name = data_builder.build_metric_name()
@@ -47,6 +48,7 @@ def test_basic_lambda_metric_is_visible(basic_handler_fn: str, basic_handler_fn_
     assert metric_values == [3.0]
 
 
+@pytest.mark.xdist_group(name="metrics")
 def test_cold_start_metric(cold_start_fn_arn: str, cold_start_fn: str):
     # GIVEN
     metric_name = "ColdStart"

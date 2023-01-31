@@ -45,7 +45,12 @@ A resolver will handle request resolution, including [one or more routers](#spli
 For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, `ALBResolver`, and `LambdaFunctionUrlResolver`. From here on, we will default to `APIGatewayRestResolver` across examples.
 
 ???+ info "Auto-serialization"
-    We serialize `Dict` responses as JSON, trim whitespace for compact responses, and set content-type to `application/json`.
+    We serialize `Dict` responses as JSON, trim whitespace for compact responses, set content-type to `application/json`, and
+    return a 200 OK HTTP status. You can optionally set a different HTTP status code as the second argument of the tuple:
+
+    ```python hl_lines="15 16"
+    --8<-- "examples/event_handler_rest/src/getting_started_return_tuple.py"
+    ```
 
 #### API Gateway REST API
 
@@ -458,6 +463,21 @@ When necessary, you can set a prefix when including a router object. This means 
     ```python hl_lines="13 25"
     --8<-- "examples/event_handler_rest/src/split_route_prefix_module.py"
     ```
+
+#### Specialized router types
+
+You can use specialized router classes according to the type of event that you are resolving. This way you'll get type hints from your IDE as you access the `current_event` property.
+
+| Router                  | Resolver                  | `current_event` type   |
+|-------------------------|---------------------------|------------------------|
+| APIGatewayRouter        | APIGatewayRestResolver    | APIGatewayProxyEvent   |
+| APIGatewayHttpRouter    | APIGatewayHttpResolver    | APIGatewayProxyEventV2 |
+| ALBRouter               | ALBResolver               | ALBEvent               |
+| LambdaFunctionUrlRouter | LambdaFunctionUrlResolver | LambdaFunctionUrlEvent |
+
+```python hl_lines="1 5 9"
+--8<-- "examples/event_handler_rest/src/split_route_specialized_router.py"
+```
 
 #### Sharing contextual data
 

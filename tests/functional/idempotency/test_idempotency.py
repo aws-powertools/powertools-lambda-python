@@ -397,7 +397,7 @@ def test_idempotent_lambda_exception(
     def lambda_handler(event, context):
         raise Exception("Something went wrong!")
 
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="Something went wrong!"):
         lambda_handler(lambda_apigw_event, lambda_context)
 
     stubber.assert_no_pending_responses()
@@ -1070,7 +1070,19 @@ def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPers
     # GIVEN a miss configured persistence layer
     # like no table was created for the idempotency persistence layer
     stubber = stub.Stubber(persistence_store.table.meta.client)
-    stubber.add_client_error("put_item", "ResourceNotFoundException")
+    service_error_code = "ResourceNotFoundException"
+    service_message = "Custom message"
+
+    exception_message = "Failed to save in progress record to idempotency store"
+    exception_details = (
+        f"An error occurred ({service_error_code}) when calling the PutItem operation: {service_message}"
+    )
+
+    stubber.add_client_error(
+        "put_item",
+        service_error_code,
+        service_message,
+    )
     stubber.activate()
 
     @idempotent(persistence_store=persistence_store)
@@ -1083,9 +1095,13 @@ def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPers
         lambda_handler({}, lambda_context)
 
     # THEN idempotent should raise an IdempotencyPersistenceLayerError
+    # AND append downstream exception details
     stubber.assert_no_pending_responses()
     stubber.deactivate()
-    assert "Failed to save in progress record to idempotency store" == e.value.args[0]
+    assert exception_message == e.value.args[0]
+    assert isinstance(e.value.args[1], Exception)
+    assert exception_details in e.value.args[1].args
+    assert f"{exception_message} - ({exception_details})" in str(e.value)
 
 
 def test_handler_raise_idempotency_key_error(persistence_store: DynamoDBPersistenceLayer, lambda_context):
