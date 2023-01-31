@@ -397,7 +397,7 @@ def test_idempotent_lambda_exception(
     def lambda_handler(event, context):
         raise Exception("Something went wrong!")
 
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="Something went wrong!"):
         lambda_handler(lambda_apigw_event, lambda_context)
 
     stubber.assert_no_pending_responses()
