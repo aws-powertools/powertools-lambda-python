@@ -29,6 +29,7 @@ class LogFetcher:
         start_time: datetime,
         log_client: Optional[CloudWatchLogsClient] = None,
         filter_expression: Optional[str] = None,
+        minimum_log_entries: int = 1,
     ):
         """Fetch and expose Powertools Logger logs from CloudWatch Logs
 
@@ -42,12 +43,15 @@ class LogFetcher:
             Amazon CloudWatch Logs Client, by default boto3.client('logs)
         filter_expression : Optional[str], optional
             CloudWatch Logs Filter Pattern expression, by default "message"
+        minimum_log_entries: int
+            Minimum number of log entries to be retrieved before exhausting retry attempts
         """
         self.function_name = function_name
         self.start_time = int(start_time.timestamp())
         self.log_client = log_client or boto3.client("logs")
         self.filter_expression = filter_expression or "message"  # Logger message key
         self.log_group = f"/aws/lambda/{self.function_name}"
+        self.minimum_log_entries = minimum_log_entries
         self.logs: List[Log] = self._get_logs()
 
     def get_log(self, key: str, value: Optional[any] = None) -> List[Log]:
@@ -112,6 +116,11 @@ class LogFetcher:
                 continue
             filtered_logs.append(message)
 
+        if len(filtered_logs) < self.minimum_log_entries:
+            raise ValueError(
+                f"Number of log entries found doesn't meet minimum required ({self.minimum_log_entries}). Repeating..."
+            )
+
         return filtered_logs
 
     def __len__(self) -> int:
@@ -122,7 +131,7 @@ class LogFetcher:
 def get_logs(
     function_name: str,
     start_time: datetime,
-    expected_number_of_logs: Optional[int],
+    minimum_log_entries: int = 1,
     filter_expression: Optional[str] = None,
     log_client: Optional[CloudWatchLogsClient] = None,
 ) -> LogFetcher:
@@ -134,8 +143,8 @@ def get_logs(
         Name of Lambda function to fetch logs for
     start_time : datetime
         Start date range to filter traces
-    minimum_log_entries : Optional[int]
-        Retry fetching logs until this number of log lines are obtained
+    minimum_log_entries : int
+        Minimum number of log entries to be retrieved before exhausting retry attempts
     log_client : Optional[CloudWatchLogsClient], optional
         Amazon CloudWatch Logs Client, by default boto3.client('logs)
     filter_expression : Optional[str], optional
@@ -146,11 +155,10 @@ def get_logs(
     LogFetcher
         LogFetcher instance with logs available as properties and methods
     """
-    log_fetcher = LogFetcher(
-        function_name=function_name, start_time=start_time, filter_expression=filter_expression, log_client=log_client
+    return LogFetcher(
+        function_name=function_name,
+        start_time=start_time,
+        filter_expression=filter_expression,
+        log_client=log_client,
+        minimum_log_entries=minimum_log_entries,
     )
-
-    if minimum_log_entries < len(log_fetcher):
-        raise ValueError(f"expected {expected_number_of_logs} logs but only got ${len(log_fetcher)}")
-
-    return log_fetcher
