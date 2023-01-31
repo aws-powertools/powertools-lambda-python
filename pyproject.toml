@@ -80,6 +80,7 @@ mypy-boto3-appconfigdata = "^1.26.0"
 importlib-metadata = "^6.0"
 ijson = "^3.2.0"
 typed-ast = { version = "^1.5.4", python = "< 3.8"}
+hvac = "^1.0.2"
 
 [tool.poetry.extras]
 parser = ["pydantic"]
