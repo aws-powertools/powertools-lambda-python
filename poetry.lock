@@ -459,14 +459,14 @@ files = [
 
 [[package]]
 name = "constructs"
-version = "10.1.235"
+version = "10.1.236"
 description = "A programming model for software-defined state"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "constructs-10.1.235-py3-none-any.whl", hash = "sha256:7e7d56dbb75cb51b859e2e7418e4adc71da2669df53f95cd60cff4e728375563"},
-    {file = "constructs-10.1.235.tar.gz", hash = "sha256:9f64f57871743722f26dad556fdc8f196d26fb5b07f36b0e4a1f4e4bf73fdcf8"},
+    {file = "constructs-10.1.236-py3-none-any.whl", hash = "sha256:e51d8fac38b12a88359d5d2bedb535987eaa54e68631add29726652be66490e9"},
+    {file = "constructs-10.1.236.tar.gz", hash = "sha256:10b3c5ed3d4c6fd930bd8f59c8a5926028dafe8a5bf703fba5bcc53c89fce002"},
 ]
 
 [package.dependencies]
@@ -683,14 +683,14 @@ develop = ["build", "twine"]
 
 [[package]]
 name = "flake8-bugbear"
-version = "22.12.6"
+version = "23.1.20"
 description = "A plugin for flake8 finding likely bugs and design problems in your program. Contains warnings that don't belong in pyflakes and pycodestyle."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "flake8-bugbear-22.12.6.tar.gz", hash = "sha256:4cdb2c06e229971104443ae293e75e64c6107798229202fbe4f4091427a30ac0"},
-    {file = "flake8_bugbear-22.12.6-py3-none-any.whl", hash = "sha256:b69a510634f8a9c298dfda2b18a8036455e6b19ecac4fe582e4d7a0abfa50a30"},
+    {file = "flake8-bugbear-23.1.20.tar.gz", hash = "sha256:55902ab5a48c5ea53d8689ecd146eda548e72f2724192b9c1d68f6d975d13c06"},
+    {file = "flake8_bugbear-23.1.20-py3-none-any.whl", hash = "sha256:04a115e5f9c8e87c38bdbbcdf9f58223ffe05469c07c9a7bd8633330bc4d078b"},
 ]
 
 [package.dependencies]
@@ -698,7 +698,7 @@ attrs = ">=19.2.0"
 flake8 = ">=3.0.0"
 
 [package.extras]
-dev = ["coverage", "hypothesis", "hypothesmith (>=0.2)", "pre-commit", "tox"]
+dev = ["coverage", "hypothesis", "hypothesmith (>=0.2)", "pre-commit", "pytest", "tox"]
 
 [[package]]
 name = "flake8-builtins"
@@ -2796,4 +2796,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "f4ca878c728c12c307107c8c14c4ceba6c8cf7b5481e78d6cc60427f4537c77c"
+content-hash = "3a1013eb7ad5ff7a4a1bcf3be36eda55135bae69aae74cd91c1fde062805e154"
