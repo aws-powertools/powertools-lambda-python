@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'DynamoDB Table example'
+Resources:
+  ParameterTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ParameterTable
+      AttributeDefinitions:
+        -   AttributeName: IdKeyAttr
+            AttributeType: S
+        -   AttributeName: SkKeyAttr
+            AttributeType: S
+      KeySchema:
+        -   AttributeName: IdKeyAttr
+            KeyType: HASH
+        -   AttributeName: SkKeyAttr
+            KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: expiration
+        Enabled: true
+      BillingMode: PAY_PER_REQUEST

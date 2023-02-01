@@ -21,6 +21,7 @@ def s3_object_handler_fn_arn(infrastructure: dict) -> str:
     return infrastructure.get("S3ObjectHandler", "")
 
 
+@pytest.mark.xdist_group(name="streaming")
 def get_object_version(bucket, key) -> str:
     s3 = boto3.client("s3")
     versions = s3.list_object_versions(Bucket=bucket)
@@ -43,6 +44,7 @@ def get_lambda_result_payload(s3_object_handler_fn_arn: str, payload: dict) -> d
     return json.loads(handler_result["Payload"].read())
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_object_size(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "plain.txt"}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
@@ -50,6 +52,7 @@ def test_s3_object_size(s3_object_handler_fn_arn, regular_bucket_name):
     assert result.get("body") == "hello world"
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_versioned_object_size(s3_object_handler_fn_arn, versioned_bucket_name):
     key = "plain.txt"
     payload = {
@@ -62,18 +65,21 @@ def test_s3_versioned_object_size(s3_object_handler_fn_arn, versioned_bucket_nam
     assert result.get("body") == "hello world"
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_object_non_existent(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "NOTEXISTENT.txt"}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("error") == "Not found"
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_object_csv_constructor(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "csv.txt", "is_csv": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("body") == {"name": "hello", "value": "world"}
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_versioned_object_csv_constructor(s3_object_handler_fn_arn, versioned_bucket_name):
     key = "csv.txt"
     payload = {
@@ -86,24 +92,28 @@ def test_s3_versioned_object_csv_constructor(s3_object_handler_fn_arn, versioned
     assert result.get("body") == {"name": "hello", "value": "world"}
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_object_csv_transform(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "csv.txt", "transform_csv": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("body") == {"name": "hello", "value": "world"}
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_object_csv_transform_in_place(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "csv.txt", "transform_csv": True, "in_place": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("body") == {"name": "hello", "value": "world"}
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_object_csv_gzip_constructor(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "csv.txt.gz", "is_csv": True, "is_gzip": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("body") == {"name": "hello", "value": "world"}
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_versioned_object_csv_gzip_constructor(s3_object_handler_fn_arn, versioned_bucket_name):
     key = "csv.txt.gz"
     payload = {
@@ -117,12 +127,14 @@ def test_s3_versioned_object_csv_gzip_constructor(s3_object_handler_fn_arn, vers
     assert result.get("body") == {"name": "hello", "value": "world"}
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_object_gzip_constructor(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "plain.txt.gz", "is_gzip": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("body") == "hello world"
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_versioned_object_gzip_constructor(s3_object_handler_fn_arn, versioned_bucket_name):
     key = "plain.txt.gz"
     payload = {
@@ -135,18 +147,21 @@ def test_s3_versioned_object_gzip_constructor(s3_object_handler_fn_arn, versione
     assert result.get("body") == "hello world"
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_object_gzip_transform(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "plain.txt.gz", "transform_gzip": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("body") == "hello world"
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_object_gzip_transform_in_place(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "plain.txt.gz", "transform_gzip": True, "in_place": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
     assert result.get("body") == "hello world"
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_object_zip_transform(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "fileset.zip", "transform_zip": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
@@ -154,6 +169,7 @@ def test_s3_object_zip_transform(s3_object_handler_fn_arn, regular_bucket_name):
     assert result.get("body") == "This is file 2"
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_object_zip_transform_in_place(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "fileset.zip", "transform_zip": True, "in_place": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
@@ -161,6 +177,7 @@ def test_s3_object_zip_transform_in_place(s3_object_handler_fn_arn, regular_buck
     assert result.get("body") == "This is file 2"
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_object_zip_lzma_transform(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "fileset.zip.lzma", "transform_zip_lzma": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
@@ -168,6 +185,7 @@ def test_s3_object_zip_lzma_transform(s3_object_handler_fn_arn, regular_bucket_n
     assert result.get("body") == "This is file 2"
 
 
+@pytest.mark.xdist_group(name="streaming")
 def test_s3_object_zip_lzma_transform_in_place(s3_object_handler_fn_arn, regular_bucket_name):
     payload = {"bucket": regular_bucket_name, "key": "fileset.zip.lzma", "transform_zip_lzma": True, "in_place": True}
     result = get_lambda_result_payload(s3_object_handler_fn_arn, payload)
