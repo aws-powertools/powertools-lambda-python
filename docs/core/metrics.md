@@ -216,6 +216,20 @@ CloudWatch EMF uses the same dimensions across all your metrics. Use `single_met
     --8<-- "examples/metrics/src/single_metric_output.json"
     ```
 
+By default it will skip all previously defined dimensions including default dimensions. Use `default_dimensions` keyword argument if you want to reuse default dimensions or specify custom dimensions from a dictionary.
+
+=== "single_metric_default_dimensions_inherit.json"
+
+    ```json hl_lines="10 15"
+    --8<-- "examples/metrics/src/single_metric_default_dimensions_inherit.py"
+    ```
+
+=== "single_metric_default_dimensions.py"
+
+    ```python hl_lines="12"
+    --8<-- "examples/metrics/src/single_metric_default_dimensions.py"
+    ```
+
 ### Flushing metrics manually
 
 If you prefer not to use `log_metrics` because you might want to encapsulate additional logic when doing so, you can manually flush and clear metrics as follows:
