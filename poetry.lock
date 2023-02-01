@@ -90,6 +90,26 @@ publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
+name = "aws-cdk-aws-apigatewayv2-authorizers-alpha"
+version = "2.62.2a0"
+description = "Authorizers for AWS APIGateway V2"
+category = "dev"
+optional = false
+python-versions = "~=3.7"
+files = [
+    {file = "aws-cdk.aws-apigatewayv2-authorizers-alpha-2.62.2a0.tar.gz", hash = "sha256:9a4ba121c49e4ba866b985495b87e9ecaec50c1f26e0d8cb116e15492196c042"},
+    {file = "aws_cdk.aws_apigatewayv2_authorizers_alpha-2.62.2a0-py3-none-any.whl", hash = "sha256:9cfb1495b618880b395d6ecbd45c3c524c67013f2567eae6e19e6f06586b9a38"},
+]
+
+[package.dependencies]
+"aws-cdk.aws-apigatewayv2-alpha" = "2.62.2.a0"
+aws-cdk-lib = ">=2.62.2,<3.0.0"
+constructs = ">=10.0.0,<11.0.0"
+jsii = ">=1.73.0,<2.0.0"
+publication = ">=0.0.3"
+typeguard = ">=2.13.3,<2.14.0"
+
+[[package]]
 name = "aws-cdk-aws-apigatewayv2-integrations-alpha"
 version = "2.62.2a0"
 description = "Integrations for AWS APIGateway V2"
@@ -129,6 +149,21 @@ constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.73.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
+
+[[package]]
+name = "aws-requests-auth"
+version = "0.4.3"
+description = "AWS signature version 4 signing process for the python requests module"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "aws-requests-auth-0.4.3.tar.gz", hash = "sha256:33593372018b960a31dbbe236f89421678b885c35f0b6a7abfae35bb77e069b2"},
+    {file = "aws_requests_auth-0.4.3-py2.py3-none-any.whl", hash = "sha256:646bc37d62140ea1c709d20148f5d43197e6bd2d63909eb36fa4bb2345759977"},
+]
+
+[package.dependencies]
+requests = ">=0.14.0"
 
 [[package]]
 name = "aws-sam-translator"
@@ -2796,4 +2831,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "3a1013eb7ad5ff7a4a1bcf3be36eda55135bae69aae74cd91c1fde062805e154"
+content-hash = "b897ddb6a5d83dd5acce3c612c912af40b6c6c7821abc4804a93037e2f26639b"
