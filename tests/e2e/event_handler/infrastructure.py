@@ -3,6 +3,7 @@ from typing import Dict, Optional
 from aws_cdk import CfnOutput
 from aws_cdk import aws_apigateway as apigwv1
 from aws_cdk import aws_apigatewayv2_alpha as apigwv2
+from aws_cdk import aws_apigatewayv2_authorizers_alpha as apigwv2authorizers
 from aws_cdk import aws_apigatewayv2_integrations_alpha as apigwv2integrations
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
@@ -57,7 +58,12 @@ class EventHandlerStack(BaseInfrastructure):
         CfnOutput(self.stack, f"ALB{name}ListenerPort", value=str(port))
 
     def _create_api_gateway_http(self, function: Function):
-        apigw = apigwv2.HttpApi(self.stack, "APIGatewayHTTP", create_default_stage=True)
+        apigw = apigwv2.HttpApi(
+            self.stack,
+            "APIGatewayHTTP",
+            create_default_stage=True,
+            default_authorizer=apigwv2authorizers.HttpIamAuthorizer(),
+        )
         apigw.add_routes(
             path="/todos",
             methods=[apigwv2.HttpMethod.POST],
@@ -76,5 +82,5 @@ class EventHandlerStack(BaseInfrastructure):
 
     def _create_lambda_function_url(self, function: Function):
         # Maintenance: move auth to IAM when we create sigv4 builders
-        function_url = function.add_function_url(auth_type=FunctionUrlAuthType.NONE)
+        function_url = function.add_function_url(auth_type=FunctionUrlAuthType.AWS_IAM)
         CfnOutput(self.stack, "LambdaFunctionUrl", value=function_url.url)
