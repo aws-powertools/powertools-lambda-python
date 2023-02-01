@@ -220,13 +220,13 @@ By default it will skip all previously defined dimensions including default dime
 
 === "single_metric_default_dimensions_inherit.json"
 
-    ```json hl_lines="9-10 13"
+    ```json hl_lines="10 15"
     --8<-- "examples/metrics/src/single_metric_default_dimensions_inherit.py"
     ```
 
 === "single_metric_default_dimensions.py"
 
-    ```python hl_lines="10"
+    ```python hl_lines="12"
     --8<-- "examples/metrics/src/single_metric_default_dimensions.py"
     ```
 
