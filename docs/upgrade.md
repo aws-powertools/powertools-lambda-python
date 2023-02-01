@@ -7,9 +7,9 @@ description: Guide to update between major Powertools versions
 
 ## End of support v1
 
-On March 31, 2023, AWS Lambda Powertools for Python version 1 will reach end of support. After that, AWS Lambda Powertools for Python version 1 will no longer receive updates or releases. If you are still using v1, we encourage you to read our upgrade guide and update to the latest version.
+On March 31st, AWS Lambda Powertools for Python v1 will reach end of support. After that, Powertools v1 will no longer receive updates or releases. If you are still using v1, we encourage you to read our upgrade guide and update to the latest version.
 
-Given our commitment to all of our customers using AWS Lambda Powertools for Python, we won't remove old package versions from [Pypi](https://pypi.org/project/aws-lambda-powertools/) and will also leave old tags active, so you can read the documentation for v1 version.
+Given our commitment to all of our customers using AWS Lambda Powertools for Python, we will keep [Pypi](https://pypi.org/project/aws-lambda-powertools/) v1 releases and documentation 1.x versions to prevent any disruption.
 
 ## Migrate to v2 from v1
 
