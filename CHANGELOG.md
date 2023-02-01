@@ -9,6 +9,9 @@
 * parallel_run should fail when e2e tests fail
 * bump aws-cdk version
 * **ci:** scope e2e tests by python version
+* **ci:** add auth to API HTTP Gateway and Lambda Function Url ([#1882](https://github.com/awslabs/aws-lambda-powertools-python/issues/1882))
+* **license:** correction to MIT + MIT-0 (no proprietary anymore) ([#1883](https://github.com/awslabs/aws-lambda-powertools-python/issues/1883))
+* **license:** add MIT-0 license header ([#1871](https://github.com/awslabs/aws-lambda-powertools-python/issues/1871))
 * **tests:** make logs fetching more robust ([#1878](https://github.com/awslabs/aws-lambda-powertools-python/issues/1878))
 * **tests:** remove custom workers
 * **tests:** make sure multiple e2e tests run concurrently ([#1861](https://github.com/awslabs/aws-lambda-powertools-python/issues/1861))
@@ -16,6 +19,7 @@
 ## Documentation
 
 * **event-source:**  fix incorrect method in example CloudWatch Logs ([#1857](https://github.com/awslabs/aws-lambda-powertools-python/issues/1857))
+* **homepage:** add banner for end-of-support v1 ([#1879](https://github.com/awslabs/aws-lambda-powertools-python/issues/1879))
 * **parameters:** snippets split, improved, and lint ([#1564](https://github.com/awslabs/aws-lambda-powertools-python/issues/1564))
 
 ## Maintenance
