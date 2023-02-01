@@ -5,7 +5,7 @@ from requests import Request
 
 from aws_lambda_powertools.shared.cookies import Cookie
 from tests.e2e.utils import data_fetcher
-from tests.e2e.utils.auth import iam_auth
+from tests.e2e.utils.auth import build_iam_auth
 
 
 @pytest.fixture
@@ -169,7 +169,7 @@ def test_api_gateway_http_headers_serializer(apigw_http_endpoint):
             method="POST",
             url=url,
             json={"body": body, "status_code": status_code, "headers": headers, "cookies": list(map(str, cookies))},
-            auth=iam_auth(url, "execute-api"),
+            auth=build_iam_auth(url=url, aws_service="execute-api"),
         )
     )
 
@@ -206,7 +206,7 @@ def test_lambda_function_url_headers_serializer(lambda_function_url_endpoint):
             method="POST",
             url=url,
             json={"body": body, "status_code": status_code, "headers": headers, "cookies": list(map(str, cookies))},
-            auth=iam_auth(url, "lambda"),
+            auth=build_iam_auth(url=url, aws_service="lambda"),
         )
     )
 

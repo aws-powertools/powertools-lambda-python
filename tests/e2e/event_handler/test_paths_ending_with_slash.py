@@ -2,7 +2,7 @@ import pytest
 from requests import HTTPError, Request
 
 from tests.e2e.utils import data_fetcher
-from tests.e2e.utils.auth import iam_auth
+from tests.e2e.utils.auth import build_iam_auth
 
 
 @pytest.fixture
@@ -46,7 +46,7 @@ def test_api_gateway_rest_trailing_slash(apigw_rest_endpoint):
             method="POST",
             url=url,
             json={"body": body},
-            auth=iam_auth(url, "lambda"),
+            auth=build_iam_auth(url=url, aws_service="lambda"),
         )
     )
 
@@ -67,7 +67,7 @@ def test_api_gateway_http_trailing_slash(apigw_http_endpoint):
                 method="POST",
                 url=url,
                 json={"body": body},
-                auth=iam_auth(url, "lambda"),
+                auth=build_iam_auth(url=url, aws_service="lambda"),
             )
         )
 
@@ -85,7 +85,7 @@ def test_lambda_function_url_trailing_slash(lambda_function_url_endpoint):
                 method="POST",
                 url=url,
                 json={"body": body},
-                auth=iam_auth(url, "lambda"),
+                auth=build_iam_auth(url=url, aws_service="lambda"),
             )
         )
 
@@ -103,6 +103,6 @@ def test_alb_url_trailing_slash(alb_multi_value_header_listener_endpoint):
                 method="POST",
                 url=url,
                 json={"body": body},
-                auth=iam_auth(url, "lambda"),
+                auth=build_iam_auth(url=url, aws_service="lambda"),
             )
         )

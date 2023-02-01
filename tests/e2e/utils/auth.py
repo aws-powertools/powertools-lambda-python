@@ -4,7 +4,7 @@ import boto3
 from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
 
 
-def iam_auth(url: str, aws_service: str) -> BotoAWSRequestsAuth:
+def build_iam_auth(url: str, aws_service: str) -> BotoAWSRequestsAuth:
     """Generates IAM auth keys for a given hostname and service.
     This can be directly passed on to the requests library to authenticate the request.
     """
