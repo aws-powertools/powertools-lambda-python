@@ -14,7 +14,6 @@ config = IdempotencyConfig(expires_after_seconds=5)
 
 @idempotent(config=config, persistence_store=persistence_layer)
 def lambda_handler(event, context):
-
     time_now = time.time()
 
     return {"time": str(time_now)}

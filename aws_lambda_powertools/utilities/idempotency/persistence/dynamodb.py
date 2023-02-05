@@ -154,7 +154,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         if data_record.in_progress_expiry_timestamp is not None:
             item[self.in_progress_expiry_attr] = {"N": str(data_record.in_progress_expiry_timestamp)}
 
-        if self.payload_validation_enabled:
+        if self.payload_validation_enabled and data_record.payload_hash:
             item[self.validation_key_attr] = {"S": data_record.payload_hash}
 
         now = datetime.datetime.now()
