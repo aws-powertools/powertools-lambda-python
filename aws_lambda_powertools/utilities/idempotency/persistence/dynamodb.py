@@ -4,7 +4,9 @@ import os
 from typing import Any, Dict, Optional
 
 import boto3
+from boto3.dynamodb.types import TypeDeserializer
 from botocore.config import Config
+from botocore.exceptions import ClientError
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
@@ -79,13 +81,14 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
         self._boto_config = boto_config or Config()
         self._boto3_session = boto3_session or boto3.session.Session()
+        self._client = self._boto3_session.client("dynamodb", config=self._boto_config)
+
         if sort_key_attr == key_attr:
             raise ValueError(f"key_attr [{key_attr}] and sort_key_attr [{sort_key_attr}] cannot be the same!")
 
         if static_pk_value is None:
             static_pk_value = f"idempotency#{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, '')}"
 
-        self._table = None
         self.table_name = table_name
         self.key_attr = key_attr
         self.static_pk_value = static_pk_value
@@ -95,31 +98,15 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         self.status_attr = status_attr
         self.data_attr = data_attr
         self.validation_key_attr = validation_key_attr
+
+        self._deserializer = TypeDeserializer()
+
         super(DynamoDBPersistenceLayer, self).__init__()
-
-    @property
-    def table(self):
-        """
-        Caching property to store boto3 dynamodb Table resource
-
-        """
-        if self._table:
-            return self._table
-        ddb_resource = self._boto3_session.resource("dynamodb", config=self._boto_config)
-        self._table = ddb_resource.Table(self.table_name)
-        return self._table
-
-    @table.setter
-    def table(self, table):
-        """
-        Allow table instance variable to be set directly, primarily for use in tests
-        """
-        self._table = table
 
     def _get_key(self, idempotency_key: str) -> dict:
         if self.sort_key_attr:
-            return {self.key_attr: self.static_pk_value, self.sort_key_attr: idempotency_key}
-        return {self.key_attr: idempotency_key}
+            return {self.key_attr: {"S": self.static_pk_value}, self.sort_key_attr: {"S": idempotency_key}}
+        return {self.key_attr: {"S": idempotency_key}}
 
     def _item_to_data_record(self, item: Dict[str, Any]) -> DataRecord:
         """
@@ -136,36 +123,39 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             representation of item
 
         """
+        data = self._deserializer.deserialize({"M": item})
         return DataRecord(
-            idempotency_key=item[self.key_attr],
-            status=item[self.status_attr],
-            expiry_timestamp=item[self.expiry_attr],
-            in_progress_expiry_timestamp=item.get(self.in_progress_expiry_attr),
-            response_data=item.get(self.data_attr),
-            payload_hash=item.get(self.validation_key_attr),
+            idempotency_key=data[self.key_attr],
+            status=data[self.status_attr],
+            expiry_timestamp=data[self.expiry_attr],
+            in_progress_expiry_timestamp=data.get(self.in_progress_expiry_attr),
+            response_data=data.get(self.data_attr),
+            payload_hash=data.get(self.validation_key_attr),
         )
 
     def _get_record(self, idempotency_key) -> DataRecord:
-        response = self.table.get_item(Key=self._get_key(idempotency_key), ConsistentRead=True)
-
+        response = self._client.get_item(
+            TableName=self.table_name, Key=self._get_key(idempotency_key), ConsistentRead=True
+        )
         try:
             item = response["Item"]
-        except KeyError:
-            raise IdempotencyItemNotFoundError
+        except KeyError as exc:
+            raise IdempotencyItemNotFoundError from exc
         return self._item_to_data_record(item)
 
     def _put_record(self, data_record: DataRecord) -> None:
         item = {
             **self._get_key(data_record.idempotency_key),
-            self.expiry_attr: data_record.expiry_timestamp,
-            self.status_attr: data_record.status,
+            self.key_attr: {"S": data_record.idempotency_key},
+            self.expiry_attr: {"N": str(data_record.expiry_timestamp)},
+            self.status_attr: {"S": data_record.status},
         }
 
         if data_record.in_progress_expiry_timestamp is not None:
-            item[self.in_progress_expiry_attr] = data_record.in_progress_expiry_timestamp
+            item[self.in_progress_expiry_attr] = {"N": str(data_record.in_progress_expiry_timestamp)}
 
         if self.payload_validation_enabled:
-            item[self.validation_key_attr] = data_record.payload_hash
+            item[self.validation_key_attr] = {"S": data_record.payload_hash}
 
         now = datetime.datetime.now()
         try:
@@ -199,8 +189,8 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             condition_expression = (
                 f"{idempotency_key_not_exist} OR {idempotency_expiry_expired} OR ({inprogress_expiry_expired})"
             )
-
-            self.table.put_item(
+            self._client.put_item(
+                TableName=self.table_name,
                 Item=item,
                 ConditionExpression=condition_expression,
                 ExpressionAttributeNames={
@@ -210,22 +200,28 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
                     "#status": self.status_attr,
                 },
                 ExpressionAttributeValues={
-                    ":now": int(now.timestamp()),
-                    ":now_in_millis": int(now.timestamp() * 1000),
-                    ":inprogress": STATUS_CONSTANTS["INPROGRESS"],
+                    ":now": {"N": str(int(now.timestamp()))},
+                    ":now_in_millis": {"N": str(int(now.timestamp() * 1000))},
+                    ":inprogress": {"S": STATUS_CONSTANTS["INPROGRESS"]},
                 },
             )
-        except self.table.meta.client.exceptions.ConditionalCheckFailedException:
-            logger.debug(f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}")
-            raise IdempotencyItemAlreadyExistsError
+        except ClientError as exc:
+            error_code = exc.response.get("Error", {}).get("Code")
+            if error_code == "ConditionalCheckFailedException":
+                logger.debug(
+                    f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}"
+                )
+                raise IdempotencyItemAlreadyExistsError from exc
+            else:
+                raise
 
     def _update_record(self, data_record: DataRecord):
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
         update_expression = "SET #response_data = :response_data, #expiry = :expiry, " "#status = :status"
         expression_attr_values = {
-            ":expiry": data_record.expiry_timestamp,
-            ":response_data": data_record.response_data,
-            ":status": data_record.status,
+            ":expiry": {"N": str(data_record.expiry_timestamp)},
+            ":response_data": {"S": data_record.response_data},
+            ":status": {"S": data_record.status},
         }
         expression_attr_names = {
             "#expiry": self.expiry_attr,
@@ -235,7 +231,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
         if self.payload_validation_enabled:
             update_expression += ", #validation_key = :validation_key"
-            expression_attr_values[":validation_key"] = data_record.payload_hash
+            expression_attr_values[":validation_key"] = {"S": data_record.payload_hash}
             expression_attr_names["#validation_key"] = self.validation_key_attr
 
         kwargs = {
@@ -245,8 +241,8 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             "ExpressionAttributeNames": expression_attr_names,
         }
 
-        self.table.update_item(**kwargs)
+        self._client.update_item(TableName=self.table_name, **kwargs)
 
     def _delete_record(self, data_record: DataRecord) -> None:
         logger.debug(f"Deleting record for idempotency key: {data_record.idempotency_key}")
-        self.table.delete_item(Key=self._get_key(data_record.idempotency_key))
+        self._client.delete_item(TableName=self.table_name, Key={**self._get_key(data_record.idempotency_key)})

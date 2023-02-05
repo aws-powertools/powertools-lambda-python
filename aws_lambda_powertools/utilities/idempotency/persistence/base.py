@@ -37,7 +37,7 @@ class DataRecord:
 
     def __init__(
         self,
-        idempotency_key,
+        idempotency_key: str,
         status: str = "",
         expiry_timestamp: Optional[int] = None,
         in_progress_expiry_timestamp: Optional[int] = None,

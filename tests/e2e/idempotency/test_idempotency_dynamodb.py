@@ -23,11 +23,15 @@ def parallel_execution_handler_fn_arn(infrastructure: dict) -> str:
 
 
 @pytest.fixture
+def parallel_functions_handler_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("ParallelFunctionsHandlerArn", "")
+
+
+@pytest.fixture
 def idempotency_table_name(infrastructure: dict) -> str:
     return infrastructure.get("DynamoDBTable", "")
 
 
-@pytest.mark.xdist_group(name="idempotency")
 def test_ttl_caching_expiration_idempotency(ttl_cache_expiration_handler_fn_arn: str):
     # GIVEN
     payload = json.dumps({"message": "Lambda Powertools - TTL 5s"})
@@ -57,7 +61,6 @@ def test_ttl_caching_expiration_idempotency(ttl_cache_expiration_handler_fn_arn:
     assert third_execution_response != second_execution_response
 
 
-@pytest.mark.xdist_group(name="idempotency")
 def test_ttl_caching_timeout_idempotency(ttl_cache_timeout_handler_fn_arn: str):
     # GIVEN
     payload_timeout_execution = json.dumps({"sleep": 5, "message": "Lambda Powertools - TTL 1s"})
@@ -81,7 +84,6 @@ def test_ttl_caching_timeout_idempotency(ttl_cache_timeout_handler_fn_arn: str):
     assert payload_working_execution == execution_working_response
 
 
-@pytest.mark.xdist_group(name="idempotency")
 def test_parallel_execution_idempotency(parallel_execution_handler_fn_arn: str):
     # GIVEN
     arguments = json.dumps({"message": "Lambda Powertools - Parallel execution"})
@@ -97,3 +99,29 @@ def test_parallel_execution_idempotency(parallel_execution_handler_fn_arn: str):
     # THEN
     assert "Execution already in progress with idempotency key" in error_idempotency_execution_response
     assert "Task timed out after" in timeout_execution_response
+
+
+def test_parallel_functions_execution_idempotency(parallel_functions_handler_fn_arn: str):
+    # GIVEN
+    payload = json.dumps({"message": "Lambda Powertools - Parallel functions execution"})
+
+    # WHEN
+    # first execution
+    first_execution, _ = data_fetcher.get_lambda_response(lambda_arn=parallel_functions_handler_fn_arn, payload=payload)
+    first_execution_response = first_execution["Payload"].read().decode("utf-8")
+
+    # the second execution should return the same response as the first execution
+    second_execution, _ = data_fetcher.get_lambda_response(
+        lambda_arn=parallel_functions_handler_fn_arn, payload=payload
+    )
+    second_execution_response = second_execution["Payload"].read().decode("utf-8")
+
+    # THEN
+    # Function threads finished without exception AND
+    # first and second execution is the same
+    for function_thread in json.loads(first_execution_response):
+        assert function_thread["state"] == "FINISHED"
+        assert function_thread["exception"] is None
+        assert function_thread["output"] is not None
+
+    assert first_execution_response == second_execution_response
