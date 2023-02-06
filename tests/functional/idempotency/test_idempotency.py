@@ -8,6 +8,8 @@ from unittest.mock import MagicMock
 import jmespath
 import pytest
 from botocore import stub
+from botocore.config import Config
+
 from pydantic import BaseModel
 
 from aws_lambda_powertools.utilities.data_classes import (
@@ -1369,9 +1371,7 @@ def test_invalid_dynamodb_persistence_layer():
     # Scenario constructing a DynamoDBPersistenceLayer with a key_attr matching sort_key_attr should fail
     with pytest.raises(ValueError) as ve:
         DynamoDBPersistenceLayer(
-            table_name="Foo",
-            key_attr="id",
-            sort_key_attr="id",
+            table_name="Foo", key_attr="id", sort_key_attr="id", boto_config=Config(region_name="eu-west-1")
         )
     # and raise a ValueError
     assert str(ve.value) == "key_attr [id] and sort_key_attr [id] cannot be the same!"

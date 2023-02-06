@@ -32,6 +32,7 @@ def idempotency_table_name(infrastructure: dict) -> str:
     return infrastructure.get("DynamoDBTable", "")
 
 
+@pytest.mark.xdist_group(name="idempotency")
 def test_ttl_caching_expiration_idempotency(ttl_cache_expiration_handler_fn_arn: str):
     # GIVEN
     payload = json.dumps({"message": "Lambda Powertools - TTL 5s"})
@@ -61,6 +62,7 @@ def test_ttl_caching_expiration_idempotency(ttl_cache_expiration_handler_fn_arn:
     assert third_execution_response != second_execution_response
 
 
+@pytest.mark.xdist_group(name="idempotency")
 def test_ttl_caching_timeout_idempotency(ttl_cache_timeout_handler_fn_arn: str):
     # GIVEN
     payload_timeout_execution = json.dumps({"sleep": 5, "message": "Lambda Powertools - TTL 1s"})
@@ -84,6 +86,7 @@ def test_ttl_caching_timeout_idempotency(ttl_cache_timeout_handler_fn_arn: str):
     assert payload_working_execution == execution_working_response
 
 
+@pytest.mark.xdist_group(name="idempotency")
 def test_parallel_execution_idempotency(parallel_execution_handler_fn_arn: str):
     # GIVEN
     arguments = json.dumps({"message": "Lambda Powertools - Parallel execution"})
@@ -101,6 +104,7 @@ def test_parallel_execution_idempotency(parallel_execution_handler_fn_arn: str):
     assert "Task timed out after" in timeout_execution_response
 
 
+@pytest.mark.xdist_group(name="idempotency")
 def test_parallel_functions_execution_idempotency(parallel_functions_handler_fn_arn: str):
     # GIVEN
     payload = json.dumps({"message": "Lambda Powertools - Parallel functions execution"})
