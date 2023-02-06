@@ -26,6 +26,13 @@ times with the same parameters**. This makes idempotent operations safe to retry
 
 ## Getting started
 
+### IAM Permissions
+
+Your Lambda function IAM Role must have `dynamodb:GetItem`, `dynamodb:PutItem`, `dynamodb:UpdateItem` and `dynamodb:DeleteItem` IAM permissions before using this feature.
+
+???+ note
+    If you're using our example [AWS Serverless Application Model (SAM)](#required-resources), it already adds the required permissions.
+
 ### Required resources
 
 Before getting started, you need to create a persistent storage layer where the idempotency utility can store its state - your lambda functions will need read and write access to it.
