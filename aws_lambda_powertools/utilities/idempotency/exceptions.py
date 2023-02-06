@@ -71,9 +71,3 @@ class IdempotencyKeyError(BaseError):
     """
     Payload does not contain an idempotent key
     """
-
-
-class IdempotencyRedisConnectionError(BaseError):
-    """
-    Payload does not contain an idempotent key
-    """
