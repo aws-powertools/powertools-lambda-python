@@ -5,8 +5,8 @@ from typing import Any, Dict, Optional
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
+    IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
-    IdempotencyPersistenceLayerError,
 )
 from aws_lambda_powertools.utilities.idempotency.persistence.base import DataRecord
 
@@ -63,7 +63,6 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
     def _item_to_data_record(self, item: Dict[str, Any]) -> DataRecord:
         # Need to review this after adding GETKEY logic
         return DataRecord(
-            idempotency_key=item[self.key_attr],
             status=item[self.status_attr],
             expiry_timestamp=item[self.expiry_attr],
             in_progress_expiry_timestamp=item.get(self.in_progress_expiry_attr),
@@ -89,20 +88,44 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             "mapping": {
                 self.in_progress_expiry_attr: data_record.in_progress_expiry_timestamp,
                 self.status_attr: data_record.status,
+                self.expiry_attr: data_record.expiry_timestamp,
             },
         }
 
+        if data_record.in_progress_expiry_timestamp is not None:
+            item["mapping"][self.in_progress_expiry_attr] = data_record.in_progress_expiry_timestamp
+
+        if self.payload_validation_enabled:
+            item["mapping"][self.validation_key_attr] = data_record.payload_hash
+
         try:
+            # |     LOCKED     |         RETRY if status = "INPROGRESS"                |     RETRY
+            # |----------------|-------------------------------------------------------|-------------> .... (time)
+            # |             Lambda                                              Idempotency Record
+            # |             Timeout                                                 Timeout
+            # |       (in_progress_expiry)                                          (expiry)
+
+            # Conditions to successfully save a record:
+
+            # The idempotency key does not exist:
+            #    - first time that this invocation key is used
+            #    - previous invocation with the same key was deleted due to TTL
+            idempotency_key_not_exist = self._connection.exists(data_record.idempotency_key)
+
+            # key exists
+            if idempotency_key_not_exist == 1:
+                raise
+
+            # missing logic to compare expiration
+
             logger.debug(f"Putting record on Redis for idempotency key: {data_record.idempotency_key}")
             self._connection.hset(**item)
             # hset type must set expiration after adding the record
             # Need to review this to get ttl in seconds
             self._connection.expire(name=data_record.idempotency_key, time=60)
-        except Exception as exc:
-            logger.debug(f"Failed to add record idempotency key: {data_record.idempotency_key}")
-            raise IdempotencyPersistenceLayerError(
-                f"Failed to add record idempotency key: {data_record.idempotency_key}", exc
-            ) from exc
+        except Exception:
+            logger.debug(f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}")
+            raise IdempotencyItemAlreadyExistsError
 
     def _update_record(self, data_record: DataRecord) -> None:
         item = {

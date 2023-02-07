@@ -64,7 +64,12 @@ class RedisStandalone(BaseConnectionSync):
             else:
                 logger.debug(f"Using other parameters to connect to Redis: {self.host}")
                 self._connection = redis.Redis(
-                    host=self.host, port=self.port, username=self.username, password=self.password, db=self.db_index
+                    host=self.host,
+                    port=self.port,
+                    username=self.username,
+                    password=self.password,
+                    db=self.db_index,
+                    decode_responses=True,
                 )
         except redis.exceptions.ConnectionError as exc:
             logger.debug(f"Cannot connect in Redis Host: {self.host}")
