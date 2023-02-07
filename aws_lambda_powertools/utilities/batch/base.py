@@ -249,114 +249,6 @@ class BasePartialProcessor(ABC):
 
 
 class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
-    """Process native partial responses from SQS, Kinesis Data Streams, and DynamoDB.
-
-
-    Example
-    -------
-
-    ## Process batch triggered by SQS
-
-    ```python
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    processor = BatchProcessor(event_type=EventType.SQS)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: SQSRecord):
-        payload: str = record.body
-        if payload:
-            item: dict = json.loads(payload)
-        ...
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context: LambdaContext):
-        return processor.response()
-    ```
-
-    ## Process batch triggered by Kinesis Data Streams
-
-    ```python
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-    from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: KinesisStreamRecord):
-        logger.info(record.kinesis.data_as_text)
-        payload: dict = record.kinesis.data_as_json()
-        ...
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context: LambdaContext):
-        return processor.response()
-    ```
-
-
-    ## Process batch triggered by DynamoDB Data Streams
-
-    ```python
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-    from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    processor = BatchProcessor(event_type=EventType.DynamoDBStreams)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: DynamoDBRecord):
-        logger.info(record.dynamodb.new_image)
-        payload: dict = json.loads(record.dynamodb.new_image.get("item"))
-        # alternatively:
-        # changes: Dict[str, Any] = record.dynamodb.new_image  # noqa: E800
-        # payload = change.get("Message") -> "<payload>"
-        ...
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context: LambdaContext):
-        batch = event["Records"]
-        with processor(records=batch, processor=processor):
-            processed_messages = processor.process() # kick off processing, return list[tuple]
-
-        return processor.response()
-    ```
-
-
-    Raises
-    ------
-    BatchProcessingError
-        When all batch records fail processing
-    """
-
     DEFAULT_RESPONSE: Dict[str, List[Optional[dict]]] = {"batchItemFailures": []}
 
     def __init__(self, event_type: EventType, model: Optional["BatchTypeModels"] = None):
@@ -475,6 +367,116 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
 
 
 class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibility
+    """Process native partial responses from SQS, Kinesis Data Streams, and DynamoDB.
+
+    Example
+    -------
+
+    ## Process batch triggered by SQS
+
+    ```python
+    import json
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    processor = BatchProcessor(event_type=EventType.SQS)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    def record_handler(record: SQSRecord):
+        payload: str = record.body
+        if payload:
+            item: dict = json.loads(payload)
+        ...
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context: LambdaContext):
+        return processor.response()
+    ```
+
+    ## Process batch triggered by Kinesis Data Streams
+
+    ```python
+    import json
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    def record_handler(record: KinesisStreamRecord):
+        logger.info(record.kinesis.data_as_text)
+        payload: dict = record.kinesis.data_as_json()
+        ...
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context: LambdaContext):
+        return processor.response()
+    ```
+
+    ## Process batch triggered by DynamoDB Data Streams
+
+    ```python
+    import json
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    processor = BatchProcessor(event_type=EventType.DynamoDBStreams)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    def record_handler(record: DynamoDBRecord):
+        logger.info(record.dynamodb.new_image)
+        payload: dict = json.loads(record.dynamodb.new_image.get("item"))
+        # alternatively:
+        # changes: Dict[str, Any] = record.dynamodb.new_image  # noqa: E800
+        # payload = change.get("Message") -> "<payload>"
+        ...
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context: LambdaContext):
+        batch = event["Records"]
+        with processor(records=batch, processor=processor):
+            processed_messages = processor.process() # kick off processing, return list[tuple]
+
+        return processor.response()
+    ```
+
+
+    Raises
+    ------
+    BatchProcessingError
+        When all batch records fail processing
+
+    Limitations
+    -----------
+    * Async record handler not supported, use AsyncBatchProcessor instead.
+    """
+
     async def _async_process_record(self, record: dict):
         raise NotImplementedError()
 
@@ -545,6 +547,116 @@ def batch_processor(
 
 
 class AsyncBatchProcessor(BasePartialBatchProcessor):
+    """Process native partial responses from SQS, Kinesis Data Streams, and DynamoDB asynchronously.
+
+    Example
+    -------
+
+    ## Process batch triggered by SQS
+
+    ```python
+    import json
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    processor = BatchProcessor(event_type=EventType.SQS)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    async def record_handler(record: SQSRecord):
+        payload: str = record.body
+        if payload:
+            item: dict = json.loads(payload)
+        ...
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context: LambdaContext):
+        return processor.response()
+    ```
+
+    ## Process batch triggered by Kinesis Data Streams
+
+    ```python
+    import json
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    async def record_handler(record: KinesisStreamRecord):
+        logger.info(record.kinesis.data_as_text)
+        payload: dict = record.kinesis.data_as_json()
+        ...
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context: LambdaContext):
+        return processor.response()
+    ```
+
+    ## Process batch triggered by DynamoDB Data Streams
+
+    ```python
+    import json
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    processor = BatchProcessor(event_type=EventType.DynamoDBStreams)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    async def record_handler(record: DynamoDBRecord):
+        logger.info(record.dynamodb.new_image)
+        payload: dict = json.loads(record.dynamodb.new_image.get("item"))
+        # alternatively:
+        # changes: Dict[str, Any] = record.dynamodb.new_image  # noqa: E800
+        # payload = change.get("Message") -> "<payload>"
+        ...
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    def lambda_handler(event, context: LambdaContext):
+        batch = event["Records"]
+        with processor(records=batch, processor=processor):
+            processed_messages = processor.process() # kick off processing, return list[tuple]
+
+        return processor.response()
+    ```
+
+
+    Raises
+    ------
+    BatchProcessingError
+        When all batch records fail processing
+
+    Limitations
+    -----------
+    * Sync record handler not supported, use BatchProcessor instead.
+    """
+
     def _process_record(self, record: dict):
         raise NotImplementedError()
 
