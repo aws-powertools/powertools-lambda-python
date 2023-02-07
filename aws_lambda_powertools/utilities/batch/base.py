@@ -25,6 +25,7 @@ from typing import (
 )
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.batch.exceptions import (
     BatchProcessingError,
     ExceptionInfo,
@@ -131,29 +132,30 @@ class BasePartialProcessor(ABC):
         customers' existing middlewares. Instead, we create an async closure to handle asynchrony.
 
         We also handle edge cases like Lambda container thaw by getting an existing or creating an event loop.
+
+        See: https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtime-environment.html#runtimes-lifecycle-shutdown
         """
 
-        async def async_process():
+        async def async_process_closure():
             return list(await asyncio.gather(*[self._async_process_record(record) for record in self.records]))
 
         # WARNING
         # Do not use "asyncio.run(async_process())" due to Lambda container thaws/freeze, otherwise we might get "Event Loop is closed" # noqa: E501
         # Instead, get_event_loop() can also create one if a previous was erroneously closed
-        # More: https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtime-environment.html#runtimes-lifecycle-shutdown
-        # Extra: just follow how the well-tested mangum library do:
-        #       https://github.com/jordaneremieff/mangum/discussions/256#discussioncomment-2638946
-        #       https://github.com/jordaneremieff/mangum/blob/b85cd4a97f8ddd56094ccc540ca7156c76081745/mangum/protocols/http.py#L44
+        # Mangum library does this as well. It's battle tested with other popular async-only frameworks like FastAPI
+        # https://github.com/jordaneremieff/mangum/discussions/256#discussioncomment-2638946
+        # https://github.com/jordaneremieff/mangum/blob/b85cd4a97f8ddd56094ccc540ca7156c76081745/mangum/protocols/http.py#L44
 
-        # Detect environment and create a loop for each one
-        coro = async_process()
-        if os.environ.get("AWS_LAMBDA_RUNTIME_API"):
-            # Running in lambda server
+        # Let's prime the coroutine and decide
+        # whether we create an event loop (Lambda) or schedule it as usual (non-Lambda)
+        coro = async_process_closure()
+        if os.getenv(constants.LAMBDA_TASK_ROOT_ENV):
             loop = asyncio.get_event_loop()  # NOTE: this might return an error starting in Python 3.12 in a few years
             task_instance = loop.create_task(coro)
             return loop.run_until_complete(task_instance)
-        else:
-            # Running in another place like local tests
-            return asyncio.run(coro)
+
+        # Non-Lambda environment, run coroutine as usual
+        return asyncio.run(coro)
 
     def __enter__(self):
         self._prepare()
