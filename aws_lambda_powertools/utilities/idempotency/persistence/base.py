@@ -116,6 +116,7 @@ class BasePersistenceLayer(ABC):
     def __init__(self):
         """Initialize the defaults"""
         self.function_name = ""
+        self.backend = ""
         self.configured = False
         self.event_key_jmespath: Optional[str] = None
         self.event_key_compiled_jmespath = None
@@ -262,9 +263,12 @@ class BasePersistenceLayer(ABC):
             unix timestamp of expiry date for idempotency record
 
         """
-        now = datetime.datetime.now()
-        period = datetime.timedelta(seconds=self.expires_after_seconds)
-        return int((now + period).timestamp())
+        if self.backend == "redis":
+            return self.expires_after_seconds
+        else:
+            now = datetime.datetime.now()
+            period = datetime.timedelta(seconds=self.expires_after_seconds)
+            return int((now + period).timestamp())
 
     def _save_to_cache(self, data_record: DataRecord):
         """

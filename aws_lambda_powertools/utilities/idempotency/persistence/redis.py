@@ -122,7 +122,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             self._connection.hset(**item)
             # hset type must set expiration after adding the record
             # Need to review this to get ttl in seconds
-            self._connection.expire(name=data_record.idempotency_key, time=60)
+            self._connection.expire(name=data_record.idempotency_key, time=self.expires_after_seconds)
         except Exception:
             logger.debug(f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}")
             raise IdempotencyItemAlreadyExistsError
