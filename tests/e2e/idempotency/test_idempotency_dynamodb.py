@@ -23,8 +23,8 @@ def parallel_execution_handler_fn_arn(infrastructure: dict) -> str:
 
 
 @pytest.fixture
-def parallel_functions_handler_fn_arn(infrastructure: dict) -> str:
-    return infrastructure.get("ParallelFunctionsHandlerArn", "")
+def function_thread_safety_handler_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("FunctionThreadSafetyHandlerArn", "")
 
 
 @pytest.fixture
@@ -105,18 +105,20 @@ def test_parallel_execution_idempotency(parallel_execution_handler_fn_arn: str):
 
 
 @pytest.mark.xdist_group(name="idempotency")
-def test_parallel_functions_execution_idempotency(parallel_functions_handler_fn_arn: str):
+def test_idempotent_function_thread_safety(function_thread_safety_handler_fn_arn: str):
     # GIVEN
-    payload = json.dumps({"message": "Lambda Powertools - Parallel functions execution"})
+    payload = json.dumps({"message": "Lambda Powertools - Idempotent function thread safety check"})
 
     # WHEN
     # first execution
-    first_execution, _ = data_fetcher.get_lambda_response(lambda_arn=parallel_functions_handler_fn_arn, payload=payload)
+    first_execution, _ = data_fetcher.get_lambda_response(
+        lambda_arn=function_thread_safety_handler_fn_arn, payload=payload
+    )
     first_execution_response = first_execution["Payload"].read().decode("utf-8")
 
     # the second execution should return the same response as the first execution
     second_execution, _ = data_fetcher.get_lambda_response(
-        lambda_arn=parallel_functions_handler_fn_arn, payload=payload
+        lambda_arn=function_thread_safety_handler_fn_arn, payload=payload
     )
     second_execution_response = second_execution["Payload"].read().decode("utf-8")
 

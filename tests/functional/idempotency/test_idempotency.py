@@ -9,7 +9,6 @@ import jmespath
 import pytest
 from botocore import stub
 from botocore.config import Config
-
 from pydantic import BaseModel
 
 from aws_lambda_powertools.utilities.data_classes import (
