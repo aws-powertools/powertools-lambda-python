@@ -123,6 +123,14 @@ class BasePartialProcessor(ABC):
     def async_process(self) -> List[Tuple]:
         """
         Async call instance's handler for each record.
+
+        Note
+        ----
+
+        We keep the outer function synchronous to prevent making Lambda handler async, so to not impact
+        customers' existing middlewares. Instead, we create an async closure to handle asynchrony.
+
+        We also handle edge cases like Lambda container thaw by getting an existing or creating an event loop.
         """
 
         async def async_process():
@@ -140,7 +148,7 @@ class BasePartialProcessor(ABC):
         coro = async_process()
         if os.environ.get("AWS_LAMBDA_RUNTIME_API"):
             # Running in lambda server
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_event_loop()  # NOTE: this might return an error starting in Python 3.12 in a few years
             task_instance = loop.create_task(coro)
             return loop.run_until_complete(task_instance)
         else:
