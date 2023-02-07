@@ -3,12 +3,13 @@ from typing import Optional
 
 import redis
 
-from aws_lambda_powertools.utilities.database.exceptions import RedisConnectionError
+from .base_sync import BaseConnectionSync
+from .exceptions import RedisConnectionError
 
 logger = logging.getLogger(__name__)
 
 
-class RedisStandalone:
+class RedisStandalone(BaseConnectionSync):
     def __init__(
         self,
         host: Optional[str] = None,
@@ -30,7 +31,7 @@ class RedisStandalone:
             Name of the username to connect to Redis instance/cluster in case of using ACL
             See: https://redis.io/docs/management/security/acl/
         password: str
-            Password to connect to Redis instance/cluster
+            Passwod to connect to Redis instance/cluster
         db_index: int
             Index of Redis database
             See: https://redis.io/commands/select/
@@ -47,7 +48,7 @@ class RedisStandalone:
         self.db_index = db_index
         self._connection = None
 
-    def get_redis_connection(self):
+    def init_connection(self):
         """
         Connection is cached, so returning this
         """
@@ -72,7 +73,7 @@ class RedisStandalone:
         return self._connection
 
 
-class RedisCluster:
+class RedisCluster(BaseConnectionSync):
     def __init__(
         self,
         host: Optional[str] = None,
@@ -107,7 +108,7 @@ class RedisCluster:
         self.read_from_replicas = read_from_replicas
         self._connection = None
 
-    def get_redis_connection(self):
+    def init_connection(self):
         """
         Connection is cached, so returning this
         """

@@ -41,7 +41,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         """
 
         # Initialize connection with Redis
-        self._connection = connection._init_connection()
+        self._connection = connection.init_connection()
 
         if static_pk_value is None:
             static_pk_value = f"idempotency#{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, '')}"
