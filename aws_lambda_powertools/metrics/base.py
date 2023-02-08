@@ -516,7 +516,7 @@ class SingleMetric(MetricManager):
         name: str,
         unit: Union[MetricUnit, str],
         value: float,
-        resolution: Optional[Union[MetricResolution, int]] = 60,
+        resolution: Union[MetricResolution, int] = 60,
     ) -> None:
         """Method to prevent more than one metric being created
 
