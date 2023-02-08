@@ -12,7 +12,12 @@ from typing import Any, Callable, Dict, Generator, List, Optional, Union
 
 from ..shared import constants
 from ..shared.functions import resolve_env_var_choice
-from .exceptions import MetricUnitError, MetricValueError, SchemaValidationError
+from .exceptions import (
+    MetricResolutionError,
+    MetricUnitError,
+    MetricValueError,
+    SchemaValidationError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +25,11 @@ MAX_METRICS = 100
 MAX_DIMENSIONS = 29
 
 is_cold_start = True
+
+
+class MetricResolution(Enum):
+    Standard = 60
+    High = 1
 
 
 class MetricUnit(Enum):
@@ -72,7 +82,9 @@ class MetricManager:
     Raises
     ------
     MetricUnitError
-        When metric metric isn't supported by CloudWatch
+        When metric unit isn't supported by CloudWatch
+    MetricResolutionError
+        When metric resolution isn't supported by CloudWatch
     MetricValueError
         When metric value isn't a number
     SchemaValidationError
@@ -94,8 +106,16 @@ class MetricManager:
         self.metadata_set = metadata_set if metadata_set is not None else {}
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_options = list(MetricUnit.__members__)
+        self._metric_resolutions = [resolution.value for resolution in MetricResolution]
+        self._metric_resolution_options = list(MetricResolution.__members__)
 
-    def add_metric(self, name: str, unit: Union[MetricUnit, str], value: float) -> None:
+    def add_metric(
+        self,
+        name: str,
+        unit: Union[MetricUnit, str],
+        value: float,
+        resolution: Union[MetricResolution, int] = 60,
+    ) -> None:
         """Adds given metric
 
         Example
@@ -108,6 +128,10 @@ class MetricManager:
 
             metric.add_metric(name="BookingConfirmation", unit="Count", value=1)
 
+        **Add given metric with MetricResolution non default value**
+
+            metric.add_metric(name="BookingConfirmation", unit="Count", value=1, resolution=MetricResolution.High)
+
         Parameters
         ----------
         name : str
@@ -116,18 +140,24 @@ class MetricManager:
             `aws_lambda_powertools.helper.models.MetricUnit`
         value : float
             Metric value
+        resolution : Union[MetricResolution, int]
+            `aws_lambda_powertools.helper.models.MetricResolution`
 
         Raises
         ------
         MetricUnitError
             When metric unit is not supported by CloudWatch
+        MetricResolutionError
+            When metric resolution is not supported by CloudWatch
         """
         if not isinstance(value, numbers.Number):
             raise MetricValueError(f"{value} is not a valid number")
 
         unit = self._extract_metric_unit_value(unit=unit)
+        resolution = self._extract_metric_resolution_value(resolution=resolution)
         metric: Dict = self.metric_set.get(name, defaultdict(list))
         metric["Unit"] = unit
+        metric["StorageResolution"] = resolution
         metric["Value"].append(float(value))
         logger.debug(f"Adding metric: {name} with {metric}")
         self.metric_set[name] = metric
@@ -194,15 +224,20 @@ class MetricManager:
 
         logger.debug({"details": "Serializing metrics", "metrics": metrics, "dimensions": dimensions})
 
-        metric_names_and_units: List[Dict[str, str]] = []  # [ { "Name": "metric_name", "Unit": "Count" } ]
+        metric_names_and_units_and_resolution: List[
+            Dict[str, Union[str, int]]
+        ] = []  # [ { "Name": "metric_name", "Unit": "Count", "StorageResolution": 60 } ]
         metric_names_and_values: Dict[str, float] = {}  # { "metric_name": 1.0 }
 
         for metric_name in metrics:
             metric: dict = metrics[metric_name]
             metric_value: int = metric.get("Value", 0)
             metric_unit: str = metric.get("Unit", "")
+            metric_resolution: int = metric.get("StorageResolution", 60)
 
-            metric_names_and_units.append({"Name": metric_name, "Unit": metric_unit})
+            metric_names_and_units_and_resolution.append(
+                {"Name": metric_name, "Unit": metric_unit, "StorageResolution": metric_resolution}
+            )
             metric_names_and_values.update({metric_name: metric_value})
 
         return {
@@ -212,7 +247,7 @@ class MetricManager:
                     {
                         "Namespace": self.namespace,  # "test_namespace"
                         "Dimensions": [list(dimensions.keys())],  # [ "service" ]
-                        "Metrics": metric_names_and_units,
+                        "Metrics": metric_names_and_units_and_resolution,
                     }
                 ],
             },
@@ -358,6 +393,39 @@ class MetricManager:
 
         return decorate
 
+    def _extract_metric_resolution_value(self, resolution: Union[int, MetricResolution]) -> int:
+        """Return metric value from metric unit whether that's str or MetricResolution enum
+
+        Parameters
+        ----------
+        unit : Union[int, MetricResolution]
+            Metric resolution
+
+        Returns
+        -------
+        int
+            Metric resolution value must be 1 or 60
+
+        Raises
+        ------
+        MetricResolutionError
+            When metric resolution is not supported by CloudWatch
+        """
+
+        if isinstance(resolution, int):
+            if resolution in self._metric_resolution_options:
+                resolution = MetricResolution[str(resolution)].value
+
+            if resolution not in self._metric_resolutions:
+                raise MetricResolutionError(
+                    f"Invalid metric resolution '{resolution}', expected either option: {self._metric_resolution_options}"  # noqa: E501
+                )
+
+        if isinstance(resolution, MetricResolution):
+            resolution = resolution.value
+
+        return resolution
+
     def _extract_metric_unit_value(self, unit: Union[str, MetricUnit]) -> str:
         """Return metric value from metric unit whether that's str or MetricUnit enum
 
@@ -429,10 +497,10 @@ class SingleMetric(MetricManager):
     **Creates cold start metric with function_version as dimension**
 
         import json
-        from aws_lambda_powertools.metrics import single_metric, MetricUnit
+        from aws_lambda_powertools.metrics import single_metric, MetricUnit, MetricResolution
         metric = single_metric(namespace="ServerlessAirline")
 
-        metric.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1)
+        metric.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard)
         metric.add_dimension(name="function_version", value=47)
 
         print(json.dumps(metric.serialize_metric_set(), indent=4))
@@ -443,7 +511,13 @@ class SingleMetric(MetricManager):
         Inherits from `aws_lambda_powertools.metrics.base.MetricManager`
     """
 
-    def add_metric(self, name: str, unit: Union[MetricUnit, str], value: float) -> None:
+    def add_metric(
+        self,
+        name: str,
+        unit: Union[MetricUnit, str],
+        value: float,
+        resolution: Optional[Union[MetricResolution, int]] = 60,
+    ) -> None:
         """Method to prevent more than one metric being created
 
         Parameters
@@ -454,11 +528,13 @@ class SingleMetric(MetricManager):
             Metric unit (e.g. "Seconds", MetricUnit.Seconds)
         value : float
             Metric value
+        resolution : MetricResolution
+            Metric resolution (e.g. 60, MetricResolution.Standard)
         """
         if len(self.metric_set) > 0:
             logger.debug(f"Metric {name} already set, skipping...")
             return
-        return super().add_metric(name, unit, value)
+        return super().add_metric(name, unit, value, resolution)
 
 
 @contextmanager
@@ -466,6 +542,7 @@ def single_metric(
     name: str,
     unit: MetricUnit,
     value: float,
+    resolution: Optional[Union[MetricResolution, int]] = 60,
     namespace: Optional[str] = None,
     default_dimensions: Optional[Dict[str, str]] = None,
 ) -> Generator[SingleMetric, None, None]:
@@ -477,8 +554,9 @@ def single_metric(
 
         from aws_lambda_powertools import single_metric
         from aws_lambda_powertools.metrics import MetricUnit
+        from aws_lambda_powertools.metrics import MetricResolution
 
-        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace="ServerlessAirline") as metric:
+        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard, namespace="ServerlessAirline") as metric: # noqa E501
             metric.add_dimension(name="function_version", value="47")
 
     **Same as above but set namespace using environment variable**
@@ -487,8 +565,9 @@ def single_metric(
 
         from aws_lambda_powertools import single_metric
         from aws_lambda_powertools.metrics import MetricUnit
+        from aws_lambda_powertools.metrics import MetricResolution
 
-        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1) as metric:
+        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard) as metric: # noqa E501
             metric.add_dimension(name="function_version", value="47")
 
     Parameters
@@ -497,6 +576,8 @@ def single_metric(
         Metric name
     unit : MetricUnit
         `aws_lambda_powertools.helper.models.MetricUnit`
+    resolution : MetricResolution
+        `aws_lambda_powertools.helper.models.MetricResolution`
     value : float
         Metric value
     namespace: str
@@ -511,6 +592,8 @@ def single_metric(
     ------
     MetricUnitError
         When metric metric isn't supported by CloudWatch
+    MetricResolutionError
+        When metric resolution isn't supported by CloudWatch
     MetricValueError
         When metric value isn't a number
     SchemaValidationError
@@ -519,7 +602,7 @@ def single_metric(
     metric_set: Optional[Dict] = None
     try:
         metric: SingleMetric = SingleMetric(namespace=namespace)
-        metric.add_metric(name=name, unit=unit, value=value)
+        metric.add_metric(name=name, unit=unit, value=value, resolution=resolution)
 
         if default_dimensions:
             for dim_name, dim_value in default_dimensions.items():

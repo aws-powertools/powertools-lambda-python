@@ -4,6 +4,12 @@ class MetricUnitError(Exception):
     pass
 
 
+class MetricResolutionError(Exception):
+    """When metric resolution is not supported by CloudWatch"""
+
+    pass
+
+
 class SchemaValidationError(Exception):
     """When serialization fail schema validation"""
 
