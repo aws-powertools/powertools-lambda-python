@@ -1,13 +1,15 @@
 import json
 import warnings
 from collections import namedtuple
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import pytest
 
 from aws_lambda_powertools import Metrics, single_metric
 from aws_lambda_powertools.metrics import (
     EphemeralMetrics,
+    MetricResolution,
+    MetricResolutionError,
     MetricUnit,
     MetricUnitError,
     MetricValueError,
@@ -30,23 +32,23 @@ def reset_metric_set():
 
 
 @pytest.fixture
-def metric() -> Dict[str, str]:
-    return {"name": "single_metric", "unit": MetricUnit.Count, "value": 1}
+def metric() -> Dict[str, Union[str, int]]:
+    return {"name": "single_metric", "unit": MetricUnit.Count, "value": 1, "resolution": MetricResolution.Standard}
 
 
 @pytest.fixture
-def metrics() -> List[Dict[str, str]]:
+def metrics() -> List[Dict[str, Union[str, int]]]:
     return [
-        {"name": "metric_one", "unit": MetricUnit.Count, "value": 1},
-        {"name": "metric_two", "unit": MetricUnit.Count, "value": 1},
+        {"name": "metric_one", "unit": MetricUnit.Count, "value": 1, "resolution": MetricResolution.Standard},
+        {"name": "metric_two", "unit": MetricUnit.Count, "value": 1, "resolution": MetricResolution.Standard},
     ]
 
 
 @pytest.fixture
-def metrics_same_name() -> List[Dict[str, str]]:
+def metrics_same_name() -> List[Dict[str, Union[str, int]]]:
     return [
-        {"name": "metric_one", "unit": MetricUnit.Count, "value": 1},
-        {"name": "metric_one", "unit": MetricUnit.Count, "value": 5},
+        {"name": "metric_one", "unit": MetricUnit.Count, "value": 1, "resolution": MetricResolution.Standard},
+        {"name": "metric_one", "unit": MetricUnit.Count, "value": 5, "resolution": MetricResolution.Standard},
     ]
 
 
@@ -161,7 +163,7 @@ def test_single_metric_default_dimensions(capsys, metric, dimension, namespace):
     # WHEN using single_metric context manager
     default_dimensions = {dimension["name"]: dimension["value"]}
     with single_metric(namespace=namespace, default_dimensions=default_dimensions, **metric) as my_metric:
-        my_metric.add_metric(name="second_metric", unit="Count", value=1)
+        my_metric.add_metric(name="second_metric", unit="Count", value=1, resolution=60)
 
     output = capture_metrics_output(capsys)
     expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
@@ -350,6 +352,17 @@ def test_schema_validation_incorrect_metric_unit(metric, dimension, namespace):
     # WHEN we try adding a new metric
     # THEN it should fail metric unit validation
     with pytest.raises(MetricUnitError):
+        with single_metric(**metric) as my_metric:
+            my_metric.add_dimension(**dimension)
+
+
+def test_schema_validation_incorrect_metric_resolution(metric, dimension, namespace):
+    # GIVEN we pass a metric resolution that is not supported by CloudWatch
+    metric["resolution"] = 10  # metric resolution must be 1 (High) or 60 (Standard)
+
+    # WHEN we try adding a new metric
+    # THEN it should fail metric unit validation
+    with pytest.raises(MetricResolutionError):
         with single_metric(**metric) as my_metric:
             my_metric.add_dimension(**dimension)
 
@@ -758,7 +771,7 @@ def test_serialize_metric_set_metric_definition(metric, dimension, namespace, se
                 {
                     "Namespace": "test_namespace",
                     "Dimensions": [["test_dimension", "service"]],
-                    "Metrics": [{"Name": "single_metric", "Unit": "Count"}],
+                    "Metrics": [{"Name": "single_metric", "Unit": "Count", "StorageResolution": 60}],
                 }
             ],
         },
@@ -852,7 +865,7 @@ def test_serialize_metric_set_metric_definition_multiple_values(
                 {
                     "Namespace": "test_namespace",
                     "Dimensions": [["test_dimension", "service"]],
-                    "Metrics": [{"Name": "metric_one", "Unit": "Count"}],
+                    "Metrics": [{"Name": "metric_one", "Unit": "Count", "StorageResolution": 60}],
                 }
             ],
         },
