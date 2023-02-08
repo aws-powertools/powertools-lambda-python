@@ -78,6 +78,19 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 ???+ warning "Warning: Do not create metrics or dimensions outside the handler"
     Metrics or dimensions added in the global scope will only be added during cold start. Disregard if you that's the intended behavior.
 
+### Adding high-resolution metrics
+
+You can create [high-resolution metrics](https://aws.amazon.com/pt/about-aws/whats-new/2023/02/amazon-cloudwatch-high-resolution-metric-extraction-structured-logs/) passing `resolution` parameter to `add_metric`.
+
+=== "add_high_resolution_metrics.py"
+
+    ```python hl_lines="14-15"
+    --8<-- "examples/metrics/src/add_high_resolution_metric.py"
+    ```
+
+???+ tip "Tip: Autocomplete Metric Resolutions"
+    `MetricResolution` enum facilitates finding a supported metric resolution by CloudWatch. Alternatively, you can pass the values 1 or 60 (must be one of them) as an integer _e.g. `resolution=1`_.
+
 ### Adding multi-value metrics
 
 You can call `add_metric()` with the same metric name multiple times. The values will be grouped together in a list.
