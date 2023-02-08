@@ -542,7 +542,7 @@ def single_metric(
     name: str,
     unit: MetricUnit,
     value: float,
-    resolution: Optional[Union[MetricResolution, int]] = 60,
+    resolution: Union[MetricResolution, int] = 60,
     namespace: Optional[str] = None,
     default_dimensions: Optional[Dict[str, str]] = None,
 ) -> Generator[SingleMetric, None, None]:
