@@ -23,7 +23,7 @@ TIME_RANGE_RE_PATTERN = re.compile(r"2[0-3]:[0-5]\d|[0-1]\d:[0-5]\d")  # 24 hour
 HOUR_MIN_SEPARATOR = ":"
 
 
-class RuleAction(Enum):
+class RuleAction(str, Enum):
     EQUALS = "EQUALS"
     NOT_EQUALS = "NOT_EQUALS"
     KEY_GREATER_THAN_VALUE = "KEY_GREATER_THAN_VALUE"
