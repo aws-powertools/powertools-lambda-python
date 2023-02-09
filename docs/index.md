@@ -49,7 +49,7 @@ Powertools relies on the AWS SDK bundled in the Lambda runtime. This helps us ac
 This means you need to add AWS SDK as a development dependency (not as a production dependency).
 
 * **Pip**: `pip install "aws-lambda-powertools[aws-sdk]"`
-* **Poetry**: `poetry add "aws-lambda-powertools[aws-sdk]" --dev`
+* **Poetry**: `poetry add "aws-lambda-powertools[aws-sdk] --group dev"`
 * **Pipenv**: `pipenv install --dev "aws-lambda-powertools[aws-sdk]"`
 
 ???+ note "Local emulation"
