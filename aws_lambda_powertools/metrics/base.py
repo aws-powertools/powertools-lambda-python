@@ -463,7 +463,11 @@ class SingleMetric(MetricManager):
 
 @contextmanager
 def single_metric(
-    name: str, unit: MetricUnit, value: float, namespace: Optional[str] = None
+    name: str,
+    unit: MetricUnit,
+    value: float,
+    namespace: Optional[str] = None,
+    default_dimensions: Optional[Dict[str, str]] = None,
 ) -> Generator[SingleMetric, None, None]:
     """Context manager to simplify creation of a single metric
 
@@ -516,6 +520,11 @@ def single_metric(
     try:
         metric: SingleMetric = SingleMetric(namespace=namespace)
         metric.add_metric(name=name, unit=unit, value=value)
+
+        if default_dimensions:
+            for dim_name, dim_value in default_dimensions.items():
+                metric.add_dimension(name=dim_name, value=dim_value)
+
         yield metric
         metric_set = metric.serialize_metric_set()
     finally:

@@ -315,6 +315,7 @@ def test_flags_conditions_rule_match_multiple_actions_multiple_rules_multiple_co
 
 # check a case where the feature exists but the rule doesn't match so we revert to the default value of the feature
 
+
 # Check IN/NOT_IN/KEY_IN_VALUE/KEY_NOT_IN_VALUE/VALUE_IN_KEY/VALUE_NOT_IN_KEY conditions
 def test_flags_match_rule_with_in_action(mocker, config):
     expected_value = True
@@ -774,6 +775,7 @@ def test_get_configuration_with_envelope_and_raw(mocker, config):
 ##
 ## Inequality test cases
 ##
+
 
 # Test not equals
 def test_flags_not_equal_no_match(mocker, config):

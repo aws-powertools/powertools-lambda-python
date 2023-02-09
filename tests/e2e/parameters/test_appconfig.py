@@ -35,6 +35,7 @@ def parameter_appconfig_freeform_profile(infrastructure: dict) -> str:
     return infrastructure.get("AppConfigProfile", "")
 
 
+@pytest.mark.xdist_group(name="parameters")
 def test_get_parameter_appconfig_freeform(
     parameter_appconfig_freeform_handler_fn_arn: str,
     parameter_appconfig_freeform_value: str,

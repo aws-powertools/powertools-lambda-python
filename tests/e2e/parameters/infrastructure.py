@@ -27,14 +27,13 @@ class ParametersStack(BaseInfrastructure):
             iam.PolicyStatement(
                 effect=iam.Effect.ALLOW,
                 actions=[
-                    "ssm:GetParameter",
+                    "ssm:GetParameters",
                 ],
                 resources=[f"arn:aws:ssm:{self.region}:{self.account_id}:parameter/powertools/e2e/parameters/*"],
             )
         )
 
     def _create_app_config(self, function: Function):
-
         service_name = build_service_name()
 
         cfn_application = appconfig.CfnApplication(
@@ -82,7 +81,6 @@ class ParametersStack(BaseInfrastructure):
         function: Function,
         service_name: str,
     ):
-
         cfn_configuration_profile = appconfig.CfnConfigurationProfile(
             self.stack,
             "appconfig-profile",

@@ -272,7 +272,6 @@ class ConditionsValidator(BaseValidator):
         self.logger = logger or logging.getLogger(__name__)
 
     def validate(self):
-
         if not self.conditions or not isinstance(self.conditions, list):
             self.logger.debug(f"Condition is empty or invalid for rule={self.rule_name}")
             raise SchemaValidationError(f"Invalid condition, rule={self.rule_name}")

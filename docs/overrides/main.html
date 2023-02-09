@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block announce %}
+👋 Powertools for Python v1 will no longer receive updates or releases after 31/03/2023!
+We encourage you to read our <a href="{{ base_url }}/upgrade/#end-of-support-v1">upgrade guide on how to migrate to v2</a>.
+{% endblock %}
+
 {% block outdated %}
   You're not viewing the latest version.
   <a href="{{ '../' ~ base_url }}">

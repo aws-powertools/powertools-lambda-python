@@ -156,6 +156,38 @@ def test_single_metric_logs_one_metric_only(capsys, metric, dimension, namespace
     assert expected == output
 
 
+def test_single_metric_default_dimensions(capsys, metric, dimension, namespace):
+    # GIVEN we provide default dimensions
+    # WHEN using single_metric context manager
+    default_dimensions = {dimension["name"]: dimension["value"]}
+    with single_metric(namespace=namespace, default_dimensions=default_dimensions, **metric) as my_metric:
+        my_metric.add_metric(name="second_metric", unit="Count", value=1)
+
+    output = capture_metrics_output(capsys)
+    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
+
+    # THEN we should have default dimension added to the metric
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
+def test_single_metric_default_dimensions_inherit(capsys, metric, dimension, namespace):
+    # GIVEN we provide Metrics default dimensions
+    # WHEN using single_metric context manager
+    metrics = Metrics()
+    default_dimensions = {dimension["name"]: dimension["value"]}
+    metrics.set_default_dimensions(**default_dimensions)
+    with single_metric(namespace=namespace, default_dimensions=metrics.default_dimensions, **metric) as my_metric:
+        my_metric.add_metric(name="second_metric", unit="Count", value=1)
+
+    output = capture_metrics_output(capsys)
+    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
+
+    # THEN we should have default dimension added to the metric
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
 def test_log_metrics(capsys, metrics, dimensions, namespace):
     # GIVEN Metrics is initialized
     my_metrics = Metrics(namespace=namespace)

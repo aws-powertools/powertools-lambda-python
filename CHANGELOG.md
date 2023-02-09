@@ -6,22 +6,71 @@
 
 ## Bug Fixes
 
+* **idempotency:** make idempotent_function decorator thread safe ([#1899](https://github.com/awslabs/aws-lambda-powertools-python/issues/1899))
+
+## Documentation
+
+* **homepage:** set url for end-of-support in announce block ([#1893](https://github.com/awslabs/aws-lambda-powertools-python/issues/1893))
+* **idempotency:** add IAM permissions section ([#1902](https://github.com/awslabs/aws-lambda-powertools-python/issues/1902))
+
+## Features
+
+* **metrics:** add default_dimensions to single_metric ([#1880](https://github.com/awslabs/aws-lambda-powertools-python/issues/1880))
+
+## Maintenance
+
+* **deps:** bump docker/setup-buildx-action from 2.4.0 to 2.4.1 ([#1903](https://github.com/awslabs/aws-lambda-powertools-python/issues/1903))
+* **deps-dev:** bump mypy-boto3-appconfig from 1.26.0.post1 to 1.26.63 ([#1895](https://github.com/awslabs/aws-lambda-powertools-python/issues/1895))
+* **deps-dev:** bump types-requests from 2.28.11.8 to 2.28.11.12 ([#1906](https://github.com/awslabs/aws-lambda-powertools-python/issues/1906))
+* **deps-dev:** bump pytest-xdist from 3.1.0 to 3.2.0 ([#1905](https://github.com/awslabs/aws-lambda-powertools-python/issues/1905))
+* **deps-dev:** bump aws-cdk-lib from 2.63.0 to 2.63.2 ([#1904](https://github.com/awslabs/aws-lambda-powertools-python/issues/1904))
+* **deps-dev:** bump mkdocs-material from 9.0.10 to 9.0.11 ([#1896](https://github.com/awslabs/aws-lambda-powertools-python/issues/1896))
+* **deps-dev:** bump mkdocs-material from 9.0.9 to 9.0.10 ([#1888](https://github.com/awslabs/aws-lambda-powertools-python/issues/1888))
+* **deps-dev:** bump mypy-boto3-s3 from 1.26.58 to 1.26.62 ([#1889](https://github.com/awslabs/aws-lambda-powertools-python/issues/1889))
+* **deps-dev:** bump black from 22.12.0 to 23.1.0 ([#1886](https://github.com/awslabs/aws-lambda-powertools-python/issues/1886))
+* **deps-dev:** bump aws-cdk-lib from 2.62.2 to 2.63.0 ([#1887](https://github.com/awslabs/aws-lambda-powertools-python/issues/1887))
+* **maintainers:** fix release workflow rename
+* **pypi:** add new links to Pypi package homepage ([#1912](https://github.com/awslabs/aws-lambda-powertools-python/issues/1912))
+
+
+<a name="v2.7.1"></a>
+## [v2.7.1] - 2023-02-01
+## Bug Fixes
+
 * parallel_run should fail when e2e tests fail
 * bump aws-cdk version
 * **ci:** scope e2e tests by python version
+* **ci:** add auth to API HTTP Gateway and Lambda Function Url ([#1882](https://github.com/awslabs/aws-lambda-powertools-python/issues/1882))
+* **license:** correction to MIT + MIT-0 (no proprietary anymore) ([#1883](https://github.com/awslabs/aws-lambda-powertools-python/issues/1883))
+* **license:** add MIT-0 license header ([#1871](https://github.com/awslabs/aws-lambda-powertools-python/issues/1871))
+* **tests:** make logs fetching more robust ([#1878](https://github.com/awslabs/aws-lambda-powertools-python/issues/1878))
+* **tests:** remove custom workers
+* **tests:** make sure multiple e2e tests run concurrently ([#1861](https://github.com/awslabs/aws-lambda-powertools-python/issues/1861))
 
 ## Documentation
 
 * **event-source:**  fix incorrect method in example CloudWatch Logs ([#1857](https://github.com/awslabs/aws-lambda-powertools-python/issues/1857))
+* **homepage:** add banner for end-of-support v1 ([#1879](https://github.com/awslabs/aws-lambda-powertools-python/issues/1879))
+* **parameters:** snippets split, improved, and lint ([#1564](https://github.com/awslabs/aws-lambda-powertools-python/issues/1564))
 
 ## Maintenance
 
+* update v2 layer ARN on documentation
+* **deps:** bump docker/setup-buildx-action from 2.0.0 to 2.4.0 ([#1873](https://github.com/awslabs/aws-lambda-powertools-python/issues/1873))
 * **deps:** bump dependabot/fetch-metadata from 1.3.5 to 1.3.6 ([#1855](https://github.com/awslabs/aws-lambda-powertools-python/issues/1855))
+* **deps-dev:** bump mypy-boto3-s3 from 1.26.0.post1 to 1.26.58 ([#1868](https://github.com/awslabs/aws-lambda-powertools-python/issues/1868))
+* **deps-dev:** bump isort from 5.11.4 to 5.11.5 ([#1875](https://github.com/awslabs/aws-lambda-powertools-python/issues/1875))
+* **deps-dev:** bump aws-cdk-lib from 2.62.1 to 2.62.2 ([#1869](https://github.com/awslabs/aws-lambda-powertools-python/issues/1869))
+* **deps-dev:** bump mkdocs-material from 9.0.6 to 9.0.8 ([#1874](https://github.com/awslabs/aws-lambda-powertools-python/issues/1874))
 * **deps-dev:** bump aws-cdk-lib from 2.62.0 to 2.62.1 ([#1866](https://github.com/awslabs/aws-lambda-powertools-python/issues/1866))
 * **deps-dev:** bump mypy-boto3-cloudformation from 1.26.35.post1 to 1.26.57 ([#1865](https://github.com/awslabs/aws-lambda-powertools-python/issues/1865))
 * **deps-dev:** bump coverage from 7.0.5 to 7.1.0 ([#1862](https://github.com/awslabs/aws-lambda-powertools-python/issues/1862))
 * **deps-dev:** bump aws-cdk-lib from 2.61.1 to 2.62.0 ([#1863](https://github.com/awslabs/aws-lambda-powertools-python/issues/1863))
+* **deps-dev:** bump flake8-bugbear from 22.12.6 to 23.1.20 ([#1854](https://github.com/awslabs/aws-lambda-powertools-python/issues/1854))
 * **deps-dev:** bump mypy-boto3-lambda from 1.26.49 to 1.26.55 ([#1856](https://github.com/awslabs/aws-lambda-powertools-python/issues/1856))
+
+## Reverts
+* fix(tests): remove custom workers
 
 
 <a name="v2.7.0"></a>
@@ -2801,7 +2850,8 @@
 * Merge pull request [#5](https://github.com/awslabs/aws-lambda-powertools-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.7.0...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.7.1...HEAD
+[v2.7.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.7.0...v2.7.1
 [v2.7.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.6.0...v2.7.0
 [v2.6.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.5.0...v2.6.0
 [v2.5.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.4.0...v2.5.0

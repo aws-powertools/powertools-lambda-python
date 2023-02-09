@@ -5,6 +5,7 @@ from requests import Request
 
 from aws_lambda_powertools.shared.cookies import Cookie
 from tests.e2e.utils import data_fetcher
+from tests.e2e.utils.auth import build_iam_auth
 
 
 @pytest.fixture
@@ -36,6 +37,7 @@ def lambda_function_url_endpoint(infrastructure: dict) -> str:
     return infrastructure.get("LambdaFunctionUrl", "")
 
 
+@pytest.mark.xdist_group(name="event_handler")
 def test_alb_headers_serializer(alb_basic_listener_endpoint):
     # GIVEN
     url = f"{alb_basic_listener_endpoint}/todos"
@@ -74,6 +76,7 @@ def test_alb_headers_serializer(alb_basic_listener_endpoint):
     assert response.cookies.get(last_cookie.name) == last_cookie.value
 
 
+@pytest.mark.xdist_group(name="event_handler")
 def test_alb_multi_value_headers_serializer(alb_multi_value_header_listener_endpoint):
     # GIVEN
     url = f"{alb_multi_value_header_listener_endpoint}/todos"
@@ -112,6 +115,7 @@ def test_alb_multi_value_headers_serializer(alb_multi_value_header_listener_endp
         assert response.cookies.get(cookie.name) == cookie.value
 
 
+@pytest.mark.xdist_group(name="event_handler")
 def test_api_gateway_rest_headers_serializer(apigw_rest_endpoint):
     # GIVEN
     url = f"{apigw_rest_endpoint}todos"
@@ -147,6 +151,7 @@ def test_api_gateway_rest_headers_serializer(apigw_rest_endpoint):
         assert response.cookies.get(cookie.name) == cookie.value
 
 
+@pytest.mark.xdist_group(name="event_handler")
 def test_api_gateway_http_headers_serializer(apigw_http_endpoint):
     # GIVEN
     url = f"{apigw_http_endpoint}todos"
@@ -164,6 +169,7 @@ def test_api_gateway_http_headers_serializer(apigw_http_endpoint):
             method="POST",
             url=url,
             json={"body": body, "status_code": status_code, "headers": headers, "cookies": list(map(str, cookies))},
+            auth=build_iam_auth(url=url, aws_service="execute-api"),
         )
     )
 
@@ -182,6 +188,7 @@ def test_api_gateway_http_headers_serializer(apigw_http_endpoint):
         assert response.cookies.get(cookie.name) == cookie.value
 
 
+@pytest.mark.xdist_group(name="event_handler")
 def test_lambda_function_url_headers_serializer(lambda_function_url_endpoint):
     # GIVEN
     url = f"{lambda_function_url_endpoint}todos"  # the function url endpoint already has the trailing /
@@ -199,6 +206,7 @@ def test_lambda_function_url_headers_serializer(lambda_function_url_endpoint):
             method="POST",
             url=url,
             json={"body": body, "status_code": status_code, "headers": headers, "cookies": list(map(str, cookies))},
+            auth=build_iam_auth(url=url, aws_service="lambda"),
         )
     )
 

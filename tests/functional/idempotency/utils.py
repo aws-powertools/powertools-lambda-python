@@ -32,12 +32,16 @@ def build_idempotency_put_item_stub(
             "#status": "status",
             "#in_progress_expiry": "in_progress_expiration",
         },
-        "ExpressionAttributeValues": {":now": stub.ANY, ":now_in_millis": stub.ANY, ":inprogress": "INPROGRESS"},
+        "ExpressionAttributeValues": {
+            ":now": {"N": stub.ANY},
+            ":now_in_millis": {"N": stub.ANY},
+            ":inprogress": {"S": "INPROGRESS"},
+        },
         "Item": {
-            "expiration": stub.ANY,
-            "id": idempotency_key_hash,
-            "status": "INPROGRESS",
-            "in_progress_expiration": stub.ANY,
+            "expiration": {"N": stub.ANY},
+            "id": {"S": idempotency_key_hash},
+            "status": {"S": "INPROGRESS"},
+            "in_progress_expiration": {"N": stub.ANY},
         },
         "TableName": "TEST_TABLE",
     }
@@ -62,11 +66,11 @@ def build_idempotency_update_item_stub(
             "#status": "status",
         },
         "ExpressionAttributeValues": {
-            ":expiry": stub.ANY,
-            ":response_data": serialized_lambda_response,
-            ":status": "COMPLETED",
+            ":expiry": {"N": stub.ANY},
+            ":response_data": {"S": serialized_lambda_response},
+            ":status": {"S": "COMPLETED"},
         },
-        "Key": {"id": idempotency_key_hash},
+        "Key": {"id": {"S": idempotency_key_hash}},
         "TableName": "TEST_TABLE",
         "UpdateExpression": "SET #response_data = :response_data, " "#expiry = :expiry, #status = :status",
     }

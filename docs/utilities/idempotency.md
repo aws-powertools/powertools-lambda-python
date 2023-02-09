@@ -26,6 +26,13 @@ times with the same parameters**. This makes idempotent operations safe to retry
 
 ## Getting started
 
+### IAM Permissions
+
+Your Lambda function IAM Role must have `dynamodb:GetItem`, `dynamodb:PutItem`, `dynamodb:UpdateItem` and `dynamodb:DeleteItem` IAM permissions before using this feature.
+
+???+ note
+    If you're using our example [AWS Serverless Application Model (SAM)](#required-resources), it already adds the required permissions.
+
 ### Required resources
 
 Before getting started, you need to create a persistent storage layer where the idempotency utility can store its state - your lambda functions will need read and write access to it.
@@ -125,12 +132,8 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
 !!! info "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.7/library/dataclasses.html){target="_blank"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
 
-???+ warning "Limitations"
+???+ warning "Limitation"
     Make sure to call your decorated function using keyword arguments.
-
-    Decorated functions with `idempotent_function` are not thread-safe, if the caller uses threading, not the function computation itself.
-
-    DynamoDB Persistency layer uses a Resource client [which is not thread-safe](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/resources.html?highlight=multithreading#multithreading-or-multiprocessing-with-resources){target="_blank"}.
 
 === "dataclass_sample.py"
 
