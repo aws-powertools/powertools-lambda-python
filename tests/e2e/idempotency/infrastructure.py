@@ -15,6 +15,7 @@ class IdempotencyDynamoDBStack(BaseInfrastructure):
         table.grant_read_write_data(functions["TtlCacheExpirationHandler"])
         table.grant_read_write_data(functions["TtlCacheTimeoutHandler"])
         table.grant_read_write_data(functions["ParallelExecutionHandler"])
+        table.grant_read_write_data(functions["FunctionThreadSafetyHandler"])
 
     def _create_dynamodb_table(self) -> Table:
         table = dynamodb.Table(

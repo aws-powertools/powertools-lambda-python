@@ -12,7 +12,6 @@ def copy_config_to_registered_loggers(
     exclude: Optional[Set[str]] = None,
     include: Optional[Set[str]] = None,
 ) -> None:
-
     """Copies source Logger level and handler to all registered loggers for consistent formatting.
 
     Parameters
