@@ -32,23 +32,28 @@ def reset_metric_set():
 
 
 @pytest.fixture
-def metric() -> Dict[str, Union[str, int]]:
-    return {"name": "single_metric", "unit": MetricUnit.Count, "value": 1, "resolution": MetricResolution.Standard}
+def metric_with_resolution() -> Dict[str, Union[str, int]]:
+    return {"name": "single_metric", "unit": MetricUnit.Count, "value": 1, "resolution": MetricResolution.High}
 
 
 @pytest.fixture
-def metrics() -> List[Dict[str, Union[str, int]]]:
+def metric() -> Dict[str, str]:
+    return {"name": "single_metric", "unit": MetricUnit.Count, "value": 1}
+
+
+@pytest.fixture
+def metrics() -> List[Dict[str, str]]:
     return [
-        {"name": "metric_one", "unit": MetricUnit.Count, "value": 1, "resolution": MetricResolution.Standard},
-        {"name": "metric_two", "unit": MetricUnit.Count, "value": 1, "resolution": MetricResolution.Standard},
+        {"name": "metric_one", "unit": MetricUnit.Count, "value": 1},
+        {"name": "metric_two", "unit": MetricUnit.Count, "value": 1},
     ]
 
 
 @pytest.fixture
-def metrics_same_name() -> List[Dict[str, Union[str, int]]]:
+def metrics_same_name() -> List[Dict[str, str]]:
     return [
-        {"name": "metric_one", "unit": MetricUnit.Count, "value": 1, "resolution": MetricResolution.Standard},
-        {"name": "metric_one", "unit": MetricUnit.Count, "value": 5, "resolution": MetricResolution.Standard},
+        {"name": "metric_one", "unit": MetricUnit.Count, "value": 1},
+        {"name": "metric_one", "unit": MetricUnit.Count, "value": 5},
     ]
 
 
@@ -143,6 +148,21 @@ def capture_metrics_output_multiple_emf_objects(capsys):
     return [json.loads(line.strip()) for line in capsys.readouterr().out.split("\n") if line]
 
 
+def test_single_metric_logs_one_metric_only_with_high_resolution(capsys, metric_with_resolution, dimension, namespace):
+    # GIVEN we try adding more than one metric
+    # WHEN using single_metric context manager
+    with single_metric(namespace=namespace, **metric_with_resolution) as my_metric:
+        my_metric.add_metric(name="second_metric", unit="Count", value=1, resolution=1)
+        my_metric.add_dimension(**dimension)
+
+    output = capture_metrics_output(capsys)
+    expected = serialize_single_metric(metric=metric_with_resolution, dimension=dimension, namespace=namespace)
+
+    # THEN we should only have the first metric added
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
 def test_single_metric_logs_one_metric_only(capsys, metric, dimension, namespace):
     # GIVEN we try adding more than one metric
     # WHEN using single_metric context manager
@@ -163,7 +183,7 @@ def test_single_metric_default_dimensions(capsys, metric, dimension, namespace):
     # WHEN using single_metric context manager
     default_dimensions = {dimension["name"]: dimension["value"]}
     with single_metric(namespace=namespace, default_dimensions=default_dimensions, **metric) as my_metric:
-        my_metric.add_metric(name="second_metric", unit="Count", value=1, resolution=60)
+        my_metric.add_metric(name="second_metric", unit="Count", value=1)
 
     output = capture_metrics_output(capsys)
     expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
@@ -345,17 +365,6 @@ def test_log_metrics_decorator_call_decorated_function(metric, namespace, servic
     assert lambda_handler({}, {}) is True
 
 
-def test_schema_validation_incorrect_metric_unit(metric, dimension, namespace):
-    # GIVEN we pass a metric unit that is not supported by CloudWatch
-    metric["unit"] = "incorrect_unit"
-
-    # WHEN we try adding a new metric
-    # THEN it should fail metric unit validation
-    with pytest.raises(MetricUnitError):
-        with single_metric(**metric) as my_metric:
-            my_metric.add_dimension(**dimension)
-
-
 def test_schema_validation_incorrect_metric_resolution(metric, dimension, namespace):
     # GIVEN we pass a metric resolution that is not supported by CloudWatch
     metric["resolution"] = 10  # metric resolution must be 1 (High) or 60 (Standard)
@@ -363,6 +372,17 @@ def test_schema_validation_incorrect_metric_resolution(metric, dimension, namesp
     # WHEN we try adding a new metric
     # THEN it should fail metric unit validation
     with pytest.raises(MetricResolutionError):
+        with single_metric(**metric) as my_metric:
+            my_metric.add_dimension(**dimension)
+
+
+def test_schema_validation_incorrect_metric_unit(metric, dimension, namespace):
+    # GIVEN we pass a metric unit that is not supported by CloudWatch
+    metric["unit"] = "incorrect_unit"
+
+    # WHEN we try adding a new metric
+    # THEN it should fail metric unit validation
+    with pytest.raises(MetricUnitError):
         with single_metric(**metric) as my_metric:
             my_metric.add_dimension(**dimension)
 
@@ -762,6 +782,41 @@ def test_log_metrics_with_metadata(capsys, metric, dimension, namespace, service
     assert expected == output
 
 
+def test_serialize_high_resolution_metric_set_metric_definition(
+    metric_with_resolution, dimension, namespace, service, metadata
+):
+    expected_metric_definition = {
+        "single_metric": [1.0],
+        "_aws": {
+            "Timestamp": 1592237875494,
+            "CloudWatchMetrics": [
+                {
+                    "Namespace": "test_namespace",
+                    "Dimensions": [["test_dimension", "service"]],
+                    "Metrics": [{"Name": "single_metric", "Unit": "Count", "StorageResolution": 1}],
+                }
+            ],
+        },
+        "service": "test_service",
+        "username": "test",
+        "test_dimension": "test",
+    }
+
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(service=service, namespace=namespace)
+    my_metrics.add_metric(**metric_with_resolution)
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_metadata(**metadata)
+
+    # WHEN metrics are serialized manually
+    metric_definition_output = my_metrics.serialize_metric_set()
+
+    # THEN we should emit a valid embedded metric definition object
+    assert "Timestamp" in metric_definition_output["_aws"]
+    remove_timestamp(metrics=[metric_definition_output, expected_metric_definition])
+    assert metric_definition_output == expected_metric_definition
+
+
 def test_serialize_metric_set_metric_definition(metric, dimension, namespace, service, metadata):
     expected_metric_definition = {
         "single_metric": [1.0],
@@ -771,7 +826,7 @@ def test_serialize_metric_set_metric_definition(metric, dimension, namespace, se
                 {
                     "Namespace": "test_namespace",
                     "Dimensions": [["test_dimension", "service"]],
-                    "Metrics": [{"Name": "single_metric", "Unit": "Count", "StorageResolution": 60}],
+                    "Metrics": [{"Name": "single_metric", "Unit": "Count"}],
                 }
             ],
         },
@@ -865,7 +920,7 @@ def test_serialize_metric_set_metric_definition_multiple_values(
                 {
                     "Namespace": "test_namespace",
                     "Dimensions": [["test_dimension", "service"]],
-                    "Metrics": [{"Name": "metric_one", "Unit": "Count", "StorageResolution": 60}],
+                    "Metrics": [{"Name": "metric_one", "Unit": "Count"}],
                 }
             ],
         },

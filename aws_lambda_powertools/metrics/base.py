@@ -18,6 +18,7 @@ from .exceptions import (
     MetricValueError,
     SchemaValidationError,
 )
+from .types import MetricNameUnitResolution
 
 logger = logging.getLogger(__name__)
 
@@ -105,9 +106,9 @@ class MetricManager:
         self.service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
         self.metadata_set = metadata_set if metadata_set is not None else {}
         self._metric_units = [unit.value for unit in MetricUnit]
-        self._metric_unit_options = list(MetricUnit.__members__)
+        self._metric_unit_valid_options = list(MetricUnit.__members__)
         self._metric_resolutions = [resolution.value for resolution in MetricResolution]
-        self._metric_resolution_options = list(MetricResolution.__members__)
+        self._metric_resolution_valid_options = list(MetricResolution.__members__)
 
     def add_metric(
         self,
@@ -224,9 +225,12 @@ class MetricManager:
 
         logger.debug({"details": "Serializing metrics", "metrics": metrics, "dimensions": dimensions})
 
-        metric_names_and_units_and_resolution: List[
-            Dict[str, Union[str, int]]
-        ] = []  # [ { "Name": "metric_name", "Unit": "Count", "StorageResolution": 60 } ]
+        # For standard resolution metrics, don't add StorageResolution field to avoid unnecessary ingestion of data into cloudwatch # noqa E501
+        # Example: [ { "Name": "metric_name", "Unit": "Count"} ] # noqa E800
+        #
+        # In case using high-resolution metrics, add StorageResolution field
+        # Example: [ { "Name": "metric_name", "Unit": "Count", "StorageResolution": 1 } ] # noqa E800
+        metric_definition: List[MetricNameUnitResolution] = []
         metric_names_and_values: Dict[str, float] = {}  # { "metric_name": 1.0 }
 
         for metric_name in metrics:
@@ -235,9 +239,14 @@ class MetricManager:
             metric_unit: str = metric.get("Unit", "")
             metric_resolution: int = metric.get("StorageResolution", 60)
 
-            metric_names_and_units_and_resolution.append(
-                {"Name": metric_name, "Unit": metric_unit, "StorageResolution": metric_resolution}
-            )
+            metric_definition_data: MetricNameUnitResolution = {"Name": metric_name, "Unit": metric_unit}
+
+            # high-resolution metrics
+            if metric_resolution == 1:
+                metric_definition_data["StorageResolution"] = metric_resolution
+
+            metric_definition.append(metric_definition_data)
+
             metric_names_and_values.update({metric_name: metric_value})
 
         return {
@@ -247,7 +256,7 @@ class MetricManager:
                     {
                         "Namespace": self.namespace,  # "test_namespace"
                         "Dimensions": [list(dimensions.keys())],  # [ "service" ]
-                        "Metrics": metric_names_and_units_and_resolution,
+                        "Metrics": metric_definition,
                     }
                 ],
             },
@@ -413,12 +422,12 @@ class MetricManager:
         """
 
         if isinstance(resolution, int):
-            if resolution in self._metric_resolution_options:
+            if resolution in self._metric_resolution_valid_options:
                 resolution = MetricResolution[str(resolution)].value
 
             if resolution not in self._metric_resolutions:
                 raise MetricResolutionError(
-                    f"Invalid metric resolution '{resolution}', expected either option: {self._metric_resolution_options}"  # noqa: E501
+                    f"Invalid metric resolution '{resolution}', expected either option: {self._metric_resolution_valid_options}"  # noqa: E501
                 )
 
         if isinstance(resolution, MetricResolution):
@@ -446,12 +455,12 @@ class MetricManager:
         """
 
         if isinstance(unit, str):
-            if unit in self._metric_unit_options:
+            if unit in self._metric_unit_valid_options:
                 unit = MetricUnit[unit].value
 
             if unit not in self._metric_units:
                 raise MetricUnitError(
-                    f"Invalid metric unit '{unit}', expected either option: {self._metric_unit_options}"
+                    f"Invalid metric unit '{unit}', expected either option: {self._metric_unit_valid_options}"
                 )
 
         if isinstance(unit, MetricUnit):
