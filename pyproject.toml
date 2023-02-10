@@ -13,12 +13,17 @@ classifiers=[
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
 ]
-repository="https://github.com/awslabs/aws-lambda-powertools-python"
+repository = "https://github.com/awslabs/aws-lambda-powertools-python"
+documentation = "https://awslabs.github.io/aws-lambda-powertools-python/"
 readme = "README.md"
 keywords = ["aws_lambda_powertools", "aws", "tracing", "logging", "lambda", "powertools", "feature_flags", "idempotency", "middleware"]
 # MIT-0 is not recognized as an existing license from poetry.
 # By using `MIT` as a license value, a `License :: OSI Approved :: MIT License` classifier is added to the classifiers list.
 license = "MIT"
+
+[tool.poetry.urls]
+"Issue tracker" = "https://github.com/awslabs/aws-lambda-powertools-python/issues"
+"Releases" = "https://github.com/awslabs/aws-lambda-powertools-python/releases"
 
 [tool.poetry.dependencies]
 python = "^3.7.4"
@@ -57,8 +62,8 @@ flake8-bugbear = "^23.1.20"
 mkdocs-git-revision-date-plugin = "^0.3.2"
 mike = "^1.1.2"
 retry = "^0.9.2"
-pytest-xdist = "^3.1.0"
-aws-cdk-lib = "^2.63.2"
+pytest-xdist = "^3.2.0"
+aws-cdk-lib = "^2.64.0"
 "aws-cdk.aws-apigatewayv2-alpha" = "^2.38.1-alpha.0"
 "aws-cdk.aws-apigatewayv2-integrations-alpha" = "^2.38.1-alpha.0"
 "aws-cdk.aws-apigatewayv2-authorizers-alpha" = "^2.38.1-alpha.0"
@@ -76,7 +81,7 @@ mypy-boto3-s3 = "^1.26.62"
 mypy-boto3-xray = "^1.26.11"
 types-requests = "^2.28.11"
 typing-extensions = "^4.4.0"
-mkdocs-material = "^9.0.11"
+mkdocs-material = "^9.0.12"
 filelock = "^3.9.0"
 checksumdir = "^1.2.0"
 mypy-boto3-appconfigdata = "^1.26.0"

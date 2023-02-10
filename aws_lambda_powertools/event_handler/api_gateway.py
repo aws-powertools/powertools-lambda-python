@@ -836,7 +836,6 @@ class APIGatewayRestResolver(ApiGatewayResolver):
     # Override _compile_regex to exclude trailing slashes for route resolution
     @staticmethod
     def _compile_regex(rule: str, base_regex: str = _ROUTE_REGEX):
-
         return super(APIGatewayRestResolver, APIGatewayRestResolver)._compile_regex(rule, "^{}/*$")
 
 

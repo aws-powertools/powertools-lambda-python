@@ -2957,4 +2957,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "70ff8b8b4facaf2c9ea6ae231969fcd917320ce06625121b26c5ffcf9ec3f53c"
+content-hash = "62a6b0896bad16de0b814e025384cc7c078c72cead1e5c4926700c118d8b7dda"
