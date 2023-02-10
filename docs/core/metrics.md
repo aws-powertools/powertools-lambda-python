@@ -237,9 +237,9 @@ CloudWatch EMF uses the same dimensions across all your metrics. Use `single_met
 
 By default it will skip all previously defined dimensions including default dimensions. Use `default_dimensions` keyword argument if you want to reuse default dimensions or specify custom dimensions from a dictionary.
 
-=== "single_metric_default_dimensions_inherit.json"
+=== "single_metric_default_dimensions_inherit.py"
 
-    ```json hl_lines="10 15"
+    ```python hl_lines="10 15"
     --8<-- "examples/metrics/src/single_metric_default_dimensions_inherit.py"
     ```
 
