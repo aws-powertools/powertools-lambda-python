@@ -391,6 +391,18 @@ def test_schema_validation_incorrect_metric_resolution(metric, dimension):
             my_metric.add_dimension(**dimension)
 
 
+@pytest.mark.parametrize("resolution", ["sixty", False, [], {}, object])
+def test_schema_validation_incorrect_metric_resolution_non_integer_enum(metric, dimension, resolution, namespace):
+    # GIVEN we pass a metric resolution that is not supported by CloudWatch
+    metric["resolution"] = resolution  # metric resolution must be 1 (High) or 60 (Standard)
+
+    # WHEN we try adding a new metric
+    # THEN it should fail metric unit validation
+    with pytest.raises(MetricResolutionError, match="Invalid metric resolution.*60"):
+        with single_metric(namespace=namespace, **metric) as my_metric:
+            my_metric.add_dimension(**dimension)
+
+
 def test_schema_validation_incorrect_metric_unit(metric, dimension, namespace):
     # GIVEN we pass a metric unit that is not supported by CloudWatch
     metric["unit"] = "incorrect_unit"
