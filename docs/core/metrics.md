@@ -85,7 +85,7 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 
 You can create [high-resolution metrics](https://aws.amazon.com/pt/about-aws/whats-new/2023/02/amazon-cloudwatch-high-resolution-metric-extraction-structured-logs/) passing `resolution` parameter to `add_metric`.
 
-???+ tip "High-resolution metrics - when is it useful?"
+???+ tip "When is it useful?"
     High-resolution metrics are data with a granularity of one second and are very useful in several situations such as telemetry, time series, real-time incident management, and others.
 
 === "add_high_resolution_metrics.py"
