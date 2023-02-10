@@ -15,19 +15,22 @@
 
 ## Features
 
+* **batch:** add async_batch_processor for concurrent processing ([#1724](https://github.com/awslabs/aws-lambda-powertools-python/issues/1724))
 * **metrics:** add default_dimensions to single_metric ([#1880](https://github.com/awslabs/aws-lambda-powertools-python/issues/1880))
 
 ## Maintenance
 
 * **deps:** bump docker/setup-buildx-action from 2.4.0 to 2.4.1 ([#1903](https://github.com/awslabs/aws-lambda-powertools-python/issues/1903))
-* **deps-dev:** bump mypy-boto3-appconfig from 1.26.0.post1 to 1.26.63 ([#1895](https://github.com/awslabs/aws-lambda-powertools-python/issues/1895))
+* **deps-dev:** bump mkdocs-material from 9.0.11 to 9.0.12 ([#1919](https://github.com/awslabs/aws-lambda-powertools-python/issues/1919))
+* **deps-dev:** bump black from 22.12.0 to 23.1.0 ([#1886](https://github.com/awslabs/aws-lambda-powertools-python/issues/1886))
 * **deps-dev:** bump types-requests from 2.28.11.8 to 2.28.11.12 ([#1906](https://github.com/awslabs/aws-lambda-powertools-python/issues/1906))
 * **deps-dev:** bump pytest-xdist from 3.1.0 to 3.2.0 ([#1905](https://github.com/awslabs/aws-lambda-powertools-python/issues/1905))
+* **deps-dev:** bump aws-cdk-lib from 2.63.2 to 2.64.0 ([#1918](https://github.com/awslabs/aws-lambda-powertools-python/issues/1918))
 * **deps-dev:** bump aws-cdk-lib from 2.63.0 to 2.63.2 ([#1904](https://github.com/awslabs/aws-lambda-powertools-python/issues/1904))
 * **deps-dev:** bump mkdocs-material from 9.0.10 to 9.0.11 ([#1896](https://github.com/awslabs/aws-lambda-powertools-python/issues/1896))
-* **deps-dev:** bump mkdocs-material from 9.0.9 to 9.0.10 ([#1888](https://github.com/awslabs/aws-lambda-powertools-python/issues/1888))
+* **deps-dev:** bump mypy-boto3-appconfig from 1.26.0.post1 to 1.26.63 ([#1895](https://github.com/awslabs/aws-lambda-powertools-python/issues/1895))
 * **deps-dev:** bump mypy-boto3-s3 from 1.26.58 to 1.26.62 ([#1889](https://github.com/awslabs/aws-lambda-powertools-python/issues/1889))
-* **deps-dev:** bump black from 22.12.0 to 23.1.0 ([#1886](https://github.com/awslabs/aws-lambda-powertools-python/issues/1886))
+* **deps-dev:** bump mkdocs-material from 9.0.9 to 9.0.10 ([#1888](https://github.com/awslabs/aws-lambda-powertools-python/issues/1888))
 * **deps-dev:** bump aws-cdk-lib from 2.62.2 to 2.63.0 ([#1887](https://github.com/awslabs/aws-lambda-powertools-python/issues/1887))
 * **maintainers:** fix release workflow rename
 * **pypi:** add new links to Pypi package homepage ([#1912](https://github.com/awslabs/aws-lambda-powertools-python/issues/1912))
