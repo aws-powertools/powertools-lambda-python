@@ -636,6 +636,28 @@ All records in the batch will be passed to this handler for processing, even if 
 
     All processing logic will and should be performed by the `record_handler` function.
 
+### Processing messages asynchronously
+
+!!! tip "New to AsyncIO? Read this [comprehensive guide first](https://realpython.com/async-io-python/){target="_blank"}."
+
+You can use `AsyncBatchProcessor` class and `async_batch_processor` decorator to process messages concurrently.
+
+???+ question "When is this useful?"
+    Your use case might be able to process multiple records at the same time without conflicting with one another.
+
+    For example, imagine you need to process multiple loyalty points and incrementally save in a database. While you await the database to confirm your records are saved, you could start processing another request concurrently.
+
+    The reason this is not the default behaviour is that not all use cases can handle concurrency safely (e.g., loyalty points must be updated in order).
+
+```python hl_lines="4 6 11 14 23" title="High-concurrency with AsyncBatchProcessor"
+--8<-- "examples/batch_processing/src/getting_started_async_batch_processor.py"
+```
+
+???+ warning "Using tracer?"
+    `AsyncBatchProcessor` uses `asyncio.gather` which can cause side effects and reach trace limits at high concurrency.
+
+    See [Tracing concurrent asynchronous functions](../core/tracer.md#concurrent-asynchronous-functions).
+
 ## Advanced
 
 ### Pydantic integration

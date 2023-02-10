@@ -1,13 +1,15 @@
 import json
 from random import randint
-from typing import Callable, Dict, Optional
+from typing import Any, Awaitable, Callable, Dict, Optional
 
 import pytest
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities.batch import (
+    AsyncBatchProcessor,
     BatchProcessor,
     EventType,
+    async_batch_processor,
     batch_processor,
 )
 from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError
@@ -107,6 +109,17 @@ def dynamodb_event_factory() -> Callable:
 @pytest.fixture(scope="module")
 def record_handler() -> Callable:
     def handler(record):
+        body = record["body"]
+        if "fail" in body:
+            raise Exception("Failed to process record.")
+        return body
+
+    return handler
+
+
+@pytest.fixture(scope="module")
+def async_record_handler() -> Callable[..., Awaitable[Any]]:
+    async def handler(record):
         body = record["body"]
         if "fail" in body:
             raise Exception("Failed to process record.")
@@ -639,3 +652,82 @@ def test_batch_processor_error_when_entire_batch_fails(sqs_event_factory, record
 
     # THEN raise BatchProcessingError
     assert "All records failed processing. " in str(e.value)
+
+
+def test_async_batch_processor_middleware_success_only(sqs_event_factory, async_record_handler):
+    # GIVEN
+    first_record = SQSRecord(sqs_event_factory("success"))
+    second_record = SQSRecord(sqs_event_factory("success"))
+    event = {"Records": [first_record.raw_event, second_record.raw_event]}
+
+    processor = AsyncBatchProcessor(event_type=EventType.SQS)
+
+    @async_batch_processor(record_handler=async_record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
+
+    # WHEN
+    result = lambda_handler(event, {})
+
+    # THEN
+    assert result["batchItemFailures"] == []
+
+
+def test_async_batch_processor_middleware_with_failure(sqs_event_factory, async_record_handler):
+    # GIVEN
+    first_record = SQSRecord(sqs_event_factory("fail"))
+    second_record = SQSRecord(sqs_event_factory("success"))
+    third_record = SQSRecord(sqs_event_factory("fail"))
+    event = {"Records": [first_record.raw_event, second_record.raw_event, third_record.raw_event]}
+
+    processor = AsyncBatchProcessor(event_type=EventType.SQS)
+
+    @async_batch_processor(record_handler=async_record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
+
+    # WHEN
+    result = lambda_handler(event, {})
+
+    # THEN
+    assert len(result["batchItemFailures"]) == 2
+
+
+def test_async_batch_processor_context_success_only(sqs_event_factory, async_record_handler):
+    # GIVEN
+    first_record = SQSRecord(sqs_event_factory("success"))
+    second_record = SQSRecord(sqs_event_factory("success"))
+    records = [first_record.raw_event, second_record.raw_event]
+    processor = AsyncBatchProcessor(event_type=EventType.SQS)
+
+    # WHEN
+    with processor(records, async_record_handler) as batch:
+        processed_messages = batch.async_process()
+
+    # THEN
+    assert processed_messages == [
+        ("success", first_record.body, first_record.raw_event),
+        ("success", second_record.body, second_record.raw_event),
+    ]
+
+    assert batch.response() == {"batchItemFailures": []}
+
+
+def test_async_batch_processor_context_with_failure(sqs_event_factory, async_record_handler):
+    # GIVEN
+    first_record = SQSRecord(sqs_event_factory("failure"))
+    second_record = SQSRecord(sqs_event_factory("success"))
+    third_record = SQSRecord(sqs_event_factory("fail"))
+    records = [first_record.raw_event, second_record.raw_event, third_record.raw_event]
+    processor = AsyncBatchProcessor(event_type=EventType.SQS)
+
+    # WHEN
+    with processor(records, async_record_handler) as batch:
+        processed_messages = batch.async_process()
+
+    # THEN
+    assert processed_messages[1] == ("success", second_record.body, second_record.raw_event)
+    assert len(batch.fail_messages) == 2
+    assert batch.response() == {
+        "batchItemFailures": [{"itemIdentifier": first_record.message_id}, {"itemIdentifier": third_record.message_id}]
+    }
