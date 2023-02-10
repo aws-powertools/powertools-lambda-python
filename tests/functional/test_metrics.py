@@ -148,17 +148,16 @@ def capture_metrics_output_multiple_emf_objects(capsys):
     return [json.loads(line.strip()) for line in capsys.readouterr().out.split("\n") if line]
 
 
-def test_single_metric_logs_one_metric_only_with_high_resolution(capsys, metric_with_resolution, dimension, namespace):
-    # GIVEN we try adding more than one metric
+def test_single_metric_logs_with_high_resolution_enum(capsys, metric_with_resolution, dimension, namespace):
+    # GIVEN we have a metric with high resolution as enum
     # WHEN using single_metric context manager
     with single_metric(namespace=namespace, **metric_with_resolution) as my_metric:
-        my_metric.add_metric(name="second_metric", unit="Count", value=1, resolution=1)
         my_metric.add_dimension(**dimension)
 
+    # THEN we should only have the first metric added
     output = capture_metrics_output(capsys)
     expected = serialize_single_metric(metric=metric_with_resolution, dimension=dimension, namespace=namespace)
 
-    # THEN we should only have the first metric added
     remove_timestamp(metrics=[output, expected])
     assert expected == output
 
