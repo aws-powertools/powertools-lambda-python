@@ -163,6 +163,22 @@ def test_single_metric_logs_one_metric_only_with_high_resolution(capsys, metric_
     assert expected == output
 
 
+def test_single_metric_logs_with_high_resolution_integer(capsys, metric_with_resolution, dimension, namespace):
+    # GIVEN we have a metric with high resolution as integer
+    metric_with_resolution["resolution"] = MetricResolution.High.value
+
+    # WHEN using single_metric context manager
+    with single_metric(namespace=namespace, **metric_with_resolution) as my_metric:
+        my_metric.add_dimension(**dimension)
+
+    # THEN we should only have the first metric added
+    output = capture_metrics_output(capsys)
+    expected = serialize_single_metric(metric=metric_with_resolution, dimension=dimension, namespace=namespace)
+
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
 def test_single_metric_logs_one_metric_only(capsys, metric, dimension, namespace):
     # GIVEN we try adding more than one metric
     # WHEN using single_metric context manager

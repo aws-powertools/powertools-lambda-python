@@ -421,17 +421,14 @@ class MetricManager:
             When metric resolution is not supported by CloudWatch
         """
 
-        if isinstance(resolution, int):
-            if resolution in self._metric_resolution_valid_options:
-                resolution = MetricResolution[str(resolution)].value
-
-            if resolution not in self._metric_resolutions:
-                raise MetricResolutionError(
-                    f"Invalid metric resolution '{resolution}', expected either option: {self._metric_resolution_valid_options}"  # noqa: E501
-                )
-
         if isinstance(resolution, MetricResolution):
             resolution = resolution.value
+            return resolution
+
+        if isinstance(resolution, int) and resolution not in self._metric_resolutions:
+            raise MetricResolutionError(
+                f"Invalid metric resolution '{resolution}', expected either option: {self._metric_resolution_valid_options}"  # noqa: E501
+            )
 
         return resolution
 
