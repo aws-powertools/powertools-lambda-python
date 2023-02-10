@@ -20,6 +20,9 @@ If you're new to Amazon CloudWatch, there are two terminologies you must be awar
 
 * **Namespace**. It's the highest level container that will group multiple metrics from multiple services for a given application, for example `ServerlessEcommerce`.
 * **Dimensions**. Metrics metadata in key-value format. They help you slice and dice metrics visualization, for example `ColdStart` metric by Payment `service`.
+* **Metric**. It's the name of the metric, for example: `SuccessfulBooking` or `UpdatedBooking`.
+* **Unit**. It's a value representing the unit of measure for the corresponding metric, for example: `Count` or `Seconds`.
+* **Resolution**. It's a value representing the storage resolution for the corresponding metric. Metrics can be either Standard or High resolution. Read more [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics).
 
 <figure>
   <img src="../../media/metrics_terminology.png" />
@@ -77,6 +80,22 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 
 ???+ warning "Warning: Do not create metrics or dimensions outside the handler"
     Metrics or dimensions added in the global scope will only be added during cold start. Disregard if you that's the intended behavior.
+
+### Adding high-resolution metrics
+
+You can create [high-resolution metrics](https://aws.amazon.com/pt/about-aws/whats-new/2023/02/amazon-cloudwatch-high-resolution-metric-extraction-structured-logs/) passing `resolution` parameter to `add_metric`.
+
+???+ tip "High-resolution metrics - when is it useful?"
+    High-resolution metrics are data with a granularity of one second and are very useful in several situations such as telemetry, time series, real-time incident management, and others.
+
+=== "add_high_resolution_metrics.py"
+
+    ```python hl_lines="10"
+    --8<-- "examples/metrics/src/add_high_resolution_metric.py"
+    ```
+
+???+ tip "Tip: Autocomplete Metric Resolutions"
+    `MetricResolution` enum facilitates finding a supported metric resolution by CloudWatch. Alternatively, you can pass the values 1 or 60 (must be one of them) as an integer _e.g. `resolution=1`_.
 
 ### Adding multi-value metrics
 
