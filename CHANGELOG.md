@@ -12,6 +12,7 @@
 
 * **homepage:** set url for end-of-support in announce block ([#1893](https://github.com/awslabs/aws-lambda-powertools-python/issues/1893))
 * **idempotency:** add IAM permissions section ([#1902](https://github.com/awslabs/aws-lambda-powertools-python/issues/1902))
+* **metrics:** fix syntax highlighting for new default_dimensions
 
 ## Features
 
