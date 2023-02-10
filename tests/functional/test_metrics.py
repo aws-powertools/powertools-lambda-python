@@ -380,13 +380,13 @@ def test_log_metrics_decorator_call_decorated_function(metric, namespace, servic
     assert lambda_handler({}, {}) is True
 
 
-def test_schema_validation_incorrect_metric_resolution(metric, dimension, namespace):
+def test_schema_validation_incorrect_metric_resolution(metric, dimension):
     # GIVEN we pass a metric resolution that is not supported by CloudWatch
     metric["resolution"] = 10  # metric resolution must be 1 (High) or 60 (Standard)
 
     # WHEN we try adding a new metric
     # THEN it should fail metric unit validation
-    with pytest.raises(MetricResolutionError):
+    with pytest.raises(MetricResolutionError, match="Invalid metric resolution.*60"):
         with single_metric(**metric) as my_metric:
             my_metric.add_dimension(**dimension)
 

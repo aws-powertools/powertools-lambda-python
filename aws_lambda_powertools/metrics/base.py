@@ -108,7 +108,6 @@ class MetricManager:
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_valid_options = list(MetricUnit.__members__)
         self._metric_resolutions = [resolution.value for resolution in MetricResolution]
-        self._metric_resolution_valid_options = list(MetricResolution.__members__)
 
     def add_metric(
         self,
@@ -427,7 +426,7 @@ class MetricManager:
 
         if isinstance(resolution, int) and resolution not in self._metric_resolutions:
             raise MetricResolutionError(
-                f"Invalid metric resolution '{resolution}', expected either option: {self._metric_resolution_valid_options}"  # noqa: E501
+                f"Invalid metric resolution '{resolution}', expected either option: {self._metric_resolutions}"  # noqa: E501
             )
 
         return resolution
