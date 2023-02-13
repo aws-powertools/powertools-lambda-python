@@ -84,7 +84,7 @@ typing-extensions = "^4.4.0"
 mkdocs-material = "^9.0.12"
 filelock = "^3.9.0"
 checksumdir = "^1.2.0"
-mypy-boto3-appconfigdata = "^1.26.0"
+mypy-boto3-appconfigdata = "^1.26.70"
 importlib-metadata = "^6.0"
 ijson = "^3.2.0"
 typed-ast = { version = "^1.5.4", python = "< 3.8"}
