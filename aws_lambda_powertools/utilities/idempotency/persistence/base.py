@@ -182,7 +182,7 @@ class BasePersistenceLayer(ABC):
         if self.is_missing_idempotency_key(data=data):
             if self.raise_on_no_idempotency_key:
                 raise IdempotencyKeyError("No data found to create a hashed idempotency_key")
-            warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}")
+            warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}", stacklevel=2)
 
         generated_hash = self._generate_hash(data=data)
         return f"{self.function_name}#{generated_hash}"
@@ -359,7 +359,8 @@ class BasePersistenceLayer(ABC):
         else:
             warnings.warn(
                 "Couldn't determine the remaining time left. "
-                "Did you call register_lambda_context on IdempotencyConfig?"
+                "Did you call register_lambda_context on IdempotencyConfig?",
+                stacklevel=2,
             )
 
         logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")
