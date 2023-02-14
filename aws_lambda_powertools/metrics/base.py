@@ -391,7 +391,7 @@ class MetricManager:
                     self._add_cold_start_metric(context=context)
             finally:
                 if not raise_on_empty_metrics and not self.metric_set:
-                    warnings.warn("No metrics to publish, skipping")
+                    warnings.warn("No metrics to publish, skipping", stacklevel=2)
                 else:
                     metrics = self.serialize_metric_set()
                     self.clear_metrics()
