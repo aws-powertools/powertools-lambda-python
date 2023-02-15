@@ -251,6 +251,20 @@ def test_logger_append_duplicated(stdout, service_name):
     assert "new_value" == log["request_id"]
 
 
+def test_logger_honors_given_exception_keys(stdout, service_name):
+    # GIVEN Logger is initialized with exception and exception_name fields
+    logger = Logger(
+        service=service_name, stream=stdout, exception="exception_value", exception_name="exception_name_value"
+    )
+
+    logger.info("log")
+
+    # THEN log statements should have these keys
+    log = capture_logging_output(stdout)
+    assert "exception_value" == log["exception"]
+    assert "exception_name_value" == log["exception_name"]
+
+
 def test_logger_invalid_sampling_rate(service_name):
     # GIVEN Logger is initialized
     # WHEN sampling_rate non-numeric value
