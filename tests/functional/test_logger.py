@@ -257,6 +257,7 @@ def test_logger_honors_given_exception_keys(stdout, service_name):
         service=service_name, stream=stdout, exception="exception_value", exception_name="exception_name_value"
     )
 
+    # WHEN log level info
     logger.info("log")
 
     # THEN log statements should have these keys
