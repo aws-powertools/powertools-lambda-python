@@ -253,12 +253,10 @@ def test_logger_append_duplicated(stdout, service_name):
 
 def test_logger_honors_given_exception_keys(stdout, service_name):
     # GIVEN Logger is initialized with exception and exception_name fields
-    logger = Logger(
-        service=service_name, stream=stdout, exception="exception_value", exception_name="exception_name_value"
-    )
+    logger = Logger(service=service_name, stream=stdout)
 
     # WHEN log level info
-    logger.info("log")
+    logger.info("log", exception="exception_value", exception_name="exception_name_value")
 
     # THEN log statements should have these keys
     log = capture_logging_output(stdout)
