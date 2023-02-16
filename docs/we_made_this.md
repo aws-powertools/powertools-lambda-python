@@ -68,6 +68,14 @@ This article walks through a sample AWS EventBridge cookiecutter template presen
 * [binx.io/2022/10/11/speedup-event-driven-projects/](https://binx.io/2022/10/11/speedup-event-driven-projects/){target="_blank"}
 * [Slides](https://www.slideshare.net/JorisConijn/let-codecommit-work-for-you){target="_blank"}
 
+### Implementing Feature Flags with AWS AppConfig and AWS Lambda Powertools
+
+> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/IsenbergRan){target="_blank"} [:material-linkedin:](https://www.linkedin.com/in/ranisenberg/){target="_blank"}**
+
+This article walks through how CyberArk uses Powertools to implement Feature Flags with AWS AppConfig
+
+* [aws.amazon.com/blogs/mt/how-cyberark-implements-feature-flags-with-aws-appconfig](https://aws.amazon.com/blogs/mt/how-cyberark-implements-feature-flags-with-aws-appconfig){target="_blank"}
+
 ## Videos
 
 #### Building a resilient input handling with Parser
