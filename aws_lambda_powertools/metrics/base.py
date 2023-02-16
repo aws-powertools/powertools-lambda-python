@@ -391,7 +391,11 @@ class MetricManager:
                     self._add_cold_start_metric(context=context)
             finally:
                 if not raise_on_empty_metrics and not self.metric_set:
-                    warnings.warn("No metrics to publish, skipping", stacklevel=2)
+                    warnings.warn(
+                        "No application metrics to publish. The cold-start metric may be published if enabled. "
+                        "If application metrics should never be empty, consider using 'raise_on_empty_metrics'",
+                        stacklevel=2,
+                    )
                 else:
                     metrics = self.serialize_metric_set()
                     self.clear_metrics()
