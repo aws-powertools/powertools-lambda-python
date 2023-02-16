@@ -728,7 +728,10 @@ def test_log_metrics_decorator_no_metrics_warning(dimensions, namespace, service
         warnings.simplefilter("default")
         lambda_handler({}, {})
         assert len(w) == 1
-        assert str(w[-1].message) == "No metrics to publish, skipping"
+        assert str(w[-1].message) == (
+            "No application metrics to publish. The cold-start metric may be published if enabled. "
+            "If application metrics should never be empty, consider using 'raise_on_empty_metrics'"
+        )
 
 
 def test_log_metrics_with_implicit_dimensions_called_twice(capsys, metric, namespace, service):
