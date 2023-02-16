@@ -1,4 +1,5 @@
 import json
+import uuid
 from random import randint
 from typing import Any, Awaitable, Callable, Dict, Optional
 
@@ -9,6 +10,7 @@ from aws_lambda_powertools.utilities.batch import (
     AsyncBatchProcessor,
     BatchProcessor,
     EventType,
+    SQSFifoPartialProcessor,
     async_batch_processor,
     batch_processor,
 )
@@ -40,7 +42,7 @@ from tests.functional.utils import b64_to_str, str_to_b64
 def sqs_event_factory() -> Callable:
     def factory(body: str):
         return {
-            "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
+            "messageId": str(uuid.uuid4()),
             "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a",
             "body": body,
             "attributes": {
@@ -108,6 +110,17 @@ def dynamodb_event_factory() -> Callable:
 
 @pytest.fixture(scope="module")
 def record_handler() -> Callable:
+    def handler(record):
+        body = record["body"]
+        if "fail" in body:
+            raise Exception("Failed to process record.")
+        return body
+
+    return handler
+
+
+@pytest.fixture(scope="module")
+def sqs_fifo_record_handler() -> Callable:
     def handler(record):
         body = record["body"]
         if "fail" in body:
@@ -652,6 +665,48 @@ def test_batch_processor_error_when_entire_batch_fails(sqs_event_factory, record
 
     # THEN raise BatchProcessingError
     assert "All records failed processing. " in str(e.value)
+
+
+def test_sqs_fifo_batch_processor_middleware_success_only(sqs_event_factory, sqs_fifo_record_handler):
+    # GIVEN
+    first_record = SQSRecord(sqs_event_factory("success"))
+    second_record = SQSRecord(sqs_event_factory("success"))
+    event = {"Records": [first_record.raw_event, second_record.raw_event]}
+
+    processor = SQSFifoPartialProcessor()
+
+    @batch_processor(record_handler=sqs_fifo_record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
+
+    # WHEN
+    result = lambda_handler(event, {})
+
+    # THEN
+    assert result["batchItemFailures"] == []
+
+
+def test_sqs_fifo_batch_processor_middleware_with_failure(sqs_event_factory, sqs_fifo_record_handler):
+    # GIVEN
+    first_record = SQSRecord(sqs_event_factory("success"))
+    second_record = SQSRecord(sqs_event_factory("fail"))
+    # this would normally suceed, but since it's a FIFO queue, it will be marked as failure
+    third_record = SQSRecord(sqs_event_factory("success"))
+    event = {"Records": [first_record.raw_event, second_record.raw_event, third_record.raw_event]}
+
+    processor = SQSFifoPartialProcessor()
+
+    @batch_processor(record_handler=sqs_fifo_record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
+
+    # WHEN
+    result = lambda_handler(event, {})
+
+    # THEN
+    assert len(result["batchItemFailures"]) == 2
+    assert result["batchItemFailures"][0]["itemIdentifier"] == second_record.message_id
+    assert result["batchItemFailures"][1]["itemIdentifier"] == third_record.message_id
 
 
 def test_async_batch_processor_middleware_success_only(sqs_event_factory, async_record_handler):
