@@ -19,10 +19,10 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         connection,
         static_pk_value: Optional[str] = None,
         expiry_attr: str = "expiration",
-        in_progress_expiry_attr: str = "in_progress_expiration",
+        in_progress_expiry_attr="in_progress_expiration",
         status_attr: str = "status",
         data_attr: str = "data",
-        validation_key_attr: str = "validation",
+        validation_key_attr="validation",
     ):
         """
         Initialize the Redis Persistence Layer
@@ -53,12 +53,6 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         self.data_attr = data_attr
         self.validation_key_attr = validation_key_attr
         super(RedisCachePersistenceLayer, self).__init__()
-
-    def _get_key(self, idempotency_key: str) -> dict:
-        # Need to review this after adding GETKEY logic
-        if self.sort_key_attr:
-            return {self.key_attr: self.static_pk_value, self.sort_key_attr: idempotency_key}
-        return {self.key_attr: idempotency_key}
 
     def _item_to_data_record(self, item: Dict[str, Any]) -> DataRecord:
         # Need to review this after adding GETKEY logic
@@ -93,10 +87,10 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         }
 
         if data_record.in_progress_expiry_timestamp is not None:
-            item["mapping"][self.in_progress_expiry_attr] = data_record.in_progress_expiry_timestamp
+            item.update({"mapping": {self.in_progress_expiry_attr: data_record.in_progress_expiry_timestamp}})
 
         if self.payload_validation_enabled:
-            item["mapping"][self.validation_key_attr] = data_record.payload_hash
+            item.update({"mapping": {self.validation_key_attr: data_record.payload_hash}})
 
         try:
             # |     LOCKED     |         RETRY if status = "INPROGRESS"                |     RETRY
