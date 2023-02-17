@@ -166,7 +166,7 @@ You can also combine nested paths with greedy regex to catch in between routes.
 
 ### HTTP Methods
 
-You can use named decorators to specify the HTTP method that should be handled in your functions. That is, `app.<http_method>`, where the HTTP method could be `get`, `post`, `put`, `patch`, `delete`, and `options`.
+You can use named decorators to specify the HTTP method that should be handled in your functions. That is, `app.<http_method>`, where the HTTP method could be `get`, `post`, `put`, `patch` and `delete`.
 
 === "http_methods.py"
 
