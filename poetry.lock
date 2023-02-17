@@ -27,7 +27,7 @@ name = "async-timeout"
 version = "4.0.2"
 description = "Timeout context manager for asyncio programs"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.6"
 files = [
     {file = "async-timeout-4.0.2.tar.gz", hash = "sha256:2163e1640ddb52b7a8c80d0a67a08587e5d245cc9c553a74a847056bc2976b15"},
@@ -2536,7 +2536,7 @@ name = "redis"
 version = "4.5.1"
 description = "Python client for Redis database and key-value store"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "redis-4.5.1-py3-none-any.whl", hash = "sha256:5deb072d26e67d2be1712603bfb7947ec3431fb0eec9c578994052e33035af6d"},
@@ -3144,4 +3144,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "ddcef7738045cc2c082cb5a58200d7a2305e82376415a382d56d03227ae83ba1"
+content-hash = "bdbccdd716558b962a801c46c062aeb7892153a1f821c3cfee836294a102cb0f"

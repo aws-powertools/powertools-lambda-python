@@ -107,6 +107,7 @@ mypy = "^0.982"
 types-python-dateutil = "^2.8.19.6"
 types-redis = "^4.5.1.1"
 httpx = "^0.23.3"
+redis = "^4.5.1"
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]
