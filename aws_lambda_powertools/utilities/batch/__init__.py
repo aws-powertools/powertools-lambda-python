@@ -19,12 +19,14 @@ from aws_lambda_powertools.utilities.batch.exceptions import ExceptionInfo
 from aws_lambda_powertools.utilities.batch.sqs_fifo_partial_processor import (
     SQSFifoPartialProcessor,
 )
+from aws_lambda_powertools.utilities.batch.types import BatchTypeModels
 
 __all__ = (
     "BatchProcessor",
     "AsyncBatchProcessor",
     "BasePartialProcessor",
     "BasePartialBatchProcessor",
+    "BatchTypeModels",
     "ExceptionInfo",
     "EventType",
     "FailureResponse",

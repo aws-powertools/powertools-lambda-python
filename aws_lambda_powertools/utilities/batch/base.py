@@ -19,7 +19,6 @@ from typing import (
     List,
     Optional,
     Tuple,
-    Type,
     Union,
     overload,
 )
@@ -30,6 +29,7 @@ from aws_lambda_powertools.utilities.batch.exceptions import (
     BatchProcessingError,
     ExceptionInfo,
 )
+from aws_lambda_powertools.utilities.batch.types import BatchTypeModels
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
     DynamoDBRecord,
 )
@@ -47,24 +47,6 @@ class EventType(Enum):
     KinesisDataStreams = "KinesisDataStreams"
     DynamoDBStreams = "DynamoDBStreams"
 
-
-#
-# type specifics
-#
-has_pydantic = "pydantic" in sys.modules
-
-# For IntelliSense and Mypy to work, we need to account for possible SQS, Kinesis and DynamoDB subclasses
-# We need them as subclasses as we must access their message ID or sequence number metadata via dot notation
-if has_pydantic:
-    from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamRecordModel
-    from aws_lambda_powertools.utilities.parser.models import (
-        KinesisDataStreamRecord as KinesisDataStreamRecordModel,
-    )
-    from aws_lambda_powertools.utilities.parser.models import SqsRecordModel
-
-    BatchTypeModels = Optional[
-        Union[Type[SqsRecordModel], Type[DynamoDBStreamRecordModel], Type[KinesisDataStreamRecordModel]]
-    ]
 
 # When using processor with default arguments, records will carry EventSourceDataClassTypes
 # and depending on what EventType it's passed it'll correctly map to the right record

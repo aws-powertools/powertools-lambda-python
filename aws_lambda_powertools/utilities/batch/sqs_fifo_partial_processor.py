@@ -1,18 +1,7 @@
-import sys
-from typing import List, Optional, Tuple, Type
+from typing import List, Optional, Tuple
 
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
-from aws_lambda_powertools.utilities.parser.models import SqsRecordModel
-
-#
-# type specifics
-#
-has_pydantic = "pydantic" in sys.modules
-
-# For IntelliSense and Mypy to work, we need to account for possible SQS subclasses
-# We need them as subclasses as we must access their message ID or sequence number metadata via dot notation
-if has_pydantic:
-    BatchTypeModels = Optional[Type[SqsRecordModel]]
+from aws_lambda_powertools.utilities.batch.types import BatchSqsTypeModel
 
 
 class SQSFifoCircuitBreakerError(Exception):
@@ -24,10 +13,9 @@ class SQSFifoCircuitBreakerError(Exception):
 
 
 class SQSFifoPartialProcessor(BatchProcessor):
-    """Specialized BatchProcessor subclass that handles FIFO SQS batch records.
+    """Process native partial responses from SQS FIFO queues.
 
-    As soon as the processing of the first record fails, the remaining records
-    are marked as failed without processing, and returned as native partial responses.
+    Stops processing records when the first record fails. The remaining records are reported as failed items.
 
     Example
     _______
@@ -63,38 +51,41 @@ class SQSFifoPartialProcessor(BatchProcessor):
     ```
     """
 
-    circuitBreakerError = SQSFifoCircuitBreakerError("A previous record failed processing.")
+    circuit_breaker_exc = (
+        SQSFifoCircuitBreakerError,
+        SQSFifoCircuitBreakerError("A previous record failed processing"),
+        None,
+    )
 
-    def __init__(self, model: Optional["BatchTypeModels"] = None):
+    def __init__(self, model: Optional["BatchSqsTypeModel"] = None):
         super().__init__(EventType.SQS, model)
 
     def process(self) -> List[Tuple]:
+        """
+        Call instance's handler for each record. When the first failed message is detected,
+        the process is short-circuited, and the remaining messages are reported as failed items.
+        """
         result: List[Tuple] = []
 
         for i, record in enumerate(self.records):
-            """
-            If we have failed messages, it means that the last message failed.
-            We then short circuit the process, failing the remaining messages
-            """
+            # If we have failed messages, it means that the last message failed.
+            # We then short circuit the process, failing the remaining messages
             if self.fail_messages:
                 return self._short_circuit_processing(i, result)
 
-            """
-            Otherwise, process the message normally
-            """
+            # Otherwise, process the message normally
             result.append(self._process_record(record))
 
         return result
 
     def _short_circuit_processing(self, first_failure_index: int, result: List[Tuple]) -> List[Tuple]:
+        """
+        Starting from the first failure index, fail all the remaining messages, and append them to the result list.
+        """
         remaining_records = self.records[first_failure_index:]
         for remaining_record in remaining_records:
             data = self._to_batch_type(record=remaining_record, event_type=self.event_type, model=self.model)
-            result.append(
-                self.failure_handler(
-                    record=data, exception=(type(self.circuitBreakerError), self.circuitBreakerError, None)
-                )
-            )
+            result.append(self.failure_handler(record=data, exception=self.circuit_breaker_exc))
         return result
 
     async def _async_process_record(self, record: dict):
