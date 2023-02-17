@@ -95,7 +95,6 @@ class RedisStandalone(RedisConnection):
             Redis client object configured from the given URL
             See: https://redis.readthedocs.io/en/latest/connections.html#redis.Redis.from_url
         """
-        print(extra_options)
         super().__init__(redis.Redis, host, port, username, password, db_index, url, **extra_options)
 
 
