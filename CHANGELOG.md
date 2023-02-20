@@ -16,6 +16,10 @@
 * **home:** update powertools definition
 * **we-made-this:** add Feature Flags post ([#1939](https://github.com/awslabs/aws-lambda-powertools-python/issues/1939))
 
+## Features
+
+* **batch:** add support to SQS FIFO queues (SqsFifoPartialProcessor) ([#1934](https://github.com/awslabs/aws-lambda-powertools-python/issues/1934))
+
 ## Maintenance
 
 * **deps:** bump pydantic from 1.10.4 to 1.10.5 ([#1931](https://github.com/awslabs/aws-lambda-powertools-python/issues/1931))
