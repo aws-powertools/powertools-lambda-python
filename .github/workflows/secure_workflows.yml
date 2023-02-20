@@ -16,7 +16,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Ensure 3rd party workflows have SHA pinned
-        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@bd2868d14a756969608c618665394415a238de69 # v2.0.5
+        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@b9ddf6a5153efe6fb94f071c8915175afdce60fa # v2.1.0
         with:
           # Trusted GitHub Actions and/or organizations
           allowlist: |
