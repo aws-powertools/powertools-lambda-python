@@ -42,7 +42,7 @@ from tests.functional.utils import b64_to_str, str_to_b64
 def sqs_event_factory() -> Callable:
     def factory(body: str):
         return {
-            "messageId": str(uuid.uuid4()),
+            "messageId": f"{uuid.uuid4()}",
             "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a",
             "body": body,
             "attributes": {
