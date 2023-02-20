@@ -347,6 +347,23 @@ Processing batches from SQS works in four stages:
     }
     ```
 
+#### FIFO queues
+
+When using [SQS FIFO queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html){target="_blank"}, we will stop processing messages after the first failure, and return all failed and unprocessed messages in `batchItemFailures`.
+This helps preserve the ordering of messages in your queue.
+
+=== "As a decorator"
+
+    ```python hl_lines="5 11"
+    --8<-- "examples/batch_processing/src/sqs_fifo_batch_processor.py"
+    ```
+
+=== "As a context manager"
+
+    ```python hl_lines="4 8"
+    --8<-- "examples/batch_processing/src/sqs_fifo_batch_processor_context_manager.py"
+    ```
+
 ### Processing messages from Kinesis
 
 Processing batches from Kinesis works in four stages:
