@@ -10,7 +10,7 @@ from aws_lambda_powertools.utilities.batch import (
     AsyncBatchProcessor,
     BatchProcessor,
     EventType,
-    SQSFifoPartialProcessor,
+    SqsFifoPartialProcessor,
     async_batch_processor,
     batch_processor,
 )
@@ -110,17 +110,6 @@ def dynamodb_event_factory() -> Callable:
 
 @pytest.fixture(scope="module")
 def record_handler() -> Callable:
-    def handler(record):
-        body = record["body"]
-        if "fail" in body:
-            raise Exception("Failed to process record.")
-        return body
-
-    return handler
-
-
-@pytest.fixture(scope="module")
-def sqs_fifo_record_handler() -> Callable:
     def handler(record):
         body = record["body"]
         if "fail" in body:
@@ -667,15 +656,15 @@ def test_batch_processor_error_when_entire_batch_fails(sqs_event_factory, record
     assert "All records failed processing. " in str(e.value)
 
 
-def test_sqs_fifo_batch_processor_middleware_success_only(sqs_event_factory, sqs_fifo_record_handler):
+def test_sqs_fifo_batch_processor_middleware_success_only(sqs_event_factory, record_handler):
     # GIVEN
     first_record = SQSRecord(sqs_event_factory("success"))
     second_record = SQSRecord(sqs_event_factory("success"))
     event = {"Records": [first_record.raw_event, second_record.raw_event]}
 
-    processor = SQSFifoPartialProcessor()
+    processor = SqsFifoPartialProcessor()
 
-    @batch_processor(record_handler=sqs_fifo_record_handler, processor=processor)
+    @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context):
         return processor.response()
 
@@ -686,17 +675,17 @@ def test_sqs_fifo_batch_processor_middleware_success_only(sqs_event_factory, sqs
     assert result["batchItemFailures"] == []
 
 
-def test_sqs_fifo_batch_processor_middleware_with_failure(sqs_event_factory, sqs_fifo_record_handler):
+def test_sqs_fifo_batch_processor_middleware_with_failure(sqs_event_factory, record_handler):
     # GIVEN
     first_record = SQSRecord(sqs_event_factory("success"))
     second_record = SQSRecord(sqs_event_factory("fail"))
-    # this would normally suceed, but since it's a FIFO queue, it will be marked as failure
+    # this would normally succeed, but since it's a FIFO queue, it will be marked as failure
     third_record = SQSRecord(sqs_event_factory("success"))
     event = {"Records": [first_record.raw_event, second_record.raw_event, third_record.raw_event]}
 
-    processor = SQSFifoPartialProcessor()
+    processor = SqsFifoPartialProcessor()
 
-    @batch_processor(record_handler=sqs_fifo_record_handler, processor=processor)
+    @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context):
         return processor.response()
 

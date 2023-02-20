@@ -12,7 +12,7 @@ class SQSFifoCircuitBreakerError(Exception):
     pass
 
 
-class SQSFifoPartialProcessor(BatchProcessor):
+class SqsFifoPartialProcessor(BatchProcessor):
     """Process native partial responses from SQS FIFO queues.
 
     Stops processing records when the first record fails. The remaining records are reported as failed items.
@@ -26,12 +26,12 @@ class SQSFifoPartialProcessor(BatchProcessor):
     import json
 
     from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import SQSFifoPartialProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.batch import SqsFifoPartialProcessor, EventType, batch_processor
     from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
-    processor = SQSFifoPartialProcessor()
+    processor = SqsFifoPartialProcessor()
     tracer = Tracer()
     logger = Logger()
 

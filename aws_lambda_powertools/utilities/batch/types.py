@@ -20,5 +20,5 @@ if has_pydantic:
     ]
     BatchSqsTypeModel = Optional[Type[SqsRecordModel]]
 else:
-    BatchTypeModels = Optional  # type: ignore
-    BatchSqsTypeModel = Optional  # type: ignore
+    BatchTypeModels = "BatchTypeModels"  # type: ignore
+    BatchSqsTypeModel = "BatchSqsTypeModel"  # type: ignore
