@@ -43,18 +43,18 @@ tests-no-zope = ["cloudpickle", "cloudpickle", "hypothesis", "hypothesis", "mypy
 
 [[package]]
 name = "aws-cdk-asset-awscli-v1"
-version = "2.2.67"
+version = "2.2.74"
 description = "A library that contains the AWS CLI for use in Lambda Layers"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.asset-awscli-v1-2.2.67.tar.gz", hash = "sha256:92d3c003e692a4feafbcf215fd4b8c6321a0dc86f82008d906892ca6eac08851"},
-    {file = "aws_cdk.asset_awscli_v1-2.2.67-py3-none-any.whl", hash = "sha256:250c66fe8611c4cdef115ce32bb02d19d374597c53b299c68bb2a1070dd66727"},
+    {file = "aws-cdk.asset-awscli-v1-2.2.74.tar.gz", hash = "sha256:59dd8343c89fd2c1f4f23d7934da32139c302273cb6f7258e01c3ea9ae4ccd44"},
+    {file = "aws_cdk.asset_awscli_v1-2.2.74-py3-none-any.whl", hash = "sha256:865c02f4e04440507c494c0617ec3ced8f1cb426717619a83ace71b10b1a5fe0"},
 ]
 
 [package.dependencies]
-jsii = ">=1.74.0,<2.0.0"
+jsii = ">=1.75.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -77,18 +77,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-asset-node-proxy-agent-v5"
-version = "2.0.56"
+version = "2.0.63"
 description = "@aws-cdk/asset-node-proxy-agent-v5"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.asset-node-proxy-agent-v5-2.0.56.tar.gz", hash = "sha256:4014d618fe22e8cfe026d5307728af434c695c039716ad31544a2b5301a98de1"},
-    {file = "aws_cdk.asset_node_proxy_agent_v5-2.0.56-py3-none-any.whl", hash = "sha256:47bd82e63988a4d1982aa2d04367df10b1e564971847adf3e9d42c0fdce0adeb"},
+    {file = "aws-cdk.asset-node-proxy-agent-v5-2.0.63.tar.gz", hash = "sha256:f40771dbccf221ec27077d1c95067737919b1c1626caa760a9f881b698049591"},
+    {file = "aws_cdk.asset_node_proxy_agent_v5-2.0.63-py3-none-any.whl", hash = "sha256:128cba2bb8d0288c7037d4ddace9450d288ef272c2c59fb9dab8fe206e5a4994"},
 ]
 
 [package.dependencies]
-jsii = ">=1.74.0,<2.0.0"
+jsii = ">=1.75.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -153,22 +153,22 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.65.0"
+version = "2.66.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk-lib-2.65.0.tar.gz", hash = "sha256:7d2ea69f827b7f325567109c482ead017f5d2e0fc071d4b352f5db87c24ba010"},
-    {file = "aws_cdk_lib-2.65.0-py3-none-any.whl", hash = "sha256:ea12088a72b858a9bf1aaaf0f6de5e6dfe5962b382324239eb7c830327b84f7c"},
+    {file = "aws-cdk-lib-2.66.0.tar.gz", hash = "sha256:a385b7bad334a13db354b36c918ac6c9917356be7fecc4c39d0f1cb99eeaa0ac"},
+    {file = "aws_cdk_lib-2.66.0-py3-none-any.whl", hash = "sha256:28cfa3d97a0d2278c4e8daf3ab368010a0997bc7e738d9d1b9d3681da5983bf1"},
 ]
 
 [package.dependencies]
-"aws-cdk.asset-awscli-v1" = ">=2.2.65,<3.0.0"
+"aws-cdk.asset-awscli-v1" = ">=2.2.69,<3.0.0"
 "aws-cdk.asset-kubectl-v20" = ">=2.1.1,<3.0.0"
-"aws-cdk.asset-node-proxy-agent-v5" = ">=2.0.54,<3.0.0"
+"aws-cdk.asset-node-proxy-agent-v5" = ">=2.0.58,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.74.0,<2.0.0"
+jsii = ">=1.75.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -1218,14 +1218,14 @@ pbr = "*"
 
 [[package]]
 name = "jsii"
-version = "1.74.0"
+version = "1.75.0"
 description = "Python client for jsii runtime"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "jsii-1.74.0-py3-none-any.whl", hash = "sha256:ee76781fe66106c367fbb3bb383db4f5e9b8ff3d3c4c0f34624c050211f040be"},
-    {file = "jsii-1.74.0.tar.gz", hash = "sha256:575131396ad34f8f6e9f2604953ecbf4f3368625656a828b13089e4abb81b443"},
+    {file = "jsii-1.75.0-py3-none-any.whl", hash = "sha256:0a36266470e223413f5e3b10ab656bb0a9c8a8902aa180a0c1ebcc93cc15cfce"},
+    {file = "jsii-1.75.0.tar.gz", hash = "sha256:87ecc63fdd7e972ae35f25e0804d86ce6f56871f1f4b0dc4e620d3e9fe761912"},
 ]
 
 [package.dependencies]
@@ -2958,4 +2958,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "9a325439a5db67bb46298936cae243c40613cf8db568e36a42dbeeda1d2bbc4e"
+content-hash = "a50dc7f4f9d6e7ee087f4ddc4bbaf8f050e089629eb56462b822781fd817a537"
