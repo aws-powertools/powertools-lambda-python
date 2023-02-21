@@ -76,14 +76,14 @@ class EventBridgeEvent(DictWrapper):
         URLs:
             https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-putevent-size.html
         """
-
         size = 0
-        if self["time"] is not None:
+        if self.get("time") is not None:
             size += 14
-        size += len(self["source"].encode("utf-8"))
-        size += len(self["detail-type"].encode("utf-8"))
-        size += len(json.dumps(self["detail"]).encode("utf-8"))
+        size += len(self["source"].encode())
+        size += len(self["detail-type"].encode())
+        if len(self["detail"]) > 0:
+            size += len(json.dumps(self["detail"]).encode())
         for resource in self["resources"]:
             if resource:
-                size += len(resource.encode("utf-8"))
+                size += len(resource.encode())
         return size
