@@ -6,6 +6,7 @@
 
 ## Bug Fixes
 
+* **ci:** upgraded cdk to match the version used on e2e tests
 * **feature-flags:** revert RuleAction Enum inheritance on str ([#1910](https://github.com/awslabs/aws-lambda-powertools-python/issues/1910))
 * **logger:** support exception and exception_name fields at any log level ([#1930](https://github.com/awslabs/aws-lambda-powertools-python/issues/1930))
 * **metrics:** clarify no-metrics user warning ([#1935](https://github.com/awslabs/aws-lambda-powertools-python/issues/1935))
@@ -14,6 +15,7 @@
 
 * **event_handlers:** Fix REST API - HTTP Methods documentation ([#1936](https://github.com/awslabs/aws-lambda-powertools-python/issues/1936))
 * **home:** update powertools definition
+* **we-made-this:** add CI/CD using Feature Flags video   ([#1940](https://github.com/awslabs/aws-lambda-powertools-python/issues/1940))
 * **we-made-this:** add Feature Flags post ([#1939](https://github.com/awslabs/aws-lambda-powertools-python/issues/1939))
 
 ## Features
@@ -22,7 +24,9 @@
 
 ## Maintenance
 
+* **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 2.0.5 to 2.1.0 ([#1943](https://github.com/awslabs/aws-lambda-powertools-python/issues/1943))
 * **deps:** bump pydantic from 1.10.4 to 1.10.5 ([#1931](https://github.com/awslabs/aws-lambda-powertools-python/issues/1931))
+* **deps-dev:** bump mkdocs-material from 9.0.12 to 9.0.13 ([#1944](https://github.com/awslabs/aws-lambda-powertools-python/issues/1944))
 * **deps-dev:** bump aws-cdk-lib from 2.64.0 to 2.65.0 ([#1938](https://github.com/awslabs/aws-lambda-powertools-python/issues/1938))
 * **deps-dev:** bump types-python-dateutil from 2.8.19.6 to 2.8.19.7 ([#1932](https://github.com/awslabs/aws-lambda-powertools-python/issues/1932))
 * **deps-dev:** bump types-requests from 2.28.11.12 to 2.28.11.13 ([#1933](https://github.com/awslabs/aws-lambda-powertools-python/issues/1933))
