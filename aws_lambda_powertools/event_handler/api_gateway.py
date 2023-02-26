@@ -667,7 +667,8 @@ class ApiGatewayResolver(BaseRouter):
     def _call_route(self, route: Route, args: Dict[str, str]) -> ResponseBuilder:
         """Actually call the matching route with any provided keyword arguments."""
         try:
-            return ResponseBuilder(self._to_response(route.func(**args)), route)
+            kwargs = {"event": self.current_event, "context": self.context}
+            return ResponseBuilder(self._to_response(route.func(**args, **kwargs)), route)
         except Exception as exc:
             response_builder = self._call_exception_handler(exc, route)
             if response_builder:

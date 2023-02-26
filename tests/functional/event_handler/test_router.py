@@ -17,6 +17,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEventV2,
     LambdaFunctionUrlEvent,
 )
+from aws_lambda_powertools.utilities.typing.lambda_context import LambdaContext
 from tests.functional.utils import load_event
 
 
@@ -25,7 +26,7 @@ def test_alb_router_event_type():
     router = ALBRouter()
 
     @router.route(rule="/lambda", method=["GET"])
-    def foo():
+    def foo(event: ALBEvent, context: LambdaContext):
         assert type(router.current_event) is ALBEvent
         return Response(status_code=200, body="routed")
 
@@ -39,7 +40,7 @@ def test_apigateway_router_event_type():
     router = APIGatewayRouter()
 
     @router.route(rule="/my/path", method=["GET"])
-    def foo():
+    def foo(event: APIGatewayProxyEvent, context: LambdaContext):
         assert type(router.current_event) is APIGatewayProxyEvent
         return Response(status_code=200, body="routed")
 
@@ -53,7 +54,7 @@ def test_apigatewayhttp_router_event_type():
     router = APIGatewayHttpRouter()
 
     @router.route(rule="/my/path", method=["POST"])
-    def foo():
+    def foo(event: APIGatewayProxyEventV2, context: LambdaContext):
         assert type(router.current_event) is APIGatewayProxyEventV2
         return Response(status_code=200, body="routed")
 
@@ -67,7 +68,7 @@ def test_lambda_function_url_router_event_type():
     router = LambdaFunctionUrlRouter()
 
     @router.route(rule="/", method=["GET"])
-    def foo():
+    def foo(event: LambdaFunctionUrlEvent, context: LambdaContext):
         assert type(router.current_event) is LambdaFunctionUrlEvent
         return Response(status_code=200, body="routed")
 
