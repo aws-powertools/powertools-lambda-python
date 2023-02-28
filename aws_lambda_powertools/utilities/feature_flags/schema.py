@@ -23,7 +23,7 @@ TIME_RANGE_RE_PATTERN = re.compile(r"2[0-3]:[0-5]\d|[0-1]\d:[0-5]\d")  # 24 hour
 HOUR_MIN_SEPARATOR = ":"
 
 
-class RuleAction(Enum):
+class RuleAction(str, Enum):
     EQUALS = "EQUALS"
     NOT_EQUALS = "NOT_EQUALS"
     KEY_GREATER_THAN_VALUE = "KEY_GREATER_THAN_VALUE"
@@ -272,7 +272,6 @@ class ConditionsValidator(BaseValidator):
         self.logger = logger or logging.getLogger(__name__)
 
     def validate(self):
-
         if not self.conditions or not isinstance(self.conditions, list):
             self.logger.debug(f"Condition is empty or invalid for rule={self.rule_name}")
             raise SchemaValidationError(f"Invalid condition, rule={self.rule_name}")

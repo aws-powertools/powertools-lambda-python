@@ -68,6 +68,14 @@ This article walks through a sample AWS EventBridge cookiecutter template presen
 * [binx.io/2022/10/11/speedup-event-driven-projects/](https://binx.io/2022/10/11/speedup-event-driven-projects/){target="_blank"}
 * [Slides](https://www.slideshare.net/JorisConijn/let-codecommit-work-for-you){target="_blank"}
 
+### Implementing Feature Flags with AWS AppConfig and AWS Lambda Powertools
+
+> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/IsenbergRan){target="_blank"} [:material-linkedin:](https://www.linkedin.com/in/ranisenberg/){target="_blank"}**
+
+This article walks through how CyberArk uses Powertools to implement Feature Flags with AWS AppConfig
+
+* [aws.amazon.com/blogs/mt/how-cyberark-implements-feature-flags-with-aws-appconfig](https://aws.amazon.com/blogs/mt/how-cyberark-implements-feature-flags-with-aws-appconfig){target="_blank"}
+
 ## Videos
 
 #### Building a resilient input handling with Parser
@@ -87,6 +95,16 @@ In this session you will learn how to increase code quality, extensibility and t
 A deep dive in the [Feature Flags](./utilities/feature_flags.md){target="_blank"} feature along with tips and tricks.
 
 <iframe src="https://player.twitch.tv/?video=1174133534&parent=awslabs.github.io&autoplay=false" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
+
+#### Level Up Your CI/CD With Smart AWS Feature Flags
+
+> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/IsenbergRan){target="_blank"} [:material-linkedin:](https://www.linkedin.com/in/ranisenberg/){target="_blank"}**
+
+Feature flags can improve your CI/CD process by enabling capabilities otherwise not possible, thus making them an enabler of DevOps and a crucial part of continuous integration. Partial rollouts, A/B testing, and the ability to quickly change a configuration without redeploying code are advantages you gain by using features flags.
+
+In this talk, you will learn the added value of using feature flags as part of your CI/CD process and how AWS Lambda Powertools can help with that.
+
+<iframe width="620" height="378" src="https://www.youtube.com/embed/3IT4UzN9Jds" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
 ## Workshops
 

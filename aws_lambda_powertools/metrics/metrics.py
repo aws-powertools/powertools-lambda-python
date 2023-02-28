@@ -50,7 +50,9 @@ class Metrics(MetricManager):
     Raises
     ------
     MetricUnitError
-        When metric metric isn't supported by CloudWatch
+        When metric unit isn't supported by CloudWatch
+    MetricResolutionError
+        When metric resolution isn't supported by CloudWatch
     MetricValueError
         When metric value isn't a number
     SchemaValidationError

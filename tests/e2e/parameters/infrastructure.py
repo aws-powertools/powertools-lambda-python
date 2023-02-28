@@ -34,7 +34,6 @@ class ParametersStack(BaseInfrastructure):
         )
 
     def _create_app_config(self, function: Function):
-
         service_name = build_service_name()
 
         cfn_application = appconfig.CfnApplication(
@@ -82,7 +81,6 @@ class ParametersStack(BaseInfrastructure):
         function: Function,
         service_name: str,
     ):
-
         cfn_configuration_profile = appconfig.CfnConfigurationProfile(
             self.stack,
             "appconfig-profile",

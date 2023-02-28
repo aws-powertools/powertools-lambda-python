@@ -501,7 +501,9 @@ class ApiGatewayResolver(BaseRouter):
                 self._routes.append(Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control))
                 route_key = item + rule
                 if route_key in self._route_keys:
-                    warnings.warn(f"A route like this was already registered. method: '{item}' rule: '{rule}'")
+                    warnings.warn(
+                        f"A route like this was already registered. method: '{item}' rule: '{rule}'", stacklevel=2
+                    )
                 self._route_keys.append(route_key)
                 if cors_enabled:
                     logger.debug(f"Registering method {item.upper()} to Allow Methods in CORS")
@@ -526,7 +528,9 @@ class ApiGatewayResolver(BaseRouter):
         """
         if isinstance(event, BaseProxyEvent):
             warnings.warn(
-                "You don't need to serialize event to Event Source Data Class when using Event Handler; see issue #1152"
+                "You don't need to serialize event to Event Source Data Class when using Event Handler; "
+                "see issue #1152",
+                stacklevel=2,
             )
             event = event.raw_event
 
@@ -836,7 +840,6 @@ class APIGatewayRestResolver(ApiGatewayResolver):
     # Override _compile_regex to exclude trailing slashes for route resolution
     @staticmethod
     def _compile_regex(rule: str, base_regex: str = _ROUTE_REGEX):
-
         return super(APIGatewayRestResolver, APIGatewayRestResolver)._compile_regex(rule, "^{}/*$")
 
 
