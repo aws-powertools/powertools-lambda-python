@@ -61,25 +61,25 @@ Here's an example with two separate functions to resolve `getTodo` and `listTodo
 
 === "getting_started_graphql_api_resolver.py"
 
-    ```python hl_lines="14 20 30 32-33 42 44 55"
+    ```python hl_lines="14 21 31 33-34 43 45 53 55 70"
     --8<-- "examples/event_handler_graphql/src/getting_started_graphql_api_resolver.py"
     ```
 
 === "getting_started_schema.graphql"
 
-    ```typescript hl_lines="6-7"
+    ```typescript hl_lines="6-8 12"
     --8<-- "examples/event_handler_graphql/src/getting_started_schema.graphql"
     ```
 
 === "getting_started_get_todo.json"
 
-    ```json hl_lines="2-3"
+    ```json hl_lines="2-3 42"
     --8<-- "examples/event_handler_graphql/src/getting_started_get_todo.json"
     ```
 
 === "getting_started_list_todos.json"
 
-    ```json hl_lines="2 40 42"
+    ```json hl_lines="2 40"
     --8<-- "examples/event_handler_graphql/src/getting_started_list_todos.json"
     ```
 
