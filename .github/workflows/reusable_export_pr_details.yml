@@ -71,19 +71,19 @@ jobs:
       # otherwise the parent caller won't see them regardless on how outputs are set.
       - name: "Export Pull Request Number"
         id: prNumber
-        run: echo ::set-output name=prNumber::$(jq -c '.number' ${FILENAME})
+        run: echo "prNumber=$(jq -c '.number' ${FILENAME})" >> $GITHUB_OUTPUT
       - name: "Export Pull Request Title"
         id: prTitle
-        run: echo ::set-output name=prTitle::$(jq -c '.pull_request.title' ${FILENAME})
+        run: echo "prTitle=$(jq -c '.pull_request.title' ${FILENAME})" >> $GITHUB_OUTPUT
       - name: "Export Pull Request Body"
         id: prBody
-        run: echo ::set-output name=prBody::$(jq -c '.pull_request.body' ${FILENAME})
+        run: echo "prBody=$(jq -c '.pull_request.body' ${FILENAME})" >> $GITHUB_OUTPUT
       - name: "Export Pull Request Author"
         id: prAuthor
-        run: echo ::set-output name=prAuthor::$(jq -c '.pull_request.user.login' ${FILENAME})
+        run: echo "prAuthor=$(jq -c '.pull_request.user.login' ${FILENAME})" >> $GITHUB_OUTPUT
       - name: "Export Pull Request Action"
         id: prAction
-        run: echo ::set-output name=prAction::$(jq -c '.action' ${FILENAME})
+        run: echo "prAction=$(jq -c '.action' ${FILENAME})" >> $GITHUB_OUTPUT
       - name: "Export Pull Request Merged status"
         id: prIsMerged
-        run: echo ::set-output name=prIsMerged::$(jq -c '.pull_request.merged' ${FILENAME})
+        run: echo "prIsMerged=$(jq -c '.pull_request.merged' ${FILENAME})" >> $GITHUB_OUTPUT
