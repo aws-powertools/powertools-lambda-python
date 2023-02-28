@@ -667,14 +667,14 @@ testing = ["pre-commit"]
 
 [[package]]
 name = "fastjsonschema"
-version = "2.16.2"
+version = "2.16.3"
 description = "Fastest Python implementation of JSON schema"
 category = "main"
 optional = true
 python-versions = "*"
 files = [
-    {file = "fastjsonschema-2.16.2-py3-none-any.whl", hash = "sha256:21f918e8d9a1a4ba9c22e09574ba72267a6762d47822db9add95f6454e51cc1c"},
-    {file = "fastjsonschema-2.16.2.tar.gz", hash = "sha256:01e366f25d9047816fe3d288cbfc3e10541daf0af2044763f3d0ade42476da18"},
+    {file = "fastjsonschema-2.16.3-py3-none-any.whl", hash = "sha256:04fbecc94300436f628517b05741b7ea009506ce8f946d40996567c669318490"},
+    {file = "fastjsonschema-2.16.3.tar.gz", hash = "sha256:4a30d6315a68c253cfa8f963b9697246315aa3db89f98b97235e345dedfb0b8e"},
 ]
 
 [package.extras]
