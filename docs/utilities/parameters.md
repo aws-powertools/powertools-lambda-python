@@ -33,7 +33,7 @@ This utility requires additional permissions to work as expected.
 | SSM       | **`get_parameters`**, **`SSMProvider.get_multiple`**                   | **`ssm:GetParametersByPath`**                                                        |
 | SSM       | **`get_parameters_by_name`**, **`SSMProvider.get_parameters_by_name`** | **`ssm:GetParameter`** and **`ssm:GetParameters`**                                   |
 | SSM       | If using **`decrypt=True`**                                            | You must add an additional permission **`kms:Decrypt`**                              |
-| Secrets   | **`get_secret`**, **`SecretsManager.get`**                             | **`secretsmanager:GetSecretValue`**                                                  |
+| Secrets   | **`get_secret`**, **`SecretsProvider.get`**                            | **`secretsmanager:GetSecretValue`**                                                 |
 | DynamoDB  | **`DynamoDBProvider.get`**                                             | **`dynamodb:GetItem`**                                                               |
 | DynamoDB  | **`DynamoDBProvider.get_multiple`**                                    | **`dynamodb:Query`**                                                                 |
 | AppConfig | **`get_app_config`**, **`AppConfigProvider.get_app_config`**           | **`appconfig:GetLatestConfiguration`** and **`appconfig:StartConfigurationSession`** |
@@ -212,7 +212,7 @@ For single parameters, you must use `id` as the [partition key](https://docs.aws
  | ------------ | -------- |
  | my-parameter | my-value |
 
-With this table, `dynamodb_provider.get("my-param")` will return `my-value`.
+With this table, `dynamodb_provider.get("my-parameter")` will return `my-value`.
 
 === "builtin_provider_dynamodb_single_parameter.py"
     ```python hl_lines="5 8 15"
@@ -237,7 +237,7 @@ You can retrieve multiple parameters sharing the same `id` by having a sort key 
 
 ???+ example
 
-	DynamoDB table with `id` primary key, `sk` as sort key` and `value` as attribute
+	DynamoDB table with `id` primary key, `sk` as sort key and `value` as attribute
 
  | id     | sk                | value                                            |
  | ------ | ----------------- | ------------------------------------------------ |
@@ -390,7 +390,7 @@ Here is the mapping between this utility's functions and methods and the underly
 | SSM Parameter Store | `SSMProvider.get`               | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter)                                                                                                                                                                                                                             |
 | SSM Parameter Store | `SSMProvider.get_multiple`      | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path)                                                                                                                                                                                                           |
 | Secrets Manager     | `get_secret`                    | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value)                                                                                                                                                                                                 |
-| Secrets Manager     | `SecretsManager.get`            | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value)                                                                                                                                                                                                 |
+| Secrets Manager     | `SecretsProvider.get`            | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value)                                                                                                                                                                                                 |
 | DynamoDB            | `DynamoDBProvider.get`          | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table))                                                                                                                                                                                                                                        | [get_item](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.get_item) |
 | DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table))                                                                                                                                                                                                                                        | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)       |
 | App Config          | `get_app_config`                | `appconfigdata`  | [start_configuration_session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.start_configuration_session) and [get_latest_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.get_latest_configuration) |
