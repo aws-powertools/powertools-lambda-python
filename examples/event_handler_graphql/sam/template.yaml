@@ -80,6 +80,10 @@ Resources:
             listTodos: [Todo]
         }
 
+        type Mutation {
+            createTodo(title: String!): Todo
+        }
+
         type Todo {
             id: ID!
             userId: String
@@ -113,6 +117,14 @@ Resources:
       ApiId: !GetAtt TodosApi.ApiId
       TypeName: "Query"
       FieldName: "getTodo"
+      DataSourceName: !GetAtt TodosFunctionDataSource.Name
+
+  CreateTodoResolver:
+    Type: "AWS::AppSync::Resolver"
+    Properties:
+      ApiId: !GetAtt TodosApi.ApiId
+      TypeName: "Mutation"
+      FieldName: "createTodo"
       DataSourceName: !GetAtt TodosFunctionDataSource.Name
 
 Outputs:
