@@ -4,6 +4,31 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **parameters:** fix typos and inconsistencies ([#1966](https://github.com/awslabs/aws-lambda-powertools-python/issues/1966))
+
+## Maintenance
+
+* **ci:** replace deprecated set-output commands ([#1957](https://github.com/awslabs/aws-lambda-powertools-python/issues/1957))
+* **deps:** bump fastjsonschema from 2.16.2 to 2.16.3 ([#1961](https://github.com/awslabs/aws-lambda-powertools-python/issues/1961))
+* **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 2.1.0 to 2.1.1 ([#1958](https://github.com/awslabs/aws-lambda-powertools-python/issues/1958))
+* **deps:** bump release-drafter/release-drafter from 5.22.0 to 5.23.0 ([#1947](https://github.com/awslabs/aws-lambda-powertools-python/issues/1947))
+* **deps-dev:** bump aws-cdk-lib from 2.66.0 to 2.66.1 ([#1954](https://github.com/awslabs/aws-lambda-powertools-python/issues/1954))
+* **deps-dev:** bump coverage from 7.2.0 to 7.2.1 ([#1963](https://github.com/awslabs/aws-lambda-powertools-python/issues/1963))
+* **deps-dev:** bump types-requests from 2.28.11.14 to 2.28.11.15 ([#1962](https://github.com/awslabs/aws-lambda-powertools-python/issues/1962))
+* **deps-dev:** bump types-python-dateutil from 2.8.19.8 to 2.8.19.9 ([#1960](https://github.com/awslabs/aws-lambda-powertools-python/issues/1960))
+* **deps-dev:** bump coverage from 7.1.0 to 7.2.0 ([#1951](https://github.com/awslabs/aws-lambda-powertools-python/issues/1951))
+* **deps-dev:** bump mkdocs-material from 9.0.13 to 9.0.14 ([#1952](https://github.com/awslabs/aws-lambda-powertools-python/issues/1952))
+* **deps-dev:** bump mypy-boto3-ssm from 1.26.43 to 1.26.77 ([#1949](https://github.com/awslabs/aws-lambda-powertools-python/issues/1949))
+* **deps-dev:** bump mkdocs-material from 9.0.14 to 9.0.15 ([#1959](https://github.com/awslabs/aws-lambda-powertools-python/issues/1959))
+* **deps-dev:** bump aws-cdk-lib from 2.65.0 to 2.66.0 ([#1948](https://github.com/awslabs/aws-lambda-powertools-python/issues/1948))
+* **deps-dev:** bump types-requests from 2.28.11.13 to 2.28.11.14 ([#1946](https://github.com/awslabs/aws-lambda-powertools-python/issues/1946))
+* **deps-dev:** bump types-python-dateutil from 2.8.19.7 to 2.8.19.8 ([#1945](https://github.com/awslabs/aws-lambda-powertools-python/issues/1945))
+
+
+<a name="v2.9.0"></a>
+## [v2.9.0] - 2023-02-21
 ## Bug Fixes
 
 * **ci:** upgraded cdk to match the version used on e2e tests
@@ -24,6 +49,7 @@
 
 ## Maintenance
 
+* update v2 layer ARN on documentation
 * **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 2.0.5 to 2.1.0 ([#1943](https://github.com/awslabs/aws-lambda-powertools-python/issues/1943))
 * **deps:** bump pydantic from 1.10.4 to 1.10.5 ([#1931](https://github.com/awslabs/aws-lambda-powertools-python/issues/1931))
 * **deps-dev:** bump mkdocs-material from 9.0.12 to 9.0.13 ([#1944](https://github.com/awslabs/aws-lambda-powertools-python/issues/1944))
@@ -2891,7 +2917,8 @@
 * Merge pull request [#5](https://github.com/awslabs/aws-lambda-powertools-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.8.0...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.9.0...HEAD
+[v2.9.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.8.0...v2.9.0
 [v2.8.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.7.1...v2.8.0
 [v2.7.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.7.0...v2.7.1
 [v2.7.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.6.0...v2.7.0
