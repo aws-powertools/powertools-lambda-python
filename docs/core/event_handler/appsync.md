@@ -71,23 +71,25 @@ Here's an example with two separate functions to resolve `getTodo` and `listTodo
     --8<-- "examples/event_handler_graphql/src/getting_started_schema.graphql"
     ```
 
-=== "getting_started_get_todo.json"
+=== "sample events"
 
-    ```json hl_lines="2-3 42"
-    --8<-- "examples/event_handler_graphql/src/getting_started_get_todo.json"
-    ```
+    === "getting_started_get_todo.json"
 
-=== "getting_started_list_todos.json"
+        ```json hl_lines="2-3 42"
+        --8<-- "examples/event_handler_graphql/src/getting_started_get_todo.json"
+        ```
 
-    ```json hl_lines="2 40"
-    --8<-- "examples/event_handler_graphql/src/getting_started_list_todos.json"
-    ```
+    === "getting_started_list_todos.json"
 
-=== "getting_started_create_todo.json"
+        ```json hl_lines="2 40"
+        --8<-- "examples/event_handler_graphql/src/getting_started_list_todos.json"
+        ```
 
-    ```json
-    --8<-- "examples/event_handler_graphql/src/getting_started_create_todo.json"
-    ```
+    === "getting_started_create_todo.json"
+
+        ```json
+        --8<-- "examples/event_handler_graphql/src/getting_started_create_todo.json"
+        ```
 
 ### Scalar functions
 
