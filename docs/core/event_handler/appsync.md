@@ -47,7 +47,7 @@ This is the sample infrastructure we are using for the initial examples with a A
 You can define your functions to match GraphQL types and fields with the `app.resolver()` decorator.
 
 ???+ question "What is a type and field?"
-    A type would be a top-level **GraphQL Type** like `Query`, `Mutation`, `Todo`. A **GraphQL Field** would be `listTodos` under `Query`, or `createTodo` under `Mutation`, or `title` under `Todo`.
+    A type would be a top-level **GraphQL Type** like `Query`, `Mutation`, `Todo`. A **GraphQL Field** would be `listTodos` under `Query`, `createTodo` under `Mutation`, etc.
 
 Here's an example with two separate functions to resolve `getTodo` and `listTodos` fields within the `Query` type. For completion, we use [Scalar type utilities](#scalar-functions) to generate the right output based on our schema definition.
 
