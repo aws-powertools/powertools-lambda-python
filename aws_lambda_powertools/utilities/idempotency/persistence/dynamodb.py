@@ -104,6 +104,21 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         super(DynamoDBPersistenceLayer, self).__init__()
 
     def _get_key(self, idempotency_key: str) -> dict:
+        """Build primary key attribute simple or composite based on params.
+
+        When sort_key_attr is set, we must return a composite key with static_pk_value,
+        otherwise we use the idempotency key given.
+
+        Parameters
+        ----------
+        idempotency_key : str
+            idempotency key to use for simple primary key
+
+        Returns
+        -------
+        dict
+            simple or composite key for DynamoDB primary key
+        """
         if self.sort_key_attr:
             return {self.key_attr: {"S": self.static_pk_value}, self.sort_key_attr: {"S": idempotency_key}}
         return {self.key_attr: {"S": idempotency_key}}
@@ -145,8 +160,8 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
     def _put_record(self, data_record: DataRecord) -> None:
         item = {
+            # get simple or composite primary key
             **self._get_key(data_record.idempotency_key),
-            self.key_attr: {"S": data_record.idempotency_key},
             self.expiry_attr: {"N": str(data_record.expiry_timestamp)},
             self.status_attr: {"S": data_record.status},
         }
