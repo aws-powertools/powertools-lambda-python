@@ -13,6 +13,7 @@ from requests import Response
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import AppSyncResolver
 from aws_lambda_powertools.logging import correlation_paths
+from aws_lambda_powertools.utilities.data_classes.appsync import scalar_types_utils
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
@@ -47,6 +48,16 @@ def list_todos() -> List[Todo]:
 
     # for brevity, we'll limit to the first 10 only
     return todos.json()[:10]
+
+
+@app.resolver(type_name="Mutation", field_name="createTodo")
+@tracer.capture_method
+def create_todo(title: str) -> Todo:
+    payload = {"userId": scalar_types_utils.make_id(), "title": title, "completed": False}  # dummy UUID str
+    todo: Response = requests.post("https://jsonplaceholder.typicode.com/todos", json=payload)
+    todo.raise_for_status()
+
+    return todo.json()
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
