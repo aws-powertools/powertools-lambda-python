@@ -53,7 +53,7 @@ def list_todos() -> List[Todo]:
 @app.resolver(type_name="Mutation", field_name="createTodo")
 @tracer.capture_method
 def create_todo(title: str) -> Todo:
-    payload = ({"userId": scalar_types_utils.make_id(), "title": title, "completed": False},)  # dummy UUID str
+    payload = {"userId": scalar_types_utils.make_id(), "title": title, "completed": False}  # dummy UUID str
     todo: Response = requests.post("https://jsonplaceholder.typicode.com/todos", json=payload)
     todo.raise_for_status()
 
