@@ -73,7 +73,7 @@ jobs:
         run: |
           RELEASE_VERSION="${RELEASE_TAG_VERSION:1}"
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_ENV"
-          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> $GITHUB_OUTPUT
+          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
       - name: Install dependencies
         run: make dev
       - name: Run all tests, linting and baselines
@@ -92,12 +92,13 @@ jobs:
       - name: Build python package and wheel
         if: ${{ !inputs.skip_pypi }}
         run: poetry build
-      - name: Upload to PyPi test
-        if: ${{ !inputs.skip_pypi }}
-        run: make release-test
-        env:
-          PYPI_USERNAME: __token__
-          PYPI_TEST_TOKEN: ${{ secrets.PYPI_TEST_TOKEN }}
+      # March 1st: PyPi test is under maintenance....
+      # - name: Upload to PyPi test
+      #   if: ${{ !inputs.skip_pypi }}
+      #   run: make release-test
+      #   env:
+      #     PYPI_USERNAME: __token__
+      #     PYPI_TEST_TOKEN: ${{ secrets.PYPI_TEST_TOKEN }}
       - name: Upload to PyPi prod
         if: ${{ !inputs.skip_pypi }}
         run: make release-prod
