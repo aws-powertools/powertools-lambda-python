@@ -6,6 +6,7 @@
 
 ## Documentation
 
+* **appsync:** add mutation example and infrastructure fix ([#1964](https://github.com/awslabs/aws-lambda-powertools-python/issues/1964))
 * **parameters:** fix typos and inconsistencies ([#1966](https://github.com/awslabs/aws-lambda-powertools-python/issues/1966))
 
 ## Maintenance
