@@ -70,26 +70,12 @@ Resources:
     Type: "AWS::AppSync::GraphQLSchema"
     Properties:
       ApiId: !GetAtt TodosApi.ApiId
-      Definition: |
-        schema {
-            query:Query
-        }
-
-        type Query {
-            getTodo(id: ID!): Todo
-            listTodos: [Todo]
-        }
-
-        type Mutation {
-            createTodo(title: String!): Todo
-        }
-
-        type Todo {
-            id: ID!
-            userId: String
-            title: String
-            completed: Boolean
-        }
+      DefinitionS3Location: ../src/getting_started_schema.graphql
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+            - W3002  # allow relative path in DefinitionS3Location
 
   # Lambda Direct Data Source and Resolver
 
@@ -133,4 +119,4 @@ Outputs:
     Value: !GetAtt TodosFunction.Arn
 
   TodosApi:
-    Value: !GetAtt TodosApi.Arn
+    Value: !GetAtt TodosApi.GraphQLUrl

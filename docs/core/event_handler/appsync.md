@@ -67,7 +67,7 @@ Here's an example with two separate functions to resolve `getTodo` and `listTodo
 
 === "getting_started_schema.graphql"
 
-    ```typescript hl_lines="6-8 12"
+    ```typescript hl_lines="7-9 13"
     --8<-- "examples/event_handler_graphql/src/getting_started_schema.graphql"
     ```
 
@@ -81,6 +81,12 @@ Here's an example with two separate functions to resolve `getTodo` and `listTodo
 
     ```json hl_lines="2 40"
     --8<-- "examples/event_handler_graphql/src/getting_started_list_todos.json"
+    ```
+
+=== "getting_started_create_todo.json"
+
+    ```json
+    --8<-- "examples/event_handler_graphql/src/getting_started_create_todo.json"
     ```
 
 ### Scalar functions

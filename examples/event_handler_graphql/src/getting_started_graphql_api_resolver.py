@@ -57,7 +57,7 @@ def create_todo(title: str) -> Todo:
     todo: Response = requests.post("https://jsonplaceholder.typicode.com/todos", json=payload)
     todo.raise_for_status()
 
-    return todo.json()["0"]
+    return todo.json()
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
