@@ -1504,3 +1504,34 @@ def test_idempotent_lambda_compound_already_completed(
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}], indirect=True)
+def test_idempotent_lambda_compound_static_pk_value_has_correct_pk(
+    idempotency_config: IdempotencyConfig,
+    persistence_store_compound_static_pk_value: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    expected_params_put_item_compound_key_static_pk_value,
+    expected_params_update_item_compound_key_static_pk_value,
+    lambda_response,
+    lambda_context,
+):
+    """
+    Test idempotent decorator having a DynamoDBPersistenceLayer with a compound key and a static PK value
+    """
+
+    stubber = stub.Stubber(persistence_store_compound_static_pk_value._client)
+    ddb_response = {}
+
+    stubber.add_response("put_item", ddb_response, expected_params_put_item_compound_key_static_pk_value)
+    stubber.add_response("update_item", ddb_response, expected_params_update_item_compound_key_static_pk_value)
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store_compound_static_pk_value)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    lambda_handler(lambda_apigw_event, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()

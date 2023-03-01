@@ -216,6 +216,13 @@ def persistence_store_compound(config):
 
 
 @pytest.fixture
+def persistence_store_compound_static_pk_value(config, static_pk_value):
+    return DynamoDBPersistenceLayer(
+        table_name=TABLE_NAME, boto_config=config, key_attr="id", sort_key_attr="sk", static_pk_value=static_pk_value
+    )
+
+
+@pytest.fixture
 def idempotency_config(config, request, default_jmespath):
     return IdempotencyConfig(
         event_key_jmespath=request.param.get("event_key_jmespath") or default_jmespath,
@@ -246,3 +253,58 @@ def config_with_jmespath_options(config, request):
 @pytest.fixture
 def mock_function():
     return mock.MagicMock()
+
+
+@pytest.fixture
+def static_pk_value():
+    return "static-value"
+
+
+@pytest.fixture
+def expected_params_update_item_compound_key_static_pk_value(
+    serialized_lambda_response, hashed_idempotency_key, static_pk_value
+):
+    return {
+        "ExpressionAttributeNames": {
+            "#expiry": "expiration",
+            "#response_data": "data",
+            "#status": "status",
+        },
+        "ExpressionAttributeValues": {
+            ":expiry": {"N": stub.ANY},
+            ":response_data": {"S": serialized_lambda_response},
+            ":status": {"S": "COMPLETED"},
+        },
+        "Key": {"id": {"S": static_pk_value}, "sk": {"S": hashed_idempotency_key}},
+        "TableName": "TEST_TABLE",
+        "UpdateExpression": "SET #response_data = :response_data, " "#expiry = :expiry, #status = :status",
+    }
+
+
+@pytest.fixture
+def expected_params_put_item_compound_key_static_pk_value(hashed_idempotency_key, static_pk_value):
+    return {
+        "ConditionExpression": (
+            "attribute_not_exists(#id) OR #expiry < :now OR "
+            "(#status = :inprogress AND attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now_in_millis)"
+        ),
+        "ExpressionAttributeNames": {
+            "#id": "id",
+            "#expiry": "expiration",
+            "#status": "status",
+            "#in_progress_expiry": "in_progress_expiration",
+        },
+        "ExpressionAttributeValues": {
+            ":now": {"N": stub.ANY},
+            ":now_in_millis": {"N": stub.ANY},
+            ":inprogress": {"S": "INPROGRESS"},
+        },
+        "Item": {
+            "expiration": {"N": stub.ANY},
+            "in_progress_expiration": {"N": stub.ANY},
+            "id": {"S": static_pk_value},
+            "sk": {"S": hashed_idempotency_key},
+            "status": {"S": "INPROGRESS"},
+        },
+        "TableName": "TEST_TABLE",
+    }
