@@ -87,7 +87,7 @@ Here's an example with two separate functions to resolve `getTodo` and `listTodo
 
     === "getting_started_create_todo.json"
 
-        ```json
+        ```json hl_lines="2 48 49"
         --8<-- "examples/event_handler_graphql/src/getting_started_create_todo.json"
         ```
 
