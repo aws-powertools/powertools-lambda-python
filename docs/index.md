@@ -61,7 +61,11 @@ In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependen
 
 ### Lambda Layer
 
+???+ warning "As of now, Container Image deployment (OCI) or inline Lambda functions do not support Lambda Layers."
+
 [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. Layers promote code sharing and separation of responsibilities so that you can iterate faster on writing business logic.
+
+For our Layers, we compile and optimize [all dependencies](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/pyproject.toml#L98){target="_blank"}, and [remove duplicate dependencies already available in the Lambda runtime](https://github.com/awslabs/cdk-aws-lambda-powertools-layer/blob/main/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
 
 You can include Powertools Lambda Layer using [AWS Lambda Console](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html#invocation-layers-using){target="_blank"}, or your preferred deployment framework.
 
@@ -451,10 +455,6 @@ You can include Powertools Lambda Layer using [AWS Lambda Console](https://docs.
             ```
 
             The pre-signed URL to download this Lambda Layer will be within `Location` key.
-
-???+ warning "Warning: Limitations"
-
-	Container Image deployment (OCI) or inline Lambda functions do not support Lambda Layers.
 
 #### SAR
 
