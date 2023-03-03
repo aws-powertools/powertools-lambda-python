@@ -279,16 +279,6 @@ You can include Powertools Lambda Layer using [AWS Lambda Console](https://docs.
             ? Do you want to edit the local lambda function now? No
             ```
 
-        === "Get the Layer .zip contents"
-
-        	Change {region} to your AWS region, e.g. `eu-west-1`
-
-            ```bash title="AWS CLI"
-        	  aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:23 --region {region}
-            ```
-
-            The pre-signed URL to download this Lambda Layer will be within `Location` key.
-
     === "arm64"
 
         === "SAM"
@@ -447,14 +437,14 @@ You can include Powertools Lambda Layer using [AWS Lambda Console](https://docs.
             ? Do you want to edit the local lambda function now? No
             ```
 
-        === "Get the Layer .zip contents"
-        	Change {region} to your AWS region, e.g. `eu-west-1`
+??? question "Want to inspect the contents of the Layer?"
+	Change {region} to your AWS region, e.g. `eu-west-1`
 
-            ```bash title="AWS CLI"
-        	aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:23 --region {region}
-            ```
+    ```bash title="AWS CLI"
+    aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:23 --region {region}
+    ```
 
-            The pre-signed URL to download this Lambda Layer will be within `Location` key.
+    The pre-signed URL to download this Lambda Layer will be within `Location` key.
 
 #### SAR
 
