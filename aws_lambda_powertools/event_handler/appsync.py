@@ -1,8 +1,10 @@
 import logging
-from typing import Any, Callable, Optional, Type, TypeVar
+from typing import Any, Callable, Optional, Type, TypeVar, List, Union
 
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
+from itertools import groupby
+from operator import itemgetter
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +12,7 @@ AppSyncResolverEventT = TypeVar("AppSyncResolverEventT", bound=AppSyncResolverEv
 
 
 class BaseRouter:
-    current_event: AppSyncResolverEventT  # type: ignore[valid-type]
+    current_event: Union[AppSyncResolverEventT, List[AppSyncResolverEventT]]  # type: ignore[valid-type]
     lambda_context: LambdaContext
     context: dict
 
@@ -152,11 +154,26 @@ class AppSyncResolver(BaseRouter):
             If we could not find a field resolver
         """
         # Maintenance: revisit generics/overload to fix [attr-defined] in mypy usage
-        BaseRouter.current_event = data_model(event)
+
+        # If event is a list it means that AppSync sent batch request
+        if isinstance(event, list):
+            event_groups = [
+                {"field_name": field_name, "events": list(events)}
+                for field_name, events in groupby(event, key=lambda x: x["info"]["fieldName"])
+            ]
+            if len(event_groups) > 1:
+                ValueError("batch with different field names. It shouldn't happen!")
+
+            BaseRouter.current_event = [data_model(event) for event in event_groups[0]["events"]]
+
+            resolver = self._get_resolver(BaseRouter.current_event[0].type_name, event_groups[0]["field_name"])
+            response = resolver()
+        else:
+            BaseRouter.current_event = data_model(event)
+            resolver = self._get_resolver(BaseRouter.current_event.type_name, BaseRouter.current_event.field_name)
+            response = resolver(**BaseRouter.current_event.arguments)
         BaseRouter.lambda_context = context
 
-        resolver = self._get_resolver(BaseRouter.current_event.type_name, BaseRouter.current_event.field_name)
-        response = resolver(**BaseRouter.current_event.arguments)
         self.clear_context()
 
         return response
