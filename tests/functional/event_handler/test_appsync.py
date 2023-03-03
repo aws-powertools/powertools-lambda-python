@@ -164,6 +164,59 @@ def test_resolve_custom_data_model():
     assert app.current_event.country_viewer == "US"
 
 
+def test_resolve_batch_processing():
+    event = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "1",
+            },
+        },
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "2",
+            },
+        },
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "3",
+            },
+        },
+    ]
+
+    app = AppSyncResolver()
+
+    @app.resolver(field_name="listLocations")
+    def create_something():  # noqa AA03 VNE003
+        return [event.source["id"] for event in app.current_event]
+
+    # Call the implicit handler
+    result = app.resolve(event, LambdaContext())
+    assert result == ["1", "2", "3"]
+
+    assert len(app.current_event) == len(event)
+
+
 def test_resolver_include_resolver():
     # GIVEN
     app = AppSyncResolver()

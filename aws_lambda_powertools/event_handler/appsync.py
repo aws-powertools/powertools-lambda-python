@@ -1,10 +1,9 @@
 import logging
-from typing import Any, Callable, Optional, Type, TypeVar, List, Union
+from itertools import groupby
+from typing import Any, Callable, List, Optional, Type, TypeVar, Union
 
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from itertools import groupby
-from operator import itemgetter
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +154,8 @@ class AppSyncResolver(BaseRouter):
         """
         # Maintenance: revisit generics/overload to fix [attr-defined] in mypy usage
 
+        BaseRouter.lambda_context = context
+
         # If event is a list it means that AppSync sent batch request
         if isinstance(event, list):
             event_groups = [
@@ -164,15 +165,15 @@ class AppSyncResolver(BaseRouter):
             if len(event_groups) > 1:
                 ValueError("batch with different field names. It shouldn't happen!")
 
-            BaseRouter.current_event = [data_model(event) for event in event_groups[0]["events"]]
-
-            resolver = self._get_resolver(BaseRouter.current_event[0].type_name, event_groups[0]["field_name"])
+            appconfig_events = [data_model(event) for event in event_groups[0]["events"]]
+            BaseRouter.current_event = appconfig_events
+            resolver = self._get_resolver(appconfig_events[0].type_name, event_groups[0]["field_name"])
             response = resolver()
         else:
-            BaseRouter.current_event = data_model(event)
-            resolver = self._get_resolver(BaseRouter.current_event.type_name, BaseRouter.current_event.field_name)
-            response = resolver(**BaseRouter.current_event.arguments)
-        BaseRouter.lambda_context = context
+            appconfig_event = data_model(event)
+            BaseRouter.current_event = appconfig_event
+            resolver = self._get_resolver(appconfig_event.type_name, appconfig_event.field_name)
+            response = resolver(**appconfig_event.arguments)
 
         self.clear_context()
 
