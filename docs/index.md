@@ -24,36 +24,40 @@ Powertools is a developer toolkit to implement Serverless best practices and inc
 
 ## Install
 
-Powertools is available in the following formats:
+You can install Powertools using one of the following options:
 
 * **Lambda Layer (x86_64)**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:23**](#){: .copyMe}:clipboard:
 * **Lambda Layer (arm64)**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:23**](#){: .copyMe}:clipboard:
-* **PyPi**: **`pip install "aws-lambda-powertools"`**
+* **Pip**: **[`pip install "aws-lambda-powertools"`](#){: .copyMe}:clipboard:**
 
-???+ info "Some utilities require additional dependencies"
-    You can stop reading if you're using Lambda Layer.
-
-    [Tracer](./core/tracer.md){target="_blank"}, [Validation](./utilities/validation.md){target="_blank"} and [Parser](./utilities/parser.md){target="_blank"} require additional dependencies. If you prefer to install all of them, use `pip install "aws-lambda-powertools[all]"`.
+??? question "Using Pip? You might need to install additional dependencies."
+    [**Tracer**](./core/tracer.md){target="_blank"}, [**Validation**](./utilities/validation.md){target="_blank"} and [**Parser**](./utilities/parser.md){target="_blank"} require additional dependencies. If you prefer to install all of them, use [`pip install "aws-lambda-powertools[all]"`](#){: .copyMe}:clipboard:.
 
     For example:
 
-    * [Tracer](./core/tracer.md#install){target="_blank"}: **`pip install "aws-lambda-powertools[tracer]"`**
-    * [Validation](./utilities/validation.md#install){target="_blank"}: **`pip install "aws-lambda-powertools[validation]"`**
-    * [Parser](./utilities/parser.md#install){target="_blank"}: **`pip install "aws-lambda-powertools[parser]"`**
-    * [Tracer](./core/tracer.md#install){target="_blank"} and [Parser](./utilities/parser.md#install){target="_blank"}: **`pip install "aws-lambda-powertools[tracer,parser]"`**
+    * **Tracer**: **[`pip install "aws-lambda-powertools[tracer]"`](#){: .copyMe}:clipboard:**
+    * **Validation**: **[`pip install "aws-lambda-powertools[validation]"`](#){: .copyMe}:clipboard:**
+    * **Parser**: **[`pip install "aws-lambda-powertools[parser]"`](#){: .copyMe}:clipboard:**
+    * **Tracer** and **Parser**: **[`pip install "aws-lambda-powertools[tracer,parser]"`](#){: .copyMe}:clipboard:**
 
 ### Local development
 
-Powertools relies on the AWS SDK bundled in the Lambda runtime. This helps us achieve an optimal package size and initialization.
+!!! info "Using Powertools via Lambda Layer? Simply add [**`"aws-lambda-powertools[all]"`**](#){: .copyMe}:clipboard: as a development dependency."
 
-This means you need to add AWS SDK as a development dependency (not as a production dependency).
+Powertools relies on the [AWS SDK bundled in the Lambda runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html){target="_blank"}. This helps us achieve an optimal package size and initialization.
 
-* **Pip**: `pip install "aws-lambda-powertools[aws-sdk]"`
-* **Poetry**: `poetry add "aws-lambda-powertools[aws-sdk]" --group dev`
-* **Pipenv**: `pipenv install --dev "aws-lambda-powertools[aws-sdk]"`
+However, when developing locally, you might want to have IDE autocompletion, or run your tests suite locally without any emulation like [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html){target="_blank"}. For this to work, you need to install AWS SDK as a development dependency (not as a production dependency):
 
-???+ note "Local emulation"
-    If you're running your code locally with [AWS SAM CLI](https://github.com/aws/aws-sam-cli){target="_blank"}, and not with your Python/IDE interpreter directly, this is not necessary. SAM CLI already brings the AWS SDK in its emulation image.
+* **Pip**: [**`pip install "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
+* **Poetry**: [**`poetry add "aws-lambda-powertools[aws-sdk]" --group dev`**](#){: .copyMe}:clipboard:
+* **Pipenv**: [**`pipenv install --dev "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
+
+!!! note "A word about dependency resolution"
+
+In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependency resolution, it'll either install:
+
+* **(A)** the SDK version available in [Lambda runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html){target="_blank"}
+* **(B)** a more up-to-date version if another package you use also depends on `boto3`, for example [Powertools Tracer](core/tracer.md){target="_blank"}
 
 ### Lambda Layer
 
