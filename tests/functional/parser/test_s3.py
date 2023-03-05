@@ -1,7 +1,13 @@
 import pytest
 
 from aws_lambda_powertools.utilities.parser import ValidationError, event_parser, parse
-from aws_lambda_powertools.utilities.parser.models import S3Model, S3RecordModel
+from aws_lambda_powertools.utilities.parser.envelopes import EventBridgeEnvelope
+from aws_lambda_powertools.utilities.parser.models import (
+    S3EventNotificationEventBridgeDetailModel,
+    S3EventNotificationObjectModel,
+    S3Model,
+    S3RecordModel,
+)
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
 
@@ -111,6 +117,26 @@ def test_s3_none_etag_value_failed_validation():
         parse(event=event_dict, model=S3Model)
 
 
+def test_s3_eventbridge_notification_object_created_event():
+    event_dict = load_event("s3EventBridgeNotificationObjectCreatedEvent.json")
+    handle_s3_eventbridge_object_created(event_dict, LambdaContext())
+
+
+def test_s3_eventbridge_notification_object_deleted_event():
+    event_dict = load_event("s3EventBridgeNotificationObjectDeletedEvent.json")
+    handle_s3_eventbridge_object_deleted(event_dict, LambdaContext())
+
+
+def test_s3_eventbridge_notification_object_expired_event():
+    event_dict = load_event("s3EventBridgeNotificationObjectExpiredEvent.json")
+    handle_s3_eventbridge_object_expired(event_dict, LambdaContext())
+
+
+def test_s3_eventbridge_notification_object_restore_completed_event():
+    event_dict = load_event("s3EventBridgeNotificationObjectRestoreCompletedEvent.json")
+    handle_s3_eventbridge_object_restore_completed(event_dict, LambdaContext())
+
+
 @event_parser(model=S3Model)
 def handle_s3_delete_object(event: S3Model, _: LambdaContext):
     records = list(event.Records)
@@ -149,3 +175,135 @@ def handle_s3_delete_object(event: S3Model, _: LambdaContext):
 def test_s3_trigger_event_delete_object():
     event_dict = load_event("s3EventDeleteObject.json")
     handle_s3_delete_object(event_dict, LambdaContext())
+
+
+@event_parser(model=S3EventNotificationEventBridgeDetailModel, envelope=EventBridgeEnvelope)
+def handle_s3_eventbridge_object_created(event: S3EventNotificationEventBridgeDetailModel, _: LambdaContext):
+    """
+    Tests that the `S3EventNotificationEventBridgeDetailModel` parses events from
+    https://docs.aws.amazon.com/AmazonS3/latest/userguide/ev-events.html
+    """
+    bucket_name = "example-bucket"
+    deletion_type = None
+    destination_access_tier = None
+    destination_storage_class = None
+    _object: S3EventNotificationObjectModel = event.object
+    reason = "PutObject"
+    request_id = "57H08PA84AB1JZW0"
+    requester = "123456789012"
+    restore_expiry_time = None
+    source_ip_address = "34.252.34.74"
+    source_storage_class = None
+    version = "0"
+
+    assert bucket_name == event.bucket.name
+    assert deletion_type == event.deletion_type
+    assert destination_access_tier == event.destination_access_tier
+    assert destination_storage_class == event.destination_storage_class
+    assert _object == event.object
+    assert reason == event.reason
+    assert request_id == event.request_id
+    assert requester == event.requester
+    assert restore_expiry_time == event.restore_expiry_time
+    assert source_ip_address == event.source_ip_address
+    assert source_storage_class == event.source_storage_class
+    assert version == event.version
+
+
+@event_parser(model=S3EventNotificationEventBridgeDetailModel, envelope=EventBridgeEnvelope)
+def handle_s3_eventbridge_object_deleted(event: S3EventNotificationEventBridgeDetailModel, _: LambdaContext):
+    """
+    Tests that the `S3EventNotificationEventBridgeDetailModel` parses events from
+    https://docs.aws.amazon.com/AmazonS3/latest/userguide/ev-events.html
+    """
+    bucket_name = "example-bucket"
+    deletion_type = "Delete Marker Created"
+    destination_access_tier = None
+    destination_storage_class = None
+    _object: S3EventNotificationObjectModel = event.object
+    reason = "DeleteObject"
+    request_id = "0BH729840619AG5K"
+    requester = "123456789012"
+    restore_expiry_time = None
+    source_ip_address = "34.252.34.74"
+    source_storage_class = None
+    version = "0"
+
+    assert bucket_name == event.bucket.name
+    assert deletion_type == event.deletion_type
+    assert destination_access_tier == event.destination_access_tier
+    assert destination_storage_class == event.destination_storage_class
+    assert _object == event.object
+    assert reason == event.reason
+    assert request_id == event.request_id
+    assert requester == event.requester
+    assert restore_expiry_time == event.restore_expiry_time
+    assert source_ip_address == event.source_ip_address
+    assert source_storage_class == event.source_storage_class
+    assert version == event.version
+
+
+@event_parser(model=S3EventNotificationEventBridgeDetailModel, envelope=EventBridgeEnvelope)
+def handle_s3_eventbridge_object_expired(event: S3EventNotificationEventBridgeDetailModel, _: LambdaContext):
+    """
+    Tests that the `S3EventNotificationEventBridgeDetailModel` parses events from
+    https://docs.aws.amazon.com/AmazonS3/latest/userguide/ev-events.html
+    """
+    bucket_name = "example-bucket"
+    deletion_type = "Delete Marker Created"
+    destination_access_tier = None
+    destination_storage_class = None
+    _object: S3EventNotificationObjectModel = event.object
+    reason = "Lifecycle Expiration"
+    request_id = "20EB74C14654DC47"
+    requester = "s3.amazonaws.com"
+    restore_expiry_time = None
+    source_ip_address = None
+    source_storage_class = None
+    version = "0"
+
+    assert bucket_name == event.bucket.name
+    assert deletion_type == event.deletion_type
+    assert destination_access_tier == event.destination_access_tier
+    assert destination_storage_class == event.destination_storage_class
+    assert _object == event.object
+    assert reason == event.reason
+    assert request_id == event.request_id
+    assert requester == event.requester
+    assert restore_expiry_time == event.restore_expiry_time
+    assert source_ip_address == event.source_ip_address
+    assert source_storage_class == event.source_storage_class
+    assert version == event.version
+
+
+@event_parser(model=S3EventNotificationEventBridgeDetailModel, envelope=EventBridgeEnvelope)
+def handle_s3_eventbridge_object_restore_completed(event: S3EventNotificationEventBridgeDetailModel, _: LambdaContext):
+    """
+    Tests that the `S3EventNotificationEventBridgeDetailModel` parses events from
+    https://docs.aws.amazon.com/AmazonS3/latest/userguide/ev-events.html
+    """
+    bucket_name = "example-bucket"
+    deletion_type = None
+    destination_access_tier = None
+    destination_storage_class = None
+    _object: S3EventNotificationObjectModel = event.object
+    reason = None
+    request_id = "189F19CB7FB1B6A4"
+    requester = "s3.amazonaws.com"
+    restore_expiry_time = "2021-11-13T00:00:00Z"
+    source_ip_address = None
+    source_storage_class = "GLACIER"
+    version = "0"
+
+    assert bucket_name == event.bucket.name
+    assert deletion_type == event.deletion_type
+    assert destination_access_tier == event.destination_access_tier
+    assert destination_storage_class == event.destination_storage_class
+    assert _object == event.object
+    assert reason == event.reason
+    assert request_id == event.request_id
+    assert requester == event.requester
+    assert restore_expiry_time == event.restore_expiry_time
+    assert source_ip_address == event.source_ip_address
+    assert source_storage_class == event.source_storage_class
+    assert version == event.version
