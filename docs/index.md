@@ -44,15 +44,18 @@ You can install Powertools using one of the following options:
 
 !!! info "Using Powertools via Lambda Layer? Simply add [**`"aws-lambda-powertools[all]"`**](#){: .copyMe}:clipboard: as a development dependency."
 
-Powertools relies on the [AWS SDK bundled in the Lambda runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html){target="_blank"}. This helps us achieve an optimal package size and initialization.
-
-However, when developing locally, you might want to have IDE autocompletion, or run your tests suite locally without any emulation like [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html){target="_blank"}. For this to work, you need to install AWS SDK as a development dependency (not as a production dependency):
+Powertools relies on the [AWS SDK bundled in the Lambda runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html){target="_blank"}. This helps us achieve an optimal package size and initialization. However, when developing locally, you need to install AWS SDK as a development dependency (not as a production dependency):
 
 * **Pip**: [**`pip install "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
 * **Poetry**: [**`poetry add "aws-lambda-powertools[aws-sdk]" --group dev`**](#){: .copyMe}:clipboard:
 * **Pipenv**: [**`pipenv install --dev "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
 
-!!! note "A word about dependency resolution"
+??? question "Why is that necessary?"
+      Powertools relies on the AWS SDK being available to use in the target runtime (AWS Lambda).
+
+      As a result, it affects your favorite IDE in terms of code auto-completion, or running your tests suite locally with no Lambda emulation such as [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html){target="_blank"}.
+
+**A word about dependency resolution**
 
 In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependency resolution, it'll either install:
 
