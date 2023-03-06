@@ -4,6 +4,20 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **homepage:** revamp install UX & share how we build Lambda Layer ([#1978](https://github.com/awslabs/aws-lambda-powertools-python/issues/1978))
+
+## Maintenance
+
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.26.24 to 1.26.84 ([#1981](https://github.com/awslabs/aws-lambda-powertools-python/issues/1981))
+* **deps-dev:** bump mkdocs-material from 9.0.15 to 9.1.0 ([#1976](https://github.com/awslabs/aws-lambda-powertools-python/issues/1976))
+* **deps-dev:** bump cfn-lint from 0.67.0 to 0.74.0 ([#1974](https://github.com/awslabs/aws-lambda-powertools-python/issues/1974))
+* **deps-dev:** bump aws-cdk-lib from 2.66.1 to 2.67.0 ([#1977](https://github.com/awslabs/aws-lambda-powertools-python/issues/1977))
+
+
+<a name="v2.9.1"></a>
+## [v2.9.1] - 2023-03-01
 ## Bug Fixes
 
 * **idempotency:** revert dict mutation that impacted static_pk_value feature ([#1970](https://github.com/awslabs/aws-lambda-powertools-python/issues/1970))
@@ -16,6 +30,7 @@
 ## Maintenance
 
 * update project description
+* update v2 layer ARN on documentation
 * **ci:** disable pypi test due to maintenance mode
 * **ci:** replace deprecated set-output commands ([#1957](https://github.com/awslabs/aws-lambda-powertools-python/issues/1957))
 * **deps:** bump fastjsonschema from 2.16.2 to 2.16.3 ([#1961](https://github.com/awslabs/aws-lambda-powertools-python/issues/1961))
@@ -2926,7 +2941,8 @@
 * Merge pull request [#5](https://github.com/awslabs/aws-lambda-powertools-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.9.0...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.9.1...HEAD
+[v2.9.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.9.0...v2.9.1
 [v2.9.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.8.0...v2.9.0
 [v2.8.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.7.1...v2.8.0
 [v2.7.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.7.0...v2.7.1
