@@ -88,7 +88,7 @@ mypy-boto3-appconfigdata = "^1.26.70"
 importlib-metadata = "^6.0"
 ijson = "^3.2.0"
 typed-ast = { version = "^1.5.4", python = "< 3.8"}
-hvac = "^1.0.2"
+hvac = "^1.1.0"
 aws-requests-auth = "^0.4.3"
 
 [tool.poetry.extras]
