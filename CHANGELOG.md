@@ -4,12 +4,21 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **ci:** bump CDK version
+
 ## Documentation
 
 * **homepage:** revamp install UX & share how we build Lambda Layer ([#1978](https://github.com/awslabs/aws-lambda-powertools-python/issues/1978))
 
 ## Maintenance
 
+* **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 2.1.1 to 2.1.2 ([#1979](https://github.com/awslabs/aws-lambda-powertools-python/issues/1979))
+* **deps-dev:** bump pytest from 7.2.1 to 7.2.2 ([#1980](https://github.com/awslabs/aws-lambda-powertools-python/issues/1980))
+* **deps-dev:** bump types-python-dateutil from 2.8.19.9 to 2.8.19.10 ([#1973](https://github.com/awslabs/aws-lambda-powertools-python/issues/1973))
+* **deps-dev:** bump hvac from 1.0.2 to 1.1.0 ([#1983](https://github.com/awslabs/aws-lambda-powertools-python/issues/1983))
+* **deps-dev:** bump mkdocs-material from 9.1.0 to 9.1.1 ([#1984](https://github.com/awslabs/aws-lambda-powertools-python/issues/1984))
 * **deps-dev:** bump mypy-boto3-dynamodb from 1.26.24 to 1.26.84 ([#1981](https://github.com/awslabs/aws-lambda-powertools-python/issues/1981))
 * **deps-dev:** bump mkdocs-material from 9.0.15 to 9.1.0 ([#1976](https://github.com/awslabs/aws-lambda-powertools-python/issues/1976))
 * **deps-dev:** bump cfn-lint from 0.67.0 to 0.74.0 ([#1974](https://github.com/awslabs/aws-lambda-powertools-python/issues/1974))
