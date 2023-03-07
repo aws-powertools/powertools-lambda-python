@@ -68,7 +68,7 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
       - name: aws credentials
-        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838
+        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef
         with:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
