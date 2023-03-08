@@ -16,7 +16,7 @@ from .kafka_event import KafkaEvent
 from .kinesis_firehose_event import KinesisFirehoseEvent
 from .kinesis_stream_event import KinesisStreamEvent
 from .lambda_function_url_event import LambdaFunctionUrlEvent
-from .s3_event import S3Event
+from .s3_event import S3Event, S3EventBridgeNotificationEvent
 from .ses_event import SESEvent
 from .sns_event import SNSEvent
 from .sqs_event import SQSEvent
@@ -37,6 +37,7 @@ __all__ = [
     "KinesisStreamEvent",
     "LambdaFunctionUrlEvent",
     "S3Event",
+    "S3EventBridgeNotificationEvent",
     "SESEvent",
     "SNSEvent",
     "SQSEvent",
