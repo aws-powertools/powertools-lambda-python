@@ -82,6 +82,7 @@ Same example as above, but using the `event_source` decorator
 | [Rabbit MQ](#rabbit-mq)                                                   | `RabbitMQEvent`                                    |
 | [S3](#s3)                                                                 | `S3Event`                                          |
 | [S3 Object Lambda](#s3-object-lambda)                                     | `S3ObjectLambdaEvent`                              |
+| [S3 EventBridge Notification](#s3-eventbridge-notification)               | `S3EventBridgeNotificationEvent`                   |
 | [SES](#ses)                                                               | `SESEvent`                                         |
 | [SNS](#sns)                                                               | `SNSEvent`                                         |
 | [SQS](#sqs)                                                               | `SQSEvent`                                         |
@@ -1041,6 +1042,19 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
         )
 
         return {"status_code": 200}
+    ```
+
+### S3 EventBridge Notification
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import event_source, S3EventBridgeNotificationEvent
+
+    @event_source(data_class=S3EventBridgeNotificationEvent)
+    def lambda_handler(event: S3EventBridgeNotificationEvent, context):
+        bucket_name = event.detail.bucket.name
+        file_key = event.detail.object.key
     ```
 
 ### SES
