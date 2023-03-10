@@ -6,11 +6,10 @@ from aws_cdk import aws_apigateway as apigwv1
 from aws_cdk import aws_apigatewayv2_alpha as apigwv2
 from aws_cdk import aws_apigatewayv2_authorizers_alpha as apigwv2authorizers
 from aws_cdk import aws_apigatewayv2_integrations_alpha as apigwv2integrations
+from aws_cdk import aws_appsync_alpha as appsync
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_elasticloadbalancingv2_targets as targets
-from aws_cdk import aws_appsync_alpha as appsync
-from aws_cdk import aws_iam
 from aws_cdk.aws_lambda import Function, FunctionUrlAuthType
 
 from tests.e2e.utils.infrastructure import BaseInfrastructure
@@ -20,10 +19,10 @@ class EventHandlerStack(BaseInfrastructure):
     def create_resources(self):
         functions = self.create_lambda_functions()
 
-        # self._create_alb(function=functions["AlbHandler"])
-        # self._create_api_gateway_rest(function=functions["ApiGatewayRestHandler"])
-        # self._create_api_gateway_http(function=functions["ApiGatewayHttpHandler"])
-        # self._create_lambda_function_url(function=functions["LambdaFunctionUrlHandler"])
+        self._create_alb(function=functions["AlbHandler"])
+        self._create_api_gateway_rest(function=functions["ApiGatewayRestHandler"])
+        self._create_api_gateway_http(function=functions["ApiGatewayHttpHandler"])
+        self._create_lambda_function_url(function=functions["LambdaFunctionUrlHandler"])
         self._create_appsync_endpoint(function=functions["AppsyncResolverHandler"])
 
     def _create_alb(self, function: Function):

@@ -1,9 +1,9 @@
 import json
+
 import pytest
-from requests import HTTPError, Request
+from requests import Request
 
 from tests.e2e.utils import data_fetcher
-from tests.e2e.utils.auth import build_iam_auth
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ def appsync_access_key(infrastructure: dict) -> str:
 def test_appsync_get_all_posts(appsync_endpoint, appsync_access_key):
     # GIVEN
     body = {
-        "query": "query MyQuery { allPosts { id }}",
+        "query": "query MyQuery { allPosts { post_id }}",
         "variables": None,
         "operationName": "MyQuery",
     }
@@ -50,7 +50,7 @@ def test_appsync_get_post(appsync_endpoint, appsync_access_key):
     # GIVEN
     post_id = "1"
     body = {
-        "query": f'query MyQuery {{ getPost(id: "{post_id}") {{ id }} }}',
+        "query": f'query MyQuery {{ getPost(post_id: "{post_id}") {{ post_id }} }}',
         "variables": None,
         "operationName": "MyQuery",
     }
@@ -71,7 +71,7 @@ def test_appsync_get_post(appsync_endpoint, appsync_access_key):
 
     data = json.loads(response.content.decode("ascii"))["data"]
 
-    assert data["getPost"]["id"] == post_id
+    assert data["getPost"]["post_id"] == post_id
 
 
 @pytest.mark.xdist_group(name="event_handler")
@@ -81,7 +81,7 @@ def test_appsync_get_related_posts_batch(appsync_endpoint, appsync_access_key):
     related_posts_ids = ["3", "5"]
 
     body = {
-        "query": f'query MyQuery {{ getPost(id: "{post_id}") {{ id relatedPosts {{ id }} }} }}',
+        "query": f'query MyQuery {{ getPost(post_id: "{post_id}") {{ post_id relatedPosts {{ post_id }} }} }}',
         "variables": None,
         "operationName": "MyQuery",
     }
@@ -102,7 +102,7 @@ def test_appsync_get_related_posts_batch(appsync_endpoint, appsync_access_key):
 
     data = json.loads(response.content.decode("ascii"))["data"]
 
-    assert data["getPost"]["id"] == post_id
+    assert data["getPost"]["post_id"] == post_id
     assert len(data["getPost"]["relatedPosts"]) == len(related_posts_ids)
     for post in data["getPost"]["relatedPosts"]:
-        assert post["id"] in related_posts_ids
+        assert post["post_id"] in related_posts_ids

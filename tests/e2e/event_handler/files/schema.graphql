@@ -3,12 +3,12 @@ schema {
 }
 
 type Query {
-    getPost(id:ID!): Post
+    getPost(post_id:ID!): Post
     allPosts: [Post]
 }
 
 type Post {
-    id: ID!
+    post_id: ID!
     author: String!
     title: String
     content: String
