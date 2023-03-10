@@ -64,7 +64,7 @@ class S3EventBridgeNotificationDetail(DictWrapper):
         return S3EventNotificationEventBridgeBucket(self["bucket"])
 
     @property
-    def object(self) -> S3EventBridgeNotificationObject:  # noqa: A003
+    def object(self) -> S3EventBridgeNotificationObject:  # noqa: A003 # ignore shadowing built-in grammar
         """Get the request-id for the S3 notification"""
         return S3EventBridgeNotificationObject(self["object"])
 
