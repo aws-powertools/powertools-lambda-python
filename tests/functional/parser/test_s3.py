@@ -145,6 +145,11 @@ def test_s3_eventbridge_notification_object_expired_event():
     handle_s3_eventbridge_object_expired(event_dict, LambdaContext())
 
 
+def test_s3_eventbridge_notification_object_expired_event_no_envelope():
+    event_dict = load_event("s3EventBridgeNotificationObjectExpiredEvent.json")
+    handle_s3_eventbridge_object_expired_no_envelope(event_dict, LambdaContext())
+
+
 def test_s3_eventbridge_notification_object_restore_completed_event():
     event_dict = load_event("s3EventBridgeNotificationObjectRestoreCompletedEvent.json")
     handle_s3_eventbridge_object_restore_completed(event_dict, LambdaContext())
@@ -347,6 +352,36 @@ def handle_s3_eventbridge_object_expired(event: S3EventNotificationEventBridgeDe
     assert source_ip_address == event.source_ip_address
     assert source_storage_class == event.source_storage_class
     assert version == event.version
+
+
+@event_parser(model=S3EventNotificationEventBridgeModel)
+def handle_s3_eventbridge_object_expired_no_envelope(event: S3EventNotificationEventBridgeModel, _: LambdaContext):
+    """
+    Tests that the `S3EventNotificationEventBridgeModel` parses events from
+    https://docs.aws.amazon.com/AmazonS3/latest/userguide/ev-events.html
+    """
+
+    raw_event = load_event("s3EventBridgeNotificationObjectExpiredEvent.json")
+
+    assert event.version == raw_event["version"]
+    assert event.id == raw_event["id"]
+    assert event.detail_type == raw_event["detail-type"]
+    assert event.source == raw_event["source"]
+    assert event.account == raw_event["account"]
+    assert event.time == datetime.fromisoformat(raw_event["time"].replace("Z", "+00:00"))
+    assert event.region == raw_event["region"]
+    assert event.resources == raw_event["resources"]
+
+    assert event.detail.version == raw_event["detail"]["version"]
+    assert event.detail.bucket.name == raw_event["detail"]["bucket"]["name"]
+    assert event.detail.object.key == raw_event["detail"]["object"]["key"]
+    assert event.detail.object.size == raw_event["detail"]["object"]["size"]
+    assert event.detail.object.etag == raw_event["detail"]["object"]["etag"]
+    assert event.detail.object.sequencer == raw_event["detail"]["object"]["sequencer"]
+    assert event.detail.request_id == raw_event["detail"]["request-id"]
+    assert event.detail.requester == raw_event["detail"]["requester"]
+    assert event.detail.reason == raw_event["detail"]["reason"]
+    assert event.detail.deletion_type == raw_event["detail"]["deletion-type"]
 
 
 @event_parser(model=S3EventNotificationEventBridgeDetailModel, envelope=EventBridgeEnvelope)
