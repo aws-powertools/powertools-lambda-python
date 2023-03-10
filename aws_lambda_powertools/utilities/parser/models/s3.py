@@ -86,7 +86,7 @@ class S3EventNotificationEventBridgeDetailModel(BaseModel):
 
 
 class S3EventNotificationEventBridgeModel(EventBridgeModel):
-    detail = S3EventNotificationEventBridgeDetailModel
+    detail: S3EventNotificationEventBridgeDetailModel
 
 
 class S3RecordModel(BaseModel):
