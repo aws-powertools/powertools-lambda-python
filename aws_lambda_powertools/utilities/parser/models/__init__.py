@@ -45,6 +45,7 @@ from .kinesis_firehose import (
 from .lambda_function_url import LambdaFunctionUrlModel
 from .s3 import (
     S3EventNotificationEventBridgeDetailModel,
+    S3EventNotificationEventBridgeModel,
     S3EventNotificationObjectModel,
     S3Model,
     S3RecordModel,
@@ -111,6 +112,7 @@ __all__ = [
     "S3ObjectConfiguration",
     "S3ObjectContext",
     "S3EventNotificationObjectModel",
+    "S3EventNotificationEventBridgeModel",
     "S3EventNotificationEventBridgeDetailModel",
     "SesModel",
     "SesRecordModel",
