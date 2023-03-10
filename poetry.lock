@@ -152,6 +152,25 @@ publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
+name = "aws-cdk-aws-appsync-alpha"
+version = "2.59.0a0"
+description = "The CDK Construct Library for AWS::AppSync"
+category = "dev"
+optional = false
+python-versions = "~=3.7"
+files = [
+    {file = "aws-cdk.aws-appsync-alpha-2.59.0a0.tar.gz", hash = "sha256:f5c7773b70b759efd576561dc3d71af5762a6f7cbc9ee9eef5e538c7ab3dccc7"},
+    {file = "aws_cdk.aws_appsync_alpha-2.59.0a0-py3-none-any.whl", hash = "sha256:ecc235f1f70d404c8d03cf250be0227becd14c468f8c43b6d9df334a1d60c8e2"},
+]
+
+[package.dependencies]
+aws-cdk-lib = ">=2.59.0,<3.0.0"
+constructs = ">=10.0.0,<11.0.0"
+jsii = ">=1.72.0,<2.0.0"
+publication = ">=0.0.3"
+typeguard = ">=2.13.3,<2.14.0"
+
+[[package]]
 name = "aws-cdk-lib"
 version = "2.68.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
