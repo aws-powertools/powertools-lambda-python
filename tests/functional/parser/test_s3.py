@@ -236,7 +236,7 @@ def handle_s3_eventbridge_object_created(event: S3EventNotificationEventBridgeDe
 @event_parser(model=S3EventNotificationEventBridgeModel)
 def handle_s3_eventbridge_object_created_no_envelope(event: S3EventNotificationEventBridgeModel, _: LambdaContext):
     """
-    Tests that the `S3EventNotificationEventBridgeDetailModel` parses events from
+    Tests that the `S3EventNotificationEventBridgeModel` parses events from
     https://docs.aws.amazon.com/AmazonS3/latest/userguide/ev-events.html
     """
 

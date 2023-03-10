@@ -156,25 +156,25 @@ def my_function():
 
 Parser comes with the following built-in models:
 
-| Model name                              | Description                                                                                                                                            |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **DynamoDBStreamModel**                 | Lambda Event Source payload for Amazon DynamoDB Streams                                                                                                |
-| **EventBridgeModel**                    | Lambda Event Source payload for Amazon EventBridge                                                                                                     |
-| **SqsModel**                            | Lambda Event Source payload for Amazon SQS                                                                                                             |
-| **AlbModel**                            | Lambda Event Source payload for Amazon Application Load Balancer                                                                                       |
-| **CloudwatchLogsModel**                 | Lambda Event Source payload for Amazon CloudWatch Logs                                                                                                 |
-| **S3Model**                             | Lambda Event Source payload for Amazon S3                                                                                                              |
-| **S3ObjectLambdaEvent**                 | Lambda Event Source payload for Amazon S3 Object Lambda                                                                                                |
-| **S3EventNotificationEventBridgeModel** | Lambda Event Source payload for Amazon S3 Event Notification to EventBridge. <br /> It's compatible with `EventBridgeEnvelope` [envelope](#envelopes). |
-| **KinesisDataStreamModel**              | Lambda Event Source payload for Amazon Kinesis Data Streams                                                                                            |
-| **KinesisFirehoseModel**                | Lambda Event Source payload for Amazon Kinesis Firehose                                                                                                |
-| **SesModel**                            | Lambda Event Source payload for Amazon Simple Email Service                                                                                            |
-| **SnsModel**                            | Lambda Event Source payload for Amazon Simple Notification Service                                                                                     |
-| **APIGatewayProxyEventModel**           | Lambda Event Source payload for Amazon API Gateway                                                                                                     |
-| **APIGatewayProxyEventV2Model**         | Lambda Event Source payload for Amazon API Gateway v2 payload                                                                                          |
-| **LambdaFunctionUrlModel**              | Lambda Event Source payload for Lambda Function URL payload                                                                                            |
-| **KafkaSelfManagedEventModel**          | Lambda Event Source payload for self managed Kafka payload                                                                                             |
-| **KafkaMskEventModel**                  | Lambda Event Source payload for AWS MSK payload                                                                                                        |
+| Model name                              | Description                                                                  |
+| --------------------------------------- | ---------------------------------------------------------------------------- |
+| **DynamoDBStreamModel**                 | Lambda Event Source payload for Amazon DynamoDB Streams                      |
+| **EventBridgeModel**                    | Lambda Event Source payload for Amazon EventBridge                           |
+| **SqsModel**                            | Lambda Event Source payload for Amazon SQS                                   |
+| **AlbModel**                            | Lambda Event Source payload for Amazon Application Load Balancer             |
+| **CloudwatchLogsModel**                 | Lambda Event Source payload for Amazon CloudWatch Logs                       |
+| **S3Model**                             | Lambda Event Source payload for Amazon S3                                    |
+| **S3ObjectLambdaEvent**                 | Lambda Event Source payload for Amazon S3 Object Lambda                      |
+| **S3EventNotificationEventBridgeModel** | Lambda Event Source payload for Amazon S3 Event Notification to EventBridge. |
+| **KinesisDataStreamModel**              | Lambda Event Source payload for Amazon Kinesis Data Streams                  |
+| **KinesisFirehoseModel**                | Lambda Event Source payload for Amazon Kinesis Firehose                      |
+| **SesModel**                            | Lambda Event Source payload for Amazon Simple Email Service                  |
+| **SnsModel**                            | Lambda Event Source payload for Amazon Simple Notification Service           |
+| **APIGatewayProxyEventModel**           | Lambda Event Source payload for Amazon API Gateway                           |
+| **APIGatewayProxyEventV2Model**         | Lambda Event Source payload for Amazon API Gateway v2 payload                |
+| **LambdaFunctionUrlModel**              | Lambda Event Source payload for Lambda Function URL payload                  |
+| **KafkaSelfManagedEventModel**          | Lambda Event Source payload for self managed Kafka payload                   |
+| **KafkaMskEventModel**                  | Lambda Event Source payload for AWS MSK payload                              |
 
 #### Extending built-in models
 
