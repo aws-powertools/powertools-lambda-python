@@ -30,6 +30,7 @@ def test_active_mq_event():
     assert message.timestamp is not None
     assert message.broker_in_time is not None
     assert message.broker_out_time is not None
+    assert message.properties["testKey"] == "testValue"
     assert message.destination_physicalname is not None
     assert message.delivery_mode is None
     assert message.correlation_id is None
