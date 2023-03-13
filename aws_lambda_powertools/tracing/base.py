@@ -2,7 +2,7 @@ import abc
 import numbers
 import traceback
 from contextlib import contextmanager
-from typing import Any, Generator, List, NoReturn, Optional, Sequence, Union
+from typing import Any, Generator, List, Optional, Sequence, Union
 
 
 class BaseSegment(abc.ABC):
@@ -28,7 +28,7 @@ class BaseSegment(abc.ABC):
         """Remove input subsegment from child subsegments."""
 
     @abc.abstractmethod
-    def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]) -> NoReturn:
+    def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]) -> None:
         """Annotate segment or subsegment with a key-value pair.
 
         Note: Annotations will be indexed for later search query.
@@ -42,7 +42,7 @@ class BaseSegment(abc.ABC):
         """
 
     @abc.abstractmethod
-    def put_metadata(self, key: str, value: Any, namespace: str = "default") -> NoReturn:
+    def put_metadata(self, key: str, value: Any, namespace: str = "default") -> None:
         """Add metadata to segment or subsegment. Metadata is not indexed
         but can be later retrieved by BatchGetTraces API.
 
@@ -101,7 +101,7 @@ class BaseProvider(abc.ABC):
         """
 
     @abc.abstractmethod
-    def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]) -> NoReturn:
+    def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]) -> None:
         """Annotate current active trace entity with a key-value pair.
 
         Note: Annotations will be indexed for later search query.
@@ -115,7 +115,7 @@ class BaseProvider(abc.ABC):
         """
 
     @abc.abstractmethod
-    def put_metadata(self, key: str, value: Any, namespace: str = "default") -> NoReturn:
+    def put_metadata(self, key: str, value: Any, namespace: str = "default") -> None:
         """Add metadata to the current active trace entity.
 
         Note: Metadata is not indexed but can be later retrieved by BatchGetTraces API.
@@ -131,7 +131,7 @@ class BaseProvider(abc.ABC):
         """
 
     @abc.abstractmethod
-    def patch(self, modules: Sequence[str]) -> NoReturn:
+    def patch(self, modules: Sequence[str]) -> None:
         """Instrument a set of supported libraries
 
         Parameters
@@ -141,5 +141,5 @@ class BaseProvider(abc.ABC):
         """
 
     @abc.abstractmethod
-    def patch_all(self) -> NoReturn:
+    def patch_all(self) -> None:
         """Instrument all supported libraries"""
