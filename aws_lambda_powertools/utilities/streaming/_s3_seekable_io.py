@@ -1,6 +1,6 @@
 import io
 import logging
-from typing import IO, TYPE_CHECKING, AnyStr, Iterable, List, Optional
+from typing import IO, TYPE_CHECKING, AnyStr, Iterable, List, Optional, cast
 
 import boto3
 
@@ -85,7 +85,7 @@ class _S3SeekableIO(IO[bytes]):
             self._raw_stream = self.s3_client.get_object(Range=range_header, **self._sdk_options).get("Body")
             self._closed = False
 
-        return self._raw_stream
+        return cast(PowertoolsStreamingBody, self._raw_stream)
 
     def seek(self, offset: int, whence: int = io.SEEK_SET) -> int:
         """
