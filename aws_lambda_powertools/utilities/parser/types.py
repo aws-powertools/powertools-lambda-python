@@ -1,7 +1,7 @@
 """Generics and other shared types used across parser"""
 
 import sys
-from typing import TypeVar
+from typing import Any, Dict, Type, TypeVar, Union
 
 from pydantic import BaseModel
 
@@ -14,3 +14,5 @@ else:
 Model = TypeVar("Model", bound=BaseModel)
 EnvelopeModel = TypeVar("EnvelopeModel")
 EventParserReturnType = TypeVar("EventParserReturnType")
+AnyInheritedModel = Union[Type[BaseModel], BaseModel]
+RawDictOrModel = Union[Dict[str, Any], AnyInheritedModel]
