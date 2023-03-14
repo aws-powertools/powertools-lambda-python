@@ -6,6 +6,29 @@
 
 ## Bug Fixes
 
+* **ci:** bump CDK version
+
+## Documentation
+
+* **homepage:** revamp install UX & share how we build Lambda Layer ([#1978](https://github.com/awslabs/aws-lambda-powertools-python/issues/1978))
+
+## Maintenance
+
+* **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 2.1.1 to 2.1.2 ([#1979](https://github.com/awslabs/aws-lambda-powertools-python/issues/1979))
+* **deps-dev:** bump pytest from 7.2.1 to 7.2.2 ([#1980](https://github.com/awslabs/aws-lambda-powertools-python/issues/1980))
+* **deps-dev:** bump types-python-dateutil from 2.8.19.9 to 2.8.19.10 ([#1973](https://github.com/awslabs/aws-lambda-powertools-python/issues/1973))
+* **deps-dev:** bump hvac from 1.0.2 to 1.1.0 ([#1983](https://github.com/awslabs/aws-lambda-powertools-python/issues/1983))
+* **deps-dev:** bump mkdocs-material from 9.1.0 to 9.1.1 ([#1984](https://github.com/awslabs/aws-lambda-powertools-python/issues/1984))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.26.24 to 1.26.84 ([#1981](https://github.com/awslabs/aws-lambda-powertools-python/issues/1981))
+* **deps-dev:** bump mkdocs-material from 9.0.15 to 9.1.0 ([#1976](https://github.com/awslabs/aws-lambda-powertools-python/issues/1976))
+* **deps-dev:** bump cfn-lint from 0.67.0 to 0.74.0 ([#1974](https://github.com/awslabs/aws-lambda-powertools-python/issues/1974))
+* **deps-dev:** bump aws-cdk-lib from 2.66.1 to 2.67.0 ([#1977](https://github.com/awslabs/aws-lambda-powertools-python/issues/1977))
+
+
+<a name="v2.9.1"></a>
+## [v2.9.1] - 2023-03-01
+## Bug Fixes
+
 * **idempotency:** revert dict mutation that impacted static_pk_value feature ([#1970](https://github.com/awslabs/aws-lambda-powertools-python/issues/1970))
 
 ## Documentation
@@ -16,6 +39,7 @@
 ## Maintenance
 
 * update project description
+* update v2 layer ARN on documentation
 * **ci:** disable pypi test due to maintenance mode
 * **ci:** replace deprecated set-output commands ([#1957](https://github.com/awslabs/aws-lambda-powertools-python/issues/1957))
 * **deps:** bump fastjsonschema from 2.16.2 to 2.16.3 ([#1961](https://github.com/awslabs/aws-lambda-powertools-python/issues/1961))
@@ -2926,7 +2950,8 @@
 * Merge pull request [#5](https://github.com/awslabs/aws-lambda-powertools-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.9.0...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.9.1...HEAD
+[v2.9.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.9.0...v2.9.1
 [v2.9.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.8.0...v2.9.0
 [v2.8.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.7.1...v2.8.0
 [v2.7.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.7.0...v2.7.1

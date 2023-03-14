@@ -33,7 +33,9 @@ class KafkaEnvelope(BaseEnvelope):
             List of records parsed with model provided
         """
         event_source = cast(dict, data).get("eventSource")
-        model_parse_event = KafkaMskEventModel if event_source == "aws:kafka" else KafkaSelfManagedEventModel
+        model_parse_event: Union[Type[KafkaMskEventModel], Type[KafkaSelfManagedEventModel]] = (
+            KafkaMskEventModel if event_source == "aws:kafka" else KafkaSelfManagedEventModel
+        )
 
         logger.debug(f"Parsing incoming data with Kafka event model {model_parse_event}")
         parsed_envelope = model_parse_event.parse_obj(data)
