@@ -176,6 +176,10 @@ markers = [
 requires = ["poetry-core>=1.3.2"]
 build-backend = "poetry.core.masonry.api"
 
+# poetry-core (PR #318) stopped generating setup.py by default, this enables it again.
+[tool.poetry.build]
+generate-setup-file = true
+
 # NOTE
 # As of now, Feb 2020, flake8 don't support pyproject
 # For latest: https://github.com/flying-sheep/awesome-python-packaging
