@@ -6,12 +6,14 @@
 
 ## Bug Fixes
 
+* **build:** auto-generate setup.py for legacy build tools ([#2013](https://github.com/awslabs/aws-lambda-powertools-python/issues/2013))
 * **ci:** bump CDK version
 * **typing:** swap NoReturn with None for methods with no return value ([#2004](https://github.com/awslabs/aws-lambda-powertools-python/issues/2004))
 
 ## Documentation
 
 * **homepage:** revamp install UX & share how we build Lambda Layer ([#1978](https://github.com/awslabs/aws-lambda-powertools-python/issues/1978))
+* **metrics:** fix high-resolution metrics announcement link ([#2017](https://github.com/awslabs/aws-lambda-powertools-python/issues/2017))
 
 ## Features
 
