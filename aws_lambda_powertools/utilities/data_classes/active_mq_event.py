@@ -56,6 +56,11 @@ class ActiveMQMessage(DictWrapper):
         return self["brokerOutTime"]
 
     @property
+    def properties(self) -> dict:
+        """Custom properties"""
+        return self["properties"]
+
+    @property
     def destination_physicalname(self) -> str:
         return self["destination"]["physicalname"]
 
