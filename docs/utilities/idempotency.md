@@ -28,6 +28,7 @@ times with the same parameters**. This makes idempotent operations safe to retry
 
 ### IAM Permissions
 
+#### DynamoDB
 Your Lambda function IAM Role must have `dynamodb:GetItem`, `dynamodb:PutItem`, `dynamodb:UpdateItem` and `dynamodb:DeleteItem` IAM permissions before using this feature.
 
 ???+ note
@@ -35,9 +36,13 @@ Your Lambda function IAM Role must have `dynamodb:GetItem`, `dynamodb:PutItem`, 
 
 ### Required resources
 
+_**DynamoDB**_
 Before getting started, you need to create a persistent storage layer where the idempotency utility can store its state - your lambda functions will need read and write access to it.
 
 As of now, Amazon DynamoDB is the only supported persistent storage layer, so you'll need to create a table first.
+
+_**Redis**_
+Before getting started you need to setup your [EC2 Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html) and [ElastiCache for Redis cluster](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/GettingStarted.html).
 
 **Default table configuration**
 
@@ -90,6 +95,8 @@ Resources:
 
 ### Idempotent decorator
 
+_**DynamoDB**_
+
 You can quickly start by initializing the `DynamoDBPersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler.
 
 === "app.py"
@@ -123,6 +130,31 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
       "product_id": "123456789"
     }
     ```
+    
+_**Redis**_
+
+You can initialize `RedisCachePersistenceLayer` class and use it with `idempotent` decorator on your lambda handler.
+
+=== "app.py"
+
+```
+	from aws_lambda_powertools.utilities.connections import RedisStandalone, RedisCluster
+	from aws_lambda_powertools.utilities.idempotency import (
+	    idempotent,
+	    RedisCachePersistenceLayer,
+	    IdempotencyConfig
+	)    
+	# For connection using Redis Standalone architecture
+	redis_connection = RedisStandalone(host="192.168.68.112", port=6379, password="pass", db_index=0) 
+
+	persistence_layer = RedisCachePersistenceLayer(connection=redis_connection)
+	config =  IdempotencyConfig(
+	    expires_after_seconds=1*60,  # 1 minutes
+	)
+	@idempotent(config=config, persistence_store=persistence_layer)
+	def lambda_handler(event, context):
+	    return {"message":"Hello"}
+```
 
 ### Idempotent_function decorator
 
@@ -565,6 +597,57 @@ When using DynamoDB as a persistence layer, you can alter the attribute names by
 | **sort_key_attr**           |                    |                                      | Sort key of the table (if table is configured with a sort key).                                          |
 | **static_pk_value**         |                    | `idempotency#{LAMBDA_FUNCTION_NAME}` | Static value to use as the partition key. Only used when **sort_key_attr** is set.                       |
 
+#### RedisCachePersistenceLayer
+
+This persistence layer is built-in and you can use ElastiCache to store and see the keys.
+
+```
+	from aws_lambda_powertools.utilities.idempotency import RedisCachePersistenceLayer
+	persistence_layer = RedisCachePersistenceLayer(
+	    static_pk_value: Optional[str] = None,
+	    expiry_attr: str = "expiration",
+	    in_progress_expiry_attr: str = "in_progress_expiration",
+	    status_attr: str = "status",
+	    data_attr: str = "data",
+	    validation_key_attr: str = "validation",
+	  )
+```
+
+When using ElastiCache for Redis as a persistence layer, you can alter the attribute names by passing these parameters when initializing the persistence layer:
+
+| Parameter                   | Required           | Default                              | Description                                                                                              |
+| --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| **static_pk_value**         |                    | `idempotency#{LAMBDA_FUNCTION_NAME}` | Static value to use as the partition key. Only used when **sort_key_attr** is set.                       |
+| **expiry_attr**             |                    | `expiration`                         | Unix timestamp of when record expires                                                                    |
+| **in_progress_expiry_attr** |                    | `in_progress_expiration`             | Unix timestamp of when record expires while in progress (in case of the invocation times out)            |
+| **status_attr**             |                    | `status`                             | Stores status of the lambda execution during and after invocation                                        |
+| **data_attr**               |                    | `data`                               | Stores results of successfully executed Lambda handlers                                                  |
+| **validation_key_attr**     |                    | `validation`                         | Hashed representation of the parts of the event used for validation                                      |
+
+#### RedisStandalone/RedisCluster:
+
+```
+from aws_lambda_powertools.utilities.connections import RedisStandalone,RedisCluster
+
+redis_connection = RedisStandalone(
+	host="192.168.68.112", 
+	port=6379,
+	username = "abc"
+	password="pass", 
+	db_index=0,
+	url = None
+)
+```
+
+| Parameter                   | Required           | Default                              | Description                                                                                              |
+| --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| **host**                    |                    | `localhost`                          | Name of the host to connect to Redis instance/cluster     |
+| **port**                    |                    | 6379                                 | Number of the port to connect to Redis instance/cluster   |
+| **username**                |                    | `None`                               | Name of the username to connect to Redis instance/cluster in case of using ACL | 
+| **password**                |                    | `None`                               | Passwod to connect to Redis instance/cluster              |
+| **db_index**                |                    | 0.                                   | Index of Redis database                                   |
+| **url**                     |                    | `None`                               | Redis client object configured from the given URL.        |
+
 ## Advanced
 
 ### Customizing the default behavior
@@ -626,6 +709,8 @@ In most cases, it is not desirable to store the idempotency records forever. Rat
 
 You can change this window with the **`expires_after_seconds`** parameter:
 
+_**DynamoDB**_
+
 ```python hl_lines="8 11" title="Adjusting cache TTL"
 from aws_lambda_powertools.utilities.idempotency import (
 	IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
@@ -640,6 +725,24 @@ config =  IdempotencyConfig(
 @idempotent(config=config, persistence_store=persistence_layer)
 def handler(event, context):
 	...
+```
+
+_**Redis**_
+
+```
+from aws_lambda_powertools.utilities.connections import RedisStandalone, RedisCluster
+from aws_lambda_powertools.utilities.idempotency import (
+	idempotent,
+	RedisCachePersistenceLayer,
+	IdempotencyConfig
+)    
+# For connection using Redis Standalone architecture
+redis_connection = RedisStandalone(host="192.168.68.112", port=6379, password="pass", db_index=0) 
+
+persistence_layer = RedisCachePersistenceLayer(connection=redis_connection)
+config =  IdempotencyConfig(
+	expires_after_seconds=5*60,  # 5 minutes
+)
 ```
 
 This will mark any records older than 5 minutes as expired, and the lambda handler will be executed as normal if it is invoked with a matching payload.
@@ -856,6 +959,8 @@ This utility provides an abstract base class (ABC), so that you can implement yo
 You can inherit from the `BasePersistenceLayer` class and implement the abstract methods `_get_record`, `_put_record`,
 `_update_record` and `_delete_record`.
 
+_**DynamoDB**_
+
 ```python hl_lines="8-13 57 65 74 96 124" title="Excerpt DynamoDB Persistence Layer implementation for reference"
 import datetime
 import logging
@@ -983,6 +1088,155 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 	def _delete_record(self, data_record: DataRecord) -> None:
 		logger.debug(f"Deleting record for idempotency key: {data_record.idempotency_key}")
 		self.table.delete_item(Key={self.key_attr: data_record.idempotency_key},)
+```
+
+_**Redis**_
+
+```
+import logging
+import os
+from typing import Any, Dict, Optional
+
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
+from aws_lambda_powertools.utilities.idempotency.exceptions import (
+    IdempotencyItemAlreadyExistsError,
+    IdempotencyItemNotFoundError,
+)
+from aws_lambda_powertools.utilities.idempotency.persistence.base import DataRecord
+
+logger = logging.getLogger(__name__)
+
+
+class RedisCachePersistenceLayer(BasePersistenceLayer):
+    def __init__(
+        self,
+        connection,
+        static_pk_value: Optional[str] = None,
+        expiry_attr: str = "expiration",
+        in_progress_expiry_attr: str = "in_progress_expiration",
+        status_attr: str = "status",
+        data_attr: str = "data",
+        validation_key_attr: str = "validation",
+    ):
+        """
+        Initialize the Redis Persistence Layer
+        Parameters
+        ----------
+        static_pk_value: str, optional
+            Redis attribute value for cache key, by default "idempotency#<function-name>".
+        expiry_attr: str, optional
+            Redis hash attribute name for expiry timestamp, by default "expiration"
+        in_progress_expiry_attr: str, optional
+            Redis hash attribute name for in-progress expiry timestamp, by default "in_progress_expiration"
+        status_attr: str, optional
+            Redis hash attribute name for status, by default "status"
+        data_attr: str, optional
+            Redis hash attribute name for response data, by default "data"
+        """
+
+        # Initialize connection with Redis
+        self._connection = connection.init_connection()
+
+        if static_pk_value is None:
+            static_pk_value = f"idempotency#{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, '')}"
+
+        self.static_pk_value = static_pk_value
+        self.in_progress_expiry_attr = in_progress_expiry_attr
+        self.expiry_attr = expiry_attr
+        self.status_attr = status_attr
+        self.data_attr = data_attr
+        self.validation_key_attr = validation_key_attr
+        super(RedisCachePersistenceLayer, self).__init__()
+
+    def _get_key(self, idempotency_key: str) -> dict:
+        # Need to review this after adding GETKEY logic
+        if self.sort_key_attr:
+            return {self.key_attr: self.static_pk_value, self.sort_key_attr: idempotency_key}
+        return {self.key_attr: idempotency_key}
+
+    def _item_to_data_record(self, item: Dict[str, Any]) -> DataRecord:
+        # Need to review this after adding GETKEY logic
+        return DataRecord(
+            status=item[self.status_attr],
+            expiry_timestamp=item[self.expiry_attr],
+            in_progress_expiry_timestamp=item.get(self.in_progress_expiry_attr),
+            response_data=item.get(self.data_attr),
+            payload_hash=item.get(self.validation_key_attr),
+        )
+
+    def _get_record(self, idempotency_key) -> DataRecord:
+        # See: https://redis.io/commands/hgetall/
+        response = self._connection.hgetall(idempotency_key)
+
+        try:
+            item = response
+        except KeyError:
+            raise IdempotencyItemNotFoundError
+        return self._item_to_data_record(item)
+
+    def _put_record(self, data_record: DataRecord) -> None:
+        # Redis works with hset to support hashing keys with multiple attributes
+        # See: https://redis.io/commands/hset/
+        item = {
+            "name": data_record.idempotency_key,
+            "mapping": {
+                self.in_progress_expiry_attr: data_record.in_progress_expiry_timestamp,
+                self.status_attr: data_record.status,
+                self.expiry_attr: data_record.expiry_timestamp,
+            },
+        }
+
+        if data_record.in_progress_expiry_timestamp is not None:
+            item["mapping"][self.in_progress_expiry_attr] = data_record.in_progress_expiry_timestamp
+
+        if self.payload_validation_enabled:
+            item["mapping"][self.validation_key_attr] = data_record.payload_hash
+
+        try:
+            # |     LOCKED     |         RETRY if status = "INPROGRESS"                |     RETRY
+            # |----------------|-------------------------------------------------------|-------------> .... (time)
+            # |             Lambda                                              Idempotency Record
+            # |             Timeout                                                 Timeout
+            # |       (in_progress_expiry)                                          (expiry)
+
+            # Conditions to successfully save a record:
+
+            # The idempotency key does not exist:
+            #    - first time that this invocation key is used
+            #    - previous invocation with the same key was deleted due to TTL
+            idempotency_key_not_exist = self._connection.exists(data_record.idempotency_key)
+
+            # key exists
+            if idempotency_key_not_exist == 1:
+                raise
+
+            # missing logic to compare expiration
+
+            logger.debug(f"Putting record on Redis for idempotency key: {data_record.idempotency_key}")
+            self._connection.hset(**item)
+            # hset type must set expiration after adding the record
+            # Need to review this to get ttl in seconds
+            self._connection.expire(name=data_record.idempotency_key, time=self.expires_after_seconds)
+        except Exception:
+            logger.debug(f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}")
+            raise IdempotencyItemAlreadyExistsError
+
+    def _update_record(self, data_record: DataRecord) -> None:
+        item = {
+            "name": data_record.idempotency_key,
+            "mapping": {
+                self.data_attr: data_record.response_data,
+                self.status_attr: data_record.status,
+            },
+        }
+        logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
+        self._connection.hset(**item)
+
+    def _delete_record(self, data_record: DataRecord) -> None:
+        logger.debug(f"Deleting record for idempotency key: {data_record.idempotency_key}")
+        # See: https://redis.io/commands/del/
+        self._connection.delete(data_record.idempotency_key)
 ```
 
 ???+ danger
