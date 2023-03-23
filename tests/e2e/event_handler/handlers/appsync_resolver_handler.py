@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
 from aws_lambda_powertools.event_handler import AppSyncResolver
+from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app = AppSyncResolver()
@@ -86,13 +87,9 @@ def all_posts() -> List[dict]:
     return list(posts.values())
 
 
-@app.resolver(type_name="Post", field_name="relatedPosts")
-def related_posts() -> List[dict]:
-    posts = []
-    for resolver_event in app.current_event:
-        if resolver_event.source:
-            posts.append(posts_related[resolver_event.source["post_id"]])
-    return posts
+@app.batch_resolver(type_name="Post", field_name="relatedPosts")
+def related_posts(event: AppSyncResolverEvent) -> Optional[list]:
+    return posts_related[event.source["post_id"]] if event.source else None
 
 
 def lambda_handler(event, context: LambdaContext) -> dict:

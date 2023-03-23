@@ -1,22 +1,32 @@
 import logging
 from itertools import groupby
-from typing import Any, Callable, List, Optional, Type, TypeVar, Union
+from typing import Any, Callable, List, Optional, Type, Union
 
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
-AppSyncResolverEventT = TypeVar("AppSyncResolverEventT", bound=AppSyncResolverEvent)
 
-
-class BaseRouter:
-    current_event: Union[AppSyncResolverEventT, List[AppSyncResolverEventT]]  # type: ignore[valid-type]
-    lambda_context: LambdaContext
-    context: dict
-
+class RouterContext:
     def __init__(self):
+        super().__init__()
+        self.context = {}
+
+    def append_context(self, **additional_context):
+        """Append key=value data as routing context"""
+        self.context.update(**additional_context)
+
+    def clear_context(self):
+        """Resets routing context"""
+        self.context.clear()
+
+
+class ResolverRegistry:
+    def __init__(self):
+        super().__init__()
         self._resolvers: dict = {}
+        self._batch_resolvers: dict = {}
 
     def resolver(self, type_name: str = "*", field_name: Optional[str] = None):
         """Registers the resolver for field_name
@@ -29,23 +39,33 @@ class BaseRouter:
             Field name
         """
 
-        def register_resolver(func):
+        def register(func):
             logger.debug(f"Adding resolver `{func.__name__}` for field `{type_name}.{field_name}`")
             self._resolvers[f"{type_name}.{field_name}"] = {"func": func}
             return func
 
-        return register_resolver
+        return register
 
-    def append_context(self, **additional_context):
-        """Append key=value data as routing context"""
-        self.context.update(**additional_context)
+    def batch_resolver(self, type_name: str = "*", field_name: Optional[str] = None):
+        """Registers the resolver for field_name
 
-    def clear_context(self):
-        """Resets routing context"""
-        self.context.clear()
+        Parameters
+        ----------
+        type_name : str
+            Type name
+        field_name : str
+            Field name
+        """
+
+        def register(func):
+            logger.debug(f"Adding batch resolver `{func.__name__}` for field `{type_name}.{field_name}`")
+            self._batch_resolvers[f"{type_name}.{field_name}"] = {"func": func}
+            return func
+
+        return register
 
 
-class AppSyncResolver(BaseRouter):
+class AppSyncResolver(ResolverRegistry, RouterContext):
     """
     AppSync resolver decorator
 
@@ -78,16 +98,20 @@ class AppSyncResolver(BaseRouter):
 
     def __init__(self):
         super().__init__()
-        self.context = {}  # early init as customers might add context before event resolution
+        self.current_batch_event: List[AppSyncResolverEvent] = []
+        self.current_event: Optional[AppSyncResolverEvent] = None
 
     def resolve(
-        self, event: dict, context: LambdaContext, data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent
+        self,
+        event: Union[dict, List[dict]],
+        context: LambdaContext,
+        data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent,
     ) -> Any:
         """Resolve field_name
 
         Parameters
         ----------
-        event : dict
+        event : dict | List[dict]
             Lambda event
         context : LambdaContext
             Lambda context
@@ -152,32 +176,37 @@ class AppSyncResolver(BaseRouter):
         ValueError
             If we could not find a field resolver
         """
-        # Maintenance: revisit generics/overload to fix [attr-defined] in mypy usage
 
-        BaseRouter.lambda_context = context
+        self.lambda_context = context
 
-        # If event is a list it means that AppSync sent batch request
-        if isinstance(event, list):
-            event_groups = [
-                {"field_name": field_name, "events": list(events)}
-                for field_name, events in groupby(event, key=lambda x: x["info"]["fieldName"])
-            ]
-            if len(event_groups) > 1:
-                ValueError("batch with different field names. It shouldn't happen!")
-
-            appconfig_events = [data_model(event) for event in event_groups[0]["events"]]
-            BaseRouter.current_event = appconfig_events
-            resolver = self._get_resolver(appconfig_events[0].type_name, event_groups[0]["field_name"])
-            response = resolver()
-        else:
-            appconfig_event = data_model(event)
-            BaseRouter.current_event = appconfig_event
-            resolver = self._get_resolver(appconfig_event.type_name, appconfig_event.field_name)
-            response = resolver(**appconfig_event.arguments)
-
+        response = (
+            self._call_batch_resolver(event, data_model)
+            if isinstance(event, list)
+            else self._call_resolver(event, data_model)
+        )
         self.clear_context()
 
         return response
+
+    def _call_resolver(self, event: dict, data_model: Type[AppSyncResolverEvent]) -> Any:
+        self.current_event = data_model(event)
+        resolver = self._get_resolver(self.current_event.type_name, self.current_event.field_name)
+        return resolver(**self.current_event.arguments)
+
+    def _call_batch_resolver(self, event: List[dict], data_model: Type[AppSyncResolverEvent]) -> List[Any]:
+        event_groups = [
+            {"field_name": field_name, "events": list(events)}
+            for field_name, events in groupby(event, key=lambda x: x["info"]["fieldName"])
+        ]
+        if len(event_groups) > 1:
+            ValueError("batch with different field names. It shouldn't happen!")
+
+        self.current_batch_event = [data_model(event) for event in event_groups[0]["events"]]
+        resolver = self._get_batch_resolver(
+            self.current_batch_event[0].type_name, self.current_batch_event[0].field_name
+        )
+
+        return [resolver(event=appconfig_event) for appconfig_event in self.current_batch_event]
 
     def _get_resolver(self, type_name: str, field_name: str) -> Callable:
         """Get resolver for field_name
@@ -200,8 +229,32 @@ class AppSyncResolver(BaseRouter):
             raise ValueError(f"No resolver found for '{full_name}'")
         return resolver["func"]
 
+    def _get_batch_resolver(self, type_name: str, field_name: str) -> Callable:
+        """Get resolver for field_name
+
+        Parameters
+        ----------
+        type_name : str
+            Type name
+        field_name : str
+            Field name
+
+        Returns
+        -------
+        Callable
+            callable function and configuration
+        """
+        full_name = f"{type_name}.{field_name}"
+        resolver = self._batch_resolvers.get(full_name, self._batch_resolvers.get(f"*.{field_name}"))
+        if not resolver:
+            raise ValueError(f"No batch resolver found for '{full_name}'")
+        return resolver["func"]
+
     def __call__(
-        self, event: dict, context: LambdaContext, data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent
+        self,
+        event: Union[dict, List[dict]],
+        context: LambdaContext,
+        data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent,
     ) -> Any:
         """Implicit lambda handler which internally calls `resolve`"""
         return self.resolve(event, context, data_model)
@@ -222,7 +275,6 @@ class AppSyncResolver(BaseRouter):
         self._resolvers.update(router._resolvers)
 
 
-class Router(BaseRouter):
+class Router(RouterContext, ResolverRegistry):
     def __init__(self):
         super().__init__()
-        self.context = {}  # early init as customers might add context before event resolution

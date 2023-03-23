@@ -1,5 +1,6 @@
 import asyncio
 import sys
+from typing import Optional
 
 import pytest
 
@@ -199,22 +200,23 @@ def test_resolve_batch_processing():
             "fieldName": "listLocations",
             "arguments": {},
             "source": {
-                "id": "3",
+                "id": [3, 4],
             },
         },
     ]
 
     app = AppSyncResolver()
 
-    @app.resolver(field_name="listLocations")
-    def create_something():  # noqa AA03 VNE003
-        return [event.source["id"] for event in app.current_event]
+    @app.batch_resolver(field_name="listLocations")
+    def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+        return event.source["id"] if event.source else None
 
     # Call the implicit handler
     result = app.resolve(event, LambdaContext())
-    assert result == ["1", "2", "3"]
+    assert result == [appsync_event["source"]["id"] for appsync_event in event]
 
-    assert len(app.current_event) == len(event)
+    assert app.current_batch_event and len(app.current_batch_event) == len(event)
+    assert not app.current_event
 
 
 def test_resolver_include_resolver():
