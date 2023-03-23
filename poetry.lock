@@ -1760,14 +1760,14 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-s3"
-version = "1.26.97"
-description = "Type annotations for boto3.S3 1.26.97 service generated with mypy-boto3-builder 7.13.0"
+version = "1.26.97.post2"
+description = "Type annotations for boto3.S3 1.26.97 service generated with mypy-boto3-builder 7.14.2"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-s3-1.26.97.tar.gz", hash = "sha256:7b596ba20903612034e9b83451bf7186cd6d027df7dfa97a17f09d51a47c275d"},
-    {file = "mypy_boto3_s3-1.26.97-py3-none-any.whl", hash = "sha256:c1b6513112e7b9aa06afe16b5a35bfe6e51fc45d4ffef55aa1ff8a8148c6c39a"},
+    {file = "mypy-boto3-s3-1.26.97.post2.tar.gz", hash = "sha256:e5f6b688be07ef735ef94d61573749a2657a351251726b325f3dce494710ad08"},
+    {file = "mypy_boto3_s3-1.26.97.post2-py3-none-any.whl", hash = "sha256:561094e0fa213780a18fd51a312e8683463d74cb91afffdc1033d73612ee8190"},
 ]
 
 [package.dependencies]
