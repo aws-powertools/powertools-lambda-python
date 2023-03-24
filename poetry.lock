@@ -1700,18 +1700,18 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-cloudwatch"
-version = "1.26.52"
-description = "Type annotations for boto3.CloudWatch 1.26.52 service generated with mypy-boto3-builder 7.12.3"
+version = "1.26.99"
+description = "Type annotations for boto3.CloudWatch 1.26.99 service generated with mypy-boto3-builder 7.14.2"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-cloudwatch-1.26.52.tar.gz", hash = "sha256:d77194f2e359a9b17d54aee4de64f1f9502469987ff48fdc94f9f846cd08818b"},
-    {file = "mypy_boto3_cloudwatch-1.26.52-py3-none-any.whl", hash = "sha256:412a76f354b637206365d93c6311e5b32cd0e1c9863f3edd5979a55ead4c4dee"},
+    {file = "mypy-boto3-cloudwatch-1.26.99.tar.gz", hash = "sha256:ada2b942a88cc6fd307fef0fcb40d0765d3971e33e0c6f92a127d5abcfea1fdb"},
+    {file = "mypy_boto3_cloudwatch-1.26.99-py3-none-any.whl", hash = "sha256:98b4b2d6363c17ab5a4c1dee2ee1da2d4b52333f0cae999b8145a0c28a86e61e"},
 ]
 
 [package.dependencies]
-typing-extensions = ">=4.1.0"
+typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-dynamodb"
@@ -3019,4 +3019,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "8a5e42caf020bfc99e3f0d4c6d29a1c7a691f7aa4e75603e09c9e40515492aa3"
+content-hash = "8806b39d55966c6661fa404e1eac083cef0ac819c67d28887f03bea1b13120f3"
