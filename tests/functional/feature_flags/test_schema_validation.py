@@ -301,7 +301,7 @@ def test_validate_condition_missing_condition_value():
     }
 
     # WHEN calling validate_condition
-    with pytest.raises(SchemaValidationError, match="'value' key must not be empty"):
+    with pytest.raises(SchemaValidationError, match="'value' key must not be none"):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name="dummy")
 
 
@@ -314,8 +314,20 @@ def test_validate_condition_none_condition_value():
     }
 
     # WHEN calling validate_condition
-    with pytest.raises(SchemaValidationError, match="'value' key must not be empty"):
+    with pytest.raises(SchemaValidationError, match="'value' key must not be none"):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name="dummy")
+
+
+def test_validate_condition_empty_condition_value():
+    # GIVEN a configuration with a missing condition value
+    condition = {
+        "action": RuleAction.EQUALS.value,
+        "key": "tenant_id",
+        "value": "",
+    }
+
+    # WHEN calling validate_condition
+    ConditionsValidator.validate_condition_value(condition=condition, rule_name="dummy")
 
 
 def test_validate_condition_valid_falsy_condition_value():
