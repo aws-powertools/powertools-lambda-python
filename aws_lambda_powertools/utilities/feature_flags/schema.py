@@ -325,8 +325,8 @@ class ConditionsValidator(BaseValidator):
 
     @staticmethod
     def validate_condition_value(condition: Dict[str, Any], rule_name: str):
-        value = condition.get(CONDITION_VALUE, "")
-        if not value:
+        value = condition.get(CONDITION_VALUE)
+        if value is None:
             raise SchemaValidationError(f"'value' key must not be empty, rule={rule_name}")
         action = condition.get(CONDITION_ACTION, "")
 
