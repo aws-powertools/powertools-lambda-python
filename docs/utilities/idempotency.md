@@ -37,11 +37,13 @@ Your Lambda function IAM Role must have `dynamodb:GetItem`, `dynamodb:PutItem`, 
 ### Required resources
 
 _**DynamoDB**_
+
 Before getting started, you need to create a persistent storage layer where the idempotency utility can store its state - your lambda functions will need read and write access to it.
 
 As of now, Amazon DynamoDB is the only supported persistent storage layer, so you'll need to create a table first.
 
 _**Redis**_
+
 Before getting started you need to setup your [EC2 Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html) and [ElastiCache for Redis cluster](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/GettingStarted.html).
 
 **Default table configuration**
