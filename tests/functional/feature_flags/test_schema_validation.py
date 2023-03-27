@@ -314,7 +314,7 @@ def test_validate_condition_none_condition_value():
     }
 
     # WHEN calling validate_condition
-    with pytest.raises(SchemaValidationError, match="'value' key must not be none"):
+    with pytest.raises(SchemaValidationError, match="'value' key must not be null"):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name="dummy")
 
 
