@@ -827,10 +827,10 @@ def test_flags_condition_match(mocker):
 	expected_value = True
 	mocked_app_config_schema = {
 		"my_feature": {
-			"default": expected_value,
+			"default": False,
 			"rules": {
 				"tenant id equals 12345": {
-					"when_match": True,
+					"when_match": expected_value,
 					"conditions": [
 						{
 							"action": RuleAction.EQUALS.value,
