@@ -4,6 +4,11 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **feature_flags:** make test conditions deterministic ([#2059](https://github.com/awslabs/aws-lambda-powertools-python/issues/2059))
+* **feature_flags:** handle expected falsy values in conditions ([#2052](https://github.com/awslabs/aws-lambda-powertools-python/issues/2052))
+
 ## Documentation
 
 * **logger:** warn append_keys on not being thread-safe ([#2046](https://github.com/awslabs/aws-lambda-powertools-python/issues/2046))
@@ -15,13 +20,22 @@
 ## Maintenance
 
 * **deps:** bump pydantic from 1.10.6 to 1.10.7 ([#2034](https://github.com/awslabs/aws-lambda-powertools-python/issues/2034))
+* **deps-dev:** bump filelock from 3.10.4 to 3.10.7 ([#2055](https://github.com/awslabs/aws-lambda-powertools-python/issues/2055))
+* **deps-dev:** bump types-python-dateutil from 2.8.19.10 to 2.8.19.11 ([#2057](https://github.com/awslabs/aws-lambda-powertools-python/issues/2057))
+* **deps-dev:** bump mypy-boto3-s3 from 1.26.97.post2 to 1.26.99 ([#2054](https://github.com/awslabs/aws-lambda-powertools-python/issues/2054))
+* **deps-dev:** bump mkdocs-material from 9.1.3 to 9.1.4 ([#2050](https://github.com/awslabs/aws-lambda-powertools-python/issues/2050))
+* **deps-dev:** bump filelock from 3.10.2 to 3.10.4 ([#2048](https://github.com/awslabs/aws-lambda-powertools-python/issues/2048))
+* **deps-dev:** bump mypy-boto3-cloudwatch from 1.26.52 to 1.26.99 ([#2049](https://github.com/awslabs/aws-lambda-powertools-python/issues/2049))
+* **deps-dev:** bump filelock from 3.10.1 to 3.10.2 ([#2045](https://github.com/awslabs/aws-lambda-powertools-python/issues/2045))
+* **deps-dev:** bump types-requests from 2.28.11.15 to 2.28.11.16 ([#2044](https://github.com/awslabs/aws-lambda-powertools-python/issues/2044))
 * **deps-dev:** bump mypy-boto3-s3 from 1.26.97 to 1.26.97.post2 ([#2043](https://github.com/awslabs/aws-lambda-powertools-python/issues/2043))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.26.97 to 1.26.97.post1 ([#2042](https://github.com/awslabs/aws-lambda-powertools-python/issues/2042))
 * **deps-dev:** bump filelock from 3.10.0 to 3.10.1 ([#2036](https://github.com/awslabs/aws-lambda-powertools-python/issues/2036))
 * **deps-dev:** bump aws-cdk from 2.69.0 to 2.70.0 ([#2039](https://github.com/awslabs/aws-lambda-powertools-python/issues/2039))
 * **deps-dev:** bump mypy-boto3-dynamodb from 1.26.87 to 1.26.97 ([#2035](https://github.com/awslabs/aws-lambda-powertools-python/issues/2035))
 * **deps-dev:** bump mypy-boto3-s3 from 1.26.62 to 1.26.97 ([#2037](https://github.com/awslabs/aws-lambda-powertools-python/issues/2037))
 * **deps-dev:** bump aws-cdk-lib from 2.69.0 to 2.70.0 ([#2038](https://github.com/awslabs/aws-lambda-powertools-python/issues/2038))
-* **deps-dev:** bump mypy-boto3-dynamodb from 1.26.97 to 1.26.97.post1 ([#2042](https://github.com/awslabs/aws-lambda-powertools-python/issues/2042))
+* **deps-dev:** bump cfn-lint from 0.75.1 to 0.76.1 ([#2056](https://github.com/awslabs/aws-lambda-powertools-python/issues/2056))
 * **deps-dev:** bump mypy-boto3-ssm from 1.26.77 to 1.26.97 ([#2033](https://github.com/awslabs/aws-lambda-powertools-python/issues/2033))
 * **deps-dev:** bump flake8-comprehensions from 3.11.0 to 3.11.1 ([#2029](https://github.com/awslabs/aws-lambda-powertools-python/issues/2029))
 * **deps-dev:** bump cfn-lint from 0.75.0 to 0.75.1 ([#2027](https://github.com/awslabs/aws-lambda-powertools-python/issues/2027))
