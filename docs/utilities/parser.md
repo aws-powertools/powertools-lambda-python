@@ -63,7 +63,7 @@ Use the decorator for fail fast scenarios where you want your Lambda function to
 ???+ note
     **This decorator will replace the `event` object with the parsed model if successful**. This means you might be careful when nesting other decorators that expect `event` to be a `dict`.
 
-```python hl_lines="18" title="Parsing and validating upon invocation with event_parser decorator"
+```python hl_lines="19" title="Parsing and validating upon invocation with event_parser decorator"
 from aws_lambda_powertools.utilities.parser import event_parser, BaseModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from typing import List, Optional
