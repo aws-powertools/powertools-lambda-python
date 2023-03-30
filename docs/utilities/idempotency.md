@@ -70,7 +70,7 @@ Resources:
   HelloWorldFunction:
   Type: AWS::Serverless::Function
   Properties:
-	Runtime: python3.8
+	Runtime: python3.9
 	...
 	Policies:
 	  - DynamoDBCrudPolicy:
