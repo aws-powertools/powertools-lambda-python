@@ -476,6 +476,34 @@ sequenceDiagram
 <i>Previous Idempotent request expired</i>
 </center>
 
+#### Concurrent identical in-flight requests
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    Client->>Lambda: Invoke (event)
+    Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+    activate Persistence Layer
+    Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload
+      par Second request
+          Client->>Lambda: Invoke (event)
+          Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+          Lambda-->>Lambda: IdempotencyAlreadyInProgressError
+          Lambda->>Client: Error sent to client if unhandled
+      end
+    Lambda-->>Lambda: Call your function
+    Lambda->>Persistence Layer: Update record with result
+    deactivate Persistence Layer
+    Persistence Layer-->>Persistence Layer: Update record
+    Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result
+    Lambda-->>Client: Response sent to client
+```
+<i>Concurrent identical in-flight requests</i>
+</center>
+
 #### Lambda timeouts
 
 ???+ note
