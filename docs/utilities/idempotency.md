@@ -92,6 +92,9 @@ Resources:
 
 You can quickly start by initializing the `DynamoDBPersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler.
 
+???+ note
+    In this example, the entire Lambda handler is treated as a single idempotent operation. If your Lambda handler can cause multiple side effects, or you're only interested in making a specific logic idempotent, use [`idempotent_function`](#idempotent_function-decorator) instead.
+
 === "app.py"
 
     ```python hl_lines="1-3 5 7 14"
@@ -123,6 +126,8 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
       "product_id": "123456789"
     }
     ```
+
+After processing this request successfully, a second request containing the exact same payload above will now return the same response, ensuring our customer isn't charged twice.
 
 ### Idempotent_function decorator
 
@@ -401,13 +406,8 @@ sequenceDiagram
         Lambda-->>Client: Same response sent to client
     end
 ```
-<i>Idempotent sequence</i>
+<i>Idempotent successful request</i>
 </center>
-
-The client was successful in receiving the result after the retry. Since the Lambda handler was only executed once, our customer hasn't been charged twice.
-
-???+ note
-    Bear in mind that the entire Lambda handler is treated as a single idempotent operation. If your Lambda handler can cause multiple side effects, consider splitting it into separate functions.
 
 #### Lambda timeouts
 
