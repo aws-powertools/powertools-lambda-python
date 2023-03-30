@@ -1087,7 +1087,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 
 ### Testing with DynamoDB Local
 
-To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html), you can replace the `Table` resource used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
+To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html), you can replace the `DynamoDB table` used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
 
 === "tests.py"
 
@@ -1115,10 +1115,10 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
         return LambdaContext()
 
     def test_idempotent_lambda(lambda_context):
-        # Create our own Table resource using the endpoint for our DynamoDB Local instance
-        resource = boto3.resource("dynamodb", endpoint_url='http://localhost:8000')
-        table = resource.Table(app.persistence_layer.table_name)
-        app.persistence_layer.table = table
+        # Configure the boto3 to use the endpoint for the DynamoDB Local instance
+        resource = boto3.client("dynamodb", endpoint_url='http://localhost:8000')
+        # If desired, change the name of the DynamoDB table used by the persistence layer to one you created locally
+        app.persistence_layer.table_name = "localtable"
 
         result = app.handler({'testkey': 'testvalue'}, lambda_context)
         assert result['payment_id'] == 12345
