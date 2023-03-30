@@ -36,7 +36,7 @@ typing-extensions = "^4.4.0"
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^7.2"}
 pytest = "^7.2.2"
-black = "^23.1"
+black = "^23.3"
 boto3 = "^1.18"
 flake8 = [
   # https://github.com/python/importlib_metadata/issues/406
