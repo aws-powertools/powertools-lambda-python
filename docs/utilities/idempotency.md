@@ -373,9 +373,98 @@ Imagine the function executes successfully, but the client never receives the re
     }
     ```
 
+### Lambda timeouts
+
+???+ note
+    This is automatically done when you decorate your Lambda handler with [@idempotent decorator](#idempotent-decorator).
+
+To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/), Powertools calculates and includes the remaining invocation available time as part of the idempotency record.
+
+???+ example
+    If a second invocation happens **after** this timestamp, and the record is marked as `INPROGRESS`, we will execute the invocation again as if it was in the `EXPIRED` state (e.g, `expire_seconds` field elapsed).
+
+    This means that if an invocation expired during execution, it will be quickly executed again on the next retry.
+
+???+ important
+    If you are only using the [@idempotent_function decorator](#idempotent_function-decorator) to guard isolated parts of your code, you must use `register_lambda_context` available in the [idempotency config object](#customizing-the-default-behavior) to benefit from this protection.
+
+Here is an example on how you register the Lambda context in your handler:
+
+```python hl_lines="8 16" title="Registering the Lambda context"
+from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+from aws_lambda_powertools.utilities.idempotency import (
+    IdempotencyConfig, idempotent_function
+)
+
+persistence_layer = DynamoDBPersistenceLayer(table_name="...")
+
+config = IdempotencyConfig()
+
+@idempotent_function(data_keyword_argument="record", persistence_store=persistence_layer, config=config)
+def record_handler(record: SQSRecord):
+    return {"message": record["body"]}
+
+
+def lambda_handler(event, context):
+    config.register_lambda_context(context)
+
+    return record_handler(event)
+```
+
+### Handling exceptions
+
+If you are using the `idempotent` decorator on your Lambda handler, any unhandled exceptions that are raised during the code execution will cause **the record in the persistence layer to be deleted**.
+This means that new invocations will execute your code again despite having the same payload. If you don't want the record to be deleted, you need to catch exceptions within the idempotent function and return a successful response.
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    Client->>Lambda: Invoke (event)
+    Lambda->>Persistence Layer: Get or set (id=event.search(payload))
+    activate Persistence Layer
+    Note right of Persistence Layer: Locked during this time. Prevents multiple<br/>Lambda invocations with the same<br/>payload running concurrently.
+    Lambda--xLambda: Call handler (event).<br/>Raises exception
+    Lambda->>Persistence Layer: Delete record (id=event.search(payload))
+    deactivate Persistence Layer
+    Lambda-->>Client: Return error response
+```
+<i>Idempotent sequence exception</i>
+</center>
+
+If you are using `idempotent_function`, any unhandled exceptions that are raised _inside_ the decorated function will cause the record in the persistence layer to be deleted, and allow the function to be executed again if retried.
+
+If an Exception is raised _outside_ the scope of the decorated function and after your function has been called, the persistent record will not be affected. In this case, idempotency will be maintained for your decorated function. Example:
+
+```python hl_lines="2-4 8-10" title="Exception not affecting idempotency record sample"
+def lambda_handler(event, context):
+    # If an exception is raised here, no idempotent record will ever get created as the
+    # idempotent function does not get called
+    do_some_stuff()
+
+    result = call_external_service(data={"user": "user1", "id": 5})
+
+    # This exception will not cause the idempotent record to be deleted, since it
+    # happens after the decorated function has been successfully called
+    raise Exception
+
+
+@idempotent_function(data_keyword_argument="data", config=config, persistence_store=dynamodb)
+def call_external_service(data: dict, **kwargs):
+    result = requests.post('http://example.com', json={"user": data['user'], "transaction_id": data['id']}
+    return result.json()
+```
+
+???+ warning
+    **We will raise `IdempotencyPersistenceLayerError`** if any of the calls to the persistence layer fail unexpectedly.
+
+    As this happens outside the scope of your decorated function, you are not able to catch it if you're using the `idempotent` decorator on your Lambda handler.
+
 ### Idempotency request flow
 
-The following sequence diagrams explain how the Idempotency feature behaves under different transactions.
+The following sequence diagrams explain how the Idempotency feature behaves under different scenarios.
 
 #### Successful request
 
@@ -537,94 +626,7 @@ sequenceDiagram
 <i>Idempotent request during and after Lambda timeouts</i>
 </center>
 
-### Lambda timeouts
-
-???+ note
-    This is automatically done when you decorate your Lambda handler with [@idempotent decorator](#idempotent-decorator).
-
-To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/), Powertools calculates and includes the remaining invocation available time as part of the idempotency record.
-
-???+ example
-    If a second invocation happens **after** this timestamp, and the record is marked as `INPROGRESS`, we will execute the invocation again as if it was in the `EXPIRED` state (e.g, `expire_seconds` field elapsed).
-
-    This means that if an invocation expired during execution, it will be quickly executed again on the next retry.
-
-???+ important
-    If you are only using the [@idempotent_function decorator](#idempotent_function-decorator) to guard isolated parts of your code, you must use `register_lambda_context` available in the [idempotency config object](#customizing-the-default-behavior) to benefit from this protection.
-
-Here is an example on how you register the Lambda context in your handler:
-
-```python hl_lines="8 16" title="Registering the Lambda context"
-from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-from aws_lambda_powertools.utilities.idempotency import (
-    IdempotencyConfig, idempotent_function
-)
-
-persistence_layer = DynamoDBPersistenceLayer(table_name="...")
-
-config = IdempotencyConfig()
-
-@idempotent_function(data_keyword_argument="record", persistence_store=persistence_layer, config=config)
-def record_handler(record: SQSRecord):
-    return {"message": record["body"]}
-
-
-def lambda_handler(event, context):
-    config.register_lambda_context(context)
-
-    return record_handler(event)
-```
-
-### Handling exceptions
-
-If you are using the `idempotent` decorator on your Lambda handler, any unhandled exceptions that are raised during the code execution will cause **the record in the persistence layer to be deleted**.
-This means that new invocations will execute your code again despite having the same payload. If you don't want the record to be deleted, you need to catch exceptions within the idempotent function and return a successful response.
-
-<center>
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Lambda
-    participant Persistence Layer
-    Client->>Lambda: Invoke (event)
-    Lambda->>Persistence Layer: Get or set (id=event.search(payload))
-    activate Persistence Layer
-    Note right of Persistence Layer: Locked during this time. Prevents multiple<br/>Lambda invocations with the same<br/>payload running concurrently.
-    Lambda--xLambda: Call handler (event).<br/>Raises exception
-    Lambda->>Persistence Layer: Delete record (id=event.search(payload))
-    deactivate Persistence Layer
-    Lambda-->>Client: Return error response
-```
-<i>Idempotent sequence exception</i>
-</center>
-
-If you are using `idempotent_function`, any unhandled exceptions that are raised _inside_ the decorated function will cause the record in the persistence layer to be deleted, and allow the function to be executed again if retried.
-
-If an Exception is raised _outside_ the scope of the decorated function and after your function has been called, the persistent record will not be affected. In this case, idempotency will be maintained for your decorated function. Example:
-
-```python hl_lines="2-4 8-10" title="Exception not affecting idempotency record sample"
-def lambda_handler(event, context):
-    # If an exception is raised here, no idempotent record will ever get created as the
-    # idempotent function does not get called
-    do_some_stuff()
-
-    result = call_external_service(data={"user": "user1", "id": 5})
-
-    # This exception will not cause the idempotent record to be deleted, since it
-    # happens after the decorated function has been successfully called
-    raise Exception
-
-
-@idempotent_function(data_keyword_argument="data", config=config, persistence_store=dynamodb)
-def call_external_service(data: dict, **kwargs):
-    result = requests.post('http://example.com', json={"user": data['user'], "transaction_id": data['id']}
-    return result.json()
-```
-
-???+ warning
-    **We will raise `IdempotencyPersistenceLayerError`** if any of the calls to the persistence layer fail unexpectedly.
-
-    As this happens outside the scope of your decorated function, you are not able to catch it if you're using the `idempotent` decorator on your Lambda handler.
+## Advanced
 
 ### Persistence layers
 
@@ -659,8 +661,6 @@ When using DynamoDB as a persistence layer, you can alter the attribute names by
 | **validation_key_attr**     |                    | `validation`                         | Hashed representation of the parts of the event used for validation                                      |
 | **sort_key_attr**           |                    |                                      | Sort key of the table (if table is configured with a sort key).                                          |
 | **static_pk_value**         |                    | `idempotency#{LAMBDA_FUNCTION_NAME}` | Static value to use as the partition key. Only used when **sort_key_attr** is set.                       |
-
-## Advanced
 
 ### Customizing the default behavior
 
