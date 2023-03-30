@@ -389,12 +389,12 @@ sequenceDiagram
         Client->>Lambda: Invoke (event)
         Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
         activate Persistence Layer
-        Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload.
-        Lambda-->>Lambda: Call your decorated function
+        Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload
+        Lambda-->>Lambda: Call your function
         Lambda->>Persistence Layer: Update record with result
         deactivate Persistence Layer
         Persistence Layer-->>Persistence Layer: Update record
-        Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result.
+        Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result
         Lambda-->>Client: Response sent to client
     else retried request
         Client->>Lambda: Invoke (event)
@@ -423,12 +423,12 @@ sequenceDiagram
       Client->>Lambda: Invoke (event)
       Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
       activate Persistence Layer
-      Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload.
-      Lambda-->>Lambda: Call your decorated function
+      Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload
+      Lambda-->>Lambda: Call your function
       Lambda->>Persistence Layer: Update record with result
       deactivate Persistence Layer
       Persistence Layer-->>Persistence Layer: Update record
-      Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result.
+      Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result
       Lambda-->>Lambda: Save record and result in memory
       Lambda-->>Client: Response sent to client
     else retried request
@@ -439,6 +439,41 @@ sequenceDiagram
     end
 ```
 <i>Idempotent successful request cached</i>
+</center>
+
+#### Expired records
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    alt initial request
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload
+        Lambda-->>Lambda: Call your function
+        Lambda->>Persistence Layer: Update record with result
+        deactivate Persistence Layer
+        Persistence Layer-->>Persistence Layer: Update record
+        Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result
+        Lambda-->>Client: Response sent to client
+    else retried request
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Persistence Layer-->>Lambda: Already exists in persistence layer.
+        deactivate Persistence Layer
+        Note over Lambda,Persistence Layer: Record status is COMPLETE but expired hours ago
+        loop Repeat initial request process
+            Note over Lambda,Persistence Layer: 1. Set record to INPROGRESS, <br> 2. Call your function, <br> 3. Set record to COMPLETE
+        end
+        Lambda-->>Client: Same response sent to client
+    end
+```
+<i>Previous Idempotent request expired</i>
 </center>
 
 #### Lambda timeouts
