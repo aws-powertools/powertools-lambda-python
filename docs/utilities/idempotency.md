@@ -491,7 +491,7 @@ sequenceDiagram
       par Second request
           Client->>Lambda: Invoke (event)
           Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
-          Lambda-->>Lambda: IdempotencyAlreadyInProgressError
+          Lambda--xLambda: IdempotencyAlreadyInProgressError
           Lambda->>Client: Error sent to client if unhandled
       end
     Lambda-->>Lambda: Call your function
@@ -504,7 +504,40 @@ sequenceDiagram
 <i>Concurrent identical in-flight requests</i>
 </center>
 
-#### Lambda timeouts
+#### Lambda request timeout
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    alt initial request
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload
+        Lambda-->>Lambda: Call your function
+        Note right of Lambda: Time out
+        Lambda--xLambda: Time out error
+        Lambda-->>Client: Return error response
+        deactivate Persistence Layer
+    else retry after Lambda timeout elapses
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Reset in_progress_expiry attribute
+        Lambda-->>Lambda: Call your function
+        Lambda->>Persistence Layer: Update record with result
+        deactivate Persistence Layer
+        Persistence Layer-->>Persistence Layer: Update record
+        Lambda-->>Client: Response sent to client
+    end
+```
+<i>Idempotent request during and after Lambda timeouts</i>
+</center>
+
+### Lambda timeouts
 
 ???+ note
     This is automatically done when you decorate your Lambda handler with [@idempotent decorator](#idempotent-decorator).
@@ -541,45 +574,6 @@ def lambda_handler(event, context):
 
     return record_handler(event)
 ```
-
-#### Lambda timeout sequence diagram
-
-This sequence diagram shows an example flow of what happens if a Lambda function times out:
-
-<center>
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Lambda
-    participant Persistence Layer
-    alt initial request
-        Client->>Lambda: Invoke (event)
-        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
-        activate Persistence Layer
-        Note right of Persistence Layer: Locked to prevent concurrent<br/>invocations with <br/> the same payload.
-        Note over Lambda: Time out
-        Lambda--xLambda: Call handler (event)
-        Lambda-->>Client: Return error response
-        deactivate Persistence Layer
-    else concurrent request before timeout
-        Client->>Lambda: Invoke (event)
-        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
-        Persistence Layer-->>Lambda: Request already INPROGRESS
-        Lambda--xClient: Return IdempotencyAlreadyInProgressError
-    else retry after Lambda timeout
-        Client->>Lambda: Invoke (event)
-        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
-        activate Persistence Layer
-        Note right of Persistence Layer: Locked to prevent concurrent<br/>invocations with <br/> the same payload.
-        Lambda-->>Lambda: Call handler (event)
-        Lambda->>Persistence Layer: Update record with result
-        deactivate Persistence Layer
-        Persistence Layer-->>Persistence Layer: Update record with result
-        Lambda-->>Client: Response sent to client
-    end
-```
-<i>Idempotent sequence for Lambda timeouts</i>
-</center>
 
 ### Handling exceptions
 
