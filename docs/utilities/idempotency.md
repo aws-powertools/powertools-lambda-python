@@ -387,7 +387,7 @@ sequenceDiagram
     participant Persistence Layer
     alt initial request
         Client->>Lambda: Invoke (event)
-        Lambda->>Persistence Layer: Get or set (idempotency_key=hash(payload))
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
         activate Persistence Layer
         Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload.
         Lambda-->>Lambda: Call your decorated function
@@ -398,7 +398,7 @@ sequenceDiagram
         Lambda-->>Client: Response sent to client
     else retried request
         Client->>Lambda: Invoke (event)
-        Lambda->>Persistence Layer: Get or set (idempotency_key=hash(payload)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
         activate Persistence Layer
         Persistence Layer-->>Lambda: Already exists in persistence layer.
         deactivate Persistence Layer
@@ -407,6 +407,38 @@ sequenceDiagram
     end
 ```
 <i>Idempotent successful request</i>
+</center>
+
+#### Successful request with cache enabled
+
+!!! note "[In-memory cache is disabled by default](#using-in-memory-cache)."
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    alt initial request
+      Client->>Lambda: Invoke (event)
+      Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+      activate Persistence Layer
+      Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload.
+      Lambda-->>Lambda: Call your decorated function
+      Lambda->>Persistence Layer: Update record with result
+      deactivate Persistence Layer
+      Persistence Layer-->>Persistence Layer: Update record
+      Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result.
+      Lambda-->>Lambda: Save record and result in memory
+      Lambda-->>Client: Response sent to client
+    else retried request
+      Client->>Lambda: Invoke (event)
+      Lambda-->>Lambda: Get idempotency_key=hash(payload)
+      Note over Lambda,Persistence Layer: Record status is COMPLETE and not expired
+      Lambda-->>Client: Same response sent to client
+    end
+```
+<i>Idempotent successful request cached</i>
 </center>
 
 #### Lambda timeouts
