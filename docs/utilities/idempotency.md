@@ -370,7 +370,9 @@ Imagine the function executes successfully, but the client never receives the re
 
 ### Idempotency request flow
 
-This sequence diagram shows an example flow of what happens in the payment scenario:
+The following sequence diagrams explain how the Idempotency feature behaves under different transactions.
+
+#### Successful request
 
 <center>
 ```mermaid
@@ -380,19 +382,23 @@ sequenceDiagram
     participant Persistence Layer
     alt initial request
         Client->>Lambda: Invoke (event)
-        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
+        Lambda->>Persistence Layer: Get or set (idempotency_key=hash(payload))
         activate Persistence Layer
-        Note right of Persistence Layer: Locked to prevent concurrent<br/>invocations with <br/> the same payload.
-        Lambda-->>Lambda: Call handler (event)
+        Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload.
+        Lambda-->>Lambda: Call your decorated function
         Lambda->>Persistence Layer: Update record with result
         deactivate Persistence Layer
-        Persistence Layer-->>Persistence Layer: Update record with result
+        Persistence Layer-->>Persistence Layer: Update record
+        Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result.
         Lambda-->>Client: Response sent to client
     else retried request
         Client->>Lambda: Invoke (event)
-        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
-        Persistence Layer-->>Lambda: Already exists in persistence layer. Return result
-        Lambda-->>Client: Response sent to client
+        Lambda->>Persistence Layer: Get or set (idempotency_key=hash(payload)
+        activate Persistence Layer
+        Persistence Layer-->>Lambda: Already exists in persistence layer.
+        deactivate Persistence Layer
+        Note over Lambda,Persistence Layer: Record status is COMPLETE and not expired
+        Lambda-->>Client: Same response sent to client
     end
 ```
 <i>Idempotent sequence</i>
