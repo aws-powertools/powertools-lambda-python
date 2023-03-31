@@ -330,8 +330,10 @@ In this example, we have a Lambda handler that creates a payment for a user subs
 
 Imagine the function executes successfully, but the client never receives the response due to a connection issue. It is safe to retry in this instance, as the idempotent decorator will return a previously saved response.
 
-???+ warning "Warning: Idempotency for JSON payloads"
-    The payload extracted by the `event_key_jmespath` is treated as a string by default, so will be sensitive to differences in whitespace even when the JSON payload itself is identical.
+**What we want here** is to instruct Idempotency to use `user` and `product_id` fields from our incoming payload as our idempotency key. If we were to treat the entire request as our idempotency key, a simple HTTP header change would cause our customer to be charged twice.
+
+???+ tip "Deserializing JSON strings in payloads for increased accuracy."
+    The payload extracted by the `event_key_jmespath` is treated as a string by default. This means there could be differences in whitespace even when the JSON payload itself is identical.
 
     To alter this behaviour, we can use the [JMESPath built-in function](jmespath_functions.md#powertools_json-function) `powertools_json()` to treat the payload as a JSON object (dict) rather than a string.
 
@@ -345,9 +347,9 @@ Imagine the function executes successfully, but the client never receives the re
 
     persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 
-    # Treat everything under the "body" key
-    # in the event json object as our payload
-    config = IdempotencyConfig(event_key_jmespath="powertools_json(body)")
+    # Deserialize JSON string under the "body" key
+    # then extract "user" and "product_id" data
+    config = IdempotencyConfig(event_key_jmespath="powertools_json(body).[user, product_id]")
 
     @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event, context):
@@ -556,7 +558,7 @@ sequenceDiagram
 <i>Idempotent successful request cached</i>
 </center>
 
-#### Expired records
+#### Expired idempotency records
 
 <center>
 ```mermaid
