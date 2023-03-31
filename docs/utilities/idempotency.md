@@ -157,6 +157,8 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
 
 After processing this request successfully, a second request containing the exact same payload above will now return the same response, ensuring our customer isn't charged twice.
 
+!!! question "New to idempotency concept? Please review our [Terminology](#terminology) section if you haven't yet."
+
 ### Idempotent_function decorator
 
 Similar to [idempotent decorator](#idempotent-decorator), you can use `idempotent_function` decorator for any synchronous Python function.
