@@ -16,6 +16,32 @@ times with the same parameters**. This makes idempotent operations safe to retry
 
 **Idempotency key** is a hash representation of either the entire event or a specific configured subset of the event, and invocation results are **JSON serialized** and stored in your persistence storage layer.
 
+**Idempotency record** is the data representation of an idempotent request saved in your preferred  storage layer. We use it to coordinate whether a request is idempotent, whether it's still valid or expired based on timestamps, etc.
+
+<center>
+```mermaid
+classDiagram
+    direction LR
+    class IdempotencyRecord {
+        idempotency_key str
+        status Status
+        expiry_timestamp int
+        in_progress_expiry_timestamp int
+        response_data Json~str~
+        payload_hash str
+    }
+    class Status {
+        <<Enumeration>>
+        INPROGRESS
+        COMPLETE
+        EXPIRED internal_only
+    }
+    IdempotencyRecord -- Status
+```
+
+<i>Idempotency record representation</i>
+</center>
+
 ## Key features
 
 * Prevent Lambda handler from executing more than once on the same event payload during a time window
