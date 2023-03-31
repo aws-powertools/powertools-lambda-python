@@ -1,6 +1,7 @@
 import logging
+from abc import ABC, abstractmethod
 from itertools import groupby
-from typing import Any, Callable, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -10,23 +11,68 @@ logger = logging.getLogger(__name__)
 
 class RouterContext:
     def __init__(self):
-        super().__init__()
-        self.context = {}
+        self._context = {}
 
-    def append_context(self, **additional_context):
+    @property
+    def context(self) -> Dict[str, Any]:
+        return self._context
+
+    @context.setter
+    def context(self, additional_context: Dict[str, Any]) -> None:
         """Append key=value data as routing context"""
-        self.context.update(**additional_context)
+        self._context.update(**additional_context)
 
-    def clear_context(self):
+    @context.deleter
+    def context(self):
         """Resets routing context"""
-        self.context.clear()
+        self._context.clear()
 
 
-class ResolverRegistry:
+class IResolverRegistry(ABC):
+    @property
+    @abstractmethod
+    def resolvers(self) -> Dict[str, Dict[str, Any]]:
+        ...
+
+    @resolvers.setter
+    @abstractmethod
+    def resolvers(self, resolvers: dict) -> None:
+        ...
+
+    @abstractmethod
+    def resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
+        ...
+
+    @abstractmethod
+    def find_resolver(self, type_name: str, field_name: str) -> Callable:
+        ...
+
+
+class IPublic(ABC):
+    @abstractmethod
+    def resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
+        ...
+
+    @abstractmethod
+    def batch_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
+        ...
+
+    @abstractmethod
+    def append_context(self, **additional_context) -> None:
+        ...
+
+
+class ResolverRegistry(IResolverRegistry):
     def __init__(self):
-        super().__init__()
-        self._resolvers: dict = {}
-        self._batch_resolvers: dict = {}
+        self._resolvers: Dict[str, Dict[str, Any]] = {}
+
+    @property
+    def resolvers(self) -> Dict[str, Dict[str, Any]]:
+        return self._resolvers
+
+    @resolvers.setter
+    def resolvers(self, resolvers: dict) -> None:
+        self._resolvers.update(resolvers)
 
     def resolver(self, type_name: str = "*", field_name: Optional[str] = None):
         """Registers the resolver for field_name
@@ -46,8 +92,8 @@ class ResolverRegistry:
 
         return register
 
-    def batch_resolver(self, type_name: str = "*", field_name: Optional[str] = None):
-        """Registers the resolver for field_name
+    def find_resolver(self, type_name: str, field_name: str) -> Callable:
+        """Find resolver based on type_name and field_name
 
         Parameters
         ----------
@@ -57,15 +103,14 @@ class ResolverRegistry:
             Field name
         """
 
-        def register(func):
-            logger.debug(f"Adding batch resolver `{func.__name__}` for field `{type_name}.{field_name}`")
-            self._batch_resolvers[f"{type_name}.{field_name}"] = {"func": func}
-            return func
+        full_name = f"{type_name}.{field_name}"
+        resolver = self._resolvers.get(full_name, self._resolvers.get(f"*.{field_name}"))
+        if not resolver:
+            raise ValueError(f"No resolver found for '{full_name}'")
+        return resolver["func"]
 
-        return register
 
-
-class AppSyncResolver(ResolverRegistry, RouterContext):
+class AppSyncResolver(IPublic):
     """
     AppSync resolver decorator
 
@@ -97,22 +142,25 @@ class AppSyncResolver(ResolverRegistry, RouterContext):
     """
 
     def __init__(self):
-        super().__init__()
+        self._resolver_registry: IResolverRegistry = ResolverRegistry()
+        self._batch_resolver_registry: IResolverRegistry = ResolverRegistry()
+        self._router_context: RouterContext = RouterContext()
         self.current_batch_event: List[AppSyncResolverEvent] = []
         self.current_event: Optional[AppSyncResolverEvent] = None
+        self.lambda_context: Optional[LambdaContext] = None
 
     def resolve(
         self,
-        event: Union[dict, List[dict]],
+        event: Union[Dict[str, Any], List[Dict[str, Any]]],
         context: LambdaContext,
         data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent,
     ) -> Any:
-        """Resolve field_name
+        """Resolve field_name in single event or in a batch event
 
         Parameters
         ----------
-        event : dict | List[dict]
-            Lambda event
+        event : dict | List[Dict]
+            Lambda event either coming from batch processing endpoint or from standard processing endpoint
         context : LambdaContext
             Lambda context
         data_model:
@@ -180,17 +228,26 @@ class AppSyncResolver(ResolverRegistry, RouterContext):
         self.lambda_context = context
 
         response = (
-            self._call_batch_resolver(event, data_model)
+            self._call_batch_resolver(event=event, data_model=data_model)
             if isinstance(event, list)
-            else self._call_resolver(event, data_model)
+            else self._call_single_resolver(event=event, data_model=data_model)
         )
-        self.clear_context()
+        del self._router_context.context
 
         return response
 
-    def _call_resolver(self, event: dict, data_model: Type[AppSyncResolverEvent]) -> Any:
+    def _call_single_resolver(self, event: dict, data_model: Type[AppSyncResolverEvent]) -> Any:
+        """Call single event resolver
+
+        Parameters
+        ----------
+        event : dict
+            Type name
+        data_model : Type[AppSyncResolverEvent]
+            Data_model to decode AppSync event, by default it is of AppSyncResolverEvent type or subclass of it
+        """
         self.current_event = data_model(event)
-        resolver = self._get_resolver(self.current_event.type_name, self.current_event.field_name)
+        resolver = self._resolver_registry.find_resolver(self.current_event.type_name, self.current_event.field_name)
         return resolver(**self.current_event.arguments)
 
     def _call_batch_resolver(self, event: List[dict], data_model: Type[AppSyncResolverEvent]) -> List[Any]:
@@ -202,53 +259,14 @@ class AppSyncResolver(ResolverRegistry, RouterContext):
             ValueError("batch with different field names. It shouldn't happen!")
 
         self.current_batch_event = [data_model(event) for event in event_groups[0]["events"]]
-        resolver = self._get_batch_resolver(
+        resolver = self._batch_resolver_registry.find_resolver(
             self.current_batch_event[0].type_name, self.current_batch_event[0].field_name
         )
 
-        return [resolver(event=appconfig_event) for appconfig_event in self.current_batch_event]
-
-    def _get_resolver(self, type_name: str, field_name: str) -> Callable:
-        """Get resolver for field_name
-
-        Parameters
-        ----------
-        type_name : str
-            Type name
-        field_name : str
-            Field name
-
-        Returns
-        -------
-        Callable
-            callable function and configuration
-        """
-        full_name = f"{type_name}.{field_name}"
-        resolver = self._resolvers.get(full_name, self._resolvers.get(f"*.{field_name}"))
-        if not resolver:
-            raise ValueError(f"No resolver found for '{full_name}'")
-        return resolver["func"]
-
-    def _get_batch_resolver(self, type_name: str, field_name: str) -> Callable:
-        """Get resolver for field_name
-
-        Parameters
-        ----------
-        type_name : str
-            Type name
-        field_name : str
-            Field name
-
-        Returns
-        -------
-        Callable
-            callable function and configuration
-        """
-        full_name = f"{type_name}.{field_name}"
-        resolver = self._batch_resolvers.get(full_name, self._batch_resolvers.get(f"*.{field_name}"))
-        if not resolver:
-            raise ValueError(f"No batch resolver found for '{full_name}'")
-        return resolver["func"]
+        return [
+            resolver(event=appconfig_event, **appconfig_event.arguments)
+            for appconfig_event in self.current_batch_event
+        ]
 
     def __call__(
         self,
@@ -267,14 +285,38 @@ class AppSyncResolver(ResolverRegistry, RouterContext):
         router : Router
             A router containing a dict of field resolvers
         """
+
         # Merge app and router context
-        self.context.update(**router.context)
+        self._router_context.context = router._router_context.context
         # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
-        router.context = self.context
+        router._router_context._context = self._router_context.context
 
-        self._resolvers.update(router._resolvers)
+        self._resolver_registry.resolvers = router._resolver_registry.resolvers
+        self._batch_resolver_registry.resolvers = router._batch_resolver_registry.resolvers
+
+    # Interfaces
+    def resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
+        return self._resolver_registry.resolver(field_name=field_name, type_name=type_name)
+
+    def batch_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
+        return self._batch_resolver_registry.resolver(field_name=field_name, type_name=type_name)
+
+    def append_context(self, **additional_context) -> None:
+        self._router_context.context = additional_context
 
 
-class Router(RouterContext, ResolverRegistry):
+class Router(IPublic):
     def __init__(self):
-        super().__init__()
+        self._resolver_registry: IResolverRegistry = ResolverRegistry()
+        self._batch_resolver_registry: IResolverRegistry = ResolverRegistry()
+        self._router_context: RouterContext = RouterContext()
+
+    # Interfaces
+    def resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
+        return self._resolver_registry.resolver(field_name=field_name, type_name=type_name)
+
+    def batch_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
+        return self._batch_resolver_registry.resolver(field_name=field_name, type_name=type_name)
+
+    def append_context(self, **additional_context) -> None:
+        self._router_context.context = additional_context
