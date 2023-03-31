@@ -248,7 +248,7 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 You can can easily integrate with [Batch utility](batch.md) via context manager. This ensures that you process each record in an idempotent manner, and guard against a [Lambda timeout](#lambda-timeouts) idempotent situation.
 
 ???+ "Choosing an unique batch record attribute"
-    In this example, we choose `messageId` as our idempotency token since we know it'll be unique.
+    In this example, we choose `messageId` as our idempotency key since we know it'll be unique.
 
     Depending on your use case, it might be more accurate [to choose another field](#choosing-a-payload-subset-for-idempotency) your producer intentionally set to define uniqueness.
 
