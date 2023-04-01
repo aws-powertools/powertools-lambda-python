@@ -153,14 +153,14 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.72.0"
+version = "2.72.1"
 description = "Version 2 of the AWS Cloud Development Kit library"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk-lib-2.72.0.tar.gz", hash = "sha256:52aad005f1c7142682cb75362dfd27981d95678615c604c763e1c89d758ed557"},
-    {file = "aws_cdk_lib-2.72.0-py3-none-any.whl", hash = "sha256:22e327f05eee7484ae2122192ae90e66b9d23e641f61c9d6e50bff17c6d7382c"},
+    {file = "aws-cdk-lib-2.72.1.tar.gz", hash = "sha256:a0aeaf0e0d0dcc36fe52a1df09708028a8f71f54116bc3f2afec546b0d90c256"},
+    {file = "aws_cdk_lib-2.72.1-py3-none-any.whl", hash = "sha256:0d7001b0f507dcd435c6c20688e61d6c45c297e54bae2bf36256e10520668a8a"},
 ]
 
 [package.dependencies]
@@ -1573,14 +1573,14 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.1.4"
+version = "9.1.5"
 description = "Documentation that simply works"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mkdocs_material-9.1.4-py3-none-any.whl", hash = "sha256:4c92dcf9365068259bef3eed8e0dd5410056b6f7187bdea2d52848c0f94cd94c"},
-    {file = "mkdocs_material-9.1.4.tar.gz", hash = "sha256:c3a8943e9e4a7d2624291da365bbccf0b9f88688aa6947a46260d8c165cd4389"},
+    {file = "mkdocs_material-9.1.5-py3-none-any.whl", hash = "sha256:981e1ef0250e2fbcc23610e9b20e5f242fe1f808079b9bcfbb6c49aa2999343c"},
+    {file = "mkdocs_material-9.1.5.tar.gz", hash = "sha256:744519bca52b1e8fe7c2e80e15ed59baf8948111ec763ae6ae629c409bd16d6e"},
 ]
 
 [package.dependencies]
@@ -1779,14 +1779,14 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-s3"
-version = "1.26.99"
-description = "Type annotations for boto3.S3 1.26.99 service generated with mypy-boto3-builder 7.14.4"
+version = "1.26.104"
+description = "Type annotations for boto3.S3 1.26.104 service generated with mypy-boto3-builder 7.14.5"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-s3-1.26.99.tar.gz", hash = "sha256:8889a4c62aec85906bdb5f2727560bbd4c41cb5874ba067e250f24e09e0d9b24"},
-    {file = "mypy_boto3_s3-1.26.99-py3-none-any.whl", hash = "sha256:1a9c3e758fa255fe48b2f6c3c48004cae7a92c31b457421fe1116989e9ea882d"},
+    {file = "mypy-boto3-s3-1.26.104.tar.gz", hash = "sha256:a58d342d72d58fefa2ecd24d926dbc92ae8b97205c59c3144d186857d5f30814"},
+    {file = "mypy_boto3_s3-1.26.104-py3-none-any.whl", hash = "sha256:24ff5ec193659abb0415925e73787a64631de46e59fd0f261a840e6c0611a38e"},
 ]
 
 [package.dependencies]
@@ -3053,4 +3053,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "16c9a382adaae01963762950cc49d0fe004aed6f6d45800c1888b73d1ebd6643"
+content-hash = "9711a25bda181e76ad773eb53f3f1497d203621a1f96c83b96228d0cfd8cfb21"
