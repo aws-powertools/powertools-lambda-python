@@ -1251,6 +1251,8 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
     def test_idempotent_lambda(lambda_context):
         # Configure the boto3 to use the endpoint for the DynamoDB Local instance
         resource = boto3.client("dynamodb", endpoint_url='http://localhost:8000')
+        app.persistence_layer._client = resource
+
         # If desired, change the value of the table_name variable to set the name of the DynamoDB table used by the persistence layer to one you created locally
         table_name = app.persistence_layer.table_name
         app.persistence_layer.table_name = table_name
