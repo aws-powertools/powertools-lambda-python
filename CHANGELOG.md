@@ -7,10 +7,14 @@
 ## Documentation
 
 * **idempotency:** new sequence diagrams, fix idempotency record vs DynamoDB TTL confusion ([#2074](https://github.com/awslabs/aws-lambda-powertools-python/issues/2074))
+* **parser:** fix highlighted line ([#2064](https://github.com/awslabs/aws-lambda-powertools-python/issues/2064))
 
 ## Maintenance
 
 * **deps:** bump peaceiris/actions-gh-pages from 3.9.2 to 3.9.3 ([#2069](https://github.com/awslabs/aws-lambda-powertools-python/issues/2069))
+* **deps-dev:** bump mkdocs-material from 9.1.4 to 9.1.5 ([#2077](https://github.com/awslabs/aws-lambda-powertools-python/issues/2077))
+* **deps-dev:** bump aws-cdk-lib from 2.72.0 to 2.72.1 ([#2076](https://github.com/awslabs/aws-lambda-powertools-python/issues/2076))
+* **deps-dev:** bump mypy-boto3-s3 from 1.26.99 to 1.26.104 ([#2075](https://github.com/awslabs/aws-lambda-powertools-python/issues/2075))
 * **deps-dev:** bump aws-cdk from 2.71.0 to 2.72.0 ([#2071](https://github.com/awslabs/aws-lambda-powertools-python/issues/2071))
 * **deps-dev:** bump aws-cdk-lib from 2.71.0 to 2.72.0 ([#2070](https://github.com/awslabs/aws-lambda-powertools-python/issues/2070))
 * **deps-dev:** bump black from 23.1.0 to 23.3.0 ([#2066](https://github.com/awslabs/aws-lambda-powertools-python/issues/2066))
