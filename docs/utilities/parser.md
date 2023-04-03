@@ -111,7 +111,7 @@ handler(event=json.dumps(payload), context=LambdaContext()) # also works if even
 
 Use this standalone function when you want more control over the data validation process, for example returning a 400 error for malformed payloads.
 
-```python hl_lines="21 30" title="Using standalone parse function for more flexibility"
+```python hl_lines="21 31" title="Using standalone parse function for more flexibility"
 from aws_lambda_powertools.utilities.parser import parse, BaseModel, ValidationError
 from typing import List, Optional
 
