@@ -89,7 +89,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         if boto3_client is None:
             self._boto_config = boto_config or Config()
             self._boto3_session: boto3.Session = boto3_session or boto3.session.Session()
-            self.client = self._boto3_session.client("dynamodb", config=self._boto_config)
+            self.client: "DynamoDBClient" = self._boto3_session.client("dynamodb", config=self._boto_config)
         else:
             self.client = boto3_client
 
