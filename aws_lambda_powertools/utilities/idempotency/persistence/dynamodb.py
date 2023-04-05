@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import datetime
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import boto3
 from boto3.dynamodb.types import TypeDeserializer
@@ -18,6 +20,9 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     STATUS_CONSTANTS,
     DataRecord,
 )
+
+if TYPE_CHECKING:
+    from mypy_boto3_dynamodb import DynamoDBClient
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +41,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         validation_key_attr: str = "validation",
         boto_config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
+        boto3_client: "DynamoDBClient" | None = None,
     ):
         """
         Initialize the DynamoDB client
@@ -61,8 +67,10 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             DynamoDB attribute name for response data, by default "data"
         boto_config: botocore.config.Config, optional
             Botocore configuration to pass during client initialization
-        boto3_session : boto3.session.Session, optional
+        boto3_session : boto3.Session, optional
             Boto3 session to use for AWS API communication
+        boto3_client : DynamoDBClient, optional
+            Boto3 DynamoDB Client to use, boto3_session and boto_config will be ignored if both are provided
 
         Examples
         --------
@@ -78,10 +86,12 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             >>> def handler(event, context):
             >>>     return {"StatusCode": 200}
         """
-
-        self._boto_config = boto_config or Config()
-        self._boto3_session = boto3_session or boto3.session.Session()
-        self._client = self._boto3_session.client("dynamodb", config=self._boto_config)
+        if boto3_client is None:
+            self._boto_config = boto_config or Config()
+            self._boto3_session: boto3.Session = boto3_session or boto3.session.Session()
+            self.client = self._boto3_session.client("dynamodb", config=self._boto_config)
+        else:
+            self.client = boto3_client
 
         if sort_key_attr == key_attr:
             raise ValueError(f"key_attr [{key_attr}] and sort_key_attr [{sort_key_attr}] cannot be the same!")
@@ -149,7 +159,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         )
 
     def _get_record(self, idempotency_key) -> DataRecord:
-        response = self._client.get_item(
+        response = self.client.get_item(
             TableName=self.table_name, Key=self._get_key(idempotency_key), ConsistentRead=True
         )
         try:
@@ -204,7 +214,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             condition_expression = (
                 f"{idempotency_key_not_exist} OR {idempotency_expiry_expired} OR ({inprogress_expiry_expired})"
             )
-            self._client.put_item(
+            self.client.put_item(
                 TableName=self.table_name,
                 Item=item,
                 ConditionExpression=condition_expression,
@@ -256,8 +266,8 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             "ExpressionAttributeNames": expression_attr_names,
         }
 
-        self._client.update_item(TableName=self.table_name, **kwargs)
+        self.client.update_item(TableName=self.table_name, **kwargs)
 
     def _delete_record(self, data_record: DataRecord) -> None:
         logger.debug(f"Deleting record for idempotency key: {data_record.idempotency_key}")
-        self._client.delete_item(TableName=self.table_name, Key={**self._get_key(data_record.idempotency_key)})
+        self.client.delete_item(TableName=self.table_name, Key={**self._get_key(data_record.idempotency_key)})
