@@ -179,6 +179,9 @@ The AWS Systems Manager Parameter Store provider supports two additional argumen
 
 You can create `SecureString` parameters, which are parameters that have a plaintext parameter name and an encrypted parameter value. If you don't use the `decrypt` argument, you will get an encrypted value. Read [here](https://docs.aws.amazon.com/kms/latest/developerguide/services-parameter-store.html) about best practices using KMS to secure your parameters.
 
+???+ tip
+	If you want to always decrypt parameters, you can set the `POWERTOOLS_PARAMETERS_SSM_DECRYPT=true` environment variable. **This will override the default value of `false` but can be overridden by the `decrypt` parameter**.
+
 === "builtin_provider_ssm_with_decrypt.py"
     ```python hl_lines="6 10 16"
     --8<-- "examples/parameters/src/builtin_provider_ssm_with_decrypt.py"
