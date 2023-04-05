@@ -103,7 +103,7 @@ The following will retrieve the latest version and store it in the cache.
 ???+ tip
 	`max_age` parameter is also available in underlying provider functions like `get()`, `get_multiple()`, etc.
 
-By default, we cache parameters retrieved in-memory for 5 seconds.
+By default, we cache parameters retrieved in-memory for 5 seconds. If you want to change this default value and set the same TTL for all parameters, you can set the `POWERTOOLS_PARAMETERS_MAX_AGE` environment variable. **This will override the default TTL of 5 seconds but can be overridden by the `maxAge` parameter**.
 
 You can adjust how long we should keep values in cache by using the param `max_age`, when using  `get_parameter()`, `get_parameters()` and `get_secret()` methods across all providers.
 

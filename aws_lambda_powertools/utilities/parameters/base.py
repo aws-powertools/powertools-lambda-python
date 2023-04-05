@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import base64
 import json
+import os
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from typing import (
@@ -24,6 +25,7 @@ from typing import (
 import boto3
 from botocore.config import Config
 
+from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
 from .exceptions import GetParameterError, TransformParameterError
@@ -35,7 +37,9 @@ if TYPE_CHECKING:
     from mypy_boto3_ssm import SSMClient
 
 
-DEFAULT_MAX_AGE_SECS = 5
+# If the environment variable is not set, the default value is 5
+DEFAULT_MAX_AGE_SECS: int = int(os.getenv(constants.PARAMETERS_MAX_AGE, 5))
+
 # These providers will be dynamically initialized on first use of the helper functions
 DEFAULT_PROVIDERS: Dict[str, Any] = {}
 TRANSFORM_METHOD_JSON = "json"
