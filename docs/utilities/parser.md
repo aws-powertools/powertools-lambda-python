@@ -63,7 +63,7 @@ Use the decorator for fail fast scenarios where you want your Lambda function to
 ???+ note
     **This decorator will replace the `event` object with the parsed model if successful**. This means you might be careful when nesting other decorators that expect `event` to be a `dict`.
 
-```python hl_lines="18" title="Parsing and validating upon invocation with event_parser decorator"
+```python hl_lines="19" title="Parsing and validating upon invocation with event_parser decorator"
 from aws_lambda_powertools.utilities.parser import event_parser, BaseModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from typing import List, Optional
@@ -111,7 +111,7 @@ handler(event=json.dumps(payload), context=LambdaContext()) # also works if even
 
 Use this standalone function when you want more control over the data validation process, for example returning a 400 error for malformed payloads.
 
-```python hl_lines="21 30" title="Using standalone parse function for more flexibility"
+```python hl_lines="21 31" title="Using standalone parse function for more flexibility"
 from aws_lambda_powertools.utilities.parser import parse, BaseModel, ValidationError
 from typing import List, Optional
 

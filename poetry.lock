@@ -210,14 +210,14 @@ dev = ["black (==23.1.0)", "boto3 (>=1.23,<2)", "boto3-stubs[appconfig,serverles
 
 [[package]]
 name = "aws-xray-sdk"
-version = "2.11.0"
+version = "2.12.0"
 description = "The AWS X-Ray SDK for Python (the SDK) enables Python developers to record and emit information from within their applications to the AWS X-Ray service."
 category = "main"
 optional = true
 python-versions = "*"
 files = [
-    {file = "aws-xray-sdk-2.11.0.tar.gz", hash = "sha256:78835fc841f03e550858f18a9973eab8618f47f22d2f59edf130578fa545a867"},
-    {file = "aws_xray_sdk-2.11.0-py2.py3-none-any.whl", hash = "sha256:693fa3a4c790e131fe1e20814ede415a9eeeab5c3b7c868686d3e3c696b8524d"},
+    {file = "aws-xray-sdk-2.12.0.tar.gz", hash = "sha256:295afc237073a80956d7d4f27c31830edcb9a8ccca9ef8aa44990badef15e5b7"},
+    {file = "aws_xray_sdk-2.12.0-py2.py3-none-any.whl", hash = "sha256:30886e23cc2daadc1c06a76f25b071205e84848419d1ddf097b62a565e156542"},
 ]
 
 [package.dependencies]
@@ -370,14 +370,14 @@ files = [
 
 [[package]]
 name = "cfn-lint"
-version = "0.76.1"
+version = "0.76.2"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 category = "dev"
 optional = false
 python-versions = ">=3.7, <=4.0, !=4.0"
 files = [
-    {file = "cfn-lint-0.76.1.tar.gz", hash = "sha256:9aa952f13f6383e902a2aa6f5b88f058fc274a691917fb31ee95fc62f0acaa0d"},
-    {file = "cfn_lint-0.76.1-py3-none-any.whl", hash = "sha256:7408a6849e700539923a209a16bf74c0dd78a10ec52d26ed08889b23140d9abd"},
+    {file = "cfn-lint-0.76.2.tar.gz", hash = "sha256:997be30acb914c19f4df570bd53811dd8f0f3781f6864725bd07c1b5c3144439"},
+    {file = "cfn_lint-0.76.2-py3-none-any.whl", hash = "sha256:1f38f88203097ff6dc80e57b71c9e33d620310ec11944f49e68b10208c342181"},
 ]
 
 [package.dependencies]
@@ -2804,14 +2804,14 @@ test = ["mypy", "pytest", "typing-extensions"]
 
 [[package]]
 name = "types-python-dateutil"
-version = "2.8.19.11"
+version = "2.8.19.12"
 description = "Typing stubs for python-dateutil"
 category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "types-python-dateutil-2.8.19.11.tar.gz", hash = "sha256:de66222c54318c2e05ceb4956976d16696240a45fc2c98e54bfe9a56ce5e1eff"},
-    {file = "types_python_dateutil-2.8.19.11-py3-none-any.whl", hash = "sha256:357553f8056cfbb8ce8ea0ca4a6a3480268596748360df73a94c2b8c113a5b06"},
+    {file = "types-python-dateutil-2.8.19.12.tar.gz", hash = "sha256:355b2cb82b31e556fd18e7b074de7c350c680ab80608f0cc55ba6770d986d67d"},
+    {file = "types_python_dateutil-2.8.19.12-py3-none-any.whl", hash = "sha256:fe5b545e678ec13e3ddc83a0eee1545c1b5e2fba4cfc39b276ab6f4e7604a923"},
 ]
 
 [[package]]
@@ -3053,4 +3053,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "9711a25bda181e76ad773eb53f3f1497d203621a1f96c83b96228d0cfd8cfb21"
+content-hash = "c7bce703660fd5e1b6487bbefe71076715daacba5b28302b058c570dd81658d5"
