@@ -6,16 +6,25 @@
 
 ## Documentation
 
+* **idempotency:** fixes to testing your code section ([#2073](https://github.com/awslabs/aws-lambda-powertools-python/issues/2073))
 * **idempotency:** new sequence diagrams, fix idempotency record vs DynamoDB TTL confusion ([#2074](https://github.com/awslabs/aws-lambda-powertools-python/issues/2074))
 * **parser:** fix highlighted line ([#2064](https://github.com/awslabs/aws-lambda-powertools-python/issues/2064))
 
+## Features
+
+* **idempotency:** allow custom sdk clients in DynamoDBPersistenceLayer ([#2087](https://github.com/awslabs/aws-lambda-powertools-python/issues/2087))
+
 ## Maintenance
 
+* **deps:** bump aws-xray-sdk from 2.11.0 to 2.12.0 ([#2080](https://github.com/awslabs/aws-lambda-powertools-python/issues/2080))
 * **deps:** bump peaceiris/actions-gh-pages from 3.9.2 to 3.9.3 ([#2069](https://github.com/awslabs/aws-lambda-powertools-python/issues/2069))
+* **deps-dev:** bump types-python-dateutil from 2.8.19.11 to 2.8.19.12 ([#2085](https://github.com/awslabs/aws-lambda-powertools-python/issues/2085))
+* **deps-dev:** bump aws-cdk from 2.72.0 to 2.72.1 ([#2081](https://github.com/awslabs/aws-lambda-powertools-python/issues/2081))
 * **deps-dev:** bump mkdocs-material from 9.1.4 to 9.1.5 ([#2077](https://github.com/awslabs/aws-lambda-powertools-python/issues/2077))
 * **deps-dev:** bump aws-cdk-lib from 2.72.0 to 2.72.1 ([#2076](https://github.com/awslabs/aws-lambda-powertools-python/issues/2076))
 * **deps-dev:** bump mypy-boto3-s3 from 1.26.99 to 1.26.104 ([#2075](https://github.com/awslabs/aws-lambda-powertools-python/issues/2075))
 * **deps-dev:** bump aws-cdk from 2.71.0 to 2.72.0 ([#2071](https://github.com/awslabs/aws-lambda-powertools-python/issues/2071))
+* **deps-dev:** bump cfn-lint from 0.76.1 to 0.76.2 ([#2084](https://github.com/awslabs/aws-lambda-powertools-python/issues/2084))
 * **deps-dev:** bump aws-cdk-lib from 2.71.0 to 2.72.0 ([#2070](https://github.com/awslabs/aws-lambda-powertools-python/issues/2070))
 * **deps-dev:** bump black from 23.1.0 to 23.3.0 ([#2066](https://github.com/awslabs/aws-lambda-powertools-python/issues/2066))
 * **deps-dev:** bump aws-cdk from 2.70.0 to 2.71.0 ([#2067](https://github.com/awslabs/aws-lambda-powertools-python/issues/2067))
