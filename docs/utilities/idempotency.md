@@ -1221,7 +1221,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 
 ### Testing with DynamoDB Local
 
-To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html), you can replace the `DynamoDB table` used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
+To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html), you can replace the `DynamoDB client` used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
 
 === "tests.py"
 
