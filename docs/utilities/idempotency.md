@@ -1250,8 +1250,8 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
 
     def test_idempotent_lambda(lambda_context):
         # Configure the boto3 to use the endpoint for the DynamoDB Local instance
-        resource = boto3.client("dynamodb", endpoint_url='http://localhost:8000')
-        app.persistence_layer._client = resource
+        dynamodb_local_client = boto3.client("dynamodb", endpoint_url='http://localhost:8000')
+        app.persistence_layer.client = dynamodb_local_client
 
         # If desired, you can use a different DynamoDB Local table name than what your code already uses
         # app.persistence_layer.table_name = "another table name"
@@ -1312,10 +1312,10 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 
 
     def test_idempotent_lambda(lambda_context):
-        table = MagicMock()
-        app.persistence_layer.table = table
+        mock_client = MagicMock()
+        app.persistence_layer.client = mock_client
         result = app.handler({'testkey': 'testvalue'}, lambda_context)
-        table.put_item.assert_called()
+        mock_client.put_item.assert_called()
         ...
     ```
 
