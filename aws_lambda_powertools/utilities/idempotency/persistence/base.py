@@ -41,8 +41,8 @@ class DataRecord:
         status: str = "",
         expiry_timestamp: Optional[int] = None,
         in_progress_expiry_timestamp: Optional[int] = None,
-        response_data: Optional[str] = "",
-        payload_hash: Optional[str] = None,
+        response_data: str = "",
+        payload_hash: str = "",
     ) -> None:
         """
 

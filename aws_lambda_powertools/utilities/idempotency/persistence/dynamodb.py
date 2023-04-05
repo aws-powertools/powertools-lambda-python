@@ -23,6 +23,7 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
 
 if TYPE_CHECKING:
     from mypy_boto3_dynamodb import DynamoDBClient
+    from mypy_boto3_dynamodb.type_defs import AttributeValueTypeDef
 
 logger = logging.getLogger(__name__)
 
@@ -243,7 +244,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
     def _update_record(self, data_record: DataRecord):
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
         update_expression = "SET #response_data = :response_data, #expiry = :expiry, " "#status = :status"
-        expression_attr_values = {
+        expression_attr_values: Dict[str, "AttributeValueTypeDef"] = {
             ":expiry": {"N": str(data_record.expiry_timestamp)},
             ":response_data": {"S": data_record.response_data},
             ":status": {"S": data_record.status},
@@ -259,14 +260,13 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             expression_attr_values[":validation_key"] = {"S": data_record.payload_hash}
             expression_attr_names["#validation_key"] = self.validation_key_attr
 
-        kwargs = {
-            "Key": self._get_key(data_record.idempotency_key),
-            "UpdateExpression": update_expression,
-            "ExpressionAttributeValues": expression_attr_values,
-            "ExpressionAttributeNames": expression_attr_names,
-        }
-
-        self.client.update_item(TableName=self.table_name, **kwargs)
+        self.client.update_item(
+            TableName=self.table_name,
+            Key=self._get_key(data_record.idempotency_key),
+            UpdateExpression=update_expression,
+            ExpressionAttributeNames=expression_attr_names,
+            ExpressionAttributeValues=expression_attr_values,
+        )
 
     def _delete_record(self, data_record: DataRecord) -> None:
         logger.debug(f"Deleting record for idempotency key: {data_record.idempotency_key}")
