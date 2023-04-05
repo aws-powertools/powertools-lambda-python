@@ -1253,9 +1253,8 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
         resource = boto3.client("dynamodb", endpoint_url='http://localhost:8000')
         app.persistence_layer._client = resource
 
-        # If desired, change the value of the table_name variable to set the name of the DynamoDB table used by the persistence layer to one you created locally
-        table_name = app.persistence_layer.table_name
-        app.persistence_layer.table_name = table_name
+        # If desired, you can use a different DynamoDB Local table name than what your code already uses
+        # app.persistence_layer.table_name = "another table name"
 
         result = app.handler({'testkey': 'testvalue'}, lambda_context)
         assert result['payment_id'] == 12345
