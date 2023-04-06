@@ -229,34 +229,10 @@ Processing batches from SQS works in four stages:
 ???+ info
     This code example optionally uses Tracer and Logger for completion.
 
-=== "As a decorator"
+=== "Recommended"
 
-    ```python hl_lines="4-5 9 15 23 25"
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    processor = BatchProcessor(event_type=EventType.SQS)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: SQSRecord):
-        payload: str = record.body
-        if payload:
-            item: dict = json.loads(payload)
-        ...
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context: LambdaContext):
-        return processor.response()
+    ```python hl_lines="4 9 12 18 29"
+    --8<-- "examples/batch_processing/src/getting_started_sqs.py"
     ```
 
 === "As a context manager"
@@ -289,6 +265,36 @@ Processing batches from SQS works in four stages:
         with processor(records=batch, handler=record_handler):
             processed_messages = processor.process() # kick off processing, return list[tuple]
 
+        return processor.response()
+    ```
+
+=== "As a decorator (legacy)"
+
+    ```python hl_lines="4-5 9 15 23 25"
+    import json
+
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    processor = BatchProcessor(event_type=EventType.SQS)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    def record_handler(record: SQSRecord):
+        payload: str = record.body
+        if payload:
+            item: dict = json.loads(payload)
+        ...
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context: LambdaContext):
         return processor.response()
     ```
 
@@ -352,16 +358,22 @@ Processing batches from SQS works in four stages:
 When using [SQS FIFO queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html){target="_blank"}, we will stop processing messages after the first failure, and return all failed and unprocessed messages in `batchItemFailures`.
 This helps preserve the ordering of messages in your queue.
 
-=== "As a decorator"
+=== "Recommended"
 
-    ```python hl_lines="5 11"
-    --8<-- "examples/batch_processing/src/sqs_fifo_batch_processor.py"
+    ```python hl_lines="3 9"
+    --8<-- "examples/batch_processing/src/getting_started_sqs_fifo.py"
     ```
 
 === "As a context manager"
 
-    ```python hl_lines="4 8"
-    --8<-- "examples/batch_processing/src/sqs_fifo_batch_processor_context_manager.py"
+    ```python hl_lines="2 6"
+    --8<-- "examples/batch_processing/src/getting_started_sqs_fifo_context_manager.py"
+    ```
+
+=== "As a decorator (legacy)"
+
+    ```python hl_lines="3 9"
+    --8<-- "examples/batch_processing/src/getting_started_sqs_fifo_decorator.py"
     ```
 
 ### Processing messages from Kinesis
@@ -376,33 +388,10 @@ Processing batches from Kinesis works in four stages:
 ???+ info
     This code example optionally uses Tracer and Logger for completion.
 
-=== "As a decorator"
+=== "Recommended"
 
-    ```python hl_lines="4-5 9 15 22 24"
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-    from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: KinesisStreamRecord):
-        logger.info(record.kinesis.data_as_text)
-        payload: dict = record.kinesis.data_as_json()
-        ...
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context: LambdaContext):
-        return processor.response()
+    ```python hl_lines="2 7 12 18 28"
+    --8<-- "examples/batch_processing/src/getting_started_kinesis.py"
     ```
 
 === "As a context manager"
@@ -434,6 +423,33 @@ Processing batches from Kinesis works in four stages:
         with processor(records=batch, handler=record_handler):
             processed_messages = processor.process() # kick off processing, return list[tuple]
 
+        return processor.response()
+    ```
+
+=== "As a decorator (legacy)"
+
+    ```python hl_lines="2-3 7 20 22"
+    from aws_lambda_powertools import Logger, Tracer
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+    processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
+    tracer = Tracer()
+    logger = Logger()
+
+
+    @tracer.capture_method
+    def record_handler(record: KinesisStreamRecord):
+        logger.info(record.kinesis.data_as_text)
+        payload: dict = record.kinesis.data_as_json()
+        ...
+
+    @logger.inject_lambda_context
+    @tracer.capture_lambda_handler
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context: LambdaContext):
         return processor.response()
     ```
 
@@ -504,9 +520,15 @@ Processing batches from Kinesis works in four stages:
 ???+ info
     This code example optionally uses Tracer and Logger for completion.
 
-=== "As a decorator"
+=== "Recommended"
 
-    ```python hl_lines="4-5 9 15 25 27"
+    ```python hl_lines="4 9 14 20 30"
+    --8<-- "examples/batch_processing/src/getting_started_dynamodb.py"
+    ```
+
+=== "As a context manager"
+
+    ```python hl_lines="4-5 9 15 23-27"
     import json
 
     from aws_lambda_powertools import Logger, Tracer
@@ -524,21 +546,21 @@ Processing batches from Kinesis works in four stages:
     def record_handler(record: DynamoDBRecord):
         logger.info(record.dynamodb.new_image)
         payload: dict = json.loads(record.dynamodb.new_image.get("Message"))
-        # alternatively:
-        # changes: Dict[str, Any] = record.dynamodb.new_image
-        # payload = change.get("Message").raw_event -> {"S": "<payload>"}
         ...
 
     @logger.inject_lambda_context
     @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context: LambdaContext):
+        batch = event["Records"]
+        with processor(records=batch, handler=record_handler):
+            processed_messages = processor.process() # kick off processing, return list[tuple]
+
         return processor.response()
     ```
 
-=== "As a context manager"
+=== "As a decorator (legacy)"
 
-    ```python hl_lines="4-5 9 15 26-28 30"
+    ```python hl_lines="4-5 9 15 22 24"
     import json
 
     from aws_lambda_powertools import Logger, Tracer
@@ -555,19 +577,13 @@ Processing batches from Kinesis works in four stages:
     @tracer.capture_method
     def record_handler(record: DynamoDBRecord):
         logger.info(record.dynamodb.new_image)
-        payload: dict = json.loads(record.dynamodb.new_image.get("item"))
-        # alternatively:
-        # changes: Dict[str, Any] = record.dynamodb.new_image
-        # payload = change.get("Message") -> "<payload>"
+        payload: dict = json.loads(record.dynamodb.new_image.get("Message"))
         ...
 
     @logger.inject_lambda_context
     @tracer.capture_lambda_handler
+    @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context: LambdaContext):
-        batch = event["Records"]
-        with processor(records=batch, handler=record_handler):
-            processed_messages = processor.process() # kick off processing, return list[tuple]
-
         return processor.response()
     ```
 
@@ -666,8 +682,8 @@ You can use `AsyncBatchProcessor` class and `async_batch_processor` decorator to
 
     The reason this is not the default behaviour is that not all use cases can handle concurrency safely (e.g., loyalty points must be updated in order).
 
-```python hl_lines="4 6 11 14 23" title="High-concurrency with AsyncBatchProcessor"
---8<-- "examples/batch_processing/src/getting_started_async_batch_processor.py"
+```python hl_lines="3 11 14 24" title="High-concurrency with AsyncBatchProcessor"
+--8<-- "examples/batch_processing/src/getting_started_async.py"
 ```
 
 ???+ warning "Using tracer?"
@@ -685,13 +701,14 @@ Inheritance is importance because we need to access message IDs and sequence num
 
 === "SQS"
 
-    ```python hl_lines="5 9-10 12-19 21 27"
+    ```python hl_lines="5 13 22 28"
     import json
 
     from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
     from aws_lambda_powertools.utilities.parser.models import SqsRecordModel
     from aws_lambda_powertools.utilities.typing import LambdaContext
+    from aws_lambda_powertools.utilities.parser import validator, BaseModel
 
 
     class Order(BaseModel):
@@ -717,24 +734,25 @@ Inheritance is importance because we need to access message IDs and sequence num
 
     @logger.inject_lambda_context
     @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context: LambdaContext):
-        return processor.response()
+        return process_partial_response(event=event, record_handler=record_handler, processor=processor, context=context)
     ```
 
 === "Kinesis Data Streams"
 
-    ```python hl_lines="5 9-10 12-20 22-23 26 32"
+    ```python hl_lines="5 14 25 29 35"
     import json
 
     from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-    from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecord
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
+    from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecordPayload, KinesisDataStreamRecord
+    from aws_lambda_powertools.utilities.parser import BaseModel, validator
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
     class Order(BaseModel):
         item: dict
+
 
     class OrderKinesisPayloadRecord(KinesisDataStreamRecordPayload):
         data: Order
@@ -743,10 +761,11 @@ Inheritance is importance because we need to access message IDs and sequence num
         # so Pydantic can auto-initialize nested Order model
         @validator("data", pre=True)
         def transform_message_to_dict(cls, value: str):
-            # Powertools KinesisDataStreamRecordModel already decodes b64 to str here
+            # Powertools KinesisDataStreamRecord already decodes b64 to str here
             return json.loads(value)
 
-    class OrderKinesisRecord(KinesisDataStreamRecordModel):
+
+    class OrderKinesisRecord(KinesisDataStreamRecord):
         kinesis: OrderKinesisPayloadRecord
 
 
@@ -762,26 +781,27 @@ Inheritance is importance because we need to access message IDs and sequence num
 
     @logger.inject_lambda_context
     @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context: LambdaContext):
-        return processor.response()
+        return process_partial_response(event=event, record_handler=record_handler, processor=processor, context=context)
     ```
 
 === "DynamoDB Streams"
 
-    ```python hl_lines="7 11-12 14-21 23-25 27-28 31 37"
+    ```python hl_lines="7 16 26 31 35 41"
     import json
 
-    from typing import Dict, Literal
+    from typing import Dict, Literal, Optional
 
     from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-    from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamRecordModel
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
+    from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamChangedRecordModel, DynamoDBStreamRecordModel
     from aws_lambda_powertools.utilities.typing import LambdaContext
+    from aws_lambda_powertools.utilities.parser import BaseModel, validator
 
 
     class Order(BaseModel):
         item: dict
+
 
     class OrderDynamoDB(BaseModel):
         Message: Order
@@ -792,15 +812,17 @@ Inheritance is importance because we need to access message IDs and sequence num
         def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
             return json.loads(value["S"])
 
+
     class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
         NewImage: Optional[OrderDynamoDB]
         OldImage: Optional[OrderDynamoDB]
+
 
     class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
         dynamodb: OrderDynamoDBChangeRecord
 
 
-    processor = BatchProcessor(event_type=EventType.DynamoDBStreams, model=OrderKinesisRecord)
+    processor = BatchProcessor(event_type=EventType.DynamoDBStreams, model=OrderDynamoDBRecord)
     tracer = Tracer()
     logger = Logger()
 
@@ -812,9 +834,8 @@ Inheritance is importance because we need to access message IDs and sequence num
 
     @logger.inject_lambda_context
     @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context: LambdaContext):
-        return processor.response()
+        return process_partial_response(event=event, record_handler=record_handler, processor=processor, context=context)
     ```
 
 ### Accessing processed messages
@@ -873,7 +894,13 @@ Within your `record_handler` function, you might need access to the Lambda conte
 
 We can automatically inject the [Lambda context](https://docs.aws.amazon.com/lambda/latest/dg/python-context.html){target="_blank"} into your `record_handler` if your function signature has a parameter named `lambda_context`. When using a context manager, you also need to pass the Lambda context object like in the example below.
 
-=== "As a decorator"
+=== "Recommended"
+
+    ```python hl_lines="19"
+    --8<-- "examples/batch_processing/src/advanced_accessing_lambda_context.py"
+    ```
+
+=== "As a decorator (legacy)"
 
     ```python hl_lines="15"
     from typing import Optional
@@ -952,7 +979,7 @@ from typing import Tuple
 
 from aws_lambda_powertools import Metrics
 from aws_lambda_powertools.metrics import MetricUnit
-from aws_lambda_powertools.utilities.batch import batch_processor, BatchProcessor, ExceptionInfo, EventType, FailureResponse
+from aws_lambda_powertools.utilities.batch import BatchProcessor, ExceptionInfo, EventType, FailureResponse, process_partial_response
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 
 
@@ -973,9 +1000,8 @@ def record_handler(record: SQSRecord):
 	...
 
 @metrics.log_metrics(capture_cold_start_metric=True)
-@batch_processor(record_handler=record_handler, processor=processor)
 def lambda_handler(event, context: LambdaContext):
-	return processor.response()
+    return process_partial_response(event=event, record_handler=record_handler, processor=processor, context=context)
 ```
 
 ### Create your own partial processor
@@ -1157,7 +1183,7 @@ Given a SQS batch where the first batch record succeeds and the second fails pro
     import json
 
     from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
     from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -1176,9 +1202,8 @@ Given a SQS batch where the first batch record succeeds and the second fails pro
 
     @logger.inject_lambda_context
     @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context: LambdaContext):
-        return processor.response()
+        return process_partial_response(event=event, record_handler=record_handler, processor=processor, context=context)
     ```
 
 === "Sample SQS event"

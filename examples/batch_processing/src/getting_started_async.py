@@ -3,7 +3,7 @@ import httpx  # external dependency
 from aws_lambda_powertools.utilities.batch import (
     AsyncBatchProcessor,
     EventType,
-    async_batch_processor,
+    async_process_partial_response,
 )
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -20,6 +20,7 @@ async def async_record_handler(record: SQSRecord):
     return ret.status_code
 
 
-@async_batch_processor(record_handler=async_record_handler, processor=processor)
 def lambda_handler(event, context: LambdaContext):
-    return processor.response()
+    return async_process_partial_response(
+        event=event, record_handler=async_record_handler, processor=processor, context=context
+    )
