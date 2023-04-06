@@ -10,7 +10,6 @@ from aws_lambda_powertools.utilities.batch import (
     EventType,
 )
 from aws_lambda_powertools.utilities.batch.types import PartialItemFailureResponse
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
@@ -24,6 +23,11 @@ def async_batch_processor(
 ):
     """
     Middleware to handle batch event processing
+
+    Notes
+    -----
+    Consider using async_process_partial_response function for an easier experience.
+
     Parameters
     ----------
     handler: Callable
@@ -36,16 +40,18 @@ def async_batch_processor(
         Callable to process each record from the batch
     processor: AsyncBatchProcessor
         Batch Processor to handle partial failure cases
+
     Examples
     --------
     **Processes Lambda's event with a BasePartialProcessor**
         >>> from aws_lambda_powertools.utilities.batch import async_batch_processor, AsyncBatchProcessor
-        >>>
-        >>> async def async_record_handler(record):
-        >>>     payload: str = record.body
-        >>>     return payload
+        >>> from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
         >>>
         >>> processor = AsyncBatchProcessor(event_type=EventType.SQS)
+        >>>
+        >>> async def async_record_handler(record: SQSRecord):
+        >>>     payload: str = record.body
+        >>>     return payload
         >>>
         >>> @async_batch_processor(record_handler=async_record_handler, processor=processor)
         >>> async def lambda_handler(event, context: LambdaContext):
@@ -70,8 +76,8 @@ def batch_processor(
     """
     Middleware to handle batch event processing
 
-    NOTE
-    ----
+    Notes
+    -----
     Consider using process_partial_response function for an easier experience.
 
     Parameters
@@ -89,16 +95,19 @@ def batch_processor(
 
     Examples
     --------
-    **Processes Lambda's event with a BasePartialProcessor**
+    **Processes Lambda's event with a BatchProcessor**
 
-        >>> from aws_lambda_powertools.utilities.batch import batch_processor, BatchProcessor
+        >>> from aws_lambda_powertools.utilities.batch import batch_processor, BatchProcessor, EventType
+        >>> from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+        >>>
+        >>> processor = BatchProcessor(EventType.SQS)
         >>>
         >>> def record_handler(record):
         >>>     return record["body"]
         >>>
         >>> @batch_processor(record_handler=record_handler, processor=BatchProcessor())
         >>> def handler(event, context):
-        >>>     return {"StatusCode": 200}
+        >>>     return processor.response()
 
     Limitations
     -----------
@@ -113,7 +122,7 @@ def batch_processor(
 
 
 def process_partial_response(
-    event: Dict | DictWrapper,
+    event: Dict,
     record_handler: Callable,
     processor: BasePartialBatchProcessor,
     context: LambdaContext | None = None,
