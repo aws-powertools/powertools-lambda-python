@@ -54,7 +54,7 @@ def async_batch_processor(
         >>>     return payload
         >>>
         >>> @async_batch_processor(record_handler=async_record_handler, processor=processor)
-        >>> async def lambda_handler(event, context: LambdaContext):
+        >>> def lambda_handler(event, context):
         >>>     return processor.response()
 
     Limitations
@@ -181,5 +181,69 @@ def process_partial_response(
 
     with processor(records, record_handler, context):
         processor.process()
+
+    return processor.response()
+
+
+def async_process_partial_response(
+    event: Dict,
+    record_handler: Callable,
+    processor: AsyncBatchProcessor,
+    context: LambdaContext | None = None,
+) -> PartialItemFailureResponse:
+    """
+    Higher level function to handle batch event processing asynchronously.
+
+    Parameters
+    ----------
+    event: Dict
+        Lambda's original event
+    record_handler: Callable
+        Callable to process each record from the batch
+    processor: AsyncBatchProcessor
+        Batch Processor to handle partial failure cases
+    context: LambdaContext
+        Lambda's context, used to optionally inject in record handler
+
+    Returns
+    -------
+    result: PartialItemFailureResponse
+        Lambda Partial Batch Response
+
+    Examples
+    --------
+    **Processes Lambda's SQS event**
+
+    ```python
+    from aws_lambda_powertools.utilities.batch import AsyncBatchProcessor, EventType, process_partial_response
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+
+    processor = BatchProcessor(EventType.SQS)
+
+    async def record_handler(record: SQSRecord):
+        return record.body
+
+    def handler(event, context):
+        return async_process_partial_response(
+            event=event, record_handler=record_handler, processor=processor, context=context
+        )
+    ```
+
+    Limitations
+    -----------
+    * Sync batch processors. Use `process_partial_response` instead.
+    """
+    try:
+        records: List[Dict] = event.get("Records", [])
+    except AttributeError:
+        event_types = ", ".join(list(EventType.__members__))
+        docs = "https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/batch/#processing-messages-from-sqs"  # noqa: E501 # long-line
+        raise ValueError(
+            f"Invalid event format. Please ensure batch event is a valid {processor.event_type.value} event. \n"
+            f"See sample events in our documentation for either {event_types}: \n {docs}"
+        )
+
+    with processor(records, record_handler, context):
+        processor.async_process()
 
     return processor.response()

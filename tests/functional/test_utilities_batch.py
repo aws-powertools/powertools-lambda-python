@@ -12,6 +12,7 @@ from aws_lambda_powertools.utilities.batch import (
     EventType,
     SqsFifoPartialProcessor,
     async_batch_processor,
+    async_process_partial_response,
     batch_processor,
     process_partial_response,
 )
@@ -808,3 +809,35 @@ def test_process_partial_response_invalid_input(record_handler: Callable, batch:
     # WHEN/THEN
     with pytest.raises(ValueError):
         process_partial_response(batch, record_handler, processor)
+
+
+def test_async_process_partial_response(sqs_event_factory, async_record_handler):
+    # GIVEN
+    records = [sqs_event_factory("success"), sqs_event_factory("success")]
+    batch = {"Records": records}
+    processor = AsyncBatchProcessor(event_type=EventType.SQS)
+
+    # WHEN
+    ret = async_process_partial_response(batch, async_record_handler, processor)
+
+    # THEN
+    assert ret == {"batchItemFailures": []}
+
+
+@pytest.mark.parametrize(
+    "batch",
+    [
+        pytest.param(123456789, id="num"),
+        pytest.param([], id="list"),
+        pytest.param(False, id="bool"),
+        pytest.param(object, id="object"),
+        pytest.param(lambda x: x, id="callable"),
+    ],
+)
+def test_async_process_partial_response_invalid_input(async_record_handler: Callable, batch: Any):
+    # GIVEN
+    processor = AsyncBatchProcessor(event_type=EventType.SQS)
+
+    # WHEN/THEN
+    with pytest.raises(ValueError):
+        async_process_partial_response(batch, record_handler, processor)
