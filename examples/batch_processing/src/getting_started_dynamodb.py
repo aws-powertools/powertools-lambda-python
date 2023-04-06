@@ -18,8 +18,8 @@ logger = Logger()
 
 @tracer.capture_method
 def record_handler(record: DynamoDBRecord):
-    logger.info(record.dynamodb.new_image)
-    payload: dict = json.loads(record.dynamodb.new_image.get("Message"))
+    logger.info(record.dynamodb.new_image)  # type: ignore[union-attr]
+    payload: dict = json.loads(record.dynamodb.new_image.get("Message"))  # type: ignore[union-attr,arg-type]
     logger.info(payload)
     ...
 
