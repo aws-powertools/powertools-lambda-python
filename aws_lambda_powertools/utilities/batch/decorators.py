@@ -70,6 +70,10 @@ def batch_processor(
     """
     Middleware to handle batch event processing
 
+    NOTE
+    ----
+    Consider using process_partial_response function for an easier experience.
+
     Parameters
     ----------
     handler: Callable
@@ -114,6 +118,48 @@ def process_partial_response(
     processor: BasePartialBatchProcessor,
     context: LambdaContext | None = None,
 ) -> PartialItemFailureResponse:
+    """
+    Higher level function to handle batch event processing.
+
+    Parameters
+    ----------
+    event: Dict
+        Lambda's original event
+    record_handler: Callable
+        Callable to process each record from the batch
+    processor: BasePartialBatchProcessor
+        Batch Processor to handle partial failure cases
+    context: LambdaContext
+        Lambda's context, used to optionally inject in record handler
+
+    Returns
+    -------
+    result: PartialItemFailureResponse
+        Lambda Partial Batch Response
+
+    Examples
+    --------
+    **Processes Lambda's SQS event**
+
+    ```python
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+
+    processor = BatchProcessor(EventType.SQS)
+
+    def record_handler(record: SQSRecord):
+        return record.body
+
+    def handler(event, context):
+        return process_partial_response(
+            event=event, record_handler=record_handler, processor=processor, context=context
+        )
+    ```
+
+    Limitations
+    -----------
+    * Async batch processors. Use `async_process_partial_response` instead.
+    """
     try:
         records: List[Dict] = event.get("Records", [])
     except AttributeError:
