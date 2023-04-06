@@ -16,6 +16,7 @@ from aws_lambda_powertools.utilities.batch.base import (
 from aws_lambda_powertools.utilities.batch.decorators import (
     async_batch_processor,
     batch_processor,
+    process_partial_response,
 )
 from aws_lambda_powertools.utilities.batch.exceptions import ExceptionInfo
 from aws_lambda_powertools.utilities.batch.sqs_fifo_partial_processor import (
@@ -26,6 +27,7 @@ from aws_lambda_powertools.utilities.batch.types import BatchTypeModels
 __all__ = (
     "async_batch_processor",
     "batch_processor",
+    "process_partial_response",
     "BatchProcessor",
     "AsyncBatchProcessor",
     "BasePartialProcessor",

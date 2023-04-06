@@ -1,7 +1,16 @@
-from typing import Any, Awaitable, Callable, Dict
+from __future__ import annotations
+
+from typing import Any, Awaitable, Callable, Dict, List
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.utilities.batch import AsyncBatchProcessor, BatchProcessor
+from aws_lambda_powertools.utilities.batch import (
+    AsyncBatchProcessor,
+    BasePartialBatchProcessor,
+    BatchProcessor,
+    EventType,
+)
+from aws_lambda_powertools.utilities.batch.types import PartialItemFailureResponse
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
@@ -97,3 +106,25 @@ def batch_processor(
         processor.process()
 
     return handler(event, context)
+
+
+def process_partial_response(
+    event: Dict | DictWrapper,
+    record_handler: Callable,
+    processor: BasePartialBatchProcessor,
+    context: LambdaContext | None = None,
+) -> PartialItemFailureResponse:
+    try:
+        records: List[Dict] = event.get("Records", [])
+    except AttributeError:
+        event_types = ", ".join(list(EventType.__members__))
+        docs = "https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/batch/#processing-messages-from-sqs"  # noqa: E501 # long-line
+        raise ValueError(
+            f"Invalid event format. Please ensure batch event is a valid {processor.event_type.value} event. \n"
+            f"See sample events in our documentation for either {event_types}: \n {docs}"
+        )
+
+    with processor(records, record_handler, context):
+        processor.process()
+
+    return processor.response()
