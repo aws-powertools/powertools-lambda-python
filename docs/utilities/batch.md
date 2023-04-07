@@ -219,12 +219,11 @@ The remaining sections of the documentation will rely on these samples. For comp
 
 ### Processing messages from SQS
 
-Processing batches from SQS works in four stages:
+Processing batches from SQS works in three stages:
 
 1. Instantiate **`BatchProcessor`** and choose **`EventType.SQS`** for the event type
 2. Define your function to handle each batch record, and use [`SQSRecord`](data_classes.md#sqs){target="_blank"} type annotation for autocompletion
-3. Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
-4. Return the appropriate response contract to Lambda via **`.response()`** processor method
+3. Use **`process_partial_response`** to kick off processing
 
 ???+ info
     This code example optionally uses Tracer and Logger for completion.
@@ -241,7 +240,7 @@ Processing batches from SQS works in four stages:
     import json
 
     from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
     from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -378,12 +377,11 @@ This helps preserve the ordering of messages in your queue.
 
 ### Processing messages from Kinesis
 
-Processing batches from Kinesis works in four stages:
+Processing batches from Kinesis works in three stages:
 
 1. Instantiate **`BatchProcessor`** and choose **`EventType.KinesisDataStreams`** for the event type
 2. Define your function to handle each batch record, and use [`KinesisStreamRecord`](data_classes.md#kinesis-streams){target="_blank"} type annotation for autocompletion
-3. Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
-4. Return the appropriate response contract to Lambda via **`.response()`** processor method
+3. Use **`process_partial_response`** to kick off processing
 
 ???+ info
     This code example optionally uses Tracer and Logger for completion.
@@ -400,7 +398,7 @@ Processing batches from Kinesis works in four stages:
     import json
 
     from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
     from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -510,12 +508,11 @@ Processing batches from Kinesis works in four stages:
 
 ### Processing messages from DynamoDB
 
-Processing batches from Kinesis works in four stages:
+Processing batches from Kinesis works in three stages:
 
 1. Instantiate **`BatchProcessor`** and choose **`EventType.DynamoDBStreams`** for the event type
 2. Define your function to handle each batch record, and use [`DynamoDBRecord`](data_classes.md#dynamodb-streams){target="_blank"} type annotation for autocompletion
-3. Use either **`batch_processor`** decorator or your instantiated processor as a context manager to kick off processing
-4. Return the appropriate response contract to Lambda via **`.response()`** processor method
+3. Use **`process_partial_response`** to kick off processing
 
 ???+ info
     This code example optionally uses Tracer and Logger for completion.
@@ -532,7 +529,7 @@ Processing batches from Kinesis works in four stages:
     import json
 
     from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
     from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -673,7 +670,7 @@ All records in the batch will be passed to this handler for processing, even if 
 
 !!! tip "New to AsyncIO? Read this [comprehensive guide first](https://realpython.com/async-io-python/){target="_blank"}."
 
-You can use `AsyncBatchProcessor` class and `async_batch_processor` decorator to process messages concurrently.
+You can use `AsyncBatchProcessor` class and `async_process_partial_response` function to process messages concurrently.
 
 ???+ question "When is this useful?"
     Your use case might be able to process multiple records at the same time without conflicting with one another.
@@ -845,7 +842,7 @@ Use the context manager to access a list of all returned values from your `recor
 * **When successful**. We will include a tuple with `success`, the result of `record_handler`, and the batch record
 * **When failed**. We will include a tuple with `fail`, exception as a string, and the batch record
 
-```python hl_lines="31-38" title="Accessing processed messages via context manager"
+```python hl_lines="30-36" title="Accessing processed messages via context manager"
 import json
 
 from typing import Any, List, Literal, Union
@@ -854,8 +851,7 @@ from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import (BatchProcessor,
 												   EventType,
 												   FailureResponse,
-												   SuccessResponse,
-												   batch_processor)
+												   SuccessResponse)
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
