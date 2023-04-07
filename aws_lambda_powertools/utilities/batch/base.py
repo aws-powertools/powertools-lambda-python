@@ -471,8 +471,8 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
         record: dict
             A batch record to be processed.
         """
-        data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
         try:
+            data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
             if self._handler_accepts_lambda_context:
                 result = self.handler(record=data, lambda_context=self.lambda_context)
             else:
@@ -651,8 +651,8 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
         record: dict
             A batch record to be processed.
         """
-        data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
         try:
+            data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
             if self._handler_accepts_lambda_context:
                 result = await self.handler(record=data, lambda_context=self.lambda_context)
             else:
