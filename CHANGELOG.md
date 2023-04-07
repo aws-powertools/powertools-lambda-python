@@ -10,6 +10,7 @@
 
 ## Documentation
 
+* **batch:** use newly supported Json model ([#2100](https://github.com/awslabs/aws-lambda-powertools-python/issues/2100))
 * **homepage:** remove banner for end-of-support v1 ([#2098](https://github.com/awslabs/aws-lambda-powertools-python/issues/2098))
 * **idempotency:** fixes to testing your code section ([#2073](https://github.com/awslabs/aws-lambda-powertools-python/issues/2073))
 * **idempotency:** new sequence diagrams, fix idempotency record vs DynamoDB TTL confusion ([#2074](https://github.com/awslabs/aws-lambda-powertools-python/issues/2074))
