@@ -661,11 +661,6 @@ All records in the batch will be passed to this handler for processing, even if 
 * **Partial success with some exceptions**. We will return a list of all item IDs/sequence numbers that failed processing
 * **All records failed to be processed**. We will raise `BatchProcessingError` exception with a list of all exceptions raised when processing
 
-???+ warning
-    You will not have access to the **processed messages** within the Lambda Handler; use context manager for that.
-
-    All processing logic will and should be performed by the `record_handler` function.
-
 ### Processing messages asynchronously
 
 !!! tip "New to AsyncIO? Read this [comprehensive guide first](https://realpython.com/async-io-python/){target="_blank"}."
