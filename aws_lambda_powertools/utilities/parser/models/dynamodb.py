@@ -9,8 +9,8 @@ from aws_lambda_powertools.utilities.parser.types import Literal
 class DynamoDBStreamChangedRecordModel(BaseModel):
     ApproximateCreationDateTime: Optional[date]
     Keys: Dict[str, Dict[str, Any]]
-    NewImage: Optional[Union[Dict[str, Any], Type[BaseModel]]]
-    OldImage: Optional[Union[Dict[str, Any], Type[BaseModel]]]
+    NewImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]]
+    OldImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]]
     SequenceNumber: str
     SizeBytes: int
     StreamViewType: Literal["NEW_AND_OLD_IMAGES", "KEYS_ONLY", "NEW_IMAGE", "OLD_IMAGE"]

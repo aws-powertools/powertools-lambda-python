@@ -37,6 +37,7 @@ from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
     KinesisStreamRecord,
 )
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+from aws_lambda_powertools.utilities.parser import ValidationError
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
@@ -316,21 +317,36 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
     def _collect_sqs_failures(self):
         failures = []
         for msg in self.fail_messages:
-            msg_id = msg.messageId if self.model else msg.message_id
+            # If a message failed due to model validation (e.g., poison pill)
+            # we convert to an event source data class...but self.model is still true
+            # therefore, we do an additional check on whether the failed message is still a model
+            # see https://github.com/awslabs/aws-lambda-powertools-python/issues/2091
+            if self.model and getattr(msg, "parse_obj", None):
+                msg_id = msg.messageId
+            else:
+                msg_id = msg.message_id
             failures.append({"itemIdentifier": msg_id})
         return failures
 
     def _collect_kinesis_failures(self):
         failures = []
         for msg in self.fail_messages:
-            msg_id = msg.kinesis.sequenceNumber if self.model else msg.kinesis.sequence_number
+            # # see https://github.com/awslabs/aws-lambda-powertools-python/issues/2091
+            if self.model and getattr(msg, "parse_obj", None):
+                msg_id = msg.kinesis.sequenceNumber
+            else:
+                msg_id = msg.kinesis.sequence_number
             failures.append({"itemIdentifier": msg_id})
         return failures
 
     def _collect_dynamodb_failures(self):
         failures = []
         for msg in self.fail_messages:
-            msg_id = msg.dynamodb.SequenceNumber if self.model else msg.dynamodb.sequence_number
+            # see https://github.com/awslabs/aws-lambda-powertools-python/issues/2091
+            if self.model and getattr(msg, "parse_obj", None):
+                msg_id = msg.dynamodb.SequenceNumber
+            else:
+                msg_id = msg.dynamodb.sequence_number
             failures.append({"itemIdentifier": msg_id})
         return failures
 
@@ -346,6 +362,17 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         if model is not None:
             return model.parse_obj(record)
         return self._DATA_CLASS_MAPPING[event_type](record)
+
+    def _register_model_validation_error_record(self, record: dict):
+        """Convert and register failure due to poison pills where model failed validation early"""
+        # Parser will fail validation if record is a poison pill (malformed input)
+        # this means we can't collect the message id if we try transforming again
+        # so we convert into to the equivalent batch type model (e.g., SQS, Kinesis, DynamoDB Stream)
+        # and downstream we can correctly collect the correct message id identifier and make the failed record available
+        # see https://github.com/awslabs/aws-lambda-powertools-python/issues/2091
+        logger.debug("Record cannot be converted to customer's model; converting without model")
+        failed_record: "EventSourceDataClassTypes" = self._to_batch_type(record=record, event_type=self.event_type)
+        return self.failure_handler(record=failed_record, exception=sys.exc_info())
 
 
 class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibility
@@ -471,14 +498,17 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
         record: dict
             A batch record to be processed.
         """
-        data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
+        data: Optional["BatchTypeModels"] = None
         try:
+            data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
             if self._handler_accepts_lambda_context:
                 result = self.handler(record=data, lambda_context=self.lambda_context)
             else:
                 result = self.handler(record=data)
 
             return self.success_handler(record=record, result=result)
+        except ValidationError:
+            return self._register_model_validation_error_record(record)
         except Exception:
             return self.failure_handler(record=data, exception=sys.exc_info())
 
@@ -651,14 +681,17 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
         record: dict
             A batch record to be processed.
         """
-        data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
+        data: Optional["BatchTypeModels"] = None
         try:
+            data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
             if self._handler_accepts_lambda_context:
                 result = await self.handler(record=data, lambda_context=self.lambda_context)
             else:
                 result = await self.handler(record=data)
 
             return self.success_handler(record=record, result=result)
+        except ValidationError:
+            return self._register_model_validation_error_record(record)
         except Exception:
             return self.failure_handler(record=data, exception=sys.exc_info())
 
