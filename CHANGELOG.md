@@ -4,6 +4,10 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **batch:** handle early validation errors for pydantic models (poison pill) [#2091](https://github.com/awslabs/aws-lambda-powertools-python/issues/2091) ([#2099](https://github.com/awslabs/aws-lambda-powertools-python/issues/2099))
+
 ## Documentation
 
 * **homepage:** remove banner for end-of-support v1 ([#2098](https://github.com/awslabs/aws-lambda-powertools-python/issues/2098))
@@ -13,6 +17,7 @@
 
 ## Features
 
+* **batch:** reduce boilerplate with process_partial_response ([#2090](https://github.com/awslabs/aws-lambda-powertools-python/issues/2090))
 * **idempotency:** allow custom sdk clients in DynamoDBPersistenceLayer ([#2087](https://github.com/awslabs/aws-lambda-powertools-python/issues/2087))
 
 ## Maintenance
