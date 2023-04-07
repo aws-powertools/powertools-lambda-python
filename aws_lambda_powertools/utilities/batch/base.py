@@ -361,6 +361,17 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
             return model.parse_obj(record)
         return self._DATA_CLASS_MAPPING[event_type](record)
 
+    def _register_model_validation_error_record(self, record: dict):
+        """Convert and register failure due to poison pills where model failed validation early"""
+        # Parser will fail validation if record is a poison pill (malformed input)
+        # this means we can't collect the message id if we try transforming again
+        # so we convert into to the equivalent batch type model (e.g., SQS, Kinesis, DynamoDB Stream)
+        # and downstream we can correctly collect the correct message id identifier and make the failed record available
+        # see https://github.com/awslabs/aws-lambda-powertools-python/issues/2091
+        logger.debug("Record cannot be converted to customer's model; converting without model")
+        failed_record: "EventSourceDataClassTypes" = self._to_batch_type(record=record, event_type=self.event_type)
+        return self.failure_handler(record=failed_record, exception=sys.exc_info())
+
 
 class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibility
     """Process native partial responses from SQS, Kinesis Data Streams, and DynamoDB.
@@ -494,15 +505,8 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
                 result = self.handler(record=data)
 
             return self.success_handler(record=record, result=result)
-        # Parser will fail validation if record is a poison pill (malformed input)
-        # this means we can't collect the message id if we try transforming again
-        # so we convert into to the equivalent batch type model (e.g., SQS, Kinesis, DynamoDB Stream)
-        # and downstream we can correctly collect the correct message id identifier and make the failed record available
-        # see https://github.com/awslabs/aws-lambda-powertools-python/issues/2091
         except ValidationError:
-            logger.debug("Record cannot be converted to customer's model; converting without model")
-            failed_record: "EventSourceDataClassTypes" = self._to_batch_type(record=record, event_type=self.event_type)
-            return self.failure_handler(record=failed_record, exception=sys.exc_info())
+            return self._register_model_validation_error_record(record)
         except Exception:
             return self.failure_handler(record=data, exception=sys.exc_info())
 
@@ -675,6 +679,7 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
         record: dict
             A batch record to be processed.
         """
+        data: Optional["BatchTypeModels"] = None
         try:
             data = self._to_batch_type(record=record, event_type=self.event_type, model=self.model)
             if self._handler_accepts_lambda_context:
@@ -683,6 +688,8 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
                 result = await self.handler(record=data)
 
             return self.success_handler(record=record, result=result)
+        except ValidationError:
+            return self._register_model_validation_error_record(record)
         except Exception:
             return self.failure_handler(record=data, exception=sys.exc_info())
 
