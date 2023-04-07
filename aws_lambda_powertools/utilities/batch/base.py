@@ -331,6 +331,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
     def _collect_kinesis_failures(self):
         failures = []
         for msg in self.fail_messages:
+            # # see https://github.com/awslabs/aws-lambda-powertools-python/issues/2091
             if self.model and getattr(msg, "parse_obj", None):
                 msg_id = msg.kinesis.sequenceNumber
             else:
@@ -341,6 +342,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
     def _collect_dynamodb_failures(self):
         failures = []
         for msg in self.fail_messages:
+            # see https://github.com/awslabs/aws-lambda-powertools-python/issues/2091
             if self.model and getattr(msg, "parse_obj", None):
                 msg_id = msg.dynamodb.SequenceNumber
             else:
