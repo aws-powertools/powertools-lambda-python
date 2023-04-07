@@ -775,3 +775,43 @@ def test_async_batch_processor_context_with_failure(sqs_event_factory, async_rec
     assert batch.response() == {
         "batchItemFailures": [{"itemIdentifier": first_record.message_id}, {"itemIdentifier": third_record.message_id}]
     }
+
+
+def test_batch_processor_model_with_partial_validation_error(sqs_event_factory, order_event_factory):
+    # GIVEN
+    class Order(BaseModel):
+        item: dict
+
+    # NOTE: export JSON type and fix Model
+    class OrderSqs(SqsRecordModel):
+        body: Order
+
+        # auto transform json string
+        # so Pydantic can auto-initialize nested Order model
+        @validator("body", pre=True)
+        def transform_body_to_dict(cls, value: str):
+            return json.loads(value)
+
+    def record_handler(record: OrderSqs):
+        if "fail" in record.body.item["type"]:
+            raise Exception("Failed to process record.")
+        return record.body.item
+
+    order_event = order_event_factory({"type": "success"})
+    first_record = sqs_event_factory(order_event)
+    second_record = sqs_event_factory(order_event)
+    malformed_record = sqs_event_factory({"poison": "pill"})
+    records = [first_record, malformed_record, second_record]
+
+    # WHEN
+    processor = BatchProcessor(event_type=EventType.SQS, model=OrderSqs)
+    with processor(records, record_handler) as batch:
+        batch.process()
+
+    # THEN
+    assert len(batch.fail_messages) == 1
+    assert batch.response() == {
+        "batchItemFailures": [
+            {"itemIdentifier": malformed_record["messageId"]},
+        ]
+    }
