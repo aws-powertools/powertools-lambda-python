@@ -2,7 +2,9 @@
 # type specifics
 #
 import sys
-from typing import Optional, Type, Union
+from typing import List, Optional, Type, Union
+
+from typing_extensions import TypedDict
 
 has_pydantic = "pydantic" in sys.modules
 
@@ -22,3 +24,11 @@ if has_pydantic:
 else:
     BatchTypeModels = "BatchTypeModels"  # type: ignore
     BatchSqsTypeModel = "BatchSqsTypeModel"  # type: ignore
+
+
+class PartialItemFailures(TypedDict):
+    itemIdentifier: str
+
+
+class PartialItemFailureResponse(TypedDict):
+    batchItemFailures: List[PartialItemFailures]
