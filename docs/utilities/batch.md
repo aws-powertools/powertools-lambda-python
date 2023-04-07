@@ -693,27 +693,22 @@ Inheritance is importance because we need to access message IDs and sequence num
 
 === "SQS"
 
-    ```python hl_lines="5 13 22 28"
+    ```python hl_lines="5 14 23 29"
     import json
 
     from aws_lambda_powertools import Logger, Tracer
     from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
     from aws_lambda_powertools.utilities.parser.models import SqsRecordModel
     from aws_lambda_powertools.utilities.typing import LambdaContext
-    from aws_lambda_powertools.utilities.parser import validator, BaseModel
+    from aws_lambda_powertools.utilities.parser import BaseModel
+    from aws_lambda_powertools.utilities.parser.types import Json
 
 
     class Order(BaseModel):
         item: dict
 
     class OrderSqsRecord(SqsRecordModel):
-        body: Order
-
-        # auto transform json string
-        # so Pydantic can auto-initialize nested Order model
-        @validator("body", pre=True)
-        def transform_body_to_dict(cls, value: str):
-            return json.loads(value)
+        body: Json[Order]  # deserialize order data from JSON string
 
     processor = BatchProcessor(event_type=EventType.SQS, model=OrderSqsRecord)
     tracer = Tracer()
@@ -732,13 +727,14 @@ Inheritance is importance because we need to access message IDs and sequence num
 
 === "Kinesis Data Streams"
 
-    ```python hl_lines="5 14 25 29 35"
+    ```python hl_lines="5 15 19 23 29 36"
     import json
 
     from aws_lambda_powertools import Logger, Tracer
     from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
     from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecordPayload, KinesisDataStreamRecord
     from aws_lambda_powertools.utilities.parser import BaseModel, validator
+    from aws_lambda_powertools.utilities.parser.types import Json
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
@@ -747,14 +743,7 @@ Inheritance is importance because we need to access message IDs and sequence num
 
 
     class OrderKinesisPayloadRecord(KinesisDataStreamRecordPayload):
-        data: Order
-
-        # auto transform json string
-        # so Pydantic can auto-initialize nested Order model
-        @validator("data", pre=True)
-        def transform_message_to_dict(cls, value: str):
-            # Powertools KinesisDataStreamRecord already decodes b64 to str here
-            return json.loads(value)
+        data: Json[Order]
 
 
     class OrderKinesisRecord(KinesisDataStreamRecord):
