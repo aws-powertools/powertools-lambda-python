@@ -15,7 +15,7 @@ class KinesisDataStreamRecordPayload(BaseModel):
     kinesisSchemaVersion: str
     partitionKey: str
     sequenceNumber: str
-    data: Union[bytes, Type[BaseModel]]  # base64 encoded str is parsed into bytes
+    data: Union[bytes, Type[BaseModel], BaseModel]  # base64 encoded str is parsed into bytes
     approximateArrivalTimestamp: float
 
     @validator("data", pre=True, allow_reuse=True)
