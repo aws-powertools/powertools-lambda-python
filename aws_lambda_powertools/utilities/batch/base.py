@@ -331,14 +331,20 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
     def _collect_kinesis_failures(self):
         failures = []
         for msg in self.fail_messages:
-            msg_id = msg.kinesis.sequenceNumber if self.model else msg.kinesis.sequence_number
+            if self.model and getattr(msg, "parse_obj", None):
+                msg_id = msg.kinesis.sequenceNumber
+            else:
+                msg_id = msg.kinesis.sequence_number
             failures.append({"itemIdentifier": msg_id})
         return failures
 
     def _collect_dynamodb_failures(self):
         failures = []
         for msg in self.fail_messages:
-            msg_id = msg.dynamodb.SequenceNumber if self.model else msg.dynamodb.sequence_number
+            if self.model and getattr(msg, "parse_obj", None):
+                msg_id = msg.dynamodb.SequenceNumber
+            else:
+                msg_id = msg.dynamodb.sequence_number
             failures.append({"itemIdentifier": msg_id})
         return failures
 
