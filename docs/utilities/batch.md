@@ -1244,6 +1244,12 @@ Given a SQS batch where the first batch record succeeds and the second fails pro
 
 Use context manager when you want access to the processed messages or handle `BatchProcessingError` exception when all records within the batch fail to be processed.
 
+### What's the difference between the decorator and process_partial_response functions?
+
+`batch_processor` and `async_batch_processor` decorators are now considered legacy. Historically, they were kept due to backwards compatibility and to minimize code changes between V1 and V2.
+
+As 2.12.0, `process_partial_response` and `async_process_partial_response` are the recommended instead. It reduces boilerplate, smaller memory/CPU cycles, and it makes it less error prone - e.g., decorators required an additional return.
+
 ### Integrating exception handling with Sentry.io
 
 When using Sentry.io for error monitoring, you can override `failure_handler` to capture each processing exception with Sentry SDK:
