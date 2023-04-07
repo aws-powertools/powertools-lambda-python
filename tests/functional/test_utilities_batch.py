@@ -27,14 +27,8 @@ from aws_lambda_powertools.utilities.parser.models import (
     DynamoDBStreamChangedRecordModel,
     DynamoDBStreamRecordModel,
 )
-from aws_lambda_powertools.utilities.parser.models import (
-    KinesisDataStreamRecord as KinesisDataStreamRecordModel,
-)
-from aws_lambda_powertools.utilities.parser.models import (
-    KinesisDataStreamRecordPayload,
-    SqsRecordModel,
-)
-from aws_lambda_powertools.utilities.parser.types import Json, Literal
+from aws_lambda_powertools.utilities.parser.types import Literal
+from tests.functional.batch.sample_models import OrderKinesisRecord, OrderSqs
 from tests.functional.utils import b64_to_str, str_to_b64
 
 
@@ -374,18 +368,6 @@ def test_batch_processor_dynamodb_middleware_with_failure(dynamodb_event_factory
 
 def test_batch_processor_context_model(sqs_event_factory, order_event_factory):
     # GIVEN
-    class Order(BaseModel):
-        item: dict
-
-    class OrderSqs(SqsRecordModel):
-        body: Order
-
-        # auto transform json string
-        # so Pydantic can auto-initialize nested Order model
-        @validator("body", pre=True)
-        def transform_body_to_dict(cls, value: str):
-            return json.loads(value)
-
     def record_handler(record: OrderSqs):
         return record.body.item
 
@@ -411,18 +393,6 @@ def test_batch_processor_context_model(sqs_event_factory, order_event_factory):
 
 def test_batch_processor_context_model_with_failure(sqs_event_factory, order_event_factory):
     # GIVEN
-    class Order(BaseModel):
-        item: dict
-
-    class OrderSqs(SqsRecordModel):
-        body: Order
-
-        # auto transform json string
-        # so Pydantic can auto-initialize nested Order model
-        @validator("body", pre=True)
-        def transform_body_to_dict(cls, value: str):
-            return json.loads(value)
-
     def record_handler(record: OrderSqs):
         if "fail" in record.body.item["type"]:
             raise Exception("Failed to process record.")
@@ -544,22 +514,6 @@ def test_batch_processor_dynamodb_context_model_with_failure(dynamodb_event_fact
 
 def test_batch_processor_kinesis_context_parser_model(kinesis_event_factory, order_event_factory):
     # GIVEN
-    class Order(BaseModel):
-        item: dict
-
-    class OrderKinesisPayloadRecord(KinesisDataStreamRecordPayload):
-        data: Order
-
-        # auto transform json string
-        # so Pydantic can auto-initialize nested Order model
-        @validator("data", pre=True)
-        def transform_message_to_dict(cls, value: str):
-            # Powertools KinesisDataStreamRecordModel already decodes b64 to str here
-            return json.loads(value)
-
-    class OrderKinesisRecord(KinesisDataStreamRecordModel):
-        kinesis: OrderKinesisPayloadRecord
-
     def record_handler(record: OrderKinesisRecord):
         return record.kinesis.data.item
 
@@ -585,22 +539,6 @@ def test_batch_processor_kinesis_context_parser_model(kinesis_event_factory, ord
 
 def test_batch_processor_kinesis_context_parser_model_with_failure(kinesis_event_factory, order_event_factory):
     # GIVEN
-    class Order(BaseModel):
-        item: dict
-
-    class OrderKinesisPayloadRecord(KinesisDataStreamRecordPayload):
-        data: Order
-
-        # auto transform json string
-        # so Pydantic can auto-initialize nested Order model
-        @validator("data", pre=True)
-        def transform_message_to_dict(cls, value: str):
-            # Powertools KinesisDataStreamRecordModel
-            return json.loads(value)
-
-    class OrderKinesisRecord(KinesisDataStreamRecordModel):
-        kinesis: OrderKinesisPayloadRecord
-
     def record_handler(record: OrderKinesisRecord):
         if "fail" in record.kinesis.data.item["type"]:
             raise Exception("Failed to process record.")
@@ -779,12 +717,6 @@ def test_async_batch_processor_context_with_failure(sqs_event_factory, async_rec
 
 def test_batch_processor_model_with_partial_validation_error(sqs_event_factory, order_event_factory):
     # GIVEN
-    class Order(BaseModel):
-        item: dict
-
-    class OrderSqs(SqsRecordModel):
-        body: Json[Order]
-
     def record_handler(record: OrderSqs):
         if "fail" in record.body.item["type"]:
             raise Exception("Failed to process record.")
@@ -862,15 +794,6 @@ def test_batch_processor_kinesis_context_parser_model_with_partial_validation_er
     kinesis_event_factory, order_event_factory
 ):
     # GIVEN
-    class Order(BaseModel):
-        item: dict
-
-    class OrderKinesisPayloadRecord(KinesisDataStreamRecordPayload):
-        data: Json[Order]
-
-    class OrderKinesisRecord(KinesisDataStreamRecordModel):
-        kinesis: OrderKinesisPayloadRecord
-
     def record_handler(record: OrderKinesisRecord):
         if "fail" in record.kinesis.data.item["type"]:
             raise RuntimeError("Failed to process record.")
@@ -898,12 +821,6 @@ def test_batch_processor_kinesis_context_parser_model_with_partial_validation_er
 
 def test_async_batch_processor_model_with_partial_validation_error(sqs_event_factory, order_event_factory):
     # GIVEN
-    class Order(BaseModel):
-        item: dict
-
-    class OrderSqs(SqsRecordModel):
-        body: Json[Order]
-
     async def async_record_handler(record: OrderSqs):
         if "fail" in record.body.item["type"]:
             raise Exception("Failed to process record.")
@@ -981,15 +898,6 @@ def test_async_batch_processor_kinesis_context_parser_model_with_partial_validat
     kinesis_event_factory, order_event_factory
 ):
     # GIVEN
-    class Order(BaseModel):
-        item: dict
-
-    class OrderKinesisPayloadRecord(KinesisDataStreamRecordPayload):
-        data: Json[Order]
-
-    class OrderKinesisRecord(KinesisDataStreamRecordModel):
-        kinesis: OrderKinesisPayloadRecord
-
     async def record_handler(record: OrderKinesisRecord):
         if "fail" in record.kinesis.data.item["type"]:
             raise Exception("Failed to process record.")
@@ -998,7 +906,7 @@ def test_async_batch_processor_kinesis_context_parser_model_with_partial_validat
     order_event = order_event_factory({"type": "success"})
     first_record = kinesis_event_factory(order_event)
     second_record = kinesis_event_factory(order_event)
-    malformed_record = kinesis_event_factory({"poison": "pill"})
+    malformed_record = kinesis_event_factory('{"poison": "pill"}')
     records = [first_record, malformed_record, second_record]
 
     # WHEN
@@ -1010,6 +918,6 @@ def test_async_batch_processor_kinesis_context_parser_model_with_partial_validat
     assert len(batch.fail_messages) == 1
     assert batch.response() == {
         "batchItemFailures": [
-            {"itemIdentifier": malformed_record["kinesis"]["SequenceNumber"]},
+            {"itemIdentifier": malformed_record["kinesis"]["sequenceNumber"]},
         ]
     }
