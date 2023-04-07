@@ -856,3 +856,41 @@ def test_batch_processor_dynamodb_context_model_with_partial_validation_error(
             {"itemIdentifier": malformed_record["dynamodb"]["SequenceNumber"]},
         ]
     }
+
+
+def test_batch_processor_kinesis_context_parser_model_with_partial_validation_error(
+    kinesis_event_factory, order_event_factory
+):
+    # GIVEN
+    class Order(BaseModel):
+        item: dict
+
+    class OrderKinesisPayloadRecord(KinesisDataStreamRecordPayload):
+        data: Json[Order]
+
+    class OrderKinesisRecord(KinesisDataStreamRecordModel):
+        kinesis: OrderKinesisPayloadRecord
+
+    def record_handler(record: OrderKinesisRecord):
+        if "fail" in record.kinesis.data.item["type"]:
+            raise Exception("Failed to process record.")
+        return record.kinesis.data.item
+
+    order_event = order_event_factory({"type": "success"})
+    first_record = kinesis_event_factory(order_event)
+    second_record = kinesis_event_factory(order_event)
+    malformed_record = kinesis_event_factory({"poison": "pill"})
+    records = [first_record, malformed_record, second_record]
+
+    # WHEN
+    processor = BatchProcessor(event_type=EventType.KinesisDataStreams, model=OrderKinesisRecord)
+    with processor(records, record_handler) as batch:
+        batch.process()
+
+    # THEN
+    assert len(batch.fail_messages) == 1
+    assert batch.response() == {
+        "batchItemFailures": [
+            {"itemIdentifier": malformed_record["kinesis"]["SequenceNumber"]},
+        ]
+    }
