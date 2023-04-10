@@ -189,14 +189,14 @@ requests = ">=0.14.0"
 
 [[package]]
 name = "aws-sam-translator"
-version = "1.62.0"
+version = "1.64.0"
 description = "AWS SAM Translator is a library that transform SAM templates into AWS CloudFormation templates"
 category = "dev"
 optional = false
 python-versions = ">=3.7, <=4.0, !=4.0"
 files = [
-    {file = "aws-sam-translator-1.62.0.tar.gz", hash = "sha256:2db24633fbc76b8e6eb76adaf0c1001a0d749288af91d85e7d9007e3b05479fa"},
-    {file = "aws_sam_translator-1.62.0-py3-none-any.whl", hash = "sha256:5d198c8b4097b9210e1a44a64f55c4ee53b84f35d16ef1671b340242c41379cf"},
+    {file = "aws-sam-translator-1.64.0.tar.gz", hash = "sha256:0cc5b07dd6ef1de3525d887a3b9557168e04cb44327706a43661653bad30687f"},
+    {file = "aws_sam_translator-1.64.0-py3-none-any.whl", hash = "sha256:c44725f12b05d4881e3bc077f70e23ebce56ea78c729acf0ca9f51302b27d304"},
 ]
 
 [package.dependencies]
@@ -206,7 +206,7 @@ pydantic = ">=1.8,<2.0"
 typing-extensions = ">=4.4,<5"
 
 [package.extras]
-dev = ["black (==23.1.0)", "boto3 (>=1.23,<2)", "boto3-stubs[appconfig,serverlessrepo] (>=1.19.5,<2.0.0)", "coverage (>=5.3,<8)", "dateparser (>=1.1,<2.0)", "mypy (>=1.0.0,<1.1.0)", "parameterized (>=0.7,<1.0)", "pytest (>=6.2,<8)", "pytest-cov (>=2.10,<5)", "pytest-env (>=0.6,<1)", "pytest-rerunfailures (>=9.1,<12)", "pytest-xdist (>=2.5,<4)", "pyyaml (>=6.0,<7.0)", "requests (>=2.28,<3.0)", "ruamel.yaml (==0.17.21)", "ruff (==0.0.253)", "tenacity (>=8.0,<9.0)", "types-PyYAML (>=6.0,<7.0)", "types-jsonschema (>=3.2,<4.0)"]
+dev = ["black (==23.1.0)", "boto3 (>=1.23,<2)", "boto3-stubs[appconfig,serverlessrepo] (>=1.19.5,<2.0.0)", "coverage (>=5.3,<8)", "dateparser (>=1.1,<2.0)", "mypy (>=1.1.0,<1.2.0)", "parameterized (>=0.7,<1.0)", "pytest (>=6.2,<8)", "pytest-cov (>=2.10,<5)", "pytest-env (>=0.6,<1)", "pytest-rerunfailures (>=9.1,<12)", "pytest-xdist (>=2.5,<4)", "pyyaml (>=6.0,<7.0)", "requests (>=2.28,<3.0)", "ruamel.yaml (==0.17.21)", "ruff (==0.0.254)", "tenacity (>=8.0,<9.0)", "types-PyYAML (>=6.0,<7.0)", "types-jsonschema (>=3.2,<4.0)"]
 
 [[package]]
 name = "aws-xray-sdk"
@@ -370,24 +370,25 @@ files = [
 
 [[package]]
 name = "cfn-lint"
-version = "0.76.2"
+version = "0.77.0"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 category = "dev"
 optional = false
 python-versions = ">=3.7, <=4.0, !=4.0"
 files = [
-    {file = "cfn-lint-0.76.2.tar.gz", hash = "sha256:997be30acb914c19f4df570bd53811dd8f0f3781f6864725bd07c1b5c3144439"},
-    {file = "cfn_lint-0.76.2-py3-none-any.whl", hash = "sha256:1f38f88203097ff6dc80e57b71c9e33d620310ec11944f49e68b10208c342181"},
+    {file = "cfn-lint-0.77.0.tar.gz", hash = "sha256:a1cf0499a0a17028431d2728cb41fe196e7d4365984a4a42002774ff5c1706c6"},
+    {file = "cfn_lint-0.77.0-py3-none-any.whl", hash = "sha256:a85b70a6ee281c1aac473aee9da0e0f8ff104e66f1669d684caddf3df8ce5cb7"},
 ]
 
 [package.dependencies]
-aws-sam-translator = ">=1.62.0"
+aws-sam-translator = ">=1.64.0"
 jschema-to-python = ">=1.2.3,<1.3.0"
 jsonpatch = "*"
 jsonschema = ">=3.0,<5"
 junit-xml = ">=1.9,<2.0"
 networkx = ">=2.4,<4"
 pyyaml = ">5.4"
+regex = "*"
 sarif-om = ">=1.0.4,<1.1.0"
 sympy = ">=1.0.0"
 
@@ -3052,4 +3053,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "2483a902d8684619a9c3ed61ad34b39ad5acead6cff6d675dde7fc313975aef1"
+content-hash = "cb1407f2c3e5fd11f168383a674c957472bf84151c65861d499d873fbd5d48a2"
