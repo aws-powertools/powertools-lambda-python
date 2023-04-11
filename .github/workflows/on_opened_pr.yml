@@ -32,3 +32,20 @@ jobs:
           script: |
             const script = require('.github/scripts/label_missing_related_issue.js')
             await script({github, context, core})
+  check_acknowledge_section:
+    needs: get_pr_details
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: "Ensure acknowledgement section is present"
+        uses: actions/github-script@v6
+        env:
+          PR_BODY: ${{ needs.get_pr_details.outputs.prBody }}
+          PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
+          PR_ACTION: ${{ needs.get_pr_details.outputs.prAction }}
+          PR_AUTHOR: ${{ needs.get_pr_details.outputs.prAuthor }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const script = require('.github/scripts/label_missing_acknowledgement_section.js')
+            await script({github, context, core})
