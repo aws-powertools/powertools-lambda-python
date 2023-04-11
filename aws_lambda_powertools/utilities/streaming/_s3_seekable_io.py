@@ -19,7 +19,6 @@ from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreaming
 
 if TYPE_CHECKING:
     from mmap import mmap
-    from pickle import PickleBuffer  # nosec B403
 
     from mypy_boto3_s3 import Client
 
@@ -193,13 +192,11 @@ class _S3SeekableIO(IO[bytes]):
     def truncate(self, size: Optional[int] = 0) -> int:
         raise NotImplementedError("this stream is not writable")
 
-    def write(
-        self, data: Union[bytes, Union[bytearray, memoryview, Sequence[Any], "mmap", "_CData", "PickleBuffer"]]
-    ) -> int:
+    def write(self, data: Union[bytes, Union[bytearray, memoryview, Sequence[Any], "mmap", "_CData"]]) -> int:
         raise NotImplementedError("this stream is not writable")
 
     def writelines(
         self,
-        data: Iterable[Union[bytes, Union[bytearray, memoryview, Sequence[Any], "mmap", "_CData", "PickleBuffer"]]],
+        data: Iterable[Union[bytes, Union[bytearray, memoryview, Sequence[Any], "mmap", "_CData"]]],
     ) -> None:
         raise NotImplementedError("this stream is not writable")
