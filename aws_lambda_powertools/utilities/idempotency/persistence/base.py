@@ -37,12 +37,12 @@ class DataRecord:
 
     def __init__(
         self,
-        idempotency_key,
+        idempotency_key: str,
         status: str = "",
         expiry_timestamp: Optional[int] = None,
         in_progress_expiry_timestamp: Optional[int] = None,
-        response_data: Optional[str] = "",
-        payload_hash: Optional[str] = None,
+        response_data: str = "",
+        payload_hash: str = "",
     ) -> None:
         """
 
@@ -117,7 +117,7 @@ class BasePersistenceLayer(ABC):
         """Initialize the defaults"""
         self.function_name = ""
         self.configured = False
-        self.event_key_jmespath: Optional[str] = None
+        self.event_key_jmespath: str = ""
         self.event_key_compiled_jmespath = None
         self.jmespath_options: Optional[dict] = None
         self.payload_validation_enabled = False
@@ -125,7 +125,7 @@ class BasePersistenceLayer(ABC):
         self.raise_on_no_idempotency_key = False
         self.expires_after_seconds: int = 60 * 60  # 1 hour default
         self.use_local_cache = False
-        self.hash_function = None
+        self.hash_function = hashlib.md5
 
     def configure(self, config: IdempotencyConfig, function_name: Optional[str] = None) -> None:
         """
@@ -182,7 +182,7 @@ class BasePersistenceLayer(ABC):
         if self.is_missing_idempotency_key(data=data):
             if self.raise_on_no_idempotency_key:
                 raise IdempotencyKeyError("No data found to create a hashed idempotency_key")
-            warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}")
+            warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}", stacklevel=2)
 
         generated_hash = self._generate_hash(data=data)
         return f"{self.function_name}#{generated_hash}"
@@ -359,7 +359,8 @@ class BasePersistenceLayer(ABC):
         else:
             warnings.warn(
                 "Couldn't determine the remaining time left. "
-                "Did you call register_lambda_context on IdempotencyConfig?"
+                "Did you call register_lambda_context on IdempotencyConfig?",
+                stacklevel=2,
             )
 
         logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")

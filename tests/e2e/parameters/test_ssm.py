@@ -17,7 +17,7 @@ def parameters_list(infrastructure: dict) -> List[str]:
     return json.loads(param_list)
 
 
-#
+@pytest.mark.xdist_group(name="parameters")
 def test_get_parameters_by_name(
     ssm_get_parameters_by_name_fn_arn: str,
     parameters_list: str,

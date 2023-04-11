@@ -19,6 +19,8 @@ on:
 env:
   AWS_DEFAULT_REGION: us-east-1
 
+concurrency: e2e
+
 jobs:
   run:
     runs-on: aws-lambda-powertools_ubuntu-latest_8-core
@@ -26,6 +28,7 @@ jobs:
       id-token: write # needed to request JWT with GitHub's OIDC Token endpoint. docs: https://bit.ly/3MNgQO9
       contents: read
     strategy:
+      fail-fast: false # needed so if a version fails, the others will still be able to complete and cleanup
       matrix:
         version: ["3.7", "3.8", "3.9"]
     if: ${{ github.actor != 'dependabot[bot]' }}
@@ -51,7 +54,7 @@ jobs:
       - name: Install dependencies
         run: make dev
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef
         with:
           role-to-assume: ${{ secrets.AWS_TEST_ROLE_ARN }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}

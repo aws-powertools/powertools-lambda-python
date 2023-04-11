@@ -43,7 +43,7 @@ repos:
         types: [yaml]
         files: examples/.*
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.6.21
+    rev: v1.6.23
     hooks:
       - id: actionlint-docker
         args: [-pyflakes=]

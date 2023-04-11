@@ -2,6 +2,9 @@ from typing import Dict, Iterator, Optional
 from urllib.parse import unquote_plus
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.event_bridge_event import (
+    EventBridgeEvent,
+)
 
 
 class S3Identity(DictWrapper):
@@ -14,6 +17,138 @@ class S3RequestParameters(DictWrapper):
     @property
     def source_ip_address(self) -> str:
         return self["requestParameters"]["sourceIPAddress"]
+
+
+class S3EventNotificationEventBridgeBucket(DictWrapper):
+    @property
+    def name(self) -> str:
+        return self["name"]
+
+
+class S3EventBridgeNotificationObject(DictWrapper):
+    @property
+    def key(self) -> str:
+        """Object key"""
+        return unquote_plus(self["key"])
+
+    @property
+    def size(self) -> str:
+        """Object size"""
+        return self["size"]
+
+    @property
+    def etag(self) -> str:
+        """Object etag"""
+        return self["etag"]
+
+    @property
+    def version_id(self) -> str:
+        """Object version ID"""
+        return self["version-id"]
+
+    @property
+    def sequencer(self) -> str:
+        """Object key"""
+        return self["sequencer"]
+
+
+class S3EventBridgeNotificationDetail(DictWrapper):
+    @property
+    def version(self) -> str:
+        """Get the detail version"""
+        return self["version"]
+
+    @property
+    def bucket(self) -> S3EventNotificationEventBridgeBucket:
+        """Get the bucket name for the S3 notification"""
+        return S3EventNotificationEventBridgeBucket(self["bucket"])
+
+    @property
+    def object(self) -> S3EventBridgeNotificationObject:  # noqa: A003 # ignore shadowing built-in grammar
+        """Get the request-id for the S3 notification"""
+        return S3EventBridgeNotificationObject(self["object"])
+
+    @property
+    def request_id(self) -> str:
+        """Get the request-id for the S3 notification"""
+        return self["request-id"]
+
+    @property
+    def requester(self) -> str:
+        """Get the AWS account ID or AWS service principal of requester for the S3 notification"""
+        return self["requester"]
+
+    @property
+    def source_ip_address(self) -> Optional[str]:
+        """Get the source IP address of S3 request. Only present for events triggered by an S3 request."""
+        return self.get("source-ip-address")
+
+    @property
+    def reason(self) -> Optional[str]:
+        """Get the reason for the S3 notification.
+
+        For 'Object Created events', the S3 API used to create the object: `PutObject`, `POST Object`, `CopyObject`, or
+        `CompleteMultipartUpload`. For 'Object Deleted' events, this is set to `DeleteObject` when an object is deleted
+        by an S3 API call, or 'Lifecycle Expiration' when an object is deleted by an S3 Lifecycle expiration rule.
+        """
+        return self.get("reason")
+
+    @property
+    def deletion_type(self) -> Optional[str]:
+        """Get the deletion type for the S3 object in this notification.
+
+        For 'Object Deleted' events, when an unversioned object is deleted, or a versioned object is permanently deleted
+        this is set to 'Permanently Deleted'. When a delete marker is created for a versioned object, this is set to
+        'Delete Marker Created'.
+        """
+        return self.get("deletion-type")
+
+    @property
+    def restore_expiry_time(self) -> Optional[str]:
+        """Get the restore expiry time for the S3 object in this notification.
+
+        For 'Object Restore Completed' events, the time when the temporary copy of the object will be deleted from S3.
+        """
+        return self.get("restore-expiry-time")
+
+    @property
+    def source_storage_class(self) -> Optional[str]:
+        """Get the source storage class of the S3 object in this notification.
+
+        For 'Object Restore Initiated' and 'Object Restore Completed' events, the storage class of the object being
+        restored.
+        """
+        return self.get("source-storage-class")
+
+    @property
+    def destination_storage_class(self) -> Optional[str]:
+        """Get the destination storage class of the S3 object in this notification.
+
+        For 'Object Storage Class Changed' events, the new storage class of the object.
+        """
+        return self.get("destination-storage-class")
+
+    @property
+    def destination_access_tier(self) -> Optional[str]:
+        """Get the destination access tier of the S3 object in this notification.
+
+        For 'Object Access Tier Changed' events, the new access tier of the object.
+        """
+        return self.get("destination-access-tier")
+
+
+class S3EventBridgeNotificationEvent(EventBridgeEvent):
+    """Amazon S3EventBridge Event
+
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/AmazonS3/latest/userguide/ev-events.html
+    """
+
+    @property
+    def detail(self) -> S3EventBridgeNotificationDetail:  # type: ignore[override]
+        """S3 notification details"""
+        return S3EventBridgeNotificationDetail(self["detail"])
 
 
 class S3Bucket(DictWrapper):

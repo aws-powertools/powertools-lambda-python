@@ -8,6 +8,8 @@ from pydantic.types import NonNegativeFloat
 
 from aws_lambda_powertools.utilities.parser.types import Literal
 
+from .event_bridge import EventBridgeModel
+
 
 class S3EventRecordGlacierRestoreEventData(BaseModel):
     lifecycleRestorationExpiryTime: datetime
@@ -54,6 +56,37 @@ class S3Message(BaseModel):
     configurationId: str
     bucket: S3Bucket
     object: S3Object  # noqa: A003,VNE003
+
+
+class S3EventNotificationObjectModel(BaseModel):
+    key: str
+    size: Optional[NonNegativeFloat]
+    etag: str
+    version_id: str = Field(None, alias="version-id")
+    sequencer: Optional[str]
+
+
+class S3EventNotificationEventBridgeBucketModel(BaseModel):
+    name: str
+
+
+class S3EventNotificationEventBridgeDetailModel(BaseModel):
+    version: str
+    bucket: S3EventNotificationEventBridgeBucketModel
+    object: S3EventNotificationObjectModel  # noqa: A003,VNE003
+    request_id: str = Field(None, alias="request-id")
+    requester: str
+    source_ip_address: str = Field(None, alias="source-ip-address")
+    reason: Optional[str]
+    deletion_type: Optional[str] = Field(None, alias="deletion-type")
+    restore_expiry_time: Optional[str] = Field(None, alias="restore-expiry-time")
+    source_storage_class: Optional[str] = Field(None, alias="source-storage-class")
+    destination_storage_class: Optional[str] = Field(None, alias="destination-storage-class")
+    destination_access_tier: Optional[str] = Field(None, alias="destination-access-tier")
+
+
+class S3EventNotificationEventBridgeModel(EventBridgeModel):
+    detail: S3EventNotificationEventBridgeDetailModel
 
 
 class S3RecordModel(BaseModel):

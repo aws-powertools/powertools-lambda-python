@@ -1,0 +1,28 @@
+{
+  "version": "0",
+  "id": "6924de0d-13e2-6bbf-c0c1-b903b753565e",
+  "detail-type": "Object Restore Completed",
+  "source": "aws.s3",
+  "account": "111122223333",
+  "time": "2021-11-12T00:00:00Z",
+  "region": "ca-central-1",
+  "resources": [
+    "arn:aws:s3:::example-bucket"
+  ],
+  "detail": {
+    "version": "0",
+    "bucket": {
+      "name": "example-bucket"
+    },
+    "object": {
+        "key": "IMG_m7fzo3.jpg",
+        "size": 184662,
+        "etag": "4e68adba0abe2dc8653dc3354e14c01d",
+        "sequencer": "006408CAD69598B05E"
+    },
+    "request-id": "189F19CB7FB1B6A4",
+    "requester": "s3.amazonaws.com",
+    "restore-expiry-time": "2021-11-13T00:00:00Z",
+    "source-storage-class": "GLACIER"
+  }
+}

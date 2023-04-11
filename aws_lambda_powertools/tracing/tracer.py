@@ -529,7 +529,7 @@ class Tracer:
             return self._decorate_generator_function(
                 method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
             )
-        elif hasattr(method, "__wrapped__") and inspect.isgeneratorfunction(method.__wrapped__):  # type: ignore
+        elif hasattr(method, "__wrapped__") and inspect.isgeneratorfunction(method.__wrapped__):
             return self._decorate_generator_function_with_context_manager(
                 method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
             )

@@ -162,8 +162,8 @@ You can append additional keys using either mechanism:
 
 #### append_keys method
 
-???+ note
-	`append_keys` replaces `structure_logs(append=True, **kwargs)` method. structure_logs will be removed in v2.
+???+ warning
+	`append_keys` is not thread-safe, please see [RFC](https://github.com/awslabs/aws-lambda-powertools-python/issues/991){target="_blank"}.
 
 You can append your own keys to your existing Logger via `append_keys(**additional_key_values)` method.
 

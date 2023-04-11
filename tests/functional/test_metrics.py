@@ -1,13 +1,15 @@
 import json
 import warnings
 from collections import namedtuple
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import pytest
 
 from aws_lambda_powertools import Metrics, single_metric
 from aws_lambda_powertools.metrics import (
     EphemeralMetrics,
+    MetricResolution,
+    MetricResolutionError,
     MetricUnit,
     MetricUnitError,
     MetricValueError,
@@ -27,6 +29,11 @@ def reset_metric_set():
     metrics.clear_default_dimensions()
     reset_cold_start_flag()  # ensure each test has cold start
     yield
+
+
+@pytest.fixture
+def metric_with_resolution() -> Dict[str, Union[str, int]]:
+    return {"name": "single_metric", "unit": MetricUnit.Count, "value": 1, "resolution": MetricResolution.High}
 
 
 @pytest.fixture
@@ -141,6 +148,36 @@ def capture_metrics_output_multiple_emf_objects(capsys):
     return [json.loads(line.strip()) for line in capsys.readouterr().out.split("\n") if line]
 
 
+def test_single_metric_logs_with_high_resolution_enum(capsys, metric_with_resolution, dimension, namespace):
+    # GIVEN we have a metric with high resolution as enum
+    # WHEN using single_metric context manager
+    with single_metric(namespace=namespace, **metric_with_resolution) as my_metric:
+        my_metric.add_dimension(**dimension)
+
+    # THEN we should only have the first metric added
+    output = capture_metrics_output(capsys)
+    expected = serialize_single_metric(metric=metric_with_resolution, dimension=dimension, namespace=namespace)
+
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
+def test_single_metric_logs_with_high_resolution_integer(capsys, metric_with_resolution, dimension, namespace):
+    # GIVEN we have a metric with high resolution as integer
+    metric_with_resolution["resolution"] = MetricResolution.High.value
+
+    # WHEN using single_metric context manager
+    with single_metric(namespace=namespace, **metric_with_resolution) as my_metric:
+        my_metric.add_dimension(**dimension)
+
+    # THEN we should only have the first metric added
+    output = capture_metrics_output(capsys)
+    expected = serialize_single_metric(metric=metric_with_resolution, dimension=dimension, namespace=namespace)
+
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
 def test_single_metric_logs_one_metric_only(capsys, metric, dimension, namespace):
     # GIVEN we try adding more than one metric
     # WHEN using single_metric context manager
@@ -152,6 +189,38 @@ def test_single_metric_logs_one_metric_only(capsys, metric, dimension, namespace
     expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
 
     # THEN we should only have the first metric added
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
+def test_single_metric_default_dimensions(capsys, metric, dimension, namespace):
+    # GIVEN we provide default dimensions
+    # WHEN using single_metric context manager
+    default_dimensions = {dimension["name"]: dimension["value"]}
+    with single_metric(namespace=namespace, default_dimensions=default_dimensions, **metric) as my_metric:
+        my_metric.add_metric(name="second_metric", unit="Count", value=1)
+
+    output = capture_metrics_output(capsys)
+    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
+
+    # THEN we should have default dimension added to the metric
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
+def test_single_metric_default_dimensions_inherit(capsys, metric, dimension, namespace):
+    # GIVEN we provide Metrics default dimensions
+    # WHEN using single_metric context manager
+    metrics = Metrics()
+    default_dimensions = {dimension["name"]: dimension["value"]}
+    metrics.set_default_dimensions(**default_dimensions)
+    with single_metric(namespace=namespace, default_dimensions=metrics.default_dimensions, **metric) as my_metric:
+        my_metric.add_metric(name="second_metric", unit="Count", value=1)
+
+    output = capture_metrics_output(capsys)
+    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
+
+    # THEN we should have default dimension added to the metric
     remove_timestamp(metrics=[output, expected])
     assert expected == output
 
@@ -309,6 +378,29 @@ def test_log_metrics_decorator_call_decorated_function(metric, namespace, servic
     # THEN log_metrics should invoke the function it decorates
     # and return no error if we have a namespace and dimension
     assert lambda_handler({}, {}) is True
+
+
+def test_schema_validation_incorrect_metric_resolution(metric, dimension):
+    # GIVEN we pass a metric resolution that is not supported by CloudWatch
+    metric["resolution"] = 10  # metric resolution must be 1 (High) or 60 (Standard)
+
+    # WHEN we try adding a new metric
+    # THEN it should fail metric unit validation
+    with pytest.raises(MetricResolutionError, match="Invalid metric resolution.*60"):
+        with single_metric(**metric) as my_metric:
+            my_metric.add_dimension(**dimension)
+
+
+@pytest.mark.parametrize("resolution", ["sixty", False, [], {}, object])
+def test_schema_validation_incorrect_metric_resolution_non_integer_enum(metric, dimension, resolution, namespace):
+    # GIVEN we pass a metric resolution that is not supported by CloudWatch
+    metric["resolution"] = resolution  # metric resolution must be 1 (High) or 60 (Standard)
+
+    # WHEN we try adding a new metric
+    # THEN it should fail metric unit validation
+    with pytest.raises(MetricResolutionError, match="Invalid metric resolution.*60"):
+        with single_metric(namespace=namespace, **metric) as my_metric:
+            my_metric.add_dimension(**dimension)
 
 
 def test_schema_validation_incorrect_metric_unit(metric, dimension, namespace):
@@ -636,7 +728,10 @@ def test_log_metrics_decorator_no_metrics_warning(dimensions, namespace, service
         warnings.simplefilter("default")
         lambda_handler({}, {})
         assert len(w) == 1
-        assert str(w[-1].message) == "No metrics to publish, skipping"
+        assert str(w[-1].message) == (
+            "No application metrics to publish. The cold-start metric may be published if enabled. "
+            "If application metrics should never be empty, consider using 'raise_on_empty_metrics'"
+        )
 
 
 def test_log_metrics_with_implicit_dimensions_called_twice(capsys, metric, namespace, service):
@@ -715,6 +810,41 @@ def test_log_metrics_with_metadata(capsys, metric, dimension, namespace, service
     # THEN we should have no exceptions and metadata
     remove_timestamp(metrics=[output, expected])
     assert expected == output
+
+
+def test_serialize_high_resolution_metric_set_metric_definition(
+    metric_with_resolution, dimension, namespace, service, metadata
+):
+    expected_metric_definition = {
+        "single_metric": [1.0],
+        "_aws": {
+            "Timestamp": 1592237875494,
+            "CloudWatchMetrics": [
+                {
+                    "Namespace": "test_namespace",
+                    "Dimensions": [["test_dimension", "service"]],
+                    "Metrics": [{"Name": "single_metric", "Unit": "Count", "StorageResolution": 1}],
+                }
+            ],
+        },
+        "service": "test_service",
+        "username": "test",
+        "test_dimension": "test",
+    }
+
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(service=service, namespace=namespace)
+    my_metrics.add_metric(**metric_with_resolution)
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_metadata(**metadata)
+
+    # WHEN metrics are serialized manually
+    metric_definition_output = my_metrics.serialize_metric_set()
+
+    # THEN we should emit a valid embedded metric definition object
+    assert "Timestamp" in metric_definition_output["_aws"]
+    remove_timestamp(metrics=[metric_definition_output, expected_metric_definition])
+    assert metric_definition_output == expected_metric_definition
 
 
 def test_serialize_metric_set_metric_definition(metric, dimension, namespace, service, metadata):

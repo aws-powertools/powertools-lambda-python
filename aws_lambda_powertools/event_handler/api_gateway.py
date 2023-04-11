@@ -501,7 +501,9 @@ class ApiGatewayResolver(BaseRouter):
                 self._routes.append(Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control))
                 route_key = item + rule
                 if route_key in self._route_keys:
-                    warnings.warn(f"A route like this was already registered. method: '{item}' rule: '{rule}'")
+                    warnings.warn(
+                        f"A route like this was already registered. method: '{item}' rule: '{rule}'", stacklevel=2
+                    )
                 self._route_keys.append(route_key)
                 if cors_enabled:
                     logger.debug(f"Registering method {item.upper()} to Allow Methods in CORS")
@@ -526,7 +528,9 @@ class ApiGatewayResolver(BaseRouter):
         """
         if isinstance(event, BaseProxyEvent):
             warnings.warn(
-                "You don't need to serialize event to Event Source Data Class when using Event Handler; see issue #1152"
+                "You don't need to serialize event to Event Source Data Class when using Event Handler; "
+                "see issue #1152",
+                stacklevel=2,
             )
             event = event.raw_event
 
@@ -728,21 +732,26 @@ class ApiGatewayResolver(BaseRouter):
 
         return None
 
-    def _to_response(self, result: Union[Dict, Response]) -> Response:
+    def _to_response(self, result: Union[Dict, Tuple, Response]) -> Response:
         """Convert the route's result to a Response
 
-         2 main result types are supported:
+         3 main result types are supported:
 
         - Dict[str, Any]: Rest api response with just the Dict to json stringify and content-type is set to
           application/json
+        - Tuple[dict, int]: Same dict handling as above but with the option of including a status code
         - Response: returned as is, and allows for more flexibility
         """
+        status_code = HTTPStatus.OK
         if isinstance(result, Response):
             return result
+        elif isinstance(result, tuple) and len(result) == 2:
+            # Unpack result dict and status code from tuple
+            result, status_code = result
 
         logger.debug("Simple response detected, serializing return before constructing final response")
         return Response(
-            status_code=200,
+            status_code=status_code,
             content_type=content_types.APPLICATION_JSON,
             body=self._json_dump(result),
         )
@@ -831,7 +840,6 @@ class APIGatewayRestResolver(ApiGatewayResolver):
     # Override _compile_regex to exclude trailing slashes for route resolution
     @staticmethod
     def _compile_regex(rule: str, base_regex: str = _ROUTE_REGEX):
-
         return super(APIGatewayRestResolver, APIGatewayRestResolver)._compile_regex(rule, "^{}/*$")
 
 

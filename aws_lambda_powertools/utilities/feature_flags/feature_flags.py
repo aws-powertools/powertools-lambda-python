@@ -6,6 +6,11 @@ from ...shared.types import JSONType
 from . import schema
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError
+from .time_conditions import (
+    compare_datetime_range,
+    compare_days_of_week,
+    compare_time_range,
+)
 
 
 class FeatureFlags:
@@ -42,8 +47,6 @@ class FeatureFlags:
         self.logger = logger or logging.getLogger(__name__)
 
     def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
-        if not context_value:
-            return False
         mapping_by_action = {
             schema.RuleAction.EQUALS.value: lambda a, b: a == b,
             schema.RuleAction.NOT_EQUALS.value: lambda a, b: a != b,
@@ -59,6 +62,9 @@ class FeatureFlags:
             schema.RuleAction.KEY_NOT_IN_VALUE.value: lambda a, b: a not in b,
             schema.RuleAction.VALUE_IN_KEY.value: lambda a, b: b in a,
             schema.RuleAction.VALUE_NOT_IN_KEY.value: lambda a, b: b not in a,
+            schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value: lambda a, b: compare_time_range(a, b),
+            schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value: lambda a, b: compare_datetime_range(a, b),
+            schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value: lambda a, b: compare_days_of_week(a, b),
         }
 
         try:
@@ -83,9 +89,17 @@ class FeatureFlags:
             return False
 
         for condition in conditions:
-            context_value = context.get(str(condition.get(schema.CONDITION_KEY)))
+            context_value = context.get(condition.get(schema.CONDITION_KEY, ""))
             cond_action = condition.get(schema.CONDITION_ACTION, "")
             cond_value = condition.get(schema.CONDITION_VALUE)
+
+            # time based rule actions have no user context. the context is the condition key
+            if cond_action in (
+                schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value,
+                schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value,
+                schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,
+            ):
+                context_value = condition.get(schema.CONDITION_KEY)  # e.g., CURRENT_TIME
 
             if not self._match_by_action(action=cond_action, condition_value=cond_value, context_value=context_value):
                 self.logger.debug(
@@ -169,7 +183,7 @@ class FeatureFlags:
         # parse result conf as JSON, keep in cache for max age defined in store
         self.logger.debug(f"Fetching schema from registered store, store={self.store}")
         config: Dict = self.store.get_configuration()
-        validator = schema.SchemaValidator(schema=config)
+        validator = schema.SchemaValidator(schema=config, logger=self.logger)
         validator.validate()
 
         return config
@@ -228,7 +242,7 @@ class FeatureFlags:
         # method `get_matching_features` returning Dict[feature_name, feature_value]
         boolean_feature = feature.get(
             schema.FEATURE_DEFAULT_VAL_TYPE_KEY, True
-        )  # backwards compatability ,assume feature flag
+        )  # backwards compatibility, assume feature flag
         if not rules:
             self.logger.debug(
                 f"no rules found, returning feature default, name={name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # noqa: E501
@@ -287,7 +301,7 @@ class FeatureFlags:
             feature_default_value = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
             boolean_feature = feature.get(
                 schema.FEATURE_DEFAULT_VAL_TYPE_KEY, True
-            )  # backwards compatability ,assume feature flag
+            )  # backwards compatibility, assume feature flag
 
             if feature_default_value and not rules:
                 self.logger.debug(f"feature is enabled by default and has no defined rules, name={name}")

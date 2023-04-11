@@ -58,6 +58,7 @@ theme:
     - navigation.indexes
     - navigation.tracking
     - content.code.annotate
+    - content.code.copy
   icon:
     repo: fontawesome/brands/github
   logo: media/aws-logo-light.svg

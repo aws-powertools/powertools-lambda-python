@@ -45,7 +45,12 @@ A resolver will handle request resolution, including [one or more routers](#spli
 For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, `ALBResolver`, and `LambdaFunctionUrlResolver`. From here on, we will default to `APIGatewayRestResolver` across examples.
 
 ???+ info "Auto-serialization"
-    We serialize `Dict` responses as JSON, trim whitespace for compact responses, and set content-type to `application/json`.
+    We serialize `Dict` responses as JSON, trim whitespace for compact responses, set content-type to `application/json`, and
+    return a 200 OK HTTP status. You can optionally set a different HTTP status code as the second argument of the tuple:
+
+    ```python hl_lines="15 16"
+    --8<-- "examples/event_handler_rest/src/getting_started_return_tuple.py"
+    ```
 
 #### API Gateway REST API
 
@@ -161,7 +166,7 @@ You can also combine nested paths with greedy regex to catch in between routes.
 
 ### HTTP Methods
 
-You can use named decorators to specify the HTTP method that should be handled in your functions. That is, `app.<http_method>`, where the HTTP method could be `get`, `post`, `put`, `patch`, `delete`, and `options`.
+You can use named decorators to specify the HTTP method that should be handled in your functions. That is, `app.<http_method>`, where the HTTP method could be `get`, `post`, `put`, `patch` and `delete`.
 
 === "http_methods.py"
 

@@ -85,11 +85,11 @@ def expected_params_update_item(serialized_lambda_response, hashed_idempotency_k
             "#status": "status",
         },
         "ExpressionAttributeValues": {
-            ":expiry": stub.ANY,
-            ":response_data": serialized_lambda_response,
-            ":status": "COMPLETED",
+            ":expiry": {"N": stub.ANY},
+            ":response_data": {"S": serialized_lambda_response},
+            ":status": {"S": "COMPLETED"},
         },
-        "Key": {"id": hashed_idempotency_key},
+        "Key": {"id": {"S": hashed_idempotency_key}},
         "TableName": "TEST_TABLE",
         "UpdateExpression": "SET #response_data = :response_data, " "#expiry = :expiry, #status = :status",
     }
@@ -107,12 +107,12 @@ def expected_params_update_item_with_validation(
             "#validation_key": "validation",
         },
         "ExpressionAttributeValues": {
-            ":expiry": stub.ANY,
-            ":response_data": serialized_lambda_response,
-            ":status": "COMPLETED",
-            ":validation_key": hashed_validation_key,
+            ":expiry": {"N": stub.ANY},
+            ":response_data": {"S": serialized_lambda_response},
+            ":status": {"S": "COMPLETED"},
+            ":validation_key": {"S": hashed_validation_key},
         },
-        "Key": {"id": hashed_idempotency_key},
+        "Key": {"id": {"S": hashed_idempotency_key}},
         "TableName": "TEST_TABLE",
         "UpdateExpression": (
             "SET #response_data = :response_data, "
@@ -135,12 +135,16 @@ def expected_params_put_item(hashed_idempotency_key):
             "#status": "status",
             "#in_progress_expiry": "in_progress_expiration",
         },
-        "ExpressionAttributeValues": {":now": stub.ANY, ":now_in_millis": stub.ANY, ":inprogress": "INPROGRESS"},
+        "ExpressionAttributeValues": {
+            ":now": {"N": stub.ANY},
+            ":now_in_millis": {"N": stub.ANY},
+            ":inprogress": {"S": "INPROGRESS"},
+        },
         "Item": {
-            "expiration": stub.ANY,
-            "id": hashed_idempotency_key,
-            "status": "INPROGRESS",
-            "in_progress_expiration": stub.ANY,
+            "expiration": {"N": stub.ANY},
+            "in_progress_expiration": {"N": stub.ANY},
+            "id": {"S": hashed_idempotency_key},
+            "status": {"S": "INPROGRESS"},
         },
         "TableName": "TEST_TABLE",
     }
@@ -159,13 +163,17 @@ def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_vali
             "#status": "status",
             "#in_progress_expiry": "in_progress_expiration",
         },
-        "ExpressionAttributeValues": {":now": stub.ANY, ":now_in_millis": stub.ANY, ":inprogress": "INPROGRESS"},
+        "ExpressionAttributeValues": {
+            ":now": {"N": stub.ANY},
+            ":now_in_millis": {"N": stub.ANY},
+            ":inprogress": {"S": "INPROGRESS"},
+        },
         "Item": {
-            "expiration": stub.ANY,
-            "in_progress_expiration": stub.ANY,
-            "id": hashed_idempotency_key,
-            "status": "INPROGRESS",
-            "validation": hashed_validation_key,
+            "expiration": {"N": stub.ANY},
+            "in_progress_expiration": {"N": stub.ANY},
+            "id": {"S": hashed_idempotency_key},
+            "status": {"S": "INPROGRESS"},
+            "validation": {"S": hashed_validation_key},
         },
         "TableName": "TEST_TABLE",
     }
@@ -208,6 +216,13 @@ def persistence_store_compound(config):
 
 
 @pytest.fixture
+def persistence_store_compound_static_pk_value(config, static_pk_value):
+    return DynamoDBPersistenceLayer(
+        table_name=TABLE_NAME, boto_config=config, key_attr="id", sort_key_attr="sk", static_pk_value=static_pk_value
+    )
+
+
+@pytest.fixture
 def idempotency_config(config, request, default_jmespath):
     return IdempotencyConfig(
         event_key_jmespath=request.param.get("event_key_jmespath") or default_jmespath,
@@ -238,3 +253,37 @@ def config_with_jmespath_options(config, request):
 @pytest.fixture
 def mock_function():
     return mock.MagicMock()
+
+
+@pytest.fixture
+def static_pk_value():
+    return "static-value"
+
+
+@pytest.fixture
+def expected_params_update_item_compound_key_static_pk_value(
+    expected_params_update_item, hashed_idempotency_key, static_pk_value
+):
+    return {
+        # same as in any update_item transaction except the `Key` due to composite key value
+        **expected_params_update_item,
+        "Key": {"id": {"S": static_pk_value}, "sk": {"S": hashed_idempotency_key}},
+    }
+
+
+@pytest.fixture
+def expected_params_put_item_compound_key_static_pk_value(
+    expected_params_put_item, hashed_idempotency_key, static_pk_value
+):
+    return {
+        # same as in any put_item transaction except the `Item` due to composite key value
+        **expected_params_put_item,
+        "Item": {
+            "expiration": {"N": stub.ANY},
+            "in_progress_expiration": {"N": stub.ANY},
+            "id": {"S": static_pk_value},
+            "sk": {"S": hashed_idempotency_key},
+            "status": {"S": "INPROGRESS"},
+        },
+        "TableName": "TEST_TABLE",
+    }
