@@ -12,6 +12,7 @@ from typing_extensions import Literal
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
+    resolve_max_age,
     resolve_truthy_env_var_choice,
     slice_dictionary,
 )
@@ -115,7 +116,7 @@ class SSMProvider(BaseProvider):
     def get(  # type: ignore[override]
         self,
         name: str,
-        max_age: int = DEFAULT_MAX_AGE_SECS,
+        max_age: Optional[int] = None,
         transform: TransformOptions = None,
         decrypt: Optional[bool] = None,
         force_fetch: bool = False,
@@ -150,7 +151,10 @@ class SSMProvider(BaseProvider):
             When the parameter provider fails to transform a parameter value.
         """
 
-        # Resolving if will use the value passed by parameter or the environment
+        # Resolving if will use the default value (5), the value passed by parameter or the environment variable
+        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE, DEFAULT_MAX_AGE_SECS), choice=max_age)
+
+        # Resolving if will use the default value (False), the value passed by parameter or the environment variable
         decrypt = resolve_truthy_env_var_choice(
             env=os.getenv(constants.PARAMETERS_DEFAULT_DECRYPT, "false"), choice=decrypt
         )
@@ -223,7 +227,7 @@ class SSMProvider(BaseProvider):
         parameters: Dict[str, Dict],
         transform: TransformOptions = None,
         decrypt: Optional[bool] = None,
-        max_age: int = DEFAULT_MAX_AGE_SECS,
+        max_age: Optional[int] = None,
         raise_on_error: bool = True,
     ) -> Dict[str, str] | Dict[str, bytes] | Dict[str, dict]:
         """
@@ -269,6 +273,9 @@ class SSMProvider(BaseProvider):
 
             When "_errors" reserved key is in parameters to be fetched from SSM.
         """
+
+        # Resolving if will use the default value (5), the value passed by parameter or the environment variable
+        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
         # Resolving if will use the default value (False), the value passed by parameter or the environment variable
         decrypt = resolve_truthy_env_var_choice(
@@ -505,7 +512,7 @@ def get_parameter(
     transform: Optional[str] = None,
     decrypt: Optional[bool] = None,
     force_fetch: bool = False,
-    max_age: int = DEFAULT_MAX_AGE_SECS,
+    max_age: Optional[int] = None,
     **sdk_options,
 ) -> Union[str, dict, bytes]:
     """
@@ -559,6 +566,9 @@ def get_parameter(
     if "ssm" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
+    # Resolving if will use the default value (5), the value passed by parameter or the environment variable
+    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE, DEFAULT_MAX_AGE_SECS), choice=max_age)
+
     # Resolving if will use the default value (False), the value passed by parameter or the environment variable
     decrypt = resolve_truthy_env_var_choice(
         env=os.getenv(constants.PARAMETERS_DEFAULT_DECRYPT, "false"), choice=decrypt
@@ -578,7 +588,7 @@ def get_parameters(
     recursive: bool = True,
     decrypt: Optional[bool] = None,
     force_fetch: bool = False,
-    max_age: int = DEFAULT_MAX_AGE_SECS,
+    max_age: Optional[int] = None,
     raise_on_transform_error: bool = False,
     **sdk_options,
 ) -> Union[Dict[str, str], Dict[str, dict], Dict[str, bytes]]:
@@ -638,6 +648,9 @@ def get_parameters(
     if "ssm" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
+    # Resolving if will use the default value (5), the value passed by parameter or the environment variable
+    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE, DEFAULT_MAX_AGE_SECS), choice=max_age)
+
     # Resolving if will use the default value (False), the value passed by parameter or the environment variable
     decrypt = resolve_truthy_env_var_choice(
         env=os.getenv(constants.PARAMETERS_DEFAULT_DECRYPT, "false"), choice=decrypt
@@ -661,7 +674,7 @@ def get_parameters_by_name(
     parameters: Dict[str, Dict],
     transform: None = None,
     decrypt: Optional[bool] = None,
-    max_age: int = DEFAULT_MAX_AGE_SECS,
+    max_age: Optional[int] = None,
     raise_on_error: bool = True,
 ) -> Dict[str, str]:
     ...
@@ -672,7 +685,7 @@ def get_parameters_by_name(
     parameters: Dict[str, Dict],
     transform: Literal["binary"],
     decrypt: Optional[bool] = None,
-    max_age: int = DEFAULT_MAX_AGE_SECS,
+    max_age: Optional[int] = None,
     raise_on_error: bool = True,
 ) -> Dict[str, bytes]:
     ...
@@ -683,7 +696,7 @@ def get_parameters_by_name(
     parameters: Dict[str, Dict],
     transform: Literal["json"],
     decrypt: Optional[bool] = None,
-    max_age: int = DEFAULT_MAX_AGE_SECS,
+    max_age: Optional[int] = None,
     raise_on_error: bool = True,
 ) -> Dict[str, Dict[str, Any]]:
     ...
@@ -694,7 +707,7 @@ def get_parameters_by_name(
     parameters: Dict[str, Dict],
     transform: Literal["auto"],
     decrypt: Optional[bool] = None,
-    max_age: int = DEFAULT_MAX_AGE_SECS,
+    max_age: Optional[int] = None,
     raise_on_error: bool = True,
 ) -> Union[Dict[str, str], Dict[str, dict]]:
     ...
@@ -704,7 +717,7 @@ def get_parameters_by_name(
     parameters: Dict[str, Any],
     transform: TransformOptions = None,
     decrypt: Optional[bool] = None,
-    max_age: int = DEFAULT_MAX_AGE_SECS,
+    max_age: Optional[int] = None,
     raise_on_error: bool = True,
 ) -> Union[Dict[str, str], Dict[str, bytes], Dict[str, dict]]:
     """
@@ -757,6 +770,9 @@ def get_parameters_by_name(
 
     # NOTE: Decided against using multi-thread due to single-thread outperforming in 128M and 1G + timeout risk
     # see: https://github.com/awslabs/aws-lambda-powertools-python/issues/1040#issuecomment-1299954613
+
+    # Resolving if will use the default value (5), the value passed by parameter or the environment variable
+    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
     # Resolving if will use the default value (False), the value passed by parameter or the environment variable
     decrypt = resolve_truthy_env_var_choice(

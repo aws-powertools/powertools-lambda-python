@@ -14,8 +14,12 @@ from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 if TYPE_CHECKING:
     from mypy_boto3_appconfigdata import AppConfigDataClient
 
-from ...shared import constants
-from ...shared.functions import resolve_env_var_choice
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import (
+    resolve_env_var_choice,
+    resolve_max_age,
+)
+
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 
 
@@ -136,7 +140,7 @@ def get_app_config(
     application: Optional[str] = None,
     transform: TransformOptions = None,
     force_fetch: bool = False,
-    max_age: int = DEFAULT_MAX_AGE_SECS,
+    max_age: Optional[int] = None,
     **sdk_options
 ) -> Union[str, list, dict, bytes]:
     """
@@ -187,6 +191,8 @@ def get_app_config(
         >>> print(value)
         My configuration's JSON value
     """
+    # Resolving if will use the default value (5), the value passed by parameter or the environment variable
+    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
     # Only create the provider if this function is called at least once
     if "appconfig" not in DEFAULT_PROVIDERS:
