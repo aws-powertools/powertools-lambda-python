@@ -1555,6 +1555,16 @@ def test_code_pipeline_event_missing_user_parameters():
     assert configuration.decoded_user_parameters is None
 
 
+def test_code_pipeline_event_non_json_user_parameters():
+    event = CodePipelineJobEvent(load_event("codePipelineEvent.json"))
+
+    configuration = event.data.action_configuration.configuration
+    assert configuration.user_parameters is not None
+
+    with pytest.raises(json.decoder.JSONDecodeError):
+        configuration.decoded_user_parameters
+
+
 def test_code_pipeline_event_decoded_data():
     event = CodePipelineJobEvent(load_event("codePipelineEventData.json"))
 
