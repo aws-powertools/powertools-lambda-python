@@ -97,6 +97,16 @@ class CodePipelineArtifactCredentials(DictWrapper):
         return self.get("expirationTime")
 
 
+class CodePipelineEncryptionKey(DictWrapper):
+    @property
+    def get_id(self) -> str:
+        return self["id"]
+
+    @property
+    def get_type(self) -> str:
+        return self["type"]
+
+
 class CodePipelineData(DictWrapper):
     """CodePipeline Job Data"""
 
@@ -124,6 +134,12 @@ class CodePipelineData(DictWrapper):
     def continuation_token(self) -> Optional[str]:
         """A continuation token if continuing job"""
         return self.get("continuationToken")
+
+    @property
+    def encryption_key(self) -> Optional[CodePipelineEncryptionKey]:
+        """Represents a CodePipeline encryption key"""
+        key_data = self.get("encryptionKey")
+        return CodePipelineEncryptionKey(key_data) if key_data is not None else None
 
 
 class CodePipelineJobEvent(DictWrapper):

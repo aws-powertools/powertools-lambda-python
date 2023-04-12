@@ -1544,6 +1544,41 @@ def test_code_pipeline_event():
     assert artifact_credentials_dict["sessionToken"] == artifact_credentials.session_token
 
 
+def test_code_pipeline_event_with_encryption_keys():
+    event = CodePipelineJobEvent(load_event("codePipelineEventWithEncryptionKey.json"))
+
+    job = event["CodePipeline.job"]
+    assert job["id"] == event.get_id
+    assert job["accountId"] == event.account_id
+
+    data = event.data
+    assert isinstance(data, CodePipelineData)
+    assert job["data"]["continuationToken"] == data.continuation_token
+    configuration = data.action_configuration.configuration
+    assert "MyLambdaFunctionForAWSCodePipeline" == configuration.function_name
+    assert event.user_parameters == configuration.user_parameters
+    assert "some-input-such-as-a-URL" == configuration.user_parameters
+
+    input_artifacts = data.input_artifacts
+    assert len(input_artifacts) == 1
+    assert "ArtifactName" == input_artifacts[0].name
+    assert input_artifacts[0].revision is None
+    assert "S3" == input_artifacts[0].location.get_type
+
+    output_artifacts = data.output_artifacts
+    assert len(output_artifacts) == 0
+
+    artifact_credentials = data.artifact_credentials
+    artifact_credentials_dict = event["CodePipeline.job"]["data"]["artifactCredentials"]
+    assert artifact_credentials_dict["accessKeyId"] == artifact_credentials.access_key_id
+    assert artifact_credentials_dict["secretAccessKey"] == artifact_credentials.secret_access_key
+    assert artifact_credentials_dict["sessionToken"] == artifact_credentials.session_token
+
+    encryption_key = data.encryption_key
+    assert "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab" == encryption_key.get_id
+    assert "KMS" == encryption_key.get_type
+
+
 def test_code_pipeline_event_missing_user_parameters():
     event = CodePipelineJobEvent(load_event("codePipelineEventEmptyUserParameters.json"))
 
