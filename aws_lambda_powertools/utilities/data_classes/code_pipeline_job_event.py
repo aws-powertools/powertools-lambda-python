@@ -16,14 +16,14 @@ class CodePipelineConfiguration(DictWrapper):
         return self["FunctionName"]
 
     @property
-    def user_parameters(self) -> str:
+    def user_parameters(self) -> Optional[str]:
         """User parameters"""
-        return self["UserParameters"]
+        return self.get("UserParameters", None)
 
     @property
-    def decoded_user_parameters(self) -> Dict[str, Any]:
+    def decoded_user_parameters(self) -> Optional[Dict[str, Any]]:
         """Json Decoded user parameters"""
-        if self._json_data is None:
+        if self._json_data is None and self.user_parameters is not None:
             self._json_data = json.loads(self.user_parameters)
         return self._json_data
 
@@ -155,12 +155,12 @@ class CodePipelineJobEvent(DictWrapper):
         return CodePipelineData(self._job["data"])
 
     @property
-    def user_parameters(self) -> str:
+    def user_parameters(self) -> Optional[str]:
         """Action configuration user parameters"""
         return self.data.action_configuration.configuration.user_parameters
 
     @property
-    def decoded_user_parameters(self) -> Dict[str, Any]:
+    def decoded_user_parameters(self) -> Optional[Dict[str, Any]]:
         """Json Decoded action configuration user parameters"""
         return self.data.action_configuration.configuration.decoded_user_parameters
 
