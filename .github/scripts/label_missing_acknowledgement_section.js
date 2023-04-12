@@ -17,7 +17,7 @@ module.exports = async ({github, context, core}) => {
       return core.notice("Only newly open PRs are labelled to avoid spam; skipping")
     }
 
-    const RELATED_ACK_SECTION_REGEX = /By submitting this pull request, I confirm that you can use, modify, copy, and redistribute this contribution, under the terms of your choice.\n\n\*\*Disclaimer\*\*: We value your time and bandwidth\. As such, any pull requests created on non-triaged issues might not be successful\./;
+    const RELATED_ACK_SECTION_REGEX = /By submitting this pull request, I confirm that you can use, modify, copy, and redistribute this contribution, under the terms of your choice./;
 
     const isMatch = RELATED_ACK_SECTION_REGEX.exec(PR_BODY);
     if (isMatch == null) {
