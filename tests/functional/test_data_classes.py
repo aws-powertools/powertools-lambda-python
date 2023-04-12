@@ -1544,6 +1544,17 @@ def test_code_pipeline_event():
     assert artifact_credentials_dict["sessionToken"] == artifact_credentials.session_token
 
 
+def test_code_pipeline_event_missing_user_parameters():
+    event = CodePipelineJobEvent(load_event("codePipelineEventEmptyUserParameters.json"))
+
+    assert event.data.continuation_token is None
+    configuration = event.data.action_configuration.configuration
+    decoded_params = configuration.decoded_user_parameters
+    assert decoded_params == event.decoded_user_parameters
+    assert decoded_params is None
+    assert configuration.decoded_user_parameters is None
+
+
 def test_code_pipeline_event_decoded_data():
     event = CodePipelineJobEvent(load_event("codePipelineEventData.json"))
 
