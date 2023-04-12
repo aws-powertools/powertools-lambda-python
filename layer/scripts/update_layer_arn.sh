@@ -66,6 +66,11 @@ for file in $files; do
         # Replace all the "prefix_pseudo_region"'s in the file
         # prefix_pseudo_region:\d+ ==> line_pseudo_region
         sed -i -e "s/$prefix_pseudo_region:[[:digit:]][[:digit:]]*/$line_pseudo_region/g" docs/index.md
+
+        # The same strings can also be found in examples on Logger, Tracer and Metrics
+        sed -i -e "s/$prefix_pseudo_region:[[:digit:]][[:digit:]]*/$line_pseudo_region/g" docs/core/logger.md
+        sed -i -e "s/$prefix_pseudo_region:[[:digit:]][[:digit:]]*/$line_pseudo_region/g" docs/core/metrics.md
+        sed -i -e "s/$prefix_pseudo_region:[[:digit:]][[:digit:]]*/$line_pseudo_region/g" docs/core/tracer.md
       done
     fi
   done
