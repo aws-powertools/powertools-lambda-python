@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-cdk-aws-lambda-powertools-layer = "^3.3.1"
+cdk-aws-lambda-powertools-layer = "^3.4.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
