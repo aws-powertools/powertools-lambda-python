@@ -129,7 +129,7 @@ class SSMProvider(BaseProvider):
         ----------
         name: str
             Parameter name
-        max_age: int
+        max_age: int, optional
             Maximum age of the cached value
         transform: str
             Optional transformation of the parameter value. Supported values
@@ -151,12 +151,12 @@ class SSMProvider(BaseProvider):
             When the parameter provider fails to transform a parameter value.
         """
 
-        # Resolving if will use the default value (5), the value passed by parameter or the environment variable
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE, DEFAULT_MAX_AGE_SECS), choice=max_age)
+        # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
+        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
-        # Resolving if will use the default value (False), the value passed by parameter or the environment variable
+        # If decrypt is not set, resolve it from the environment variable, defaulting to False
         decrypt = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.PARAMETERS_DEFAULT_DECRYPT, "false"), choice=decrypt
+            env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"), choice=decrypt
         )
 
         # Add to `decrypt` sdk_options to we can have an explicit option for this
@@ -261,7 +261,7 @@ class SSMProvider(BaseProvider):
             Transforms the content from a JSON object ('json') or base64 binary string ('binary')
         decrypt: bool, optional
             If the parameter values should be decrypted
-        max_age: int
+        max_age: int, optional
             Maximum age of the cached value
         raise_on_error: bool
             Whether to fail-fast or fail gracefully by including "_errors" key in the response, by default True
@@ -274,12 +274,12 @@ class SSMProvider(BaseProvider):
             When "_errors" reserved key is in parameters to be fetched from SSM.
         """
 
-        # Resolving if will use the default value (5), the value passed by parameter or the environment variable
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE, DEFAULT_MAX_AGE_SECS), choice=max_age)
+        # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
+        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
-        # Resolving if will use the default value (False), the value passed by parameter or the environment variable
+        # If decrypt is not set, resolve it from the environment variable, defaulting to False
         decrypt = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.PARAMETERS_DEFAULT_DECRYPT, "false"), choice=decrypt
+            env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"), choice=decrypt
         )
 
         # Init potential batch/decrypt batch responses and errors
@@ -528,7 +528,7 @@ def get_parameter(
         If the parameter values should be decrypted
     force_fetch: bool, optional
         Force update even before a cached item has expired, defaults to False
-    max_age: int
+    max_age: int, optional
         Maximum age of the cached value
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameter API call
@@ -566,12 +566,12 @@ def get_parameter(
     if "ssm" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
-    # Resolving if will use the default value (5), the value passed by parameter or the environment variable
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE, DEFAULT_MAX_AGE_SECS), choice=max_age)
+    # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
+    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
-    # Resolving if will use the default value (False), the value passed by parameter or the environment variable
+    # If decrypt is not set, resolve it from the environment variable, defaulting to False
     decrypt = resolve_truthy_env_var_choice(
-        env=os.getenv(constants.PARAMETERS_DEFAULT_DECRYPT, "false"), choice=decrypt
+        env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"), choice=decrypt
     )
 
     # Add to `decrypt` sdk_options to we can have an explicit option for this
@@ -607,7 +607,7 @@ def get_parameters(
         If the parameter values should be decrypted
     force_fetch: bool, optional
         Force update even before a cached item has expired, defaults to False
-    max_age: int
+    max_age: int, optional
         Maximum age of the cached value
     raise_on_transform_error: bool, optional
         Raises an exception if any transform fails, otherwise this will
@@ -648,12 +648,12 @@ def get_parameters(
     if "ssm" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
-    # Resolving if will use the default value (5), the value passed by parameter or the environment variable
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE, DEFAULT_MAX_AGE_SECS), choice=max_age)
+    # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
+    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
-    # Resolving if will use the default value (False), the value passed by parameter or the environment variable
+    # If decrypt is not set, resolve it from the environment variable, defaulting to False
     decrypt = resolve_truthy_env_var_choice(
-        env=os.getenv(constants.PARAMETERS_DEFAULT_DECRYPT, "false"), choice=decrypt
+        env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"), choice=decrypt
     )
 
     sdk_options["recursive"] = recursive
@@ -731,7 +731,7 @@ def get_parameters_by_name(
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
     decrypt: bool, optional
         If the parameter values should be decrypted
-    max_age: int
+    max_age: int, optional
         Maximum age of the cached value
     raise_on_error: bool, optional
         Whether to fail-fast or fail gracefully by including "_errors" key in the response, by default True
@@ -771,12 +771,12 @@ def get_parameters_by_name(
     # NOTE: Decided against using multi-thread due to single-thread outperforming in 128M and 1G + timeout risk
     # see: https://github.com/awslabs/aws-lambda-powertools-python/issues/1040#issuecomment-1299954613
 
-    # Resolving if will use the default value (5), the value passed by parameter or the environment variable
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE, DEFAULT_MAX_AGE_SECS), choice=max_age)
+    # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
+    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
-    # Resolving if will use the default value (False), the value passed by parameter or the environment variable
+    # If decrypt is not set, resolve it from the environment variable, defaulting to False
     decrypt = resolve_truthy_env_var_choice(
-        env=os.getenv(constants.PARAMETERS_DEFAULT_DECRYPT, "false"), choice=decrypt
+        env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"), choice=decrypt
     )
 
     # Only create the provider if this function is called at least once
