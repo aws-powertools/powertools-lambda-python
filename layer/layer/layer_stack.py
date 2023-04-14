@@ -78,7 +78,7 @@ class LayerStack(Stack):
 
         has_arm64_support = CfnParameter(
             self,
-            "HasARM64Suppor",
+            "HasARM64Support",
             description="Has ARM64 Support Condition",
             type="String",
             allowed_values=["true", "false"],
