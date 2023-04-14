@@ -73,6 +73,7 @@ jobs:
       - name: install cdk and deps
         working-directory: ../
         run: |
+          ls -la
           npm install
           npx cdk --version
       - name: CDK build
