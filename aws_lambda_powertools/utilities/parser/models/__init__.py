@@ -50,7 +50,10 @@ from .s3 import (
     S3Model,
     S3RecordModel,
 )
-from .s3_event_notification import SqsS3EventNotificationModel
+from .s3_event_notification import (
+    SqsS3EventNotificationModel,
+    SqsS3EventNotificationRecordModel,
+)
 from .s3_object_event import (
     S3ObjectConfiguration,
     S3ObjectContext,
@@ -132,6 +135,7 @@ __all__ = [
     "SqsMsgAttributeModel",
     "SqsAttributesModel",
     "SqsS3EventNotificationModel",
+    "SqsS3EventNotificationRecordModel",
     "APIGatewayProxyEventModel",
     "APIGatewayEventRequestContext",
     "APIGatewayEventAuthorizer",
