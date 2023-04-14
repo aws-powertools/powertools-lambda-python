@@ -84,21 +84,21 @@ You can include Powertools Lambda Layer using [AWS Lambda Console](https://docs.
         | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard: |
         | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard: |
         | `ap-south-1`     | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:     |
-        | `ap-south-2`     | [arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:     |
+        | `ap-south-2`     | [arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:     |
         | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard: |
         | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard: |
         | `ap-southeast-3` | [arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard: |
-        | `ap-southeast-4` | [arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard: |
+        | `ap-southeast-4` | [arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard: |
         | `ca-central-1`   | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:   |
         | `eu-central-1`   | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:   |
-        | `eu-central-2`   | [arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:   |
+        | `eu-central-2`   | [arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:   |
         | `eu-north-1`     | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:     |
         | `eu-south-1`     | [arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:     |
-        | `eu-south-2`     | [arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:     |
+        | `eu-south-2`     | [arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:     |
         | `eu-west-1`      | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:      |
         | `eu-west-2`      | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:      |
         | `eu-west-3`      | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:      |
-        | `me-central-1`   | [arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:1](#){: .copyMe}:clipboard:   |
+        | `me-central-1`   | [arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:   |
         | `me-south-1`     | [arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:     |
         | `sa-east-1`      | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:      |
         | `us-east-1`      | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:28](#){: .copyMe}:clipboard:      |
