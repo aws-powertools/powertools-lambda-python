@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
+	"golang.org/x/exp/slices"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -44,27 +45,40 @@ var canonicalLayers = []LayerInfo{
 // regions are the regions that we want to keep in sync
 var regions = []string{
 	"af-south-1",
+	"ap-east-1",
+	"ap-northeast-1",
+	"ap-northeast-2",
+	"ap-northeast-3",
+	"ap-south-1",
+	"ap-south-2",
+	"ap-southeast-1",
+	"ap-southeast-2",
+	"ap-southeast-3",
+	"ap-southeast-4",
+	"ca-central-1",
 	"eu-central-1",
+	"eu-central-2",
+	"eu-north-1",
+	"eu-south-1",
+	"eu-south-2",
+	"eu-west-1",
+	"eu-west-2",
+	"eu-west-3",
+	"me-central-1",
+	"me-south-1",
+	"sa-east-1",
 	"us-east-1",
 	"us-east-2",
 	"us-west-1",
 	"us-west-2",
-	"ap-east-1",
-	"ap-south-1",
-	"ap-northeast-1",
-	"ap-northeast-2",
-	"ap-southeast-1",
-	"ap-southeast-2",
-	"ca-central-1",
-	"eu-west-1",
-	"eu-west-2",
-	"eu-west-3",
-	"eu-south-1",
-	"eu-north-1",
-	"sa-east-1",
-	"ap-southeast-3",
-	"ap-northeast-3",
-	"me-south-1",
+}
+
+var singleArchitectureRegions = []string{
+	"ap-south-2",
+	"ap-southeast-4",
+	"eu-central-2",
+	"eu-south-2",
+	"me-central-1",
 }
 
 // getLayerVersion returns the latest version of a layer in a region
@@ -100,6 +114,11 @@ func getGreatestVersion(ctx context.Context) (int64, error) {
 		layer := &canonicalLayers[idx]
 
 		for _, region := range regions {
+			// Ignore regions that are excluded
+			if layer.Architecture == types.ArchitectureArm64 && slices.Contains(singleArchitectureRegions, region) {
+				continue
+			}
+
 			layerName := layer.Name
 			ctx := ctx
 			region := region
@@ -149,16 +168,30 @@ func balanceRegionToVersion(ctx context.Context, region string, layer *LayerInfo
 			return fmt.Errorf("error downloading canonical zip: %w", err)
 		}
 
-		layerVersionResponse, err := lambdaSvc.PublishLayerVersion(ctx, &lambda.PublishLayerVersionInput{
-			Content: &types.LayerVersionContentInput{
-				ZipFile: payload,
-			},
-			LayerName:               aws.String(layer.Name),
-			CompatibleArchitectures: []types.Architecture{layer.Architecture},
-			CompatibleRuntimes:      []types.Runtime{types.RuntimePython37, types.RuntimePython38, types.RuntimePython39},
-			Description:             aws.String(layer.Description),
-			LicenseInfo:             aws.String("MIT-0"),
-		})
+		var layerVersionResponse *lambda.PublishLayerVersionOutput
+
+		if slices.Contains(singleArchitectureRegions, region) {
+			layerVersionResponse, err = lambdaSvc.PublishLayerVersion(ctx, &lambda.PublishLayerVersionInput{
+				Content: &types.LayerVersionContentInput{
+					ZipFile: payload,
+				},
+				LayerName:          aws.String(layer.Name),
+				CompatibleRuntimes: []types.Runtime{types.RuntimePython37, types.RuntimePython38, types.RuntimePython39},
+				Description:        aws.String(layer.Description),
+				LicenseInfo:        aws.String("MIT-0"),
+			})
+		} else {
+			layerVersionResponse, err = lambdaSvc.PublishLayerVersion(ctx, &lambda.PublishLayerVersionInput{
+				Content: &types.LayerVersionContentInput{
+					ZipFile: payload,
+				},
+				LayerName:               aws.String(layer.Name),
+				CompatibleArchitectures: []types.Architecture{layer.Architecture},
+				CompatibleRuntimes:      []types.Runtime{types.RuntimePython37, types.RuntimePython38, types.RuntimePython39},
+				Description:             aws.String(layer.Description),
+				LicenseInfo:             aws.String("MIT-0"),
+			})
+		}
 		if err != nil {
 			return fmt.Errorf("error publishing layer version: %w", err)
 		}
@@ -186,6 +219,11 @@ func balanceRegions(ctx context.Context, maxVersion int64) error {
 		layer := &canonicalLayers[idx]
 
 		for _, region := range regions {
+			// Ignore regions that are excluded
+			if layer.Architecture == types.ArchitectureArm64 && slices.Contains(singleArchitectureRegions, region) {
+				continue
+			}
+
 			ctx := ctx
 			region := region
 			layer := layer
