@@ -103,7 +103,7 @@ The following will retrieve the latest version and store it in the cache.
 ???+ tip
 	`max_age` parameter is also available in underlying provider functions like `get()`, `get_multiple()`, etc.
 
-By default, we cache parameters retrieved in-memory for 5 seconds.
+By default, we cache parameters retrieved in-memory for 5 seconds. If you want to change this default value and set the same TTL for all parameters, you can set the `POWERTOOLS_PARAMETERS_MAX_AGE` environment variable. **You can still set `max_age` for individual parameters**.
 
 You can adjust how long we should keep values in cache by using the param `max_age`, when using  `get_parameter()`, `get_parameters()` and `get_secret()` methods across all providers.
 
@@ -178,6 +178,9 @@ The AWS Systems Manager Parameter Store provider supports two additional argumen
 | **recursive** | `True`  | For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix. |
 
 You can create `SecureString` parameters, which are parameters that have a plaintext parameter name and an encrypted parameter value. If you don't use the `decrypt` argument, you will get an encrypted value. Read [here](https://docs.aws.amazon.com/kms/latest/developerguide/services-parameter-store.html) about best practices using KMS to secure your parameters.
+
+???+ tip
+	If you want to always decrypt parameters, you can set the `POWERTOOLS_PARAMETERS_SSM_DECRYPT=true` environment variable. **This will override the default value of `false` but you can still set the `decrypt` option for individual parameters**.
 
 === "builtin_provider_ssm_with_decrypt.py"
     ```python hl_lines="6 10 16"

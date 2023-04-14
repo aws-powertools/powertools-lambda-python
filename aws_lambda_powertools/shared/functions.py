@@ -51,6 +51,11 @@ def resolve_truthy_env_var_choice(env: str, choice: Optional[bool] = None) -> bo
     return choice if choice is not None else strtobool(env)
 
 
+def resolve_max_age(env: str, choice: Optional[int]) -> int:
+    """Resolve max age value"""
+    return choice if choice is not None else int(env)
+
+
 @overload
 def resolve_env_var_choice(env: Optional[str], choice: float) -> float:
     ...
