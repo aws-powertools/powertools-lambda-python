@@ -46,7 +46,7 @@ jobs:
         run: |
           HAS_CHANGE=$(git status --porcelain)
           test -z "${HAS_CHANGE}" && echo "Nothing to update" && exit 0
-          git add docs/index.md docs/core/logger.md docs/core/tracer.md docs/core/metrics.md
+          git add docs/index.md examples
           git commit -m "chore: update v2 layer ARN on documentation"
           git pull origin "${BRANCH}" # prevents concurrent branch update failing push
           git push origin HEAD:refs/heads/"${BRANCH}"
