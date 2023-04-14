@@ -1,3 +1,4 @@
+import os
 import warnings
 from dataclasses import dataclass
 
@@ -10,10 +11,12 @@ from aws_lambda_powertools.shared.functions import (
     powertools_debug_is_set,
     powertools_dev_is_set,
     resolve_env_var_choice,
+    resolve_max_age,
     resolve_truthy_env_var_choice,
     strtobool,
 )
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.parameters.base import DEFAULT_MAX_AGE_SECS
 
 
 def test_resolve_env_var_choice_explicit_wins_over_env_var():
@@ -103,3 +106,35 @@ def test_extract_event_dataclass():
 @pytest.mark.parametrize("data", [False, True, "", 10, [], {}, object])
 def test_extract_event_any(data):
     assert extract_event_from_common_models(data) == data
+
+
+def test_resolve_max_age_explicit_wins_over_env_var(monkeypatch: pytest.MonkeyPatch):
+    # GIVEN POWERTOOLS_PARAMETERS_MAX_AGE environment variable is set
+    monkeypatch.setenv(constants.PARAMETERS_MAX_AGE_ENV, "20")
+
+    # WHEN the choice is set explicitly
+    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=10)
+
+    # THEN the result must be the choice
+    assert max_age == 10
+
+
+def test_resolve_max_age_with_default_value():
+    # GIVEN POWERTOOLS_PARAMETERS_MAX_AGE is not set
+
+    # WHEN the choice is set to None
+    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=None)
+
+    # THEN the result must be the default value (DEFAULT_MAX_AGE_SECS)
+    assert max_age == int(DEFAULT_MAX_AGE_SECS)
+
+
+def test_resolve_max_age_env_var_wins_over_default_value(monkeypatch: pytest.MonkeyPatch):
+    # GIVEN POWERTOOLS_PARAMETERS_MAX_AGE environment variable is set
+    monkeypatch.setenv(constants.PARAMETERS_MAX_AGE_ENV, "20")
+
+    # WHEN the choice is set to None
+    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=None)
+
+    # THEN the result must be the environment variable value
+    assert max_age == 20

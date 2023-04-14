@@ -1,13 +1,28 @@
 import io
 import logging
-from typing import IO, TYPE_CHECKING, AnyStr, Iterable, List, Optional
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    Any,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import boto3
 
 from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
 
 if TYPE_CHECKING:
+    from mmap import mmap
+
     from mypy_boto3_s3 import Client
+
+    _CData = TypeVar("_CData")
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +100,7 @@ class _S3SeekableIO(IO[bytes]):
             self._raw_stream = self.s3_client.get_object(Range=range_header, **self._sdk_options).get("Body")
             self._closed = False
 
-        return self._raw_stream
+        return cast(PowertoolsStreamingBody, self._raw_stream)
 
     def seek(self, offset: int, whence: int = io.SEEK_SET) -> int:
         """
@@ -177,8 +192,11 @@ class _S3SeekableIO(IO[bytes]):
     def truncate(self, size: Optional[int] = 0) -> int:
         raise NotImplementedError("this stream is not writable")
 
-    def write(self, data: AnyStr) -> int:
+    def write(self, data: Union[bytes, Union[bytearray, memoryview, Sequence[Any], "mmap", "_CData"]]) -> int:
         raise NotImplementedError("this stream is not writable")
 
-    def writelines(self, lines: Iterable[AnyStr]) -> None:
+    def writelines(
+        self,
+        data: Iterable[Union[bytes, Union[bytearray, memoryview, Sequence[Any], "mmap", "_CData"]]],
+    ) -> None:
         raise NotImplementedError("this stream is not writable")

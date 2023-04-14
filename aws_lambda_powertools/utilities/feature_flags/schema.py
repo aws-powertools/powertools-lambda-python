@@ -325,9 +325,9 @@ class ConditionsValidator(BaseValidator):
 
     @staticmethod
     def validate_condition_value(condition: Dict[str, Any], rule_name: str):
-        value = condition.get(CONDITION_VALUE, "")
-        if not value:
-            raise SchemaValidationError(f"'value' key must not be empty, rule={rule_name}")
+        value = condition.get(CONDITION_VALUE)
+        if value is None:
+            raise SchemaValidationError(f"'value' key must not be null, rule={rule_name}")
         action = condition.get(CONDITION_ACTION, "")
 
         # time actions need to be parsed to make sure date and time format is valid and timezone is recognized

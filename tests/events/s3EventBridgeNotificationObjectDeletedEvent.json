@@ -1,0 +1,29 @@
+{
+  "version": "0",
+  "id": "2ee9cc15-d022-99ea-1fb8-1b1bac4850f9",
+  "detail-type": "Object Deleted",
+  "source": "aws.s3",
+  "account": "111122223333",
+  "time": "2021-11-12T00:00:00Z",
+  "region": "ca-central-1",
+  "resources": [
+    "arn:aws:s3:::example-bucket"
+  ],
+  "detail": {
+    "version": "0",
+    "bucket": {
+      "name": "example-bucket"
+    },
+    "object": {
+        "key": "IMG_m7fzo3.jpg",
+        "size": 184662,
+        "etag": "4e68adba0abe2dc8653dc3354e14c01d",
+        "sequencer": "006408CAD69598B05E"
+    },
+    "request-id": "0BH729840619AG5K",
+    "requester": "123456789012",
+    "source-ip-address": "34.252.34.74",
+    "reason": "DeleteObject",
+    "deletion-type": "Delete Marker Created"
+  }
+}

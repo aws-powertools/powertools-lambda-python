@@ -19,6 +19,8 @@ on:
 env:
   AWS_DEFAULT_REGION: us-east-1
 
+concurrency: e2e
+
 jobs:
   run:
     runs-on: aws-lambda-powertools_ubuntu-latest_8-core

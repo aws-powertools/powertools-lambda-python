@@ -16,6 +16,32 @@ times with the same parameters**. This makes idempotent operations safe to retry
 
 **Idempotency key** is a hash representation of either the entire event or a specific configured subset of the event, and invocation results are **JSON serialized** and stored in your persistence storage layer.
 
+**Idempotency record** is the data representation of an idempotent request saved in your preferred  storage layer. We use it to coordinate whether a request is idempotent, whether it's still valid or expired based on timestamps, etc.
+
+<center>
+```mermaid
+classDiagram
+    direction LR
+    class IdempotencyRecord {
+        idempotency_key str
+        status Status
+        expiry_timestamp int
+        in_progress_expiry_timestamp int
+        response_data Json~str~
+        payload_hash str
+    }
+    class Status {
+        <<Enumeration>>
+        INPROGRESS
+        COMPLETE
+        EXPIRED internal_only
+    }
+    IdempotencyRecord -- Status
+```
+
+<i>Idempotency record representation</i>
+</center>
+
 ## Key features
 
 * Prevent Lambda handler from executing more than once on the same event payload during a time window
@@ -70,7 +96,7 @@ Resources:
   HelloWorldFunction:
   Type: AWS::Serverless::Function
   Properties:
-	Runtime: python3.8
+	Runtime: python3.9
 	...
 	Policies:
 	  - DynamoDBCrudPolicy:
@@ -91,6 +117,11 @@ Resources:
 ### Idempotent decorator
 
 You can quickly start by initializing the `DynamoDBPersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler.
+
+???+ note
+    In this example, the entire Lambda handler is treated as a single idempotent operation. If your Lambda handler can cause multiple side effects, or you're only interested in making a specific logic idempotent, use [`idempotent_function`](#idempotent_function-decorator) instead.
+
+!!! tip "See [Choosing a payload subset for idempotency](#choosing-a-payload-subset-for-idempotency) for more elaborate use cases."
 
 === "app.py"
 
@@ -124,13 +155,17 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
     }
     ```
 
+After processing this request successfully, a second request containing the exact same payload above will now return the same response, ensuring our customer isn't charged twice.
+
+!!! question "New to idempotency concept? Please review our [Terminology](#terminology) section if you haven't yet."
+
 ### Idempotent_function decorator
 
 Similar to [idempotent decorator](#idempotent-decorator), you can use `idempotent_function` decorator for any synchronous Python function.
 
 When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`**.
 
-!!! info "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.7/library/dataclasses.html){target="_blank"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
+!!! tip "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.7/library/dataclasses.html){target="_blank"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
 
 ???+ warning "Limitation"
     Make sure to call your decorated function using keyword arguments.
@@ -215,7 +250,7 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 You can can easily integrate with [Batch utility](batch.md) via context manager. This ensures that you process each record in an idempotent manner, and guard against a [Lambda timeout](#lambda-timeouts) idempotent situation.
 
 ???+ "Choosing an unique batch record attribute"
-    In this example, we choose `messageId` as our idempotency token since we know it'll be unique.
+    In this example, we choose `messageId` as our idempotency key since we know it'll be unique.
 
     Depending on your use case, it might be more accurate [to choose another field](#choosing-a-payload-subset-for-idempotency) your producer intentionally set to define uniqueness.
 
@@ -299,8 +334,10 @@ In this example, we have a Lambda handler that creates a payment for a user subs
 
 Imagine the function executes successfully, but the client never receives the response due to a connection issue. It is safe to retry in this instance, as the idempotent decorator will return a previously saved response.
 
-???+ warning "Warning: Idempotency for JSON payloads"
-    The payload extracted by the `event_key_jmespath` is treated as a string by default, so will be sensitive to differences in whitespace even when the JSON payload itself is identical.
+**What we want here** is to instruct Idempotency to use `user` and `product_id` fields from our incoming payload as our idempotency key. If we were to treat the entire request as our idempotency key, a simple HTTP header change would cause our customer to be charged twice.
+
+???+ tip "Deserializing JSON strings in payloads for increased accuracy."
+    The payload extracted by the `event_key_jmespath` is treated as a string by default. This means there could be differences in whitespace even when the JSON payload itself is identical.
 
     To alter this behaviour, we can use the [JMESPath built-in function](jmespath_functions.md#powertools_json-function) `powertools_json()` to treat the payload as a JSON object (dict) rather than a string.
 
@@ -314,9 +351,9 @@ Imagine the function executes successfully, but the client never receives the re
 
     persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 
-    # Treat everything under the "body" key
-    # in the event json object as our payload
-    config = IdempotencyConfig(event_key_jmespath="powertools_json(body)")
+    # Deserialize JSON string under the "body" key
+    # then extract "user" and "product_id" data
+    config = IdempotencyConfig(event_key_jmespath="powertools_json(body).[user, product_id]")
 
     @idempotent(config=config, persistence_store=persistence_layer)
     def handler(event, context):
@@ -368,42 +405,7 @@ Imagine the function executes successfully, but the client never receives the re
     }
     ```
 
-### Idempotency request flow
-
-This sequence diagram shows an example flow of what happens in the payment scenario:
-
-<center>
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Lambda
-    participant Persistence Layer
-    alt initial request
-        Client->>Lambda: Invoke (event)
-        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
-        activate Persistence Layer
-        Note right of Persistence Layer: Locked to prevent concurrent<br/>invocations with <br/> the same payload.
-        Lambda-->>Lambda: Call handler (event)
-        Lambda->>Persistence Layer: Update record with result
-        deactivate Persistence Layer
-        Persistence Layer-->>Persistence Layer: Update record with result
-        Lambda-->>Client: Response sent to client
-    else retried request
-        Client->>Lambda: Invoke (event)
-        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
-        Persistence Layer-->>Lambda: Already exists in persistence layer. Return result
-        Lambda-->>Client: Response sent to client
-    end
-```
-<i>Idempotent sequence</i>
-</center>
-
-The client was successful in receiving the result after the retry. Since the Lambda handler was only executed once, our customer hasn't been charged twice.
-
-???+ note
-    Bear in mind that the entire Lambda handler is treated as a single idempotent operation. If your Lambda handler can cause multiple side effects, consider splitting it into separate functions.
-
-#### Lambda timeouts
+### Lambda timeouts
 
 ???+ note
     This is automatically done when you decorate your Lambda handler with [@idempotent decorator](#idempotent-decorator).
@@ -440,45 +442,6 @@ def lambda_handler(event, context):
 
     return record_handler(event)
 ```
-
-#### Lambda timeout sequence diagram
-
-This sequence diagram shows an example flow of what happens if a Lambda function times out:
-
-<center>
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Lambda
-    participant Persistence Layer
-    alt initial request
-        Client->>Lambda: Invoke (event)
-        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
-        activate Persistence Layer
-        Note right of Persistence Layer: Locked to prevent concurrent<br/>invocations with <br/> the same payload.
-        Note over Lambda: Time out
-        Lambda--xLambda: Call handler (event)
-        Lambda-->>Client: Return error response
-        deactivate Persistence Layer
-    else concurrent request before timeout
-        Client->>Lambda: Invoke (event)
-        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
-        Persistence Layer-->>Lambda: Request already INPROGRESS
-        Lambda--xClient: Return IdempotencyAlreadyInProgressError
-    else retry after Lambda timeout
-        Client->>Lambda: Invoke (event)
-        Lambda->>Persistence Layer: Get or set (id=event.search(payload))
-        activate Persistence Layer
-        Note right of Persistence Layer: Locked to prevent concurrent<br/>invocations with <br/> the same payload.
-        Lambda-->>Lambda: Call handler (event)
-        Lambda->>Persistence Layer: Update record with result
-        deactivate Persistence Layer
-        Persistence Layer-->>Persistence Layer: Update record with result
-        Lambda-->>Client: Response sent to client
-    end
-```
-<i>Idempotent sequence for Lambda timeouts</i>
-</center>
 
 ### Handling exceptions
 
@@ -531,6 +494,172 @@ def call_external_service(data: dict, **kwargs):
 
     As this happens outside the scope of your decorated function, you are not able to catch it if you're using the `idempotent` decorator on your Lambda handler.
 
+### Idempotency request flow
+
+The following sequence diagrams explain how the Idempotency feature behaves under different scenarios.
+
+#### Successful request
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    alt initial request
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload
+        Lambda-->>Lambda: Call your function
+        Lambda->>Persistence Layer: Update record with result
+        deactivate Persistence Layer
+        Persistence Layer-->>Persistence Layer: Update record
+        Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result
+        Lambda-->>Client: Response sent to client
+    else retried request
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Persistence Layer-->>Lambda: Already exists in persistence layer.
+        deactivate Persistence Layer
+        Note over Lambda,Persistence Layer: Record status is COMPLETE and not expired
+        Lambda-->>Client: Same response sent to client
+    end
+```
+<i>Idempotent successful request</i>
+</center>
+
+#### Successful request with cache enabled
+
+!!! note "[In-memory cache is disabled by default](#using-in-memory-cache)."
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    alt initial request
+      Client->>Lambda: Invoke (event)
+      Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+      activate Persistence Layer
+      Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload
+      Lambda-->>Lambda: Call your function
+      Lambda->>Persistence Layer: Update record with result
+      deactivate Persistence Layer
+      Persistence Layer-->>Persistence Layer: Update record
+      Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result
+      Lambda-->>Lambda: Save record and result in memory
+      Lambda-->>Client: Response sent to client
+    else retried request
+      Client->>Lambda: Invoke (event)
+      Lambda-->>Lambda: Get idempotency_key=hash(payload)
+      Note over Lambda,Persistence Layer: Record status is COMPLETE and not expired
+      Lambda-->>Client: Same response sent to client
+    end
+```
+<i>Idempotent successful request cached</i>
+</center>
+
+#### Expired idempotency records
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    alt initial request
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload
+        Lambda-->>Lambda: Call your function
+        Lambda->>Persistence Layer: Update record with result
+        deactivate Persistence Layer
+        Persistence Layer-->>Persistence Layer: Update record
+        Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result
+        Lambda-->>Client: Response sent to client
+    else retried request
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Persistence Layer-->>Lambda: Already exists in persistence layer.
+        deactivate Persistence Layer
+        Note over Lambda,Persistence Layer: Record status is COMPLETE but expired hours ago
+        loop Repeat initial request process
+            Note over Lambda,Persistence Layer: 1. Set record to INPROGRESS, <br> 2. Call your function, <br> 3. Set record to COMPLETE
+        end
+        Lambda-->>Client: Same response sent to client
+    end
+```
+<i>Previous Idempotent request expired</i>
+</center>
+
+#### Concurrent identical in-flight requests
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    Client->>Lambda: Invoke (event)
+    Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+    activate Persistence Layer
+    Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload
+      par Second request
+          Client->>Lambda: Invoke (event)
+          Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+          Lambda--xLambda: IdempotencyAlreadyInProgressError
+          Lambda->>Client: Error sent to client if unhandled
+      end
+    Lambda-->>Lambda: Call your function
+    Lambda->>Persistence Layer: Update record with result
+    deactivate Persistence Layer
+    Persistence Layer-->>Persistence Layer: Update record
+    Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result
+    Lambda-->>Client: Response sent to client
+```
+<i>Concurrent identical in-flight requests</i>
+</center>
+
+#### Lambda request timeout
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    alt initial request
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload
+        Lambda-->>Lambda: Call your function
+        Note right of Lambda: Time out
+        Lambda--xLambda: Time out error
+        Lambda-->>Client: Return error response
+        deactivate Persistence Layer
+    else retry after Lambda timeout elapses
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Reset in_progress_expiry attribute
+        Lambda-->>Lambda: Call your function
+        Lambda->>Persistence Layer: Update record with result
+        deactivate Persistence Layer
+        Persistence Layer-->>Persistence Layer: Update record
+        Lambda-->>Client: Response sent to client
+    end
+```
+<i>Idempotent request during and after Lambda timeouts</i>
+</center>
+
+## Advanced
+
 ### Persistence layers
 
 #### DynamoDBPersistenceLayer
@@ -564,8 +693,6 @@ When using DynamoDB as a persistence layer, you can alter the attribute names by
 | **validation_key_attr**     |                    | `validation`                         | Hashed representation of the parts of the event used for validation                                      |
 | **sort_key_attr**           |                    |                                      | Sort key of the table (if table is configured with a sort key).                                          |
 | **static_pk_value**         |                    | `idempotency#{LAMBDA_FUNCTION_NAME}` | Static value to use as the partition key. Only used when **sort_key_attr** is set.                       |
-
-## Advanced
 
 ### Customizing the default behavior
 
@@ -619,14 +746,13 @@ When enabled, the default is to cache a maximum of 256 records in each Lambda ex
 
 ### Expiring idempotency records
 
-???+ note
-    By default, we expire idempotency records after **an hour** (3600 seconds).
+!!! note "By default, we expire idempotency records after **an hour** (3600 seconds)."
 
 In most cases, it is not desirable to store the idempotency records forever. Rather, you want to guarantee that the same payload won't be executed within a period of time.
 
 You can change this window with the **`expires_after_seconds`** parameter:
 
-```python hl_lines="8 11" title="Adjusting cache TTL"
+```python hl_lines="8 11" title="Adjusting idempotency record expiration"
 from aws_lambda_powertools.utilities.idempotency import (
 	IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
 )
@@ -642,10 +768,18 @@ def handler(event, context):
 	...
 ```
 
-This will mark any records older than 5 minutes as expired, and the lambda handler will be executed as normal if it is invoked with a matching payload.
+This will mark any records older than 5 minutes as expired, and [your function will be executed as normal if it is invoked with a matching payload](#expired-idempotency-records).
 
-???+ note "Note: DynamoDB time-to-live field"
-    This utility uses **`expiration`** as the TTL field in DynamoDB, as [demonstrated in the SAM example earlier](#required-resources).
+???+ important "Idempotency record expiration vs DynamoDB time-to-live (TTL)"
+    [DynamoDB TTL is a feature](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/howitworks-ttl.html){target="_blank"} to remove items after a certain period of time, it may occur within 48 hours of expiration.
+
+    We don't rely on DynamoDB or any persistence storage layer to determine whether a record is expired to avoid eventual inconsistency states.
+
+    Instead, Idempotency records saved in the storage layer contain timestamps that can be verified upon retrieval and double checked within Idempotency feature.
+
+    **Why?**
+
+    A record might still be valid (`COMPLETE`) when we retrieved, but in some rare cases it might expire a second later. A record could also be [cached in memory](#using-in-memory-cache). You might also want to have idempotent transactions that should expire in seconds.
 
 ### Payload validation
 
@@ -1087,7 +1221,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 
 ### Testing with DynamoDB Local
 
-To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html), you can replace the `Table` resource used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
+To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html), you can replace the `DynamoDB client` used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
 
 === "tests.py"
 
@@ -1115,10 +1249,12 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
         return LambdaContext()
 
     def test_idempotent_lambda(lambda_context):
-        # Create our own Table resource using the endpoint for our DynamoDB Local instance
-        resource = boto3.resource("dynamodb", endpoint_url='http://localhost:8000')
-        table = resource.Table(app.persistence_layer.table_name)
-        app.persistence_layer.table = table
+        # Configure the boto3 to use the endpoint for the DynamoDB Local instance
+        dynamodb_local_client = boto3.client("dynamodb", endpoint_url='http://localhost:8000')
+        app.persistence_layer.client = dynamodb_local_client
+
+        # If desired, you can use a different DynamoDB Local table name than what your code already uses
+        # app.persistence_layer.table_name = "another table name"
 
         result = app.handler({'testkey': 'testvalue'}, lambda_context)
         assert result['payment_id'] == 12345
@@ -1176,10 +1312,10 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 
 
     def test_idempotent_lambda(lambda_context):
-        table = MagicMock()
-        app.persistence_layer.table = table
+        mock_client = MagicMock()
+        app.persistence_layer.client = mock_client
         result = app.handler({'testkey': 'testvalue'}, lambda_context)
-        table.put_item.assert_called()
+        mock_client.put_item.assert_called()
         ...
     ```
 

@@ -63,7 +63,7 @@ Use the decorator for fail fast scenarios where you want your Lambda function to
 ???+ note
     **This decorator will replace the `event` object with the parsed model if successful**. This means you might be careful when nesting other decorators that expect `event` to be a `dict`.
 
-```python hl_lines="18" title="Parsing and validating upon invocation with event_parser decorator"
+```python hl_lines="19" title="Parsing and validating upon invocation with event_parser decorator"
 from aws_lambda_powertools.utilities.parser import event_parser, BaseModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from typing import List, Optional
@@ -111,7 +111,7 @@ handler(event=json.dumps(payload), context=LambdaContext()) # also works if even
 
 Use this standalone function when you want more control over the data validation process, for example returning a 400 error for malformed payloads.
 
-```python hl_lines="21 30" title="Using standalone parse function for more flexibility"
+```python hl_lines="21 31" title="Using standalone parse function for more flexibility"
 from aws_lambda_powertools.utilities.parser import parse, BaseModel, ValidationError
 from typing import List, Optional
 
@@ -156,24 +156,25 @@ def my_function():
 
 Parser comes with the following built-in models:
 
-| Model name                      | Description                                                        |
-| ------------------------------- | ------------------------------------------------------------------ |
-| **DynamoDBStreamModel**         | Lambda Event Source payload for Amazon DynamoDB Streams            |
-| **EventBridgeModel**            | Lambda Event Source payload for Amazon EventBridge                 |
-| **SqsModel**                    | Lambda Event Source payload for Amazon SQS                         |
-| **AlbModel**                    | Lambda Event Source payload for Amazon Application Load Balancer   |
-| **CloudwatchLogsModel**         | Lambda Event Source payload for Amazon CloudWatch Logs             |
-| **S3Model**                     | Lambda Event Source payload for Amazon S3                          |
-| **S3ObjectLambdaEvent**         | Lambda Event Source payload for Amazon S3 Object Lambda            |
-| **KinesisDataStreamModel**      | Lambda Event Source payload for Amazon Kinesis Data Streams        |
-| **KinesisFirehoseModel**        | Lambda Event Source payload for Amazon Kinesis Firehose            |
-| **SesModel**                    | Lambda Event Source payload for Amazon Simple Email Service        |
-| **SnsModel**                    | Lambda Event Source payload for Amazon Simple Notification Service |
-| **APIGatewayProxyEventModel**   | Lambda Event Source payload for Amazon API Gateway                 |
-| **APIGatewayProxyEventV2Model** | Lambda Event Source payload for Amazon API Gateway v2 payload      |
-| **LambdaFunctionUrlModel**      | Lambda Event Source payload for Lambda Function URL payload        |
-| **KafkaSelfManagedEventModel**  | Lambda Event Source payload for self managed Kafka payload         |
-| **KafkaMskEventModel**          | Lambda Event Source payload for AWS MSK payload                    |
+| Model name                              | Description                                                                  |
+| --------------------------------------- | ---------------------------------------------------------------------------- |
+| **DynamoDBStreamModel**                 | Lambda Event Source payload for Amazon DynamoDB Streams                      |
+| **EventBridgeModel**                    | Lambda Event Source payload for Amazon EventBridge                           |
+| **SqsModel**                            | Lambda Event Source payload for Amazon SQS                                   |
+| **AlbModel**                            | Lambda Event Source payload for Amazon Application Load Balancer             |
+| **CloudwatchLogsModel**                 | Lambda Event Source payload for Amazon CloudWatch Logs                       |
+| **S3Model**                             | Lambda Event Source payload for Amazon S3                                    |
+| **S3ObjectLambdaEvent**                 | Lambda Event Source payload for Amazon S3 Object Lambda                      |
+| **S3EventNotificationEventBridgeModel** | Lambda Event Source payload for Amazon S3 Event Notification to EventBridge. |
+| **KinesisDataStreamModel**              | Lambda Event Source payload for Amazon Kinesis Data Streams                  |
+| **KinesisFirehoseModel**                | Lambda Event Source payload for Amazon Kinesis Firehose                      |
+| **SesModel**                            | Lambda Event Source payload for Amazon Simple Email Service                  |
+| **SnsModel**                            | Lambda Event Source payload for Amazon Simple Notification Service           |
+| **APIGatewayProxyEventModel**           | Lambda Event Source payload for Amazon API Gateway                           |
+| **APIGatewayProxyEventV2Model**         | Lambda Event Source payload for Amazon API Gateway v2 payload                |
+| **LambdaFunctionUrlModel**              | Lambda Event Source payload for Lambda Function URL payload                  |
+| **KafkaSelfManagedEventModel**          | Lambda Event Source payload for self managed Kafka payload                   |
+| **KafkaMskEventModel**                  | Lambda Event Source payload for AWS MSK payload                              |
 
 #### Extending built-in models
 

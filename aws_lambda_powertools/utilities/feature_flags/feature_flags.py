@@ -47,8 +47,6 @@ class FeatureFlags:
         self.logger = logger or logging.getLogger(__name__)
 
     def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
-        if not context_value:
-            return False
         mapping_by_action = {
             schema.RuleAction.EQUALS.value: lambda a, b: a == b,
             schema.RuleAction.NOT_EQUALS.value: lambda a, b: a != b,

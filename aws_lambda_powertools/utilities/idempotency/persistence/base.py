@@ -41,8 +41,8 @@ class DataRecord:
         status: str = "",
         expiry_timestamp: Optional[int] = None,
         in_progress_expiry_timestamp: Optional[int] = None,
-        response_data: Optional[str] = "",
-        payload_hash: Optional[str] = None,
+        response_data: str = "",
+        payload_hash: str = "",
     ) -> None:
         """
 
@@ -117,7 +117,7 @@ class BasePersistenceLayer(ABC):
         """Initialize the defaults"""
         self.function_name = ""
         self.configured = False
-        self.event_key_jmespath: Optional[str] = None
+        self.event_key_jmespath: str = ""
         self.event_key_compiled_jmespath = None
         self.jmespath_options: Optional[dict] = None
         self.payload_validation_enabled = False
@@ -125,7 +125,7 @@ class BasePersistenceLayer(ABC):
         self.raise_on_no_idempotency_key = False
         self.expires_after_seconds: int = 60 * 60  # 1 hour default
         self.use_local_cache = False
-        self.hash_function = None
+        self.hash_function = hashlib.md5
 
     def configure(self, config: IdempotencyConfig, function_name: Optional[str] = None) -> None:
         """

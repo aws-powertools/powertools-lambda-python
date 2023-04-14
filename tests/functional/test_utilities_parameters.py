@@ -547,6 +547,44 @@ def test_ssm_provider_get_with_custom_client(mock_name, mock_value, mock_version
         stubber.deactivate()
 
 
+def test_ssm_provider_get_with_decrypt_environment_variable(monkeypatch, mock_name, mock_value, mock_version, config):
+    """
+    Test SSMProvider.get() with decrypt value replaced by environment variable
+    """
+
+    # Setting environment variable to override the default value
+    monkeypatch.setenv("POWERTOOLS_PARAMETERS_SSM_DECRYPT", "true")
+
+    # Create a new provider
+    provider = parameters.SSMProvider(config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "Parameter": {
+            "Name": mock_name,
+            "Type": "String",
+            "Value": mock_value,
+            "Version": mock_version,
+            "Selector": f"{mock_name}:{mock_version}",
+            "SourceResult": "string",
+            "LastModifiedDate": datetime(2015, 1, 1),
+            "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
+        }
+    }
+    expected_params = {"Name": mock_name, "WithDecryption": True}
+    stubber.add_response("get_parameter", response, expected_params)
+    stubber.activate()
+
+    try:
+        value = provider.get(mock_name)
+
+        assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
 def test_ssm_provider_get_default_config(monkeypatch, mock_name, mock_value, mock_version):
     """
     Test SSMProvider.get() without specifying the config

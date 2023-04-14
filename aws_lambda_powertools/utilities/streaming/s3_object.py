@@ -4,11 +4,13 @@ import io
 from typing import (
     IO,
     TYPE_CHECKING,
-    AnyStr,
+    Any,
     Iterable,
     List,
     Optional,
     Sequence,
+    TypeVar,
+    Union,
     cast,
     overload,
 )
@@ -26,7 +28,11 @@ from aws_lambda_powertools.utilities.streaming.transformations.base import (
 )
 
 if TYPE_CHECKING:
+    from mmap import mmap
+
     from mypy_boto3_s3 import Client
+
+    _CData = TypeVar("_CData")
 
 
 # Maintenance: almost all this logic should be moved to a base class
@@ -252,8 +258,11 @@ class S3Object(IO[bytes]):
     def truncate(self, size: Optional[int] = 0) -> int:
         raise NotImplementedError("this stream is not writable")
 
-    def write(self, data: AnyStr) -> int:
+    def write(self, data: Union[bytes, Union[bytearray, memoryview, Sequence[Any], "mmap", "_CData"]]) -> int:
         raise NotImplementedError("this stream is not writable")
 
-    def writelines(self, lines: Iterable[AnyStr]) -> None:
+    def writelines(
+        self,
+        data: Iterable[Union[bytes, Union[bytearray, memoryview, Sequence[Any], "mmap", "_CData"]]],
+    ) -> None:
         raise NotImplementedError("this stream is not writable")

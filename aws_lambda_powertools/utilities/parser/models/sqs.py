@@ -52,7 +52,7 @@ class SqsMsgAttributeModel(BaseModel):
 class SqsRecordModel(BaseModel):
     messageId: str
     receiptHandle: str
-    body: Union[str, Type[BaseModel]]
+    body: Union[str, Type[BaseModel], BaseModel]
     attributes: SqsAttributesModel
     messageAttributes: Dict[str, SqsMsgAttributeModel]
     md5OfBody: str
