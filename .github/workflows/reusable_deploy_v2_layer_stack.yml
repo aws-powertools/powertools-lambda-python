@@ -1,8 +1,5 @@
 name: Deploy CDK Layer v2 stack
 
-env:
-  CDK_VERSION: 2.44.0
-
 permissions:
   id-token: write
   contents: write
@@ -88,9 +85,10 @@ jobs:
           poetry export --format requirements.txt --output requirements.txt
           pip install -r requirements.txt
       - name: install cdk and deps
+        working-directory: ../
         run: |
-          npm install -g "aws-cdk@$CDK_VERSION"
-          cdk --version
+          npm install
+          npx cdk --version
       - name: install deps
         run: poetry install
       - name: Download artifact
@@ -101,7 +99,7 @@ jobs:
       - name: unzip artefact
         run: unzip cdk.out.zip
       - name: CDK Deploy Layer
-        run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'LayerV2Stack' --require-approval never --verbose --outputs-file cdk-outputs.json
+        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} 'LayerV2Stack' --require-approval never --verbose --outputs-file cdk-outputs.json
       - name: Store latest Layer ARN
         if: ${{ inputs.stage == 'PROD' }}
         run: |
@@ -118,7 +116,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - name: CDK Deploy Canary
-        run: cdk deploy --app cdk.out --context region=${{ matrix.region}} --parameters DeployStage="${{ inputs.stage }}" 'CanaryV2Stack' --require-approval never --verbose
+        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region}} --parameters DeployStage="${{ inputs.stage }}" 'CanaryV2Stack' --require-approval never --verbose
 
   update_v2_layer_arn_docs:
     needs: deploy-cdk-stack
