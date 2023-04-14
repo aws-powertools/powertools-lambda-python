@@ -3,6 +3,7 @@ import pytest
 from aws_lambda_powertools.utilities.parser import ValidationError, event_parser
 from aws_lambda_powertools.utilities.parser.models import SqsS3EventNotificationModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
+from tests.functional.parser.test_s3 import assert_s3
 from tests.functional.utils import json_serialize, load_event
 
 
