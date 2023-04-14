@@ -71,9 +71,8 @@ jobs:
           driver: docker
           platforms: linux/amd64,linux/arm64
       - name: install cdk and deps
-        working-directory: ../
+        working-directory: ./
         run: |
-          ls -la
           npm install
           npx cdk --version
       - name: CDK build
