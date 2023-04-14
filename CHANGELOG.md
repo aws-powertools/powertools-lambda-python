@@ -6,6 +6,7 @@
 
 ## Bug Fixes
 
+* **ci:** fix working directory
 * **ci:** add debug log to NPM install
 * **ci:** use project's CDK version when building layers
 * **ci:** add the rest of the changed docs
