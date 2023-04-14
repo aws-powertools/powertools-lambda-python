@@ -7,6 +7,7 @@
 # see .github/workflows/reusable_deploy_v2_layer_stack.yml
 
 set -eo pipefail
+set -x
 
 if [[ $# -ne 1 ]]; then
   cat <<EOM
