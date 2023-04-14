@@ -6,11 +6,14 @@
 
 ## Bug Fixes
 
+* **ci:** fix layer version in tracer, logger and metrics
 * **ci:** typo
 * **docs:** add Layer ARN for new 5 regions
+* **layers:** add debug to update layer arn script
 
 ## Maintenance
 
+* update v2 layer ARN on documentation
 * update v2 layer ARN on documentation
 * **ci:** add support for x86-64 regions only ([#2122](https://github.com/awslabs/aws-lambda-powertools-python/issues/2122))
 * **layer:** change layer-balance script to support new regions
