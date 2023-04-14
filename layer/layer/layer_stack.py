@@ -39,7 +39,7 @@ class Layer(Construct):
         powertools_version: str,
         architecture: Optional[Architecture] = None,
         **kwargs
-    ):
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         layer = LambdaPowertoolsLayer(
