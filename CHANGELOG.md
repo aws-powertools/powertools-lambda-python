@@ -6,6 +6,7 @@
 
 ## Bug Fixes
 
+* **ci:** add debug log to NPM install
 * **ci:** use project's CDK version when building layers
 * **ci:** add the rest of the changed docs
 * **ci:** update layer version on logger, tracer and metrics docs ([#2120](https://github.com/awslabs/aws-lambda-powertools-python/issues/2120))
