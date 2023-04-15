@@ -35,7 +35,7 @@ typing-extensions = "^4.4.0"
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^7.2"}
-pytest = "^7.3.0"
+pytest = "^7.3.1"
 black = "^23.3"
 boto3 = "^1.18"
 flake8 = [
