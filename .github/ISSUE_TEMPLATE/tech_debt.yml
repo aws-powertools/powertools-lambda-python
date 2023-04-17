@@ -1,0 +1,62 @@
+name: Technical debt
+description: Suggest an activity to help address technical debt.
+title: "Tech debt: TITLE"
+labels: ["tech-debt", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for taking the time to help us proactively improve delivery velocity, safely.
+  - type: textarea
+    id: importance
+    attributes:
+      label: Why is this needed?
+      description: Please help us understand the value so we can prioritize it accordingly
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area does this relate to?
+      multiple: true
+      options:
+        - Tests
+        - Static typing
+        - Tracer
+        - Logger
+        - Metrics
+        - Event Handler - REST API
+        - Event Handler - GraphQL API
+        - Middleware factory
+        - Parameters
+        - Batch processing
+        - Validation
+        - Event Source Data Classes
+        - Parser
+        - Idempotency
+        - Feature flags
+        - JMESPath functions
+        - Streaming
+        - Automation
+        - Other
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggestion
+      description: If available, please share what a good solution would look like
+    validations:
+      required: false
+  - type: checkboxes
+    id: acknowledgment
+    attributes:
+      label: Acknowledgment
+      options:
+        - label: This request meets [Lambda Powertools Tenets](https://awslabs.github.io/aws-lambda-powertools-python/latest/#tenets)
+          required: true
+        - label: Should this be considered in other Lambda Powertools languages? i.e. [TypeScript](https://github.com/awslabs/aws-lambda-powertools-typescript/)
+          required: false
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        **Disclaimer**: We value your time and bandwidth. As such, any pull requests created on non-triaged issues might not be successful.
