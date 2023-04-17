@@ -16,6 +16,8 @@
 * update v2 layer ARN on documentation
 * update v2 layer ARN on documentation
 * **ci:** add support for x86-64 regions only ([#2122](https://github.com/awslabs/aws-lambda-powertools-python/issues/2122))
+* **deps-dev:** bump pytest from 7.3.0 to 7.3.1 ([#2127](https://github.com/awslabs/aws-lambda-powertools-python/issues/2127))
+* **deps-dev:** bump mypy-boto3-lambda from 1.26.109 to 1.26.114 ([#2126](https://github.com/awslabs/aws-lambda-powertools-python/issues/2126))
 * **layer:** change layer-balance script to support new regions
 
 
