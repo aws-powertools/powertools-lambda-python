@@ -12,6 +12,7 @@ Event Source Data Classes utility provides classes self-describing Lambda event 
 * Type hinting and code completion for common event types
 * Helper functions for decoding/deserializing nested fields
 * Docstrings for fields contained in event schemas
+* Implement str() to recursively inspect contents
 
 **Background**
 
@@ -52,6 +53,22 @@ Same example as above, but using the `event_source` decorator
         if 'helloworld' in event.path and event.http_method == 'GET':
             do_something_with(event.body, user)
     ```
+
+Log Data Event for Troubleshooting
+
+=== "app.py"
+
+    ```python hl_lines="4 8"
+    from aws_lambda_powertools.utilities.data_classes import event_source, APIGatewayProxyEvent
+    from aws_lambda_powertools.logging.logger import Logger
+
+    logger = Logger(service="hello_logs", level="DEBUG")
+
+    @event_source(data_class=APIGatewayProxyEvent)
+    def lambda_handler(event: APIGatewayProxyEvent, context):
+        logger.debug(event)
+    ```
+
 **Autocomplete with self-documented properties and methods**
 
 ![Utilities Data Classes](../media/utilities_data_classes.png)
