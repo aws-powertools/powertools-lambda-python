@@ -126,6 +126,174 @@ def test_dict_wrapper_implements_mapping():
     assert event_source.items() == data.items()
 
 
+def test_dict_wrapper_str_no_property():
+    """
+    Checks that the _properties function returns
+    only the "raw_event", and the resulting string
+    notes it as sensitive.
+    """
+
+    class DataClassSample(DictWrapper):
+        attribute = None
+
+        def function(self):
+            pass
+
+    event_source = DataClassSample({})
+    assert event_source._properties() == ["raw_event"]
+    assert str(event_source) == "{'raw_event': '[SENSITIVE]'}"
+
+
+def test_dict_wrapper_str_single_property():
+    """
+    Checks that the _properties function returns
+    the defined property "data_property", and
+    resulting string includes the property value.
+    """
+
+    class DataClassSample(DictWrapper):
+        attribute = None
+
+        def function(self):
+            pass
+
+        @property
+        def data_property(self):
+            return "value"
+
+    event_source = DataClassSample({})
+    assert event_source._properties() == ["data_property", "raw_event"]
+    assert event_source._str_helper() == {"data_property": "value", "raw_event": "[SENSITIVE]"}
+    assert str(event_source) == "{'data_property': 'value', 'raw_event': '[SENSITIVE]'}"
+
+
+def test_dict_wrapper_str_property_exception():
+    """
+    Check the recursive _str_helper function handles
+    exceptions that may occur when accessing properties
+    """
+
+    class DataClassSample(DictWrapper):
+        attribute = None
+
+        def function(self):
+            pass
+
+        @property
+        def data_property(self):
+            raise Exception()
+
+    event_source = DataClassSample({})
+    assert event_source._str_helper() == {
+        "data_property": "[EXCEPTION <class 'Exception'>]",
+        "raw_event": "[SENSITIVE]",
+    }
+    assert str(event_source) == "{'data_property': \"[EXCEPTION <class 'Exception'>]\", 'raw_event': '[SENSITIVE]'}"
+
+
+def test_dict_wrapper_str_property_list_exception():
+    """
+    Check that _str_helper properly handles exceptions
+    that occur when recursively working through items
+    in a list property.
+    """
+
+    class BrokenDataClass(DictWrapper):
+        @property
+        def broken_data_property(self):
+            raise Exception()
+
+    class DataClassSample(DictWrapper):
+        attribute = None
+
+        def function(self):
+            pass
+
+        @property
+        def data_property(self):
+            return ["string", 0, 0.0, BrokenDataClass({})]
+
+    event_source = DataClassSample({})
+    assert event_source._properties() == ["data_property", "raw_event"]
+    assert event_source._str_helper() == {
+        "data_property": [
+            "string",
+            0,
+            0.0,
+            {"broken_data_property": "[EXCEPTION <class 'Exception'>]", "raw_event": "[SENSITIVE]"},
+        ],
+        "raw_event": "[SENSITIVE]",
+    }
+    event_str = (
+        "{'data_property': ['string', 0, 0.0, {'broken_data_property': "
+        + "\"[EXCEPTION <class 'Exception'>]\", 'raw_event': '[SENSITIVE]'}], 'raw_event': '[SENSITIVE]'}"
+    )
+    assert str(event_source) == event_str
+
+
+def test_dict_wrapper_str_recursive_property():
+    """
+    Check that the _str_helper function recursively
+    handles Data Classes within Data Classes
+    """
+
+    class DataClassTerminal(DictWrapper):
+        attribute = None
+
+        def function(self):
+            pass
+
+        @property
+        def terminal_property(self):
+            return "end-recursion"
+
+    class DataClassRecursive(DictWrapper):
+        attribute = None
+
+        def function(self):
+            pass
+
+        @property
+        def data_property(self):
+            return DataClassTerminal({})
+
+    event_source = DataClassRecursive({})
+    assert event_source._properties() == ["data_property", "raw_event"]
+    assert event_source._str_helper() == {
+        "data_property": {"raw_event": "[SENSITIVE]", "terminal_property": "end-recursion"},
+        "raw_event": "[SENSITIVE]",
+    }
+    assert (
+        str(event_source)
+        == "{'data_property': {'raw_event': '[SENSITIVE]', 'terminal_property': 'end-recursion'},"
+        + " 'raw_event': '[SENSITIVE]'}"
+    )
+
+
+def test_dict_wrapper_sensitive_properties_property():
+    """
+    Checks that the _str_helper function correctly
+    handles _sensitive_properties
+    """
+
+    class DataClassSample(DictWrapper):
+        attribute = None
+
+        def function(self):
+            pass
+
+        _sensitive_properties = ["data_property"]
+
+        @property
+        def data_property(self):
+            return "value"
+
+    event_source = DataClassSample({})
+    assert event_source._properties() == ["data_property", "raw_event"]
+    assert event_source._str_helper() == {"data_property": "[SENSITIVE]", "raw_event": "[SENSITIVE]"}
+    assert str(event_source) == "{'data_property': '[SENSITIVE]', 'raw_event': '[SENSITIVE]'}"
+
+
 def test_cloud_watch_dashboard_event():
     event = CloudWatchDashboardCustomWidgetEvent(load_event("cloudWatchDashboardEvent.json"))
     assert event.describe is False
