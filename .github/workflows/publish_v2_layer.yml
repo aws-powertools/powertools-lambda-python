@@ -50,7 +50,7 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: "3.10"
           cache: "pip"
       - name: Resolve and install project dependencies
         # CDK spawns system python when compiling stack

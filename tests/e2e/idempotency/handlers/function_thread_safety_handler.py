@@ -21,7 +21,7 @@ def record_handler(record):
 
 def lambda_handler(event, context):
     with ThreadPoolExecutor(max_workers=threads_count) as executor:
-        futures = [executor.submit(record_handler, **{"record": event}) for _ in range(threads_count)]
+        futures = [executor.submit(record_handler, **{"record": i}) for i in range(threads_count)]
 
     return [
         {"state": future._state, "exception": future.exception(), "output": future.result()}
