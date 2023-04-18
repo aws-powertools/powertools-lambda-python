@@ -30,7 +30,7 @@ jobs:
       matrix:
         python-version: [3.7, 3.8, 3.9, 3.10]
     env:
-      PYTHON: ${{ matrix.python-version }}
+      PYTHON: "${{ matrix.python-version }}"
     steps:
       - uses: actions/checkout@v3
       - name: Install poetry
@@ -38,7 +38,7 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "${{ matrix.python-version }}"
           cache: "poetry"
       - name: Install dependencies
         run: make dev
