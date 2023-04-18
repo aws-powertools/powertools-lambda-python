@@ -100,7 +100,7 @@ class BaseInfrastructure(InfrastructureProvider):
         ```python
         from aws_cdk.aws_lambda import Runtime
 
-        self.create_lambda_functions(function_props={"runtime": Runtime.PYTHON_3_9)
+        self.create_lambda_functions(function_props={"runtime": Runtime.PYTHON_3_10)
         ```
         """
         if not self._handlers_dir.exists():
