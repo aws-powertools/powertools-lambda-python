@@ -4,21 +4,38 @@
 <a name="unreleased"></a>
 # Unreleased
 
+
+<a name="v2.14.0"></a>
+## [v2.14.0] - 2023-04-18
 ## Bug Fixes
 
+* enable python 3.10 on SAR template
 * **ci:** fix layer version in tracer, logger and metrics
 * **ci:** typo
 * **docs:** add Layer ARN for new 5 regions
 * **layers:** add debug to update layer arn script
 
+## Features
+
+* **runtime:** add support for python 3.10 ([#2137](https://github.com/awslabs/aws-lambda-powertools-python/issues/2137))
+
 ## Maintenance
 
 * update v2 layer ARN on documentation
 * update v2 layer ARN on documentation
+* update v2 layer ARN on documentation
 * **ci:** add support for x86-64 regions only ([#2122](https://github.com/awslabs/aws-lambda-powertools-python/issues/2122))
+* **deps-dev:** bump importlib-metadata from 6.3.0 to 6.4.1 ([#2134](https://github.com/awslabs/aws-lambda-powertools-python/issues/2134))
+* **deps-dev:** bump cfn-lint from 0.77.0 to 0.77.1 ([#2133](https://github.com/awslabs/aws-lambda-powertools-python/issues/2133))
 * **deps-dev:** bump pytest from 7.3.0 to 7.3.1 ([#2127](https://github.com/awslabs/aws-lambda-powertools-python/issues/2127))
 * **deps-dev:** bump mypy-boto3-lambda from 1.26.109 to 1.26.114 ([#2126](https://github.com/awslabs/aws-lambda-powertools-python/issues/2126))
+* **deps-dev:** bump mypy-boto3-lambda from 1.26.114 to 1.26.115 ([#2135](https://github.com/awslabs/aws-lambda-powertools-python/issues/2135))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.26.97.post1 to 1.26.115 ([#2132](https://github.com/awslabs/aws-lambda-powertools-python/issues/2132))
+* **github:** new tech debt issue form ([#2131](https://github.com/awslabs/aws-lambda-powertools-python/issues/2131))
 * **layer:** change layer-balance script to support new regions
+
+## Reverts
+* chore: update v2 layer ARN on documentation
 
 
 <a name="v2.13.0"></a>
@@ -3119,7 +3136,8 @@
 * Merge pull request [#5](https://github.com/awslabs/aws-lambda-powertools-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.13.0...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.14.0...HEAD
+[v2.14.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.13.0...v2.14.0
 [v2.13.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.12.0...v2.13.0
 [v2.12.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.11.0...v2.12.0
 [v2.11.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.10.0...v2.11.0
