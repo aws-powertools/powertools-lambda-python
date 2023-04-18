@@ -85,7 +85,7 @@ mkdocs-material = "^9.1.6"
 filelock = "^3.11.0"
 checksumdir = "^1.2.0"
 mypy-boto3-appconfigdata = "^1.26.70"
-importlib-metadata = "^6.3"
+importlib-metadata = "^6.4"
 ijson = "^3.2.0"
 typed-ast = { version = "^1.5.4", python = "< 3.8"}
 hvac = "^1.1.0"
