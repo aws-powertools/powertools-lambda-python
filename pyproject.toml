@@ -12,6 +12,7 @@ classifiers=[
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
 ]
 repository = "https://github.com/awslabs/aws-lambda-powertools-python"
 documentation = "https://awslabs.github.io/aws-lambda-powertools-python/"
