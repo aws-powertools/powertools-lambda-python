@@ -779,6 +779,7 @@ def test_seq_trigger_event():
     assert record.md5_of_body == "e4e68fb7bd0e697a0ae8f1bb342846b3"
     assert record.event_source == "aws:sqs"
     assert record.event_source_arn == "arn:aws:sqs:us-east-2:123456789012:my-queue"
+    assert record.queue_url == "https://sqs.us-east-2.amazonaws.com/123456789012/my-queue"
     assert record.aws_region == "us-east-2"
 
 
