@@ -133,6 +133,18 @@ class SQSRecord(DictWrapper):
         """aws region eg: us-east-1"""
         return self["awsRegion"]
 
+    @property
+    def queue_url(self) -> str:
+        """The URL of the queue."""
+        arn_parts = self["eventSourceARN"].split(":")
+        region = arn_parts[3]
+        account_id = arn_parts[4]
+        queue_name = arn_parts[5]
+
+        queue_url = f"https://sqs.{region}.amazonaws.com/{account_id}/{queue_name}"
+
+        return queue_url
+
 
 class SQSEvent(DictWrapper):
     """SQS Event
