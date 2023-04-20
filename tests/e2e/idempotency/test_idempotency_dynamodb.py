@@ -130,4 +130,5 @@ def test_idempotent_function_thread_safety(function_thread_safety_handler_fn_arn
         assert function_thread["exception"] is None
         assert function_thread["output"] is not None
 
-    assert first_execution_response == second_execution_response
+    # we use set() here because we want to compare the elements regardless of their order in the array
+    assert set(first_execution_response) == set(second_execution_response)
