@@ -66,13 +66,15 @@ def lambda_handler(event, context):
 
         if transform_zip or transform_zip_lzma:
             response["manifest"] = obj.namelist()
-            response["body"] = obj.read(obj.namelist()[1]).rstrip()  # extracts the second file on the zip
+            response["body"] = (
+                obj.read(obj.namelist()[1]).rstrip().decode("utf-8")
+            )  # extracts the second file on the zip
         elif transform_csv or csv:
             response["body"] = obj.__next__()
         elif transform_gzip or gunzip:
-            response["body"] = obj.readline().rstrip()
+            response["body"] = obj.readline().rstrip().decode("utf-8")
         else:
-            response["body"] = obj.readline().rstrip()
+            response["body"] = obj.readline().rstrip().decode("utf-8")
     except botocore.exceptions.ClientError as e:
         if e.response["Error"]["Code"] == "404":
             response["error"] = "Not found"
