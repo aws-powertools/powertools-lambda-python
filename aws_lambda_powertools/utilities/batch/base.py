@@ -26,7 +26,6 @@ from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
     KinesisStreamRecord,
 )
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-from aws_lambda_powertools.utilities.parser import ValidationError
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
@@ -496,9 +495,10 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
                 result = self.handler(record=data)
 
             return self.success_handler(record=record, result=result)
-        except ValidationError:
-            return self._register_model_validation_error_record(record)
-        except Exception:
+        except Exception as exc:
+            if exc.__class__.__name__ == "ValidationError":
+                return self._register_model_validation_error_record(record)
+
             return self.failure_handler(record=data, exception=sys.exc_info())
 
 
@@ -634,7 +634,8 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
                 result = await self.handler(record=data)
 
             return self.success_handler(record=record, result=result)
-        except ValidationError:
-            return self._register_model_validation_error_record(record)
-        except Exception:
+        except Exception as exc:
+            if exc.__class__.__name__ == "ValidationError":
+                return self._register_model_validation_error_record(record)
+
             return self.failure_handler(record=data, exception=sys.exc_info())
