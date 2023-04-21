@@ -21,7 +21,8 @@ jobs:
 
       - name: Invoke Lambda function
         run: |
+          payload=$(echo -n '{"githubToken": "${{ secrets.GITHUB_TOKEN }}"}' | base64)
           aws lambda invoke \
             --function-name ${{ secrets.AWS_ANALYTICS_DISPATCHER_ARN }} \
-            --payload '{"githubToken": "${{ secrets.GITHUB_TOEN }}"}' response.json
+            --payload "$payload" response.json
           cat response.json
