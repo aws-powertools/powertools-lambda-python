@@ -4,6 +4,34 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **batch:** resolve use of ValidationError in batch ([#2157](https://github.com/awslabs/aws-lambda-powertools-python/issues/2157))
+* **e2e:** fix test brittleness ([#2152](https://github.com/awslabs/aws-lambda-powertools-python/issues/2152))
+
+## Documentation
+
+* **readme:** update python version badge to 3.10
+
+## Features
+
+* **event_sources:** add queue_url field in SQS EventSource DataClass ([#2146](https://github.com/awslabs/aws-lambda-powertools-python/issues/2146))
+
+## Maintenance
+
+* add Python 3.10 PyPi language classifier ([#2144](https://github.com/awslabs/aws-lambda-powertools-python/issues/2144))
+* update v2 layer ARN on documentation
+* **batch:** safeguard custom use of BatchProcessingError exception ([#2155](https://github.com/awslabs/aws-lambda-powertools-python/issues/2155))
+* **deps:** bump codecov/codecov-action from 3.1.2 to 3.1.3 ([#2153](https://github.com/awslabs/aws-lambda-powertools-python/issues/2153))
+* **deps:** bump dependabot/fetch-metadata from 1.3.6 to 1.4.0 ([#2140](https://github.com/awslabs/aws-lambda-powertools-python/issues/2140))
+* **deps-dev:** bump aws-cdk from 2.75.0 to 2.75.1 ([#2150](https://github.com/awslabs/aws-lambda-powertools-python/issues/2150))
+* **deps-dev:** bump mypy-boto3-secretsmanager from 1.26.89 to 1.26.116 ([#2147](https://github.com/awslabs/aws-lambda-powertools-python/issues/2147))
+* **deps-dev:** bump aws-cdk from 2.75.1 to 2.76.0 ([#2154](https://github.com/awslabs/aws-lambda-powertools-python/issues/2154))
+* **deps-dev:** bump importlib-metadata from 6.4.1 to 6.5.0 ([#2141](https://github.com/awslabs/aws-lambda-powertools-python/issues/2141))
+* **deps-dev:** bump mypy-boto3-s3 from 1.26.104 to 1.26.116 ([#2149](https://github.com/awslabs/aws-lambda-powertools-python/issues/2149))
+* **deps-dev:** bump filelock from 3.11.0 to 3.12.0 ([#2142](https://github.com/awslabs/aws-lambda-powertools-python/issues/2142))
+* **deps-dev:** bump cfn-lint from 0.77.1 to 0.77.2 ([#2148](https://github.com/awslabs/aws-lambda-powertools-python/issues/2148))
+
 
 <a name="v2.14.0"></a>
 ## [v2.14.0] - 2023-04-18
