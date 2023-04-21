@@ -1,7 +1,11 @@
 name: Reusable dispatch analytics
 
 on:
-  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   dispatch_token:
@@ -9,4 +13,11 @@ jobs:
       group: analytics
     runs-on: ubuntu-latest
     steps:
-      - run: echo 'hello world'
+      - name: AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef
+        with:
+          aws-region: eu-central-1
+          role-to-assume: ${{ secrets.AWS_ANALYTICS_ROLE_ARN }}
+      - name: test
+        run: |
+          aws sts get-caller-identity
