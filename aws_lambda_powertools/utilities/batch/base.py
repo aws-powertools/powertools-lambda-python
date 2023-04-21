@@ -496,7 +496,12 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
 
             return self.success_handler(record=record, result=result)
         except Exception as exc:
-            if exc.__class__.__name__ == "ValidationError":
+            # NOTE: Pydantic is an optional dependency, but when used and a poison pill scenario happens
+            # we need to handle that exception differently.
+            # We check for a public attr in validation errors coming from Pydantic exceptions (subclass or not)
+            # and we compare if it's coming from the same model that trigger the exception in the first place
+            model = getattr(exc, "model", None)
+            if model == self.model:
                 return self._register_model_validation_error_record(record)
 
             return self.failure_handler(record=data, exception=sys.exc_info())
