@@ -1,7 +1,7 @@
 name: Reusable dispatch analytics
 
 on:
-  workflow_call:
+  workflow_dispatch:
 
 permissions:
   id-token: write
